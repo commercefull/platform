@@ -10,12 +10,13 @@ import { Basket, BasketStatus } from '../../domain/entities/Basket';
 import { BasketItem } from '../../domain/entities/BasketItem';
 import { Money } from '../../domain/valueObjects/Money';
 import { BasketNotFoundError, BasketNotActiveError, BasketExpiredError } from '../../domain/errors/BasketErrors';
+import { Basket as DbBasket, BasketItem as DbBasketItem } from '../../../../libs/db/types';
 
 // Note: Using camelCase column names to match database migrations
 
 export class BasketRepo implements BasketRepository {
   async findById(basketId: string): Promise<Basket | null> {
-    const basketRow = await queryOne<Record<string, any>>('SELECT * FROM basket WHERE "basketId" = $1', [basketId]);
+    const basketRow = await queryOne<DbBasket>('SELECT * FROM basket WHERE "basketId" = $1', [basketId]);
 
     if (!basketRow) return null;
 
@@ -24,7 +25,7 @@ export class BasketRepo implements BasketRepository {
   }
 
   async findByCustomerId(customerId: string): Promise<Basket | null> {
-    const basketRow = await queryOne<Record<string, any>>(
+    const basketRow = await queryOne<DbBasket>(
       'SELECT * FROM basket WHERE "customerId" = $1 AND status = \'active\' ORDER BY "updatedAt" DESC LIMIT 1',
       [customerId],
     );
@@ -36,7 +37,7 @@ export class BasketRepo implements BasketRepository {
   }
 
   async findBySessionId(sessionId: string): Promise<Basket | null> {
-    const basketRow = await queryOne<Record<string, any>>(
+    const basketRow = await queryOne<DbBasket>(
       'SELECT * FROM basket WHERE "sessionId" = $1 AND status = \'active\' ORDER BY "updatedAt" DESC LIMIT 1',
       [sessionId],
     );
@@ -66,7 +67,7 @@ export class BasketRepo implements BasketRepository {
     const now = new Date().toISOString();
 
     // Check if basket exists
-    const existing = await queryOne<Record<string, any>>('SELECT "basketId" FROM basket WHERE "basketId" = $1', [basket.basketId]);
+    const existing = await queryOne<DbBasket>('SELECT "basketId" FROM basket WHERE "basketId" = $1', [basket.basketId]);
 
     if (existing) {
       // Update
@@ -132,35 +133,35 @@ export class BasketRepo implements BasketRepository {
     // Clear analytics events referencing this basket (may not exist in all environments)
     try {
       await query('DELETE FROM "analyticsReportEvent" WHERE "basketId" = $1', [basketId]);
-    } catch (e) {
+    } catch {
       // Table may not exist
     }
 
     // Clear basket analytics (may not exist in all environments)
     try {
       await query('DELETE FROM "basketAnalytics" WHERE "basketId" = $1', [basketId]);
-    } catch (e) {
+    } catch {
       // Table may not exist
     }
 
     // Clear basket history
     try {
       await query('DELETE FROM "basketHistory" WHERE "basketId" = $1', [basketId]);
-    } catch (e) {
+    } catch {
       // Table may not exist
     }
 
     // Clear basket discounts
     try {
       await query('DELETE FROM "basketDiscount" WHERE "basketId" = $1', [basketId]);
-    } catch (e) {
+    } catch {
       // Table may not exist
     }
 
     // Clear basket merge records (both source and target)
     try {
       await query('DELETE FROM "basketMerge" WHERE "sourceBasketId" = $1 OR "targetBasketId" = $1', [basketId]);
-    } catch (e) {
+    } catch {
       // Table may not exist
     }
 
@@ -245,7 +246,7 @@ export class BasketRepo implements BasketRepository {
     const now = new Date().toISOString();
 
     // Get basket ID before deleting
-    const item = await queryOne<Record<string, any>>('SELECT "basketId" FROM "basketItem" WHERE "basketItemId" = $1', [basketItemId]);
+    const item = await queryOne<DbBasketItem>('SELECT "basketId" FROM "basketItem" WHERE "basketItemId" = $1', [basketItemId]);
 
     await query('DELETE FROM "basketItem" WHERE "basketItemId" = $1', [basketItemId]);
 
@@ -259,7 +260,7 @@ export class BasketRepo implements BasketRepository {
   }
 
   private async getItemsWithCurrency(basketId: string, currency: string): Promise<BasketItem[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "basketItem" WHERE "basketId" = $1 ORDER BY "createdAt" ASC', [
+    const rows = await query<DbBasketItem[]>('SELECT * FROM "basketItem" WHERE "basketId" = $1 ORDER BY "createdAt" ASC', [
       basketId,
     ]);
 
@@ -274,7 +275,7 @@ export class BasketRepo implements BasketRepository {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<DbBasket[]>(
       `SELECT * FROM basket 
        WHERE status = 'active' 
        AND "lastActivityAt" < $1 
@@ -294,7 +295,7 @@ export class BasketRepo implements BasketRepository {
   async findExpiredBaskets(): Promise<Basket[]> {
     const now = new Date().toISOString();
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<DbBasket[]>(
       `SELECT * FROM basket 
        WHERE status = 'active' 
        AND "expiresAt" < $1 
@@ -376,7 +377,7 @@ export class BasketRepo implements BasketRepository {
   // Private helper methods
   private async syncItems(basket: Basket): Promise<void> {
     // Get current items in DB
-    const existingItems = await query<Record<string, any>[]>('SELECT "basketItemId" FROM "basketItem" WHERE "basketId" = $1', [
+    const existingItems = await query<DbBasketItem[]>('SELECT "basketItemId" FROM "basketItem" WHERE "basketId" = $1', [
       basket.basketId,
     ]);
     const existingIds = new Set((existingItems || []).map(i => i.basketItemId));
@@ -404,38 +405,38 @@ export class BasketRepo implements BasketRepository {
     });
   }
 
-  private mapToBasket(row: Record<string, any>, items: BasketItem[]): Basket {
+  private mapToBasket(row: DbBasket, items: BasketItem[]): Basket {
     return Basket.reconstitute({
       basketId: row.basketId,
-      customerId: row.customerId || undefined,
-      sessionId: row.sessionId || undefined,
+      customerId: row.customerId ?? undefined,
+      sessionId: row.sessionId ?? undefined,
       status: row.status as BasketStatus,
       currency: row.currency,
       items,
-      metadata: row.metadata || undefined,
+      metadata: row.metadata as Record<string, unknown> | undefined ?? undefined,
       expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
-      convertedToOrderId: row.convertedToOrderId || undefined,
+      convertedToOrderId: row.convertedToOrderId ?? undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
       lastActivityAt: new Date(row.lastActivityAt),
     });
   }
 
-  private mapToBasketItem(row: Record<string, any>, basketId: string, currency: string = 'USD'): BasketItem {
+  private mapToBasketItem(row: DbBasketItem, basketId: string, currency: string = 'USD'): BasketItem {
     return BasketItem.reconstitute({
       basketItemId: row.basketItemId,
       basketId: basketId,
       productId: row.productId,
-      productVariantId: row.productVariantId || undefined,
+      productVariantId: row.productVariantId ?? undefined,
       sku: row.sku,
       name: row.name,
       quantity: Number(row.quantity),
       unitPrice: Money.create(Number(row.unitPrice), currency),
-      imageUrl: row.imageUrl || undefined,
-      attributes: row.attributes || undefined,
-      itemType: row.itemType || 'physical',
+      imageUrl: row.imageUrl ?? undefined,
+      attributes: row.attributes as Record<string, unknown> | undefined ?? undefined,
+      itemType: (row.itemType as 'physical' | 'digital' | 'subscription' | 'service') || 'physical',
       isGift: Boolean(row.isGift),
-      giftMessage: row.giftMessage || undefined,
+      giftMessage: row.giftMessage ?? undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

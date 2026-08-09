@@ -21,10 +21,36 @@ export interface AssignToStoreOutput {
   assignedAt: string;
 }
 
+interface StoreRecord {
+  storeId: string;
+}
+
+interface StoreAssignment {
+  warehouseId: string;
+  storeId: string;
+  priority: number;
+  isDefault: boolean;
+}
+
+interface WarehouseRecord {
+  warehouseId: string;
+  name: string;
+}
+
+interface WarehouseRepositoryPort {
+  findById(id: string): Promise<WarehouseRecord | null>;
+  unsetDefaultForStore(storeId: string): Promise<void>;
+  assignToStore(data: { warehouseId: string; storeId: string; priority: number; isDefault: boolean }): Promise<StoreAssignment>;
+}
+
+interface StoreRepositoryPort {
+  findById(id: string): Promise<StoreRecord | null>;
+}
+
 export class AssignToStoreUseCase {
   constructor(
-    private readonly warehouseRepository: any,
-    private readonly storeRepository: any,
+    private readonly warehouseRepository: WarehouseRepositoryPort,
+    private readonly storeRepository: StoreRepositoryPort,
   ) {}
 
   async execute(input: AssignToStoreInput): Promise<AssignToStoreOutput> {

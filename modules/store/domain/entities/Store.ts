@@ -73,9 +73,9 @@ export interface StoreProps {
 
   // Social & Links
   socialLinks?: Record<string, string>;
-  openingHours?: Record<string, any>;
-  customPages?: Record<string, any>;
-  customFields?: Record<string, any>;
+  openingHours?: Record<string, unknown>;
+  customPages?: Record<string, unknown>;
+  customFields?: Record<string, unknown>;
 
   // Store-specific settings
   settings?: {
@@ -86,9 +86,30 @@ export interface StoreProps {
     enableStoreLocator: boolean;
     inventoryDisplayMode: 'always_show' | 'hide_when_out' | 'show_low_stock';
     priceDisplayMode: 'inclusive_tax' | 'exclusive_tax';
+    pickup?: {
+      enabled: boolean;
+      prepareTimeMinutes: number;
+      maxHoldDays: number;
+      notifyOnReady: boolean;
+      notifyMethods: ('email' | 'sms' | 'push')[];
+      pickupInstructions: string;
+      requireIdVerification: boolean;
+      allowCurbside: boolean;
+      operatingHours: Record<string, { open: string; close: string }>;
+    };
+    localDelivery?: {
+      enabled: boolean;
+      radiusKm?: number;
+      postalCodes: string[];
+      deliveryFee: number;
+      freeDeliveryThreshold?: number;
+      estimatedDeliveryMinutes: number;
+      maxDailyOrders: number;
+      availableSlots: Array<{ day: string; startTime: string; endTime: string; maxOrders: number }>;
+    };
   };
 
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -121,7 +142,7 @@ export class Store {
     theme?: string;
     defaultCurrency?: string;
     supportedCurrencies?: string[];
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Store {
     const now = new Date();
 
@@ -315,17 +336,17 @@ export class Store {
   get socialLinks(): Record<string, string> | undefined {
     return this.props.socialLinks;
   }
-  get openingHours(): Record<string, any> | undefined {
+  get openingHours(): Record<string, unknown> | undefined {
     return this.props.openingHours;
   }
-  get customPages(): Record<string, any> | undefined {
+  get customPages(): Record<string, unknown> | undefined {
     return this.props.customPages;
   }
-  get customFields(): Record<string, any> | undefined {
+  get customFields(): Record<string, unknown> | undefined {
     return this.props.customFields;
   }
 
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -419,7 +440,7 @@ export class Store {
     // Only update defined properties
     Object.entries(settings).forEach(([key, value]) => {
       if (value !== undefined) {
-        (updatedSettings as any)[key] = value;
+        (updatedSettings as Record<string, unknown>)[key] = value;
       }
     });
 
@@ -432,7 +453,7 @@ export class Store {
     this.touch();
   }
 
-  setOpeningHours(hours: Record<string, any>): void {
+  setOpeningHours(hours: Record<string, unknown>): void {
     this.props.openingHours = hours;
     this.touch();
   }
@@ -487,7 +508,7 @@ export class Store {
     this.touch();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -504,7 +525,7 @@ export class Store {
       .substring(0, 100);
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       storeId: this.props.storeId,
       name: this.props.name,

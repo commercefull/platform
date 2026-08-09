@@ -18,7 +18,7 @@ export interface SubscriptionInvoice {
   orderPaymentId?: string;
   invoiceNumber?: string;
   invoiceUrl?: string;
-  items: any;
+  items: unknown;
   subtotal: number;
   tax: number;
   discount: number;
@@ -55,7 +55,7 @@ export class SubscriptionInvoiceRepo {
 
   async findByCustomer(customerId: string, status?: SubscriptionInvoiceStatus, limit = 100): Promise<SubscriptionInvoice[]> {
     let sql = `SELECT * FROM "subscriptionInvoice" WHERE "customerId" = $1 AND "deletedAt" IS NULL`;
-    const params: any[] = [customerId];
+    const params: unknown[] = [customerId];
     if (status) {
       sql += ` AND "status" = $2`;
       params.push(status);
@@ -117,7 +117,7 @@ export class SubscriptionInvoiceRepo {
 
   async update(id: string, params: SubscriptionInvoiceUpdateParams): Promise<SubscriptionInvoice | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -156,7 +156,7 @@ export class SubscriptionInvoiceRepo {
 
   async count(paymentSubscriptionId?: string, status?: SubscriptionInvoiceStatus): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "subscriptionInvoice" WHERE "deletedAt" IS NULL`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (paymentSubscriptionId) {
       sql += ` AND "paymentSubscriptionId" = $${params.length + 1}`;

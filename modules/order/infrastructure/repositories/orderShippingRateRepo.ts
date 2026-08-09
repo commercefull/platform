@@ -18,7 +18,7 @@ export interface OrderShippingRate {
   isSelected: boolean;
   carrierAccountId?: string;
   shipmentId?: string;
-  rateData?: Record<string, any>;
+  rateData?: Record<string, unknown>;
 }
 
 export type OrderShippingRateCreateParams = Omit<OrderShippingRate, 'orderShippingRateId' | 'createdAt' | 'updatedAt'>;

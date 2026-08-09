@@ -33,7 +33,7 @@ export interface WarehouseProps {
   currentUtilization?: number;
   supportedShippingMethods?: string[];
   autoFulfillment: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -151,7 +151,7 @@ export class Warehouse {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       ...this.props,
       ownerId: this.ownerId,

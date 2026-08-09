@@ -1,7 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Currency, CurrencyRegion } from '../../domain/currency';
 import { Table } from '../../../../libs/db/types';
-import { generateUUID } from '../../../../libs/uuid';
 
 /**
  * Currency Repository
@@ -229,8 +228,8 @@ export class CurrencyRepo {
    * Create a new currency region
    */
   async createCurrencyRegion(region: CurrencyRegion): Promise<CurrencyRegion> {
-    const code = region.regionCode || (region as any).code;
-    const name = region.regionName || (region as any).name;
+    const code = region.regionCode || region.code || '';
+    const name = region.regionName || region.name || '';
     const existingRegion = await this.getCurrencyRegionByCode(code);
     if (existingRegion) {
       throw new Error(`Currency region with code ${code} already exists`);
@@ -247,7 +246,7 @@ export class CurrencyRepo {
       code,
       name,
       region.currencyCode,
-      (region as any).countries || null,
+      region.countries || null,
       region.isActive !== undefined ? region.isActive : true,
     ]);
 
@@ -268,7 +267,7 @@ export class CurrencyRepo {
     }
 
     const setStatements: string[] = ['"updatedAt" = now()'];
-    const values: any[] = [id];
+    const values: unknown[] = [id];
     let paramIndex = 2;
 
     for (const [key, value] of Object.entries(region)) {

@@ -23,7 +23,7 @@ export interface Category {
   merchantId?: string;
   isGlobal: boolean;
   customLayout?: string;
-  displaySettings?: Record<string, any>;
+  displaySettings?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,7 +49,7 @@ export interface CategoryCreateProps {
   merchantId?: string;
   isGlobal?: boolean;
   customLayout?: string;
-  displaySettings?: Record<string, any>;
+  displaySettings?: Record<string, unknown>;
 }
 
 export type CategoryUpdateProps = Partial<CategoryCreateProps>;
@@ -159,7 +159,7 @@ export class CategoryRepo {
 
   async update(id: string, props: CategoryUpdateProps): Promise<Category | null> {
     const setStatements: string[] = ['"updatedAt" = now()'];
-    const values: any[] = [id];
+    const values: unknown[] = [id];
     let paramIndex = 2;
 
     const updateableFields: (keyof CategoryUpdateProps)[] = [

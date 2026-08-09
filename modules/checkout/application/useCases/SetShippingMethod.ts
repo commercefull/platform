@@ -6,6 +6,7 @@
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
 import { Money } from '../../../basket/domain/valueObjects/Money';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
+import { CalculateShippingRatesUseCase, CalculateShippingRatesCommand } from '../../../shipping/application/useCases/CalculateShippingRates';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -36,26 +37,37 @@ export class SetShippingMethodUseCase {
       throw new Error('Shipping address must be set first');
     }
 
-    const methods = await this.checkoutRepository.getAvailableShippingMethods(
-      session.shippingAddress.country,
-      session.shippingAddress.postalCode,
+    const shippingUseCase = new CalculateShippingRatesUseCase();
+    const shippingCommand = new CalculateShippingRatesCommand(
+      {
+        country: session.shippingAddress.country,
+        state: session.shippingAddress.region,
+        city: session.shippingAddress.city,
+        postalCode: session.shippingAddress.postalCode,
+      },
+      { subtotal: session.subtotal.amount, itemCount: 0, currency: session.subtotal.currency },
     );
+    const result = await shippingUseCase.execute(shippingCommand);
 
-    const selectedMethod = methods.find(m => m.id === command.shippingMethodId);
-    if (!selectedMethod) {
+    if (!result.success || result.rates.length === 0) {
+      throw new Error('No shipping methods available for this address');
+    }
+
+    const selectedRate = result.rates.find(r => r.shippingMethodId === command.shippingMethodId);
+    if (!selectedRate) {
       throw new Error('Invalid shipping method');
     }
 
-    session.setShippingMethod(selectedMethod.id, selectedMethod.name, Money.create(selectedMethod.price, selectedMethod.currency));
+    session.setShippingMethod(selectedRate.shippingMethodId, selectedRate.shippingMethodName, Money.create(selectedRate.amount, selectedRate.currency));
 
     await this.checkoutRepository.save(session);
 
     eventBus.emit('checkout.updated', {
       checkoutId: session.id,
       field: 'shippingMethod',
-      methodId: selectedMethod.id,
-      methodName: selectedMethod.name,
-      amount: selectedMethod.price,
+      methodId: selectedRate.shippingMethodId,
+      methodName: selectedRate.shippingMethodName,
+      amount: selectedRate.amount,
     });
 
     return mapCheckoutToResponse(session);

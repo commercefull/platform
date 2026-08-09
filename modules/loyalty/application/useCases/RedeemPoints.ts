@@ -20,10 +20,32 @@ export interface RedeemPointsOutput {
   discountValue?: number;
 }
 
+export interface RedeemPointsMember {
+  memberId: string;
+  availablePoints: number;
+}
+
+export interface RedeemPointsReward {
+  isActive: boolean;
+  pointsCost: number;
+  discountValue?: number;
+  name: string;
+}
+
+export interface RedeemPointsRepository {
+  findMemberByCustomerId(customerId: string): Promise<RedeemPointsMember | null>;
+  createTransaction(data: Record<string, unknown>): Promise<void>;
+  updateMemberPoints(memberId: string, data: { availablePoints: number }): Promise<void>;
+}
+
+export interface RedeemPointsRewardRepository {
+  findById(rewardId: string): Promise<RedeemPointsReward | null>;
+}
+
 export class RedeemPointsUseCase {
   constructor(
-    private readonly loyaltyRepository: any,
-    private readonly rewardRepository: any,
+    private readonly loyaltyRepository: RedeemPointsRepository,
+    private readonly rewardRepository: RedeemPointsRewardRepository,
   ) {}
 
   async execute(input: RedeemPointsInput): Promise<RedeemPointsOutput> {

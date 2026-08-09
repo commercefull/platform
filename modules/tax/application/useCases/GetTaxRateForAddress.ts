@@ -30,10 +30,38 @@ export interface GetTaxRateForAddressOutput {
   exemptionReason?: string;
 }
 
+interface RateRecord {
+  taxRateId: string;
+  name: string;
+  rate: number;
+  isCompound: boolean;
+  includesShipping: boolean;
+  priority: number;
+}
+
+interface ExemptionRecord {
+  isActive: boolean;
+  reason?: string;
+}
+
+interface TaxRepository {
+  findRatesForAddress(params: {
+    country: string;
+    state?: string;
+    city?: string;
+    postalCode?: string;
+    taxCategory?: string;
+  }): Promise<RateRecord[]>;
+}
+
+interface CustomerRepository {
+  getTaxExemption(customerId: string): Promise<ExemptionRecord | null>;
+}
+
 export class GetTaxRateForAddressUseCase {
   constructor(
-    private readonly taxRepository: any,
-    private readonly customerRepository: any,
+    private readonly taxRepository: TaxRepository,
+    private readonly customerRepository: CustomerRepository,
   ) {}
 
   async execute(input: GetTaxRateForAddressInput): Promise<GetTaxRateForAddressOutput> {
@@ -69,7 +97,7 @@ export class GetTaxRateForAddressUseCase {
 
     // Calculate combined rate (considering compound taxes)
     let combinedRate = 0;
-    const sortedRates = rates.sort((a: any, b: any) => a.priority - b.priority);
+    const sortedRates = rates.sort((a: RateRecord, b: RateRecord) => a.priority - b.priority);
 
     for (const rate of sortedRates) {
       if (rate.isCompound) {
@@ -81,7 +109,7 @@ export class GetTaxRateForAddressUseCase {
     }
 
     return {
-      rates: sortedRates.map((r: any) => ({
+      rates: sortedRates.map((r: RateRecord) => ({
         taxRateId: r.taxRateId,
         name: r.name,
         rate: r.rate,

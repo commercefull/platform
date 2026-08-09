@@ -31,7 +31,7 @@ export interface CheckoutSessionProps {
   total: Money;
   couponCode?: string;
   notes?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
   completedAt?: Date;
@@ -157,7 +157,7 @@ export class CheckoutSession {
     return this.props.notes;
   }
 
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
 
@@ -190,6 +190,10 @@ export class CheckoutSession {
   }
 
   get isReadyForPayment(): boolean {
+    const isPickup = this.props.metadata?.fulfillmentType === 'pickup' && !!this.props.metadata?.pickupLocationId;
+    if (isPickup) {
+      return !!this.props.paymentMethodId && !this.props.total.isZero();
+    }
     return !!this.props.shippingAddress && !!this.props.shippingMethodId && !this.props.total.isZero();
   }
 
@@ -268,7 +272,7 @@ export class CheckoutSession {
     this.touch();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -333,7 +337,7 @@ export class CheckoutSession {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       id: this.props.id,
       customerId: this.props.customerId,

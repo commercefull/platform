@@ -17,81 +17,131 @@ import {
   RedeemCouponUseCase,
 } from '../../application/useCases';
 
+interface CreateCouponBody {
+  code: string;
+  name: string;
+  type: 'percentage' | 'fixed_amount' | 'free_shipping';
+  value: number;
+  createdBy: string;
+  description?: string;
+  currency?: string;
+  minOrderValue?: number;
+  maxDiscountAmount?: number;
+  usageType?: 'single_use' | 'multi_use' | 'unlimited';
+  usageLimit?: number;
+  customerUsageLimit?: number;
+  startsAt?: string;
+  expiresAt?: string;
+  applicableProducts?: string[];
+  applicableCategories?: string[];
+  applicableCustomerGroups?: string[];
+  excludedProducts?: string[];
+  excludedCategories?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+interface ValidateCouponBody {
+  code?: string;
+  orderValue: number;
+  customerId?: string;
+  items?: Array<{ productId: string; categoryId?: string; quantity: number; price: number }>;
+}
+
+interface ApplyCouponBody {
+  couponCode?: string;
+  code?: string;
+  basketId: string;
+  customerId?: string;
+  orderTotal: number;
+  items?: Array<{ productId: string; categoryId?: string; quantity: number; price: number }>;
+}
+
+interface RedeemCouponBody {
+  code: string;
+  orderId: string;
+  customerId?: string;
+  discountAmount: number;
+}
+
 export const createCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as CreateCouponBody;
     const useCase = new CreateCouponUseCase(couponRepository);
     const command = new CreateCouponCommand(
-      req.body.code,
-      req.body.name,
-      req.body.type,
-      req.body.value,
-      req.body.createdBy,
-      req.body.description,
-      req.body.currency,
-      req.body.minOrderValue,
-      req.body.maxDiscountAmount,
-      req.body.usageType,
-      req.body.usageLimit,
-      req.body.customerUsageLimit,
-      req.body.startsAt ? new Date(req.body.startsAt) : undefined,
-      req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
-      req.body.applicableProducts,
-      req.body.applicableCategories,
-      req.body.applicableCustomerGroups,
-      req.body.excludedProducts,
-      req.body.excludedCategories,
-      req.body.metadata,
+      body.code,
+      body.name,
+      body.type,
+      body.value,
+      body.createdBy,
+      body.description,
+      body.currency,
+      body.minOrderValue,
+      body.maxDiscountAmount,
+      body.usageType,
+      body.usageLimit,
+      body.customerUsageLimit,
+      body.startsAt ? new Date(body.startsAt) : undefined,
+      body.expiresAt ? new Date(body.expiresAt) : undefined,
+      body.applicableProducts,
+      body.applicableCategories,
+      body.applicableCustomerGroups,
+      body.excludedProducts,
+      body.excludedCategories,
+      body.metadata,
     );
     const coupon = await useCase.execute(command);
     res.status(201).json({ success: true, data: coupon });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
 export const validateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as ValidateCouponBody;
     const useCase = new ValidateCouponUseCase(couponRepository);
-    const command = new ValidateCouponCommand(req.body.code || req.params.code, req.body.orderValue, req.body.customerId, req.body.items);
+    const command = new ValidateCouponCommand(body.code || req.params.code, body.orderValue, body.customerId, body.items);
     const result = await useCase.execute(command);
     res.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
 export const applyCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as ApplyCouponBody;
     const useCase = new ApplyCouponUseCase(couponRepository);
     const result = await useCase.execute({
-      couponCode: req.body.couponCode || req.body.code,
-      basketId: req.body.basketId,
-      customerId: req.body.customerId,
-      orderTotal: req.body.orderTotal,
-      items: req.body.items,
+      couponCode: body.couponCode || body.code || '',
+      basketId: body.basketId,
+      customerId: body.customerId,
+      orderTotal: body.orderTotal,
+      items: body.items,
     });
     res.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
 export const redeemCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RedeemCouponBody;
     const useCase = new RedeemCouponUseCase(couponRepository);
     const result = await useCase.execute({
-      couponCode: req.body.code,
-      orderId: req.body.orderId,
-      customerId: req.body.customerId,
-      discountAmount: req.body.discountAmount,
+      couponCode: body.code,
+      orderId: body.orderId,
+      customerId: body.customerId,
+      discountAmount: body.discountAmount,
     });
     res.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -103,9 +153,9 @@ export const getCoupon = async (req: TypedRequest, res: Response): Promise<void>
       return;
     }
     res.json({ success: true, data: coupon });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -123,9 +173,9 @@ export const listCoupons = async (req: TypedRequest, res: Response): Promise<voi
       },
     );
     res.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -133,9 +183,9 @@ export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<vo
   try {
     await couponRepository.delete(req.params.couponId);
     res.json({ success: true, message: 'Coupon deleted' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 

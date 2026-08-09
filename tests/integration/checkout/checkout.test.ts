@@ -1,13 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { loginTestUser } from '../testUtils';
-import {
-  TEST_CHECKOUT_ID,
-  TEST_CHECKOUT_BASKET_ID,
-  TEST_PRODUCT_1_ID,
-  TEST_SHIPPING_ADDRESS,
-  TEST_BILLING_ADDRESS,
-  ADMIN_CREDENTIALS,
-} from '../testConstants';
+import { TEST_CHECKOUT_ID, TEST_SHIPPING_ADDRESS, TEST_BILLING_ADDRESS, ADMIN_CREDENTIALS } from '../testConstants';
 
 // Create axios client for tests
 const createClient = () =>
@@ -22,6 +15,7 @@ const createClient = () =>
 
 describe('Checkout Feature Tests', () => {
   let client: AxiosInstance;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let adminToken: string;
   let checkoutId: string;
 
@@ -29,6 +23,7 @@ describe('Checkout Feature Tests', () => {
     jest.setTimeout(30000);
     client = createClient();
 
+     
     // Get admin token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     adminToken = loginResponse.data.accessToken;
@@ -533,13 +528,13 @@ describe('Checkout Feature Tests', () => {
 // ============================================================================
 
 import { loginTestUser as loginCheckoutTestUser } from '../testUtils';
-import { eventBus as checkoutEventBus } from '../../../libs/events/eventBus';
+import { eventBus as checkoutEventBus, EventPayload as CheckoutEventPayload } from '../../../libs/events/eventBus';
 
 describe('Checkout Gap Tests', () => {
-  let client: any;
+  let client: AxiosInstance;
   let customerToken: string;
 
-  const createBasketWithItem = async (c: any, token: string) => {
+  const createBasketWithItem = async (c: AxiosInstance, token: string) => {
     const basketResp = await c.post(
       '/customer/basket',
       { sessionId: `gap-test-${Date.now()}` },
@@ -555,7 +550,7 @@ describe('Checkout Gap Tests', () => {
     return basketId;
   };
 
-  const createCheckout = async (c: any, token: string, basketId: string) => {
+  const createCheckout = async (c: AxiosInstance, token: string, basketId: string) => {
     const resp = await c.post('/customer/checkout', { basketId }, { headers: { Authorization: `Bearer ${token}` } });
     return resp.status === 201 ? resp.data.data.checkoutId : null;
   };
@@ -936,8 +931,8 @@ describe('Checkout Gap Tests', () => {
 
   it('Event spies — checkout.started emitted with correct payload shape', async () => {
     if (!customerToken) return;
-    const received: any[] = [];
-    checkoutEventBus.registerHandler('checkout.started', (p: any) => {
+    const received: CheckoutEventPayload[] = [];
+    checkoutEventBus.registerHandler('checkout.started', (p: CheckoutEventPayload) => {
       received.push(p);
     });
 
@@ -946,9 +941,9 @@ describe('Checkout Gap Tests', () => {
     const r = await client.post('/customer/checkout', { basketId }, { headers: { Authorization: `Bearer ${customerToken}` } });
     if (r.status !== 201) return;
 
-    const event = received.find(e => e.basketId === basketId);
+    const event = received.find((e: CheckoutEventPayload) => (e.data as Record<string, unknown>)?.basketId === basketId);
     expect(event).toBeDefined();
-    expect(event).toHaveProperty('checkoutId');
-    expect(event).toHaveProperty('basketId');
+    expect(event?.data).toHaveProperty('checkoutId');
+    expect(event?.data).toHaveProperty('basketId');
   });
 });

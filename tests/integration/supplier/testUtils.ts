@@ -57,7 +57,7 @@ export async function setupSupplierTests() {
   return { client, adminToken };
 }
 
-export function createTestSupplier(overrides: Partial<any> = {}) {
+export function createTestSupplier(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();
   return {
     name: `Test Supplier ${timestamp}`,
@@ -79,7 +79,7 @@ export function createTestSupplier(overrides: Partial<any> = {}) {
   };
 }
 
-export function createTestPurchaseOrder(supplierId: string, warehouseId: string, overrides: Partial<any> = {}) {
+export function createTestPurchaseOrder(supplierId: string, warehouseId: string, overrides: Partial<unknown> = {}) {
   return {
     supplierId,
     warehouseId,
@@ -101,7 +101,7 @@ export function createTestPurchaseOrder(supplierId: string, warehouseId: string,
   };
 }
 
-export function createTestSupplierAddress(supplierId: string, overrides: Partial<any> = {}) {
+export function createTestSupplierAddress(supplierId: string, overrides: Partial<unknown> = {}) {
   return {
     supplierId,
     name: 'Test Address',
@@ -127,12 +127,12 @@ export async function cleanupSupplierTests(
   for (const id of resources.poIds || []) {
     try {
       await client.post(`/business/suppliers/purchase-orders/${id}/cancel`, { reason: 'Cleanup' }, { headers });
-    } catch (error) {}
+    } catch {}
   }
 
   for (const id of resources.supplierIds || []) {
     try {
       await client.delete(`/business/suppliers/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 }

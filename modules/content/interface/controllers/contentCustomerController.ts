@@ -82,7 +82,7 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
             return {
               ...block,
               contentType: contentType || {
-                id: block.blockTypeId,
+                contentBlockTypeId: block.blockTypeId,
                 name: 'Unknown',
                 slug: 'unknown',
               },
@@ -102,13 +102,13 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
       }
 
       // Sanitize content types to remove sensitive schema information
-      const sanitizedBlocks = pageData.blocks.map((block: any) => ({
+      const sanitizedBlocks = pageData.blocks.map((block) => ({
         id: block.contentBlockId,
         title: block.title,
         sortOrder: block.sortOrder,
         content: block.content,
         contentType: {
-          id: block.contentType.contentTypeId,
+          id: block.contentType.contentBlockTypeId,
           name: block.contentType.name,
           slug: block.contentType.slug,
         },
@@ -143,9 +143,9 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
           template: sanitizedTemplate,
         },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      if (error.message.includes('not found')) {
+      if ((error as Error).message.includes('not found')) {
         res.status(404).json({
           success: false,
           message: 'Page not found',
@@ -154,13 +154,13 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
       }
       throw error;
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({
       success: false,
       message: 'Failed to fetch page content',
-      error: error.message,
+      error: (error as Error).message,
     });
   }
 };
@@ -184,13 +184,13 @@ export const getActiveContentTypes = async (req: TypedRequest, res: Response): P
       success: true,
       data: sanitizedContentTypes,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({
       success: false,
       message: 'Failed to fetch content types',
-      error: error.message,
+      error: (error as Error).message,
     });
   }
 };

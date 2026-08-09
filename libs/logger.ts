@@ -3,8 +3,8 @@ import 'winston-daily-rotate-file';
 import expressWinston from 'express-winston';
 import path from 'path';
 
-function stringify(obj: any) {
-  let cache: any[] = [];
+function stringify(obj: unknown) {
+  let cache: unknown[] = [];
   let str = JSON.stringify(obj, function (key, value) {
     if (typeof value === 'object' && value !== null) {
       if (cache.indexOf(value) !== -1) {
@@ -60,7 +60,7 @@ const levels = {
 
 // Unified JSON formatter
 const jsonFormatter = printf(({ level, message, timestamp, stack, ...meta }: TransformableInfo) => {
-  const logEntry: Record<string, any> = {
+  const logEntry: Record<string, unknown> = {
     timestamp,
     level,
     message,
@@ -130,7 +130,7 @@ const expressHttpLogger = expressWinston.logger({
   responseWhitelist: ['statusCode'], // Only log status code from response
 });
 
-const logRequest = (req: any) => {
+const logRequest = (req: unknown) => {
   logger.info('Request', stringify(req));
 };
 

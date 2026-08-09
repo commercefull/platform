@@ -41,7 +41,7 @@ export class ProductMediaRepo {
    */
   async findByProductId(productId: string, type?: MediaType): Promise<ProductMedia[]> {
     let sql = `SELECT * FROM "productMedia" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (type) {
       sql += ` AND "type" = $2`;
@@ -59,7 +59,7 @@ export class ProductMediaRepo {
    */
   async findByVariantId(productVariantId: string, type?: MediaType): Promise<ProductMedia[]> {
     let sql = `SELECT * FROM "productMedia" WHERE "productVariantId" = $1`;
-    const params: any[] = [productVariantId];
+    const params: unknown[] = [productVariantId];
 
     if (type) {
       sql += ` AND "type" = $2`;
@@ -163,7 +163,7 @@ export class ProductMediaRepo {
    */
   async update(productMediaId: string, params: ProductMediaUpdateParams): Promise<ProductMedia | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     // If setting as primary, need to unset others first
@@ -218,7 +218,7 @@ export class ProductMediaRepo {
     let sql = `UPDATE "productMedia" 
                SET "isPrimary" = false, "updatedAt" = $1
                WHERE "productId" = $2 AND "productVariantId" IS NULL AND "isPrimary" = true`;
-    const params: any[] = [unixTimestamp(), productId];
+    const params: unknown[] = [unixTimestamp(), productId];
 
     if (exceptId) {
       sql += ` AND "productMediaId" != $3`;
@@ -235,7 +235,7 @@ export class ProductMediaRepo {
     let sql = `UPDATE "productMedia" 
                SET "isPrimary" = false, "updatedAt" = $1
                WHERE "productVariantId" = $2 AND "isPrimary" = true`;
-    const params: any[] = [unixTimestamp(), productVariantId];
+    const params: unknown[] = [unixTimestamp(), productVariantId];
 
     if (exceptId) {
       sql += ` AND "productMediaId" != $3`;

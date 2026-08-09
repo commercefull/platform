@@ -4,14 +4,12 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLE = Table.SupplierReceivingRecord;
 
 // ============================================================================
 // Types
@@ -34,7 +32,7 @@ export interface SupplierReceivingRecord {
   packageCount?: number;
   notes?: string;
   discrepancies: boolean;
-  attachments?: Record<string, any>;
+  attachments?: Record<string, unknown>;
   completedAt?: string;
 }
 
@@ -142,7 +140,7 @@ export class SupplierReceivingRecordRepo {
 
   async update(id: string, params: SupplierReceivingRecordUpdateParams): Promise<SupplierReceivingRecord | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

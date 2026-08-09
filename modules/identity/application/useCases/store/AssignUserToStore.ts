@@ -1,6 +1,6 @@
 import { generateUUID } from '../../../../../libs/uuid';
 import { UserStoreAssignment, StoreRole } from '../../../domain/entities/UserStoreAssignment';
-import { UserStoreRepository } from '../../../domain/repositories/UserStoreRepository';
+import { StoreUserRepository } from '../../../domain/repositories/StoreUserRepository';
 import { UserRepository } from '../../../domain/repositories/UserRepository';
 import { StoreRepository } from '../../../../store/domain/repositories/StoreRepository';
 
@@ -24,7 +24,7 @@ export interface AssignUserToStoreOutput {
 
 export class AssignUserToStoreUseCase {
   constructor(
-    private readonly userStoreRepository: UserStoreRepository,
+    private readonly userStoreRepository: StoreUserRepository,
     private readonly userRepository: UserRepository,
     private readonly storeRepository: StoreRepository,
   ) {}

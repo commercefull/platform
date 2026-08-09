@@ -49,7 +49,6 @@ export interface FulfillmentProps {
   // For marketplace - which merchant
   merchantId?: string;
 
-  // For B2B - which supplier
   supplierId?: string;
 
   // For multi-store - which store

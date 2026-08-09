@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import shippingMethodRepo from '../../../modules/shipping/infrastructure/repositories/shippingMethodRepo';
 import { adminRespond } from '../../respond';
 
@@ -23,12 +23,12 @@ export const listShippingMethods = async (req: TypedRequest, res: Response): Pro
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load shipping methods',
+      error: (error as Error).message || 'Failed to load shipping methods',
     });
   }
 };
@@ -38,18 +38,19 @@ export const createShippingMethodForm = async (req: TypedRequest, res: Response)
     adminRespond(req, res, 'shipping/methods/create', {
       pageName: 'Create Shipping Method',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
 
 export const createShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
     const {
       name,
       code,
@@ -68,7 +69,7 @@ export const createShippingMethod = async (req: TypedRequest, res: Response): Pr
       minOrderValue,
       maxOrderValue,
       shippingClass,
-    } = req.body;
+    } = body;
 
     const method = await shippingMethodRepo.create({
       shippingCarrierId: null,
@@ -95,13 +96,13 @@ export const createShippingMethod = async (req: TypedRequest, res: Response): Pr
     });
 
     res.redirect(`/hub/shipping/methods/${method.shippingMethodId}?success=Shipping method created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'shipping/methods/create', {
       pageName: 'Create Shipping Method',
-      error: error.message || 'Failed to create shipping method',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create shipping method',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -126,12 +127,12 @@ export const viewShippingMethod = async (req: TypedRequest, res: Response): Prom
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load shipping method',
+      error: (error as Error).message || 'Failed to load shipping method',
     });
   }
 };
@@ -154,12 +155,12 @@ export const editShippingMethodForm = async (req: TypedRequest, res: Response): 
       pageName: `Edit: ${method.name}`,
       method,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -167,8 +168,9 @@ export const editShippingMethodForm = async (req: TypedRequest, res: Response): 
 export const updateShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { methodId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
+    const body = req.body as RequestBody;
     const {
       name,
       code,
@@ -187,7 +189,7 @@ export const updateShippingMethod = async (req: TypedRequest, res: Response): Pr
       minOrderValue,
       maxOrderValue,
       shippingClass,
-    } = req.body;
+    } = body;
 
     if (name !== undefined) updates.name = name;
     if (code !== undefined) updates.code = code;
@@ -215,7 +217,7 @@ export const updateShippingMethod = async (req: TypedRequest, res: Response): Pr
     }
 
     res.redirect(`/hub/shipping/methods/${methodId}?success=Shipping method updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -224,13 +226,13 @@ export const updateShippingMethod = async (req: TypedRequest, res: Response): Pr
       adminRespond(req, res, 'shipping/methods/edit', {
         pageName: `Edit: ${method?.name || 'Method'}`,
         method,
-        error: error.message || 'Failed to update shipping method',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update shipping method',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update shipping method',
+        error: (error as Error).message || 'Failed to update shipping method',
       });
     }
   }
@@ -247,10 +249,10 @@ export const deleteShippingMethod = async (req: TypedRequest, res: Response): Pr
     }
 
     res.json({ success: true, message: 'Shipping method deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete shipping method' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete shipping method' });
   }
 };
 
@@ -265,10 +267,10 @@ export const activateShippingMethod = async (req: TypedRequest, res: Response): 
     }
 
     res.json({ success: true, message: 'Shipping method activated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to activate shipping method' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate shipping method' });
   }
 };
 
@@ -283,9 +285,9 @@ export const deactivateShippingMethod = async (req: TypedRequest, res: Response)
     }
 
     res.json({ success: true, message: 'Shipping method deactivated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to deactivate shipping method' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate shipping method' });
   }
 };

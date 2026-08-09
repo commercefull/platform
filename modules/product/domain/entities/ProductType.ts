@@ -58,7 +58,7 @@ export class ProductType {
   }
 
   /**
-   * Check if this product type has any attribute sets
+   * Check if this product type has unknown attribute sets
    */
   hasAttributeSets(): boolean {
     return this.attributeSets.length > 0;
@@ -68,8 +68,8 @@ export class ProductType {
    * Update the name
    */
   updateName(name: string): void {
-    (this.props as any).name = name;
-    (this.props as any).updatedAt = new Date();
+    (this.props as { name: string }).name = name;
+    (this.props as { updatedAt: Date }).updatedAt = new Date();
   }
 
   /**

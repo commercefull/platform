@@ -1,7 +1,13 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import PurchaseOrderRepo from '../../infrastructure/repositories/purchaseOrderRepo';
+import PurchaseOrderRepo, {
+  SupplierPurchaseOrderStatus,
+  SupplierPurchaseOrderCreateParams,
+  SupplierPurchaseOrderUpdateParams,
+  SupplierPurchaseOrderItemCreateParams,
+  SupplierPurchaseOrderItemUpdateParams,
+} from '../../infrastructure/repositories/purchaseOrderRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 
 // Use the singleton instance directly
@@ -15,7 +21,11 @@ export const getPurchaseOrders = async (req: TypedRequest, res: Response): Promi
     let purchaseOrders;
 
     if (status) {
-      purchaseOrders = await purchaseOrderRepo.findByStatus(status as any, parseInt(limit as string), parseInt(offset as string));
+      purchaseOrders = await purchaseOrderRepo.findByStatus(
+        status as SupplierPurchaseOrderStatus,
+        parseInt(limit as string),
+        parseInt(offset as string),
+      );
     } else if (supplierId) {
       purchaseOrders = await purchaseOrderRepo.findBySupplierId(
         supplierId as string,
@@ -35,7 +45,7 @@ export const getPurchaseOrders = async (req: TypedRequest, res: Response): Promi
     }
 
     successResponse(res, purchaseOrders);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch purchase orders');
@@ -53,7 +63,7 @@ export const getPurchaseOrderById = async (req: TypedRequest, res: Response): Pr
     }
 
     successResponse(res, purchaseOrder);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch purchase order');
@@ -68,7 +78,7 @@ export const getPurchaseOrdersBySupplierId = async (req: TypedRequest, res: Resp
     const purchaseOrders = await purchaseOrderRepo.findBySupplierId(id, parseInt(limit as string), parseInt(offset as string));
 
     successResponse(res, purchaseOrders);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch purchase orders');
@@ -100,7 +110,7 @@ export const createPurchaseOrder = async (req: TypedRequest, res: Response): Pro
       supplierNotes,
       attachments,
       items, // Array of purchase order items
-    } = req.body;
+    } = req.body as SupplierPurchaseOrderCreateParams & { items: SupplierPurchaseOrderItemCreateParams[] };
 
     // Validate required fields
     const errors: string[] = [];
@@ -143,9 +153,9 @@ export const createPurchaseOrder = async (req: TypedRequest, res: Response): Pro
     // Create purchase order items
     const createdItems = [];
     for (const item of items) {
-      const itemParams = {
-        supplierPurchaseOrderId: purchaseOrder.supplierPurchaseOrderId,
+      const itemParams: SupplierPurchaseOrderItemCreateParams = {
         ...item,
+        supplierPurchaseOrderId: purchaseOrder.supplierPurchaseOrderId,
       };
       const createdItem = await purchaseOrderRepo.createItem(itemParams);
       createdItems.push(createdItem);
@@ -159,7 +169,7 @@ export const createPurchaseOrder = async (req: TypedRequest, res: Response): Pro
       },
       201,
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to create purchase order');
@@ -169,7 +179,7 @@ export const createPurchaseOrder = async (req: TypedRequest, res: Response): Pro
 export const updatePurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const updateParams = req.body;
+    const updateParams = req.body as SupplierPurchaseOrderUpdateParams;
 
     const purchaseOrder = await purchaseOrderRepo.update(id, updateParams);
 
@@ -179,7 +189,7 @@ export const updatePurchaseOrder = async (req: TypedRequest, res: Response): Pro
     }
 
     successResponse(res, purchaseOrder);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to update purchase order');
@@ -197,7 +207,7 @@ export const deletePurchaseOrder = async (req: TypedRequest, res: Response): Pro
     }
 
     successResponse(res, { message: 'Purchase order deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to delete purchase order');
@@ -215,7 +225,7 @@ export const approvePurchaseOrder = async (req: TypedRequest, res: Response): Pr
     }
 
     successResponse(res, purchaseOrder);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to approve purchase order');
@@ -233,7 +243,7 @@ export const cancelPurchaseOrder = async (req: TypedRequest, res: Response): Pro
     }
 
     successResponse(res, purchaseOrder);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to cancel purchase order');
@@ -251,7 +261,7 @@ export const sendPurchaseOrder = async (req: TypedRequest, res: Response): Promi
     }
 
     successResponse(res, purchaseOrder);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to send purchase order');
@@ -265,7 +275,7 @@ export const getPurchaseOrderItems = async (req: TypedRequest, res: Response): P
     const { id } = req.params;
     const items = await purchaseOrderRepo.findItemsByOrderId(id);
     successResponse(res, items);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch purchase order items');
@@ -275,9 +285,10 @@ export const getPurchaseOrderItems = async (req: TypedRequest, res: Response): P
 export const addPurchaseOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const itemParams = {
-      purchaseOrderId: id,
-      ...req.body,
+    const body = req.body as Omit<SupplierPurchaseOrderItemCreateParams, 'supplierPurchaseOrderId'>;
+    const itemParams: SupplierPurchaseOrderItemCreateParams = {
+      supplierPurchaseOrderId: id,
+      ...body,
     };
 
     // Validate required fields
@@ -295,7 +306,7 @@ export const addPurchaseOrderItem = async (req: TypedRequest, res: Response): Pr
 
     const item = await purchaseOrderRepo.createItem(itemParams);
     successResponse(res, item, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to add purchase order item');
@@ -305,7 +316,7 @@ export const addPurchaseOrderItem = async (req: TypedRequest, res: Response): Pr
 export const updatePurchaseOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const updateParams = req.body;
+    const updateParams = req.body as SupplierPurchaseOrderItemUpdateParams;
 
     const item = await purchaseOrderRepo.updateItem(id, updateParams);
 
@@ -315,7 +326,7 @@ export const updatePurchaseOrderItem = async (req: TypedRequest, res: Response):
     }
 
     successResponse(res, item);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to update purchase order item');
@@ -333,7 +344,7 @@ export const deletePurchaseOrderItem = async (req: TypedRequest, res: Response):
     }
 
     successResponse(res, { message: 'Purchase order item deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to delete purchase order item');

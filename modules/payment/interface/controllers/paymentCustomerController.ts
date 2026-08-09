@@ -15,22 +15,22 @@ import { SaveStoredPaymentMethodCommand, SaveStoredPaymentMethodUseCase } from '
 
 export const listStoredMethods = async (req: Request, res: Response): Promise<void> => {
   try {
-    const customerId = (req.user as any)?.customerId || (req.user as any)?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     if (!customerId) {
       errorResponse(res, 'Authentication required', 401);
       return;
     }
     const methods = await storedPaymentMethodRepo.findByCustomer(customerId);
     successResponse(res, { methods });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('listStoredMethods error:', error);
-    errorResponse(res, error.message || 'Failed to list stored payment methods');
+    errorResponse(res, (error as Error).message || 'Failed to list stored payment methods');
   }
 };
 
 export const saveStoredMethod = async (req: Request, res: Response): Promise<void> => {
   try {
-    const customerId = (req.user as any)?.customerId || (req.user as any)?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     if (!customerId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -56,15 +56,15 @@ export const saveStoredMethod = async (req: Request, res: Response): Promise<voi
       ),
     );
     successResponse(res, result, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('saveStoredMethod error:', error);
-    errorResponse(res, error.message || 'Failed to save payment method');
+    errorResponse(res, (error as Error).message || 'Failed to save payment method');
   }
 };
 
 export const setDefaultMethod = async (req: Request, res: Response): Promise<void> => {
   try {
-    const customerId = (req.user as any)?.customerId || (req.user as any)?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     if (!customerId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -76,9 +76,9 @@ export const setDefaultMethod = async (req: Request, res: Response): Promise<voi
       return;
     }
     successResponse(res, { method });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('setDefaultMethod error:', error);
-    errorResponse(res, error.message || 'Failed to set default payment method');
+    errorResponse(res, (error as Error).message || 'Failed to set default payment method');
   }
 };
 
@@ -91,8 +91,8 @@ export const deleteStoredMethod = async (req: Request, res: Response): Promise<v
       return;
     }
     successResponse(res, { deleted: true, methodId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('deleteStoredMethod error:', error);
-    errorResponse(res, error.message || 'Failed to delete payment method');
+    errorResponse(res, (error as Error).message || 'Failed to delete payment method');
   }
 };

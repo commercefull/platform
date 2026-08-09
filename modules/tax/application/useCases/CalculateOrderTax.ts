@@ -147,7 +147,7 @@ export class CalculateOrderTaxUseCase {
         lineItems,
         message: isExempt ? 'Customer is tax exempt' : undefined,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Return a safe fallback with zero tax
       const subtotal = command.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
 
@@ -165,7 +165,7 @@ export class CalculateOrderTaxUseCase {
           taxAmount: 0,
           taxRate: 0,
         })),
-        message: error.message || 'Failed to calculate tax',
+        message: (error as Error).message || 'Failed to calculate tax',
       };
     }
   }

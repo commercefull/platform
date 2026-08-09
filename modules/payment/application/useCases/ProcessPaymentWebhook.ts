@@ -18,7 +18,7 @@ export class ProcessPaymentWebhookCommand {
     public readonly externalId: string,
     public readonly provider: string,
     public readonly eventType: string,
-    public readonly payload: Record<string, any>,
+    public readonly payload: Record<string, unknown>,
   ) {}
 }
 

@@ -22,7 +22,7 @@ export const loginTestUser = async (
     }
 
     return '';
-  } catch (error) {
+  } catch {
     return '';
   }
 };
@@ -100,11 +100,11 @@ export const setupNotificationTests = async () => {
 
   try {
     adminToken = await loginTestAdmin(client);
-  } catch (error) {}
+  } catch {}
 
   try {
     customerToken = await loginTestUser(client);
-  } catch (error) {}
+  } catch {}
 
   if (adminToken) {
     try {
@@ -133,7 +133,7 @@ export const setupNotificationTests = async () => {
         testTemplateId = createTemplateResponse.data.data.notificationTemplateId;
       } else {
       }
-    } catch (error) {}
+    } catch {}
   }
 
   return {
@@ -189,7 +189,7 @@ export const cleanupNotificationTests = async (
         })
         .catch(() => {});
     }
-  } catch (error) {
+  } catch {
     // Silently ignore cleanup errors
   }
 };

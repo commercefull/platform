@@ -4,6 +4,8 @@
  * Configures BOPIS (Buy Online, Pick Up In Store) for a store.
  */
 
+import type { StoreRepository } from '../../domain/repositories/StoreRepository';
+
 export interface ConfigureStorePickupInput {
   storeId: string;
   enabled: boolean;
@@ -28,7 +30,7 @@ export interface ConfigureStorePickupOutput {
 }
 
 export class ConfigureStorePickupUseCase {
-  constructor(private readonly storeRepository: any) {}
+  constructor(private readonly storeRepository: StoreRepository) {}
 
   async execute(input: ConfigureStorePickupInput): Promise<ConfigureStorePickupOutput> {
     const store = await this.storeRepository.findById(input.storeId);

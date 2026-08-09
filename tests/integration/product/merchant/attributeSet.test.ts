@@ -9,7 +9,7 @@
 
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../../testUtils';
-import { SEEDED_ATTRIBUTE_COLOR_ID, SEEDED_ATTRIBUTE_RAM_ID, SEEDED_ATTRIBUTE_SCREEN_SIZE_ID, SEEDED_ATTRIBUTE_SET_APPAREL_ID, SEEDED_ATTRIBUTE_SET_DEFAULT_ID, SEEDED_ATTRIBUTE_SET_ELECTRONICS_ID, SEEDED_ATTRIBUTE_SIZE_ID, SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID, SEEDED_PRODUCT_1_ID } from '../testUtils';
+import { SEEDED_ATTRIBUTE_COLOR_ID, SEEDED_ATTRIBUTE_SET_APPAREL_ID, SEEDED_ATTRIBUTE_SET_DEFAULT_ID, SEEDED_ATTRIBUTE_SET_ELECTRONICS_ID, SEEDED_ATTRIBUTE_SIZE_ID, SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID, SEEDED_PRODUCT_1_ID } from '../testUtils';
 
 describe('Attribute Set Tests', () => {
   let client: AxiosInstance;
@@ -50,7 +50,7 @@ describe('Attribute Set Tests', () => {
       });
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
-      const attrCodes = res.data.data.attributes.map((a: any) => a.code);
+      const attrCodes = res.data.data.attributes.map((a: Record<string, unknown>) => a.code);
       expect(attrCodes).toContain('color-test');
       expect(attrCodes).toContain('size-test');
     });
@@ -60,7 +60,7 @@ describe('Attribute Set Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
       expect(res.status).toBe(200);
-      const colorAttr = res.data.data.attributes.find((a: any) => a.code === 'color-test');
+      const colorAttr = res.data.data.attributes.find((a: Record<string, unknown>) => a.code === 'color-test');
       expect(colorAttr).toBeDefined();
       expect(colorAttr).toHaveProperty('isRequired');
     });
@@ -84,7 +84,7 @@ describe('Attribute Set Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
       expect(res.status).toBe(200);
-      const setIds = (res.data.data.attributeSets || []).map((s: any) => s.productAttributeSetId);
+      const setIds = (res.data.data.attributeSets || []).map((s: Record<string, unknown>) => s.productAttributeSetId);
       expect(setIds).toContain(SEEDED_ATTRIBUTE_SET_DEFAULT_ID);
     });
 
@@ -93,7 +93,7 @@ describe('Attribute Set Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
       expect(res.status).toBe(200);
-      const setIds = (res.data.data.attributeSets || []).map((s: any) => s.productAttributeSetId);
+      const setIds = (res.data.data.attributeSets || []).map((s: Record<string, unknown>) => s.productAttributeSetId);
       expect(setIds).toContain(SEEDED_ATTRIBUTE_SET_APPAREL_ID);
       expect(setIds).toContain(SEEDED_ATTRIBUTE_SET_ELECTRONICS_ID);
     });
@@ -107,7 +107,7 @@ describe('Attribute Set Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
       expect(res.status).toBe(200);
-      const attrCodes = res.data.data.attributes.map((a: any) => a.code);
+      const attrCodes = res.data.data.attributes.map((a: Record<string, unknown>) => a.code);
       expect(attrCodes).toContain('screen-size-test');
       expect(attrCodes).toContain('ram-test');
     });
@@ -117,7 +117,7 @@ describe('Attribute Set Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
       expect(res.status).toBe(200);
-      const positions = res.data.data.attributes.map((a: any) => a.position);
+      const positions = res.data.data.attributes.map((a: Record<string, unknown>) => a.position);
       for (let i = 1; i < positions.length; i++) {
         expect(positions[i]).toBeGreaterThanOrEqual(positions[i - 1]);
       }
@@ -153,7 +153,7 @@ describe('Attribute Set Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
       expect(res.status).toBe(200);
-      res.data.data.forEach((attr: any) => {
+      res.data.data.forEach((attr: Record<string, unknown>) => {
         expect(attr.isFilterable).toBe(true);
       });
     });
@@ -217,7 +217,7 @@ describe('Attribute Set Tests', () => {
       );
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
-      const attrIds = res.data.data.attributes.map((a: any) => a.productAttributeId);
+      const attrIds = res.data.data.attributes.map((a: Record<string, unknown>) => a.productAttributeId);
       expect(attrIds).toContain(SEEDED_ATTRIBUTE_COLOR_ID);
     });
 

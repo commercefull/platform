@@ -20,8 +20,21 @@ export interface UpdateTicketOutput {
   updatedAt: string;
 }
 
+interface TicketRecord {
+  ticketId: string;
+  status: string;
+  priority: string;
+  assignedTo?: string;
+  updatedAt: Date;
+}
+
+interface SupportRepository {
+  findTicketById(ticketId: string): Promise<TicketRecord | null>;
+  updateTicket(ticketId: string, data: Record<string, unknown>): Promise<TicketRecord>;
+}
+
 export class UpdateTicketUseCase {
-  constructor(private readonly supportRepository: any) {}
+  constructor(private readonly supportRepository: SupportRepository) {}
 
   async execute(input: UpdateTicketInput): Promise<UpdateTicketOutput> {
     const ticket = await this.supportRepository.findTicketById(input.ticketId);

@@ -7,7 +7,7 @@ export interface PaymentReport {
   currency: string;
   totalAmount: number;
   transactionCount: number;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   periodStart: Date;
   periodEnd: Date;
   createdAt: Date;
@@ -49,4 +49,14 @@ export async function create(params: Omit<PaymentReport, 'paymentReportId' | 'cr
   );
 }
 
-export default { findByMerchant, findByDateRange, create };
+export async function findAll(limit: number = 100): Promise<PaymentReport[]> {
+  return (
+    (await query<PaymentReport[]>(`SELECT * FROM "paymentReport" ORDER BY "periodStart" DESC LIMIT $1`, [limit])) || []
+  );
+}
+
+export async function findById(paymentReportId: string): Promise<PaymentReport | null> {
+  return queryOne<PaymentReport>(`SELECT * FROM "paymentReport" WHERE "paymentReportId" = $1`, [paymentReportId]);
+}
+
+export default { findByMerchant, findByDateRange, create, findAll, findById };

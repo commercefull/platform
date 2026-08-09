@@ -102,10 +102,10 @@ export class CancelSubscriptionUseCase {
           ? 'Subscription cancelled immediately'
           : 'Subscription will be cancelled at the end of the current billing period',
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        message: error.message || 'Failed to cancel subscription',
+        message: (error as Error).message || 'Failed to cancel subscription',
         errors: ['cancellation_failed'],
       };
     }

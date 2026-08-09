@@ -6,7 +6,7 @@
 import { StoreRepository } from '../../domain/repositories/StoreRepository';
 import { BusinessRepository } from '../../../business/domain/repositories/BusinessRepository';
 import { SystemConfigurationRepository } from '../../../configuration/domain/repositories/SystemConfigurationRepository';
-import { Store } from '../../domain/entities/Store';
+import { Store, type StoreProps } from '../../domain/entities/Store';
 
 // ============================================================================
 // Command
@@ -32,21 +32,21 @@ export class CreateStoreCommand {
       primaryColor?: string;
       secondaryColor?: string;
       theme?: string;
-      address?: any;
+      address?: unknown;
       isActive?: boolean;
       isVerified?: boolean;
       isFeatured?: boolean;
       defaultCurrency?: string;
       supportedCurrencies?: string[];
-      settings?: any;
+      settings?: unknown;
       metaTitle?: string;
       metaDescription?: string;
       metaKeywords?: string[];
-      socialLinks?: any;
-      openingHours?: any;
-      customPages?: any;
-      customFields?: any;
-      metadata?: any;
+      socialLinks?: unknown;
+      openingHours?: unknown;
+      customPages?: unknown;
+      customFields?: unknown;
+      metadata?: unknown;
     },
   ) {}
 }
@@ -122,7 +122,7 @@ export class CreateStoreUseCase {
       storeUrl: command.storeData.storeUrl,
       storeEmail: command.storeData.storeEmail,
       storePhone: command.storeData.storePhone,
-      address: command.storeData.address,
+      address: command.storeData.address as StoreProps['address'],
       logo: command.storeData.logo,
       banner: command.storeData.banner,
       favicon: command.storeData.favicon,
@@ -131,7 +131,7 @@ export class CreateStoreUseCase {
       theme: command.storeData.theme,
       defaultCurrency: command.storeData.defaultCurrency,
       supportedCurrencies: command.storeData.supportedCurrencies,
-      metadata: command.storeData.metadata,
+      metadata: command.storeData.metadata as Record<string, unknown> | undefined,
     });
 
     // Save store
@@ -153,7 +153,7 @@ export class CreateStoreUseCase {
     };
   }
 
-  private async validateStoreOwnership(command: CreateStoreCommand, systemConfig: any): Promise<void> {
+  private async validateStoreOwnership(command: CreateStoreCommand, _systemConfig: unknown): Promise<void> {
     const { storeType, merchantId, businessId, isHeadquarters, parentStoreId } = command.storeData;
 
     if (storeType === 'merchant_store') {

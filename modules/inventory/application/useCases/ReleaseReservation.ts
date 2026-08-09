@@ -23,9 +23,32 @@ export interface ReleaseReservationOutput {
   }>;
 }
 
+interface ReservationRecord {
+  reservationId: string;
+  inventoryItemId: string;
+  productId: string;
+  variantId?: string;
+  quantity: number;
+  locationId?: string;
+  status: string;
+}
+
+interface InventoryRecord {
+  inventoryItemId: string;
+  reservedQuantity: number;
+}
+
+interface ReleaseReservationRepositoryPort {
+  findReservationById(reservationId: string): Promise<ReservationRecord | null>;
+  findReservationsByOrderId(orderId: string): Promise<ReservationRecord[]>;
+  findById(inventoryItemId: string): Promise<InventoryRecord | null>;
+  updateReservedQuantity(inventoryItemId: string, newReservedQuantity: number): Promise<void>;
+  updateReservationStatus(reservationId: string, status: string, reason?: string): Promise<void>;
+}
+
 export class ReleaseReservationUseCase {
   constructor(
-    private readonly inventoryRepository: any, // InventoryRepository
+    private readonly inventoryRepository: ReleaseReservationRepositoryPort,
   ) {}
 
   async execute(input: ReleaseReservationInput): Promise<ReleaseReservationOutput> {
@@ -34,7 +57,7 @@ export class ReleaseReservationUseCase {
     }
 
     // Find reservations to release
-    let reservations: any[];
+    let reservations: ReservationRecord[];
     if (input.reservationId) {
       const reservation = await this.inventoryRepository.findReservationById(input.reservationId);
       reservations = reservation ? [reservation] : [];

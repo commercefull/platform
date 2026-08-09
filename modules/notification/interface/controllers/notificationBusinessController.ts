@@ -9,6 +9,51 @@ import { ManageNotificationWebhookUseCase, ManageNotificationWebhookCommand } fr
 import { UpsertTemplateTranslationUseCase, UpsertTemplateTranslationCommand } from '../../application/useCases/UpsertTemplateTranslation';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
+// Typed body interfaces
+interface CreateNotificationBody {
+  userId: string;
+  userType?: string;
+  type: string;
+  title: string;
+  content: string;
+  channel: string;
+  priority?: string;
+  category?: string;
+  data?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+interface UpdateNotificationBody {
+  title?: string;
+  content?: string;
+  priority?: string;
+  category?: string;
+  data?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+interface SendBatchBody {
+  name: string;
+  channel: string;
+  type: string;
+  title: string;
+  content: string;
+  recipients: Array<{ userId: string; userType: string }>;
+  scheduledAt?: string;
+}
+
+interface CreateWebhookBody {
+  url: string;
+  secret: string;
+  events: string[];
+}
+
+interface UpsertTranslationBody {
+  locale: string;
+  subject?: string;
+  body: string;
+}
+
 // Extend Express Request with User
 interface UserRequest extends TypedRequest {
   user?: {
@@ -20,7 +65,7 @@ interface UserRequest extends TypedRequest {
     (): { [key: string]: string[] };
     (message: string): string[];
     (type: string, message: string | string[]): number;
-    (type: string, format: string, ...args: any[]): number;
+    (type: string, format: string, ...args: unknown[]): number;
   };
 }
 
@@ -62,7 +107,7 @@ export const getNotificationById = async (req: TypedRequest, res: Response): Pro
   }
 };
 
-export const createNotification = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createNotification = async (req: TypedRequest<Record<string, string>, unknown, CreateNotificationBody>, res: Response): Promise<void> => {
   try {
     const { userId, userType, type, title, content, channel, priority, category, data, metadata } = req.body;
     if (!userId || !type || !title || !content || !channel) {
@@ -88,7 +133,7 @@ export const createNotification = async (req: TypedRequest, res: Response): Prom
   }
 };
 
-export const updateNotification = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateNotification = async (req: TypedRequest<Record<string, string>, unknown, UpdateNotificationBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { title, content, priority, category, data, metadata } = req.body;
@@ -246,9 +291,9 @@ export const listBatches = async (req: TypedRequest, res: Response): Promise<voi
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
     successResponse(res, { batches: [], limit, offset });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('listBatches error:', error);
-    errorResponse(res, error.message || 'Failed to list batches');
+    errorResponse(res, (error as Error).message || 'Failed to list batches');
   }
 };
 
@@ -264,16 +309,16 @@ export const getBatch = async (req: TypedRequest, res: Response): Promise<void> 
       return;
     }
     successResponse(res, { batch });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('getBatch error:', error);
-    errorResponse(res, error.message || 'Failed to get batch');
+    errorResponse(res, (error as Error).message || 'Failed to get batch');
   }
 };
 
 /**
  * POST /business/notifications/batches
  */
-export const sendBatch = async (req: TypedRequest, res: Response): Promise<void> => {
+export const sendBatch = async (req: TypedRequest<Record<string, string>, unknown, SendBatchBody>, res: Response): Promise<void> => {
   try {
     const { name, channel, type, title, content, recipients, scheduledAt } = req.body;
     const useCase = new SendNotificationBatchUseCase();
@@ -281,9 +326,9 @@ export const sendBatch = async (req: TypedRequest, res: Response): Promise<void>
       new SendNotificationBatchCommand(name, channel, type, title, content, recipients, scheduledAt ? new Date(scheduledAt) : undefined),
     );
     successResponse(res, result, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('sendBatch error:', error);
-    errorResponse(res, error.message || 'Failed to send batch');
+    errorResponse(res, (error as Error).message || 'Failed to send batch');
   }
 };
 
@@ -304,9 +349,9 @@ export const listWebhooks = async (req: UserRequest, res: Response): Promise<voi
       return;
     }
     successResponse(res, { webhooks: result.webhooks });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('listWebhooks error:', error);
-    errorResponse(res, error.message || 'Failed to list webhooks');
+    errorResponse(res, (error as Error).message || 'Failed to list webhooks');
   }
 };
 
@@ -316,7 +361,7 @@ export const listWebhooks = async (req: UserRequest, res: Response): Promise<voi
 export const createWebhook = async (req: UserRequest, res: Response): Promise<void> => {
   try {
     const merchantId = req.user?.merchantId;
-    const { url, secret, events } = req.body;
+    const { url, secret, events } = req.body as CreateWebhookBody;
     const useCase = new ManageNotificationWebhookUseCase();
     const result = await useCase.execute(new ManageNotificationWebhookCommand('create', merchantId, undefined, url, secret, events));
     if (!result.success) {
@@ -324,9 +369,9 @@ export const createWebhook = async (req: UserRequest, res: Response): Promise<vo
       return;
     }
     successResponse(res, result.webhook, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('createWebhook error:', error);
-    errorResponse(res, error.message || 'Failed to create webhook');
+    errorResponse(res, (error as Error).message || 'Failed to create webhook');
   }
 };
 
@@ -343,9 +388,9 @@ export const deactivateWebhook = async (req: TypedRequest, res: Response): Promi
       return;
     }
     successResponse(res, { webhookId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('deactivateWebhook error:', error);
-    errorResponse(res, error.message || 'Failed to deactivate webhook');
+    errorResponse(res, (error as Error).message || 'Failed to deactivate webhook');
   }
 };
 
@@ -361,24 +406,24 @@ export const listTranslations = async (req: TypedRequest, res: Response): Promis
     const { templateId } = req.params;
     const translations = await notificationTemplateTranslationRepo.findByTemplate(templateId);
     successResponse(res, { translations });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('listTranslations error:', error);
-    errorResponse(res, error.message || 'Failed to list translations');
+    errorResponse(res, (error as Error).message || 'Failed to list translations');
   }
 };
 
 /**
  * POST /business/notifications/templates/:templateId/translations
  */
-export const upsertTranslation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const upsertTranslation = async (req: TypedRequest<Record<string, string>, unknown, UpsertTranslationBody>, res: Response): Promise<void> => {
   try {
     const { templateId } = req.params;
     const { locale, subject, body } = req.body;
     const useCase = new UpsertTemplateTranslationUseCase(notificationTemplateTranslationRepo);
     const result = await useCase.execute(new UpsertTemplateTranslationCommand(templateId, locale, body, subject));
     successResponse(res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('upsertTranslation error:', error);
-    errorResponse(res, error.message || 'Failed to upsert translation');
+    errorResponse(res, (error as Error).message || 'Failed to upsert translation');
   }
 };

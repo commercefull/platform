@@ -45,4 +45,30 @@ export interface StoreRepository {
       followerCount?: number;
     },
   ): Promise<void>;
+
+  // Pickup and local delivery settings
+  updatePickupSettings(storeId: string, pickupSettings: Record<string, unknown>): Promise<Store>;
+  updateLocalDeliverySettings(storeId: string, deliverySettings: Record<string, unknown>): Promise<Store>;
+
+  // Store hierarchy
+  createHierarchy(input: {
+    hierarchyId: string;
+    businessId: string;
+    name: string;
+    defaultStoreId: string;
+    storeIds: string[];
+    sharedInventoryPoolId?: string;
+    sharedCatalogId?: string;
+    settings?: {
+      allowCrossStoreTransfers: boolean;
+      allowCrossStoreFulfillment: boolean;
+      centralizedPricing: boolean;
+    };
+  }): Promise<{
+    hierarchyId: string;
+    businessId: string;
+    name: string;
+    defaultStoreId: string;
+    createdAt: Date;
+  }>;
 }

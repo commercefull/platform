@@ -33,11 +33,11 @@ export const setupPaymentTests = async () => {
 
   try {
     adminToken = await loginTestAdmin(client);
-  } catch (error: any) {}
+  } catch {}
 
   try {
     customerToken = await loginTestUser(client);
-  } catch (error: any) {}
+  } catch {}
 
   let testGatewayId = '';
   let testMethodConfigId = '';
@@ -51,7 +51,7 @@ export const setupPaymentTests = async () => {
     if (gatewayResponse.data.success && gatewayResponse.data.data) {
       testGatewayId = gatewayResponse.data.data.paymentGatewayId || gatewayResponse.data.data.id || '';
     }
-  } catch (error: any) {}
+  } catch {}
 
   // Try to create test method config
   if (testGatewayId) {
@@ -70,7 +70,7 @@ export const setupPaymentTests = async () => {
       if (methodConfigResponse.data.success && methodConfigResponse.data.data) {
         testMethodConfigId = methodConfigResponse.data.data.paymentMethodConfigId || methodConfigResponse.data.data.id || '';
       }
-    } catch (error: any) {}
+    } catch {}
   }
 
   return {
@@ -94,7 +94,7 @@ export const cleanupPaymentTests = async (client: AxiosInstance, adminToken: str
       await client.delete(`/business/method-configs/${testMethodConfigId}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
-    } catch (e) {
+    } catch {
       /* ignore */
     }
   }
@@ -105,7 +105,7 @@ export const cleanupPaymentTests = async (client: AxiosInstance, adminToken: str
       await client.delete(`/business/gateways/${testGatewayId}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
-    } catch (e) {
+    } catch {
       /* ignore */
     }
   }

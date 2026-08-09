@@ -32,8 +32,21 @@ export interface CreateRewardOutput {
   createdAt: string;
 }
 
+export interface CreatedRewardData {
+  rewardId: string;
+  name: string;
+  pointsCost: number;
+  type: string;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+export interface CreateRewardRepository {
+  createReward(data: Record<string, unknown>): Promise<CreatedRewardData>;
+}
+
 export class CreateRewardUseCase {
-  constructor(private readonly loyaltyRepository: any) {}
+  constructor(private readonly loyaltyRepository: CreateRewardRepository) {}
 
   async execute(input: CreateRewardInput): Promise<CreateRewardOutput> {
     const {

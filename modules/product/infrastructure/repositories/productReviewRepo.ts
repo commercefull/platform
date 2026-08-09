@@ -61,7 +61,7 @@ export class ProductReviewRepo {
    */
   async findByProductId(productId: string, status?: ReviewStatus, limit: number = 50, offset: number = 0): Promise<ProductReview[]> {
     let sql = `SELECT * FROM "productReview" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (status) {
       sql += ` AND "status" = $2`;
@@ -94,7 +94,7 @@ export class ProductReviewRepo {
    */
   async findWithFilters(filters: ReviewFilters, limit: number = 50, offset: number = 0): Promise<ProductReview[]> {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters.productId) {
@@ -176,7 +176,7 @@ export class ProductReviewRepo {
    */
   async findHighlighted(productId?: string, limit: number = 10): Promise<ProductReview[]> {
     let sql = `SELECT * FROM "productReview" WHERE "isHighlighted" = true AND "status" = 'approved'`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (productId) {
       sql += ` AND "productId" = $1`;
@@ -235,7 +235,7 @@ export class ProductReviewRepo {
    */
   async update(productReviewId: string, params: ProductReviewUpdateParams): Promise<ProductReview | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -364,7 +364,7 @@ export class ProductReviewRepo {
    */
   async countByProductId(productId: string, status?: ReviewStatus): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "productReview" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (status) {
       sql += ` AND "status" = $2`;
@@ -441,6 +441,24 @@ export class ProductReviewRepo {
       distribution,
       verifiedPurchaseCount,
     };
+  }
+
+  async findByCustomerAndProduct(customerId: string, productId: string): Promise<ProductReview | null> {
+    return await queryOne<ProductReview>(
+      `SELECT "productReviewId" FROM "productReview" WHERE "customerId" = $1 AND "productId" = $2`,
+      [customerId, productId],
+    );
+  }
+
+  async checkCustomerPurchase(customerId: string, productId: string): Promise<boolean> {
+    const result = await queryOne<{ orderItemId: string }>(
+      `SELECT oi."orderItemId" FROM "orderItem" oi
+       JOIN "order" o ON oi."orderId" = o."orderId"
+       WHERE o."customerId" = $1 AND oi."productId" = $2 AND o."status" != 'cancelled'
+       LIMIT 1`,
+      [customerId, productId],
+    );
+    return !!result;
   }
 }
 

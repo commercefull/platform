@@ -39,7 +39,7 @@ exports.seed = async function (knex) {
   // ── Clean up previous run ───────────────────────────────────────────────
   await knex('productCollectionMap').where('productCollectionId', SEEDED_COLLECTION_1_ID).delete().catch(() => {});
   await knex('productCollection').where('productCollectionId', SEEDED_COLLECTION_1_ID).delete().catch(() => {});
-  await knex('bundleItem').where('productBundleId', SEEDED_BUNDLE_1_ID).delete().catch(() => {});
+  await knex('productBundleItem').where('productBundleId', SEEDED_BUNDLE_1_ID).delete().catch(() => {});
   await knex('productBundle').where('productBundleId', SEEDED_BUNDLE_1_ID).delete().catch(() => {});
   await knex('productQa').where('productQaId', SEEDED_QA_1_ID).delete().catch(() => {});
   await knex('productReview').where('productReviewId', SEEDED_REVIEW_1_ID).delete().catch(() => {});
@@ -85,7 +85,7 @@ exports.seed = async function (knex) {
     isActive: true,
   }).onConflict('productBundleId').merge();
 
-  await knex('bundleItem').insert({
+  await knex('productBundleItem').insert({
     productBundleId: SEEDED_BUNDLE_1_ID,
     productId: TEST_PRODUCT_2_ID,
     quantity: 1,
@@ -113,7 +113,7 @@ exports.seed = async function (knex) {
 exports.down = async function (knex) {
   await knex('productCollectionMap').where('productCollectionId', SEEDED_COLLECTION_1_ID).delete().catch(() => {});
   await knex('productCollection').where('productCollectionId', SEEDED_COLLECTION_1_ID).delete().catch(() => {});
-  await knex('bundleItem').where('productBundleId', SEEDED_BUNDLE_1_ID).delete().catch(() => {});
+  await knex('productBundleItem').where('productBundleId', SEEDED_BUNDLE_1_ID).delete().catch(() => {});
   await knex('productBundle').where('productBundleId', SEEDED_BUNDLE_1_ID).delete().catch(() => {});
   await knex('productQa').where('productQaId', SEEDED_QA_1_ID).delete().catch(() => {});
   await knex('productReview').where('productReviewId', SEEDED_REVIEW_1_ID).delete().catch(() => {});

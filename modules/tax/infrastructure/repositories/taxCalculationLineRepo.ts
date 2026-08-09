@@ -4,10 +4,8 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
-const TABLE = Table.TaxCalculationLine;
 
 export interface TaxCalculationLine {
   taxCalculationLineId: string;
@@ -90,7 +88,7 @@ export class TaxCalculationLineRepo {
 
   async update(id: string, params: TaxCalculationLineUpdateParams): Promise<TaxCalculationLine | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -129,7 +127,7 @@ export class TaxCalculationLineRepo {
 
   async count(calculationId?: string): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "taxCalculationLine"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (calculationId) {
       sql += ` WHERE "calculationId" = $1`;

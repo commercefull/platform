@@ -2,6 +2,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 import { generateUUID } from '../../../../libs/uuid';
 import { StoreDispatch } from '../../domain/entities/StoreDispatch';
 import { StoreDispatchRepository } from '../../domain/repositories/StoreDispatchRepository';
+import { InventoryLocation, Inventory } from '../../domain/entities/Inventory';
 
 export interface CreateStoreDispatchInput {
   fromStoreId: string;
@@ -18,13 +19,18 @@ export interface CreateStoreDispatchInput {
   requestedBy: string;
 }
 
+interface CreateDispatchInventoryPort {
+  getLocationByStoreId(storeId: string): Promise<InventoryLocation | null>;
+  findByProductAndLocation(productId: string, locationId: string, variantId?: string): Promise<Inventory | null>;
+}
+
 export class CreateStoreDispatchUseCase {
   constructor(
     private readonly dispatchRepository: StoreDispatchRepository,
-    private readonly inventoryRepository: any,
+    private readonly inventoryRepository: CreateDispatchInventoryPort,
   ) {}
 
-  async execute(input: CreateStoreDispatchInput): Promise<Record<string, any>> {
+  async execute(input: CreateStoreDispatchInput): Promise<Record<string, unknown>> {
     if (input.fromStoreId === input.toStoreId) {
       throw new Error('Source and destination stores must be different');
     }

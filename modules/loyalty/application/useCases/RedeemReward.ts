@@ -26,8 +26,45 @@ export interface RedeemRewardOutput {
   expiresAt?: string;
 }
 
+export interface RedeemRewardData {
+  rewardId: string;
+  name: string;
+  type: string;
+  pointsCost: number;
+  value?: number;
+  valueType?: string;
+  productId?: string;
+  isActive: boolean;
+  validFrom?: Date | null;
+  validTo?: Date | null;
+  totalQuantity: number | null;
+  remainingQuantity: number;
+  maxUsagePerCustomer?: number | null;
+  redemptionExpiryDays?: number | null;
+}
+
+export interface RedeemRewardCustomerData {
+  pointsBalance: number;
+}
+
+export interface RedeemRewardRedemption {
+  redemptionId: string;
+  expiresAt?: Date;
+}
+
+export interface RedeemRewardRepository {
+  getRewardById(rewardId: string): Promise<RedeemRewardData | null>;
+  getCustomerLoyalty(customerId: string): Promise<RedeemRewardCustomerData | null>;
+  getRewardUsageCount(customerId: string, rewardId: string): Promise<number>;
+  updatePointsBalance(customerId: string, newBalance: number): Promise<void>;
+  createTransaction(data: Record<string, unknown>): Promise<void>;
+  decrementRewardQuantity(rewardId: string): Promise<void>;
+  createRedemption(data: Record<string, unknown>): Promise<RedeemRewardRedemption>;
+  generateRedemptionCoupon(redemptionId: string, reward: RedeemRewardData): Promise<string>;
+}
+
 export class RedeemRewardUseCase {
-  constructor(private readonly loyaltyRepository: any) {}
+  constructor(private readonly loyaltyRepository: RedeemRewardRepository) {}
 
   async execute(input: RedeemRewardInput): Promise<RedeemRewardOutput> {
     const { customerId, rewardId, orderId } = input;

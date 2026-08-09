@@ -38,8 +38,20 @@ export interface GetMerchantDashboardOutput {
 
 export interface MerchantDashboardRepository {
   getMerchantStats(merchantId: string): Promise<MerchantDashboardStats>;
-  getMerchantRecentOrders(merchantId: string, limit: number): Promise<any[]>;
-  getMerchantTopProducts(merchantId: string, limit: number): Promise<any[]>;
+  getMerchantRecentOrders(merchantId: string, limit: number): Promise<Array<{
+    orderId: string;
+    orderNumber: string;
+    customerName: string;
+    totalAmount: number;
+    status: string;
+    createdAt: Date;
+  }>>;
+  getMerchantTopProducts(merchantId: string, limit: number): Promise<Array<{
+    productId: string;
+    name: string;
+    totalSold: number;
+    revenue: number;
+  }>>;
 }
 
 export class GetMerchantDashboardUseCase {

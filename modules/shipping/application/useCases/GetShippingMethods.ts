@@ -75,12 +75,12 @@ export class GetShippingMethodsUseCase {
         total: methodsWithCarriers.length,
         message: `Found ${methodsWithCarriers.length} shipping method(s)`,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         methods: [],
         total: 0,
-        message: error.message || 'Failed to retrieve shipping methods',
+        message: (error as Error).message || 'Failed to retrieve shipping methods',
       };
     }
   }

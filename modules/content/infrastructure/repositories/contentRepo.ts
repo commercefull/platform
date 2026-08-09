@@ -35,7 +35,7 @@ export class ContentRepo {
 
   async findAllBlockTypes(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentBlockType[]> {
     let sql = `SELECT * FROM "${TABLES.CONTENT_BLOCK_TYPE}"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (isActive !== undefined) {
       sql += ` WHERE "isActive" = $1`;
@@ -60,7 +60,7 @@ export class ContentRepo {
 
   async findAllContentTypes(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentType[]> {
     let sql = `SELECT * FROM "${TABLES.CONTENT_TYPE}"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (isActive !== undefined) {
       sql += ' WHERE "isActive" = $1';
@@ -129,7 +129,7 @@ export class ContentRepo {
     }
 
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     // Build dynamic query
@@ -226,7 +226,7 @@ export class ContentRepo {
   ): Promise<ContentPage[]> {
     let sql = `SELECT * FROM "${TABLES.CONTENT_PAGE}"`;
     const whereConditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (status) {
@@ -270,7 +270,7 @@ export class ContentRepo {
     }
 
     // Build dynamic insert - DB uses camelCase
-    const fieldValues: any[] = [];
+    const fieldValues: unknown[] = [];
     const fieldNames: string[] = [];
     const placeholders: string[] = [];
     let paramIndex = 1;
@@ -332,7 +332,7 @@ export class ContentRepo {
 
     // Build dynamic update - DB uses camelCase
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -462,7 +462,7 @@ export class ContentRepo {
 
     // Build dynamic query with DB column names
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -521,7 +521,7 @@ export class ContentRepo {
   async findAllTemplates(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentTemplate[]> {
     let sql = `SELECT * FROM "${TABLES.CONTENT_TEMPLATE}"`;
     const whereConditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (isActive !== undefined) {
@@ -584,7 +584,7 @@ export class ContentRepo {
 
     // Build dynamic query
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

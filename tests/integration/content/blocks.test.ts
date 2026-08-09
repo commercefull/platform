@@ -213,7 +213,7 @@ describe('Content Blocks API', () => {
       if (blocksResp.data.data.length < 2) return;
 
       const blocks = blocksResp.data.data;
-      const blockOrders = blocks.map((b: any, i: number) => ({
+      const blockOrders = blocks.map((b: Record<string, unknown>, i: number) => ({
         id: b.contentBlockId,
         order: blocks.length - 1 - i,
       }));

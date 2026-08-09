@@ -36,8 +36,8 @@ router.get('/notifications', async (req, res) => {
     });
 
     res.json({ success: true, data: result });
-  } catch (error: any) {
-    res.status(400).json({ success: false, error: error.message });
+  } catch (error: unknown) {
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 });
 
@@ -59,8 +59,8 @@ router.get('/notifications/count', async (req, res) => {
     });
 
     res.json({ success: true, data: { unreadCount: result.unreadCount || 0 } });
-  } catch (error: any) {
-    res.status(400).json({ success: false, error: error.message });
+  } catch (error: unknown) {
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 });
 
@@ -79,8 +79,8 @@ router.put('/notifications/:notificationId/read', async (req, res) => {
     });
 
     res.json({ success: true, data: result });
-  } catch (error: any) {
-    res.status(400).json({ success: false, error: error.message });
+  } catch (error: unknown) {
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 });
 
@@ -100,8 +100,8 @@ router.put('/notifications/read', async (req, res) => {
 
     const result = await useCase.execute({ notificationIds, recipientId: customerId });
     res.json({ success: true, data: result });
-  } catch (error: any) {
-    res.status(400).json({ success: false, error: error.message });
+  } catch (error: unknown) {
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 });
 

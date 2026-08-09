@@ -33,10 +33,11 @@ export class StripeAdapter implements GatewayAdapter {
     }
   }
 
-  normalize(payload: Record<string, any>): WebhookEvent | null {
-    const eventType: string = payload.type || '';
-    const obj = payload.data?.object || {};
-    const externalTransactionId: string = obj.id || '';
+  normalize(payload: Record<string, unknown>): WebhookEvent | null {
+    const eventType: string = (payload.type as string) || '';
+    const dataObj = payload.data as Record<string, unknown> | undefined;
+    const obj = (dataObj?.object as Record<string, unknown>) || {};
+    const externalTransactionId: string = (obj.id as string) || '';
 
     if (!externalTransactionId) return null;
 
@@ -45,12 +46,12 @@ export class StripeAdapter implements GatewayAdapter {
     }
 
     if (eventType === 'payment_intent.payment_failed') {
-      const err = obj.last_payment_error || {};
+      const err = (obj.last_payment_error as Record<string, unknown>) || {};
       return {
         type: 'payment_failed',
         externalTransactionId,
-        errorCode: err.code || 'payment_failed',
-        errorMessage: err.message || 'Payment failed',
+        errorCode: (err.code as string) || 'payment_failed',
+        errorMessage: (err.message as string) || 'Payment failed',
         gatewayResponse: obj,
       };
     }

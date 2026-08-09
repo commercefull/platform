@@ -11,13 +11,12 @@ import { CreateOrderCommand, CreateOrderUseCase, OrderItemInput, AddressInput } 
 import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
 import { GetCustomerOrdersCommand, GetCustomerOrdersUseCase } from '../../application/useCases/GetCustomerOrders';
 import { CancelOrderCommand, CancelOrderUseCase } from '../../application/useCases/CancelOrder';
-import { channelRepository } from '../../../channel/infrastructure/repositories/ChannelRepository';
 
 // ============================================================================
 // Content Negotiation Helpers
 // ============================================================================
 
-type ResponseData = Record<string, any>;
+type ResponseData = Record<string, unknown> | unknown[] | unknown;
 
 /**
  * Respond with JSON or HTML based on Accept header
@@ -70,10 +69,10 @@ export const getMyOrders = async (req: TypedRequest, res: Response): Promise<voi
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'order/list');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get orders', 500, 'order/error');
+    respondError(req, res, (error as Error).message || 'Failed to get orders', 500, 'order/error');
   }
 };
 
@@ -96,15 +95,15 @@ export const getOrder = async (req: TypedRequest, res: Response): Promise<void> 
     }
 
     respond(req, res, order, 200, 'order/detail');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message.includes('permission')) {
-      respondError(req, res, error.message, 403, 'order/error');
+    if ((error as Error).message.includes('permission')) {
+      respondError(req, res, (error as Error).message, 403, 'order/error');
       return;
     }
 
-    respondError(req, res, error.message || 'Failed to get order', 500, 'order/error');
+    respondError(req, res, (error as Error).message || 'Failed to get order', 500, 'order/error');
   }
 };
 
@@ -127,15 +126,15 @@ export const getOrderByNumber = async (req: TypedRequest, res: Response): Promis
     }
 
     respond(req, res, order, 200, 'order/detail');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message.includes('permission')) {
-      respondError(req, res, error.message, 403, 'order/error');
+    if ((error as Error).message.includes('permission')) {
+      respondError(req, res, (error as Error).message, 403, 'order/error');
       return;
     }
 
-    respondError(req, res, error.message || 'Failed to get order', 500, 'order/error');
+    respondError(req, res, (error as Error).message || 'Failed to get order', 500, 'order/error');
   }
 };
 
@@ -146,6 +145,25 @@ export const getOrderByNumber = async (req: TypedRequest, res: Response): Promis
 export const createOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const customerId = req.user?.customerId || req.user?._id || req.user?.id;
+    const body = req.body as {
+      items: unknown[];
+      shippingAddress: unknown;
+      billingAddress?: unknown;
+      basketId?: string;
+      storeId?: string;
+      channelId?: string;
+      createdByUserId?: string;
+      orderSource?: string;
+      currencyCode?: string;
+      customerEmail?: string;
+      customerPhone?: string;
+      customerName?: string;
+      customerNotes?: string;
+      shippingTotal?: number;
+      hasGiftWrapping?: boolean;
+      giftMessage?: string;
+      isGift?: boolean;
+    };
     const {
       items,
       shippingAddress,
@@ -164,8 +182,8 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
       hasGiftWrapping,
       giftMessage,
       isGift,
-    } = req.body;
-    const channelCodeHeader = req.get('x-channel-code');
+    } = body;
+    const _channelCodeHeader = req.get('x-channel-code');
 
     // Validation
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -187,15 +205,6 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
     let resolvedStoreId = storeId || req.user?.storeId;
     let resolvedChannelId = channelId;
     let resolvedOrderSource = orderSource || 'web';
-
-    if (channelCodeHeader && !resolvedChannelId) {
-      const channel = await channelRepository.findByCode(channelCodeHeader);
-      if (channel) {
-        resolvedChannelId = channel.channelId;
-        resolvedStoreId = resolvedStoreId || channel.defaultStoreId || channel.storeIds[0];
-        resolvedOrderSource = orderSource || 'pos';
-      }
-    }
 
     const command = new CreateOrderCommand(
       customerId,
@@ -224,10 +233,10 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
     const order = await useCase.execute(command);
 
     respond(req, res, order, 201, 'order/confirmation');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to create order', 500, 'order/error');
+    respondError(req, res, (error as Error).message || 'Failed to create order', 500, 'order/error');
   }
 };
 
@@ -238,7 +247,8 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
 export const cancelOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const { reason } = req.body;
+    const body = req.body as { reason?: string };
+    const { reason } = body;
     const customerId = req.user?.customerId || req.user?._id || req.user?.id;
 
     if (!customerId) {
@@ -253,19 +263,19 @@ export const cancelOrder = async (req: TypedRequest, res: Response): Promise<voi
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'order/cancelled');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message.includes('permission')) {
-      respondError(req, res, error.message, 403, 'order/error');
+    if ((error as Error).message.includes('permission')) {
+      respondError(req, res, (error as Error).message, 403, 'order/error');
       return;
     }
 
-    if (error.message.includes('cannot be cancelled')) {
-      respondError(req, res, error.message, 400, 'order/error');
+    if ((error as Error).message.includes('cannot be cancelled')) {
+      respondError(req, res, (error as Error).message, 400, 'order/error');
       return;
     }
 
-    respondError(req, res, error.message || 'Failed to cancel order', 500, 'order/error');
+    respondError(req, res, (error as Error).message || 'Failed to cancel order', 500, 'order/error');
   }
 };

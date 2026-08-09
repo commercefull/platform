@@ -16,8 +16,13 @@ export interface SuspendMerchantOutput {
   suspendedAt: string;
 }
 
+export interface SuspendMerchantRepository {
+  findById(merchantId: string): Promise<{ merchantId: string; status: string } | null>;
+  update(merchantId: string, params: Record<string, unknown>): Promise<unknown>;
+}
+
 export class SuspendMerchantUseCase {
-  constructor(private readonly merchantRepository: any) {}
+  constructor(private readonly merchantRepository: SuspendMerchantRepository) {}
 
   async execute(input: SuspendMerchantInput): Promise<SuspendMerchantOutput> {
     const merchant = await this.merchantRepository.findById(input.merchantId);

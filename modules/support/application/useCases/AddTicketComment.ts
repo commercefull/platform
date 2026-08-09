@@ -19,8 +19,35 @@ export interface AddTicketCommentOutput {
   createdAt: string;
 }
 
+interface TicketRecord {
+  ticketId: string;
+  status: string;
+}
+
+interface CommentRecord {
+  commentId: string;
+  ticketId: string;
+  authorType: string;
+  isInternal: boolean;
+  createdAt: Date;
+}
+
+interface SupportRepository {
+  findTicketById(ticketId: string): Promise<TicketRecord | null>;
+  createComment(data: {
+    commentId: string;
+    ticketId: string;
+    authorId: string;
+    authorType: string;
+    content: string;
+    isInternal: boolean;
+    attachments: string[];
+  }): Promise<CommentRecord>;
+  updateTicket(ticketId: string, data: Record<string, unknown>): Promise<unknown>;
+}
+
 export class AddTicketCommentUseCase {
-  constructor(private readonly supportRepository: any) {}
+  constructor(private readonly supportRepository: SupportRepository) {}
 
   async execute(input: AddTicketCommentInput): Promise<AddTicketCommentOutput> {
     if (!input.ticketId || !input.authorId || !input.content) {

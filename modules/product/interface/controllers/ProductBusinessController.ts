@@ -15,6 +15,7 @@ import { UpdateProductCommand, UpdateProductUseCase } from '../../application/us
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import productVariantRepo from '../../infrastructure/repositories/productVariantRepo';
+import type { ProductVariantCreateProps, ProductVariantUpdateProps } from '../../infrastructure/repositories/productVariantRepo';
 import productImageRepo from '../../infrastructure/repositories/productImageRepo';
 import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
 import productQaRepo from '../../infrastructure/repositories/productQaRepo';
@@ -26,12 +27,170 @@ import { ProductAttributeSetRepository } from '../../infrastructure/repositories
 import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 import { ManageProductCollectionCommand, ManageProductCollectionUseCase } from '../../application/useCases/ManageProductCollection';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
+import type { ProductQaStatus } from '../../infrastructure/repositories/productQaRepo';
+import type { RelationType } from '../../infrastructure/repositories/productRelationshipRepo';
+import type { ReviewFilters } from '../../infrastructure/repositories/productReviewRepo';
+
+// ============================================================================
+// Request Body Interfaces
+// ============================================================================
+
+interface CreateProductBody {
+  name?: string;
+  description?: string;
+  productTypeId?: string;
+  type?: string;
+  sku?: string;
+  slug?: string;
+  shortDescription?: string;
+  categoryId?: string;
+  brandId?: string;
+  basePrice?: number;
+  salePrice?: number;
+  cost?: number;
+  currencyCode?: string;
+  weight?: number;
+  weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
+  length?: number;
+  width?: number;
+  height?: number;
+  dimensionUnit?: 'cm' | 'in' | 'm' | 'mm';
+  isFeatured?: boolean;
+  isVirtual?: boolean;
+  isDownloadable?: boolean;
+  isSubscription?: boolean;
+  isTaxable?: boolean;
+  taxClass?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+interface UpdateProductBody {
+  name?: string;
+  description?: string;
+  shortDescription?: string;
+  sku?: string;
+  slug?: string;
+  categoryId?: string;
+  brandId?: string;
+  basePrice?: number;
+  salePrice?: number | null;
+  cost?: number;
+  currencyCode?: string;
+  weight?: number;
+  weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
+  length?: number;
+  width?: number;
+  height?: number;
+  dimensionUnit?: 'cm' | 'in' | 'm' | 'mm';
+  isFeatured?: boolean;
+  isVirtual?: boolean;
+  isDownloadable?: boolean;
+  isSubscription?: boolean;
+  isTaxable?: boolean;
+  taxClass?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  minOrderQuantity?: number;
+  maxOrderQuantity?: number;
+  returnPolicy?: string;
+  warranty?: string;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+interface StatusBody {
+  status?: string;
+}
+
+interface VisibilityBody {
+  visibility?: string;
+}
+
+interface VariantBody {
+  sku?: string;
+  name?: string;
+  price?: number;
+  salePrice?: number;
+  compareAtPrice?: number | null;
+  costPrice?: number | null;
+  weight?: number | null;
+  length?: number | null;
+  width?: number | null;
+  height?: number | null;
+  weightUnit?: string | null;
+  dimensionUnit?: string | null;
+  barcode?: string;
+  isDefault?: boolean;
+  isActive?: boolean;
+  position?: number;
+  inventory?: number;
+  inventoryPolicy?: string;
+  options?: Array<{ name: string; value: string }>;
+  [key: string]: unknown;
+}
+
+interface InventoryBody {
+  inventory?: string | number;
+}
+
+interface ImageReorderBody {
+  imageIds?: string[];
+}
+
+interface ReviewResponseBody {
+  response?: string;
+}
+
+interface CollectionBody {
+  name?: string;
+  slug?: string;
+  description?: string;
+  imageUrl?: string;
+  isActive?: boolean;
+  position?: number;
+  addProducts?: Array<{ productId: string; position?: number }>;
+  removeMapIds?: string[];
+}
+
+interface DownloadBody {
+  name?: string;
+  fileUrl?: string;
+  filePath?: string;
+  fileSize?: number;
+  mimeType?: string;
+  maxDownloads?: number;
+  daysValid?: number;
+  isActive?: boolean;
+  sampleUrl?: string;
+  sortOrder?: number;
+  productVariantId?: string;
+}
+
+interface RelationshipBody {
+  relatedProductId?: string;
+  type?: string;
+  position?: number;
+  isAutomated?: boolean;
+}
+
+interface OptionsBody {
+  options?: Array<{ name: string; value: string }>;
+}
+
+interface AttributeSetBody {
+  attributeSetId?: string;
+}
 
 // ============================================================================
 // Content Negotiation Helpers
 // ============================================================================
 
-function respond(req: TypedRequest, res: Response, data: any, statusCode: number = 200, htmlTemplate?: string): void {
+function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
   if (acceptHeader.includes('text/html') && htmlTemplate) {
     res.status(statusCode).render(htmlTemplate, { data, success: true });
@@ -61,7 +220,14 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
   try {
     const { status, visibility, categoryId, brandId, merchantId, search, limit, offset, orderBy, orderDirection } = req.query;
 
-    const filters: any = {};
+    const filters: {
+      status?: ProductStatus;
+      visibility?: ProductVisibility;
+      categoryId?: string;
+      brandId?: string;
+      merchantId?: string;
+      search?: string;
+    } = {};
     if (status) filters.status = status as ProductStatus;
     if (visibility) filters.visibility = visibility as ProductVisibility;
     if (categoryId) filters.categoryId = categoryId as string;
@@ -81,10 +247,10 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'admin/product/list');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to list products', 500, 'admin/product/error');
+    respondError(req, res, (error as Error).message || 'Failed to list products', 500, 'admin/product/error');
   }
 };
 
@@ -113,10 +279,10 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
     }
 
     respond(req, res, product, 200, 'admin/product/detail');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get product', 500, 'admin/product/error');
+    respondError(req, res, (error as Error).message || 'Failed to get product', 500, 'admin/product/error');
   }
 };
 
@@ -130,10 +296,10 @@ export const getProductStoreAvailability = async (req: TypedRequest, res: Respon
     });
 
     respond(req, res, result, 200, 'admin/product/detail');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    const status = error.message.includes('not found') ? 404 : 500;
-    respondError(req, res, error.message || 'Failed to get product store availability', status, 'admin/product/error');
+    const status = (error as Error).message.includes('not found') ? 404 : 500;
+    respondError(req, res, (error as Error).message || 'Failed to get product store availability', status, 'admin/product/error');
   }
 };
 
@@ -144,6 +310,7 @@ export const getProductStoreAvailability = async (req: TypedRequest, res: Respon
 export const createProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const merchantId = req.user?.merchantId;
+    const body = req.body as CreateProductBody;
     const {
       name,
       description,
@@ -175,7 +342,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       metaKeywords,
       tags,
       metadata,
-    } = req.body;
+    } = body;
 
     if (!name?.trim()) {
       respondError(req, res, 'Product name is required', 400, 'admin/product/error');
@@ -226,14 +393,14 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     const product = await useCase.execute(command);
 
     respond(req, res, product, 201, 'admin/product/created');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     const domainErrors = ['required', 'already exists', 'must be owned', 'negative', 'greater than', 'cannot be'];
-    if (domainErrors.some(e => error.message.toLowerCase().includes(e))) {
-      respondError(req, res, error.message, 400, 'admin/product/error');
+    if (domainErrors.some(e => (error as Error).message.toLowerCase().includes(e))) {
+      respondError(req, res, (error as Error).message, 400, 'admin/product/error');
       return;
     }
-    respondError(req, res, error.message || 'Failed to create product', 500, 'admin/product/error');
+    respondError(req, res, (error as Error).message || 'Failed to create product', 500, 'admin/product/error');
   }
 };
 
@@ -244,7 +411,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
 export const updateProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const updates = req.body;
+    const updates = req.body as UpdateProductBody;
 
     const command = new UpdateProductCommand(productId, updates);
     const useCase = new UpdateProductUseCase(ProductRepo);
@@ -256,20 +423,20 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
     const result = await useCase2.execute(command2);
 
     respond(req, res, result, 200, 'admin/product/updated');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message.includes('not found')) {
-      respondError(req, res, error.message, 404, 'admin/product/error');
+    if ((error as Error).message.includes('not found')) {
+      respondError(req, res, (error as Error).message, 404, 'admin/product/error');
       return;
     }
     // Domain validation errors (price, status transitions) → 400
     const domainErrors = ['negative', 'greater than', 'cannot be', 'required', 'already exists'];
-    if (domainErrors.some(e => error.message.toLowerCase().includes(e))) {
-      respondError(req, res, error.message, 400, 'admin/product/error');
+    if (domainErrors.some(e => (error as Error).message.toLowerCase().includes(e))) {
+      respondError(req, res, (error as Error).message, 400, 'admin/product/error');
       return;
     }
-    respondError(req, res, error.message || 'Failed to update product', 500, 'admin/product/error');
+    respondError(req, res, (error as Error).message || 'Failed to update product', 500, 'admin/product/error');
   }
 };
 
@@ -280,10 +447,10 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
 export const updateProductStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { status } = req.body;
+    const { status } = req.body as StatusBody;
 
-    const validStatuses = Object.values(ProductStatus);
-    if (!validStatuses.includes(status)) {
+    const validStatuses = Object.values(ProductStatus) as string[];
+    if (!status || !validStatuses.includes(status)) {
       respondError(req, res, `Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400, 'admin/product/error');
       return;
     }
@@ -294,14 +461,14 @@ export const updateProductStatus = async (req: TypedRequest, res: Response): Pro
       return;
     }
 
-    product.updateStatus(status);
+    product.updateStatus(status as ProductStatus);
     await ProductRepo.save(product);
 
     respond(req, res, { productId, status: product.status, updatedAt: product.updatedAt.toISOString() }, 200, 'admin/product/updated');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to update product status', 500, 'admin/product/error');
+    respondError(req, res, (error as Error).message || 'Failed to update product status', 500, 'admin/product/error');
   }
 };
 
@@ -312,10 +479,10 @@ export const updateProductStatus = async (req: TypedRequest, res: Response): Pro
 export const updateProductVisibility = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { visibility } = req.body;
+    const { visibility } = req.body as VisibilityBody;
 
-    const validVisibilities = Object.values(ProductVisibility);
-    if (!validVisibilities.includes(visibility)) {
+    const validVisibilities = Object.values(ProductVisibility) as string[];
+    if (!visibility || !validVisibilities.includes(visibility)) {
       respondError(req, res, `Invalid visibility. Must be one of: ${validVisibilities.join(', ')}`, 400, 'admin/product/error');
       return;
     }
@@ -326,7 +493,7 @@ export const updateProductVisibility = async (req: TypedRequest, res: Response):
       return;
     }
 
-    product.updateVisibility(visibility);
+    product.updateVisibility(visibility as ProductVisibility);
     await ProductRepo.save(product);
 
     respond(
@@ -336,10 +503,10 @@ export const updateProductVisibility = async (req: TypedRequest, res: Response):
       200,
       'admin/product/updated',
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to update product visibility', 500, 'admin/product/error');
+    respondError(req, res, (error as Error).message || 'Failed to update product visibility', 500, 'admin/product/error');
   }
 };
 
@@ -365,10 +532,10 @@ export const deleteProduct = async (req: TypedRequest, res: Response): Promise<v
     }
 
     respond(req, res, { productId, deleted: true, permanent: permanent === 'true' }, 200, 'admin/product/deleted');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to delete product', 500, 'admin/product/error');
+    respondError(req, res, (error as Error).message || 'Failed to delete product', 500, 'admin/product/error');
   }
 };
 
@@ -396,10 +563,10 @@ export const publishProduct = async (req: TypedRequest, res: Response): Promise<
       200,
       'admin/product/published',
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to publish product', 500, 'admin/product/error');
+    respondError(req, res, (error as Error).message || 'Failed to publish product', 500, 'admin/product/error');
   }
 };
 
@@ -427,10 +594,10 @@ export const unpublishProduct = async (req: TypedRequest, res: Response): Promis
       200,
       'admin/product/unpublished',
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to unpublish product', 500, 'admin/product/error');
+    respondError(req, res, (error as Error).message || 'Failed to unpublish product', 500, 'admin/product/error');
   }
 };
 
@@ -458,9 +625,9 @@ export const findByBarcode = async (req: TypedRequest, res: Response): Promise<v
     }
 
     respond(req, res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to find product by barcode');
+    respondError(req, res, (error as Error).message || 'Failed to find product by barcode');
   }
 };
 
@@ -472,9 +639,9 @@ export const getProductVariants = async (req: TypedRequest, res: Response): Prom
   try {
     const variants = await productVariantRepo.findByProductId(req.params.productId);
     respond(req, res, variants);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to get variants');
+    respondError(req, res, (error as Error).message || 'Failed to get variants');
   }
 };
 
@@ -486,39 +653,41 @@ export const getProductVariant = async (req: TypedRequest, res: Response): Promi
       return;
     }
     respond(req, res, variant);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to get variant');
+    respondError(req, res, (error as Error).message || 'Failed to get variant');
   }
 };
 
 export const createProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as VariantBody;
     const variant = await productVariantRepo.create({
       productId: req.params.productId,
-      ...req.body,
-    });
+      ...body,
+    } as ProductVariantCreateProps);
     respond(req, res, variant, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to create variant', 400);
+    respondError(req, res, (error as Error).message || 'Failed to create variant', 400);
   }
 };
 
 export const updateProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const variant = await productVariantRepo.update(req.params.variantId, req.body);
+    const body = req.body as ProductVariantUpdateProps;
+    const variant = await productVariantRepo.update(req.params.variantId, body);
     respond(req, res, variant);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to update variant', 400);
+    respondError(req, res, (error as Error).message || 'Failed to update variant', 400);
   }
 };
 
 export const updateVariantInventory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { variantId } = req.params;
-    const { inventory } = req.body;
+    const { inventory } = req.body as InventoryBody;
     if (inventory === undefined || inventory === null) {
       respondError(req, res, 'inventory is required', 400);
       return;
@@ -530,10 +699,10 @@ export const updateVariantInventory = async (req: TypedRequest, res: Response): 
     }
     // Return variant with the requested inventory value
     // (inventory is managed by the inventory module, not stored on the variant)
-    respond(req, res, { ...variant, inventory: parseInt(inventory) });
-  } catch (error: any) {
+    respond(req, res, { ...variant, inventory: parseInt(String(inventory)) });
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to update variant inventory', 400);
+    respondError(req, res, (error as Error).message || 'Failed to update variant inventory', 400);
   }
 };
 
@@ -541,9 +710,9 @@ export const deleteProductVariant = async (req: TypedRequest, res: Response): Pr
   try {
     await productVariantRepo.delete(req.params.variantId);
     respond(req, res, { deleted: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to delete variant');
+    respondError(req, res, (error as Error).message || 'Failed to delete variant');
   }
 };
 
@@ -555,32 +724,44 @@ export const getProductImages = async (req: TypedRequest, res: Response): Promis
   try {
     const images = await productImageRepo.findByProductId(req.params.productId);
     respond(req, res, images);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to get images');
+    respondError(req, res, (error as Error).message || 'Failed to get images');
   }
 };
 
 export const addProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as { url: string; position?: number; isPrimary?: boolean; productVariantId?: string; alt?: string; title?: string; width?: number; height?: number; size?: number; type?: string; isVisible?: boolean };
     const image = await productImageRepo.create({
       productId: req.params.productId,
-      ...req.body,
+      url: body.url,
+      position: body.position ?? 0,
+      isPrimary: body.isPrimary ?? false,
+      productVariantId: body.productVariantId,
+      alt: body.alt,
+      title: body.title,
+      width: body.width,
+      height: body.height,
+      size: body.size,
+      type: body.type,
+      isVisible: body.isVisible,
     });
     respond(req, res, image, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to add image', 400);
+    respondError(req, res, (error as Error).message || 'Failed to add image', 400);
   }
 };
 
 export const updateProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const image = await productImageRepo.update(req.params.imageId, req.body);
+    const body = req.body as { url?: string; position?: number; isPrimary?: boolean; alt?: string; altText?: string; title?: string; width?: number; height?: number; size?: number; type?: string; isVisible?: boolean };
+    const image = await productImageRepo.update(req.params.imageId, body);
     respond(req, res, image);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to update image', 400);
+    respondError(req, res, (error as Error).message || 'Failed to update image', 400);
   }
 };
 
@@ -588,24 +769,24 @@ export const deleteProductImage = async (req: TypedRequest, res: Response): Prom
   try {
     await productImageRepo.delete(req.params.imageId);
     respond(req, res, { deleted: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to delete image');
+    respondError(req, res, (error as Error).message || 'Failed to delete image');
   }
 };
 
 export const reorderProductImages = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { imageIds } = req.body;
+    const { imageIds } = req.body as ImageReorderBody;
     if (!Array.isArray(imageIds)) {
       respondError(req, res, 'imageIds must be an array', 400);
       return;
     }
     await productImageRepo.reorder(req.params.productId, imageIds);
     respond(req, res, { reordered: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to reorder images');
+    respondError(req, res, (error as Error).message || 'Failed to reorder images');
   }
 };
 
@@ -616,14 +797,14 @@ export const reorderProductImages = async (req: TypedRequest, res: Response): Pr
 export const listReviews = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId, status, limit, offset } = req.query;
-    const filters: any = {};
+    const filters: ReviewFilters = {};
     if (productId) filters.productId = productId as string;
-    if (status) filters.status = status as string;
+    if (status) filters.status = status as ReviewFilters['status'];
     const reviews = await productReviewRepo.findWithFilters(filters, parseInt(limit as string) || 50, parseInt(offset as string) || 0);
     respond(req, res, reviews);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to list reviews');
+    respondError(req, res, (error as Error).message || 'Failed to list reviews');
   }
 };
 
@@ -635,9 +816,9 @@ export const getReview = async (req: TypedRequest, res: Response): Promise<void>
       return;
     }
     respond(req, res, review);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to get review');
+    respondError(req, res, (error as Error).message || 'Failed to get review');
   }
 };
 
@@ -649,9 +830,9 @@ export const approveReview = async (req: TypedRequest, res: Response): Promise<v
       return;
     }
     respond(req, res, review);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to approve review');
+    respondError(req, res, (error as Error).message || 'Failed to approve review');
   }
 };
 
@@ -663,15 +844,15 @@ export const rejectReview = async (req: TypedRequest, res: Response): Promise<vo
       return;
     }
     respond(req, res, review);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to reject review');
+    respondError(req, res, (error as Error).message || 'Failed to reject review');
   }
 };
 
 export const respondToReview = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { response } = req.body;
+    const { response } = req.body as ReviewResponseBody;
     if (!response?.trim()) {
       respondError(req, res, 'Response text is required', 400);
       return;
@@ -682,9 +863,9 @@ export const respondToReview = async (req: TypedRequest, res: Response): Promise
       return;
     }
     respond(req, res, review);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to respond to review');
+    respondError(req, res, (error as Error).message || 'Failed to respond to review');
   }
 };
 
@@ -692,9 +873,9 @@ export const deleteReview = async (req: TypedRequest, res: Response): Promise<vo
   try {
     await productReviewRepo.delete(req.params.reviewId);
     respond(req, res, { deleted: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to delete review');
+    respondError(req, res, (error as Error).message || 'Failed to delete review');
   }
 };
 
@@ -710,11 +891,11 @@ export const listProductQa = async (req: TypedRequest, res: Response): Promise<v
   try {
     const { productId } = req.params;
     const { status } = req.query;
-    const qa = await productQaRepo.findByProduct(productId, status as any);
+    const qa = await productQaRepo.findByProduct(productId, status as ProductQaStatus | undefined);
     successResponse(res, qa);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing product Q&A:', error);
-    errorResponse(res, error.message || 'Failed to list product Q&A');
+    errorResponse(res, (error as Error).message || 'Failed to list product Q&A');
   }
 };
 
@@ -725,20 +906,20 @@ export const listProductQa = async (req: TypedRequest, res: Response): Promise<v
 export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { qaId } = req.params;
-    const { status } = req.body;
+    const { status } = req.body as StatusBody;
     if (!status) {
       errorResponse(res, 'status is required', 400);
       return;
     }
-    const qa = await productQaRepo.updateStatus(qaId, status);
+    const qa = await productQaRepo.updateStatus(qaId, status as ProductQaStatus);
     if (!qa) {
       errorResponse(res, 'Q&A not found', 404);
       return;
     }
     successResponse(res, qa);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating Q&A status:', error);
-    errorResponse(res, error.message || 'Failed to update Q&A status');
+    errorResponse(res, (error as Error).message || 'Failed to update Q&A status');
   }
 };
 
@@ -759,9 +940,9 @@ export const listReviewMedia = async (req: TypedRequest, res: Response): Promise
     }
     const media = await productReviewMediaRepo.findByReview(reviewId as string);
     successResponse(res, media);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing review media:', error);
-    errorResponse(res, error.message || 'Failed to list review media');
+    errorResponse(res, (error as Error).message || 'Failed to list review media');
   }
 };
 
@@ -778,9 +959,9 @@ export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promi
       return;
     }
     successResponse(res, { deleted: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting review media:', error);
-    errorResponse(res, error.message || 'Failed to delete review media');
+    errorResponse(res, (error as Error).message || 'Failed to delete review media');
   }
 };
 
@@ -796,9 +977,9 @@ export const listCollections = async (req: TypedRequest, res: Response): Promise
   try {
     const collections = await productCollectionRepo.findAll();
     successResponse(res, collections);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing collections:', error);
-    errorResponse(res, error.message || 'Failed to list collections');
+    errorResponse(res, (error as Error).message || 'Failed to list collections');
   }
 };
 
@@ -809,7 +990,7 @@ export const listCollections = async (req: TypedRequest, res: Response): Promise
 export const createCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const merchantId = req.user?.merchantId;
-    const { name, slug, description, imageUrl, isActive, position, addProducts } = req.body;
+    const { name, slug, description, imageUrl, isActive, position, addProducts } = req.body as CollectionBody;
     if (!name?.trim()) {
       errorResponse(res, 'name is required', 400);
       return;
@@ -832,9 +1013,9 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
     const useCase = new ManageProductCollectionUseCase();
     const result = await useCase.execute(command);
     successResponse(res, result, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating collection:', error);
-    errorResponse(res, error.message || 'Failed to create collection', 400);
+    errorResponse(res, (error as Error).message || 'Failed to create collection', 400);
   }
 };
 
@@ -846,7 +1027,7 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
   try {
     const { collectionId } = req.params;
     const merchantId = req.user?.merchantId;
-    const { name, slug, description, imageUrl, isActive, position, addProducts, removeMapIds } = req.body;
+    const { name, slug, description, imageUrl, isActive, position, addProducts, removeMapIds } = req.body as CollectionBody;
     if (!name?.trim()) {
       errorResponse(res, 'name is required', 400);
       return;
@@ -870,10 +1051,10 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
     const useCase = new ManageProductCollectionUseCase();
     const result = await useCase.execute(command);
     successResponse(res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating collection:', error);
-    const status = error.message.includes('not found') ? 404 : 400;
-    errorResponse(res, error.message || 'Failed to update collection', status);
+    const status = (error as Error).message.includes('not found') ? 404 : 400;
+    errorResponse(res, (error as Error).message || 'Failed to update collection', status);
   }
 };
 
@@ -890,9 +1071,9 @@ export const deleteCollection = async (req: TypedRequest, res: Response): Promis
       return;
     }
     successResponse(res, { deleted: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting collection:', error);
-    errorResponse(res, error.message || 'Failed to delete collection');
+    errorResponse(res, (error as Error).message || 'Failed to delete collection');
   }
 };
 
@@ -906,16 +1087,16 @@ export const listDownloads = async (req: TypedRequest, res: Response): Promise<v
     const { activeOnly } = req.query;
     const downloads = await productDownloadRepo.findByProductId(productId, undefined, activeOnly === 'true');
     successResponse(res, downloads);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing downloads:', error);
-    errorResponse(res, error.message || 'Failed to list downloads');
+    errorResponse(res, (error as Error).message || 'Failed to list downloads');
   }
 };
 
 export const createDownload = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { name, fileUrl, filePath, fileSize, mimeType, maxDownloads, daysValid, isActive, sampleUrl, sortOrder, productVariantId } = req.body;
+    const { name, fileUrl, filePath, fileSize, mimeType, maxDownloads, daysValid, isActive, sampleUrl, sortOrder, productVariantId } = req.body as DownloadBody;
     if (!name?.trim()) {
       errorResponse(res, 'name is required', 400);
       return;
@@ -939,24 +1120,25 @@ export const createDownload = async (req: TypedRequest, res: Response): Promise<
       sortOrder: sortOrder || 0,
     });
     successResponse(res, download, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating download:', error);
-    errorResponse(res, error.message || 'Failed to create download', 400);
+    errorResponse(res, (error as Error).message || 'Failed to create download', 400);
   }
 };
 
 export const updateDownload = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { downloadId } = req.params;
-    const updated = await productDownloadRepo.update(downloadId, req.body);
+    const body = req.body as DownloadBody;
+    const updated = await productDownloadRepo.update(downloadId, body);
     if (!updated) {
       errorResponse(res, 'Download not found', 404);
       return;
     }
     successResponse(res, updated);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating download:', error);
-    errorResponse(res, error.message || 'Failed to update download');
+    errorResponse(res, (error as Error).message || 'Failed to update download');
   }
 };
 
@@ -969,9 +1151,9 @@ export const deleteDownload = async (req: TypedRequest, res: Response): Promise<
       return;
     }
     successResponse(res, { deleted: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting download:', error);
-    errorResponse(res, error.message || 'Failed to delete download');
+    errorResponse(res, (error as Error).message || 'Failed to delete download');
   }
 };
 
@@ -983,18 +1165,18 @@ export const listRelationships = async (req: TypedRequest, res: Response): Promi
   try {
     const { productId } = req.params;
     const { type } = req.query;
-    const relationships = await productRelationshipRepo.findByProductId(productId, type as any);
+    const relationships = await productRelationshipRepo.findByProductId(productId, type as RelationType | undefined);
     successResponse(res, relationships);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing relationships:', error);
-    errorResponse(res, error.message || 'Failed to list relationships');
+    errorResponse(res, (error as Error).message || 'Failed to list relationships');
   }
 };
 
 export const createRelationship = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { relatedProductId, type, position, isAutomated } = req.body;
+    const { relatedProductId, type, position, isAutomated } = req.body as RelationshipBody;
     if (!relatedProductId) {
       errorResponse(res, 'relatedProductId is required', 400);
       return;
@@ -1006,14 +1188,14 @@ export const createRelationship = async (req: TypedRequest, res: Response): Prom
     const relationship = await productRelationshipRepo.create({
       productId,
       relatedProductId,
-      type,
+      type: type as RelationType,
       position: position || 0,
       isAutomated: isAutomated || false,
     });
     successResponse(res, relationship, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating relationship:', error);
-    errorResponse(res, error.message || 'Failed to create relationship', 400);
+    errorResponse(res, (error as Error).message || 'Failed to create relationship', 400);
   }
 };
 
@@ -1026,9 +1208,9 @@ export const deleteRelationship = async (req: TypedRequest, res: Response): Prom
       return;
     }
     successResponse(res, { deleted: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting relationship:', error);
-    errorResponse(res, error.message || 'Failed to delete relationship');
+    errorResponse(res, (error as Error).message || 'Failed to delete relationship');
   }
 };
 
@@ -1061,16 +1243,16 @@ export const getVariantMatrix = async (req: TypedRequest, res: Response): Promis
       ? [...new Set(matrix.flatMap(v => v.options.map(o => o.name)))]
       : [];
     successResponse(res, { productId, productName: product.name, hasVariants: product.hasVariants, optionAxes, variants: matrix });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error getting variant matrix:', error);
-    errorResponse(res, error.message || 'Failed to get variant matrix');
+    errorResponse(res, (error as Error).message || 'Failed to get variant matrix');
   }
 };
 
 export const configureVariant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { options } = req.body;
+    const { options } = req.body as OptionsBody;
     if (!options || !Array.isArray(options) || options.length === 0) {
       errorResponse(res, 'options array is required', 400);
       return;
@@ -1086,9 +1268,9 @@ export const configureVariant = async (req: TypedRequest, res: Response): Promis
       return;
     }
     successResponse(res, match);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error configuring variant:', error);
-    errorResponse(res, error.message || 'Failed to configure variant');
+    errorResponse(res, (error as Error).message || 'Failed to configure variant');
   }
 };
 
@@ -1099,17 +1281,17 @@ export const configureVariant = async (req: TypedRequest, res: Response): Promis
 export const listGroupedChildren = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const relationships = await productRelationshipRepo.findByProductId(productId, 'grouped' as any);
+    const relationships = await productRelationshipRepo.findByProductId(productId, 'grouped' as RelationType);
     const childIds = relationships.map(r => r.relatedProductId);
-    const children: any[] = [];
+    const children: unknown[] = [];
     for (const id of childIds) {
       const p = await ProductRepo.findById(id);
       if (p) children.push(p.toJSON());
     }
     successResponse(res, children);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing grouped children:', error);
-    errorResponse(res, error.message || 'Failed to list grouped children');
+    errorResponse(res, (error as Error).message || 'Failed to list grouped children');
   }
 };
 
@@ -1120,7 +1302,7 @@ export const listGroupedChildren = async (req: TypedRequest, res: Response): Pro
 export const applyAttributeSet = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { attributeSetId } = req.body;
+    const { attributeSetId } = req.body as AttributeSetBody;
     if (!attributeSetId) {
       errorResponse(res, 'attributeSetId is required', 400);
       return;
@@ -1150,8 +1332,8 @@ export const applyAttributeSet = async (req: TypedRequest, res: Response): Promi
     }
 
     successResponse(res, { applied: true, attributeSetId, attributesAssigned: attrsToSet.length });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error applying attribute set:', error);
-    errorResponse(res, error.message || 'Failed to apply attribute set');
+    errorResponse(res, (error as Error).message || 'Failed to apply attribute set');
   }
 };

@@ -1,10 +1,11 @@
 import { AxiosInstance } from 'axios';
-import { setupMembershipTests, cleanupMembershipTests, testTier, testBenefit, testUserMembership } from './testUtils';
+import { setupMembershipTests, cleanupMembershipTests, testTier, testBenefit } from './testUtils';
 
 describe('Membership Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let userToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let userId: string;
   let testTierId: string;
   let testBenefitId: string;
@@ -38,7 +39,7 @@ describe('Membership Tests', () => {
       if (response.data.data.length > 0) {
         // Verify that fields use camelCase in the API responses (TypeScript interface)
         // DB returns membershipTierId, not id
-        const tier = response.data.data.find((t: any) => (t.membershipTierId || t.id) === testTierId);
+        const tier = response.data.data.find((t: Record<string, unknown>) => (t.membershipTierId || t.id) === testTierId);
         expect(tier).toBeDefined();
         expect(tier).toHaveProperty('monthlyPrice');
         expect(tier).toHaveProperty('annualPrice');
@@ -101,7 +102,7 @@ describe('Membership Tests', () => {
       if (response.data.data.length > 0) {
         // Verify that fields use camelCase in the API responses
         // DB returns membershipBenefitId, not id
-        const benefit = response.data.data.find((b: any) => (b.membershipBenefitId || b.id) === testBenefitId);
+        const benefit = response.data.data.find((b: Record<string, unknown>) => (b.membershipBenefitId || b.id) === testBenefitId);
         expect(benefit).toBeDefined();
         expect(benefit).toHaveProperty('tierIds');
         expect(benefit).toHaveProperty('benefitType');

@@ -7,10 +7,12 @@ import axios from 'axios';
 import { Express } from 'express';
 import { configureRoutes } from '../../../boot/routes';
 import express from 'express';
+import http from 'http';
+import { AddressInfo } from 'net';
 
 describe('Business API Integration', () => {
   let app: Express;
-  let server: any;
+  let server: http.Server;
   let baseURL: string;
 
   beforeAll(async () => {
@@ -21,7 +23,7 @@ describe('Business API Integration', () => {
 
     // Start server on random port
     server = app.listen(0);
-    const port = server.address().port;
+    const port = (server.address() as AddressInfo).port;
     baseURL = `http://localhost:${port}`;
 
     // Configure axios defaults
@@ -243,7 +245,7 @@ describe('Business API Integration', () => {
       expect(response.data.count).toBeGreaterThanOrEqual(2);
 
       // Verify structure
-      response.data.data.forEach((business: any) => {
+      response.data.data.forEach((business: Record<string, unknown>) => {
         expect(business.businessId).toBeDefined();
         expect(business.name).toBeDefined();
         expect(business.slug).toBeDefined();

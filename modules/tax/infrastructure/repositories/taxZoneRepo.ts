@@ -4,14 +4,12 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLE = Table.TaxZone;
 
 // ============================================================================
 // Types
@@ -25,10 +23,10 @@ export interface TaxZone {
   code: string;
   description?: string;
   isDefault: boolean;
-  countries: any; // JSON array
-  states?: any; // JSON array
-  postcodes?: any; // JSON array
-  cities?: any; // JSON array
+  countries: unknown; // JSON array
+  states?: unknown; // JSON array
+  postcodes?: unknown; // JSON array
+  cities?: unknown; // JSON array
   isActive: boolean;
 }
 
@@ -94,7 +92,7 @@ export class TaxZoneRepo {
     }
 
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

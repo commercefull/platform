@@ -17,7 +17,7 @@ export class LocalStorageService implements StorageService {
     buffer: Buffer,
     key: string,
     mimeType: string,
-    options: {
+    _options: {
       public?: boolean;
       metadata?: Record<string, string>;
     } = {},
@@ -62,12 +62,12 @@ export class LocalStorageService implements StorageService {
     const filePath = path.join(this.baseDir, key);
     try {
       await fs.unlink(filePath);
-    } catch (error) {
+    } catch {
       // Ignore if file doesn't exist
     }
   }
 
-  async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
+  async getSignedUrl(key: string, _expiresIn: number = 3600): Promise<string> {
     // For local storage, just return the regular URL
     return `${this.baseUrl}/${key}`;
   }
@@ -82,7 +82,7 @@ export class LocalStorageService implements StorageService {
     }
   }
 
-  async getMetadata(key: string): Promise<Record<string, any>> {
+  async getMetadata(key: string): Promise<Record<string, unknown>> {
     const filePath = path.join(this.baseDir, key);
     const stats = await fs.stat(filePath);
 

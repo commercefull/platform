@@ -29,7 +29,7 @@ export interface StoreDispatchProps {
   dispatchedAt?: Date;
   receivedAt?: Date;
   notes?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,7 +57,7 @@ export class StoreDispatch {
     }>;
     requestedBy?: string;
     notes?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     status?: DispatchStatus;
   }): StoreDispatch {
     const now = new Date();
@@ -153,7 +153,7 @@ export class StoreDispatch {
     return this.props.notes;
   }
 
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
 
@@ -251,7 +251,7 @@ export class StoreDispatch {
     this.touch();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       dispatchId: this.props.dispatchId,
       fromStoreId: this.props.fromStoreId,

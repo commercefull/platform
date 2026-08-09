@@ -14,7 +14,7 @@ export interface CustomerLoyaltyTransaction {
   orderId?: string;
   description?: string;
   expiresAt?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdBy?: string;
 }
 

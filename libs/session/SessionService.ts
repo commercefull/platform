@@ -153,7 +153,7 @@ class SessionServiceClass {
       DELETE FROM "${this.tableName}"
       WHERE "expiresAt" < NOW()
     `;
-    const result = (await query(sql)) as any;
+    const result = (await query(sql)) as { rowCount?: number } | null;
     return result?.rowCount || 0;
   }
 

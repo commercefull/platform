@@ -38,10 +38,10 @@ export const findNearestStores = async (req: TypedRequest, res: Response): Promi
     const stores = await warehouseRepo.findNearLocation(lat, lng, parseFloat(radiusKm as string), parseInt(limit as string));
 
     // Filter to only return active stores (fulfillment centers that can serve customers)
-    const activeStores = stores.filter((store: any) => store.isActive);
+    const activeStores = stores.filter((store) => store.isActive);
 
     // Map to public-facing store data (hide internal fields)
-    const publicStores = activeStores.map((store: any) => ({
+    const publicStores = activeStores.map((store) => ({
       storeId: store.distributionWarehouseId,
       name: store.name,
       address: {
@@ -63,7 +63,7 @@ export const findNearestStores = async (req: TypedRequest, res: Response): Promi
     }));
 
     successResponse(res, publicStores);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to find nearby stores');
@@ -122,7 +122,7 @@ export const getStoreById = async (req: TypedRequest, res: Response): Promise<vo
     };
 
     successResponse(res, publicStore);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch store');
@@ -144,13 +144,13 @@ export const getStoresByCity = async (req: TypedRequest, res: Response): Promise
 
     // Find all active warehouses and filter by city
     const allStores = await warehouseRepo.findAll(true);
-    const stores = allStores.filter((store: any) => store.city.toLowerCase() === city.toLowerCase());
+    const stores = allStores.filter((store) => store.city.toLowerCase() === city.toLowerCase());
 
     // Already filtered to active stores
     const activeStores = stores;
 
     // Map to public-facing store data
-    const publicStores = activeStores.map((store: any) => ({
+    const publicStores = activeStores.map((store) => ({
       storeId: store.distributionWarehouseId,
       name: store.name,
       address: {
@@ -170,7 +170,7 @@ export const getStoresByCity = async (req: TypedRequest, res: Response): Promise
     }));
 
     successResponse(res, publicStores);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch stores');
@@ -196,7 +196,7 @@ export const getStoresByCountry = async (req: TypedRequest, res: Response): Prom
     const activeStores = stores;
 
     // Map to public-facing store data
-    const publicStores = activeStores.map((store: any) => ({
+    const publicStores = activeStores.map((store) => ({
       storeId: store.distributionWarehouseId,
       name: store.name,
       city: store.city,
@@ -209,7 +209,7 @@ export const getStoresByCountry = async (req: TypedRequest, res: Response): Prom
     }));
 
     successResponse(res, publicStores);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch stores');
@@ -256,7 +256,7 @@ export const checkStoreAvailability = async (req: TypedRequest, res: Response): 
     };
 
     successResponse(res, availability);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to check availability');

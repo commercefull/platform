@@ -1,0 +1,18 @@
+exports.up = function (knex) {
+  return knex.schema.createTable('pricingRuleCondition', t => {
+    t.uuid('ruleConditionId').primary().defaultTo(knex.raw('uuidv7()'));
+    t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
+    t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
+    t.uuid('pricingRuleId').notNullable().references('pricingRuleId').inTable('pricingRule').onDelete('CASCADE');
+    t.string('type', 50).notNullable();
+    t.jsonb('parameters').notNullable();
+
+    t.index('pricingRuleId');
+    t.index('type');
+    t.index('createdAt');
+  });
+};
+
+exports.down = function (knex) {
+  return knex.schema.dropTable('pricingRuleCondition');
+};

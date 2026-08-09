@@ -46,7 +46,7 @@ export async function detectCountry(ip: string): Promise<string | null> {
 
       return country;
     }
-  } catch (error) {
+  } catch {
     // Continue to fallback
   }
 
@@ -65,7 +65,7 @@ export async function detectCountry(ip: string): Promise<string | null> {
 
       return country;
     }
-  } catch (error) {}
+  } catch {}
 
   // Set null result in cache too, but only for 1 hour
   countryCache[cacheKey] = {

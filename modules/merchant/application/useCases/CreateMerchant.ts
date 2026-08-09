@@ -37,8 +37,13 @@ export interface CreateMerchantOutput {
   createdAt: string;
 }
 
+export interface CreateMerchantRepository {
+  findByEmail(email: string): Promise<{ merchantId: string } | null>;
+  create(params: Record<string, unknown>): Promise<{ merchantId: string; name: string; email: string; status: string; createdAt: Date }>;
+}
+
 export class CreateMerchantUseCase {
-  constructor(private readonly merchantRepository: any) {}
+  constructor(private readonly merchantRepository: CreateMerchantRepository) {}
 
   async execute(input: CreateMerchantInput): Promise<CreateMerchantOutput> {
     // Check email uniqueness

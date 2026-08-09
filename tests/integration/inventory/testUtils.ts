@@ -48,7 +48,7 @@ export const setupInventoryTests = async () => {
     adminToken = adminLogin.data?.accessToken || '';
     if (!adminToken) {
     }
-  } catch (error: any) {}
+  } catch {}
 
   // Create test product if needed
   let testProductId = '';
@@ -110,7 +110,7 @@ export const setupInventoryTests = async () => {
       } else {
       }
     }
-  } catch (error) {}
+  } catch {}
 
   return {
     client,
@@ -151,7 +151,7 @@ export const cleanupInventoryTests = async (
         })
         .catch(() => {});
     }
-  } catch (error) {
+  } catch {
     // Silently ignore cleanup errors
   }
 };

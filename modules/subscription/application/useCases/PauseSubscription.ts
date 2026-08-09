@@ -17,8 +17,18 @@ export interface PauseSubscriptionOutput {
   pauseUntil?: Date;
 }
 
+interface SubscriptionRecord {
+  status: string;
+  customerId: string;
+}
+
+interface SubscriptionRepoPort {
+  findById(id: string): Promise<SubscriptionRecord | null>;
+  update(id: string, data: Record<string, unknown>): Promise<void>;
+}
+
 export class PauseSubscriptionUseCase {
-  constructor(private readonly subscriptionRepo: any) {}
+  constructor(private readonly subscriptionRepo: SubscriptionRepoPort) {}
 
   async execute(input: PauseSubscriptionInput): Promise<PauseSubscriptionOutput> {
     if (!input.subscriptionId) {

@@ -20,8 +20,28 @@ export interface ToggleFeatureFlagOutput {
   updatedAt: string;
 }
 
+interface FeatureFlagEntity {
+  key: string;
+  enabled: boolean;
+  scope: string;
+  updatedAt: Date;
+}
+
+interface ToggleFeatureFlagRepositoryPort {
+  findFeatureFlag(key: string, scope: string, scopeId?: string): Promise<FeatureFlagEntity | null>;
+  upsertFeatureFlag(params: {
+    key: string;
+    enabled: boolean;
+    scope: string;
+    scopeId?: string;
+    rolloutPercentage?: number;
+    conditions?: Record<string, unknown>;
+    updatedBy: string;
+  }): Promise<FeatureFlagEntity>;
+}
+
 export class ToggleFeatureFlagUseCase {
-  constructor(private readonly configurationRepository: any) {}
+  constructor(private readonly configurationRepository: ToggleFeatureFlagRepositoryPort) {}
 
   async execute(input: ToggleFeatureFlagInput): Promise<ToggleFeatureFlagOutput> {
     if (!input.key) {

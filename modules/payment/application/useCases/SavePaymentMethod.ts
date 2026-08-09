@@ -32,8 +32,25 @@ export interface SavePaymentMethodOutput {
   createdAt: string;
 }
 
+interface StoredMethod {
+  paymentMethodId: string;
+  type: string;
+  provider: string;
+  last4?: string;
+  brand?: string;
+  expiresAt?: Date;
+  isDefault: boolean;
+  createdAt: Date;
+}
+
+interface PaymentRepositoryPort {
+  findPaymentMethodByProviderId(customerId: string, providerPaymentMethodId: string): Promise<StoredMethod | null>;
+  unsetDefaultPaymentMethods(customerId: string): Promise<void>;
+  createPaymentMethod(params: Record<string, unknown>): Promise<StoredMethod>;
+}
+
 export class SavePaymentMethodUseCase {
-  constructor(private readonly paymentRepository: any) {}
+  constructor(private readonly paymentRepository: PaymentRepositoryPort) {}
 
   async execute(input: SavePaymentMethodInput): Promise<SavePaymentMethodOutput> {
     if (!input.customerId || !input.providerPaymentMethodId) {

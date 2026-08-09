@@ -49,7 +49,7 @@ export class ProductCollectionRepo {
 
   async update(productCollectionId: string, params: ProductCollectionUpdateParams): Promise<ProductCollection | null> {
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let i = 1;
 
     // Skip fields that don't exist in the DB schema

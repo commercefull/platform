@@ -42,8 +42,38 @@ export interface AllocateFromPoolOutput {
   allocatedAt: string;
 }
 
+interface PoolRecord {
+  poolId: string;
+  isActive: boolean;
+  allocationStrategy: string;
+}
+
+interface PoolLocationRecord {
+  inventoryId: string;
+  locationId: string;
+  availableQuantity: number;
+  priority: number;
+  latitude?: number;
+  longitude?: number;
+  createdAt: Date;
+}
+
+interface AllocateFromPoolRepositoryPort {
+  findPoolById(poolId: string): Promise<PoolRecord | null>;
+  findAvailableInPool(poolId: string, productId: string, variantId?: string): Promise<PoolLocationRecord[]>;
+  reserveStock(inventoryId: string, quantity: number, orderId: string, allocationId: string): Promise<void>;
+  createAllocation(input: {
+    allocationId: string;
+    poolId: string;
+    orderId: string;
+    results: AllocationResult[];
+    fullyAllocated: boolean;
+    strategy: string;
+  }): Promise<void>;
+}
+
 export class AllocateFromPoolUseCase {
-  constructor(private readonly inventoryRepository: any) {}
+  constructor(private readonly inventoryRepository: AllocateFromPoolRepositoryPort) {}
 
   async execute(input: AllocateFromPoolInput): Promise<AllocateFromPoolOutput> {
     const pool = await this.inventoryRepository.findPoolById(input.poolId);
@@ -121,11 +151,11 @@ export class AllocateFromPoolUseCase {
   }
 
   private sortByStrategy(
-    locations: any[],
+    locations: PoolLocationRecord[],
     strategy: string,
     preferredLocationId?: string,
     customerLocation?: { latitude: number; longitude: number },
-  ): any[] {
+  ): PoolLocationRecord[] {
     switch (strategy) {
       case 'priority':
         // Preferred location first, then by priority

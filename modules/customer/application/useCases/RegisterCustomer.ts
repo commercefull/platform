@@ -3,7 +3,7 @@
  */
 
 import { generateUUID } from '../../../../libs/uuid';
-import { Customer } from '../../domain/entities/Customer';
+import { Customer } from '../../../../libs/db/types';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
 
@@ -21,7 +21,7 @@ export class RegisterCustomerCommand {
     public readonly dateOfBirth?: Date,
     public readonly preferredCurrency?: string,
     public readonly preferredLanguage?: string,
-    public readonly metadata?: Record<string, any>,
+    public readonly metadata?: Record<string, unknown>,
   ) {}
 }
 
@@ -67,24 +67,52 @@ export class RegisterCustomerUseCase {
     }
 
     const customerId = generateUUID();
+    const now = new Date();
 
-    // Create customer
-    const customer = Customer.create({
+    const customer: Customer = {
       customerId,
-      email: command.email,
-      firstName: command.firstName,
-      lastName: command.lastName,
-      phone: command.phone,
-      dateOfBirth: command.dateOfBirth,
-      preferredCurrency: command.preferredCurrency,
-      preferredLanguage: command.preferredLanguage,
-      metadata: command.metadata,
-    });
+      email: command.email.toLowerCase().trim(),
+      firstName: command.firstName.trim(),
+      lastName: command.lastName.trim(),
+      password: '',
+      phone: command.phone?.trim() || null,
+      dateOfBirth: command.dateOfBirth || null,
+      gender: null,
+      avatarUrl: null,
+      isActive: true,
+      isVerified: false,
+      emailVerified: false,
+      phoneVerified: false,
+      lastLoginAt: null,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      preferredLocaleId: null,
+      preferredCurrencyId: null,
+      timezone: command.preferredLanguage || null,
+      referralSource: null,
+      referralCode: null,
+      referredBy: null,
+      acceptsMarketing: false,
+      marketingPreferences: null,
+      tags: null,
+      note: null,
+      externalId: null,
+      externalSource: null,
+      taxExempt: false,
+      taxExemptionCertificate: null,
+      passwordResetToken: null,
+      passwordResetExpires: null,
+      verificationToken: null,
+      agreeToTerms: false,
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+    };
 
     // Save customer
     await this.customerRepository.save(customer);
 
-    // Hash and store password (would use bcrypt in real implementation)
+    // Hash and store password
     const bcrypt = await import('bcryptjs');
     const passwordHash = await bcrypt.hash(command.password, 12);
     await this.customerRepository.updatePassword(customerId, passwordHash);
@@ -100,8 +128,8 @@ export class RegisterCustomerUseCase {
     return {
       customerId: customer.customerId,
       email: customer.email,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
+      firstName: command.firstName,
+      lastName: command.lastName,
       isVerified: customer.isVerified,
       createdAt: customer.createdAt.toISOString(),
     };

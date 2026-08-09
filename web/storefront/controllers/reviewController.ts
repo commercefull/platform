@@ -5,9 +5,8 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
-import { query, queryOne } from '../../../libs/db';
-import { storefrontRespond } from '../../respond';
+import { TypedRequest, RequestBody } from 'libs/types/express';
+import productReviewRepo, { ProductReviewCreateParams } from '../../../modules/product/infrastructure/repositories/productReviewRepo';
 
 interface CustomerUser {
   id: string;
@@ -26,29 +25,15 @@ export const getProductReviews = async (req: TypedRequest, res: Response) => {
     const limit = 10;
     const offset = (parseInt(page as string) - 1) * limit;
 
-    const reviews = await query<any[]>(
-      `SELECT r."productReviewId", r."rating", r."title", r."content", r."reviewerName",
-              r."isVerifiedPurchase", r."helpfulCount", r."createdAt"
-       FROM "productReview" r
-       WHERE r."productId" = $1 AND r."status" = 'approved'
-       ORDER BY r."createdAt" DESC
-       LIMIT $2 OFFSET $3`,
-      [productId, limit, offset],
-    );
-
-    const stats = await queryOne<any>(
-      `SELECT COUNT(*) as "totalReviews", AVG("rating") as "averageRating"
-       FROM "productReview"
-       WHERE "productId" = $1 AND "status" = 'approved'`,
-      [productId],
-    );
+    const reviews = await productReviewRepo.findByProductId(productId, 'approved', limit, offset);
+    const stats = await productReviewRepo.getProductStatistics(productId);
 
     res.json({
       success: true,
       data: {
-        reviews: reviews || [],
-        totalReviews: parseInt(stats?.totalReviews || '0'),
-        averageRating: parseFloat(stats?.averageRating || '0'),
+        reviews,
+        totalReviews: stats.totalReviews,
+        averageRating: stats.averageRating,
       },
     });
   } catch (error) {
@@ -68,44 +53,35 @@ export const submitReview = async (req: TypedRequest, res: Response) => {
     }
 
     const { productId } = req.params;
-    const { rating, title, content } = req.body;
+    const body = req.body as RequestBody;
+    const { rating, title, content } = body;
 
-    if (!rating || rating < 1 || rating > 5) {
+    if (!rating || (rating as number) < 1 || (rating as number) > 5) {
       return res.status(400).json({ error: 'Rating must be between 1 and 5' });
     }
 
-    // Check if customer already reviewed this product
-    const existing = await queryOne<any>(`SELECT "productReviewId" FROM "productReview" WHERE "customerId" = $1 AND "productId" = $2`, [
-      user.customerId,
-      productId,
-    ]);
+    const existing = await productReviewRepo.findByCustomerAndProduct(user.customerId, productId);
 
     if (existing) {
       return res.status(400).json({ error: 'You have already reviewed this product' });
     }
 
-    // Check if customer purchased this product
-    const purchase = await queryOne<any>(
-      `SELECT oi."orderItemId" FROM "orderItem" oi
-       JOIN "order" o ON oi."orderId" = o."orderId"
-       WHERE o."customerId" = $1 AND oi."productId" = $2 AND o."status" != 'cancelled'
-       LIMIT 1`,
-      [user.customerId, productId],
-    );
+    const isVerifiedPurchase = await productReviewRepo.checkCustomerPurchase(user.customerId, productId);
 
-    const result = await queryOne<any>(
-      `INSERT INTO "productReview" (
-        "productId", "customerId", "rating", "title", "content",
-        "status", "isVerifiedPurchase", "reviewerName", "reviewerEmail",
-        "helpfulCount", "unhelpfulCount", "reportCount", "isHighlighted",
-        "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, 'pending', $6, $7, $8, 0, 0, 0, false, NOW(), NOW())
-      RETURNING "productReviewId"`,
-      [productId, user.customerId, rating, title || null, content || null, !!purchase, user.name || 'Anonymous', user.email],
-    );
+    const result = await productReviewRepo.create({
+      productId,
+      customerId: user.customerId,
+      rating,
+      title: title || null,
+      content: content || null,
+      status: 'pending',
+      isVerifiedPurchase,
+      reviewerName: user.name || 'Anonymous',
+      reviewerEmail: user.email,
+    } as ProductReviewCreateParams);
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      return res.json({ success: true, reviewId: result?.productReviewId });
+      return res.json({ success: true, reviewId: result.productReviewId });
     }
     return res.redirect(`/products/${productId}`);
   } catch (error) {
@@ -121,11 +97,7 @@ export const markReviewHelpful = async (req: TypedRequest, res: Response) => {
   try {
     const { reviewId } = req.params;
 
-    await queryOne<any>(
-      `UPDATE "productReview" SET "helpfulCount" = "helpfulCount" + 1, "updatedAt" = NOW()
-       WHERE "productReviewId" = $1 RETURNING "productReviewId"`,
-      [reviewId],
-    );
+    await productReviewRepo.incrementHelpful(reviewId);
 
     res.json({ success: true });
   } catch (error) {

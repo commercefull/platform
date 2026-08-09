@@ -23,12 +23,45 @@ export interface ResendVerificationOutput {
   message: string;
 }
 
+export interface CustomerRecord {
+  customerId: string;
+  email: string;
+  emailVerified: boolean;
+  firstName?: string;
+}
+
+export interface EmailVerificationRecord {
+  customerId: string;
+  token: string;
+  expiresAt: Date;
+  used: boolean;
+}
+
+export interface CustomerRepository {
+  findByEmail(email: string): Promise<CustomerRecord | null>;
+  update(customerId: string, data: { emailVerified: boolean; status: string }): Promise<void>;
+}
+
+export interface EmailVerificationRepository {
+  findByToken(token: string): Promise<EmailVerificationRecord | null>;
+  markAsUsed(token: string): Promise<void>;
+  create(data: { customerId: string; token: string; expiresAt: Date; used: boolean }): Promise<void>;
+}
+
+export interface AuthService {
+  generateVerificationToken(customerId: string): Promise<string>;
+}
+
+export interface EmailService {
+  sendVerificationEmail(params: { to: string; token: string; firstName?: string }): Promise<void>;
+}
+
 export class VerifyCustomerEmailUseCase {
   constructor(
-    private readonly customerRepo: any,
-    private readonly emailVerificationRepo: any,
-    private readonly authService: any,
-    private readonly emailService: any,
+    private readonly customerRepo: CustomerRepository,
+    private readonly emailVerificationRepo: EmailVerificationRepository,
+    private readonly authService: AuthService,
+    private readonly emailService: EmailService,
   ) {}
 
   async verify(input: VerifyEmailInput): Promise<VerifyEmailOutput> {
@@ -108,7 +141,7 @@ export class VerifyCustomerEmailUseCase {
         token,
         firstName: customer.firstName,
       });
-    } catch (error) {}
+    } catch {}
 
     return {
       success: true,

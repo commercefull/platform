@@ -5,28 +5,28 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { StoreRepository as IStoreRepository, StoreFilters } from '../../domain/repositories/StoreRepository';
-import { Store } from '../../domain/entities/Store';
+import { Store, type StoreProps } from '../../domain/entities/Store';
 
 export class StoreRepo implements IStoreRepository {
   async findById(storeId: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM store WHERE "storeId" = $1', [storeId]);
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM store WHERE "storeId" = $1', [storeId]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findBySlug(slug: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM store WHERE slug = $1', [slug]);
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM store WHERE slug = $1', [slug]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findByUrl(storeUrl: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM store WHERE "storeUrl" = $1', [storeUrl]);
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM store WHERE "storeUrl" = $1', [storeUrl]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findAll(filters?: StoreFilters): Promise<Store[]> {
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const rows = await query<Record<string, any>[]>(`SELECT * FROM store ${whereClause} ORDER BY "createdAt" DESC`, params);
+    const rows = await query<Record<string, unknown>[]>(`SELECT * FROM store ${whereClause} ORDER BY "createdAt" DESC`, params);
 
     return (rows || []).map(row => this.mapToStore(row));
   }
@@ -34,7 +34,7 @@ export class StoreRepo implements IStoreRepository {
   async save(store: Store): Promise<Store> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>('SELECT "storeId" FROM store WHERE "storeId" = $1', [store.storeId]);
+    const existing = await queryOne<Record<string, unknown>>('SELECT "storeId" FROM store WHERE "storeId" = $1', [store.storeId]);
 
     if (existing) {
       await query(
@@ -180,7 +180,7 @@ export class StoreRepo implements IStoreRepository {
   }
 
   async findHeadquarters(businessId: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, any>>(
+    const row = await queryOne<Record<string, unknown>>(
       'SELECT * FROM store WHERE "businessId" = $1 AND "isHeadquarters" = true ORDER BY "createdAt" ASC LIMIT 1',
       [businessId],
     );
@@ -214,7 +214,7 @@ export class StoreRepo implements IStoreRepository {
     },
   ): Promise<void> {
     const setClauses: string[] = ['"updatedAt" = $1'];
-    const params: any[] = [new Date().toISOString()];
+    const params: unknown[] = [new Date().toISOString()];
     let paramIndex = 2;
 
     if (stats.productCount !== undefined) {
@@ -238,9 +238,79 @@ export class StoreRepo implements IStoreRepository {
     await query(`UPDATE store SET ${setClauses.join(', ')} WHERE "storeId" = $${paramIndex}`, params);
   }
 
-  private buildWhereClause(filters?: StoreFilters): { whereClause: string; params: any[] } {
+  async updatePickupSettings(
+    storeId: string,
+    pickupSettings: Record<string, unknown>,
+  ): Promise<Store> {
+    const row = await queryOne<Record<string, unknown>>(
+      `UPDATE store SET "settings" = COALESCE("settings", '{}'::jsonb) || jsonb_build_object('pickup', $1::jsonb), "updatedAt" = $2 WHERE "storeId" = $3 RETURNING *`,
+      [JSON.stringify(pickupSettings), new Date().toISOString(), storeId],
+    );
+    if (!row) throw new Error(`Store not found: ${storeId}`);
+    return this.mapToStore(row);
+  }
+
+  async updateLocalDeliverySettings(
+    storeId: string,
+    deliverySettings: Record<string, unknown>,
+  ): Promise<Store> {
+    const row = await queryOne<Record<string, unknown>>(
+      `UPDATE store SET "settings" = COALESCE("settings", '{}'::jsonb) || jsonb_build_object('localDelivery', $1::jsonb), "updatedAt" = $2 WHERE "storeId" = $3 RETURNING *`,
+      [JSON.stringify(deliverySettings), new Date().toISOString(), storeId],
+    );
+    if (!row) throw new Error(`Store not found: ${storeId}`);
+    return this.mapToStore(row);
+  }
+
+  async createHierarchy(input: {
+    hierarchyId: string;
+    businessId: string;
+    name: string;
+    defaultStoreId: string;
+    storeIds: string[];
+    sharedInventoryPoolId?: string;
+    sharedCatalogId?: string;
+    settings?: {
+      allowCrossStoreTransfers: boolean;
+      allowCrossStoreFulfillment: boolean;
+      centralizedPricing: boolean;
+    };
+  }): Promise<{
+    hierarchyId: string;
+    businessId: string;
+    name: string;
+    defaultStoreId: string;
+    createdAt: Date;
+  }> {
+    const now = new Date().toISOString();
+    await query(
+      `INSERT INTO "storeHierarchy" (
+        "storeHierarchyId", "businessId", "defaultStoreId",
+        "sharedInventoryPoolId", "sharedCatalogId", "isActive", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, true, $6, $7)`,
+      [
+        input.hierarchyId,
+        input.businessId,
+        input.defaultStoreId,
+        input.sharedInventoryPoolId || null,
+        input.sharedCatalogId || null,
+        now,
+        now,
+      ],
+    );
+
+    return {
+      hierarchyId: input.hierarchyId,
+      businessId: input.businessId,
+      name: input.name,
+      defaultStoreId: input.defaultStoreId,
+      createdAt: new Date(now),
+    };
+  }
+
+  private buildWhereClause(filters?: StoreFilters): { whereClause: string; params: unknown[] } {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters?.storeType) {
@@ -282,52 +352,53 @@ export class StoreRepo implements IStoreRepository {
     };
   }
 
-  private mapToStore(row: Record<string, any>): Store {
+  private mapToStore(row: Record<string, unknown>): Store {
+    const str = (v: unknown): string | undefined => (typeof v === 'string' ? v : v != null ? String(v) : undefined);
     return Store.reconstitute({
-      storeId: row.storeId,
-      name: row.name,
-      slug: row.slug,
-      description: row.description,
-      storeType: row.storeType,
-      merchantId: row.merchantId,
-      businessId: row.businessId,
+      storeId: str(row.storeId) as string,
+      name: str(row.name) as string,
+      slug: str(row.slug) as string,
+      description: str(row.description),
+      storeType: str(row.storeType) as 'merchant_store' | 'business_store',
+      merchantId: str(row.merchantId),
+      businessId: str(row.businessId),
       isHeadquarters: Boolean(row.isHeadquarters),
-      parentStoreId: row.parentStoreId || undefined,
-      storeUrl: row.storeUrl,
-      storeEmail: row.storeEmail,
-      storePhone: row.storePhone,
-      logo: row.logo,
-      banner: row.banner,
-      favicon: row.favicon,
-      primaryColor: row.primaryColor,
-      secondaryColor: row.secondaryColor,
-      theme: row.theme,
-      colorScheme: typeof row.colorScheme === 'string' ? JSON.parse(row.colorScheme) : row.colorScheme,
-      address: typeof row.address === 'string' ? JSON.parse(row.address) : row.address,
+      parentStoreId: str(row.parentStoreId) || undefined,
+      storeUrl: str(row.storeUrl),
+      storeEmail: str(row.storeEmail),
+      storePhone: str(row.storePhone),
+      logo: str(row.logo),
+      banner: str(row.banner),
+      favicon: str(row.favicon),
+      primaryColor: str(row.primaryColor),
+      secondaryColor: str(row.secondaryColor),
+      theme: str(row.theme),
+      colorScheme: typeof row.colorScheme === 'string' ? JSON.parse(row.colorScheme) : row.colorScheme as Record<string, string> | undefined,
+      address: typeof row.address === 'string' ? JSON.parse(row.address) : row.address as StoreProps['address'],
       isActive: Boolean(row.isActive),
       isVerified: Boolean(row.isVerified),
       isFeatured: Boolean(row.isFeatured),
-      storeRating: row.storeRating ? parseFloat(row.storeRating) : undefined,
-      reviewCount: row.reviewCount ? parseInt(row.reviewCount) : undefined,
-      followerCount: row.followerCount ? parseInt(row.followerCount) : undefined,
-      productCount: row.productCount ? parseInt(row.productCount) : undefined,
-      orderCount: row.orderCount ? parseInt(row.orderCount) : undefined,
-      storePolicies: typeof row.storePolicies === 'string' ? JSON.parse(row.storePolicies) : row.storePolicies,
-      shippingMethods: typeof row.shippingMethods === 'string' ? JSON.parse(row.shippingMethods) : row.shippingMethods,
-      paymentMethods: typeof row.paymentMethods === 'string' ? JSON.parse(row.paymentMethods) : row.paymentMethods,
-      supportedCurrencies: typeof row.supportedCurrencies === 'string' ? JSON.parse(row.supportedCurrencies) : row.supportedCurrencies,
-      defaultCurrency: row.defaultCurrency,
-      settings: typeof row.settings === 'string' ? JSON.parse(row.settings) : row.settings,
-      metaTitle: row.metaTitle,
-      metaDescription: row.metaDescription,
-      metaKeywords: typeof row.metaKeywords === 'string' ? JSON.parse(row.metaKeywords) : row.metaKeywords,
-      socialLinks: typeof row.socialLinks === 'string' ? JSON.parse(row.socialLinks) : row.socialLinks,
-      openingHours: typeof row.openingHours === 'string' ? JSON.parse(row.openingHours) : row.openingHours,
-      customPages: typeof row.customPages === 'string' ? JSON.parse(row.customPages) : row.customPages,
-      customFields: typeof row.customFields === 'string' ? JSON.parse(row.customFields) : row.customFields,
-      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
+      storeRating: row.storeRating ? parseFloat(row.storeRating as string) : undefined,
+      reviewCount: row.reviewCount ? parseInt(row.reviewCount as string) : undefined,
+      followerCount: row.followerCount ? parseInt(row.followerCount as string) : undefined,
+      productCount: row.productCount ? parseInt(row.productCount as string) : undefined,
+      orderCount: row.orderCount ? parseInt(row.orderCount as string) : undefined,
+      storePolicies: typeof row.storePolicies === 'string' ? JSON.parse(row.storePolicies) : row.storePolicies as StoreProps['storePolicies'],
+      shippingMethods: typeof row.shippingMethods === 'string' ? JSON.parse(row.shippingMethods) : row.shippingMethods as string[] | undefined,
+      paymentMethods: typeof row.paymentMethods === 'string' ? JSON.parse(row.paymentMethods) : row.paymentMethods as string[] | undefined,
+      supportedCurrencies: typeof row.supportedCurrencies === 'string' ? JSON.parse(row.supportedCurrencies) : row.supportedCurrencies as string[] | undefined,
+      defaultCurrency: str(row.defaultCurrency),
+      settings: typeof row.settings === 'string' ? JSON.parse(row.settings) : row.settings as StoreProps['settings'],
+      metaTitle: str(row.metaTitle),
+      metaDescription: str(row.metaDescription),
+      metaKeywords: typeof row.metaKeywords === 'string' ? JSON.parse(row.metaKeywords) : row.metaKeywords as string[] | undefined,
+      socialLinks: typeof row.socialLinks === 'string' ? JSON.parse(row.socialLinks) : row.socialLinks as Record<string, string> | undefined,
+      openingHours: typeof row.openingHours === 'string' ? JSON.parse(row.openingHours) : row.openingHours as Record<string, unknown> | undefined,
+      customPages: typeof row.customPages === 'string' ? JSON.parse(row.customPages) : row.customPages as Record<string, unknown> | undefined,
+      customFields: typeof row.customFields === 'string' ? JSON.parse(row.customFields) : row.customFields as Record<string, unknown> | undefined,
+      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata as Record<string, unknown> | undefined,
+      createdAt: new Date(row.createdAt as string),
+      updatedAt: new Date(row.updatedAt as string),
     });
   }
 }

@@ -39,7 +39,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction, secr
     const decoded = jwt.verify(token, String(secret));
     req.user = decoded as Express.User;
     return next();
-  } catch (error) {
+  } catch {
     // Return 401 for invalid/expired tokens (not 403 which is for authorization failures)
     res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
@@ -96,7 +96,7 @@ const authenticateSession = async (
     };
 
     return next();
-  } catch (error) {
+  } catch {
     res.clearCookie(SESSION_COOKIE_NAME);
     return res.redirect(loginPath);
   }

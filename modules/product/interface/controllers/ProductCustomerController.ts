@@ -13,18 +13,20 @@ import { SearchProductsCommand, SearchProductsUseCase } from '../../application/
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
+import type { ReviewRating } from '../../infrastructure/repositories/productReviewRepo';
 import productQaRepo from '../../infrastructure/repositories/productQaRepo';
 import { SubmitProductQaCommand, SubmitProductQaUseCase } from '../../application/useCases/SubmitProductQa';
 import { VoteOnReviewCommand, VoteOnReviewUseCase } from '../../application/useCases/VoteOnReview';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import productVariantRepo from '../../infrastructure/repositories/productVariantRepo';
 import productDownloadRepo from '../../infrastructure/repositories/productDownloadRepo';
+import inventoryRepo from '../../../inventory/infrastructure/repositories/inventoryRepo';
 
 // ============================================================================
 // Content Negotiation Helpers
 // ============================================================================
 
-function respond(req: TypedRequest, res: Response, data: any, statusCode: number = 200, htmlTemplate?: string): void {
+function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
   if (acceptHeader.includes('text/html') && htmlTemplate) {
     res.status(statusCode).render(htmlTemplate, { data, success: true });
@@ -54,7 +56,16 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
   try {
     const { categoryId, brandId, priceMin, priceMax, isFeatured, tags, limit, offset, orderBy, orderDirection } = req.query;
 
-    const filters: any = {
+    const filters: {
+      status?: ProductStatus | ProductStatus[];
+      visibility?: ProductVisibility | ProductVisibility[];
+      categoryId?: string;
+      brandId?: string;
+      priceMin?: number;
+      priceMax?: number;
+      isFeatured?: boolean;
+      tags?: string[];
+    } = {
       status: ProductStatus.ACTIVE,
       visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED],
     };
@@ -77,10 +88,10 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'product/list');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to list products', 500, 'product/error');
+    respondError(req, res, (error as Error).message || 'Failed to list products', 500, 'product/error');
   }
 };
 
@@ -112,10 +123,10 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
     }
 
     respond(req, res, product, 200, 'product/detail');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get product', 500, 'product/error');
+    respondError(req, res, (error as Error).message || 'Failed to get product', 500, 'product/error');
   }
 };
 
@@ -132,7 +143,12 @@ export const searchProducts = async (req: TypedRequest, res: Response): Promise<
       return;
     }
 
-    const filters: any = {};
+    const filters: {
+      categoryId?: string;
+      brandId?: string;
+      priceMin?: number;
+      priceMax?: number;
+    } = {};
     if (categoryId) filters.categoryId = categoryId as string;
     if (brandId) filters.brandId = brandId as string;
     if (priceMin) filters.priceMin = parseFloat(priceMin as string);
@@ -143,17 +159,17 @@ export const searchProducts = async (req: TypedRequest, res: Response): Promise<
       filters,
       parseInt(limit as string) || 20,
       parseInt(offset as string) || 0,
-      (orderBy as any) || 'relevance',
+      (orderBy as 'relevance' | 'price_asc' | 'price_desc' | 'newest' | 'name') || 'relevance',
     );
 
     const useCase = new SearchProductsUseCase(ProductRepo);
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'product/search');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to search products', 500, 'product/error');
+    respondError(req, res, (error as Error).message || 'Failed to search products', 500, 'product/error');
   }
 };
 
@@ -183,9 +199,9 @@ export const findByBarcode = async (req: TypedRequest, res: Response): Promise<v
     }
 
     respond(req, res, result, 200, 'product/detail');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to find product by barcode', 500, 'product/error');
+    respondError(req, res, (error as Error).message || 'Failed to find product by barcode', 500, 'product/error');
   }
 };
 
@@ -213,10 +229,10 @@ export const getFeaturedProducts = async (req: TypedRequest, res: Response): Pro
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'product/featured');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get featured products', 500, 'product/error');
+    respondError(req, res, (error as Error).message || 'Failed to get featured products', 500, 'product/error');
   }
 };
 
@@ -245,10 +261,10 @@ export const getProductsByCategory = async (req: TypedRequest, res: Response): P
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'product/category');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get products', 500, 'product/error');
+    respondError(req, res, (error as Error).message || 'Failed to get products', 500, 'product/error');
   }
 };
 
@@ -264,10 +280,10 @@ export const getRelatedProducts = async (req: TypedRequest, res: Response): Prom
     const products = await ProductRepo.findRelated(productId, parseInt(limit as string) || 8);
 
     respond(req, res, { products }, 200, 'product/related');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get related products', 500, 'product/error');
+    respondError(req, res, (error as Error).message || 'Failed to get related products', 500, 'product/error');
   }
 };
 
@@ -289,9 +305,9 @@ export const getProductReviews = async (req: TypedRequest, res: Response): Promi
     const ratingDistribution = await productReviewRepo.getRatingDistribution(productId);
     const totalCount = await productReviewRepo.countByProductId(productId, 'approved');
     respond(req, res, { reviews, averageRating, ratingDistribution, totalCount });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to get reviews');
+    respondError(req, res, (error as Error).message || 'Failed to get reviews');
   }
 };
 
@@ -299,7 +315,7 @@ export const createReview = async (req: TypedRequest, res: Response): Promise<vo
   try {
     const { productId } = req.params;
     const customerId = req.user?.customerId;
-    const { rating, title, content, reviewerName, reviewerEmail } = req.body;
+    const { rating, title, content, reviewerName, reviewerEmail } = req.body as { rating?: number; title?: string; content?: string; reviewerName?: string; reviewerEmail?: string };
 
     if (!rating || rating < 1 || rating > 5) {
       respondError(req, res, 'Rating must be between 1 and 5', 400);
@@ -313,7 +329,7 @@ export const createReview = async (req: TypedRequest, res: Response): Promise<vo
     const review = await productReviewRepo.create({
       productId,
       customerId,
-      rating,
+      rating: rating as ReviewRating,
       title,
       content,
       reviewerName,
@@ -322,9 +338,9 @@ export const createReview = async (req: TypedRequest, res: Response): Promise<vo
       status: 'pending',
     });
     respond(req, res, review, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to create review', 400);
+    respondError(req, res, (error as Error).message || 'Failed to create review', 400);
   }
 };
 
@@ -336,9 +352,9 @@ export const markReviewHelpful = async (req: TypedRequest, res: Response): Promi
       return;
     }
     respond(req, res, review);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to mark review helpful');
+    respondError(req, res, (error as Error).message || 'Failed to mark review helpful');
   }
 };
 
@@ -350,9 +366,9 @@ export const reportReview = async (req: TypedRequest, res: Response): Promise<vo
       return;
     }
     respond(req, res, { reported: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to report review');
+    respondError(req, res, (error as Error).message || 'Failed to report review');
   }
 };
 
@@ -369,9 +385,9 @@ export const listProductQaCustomer = async (req: TypedRequest, res: Response): P
     const { productId } = req.params;
     const qa = await productQaRepo.findByProduct(productId, 'answered');
     successResponse(res, qa);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing product Q&A:', error);
-    errorResponse(res, error.message || 'Failed to list product Q&A');
+    errorResponse(res, (error as Error).message || 'Failed to list product Q&A');
   }
 };
 
@@ -383,7 +399,7 @@ export const submitProductQa = async (req: TypedRequest, res: Response): Promise
   try {
     const { productId } = req.params;
     const customerId = req.user?.customerId;
-    const { question, askerName, askerEmail } = req.body;
+    const { question, askerName, askerEmail } = req.body as { question?: string; askerName?: string; askerEmail?: string };
 
     if (!question?.trim()) {
       errorResponse(res, 'question is required', 400);
@@ -394,10 +410,10 @@ export const submitProductQa = async (req: TypedRequest, res: Response): Promise
     const useCase = new SubmitProductQaUseCase();
     const result = await useCase.execute(command);
     successResponse(res, result, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error submitting product Q&A:', error);
-    const status = error.message.includes('not found') ? 404 : 400;
-    errorResponse(res, error.message || 'Failed to submit Q&A', status);
+    const status = (error as Error).message.includes('not found') ? 404 : 400;
+    errorResponse(res, (error as Error).message || 'Failed to submit Q&A', status);
   }
 };
 
@@ -409,7 +425,7 @@ export const voteOnReview = async (req: TypedRequest, res: Response): Promise<vo
   try {
     const { reviewId } = req.params;
     const customerId = req.user?.customerId;
-    const { isHelpful } = req.body;
+    const { isHelpful } = req.body as { isHelpful?: boolean };
 
     if (!customerId) {
       errorResponse(res, 'Authentication required', 401);
@@ -424,9 +440,9 @@ export const voteOnReview = async (req: TypedRequest, res: Response): Promise<vo
     const useCase = new VoteOnReviewUseCase();
     const result = await useCase.execute(command);
     successResponse(res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error voting on review:', error);
-    errorResponse(res, error.message || 'Failed to vote on review', 400);
+    errorResponse(res, (error as Error).message || 'Failed to vote on review', 400);
   }
 };
 
@@ -437,7 +453,7 @@ export const voteOnReview = async (req: TypedRequest, res: Response): Promise<vo
 export const configureVariant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { options } = req.body;
+    const { options } = req.body as { options?: Array<{ name: string; value: string }> };
     if (!options || !Array.isArray(options) || options.length === 0) {
       errorResponse(res, 'options array is required', 400);
       return;
@@ -453,9 +469,9 @@ export const configureVariant = async (req: TypedRequest, res: Response): Promis
       return;
     }
     successResponse(res, match);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error configuring variant:', error);
-    errorResponse(res, error.message || 'Failed to configure variant');
+    errorResponse(res, (error as Error).message || 'Failed to configure variant');
   }
 };
 
@@ -468,8 +484,42 @@ export const getProductDownloads = async (req: TypedRequest, res: Response): Pro
     const { productId } = req.params;
     const downloads = await productDownloadRepo.findByProductId(productId, undefined, true);
     successResponse(res, downloads);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error getting product downloads:', error);
-    errorResponse(res, error.message || 'Failed to get product downloads');
+    errorResponse(res, (error as Error).message || 'Failed to get product downloads');
+  }
+};
+
+// ============================================================================
+// Product Availability (Customer)
+// ============================================================================
+
+export const getProductAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { variantId, quantity } = req.query;
+
+    const requiredQty = quantity ? parseInt(String(quantity)) : 1;
+    const availability = await inventoryRepo.checkProductAvailability(
+      productId,
+      variantId ? String(variantId) : undefined,
+      requiredQty,
+    );
+
+    const totalStock = await inventoryRepo.getTotalStockForProduct(productId);
+
+    respond(req, res, {
+      productId,
+      variantId: variantId ? String(variantId) : undefined,
+      available: availability.available,
+      totalAvailable: availability.totalAvailable,
+      requestedQuantity: requiredQty,
+      inStock: availability.totalAvailable > 0,
+      totalStockAcrossLocations: totalStock,
+      locationCount: availability.locations.length,
+    }, 200, 'product/availability');
+  } catch (error: unknown) {
+    logger.error('Error getting product availability:', error);
+    respondError(req, res, (error as Error).message || 'Failed to get product availability', 500, 'product/error');
   }
 };

@@ -8,24 +8,24 @@ import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
 
-type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
 
 // ============================================================================
 // Browse Subscription Products
 // ============================================================================
 
-export const getAvailableSubscriptionProducts: AsyncHandler = async (req, res, next) => {
+export const getAvailableSubscriptionProducts: AsyncHandler = async (req, res, _next) => {
   try {
     const products = await subscriptionRepo.getSubscriptionProducts(true);
     res.json({ success: true, data: products });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getSubscriptionProductDetails: AsyncHandler = async (req, res, next) => {
+export const getSubscriptionProductDetails: AsyncHandler = async (req, res, _next) => {
   try {
     // Try to get by product ID first (for product page integration)
     let product = await subscriptionRepo.getSubscriptionProductByProductId(req.params.productId);
@@ -41,14 +41,14 @@ export const getSubscriptionProductDetails: AsyncHandler = async (req, res, next
 
     const plans = await subscriptionRepo.getSubscriptionPlans(product.subscriptionProductId, true);
     res.json({ success: true, data: { ...product, plans } });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getSubscriptionPlanDetails: AsyncHandler = async (req, res, next) => {
+export const getSubscriptionPlanDetails: AsyncHandler = async (req, res, _next) => {
   try {
     const plan = await subscriptionRepo.getSubscriptionPlan(req.params.planId);
     if (!plan || !plan.isActive) {
@@ -56,10 +56,10 @@ export const getSubscriptionPlanDetails: AsyncHandler = async (req, res, next) =
       return;
     }
     res.json({ success: true, data: plan });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -67,24 +67,24 @@ export const getSubscriptionPlanDetails: AsyncHandler = async (req, res, next) =
 // My Subscriptions
 // ============================================================================
 
-export const getMySubscriptions: AsyncHandler = async (req, res, next) => {
+export const getMySubscriptions: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const { status, limit, offset } = req.query;
 
     const result = await subscriptionRepo.getCustomerSubscriptions(
-      { customerId, status: status as any },
+      { customerId, status: status as subscriptionRepo.SubscriptionStatus | undefined },
       { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getMySubscription: AsyncHandler = async (req, res, next) => {
+export const getMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
@@ -98,10 +98,10 @@ export const getMySubscription: AsyncHandler = async (req, res, next) => {
     const plan = await subscriptionRepo.getSubscriptionPlan(subscription.subscriptionPlanId);
 
     res.json({ success: true, data: { ...subscription, plan, orders } });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -109,11 +109,19 @@ export const getMySubscription: AsyncHandler = async (req, res, next) => {
 // Subscribe
 // ============================================================================
 
-export const createSubscription: AsyncHandler = async (req, res, next) => {
+export const createSubscription: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const { subscriptionPlanId, productVariantId, quantity, shippingAddressId, billingAddressId, paymentMethodId, customizations } =
-      req.body;
+      req.body as {
+        subscriptionPlanId: string;
+        productVariantId?: string;
+        quantity?: number;
+        shippingAddressId?: string;
+        billingAddressId?: string;
+        paymentMethodId?: string;
+        customizations?: Record<string, unknown>;
+      };
 
     // Validate plan exists and is active
     const plan = await subscriptionRepo.getSubscriptionPlan(subscriptionPlanId);
@@ -135,10 +143,10 @@ export const createSubscription: AsyncHandler = async (req, res, next) => {
     });
 
     res.status(201).json({ success: true, data: subscription });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -146,7 +154,7 @@ export const createSubscription: AsyncHandler = async (req, res, next) => {
 // Manage Subscription
 // ============================================================================
 
-export const updateMySubscription: AsyncHandler = async (req, res, next) => {
+export const updateMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
@@ -157,18 +165,25 @@ export const updateMySubscription: AsyncHandler = async (req, res, next) => {
     }
 
     // Only allow updating certain fields
-    const { quantity, shippingAddressId, billingAddressId, paymentMethodId, customizations } = req.body;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { quantity, shippingAddressId, billingAddressId, paymentMethodId, customizations } = req.body as {
+      quantity?: number;
+      shippingAddressId?: string;
+      billingAddressId?: string;
+      paymentMethodId?: string;
+      customizations?: Record<string, unknown>;
+    };
 
     // For now, we'll just return success - full update logic would need more implementation
     res.json({ success: true, message: 'Subscription updated' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const changePlan: AsyncHandler = async (req, res, next) => {
+export const changePlan: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
@@ -183,7 +198,7 @@ export const changePlan: AsyncHandler = async (req, res, next) => {
       return;
     }
 
-    const { newPlanId } = req.body;
+    const { newPlanId } = req.body as { newPlanId: string };
     const newPlan = await subscriptionRepo.getSubscriptionPlan(newPlanId);
 
     if (!newPlan || !newPlan.isActive) {
@@ -193,14 +208,14 @@ export const changePlan: AsyncHandler = async (req, res, next) => {
 
     // Plan change logic would go here - proration, etc.
     res.json({ success: true, message: 'Plan change scheduled' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const pauseMySubscription: AsyncHandler = async (req, res, next) => {
+export const pauseMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
@@ -230,7 +245,7 @@ export const pauseMySubscription: AsyncHandler = async (req, res, next) => {
       return;
     }
 
-    const { resumeAt, reason } = req.body;
+    const { resumeAt, reason } = req.body as { resumeAt?: string; reason?: string };
 
     // Validate pause duration
     if (product?.maxPauseDays && resumeAt) {
@@ -247,14 +262,14 @@ export const pauseMySubscription: AsyncHandler = async (req, res, next) => {
     const pause = await subscriptionRepo.pauseSubscription(req.params.id, resumeAt ? new Date(resumeAt) : undefined, reason, 'customer');
 
     res.json({ success: true, data: pause });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const resumeMySubscription: AsyncHandler = async (req, res, next) => {
+export const resumeMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
@@ -271,14 +286,14 @@ export const resumeMySubscription: AsyncHandler = async (req, res, next) => {
 
     await subscriptionRepo.resumeSubscription(req.params.id, 'customer');
     res.json({ success: true, message: 'Subscription resumed' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const cancelMySubscription: AsyncHandler = async (req, res, next) => {
+export const cancelMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
@@ -310,7 +325,7 @@ export const cancelMySubscription: AsyncHandler = async (req, res, next) => {
       // Note: Early termination fee would be handled here
     }
 
-    const { reason, cancelAtPeriodEnd } = req.body;
+    const { reason, cancelAtPeriodEnd } = req.body as { reason?: string; cancelAtPeriodEnd?: boolean };
 
     await subscriptionRepo.cancelSubscription(
       req.params.id,
@@ -326,14 +341,14 @@ export const cancelMySubscription: AsyncHandler = async (req, res, next) => {
           ? 'Subscription will be cancelled at the end of the current billing period'
           : 'Subscription cancelled immediately',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const reactivateMySubscription: AsyncHandler = async (req, res, next) => {
+export const reactivateMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
@@ -356,10 +371,10 @@ export const reactivateMySubscription: AsyncHandler = async (req, res, next) => 
     });
 
     res.json({ success: true, message: 'Subscription reactivated' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -367,7 +382,7 @@ export const reactivateMySubscription: AsyncHandler = async (req, res, next) => 
 // Billing History
 // ============================================================================
 
-export const getMySubscriptionOrders: AsyncHandler = async (req, res, next) => {
+export const getMySubscriptionOrders: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
@@ -379,10 +394,10 @@ export const getMySubscriptionOrders: AsyncHandler = async (req, res, next) => {
 
     const orders = await subscriptionRepo.getSubscriptionOrders(req.params.id);
     res.json({ success: true, data: orders });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -390,7 +405,7 @@ export const getMySubscriptionOrders: AsyncHandler = async (req, res, next) => {
 // Skip Delivery
 // ============================================================================
 
-export const skipNextDelivery: AsyncHandler = async (req, res, next) => {
+export const skipNextDelivery: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
@@ -419,9 +434,9 @@ export const skipNextDelivery: AsyncHandler = async (req, res, next) => {
     await subscriptionRepo.advanceBillingCycle(subscription.customerSubscriptionId);
 
     res.json({ success: true, message: 'Next delivery skipped' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };

@@ -5,7 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import { SocialAccountRepo, CreateSocialAccountInput } from '../../infrastructure/repositories/socialAccountRepo';
+import { SocialAccountRepo } from '../../infrastructure/repositories/socialAccountRepo';
 import { SocialProvider, UserType, SocialProfileData } from '../../domain/entities/SocialAccount';
 
 // ============================================================================

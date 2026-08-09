@@ -44,9 +44,9 @@ declare global {
     interface Request {
       user?: User;
       rawBody?: Buffer;
-      companyUser?: any;
+      companyUser?: { companyId?: string; userId?: string; [key: string]: unknown };
       b2bCompanyUserId?: string;
-      customer?: { customerId?: string; [key: string]: any };
+      customer?: { customerId?: string; [key: string]: unknown };
     }
   }
 }
@@ -54,17 +54,20 @@ declare global {
 // Custom TypedRequest that overrides params to use string instead of string | string[]
 export interface TypedRequest<
   P = Record<string, string>,
-  ResBody = any,
-  ReqBody = any,
-  ReqQuery = any,
-  Locals extends Record<string, any> = Record<string, any>,
+  ResBody = unknown,
+  ReqBody = unknown,
+  ReqQuery = Record<string, string>,
+  Locals extends Record<string, unknown> = Record<string, unknown>,
 > extends ExpressRequest<P, ResBody, ReqBody, ReqQuery, Locals> {
   params: P;
   user?: Express.User;
   rawBody?: Buffer;
-  companyUser?: any;
+  companyUser?: { companyId?: string; userId?: string; [key: string]: unknown };
   b2bCompanyUserId?: string;
-  customer?: { customerId?: string; [key: string]: any };
+  customer?: { customerId?: string; [key: string]: unknown };
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type RequestBody = Record<string, any>;
 
 export {};

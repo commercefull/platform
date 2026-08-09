@@ -7,6 +7,8 @@ import axios from 'axios';
 import { Express } from 'express';
 import { configureRoutes } from '../../../boot/routes';
 import express from 'express';
+import http from 'http';
+import { AddressInfo } from 'net';
 import FormData from 'form-data';
 
 // Create a minimal 1x1 transparent PNG for testing
@@ -17,7 +19,7 @@ const createTestImageBuffer = (): Buffer => {
 
 describe('Media API Integration', () => {
   let app: Express;
-  let server: any;
+  let server: http.Server;
   let baseURL: string;
 
   beforeAll(async () => {
@@ -28,7 +30,7 @@ describe('Media API Integration', () => {
 
     // Start server on random port
     server = app.listen(0);
-    const port = server.address().port;
+    const port = (server.address() as AddressInfo).port;
     baseURL = `http://localhost:${port}`;
 
     // Configure axios defaults
@@ -164,10 +166,10 @@ describe('Media API Integration', () => {
       expect(response.data.data).toHaveLength(2);
 
       // Verify both images processed
-      response.data.data.forEach((item: any) => {
+      response.data.data.forEach((item: Record<string, unknown>) => {
         expect(item.media).toBeDefined();
         expect(item.urls).toBeDefined();
-        expect(item.urls.webp).toBeDefined();
+        expect((item.urls as Record<string, unknown>).webp).toBeDefined();
       });
 
       // Verify different IDs

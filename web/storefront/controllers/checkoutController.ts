@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
@@ -28,8 +28,8 @@ export const checkout = async (req: TypedRequest, res: Response): Promise<void> 
       return res.redirect('/signin?redirect=/checkout');
     }
 
-    const customerId = (req as any).user.customerId;
-    const sessionId = (req as any).session?.id;
+    const customerId = req.user.customerId;
+    const sessionId = req.session?.id;
 
     // Get or create basket
     const basketCommand = new GetOrCreateBasketCommand(customerId, sessionId);
@@ -50,7 +50,7 @@ export const checkout = async (req: TypedRequest, res: Response): Promise<void> 
     const shippingResult = await shippingUseCase.execute(new GetShippingMethodsQuery(true, true));
 
     // Calculate totals with tax
-    const totals = await calculateCheckoutTotals(basket, customer);
+    const totals = await calculateCheckoutTotals(basket as unknown as Record<string, unknown>, customer as unknown as Record<string, unknown> | undefined);
 
     storefrontRespond(req, res, 'shop/checkout', {
       pageName: 'Checkout',
@@ -60,12 +60,12 @@ export const checkout = async (req: TypedRequest, res: Response): Promise<void> 
       totals,
       user: req.user,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load checkout',
+      error: (error as Error).message || 'Failed to load checkout',
       user: req.user,
     });
   }
@@ -82,18 +82,19 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
       return;
     }
 
-    const customerId = (req as any).user.customerId;
-    const customerEmail = (req as any).user.email;
+    const customerId = req.user.customerId;
+    const customerEmail = req.user.email;
+    const body = req.body as RequestBody;
     const {
       shippingMethodId,
-      paymentMethod,
+      _paymentMethod,
       billingAddress: billingAddressStr,
       shippingAddress: shippingAddressStr,
       specialInstructions,
-    } = req.body;
+    } = body;
 
     // Get or create basket
-    const sessionId = (req as any).session?.id;
+    const sessionId = req.session?.id;
     const basketCommand = new GetOrCreateBasketCommand(customerId, sessionId);
     const basketUseCase = new GetOrCreateBasketUseCase(BasketRepo);
     const basket = await basketUseCase.execute(basketCommand);
@@ -104,29 +105,29 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
     }
 
     // Parse addresses
-    const shippingAddress = JSON.parse(shippingAddressStr);
-    const billingAddress = billingAddressStr ? JSON.parse(billingAddressStr) : shippingAddress;
+    const shippingAddress = JSON.parse(shippingAddressStr as string);
+    const billingAddress = billingAddressStr ? JSON.parse(billingAddressStr as string) : shippingAddress;
 
     // Get shipping method details
-    const shippingMethod = await getShippingMethod(shippingMethodId);
+    const shippingMethod = await getShippingMethod(shippingMethodId as string);
 
     // Convert basket items to order items
-    const orderItems = basket.items.map((item: any) => ({
-      productId: item.productId,
-      productVariantId: item.productVariantId,
-      sku: item.sku,
-      name: item.name,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      taxRate: item.taxRate,
-      taxAmount: item.taxAmount,
-      discountAmount: item.discountAmount,
+    const orderItems = basket.items.map((item: Record<string, unknown>) => ({
+      productId: item.productId as string,
+      productVariantId: item.productVariantId as string | undefined,
+      sku: item.sku as string,
+      name: item.name as string,
+      quantity: item.quantity as number,
+      unitPrice: item.unitPrice as number,
+      taxRate: item.taxRate as number | undefined,
+      taxAmount: item.taxAmount as number | undefined,
+      discountAmount: item.discountAmount as number | undefined,
     }));
 
     // Create order with proper constructor arguments
     const orderCommand = new CreateOrderCommand(
-      customerId,
-      customerEmail,
+      customerId as string,
+      customerEmail as string,
       orderItems,
       {
         firstName: shippingAddress.firstName,
@@ -160,7 +161,7 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
       basket.currency || 'USD',
       shippingAddress.phone,
       `${shippingAddress.firstName} ${shippingAddress.lastName}`,
-      specialInstructions,
+      specialInstructions as string | undefined,
       parseFloat(shippingMethod?.cost || '0'),
     );
 
@@ -179,13 +180,13 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
     } else {
       res.redirect(`/order-confirmation/${order.orderId}`);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: (error as Error).message });
     } else {
-      res.redirect('/checkout?error=' + encodeURIComponent(error.message || 'Failed to process checkout'));
+      res.redirect('/checkout?error=' + encodeURIComponent((error as Error).message || 'Failed to process checkout'));
     }
   }
 };
@@ -201,7 +202,7 @@ export const orderConfirmation = async (req: TypedRequest, res: Response): Promi
     }
 
     const { orderId } = req.params;
-    const customerId = (req as any).user.customerId;
+    const customerId = req.user.customerId;
 
     // Get order details using GetOrderUseCase
     const orderCommand = new GetOrderCommand(orderId, undefined, customerId);
@@ -232,12 +233,12 @@ export const orderConfirmation = async (req: TypedRequest, res: Response): Promi
       order: orderWithTotals,
       user: req.user,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load order confirmation',
+      error: (error as Error).message || 'Failed to load order confirmation',
       user: req.user,
     });
   }
@@ -247,37 +248,39 @@ export const orderConfirmation = async (req: TypedRequest, res: Response): Promi
 // Helper Functions
 // ============================================================================
 
-async function calculateCheckoutTotals(basket: any, customer: any, shippingMethod?: any) {
+async function calculateCheckoutTotals(basket: Record<string, unknown>, customer: Record<string, unknown> | undefined, shippingMethod?: Record<string, unknown>) {
+  const basketItems = basket.items as Record<string, unknown>[] | undefined;
   // Use basket.subtotal if available, otherwise calculate from items
   const subtotal =
     typeof basket.subtotal === 'number'
       ? basket.subtotal
-      : basket.items?.reduce((sum: number, item: any) => {
-          return sum + (item.lineTotal ?? item.unitPrice * item.quantity);
+      : basketItems?.reduce((sum: number, item: Record<string, unknown>) => {
+          return sum + ((item.lineTotal as number) ?? (item.unitPrice as number) * (item.quantity as number));
         }, 0) || 0;
 
-  const shippingCost = shippingMethod ? parseFloat(shippingMethod.cost || 0) : 0;
+  const shippingCost = shippingMethod ? parseFloat((shippingMethod.cost as string) || '0') : 0;
 
   // Use default shipping address or fallback
-  const shippingAddress = customer?.addresses?.find((addr: any) => addr.isDefault && addr.addressType === 'shipping') ||
-    customer?.addresses?.[0] || { country: 'US', region: '', postalCode: '', city: '' };
+  const customerAddresses = customer?.addresses as Record<string, unknown>[] | undefined;
+  const shippingAddress = customerAddresses?.find((addr: Record<string, unknown>) => addr.isDefault && addr.addressType === 'shipping') ||
+    customerAddresses?.[0] || { country: 'US', region: '', postalCode: '', city: '' };
 
   // Calculate tax using the tax service
   const taxCommand = new CalculateOrderTaxCommand(
-    basket.items?.map((item: any) => ({
-      productId: item.productId,
-      name: item.name,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
+    basketItems?.map((item: Record<string, unknown>) => ({
+      productId: item.productId as string,
+      name: item.name as string,
+      quantity: item.quantity as number,
+      unitPrice: item.unitPrice as number,
     })) || [],
     {
-      country: shippingAddress.country,
-      region: shippingAddress.state || shippingAddress.region,
-      postalCode: shippingAddress.postalCode,
-      city: shippingAddress.city,
+      country: (shippingAddress as Record<string, unknown>).country as string,
+      region: ((shippingAddress as Record<string, unknown>).state || (shippingAddress as Record<string, unknown>).region) as string,
+      postalCode: (shippingAddress as Record<string, unknown>).postalCode as string,
+      city: (shippingAddress as Record<string, unknown>).city as string,
     },
     shippingCost,
-    customer?.customerId,
+    customer?.customerId as string | undefined,
   );
 
   const taxUseCase = new CalculateOrderTaxUseCase();

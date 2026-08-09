@@ -36,11 +36,29 @@ export interface CalculateSettlementOutput {
   status: string;
 }
 
+export interface CalculateSettlementMerchantRepository {
+  findById(merchantId: string): Promise<{ merchantId: string; commissionRate?: number } | null>;
+}
+
+export interface CalculateSettlementOrderRepository {
+  findByMerchantAndPeriod(merchantId: string, periodStart: Date, periodEnd: Date): Promise<Array<{
+    orderId: string;
+    total: number;
+    paymentFee?: number;
+    status: string;
+    createdAt: Date;
+  }>>;
+}
+
+export interface CalculateSettlementSettlementRepository {
+  create(params: Record<string, unknown>): Promise<unknown>;
+}
+
 export class CalculateSettlementUseCase {
   constructor(
-    private readonly merchantRepository: any,
-    private readonly orderRepository: any,
-    private readonly settlementRepository: any,
+    private readonly merchantRepository: CalculateSettlementMerchantRepository,
+    private readonly orderRepository: CalculateSettlementOrderRepository,
+    private readonly settlementRepository: CalculateSettlementSettlementRepository,
   ) {}
 
   async execute(input: CalculateSettlementInput): Promise<CalculateSettlementOutput> {

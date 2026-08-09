@@ -5,7 +5,7 @@ export interface FulfillmentNetworkRule {
   name: string;
   organizationId?: string;
   priority: number;
-  conditions: Record<string, any>;
+  conditions: Record<string, unknown>;
   routingStrategy: string;
   locationIds?: string[];
   isActive: boolean;

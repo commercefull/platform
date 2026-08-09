@@ -4,18 +4,17 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
+
 import { unixTimestamp } from '../../../../libs/date';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLES = {
+/* const _TABLE = {
   WAREHOUSE: Table.DistributionWarehouse,
-  ZONE: Table.DistributionWarehouseZone,
   BIN: Table.DistributionWarehouseBin,
-};
+}; */
 
 // ============================================================================
 // Types
@@ -48,8 +47,8 @@ export interface Warehouse {
   timezone: string;
   cutoffTime?: string;
   processingTime?: number;
-  operatingHours?: Record<string, any>;
-  capabilities?: Record<string, any>;
+  operatingHours?: Record<string, unknown>;
+  capabilities?: Record<string, unknown>;
   shippingMethods?: string[];
   createdBy?: string;
 }
@@ -142,7 +141,7 @@ export class WarehouseRepo {
    */
   async findByCountry(country: string, activeOnly: boolean = true): Promise<Warehouse[]> {
     let sql = `SELECT * FROM "distributionWarehouse" WHERE "country" = $1`;
-    const params: any[] = [country];
+    const params: unknown[] = [country];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -264,7 +263,7 @@ export class WarehouseRepo {
     }
 
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -306,7 +305,7 @@ export class WarehouseRepo {
    */
   private async unsetAllDefaults(exceptId?: string): Promise<void> {
     let sql = `UPDATE "distributionWarehouse" SET "isDefault" = false, "updatedAt" = $1 WHERE "isDefault" = true`;
-    const params: any[] = [unixTimestamp()];
+    const params: unknown[] = [unixTimestamp()];
 
     if (exceptId) {
       sql += ` AND "distributionWarehouseId" != $2`;
@@ -393,7 +392,7 @@ export class WarehouseRepo {
   async search(searchTerm: string, activeOnly: boolean = true): Promise<Warehouse[]> {
     let sql = `SELECT * FROM "distributionWarehouse" 
                WHERE ("name" ILIKE $1 OR "code" ILIKE $1 OR "city" ILIKE $1)`;
-    const params: any[] = [`%${searchTerm}%`];
+    const params: unknown[] = [`%${searchTerm}%`];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;

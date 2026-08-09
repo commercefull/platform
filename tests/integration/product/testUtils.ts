@@ -108,7 +108,7 @@ export const testCategory = {
 
 // Helper function to create a test product
 export async function createTestProduct(client: AxiosInstance, adminToken: string, brandId?: string) {
-  const productData: any = { ...testProduct };
+  const productData: Record<string, unknown> = { ...testProduct };
 
   if (brandId) {
     productData.brandId = brandId;
@@ -211,7 +211,7 @@ export async function setupProductTests() {
   try {
     // Use merchant login for business routes
     adminToken = await loginTestAdmin(client);
-  } catch (error) {}
+  } catch {}
 
   // Create or fetch a reusable attribute option for tests that need one
   let testAttributeOptionId: string | null = null;
@@ -226,7 +226,7 @@ export async function setupProductTests() {
       testAttributeOptionId =
         optRes.data.data?.productAttributeOptionId || optRes.data.data?.id || null;
     }
-  } catch (_) {}
+  } catch (__) {}
 
   // If creation failed (e.g. duplicate), fetch the existing option by value
   if (!testAttributeOptionId) {
@@ -239,7 +239,7 @@ export async function setupProductTests() {
         testAttributeOptionId =
           getRes.data.data?.productAttributeOptionId || getRes.data.data?.id || null;
       }
-    } catch (_) {}
+    } catch (__) {}
   }
 
   return {
@@ -288,5 +288,5 @@ export async function cleanupProductTests(
         headers: { Authorization: `Bearer ${adminToken}` },
       });
     }
-  } catch (error) {}
+  } catch {}
 }

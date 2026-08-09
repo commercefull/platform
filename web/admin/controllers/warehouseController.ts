@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import warehouseRepo from '../../../modules/warehouse/infrastructure/repositories/warehouseRepo';
 import { adminRespond } from '../../respond';
 
@@ -31,12 +31,12 @@ export const listWarehouses = async (req: TypedRequest, res: Response): Promise<
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load warehouses',
+      error: (error as Error).message || 'Failed to load warehouses',
     });
   }
 };
@@ -46,18 +46,19 @@ export const createWarehouseForm = async (req: TypedRequest, res: Response): Pro
     adminRespond(req, res, 'operations/warehouses/create', {
       pageName: 'Create Warehouse',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
 
 export const createWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
     const {
       name,
       code,
@@ -81,7 +82,7 @@ export const createWarehouse = async (req: TypedRequest, res: Response): Promise
       timezone,
       cutoffTime,
       processingTime,
-    } = req.body;
+    } = body;
 
     const warehouse = await warehouseRepo.create({
       name,
@@ -109,13 +110,13 @@ export const createWarehouse = async (req: TypedRequest, res: Response): Promise
     });
 
     res.redirect(`/hub/warehouses/${warehouse.distributionWarehouseId}?success=Warehouse created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'operations/warehouses/create', {
       pageName: 'Create Warehouse',
-      error: error.message || 'Failed to create warehouse',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create warehouse',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -140,12 +141,12 @@ export const viewWarehouse = async (req: TypedRequest, res: Response): Promise<v
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load warehouse',
+      error: (error as Error).message || 'Failed to load warehouse',
     });
   }
 };
@@ -168,12 +169,12 @@ export const editWarehouseForm = async (req: TypedRequest, res: Response): Promi
       pageName: `Edit: ${warehouse.name}`,
       warehouse,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -181,8 +182,9 @@ export const editWarehouseForm = async (req: TypedRequest, res: Response): Promi
 export const updateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { warehouseId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
+    const body = req.body as RequestBody;
     const {
       name,
       description,
@@ -205,7 +207,7 @@ export const updateWarehouse = async (req: TypedRequest, res: Response): Promise
       timezone,
       cutoffTime,
       processingTime,
-    } = req.body;
+    } = body;
 
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description || undefined;
@@ -236,7 +238,7 @@ export const updateWarehouse = async (req: TypedRequest, res: Response): Promise
     }
 
     res.redirect(`/hub/warehouses/${warehouseId}?success=Warehouse updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -245,13 +247,13 @@ export const updateWarehouse = async (req: TypedRequest, res: Response): Promise
       adminRespond(req, res, 'operations/warehouses/edit', {
         pageName: `Edit: ${warehouse?.name || 'Warehouse'}`,
         warehouse,
-        error: error.message || 'Failed to update warehouse',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update warehouse',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update warehouse',
+        error: (error as Error).message || 'Failed to update warehouse',
       });
     }
   }
@@ -268,10 +270,10 @@ export const activateWarehouse = async (req: TypedRequest, res: Response): Promi
     }
 
     res.json({ success: true, message: 'Warehouse activated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to activate warehouse' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate warehouse' });
   }
 };
 
@@ -286,10 +288,10 @@ export const deactivateWarehouse = async (req: TypedRequest, res: Response): Pro
     }
 
     res.json({ success: true, message: 'Warehouse deactivated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to deactivate warehouse' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate warehouse' });
   }
 };
 
@@ -304,9 +306,9 @@ export const deleteWarehouse = async (req: TypedRequest, res: Response): Promise
     }
 
     res.json({ success: true, message: 'Warehouse deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete warehouse' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete warehouse' });
   }
 };

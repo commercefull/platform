@@ -23,8 +23,22 @@ export interface GetFeatureFlagsOutput {
   total: number;
 }
 
+interface FeatureFlagRecord {
+  key: string;
+  name: string;
+  description?: string;
+  enabled: boolean;
+  scope: string;
+  rolloutPercentage?: number;
+  conditions?: Record<string, unknown>;
+}
+
+interface FeatureFlagRepositoryPort {
+  findFeatureFlags(params: { scope: string; scopeId?: string; includeDisabled: boolean }): Promise<FeatureFlagRecord[]>;
+}
+
 export class GetFeatureFlagsUseCase {
-  constructor(private readonly configurationRepository: any) {}
+  constructor(private readonly configurationRepository: FeatureFlagRepositoryPort) {}
 
   async execute(input: GetFeatureFlagsInput): Promise<GetFeatureFlagsOutput> {
     const scope = input.scope || 'global';
@@ -36,7 +50,7 @@ export class GetFeatureFlagsUseCase {
     });
 
     return {
-      flags: flags.map((f: any) => ({
+      flags: flags.map((f) => ({
         key: f.key,
         name: f.name,
         description: f.description,

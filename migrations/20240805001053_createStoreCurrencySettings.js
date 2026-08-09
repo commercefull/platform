@@ -14,7 +14,7 @@ exports.up = function (knex) {
     t.boolean('showCurrencySelector').notNullable().defaultTo(true);
     t.boolean('autoUpdateRates').notNullable().defaultTo(false);
     t.integer('rateUpdateFrequency').defaultTo(1440);
-    t.string('activeProviderCode', 50).references('code').inTable('currencyProvider');
+    t.string('activeProviderCode', 50);
     t.decimal('markupPercentage', 5, 2).notNullable().defaultTo(0);
     t.integer('roundPrecision').notNullable().defaultTo(2);
     t.enum('roundingMethod', ['up', 'down', 'ceiling', 'floor', 'half_up', 'half_down', 'half_even']).notNullable().defaultTo('half_up');

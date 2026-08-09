@@ -87,7 +87,7 @@ export async function update(id: string, input: UpdateShippingPackagingTypeInput
   }
 
   const updateFields: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
   let paramIndex = 1;
 
   Object.entries(input).forEach(([key, value]) => {

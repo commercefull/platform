@@ -23,7 +23,7 @@ export interface NotificationDeliveryLog {
   failureReason?: string;
   provider?: string;
   providerMessageId?: string;
-  providerResponse?: Record<string, any>;
+  providerResponse?: Record<string, unknown>;
   retryCount: number;
 }
 
@@ -80,6 +80,19 @@ export class NotificationDeliveryLogRepo {
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
       [userId, limit, offset],
+    );
+    return results || [];
+  }
+
+  /**
+   * Find logs by batch ID (via notification table join)
+   */
+  async findByBatchId(batchId: string, limit: number = 100): Promise<NotificationDeliveryLog[]> {
+    const results = await query<NotificationDeliveryLog[]>(
+      `SELECT * FROM "notificationDeliveryLog" WHERE "notificationId" IN (
+        SELECT "notificationId" FROM "notification" WHERE "notificationBatchId" = $1
+      ) ORDER BY "createdAt" DESC LIMIT $2`,
+      [batchId, limit],
     );
     return results || [];
   }
@@ -196,7 +209,7 @@ export class NotificationDeliveryLogRepo {
    */
   async update(notificationDeliveryLogId: string, params: NotificationDeliveryLogUpdateParams): Promise<NotificationDeliveryLog | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -337,7 +350,7 @@ export class NotificationDeliveryLogRepo {
     deliveryRate: number;
   }> {
     let whereClause = '';
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (timeRange) {
       whereClause = `WHERE "createdAt" >= $1 AND "createdAt" <= $2`;
@@ -352,7 +365,7 @@ export class NotificationDeliveryLogRepo {
       params,
     );
 
-    const stats: Record<string, number> = {
+    const stats = {
       total: 0,
       pending: 0,
       sent: 0,
@@ -364,7 +377,7 @@ export class NotificationDeliveryLogRepo {
 
     if (results) {
       results.forEach(row => {
-        stats[row.status] = parseInt(row.count, 10);
+        stats[row.status as keyof typeof stats] = parseInt(row.count, 10);
         stats.total += parseInt(row.count, 10);
       });
     }
@@ -374,7 +387,7 @@ export class NotificationDeliveryLogRepo {
     return {
       ...stats,
       deliveryRate: Math.round(deliveryRate * 100) / 100,
-    } as any;
+    };
   }
 
   /**
@@ -388,7 +401,7 @@ export class NotificationDeliveryLogRepo {
       [],
     );
 
-    const stats: any = {
+    const stats: Record<NotificationChannel, { sent: number; delivered: number; failed: number }> = {
       email: { sent: 0, delivered: 0, failed: 0 },
       sms: { sent: 0, delivered: 0, failed: 0 },
       in_app: { sent: 0, delivered: 0, failed: 0 },

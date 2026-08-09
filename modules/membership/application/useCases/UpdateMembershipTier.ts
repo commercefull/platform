@@ -29,8 +29,22 @@ export interface UpdateMembershipTierOutput {
   updatedAt: string;
 }
 
+interface TierRecord {
+  tierId: string;
+  name: string;
+  price: number;
+  billingPeriod: string;
+  isActive: boolean;
+  updatedAt: Date;
+}
+
+interface UpdateMembershipTierRepository {
+  getTierById(tierId: string): Promise<TierRecord | null>;
+  updateTier(tierId: string, data: Record<string, unknown>): Promise<TierRecord>;
+}
+
 export class UpdateMembershipTierUseCase {
-  constructor(private readonly membershipRepository: any) {}
+  constructor(private readonly membershipRepository: UpdateMembershipTierRepository) {}
 
   async execute(input: UpdateMembershipTierInput): Promise<UpdateMembershipTierOutput> {
     const { tierId, ...updates } = input;

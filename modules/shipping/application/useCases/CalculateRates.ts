@@ -45,9 +45,33 @@ export interface CalculateRatesOutput {
   defaultRateId?: string;
 }
 
+interface ShippingZoneEntity {
+  shippingZoneId: string;
+  name: string;
+  isActive: boolean;
+}
+
+interface ShippingMethodEntity {
+  shippingMethodId: string;
+  name: string;
+  code: string;
+  isDefault: boolean;
+  estimatedDaysMin?: number;
+  estimatedDaysMax?: number;
+  carrierType?: string;
+  isAvailableFor(weight: number, orderValue: number): boolean;
+  calculateRate(weight: number, orderValue: number): number;
+}
+
+interface ShippingRepository {
+  findZonesForAddress(countryCode: string, stateCode?: string, postalCode?: string): Promise<ShippingZoneEntity[]>;
+  findDefaultZone(): Promise<ShippingZoneEntity | null>;
+  findMethodsForZones(zoneIds: string[], options: { storeId?: string; merchantId?: string }): Promise<ShippingMethodEntity[]>;
+}
+
 export class CalculateRatesUseCase {
   constructor(
-    private readonly shippingRepository: any, // ShippingRepository
+    private readonly shippingRepository: ShippingRepository,
     private readonly currencyCode: string = 'USD',
   ) {}
 
@@ -70,7 +94,7 @@ export class CalculateRatesUseCase {
       }
     }
 
-    const zoneIds = zones.map((z: any) => z.shippingZoneId);
+    const zoneIds = zones.map((z) => z.shippingZoneId);
 
     // Get shipping methods for zones
     const methods = await this.shippingRepository.findMethodsForZones(zoneIds, {

@@ -30,8 +30,20 @@ export interface CreateSupplierOutput {
   createdAt: string;
 }
 
+interface SupplierRecord {
+  supplierId: string;
+  name: string;
+  status: string;
+  createdAt: Date;
+}
+
+interface SupplierRepoPort {
+  findByEmail(email: string): Promise<SupplierRecord | null>;
+  create(data: Record<string, unknown>): Promise<SupplierRecord>;
+}
+
 export class CreateSupplierUseCase {
-  constructor(private readonly supplierRepository: any) {}
+  constructor(private readonly supplierRepository: SupplierRepoPort) {}
 
   async execute(input: CreateSupplierInput): Promise<CreateSupplierOutput> {
     const existing = await this.supplierRepository.findByEmail(input.email);

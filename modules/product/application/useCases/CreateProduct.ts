@@ -45,7 +45,7 @@ export class CreateProductCommand {
     public readonly metaDescription?: string,
     public readonly metaKeywords?: string,
     public readonly tags?: string[],
-    public readonly metadata?: Record<string, any>,
+    public readonly metadata?: Record<string, unknown>,
   ) {}
 }
 

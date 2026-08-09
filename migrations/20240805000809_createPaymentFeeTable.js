@@ -13,7 +13,7 @@ exports.up = function (knex) {
     t.uuid('orderPaymentId').references('orderPaymentId').inTable('orderPayment').onDelete('CASCADE');
     t.uuid('orderId').references('orderId').inTable('order').onDelete('CASCADE');
     t.uuid('paymentSubscriptionId').references('paymentSubscriptionId').inTable('paymentSubscription').onDelete('CASCADE');
-    t.uuid('payoutId').references('payoutId').inTable('payout').onDelete('CASCADE');
+    t.uuid('payoutId').references('payoutId').inTable('paymentPayout').onDelete('CASCADE');
     t.timestamp('appliedAt').notNullable().defaultTo(knex.fn.now());
 
     t.index('merchantId');

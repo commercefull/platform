@@ -5,6 +5,20 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { Coupon } from '../../domain/entities/Coupon';
+
+export interface RedeemCouponRepositoryPort {
+  findByCode(code: string): Promise<Coupon | null>;
+  createRedemption(redemption: {
+    redemptionId: string;
+    couponId: string;
+    orderId: string;
+    customerId?: string;
+    discountAmount: number;
+    redeemedAt: Date;
+  }): Promise<unknown>;
+  incrementUsageCount(couponId: string): Promise<unknown>;
+}
 
 export interface RedeemCouponInput {
   couponCode: string;
@@ -21,7 +35,7 @@ export interface RedeemCouponOutput {
 }
 
 export class RedeemCouponUseCase {
-  constructor(private readonly couponRepository: any) {}
+  constructor(private readonly couponRepository: RedeemCouponRepositoryPort) {}
 
   async execute(input: RedeemCouponInput): Promise<RedeemCouponOutput> {
     const coupon = await this.couponRepository.findByCode(input.couponCode);

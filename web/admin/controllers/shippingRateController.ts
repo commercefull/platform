@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import shippingRateRepo from '../../../modules/shipping/infrastructure/repositories/shippingRateRepo';
 import shippingZoneRepo from '../../../modules/shipping/infrastructure/repositories/shippingZoneRepo';
 import shippingMethodRepo from '../../../modules/shipping/infrastructure/repositories/shippingMethodRepo';
@@ -38,12 +38,12 @@ export const listShippingRates = async (req: TypedRequest, res: Response): Promi
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load shipping rates',
+      error: (error as Error).message || 'Failed to load shipping rates',
     });
   }
 };
@@ -58,18 +58,19 @@ export const createShippingRateForm = async (req: TypedRequest, res: Response): 
       zones,
       methods,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
 
 export const createShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
     const {
       shippingZoneId,
       shippingMethodId,
@@ -86,7 +87,7 @@ export const createShippingRate = async (req: TypedRequest, res: Response): Prom
       priority,
       validFrom,
       validTo,
-    } = req.body;
+    } = body;
 
     const rate = await shippingRateRepo.create({
       shippingZoneId,
@@ -111,7 +112,7 @@ export const createShippingRate = async (req: TypedRequest, res: Response): Prom
     });
 
     res.redirect(`/hub/shipping/rates/${rate.shippingRateId}?success=Shipping rate created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -122,13 +123,13 @@ export const createShippingRate = async (req: TypedRequest, res: Response): Prom
         pageName: 'Create Shipping Rate',
         zones,
         methods,
-        error: error.message || 'Failed to create shipping rate',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to create shipping rate',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to create shipping rate',
+        error: (error as Error).message || 'Failed to create shipping rate',
       });
     }
   }
@@ -160,12 +161,12 @@ export const viewShippingRate = async (req: TypedRequest, res: Response): Promis
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load shipping rate',
+      error: (error as Error).message || 'Failed to load shipping rate',
     });
   }
 };
@@ -193,12 +194,12 @@ export const editShippingRateForm = async (req: TypedRequest, res: Response): Pr
       zones,
       methods,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -206,8 +207,9 @@ export const editShippingRateForm = async (req: TypedRequest, res: Response): Pr
 export const updateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rateId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
+    const body = req.body as RequestBody;
     const {
       name,
       description,
@@ -223,7 +225,7 @@ export const updateShippingRate = async (req: TypedRequest, res: Response): Prom
       validFrom,
       validTo,
       isActive,
-    } = req.body;
+    } = body;
 
     if (name !== undefined) updates.name = name || undefined;
     if (description !== undefined) updates.description = description || undefined;
@@ -247,7 +249,7 @@ export const updateShippingRate = async (req: TypedRequest, res: Response): Prom
     }
 
     res.redirect(`/hub/shipping/rates/${rateId}?success=Shipping rate updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -260,13 +262,13 @@ export const updateShippingRate = async (req: TypedRequest, res: Response): Prom
         rate,
         zones,
         methods,
-        error: error.message || 'Failed to update shipping rate',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update shipping rate',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update shipping rate',
+        error: (error as Error).message || 'Failed to update shipping rate',
       });
     }
   }
@@ -283,10 +285,10 @@ export const activateShippingRate = async (req: TypedRequest, res: Response): Pr
     }
 
     res.json({ success: true, message: 'Shipping rate activated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to activate shipping rate' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate shipping rate' });
   }
 };
 
@@ -301,10 +303,10 @@ export const deactivateShippingRate = async (req: TypedRequest, res: Response): 
     }
 
     res.json({ success: true, message: 'Shipping rate deactivated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to deactivate shipping rate' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate shipping rate' });
   }
 };
 
@@ -319,16 +321,17 @@ export const deleteShippingRate = async (req: TypedRequest, res: Response): Prom
     }
 
     res.json({ success: true, message: 'Shipping rate deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete shipping rate' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete shipping rate' });
   }
 };
 
 export const calculateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { zoneId, methodId, orderTotal, itemCount, weight } = req.body;
+    const body = req.body as RequestBody;
+    const { zoneId, methodId, orderTotal, itemCount, weight } = body;
 
     const rate = await shippingRateRepo.findByZoneAndMethod(zoneId, methodId);
 
@@ -350,9 +353,9 @@ export const calculateShippingRate = async (req: TypedRequest, res: Response): P
       rateType: rate.rateType,
       currency: rate.currency,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ error: error.message || 'Failed to calculate shipping rate' });
+    res.status(500).json({ error: (error as Error).message || 'Failed to calculate shipping rate' });
   }
 };

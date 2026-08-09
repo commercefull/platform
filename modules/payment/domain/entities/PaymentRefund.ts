@@ -12,11 +12,11 @@ export interface PaymentRefundProps {
   currency: string;
   reason?: string;
   status: RefundStatus;
-  gatewayResponse?: Record<string, any>;
+  gatewayResponse?: Record<string, unknown>;
   errorCode?: string;
   errorMessage?: string;
   processedAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,7 +34,7 @@ export class PaymentRefund {
     amount: number;
     currency: string;
     reason?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): PaymentRefund {
     const now = new Date();
     return new PaymentRefund({
@@ -76,7 +76,7 @@ export class PaymentRefund {
   get status(): RefundStatus {
     return this.props.status;
   }
-  get gatewayResponse(): Record<string, any> | undefined {
+  get gatewayResponse(): Record<string, unknown> | undefined {
     return this.props.gatewayResponse;
   }
   get errorCode(): string | undefined {
@@ -88,7 +88,7 @@ export class PaymentRefund {
   get processedAt(): Date | undefined {
     return this.props.processedAt;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -115,7 +115,7 @@ export class PaymentRefund {
     this.touch();
   }
 
-  complete(externalRefundId: string, gatewayResponse?: Record<string, any>): void {
+  complete(externalRefundId: string, gatewayResponse?: Record<string, unknown>): void {
     this.props.status = RefundStatus.COMPLETED;
     this.props.externalRefundId = externalRefundId;
     this.props.gatewayResponse = gatewayResponse;
@@ -123,7 +123,7 @@ export class PaymentRefund {
     this.touch();
   }
 
-  fail(errorCode: string, errorMessage: string, gatewayResponse?: Record<string, any>): void {
+  fail(errorCode: string, errorMessage: string, gatewayResponse?: Record<string, unknown>): void {
     this.props.status = RefundStatus.FAILED;
     this.props.errorCode = errorCode;
     this.props.errorMessage = errorMessage;
@@ -135,7 +135,7 @@ export class PaymentRefund {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       refundId: this.props.refundId,
       transactionId: this.props.transactionId,

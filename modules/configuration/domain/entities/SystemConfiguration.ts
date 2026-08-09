@@ -72,7 +72,7 @@ export interface SystemConfigurationProps {
     analyticsProviders: string[];
     emailProviders: string[];
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -93,7 +93,7 @@ export class SystemConfiguration {
     defaultCurrency?: string;
     defaultLanguage?: string;
     timezone?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): SystemConfiguration {
     const now = new Date();
     const systemMode = props.systemMode || 'single_store';
@@ -200,7 +200,7 @@ export class SystemConfiguration {
   get integrationSettings(): SystemConfigurationProps['integrationSettings'] {
     return this.props.integrationSettings;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -274,7 +274,7 @@ export class SystemConfiguration {
     this.touch();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -283,7 +283,7 @@ export class SystemConfiguration {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       ...this.props,
       isMarketplace: this.isMarketplace,

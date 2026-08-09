@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestUser } from '../testUtils';
+import { createTestClient } from '../testUtils';
 import { randomUUID } from 'node:crypto';
 
 // Seeded promotion test data IDs (from seeds/20240805001500_seedPromotionTestData.js)
@@ -55,7 +55,7 @@ export const SEEDED_COUPON_CODE_EXPIRED = 'EXPIRED20';
 export const SEEDED_GIFT_CARD_CODE = 'GIFT-TEST-0001';
 
 // Helper function to create a test cart
-export async function createTestCart(client: AxiosInstance, adminToken: string) {
+export async function createTestCart(client: AxiosInstance, _adminToken: string) {
   try {
     const cartResponse = await client.post('/customer/basket', {
       sessionId: `test-session-${randomUUID()}`,
@@ -66,7 +66,7 @@ export async function createTestCart(client: AxiosInstance, adminToken: string) 
     }
     // Return a placeholder if cart creation fails
     return `test-cart-${randomUUID()}`;
-  } catch (error) {
+  } catch {
     return `test-cart-${randomUUID()}`;
   }
 }
@@ -96,7 +96,7 @@ export async function setupPromotionTests() {
 
     if (!adminToken) {
     }
-  } catch (error) {}
+  } catch {}
 
   // Create test data: cart, category, product
   const testCartId = await createTestCart(client, adminToken);
@@ -116,8 +116,8 @@ export async function cleanupPromotionTests(
   client: AxiosInstance | undefined,
   adminToken: string | undefined,
   testCartId?: string,
-  testProductId?: string,
-  testCategoryId?: string,
+  _testProductId?: string,
+  _testCategoryId?: string,
 ) {
   // Skip cleanup if client or token not available
   if (!client || !adminToken) {
@@ -130,7 +130,7 @@ export async function cleanupPromotionTests(
       await client.delete(`/customer/basket/${testCartId}`).catch(() => {});
     }
     // Don't delete seeded products/categories
-  } catch (error) {
+  } catch {
     // Silently ignore cleanup errors
   }
 }

@@ -45,7 +45,7 @@ export class CurrencyExchangeRateRepo {
    */
   async findBySourceCurrency(sourceCurrencyId: string, activeOnly: boolean = true): Promise<CurrencyExchangeRate[]> {
     let sql = `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "sourceCurrencyId" = $1`;
-    const params: any[] = [sourceCurrencyId];
+    const params: unknown[] = [sourceCurrencyId];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -62,7 +62,7 @@ export class CurrencyExchangeRateRepo {
    */
   async findByTargetCurrency(targetCurrencyId: string, activeOnly: boolean = true): Promise<CurrencyExchangeRate[]> {
     let sql = `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "targetCurrencyId" = $1`;
-    const params: any[] = [targetCurrencyId];
+    const params: unknown[] = [targetCurrencyId];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -79,7 +79,7 @@ export class CurrencyExchangeRateRepo {
    */
   async findByProvider(provider: string, activeOnly: boolean = true): Promise<CurrencyExchangeRate[]> {
     let sql = `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "provider" = $1`;
-    const params: any[] = [provider];
+    const params: unknown[] = [provider];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -175,7 +175,7 @@ export class CurrencyExchangeRateRepo {
    */
   async update(currencyExchangeRateId: string, params: CurrencyExchangeRateUpdateParams): Promise<CurrencyExchangeRate | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     // If rate is updated, calculate inverse rate
@@ -185,7 +185,7 @@ export class CurrencyExchangeRateRepo {
       values.push(params.rate, (1 / rateNum).toString());
 
       // Remove rate from params since we handled it
-      const { rate, ...otherParams } = params;
+      const { rate: _rate, ...otherParams } = params;
       params = otherParams as CurrencyExchangeRateUpdateParams;
     }
 
@@ -305,7 +305,6 @@ export class CurrencyExchangeRateRepo {
     provider: string,
     providerReference?: string,
   ): Promise<CurrencyExchangeRate[]> {
-    const now = unixTimestamp();
     const created: CurrencyExchangeRate[] = [];
 
     for (const rateData of rates) {

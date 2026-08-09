@@ -9,7 +9,7 @@ export interface PaymentDispute {
   reason?: string;
   amount: number;
   currency: string;
-  evidence?: Record<string, any>;
+  evidence?: Record<string, unknown>;
   dueBy?: Date;
   resolvedAt?: Date;
   createdAt: Date;
@@ -55,4 +55,18 @@ export async function updateStatus(paymentDisputeId: string, status: string, res
   );
 }
 
-export default { findByPayment, findById, create, updateStatus };
+export async function findAll(status?: string, limit: number = 100): Promise<PaymentDispute[]> {
+  if (status) {
+    return (
+      (await query<PaymentDispute[]>(
+        `SELECT * FROM "paymentDispute" WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2`,
+        [status, limit],
+      )) || []
+    );
+  }
+  return (
+    (await query<PaymentDispute[]>(`SELECT * FROM "paymentDispute" ORDER BY "createdAt" DESC LIMIT $1`, [limit])) || []
+  );
+}
+
+export default { findByPayment, findById, create, updateStatus, findAll };

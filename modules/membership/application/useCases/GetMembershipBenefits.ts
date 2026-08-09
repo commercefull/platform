@@ -21,8 +21,24 @@ export interface GetMembershipBenefitsOutput {
   daysRemaining?: number;
 }
 
+interface MembershipRecord {
+  tierId: string;
+  endDate?: Date;
+}
+
+interface TierRecord {
+  name: string;
+  level: number;
+  benefits: BenefitItem[];
+}
+
+interface GetMembershipBenefitsRepository {
+  findActiveByCustomerId(customerId: string): Promise<MembershipRecord | null>;
+  findTierById(tierId: string): Promise<TierRecord | null>;
+}
+
 export class GetMembershipBenefitsUseCase {
-  constructor(private readonly membershipRepository: any) {}
+  constructor(private readonly membershipRepository: GetMembershipBenefitsRepository) {}
 
   async execute(input: GetMembershipBenefitsInput): Promise<GetMembershipBenefitsOutput> {
     const membership = await this.membershipRepository.findActiveByCustomerId(input.customerId);

@@ -21,10 +21,20 @@ export interface RevokeTokenOutput {
   revokedCount: number;
 }
 
+export interface TokenBlacklistRepository {
+  add(entry: { token: string; type: string; blacklistedAt: Date; [key: string]: unknown }): Promise<void>;
+}
+
+export interface RefreshTokenRepository {
+  revoke(token: string): Promise<void>;
+  revokeAllForCustomer(customerId: string): Promise<number>;
+  revokeAllForMerchant(merchantId: string): Promise<number>;
+}
+
 export class RevokeTokenUseCase {
   constructor(
-    private readonly tokenBlacklistRepo: any,
-    private readonly refreshTokenRepo: any,
+    private readonly tokenBlacklistRepo: TokenBlacklistRepository,
+    private readonly refreshTokenRepo: RefreshTokenRepository,
   ) {}
 
   async revokeOne(input: RevokeTokenInput): Promise<RevokeTokenOutput> {

@@ -102,7 +102,7 @@ export class SupplierAddressRepo {
     }
 
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -125,7 +125,7 @@ export class SupplierAddressRepo {
 
   private async unsetDefaults(supplierId: string, exceptId?: string): Promise<void> {
     let sql = `UPDATE "supplierAddress" SET "isDefault" = false, "updatedAt" = $1 WHERE "supplierId" = $2 AND "isDefault" = true`;
-    const params: any[] = [unixTimestamp(), supplierId];
+    const params: unknown[] = [unixTimestamp(), supplierId];
     if (exceptId) {
       sql += ` AND "supplierAddressId" != $3`;
       params.push(exceptId);
@@ -151,7 +151,7 @@ export class SupplierAddressRepo {
 
   async count(supplierId?: string, activeOnly = false): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "supplierAddress"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
     const conditions: string[] = [];
 
     if (supplierId) {

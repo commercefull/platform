@@ -53,7 +53,7 @@ export const getPublicTiers = async (req: TypedRequest, res: Response): Promise<
 
     // Return limited tier information for public view
     const publicTiers = tiers.map(tier => ({
-      id: tier.loyaltyTierId,
+      id: tier.tierId,
       name: tier.name,
       description: tier.description,
       pointsThreshold: tier.pointsThreshold,
@@ -77,12 +77,12 @@ export const getPublicRewards = async (req: TypedRequest, res: Response): Promis
 
     // Return limited reward information for public view
     const publicRewards = rewards.map(reward => ({
-      id: reward.loyaltyRewardId,
+      id: reward.rewardId,
       name: reward.name,
       description: reward.description,
       pointsCost: reward.pointsCost,
-      freeShipping: reward.freeShipping,
-      expiresAt: reward.expiresAt,
+      freeShipping: reward.metadata && typeof reward.metadata === 'object' && 'freeShipping' in reward.metadata ? reward.metadata.freeShipping : undefined,
+      expiresAt: reward.validTo,
     }));
 
     respond(res, publicRewards);
@@ -194,7 +194,7 @@ export const redeemReward = async (req: UserRequest, res: Response): Promise<voi
       return;
     }
 
-    const { rewardId } = req.body;
+    const { rewardId } = req.body as { rewardId?: string };
 
     if (!rewardId) {
       respondError(res, 'Reward ID is required', 400);
@@ -206,7 +206,7 @@ export const redeemReward = async (req: UserRequest, res: Response): Promise<voi
     respondWithMessage(
       res,
       {
-        redemptionCode: redemption.redemptionCode,
+        redemptionCode: redemption.couponCode,
         pointsSpent: redemption.pointsSpent,
         expiresAt: redemption.expiresAt,
       },
@@ -247,11 +247,11 @@ export const getMyRedemptions = async (req: UserRequest, res: Response): Promise
       redemptions.map(async redemption => {
         const reward = await loyaltyRepo.findRewardById(redemption.rewardId);
         return {
-          id: redemption.loyaltyRedemptionId,
-          redemptionCode: redemption.redemptionCode,
+          id: redemption.redemptionId,
+          redemptionCode: redemption.couponCode,
           pointsSpent: redemption.pointsSpent,
           status: redemption.status,
-          createdAt: redemption.createdAt,
+          createdAt: redemption.redeemedAt,
           expiresAt: redemption.expiresAt,
           reward: reward
             ? {

@@ -40,7 +40,7 @@ export class ProductListRepo {
 
   async update(productListId: string, params: ProductListUpdateParams): Promise<ProductList | null> {
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let i = 1;
 
     for (const [key, value] of Object.entries(params)) {

@@ -10,7 +10,7 @@ export const testCustomer = {
   dateOfBirth: new Date('1990-01-01').toISOString().split('T')[0],
   isActive: true,
   isVerified: false,
-  notes: 'Test customer for integration tests',
+  note: 'Test customer for integration tests',
 };
 
 export const testCustomerAddress = {
@@ -28,7 +28,7 @@ export const testCustomerAddress = {
 export const testCustomerGroup = {
   name: `Test Group ${Math.floor(Math.random() * 10000)}`,
   description: 'Test customer group for integration tests',
-  discountPercentage: 10,
+  discountPercent: 10,
   isActive: true,
 };
 
@@ -72,7 +72,7 @@ export async function setupCustomerTests() {
     if (!adminToken) {
       return { client, adminToken, testCustomerId, testCustomerAddressId, testCustomerGroupId, testWishlistId };
     }
-  } catch (error) {
+  } catch {
     return { client, adminToken, testCustomerId, testCustomerAddressId, testCustomerGroupId, testWishlistId };
   }
 
@@ -118,7 +118,7 @@ export async function setupCustomerTests() {
             },
           );
         }
-      } catch (e) {}
+      } catch {}
 
       // 5. Create Wishlist (optional - endpoint may not exist)
       try {
@@ -135,9 +135,9 @@ export async function setupCustomerTests() {
         if (wishlistResponse.data?.success && wishlistResponse.data?.data) {
           testWishlistId = wishlistResponse.data.data.customerWishlistId || wishlistResponse.data.data.id;
         }
-      } catch (e) {}
+      } catch {}
     }
-  } catch (error) {}
+  } catch {}
 
   // Return all test data and helper objects
   return {
@@ -185,9 +185,9 @@ export async function cleanupCustomerTests(
 
   // 3. Delete Customer Address
   if (testCustomerAddressId) {
-    await client.delete(`/business/customer-addresses/${testCustomerAddressId}`, {
+    await client.delete(`/business/customers/${testCustomerId}/addresses/${testCustomerAddressId}`, {
       headers: { Authorization: `Bearer ${adminToken}` },
-    });
+    }).catch(() => {});
   }
 
   // 4. Delete Customer

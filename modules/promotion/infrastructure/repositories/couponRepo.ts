@@ -1,6 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
-import { generateUUID } from '../../../../libs/uuid';
 
 // Table name constants
 const COUPON_TABLE = Table.PromotionCoupon;
@@ -172,7 +171,7 @@ export class CouponRepo {
    */
   async update(id: string, input: UpdateCouponInput): Promise<PromotionCoupon> {
     const updateFields: string[] = [];
-    const params: any[] = [id];
+    const params: unknown[] = [id];
     let paramIndex = 2;
 
     // Build dynamic update query
@@ -241,7 +240,7 @@ export class CouponRepo {
    */
   async findByCode(code: string, merchantId?: string): Promise<PromotionCoupon | null> {
     let sql = `SELECT * FROM "${COUPON_TABLE}" WHERE "code" = $1`;
-    const params: any[] = [code];
+    const params: unknown[] = [code];
 
     if (merchantId) {
       sql += ' AND "merchantId" = $2';
@@ -273,7 +272,7 @@ export class CouponRepo {
       AND ("endDate" IS NULL OR "endDate" >= $1)
     `;
 
-    const params: any[] = [now];
+    const params: unknown[] = [now];
     let paramIndex = 2;
 
     if (merchantId) {
@@ -304,7 +303,7 @@ export class CouponRepo {
     const { limit = 50, offset = 0, orderBy = 'createdAt', direction = 'DESC', isActive } = options;
 
     let sql = `SELECT * FROM "${COUPON_TABLE}" WHERE 1=1`;
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (merchantId) {

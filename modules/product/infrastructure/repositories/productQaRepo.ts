@@ -19,7 +19,7 @@ export type ProductQaCreateParams = Omit<ProductQa, 'productQaId' | 'createdAt' 
 export class ProductQaRepo {
   async findByProduct(productId: string, status?: ProductQaStatus): Promise<ProductQa[]> {
     let sql = `SELECT * FROM "productQa" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (status) {
       sql += ` AND "status" = $2`;

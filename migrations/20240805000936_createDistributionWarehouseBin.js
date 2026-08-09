@@ -10,10 +10,6 @@ exports.up = function (knex) {
       .references('distributionWarehouseId')
       .inTable('distributionWarehouse')
       .onDelete('CASCADE');
-    t.uuid('distributionWarehouseZoneId')
-      .references('distributionWarehouseZoneId')
-      .inTable('distributionWarehouseZone')
-      .onDelete('SET NULL');
     t.string('locationCode', 50).notNullable();
     t.boolean('isActive').notNullable().defaultTo(true);
     t.enu('binType', ['storage', 'picking', 'receiving', 'packing', 'shipping', 'returns', 'damaged', 'inspection']).notNullable();
@@ -30,7 +26,6 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.index('distributionWarehouseId');
-    t.index('distributionWarehouseZoneId');
     t.index('locationCode');
     t.index('isActive');
     t.index('binType');

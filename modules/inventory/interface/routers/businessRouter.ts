@@ -40,6 +40,33 @@ router.get('/inventory/transactions/types', inventoryController.getTransactionTy
 router.get('/inventory/transactions/product/:productId', inventoryController.getTransactionHistory);
 
 // ============================================================================
+// Stock Transfer
+// ============================================================================
+
+router.post('/inventory/transfer', inventoryController.transferStock);
+
+// ============================================================================
+// Inventory Item Management
+// ============================================================================
+
+router.post('/inventory/items', inventoryController.createInventoryItem);
+
+// ============================================================================
+// Inventory Pool Operations
+// ============================================================================
+
+router.post('/inventory/pools', inventoryController.createInventoryPool);
+router.post('/inventory/pools/allocate', inventoryController.allocateFromPool);
+
+// ============================================================================
+// Inventory Item Queries & Store Transfers
+// ============================================================================
+
+router.get('/inventory/items', inventoryController.listInventoryItems);
+router.get('/inventory/items/lookup', inventoryController.getInventoryItem);
+router.post('/inventory/transfer-between-stores', inventoryController.transferBetweenStores);
+
+// ============================================================================
 // Legacy Routes (for backward compatibility)
 // ============================================================================
 

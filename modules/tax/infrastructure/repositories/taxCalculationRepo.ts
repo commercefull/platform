@@ -4,10 +4,8 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
-const TABLE = Table.TaxCalculation;
 
 export type TaxCalculationMethod = 'unitBased' | 'itemBased';
 export type TaxCalculationStatus = 'pending' | 'completed' | 'failed';
@@ -26,14 +24,14 @@ export interface TaxCalculation {
   status: TaxCalculationStatus;
   sourceType: TaxCalculationSourceType;
   sourceId?: string;
-  taxAddress?: any; // JSON
+  taxAddress?: unknown; // JSON
   taxableAmount: number;
   taxExemptAmount: number;
   taxAmount: number;
   totalAmount: number;
   currencyCode: string;
   exchangeRate: number;
-  taxProviderResponse?: any; // JSON
+  taxProviderResponse?: unknown; // JSON
   taxProviderReference?: string;
   errorMessage?: string;
 }
@@ -69,7 +67,7 @@ export class TaxCalculationRepo {
 
   async findByMerchant(merchantId: string, status?: TaxCalculationStatus, limit = 100): Promise<TaxCalculation[]> {
     let sql = `SELECT * FROM "taxCalculation" WHERE "merchantId" = $1`;
-    const params: any[] = [merchantId];
+    const params: unknown[] = [merchantId];
     if (status) {
       sql += ` AND "status" = $2`;
       params.push(status);
@@ -118,7 +116,7 @@ export class TaxCalculationRepo {
 
   async update(id: string, params: TaxCalculationUpdateParams): Promise<TaxCalculation | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -161,7 +159,7 @@ export class TaxCalculationRepo {
 
   async count(merchantId?: string, status?: TaxCalculationStatus): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "taxCalculation" WHERE 1=1`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (merchantId) {
       sql += ` AND "merchantId" = $${params.length + 1}`;

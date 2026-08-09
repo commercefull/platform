@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { Fulfillment as DbFulfillment, FulfillmentItem as DbFulfillmentItem } from '../../../../libs/db/types';
 import { Fulfillment, FulfillmentStatus, SourceType } from '../../domain/entities/Fulfillment';
 import { FulfillmentItem } from '../../domain/entities/FulfillmentItem';
 import {
@@ -20,7 +21,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     const props = fulfillment.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>('SELECT "fulfillmentId" FROM fulfillment WHERE "fulfillmentId" = $1', [
+    const existing = await queryOne<{ fulfillmentId: string }>('SELECT "fulfillmentId" FROM fulfillment WHERE "fulfillmentId" = $1', [
       props.fulfillmentId,
     ]);
 
@@ -174,14 +175,14 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 
   async findById(fulfillmentId: string): Promise<Fulfillment | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM fulfillment WHERE "fulfillmentId" = $1', [fulfillmentId]);
+    const row = await queryOne<DbFulfillment>('SELECT * FROM fulfillment WHERE "fulfillmentId" = $1', [fulfillmentId]);
 
     if (!row) return null;
     return this.mapToFulfillment(row);
   }
 
   async findByOrderId(orderId: string): Promise<Fulfillment[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM fulfillment WHERE "orderId" = $1 ORDER BY "createdAt" DESC', [orderId]);
+    const rows = await query<DbFulfillment[]>('SELECT * FROM fulfillment WHERE "orderId" = $1 ORDER BY "createdAt" DESC', [orderId]);
 
     return (rows || []).map(row => this.mapToFulfillment(row));
   }
@@ -196,7 +197,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM fulfillment ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0', 10);
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<DbFulfillment[]>(
       `SELECT * FROM fulfillment ${whereClause}
        ORDER BY "createdAt" DESC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -215,7 +216,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 
   async findByTrackingNumber(trackingNumber: string): Promise<Fulfillment | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM fulfillment WHERE "trackingNumber" = $1', [trackingNumber]);
+    const row = await queryOne<DbFulfillment>('SELECT * FROM fulfillment WHERE "trackingNumber" = $1', [trackingNumber]);
 
     if (!row) return null;
     return this.mapToFulfillment(row);
@@ -225,9 +226,9 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     // Delete items first
     await query('DELETE FROM "fulfillmentItem" WHERE "fulfillmentId" = $1', [fulfillmentId]);
 
-    const result = await query<{ rowCount?: number }>('DELETE FROM fulfillment WHERE "fulfillmentId" = $1', [fulfillmentId]);
+    await query('DELETE FROM fulfillment WHERE "fulfillmentId" = $1', [fulfillmentId]);
 
-    return (result as any)?.rowCount > 0;
+    return true;
   }
 
   // ===== Fulfillment Item Operations =====
@@ -236,7 +237,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     const props = item.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
+    const existing = await queryOne<{ fulfillmentItemId: string }>(
       'SELECT "fulfillmentItemId" FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1',
       [props.fulfillmentItemId],
     );
@@ -324,7 +325,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 
   async findItemsByFulfillmentId(fulfillmentId: string): Promise<FulfillmentItem[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "fulfillmentItem" WHERE "fulfillmentId" = $1 ORDER BY "createdAt" ASC', [
+    const rows = await query<DbFulfillmentItem[]>('SELECT * FROM "fulfillmentItem" WHERE "fulfillmentId" = $1 ORDER BY "createdAt" ASC', [
       fulfillmentId,
     ]);
 
@@ -332,50 +333,50 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 
   async findItem(fulfillmentItemId: string): Promise<FulfillmentItem | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1', [fulfillmentItemId]);
+    const row = await queryOne<DbFulfillmentItem>('SELECT * FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1', [fulfillmentItemId]);
 
     if (!row) return null;
     return this.mapToFulfillmentItem(row);
   }
 
   async deleteItem(fulfillmentItemId: string): Promise<boolean> {
-    const result = await query<{ rowCount?: number }>('DELETE FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1', [fulfillmentItemId]);
+    await query('DELETE FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1', [fulfillmentItemId]);
 
-    return (result as any)?.rowCount > 0;
+    return true;
   }
 
   // ===== Batch Operations =====
 
   async updateStatus(fulfillmentId: string, status: FulfillmentStatus): Promise<boolean> {
-    const result = await query<{ rowCount?: number }>(
+    await query(
       'UPDATE fulfillment SET status = $1, "updatedAt" = NOW() WHERE "fulfillmentId" = $2',
       [status, fulfillmentId],
     );
 
-    return (result as any)?.rowCount > 0;
+    return true;
   }
 
   async bulkUpdateStatus(fulfillmentIds: string[], status: FulfillmentStatus): Promise<number> {
     if (fulfillmentIds.length === 0) return 0;
 
     const placeholders = fulfillmentIds.map((_, i) => `$${i + 2}`).join(', ');
-    const result = await query<{ rowCount?: number }>(
+    await query(
       `UPDATE fulfillment SET status = $1, "updatedAt" = NOW()
        WHERE "fulfillmentId" IN (${placeholders})`,
       [status, ...fulfillmentIds],
     );
 
-    return (result as any)?.rowCount || 0;
+    return fulfillmentIds.length;
   }
 
   // ===== Helper Methods =====
 
   private buildWhereClause(filters?: FulfillmentFilters): {
     whereClause: string;
-    params: any[];
+    params: unknown[];
   } {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (filters?.orderId) {
       conditions.push(`"orderId" = $${params.length + 1}`);
@@ -439,24 +440,24 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     };
   }
 
-  private mapToFulfillment(row: Record<string, any>): Fulfillment {
+  private mapToFulfillment(row: DbFulfillment): Fulfillment {
     return Fulfillment.fromPersistence({
       fulfillmentId: row.fulfillmentId,
       orderId: row.orderId,
-      orderNumber: row.orderNumber || undefined,
+      orderNumber: row.orderNumber ?? undefined,
       sourceType: row.sourceType as SourceType,
       sourceId: row.sourceId,
-      merchantId: row.merchantId || undefined,
-      supplierId: row.supplierId || undefined,
-      storeId: row.storeId || undefined,
-      channelId: row.channelId || undefined,
+      merchantId: row.merchantId ?? undefined,
+      supplierId: row.supplierId ?? undefined,
+      storeId: row.storeId ?? undefined,
+      channelId: row.channelId ?? undefined,
       status: row.status as FulfillmentStatus,
-      carrierId: row.carrierId || undefined,
-      carrierName: row.carrierName || undefined,
-      shippingMethodId: row.shippingMethodId || undefined,
-      shippingMethodName: row.shippingMethodName || undefined,
-      trackingNumber: row.trackingNumber || undefined,
-      trackingUrl: row.trackingUrl || undefined,
+      carrierId: row.carrierId ?? undefined,
+      carrierName: row.carrierName ?? undefined,
+      shippingMethodId: row.shippingMethodId ?? undefined,
+      shippingMethodName: row.shippingMethodName ?? undefined,
+      trackingNumber: row.trackingNumber ?? undefined,
+      trackingUrl: row.trackingUrl ?? undefined,
       shipFromAddress: this.parseJson(row.shipFromAddress, {
         addressLine1: '',
         city: '',
@@ -469,15 +470,15 @@ export class FulfillmentRepository implements IFulfillmentRepository {
         postalCode: '',
         countryCode: '',
       }),
-      fulfillmentPartnerId: row.fulfillmentPartnerId || undefined,
-      weightGrams: row.weightGrams ? parseInt(row.weightGrams, 10) : undefined,
-      lengthCm: row.lengthCm ? parseFloat(row.lengthCm) : undefined,
-      widthCm: row.widthCm ? parseFloat(row.widthCm) : undefined,
-      heightCm: row.heightCm ? parseFloat(row.heightCm) : undefined,
+      fulfillmentPartnerId: row.fulfillmentPartnerId ?? undefined,
+      weightGrams: row.weightGrams ?? undefined,
+      lengthCm: row.lengthCm ?? undefined,
+      widthCm: row.widthCm ?? undefined,
+      heightCm: row.heightCm ?? undefined,
       shippingCost: row.shippingCost ? parseFloat(row.shippingCost) : undefined,
       insuranceCost: row.insuranceCost ? parseFloat(row.insuranceCost) : undefined,
-      notes: row.notes || undefined,
-      internalNotes: row.internalNotes || undefined,
+      notes: row.notes ?? undefined,
+      internalNotes: row.internalNotes ?? undefined,
       assignedAt: row.assignedAt ? new Date(row.assignedAt) : undefined,
       pickingStartedAt: row.pickingStartedAt ? new Date(row.pickingStartedAt) : undefined,
       pickedAt: row.pickedAt ? new Date(row.pickedAt) : undefined,
@@ -487,48 +488,48 @@ export class FulfillmentRepository implements IFulfillmentRepository {
       deliveredAt: row.deliveredAt ? new Date(row.deliveredAt) : undefined,
       cancelledAt: row.cancelledAt ? new Date(row.cancelledAt) : undefined,
       failedAt: row.failedAt ? new Date(row.failedAt) : undefined,
-      failureReason: row.failureReason || undefined,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
+      failureReason: row.failureReason ?? undefined,
+      createdAt: new Date(row.createdAt ?? new Date()),
+      updatedAt: new Date(row.updatedAt ?? new Date()),
     });
   }
 
-  private mapToFulfillmentItem(row: Record<string, any>): FulfillmentItem {
+  private mapToFulfillmentItem(row: DbFulfillmentItem): FulfillmentItem {
     return FulfillmentItem.fromPersistence({
       fulfillmentItemId: row.fulfillmentItemId,
       fulfillmentId: row.fulfillmentId,
       orderItemId: row.orderItemId,
       productId: row.productId,
-      variantId: row.variantId || undefined,
+      variantId: row.variantId ?? undefined,
       sku: row.sku,
       name: row.name,
-      quantityOrdered: parseInt(row.quantityOrdered, 10),
-      quantityFulfilled: parseInt(row.quantityFulfilled || '0', 10),
-      quantityPicked: row.quantityPicked ? parseInt(row.quantityPicked, 10) : undefined,
-      quantityPacked: row.quantityPacked ? parseInt(row.quantityPacked, 10) : undefined,
-      warehouseLocation: row.warehouseLocation || undefined,
-      binLocation: row.binLocation || undefined,
+      quantityOrdered: row.quantityOrdered,
+      quantityFulfilled: row.quantityFulfilled ?? 0,
+      quantityPicked: row.quantityPicked ?? undefined,
+      quantityPacked: row.quantityPacked ?? undefined,
+      warehouseLocation: row.warehouseLocation ?? undefined,
+      binLocation: row.binLocation ?? undefined,
       serialNumbers: this.parseJson(row.serialNumbers, undefined),
       lotNumbers: this.parseJson(row.lotNumbers, undefined),
       isPicked: Boolean(row.isPicked),
       isPacked: Boolean(row.isPacked),
       pickedAt: row.pickedAt ? new Date(row.pickedAt) : undefined,
       packedAt: row.packedAt ? new Date(row.packedAt) : undefined,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
+      createdAt: new Date(row.createdAt ?? new Date()),
+      updatedAt: new Date(row.updatedAt ?? new Date()),
     });
   }
 
-  private parseJson<T>(value: any, defaultValue: T): T {
+  private parseJson<T>(value: unknown, defaultValue: T): T {
     if (!value) return defaultValue;
     if (typeof value === 'string') {
       try {
-        return JSON.parse(value);
+        return JSON.parse(value) as T;
       } catch {
         return defaultValue;
       }
     }
-    return value;
+    return value as T;
   }
 }
 

@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { setupOrderTests, cleanupOrderTests, testOrderData, loginTestUser } from './testUtils';
+import { setupOrderTests, cleanupOrderTests, testOrderData } from './testUtils';
 
 // Define interfaces for order types
 interface Order {
@@ -11,7 +11,7 @@ interface Order {
   fulfillmentStatus: string;
   totalAmount: number | string;
   items?: OrderItem[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface OrderItem {
@@ -19,7 +19,7 @@ interface OrderItem {
   productId: string;
   variantId: string;
   unitPrice: number | string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 describe('Order Tests', () => {
@@ -27,6 +27,7 @@ describe('Order Tests', () => {
   let adminToken: string;
   let customerToken: string;
   let testOrderId: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testOrderItemId: string;
 
   beforeAll(async () => {
@@ -364,10 +365,10 @@ describe('Order Tests', () => {
 
 import { createTestClient, loginTestAdmin } from '../testUtils';
 import { loginTestUser as loginOrderTestUser } from './testUtils';
-import { eventBus } from '../../../libs/events/eventBus';
+import { eventBus, EventPayload } from '../../../libs/events/eventBus';
 
 describe('Order Creation Validation', () => {
-  let client: any;
+  let client: AxiosInstance;
   let customerToken: string;
 
   beforeAll(async () => {
@@ -438,7 +439,7 @@ describe('Order Creation Validation', () => {
 });
 
 describe('Order Cancellation Guards', () => {
-  let client: any;
+  let client: AxiosInstance;
   let customerToken: string;
   let adminToken: string;
 
@@ -501,7 +502,7 @@ describe('Order Cancellation Guards', () => {
 });
 
 describe('Order Event Emission', () => {
-  let client: any;
+  let client: AxiosInstance;
   let customerToken: string;
   let adminToken: string;
 
@@ -513,8 +514,8 @@ describe('Order Event Emission', () => {
 
   it('REQ 2.3.4 — POST /customer/order emits order.created with correct payload shape', async () => {
     if (!customerToken) return;
-    const received: any[] = [];
-    const handler = (payload: any) => {
+    const received: EventPayload[] = [];
+    const handler = (payload: EventPayload) => {
       received.push(payload);
     };
     eventBus.registerHandler('order.created', handler);
@@ -540,12 +541,12 @@ describe('Order Event Emission', () => {
 
     if (createResp.status === 201) {
       const orderId = createResp.data.data.orderId;
-      const event = received.find(e => e.orderId === orderId);
+      const event = received.find((e: EventPayload) => (e.data as Record<string, unknown>)?.orderId === orderId);
       expect(event).toBeDefined();
-      expect(event).toHaveProperty('orderId');
-      expect(event).toHaveProperty('orderNumber');
-      expect(event).toHaveProperty('totalAmount');
-      expect(event).toHaveProperty('currency');
+      expect(event?.data).toHaveProperty('orderId');
+      expect(event?.data).toHaveProperty('orderNumber');
+      expect(event?.data).toHaveProperty('totalAmount');
+      expect(event?.data).toHaveProperty('currency');
 
       if (adminToken) {
         await client.delete(`/business/orders/${orderId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
@@ -555,8 +556,8 @@ describe('Order Event Emission', () => {
 
   it('REQ 2.4.5 — POST /customer/order/:id/cancel emits order.cancelled', async () => {
     if (!customerToken) return;
-    const received: any[] = [];
-    eventBus.registerHandler('order.cancelled', (p: any) => {
+    const received: EventPayload[] = [];
+    eventBus.registerHandler('order.cancelled', (p: EventPayload) => {
       received.push(p);
     });
 
@@ -583,15 +584,15 @@ describe('Order Event Emission', () => {
 
     await client.post(`/customer/order/${orderId}/cancel`, {}, { headers: { Authorization: `Bearer ${customerToken}` } });
 
-    const event = received.find(e => e.orderId === orderId);
+    const event = received.find((e: EventPayload) => (e.data as Record<string, unknown>)?.orderId === orderId);
     expect(event).toBeDefined();
-    expect(event).toHaveProperty('orderId');
-    expect(event).toHaveProperty('orderNumber');
+    expect(event?.data).toHaveProperty('orderId');
+    expect(event?.data).toHaveProperty('orderNumber');
   });
 });
 
 describe('Order Optional Features', () => {
-  let client: any;
+  let client: AxiosInstance;
   let customerToken: string;
   let adminToken: string;
 

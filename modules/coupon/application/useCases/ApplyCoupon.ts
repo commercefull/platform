@@ -2,6 +2,19 @@
  * ApplyCoupon Use Case
  */
 
+import { Coupon } from '../../domain/entities/Coupon';
+
+export interface CouponRepositoryPort {
+  findByCode(code: string): Promise<Coupon | null>;
+  getCustomerUsageCount(couponId: string, customerId: string): Promise<number>;
+  recordUsage(usage: {
+    couponId: string;
+    basketId: string;
+    customerId?: string;
+    discountAmount: number;
+  }): Promise<unknown>;
+}
+
 export interface ApplyCouponInput {
   couponCode: string;
   basketId: string;
@@ -24,7 +37,7 @@ export interface ApplyCouponOutput {
 }
 
 export class ApplyCouponUseCase {
-  constructor(private readonly couponRepository: any) {}
+  constructor(private readonly couponRepository: CouponRepositoryPort) {}
 
   async execute(input: ApplyCouponInput): Promise<ApplyCouponOutput> {
     const coupon = await this.couponRepository.findByCode(input.couponCode);
@@ -44,7 +57,7 @@ export class ApplyCouponUseCase {
       return {
         applied: false,
         discountAmount: 0,
-        discountType: coupon.type,
+        discountType: coupon.type as 'percentage' | 'fixed' | 'free_shipping',
         message: validation.message,
         newTotal: input.orderTotal,
       };
@@ -57,7 +70,7 @@ export class ApplyCouponUseCase {
       if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
         discountAmount = coupon.maxDiscountAmount;
       }
-    } else if (coupon.type === 'fixed') {
+    } else if (coupon.type === 'fixed_amount') {
       discountAmount = Math.min(coupon.value, input.orderTotal);
     } else if (coupon.type === 'free_shipping') {
       // Free shipping handled separately
@@ -75,37 +88,37 @@ export class ApplyCouponUseCase {
     return {
       applied: true,
       discountAmount,
-      discountType: coupon.type,
+      discountType: coupon.type as 'percentage' | 'fixed' | 'free_shipping',
       newTotal: input.orderTotal - discountAmount,
     };
   }
 
-  private async validateCoupon(coupon: any, input: ApplyCouponInput): Promise<{ valid: boolean; message?: string }> {
+  private async validateCoupon(coupon: Coupon, input: ApplyCouponInput): Promise<{ valid: boolean; message?: string }> {
     const now = new Date();
 
     if (!coupon.isActive) {
       return { valid: false, message: 'Coupon is not active' };
     }
 
-    if (coupon.validFrom && now < new Date(coupon.validFrom)) {
+    if (coupon.startsAt && now < coupon.startsAt) {
       return { valid: false, message: 'Coupon is not yet valid' };
     }
 
-    if (coupon.validTo && now > new Date(coupon.validTo)) {
+    if (coupon.expiresAt && now > coupon.expiresAt) {
       return { valid: false, message: 'Coupon has expired' };
     }
 
-    if (coupon.minOrderAmount && input.orderTotal < coupon.minOrderAmount) {
-      return { valid: false, message: `Minimum order amount is ${coupon.minOrderAmount}` };
+    if (coupon.minOrderValue && input.orderTotal < coupon.minOrderValue) {
+      return { valid: false, message: `Minimum order amount is ${coupon.minOrderValue}` };
     }
 
-    if (coupon.maxUsage && coupon.currentUsageCount >= coupon.maxUsage) {
+    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
       return { valid: false, message: 'Coupon has reached maximum usage' };
     }
 
-    if (input.customerId && coupon.maxUsagePerCustomer) {
+    if (input.customerId && coupon.customerUsageLimit) {
       const customerUsage = await this.couponRepository.getCustomerUsageCount(coupon.couponId, input.customerId);
-      if (customerUsage >= coupon.maxUsagePerCustomer) {
+      if (customerUsage >= coupon.customerUsageLimit) {
         return { valid: false, message: 'You have already used this coupon' };
       }
     }

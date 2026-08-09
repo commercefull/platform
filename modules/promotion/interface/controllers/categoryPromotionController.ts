@@ -1,17 +1,33 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { CategoryPromotionRepo } from '../../infrastructure/repositories/categoryRepo';
+import { PromotionCategoryRepo } from '../../infrastructure/repositories/categoryRepo';
 
-const categoryPromotionRepo = new CategoryPromotionRepo();
+interface CategoryCreateBody {
+  productCategoryId: string;
+  promotionId: string;
+  displayOrder: number;
+  bannerText?: string;
+  bannerColor?: string;
+  bannerBackgroundColor?: string;
+  bannerImageUrl?: string;
+  isDisplayedOnCategoryPage?: boolean;
+  isDisplayedOnProductPage?: boolean;
+  createdBy?: string;
+  updatedBy?: string;
+}
+
+type CategoryUpdateBody = Partial<Omit<CategoryCreateBody, 'productCategoryId' | 'promotionId'>>;
+
+const categoryPromotionRepo = new PromotionCategoryRepo();
 
 export const getActiveCategoryPromotions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const promotions = await categoryPromotionRepo.getActivePromotions();
     res.status(200).json({ success: true, data: promotions || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -21,9 +37,9 @@ export const getPromotionsByCategoryId = async (req: TypedRequest, res: Response
     const { categoryId } = req.params;
     const promotions = await categoryPromotionRepo.getByCategoryId(categoryId);
     res.status(200).json({ success: true, data: promotions || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -39,40 +55,36 @@ export const getCategoryPromotionById = async (req: TypedRequest, res: Response)
     }
 
     res.status(200).json({ success: true, data: promotion });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 // Create a new category promotion
-export const createCategoryPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCategoryPromotion = async (req: TypedRequest<Record<string, string>, unknown, CategoryCreateBody>, res: Response): Promise<void> => {
   try {
     const promotionData = req.body;
 
-    // Add audit fields
-    promotionData.createdBy = req.user?.id || 'system';
-    promotionData.updatedBy = req.user?.id || 'system';
-
     const promotion = await categoryPromotionRepo.create(promotionData);
     res.status(201).json({ success: true, data: promotion });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 // Update an existing category promotion
-export const updateCategoryPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCategoryPromotion = async (req: TypedRequest<Record<string, string>, unknown, CategoryUpdateBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const promotionData = req.body;
 
     const promotion = await categoryPromotionRepo.update(id, promotionData);
     res.status(200).json({ success: true, data: promotion });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -82,8 +94,8 @@ export const deleteCategoryPromotion = async (req: TypedRequest, res: Response):
     const { id } = req.params;
     await categoryPromotionRepo.delete(id);
     res.status(200).json({ success: true, message: 'Category promotion deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };

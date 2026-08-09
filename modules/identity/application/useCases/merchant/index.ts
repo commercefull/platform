@@ -1,5 +1,5 @@
 /**
  * Merchant Identity Use Cases Barrel Export
  */
-export * from './LoginMerchant';
-export * from './RegisterMerchant';
+export { LoginMerchantUseCase, LoginMerchantInput, LoginMerchantOutput } from './LoginMerchant';
+export { RegisterMerchantUseCase, RegisterMerchantInput, RegisterMerchantOutput } from './RegisterMerchant';

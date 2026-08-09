@@ -30,7 +30,7 @@ export interface SocialAccountProps {
   scopes?: string[];
   isActive: boolean;
   isPrimary: boolean;
-  providerData?: Record<string, any>;
+  providerData?: Record<string, unknown>;
   lastUsedAt?: Date;
   lastLoginIp?: string;
   createdAt: Date;
@@ -49,7 +49,7 @@ export interface SocialProfileData {
   refreshToken?: string;
   tokenExpiresAt?: Date;
   scopes?: string[];
-  rawData?: Record<string, any>;
+  rawData?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -147,7 +147,7 @@ export class SocialAccount {
   get isPrimary(): boolean {
     return this.props.isPrimary;
   }
-  get providerData(): Record<string, any> | undefined {
+  get providerData(): Record<string, unknown> | undefined {
     return this.props.providerData;
   }
   get lastUsedAt(): Date | undefined {

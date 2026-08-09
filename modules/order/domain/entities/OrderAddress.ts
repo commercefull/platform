@@ -22,7 +22,7 @@ export interface OrderAddressProps {
   phone?: string;
   email?: string;
   isDefault: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,7 +51,7 @@ export class OrderAddress {
     phone?: string;
     email?: string;
     isDefault?: boolean;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): OrderAddress {
     const now = new Date();
     return new OrderAddress({
@@ -130,7 +130,7 @@ export class OrderAddress {
   get isDefault(): boolean {
     return this.props.isDefault;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -175,7 +175,7 @@ export class OrderAddress {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       orderAddressId: this.props.orderAddressId,
       orderId: this.props.orderId,

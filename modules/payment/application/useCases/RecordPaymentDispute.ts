@@ -23,7 +23,7 @@ export class RecordPaymentDisputeCommand {
     public readonly status: string = 'open',
     public readonly externalDisputeId?: string,
     public readonly reason?: string,
-    public readonly evidence?: Record<string, any>,
+    public readonly evidence?: Record<string, unknown>,
     public readonly dueBy?: Date,
   ) {}
 }

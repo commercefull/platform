@@ -1,8 +1,21 @@
 import ShippingCarrierRepo from '../infrastructure/repositories/shippingCarrierRepo';
-import ShippingMethodRepo from '../infrastructure/repositories/shippingMethodRepo';
+import ShippingMethodRepo, { ShippingMethod } from '../infrastructure/repositories/shippingMethodRepo';
 import ShippingRateRepo from '../infrastructure/repositories/shippingRateRepo';
 import ShippingZoneRepo from '../infrastructure/repositories/shippingZoneRepo';
 import { generateUUID } from '../../../libs/uuid';
+
+/**
+ * Extended shipping method properties that may come from customFields
+ * or from extended domain logic beyond the base DB type.
+ */
+interface ShippingMethodExtended extends ShippingMethod {
+  baseRate?: number;
+  weightRate?: number;
+  freeWeight?: number;
+  distanceRate?: number;
+  freeDistance?: number;
+  insuranceIncluded?: boolean;
+}
 
 export interface Address {
   street1: string;
@@ -117,13 +130,15 @@ export class ShippingService {
             serviceCode: method.code,
             rate: rate.total,
             currency,
-            estimatedDays: (method.estimatedDeliveryDays as any)?.min || method.handlingDays || 3,
+            estimatedDays: typeof method.estimatedDeliveryDays === 'object' && method.estimatedDeliveryDays !== null
+              ? (method.estimatedDeliveryDays as { min?: number }).min ?? method.handlingDays ?? 3
+              : method.handlingDays ?? 3,
             guaranteedDelivery: false, // Default value - not stored in interface
             trackingAvailable: true, // Default value - not stored in interface
             insuranceIncluded: rate.insurance > 0,
           });
         }
-      } catch (error) {
+      } catch {
         // Continue with other methods
       }
     }
@@ -190,7 +205,11 @@ export class ShippingService {
       serviceCode,
       status: 'pending',
       shipDate: new Date().toISOString(),
-      estimatedDeliveryDate: this.calculateEstimatedDelivery((method.estimatedDeliveryDays as any)?.min || method.handlingDays || 3),
+      estimatedDeliveryDate: this.calculateEstimatedDelivery(
+        typeof method.estimatedDeliveryDays === 'object' && method.estimatedDeliveryDays !== null
+          ? (method.estimatedDeliveryDays as { min?: number }).min ?? method.handlingDays ?? 3
+          : method.handlingDays ?? 3
+      ),
       cost: cost.baseRate,
       insurance: cost.insurance,
       labels: [],
@@ -257,11 +276,11 @@ export class ShippingService {
   /**
    * Get shipping methods for a zone
    */
-  async getShippingMethods(zoneId: string): Promise<any[]> {
+  async getShippingMethods(_zoneId: string): Promise<unknown[]> {
     try {
       // Return all active shipping methods (simplified implementation)
       return await this.methodRepo.findAll(true);
-    } catch (error) {
+    } catch {
       return [];
     }
   }
@@ -270,41 +289,42 @@ export class ShippingService {
    * Calculate shipping cost for a specific method
    */
   private async calculateMethodRate(
-    method: any,
+    method: ShippingMethod,
     packages: Package[],
-    zone: any,
+    _zone: unknown,
     fromAddress: Address,
     toAddress: Address,
   ): Promise<{ total: number; baseRate: number; insurance: number } | null> {
     try {
+      const ext = method as ShippingMethodExtended;
       // Calculate package dimensions and weight
       const totalWeight = packages.reduce((sum, pkg) => sum + pkg.weight, 0);
       const totalValue = packages.reduce((sum, pkg) => sum + (pkg.value || 0), 0);
 
       // Get base rate from method/zone configuration
-      let baseRate = method.baseRate || 0;
+      let baseRate = ext.baseRate || 0;
 
       // Add weight-based charges
-      if (method.weightRate && totalWeight > method.freeWeight) {
-        baseRate += (totalWeight - method.freeWeight) * method.weightRate;
+      if (ext.weightRate && totalWeight > (ext.freeWeight || 0)) {
+        baseRate += (totalWeight - (ext.freeWeight || 0)) * ext.weightRate;
       }
 
       // Add distance-based charges (simplified)
       const distance = this.calculateDistance(fromAddress, toAddress);
-      if (method.distanceRate && distance > method.freeDistance) {
-        baseRate += (distance - method.freeDistance) * method.distanceRate;
+      if (ext.distanceRate && distance > (ext.freeDistance || 0)) {
+        baseRate += (distance - (ext.freeDistance || 0)) * ext.distanceRate;
       }
 
       // Calculate insurance (if included)
       let insurance = 0;
-      if (method.insuranceIncluded && totalValue > 0) {
+      if (ext.insuranceIncluded && totalValue > 0) {
         insurance = totalValue * 0.01; // 1% of declared value
       }
 
       const total = baseRate + insurance;
 
       return { total, baseRate, insurance };
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -313,7 +333,7 @@ export class ShippingService {
    * Calculate shipment cost (for internal use)
    */
   private async calculateShipmentCost(
-    method: any,
+    method: ShippingMethod,
     packages: Package[],
     fromAddress: Address,
     toAddress: Address,
@@ -391,7 +411,7 @@ export class ShippingService {
   /**
    * Get carrier capabilities
    */
-  async getCarrierCapabilities(carrierCode: string): Promise<any> {
+  async getCarrierCapabilities(carrierCode: string): Promise<unknown> {
     try {
       const carrier = await this.carrierRepo.findByCode(carrierCode);
       return carrier
@@ -402,7 +422,7 @@ export class ShippingService {
             requiresContract: carrier.requiresContract,
           }
         : {};
-    } catch (error) {
+    } catch {
       return {};
     }
   }

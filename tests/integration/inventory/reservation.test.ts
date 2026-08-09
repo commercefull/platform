@@ -5,6 +5,7 @@ import { setupInventoryTests, cleanupInventoryTests } from './testUtils';
 describe('Inventory Reservation Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testProductId: string;
   let testLocationId: string;
   let testInventoryItemId: string;
@@ -102,7 +103,7 @@ describe('Inventory Reservation Tests', () => {
       expect(Array.isArray(response.data.data)).toBe(true);
       if (response.data.data.length > 0) {
         // Verify all returned reservations belong to the test cart
-        response.data.data.forEach((reservation: any) => {
+        response.data.data.forEach((reservation: Record<string, unknown>) => {
           expect(reservation.cartId).toBe(testCartId);
         });
       }
@@ -153,7 +154,7 @@ describe('Inventory Reservation Tests', () => {
       const testCartId3 = `test-cart-${randomUUID()}`;
 
       // Make two reservations (routes may not exist)
-      const res1 = await client.post(
+      const _res1 = await client.post(
         '/business/inventory/cart/reserve',
         {
           items: [
@@ -171,7 +172,7 @@ describe('Inventory Reservation Tests', () => {
         },
       );
 
-      const res2 = await client.post(
+      const _res2 = await client.post(
         '/business/inventory/cart/reserve',
         {
           items: [
@@ -288,7 +289,7 @@ describe('Inventory Reservation Tests', () => {
 
       // Find our expired reservation
       const foundExpired = reservationsResponse.data.data.some(
-        (res: any) => res.cartId === expiredReservation.cartId && res.status === 'expired',
+        (res: Record<string, unknown>) => res.cartId === expiredReservation.cartId && res.status === 'expired',
       );
 
       expect(foundExpired).toBe(true);

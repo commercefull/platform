@@ -25,10 +25,19 @@ export interface SendNotificationOutput {
   error?: string;
 }
 
+export interface SendNotificationRepository {
+  create(params: Record<string, unknown>): Promise<unknown>;
+  updateStatus?(notificationId: string, status: string, errorMessage?: string): Promise<void>;
+}
+
+export interface NotificationService {
+  send?(params: { channel: NotificationChannel; recipientId: string; subject?: string; content: string; data?: Record<string, unknown> }): Promise<void>;
+}
+
 export class SendNotificationUseCase {
   constructor(
-    private readonly notificationRepository: any,
-    private readonly notificationService: any,
+    private readonly notificationRepository: SendNotificationRepository,
+    private readonly notificationService: NotificationService | SendNotificationRepository,
   ) {}
 
   async execute(input: SendNotificationInput): Promise<SendNotificationOutput> {
@@ -56,15 +65,19 @@ export class SendNotificationUseCase {
     // If not scheduled, send immediately
     if (!input.scheduledAt) {
       try {
-        await this.notificationService.send({
-          channel: input.channel,
-          recipientId: input.recipientId,
-          subject: input.subject,
-          content: input.content,
-          data: input.data,
-        });
+        if ('send' in this.notificationService && typeof this.notificationService.send === 'function') {
+          await this.notificationService.send({
+            channel: input.channel,
+            recipientId: input.recipientId,
+            subject: input.subject,
+            content: input.content,
+            data: input.data,
+          });
+        }
 
-        await this.notificationRepository.updateStatus(notificationId, 'sent');
+        if (this.notificationRepository.updateStatus) {
+          await this.notificationRepository.updateStatus(notificationId, 'sent');
+        }
 
         return {
           notificationId,
@@ -72,9 +85,11 @@ export class SendNotificationUseCase {
           status: 'sent',
           sentAt: new Date().toISOString(),
         };
-      } catch (error) {
+      } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        await this.notificationRepository.updateStatus(notificationId, 'failed', errorMessage);
+        if (this.notificationRepository.updateStatus) {
+          await this.notificationRepository.updateStatus(notificationId, 'failed', errorMessage);
+        }
 
         return {
           notificationId,

@@ -27,7 +27,7 @@ export class RegisterWebhookUseCase {
   async execute(input: RegisterWebhookInput): Promise<{
     webhookEndpointId: string;
     secret: string;
-    endpoint: Record<string, any>;
+    endpoint: Record<string, unknown>;
   }> {
     if (!input.url || !input.url.startsWith('http')) {
       throw new Error('A valid HTTPS URL is required for webhook endpoints');

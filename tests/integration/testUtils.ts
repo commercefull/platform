@@ -58,8 +58,8 @@ export const loginTestUser = async (
     customerTokenCacheTime = Date.now();
 
     return response.data.accessToken;
-  } catch (error: any) {
-    console.error('❌ Customer login error (server may not be running):', error.message);
+  } catch (error: unknown) {
+    console.error('❌ Customer login error (server may not be running):', (error as Error).message);
     return '';
   }
 };
@@ -94,8 +94,8 @@ export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => 
     adminTokenCacheTime = Date.now();
 
     return response.data.accessToken;
-  } catch (error: any) {
-    console.error('❌ Merchant login error (server may not be running):', error.message);
+  } catch (error: unknown) {
+    console.error('❌ Merchant login error (server may not be running):', (error as Error).message);
     return '';
   }
 };

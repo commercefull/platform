@@ -11,10 +11,10 @@ interface NotificationPreference {
   type: string;
   channelPreferences: Record<string, boolean>;
   isEnabled: boolean;
-  schedulePreferences?: Record<string, any>;
-  metadata?: Record<string, any>;
+  schedulePreferences?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   updatedAt: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 describe.skip('Notification Preference Tests', () => {

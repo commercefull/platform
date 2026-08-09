@@ -4,7 +4,7 @@ import { StoreDispatchRepository } from '../../domain/repositories/StoreDispatch
 export class CancelStoreDispatchUseCase {
   constructor(private readonly dispatchRepository: StoreDispatchRepository) {}
 
-  async execute(dispatchId: string, reason?: string): Promise<Record<string, any>> {
+  async execute(dispatchId: string, reason?: string): Promise<Record<string, unknown>> {
     const dispatch = await this.dispatchRepository.findById(dispatchId);
     if (!dispatch) {
       throw new Error('Dispatch not found');

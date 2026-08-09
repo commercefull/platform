@@ -14,6 +14,7 @@ describe('Customer: Reviews & Q&A', () => {
   let client: AxiosInstance;
   let customerToken: string;
   let createdReviewId: string | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let createdQaId: string | null = null;
 
   beforeAll(async () => {
@@ -67,7 +68,7 @@ describe('Customer: Reviews & Q&A', () => {
       expect(res.data.data).toHaveProperty('averageRating');
       expect(res.data.data).toHaveProperty('ratingDistribution');
       expect(res.data.data).toHaveProperty('totalCount');
-      res.data.data.reviews.forEach((r: any) => {
+      res.data.data.reviews.forEach((r: Record<string, unknown>) => {
         expect(r.status).toBe('approved');
       });
     });
@@ -150,7 +151,7 @@ describe('Customer: Reviews & Q&A', () => {
       const res = await client.get(`/customer/products/${SEEDED_PRODUCT_1_ID}/qa`);
       expect(res.status).toBe(200);
       expect(Array.isArray(res.data.data)).toBe(true);
-      res.data.data.forEach((qa: any) => {
+      res.data.data.forEach((qa: Record<string, unknown>) => {
         expect(qa.status).toBe('answered');
       });
     });

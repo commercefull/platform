@@ -21,7 +21,7 @@
     "test:unit": "jest ./features --collectCoverage=false",
     "test:int": "jest ./tests/integration --collectCoverage=false --detectOpenHandles --runInBand",
     "test:e2e": "npx cypress run --headless --browser chrome",
-    "lint": "npx tsc --noEmit && eslint . --ext .ts,.js",
+    "lint": "node_modules/@typescript/native/bin/tsc --noEmit && eslint . --ext .ts,.js",
     "lint:errors": "eslint . --ext .ts,.js --quiet",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md,html,css,scss}\"",
@@ -37,8 +37,11 @@
     "job:new:admin": "NODE_ENV=development node --env-file=.env --import tsx ./modules/identity/interface/jobs/new-admin.ts"
   },
   "dependencies": {
+    "@apollo/server": "^5.5.1",
+    "@as-integrations/express5": "^1.1.2",
     "@aws-sdk/client-s3": "^3.1102.0",
     "@aws-sdk/s3-request-presigner": "^3.1102.0",
+    "@graphql-tools/merge": "^9.2.2",
     "bcryptjs": "3.0.3",
     "body-parser": "2.3.0",
     "compression": "1.8.1",
@@ -53,6 +56,7 @@
     "express-session": "1.19.0",
     "express-validator": "7.3.2",
     "express-winston": "^4.2.0",
+    "graphql": "^17.0.2",
     "helmet": "8.3.0",
     "hpp": "^0.2.3",
     "i18next": "26.3.6",
@@ -97,6 +101,7 @@
     "@types/supertest": "^7.2.1",
     "@typescript-eslint/eslint-plugin": "^8.66.0",
     "@typescript-eslint/parser": "^8.66.0",
+    "@typescript/native": "npm:typescript@7.0.2",
     "autoprefixer": "^10.5.4",
     "axios": "1.19.0",
     "cypress": "15.19.0",
@@ -117,6 +122,6 @@
     "supertest": "^7.2.2",
     "tailwindcss": "^4.3.3",
     "tsx": "4.20.5",
-    "typescript": "7.0.2"
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   }
 }

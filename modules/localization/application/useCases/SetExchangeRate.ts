@@ -17,8 +17,25 @@ export interface SetExchangeRateOutput {
   updatedAt: string;
 }
 
+export interface CurrencyForExchangeRate {
+  currencyId: string;
+  exchangeRate: number;
+}
+
+export interface SetExchangeRateRepository {
+  findCurrencyByCode(code: string): Promise<CurrencyForExchangeRate | null>;
+  updateCurrency(currencyId: string, data: { exchangeRate: number; lastRateUpdate: Date }): Promise<void>;
+  createExchangeRateHistory(data: {
+    currencyCode: string;
+    rate: number;
+    previousRate: number;
+    effectiveDate: Date;
+    source: string;
+  }): Promise<void>;
+}
+
 export class SetExchangeRateUseCase {
-  constructor(private readonly localizationRepository: any) {}
+  constructor(private readonly localizationRepository: SetExchangeRateRepository) {}
 
   async execute(input: SetExchangeRateInput): Promise<SetExchangeRateOutput> {
     if (!input.currencyCode || input.exchangeRate === undefined) {

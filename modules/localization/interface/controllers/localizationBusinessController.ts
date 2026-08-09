@@ -3,6 +3,25 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import LocaleRepo from '../../infrastructure/repositories/localeRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
+import { Locale } from '../../../../libs/db/types';
+
+interface CreateLocaleBody {
+  code: string;
+  name: string;
+  nativeName?: string;
+  language: string;
+  countryCode?: string;
+  isActive?: boolean;
+  isDefault?: boolean;
+  textDirection?: string;
+  dateFormat?: string;
+  timeFormat?: string;
+  timeZone?: string;
+  defaultCurrencyId?: string;
+  numberFormat?: Record<string, unknown> | null;
+  fallbackLocaleId?: string | null;
+  flagIcon?: string | null;
+}
 
 const localeRepo = LocaleRepo;
 
@@ -23,7 +42,7 @@ export const getLocales = async (req: TypedRequest, res: Response): Promise<void
     }
 
     successResponse(res, locales);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch locales');
@@ -41,7 +60,7 @@ export const getLocaleById = async (req: TypedRequest, res: Response): Promise<v
     }
 
     successResponse(res, locale);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch locale');
@@ -59,7 +78,7 @@ export const getLocaleByCode = async (req: TypedRequest, res: Response): Promise
     }
 
     successResponse(res, locale);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch locale');
@@ -76,7 +95,7 @@ export const getDefaultLocale = async (req: TypedRequest, res: Response): Promis
     }
 
     successResponse(res, locale);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch default locale');
@@ -88,7 +107,7 @@ export const getLocalesByLanguage = async (req: TypedRequest, res: Response): Pr
     const { language } = req.params;
     const locales = await localeRepo.findByLanguage(language);
     successResponse(res, locales);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch locales');
@@ -100,7 +119,7 @@ export const getLocalesByCountry = async (req: TypedRequest, res: Response): Pro
     const { countryCode } = req.params;
     const locales = await localeRepo.findByCountryCode(countryCode);
     successResponse(res, locales);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch locales');
@@ -111,14 +130,14 @@ export const getLocaleStatistics = async (req: TypedRequest, res: Response): Pro
   try {
     const statistics = await localeRepo.getStatistics();
     successResponse(res, statistics);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch locale statistics');
   }
 };
 
-export const createLocale = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createLocale = async (req: TypedRequest<Record<string, string>, unknown, CreateLocaleBody>, res: Response): Promise<void> => {
   try {
     const { code, name, language, countryCode, isActive, isDefault, textDirection, dateFormat, timeFormat, timeZone, defaultCurrencyId } =
       req.body;
@@ -154,18 +173,18 @@ export const createLocale = async (req: TypedRequest, res: Response): Promise<vo
 
     const locale = await localeRepo.create(localeParams);
     successResponse(res, locale, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message.includes('already exists')) {
-      errorResponse(res, error.message, 409);
+    if ((error as Error).message.includes('already exists')) {
+      errorResponse(res, (error as Error).message, 409);
     } else {
       errorResponse(res, 'Failed to create locale');
     }
   }
 };
 
-export const updateLocale = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateLocale = async (req: TypedRequest<Record<string, string>, unknown, Partial<Omit<Locale, 'code' | 'createdAt' | 'localeId' | 'updatedAt'>>>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateParams = req.body;
@@ -178,7 +197,7 @@ export const updateLocale = async (req: TypedRequest, res: Response): Promise<vo
     }
 
     successResponse(res, locale);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to update locale');
@@ -196,7 +215,7 @@ export const deleteLocale = async (req: TypedRequest, res: Response): Promise<vo
     }
 
     successResponse(res, { message: 'Locale deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to delete locale');
@@ -214,7 +233,7 @@ export const setDefaultLocale = async (req: TypedRequest, res: Response): Promis
     }
 
     successResponse(res, locale);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to set default locale');
@@ -232,7 +251,7 @@ export const activateLocale = async (req: TypedRequest, res: Response): Promise<
     }
 
     successResponse(res, locale);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to activate locale');
@@ -250,7 +269,7 @@ export const deactivateLocale = async (req: TypedRequest, res: Response): Promis
     }
 
     successResponse(res, locale);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to deactivate locale');
@@ -263,7 +282,7 @@ export const getCountries = async (req: TypedRequest, res: Response): Promise<vo
   try {
     // TODO: Implement when country repo is available
     successResponse(res, []);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch countries');
@@ -272,10 +291,10 @@ export const getCountries = async (req: TypedRequest, res: Response): Promise<vo
 
 export const getCountryById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    
     // TODO: Implement when country repo is available
     successResponse(res, {});
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch country');
@@ -284,10 +303,10 @@ export const getCountryById = async (req: TypedRequest, res: Response): Promise<
 
 export const getCountryByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { code } = req.params;
+    
     // TODO: Implement when country repo is available
     successResponse(res, {});
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch country');
@@ -296,10 +315,10 @@ export const getCountryByCode = async (req: TypedRequest, res: Response): Promis
 
 export const getCountriesByRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { region } = req.params;
+    
     // TODO: Implement when country repo is available
     successResponse(res, []);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch countries');
@@ -310,7 +329,7 @@ export const createCountry = async (req: TypedRequest, res: Response): Promise<v
   try {
     // TODO: Implement when country repo is available
     successResponse(res, {}, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to create country');
@@ -319,10 +338,10 @@ export const createCountry = async (req: TypedRequest, res: Response): Promise<v
 
 export const updateCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    
     // TODO: Implement when country repo is available
     successResponse(res, {});
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to update country');
@@ -331,10 +350,10 @@ export const updateCountry = async (req: TypedRequest, res: Response): Promise<v
 
 export const deleteCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    
     // TODO: Implement when country repo is available
     successResponse(res, { message: 'Country deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to delete country');
@@ -343,10 +362,10 @@ export const deleteCountry = async (req: TypedRequest, res: Response): Promise<v
 
 export const activateCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    
     // TODO: Implement when country repo is available
     successResponse(res, {});
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to activate country');
@@ -355,10 +374,10 @@ export const activateCountry = async (req: TypedRequest, res: Response): Promise
 
 export const deactivateCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    
     // TODO: Implement when country repo is available
     successResponse(res, {});
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to deactivate country');

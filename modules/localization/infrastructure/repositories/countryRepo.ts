@@ -59,7 +59,7 @@ export class CountryRepo {
    */
   async findByRegion(region: string, activeOnly: boolean = true): Promise<Country[]> {
     let sql = `SELECT * FROM "${Table.Country}" WHERE "region" = $1`;
-    const params: any[] = [region];
+    const params: unknown[] = [region];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -76,7 +76,7 @@ export class CountryRepo {
    */
   async findByCurrency(currencyId: string, activeOnly: boolean = true): Promise<Country[]> {
     let sql = `SELECT * FROM "${Table.Country}" WHERE "defaultCurrencyId" = $1`;
-    const params: any[] = [currencyId];
+    const params: unknown[] = [currencyId];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -93,7 +93,7 @@ export class CountryRepo {
    */
   async search(searchTerm: string, activeOnly: boolean = true): Promise<Country[]> {
     let sql = `SELECT * FROM "${Table.Country}" WHERE "name" ILIKE $1`;
-    const params: any[] = [`%${searchTerm}%`];
+    const params: unknown[] = [`%${searchTerm}%`];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -150,7 +150,7 @@ export class CountryRepo {
    */
   async update(countryId: string, params: CountryUpdateParams): Promise<Country | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

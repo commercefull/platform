@@ -4,17 +4,19 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { SystemConfiguration as DbSystemConfiguration } from '../../../../libs/db/types';
 import { SystemConfigurationRepository as ISystemConfigurationRepository } from '../../domain/repositories/SystemConfigurationRepository';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
+import { SystemMode } from '../../domain/entities/SystemConfiguration';
 
 export class SystemConfigurationRepo implements ISystemConfigurationRepository {
   async findById(configId: string): Promise<SystemConfiguration | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "systemConfiguration" WHERE "configId" = $1', [configId]);
+    const row = await queryOne<DbSystemConfiguration>('SELECT * FROM "systemConfiguration" WHERE "configId" = $1', [configId]);
     return row ? this.mapToSystemConfiguration(row) : null;
   }
 
   async findActive(): Promise<SystemConfiguration | null> {
-    const row = await queryOne<Record<string, any>>(
+    const row = await queryOne<DbSystemConfiguration>(
       'SELECT * FROM "systemConfiguration" WHERE "isActive" = true ORDER BY "createdAt" DESC LIMIT 1',
       [],
     );
@@ -22,14 +24,14 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
   }
 
   async findAll(): Promise<SystemConfiguration[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "systemConfiguration" ORDER BY "createdAt" DESC', []);
+    const rows = await query<DbSystemConfiguration[]>('SELECT * FROM "systemConfiguration" ORDER BY "createdAt" DESC', []);
     return (rows || []).map(row => this.mapToSystemConfiguration(row));
   }
 
   async save(config: SystemConfiguration): Promise<SystemConfiguration> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>('SELECT "configId" FROM "systemConfiguration" WHERE "configId" = $1', [
+    const existing = await queryOne<{ configId: string }>('SELECT "configId" FROM "systemConfiguration" WHERE "configId" = $1', [
       config.configId,
     ]);
 
@@ -88,17 +90,17 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
     return parseInt(result?.count || '0');
   }
 
-  private mapToSystemConfiguration(row: Record<string, any>): SystemConfiguration {
+  private mapToSystemConfiguration(row: DbSystemConfiguration): SystemConfiguration {
     return SystemConfiguration.reconstitute({
       configId: row.configId,
-      systemMode: row.systemMode,
+      systemMode: row.systemMode as SystemMode,
       features: typeof row.features === 'string' ? JSON.parse(row.features) : row.features,
       businessSettings: typeof row.businessSettings === 'string' ? JSON.parse(row.businessSettings) : row.businessSettings,
       platformSettings: typeof row.platformSettings === 'string' ? JSON.parse(row.platformSettings) : row.platformSettings,
       securitySettings: typeof row.securitySettings === 'string' ? JSON.parse(row.securitySettings) : row.securitySettings,
       notificationSettings: typeof row.notificationSettings === 'string' ? JSON.parse(row.notificationSettings) : row.notificationSettings,
       integrationSettings: typeof row.integrationSettings === 'string' ? JSON.parse(row.integrationSettings) : row.integrationSettings,
-      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : (row.metadata as Record<string, unknown> | undefined),
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

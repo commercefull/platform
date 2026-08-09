@@ -50,7 +50,7 @@ export interface ProductProps {
   isTaxable: boolean;
   taxClass?: string;
   hasVariants: boolean;
-  variantAttributes?: Record<string, any>;
+  variantAttributes?: Record<string, unknown>;
   images: ProductImage[];
   primaryImageId?: string;
   metaTitle?: string;
@@ -62,7 +62,7 @@ export interface ProductProps {
   warranty?: string;
   externalId?: string;
   tags: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   publishedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -106,7 +106,7 @@ export class Product {
     isTaxable?: boolean;
     taxClass?: string;
     hasVariants?: boolean;
-    variantAttributes?: Record<string, any>;
+    variantAttributes?: Record<string, unknown>;
     metaTitle?: string;
     metaDescription?: string;
     metaKeywords?: string;
@@ -116,7 +116,7 @@ export class Product {
     warranty?: string;
     externalId?: string;
     tags?: string[];
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Product {
     const now = new Date();
     const slug = props.slug || Product.generateSlug(props.name);
@@ -255,7 +255,7 @@ export class Product {
   get hasVariants(): boolean {
     return this.props.hasVariants;
   }
-  get variantAttributes(): Record<string, any> | undefined {
+  get variantAttributes(): Record<string, unknown> | undefined {
     return this.props.variantAttributes;
   }
   get images(): ProductImage[] {
@@ -291,7 +291,7 @@ export class Product {
   get tags(): string[] {
     return [...this.props.tags];
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get publishedAt(): Date | undefined {
@@ -499,12 +499,12 @@ export class Product {
     }
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
 
-  enableVariants(variantAttributes: Record<string, any>): void {
+  enableVariants(variantAttributes: Record<string, unknown>): void {
     this.props.hasVariants = true;
     this.props.variantAttributes = variantAttributes;
     this.touch();
@@ -544,7 +544,7 @@ export class Product {
       .substring(0, 200);
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       productId: this.props.productId,
       name: this.props.name,

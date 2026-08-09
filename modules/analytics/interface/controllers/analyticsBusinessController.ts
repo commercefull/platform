@@ -9,13 +9,13 @@ import { TypedRequest } from 'libs/types/express';
 import * as analyticsRepo from '../../infrastructure/repositories/analyticsRepo';
 import * as reportingRepo from '../../infrastructure/repositories/reportingRepo';
 
-type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
 
 // ============================================================================
 // Sales Analytics
 // ============================================================================
 
-export const getSalesDashboard: AsyncHandler = async (req, res, next) => {
+export const getSalesDashboard: AsyncHandler = async (req, res, _next) => {
   try {
     const { startDate, endDate, merchantId } = req.query;
 
@@ -36,14 +36,14 @@ export const getSalesDashboard: AsyncHandler = async (req, res, next) => {
         realTime,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getSalesDaily: AsyncHandler = async (req, res, next) => {
+export const getSalesDaily: AsyncHandler = async (req, res, _next) => {
   try {
     const { startDate, endDate, channel, merchantId, limit, offset } = req.query;
 
@@ -58,10 +58,10 @@ export const getSalesDaily: AsyncHandler = async (req, res, next) => {
     );
 
     res.json({ success: true, ...result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -69,7 +69,7 @@ export const getSalesDaily: AsyncHandler = async (req, res, next) => {
 // Product Analytics
 // ============================================================================
 
-export const getProductPerformance: AsyncHandler = async (req, res, next) => {
+export const getProductPerformance: AsyncHandler = async (req, res, _next) => {
   try {
     const { productId, startDate, endDate, limit, offset } = req.query;
 
@@ -83,14 +83,14 @@ export const getProductPerformance: AsyncHandler = async (req, res, next) => {
     );
 
     res.json({ success: true, ...result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getTopProducts: AsyncHandler = async (req, res, next) => {
+export const getTopProducts: AsyncHandler = async (req, res, _next) => {
   try {
     const { startDate, endDate, metric, limit } = req.query;
 
@@ -105,10 +105,10 @@ export const getTopProducts: AsyncHandler = async (req, res, next) => {
     );
 
     res.json({ success: true, data: products });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -116,7 +116,7 @@ export const getTopProducts: AsyncHandler = async (req, res, next) => {
 // Search Analytics
 // ============================================================================
 
-export const getSearchAnalytics: AsyncHandler = async (req, res, next) => {
+export const getSearchAnalytics: AsyncHandler = async (req, res, _next) => {
   try {
     const { startDate, endDate, isZeroResult, query, limit, offset } = req.query;
 
@@ -131,14 +131,14 @@ export const getSearchAnalytics: AsyncHandler = async (req, res, next) => {
     );
 
     res.json({ success: true, ...result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getZeroResultSearches: AsyncHandler = async (req, res, next) => {
+export const getZeroResultSearches: AsyncHandler = async (req, res, _next) => {
   try {
     const { startDate, endDate, limit } = req.query;
 
@@ -152,10 +152,10 @@ export const getZeroResultSearches: AsyncHandler = async (req, res, next) => {
     );
 
     res.json({ success: true, data: result.data });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -163,7 +163,7 @@ export const getZeroResultSearches: AsyncHandler = async (req, res, next) => {
 // Customer Analytics
 // ============================================================================
 
-export const getCustomerCohorts: AsyncHandler = async (req, res, next) => {
+export const getCustomerCohorts: AsyncHandler = async (req, res, _next) => {
   try {
     const { startMonth, endMonth } = req.query;
 
@@ -173,10 +173,10 @@ export const getCustomerCohorts: AsyncHandler = async (req, res, next) => {
     );
 
     res.json({ success: true, data: cohorts });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -184,7 +184,7 @@ export const getCustomerCohorts: AsyncHandler = async (req, res, next) => {
 // Event Tracking
 // ============================================================================
 
-export const getEvents: AsyncHandler = async (req, res, next) => {
+export const getEvents: AsyncHandler = async (req, res, _next) => {
   try {
     const { eventType, eventCategory, customerId, orderId, productId, startDate, endDate, limit, offset } = req.query;
 
@@ -202,14 +202,14 @@ export const getEvents: AsyncHandler = async (req, res, next) => {
     );
 
     res.json({ success: true, ...result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getEventCounts: AsyncHandler = async (req, res, next) => {
+export const getEventCounts: AsyncHandler = async (req, res, _next) => {
   try {
     const { startDate, endDate, groupBy } = req.query;
 
@@ -219,10 +219,10 @@ export const getEventCounts: AsyncHandler = async (req, res, next) => {
     const counts = await reportingRepo.getEventCounts(start, end, (groupBy as 'hour' | 'day') || 'hour');
 
     res.json({ success: true, data: counts });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -230,7 +230,7 @@ export const getEventCounts: AsyncHandler = async (req, res, next) => {
 // Snapshots
 // ============================================================================
 
-export const getSnapshots: AsyncHandler = async (req, res, next) => {
+export const getSnapshots: AsyncHandler = async (req, res, _next) => {
   try {
     const { snapshotType, startDate, endDate, merchantId } = req.query;
 
@@ -245,14 +245,14 @@ export const getSnapshots: AsyncHandler = async (req, res, next) => {
     );
 
     res.json({ success: true, data: snapshots });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getLatestSnapshot: AsyncHandler = async (req, res, next) => {
+export const getLatestSnapshot: AsyncHandler = async (req, res, _next) => {
   try {
     const { snapshotType, merchantId } = req.query;
 
@@ -262,10 +262,10 @@ export const getLatestSnapshot: AsyncHandler = async (req, res, next) => {
     );
 
     res.json({ success: true, data: snapshot });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -273,17 +273,17 @@ export const getLatestSnapshot: AsyncHandler = async (req, res, next) => {
 // Real-time Metrics
 // ============================================================================
 
-export const getRealTimeMetrics: AsyncHandler = async (req, res, next) => {
+export const getRealTimeMetrics: AsyncHandler = async (req, res, _next) => {
   try {
     const { merchantId, minutes } = req.query;
 
     const metrics = await reportingRepo.getRealTimeMetrics(merchantId as string, parseInt(minutes as string) || 60);
 
     res.json({ success: true, data: metrics });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -291,19 +291,19 @@ export const getRealTimeMetrics: AsyncHandler = async (req, res, next) => {
 // Dashboards
 // ============================================================================
 
-export const getDashboards: AsyncHandler = async (req, res, next) => {
+export const getDashboards: AsyncHandler = async (req, res, _next) => {
   try {
     const merchantId = req.user?.merchantId;
     const dashboards = await reportingRepo.getDashboards(merchantId);
     res.json({ success: true, data: dashboards });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getDashboard: AsyncHandler = async (req, res, next) => {
+export const getDashboard: AsyncHandler = async (req, res, _next) => {
   try {
     const dashboard = await reportingRepo.getDashboard(req.params.id);
     if (!dashboard) {
@@ -311,54 +311,58 @@ export const getDashboard: AsyncHandler = async (req, res, next) => {
       return;
     }
     res.json({ success: true, data: dashboard });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const createDashboard: AsyncHandler = async (req, res, next) => {
+export const createDashboard: AsyncHandler = async (req, res, _next) => {
   try {
     const merchantId = req.user?.merchantId;
     const createdBy = req.user?.userId;
 
+    const body = req.body as Record<string, unknown>;
     const dashboard = await reportingRepo.saveDashboard({
-      ...req.body,
+      ...body,
+      name: (body.name as string) || 'Untitled',
       merchantId,
       createdBy,
     });
 
     res.status(201).json({ success: true, data: dashboard });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const updateDashboard: AsyncHandler = async (req, res, next) => {
+export const updateDashboard: AsyncHandler = async (req, res, _next) => {
   try {
+    const body = req.body as Record<string, unknown>;
     const dashboard = await reportingRepo.saveDashboard({
       analyticsReportDashboardId: req.params.id,
-      ...req.body,
+      ...body,
+      name: (body.name as string) || 'Untitled',
     });
 
     res.json({ success: true, data: dashboard });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const deleteDashboard: AsyncHandler = async (req, res, next) => {
+export const deleteDashboard: AsyncHandler = async (req, res, _next) => {
   try {
     await reportingRepo.deleteDashboard(req.params.id);
     res.json({ success: true, message: 'Dashboard deleted' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };

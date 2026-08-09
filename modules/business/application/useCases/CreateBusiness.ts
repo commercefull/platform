@@ -25,8 +25,8 @@ export class CreateBusinessCommand {
       secondaryColor?: string;
       theme?: string;
       isActive?: boolean;
-      settings?: any;
-      metadata?: any;
+      settings?: { defaultCurrency?: string; defaultLanguage?: string; timezone?: string };
+      metadata?: Record<string, unknown>;
     },
   ) {}
 }

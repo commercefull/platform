@@ -31,11 +31,40 @@ export interface ReceiveGoodsOutput {
   receivedAt: string;
 }
 
+interface PurchaseOrderItem {
+  quantity: number;
+}
+
+interface PurchaseOrderRecord {
+  status: string;
+  items: PurchaseOrderItem[];
+}
+
+interface PurchaseOrderRepoPort {
+  findById(id: string): Promise<PurchaseOrderRecord | null>;
+  update(id: string, data: Record<string, unknown>): Promise<void>;
+}
+
+interface ReceivingRepoPort {
+  create(data: Record<string, unknown>): Promise<void>;
+}
+
+interface InventoryRepoPort {
+  adjustStock(params: {
+    productId: string;
+    variantId?: string;
+    locationId: string;
+    adjustment: number;
+    reason: string;
+    reference: string;
+  }): Promise<void>;
+}
+
 export class ReceiveGoodsUseCase {
   constructor(
-    private readonly purchaseOrderRepository: any,
-    private readonly receivingRepository: any,
-    private readonly inventoryRepository: any,
+    private readonly purchaseOrderRepository: PurchaseOrderRepoPort,
+    private readonly receivingRepository: ReceivingRepoPort,
+    private readonly inventoryRepository: InventoryRepoPort,
   ) {}
 
   async execute(input: ReceiveGoodsInput): Promise<ReceiveGoodsOutput> {
@@ -107,9 +136,9 @@ export class ReceiveGoodsUseCase {
     };
   }
 
-  private checkAllReceived(poItems: any[], receivedItems: ReceivedItem[]): boolean {
+  private checkAllReceived(poItems: PurchaseOrderItem[], receivedItems: ReceivedItem[]): boolean {
     // Simplified check - in reality would track cumulative receipts
-    const orderedQty = poItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
+    const orderedQty = poItems.reduce((sum: number, item: PurchaseOrderItem) => sum + item.quantity, 0);
     const receivedQty = receivedItems.reduce((sum, item) => sum + item.quantityReceived, 0);
     return receivedQty >= orderedQty;
   }

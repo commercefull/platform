@@ -36,7 +36,7 @@ export enum PricingRuleScope {
 
 export interface PricingCondition {
   type: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 export interface PricingAdjustment {
@@ -71,7 +71,7 @@ export interface PricingRule {
   createdAt: Date;
   updatedAt: Date;
   merchantId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export type PricingRuleCreateProps = Omit<PricingRule, 'id' | 'pricingRuleId' | 'createdAt' | 'updatedAt'>;
@@ -101,7 +101,7 @@ export interface PriceContext {
   variantId?: string; // Single variant ID for single product price calculations
   currencyCode?: string; // Requested currency code
   regionCode?: string; // Customer region for region-specific pricing
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
   excludeRuleIds?: string[]; // IDs of pricing rules to exclude from calculation
 }
 

@@ -116,7 +116,7 @@ export class StoreCurrencySettingsRepo {
    */
   async update(storeCurrencySettingsId: string, params: StoreCurrencySettingsUpdateParams): Promise<StoreCurrencySettings | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

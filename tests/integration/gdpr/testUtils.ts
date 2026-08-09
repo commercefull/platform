@@ -65,7 +65,7 @@ export function generateConsentId(): string {
 /**
  * Cleanup function for GDPR integration tests
  */
-export async function cleanupGdprTests(client: AxiosInstance, adminToken: string, requestIds: string[] = [], consentIds: string[] = []) {
+export async function cleanupGdprTests(client: AxiosInstance, adminToken: string, requestIds: string[] = [], _consentIds: string[] = []) {
   // Clean up test data requests
   for (const requestId of requestIds) {
     try {
@@ -79,7 +79,7 @@ export async function cleanupGdprTests(client: AxiosInstance, adminToken: string
           headers: { Authorization: `Bearer ${adminToken}` },
         },
       );
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   }

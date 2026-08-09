@@ -10,14 +10,14 @@ import { Organization } from '../../../../libs/db/dataModelTypes';
 export interface CreateOrganizationParams {
   name: string;
   slug: string;
-  type?: 'single' | 'multi_store' | 'marketplace' | 'b2b';
+  type?: 'single' | 'multi_store' | 'marketplace';
   settings?: Record<string, unknown>;
 }
 
 export interface UpdateOrganizationParams {
   name?: string;
   slug?: string;
-  type?: 'single' | 'multi_store' | 'marketplace' | 'b2b';
+  type?: 'single' | 'multi_store' | 'marketplace';
   settings?: Record<string, unknown>;
 }
 
@@ -108,13 +108,8 @@ export async function softDelete(organizationId: string): Promise<boolean> {
   return (result?.rowCount ?? 0) > 0;
 }
 
-export async function getStoresByOrganization(organizationId: string): Promise<any[]> {
-  const result = await query<{ rows: any[] }>('SELECT * FROM "store" WHERE "organizationId" = $1 ORDER BY "name" ASC', [organizationId]);
-  return result?.rows ?? [];
-}
-
-export async function getChannelsByOrganization(organizationId: string): Promise<any[]> {
-  const result = await query<{ rows: any[] }>('SELECT * FROM "channel" WHERE "organizationId" = $1 ORDER BY "name" ASC', [organizationId]);
+export async function getStoresByOrganization(organizationId: string): Promise<unknown[]> {
+  const result = await query<{ rows: unknown[] }>('SELECT * FROM "store" WHERE "organizationId" = $1 ORDER BY "name" ASC', [organizationId]);
   return result?.rows ?? [];
 }
 
@@ -126,5 +121,4 @@ export default {
   update,
   softDelete,
   getStoresByOrganization,
-  getChannelsByOrganization,
 };

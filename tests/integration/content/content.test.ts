@@ -24,19 +24,23 @@ const createClient = () =>
   });
 
 // Use test data from constants
-const testContentType = TEST_CONTENT_TYPE;
-const testContentPage = TEST_CONTENT_PAGE;
-const testContentBlock = TEST_CONTENT_BLOCK;
-const testContentTemplate = TEST_CONTENT_TEMPLATE;
+const _testContentType = TEST_CONTENT_TYPE;
+const _testContentPage = TEST_CONTENT_PAGE;
+const _testContentBlock = TEST_CONTENT_BLOCK;
+const _testContentTemplate = TEST_CONTENT_TEMPLATE;
 
 describe('Content Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let testContentTypeId: string;
   let testContentPageId: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testContentBlockId: string;
+   
   let testContentTemplateId: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testContentTypeSlug: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testContentPageSlug: string;
 
   beforeAll(async () => {
@@ -50,7 +54,7 @@ describe('Content Feature Tests', () => {
       if (!adminToken) {
         return;
       }
-    } catch (error) {
+    } catch {
       adminToken = '';
       return;
     }
@@ -335,7 +339,7 @@ describe('Content Feature Tests', () => {
       expect(Array.isArray(response.data.data)).toBe(true);
 
       // Find our test template in the results
-      const template = response.data.data.find((t: any) => t.contentTemplateId === testContentTemplateId);
+      const template = response.data.data.find((t: Record<string, unknown>) => t.contentTemplateId === testContentTemplateId);
       expect(template).toBeDefined();
 
       if (template) {

@@ -9,16 +9,21 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import {
+  AnalyticsReportEvent as AnalyticsReportEventRow,
+  AnalyticsReportSnapshot as AnalyticsReportSnapshotRow,
+  AnalyticsReportDashboard as AnalyticsReportDashboardRow,
+} from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Names
 // ============================================================================
 
-const TABLES = {
+/* const _TABLE = {
   REPORT_EVENT: 'analyticsReportEvent',
   REPORT_SNAPSHOT: 'analyticsReportSnapshot',
   REPORT_DASHBOARD: 'analyticsReportDashboard',
-} as const;
+} as const; */
 
 // ============================================================================
 // Types
@@ -37,7 +42,7 @@ export interface AnalyticsReportEvent {
   sessionId?: string;
   visitorId?: string;
   channel?: string;
-  eventData?: Record<string, any>;
+  eventData?: Record<string, unknown>;
   eventValue?: number;
   eventQuantity?: number;
   currency?: string;
@@ -97,9 +102,9 @@ export interface AnalyticsReportDashboard {
   description?: string;
   isDefault: boolean;
   isShared: boolean;
-  layout?: Record<string, any>;
-  widgets?: any[];
-  filters?: Record<string, any>;
+  layout?: Record<string, unknown>;
+  widgets?: unknown[];
+  filters?: Record<string, unknown>;
   dateRange: string;
   createdAt: Date;
   updatedAt: Date;
@@ -121,7 +126,7 @@ export async function trackEvent(event: {
   sessionId?: string;
   visitorId?: string;
   channel?: string;
-  eventData?: Record<string, any>;
+  eventData?: Record<string, unknown>;
   eventValue?: number;
   eventQuantity?: number;
   currency?: string;
@@ -135,7 +140,7 @@ export async function trackEvent(event: {
   country?: string;
   region?: string;
 }): Promise<AnalyticsReportEvent> {
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<AnalyticsReportEventRow>(
     `INSERT INTO "analyticsReportEvent" (
       "eventType", "eventCategory", "eventAction",
       "merchantId", "customerId", "orderId", "productId", "basketId",
@@ -192,7 +197,7 @@ export async function getEvents(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: AnalyticsReportEvent[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters.eventType) {
@@ -236,7 +241,7 @@ export async function getEvents(
   const limit = pagination?.limit || 100;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<AnalyticsReportEventRow[]>(
     `SELECT * FROM "analyticsReportEvent" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -249,7 +254,7 @@ export async function getEvents(
 }
 
 export async function getUnprocessedEvents(limit: number = 1000): Promise<AnalyticsReportEvent[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<AnalyticsReportEventRow[]>(
     `SELECT * FROM "analyticsReportEvent" WHERE "isProcessed" = false 
      ORDER BY "createdAt" ASC LIMIT $1`,
     [limit],
@@ -274,7 +279,7 @@ export async function getEventCounts(
 ): Promise<{ period: string; eventType: string; count: number }[]> {
   const dateFormat = groupBy === 'hour' ? 'YYYY-MM-DD HH24:00' : 'YYYY-MM-DD';
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Array<{ period: string; eventType: string; count: string }>>(
     `SELECT 
       TO_CHAR("createdAt", $1) as period,
       "eventType",
@@ -304,7 +309,7 @@ export async function createSnapshot(
     snapshotDate: Date;
   },
 ): Promise<AnalyticsReportSnapshot> {
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<AnalyticsReportSnapshotRow>(
     `INSERT INTO "analyticsReportSnapshot" (
       "merchantId", "snapshotType", "snapshotTime", "snapshotDate", "snapshotHour",
       "totalOrders", "pendingOrders", "processingOrders", "shippedOrders",
@@ -384,14 +389,14 @@ export async function getSnapshots(
   merchantId?: string,
 ): Promise<AnalyticsReportSnapshot[]> {
   let whereClause = '"snapshotType" = $1 AND "snapshotDate" >= $2 AND "snapshotDate" <= $3';
-  const params: any[] = [snapshotType, startDate, endDate];
+  const params: unknown[] = [snapshotType, startDate, endDate];
 
   if (merchantId) {
     whereClause += ' AND "merchantId" = $4';
     params.push(merchantId);
   }
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<AnalyticsReportSnapshotRow[]>(
     `SELECT * FROM "analyticsReportSnapshot" WHERE ${whereClause} ORDER BY "snapshotTime" DESC`,
     params,
   );
@@ -404,14 +409,14 @@ export async function getLatestSnapshot(
   merchantId?: string,
 ): Promise<AnalyticsReportSnapshot | null> {
   let whereClause = '"snapshotType" = $1';
-  const params: any[] = [snapshotType];
+  const params: unknown[] = [snapshotType];
 
   if (merchantId) {
     whereClause += ' AND "merchantId" = $2';
     params.push(merchantId);
   }
 
-  const row = await queryOne<Record<string, any>>(
+  const row = await queryOne<AnalyticsReportSnapshotRow>(
     `SELECT * FROM "analyticsReportSnapshot" WHERE ${whereClause} ORDER BY "snapshotTime" DESC LIMIT 1`,
     params,
   );
@@ -425,14 +430,14 @@ export async function getLatestSnapshot(
 
 export async function getDashboards(merchantId?: string): Promise<AnalyticsReportDashboard[]> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
 
   if (merchantId) {
     whereClause = '"merchantId" = $1 OR "isShared" = true';
     params.push(merchantId);
   }
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<AnalyticsReportDashboardRow[]>(
     `SELECT * FROM "analyticsReportDashboard" WHERE ${whereClause} ORDER BY "isDefault" DESC, "name" ASC`,
     params,
   );
@@ -441,7 +446,7 @@ export async function getDashboards(merchantId?: string): Promise<AnalyticsRepor
 }
 
 export async function getDashboard(dashboardId: string): Promise<AnalyticsReportDashboard | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "analyticsReportDashboard" WHERE "analyticsReportDashboardId" = $1', [
+  const row = await queryOne<AnalyticsReportDashboardRow>('SELECT * FROM "analyticsReportDashboard" WHERE "analyticsReportDashboardId" = $1', [
     dashboardId,
   ]);
   return row ? mapToAnalyticsReportDashboard(row) : null;
@@ -478,7 +483,7 @@ export async function saveDashboard(
     );
     return (await getDashboard(dashboard.analyticsReportDashboardId))!;
   } else {
-    const result = await queryOne<Record<string, any>>(
+    const result = await queryOne<AnalyticsReportDashboardRow>(
       `INSERT INTO "analyticsReportDashboard" (
         "merchantId", "createdBy", "name", "slug", "description",
         "isDefault", "isShared", "layout", "widgets", "filters", "dateRange",
@@ -526,7 +531,7 @@ export async function getRealTimeMetrics(
   const since = new Date(Date.now() - minutes * 60 * 1000);
 
   let merchantFilter = '';
-  const params: any[] = [since];
+  const params: unknown[] = [since];
 
   if (merchantId) {
     merchantFilter = ' AND "merchantId" = $2';
@@ -571,89 +576,89 @@ export async function getRealTimeMetrics(
 // Mappers
 // ============================================================================
 
-function mapToAnalyticsReportEvent(row: Record<string, any>): AnalyticsReportEvent {
+function mapToAnalyticsReportEvent(row: AnalyticsReportEventRow): AnalyticsReportEvent {
   return {
     analyticsReportEventId: row.analyticsReportEventId,
-    merchantId: row.merchantId,
+    merchantId: row.merchantId ?? undefined,
     eventType: row.eventType,
     eventCategory: row.eventCategory,
     eventAction: row.eventAction,
-    customerId: row.customerId,
-    orderId: row.orderId,
-    productId: row.productId,
-    basketId: row.basketId,
-    sessionId: row.sessionId,
-    visitorId: row.visitorId,
-    channel: row.channel,
-    eventData: row.eventData,
+    customerId: row.customerId ?? undefined,
+    orderId: row.orderId ?? undefined,
+    productId: row.productId ?? undefined,
+    basketId: row.basketId ?? undefined,
+    sessionId: row.sessionId ?? undefined,
+    visitorId: row.visitorId ?? undefined,
+    channel: row.channel ?? undefined,
+    eventData: (row.eventData as Record<string, unknown>) ?? undefined,
     eventValue: row.eventValue ? parseFloat(row.eventValue) : undefined,
-    eventQuantity: row.eventQuantity ? parseInt(row.eventQuantity) : undefined,
-    currency: row.currency,
-    ipAddress: row.ipAddress,
-    userAgent: row.userAgent,
-    referrer: row.referrer,
-    utmSource: row.utmSource,
-    utmMedium: row.utmMedium,
-    utmCampaign: row.utmCampaign,
-    deviceType: row.deviceType,
-    country: row.country,
-    region: row.region,
+    eventQuantity: row.eventQuantity ?? undefined,
+    currency: row.currency ?? undefined,
+    ipAddress: row.ipAddress ?? undefined,
+    userAgent: row.userAgent ?? undefined,
+    referrer: row.referrer ?? undefined,
+    utmSource: row.utmSource ?? undefined,
+    utmMedium: row.utmMedium ?? undefined,
+    utmCampaign: row.utmCampaign ?? undefined,
+    deviceType: row.deviceType ?? undefined,
+    country: row.country ?? undefined,
+    region: row.region ?? undefined,
     isProcessed: Boolean(row.isProcessed),
     processedAt: row.processedAt ? new Date(row.processedAt) : undefined,
-    createdAt: new Date(row.createdAt),
+    createdAt: new Date(row.createdAt ?? new Date()),
   };
 }
 
-function mapToAnalyticsReportSnapshot(row: Record<string, any>): AnalyticsReportSnapshot {
+function mapToAnalyticsReportSnapshot(row: AnalyticsReportSnapshotRow): AnalyticsReportSnapshot {
   return {
     analyticsReportSnapshotId: row.analyticsReportSnapshotId,
-    merchantId: row.merchantId,
-    snapshotType: row.snapshotType,
+    merchantId: row.merchantId ?? undefined,
+    snapshotType: row.snapshotType as 'hourly' | 'daily' | 'weekly' | 'monthly',
     snapshotTime: new Date(row.snapshotTime),
     snapshotDate: new Date(row.snapshotDate),
-    snapshotHour: row.snapshotHour ? parseInt(row.snapshotHour) : undefined,
-    totalOrders: parseInt(row.totalOrders) || 0,
-    pendingOrders: parseInt(row.pendingOrders) || 0,
-    processingOrders: parseInt(row.processingOrders) || 0,
-    shippedOrders: parseInt(row.shippedOrders) || 0,
-    deliveredOrders: parseInt(row.deliveredOrders) || 0,
-    cancelledOrders: parseInt(row.cancelledOrders) || 0,
-    refundedOrders: parseInt(row.refundedOrders) || 0,
-    totalRevenue: parseFloat(row.totalRevenue) || 0,
-    pendingRevenue: parseFloat(row.pendingRevenue) || 0,
-    refundedAmount: parseFloat(row.refundedAmount) || 0,
-    totalCustomers: parseInt(row.totalCustomers) || 0,
-    activeCustomers: parseInt(row.activeCustomers) || 0,
-    newCustomersToday: parseInt(row.newCustomersToday) || 0,
-    totalProducts: parseInt(row.totalProducts) || 0,
-    activeProducts: parseInt(row.activeProducts) || 0,
-    outOfStockProducts: parseInt(row.outOfStockProducts) || 0,
-    lowStockProducts: parseInt(row.lowStockProducts) || 0,
-    totalInventoryValue: parseFloat(row.totalInventoryValue) || 0,
-    totalInventoryUnits: parseInt(row.totalInventoryUnits) || 0,
-    openTickets: parseInt(row.openTickets) || 0,
-    pendingTickets: parseInt(row.pendingTickets) || 0,
-    activeSubscriptions: parseInt(row.activeSubscriptions) || 0,
-    monthlyRecurringRevenue: parseFloat(row.monthlyRecurringRevenue) || 0,
-    createdAt: new Date(row.createdAt),
+    snapshotHour: row.snapshotHour ?? undefined,
+    totalOrders: row.totalOrders ?? 0,
+    pendingOrders: row.pendingOrders ?? 0,
+    processingOrders: row.processingOrders ?? 0,
+    shippedOrders: row.shippedOrders ?? 0,
+    deliveredOrders: row.deliveredOrders ?? 0,
+    cancelledOrders: row.cancelledOrders ?? 0,
+    refundedOrders: row.refundedOrders ?? 0,
+    totalRevenue: parseFloat(row.totalRevenue ?? '0'),
+    pendingRevenue: parseFloat(row.pendingRevenue ?? '0'),
+    refundedAmount: parseFloat(row.refundedAmount ?? '0'),
+    totalCustomers: row.totalCustomers ?? 0,
+    activeCustomers: row.activeCustomers ?? 0,
+    newCustomersToday: row.newCustomersToday ?? 0,
+    totalProducts: row.totalProducts ?? 0,
+    activeProducts: row.activeProducts ?? 0,
+    outOfStockProducts: row.outOfStockProducts ?? 0,
+    lowStockProducts: row.lowStockProducts ?? 0,
+    totalInventoryValue: parseFloat(row.totalInventoryValue ?? '0'),
+    totalInventoryUnits: row.totalInventoryUnits ?? 0,
+    openTickets: row.openTickets ?? 0,
+    pendingTickets: row.pendingTickets ?? 0,
+    activeSubscriptions: row.activeSubscriptions ?? 0,
+    monthlyRecurringRevenue: parseFloat(row.monthlyRecurringRevenue ?? '0'),
+    createdAt: new Date(row.createdAt ?? new Date()),
   };
 }
 
-function mapToAnalyticsReportDashboard(row: Record<string, any>): AnalyticsReportDashboard {
+function mapToAnalyticsReportDashboard(row: AnalyticsReportDashboardRow): AnalyticsReportDashboard {
   return {
     analyticsReportDashboardId: row.analyticsReportDashboardId,
-    merchantId: row.merchantId,
-    createdBy: row.createdBy,
+    merchantId: row.merchantId ?? undefined,
+    createdBy: row.createdBy ?? undefined,
     name: row.name,
-    slug: row.slug,
-    description: row.description,
+    slug: row.slug ?? undefined,
+    description: row.description ?? undefined,
     isDefault: Boolean(row.isDefault),
     isShared: Boolean(row.isShared),
-    layout: row.layout,
-    widgets: row.widgets,
-    filters: row.filters,
-    dateRange: row.dateRange,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    layout: (row.layout as Record<string, unknown>) ?? undefined,
+    widgets: (row.widgets as unknown[]) ?? undefined,
+    filters: (row.filters as Record<string, unknown>) ?? undefined,
+    dateRange: row.dateRange ?? 'last_30_days',
+    createdAt: new Date(row.createdAt ?? new Date()),
+    updatedAt: new Date(row.updatedAt ?? new Date()),
   };
 }

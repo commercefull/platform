@@ -4,14 +4,12 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLE = Table.Supplier;
 
 // ============================================================================
 // Types
@@ -42,7 +40,7 @@ export interface Supplier {
   notes?: string;
   categories?: string[];
   tags?: string[];
-  customFields?: Record<string, any>;
+  customFields?: Record<string, unknown>;
 }
 
 export type SupplierCreateParams = Omit<Supplier, 'supplierId' | 'createdAt' | 'updatedAt'>;
@@ -98,7 +96,7 @@ export class SupplierRepo {
    */
   async findWithFilters(filters: SupplierFilters, limit: number = 50, offset: number = 0): Promise<Supplier[]> {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters.status) {
@@ -246,7 +244,7 @@ export class SupplierRepo {
    */
   async update(supplierId: string, params: SupplierUpdateParams): Promise<Supplier | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -405,7 +403,7 @@ export class SupplierRepo {
   async count(filters?: SupplierFilters): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "supplier"`;
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters) {
@@ -438,7 +436,7 @@ export class SupplierRepo {
   async search(searchTerm: string, activeOnly: boolean = true): Promise<Supplier[]> {
     let sql = `SELECT * FROM "supplier" 
                WHERE ("name" ILIKE $1 OR "description" ILIKE $1 OR "code" ILIKE $1)`;
-    const params: any[] = [`%${searchTerm}%`];
+    const params: unknown[] = [`%${searchTerm}%`];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;

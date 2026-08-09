@@ -9,7 +9,7 @@ export interface ContentBlockProps {
   contentTypeId: string;
   name: string;
   order: number;
-  content: Record<string, any>;
+  content: Record<string, unknown>;
   status: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
@@ -40,7 +40,7 @@ export class ContentBlock {
   get order(): number {
     return this.props.order;
   }
-  get content(): Record<string, any> {
+  get content(): Record<string, unknown> {
     return this.props.content;
   }
   get status(): 'active' | 'inactive' {
@@ -89,7 +89,7 @@ export class ContentBlock {
     this.props.updatedAt = new Date();
   }
 
-  updateContent(content: Record<string, any>): void {
+  updateContent(content: Record<string, unknown>): void {
     this.props.content = content;
     this.props.updatedAt = new Date();
   }

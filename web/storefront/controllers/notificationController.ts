@@ -5,9 +5,9 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import { query, queryOne } from '../../../libs/db';
+import * as storefrontNotificationRepo from '../../../modules/notification/infrastructure/repositories/storefrontNotificationRepo';
 import * as notificationDeviceRepo from '../../../modules/notification/infrastructure/repositories/notificationDeviceRepo';
 import {
   RegisterNotificationDeviceUseCase,
@@ -26,27 +26,16 @@ export const listNotifications = async (req: TypedRequest, res: Response) => {
     const limit = 20;
     const offset = (page - 1) * limit;
 
-    const countResult = await queryOne(`SELECT COUNT(*) as total FROM "notification" WHERE "userId" = $1`, [customerId]);
-    const total = parseInt((countResult as any)?.total || '0');
-
-    const notifications = await query(
-      `SELECT * FROM "notification"
-       WHERE "userId" = $1
-       ORDER BY "createdAt" DESC
-       LIMIT $2 OFFSET $3`,
-      [customerId, limit, offset],
-    );
-
-    const unreadCount = await queryOne(`SELECT COUNT(*) as count FROM "notification" WHERE "userId" = $1 AND "readAt" IS NULL`, [
-      customerId,
-    ]);
+    const total = await storefrontNotificationRepo.countByUserId(customerId);
+    const notifications = await storefrontNotificationRepo.findByUserId(customerId, limit, offset);
+    const unreadCount = await storefrontNotificationRepo.countUnreadByUserId(customerId);
 
     const totalPages = Math.ceil(total / limit);
 
     storefrontRespond(req, res, 'notifications/list', {
       pageName: 'Notifications',
       notifications,
-      unreadCount: parseInt((unreadCount as any)?.count || '0'),
+      unreadCount,
       pagination: { page, totalPages, total, limit },
     });
   } catch (error) {
@@ -65,7 +54,7 @@ export const markAsRead = async (req: TypedRequest, res: Response) => {
 
     const { notificationId } = req.params;
 
-    await query(`UPDATE "notification" SET "readAt" = NOW() WHERE "notificationId" = $1 AND "userId" = $2`, [notificationId, customerId]);
+    await storefrontNotificationRepo.markAsRead(notificationId, customerId);
 
     // If AJAX request, return JSON
     if (req.xhr || req.headers.accept?.includes('json')) {
@@ -92,14 +81,14 @@ export const markAllAsRead = async (req: TypedRequest, res: Response) => {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');
 
-    await query(`UPDATE "notification" SET "readAt" = NOW() WHERE "userId" = $1 AND "readAt" IS NULL`, [customerId]);
+    await storefrontNotificationRepo.markAllAsRead(customerId);
 
     if (req.xhr || req.headers.accept?.includes('json')) {
       res.json({ success: true });
       return;
     }
 
-    (req as any).flash?.('success', 'All notifications marked as read');
+    req.flash?.('success', 'All notifications marked as read');
     res.redirect('/notifications');
   } catch (error) {
     logger.error('Error:', error);
@@ -119,7 +108,7 @@ export const getPreferences = async (req: TypedRequest, res: Response) => {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');
 
-    const preferences = await queryOne(`SELECT * FROM "notificationPreference" WHERE "userId" = $1`, [customerId]);
+    const preferences = await storefrontNotificationRepo.getPreferences(customerId);
 
     storefrontRespond(req, res, 'notifications/preferences', {
       pageName: 'Notification Preferences',
@@ -139,22 +128,21 @@ export const updatePreferences = async (req: TypedRequest, res: Response) => {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');
 
-    const { emailOrderUpdates, emailPromotions, emailNewsletter, pushEnabled } = req.body;
+    const body = req.body as RequestBody;
+    const { emailOrderUpdates, emailPromotions, emailNewsletter, pushEnabled } = body;
 
-    await query(
-      `INSERT INTO "notificationPreference" ("userId", "emailOrderUpdates", "emailPromotions", "emailNewsletter", "pushEnabled", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, NOW())
-       ON CONFLICT ("userId") DO UPDATE SET
-         "emailOrderUpdates" = $2, "emailPromotions" = $3, "emailNewsletter" = $4,
-         "pushEnabled" = $5, "updatedAt" = NOW()`,
-      [customerId, !!emailOrderUpdates, !!emailPromotions, !!emailNewsletter, !!pushEnabled],
-    );
+    await storefrontNotificationRepo.upsertPreferences(customerId, {
+      emailOrderUpdates: !!emailOrderUpdates,
+      emailPromotions: !!emailPromotions,
+      emailNewsletter: !!emailNewsletter,
+      pushEnabled: !!pushEnabled,
+    });
 
-    (req as any).flash?.('success', 'Notification preferences updated');
+    req.flash?.('success', 'Notification preferences updated');
     res.redirect('/notifications/preferences');
   } catch (error) {
     logger.error('Error:', error);
-    (req as any).flash?.('error', 'Failed to update preferences');
+    req.flash?.('error', 'Failed to update preferences');
     res.redirect('/notifications/preferences');
   }
 };
@@ -189,16 +177,17 @@ export const registerDevice = async (req: TypedRequest, res: Response) => {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');
 
-    const { deviceToken, platform } = req.body;
+    const body = req.body as RequestBody;
+    const { deviceToken, platform } = body;
 
     const useCase = new RegisterNotificationDeviceUseCase();
-    await useCase.execute(new RegisterNotificationDeviceCommand(customerId, 'customer', deviceToken, platform));
+    await useCase.execute(new RegisterNotificationDeviceCommand(customerId, 'customer', deviceToken as string, platform as string));
 
-    (req as any).flash?.('success', 'Device registered successfully');
+    req.flash?.('success', 'Device registered successfully');
     res.redirect('/notifications/devices');
   } catch (error) {
     logger.error('Error registering notification device:', error);
-    (req as any).flash?.('error', 'Failed to register device');
+    req.flash?.('error', 'Failed to register device');
     res.redirect('/notifications/devices');
   }
 };
@@ -216,11 +205,11 @@ export const deleteDevice = async (req: TypedRequest, res: Response) => {
 
     await notificationDeviceRepo.deactivate(deviceToken);
 
-    (req as any).flash?.('success', 'Device removed successfully');
+    req.flash?.('success', 'Device removed successfully');
     res.redirect('/notifications/devices');
   } catch (error) {
     logger.error('Error deleting notification device:', error);
-    (req as any).flash?.('error', 'Failed to remove device');
+    req.flash?.('error', 'Failed to remove device');
     res.redirect('/notifications/devices');
   }
 };

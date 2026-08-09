@@ -4,7 +4,6 @@
 
 import { generateUUID } from '../../../../libs/uuid';
 import { UserRepository } from '../../domain/repositories/UserRepository';
-import { User } from '../../domain/entities/User';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================

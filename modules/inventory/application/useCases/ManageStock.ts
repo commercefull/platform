@@ -4,7 +4,6 @@
 
 import { generateUUID } from '../../../../libs/uuid';
 import { InventoryRepository } from '../../domain/repositories/InventoryRepository';
-import { InventoryItem } from '../../domain/entities/InventoryItem';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================

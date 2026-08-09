@@ -1,17 +1,25 @@
 import { eventBus } from '../../../../libs/events/eventBus';
 import { StoreDispatchRepository } from '../../domain/repositories/StoreDispatchRepository';
+import { InventoryLocation, Inventory, InventoryMovement } from '../../domain/entities/Inventory';
+
+interface DispatchFromStoreInventoryPort {
+  getLocationByStoreId(storeId: string): Promise<InventoryLocation | null>;
+  findByProductAndLocation(productId: string, locationId: string, variantId?: string): Promise<Inventory | null>;
+  save(inventory: Inventory): Promise<Inventory>;
+  recordMovement(movement: Omit<InventoryMovement, 'movementId' | 'createdAt'>): Promise<InventoryMovement>;
+}
 
 export class DispatchFromStoreUseCase {
   constructor(
     private readonly dispatchRepository: StoreDispatchRepository,
-    private readonly inventoryRepository: any,
+    private readonly inventoryRepository: DispatchFromStoreInventoryPort,
   ) {}
 
   async execute(
     dispatchId: string,
     dispatchedBy: string,
     dispatchedItems?: Array<{ dispatchItemId: string; dispatchedQuantity: number }>,
-  ): Promise<Record<string, any>> {
+  ): Promise<Record<string, unknown>> {
     const dispatch = await this.dispatchRepository.findById(dispatchId);
     if (!dispatch) {
       throw new Error('Dispatch not found');

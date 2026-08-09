@@ -67,8 +67,8 @@ export class AuthenticateCustomerUseCase {
     return {
       customerId: customer.customerId,
       email: customer.email,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
+      firstName: customer.firstName || '',
+      lastName: customer.lastName || '',
       isVerified: customer.isVerified,
     };
   }

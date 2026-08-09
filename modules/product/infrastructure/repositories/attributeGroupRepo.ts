@@ -39,7 +39,7 @@ export class AttributeGroupRepo {
   async update(id: string, props: UpdateProps): Promise<ProductAttributeGroup | null> {
     const now = new Date();
     const updates: string[] = ['"updatedAt" = $1'];
-    const values: any[] = [now];
+    const values: unknown[] = [now];
     let paramIndex = 2;
 
     for (const [key, value] of Object.entries(props)) {

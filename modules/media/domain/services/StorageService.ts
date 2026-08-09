@@ -39,5 +39,5 @@ export interface StorageService {
 
   exists(key: string): Promise<boolean>;
 
-  getMetadata(key: string): Promise<Record<string, any>>;
+  getMetadata(key: string): Promise<Record<string, unknown>>;
 }

@@ -147,29 +147,6 @@ exports.up = async function (knex) {
     { planId: planMap.ANNUAL_PREMIUM, benefitId: benefitMap.EARLY_ACCESS, isActive: true, priority: 60 },
   ]);
 
-  // Add discount rules for membership plans
-  await knex('membershipDiscountRule').insert([
-    {
-      planId: planMap.BASIC,
-      name: 'Basic Member Discount',
-      description: '10% discount on all orders',
-      isActive: true,
-      priority: 10,
-      discountType: 'percentage',
-      discountValue: 10,
-      appliesTo: 'entireOrder',
-    },
-    {
-      planId: planMap.PREMIUM,
-      name: 'Premium Member Discount',
-      description: '15% discount on all orders',
-      isActive: true,
-      priority: 10,
-      discountType: 'percentage',
-      discountValue: 15,
-      appliesTo: 'entireOrder',
-    },
-  ]);
 };
 
 /**
@@ -177,7 +154,6 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function (knex) {
-  await knex('membershipDiscountRule').whereIn('name', ['Basic Member Discount', 'Premium Member Discount']).delete();
   await knex('membershipPlanBenefit').delete();
   await knex('membershipBenefit').delete();
   await knex('membershipPlan').delete();

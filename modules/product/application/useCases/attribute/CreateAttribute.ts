@@ -1,8 +1,4 @@
-import dynamicAttributeRepository, {
-  ProductAttributeCreateInput,
-  ProductAttribute,
-  AttributeValueCreateInput,
-} from '../../../infrastructure/repositories/DynamicAttributeRepository';
+import dynamicAttributeRepository, { ProductAttributeCreateInput, ProductAttribute, AttributeType } from '../../../infrastructure/repositories/DynamicAttributeRepository';
 
 export interface CreateAttributeCommand {
   name: string;
@@ -37,7 +33,7 @@ export interface CreateAttributeCommand {
   useForConfigurations?: boolean;
   position?: number;
   defaultValue?: string;
-  validationRules?: Record<string, any>;
+  validationRules?: Record<string, unknown>;
   options?: Array<{ value: string; displayValue?: string; position?: number; isDefault?: boolean }>;
   merchantId?: string;
   isGlobal?: boolean;
@@ -75,8 +71,8 @@ export class CreateAttributeUseCase {
         code: command.code,
         description: command.description,
         groupId: command.groupId,
-        type: (command.type || 'text') as any,
-        inputType: (command.inputType as any) || command.type || 'text',
+        type: (command.type || 'text') as AttributeType,
+        inputType: ((command.inputType || command.type || 'text') as AttributeType),
         isRequired: command.isRequired,
         isUnique: command.isUnique,
         isSearchable: command.isSearchable,

@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { Brand as DbBrand } from '../../../../libs/db/types';
 import { Brand } from '../../domain/entities/Brand';
 import { IBrandRepository, BrandFilters, PaginationOptions, PaginatedResult } from '../../domain/repositories/BrandRepository';
 
@@ -12,7 +13,7 @@ export class BrandRepository implements IBrandRepository {
     const props = brand.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>('SELECT "brandId" FROM brand WHERE "brandId" = $1', [props.brandId]);
+    const existing = await queryOne<DbBrand>('SELECT "brandId" FROM brand WHERE "brandId" = $1', [props.brandId]);
 
     if (existing) {
       // Update
@@ -80,14 +81,14 @@ export class BrandRepository implements IBrandRepository {
   }
 
   async findById(brandId: string): Promise<Brand | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM brand WHERE "brandId" = $1', [brandId]);
+    const row = await queryOne<DbBrand>('SELECT * FROM brand WHERE "brandId" = $1', [brandId]);
 
     if (!row) return null;
     return this.mapToBrand(row);
   }
 
   async findBySlug(slug: string): Promise<Brand | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM brand WHERE slug = $1', [slug]);
+    const row = await queryOne<DbBrand>('SELECT * FROM brand WHERE slug = $1', [slug]);
 
     if (!row) return null;
     return this.mapToBrand(row);
@@ -105,7 +106,7 @@ export class BrandRepository implements IBrandRepository {
     const total = parseInt(countResult?.count || '0', 10);
 
     // Get paginated data
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<DbBrand[]>(
       `SELECT * FROM brand ${whereClause}
        ORDER BY "sortOrder" ASC, name ASC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -124,7 +125,7 @@ export class BrandRepository implements IBrandRepository {
   }
 
   async findFeatured(): Promise<Brand[]> {
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<DbBrand[]>(
       'SELECT * FROM brand WHERE "isFeatured" = true AND "isActive" = true ORDER BY "sortOrder" ASC',
       [],
     );
@@ -135,7 +136,7 @@ export class BrandRepository implements IBrandRepository {
   async delete(brandId: string): Promise<boolean> {
     const result = await query<{ rowCount?: number }>('DELETE FROM brand WHERE "brandId" = $1', [brandId]);
 
-    return (result as any)?.rowCount > 0;
+    return ((result as { rowCount?: number })?.rowCount ?? 0) > 0;
   }
 
   async count(filters?: BrandFilters): Promise<number> {
@@ -148,10 +149,10 @@ export class BrandRepository implements IBrandRepository {
 
   private buildWhereClause(filters?: BrandFilters): {
     whereClause: string;
-    params: any[];
+    params: unknown[];
   } {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (filters?.isActive !== undefined) {
       conditions.push(`"isActive" = $${params.length + 1}`);
@@ -174,22 +175,22 @@ export class BrandRepository implements IBrandRepository {
     };
   }
 
-  private mapToBrand(row: Record<string, any>): Brand {
+  private mapToBrand(row: DbBrand): Brand {
     return Brand.fromPersistence({
       brandId: row.brandId,
       name: row.name,
       slug: row.slug,
-      description: row.description || undefined,
-      logoMediaId: row.logoMediaId || undefined,
-      coverImageMediaId: row.coverImageMediaId || undefined,
-      website: row.website || undefined,
-      countryOfOrigin: row.countryOfOrigin || undefined,
+      description: row.description ?? undefined,
+      logoMediaId: row.logoMediaId ?? undefined,
+      coverImageMediaId: row.coverImageMediaId ?? undefined,
+      website: row.website ?? undefined,
+      countryOfOrigin: row.countryOfOrigin ?? undefined,
       isActive: Boolean(row.isActive),
       isFeatured: Boolean(row.isFeatured),
-      sortOrder: parseInt(row.sortOrder || '0', 10),
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
+      sortOrder: row.sortOrder ?? 0,
+      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata as Record<string, unknown>) : undefined,
+      createdAt: new Date(row.createdAt as string | Date ?? new Date()),
+      updatedAt: new Date(row.updatedAt as string | Date ?? new Date()),
     });
   }
 }

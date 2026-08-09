@@ -5,19 +5,25 @@
  */
 
 // Customer authentication
-export * from './customer/LoginCustomer';
-export * from './customer/RegisterCustomer';
-export * from './customer/LogoutCustomer';
-export * from './customer/ResetCustomerPassword';
-export * from './customer/VerifyCustomerEmail';
+export { LoginCustomerUseCase, LoginCustomerInput, LoginCustomerOutput } from './customer/LoginCustomer';
+export { RegisterCustomerUseCase, RegisterCustomerInput, RegisterCustomerOutput } from './customer/RegisterCustomer';
+export { LogoutCustomerUseCase, LogoutCustomerInput, LogoutCustomerOutput } from './customer/LogoutCustomer';
+export {
+  ResetCustomerPasswordUseCase,
+  RequestPasswordResetInput,
+  ResetPasswordInput,
+  RequestPasswordResetOutput,
+  ResetPasswordOutput,
+} from './customer/ResetCustomerPassword';
+export { VerifyCustomerEmailUseCase, VerifyEmailInput, ResendVerificationInput, VerifyEmailOutput, ResendVerificationOutput } from './customer/VerifyCustomerEmail';
 
 // Merchant authentication
-export * from './merchant/LoginMerchant';
-export * from './merchant/RegisterMerchant';
+export { LoginMerchantUseCase, LoginMerchantInput, LoginMerchantOutput } from './merchant/LoginMerchant';
+export { RegisterMerchantUseCase, RegisterMerchantInput, RegisterMerchantOutput } from './merchant/RegisterMerchant';
 
 // Admin authentication
 export * from './admin';
 
 // Token management
-export * from './token/RefreshToken';
-export * from './token/RevokeToken';
+export { RefreshTokenUseCase, RefreshTokenInput, RefreshTokenOutput } from './token/RefreshToken';
+export { RevokeTokenUseCase, RevokeTokenInput, RevokeAllTokensInput, RevokeTokenOutput } from './token/RevokeToken';

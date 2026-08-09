@@ -40,7 +40,7 @@ export interface SearchTrackedEvent {
     customerId?: string;
     query: string;
     resultsCount: number;
-    filters?: Record<string, any>;
+    filters?: Record<string, unknown>;
     timestamp: string;
   };
 }
@@ -149,7 +149,7 @@ export interface DashboardWidgetAddedEvent {
     dashboardId: string;
     widgetId: string;
     widgetType: string;
-    configuration: Record<string, any>;
+    configuration: Record<string, unknown>;
     timestamp: string;
   };
 }
@@ -163,7 +163,7 @@ export interface CustomerSegmentCreatedEvent {
   payload: {
     segmentId: string;
     name: string;
-    criteria: Record<string, any>;
+    criteria: Record<string, unknown>;
     estimatedSize: number;
     createdBy?: string;
     timestamp: string;

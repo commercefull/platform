@@ -23,8 +23,28 @@ export interface DowngradeMembershipOutput {
   newBillingAmount: number;
 }
 
+interface MembershipRecord {
+  status: string;
+  customerId: string;
+  tierId: string;
+  currentPeriodEnd?: string;
+}
+
+interface TierRecord {
+  name: string;
+  price: number;
+  isActive: boolean;
+}
+
+interface DowngradeMembershipRepository {
+  getMembershipById(membershipId: string): Promise<MembershipRecord | null>;
+  getTierById(tierId: string): Promise<TierRecord | null>;
+  updateMembership(membershipId: string, data: Record<string, unknown>): Promise<void>;
+  createStatusLog(data: Record<string, unknown>): Promise<void>;
+}
+
 export class DowngradeMembershipUseCase {
-  constructor(private readonly membershipRepository: any) {}
+  constructor(private readonly membershipRepository: DowngradeMembershipRepository) {}
 
   async execute(input: DowngradeMembershipInput): Promise<DowngradeMembershipOutput> {
     const { membershipId, newTierId, effectiveAtPeriodEnd = true, reason } = input;
@@ -53,7 +73,7 @@ export class DowngradeMembershipUseCase {
     const currentTier = await this.membershipRepository.getTierById(membership.tierId);
 
     // Validate downgrade (new tier should have lower price or level)
-    if (newTier.price >= currentTier.price) {
+    if (!currentTier || newTier.price >= currentTier.price) {
       throw new Error('Cannot downgrade to a tier with equal or higher price. Use upgrade instead.');
     }
 

@@ -59,12 +59,12 @@ export async function setupSubscriptionTests() {
 
     if (!adminToken) {
     }
-  } catch (error) {}
+  } catch {}
 
   return { client, adminToken, customerToken };
 }
 
-export function createTestSubscriptionProduct(productId: string, overrides: Partial<any> = {}) {
+export function createTestSubscriptionProduct(productId: string, overrides: Partial<unknown> = {}) {
   return {
     productId,
     isSubscriptionOnly: false,
@@ -87,7 +87,7 @@ export function createTestSubscriptionProduct(productId: string, overrides: Part
   };
 }
 
-export function createTestSubscriptionPlan(subscriptionProductId: string, overrides: Partial<any> = {}) {
+export function createTestSubscriptionPlan(subscriptionProductId: string, overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();
   return {
     subscriptionProductId,
@@ -116,7 +116,7 @@ export function createTestCustomerSubscription(
   customerId: string,
   subscriptionPlanId: string,
   subscriptionProductId: string,
-  overrides: Partial<any> = {},
+  overrides: Partial<unknown> = {},
 ) {
   return {
     customerId,
@@ -149,20 +149,20 @@ export async function cleanupSubscriptionTests(
   for (const id of resources.subscriptionIds || []) {
     try {
       await client.post(`/business/subscriptions/subscriptions/${id}/cancel`, {}, { headers });
-    } catch (error) {}
+    } catch {}
   }
 
   // Delete plans (they cascade from products, but try anyway)
   for (const id of resources.planIds || []) {
     try {
       await client.delete(`/business/subscriptions/plans/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 
   // Delete products
   for (const id of resources.productIds || []) {
     try {
       await client.delete(`/business/subscriptions/products/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 }

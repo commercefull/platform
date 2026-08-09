@@ -26,7 +26,7 @@ export interface SupplierProps {
   minOrderAmount?: number;
   rating?: number;
   notes?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -90,7 +90,7 @@ export class Supplier {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return { ...this.props };
   }
 }

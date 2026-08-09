@@ -28,16 +28,19 @@ const createClient = () =>
 
 describe('Basket Feature Tests', () => {
   let client: AxiosInstance;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let adminToken: string;
   let customerToken: string | undefined;
   let customerId: string | undefined;
+   
   let guestBasketId: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let customerBasketId: string | undefined;
   let createdBasketItemId: string;
 
   // Test product data from constants
-  const testProduct1 = { ...TEST_PRODUCT_1, id: TEST_PRODUCT_1_ID };
-  const testProduct2 = { ...TEST_PRODUCT_2, id: TEST_PRODUCT_2_ID };
+  const _testProduct1 = { ...TEST_PRODUCT_1, id: TEST_PRODUCT_1_ID };
+  const _testProduct2 = { ...TEST_PRODUCT_2, id: TEST_PRODUCT_2_ID };
   const basketItem1 = { productId: TEST_PRODUCT_1_ID, quantity: 2, price: TEST_PRODUCT_1.price };
   const basketItem2 = { productId: TEST_PRODUCT_2_ID, quantity: 1, price: TEST_PRODUCT_2.price };
 
@@ -54,7 +57,7 @@ describe('Basket Feature Tests', () => {
       const customerLoginResponse = await client.post('/customer/identity/login', CUSTOMER_CREDENTIALS);
       customerToken = customerLoginResponse.data.accessToken;
       customerId = customerLoginResponse.data.customer?.id;
-    } catch (error) {}
+    } catch {}
 
     // Use pre-seeded basket or create one
     const basketResponse = await client.get(`/customer/basket/${TEST_GUEST_BASKET_ID}`);
@@ -292,7 +295,7 @@ describe('Basket Feature Tests', () => {
       expect(basket).toHaveProperty('basketId', guestBasketId);
 
       // Check that the item was updated properly
-      const updatedItem = basket.items.find((item: any) => item.basketItemId === createdBasketItemId);
+      const updatedItem = basket.items.find((item: Record<string, unknown>) => item.basketItemId === createdBasketItemId);
       expect(updatedItem).toBeTruthy();
       expect(updatedItem.quantity).toBe(5);
     });
@@ -312,7 +315,7 @@ describe('Basket Feature Tests', () => {
       expect(response.data.success).toBe(true);
 
       const basket = response.data.data;
-      const giftItem = basket.items.find((item: any) => item.basketItemId === createdBasketItemId);
+      const giftItem = basket.items.find((item: Record<string, unknown>) => item.basketItemId === createdBasketItemId);
       expect(giftItem).toBeTruthy();
       expect(giftItem.isGift).toBe(true);
     });
@@ -329,7 +332,7 @@ describe('Basket Feature Tests', () => {
       expect(basket).toHaveProperty('basketId', guestBasketId);
 
       // Check that the item was removed
-      const removedItem = basket.items.find((item: any) => item.basketItemId === createdBasketItemId);
+      const removedItem = basket.items.find((item: Record<string, unknown>) => item.basketItemId === createdBasketItemId);
       expect(removedItem).toBeFalsy();
     });
   });

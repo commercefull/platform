@@ -16,8 +16,13 @@ export interface ApproveMerchantOutput {
   approvedAt: string;
 }
 
+export interface ApproveMerchantRepository {
+  findById(merchantId: string): Promise<{ merchantId: string; status: string } | null>;
+  update(merchantId: string, params: Record<string, unknown>): Promise<unknown>;
+}
+
 export class ApproveMerchantUseCase {
-  constructor(private readonly merchantRepository: any) {}
+  constructor(private readonly merchantRepository: ApproveMerchantRepository) {}
 
   async execute(input: ApproveMerchantInput): Promise<ApproveMerchantOutput> {
     const merchant = await this.merchantRepository.findById(input.merchantId);

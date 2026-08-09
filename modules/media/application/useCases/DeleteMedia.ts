@@ -14,8 +14,22 @@ export interface DeleteMediaOutput {
   deletedAt: string;
 }
 
+interface MediaRecord {
+  mediaId: string;
+}
+
+interface MediaUsage {
+  length: number;
+}
+
+interface DeleteMediaRepository {
+  findById(mediaId: string): Promise<MediaRecord | null>;
+  findUsages(mediaId: string): Promise<MediaUsage | null>;
+  delete(mediaId: string, options: { deletedBy?: string }): Promise<void>;
+}
+
 export class DeleteMediaUseCase {
-  constructor(private readonly mediaRepository: any) {}
+  constructor(private readonly mediaRepository: DeleteMediaRepository) {}
 
   async execute(input: DeleteMediaInput): Promise<DeleteMediaOutput> {
     const media = await this.mediaRepository.findById(input.mediaId);

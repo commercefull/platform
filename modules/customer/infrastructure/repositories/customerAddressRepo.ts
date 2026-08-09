@@ -115,7 +115,7 @@ export class CustomerAddressRepo {
     }
 
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -138,7 +138,7 @@ export class CustomerAddressRepo {
 
   private async unsetDefaults(customerId: string, exceptId?: string): Promise<void> {
     let sql = `UPDATE "customerAddress" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "isDefault" = true`;
-    const params: any[] = [unixTimestamp(), customerId];
+    const params: unknown[] = [unixTimestamp(), customerId];
     if (exceptId) {
       sql += ` AND "customerAddressId" != $3`;
       params.push(exceptId);
@@ -148,7 +148,7 @@ export class CustomerAddressRepo {
 
   private async unsetDefaultBilling(customerId: string, exceptId?: string): Promise<void> {
     let sql = `UPDATE "customerAddress" SET "isDefaultBilling" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "isDefaultBilling" = true`;
-    const params: any[] = [unixTimestamp(), customerId];
+    const params: unknown[] = [unixTimestamp(), customerId];
     if (exceptId) {
       sql += ` AND "customerAddressId" != $3`;
       params.push(exceptId);
@@ -158,7 +158,7 @@ export class CustomerAddressRepo {
 
   private async unsetDefaultShipping(customerId: string, exceptId?: string): Promise<void> {
     let sql = `UPDATE "customerAddress" SET "isDefaultShipping" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "isDefaultShipping" = true`;
-    const params: any[] = [unixTimestamp(), customerId];
+    const params: unknown[] = [unixTimestamp(), customerId];
     if (exceptId) {
       sql += ` AND "customerAddressId" != $3`;
       params.push(exceptId);
@@ -176,13 +176,44 @@ export class CustomerAddressRepo {
 
   async count(customerId?: string): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "customerAddress"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
     if (customerId) {
       sql += ` WHERE "customerId" = $1`;
       params.push(customerId);
     }
     const result = await queryOne<{ count: string }>(sql, params);
     return result ? parseInt(result.count, 10) : 0;
+  }
+
+  async findActiveByCustomerId(customerId: string): Promise<CustomerAddress[]> {
+    return (
+      (await query<CustomerAddress[]>(
+        `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "deletedAt" IS NULL ORDER BY "isDefault" DESC, "createdAt" DESC`,
+        [customerId],
+      )) || []
+    );
+  }
+
+  async findActiveById(id: string, customerId: string): Promise<CustomerAddress | null> {
+    return await queryOne<CustomerAddress>(
+      `SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL`,
+      [id, customerId],
+    );
+  }
+
+  async softDelete(id: string, customerId: string): Promise<boolean> {
+    const result = await queryOne<{ customerAddressId: string }>(
+      `UPDATE "customerAddress" SET "deletedAt" = NOW(), "updatedAt" = NOW() WHERE "customerAddressId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL RETURNING "customerAddressId"`,
+      [id, customerId],
+    );
+    return !!result;
+  }
+
+  async unsetDefaultsExcept(customerId: string, exceptId: string): Promise<void> {
+    await query(
+      `UPDATE "customerAddress" SET "isDefault" = false, "updatedAt" = NOW() WHERE "customerId" = $1 AND "isDefault" = true AND "customerAddressId" != $2`,
+      [customerId, exceptId],
+    );
   }
 }
 

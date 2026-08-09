@@ -17,21 +17,22 @@ interface NotificationTemplate {
   textTemplate?: string;
   pushTemplate?: string;
   smsTemplate?: string;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
   isActive: boolean;
   categoryCode?: string;
-  previewData?: Record<string, any>;
-  metadata?: Record<string, any>;
+  previewData?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
   createdBy?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 describe.skip('Notification Template Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let customerToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testUserId: string;
   let testNotificationId: string;
   let testTemplateId: string;

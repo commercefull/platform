@@ -3,7 +3,8 @@
  * Updates an existing promotion
  */
 
-import { PromotionRepo } from '../../infrastructure/repositories/promotionRepo';
+import { PromotionRepo, UpdatePromotionInput } from '../../infrastructure/repositories/promotionRepo';
+import { Promotion } from '../../../../libs/db/types';
 
 // Command
 export class UpdatePromotionCommand {
@@ -50,11 +51,11 @@ export class UpdatePromotionUseCase {
     }
 
     // Prepare update input for repository
-    const updateInput: any = {};
+    const updateInput: UpdatePromotionInput = {};
 
     if (command.updates.name !== undefined) updateInput.name = command.updates.name;
     if (command.updates.description !== undefined) updateInput.description = command.updates.description;
-    if (command.updates.status !== undefined) updateInput.status = command.updates.status;
+    if (command.updates.status !== undefined) updateInput.status = command.updates.status as UpdatePromotionInput['status'];
     if (command.updates.minOrderAmount !== undefined) updateInput.minOrderAmount = command.updates.minOrderAmount;
     if (command.updates.maxDiscountAmount !== undefined) updateInput.maxDiscountAmount = command.updates.maxDiscountAmount;
     if (command.updates.usageLimit !== undefined) updateInput.maxUsage = command.updates.usageLimit;
@@ -69,7 +70,7 @@ export class UpdatePromotionUseCase {
     return this.mapToResponse(updatedPromotion);
   }
 
-  private mapToResponse(promotion: any): UpdatePromotionResponse {
+  private mapToResponse(promotion: Promotion): UpdatePromotionResponse {
     return {
       promotionId: promotion.promotionId,
       name: promotion.name,

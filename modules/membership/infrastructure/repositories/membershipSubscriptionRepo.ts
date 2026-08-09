@@ -142,7 +142,7 @@ export class MembershipSubscriptionRepo {
 
   async update(id: string, params: MembershipSubscriptionUpdateParams): Promise<MembershipSubscription | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -164,7 +164,7 @@ export class MembershipSubscriptionRepo {
   }
 
   async updateStatus(id: string, status: SubscriptionStatus): Promise<MembershipSubscription | null> {
-    const updates: any = { status };
+    const updates: MembershipSubscriptionUpdateParams = { status };
     if (status === 'cancelled') updates.cancelledAt = new Date();
     return this.update(id, updates);
   }
@@ -203,7 +203,7 @@ export class MembershipSubscriptionRepo {
     offset?: number;
   }): Promise<{ data: MembershipSubscription[]; total: number }> {
     let whereClause = '1=1';
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (options?.status) {

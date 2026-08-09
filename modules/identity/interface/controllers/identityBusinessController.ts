@@ -14,11 +14,42 @@ const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 const merchantRepo = new MerchantRepo();
 const refreshTokenRepo = new AuthRefreshTokenRepo();
 
+interface LoginBody {
+  email: string;
+  password: string;
+}
+
+interface RegisterBody {
+  email: string;
+  password: string;
+  name: string;
+  phone?: string;
+  website?: string;
+  description?: string;
+}
+
+interface RefreshTokenBody {
+  refreshToken: string;
+}
+
+interface TokenBody {
+  token: string;
+}
+
+interface EmailBody {
+  email: string;
+}
+
+interface ResetPasswordBody {
+  token: string;
+  newPassword: string;
+}
+
 /**
  * Authenticates a merchant and returns a basic JWT token
  * Use this for simple session-based auth
  */
-export const loginMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const loginMerchant = async (req: TypedRequest<Record<string, string>, unknown, LoginBody>, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -86,7 +117,7 @@ export const loginMerchant = async (req: TypedRequest, res: Response): Promise<v
  * Registers a new merchant account
  * New accounts start with 'pending' status and require admin approval
  */
-export const registerMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const registerMerchant = async (req: TypedRequest<Record<string, string>, unknown, RegisterBody>, res: Response): Promise<void> => {
   try {
     const { email, password, name, phone, website, description } = req.body;
 
@@ -153,7 +184,7 @@ export const registerMerchant = async (req: TypedRequest, res: Response): Promis
  * Issues both access and refresh tokens for headless/mobile clients
  * More secure than simple login as refresh tokens can be revoked
  */
-export const issueTokenPair = async (req: TypedRequest, res: Response): Promise<void> => {
+export const issueTokenPair = async (req: TypedRequest<Record<string, string>, unknown, LoginBody>, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -225,7 +256,7 @@ export const issueTokenPair = async (req: TypedRequest, res: Response): Promise<
 /**
  * Refreshes an expired access token using a valid refresh token
  */
-export const renewAccessToken = async (req: TypedRequest, res: Response): Promise<void> => {
+export const renewAccessToken = async (req: TypedRequest<Record<string, string>, unknown, RefreshTokenBody>, res: Response): Promise<void> => {
   try {
     const { refreshToken } = req.body;
 
@@ -306,7 +337,7 @@ export const renewAccessToken = async (req: TypedRequest, res: Response): Promis
 /**
  * Validates a merchant access token
  */
-export const checkTokenValidity = async (req: TypedRequest, res: Response): Promise<void> => {
+export const checkTokenValidity = async (req: TypedRequest<Record<string, string>, unknown, TokenBody>, res: Response): Promise<void> => {
   try {
     const { token } = req.body;
 
@@ -352,7 +383,7 @@ export const checkTokenValidity = async (req: TypedRequest, res: Response): Prom
 /**
  * Initiates password reset flow by generating a reset token
  */
-export const requestPasswordReset = async (req: TypedRequest, res: Response): Promise<void> => {
+export const requestPasswordReset = async (req: TypedRequest<Record<string, string>, unknown, EmailBody>, res: Response): Promise<void> => {
   try {
     const { email } = req.body;
 
@@ -400,7 +431,7 @@ export const requestPasswordReset = async (req: TypedRequest, res: Response): Pr
 /**
  * Completes password reset using a valid reset token
  */
-export const resetPassword = async (req: TypedRequest, res: Response): Promise<void> => {
+export const resetPassword = async (req: TypedRequest<Record<string, string>, unknown, ResetPasswordBody>, res: Response): Promise<void> => {
   try {
     const { token, newPassword } = req.body;
 

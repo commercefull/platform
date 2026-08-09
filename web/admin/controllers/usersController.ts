@@ -1,45 +1,15 @@
 /**
  * Users Controller
  * Handles admin user management, roles, and permissions
- * for the Commercefull Admin Hub - Phase 8
  */
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
-import { query, queryOne } from '../../../libs/db';
-import { generateUUID as uuidv4 } from '../../../libs/uuid';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import bcrypt from 'bcryptjs';
 import { adminRespond } from '../../respond';
-
-// ============================================================================
-// Types
-// ============================================================================
-
-interface AdminUser {
-  userId: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  userType: 'admin';
-  status: 'active' | 'inactive' | 'suspended';
-  roleId?: string;
-  roleName?: string;
-  lastLoginAt?: Date;
-  loginCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface Role {
-  roleId: string;
-  name: string;
-  description?: string;
-  permissions: string[];
-  isSystem: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import * as adminUserRepo from '../../../modules/identity/infrastructure/repositories/identityAdminUserManagementRepo';
+import * as roleRepo from '../../../modules/identity/infrastructure/repositories/roleRepo';
 
 // ============================================================================
 // Admin Users Management
@@ -47,55 +17,30 @@ interface Role {
 
 export const listUsers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { status, role, page = '1' } = req.query;
+    const { status, page = '1' } = req.query;
     const limit = 20;
     const offset = (parseInt(page as string) - 1) * limit;
 
-    let whereClause = `WHERE "userType" = 'admin'`;
-    const params: any[] = [];
-    let paramIndex = 1;
+    const { users, total } = await adminUserRepo.listAdminUsers({
+      status: status as string | undefined,
+      limit,
+      offset,
+    });
 
-    if (status) {
-      whereClause += ` AND "status" = $${paramIndex++}`;
-      params.push(status);
-    }
-
-    // Get total count
-    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "user" ${whereClause}`, params);
-
-    // Get users
-    const users = await query<Array<any>>(
-      `SELECT u.*, r."name" as "roleName"
-       FROM "user" u
-       LEFT JOIN "adminUserRole" aur ON u."userId" = aur."userId"
-       LEFT JOIN "role" r ON aur."roleId" = r."roleId"
-       ${whereClause}
-       ORDER BY u."createdAt" DESC
-       LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-      [...params, limit, offset],
-    );
-
-    // Get roles for filter dropdown
-    const roles = await query<Array<Role>>(`SELECT * FROM "role" ORDER BY "name"`);
-
-    const total = parseInt(countResult?.count || '0');
+    const roles = await roleRepo.listRoles();
 
     adminRespond(req, res, 'users/index', {
       pageName: 'Admin Users',
-      users: users || [],
-      roles: roles || [],
+      users,
+      roles,
       total,
       currentPage: parseInt(page as string),
       totalPages: Math.ceil(total / limit),
-      filters: { status, role },
+      filters: { status },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: error.message || 'Failed to load users',
-    });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load users' });
   }
 };
 
@@ -103,162 +48,92 @@ export const viewUser = async (req: TypedRequest, res: Response): Promise<void> 
   try {
     const { userId } = req.params;
 
-    const user = await queryOne<any>(
-      `SELECT u.*, r."name" as "roleName", r."roleId"
-       FROM "user" u
-       LEFT JOIN "adminUserRole" aur ON u."userId" = aur."userId"
-       LEFT JOIN "role" r ON aur."roleId" = r."roleId"
-       WHERE u."userId" = $1`,
-      [userId],
-    );
+    const user = await adminUserRepo.findAdminUserById(userId);
 
     if (!user) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'User not found',
-      });
+      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'User not found' });
       return;
     }
 
-    // Get user's permissions through role
     let permissions: string[] = [];
     if (user.roleId) {
-      const role = await queryOne<Role>(`SELECT * FROM "role" WHERE "roleId" = $1`, [user.roleId]);
-      permissions = role?.permissions || [];
+      const role = await roleRepo.findRoleById(user.roleId);
+      permissions = (role?.permissions as string[]) || [];
     }
 
-    // Get available roles
-    const roles = await query<Array<Role>>(`SELECT * FROM "role" ORDER BY "name"`);
+    const roles = await roleRepo.listRoles();
 
     adminRespond(req, res, 'users/view', {
       pageName: 'User Details',
       adminUser: user,
       permissions,
-      roles: roles || [],
+      roles,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: error.message || 'Failed to load user',
-    });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load user' });
   }
 };
 
 export const createUserForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const roles = await query<Array<Role>>(`SELECT * FROM "role" ORDER BY "name"`);
+    const roles = await roleRepo.listRoles();
 
     adminRespond(req, res, 'users/create', {
       pageName: 'Create Admin User',
-      roles: roles || [],
+      roles,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: error.message || 'Failed to load form',
-    });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load form' });
   }
 };
 
 export const createUser = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { email, password, firstName, lastName, roleId } = req.body;
+    const body = req.body as RequestBody;
+    const { email, password, firstName, lastName, roleId } = body;
 
     if (!email || !password) {
       res.status(400).json({ success: false, message: 'Email and password are required' });
       return;
     }
 
-    // Check if email already exists
-    const existing = await queryOne<{ userId: string }>(`SELECT "userId" FROM "user" WHERE "email" = $1`, [email.toLowerCase()]);
+    const existing = await adminUserRepo.findAdminUserByEmail(email);
 
     if (existing) {
       res.status(400).json({ success: false, message: 'Email already exists' });
       return;
     }
 
-    const userId = uuidv4();
     const passwordHash = await bcrypt.hash(password, 10);
-    const now = new Date();
-
-    await query(
-      `INSERT INTO "user" (
-        "userId", "email", "passwordHash", "userType", "status",
-        "firstName", "lastName", "emailVerified", "phoneVerified",
-        "mfaEnabled", "loginCount", "failedLoginAttempts", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
-      [
-        userId,
-        email.toLowerCase(),
-        passwordHash,
-        'admin',
-        'active',
-        firstName || null,
-        lastName || null,
-        true,
-        false,
-        false,
-        0,
-        0,
-        now,
-        now,
-      ],
-    );
-
-    // Assign role if provided
-    if (roleId) {
-      await query(
-        `INSERT INTO "adminUserRole" ("userId", "roleId", "createdAt")
-         VALUES ($1, $2, $3)`,
-        [userId, roleId, now],
-      );
-    }
+    const userId = await adminUserRepo.createAdminUser({
+      email,
+      passwordHash,
+      firstName,
+      lastName,
+      roleId,
+    });
 
     res.json({ success: true, userId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 export const updateUser = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
-    const { firstName, lastName, status, roleId } = req.body;
-    const now = new Date();
+    const body = req.body as RequestBody;
+    const { firstName, lastName, status, roleId } = body;
 
-    await query(
-      `UPDATE "user" SET
-        "firstName" = COALESCE($1, "firstName"),
-        "lastName" = COALESCE($2, "lastName"),
-        "status" = COALESCE($3, "status"),
-        "updatedAt" = $4
-       WHERE "userId" = $5`,
-      [firstName, lastName, status, now, userId],
-    );
-
-    // Update role assignment
-    if (roleId !== undefined) {
-      await query(`DELETE FROM "adminUserRole" WHERE "userId" = $1`, [userId]);
-      if (roleId) {
-        await query(
-          `INSERT INTO "adminUserRole" ("userId", "roleId", "createdAt")
-           VALUES ($1, $2, $3)`,
-          [userId, roleId, now],
-        );
-      }
-    }
+    await adminUserRepo.updateAdminUser(userId, { firstName, lastName, status, roleId });
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -266,20 +141,17 @@ export const deleteUser = async (req: TypedRequest, res: Response): Promise<void
   try {
     const { userId } = req.params;
 
-    // Don't allow deleting yourself
-    if ((req as any).user?.userId === userId) {
+    if (req.user?.userId === userId) {
       res.status(400).json({ success: false, message: 'Cannot delete your own account' });
       return;
     }
 
-    await query(`DELETE FROM "adminUserRole" WHERE "userId" = $1`, [userId]);
-    await query(`DELETE FROM "user" WHERE "userId" = $1 AND "userType" = 'admin'`, [userId]);
+    await adminUserRepo.deleteAdminUser(userId);
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -289,83 +161,57 @@ export const deleteUser = async (req: TypedRequest, res: Response): Promise<void
 
 export const listRoles = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const roles = await query<Array<any>>(
-      `SELECT r.*, 
-        (SELECT COUNT(*) FROM "adminUserRole" aur WHERE aur."roleId" = r."roleId") as "userCount"
-       FROM "role" r
-       ORDER BY r."name"`,
-    );
+    const roles = await roleRepo.listRoles();
 
     adminRespond(req, res, 'users/roles', {
       pageName: 'Roles & Permissions',
-      roles: roles || [],
+      roles,
       availablePermissions: AVAILABLE_PERMISSIONS,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: error.message || 'Failed to load roles',
-    });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load roles' });
   }
 };
 
 export const createRole = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { name, description, permissions } = req.body;
+    const body = req.body as RequestBody;
+    const { name, description, permissions } = body;
 
     if (!name) {
       res.status(400).json({ success: false, message: 'Role name is required' });
       return;
     }
 
-    const roleId = uuidv4();
-    const now = new Date();
-
-    await query(
-      `INSERT INTO "role" ("roleId", "name", "description", "permissions", "isSystem", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [roleId, name, description || null, JSON.stringify(permissions || []), false, now, now],
-    );
+    const roleId = await roleRepo.createRole({ name, description, permissions });
 
     res.json({ success: true, roleId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 export const updateRole = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { roleId } = req.params;
-    const { name, description, permissions } = req.body;
-    const now = new Date();
+    const body = req.body as RequestBody;
+    const { name, description, permissions } = body;
 
-    // Check if system role
-    const role = await queryOne<Role>(`SELECT * FROM "role" WHERE "roleId" = $1`, [roleId]);
+    const role = await roleRepo.findRoleById(roleId);
 
     if (role?.isSystem) {
       res.status(400).json({ success: false, message: 'Cannot modify system roles' });
       return;
     }
 
-    await query(
-      `UPDATE "role" SET
-        "name" = COALESCE($1, "name"),
-        "description" = COALESCE($2, "description"),
-        "permissions" = COALESCE($3, "permissions"),
-        "updatedAt" = $4
-       WHERE "roleId" = $5`,
-      [name, description, permissions ? JSON.stringify(permissions) : null, now, roleId],
-    );
+    await roleRepo.updateRole(roleId, { name, description, permissions });
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -373,29 +219,26 @@ export const deleteRole = async (req: TypedRequest, res: Response): Promise<void
   try {
     const { roleId } = req.params;
 
-    // Check if system role
-    const role = await queryOne<Role>(`SELECT * FROM "role" WHERE "roleId" = $1`, [roleId]);
+    const role = await roleRepo.findRoleById(roleId);
 
     if (role?.isSystem) {
       res.status(400).json({ success: false, message: 'Cannot delete system roles' });
       return;
     }
 
-    // Check if role is in use
-    const usageCount = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "adminUserRole" WHERE "roleId" = $1`, [roleId]);
+    const usageCount = await roleRepo.countRoleAssignments(roleId);
 
-    if (parseInt(usageCount?.count || '0') > 0) {
+    if (usageCount > 0) {
       res.status(400).json({ success: false, message: 'Cannot delete role that is assigned to users' });
       return;
     }
 
-    await query(`DELETE FROM "role" WHERE "roleId" = $1`, [roleId]);
+    await roleRepo.deleteRole(roleId);
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 

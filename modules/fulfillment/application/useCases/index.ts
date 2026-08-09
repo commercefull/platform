@@ -12,3 +12,4 @@ export * from './ShipOrder';
 export * from './MarkDelivered';
 export * from './CancelFulfillment';
 export * from './UpdateTracking';
+export * from './InitiateReturn';

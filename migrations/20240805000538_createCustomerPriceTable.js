@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('customerPriceId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('priceListId').notNullable().references('priceListId').inTable('priceList').onDelete('CASCADE');
+    t.uuid('priceListId').notNullable().references('priceListId').inTable('pricingPriceList').onDelete('CASCADE');
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
     t.enum('adjustmentType', ['percentage', 'fixed']).notNullable();

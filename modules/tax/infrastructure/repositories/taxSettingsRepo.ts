@@ -3,15 +3,13 @@
  * CRUD operations for tax settings
  */
 
-import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
+import { queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLE = Table.TaxSettings;
 
 // ============================================================================
 // Types
@@ -40,7 +38,7 @@ export interface TaxSettings {
   defaultTaxCategory?: string;
   defaultTaxZone?: string;
   taxProvider?: TaxProvider;
-  taxProviderSettings?: any; // JSON
+  taxProviderSettings?: unknown; // JSON
 }
 
 export type TaxSettingsCreateParams = Omit<TaxSettings, 'taxSettingsId' | 'createdAt' | 'updatedAt'>;
@@ -90,7 +88,7 @@ export class TaxSettingsRepo {
 
   async update(id: string, params: TaxSettingsUpdateParams): Promise<TaxSettings | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

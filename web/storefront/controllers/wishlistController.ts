@@ -6,8 +6,8 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { query, queryOne } from '../../../libs/db';
 import { storefrontRespond } from '../../respond';
+import * as storefrontWishlistRepo from '../../../modules/customer/infrastructure/repositories/storefrontWishlistRepo';
 
 interface CustomerUser {
   id: string;
@@ -25,20 +25,11 @@ export const viewWishlist = async (req: TypedRequest, res: Response) => {
       return res.redirect('/signin');
     }
 
-    const items = await query<any[]>(
-      `SELECT w.*, p."name", p."price", p."sku", p."status",
-              pm."url" as "imageUrl"
-       FROM "wishlistItem" w
-       JOIN "product" p ON w."productId" = p."productId"
-       LEFT JOIN "productMedia" pm ON p."productId" = pm."productId" AND pm."isPrimary" = true
-       WHERE w."customerId" = $1
-       ORDER BY w."createdAt" DESC`,
-      [user.customerId],
-    );
+    const items = await storefrontWishlistRepo.findByCustomer(user.customerId);
 
     storefrontRespond(req, res, 'wishlist/index', {
       pageName: 'My Wishlist',
-      items: items || [],
+      items,
     });
   } catch (error) {
     logger.error('Error loading wishlist:', error);
@@ -61,18 +52,10 @@ export const addToWishlist = async (req: TypedRequest, res: Response) => {
 
     const { productId } = req.params;
 
-    // Check if already in wishlist
-    const existing = await queryOne<any>(`SELECT "wishlistItemId" FROM "wishlistItem" WHERE "customerId" = $1 AND "productId" = $2`, [
-      user.customerId,
-      productId,
-    ]);
+    const existing = await storefrontWishlistRepo.findExisting(user.customerId, productId);
 
     if (!existing) {
-      await queryOne<any>(
-        `INSERT INTO "wishlistItem" ("customerId", "productId", "createdAt", "updatedAt")
-         VALUES ($1, $2, NOW(), NOW()) RETURNING "wishlistItemId"`,
-        [user.customerId, productId],
-      );
+      await storefrontWishlistRepo.create(user.customerId, productId);
     }
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
@@ -97,10 +80,7 @@ export const removeFromWishlist = async (req: TypedRequest, res: Response) => {
 
     const { productId } = req.params;
 
-    await queryOne<any>(`DELETE FROM "wishlistItem" WHERE "customerId" = $1 AND "productId" = $2 RETURNING "wishlistItemId"`, [
-      user.customerId,
-      productId,
-    ]);
+    await storefrontWishlistRepo.remove(user.customerId, productId);
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       return res.json({ success: true });

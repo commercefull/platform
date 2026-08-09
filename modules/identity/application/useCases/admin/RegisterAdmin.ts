@@ -22,10 +22,20 @@ export interface RegisterAdminOutput {
   createdAt: Date;
 }
 
+export interface AdminRecord {
+  adminId: string;
+  email: string;
+  name: string;
+  role: string;
+  permissions: string[];
+  status: string;
+  createdAt: Date;
+}
+
 export interface AdminRepository {
-  findByEmail(email: string): Promise<any | null>;
-  findById(adminId: string): Promise<any | null>;
-  create(admin: { email: string; name: string; passwordHash: string; role: string; permissions: string[]; status: string }): Promise<any>;
+  findByEmail(email: string): Promise<AdminRecord | null>;
+  findById(adminId: string): Promise<AdminRecord | null>;
+  create(admin: { email: string; name: string; passwordHash: string; role: string; permissions: string[]; status: string }): Promise<AdminRecord>;
 }
 
 export interface AuthService {

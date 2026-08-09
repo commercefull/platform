@@ -75,7 +75,7 @@ export class CustomerGroupMembershipRepo {
 
   async update(id: string, params: CustomerGroupMembershipUpdateParams): Promise<CustomerGroupMembership | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -134,7 +134,7 @@ export class CustomerGroupMembershipRepo {
 
   async count(customerGroupId?: string, activeOnly = false): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "customerGroupMembership" WHERE "deletedAt" IS NULL`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (customerGroupId) {
       sql += ` AND "customerGroupId" = $${params.length + 1}`;

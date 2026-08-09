@@ -1,12 +1,71 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import {
-  MembershipRepo,
-  MembershipTier,
-  LegacyMembershipBenefit as MembershipBenefit,
-  UserMembership,
-} from '../../infrastructure/repositories/membershipRepo';
+import { MembershipRepo, LegacyMembershipBenefit as _MembershipBenefit } from '../../infrastructure/repositories/membershipRepo';
+
+// Request body interfaces
+interface CreateTierBody {
+  name: string;
+  description?: string;
+  monthlyPrice: number;
+  annualPrice: number;
+  level: number;
+  isActive?: boolean;
+}
+
+interface UpdateTierBody {
+  name?: string;
+  description?: string;
+  monthlyPrice?: number;
+  annualPrice?: number;
+  level?: number;
+  isActive?: boolean;
+}
+
+interface CreateBenefitBody {
+  name: string;
+  description?: string;
+  tierIds: string[];
+  benefitType: string;
+  discountPercentage?: number;
+  discountAmount?: number;
+  isActive?: boolean;
+}
+
+interface UpdateBenefitBody {
+  name?: string;
+  description?: string;
+  tierIds?: string[];
+  benefitType?: string;
+  discountPercentage?: number;
+  discountAmount?: number;
+  isActive?: boolean;
+}
+
+interface CreateUserMembershipBody {
+  userId: string;
+  tierId: string;
+  startDate?: string;
+  endDate?: string;
+  isActive?: boolean;
+  autoRenew?: boolean;
+  membershipType?: 'monthly' | 'annual' | 'lifetime';
+  lastRenewalDate?: string;
+  nextRenewalDate?: string;
+  paymentMethod?: string;
+}
+
+interface UpdateUserMembershipBody {
+  tierId?: string;
+  startDate?: string;
+  endDate?: string;
+  isActive?: boolean;
+  autoRenew?: boolean;
+  membershipType?: 'monthly' | 'annual' | 'lifetime';
+  lastRenewalDate?: string;
+  nextRenewalDate?: string;
+  paymentMethod?: string;
+}
 
 // Create a single instance of the repository to be shared across handlers
 const membershipRepo = new MembershipRepo();
@@ -60,7 +119,7 @@ export const getMembershipTierById = async (req: TypedRequest, res: Response): P
   }
 };
 
-export const createMembershipTier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createMembershipTier = async (req: TypedRequest<Record<string, string>, unknown, CreateTierBody>, res: Response): Promise<void> => {
   try {
     const { name, description, monthlyPrice, annualPrice, level, isActive = true } = req.body;
 
@@ -75,7 +134,7 @@ export const createMembershipTier = async (req: TypedRequest, res: Response): Pr
 
     const tier = await membershipRepo.createTier({
       name,
-      description,
+      description: description || '',
       monthlyPrice,
       annualPrice,
       level,
@@ -98,7 +157,7 @@ export const createMembershipTier = async (req: TypedRequest, res: Response): Pr
   }
 };
 
-export const updateMembershipTier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateMembershipTier = async (req: TypedRequest<Record<string, string>, unknown, UpdateTierBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, description, monthlyPrice, annualPrice, level, isActive } = req.body;
@@ -234,17 +293,19 @@ export const getMembershipBenefitById = async (req: TypedRequest, res: Response)
   }
 };
 
-export const createMembershipBenefit = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createMembershipBenefit = async (req: TypedRequest<Record<string, string>, unknown, CreateBenefitBody>, res: Response): Promise<void> => {
   try {
     const {
       name,
       description,
-      tierIds: [tierId],
+      tierIds,
       benefitType,
       discountPercentage,
       discountAmount,
       isActive = true,
     } = req.body;
+
+    const tierId = tierIds[0];
 
     // Basic validation
     if (!name || !tierId || !benefitType) {
@@ -291,18 +352,20 @@ export const createMembershipBenefit = async (req: TypedRequest, res: Response):
   }
 };
 
-export const updateMembershipBenefit = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateMembershipBenefit = async (req: TypedRequest<Record<string, string>, unknown, UpdateBenefitBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const {
       name,
       description,
-      tierIds: [tierId],
+      tierIds,
       benefitType,
       discountPercentage,
       discountAmount,
       isActive,
     } = req.body;
+
+    const tierId = tierIds ? tierIds[0] : undefined;
 
     // Check if benefit exists
     const existingBenefit = await membershipRepo.findBenefitById(id);
@@ -469,12 +532,12 @@ export const getUserMembershipByUserId = async (req: TypedRequest, res: Response
   }
 };
 
-export const createUserMembership = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createUserMembership = async (req: TypedRequest<Record<string, string>, unknown, CreateUserMembershipBody>, res: Response): Promise<void> => {
   try {
     const {
       userId,
       tierId,
-      startDate = new Date(),
+      startDate = new Date().toISOString(),
       endDate,
       isActive = true,
       autoRenew = false,
@@ -517,7 +580,7 @@ export const createUserMembership = async (req: TypedRequest, res: Response): Pr
       userId,
       tierId,
       startDate,
-      endDate,
+      endDate: endDate || '',
       isActive,
       autoRenew,
       membershipType,
@@ -542,7 +605,7 @@ export const createUserMembership = async (req: TypedRequest, res: Response): Pr
   }
 };
 
-export const updateUserMembership = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateUserMembership = async (req: TypedRequest<Record<string, string>, unknown, UpdateUserMembershipBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { tierId, startDate, endDate, isActive, autoRenew, membershipType, lastRenewalDate, nextRenewalDate, paymentMethod } = req.body;

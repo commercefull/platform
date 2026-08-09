@@ -4,29 +4,30 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { Business as DbBusiness } from '../../../../libs/db/types';
 import { BusinessRepository as IBusinessRepository, BusinessFilters } from '../../domain/repositories/BusinessRepository';
-import { Business } from '../../domain/entities/Business';
+import { Business, BusinessType } from '../../domain/entities/Business';
 
 export class BusinessRepo implements IBusinessRepository {
   async findById(businessId: string): Promise<Business | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "business" WHERE "businessId" = $1', [businessId]);
+    const row = await queryOne<DbBusiness>('SELECT * FROM "business" WHERE "businessId" = $1', [businessId]);
     return row ? this.mapToBusiness(row) : null;
   }
 
   async findBySlug(slug: string): Promise<Business | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "business" WHERE "slug" = $1', [slug]);
+    const row = await queryOne<DbBusiness>('SELECT * FROM "business" WHERE "slug" = $1', [slug]);
     return row ? this.mapToBusiness(row) : null;
   }
 
   async findByDomain(domain: string): Promise<Business | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "business" WHERE "domain" = $1', [domain]);
+    const row = await queryOne<DbBusiness>('SELECT * FROM "business" WHERE "domain" = $1', [domain]);
     return row ? this.mapToBusiness(row) : null;
   }
 
   async findAll(filters?: BusinessFilters): Promise<Business[]> {
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const rows = await query<Record<string, any>[]>(`SELECT * FROM "business" ${whereClause} ORDER BY "createdAt" DESC`, params);
+    const rows = await query<DbBusiness[]>(`SELECT * FROM "business" ${whereClause} ORDER BY "createdAt" DESC`, params);
 
     return (rows || []).map(row => this.mapToBusiness(row));
   }
@@ -34,7 +35,7 @@ export class BusinessRepo implements IBusinessRepository {
   async save(business: Business): Promise<Business> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>('SELECT "businessId" FROM "business" WHERE "businessId" = $1', [
+    const existing = await queryOne<DbBusiness>('SELECT "businessId" FROM "business" WHERE "businessId" = $1', [
       business.businessId,
     ]);
 
@@ -123,9 +124,9 @@ export class BusinessRepo implements IBusinessRepository {
     return this.findAll({ businessType });
   }
 
-  private buildWhereClause(filters?: BusinessFilters): { whereClause: string; params: any[] } {
+  private buildWhereClause(filters?: BusinessFilters): { whereClause: string; params: unknown[] } {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters?.businessType) {
@@ -143,18 +144,18 @@ export class BusinessRepo implements IBusinessRepository {
     };
   }
 
-  private mapToBusiness(row: Record<string, any>): Business {
+  private mapToBusiness(row: DbBusiness): Business {
     return Business.reconstitute({
       businessId: row.businessId,
       name: row.name,
       slug: row.slug,
-      description: row.description,
-      businessType: row.businessType,
-      domain: row.domain,
-      logo: row.logo,
-      favicon: row.favicon,
-      primaryColor: row.primaryColor,
-      secondaryColor: row.secondaryColor,
+      description: row.description ?? undefined,
+      businessType: row.businessType as BusinessType,
+      domain: row.domain ?? undefined,
+      logo: row.logo ?? undefined,
+      favicon: row.favicon ?? undefined,
+      primaryColor: row.primaryColor ?? undefined,
+      secondaryColor: row.secondaryColor ?? undefined,
       isActive: Boolean(row.isActive),
       settings: {
         allowMultipleStores: Boolean(row.allowMultipleStores),
@@ -164,7 +165,7 @@ export class BusinessRepo implements IBusinessRepository {
         defaultLanguage: row.defaultLanguage || 'en',
         timezone: row.timezone || 'UTC',
       },
-      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : (row.metadata as Record<string, unknown> | undefined) ?? undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

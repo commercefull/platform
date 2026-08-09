@@ -1,5 +1,5 @@
 import { queryOne, query } from '../../../../libs/db';
-import { Table, ProductVariant as DbProductVariant } from '../../../../libs/db/types';
+import { Table } from '../../../../libs/db/types';
 import { generateUUID } from '../../../../libs/uuid';
 
 export type ProductVariant = {
@@ -80,16 +80,16 @@ const tsToDbMapping: Record<string, string> = {
 };
 
 /** Parse numeric fields that Postgres returns as strings */
-function parseVariantRow(row: any): any {
+function parseVariantRow(row: Record<string, unknown> | null): Record<string, unknown> | null {
   if (!row) return row;
   return {
     ...row,
-    price: row.price != null ? parseFloat(row.price) : row.price,
-    salePrice: row.salePrice != null ? parseFloat(row.salePrice) : row.salePrice,
-    costPrice: row.costPrice != null ? parseFloat(row.costPrice) : row.costPrice,
-    compareAtPrice: row.compareAtPrice != null ? parseFloat(row.compareAtPrice) : row.compareAtPrice,
-    weight: row.weight != null ? parseFloat(row.weight) : row.weight,
-    position: row.position != null ? parseInt(row.position) : row.position,
+    price: row.price != null ? parseFloat(row.price as string) : row.price,
+    salePrice: row.salePrice != null ? parseFloat(row.salePrice as string) : row.salePrice,
+    costPrice: row.costPrice != null ? parseFloat(row.costPrice as string) : row.costPrice,
+    compareAtPrice: row.compareAtPrice != null ? parseFloat(row.compareAtPrice as string) : row.compareAtPrice,
+    weight: row.weight != null ? parseFloat(row.weight as string) : row.weight,
+    position: row.position != null ? parseInt(row.position as string) : row.position,
   };
 }
 
@@ -163,7 +163,7 @@ export class ProductVariantRepo {
     const skipFields = new Set(['inventory', 'inventoryPolicy', 'deletedAt', 'isActive', 'options']);
 
     // Convert property names to DB column names
-    const columnMap: Record<string, any> = {
+    const columnMap: Record<string, unknown> = {
       productVariantId: id,
       createdAt: now,
       updatedAt: now,
@@ -178,15 +178,15 @@ export class ProductVariantRepo {
     }
 
     // Handle special mappings
-    if ((variant as any).options !== undefined) {
-      columnMap['optionValues'] = JSON.stringify((variant as any).options);
+    if (variant.options !== undefined) {
+      columnMap['optionValues'] = JSON.stringify(variant.options);
     }
     if (!columnMap['optionValues']) {
       columnMap['optionValues'] = JSON.stringify([]);
     }
     // Map isActive to status
-    if ((variant as any).isActive !== undefined) {
-      columnMap['status'] = (variant as any).isActive ? 'active' : 'inactive';
+    if (variant.isActive !== undefined) {
+      columnMap['status'] = variant.isActive ? 'active' : 'inactive';
     }
     if (!columnMap['status']) {
       columnMap['status'] = 'active';
@@ -226,7 +226,7 @@ export class ProductVariantRepo {
     const now = new Date();
 
     // Convert property names to DB column names
-    const updateData: Record<string, any> = { updatedAt: now };
+    const updateData: Record<string, unknown> = { updatedAt: now };
 
     for (const [key, value] of Object.entries(variant)) {
       if (value !== undefined) {
@@ -296,7 +296,6 @@ export class ProductVariantRepo {
       throw new Error('Cannot delete the master variant of a product. The master variant is required.');
     }
 
-    const now = new Date();
 
     await query(`DELETE FROM "${Table.ProductVariant}" WHERE "productVariantId" = $1`, [id]);
 
@@ -307,7 +306,20 @@ export class ProductVariantRepo {
    * Ensure a master variant exists for a product
    * If no master variant exists, create one based on product data
    */
-  async ensureMasterVariantExists(product: any): Promise<ProductVariant | null> {
+  async ensureMasterVariantExists(product: {
+    id: string;
+    name: string;
+    sku?: string;
+    basePrice?: number;
+    salePrice?: number;
+    cost?: number;
+    weight?: number;
+    weightUnit?: string;
+    length?: number;
+    width?: number;
+    height?: number;
+    dimensionUnit?: string;
+  }): Promise<ProductVariant | null> {
     // Check if a default variant already exists
     const defaultVariant = await this.findDefaultForProduct(product.id);
 
@@ -339,7 +351,7 @@ export class ProductVariantRepo {
       };
 
       return await this.create(masterVariant);
-    } catch (error) {
+    } catch {
       return null;
     }
   }

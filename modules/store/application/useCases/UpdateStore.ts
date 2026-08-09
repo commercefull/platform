@@ -4,7 +4,7 @@
  */
 
 import { StoreRepository } from '../../domain/repositories/StoreRepository';
-import { Store } from '../../domain/entities/Store';
+import { type StoreProps } from '../../domain/entities/Store';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -116,7 +116,7 @@ export class UpdateStoreUseCase {
 
     // Address updates
     if (updates.address) {
-      store.updateAddress(updates.address as any);
+      store.updateAddress(updates.address as StoreProps['address'] | undefined);
     }
 
     // SEO updates
@@ -135,7 +135,7 @@ export class UpdateStoreUseCase {
 
     // Settings updates
     if (updates.settings) {
-      store.updateSettings(updates.settings as any);
+      store.updateSettings(updates.settings as Partial<StoreProps['settings']> | undefined);
     }
 
     // Social links

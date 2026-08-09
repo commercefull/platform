@@ -21,10 +21,6 @@ export const TEST_CHECKOUT_BASKET_ID = '00000000-0000-0000-0000-000000002003';
 // Test Checkout
 export const TEST_CHECKOUT_ID = '00000000-0000-0000-0000-000000003001';
 
-// Test B2B
-export const TEST_B2B_COMPANY_ID = '00000000-0000-0000-0000-000000004001';
-export const TEST_B2B_QUOTE_ID = '00000000-0000-0000-0000-000000004002';
-
 // Test Content
 export const TEST_CONTENT_TYPE_ID = '00000000-0000-0000-0000-000000005001';
 export const TEST_CONTENT_PAGE_ID = '00000000-0000-0000-0000-000000005002';
@@ -79,24 +75,6 @@ export const TEST_BILLING_ADDRESS = {
   postalCode: '97201',
   country: 'US',
   phone: '555-123-4567',
-};
-
-// Test B2B Company Data
-export const TEST_B2B_COMPANY = {
-  b2bCompanyId: TEST_B2B_COMPANY_ID,
-  name: 'Integration Test Company',
-  taxId: 'TAX-TEST-001',
-  industry: 'Technology',
-  creditLimit: 50000,
-  paymentTerms: 'net30',
-};
-
-// Test B2B Quote Data
-export const TEST_B2B_QUOTE = {
-  b2bQuoteId: TEST_B2B_QUOTE_ID,
-  b2bCompanyId: TEST_B2B_COMPANY_ID,
-  quoteNumber: 'QT-TEST-001',
-  status: 'draft',
 };
 
 // Test Content Type Data

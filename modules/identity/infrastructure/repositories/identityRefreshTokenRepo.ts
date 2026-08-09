@@ -72,7 +72,7 @@ export class AuthRefreshTokenRepo {
   }
 
   async revokeAllForUser(userId: string, userType: string): Promise<number> {
-    const result = await queryOne<{ rowCount: number }>(
+    const _result = await queryOne<{ rowCount: number }>(
       `UPDATE "identityRefreshTokens"
        SET "isRevoked" = true, "updatedAt" = $1
        WHERE "userId" = $2 AND "userType" = $3 AND "isRevoked" = false

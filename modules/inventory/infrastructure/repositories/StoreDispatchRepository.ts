@@ -6,10 +6,14 @@ import {
   PaginationOptions,
   PaginatedResult,
 } from '../../domain/repositories/StoreDispatchRepository';
+import {
+  StoreDispatch as DbStoreDispatch,
+  StoreDispatchItem as DbStoreDispatchItem,
+} from '../../../../libs/db/types';
 
 export class StoreDispatchRepository implements IStoreDispatchRepository {
   async findById(dispatchId: string): Promise<StoreDispatch | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "storeDispatch" WHERE "dispatchId" = $1', [dispatchId]);
+    const row = await queryOne<DbStoreDispatch>('SELECT * FROM "storeDispatch" WHERE "dispatchId" = $1', [dispatchId]);
     if (!row) return null;
 
     const items = await this.findItems(dispatchId);
@@ -17,7 +21,7 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
   }
 
   async findByNumber(dispatchNumber: string): Promise<StoreDispatch | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "storeDispatch" WHERE "dispatchNumber" = $1', [dispatchNumber]);
+    const row = await queryOne<DbStoreDispatch>('SELECT * FROM "storeDispatch" WHERE "dispatchNumber" = $1', [dispatchNumber]);
     if (!row) return null;
 
     const items = await this.findItems(row.dispatchId);
@@ -34,13 +38,13 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
     const countRow = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "storeDispatch" ${whereClause}`, params);
     const total = parseInt(countRow?.count || '0', 10);
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<DbStoreDispatch[]>(
       `SELECT * FROM "storeDispatch" ${whereClause} ORDER BY "${orderBy}" ${orderDirection.toUpperCase()} LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset],
     );
 
     const dispatches = await Promise.all(
-      (rows || []).map(async row => {
+      (rows || []).map(async (row: DbStoreDispatch) => {
         const items = await this.findItems(row.dispatchId);
         return this.mapToDispatch(row, items);
       }),
@@ -56,7 +60,7 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
   }
 
   async save(dispatch: StoreDispatch): Promise<StoreDispatch> {
-    const existing = await queryOne<Record<string, any>>('SELECT "dispatchId" FROM "storeDispatch" WHERE "dispatchId" = $1', [
+    const existing = await queryOne<DbStoreDispatch>('SELECT "dispatchId" FROM "storeDispatch" WHERE "dispatchId" = $1', [
       dispatch.dispatchId,
     ]);
     const now = new Date().toISOString();
@@ -169,27 +173,27 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
   }
 
   private async findItems(dispatchId: string): Promise<StoreDispatchItemProps[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "storeDispatchItem" WHERE "dispatchId" = $1 ORDER BY "createdAt" ASC', [
+    const rows = await query<DbStoreDispatchItem[]>('SELECT * FROM "storeDispatchItem" WHERE "dispatchId" = $1 ORDER BY "createdAt" ASC', [
       dispatchId,
     ]);
 
-    return (rows || []).map(row => ({
+    return (rows || []).map((row: DbStoreDispatchItem) => ({
       dispatchItemId: row.dispatchItemId,
       dispatchId: row.dispatchId,
       productId: row.productId,
-      variantId: row.variantId || undefined,
-      sku: row.sku || undefined,
-      productName: row.productName || undefined,
-      requestedQuantity: parseInt(row.requestedQuantity || '0', 10),
-      dispatchedQuantity: parseInt(row.dispatchedQuantity || '0', 10),
-      receivedQuantity: parseInt(row.receivedQuantity || '0', 10),
-      notes: row.notes || undefined,
+      variantId: row.variantId ?? undefined,
+      sku: row.sku ?? undefined,
+      productName: row.productName ?? undefined,
+      requestedQuantity: row.requestedQuantity,
+      dispatchedQuantity: row.dispatchedQuantity,
+      receivedQuantity: row.receivedQuantity,
+      notes: row.notes ?? undefined,
     }));
   }
 
-  private buildWhereClause(filters?: DispatchFilters): { whereClause: string; params: any[] } {
+  private buildWhereClause(filters?: DispatchFilters): { whereClause: string; params: unknown[] } {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (filters?.fromStoreId) {
       conditions.push(`"fromStoreId" = $${params.length + 1}`);
@@ -218,24 +222,24 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
     };
   }
 
-  private mapToDispatch(row: Record<string, any>, items: StoreDispatchItemProps[]): StoreDispatch {
+  private mapToDispatch(row: DbStoreDispatch, items: StoreDispatchItemProps[]): StoreDispatch {
     return StoreDispatch.reconstitute({
       dispatchId: row.dispatchId,
       fromStoreId: row.fromStoreId,
       toStoreId: row.toStoreId,
       dispatchNumber: row.dispatchNumber,
-      status: row.status,
+      status: row.status as StoreDispatch['status'],
       items,
-      requestedBy: row.requestedBy || undefined,
-      approvedBy: row.approvedBy || undefined,
-      dispatchedBy: row.dispatchedBy || undefined,
-      receivedBy: row.receivedBy || undefined,
+      requestedBy: row.requestedBy ?? undefined,
+      approvedBy: row.approvedBy ?? undefined,
+      dispatchedBy: row.dispatchedBy ?? undefined,
+      receivedBy: row.receivedBy ?? undefined,
       requestedAt: row.requestedAt ? new Date(row.requestedAt) : undefined,
       approvedAt: row.approvedAt ? new Date(row.approvedAt) : undefined,
       dispatchedAt: row.dispatchedAt ? new Date(row.dispatchedAt) : undefined,
       receivedAt: row.receivedAt ? new Date(row.receivedAt) : undefined,
-      notes: row.notes || undefined,
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
+      notes: row.notes ?? undefined,
+      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata as Record<string, unknown>) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

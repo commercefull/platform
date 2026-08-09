@@ -32,18 +32,18 @@ export interface OrderItem {
   taxTotal: number;
   taxRate?: number;
   taxExempt: boolean;
-  options?: Record<string, any>;
-  attributes?: Record<string, any>;
+  options?: Record<string, unknown>;
+  attributes?: Record<string, unknown>;
   fulfillmentStatus: FulfillmentStatus;
   giftWrapped: boolean;
   giftMessage?: string;
   weight?: number;
-  dimensions?: Record<string, any>;
+  dimensions?: Record<string, unknown>;
   isDigital: boolean;
   downloadLink?: string;
   downloadExpiryDate?: string;
   downloadLimit?: number;
-  subscriptionInfo?: Record<string, any>;
+  subscriptionInfo?: Record<string, unknown>;
 }
 
 export type OrderItemCreateParams = Omit<OrderItem, 'orderItemId' | 'createdAt' | 'updatedAt'>;
@@ -187,7 +187,7 @@ export class OrderItemRepo {
    */
   async update(orderItemId: string, params: OrderItemUpdateParams): Promise<OrderItem | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

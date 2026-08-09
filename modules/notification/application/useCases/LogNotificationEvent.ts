@@ -17,7 +17,7 @@ export class LogNotificationEventCommand {
     public readonly eventType: string,
     public readonly entityId?: string,
     public readonly entityType?: string,
-    public readonly payload?: Record<string, any>,
+    public readonly payload?: Record<string, unknown>,
   ) {}
 }
 

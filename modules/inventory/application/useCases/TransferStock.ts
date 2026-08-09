@@ -4,7 +4,6 @@
  * Transfers inventory between locations (warehouses, stores).
  */
 
-import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface TransferStockItemInput {
   productId: string;
@@ -43,9 +42,51 @@ export interface TransferStockOutput {
   transferredAt: string;
 }
 
+interface InventoryRecord {
+  inventoryId: string;
+  productId: string;
+  variantId?: string;
+  locationId: string;
+  sku: string;
+  quantity: number;
+  reservedQuantity: number;
+}
+
+interface TransferStockRepositoryPort {
+  findLocationById(locationId: string): Promise<{ locationId: string; name: string } | null>;
+  findByProduct(productId: string, variantId: string | undefined, locationId: string): Promise<InventoryRecord | null>;
+  updateQuantity(inventoryId: string, newQuantity: number): Promise<InventoryRecord>;
+  create(input: {
+    inventoryItemId: string;
+    productId: string;
+    variantId?: string;
+    warehouseId: string;
+    sku: string;
+    quantity: number;
+    reservedQuantity?: number;
+    reorderPoint?: number;
+    reorderQuantity?: number;
+    binLocation?: string;
+    costPrice?: number;
+    metadata?: Record<string, unknown>;
+  }): Promise<InventoryRecord>;
+  recordTransaction(input: {
+    transferId: string;
+    type: string;
+    productId: string;
+    variantId?: string;
+    fromLocationId: string;
+    toLocationId: string;
+    quantity: number;
+    reason?: string;
+    notes?: string;
+    initiatedBy?: string;
+  }): Promise<void>;
+}
+
 export class TransferStockUseCase {
   constructor(
-    private readonly inventoryRepository: any, // InventoryRepository
+    private readonly inventoryRepository: TransferStockRepositoryPort,
   ) {}
 
   async execute(input: TransferStockInput): Promise<TransferStockOutput> {
@@ -107,23 +148,25 @@ export class TransferStockUseCase {
 
         // Decrease source quantity
         const newSourceQuantity = sourceInventory.quantity - transferQuantity;
-        await this.inventoryRepository.updateQuantity(sourceInventory.inventoryItemId, newSourceQuantity);
+        await this.inventoryRepository.updateQuantity(sourceInventory.inventoryId, newSourceQuantity);
 
         // Get or create destination inventory
-        let destInventory = await this.inventoryRepository.findByProduct(item.productId, item.variantId, input.destinationLocationId);
+        const destInventory = await this.inventoryRepository.findByProduct(item.productId, item.variantId, input.destinationLocationId);
 
         let newDestQuantity: number;
         if (destInventory) {
           newDestQuantity = destInventory.quantity + transferQuantity;
-          await this.inventoryRepository.updateQuantity(destInventory.inventoryItemId, newDestQuantity);
+          await this.inventoryRepository.updateQuantity(destInventory.inventoryId, newDestQuantity);
         } else {
           // Create inventory item at destination
           newDestQuantity = transferQuantity;
+          const newItemId = `inv_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
           await this.inventoryRepository.create({
+            inventoryItemId: newItemId,
             productId: item.productId,
             variantId: item.variantId,
+            warehouseId: input.destinationLocationId,
             sku: item.sku || sourceInventory.sku,
-            locationId: input.destinationLocationId,
             quantity: transferQuantity,
             reservedQuantity: 0,
           });
@@ -157,7 +200,7 @@ export class TransferStockUseCase {
         if (transferQuantity < item.quantity) {
           allTransferred = false;
         }
-      } catch (error) {
+      } catch (error: unknown) {
         results.push({
           productId: item.productId,
           variantId: item.variantId,

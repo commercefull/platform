@@ -4,8 +4,9 @@
  */
 
 import { pool } from '../../../../libs/db/pool';
-import { Media } from '../../domain/entities/Media';
+import { Media, MediaFile } from '../../domain/entities/Media';
 import { MediaRepository, MediaFilters } from '../../domain/repositories/MediaRepository';
+import { Media as DbMedia } from '../../../../libs/db/types';
 
 export class PostgreSQLMediaRepository implements MediaRepository {
   async save(media: Media): Promise<void> {
@@ -80,7 +81,7 @@ export class PostgreSQLMediaRepository implements MediaRepository {
 
   async findAll(filters: MediaFilters = {}): Promise<Media[]> {
     let query = 'SELECT * FROM media WHERE 1=1';
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters.mediaId) {
@@ -148,7 +149,7 @@ export class PostgreSQLMediaRepository implements MediaRepository {
 
   async count(filters: Omit<MediaFilters, 'limit' | 'offset'> = {}): Promise<number> {
     let query = 'SELECT COUNT(*) as count FROM media WHERE 1=1';
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters.mediaId) {
@@ -196,18 +197,18 @@ export class PostgreSQLMediaRepository implements MediaRepository {
     return parseInt(result.rows[0].count);
   }
 
-  private mapToMedia(row: any): Media {
+  private mapToMedia(row: DbMedia): Media {
     return Media.reconstitute({
       mediaId: row.mediaId,
       originalName: row.originalName,
       mimeType: row.mimeType,
-      size: row.size,
+      size: parseInt(row.size, 10),
       originalUrl: row.originalUrl,
-      processedFiles: row.processedFiles || [],
-      thumbnailUrl: row.thumbnailUrl,
-      altText: row.altText,
-      title: row.title,
-      description: row.description,
+      processedFiles: (row.processedFiles || []) as MediaFile[],
+      thumbnailUrl: row.thumbnailUrl ?? undefined,
+      altText: row.altText ?? undefined,
+      title: row.title ?? undefined,
+      description: row.description ?? undefined,
       tags: row.tags || [],
       metadata: row.metadata || {},
       createdAt: new Date(row.createdAt),

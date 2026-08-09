@@ -27,8 +27,37 @@ export interface CreateInventoryItemOutput {
   createdAt: string;
 }
 
+interface CreatedInventoryItem {
+  inventoryId: string;
+  productId: string;
+  variantId?: string;
+  locationId: string;
+  sku: string;
+  quantity: number;
+  reservedQuantity: number;
+  createdAt: Date;
+}
+
+interface CreateInventoryItemRepositoryPort {
+  findBySkuAndWarehouse(sku: string, warehouseId: string): Promise<CreatedInventoryItem | null>;
+  create(input: {
+    inventoryItemId: string;
+    productId: string;
+    variantId?: string;
+    warehouseId: string;
+    sku: string;
+    quantity: number;
+    reservedQuantity?: number;
+    reorderPoint?: number;
+    reorderQuantity?: number;
+    binLocation?: string;
+    costPrice?: number;
+    metadata?: Record<string, unknown>;
+  }): Promise<CreatedInventoryItem>;
+}
+
 export class CreateInventoryItemUseCase {
-  constructor(private readonly inventoryRepository: any) {}
+  constructor(private readonly inventoryRepository: CreateInventoryItemRepositoryPort) {}
 
   async execute(input: CreateInventoryItemInput): Promise<CreateInventoryItemOutput> {
     if (!input.productId || !input.warehouseId || !input.sku) {
@@ -59,10 +88,10 @@ export class CreateInventoryItemUseCase {
     });
 
     return {
-      inventoryItemId: item.inventoryItemId,
+      inventoryItemId: item.inventoryId,
       productId: item.productId,
       variantId: item.variantId,
-      warehouseId: item.warehouseId,
+      warehouseId: item.locationId,
       sku: item.sku,
       quantity: item.quantity,
       availableQuantity: item.quantity - (item.reservedQuantity || 0),

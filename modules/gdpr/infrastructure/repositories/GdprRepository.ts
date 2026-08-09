@@ -8,16 +8,14 @@ import { GdprDataRequest as GdprDataRequestDb, GdprCookieConsent as GdprCookieCo
 import {
   GdprDataRequestRepository,
   GdprCookieConsentRepository,
-  GdprService,
   GdprRequestFilters,
   PaginationOptions,
   PaginatedResult,
 } from '../../domain/repositories/GdprRepository';
 import { GdprDataRequest, GdprRequestType, GdprRequestStatus } from '../../domain/entities/GdprDataRequest';
-import { GdprCookieConsent, CookiePreferences } from '../../domain/entities/GdprCookieConsent';
+import { GdprCookieConsent } from '../../domain/entities/GdprCookieConsent';
 
 // Table names
-const GDPR_DATA_REQUEST_TABLE = 'gdprDataRequest';
 const GDPR_COOKIE_CONSENT_TABLE = 'gdprCookieConsent';
 
 // ============================================================================
@@ -26,12 +24,12 @@ const GDPR_COOKIE_CONSENT_TABLE = 'gdprCookieConsent';
 
 export class GdprDataRequestRepo implements GdprDataRequestRepository {
   async findById(gdprDataRequestId: string): Promise<GdprDataRequest | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "gdprDataRequest" WHERE "gdprDataRequestId" = $1', [gdprDataRequestId]);
+    const row = await queryOne<GdprDataRequestDb>('SELECT * FROM "gdprDataRequest" WHERE "gdprDataRequestId" = $1', [gdprDataRequestId]);
     return row ? this.mapToEntity(row) : null;
   }
 
   async findByCustomerId(customerId: string): Promise<GdprDataRequest[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "gdprDataRequest" WHERE "customerId" = $1 ORDER BY "createdAt" DESC', [
+    const rows = await query<GdprDataRequestDb[]>('SELECT * FROM "gdprDataRequest" WHERE "customerId" = $1 ORDER BY "createdAt" DESC', [
       customerId,
     ]);
     return (rows || []).map(row => this.mapToEntity(row));
@@ -39,7 +37,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
 
   async findAll(filters?: GdprRequestFilters, pagination?: PaginationOptions): Promise<PaginatedResult<GdprDataRequest>> {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters?.customerId) {
@@ -79,7 +77,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "gdprDataRequest" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0', 10);
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<GdprDataRequestDb[]>(
       `SELECT * FROM "gdprDataRequest" ${whereClause} 
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
@@ -98,7 +96,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
   async save(request: GdprDataRequest): Promise<GdprDataRequest> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
+    const existing = await queryOne<{ gdprDataRequestId: string }>(
       'SELECT "gdprDataRequestId" FROM "gdprDataRequest" WHERE "gdprDataRequestId" = $1',
       [request.gdprDataRequestId],
     );
@@ -172,7 +170,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
   }
 
   async findOverdueRequests(): Promise<GdprDataRequest[]> {
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<GdprDataRequestDb[]>(
       `SELECT * FROM "gdprDataRequest" 
        WHERE ("deadlineAt" < NOW() OR ("extendedDeadlineAt" IS NOT NULL AND "extendedDeadlineAt" < NOW()))
        AND "status" IN ('pending', 'processing')
@@ -234,30 +232,30 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
     return parseFloat(result?.avg || '0');
   }
 
-  private mapToEntity(row: Record<string, any>): GdprDataRequest {
+  private mapToEntity(row: GdprDataRequestDb): GdprDataRequest {
     return GdprDataRequest.reconstitute({
       gdprDataRequestId: row.gdprDataRequestId,
       customerId: row.customerId,
-      requestType: row.requestType,
-      status: row.status,
-      reason: row.reason,
-      requestedData: row.requestedData,
-      downloadUrl: row.downloadUrl,
+      requestType: row.requestType as GdprRequestType,
+      status: row.status as GdprRequestStatus,
+      reason: row.reason ?? undefined,
+      requestedData: row.requestedData as string[] | undefined,
+      downloadUrl: row.downloadUrl ?? undefined,
       downloadExpiresAt: row.downloadExpiresAt ? new Date(row.downloadExpiresAt) : undefined,
-      downloadFormat: row.downloadFormat,
+      downloadFormat: row.downloadFormat as 'csv' | 'json' | 'xml' | undefined,
       processedAt: row.processedAt ? new Date(row.processedAt) : undefined,
-      processedBy: row.processedBy,
-      adminNotes: row.adminNotes,
-      rejectionReason: row.rejectionReason,
+      processedBy: row.processedBy ?? undefined,
+      adminNotes: row.adminNotes ?? undefined,
+      rejectionReason: row.rejectionReason ?? undefined,
       identityVerified: Boolean(row.identityVerified),
-      verificationMethod: row.verificationMethod,
+      verificationMethod: row.verificationMethod ?? undefined,
       verifiedAt: row.verifiedAt ? new Date(row.verifiedAt) : undefined,
-      deadlineAt: new Date(row.deadlineAt),
+      deadlineAt: new Date(row.deadlineAt ?? new Date()),
       extensionRequested: Boolean(row.extensionRequested),
-      extensionReason: row.extensionReason,
+      extensionReason: row.extensionReason ?? undefined,
       extendedDeadlineAt: row.extendedDeadlineAt ? new Date(row.extendedDeadlineAt) : undefined,
-      ipAddress: row.ipAddress,
-      userAgent: row.userAgent,
+      ipAddress: row.ipAddress ?? undefined,
+      userAgent: row.userAgent ?? undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

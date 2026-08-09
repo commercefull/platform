@@ -406,28 +406,6 @@ exports.seed = async function (knex) {
     .onConflict('productAttributeSetId')
     .merge();
 
-  // ==================== ATTRIBUTE SET MAPPINGS ====================
-  await knex('productAttributeSetMapping').insert([
-    // Default set - basic attributes
-    { attributeSetId: ATTRIBUTE_SET_DEFAULT_ID, attributeId: ATTRIBUTE_COLOR_ID, position: 10, isRequired: false },
-    { attributeSetId: ATTRIBUTE_SET_DEFAULT_ID, attributeId: ATTRIBUTE_MATERIAL_ID, position: 20, isRequired: false },
-    { attributeSetId: ATTRIBUTE_SET_DEFAULT_ID, attributeId: ATTRIBUTE_WEIGHT_ID, position: 30, isRequired: false },
-    { attributeSetId: ATTRIBUTE_SET_DEFAULT_ID, attributeId: ATTRIBUTE_BRAND_ID, position: 40, isRequired: false },
-    // Apparel set - color, size, material
-    { attributeSetId: ATTRIBUTE_SET_APPAREL_ID, attributeId: ATTRIBUTE_COLOR_ID, position: 10, isRequired: true },
-    { attributeSetId: ATTRIBUTE_SET_APPAREL_ID, attributeId: ATTRIBUTE_SIZE_ID, position: 20, isRequired: true },
-    { attributeSetId: ATTRIBUTE_SET_APPAREL_ID, attributeId: ATTRIBUTE_MATERIAL_ID, position: 30, isRequired: false },
-    { attributeSetId: ATTRIBUTE_SET_APPAREL_ID, attributeId: ATTRIBUTE_WEIGHT_ID, position: 40, isRequired: false },
-    { attributeSetId: ATTRIBUTE_SET_APPAREL_ID, attributeId: ATTRIBUTE_BRAND_ID, position: 50, isRequired: false },
-    // Electronics set - tech specs
-    { attributeSetId: ATTRIBUTE_SET_ELECTRONICS_ID, attributeId: ATTRIBUTE_COLOR_ID, position: 10, isRequired: false },
-    { attributeSetId: ATTRIBUTE_SET_ELECTRONICS_ID, attributeId: ATTRIBUTE_BRAND_ID, position: 20, isRequired: true },
-    { attributeSetId: ATTRIBUTE_SET_ELECTRONICS_ID, attributeId: ATTRIBUTE_SCREEN_SIZE_ID, position: 30, isRequired: false },
-    { attributeSetId: ATTRIBUTE_SET_ELECTRONICS_ID, attributeId: ATTRIBUTE_RAM_ID, position: 40, isRequired: false },
-    { attributeSetId: ATTRIBUTE_SET_ELECTRONICS_ID, attributeId: ATTRIBUTE_STORAGE_ID, position: 50, isRequired: false },
-    { attributeSetId: ATTRIBUTE_SET_ELECTRONICS_ID, attributeId: ATTRIBUTE_WEIGHT_ID, position: 60, isRequired: false },
-  ]);
-
   // ==================== PRODUCT ATTRIBUTE VALUES (assign to test products) ====================
   // Note: productAttributeValueMap has: productAttributeValueMapId, productId, productVariantId,
   // attributeId, value, valueText, valueNumeric, valueBoolean, valueJson, valueDate, isSystem, language
@@ -492,10 +470,6 @@ exports.down = async function (knex) {
       ATTRIBUTE_RAM_ID,
       ATTRIBUTE_STORAGE_ID,
     ])
-    .delete();
-
-  await knex('productAttributeSetMapping')
-    .whereIn('attributeSetId', [ATTRIBUTE_SET_DEFAULT_ID, ATTRIBUTE_SET_APPAREL_ID, ATTRIBUTE_SET_ELECTRONICS_ID])
     .delete();
 
   await knex('productAttributeSet')

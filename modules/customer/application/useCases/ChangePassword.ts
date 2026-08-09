@@ -67,7 +67,7 @@ export class ChangePasswordUseCase {
     await this.customerRepository.updatePassword(command.customerId, newHash);
 
     // Emit event
-    (eventBus as any).emit('customer.password_changed', {
+    eventBus.emit('customer.password_changed', {
       customerId: customer.customerId,
     });
 

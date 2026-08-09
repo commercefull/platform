@@ -36,7 +36,7 @@ describe('Currency Feature Tests', () => {
 
       adminToken = loginResponse.data?.accessToken || '';
     } catch (error) {
-      console.log('Warning: Login failed for currency tests:', error instanceof Error ? error.message : String(error));
+      console.log('Warning: Login failed for currency tests:', error instanceof Error ? (error as Error).message : String(error));
     }
   });
 

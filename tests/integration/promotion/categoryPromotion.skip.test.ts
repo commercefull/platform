@@ -29,7 +29,7 @@ describe('Category Promotion Tests', () => {
       } else {
         promotionId = '';
       }
-    } catch (error) {
+    } catch {
       promotionId = '';
     }
   });
@@ -75,7 +75,7 @@ describe('Category Promotion Tests', () => {
     expect(Array.isArray(response.data.data)).toBe(true);
 
     if (categoryPromotionId && response.data.data.length > 0) {
-      const foundPromotion = response.data.data.find((p: any) => p.categoryPromotionId === categoryPromotionId);
+      const foundPromotion = response.data.data.find((p: Record<string, unknown>) => p.categoryPromotionId === categoryPromotionId);
       if (foundPromotion) {
         expect(foundPromotion.categoryId).toBe(testCategoryId);
         expect(foundPromotion.promotionId).toBe(promotionId);
@@ -97,7 +97,7 @@ describe('Category Promotion Tests', () => {
     expect(Array.isArray(response.data.data)).toBe(true);
 
     if (categoryPromotionId) {
-      const foundPromotion = response.data.data.find((p: any) => p.categoryPromotionId === categoryPromotionId);
+      const _foundPromotion = response.data.data.find((p: Record<string, unknown>) => p.categoryPromotionId === categoryPromotionId);
       // Promotion may or may not be found depending on setup
     }
   });
@@ -120,7 +120,7 @@ describe('Category Promotion Tests', () => {
     });
 
     if (getResponse.status === 200 && getResponse.data?.data) {
-      const foundPromotion = getResponse.data.data.find((p: any) => p.categoryPromotionId === categoryPromotionId);
+      const foundPromotion = getResponse.data.data.find((p: Record<string, unknown>) => p.categoryPromotionId === categoryPromotionId);
       expect(foundPromotion).toBeUndefined();
     }
   });
@@ -131,7 +131,7 @@ describe('Category Promotion Tests', () => {
       await client.delete(`/business/promotions/${promotionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
-    } catch (error) {}
+    } catch {}
 
     await cleanupPromotionTests(client, adminToken, testCartId, testProductId, testCategoryId);
   });

@@ -30,7 +30,7 @@ export interface OrderPayment {
   errorMessage?: string;
   maskedNumber?: string;
   cardType?: string;
-  gatewayResponse?: Record<string, any>;
+  gatewayResponse?: Record<string, unknown>;
   refundedAmount: number;
   capturedAt?: string;
 }

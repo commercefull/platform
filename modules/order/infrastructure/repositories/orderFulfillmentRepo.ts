@@ -1,6 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
-import { generateUUID } from '../../../../libs/uuid';
 
 export type FulfillmentType = 'shipping' | 'pickup' | 'digital' | 'service';
 export type FulfillmentStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'failed' | 'cancelled';
@@ -21,7 +20,7 @@ export interface OrderFulfillment {
   shippingAddressId?: string;
   weight?: number;
   weightUnit?: string;
-  dimensions?: Record<string, any>;
+  dimensions?: Record<string, unknown>;
   packageCount?: number;
   shippedAt?: string;
   deliveredAt?: string;
@@ -173,7 +172,7 @@ export class OrderFulfillmentRepo {
    */
   async update(orderFulfillmentId: string, params: OrderFulfillmentUpdateParams): Promise<OrderFulfillment | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -206,7 +205,7 @@ export class OrderFulfillmentRepo {
    * Update fulfillment status
    */
   async updateStatus(orderFulfillmentId: string, status: FulfillmentStatus): Promise<OrderFulfillment | null> {
-    const updates: Record<string, any> = { status };
+    const updates: Record<string, unknown> = { status };
 
     // Auto-set timestamps based on status
     if (status === 'shipped') {

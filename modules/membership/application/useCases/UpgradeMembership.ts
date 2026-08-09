@@ -24,8 +24,33 @@ export interface UpgradeMembershipOutput {
   nextBillingDate: string;
 }
 
+interface MembershipRecord {
+  status: string;
+  customerId: string;
+  tierId: string;
+  currentPeriodEnd?: string;
+  billingPeriod?: string;
+}
+
+interface UpdatedMembership {
+  currentPeriodEnd?: Date;
+}
+
+interface TierRecord {
+  name: string;
+  price: number;
+  isActive: boolean;
+}
+
+interface UpgradeMembershipRepository {
+  getMembershipById(membershipId: string): Promise<MembershipRecord | null>;
+  getTierById(tierId: string): Promise<TierRecord | null>;
+  updateMembership(membershipId: string, data: Record<string, unknown>): Promise<UpdatedMembership>;
+  createStatusLog(data: Record<string, unknown>): Promise<void>;
+}
+
 export class UpgradeMembershipUseCase {
-  constructor(private readonly membershipRepository: any) {}
+  constructor(private readonly membershipRepository: UpgradeMembershipRepository) {}
 
   async execute(input: UpgradeMembershipInput): Promise<UpgradeMembershipOutput> {
     const { membershipId, newTierId, prorateBilling = true, effectiveDate } = input;
@@ -54,7 +79,7 @@ export class UpgradeMembershipUseCase {
     const currentTier = await this.membershipRepository.getTierById(membership.tierId);
 
     // Validate upgrade (new tier should have higher price or level)
-    if (newTier.price <= currentTier.price) {
+    if (!currentTier || newTier.price <= currentTier.price) {
       throw new Error('Cannot upgrade to a tier with equal or lower price. Use downgrade instead.');
     }
 

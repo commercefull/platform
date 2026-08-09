@@ -38,8 +38,33 @@ export interface GetPointsHistoryOutput {
   };
 }
 
+export interface PointsTransactionRecord {
+  transactionId: string;
+  type: 'earned' | 'redeemed' | 'expired' | 'adjusted';
+  points: number;
+  balance: number;
+  description: string;
+  referenceType?: string;
+  referenceId?: string;
+  createdAt: Date;
+  expiresAt?: Date;
+}
+
+export interface PointsSummary {
+  totalEarned: number;
+  totalRedeemed: number;
+  totalExpired: number;
+  currentBalance: number;
+}
+
+export interface GetPointsHistoryRepository {
+  getTransactions(filters: Record<string, unknown>, pagination: { page: number; limit: number }): Promise<PointsTransactionRecord[]>;
+  countTransactions(filters: Record<string, unknown>): Promise<number>;
+  getPointsSummary(customerId: string): Promise<PointsSummary>;
+}
+
 export class GetPointsHistoryUseCase {
-  constructor(private readonly loyaltyRepository: any) {}
+  constructor(private readonly loyaltyRepository: GetPointsHistoryRepository) {}
 
   async execute(input: GetPointsHistoryInput): Promise<GetPointsHistoryOutput> {
     const { customerId, page = 1, limit = 20, type, startDate, endDate } = input;
@@ -56,7 +81,7 @@ export class GetPointsHistoryUseCase {
     ]);
 
     return {
-      transactions: transactions.map((t: any) => ({
+      transactions: transactions.map((t: PointsTransactionRecord) => ({
         transactionId: t.transactionId,
         type: t.type,
         points: t.points,

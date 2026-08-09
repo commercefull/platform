@@ -25,8 +25,21 @@ export interface GetConfigurationOutput {
   inheritedFrom?: ConfigurationScope;
 }
 
+interface ConfigurationRecord {
+  key: string;
+  value: unknown;
+  scope: ConfigurationScope;
+  scopeId?: string;
+  updatedAt?: Date;
+  updatedBy?: string;
+}
+
+interface ConfigurationRepositoryPort {
+  findByKey(key: string, scope: ConfigurationScope, scopeId?: string): Promise<ConfigurationRecord | null>;
+}
+
 export class GetConfigurationUseCase {
-  constructor(private readonly configurationRepository: any) {}
+  constructor(private readonly configurationRepository: ConfigurationRepositoryPort) {}
 
   async execute(input: GetConfigurationInput): Promise<GetConfigurationOutput> {
     const scope = input.scope || 'global';

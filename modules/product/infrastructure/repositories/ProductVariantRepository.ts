@@ -6,7 +6,47 @@
 import { query, queryOne } from '../../../../libs/db';
 import { ProductVariant, VariantAttribute } from '../../domain/entities/ProductVariant';
 import { Price } from '../../domain/valueObjects/Price';
-import { Dimensions } from '../../domain/valueObjects/Dimensions';
+import { Dimensions, WeightUnit, DimensionUnit } from '../../domain/valueObjects/Dimensions';
+
+interface VariantRow {
+  variantId: string;
+  productId: string;
+  sku: string;
+  name: string;
+  basePrice: string;
+  salePrice: string | null;
+  cost: string | null;
+  currency: string | null;
+  weight: string | null;
+  weightUnit: string | null;
+  length: string | null;
+  width: string | null;
+  height: string | null;
+  dimensionUnit: string | null;
+  stockQuantity: string | null;
+  lowStockThreshold: string | null;
+  inventoryQuantity: number | null;
+  trackInventory: boolean | null;
+  allowBackorders: boolean | null;
+  isDefault: boolean;
+  isActive: boolean;
+  position: string | null;
+  imageId: string | null;
+  imageUrl: string | null;
+  barcode: string | null;
+  externalId: string | null;
+  metadata: string | Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+interface VariantAttributeRow {
+  attributeId: string;
+  attributeName: string;
+  value: string;
+  displayValue: string | null;
+}
 
 export interface ProductVariantFilters {
   productId?: string;
@@ -35,7 +75,7 @@ export interface PaginatedResult<T> {
 
 export class ProductVariantRepository {
   async findById(variantId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE "variantId" = $1 AND "deletedAt" IS NULL', [
+    const row = await queryOne<VariantRow>('SELECT * FROM "productVariant" WHERE "variantId" = $1 AND "deletedAt" IS NULL', [
       variantId,
     ]);
 
@@ -47,7 +87,7 @@ export class ProductVariantRepository {
   }
 
   async findByProductId(productId: string): Promise<ProductVariant[]> {
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<VariantRow[]>(
       'SELECT * FROM "productVariant" WHERE "productId" = $1 AND "deletedAt" IS NULL ORDER BY "sortOrder" ASC, "createdAt" ASC',
       [productId],
     );
@@ -62,7 +102,7 @@ export class ProductVariantRepository {
   }
 
   async findBySku(sku: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE sku = $1 AND "deletedAt" IS NULL', [sku]);
+    const row = await queryOne<VariantRow>('SELECT * FROM "productVariant" WHERE sku = $1 AND "deletedAt" IS NULL', [sku]);
 
     if (!row) return null;
 
@@ -72,7 +112,7 @@ export class ProductVariantRepository {
   }
 
   async findDefaultVariant(productId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>(
+    const row = await queryOne<VariantRow>(
       'SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
       [productId],
     );
@@ -87,15 +127,15 @@ export class ProductVariantRepository {
   async findAll(filters?: ProductVariantFilters, pagination?: PaginationOptions): Promise<PaginatedResult<ProductVariant>> {
     const limit = pagination?.limit || 20;
     const offset = pagination?.offset || 0;
-    const orderBy = pagination?.orderBy || 'createdAt';
-    const orderDir = pagination?.orderDirection || 'desc';
+    const _orderBy = pagination?.orderBy || 'createdAt';
+    const _orderDir = pagination?.orderDirection || 'desc';
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "productVariant" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<VariantRow[]>(
       `SELECT * FROM "productVariant" ${whereClause}
        ORDER BY "position" ASC, "createdAt" ASC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -121,7 +161,7 @@ export class ProductVariantRepository {
   async save(variant: ProductVariant): Promise<ProductVariant> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>('SELECT "variantId" FROM "productVariant" WHERE "variantId" = $1', [
+    const existing = await queryOne<{ variantId: string }>('SELECT "variantId" FROM "productVariant" WHERE "variantId" = $1', [
       variant.variantId,
     ]);
 
@@ -231,14 +271,14 @@ export class ProductVariantRepository {
     const now = new Date().toISOString();
 
     // Check if sufficient inventory
-    const row = await queryOne<Record<string, any>>(
+    const row = await queryOne<Pick<VariantRow, 'inventoryQuantity' | 'allowBackorders' | 'trackInventory'>>(
       'SELECT "inventoryQuantity", "allowBackorders", "trackInventory" FROM "productVariant" WHERE "variantId" = $1 AND "deletedAt" IS NULL',
       [variantId],
     );
 
     if (!row) return false;
 
-    const canFulfill = !row.trackInventory || row.allowBackorders || row.inventoryQuantity >= quantity;
+    const canFulfill = !row.trackInventory || row.allowBackorders || (row.inventoryQuantity ?? 0) >= quantity;
     if (!canFulfill) return false;
 
     // Reserve inventory
@@ -262,7 +302,7 @@ export class ProductVariantRepository {
 
   // Helper methods
   private async getVariantAttributes(variantId: string): Promise<VariantAttribute[]> {
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<VariantAttributeRow[]>(
       'SELECT * FROM "productVariantAttribute" WHERE "variantId" = $1 ORDER BY "displayOrder" ASC',
       [variantId],
     );
@@ -271,7 +311,7 @@ export class ProductVariantRepository {
       attributeId: row.attributeId,
       attributeName: row.attributeName,
       value: row.value,
-      displayValue: row.displayValue,
+      displayValue: row.displayValue ?? undefined,
     }));
   }
 
@@ -290,9 +330,9 @@ export class ProductVariantRepository {
     }
   }
 
-  private buildWhereClause(filters?: ProductVariantFilters): { whereClause: string; params: any[] } {
+  private buildWhereClause(filters?: ProductVariantFilters): { whereClause: string; params: unknown[] } {
     const conditions: string[] = ['"deletedAt" IS NULL'];
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (filters?.productId) {
       conditions.push('"productId" = $' + (params.length + 1));
@@ -328,7 +368,7 @@ export class ProductVariantRepository {
     };
   }
 
-  private mapToProductVariant(row: Record<string, any>, attributes: VariantAttribute[]): ProductVariant {
+  private mapToProductVariant(row: VariantRow, attributes: VariantAttribute[]): ProductVariant {
     return ProductVariant.reconstitute({
       variantId: row.variantId,
       productId: row.productId,
@@ -342,22 +382,22 @@ export class ProductVariantRepository {
       ),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
-        weightUnit: row.weightUnit,
+        weightUnit: (row.weightUnit as WeightUnit) ?? undefined,
         length: row.length ? parseFloat(row.length) : undefined,
         width: row.width ? parseFloat(row.width) : undefined,
         height: row.height ? parseFloat(row.height) : undefined,
-        dimensionUnit: row.dimensionUnit,
+        dimensionUnit: (row.dimensionUnit as DimensionUnit) ?? undefined,
       }),
       attributes,
-      imageId: row.imageId,
-      imageUrl: row.imageUrl,
+      imageId: row.imageId ?? undefined,
+      imageUrl: row.imageUrl ?? undefined,
       stockQuantity: parseInt(row.stockQuantity || '0'),
       lowStockThreshold: parseInt(row.lowStockThreshold || '5'),
       isDefault: Boolean(row.isDefault),
       isActive: Boolean(row.isActive),
       position: parseInt(row.position || '0'),
-      barcode: row.barcode,
-      externalId: row.externalId,
+      barcode: row.barcode ?? undefined,
+      externalId: row.externalId ?? undefined,
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),

@@ -62,7 +62,7 @@ export function generateAccessToken(
 export function verifyAccessToken(token: string, jwtSecret: string): JwtPayload | null {
   try {
     return jwt.verify(token, jwtSecret) as JwtPayload;
-  } catch (error) {
+  } catch {
     // Token is invalid, expired, or malformed
     return null;
   }

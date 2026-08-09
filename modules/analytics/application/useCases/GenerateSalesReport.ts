@@ -43,7 +43,7 @@ export class GenerateSalesReportUseCase {
       const reportId = `report_${Date.now()}`;
 
       // Emit event
-      (eventBus as any).emit('analytics.report.generated', {
+      (eventBus as unknown as { emit(type: string, data: unknown): Promise<void> }).emit('analytics.report.generated', {
         reportId,
         reportType: 'sales',
         dateRange: {
@@ -72,8 +72,8 @@ export class GenerateSalesReportUseCase {
           generatedAt: new Date(),
         },
       };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: (error as Error).message };
     }
   }
 }

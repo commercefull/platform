@@ -15,6 +15,7 @@ export type EventType =
   | 'order.delivered'
   | 'order.item_added'
   | 'order.item_removed'
+  | 'order.ready_for_pickup'
   // Product events
   | 'product.created'
   | 'product.updated'
@@ -116,6 +117,11 @@ export type EventType =
   | 'customer.logged_out'
   | 'customer.password_reset_requested'
   | 'customer.password_reset'
+  | 'customer.password_changed'
+  | 'customer.deactivated'
+  | 'customer.reactivated'
+  | 'customer.deleted'
+  | 'customer.verified'
   | 'customer.email_verified'
   | 'customer.all_tokens_revoked'
   | 'merchant.login_failed'
@@ -381,7 +387,7 @@ export type EventType =
 
 export interface EventPayload {
   type: EventType;
-  data: any;
+  data: unknown;
   timestamp: Date;
   correlationId?: string;
   source?: string;
@@ -403,7 +409,7 @@ class EventBus {
   /**
    * Emit an event to all registered handlers
    */
-  async emit(type: EventType, data: any, correlationId?: string, source?: string): Promise<void> {
+  async emit(type: EventType, data: unknown, correlationId?: string, source?: string): Promise<void> {
     const payload: EventPayload = {
       type,
       data,
@@ -429,7 +435,7 @@ class EventBus {
     for (const handler of handlers) {
       try {
         await handler(payload);
-      } catch (error) {}
+      } catch {}
     }
   }
 

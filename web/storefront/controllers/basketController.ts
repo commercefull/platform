@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
@@ -23,26 +23,26 @@ import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../mod
 
 export const viewBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId;
-    const sessionId = (req as any).session?.id;
+    const customerId = req.user?.customerId;
+    const sessionId = req.session?.id;
 
     const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
     const getUc = new GetOrCreateBasketUseCase(BasketRepo);
     const basket = await getUc.execute(getCmd);
 
     // Calculate totals with tax
-    const totals = await calculateBasketTotals(basket, req.user);
+    const totals = await calculateBasketTotals(basket as unknown as Record<string, unknown>, req.user as Record<string, unknown> | undefined);
 
     storefrontRespond(req, res, 'basket/basket', {
       pageName: 'Shopping Cart',
       basket: { ...basket, totals },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load shopping cart',
+      error: (error as Error).message || 'Failed to load shopping cart',
     });
   }
 };
@@ -54,9 +54,10 @@ export const viewBasket = async (req: TypedRequest, res: Response): Promise<void
 export const addToBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { quantity = 1, variantId } = req.body;
-    const customerId = (req as any).user?.customerId;
-    const sessionId = (req as any).session?.id;
+    const body = req.body as RequestBody;
+    const { quantity = 1, variantId } = body;
+    const customerId = req.user?.customerId;
+    const sessionId = req.session?.id;
 
     // Get or create basket
     const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
@@ -79,7 +80,7 @@ export const addToBasket = async (req: TypedRequest, res: Response): Promise<voi
       product.name,
       parseInt(quantity as string),
       product.effectivePrice ?? product.basePrice ?? 0,
-      variantId,
+      variantId as string | undefined,
       product.primaryImage?.url,
       undefined,
       product.hasVariants ? 'physical' : 'physical',
@@ -89,12 +90,12 @@ export const addToBasket = async (req: TypedRequest, res: Response): Promise<voi
     await addUc.execute(addCmd);
 
     // Redirect back to product page or cart with success message
-    const redirectTo = req.body.redirectTo || '/basket';
+    const redirectTo = (req.body as RequestBody).redirectTo || '/basket';
     res.redirect(redirectTo + '?success=' + encodeURIComponent('Item added to cart'));
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.redirect('/?error=' + encodeURIComponent(error.message || 'Failed to add item to cart'));
+    res.redirect('/?error=' + encodeURIComponent((error as Error).message || 'Failed to add item to cart'));
   }
 };
 
@@ -105,9 +106,10 @@ export const addToBasket = async (req: TypedRequest, res: Response): Promise<voi
 export const updateBasketItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketItemId } = req.params;
-    const { quantity } = req.body;
-    const customerId = (req as any).user?.customerId;
-    const sessionId = (req as any).session?.id;
+    const body = req.body as RequestBody;
+    const { quantity } = body;
+    const customerId = req.user?.customerId;
+    const sessionId = req.session?.id;
 
     const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
     const getUc = new GetOrCreateBasketUseCase(BasketRepo);
@@ -123,13 +125,13 @@ export const updateBasketItem = async (req: TypedRequest, res: Response): Promis
     } else {
       res.redirect('/basket?success=' + encodeURIComponent('Cart updated'));
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: (error as Error).message });
     } else {
-      res.redirect('/basket?error=' + encodeURIComponent(error.message || 'Failed to update cart'));
+      res.redirect('/basket?error=' + encodeURIComponent((error as Error).message || 'Failed to update cart'));
     }
   }
 };
@@ -141,8 +143,8 @@ export const updateBasketItem = async (req: TypedRequest, res: Response): Promis
 export const removeFromBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketItemId } = req.params;
-    const customerId = (req as any).user?.customerId;
-    const sessionId = (req as any).session?.id;
+    const customerId = req.user?.customerId;
+    const sessionId = req.session?.id;
 
     const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
     const getUc = new GetOrCreateBasketUseCase(BasketRepo);
@@ -157,13 +159,13 @@ export const removeFromBasket = async (req: TypedRequest, res: Response): Promis
     } else {
       res.redirect('/basket?success=' + encodeURIComponent('Item removed from cart'));
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: (error as Error).message });
     } else {
-      res.redirect('/basket?error=' + encodeURIComponent(error.message || 'Failed to remove item'));
+      res.redirect('/basket?error=' + encodeURIComponent((error as Error).message || 'Failed to remove item'));
     }
   }
 };
@@ -174,8 +176,8 @@ export const removeFromBasket = async (req: TypedRequest, res: Response): Promis
 
 export const clearBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId;
-    const sessionId = (req as any).session?.id;
+    const customerId = req.user?.customerId;
+    const sessionId = req.session?.id;
 
     const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
     const getUc = new GetOrCreateBasketUseCase(BasketRepo);
@@ -190,13 +192,13 @@ export const clearBasket = async (req: TypedRequest, res: Response): Promise<voi
     } else {
       res.redirect('/basket?success=' + encodeURIComponent('Cart cleared'));
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: (error as Error).message });
     } else {
-      res.redirect('/basket?error=' + encodeURIComponent(error.message || 'Failed to clear cart'));
+      res.redirect('/basket?error=' + encodeURIComponent((error as Error).message || 'Failed to clear cart'));
     }
   }
 };
@@ -205,11 +207,12 @@ export const clearBasket = async (req: TypedRequest, res: Response): Promise<voi
 // Helper Functions
 // ============================================================================
 
-async function calculateBasketTotals(basket: any, user: any) {
+async function calculateBasketTotals(basket: Record<string, unknown>, user: Record<string, unknown> | undefined) {
+  const basketItems = basket.items as Record<string, unknown>[] | undefined;
   const subtotal =
     typeof basket.subtotal === 'number'
       ? basket.subtotal
-      : basket.items?.reduce((sum: number, item: any) => sum + (item.lineTotal ?? item.unitPrice * item.quantity), 0) || 0;
+      : basketItems?.reduce((sum: number, item: Record<string, unknown>) => sum + ((item.lineTotal as number) ?? (item.unitPrice as number) * (item.quantity as number)), 0) || 0;
 
   // Use a default US address for basket tax calculation (will be recalculated at checkout with actual address)
   const defaultAddress = {
@@ -221,15 +224,15 @@ async function calculateBasketTotals(basket: any, user: any) {
 
   // Calculate tax using the tax service
   const taxCommand = new CalculateOrderTaxCommand(
-    basket.items?.map((item: any) => ({
-      productId: item.productId,
-      name: item.name,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
+    basketItems?.map((item: Record<string, unknown>) => ({
+      productId: item.productId as string,
+      name: item.name as string,
+      quantity: item.quantity as number,
+      unitPrice: item.unitPrice as number,
     })) || [],
     defaultAddress,
     0, // No shipping in basket view
-    user?.customerId,
+    user?.customerId as string | undefined,
   );
 
   const taxUseCase = new CalculateOrderTaxUseCase();

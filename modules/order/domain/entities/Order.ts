@@ -54,7 +54,7 @@ export interface OrderProps {
   parentOrderId?: string;
   items: OrderItem[];
   tags?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
@@ -90,7 +90,7 @@ export class Order {
     isSubscriptionOrder?: boolean;
     parentOrderId?: string;
     tags?: string[];
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Order {
     const now = new Date();
     const currency = props.currencyCode || 'USD';
@@ -272,7 +272,7 @@ export class Order {
   get tags(): string[] {
     return this.props.tags || [];
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -342,7 +342,7 @@ export class Order {
     return this.props.items.find(i => i.orderItemId === orderItemId);
   }
 
-  updateStatus(newStatus: OrderStatus, reason?: string): void {
+  updateStatus(newStatus: OrderStatus, _reason?: string): void {
     if (!canTransitionTo(this.props.status, newStatus)) {
       throw new Error(`Cannot transition order from ${this.props.status} to ${newStatus}`);
     }
@@ -440,7 +440,7 @@ export class Order {
     }
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -503,7 +503,7 @@ export class Order {
     return `ORD-${timestamp}-${random}`;
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       orderId: this.props.orderId,
       orderNumber: this.props.orderNumber,

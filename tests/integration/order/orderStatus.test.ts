@@ -8,7 +8,7 @@ interface OrderStatusHistoryEntry {
   status: string;
   createdAt: string;
   updatedAt: string;
-  [key: string]: any; // For other possible properties
+  [key: string]: unknown; // For other possible properties
 }
 
 interface PaymentStatusHistoryEntry {
@@ -17,7 +17,7 @@ interface PaymentStatusHistoryEntry {
   paymentStatus: string;
   createdAt: string;
   updatedAt: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface FulfillmentStatusHistoryEntry {
@@ -26,7 +26,7 @@ interface FulfillmentStatusHistoryEntry {
   fulfillmentStatus: string;
   createdAt: string;
   updatedAt: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 describe('Order Status Tests', () => {
@@ -34,6 +34,7 @@ describe('Order Status Tests', () => {
   let adminToken: string;
   let customerToken: string;
   let testOrderId: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testOrderItemId: string;
 
   beforeAll(async () => {

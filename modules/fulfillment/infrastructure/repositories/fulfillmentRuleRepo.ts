@@ -4,8 +4,8 @@ export interface FulfillmentRule {
   fulfillmentRuleId: string;
   name: string;
   priority: number;
-  conditions: Record<string, any>;
-  action: Record<string, any>;
+  conditions: Record<string, unknown>;
+  action: Record<string, unknown>;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

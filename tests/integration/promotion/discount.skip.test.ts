@@ -64,7 +64,7 @@ describe('Discount Tests', () => {
 
     // Only check for specific discount if it was created
     if (discountId) {
-      const foundDiscount = response.data.data.find((d: any) => d.discountId === discountId);
+      const foundDiscount = response.data.data.find((d: Record<string, unknown>) => d.discountId === discountId);
       expect(foundDiscount).toBeDefined();
     }
   });

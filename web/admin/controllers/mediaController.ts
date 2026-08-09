@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../respond';
 
 export const listMedia = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -17,11 +17,11 @@ export const listMedia = async (req: TypedRequest, res: Response): Promise<void>
       pagination: { total: 0, page: 1, pages: 1 },
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing media:', error);
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load media',
+      error: (error as Error).message || 'Failed to load media',
     });
   }
 };
@@ -32,11 +32,11 @@ export const uploadMediaForm = async (req: TypedRequest, res: Response): Promise
       pageName: 'Upload Media',
       folders: [],
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -44,12 +44,12 @@ export const uploadMediaForm = async (req: TypedRequest, res: Response): Promise
 export const uploadMedia = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/content/media?success=Media uploaded successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error uploading media:', error);
     adminRespond(req, res, 'content/media/upload', {
       pageName: 'Upload Media',
       folders: [],
-      error: error.message || 'Failed to upload media',
+      error: (error as Error).message || 'Failed to upload media',
     });
   }
 };
@@ -61,11 +61,11 @@ export const viewMedia = async (req: TypedRequest, res: Response): Promise<void>
       media: null,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load media',
+      error: (error as Error).message || 'Failed to load media',
     });
   }
 };
@@ -76,11 +76,11 @@ export const editMediaForm = async (req: TypedRequest, res: Response): Promise<v
       pageName: 'Edit Media',
       media: null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -89,13 +89,13 @@ export const updateMedia = async (req: TypedRequest, res: Response): Promise<voi
   try {
     const { mediaId } = req.params;
     res.redirect(`/admin/content/media/${mediaId}?success=Media updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating media:', error);
     adminRespond(req, res, 'content/media/edit', {
       pageName: 'Edit Media',
       media: null,
-      error: error.message || 'Failed to update media',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to update media',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -103,26 +103,26 @@ export const updateMedia = async (req: TypedRequest, res: Response): Promise<voi
 export const deleteMedia = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Media deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting media:', error);
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete media' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete media' });
   }
 };
 
 export const bulkDeleteMedia = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Media items deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error bulk deleting media:', error);
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete media items' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete media items' });
   }
 };
 
 export const createFolder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Folder created successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating folder:', error);
-    res.status(500).json({ success: false, message: error.message || 'Failed to create folder' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to create folder' });
   }
 };

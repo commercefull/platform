@@ -19,8 +19,12 @@ export interface CreateShippingZoneOutput {
   shippingZone: ShippingZone;
 }
 
+interface ShippingZoneRepository {
+  saveZone(zone: ShippingZone): Promise<ShippingZone>;
+}
+
 export class CreateShippingZoneUseCase {
-  constructor(private readonly shippingRepository: any) {}
+  constructor(private readonly shippingRepository: ShippingZoneRepository) {}
 
   async execute(input: CreateShippingZoneInput): Promise<CreateShippingZoneOutput> {
     const shippingZone = ShippingZone.create({

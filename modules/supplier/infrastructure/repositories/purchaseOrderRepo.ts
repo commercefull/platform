@@ -4,18 +4,17 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
+
 import { unixTimestamp } from '../../../../libs/date';
-import { generateUUID } from '../../../../libs/uuid';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLES = {
+/* const _TABLE = {
   PURCHASE_ORDER: Table.SupplierPurchaseOrder,
   PURCHASE_ORDER_ITEM: Table.SupplierPurchaseOrderItem,
-};
+}; */
 
 // ============================================================================
 // Types
@@ -51,7 +50,7 @@ export interface SupplierPurchaseOrder {
   total: number;
   notes?: string;
   supplierNotes?: string;
-  attachments?: Record<string, any>;
+  attachments?: Record<string, unknown>;
   approvedAt?: string;
   sentAt?: string;
   confirmedAt?: string;
@@ -270,7 +269,7 @@ export class SupplierPurchaseOrderRepo {
    */
   async update(supplierPurchaseOrderId: string, params: SupplierPurchaseOrderUpdateParams): Promise<SupplierPurchaseOrder | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -303,7 +302,7 @@ export class SupplierPurchaseOrderRepo {
    * Update status with timestamp
    */
   async updateStatus(supplierPurchaseOrderId: string, status: SupplierPurchaseOrderStatus): Promise<SupplierPurchaseOrder | null> {
-    const updates: any = { status };
+    const updates: Record<string, string> = { status };
     const now = unixTimestamp();
 
     // Set appropriate timestamp based on status
@@ -327,7 +326,7 @@ export class SupplierPurchaseOrderRepo {
 
     // Build update query
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(updates).forEach(([key, value]) => {
@@ -476,7 +475,7 @@ export class SupplierPurchaseOrderRepo {
     params: SupplierPurchaseOrderItemUpdateParams,
   ): Promise<SupplierPurchaseOrderItem | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -527,7 +526,7 @@ export class SupplierPurchaseOrderRepo {
     return this.updateItem(supplierPurchaseOrderItemId, {
       receivedQuantity: newReceivedQuantity,
       status: newStatus,
-      ...(newStatus === 'received' ? { receivedAt: unixTimestamp() as any } : {}),
+      ...(newStatus === 'received' ? { receivedAt: unixTimestamp() as unknown } : {}),
     });
   }
 
@@ -582,7 +581,16 @@ export class SupplierPurchaseOrderRepo {
     const overdue = await this.findOverdue();
     stats.overdue = overdue.length;
 
-    return stats as any;
+    return stats as {
+      total: number;
+      draft: number;
+      pending: number;
+      approved: number;
+      sent: number;
+      completed: number;
+      cancelled: number;
+      overdue: number;
+    };
   }
 }
 

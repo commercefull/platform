@@ -21,7 +21,7 @@ export interface ProcessImageCommand {
   title?: string;
   description?: string;
   tags?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProcessImageResult {

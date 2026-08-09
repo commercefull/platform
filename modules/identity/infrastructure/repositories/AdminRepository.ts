@@ -96,7 +96,7 @@ class AdminRepositoryClass {
 
   async update(adminId: string, updates: Partial<AdminUser>): Promise<AdminUser | null> {
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     if (updates.name !== undefined) {
@@ -143,9 +143,10 @@ class AdminRepositoryClass {
       UPDATE "${this.tableName}"
       SET "deletedAt" = $1, "updatedAt" = $1
       WHERE "adminId" = $2 AND "deletedAt" IS NULL
+      RETURNING "adminId"
     `;
-    const result = (await query(sql, [new Date(), adminId])) as any;
-    return (result?.rowCount || 0) > 0;
+    const result = await queryOne<{ adminId: string }>(sql, [new Date(), adminId]);
+    return result !== null;
   }
 
   async listAll(): Promise<AdminUser[]> {

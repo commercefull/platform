@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import ContentRepo from '../../../modules/content/infrastructure/repositories/contentRepo';
 import { CreatePageUseCase, CreatePageCommand } from '../../../modules/content/application/useCases/CreatePage';
 import { UpdatePageUseCase, UpdatePageCommand } from '../../../modules/content/application/useCases/UpdatePage';
@@ -23,7 +23,7 @@ export const listContentPages = async (req: TypedRequest, res: Response): Promis
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const pages = await ContentRepo.findAllPages(status as any, contentTypeId, limit, offset);
+    const pages = await ContentRepo.findAllPages(status as string | undefined, contentTypeId, limit, offset);
 
     // Get content types for filtering
     const contentTypes = await ContentRepo.findAllContentTypes(true);
@@ -37,12 +37,12 @@ export const listContentPages = async (req: TypedRequest, res: Response): Promis
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load content pages',
+      error: (error as Error).message || 'Failed to load content pages',
     });
   }
 };
@@ -57,18 +57,19 @@ export const createContentPageForm = async (req: TypedRequest, res: Response): P
       contentTypes,
       templates,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
 
 export const createContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
     const {
       title,
       slug,
@@ -81,9 +82,9 @@ export const createContentPage = async (req: TypedRequest, res: Response): Promi
       metaKeywords,
       status,
       visibility,
-      accessPassword,
+      _accessPassword,
       isHomePage,
-    } = req.body;
+    } = body;
 
     const command = new CreatePageCommand(
       title, // 1. title
@@ -109,7 +110,7 @@ export const createContentPage = async (req: TypedRequest, res: Response): Promi
     const result = await useCase.execute(command);
 
     res.redirect(`/hub/content/pages/${result.contentPageId}?success=Content page created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -120,13 +121,13 @@ export const createContentPage = async (req: TypedRequest, res: Response): Promi
         pageName: 'Create Content Page',
         contentTypes,
         templates,
-        error: error.message || 'Failed to create content page',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to create content page',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to create content page',
+        error: (error as Error).message || 'Failed to create content page',
       });
     }
   }
@@ -156,12 +157,12 @@ export const viewContentPage = async (req: TypedRequest, res: Response): Promise
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load content page',
+      error: (error as Error).message || 'Failed to load content page',
     });
   }
 };
@@ -189,12 +190,12 @@ export const editContentPageForm = async (req: TypedRequest, res: Response): Pro
       contentTypes,
       templates,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -202,8 +203,9 @@ export const editContentPageForm = async (req: TypedRequest, res: Response): Pro
 export const updateContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { pageId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
+    const body = req.body as RequestBody;
     const {
       title,
       slug,
@@ -218,7 +220,7 @@ export const updateContentPage = async (req: TypedRequest, res: Response): Promi
       visibility,
       accessPassword,
       isHomePage,
-    } = req.body;
+    } = body;
 
     if (title !== undefined) updates.title = title;
     if (slug !== undefined) updates.slug = slug;
@@ -234,12 +236,13 @@ export const updateContentPage = async (req: TypedRequest, res: Response): Promi
     if (accessPassword !== undefined) updates.accessPassword = accessPassword || undefined;
     if (isHomePage !== undefined) updates.isHomePage = isHomePage === 'true';
 
-    const command = new UpdatePageCommand(pageId, updates);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const command = new UpdatePageCommand(pageId, updates as any);
     const useCase = new UpdatePageUseCase(ContentRepo);
     await useCase.execute(command);
 
     res.redirect(`/hub/content/pages/${pageId}?success=Content page updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -252,13 +255,13 @@ export const updateContentPage = async (req: TypedRequest, res: Response): Promi
         page,
         contentTypes,
         templates,
-        error: error.message || 'Failed to update content page',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update content page',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update content page',
+        error: (error as Error).message || 'Failed to update content page',
       });
     }
   }
@@ -273,10 +276,10 @@ export const publishContentPage = async (req: TypedRequest, res: Response): Prom
     await useCase.execute(command);
 
     res.json({ success: true, message: 'Content page published successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to publish content page' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to publish content page' });
   }
 };
 
@@ -291,10 +294,10 @@ export const deleteContentPage = async (req: TypedRequest, res: Response): Promi
     }
 
     res.json({ success: true, message: 'Content page deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete content page' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete content page' });
   }
 };
 
@@ -312,12 +315,12 @@ export const listContentTemplates = async (req: TypedRequest, res: Response): Pr
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load content templates',
+      error: (error as Error).message || 'Failed to load content templates',
     });
   }
 };
@@ -329,7 +332,7 @@ export const listContentTemplates = async (req: TypedRequest, res: Response): Pr
 export const listContentMedia = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // For now, show basic media interface - can be expanded later
-    const mediaItems: any[] = [];
+    const mediaItems: unknown[] = [];
 
     adminRespond(req, res, 'content/media/index', {
       pageName: 'Media Library',
@@ -337,12 +340,12 @@ export const listContentMedia = async (req: TypedRequest, res: Response): Promis
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load media library',
+      error: (error as Error).message || 'Failed to load media library',
     });
   }
 };

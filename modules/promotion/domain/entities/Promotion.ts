@@ -7,7 +7,7 @@ export type PromotionStatus = 'draft' | 'scheduled' | 'active' | 'paused' | 'exp
 
 export interface PromotionCondition {
   type: 'min_purchase' | 'min_items' | 'specific_products' | 'specific_categories' | 'customer_group' | 'first_order';
-  value: any;
+  value: unknown;
 }
 
 export interface PromotionProps {
@@ -32,7 +32,7 @@ export interface PromotionProps {
   stackable: boolean;
   priority: number;
   merchantId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -63,7 +63,7 @@ export class Promotion {
     stackable?: boolean;
     priority?: number;
     merchantId?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Promotion {
     const now = new Date();
     return new Promotion({
@@ -158,7 +158,7 @@ export class Promotion {
   get merchantId(): string | undefined {
     return this.props.merchantId;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -252,7 +252,7 @@ export class Promotion {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       promotionId: this.props.promotionId,
       name: this.props.name,

@@ -67,7 +67,7 @@ export const formatDate = (date: Date = new Date()): string => {
 /**
  * Abstract base class for creating notification payloads
  */
-export abstract class NotificationBuilder<T> {
+export abstract class NotificationBuilder<_T> {
   protected userId: string;
   protected userType: NotificationUserType;
   protected type!: NotificationType; // Using definite assignment assertion

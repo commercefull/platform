@@ -4,7 +4,7 @@
  */
 
 import { SystemConfigurationRepository } from '../../domain/repositories/SystemConfigurationRepository';
-import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
+import { SystemConfigurationProps } from '../../domain/entities/SystemConfiguration';
 
 export class UpdateSystemConfigurationCommand {
   constructor(
@@ -17,13 +17,13 @@ export class UpdateSystemConfigurationCommand {
       defaultLanguage?: string;
       timezone?: string;
       systemMode?: 'marketplace' | 'multi_store' | 'single_store';
-      features?: any;
-      businessSettings?: any;
-      platformSettings?: any;
-      securitySettings?: any;
-      notificationSettings?: any;
-      integrationSettings?: any;
-      metadata?: any;
+      features?: Partial<SystemConfigurationProps['features']>;
+      businessSettings?: Partial<SystemConfigurationProps['businessSettings']>;
+      platformSettings?: Partial<SystemConfigurationProps['platformSettings']>;
+      securitySettings?: Partial<SystemConfigurationProps['securitySettings']>;
+      notificationSettings?: Partial<SystemConfigurationProps['notificationSettings']>;
+      integrationSettings?: Partial<SystemConfigurationProps['integrationSettings']>;
+      metadata?: Record<string, unknown>;
     },
   ) {}
 }

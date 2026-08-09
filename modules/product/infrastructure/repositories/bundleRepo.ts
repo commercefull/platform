@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { ProductBundle as DbProductBundle, ProductBundleItem as DbProductBundleItem } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -40,7 +41,7 @@ export interface ProductBundle {
   isActive: boolean;
   startDate?: Date;
   endDate?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -59,7 +60,7 @@ export interface BundleItem {
   priceAdjustment: number;
   discountPercent: number;
   sortOrder: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -69,12 +70,12 @@ export interface BundleItem {
 // ============================================================================
 
 export async function getBundle(productBundleId: string): Promise<ProductBundle | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "productBundle" WHERE "productBundleId" = $1', [productBundleId]);
+  const row = await queryOne<DbProductBundle>('SELECT * FROM "productBundle" WHERE "productBundleId" = $1', [productBundleId]);
   return row ? mapToBundle(row) : null;
 }
 
 export async function getBundleByProductId(productId: string): Promise<ProductBundle | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "productBundle" WHERE "productId" = $1', [productId]);
+  const row = await queryOne<DbProductBundle>('SELECT * FROM "productBundle" WHERE "productId" = $1', [productId]);
   return row ? mapToBundle(row) : null;
 }
 
@@ -83,7 +84,7 @@ export async function getBundles(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: ProductBundle[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters?.bundleType) {
@@ -100,7 +101,7 @@ export async function getBundles(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<DbProductBundle[]>(
     `SELECT * FROM "productBundle" WHERE ${whereClause} 
      ORDER BY "sortOrder" ASC, "createdAt" DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
@@ -115,7 +116,7 @@ export async function getBundles(
 
 export async function getActiveBundles(): Promise<ProductBundle[]> {
   const now = new Date().toISOString();
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<DbProductBundle[]>(
     `SELECT * FROM "productBundle" 
      WHERE "isActive" = true 
      AND ("startDate" IS NULL OR "startDate" <= $1)
@@ -180,7 +181,7 @@ export async function saveBundle(
     );
     return (await getBundle(bundle.productBundleId))!;
   } else {
-    const result = await queryOne<Record<string, any>>(
+    const result = await queryOne<DbProductBundle>(
       `INSERT INTO "productBundle" (
         "productId", "name", "slug", "description", "bundleType", "pricingType",
         "fixedPrice", "discountPercent", "discountAmount", "minPrice", "maxPrice",
@@ -227,7 +228,7 @@ export async function saveBundle(
 }
 
 export async function deleteBundle(productBundleId: string): Promise<void> {
-  await query('DELETE FROM "bundleItem" WHERE "productBundleId" = $1', [productBundleId]);
+  await query('DELETE FROM "productBundleItem" WHERE "productBundleId" = $1', [productBundleId]);
   await query('DELETE FROM "productBundle" WHERE "productBundleId" = $1', [productBundleId]);
 }
 
@@ -236,12 +237,12 @@ export async function deleteBundle(productBundleId: string): Promise<void> {
 // ============================================================================
 
 export async function getBundleItem(bundleItemId: string): Promise<BundleItem | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "bundleItem" WHERE "bundleItemId" = $1', [bundleItemId]);
+  const row = await queryOne<DbProductBundleItem>('SELECT * FROM "productBundleItem" WHERE "bundleItemId" = $1', [bundleItemId]);
   return row ? mapToBundleItem(row) : null;
 }
 
 export async function getBundleItems(productBundleId: string): Promise<BundleItem[]> {
-  const rows = await query<Record<string, any>[]>('SELECT * FROM "bundleItem" WHERE "productBundleId" = $1 ORDER BY "sortOrder" ASC', [
+  const rows = await query<DbProductBundleItem[]>('SELECT * FROM "productBundleItem" WHERE "productBundleId" = $1 ORDER BY "sortOrder" ASC', [
     productBundleId,
   ]);
   return (rows || []).map(mapToBundleItem);
@@ -257,7 +258,7 @@ export async function saveBundleItem(
 
   if (item.bundleItemId) {
     await query(
-      `UPDATE "bundleItem" SET
+      `UPDATE "productBundleItem" SET
         "productId" = $1, "productVariantId" = $2, "slotName" = $3,
         "quantity" = $4, "minQuantity" = $5, "maxQuantity" = $6,
         "isRequired" = $7, "isDefault" = $8, "priceAdjustment" = $9,
@@ -282,8 +283,8 @@ export async function saveBundleItem(
     );
     return (await getBundleItem(item.bundleItemId))!;
   } else {
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "bundleItem" (
+    const result = await queryOne<DbProductBundleItem>(
+      `INSERT INTO "productBundleItem" (
         "productBundleId", "productId", "productVariantId", "slotName",
         "quantity", "minQuantity", "maxQuantity", "isRequired", "isDefault",
         "priceAdjustment", "discountPercent", "sortOrder", "metadata",
@@ -313,7 +314,7 @@ export async function saveBundleItem(
 }
 
 export async function deleteBundleItem(bundleItemId: string): Promise<void> {
-  await query('DELETE FROM "bundleItem" WHERE "bundleItemId" = $1', [bundleItemId]);
+  await query('DELETE FROM "productBundleItem" WHERE "bundleItemId" = $1', [bundleItemId]);
 }
 
 // ============================================================================
@@ -394,58 +395,58 @@ export async function calculateBundlePrice(
 // Helpers
 // ============================================================================
 
-function mapToBundle(row: Record<string, any>): ProductBundle {
+function mapToBundle(row: DbProductBundle): ProductBundle {
   return {
     productBundleId: row.productBundleId,
     productId: row.productId,
     name: row.name,
-    slug: row.slug,
-    description: row.description,
-    bundleType: row.bundleType,
-    pricingType: row.pricingType,
+    slug: row.slug ?? undefined,
+    description: row.description ?? undefined,
+    bundleType: (row.bundleType as BundleType) ?? 'fixed',
+    pricingType: (row.pricingType as PricingType) ?? 'fixed',
     fixedPrice: row.fixedPrice ? parseFloat(row.fixedPrice) : undefined,
     discountPercent: row.discountPercent ? parseFloat(row.discountPercent) : undefined,
     discountAmount: row.discountAmount ? parseFloat(row.discountAmount) : undefined,
     minPrice: row.minPrice ? parseFloat(row.minPrice) : undefined,
     maxPrice: row.maxPrice ? parseFloat(row.maxPrice) : undefined,
     currency: row.currency || 'USD',
-    minItems: row.minItems ? parseInt(row.minItems) : undefined,
-    maxItems: row.maxItems ? parseInt(row.maxItems) : undefined,
-    minQuantity: parseInt(row.minQuantity) || 1,
-    maxQuantity: row.maxQuantity ? parseInt(row.maxQuantity) : undefined,
+    minItems: row.minItems ?? undefined,
+    maxItems: row.maxItems ?? undefined,
+    minQuantity: row.minQuantity ?? 1,
+    maxQuantity: row.maxQuantity ?? undefined,
     requireAllItems: Boolean(row.requireAllItems),
     allowDuplicates: Boolean(row.allowDuplicates),
     showSavings: Boolean(row.showSavings),
     savingsAmount: row.savingsAmount ? parseFloat(row.savingsAmount) : undefined,
     savingsPercent: row.savingsPercent ? parseFloat(row.savingsPercent) : undefined,
-    imageUrl: row.imageUrl,
-    sortOrder: parseInt(row.sortOrder) || 0,
+    imageUrl: row.imageUrl ?? undefined,
+    sortOrder: row.sortOrder ?? 0,
     isActive: Boolean(row.isActive),
     startDate: row.startDate ? new Date(row.startDate) : undefined,
     endDate: row.endDate ? new Date(row.endDate) : undefined,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    metadata: row.metadata as Record<string, unknown> | undefined ?? undefined,
+    createdAt: new Date(row.createdAt!),
+    updatedAt: new Date(row.updatedAt!),
   };
 }
 
-function mapToBundleItem(row: Record<string, any>): BundleItem {
+function mapToBundleItem(row: DbProductBundleItem): BundleItem {
   return {
     bundleItemId: row.bundleItemId,
     productBundleId: row.productBundleId,
     productId: row.productId,
-    productVariantId: row.productVariantId,
-    slotName: row.slotName,
-    quantity: parseInt(row.quantity) || 1,
-    minQuantity: parseInt(row.minQuantity) || 1,
-    maxQuantity: row.maxQuantity ? parseInt(row.maxQuantity) : undefined,
+    productVariantId: row.productVariantId ?? undefined,
+    slotName: row.slotName ?? undefined,
+    quantity: row.quantity ?? 1,
+    minQuantity: row.minQuantity ?? 1,
+    maxQuantity: row.maxQuantity ?? undefined,
     isRequired: Boolean(row.isRequired),
     isDefault: Boolean(row.isDefault),
-    priceAdjustment: parseFloat(row.priceAdjustment) || 0,
-    discountPercent: parseFloat(row.discountPercent) || 0,
-    sortOrder: parseInt(row.sortOrder) || 0,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    priceAdjustment: row.priceAdjustment ? parseFloat(row.priceAdjustment) : 0,
+    discountPercent: row.discountPercent ? parseFloat(row.discountPercent) : 0,
+    sortOrder: row.sortOrder ?? 0,
+    metadata: row.metadata as Record<string, unknown> | undefined ?? undefined,
+    createdAt: new Date(row.createdAt!),
+    updatedAt: new Date(row.updatedAt!),
   };
 }

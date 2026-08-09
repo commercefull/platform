@@ -10,6 +10,75 @@ import { TypedRequest } from 'libs/types/express';
 import loyaltyRepo, { LoyaltyPointsAction } from '../../infrastructure/repositories/loyaltyRepo';
 
 // ============================================================================
+// Body Interfaces
+// ============================================================================
+
+interface CreateTierBody {
+  name: string;
+  description?: string;
+  type?: string;
+  pointsThreshold: number;
+  multiplier: number;
+  benefits?: unknown[];
+  isActive?: boolean;
+}
+
+interface UpdateTierBody {
+  name?: string;
+  description?: string;
+  type?: string;
+  pointsThreshold?: number;
+  multiplier?: number;
+  benefits?: unknown[];
+  isActive?: boolean;
+}
+
+interface CreateRewardBody {
+  name: string;
+  description?: string;
+  pointsCost: number;
+  discountAmount?: number;
+  discountPercent?: number;
+  discountCode?: string;
+  freeShipping?: boolean;
+  productIds?: string[];
+  expiresAt?: string;
+  isActive?: boolean;
+}
+
+interface UpdateRewardBody {
+  name?: string;
+  description?: string;
+  pointsCost?: number;
+  discountAmount?: number;
+  discountPercent?: number;
+  discountCode?: string;
+  freeShipping?: boolean;
+  productIds?: string[];
+  expiresAt?: string;
+  isActive?: boolean;
+}
+
+interface AdjustPointsBody {
+  points: string;
+  reason?: string;
+  tierId?: string;
+}
+
+interface UpdateRedemptionStatusBody {
+  status: string;
+}
+
+interface ProcessOrderPointsBody {
+  orderAmount: string;
+  customerId: string;
+}
+
+interface _RedeemRewardBody {
+  rewardId: string;
+}
+
+// ============================================================================
 // Helper Functions
 // ============================================================================
 
@@ -59,7 +128,7 @@ export const getTierById = async (req: TypedRequest, res: Response): Promise<voi
   }
 };
 
-export const createTier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createTier = async (req: TypedRequest<Record<string, string>, unknown, CreateTierBody>, res: Response): Promise<void> => {
   try {
     const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = req.body;
 
@@ -86,7 +155,7 @@ export const createTier = async (req: TypedRequest, res: Response): Promise<void
   }
 };
 
-export const updateTier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateTier = async (req: TypedRequest<Record<string, string>, unknown, UpdateTierBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = req.body;
@@ -143,7 +212,7 @@ export const getRewardById = async (req: TypedRequest, res: Response): Promise<v
   }
 };
 
-export const createReward = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createReward = async (req: TypedRequest<Record<string, string>, unknown, CreateRewardBody>, res: Response): Promise<void> => {
   try {
     const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
       req.body;
@@ -174,7 +243,7 @@ export const createReward = async (req: TypedRequest, res: Response): Promise<vo
   }
 };
 
-export const updateReward = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateReward = async (req: TypedRequest<Record<string, string>, unknown, UpdateRewardBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
@@ -245,7 +314,7 @@ export const getCustomerPointsTransactions = async (req: TypedRequest, res: Resp
   }
 };
 
-export const adjustCustomerPoints = async (req: TypedRequest, res: Response): Promise<void> => {
+export const adjustCustomerPoints = async (req: TypedRequest<Record<string, string>, unknown, AdjustPointsBody>, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const { points, reason, tierId } = req.body;
@@ -270,7 +339,7 @@ export const adjustCustomerPoints = async (req: TypedRequest, res: Response): Pr
       reason || 'Manual adjustment by admin',
     );
 
-    respondWithMessage(res, updatedPoints, `Customer points ${points >= 0 ? 'increased' : 'decreased'} successfully`);
+    respondWithMessage(res, updatedPoints, `Customer points ${parseInt(points) >= 0 ? 'increased' : 'decreased'} successfully`);
   } catch (error) {
     logger.error('Error:', error);
 
@@ -296,7 +365,7 @@ export const getCustomerRedemptions = async (req: TypedRequest, res: Response): 
   }
 };
 
-export const updateRedemptionStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateRedemptionStatus = async (req: TypedRequest<Record<string, string>, unknown, UpdateRedemptionStatusBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -320,7 +389,7 @@ export const updateRedemptionStatus = async (req: TypedRequest, res: Response): 
 // Order Processing
 // ============================================================================
 
-export const processOrderPoints = async (req: TypedRequest, res: Response): Promise<void> => {
+export const processOrderPoints = async (req: TypedRequest<Record<string, string>, unknown, ProcessOrderPointsBody>, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const { orderAmount, customerId } = req.body;

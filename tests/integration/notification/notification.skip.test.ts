@@ -17,11 +17,11 @@ interface Notification {
   readAt?: string;
   priority: string;
   category?: string;
-  data?: Record<string, any>;
-  metadata?: Record<string, any>;
+  data?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 describe('Notification Tests', () => {

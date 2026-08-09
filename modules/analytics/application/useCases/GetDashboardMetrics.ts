@@ -47,7 +47,12 @@ export interface GetDashboardMetricsOutput {
 }
 
 export class GetDashboardMetricsUseCase {
-  constructor(private readonly analyticsRepository: any) {}
+  constructor(private readonly analyticsRepository: {
+    getOrderMetrics(storeId: string | undefined, startDate: Date, endDate: Date): Promise<{ count: number; revenue: number }>;
+    getCustomerMetrics(storeId: string | undefined, startDate: Date, endDate: Date): Promise<{ total: number; new: number; conversionRate: number }>;
+    getTopProducts(storeId: string | undefined, startDate: Date, endDate: Date, limit: number): Promise<Array<{ productId: string; name: string; quantity: number; revenue: number }>>;
+    getRecentOrders(storeId: string | undefined, limit: number): Promise<Array<{ orderId: string; total: number; status: string; createdAt: string }>>;
+  }) {}
 
   async execute(input: GetDashboardMetricsInput): Promise<GetDashboardMetricsOutput> {
     const { storeId, startDate, endDate, compareWithPrevious } = input;

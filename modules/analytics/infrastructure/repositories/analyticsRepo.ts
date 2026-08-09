@@ -10,6 +10,12 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import {
+  AnalyticsSalesDaily as AnalyticsSalesDailyRow,
+  AnalyticsProductPerformance as AnalyticsProductPerformanceRow,
+  AnalyticsSearchQuery as AnalyticsSearchQueryRow,
+  AnalyticsCustomerCohort as AnalyticsCustomerCohortRow,
+} from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -167,7 +173,7 @@ export async function getSalesDaily(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: SalesDaily[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters.startDate) {
@@ -195,7 +201,7 @@ export async function getSalesDaily(
   const limit = pagination?.limit || 30;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<AnalyticsSalesDailyRow[]>(
     `SELECT * FROM "${TABLES.SALES_DAILY}" WHERE ${whereClause} 
      ORDER BY "date" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -219,14 +225,20 @@ export async function getSalesSummary(
   conversionRate: number;
 }> {
   let whereClause = '"date" >= $1 AND "date" <= $2';
-  const params: any[] = [startDate, endDate];
+  const params: unknown[] = [startDate, endDate];
 
   if (merchantId) {
     whereClause += ' AND "merchantId" = $3';
     params.push(merchantId);
   }
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<{
+    totalRevenue: string;
+    totalOrders: string;
+    averageOrderValue: string;
+    newCustomers: string;
+    conversionRate: string;
+  }>(
     `SELECT 
       COALESCE(SUM("netRevenue"), 0) as "totalRevenue",
       COALESCE(SUM("orderCount"), 0) as "totalOrders",
@@ -330,7 +342,7 @@ export async function getProductPerformance(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: ProductPerformance[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters.productId) {
@@ -354,7 +366,7 @@ export async function getProductPerformance(
   const limit = pagination?.limit || 30;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<AnalyticsProductPerformanceRow[]>(
     `SELECT * FROM "analyticsProductPerformance" WHERE ${whereClause} 
      ORDER BY "date" DESC, "revenue" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -372,7 +384,7 @@ export async function getTopProducts(
   metric: 'revenue' | 'purchases' | 'views' = 'revenue',
   limit: number = 10,
 ): Promise<ProductPerformance[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<AnalyticsProductPerformanceRow[]>(
     `SELECT "productId", 
       SUM("views") as "views",
       SUM("uniqueViews") as "uniqueViews",
@@ -461,7 +473,7 @@ export async function getSearchQueries(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: SearchQuery[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters.startDate) {
@@ -489,7 +501,7 @@ export async function getSearchQueries(
   const limit = pagination?.limit || 50;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<AnalyticsSearchQueryRow[]>(
     `SELECT * FROM "analyticsSearchQuery" WHERE ${whereClause} 
      ORDER BY "searchCount" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -548,7 +560,7 @@ export async function upsertSearchQuery(data: {
 
 export async function getCustomerCohorts(startMonth?: Date, endMonth?: Date): Promise<CustomerCohort[]> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (startMonth) {
@@ -560,7 +572,7 @@ export async function getCustomerCohorts(startMonth?: Date, endMonth?: Date): Pr
     params.push(endMonth);
   }
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<AnalyticsCustomerCohortRow[]>(
     `SELECT * FROM "analyticsCustomerCohort" WHERE ${whereClause} 
      ORDER BY "cohortMonth" DESC, "monthNumber" ASC`,
     params,
@@ -573,111 +585,111 @@ export async function getCustomerCohorts(startMonth?: Date, endMonth?: Date): Pr
 // Mappers
 // ============================================================================
 
-function mapToSalesDaily(row: Record<string, any>): SalesDaily {
+function mapToSalesDaily(row: AnalyticsSalesDailyRow): SalesDaily {
   return {
     analyticsSalesDailyId: row.analyticsSalesDailyId,
-    merchantId: row.merchantId,
+    merchantId: row.merchantId ?? undefined,
     date: new Date(row.date),
-    channel: row.channel,
-    currency: row.currency,
-    orderCount: parseInt(row.orderCount) || 0,
-    itemsSold: parseInt(row.itemsSold) || 0,
-    grossRevenue: parseFloat(row.grossRevenue) || 0,
-    discountTotal: parseFloat(row.discountTotal) || 0,
-    refundTotal: parseFloat(row.refundTotal) || 0,
-    netRevenue: parseFloat(row.netRevenue) || 0,
-    taxTotal: parseFloat(row.taxTotal) || 0,
-    shippingRevenue: parseFloat(row.shippingRevenue) || 0,
-    averageOrderValue: parseFloat(row.averageOrderValue) || 0,
-    newCustomers: parseInt(row.newCustomers) || 0,
-    returningCustomers: parseInt(row.returningCustomers) || 0,
-    guestOrders: parseInt(row.guestOrders) || 0,
-    cartCreated: parseInt(row.cartCreated) || 0,
-    cartAbandoned: parseInt(row.cartAbandoned) || 0,
-    checkoutStarted: parseInt(row.checkoutStarted) || 0,
-    checkoutCompleted: parseInt(row.checkoutCompleted) || 0,
-    conversionRate: parseFloat(row.conversionRate) || 0,
-    paymentSuccessCount: parseInt(row.paymentSuccessCount) || 0,
-    paymentFailedCount: parseInt(row.paymentFailedCount) || 0,
-    paymentSuccessRate: parseFloat(row.paymentSuccessRate) || 0,
+    channel: row.channel ?? 'all',
+    currency: row.currency ?? 'USD',
+    orderCount: row.orderCount ?? 0,
+    itemsSold: row.itemsSold ?? 0,
+    grossRevenue: parseFloat(row.grossRevenue ?? '0'),
+    discountTotal: parseFloat(row.discountTotal ?? '0'),
+    refundTotal: parseFloat(row.refundTotal ?? '0'),
+    netRevenue: parseFloat(row.netRevenue ?? '0'),
+    taxTotal: parseFloat(row.taxTotal ?? '0'),
+    shippingRevenue: parseFloat(row.shippingRevenue ?? '0'),
+    averageOrderValue: parseFloat(row.averageOrderValue ?? '0'),
+    newCustomers: row.newCustomers ?? 0,
+    returningCustomers: row.returningCustomers ?? 0,
+    guestOrders: row.guestOrders ?? 0,
+    cartCreated: row.cartCreated ?? 0,
+    cartAbandoned: row.cartAbandoned ?? 0,
+    checkoutStarted: row.checkoutStarted ?? 0,
+    checkoutCompleted: row.checkoutCompleted ?? 0,
+    conversionRate: parseFloat(row.conversionRate ?? '0'),
+    paymentSuccessCount: row.paymentSuccessCount ?? 0,
+    paymentFailedCount: row.paymentFailedCount ?? 0,
+    paymentSuccessRate: parseFloat(row.paymentSuccessRate ?? '0'),
     computedAt: row.computedAt ? new Date(row.computedAt) : undefined,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    createdAt: new Date(row.createdAt ?? new Date()),
+    updatedAt: new Date(row.updatedAt ?? new Date()),
   };
 }
 
-function mapToProductPerformance(row: Record<string, any>): ProductPerformance {
+function mapToProductPerformance(row: AnalyticsProductPerformanceRow): ProductPerformance {
   return {
     analyticsProductPerformanceId: row.analyticsProductPerformanceId,
     productId: row.productId,
-    productVariantId: row.productVariantId,
+    productVariantId: row.productVariantId ?? undefined,
     date: new Date(row.date),
-    channel: row.channel,
-    views: parseInt(row.views) || 0,
-    uniqueViews: parseInt(row.uniqueViews) || 0,
-    detailViews: parseInt(row.detailViews) || 0,
-    addToCarts: parseInt(row.addToCarts) || 0,
-    removeFromCarts: parseInt(row.removeFromCarts) || 0,
-    viewToCartRate: parseFloat(row.viewToCartRate) || 0,
-    purchases: parseInt(row.purchases) || 0,
-    quantitySold: parseInt(row.quantitySold) || 0,
-    revenue: parseFloat(row.revenue) || 0,
-    averagePrice: parseFloat(row.averagePrice) || 0,
-    cartToOrderRate: parseFloat(row.cartToOrderRate) || 0,
-    returns: parseInt(row.returns) || 0,
-    returnQuantity: parseInt(row.returnQuantity) || 0,
-    returnRate: parseFloat(row.returnRate) || 0,
-    reviews: parseInt(row.reviews) || 0,
+    channel: row.channel ?? 'all',
+    views: row.views ?? 0,
+    uniqueViews: row.uniqueViews ?? 0,
+    detailViews: row.detailViews ?? 0,
+    addToCarts: row.addToCarts ?? 0,
+    removeFromCarts: row.removeFromCarts ?? 0,
+    viewToCartRate: parseFloat(row.viewToCartRate ?? '0'),
+    purchases: row.purchases ?? 0,
+    quantitySold: row.quantitySold ?? 0,
+    revenue: parseFloat(row.revenue ?? '0'),
+    averagePrice: parseFloat(row.averagePrice ?? '0'),
+    cartToOrderRate: parseFloat(row.cartToOrderRate ?? '0'),
+    returns: row.returns ?? 0,
+    returnQuantity: row.returnQuantity ?? 0,
+    returnRate: parseFloat(row.returnRate ?? '0'),
+    reviews: row.reviews ?? 0,
     averageRating: row.averageRating ? parseFloat(row.averageRating) : undefined,
-    stockAlerts: parseInt(row.stockAlerts) || 0,
-    outOfStockViews: parseInt(row.outOfStockViews) || 0,
+    stockAlerts: row.stockAlerts ?? 0,
+    outOfStockViews: row.outOfStockViews ?? 0,
     computedAt: row.computedAt ? new Date(row.computedAt) : undefined,
-    createdAt: new Date(row.createdAt),
+    createdAt: new Date(row.createdAt ?? new Date()),
   };
 }
 
-function mapToSearchQuery(row: Record<string, any>): SearchQuery {
+function mapToSearchQuery(row: AnalyticsSearchQueryRow): SearchQuery {
   return {
     analyticsSearchQueryId: row.analyticsSearchQueryId,
-    merchantId: row.merchantId,
+    merchantId: row.merchantId ?? undefined,
     query: row.query,
-    queryNormalized: row.queryNormalized,
+    queryNormalized: row.queryNormalized ?? undefined,
     date: new Date(row.date),
-    searchCount: parseInt(row.searchCount) || 0,
-    uniqueSearchers: parseInt(row.uniqueSearchers) || 0,
-    resultCount: parseInt(row.resultCount) || 0,
+    searchCount: row.searchCount ?? 0,
+    uniqueSearchers: row.uniqueSearchers ?? 0,
+    resultCount: row.resultCount ?? 0,
     isZeroResult: Boolean(row.isZeroResult),
-    clickCount: parseInt(row.clickCount) || 0,
-    clickThroughRate: parseFloat(row.clickThroughRate) || 0,
-    averageClickPosition: parseInt(row.averageClickPosition) || 0,
-    addToCartCount: parseInt(row.addToCartCount) || 0,
-    purchaseCount: parseInt(row.purchaseCount) || 0,
-    conversionRate: parseFloat(row.conversionRate) || 0,
-    revenue: parseFloat(row.revenue) || 0,
-    refinementCount: parseInt(row.refinementCount) || 0,
-    exitCount: parseInt(row.exitCount) || 0,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    clickCount: row.clickCount ?? 0,
+    clickThroughRate: parseFloat(row.clickThroughRate ?? '0'),
+    averageClickPosition: row.averageClickPosition ?? 0,
+    addToCartCount: row.addToCartCount ?? 0,
+    purchaseCount: row.purchaseCount ?? 0,
+    conversionRate: parseFloat(row.conversionRate ?? '0'),
+    revenue: parseFloat(row.revenue ?? '0'),
+    refinementCount: row.refinementCount ?? 0,
+    exitCount: row.exitCount ?? 0,
+    createdAt: new Date(row.createdAt ?? new Date()),
+    updatedAt: new Date(row.updatedAt ?? new Date()),
   };
 }
 
-function mapToCustomerCohort(row: Record<string, any>): CustomerCohort {
+function mapToCustomerCohort(row: AnalyticsCustomerCohortRow): CustomerCohort {
   return {
     analyticsCustomerCohortId: row.analyticsCustomerCohortId,
-    merchantId: row.merchantId,
+    merchantId: row.merchantId ?? undefined,
     cohortMonth: new Date(row.cohortMonth),
-    monthNumber: parseInt(row.monthNumber) || 0,
-    customersInCohort: parseInt(row.customersInCohort) || 0,
-    activeCustomers: parseInt(row.activeCustomers) || 0,
-    retentionRate: parseFloat(row.retentionRate) || 0,
-    revenue: parseFloat(row.revenue) || 0,
-    orders: parseInt(row.orders) || 0,
-    averageOrderValue: parseFloat(row.averageOrderValue) || 0,
-    lifetimeValue: parseFloat(row.lifetimeValue) || 0,
-    repeatPurchasers: parseInt(row.repeatPurchasers) || 0,
-    repeatPurchaseRate: parseFloat(row.repeatPurchaseRate) || 0,
-    averageOrdersPerCustomer: parseFloat(row.averageOrdersPerCustomer) || 0,
+    monthNumber: row.monthNumber ?? 0,
+    customersInCohort: row.customersInCohort ?? 0,
+    activeCustomers: row.activeCustomers ?? 0,
+    retentionRate: parseFloat(row.retentionRate ?? '0'),
+    revenue: parseFloat(row.revenue ?? '0'),
+    orders: row.orders ?? 0,
+    averageOrderValue: parseFloat(row.averageOrderValue ?? '0'),
+    lifetimeValue: parseFloat(row.lifetimeValue ?? '0'),
+    repeatPurchasers: row.repeatPurchasers ?? 0,
+    repeatPurchaseRate: parseFloat(row.repeatPurchaseRate ?? '0'),
+    averageOrdersPerCustomer: parseFloat(row.averageOrdersPerCustomer ?? '0'),
     computedAt: row.computedAt ? new Date(row.computedAt) : undefined,
-    createdAt: new Date(row.createdAt),
+    createdAt: new Date(row.createdAt ?? new Date()),
   };
 }

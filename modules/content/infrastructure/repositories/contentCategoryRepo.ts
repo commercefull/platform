@@ -30,7 +30,7 @@ export class ContentCategoryRepo {
   async findAllCategories(parentId?: string, isActive?: boolean, limit: number = 100, offset: number = 0): Promise<ContentCategory[]> {
     let sql = 'SELECT * FROM "contentCategory"';
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (parentId !== undefined) {
@@ -59,7 +59,7 @@ export class ContentCategoryRepo {
   }
 
   async findRootCategories(isActive?: boolean): Promise<ContentCategory[]> {
-    return this.findAllCategories(null as any, isActive);
+    return this.findAllCategories('', isActive);
   }
 
   async findChildCategories(parentId: string, isActive?: boolean): Promise<ContentCategory[]> {
@@ -68,7 +68,7 @@ export class ContentCategoryRepo {
 
   async getCategoryTree(isActive?: boolean): Promise<ContentCategory[]> {
     let sql = 'SELECT * FROM "contentCategory"';
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (isActive !== undefined) {
       sql += ' WHERE "isActive" = $1';
@@ -138,7 +138,7 @@ export class ContentCategoryRepo {
   async updateCategory(id: string, params: ContentCategoryUpdateParams): Promise<ContentCategory> {
     const now = unixTimestamp();
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     if (params.name !== undefined) {

@@ -67,7 +67,7 @@ export interface AttributeValue {
   displayValue?: string;
   position: number;
   isDefault: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class ProductAttribute {

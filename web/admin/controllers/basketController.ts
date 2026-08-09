@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
 import { adminRespond } from '../../respond';
 
@@ -49,12 +49,12 @@ export const listAbandonedCarts = async (req: TypedRequest, res: Response): Prom
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load abandoned carts',
+      error: (error as Error).message || 'Failed to load abandoned carts',
     });
   }
 };
@@ -89,12 +89,12 @@ export const viewAbandonedCart = async (req: TypedRequest, res: Response): Promi
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load abandoned cart',
+      error: (error as Error).message || 'Failed to load abandoned cart',
     });
   }
 };
@@ -102,7 +102,8 @@ export const viewAbandonedCart = async (req: TypedRequest, res: Response): Promi
 export const recoverAbandonedCart = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
-    const { recoveryMethod, message } = req.body;
+    const body = req.body as RequestBody;
+    const { recoveryMethod, message } = body;
 
     const basket = await BasketRepo.findById(basketId);
 
@@ -132,17 +133,18 @@ export const recoverAbandonedCart = async (req: TypedRequest, res: Response): Pr
       recoveryMethod,
       basketId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to recover abandoned cart' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to recover abandoned cart' });
   }
 };
 
 export const sendRecoveryEmail = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
-    const { template, subject, discountCode } = req.body;
+    const body = req.body as RequestBody;
+    const { template, subject, discountCode } = body;
 
     const basket = await BasketRepo.findById(basketId);
 
@@ -171,24 +173,24 @@ export const sendRecoveryEmail = async (req: TypedRequest, res: Response): Promi
       basketId,
       customerId: basket.customerId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to send recovery email' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to send recovery email' });
   }
 };
 
 export const markCartRecovered = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { basketId } = req.params;
+    const { _basketId } = req.params;
 
     // In a real implementation, this would be called when a customer completes purchase from recovered cart
 
     res.json({ success: true, message: 'Cart marked as recovered' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to mark cart as recovered' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to mark cart as recovered' });
   }
 };
 
@@ -264,12 +266,12 @@ export const basketAnalytics = async (req: TypedRequest, res: Response): Promise
       pageName: 'Cart Analytics',
       stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load basket analytics',
+      error: (error as Error).message || 'Failed to load basket analytics',
     });
   }
 };
@@ -289,9 +291,9 @@ export const cleanupExpiredBaskets = async (req: TypedRequest, res: Response): P
       message: `Successfully cleaned up ${deletedCount} expired baskets`,
       deletedCount,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to cleanup expired baskets' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to cleanup expired baskets' });
   }
 };

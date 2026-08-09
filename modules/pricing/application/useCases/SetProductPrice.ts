@@ -21,8 +21,21 @@ export interface SetProductPriceOutput {
   updatedAt: string;
 }
 
+interface SetProductPriceRepositoryPort {
+  setPrice(data: {
+    productId: string;
+    variantId?: string;
+    priceListId?: string;
+    price: number;
+    salePrice?: number;
+    saleStartDate?: Date;
+    saleEndDate?: Date;
+    currencyCode: string;
+  }): Promise<{ productId: string; variantId?: string; price: number; salePrice?: number; updatedAt: Date }>;
+}
+
 export class SetProductPriceUseCase {
-  constructor(private readonly pricingRepository: any) {}
+  constructor(private readonly pricingRepository: SetProductPriceRepositoryPort) {}
 
   async execute(input: SetProductPriceInput): Promise<SetProductPriceOutput> {
     if (!input.productId || input.price === undefined) {

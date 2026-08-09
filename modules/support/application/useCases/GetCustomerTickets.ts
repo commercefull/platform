@@ -30,8 +30,25 @@ export interface GetCustomerTicketsOutput {
   limit: number;
 }
 
+interface TicketRecord {
+  ticketId: string;
+  ticketNumber: string;
+  subject: string;
+  type: string;
+  priority: string;
+  status: string;
+  createdAt: Date;
+  lastActivityAt?: Date;
+  commentCount?: number;
+}
+
+interface SupportRepository {
+  findTickets(filters: Record<string, unknown>, pagination: { page: number; limit: number }): Promise<TicketRecord[]>;
+  countTickets(filters: Record<string, unknown>): Promise<number>;
+}
+
 export class GetCustomerTicketsUseCase {
-  constructor(private readonly supportRepository: any) {}
+  constructor(private readonly supportRepository: SupportRepository) {}
 
   async execute(input: GetCustomerTicketsInput): Promise<GetCustomerTicketsOutput> {
     const page = input.page || 1;
@@ -50,7 +67,7 @@ export class GetCustomerTicketsUseCase {
     ]);
 
     return {
-      tickets: tickets.map((t: any) => ({
+      tickets: tickets.map((t: TicketRecord) => ({
         ticketId: t.ticketId,
         ticketNumber: t.ticketNumber,
         subject: t.subject,

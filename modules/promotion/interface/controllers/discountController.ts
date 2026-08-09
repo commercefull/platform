@@ -9,9 +9,9 @@ export const getActiveDiscounts = async (req: TypedRequest, res: Response): Prom
     const { merchantId } = req.query;
     const discounts = await discountRepo.findActive(merchantId as string | undefined);
     res.status(200).json({ success: true, data: discounts || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -22,9 +22,9 @@ export const getDiscountsByProductId = async (req: TypedRequest, res: Response):
     const { merchantId } = req.query;
     const discounts = await discountRepo.findDiscountsForProduct(productId, merchantId as string | undefined);
     res.status(200).json({ success: true, data: discounts || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -35,9 +35,9 @@ export const getDiscountsByCategoryId = async (req: TypedRequest, res: Response)
     const { merchantId } = req.query;
     const discounts = await discountRepo.findDiscountsForCategory(categoryId, merchantId as string | undefined);
     res.status(200).json({ success: true, data: discounts || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -53,16 +53,16 @@ export const getDiscountById = async (req: TypedRequest, res: Response): Promise
     }
 
     res.status(200).json({ success: true, data: discount });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 // Create a new discount
-export const createDiscount = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createDiscount = async (req: TypedRequest<Record<string, string>, unknown, CreateProductDiscountInput>, res: Response): Promise<void> => {
   try {
-    const discountData: CreateProductDiscountInput = req.body;
+    const discountData = req.body;
 
     // Validate required fields
     if (!discountData.name || !discountData.discountType || discountData.discountValue === undefined) {
@@ -72,23 +72,23 @@ export const createDiscount = async (req: TypedRequest, res: Response): Promise<
 
     const discount = await discountRepo.create(discountData);
     res.status(201).json({ success: true, data: discount });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 // Update an existing discount
-export const updateDiscount = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateDiscount = async (req: TypedRequest<Record<string, string>, unknown, UpdateProductDiscountInput>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const discountData: UpdateProductDiscountInput = req.body;
+    const discountData = req.body;
 
     const discount = await discountRepo.update(id, discountData);
     res.status(200).json({ success: true, data: discount });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -104,8 +104,8 @@ export const deleteDiscount = async (req: TypedRequest, res: Response): Promise<
     }
 
     res.status(200).json({ success: true, message: 'Discount deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };

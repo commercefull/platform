@@ -3,6 +3,7 @@
  */
 
 import organizationRepo from '../../infrastructure/repositories/organizationRepo';
+import { Store as DbStore } from '../../../../libs/db/types';
 
 export interface GetOrganizationStoresInput {
   organizationId: string;
@@ -31,7 +32,7 @@ export class GetOrganizationStoresUseCase {
       throw new Error('Organization not found');
     }
 
-    const stores = await organizationRepo.getStoresByOrganization(input.organizationId);
+    const stores = await organizationRepo.getStoresByOrganization(input.organizationId) as DbStore[];
 
     // Apply pagination
     const start = input.offset || 0;
@@ -43,7 +44,7 @@ export class GetOrganizationStoresUseCase {
         storeId: store.storeId,
         name: store.name,
         slug: store.slug,
-        status: store.status,
+        status: store.isActive ? 'active' : 'inactive',
       })),
       total: stores.length,
     };

@@ -24,7 +24,7 @@ export interface MediaProps {
   title?: string;
   description?: string;
   tags: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,7 +48,7 @@ export class Media {
     title?: string;
     description?: string;
     tags?: string[];
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Media {
     const now = new Date();
 
@@ -108,7 +108,7 @@ export class Media {
   get tags(): string[] {
     return [...this.props.tags];
   }
-  get metadata(): Record<string, any> {
+  get metadata(): Record<string, unknown> {
     return { ...this.props.metadata };
   }
   get createdAt(): Date {
@@ -160,7 +160,7 @@ export class Media {
     this.touch();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -184,7 +184,7 @@ export class Media {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       mediaId: this.props.mediaId,
       originalName: this.props.originalName,

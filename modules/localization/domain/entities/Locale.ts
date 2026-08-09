@@ -21,7 +21,7 @@ export interface LocaleProps {
   isActive: boolean;
   isDefault: boolean;
   translations?: Record<string, string>;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -83,7 +83,7 @@ export class Locale {
     return parts.join(decimalSeparator);
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return { ...this.props };
   }
 }

@@ -8,9 +8,15 @@ import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import * as giftCardRepo from '../../infrastructure/repositories/giftCardRepo';
 
-type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
+interface RedeemOrReloadBody {
+  code: string;
+  amount: number;
+  orderId?: string;
+}
 
-export const checkGiftCardBalance: AsyncHandler = async (req, res, next) => {
+type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
+
+export const checkGiftCardBalance: AsyncHandler = async (req, res, _next) => {
   try {
     const { code } = req.params;
     const giftCard = await giftCardRepo.getGiftCardByCode(code);
@@ -39,17 +45,17 @@ export const checkGiftCardBalance: AsyncHandler = async (req, res, next) => {
         expiresAt: giftCard.expiresAt,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const redeemGiftCard: AsyncHandler = async (req, res, next) => {
+export const redeemGiftCard: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
-    const { code, amount, orderId } = req.body;
+    const { code, amount, orderId } = req.body as RedeemOrReloadBody;
 
     const giftCard = await giftCardRepo.getGiftCardByCode(code);
     if (!giftCard) {
@@ -60,14 +66,14 @@ export const redeemGiftCard: AsyncHandler = async (req, res, next) => {
     const transaction = await giftCardRepo.redeemGiftCard(giftCard.promotionGiftCardId, amount, orderId, customerId);
 
     res.json({ success: true, data: transaction });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getMyGiftCards: AsyncHandler = async (req, res, next) => {
+export const getMyGiftCards: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const { limit, offset } = req.query;
@@ -78,17 +84,17 @@ export const getMyGiftCards: AsyncHandler = async (req, res, next) => {
     );
 
     res.json({ success: true, ...result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const reloadGiftCard: AsyncHandler = async (req, res, next) => {
+export const reloadGiftCard: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
-    const { code, amount, orderId } = req.body;
+    const { code, amount, orderId } = req.body as RedeemOrReloadBody;
 
     const giftCard = await giftCardRepo.getGiftCardByCode(code);
     if (!giftCard) {
@@ -104,9 +110,9 @@ export const reloadGiftCard: AsyncHandler = async (req, res, next) => {
     const transaction = await giftCardRepo.reloadGiftCard(giftCard.promotionGiftCardId, amount, orderId, customerId);
 
     res.json({ success: true, data: transaction });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };

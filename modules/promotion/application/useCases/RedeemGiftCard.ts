@@ -93,10 +93,10 @@ export class RedeemGiftCardUseCase {
         remainingBalance: updatedGiftCard?.currentBalance ?? 0,
         message: 'Gift card redeemed successfully',
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        message: error.message || 'Failed to redeem gift card',
+        message: (error as Error).message || 'Failed to redeem gift card',
         errors: ['redemption_failed'],
       };
     }

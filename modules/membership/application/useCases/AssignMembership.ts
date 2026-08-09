@@ -22,8 +22,43 @@ export interface AssignMembershipOutput {
   endDate?: string;
 }
 
+interface MembershipTierRecord {
+  name: string;
+  isActive: boolean;
+  maxMembers?: number;
+  currentMembers?: number;
+  billingPeriod?: string;
+  price?: number;
+}
+
+interface CreatedMembership {
+  membershipId: string;
+  customerId: string;
+  tierId: string;
+  status: string;
+  startDate: Date;
+  endDate?: Date;
+}
+
+interface AssignMembershipRepository {
+  findTierById(tierId: string): Promise<MembershipTierRecord | null>;
+  findActiveByCustomerId(customerId: string): Promise<CreatedMembership | null>;
+  createMembership(data: {
+    membershipId: string;
+    customerId: string;
+    tierId: string;
+    status: string;
+    startDate: Date;
+    endDate?: Date;
+    paymentMethodId?: string;
+    source: string;
+    autoRenew: boolean;
+  }): Promise<CreatedMembership>;
+  incrementTierMembers(tierId: string): Promise<void>;
+}
+
 export class AssignMembershipUseCase {
-  constructor(private readonly membershipRepository: any) {}
+  constructor(private readonly membershipRepository: AssignMembershipRepository) {}
 
   async execute(input: AssignMembershipInput): Promise<AssignMembershipOutput> {
     // Validate tier exists
@@ -43,7 +78,7 @@ export class AssignMembershipUseCase {
     }
 
     // Check tier capacity
-    if (tier.maxMembers && tier.currentMembers >= tier.maxMembers) {
+    if (tier.maxMembers && tier.currentMembers && tier.currentMembers >= tier.maxMembers) {
       throw new Error('This membership tier has reached maximum capacity');
     }
 

@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import * as membershipPlanRepo from '../../../modules/membership/infrastructure/repositories/membershipPlanRepo';
 import { MembershipBenefitRepo } from '../../../modules/membership/infrastructure/repositories/membershipBenefitRepo';
 import { MembershipPlanBenefitRepo } from '../../../modules/membership/infrastructure/repositories/membershipPlanBenefitRepo';
@@ -36,12 +36,12 @@ export const listMembershipPlans = async (req: TypedRequest, res: Response): Pro
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load membership plans',
+      error: (error as Error).message || 'Failed to load membership plans',
     });
   }
 };
@@ -51,23 +51,24 @@ export const createMembershipPlanForm = async (req: TypedRequest, res: Response)
     adminRespond(req, res, 'programs/membership/plans/create', {
       pageName: 'Create Membership Plan',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
 
 export const createMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
     const {
       name,
       code,
       description,
-      shortDescription,
+      _shortDescription,
       isActive,
       isPublic,
       isDefault,
@@ -85,7 +86,7 @@ export const createMembershipPlan = async (req: TypedRequest, res: Response): Pr
       duration,
       gracePeriodsAllowed,
       gracePeriodDays,
-    } = req.body;
+    } = body;
 
     const plan = await membershipPlanRepo.create({
       name,
@@ -119,13 +120,13 @@ export const createMembershipPlan = async (req: TypedRequest, res: Response): Pr
     });
 
     res.redirect(`/hub/membership/plans/${plan.membershipPlanId}?success=Membership plan created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'programs/membership/plans/create', {
       pageName: 'Create Membership Plan',
-      error: error.message || 'Failed to create membership plan',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create membership plan',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -172,12 +173,12 @@ export const viewMembershipPlan = async (req: TypedRequest, res: Response): Prom
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load membership plan',
+      error: (error as Error).message || 'Failed to load membership plan',
     });
   }
 };
@@ -200,12 +201,12 @@ export const editMembershipPlanForm = async (req: TypedRequest, res: Response): 
       pageName: `Edit: ${plan.name}`,
       plan,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -213,8 +214,9 @@ export const editMembershipPlanForm = async (req: TypedRequest, res: Response): 
 export const updateMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
+    const body = req.body as RequestBody;
     const {
       name,
       description,
@@ -236,7 +238,7 @@ export const updateMembershipPlan = async (req: TypedRequest, res: Response): Pr
       duration,
       gracePeriodsAllowed,
       gracePeriodDays,
-    } = req.body;
+    } = body;
 
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description || undefined;
@@ -266,7 +268,7 @@ export const updateMembershipPlan = async (req: TypedRequest, res: Response): Pr
     }
 
     res.redirect(`/hub/membership/plans/${planId}?success=Membership plan updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -275,13 +277,13 @@ export const updateMembershipPlan = async (req: TypedRequest, res: Response): Pr
       adminRespond(req, res, 'programs/membership/plans/edit', {
         pageName: `Edit: ${plan?.name || 'Plan'}`,
         plan,
-        error: error.message || 'Failed to update membership plan',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update membership plan',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update membership plan',
+        error: (error as Error).message || 'Failed to update membership plan',
       });
     }
   }
@@ -298,10 +300,10 @@ export const activateMembershipPlan = async (req: TypedRequest, res: Response): 
     }
 
     res.json({ success: true, message: 'Membership plan activated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to activate membership plan' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate membership plan' });
   }
 };
 
@@ -316,10 +318,10 @@ export const deactivateMembershipPlan = async (req: TypedRequest, res: Response)
     }
 
     res.json({ success: true, message: 'Membership plan deactivated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to deactivate membership plan' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate membership plan' });
   }
 };
 
@@ -334,10 +336,10 @@ export const deleteMembershipPlan = async (req: TypedRequest, res: Response): Pr
     }
 
     res.json({ success: true, message: 'Membership plan deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete membership plan' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete membership plan' });
   }
 };
 
@@ -352,7 +354,7 @@ export const listMembershipBenefits = async (req: TypedRequest, res: Response): 
     const offset = parseInt(req.query.offset as string) || 0;
 
     const benefitRepo = new MembershipBenefitRepo();
-    let benefits: any[] = [];
+    let benefits: unknown[] = [];
 
     if (planId) {
       benefits = await benefitRepo.findByPlanId(planId, true); // active only
@@ -372,12 +374,12 @@ export const listMembershipBenefits = async (req: TypedRequest, res: Response): 
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load membership benefits',
+      error: (error as Error).message || 'Failed to load membership benefits',
     });
   }
 };
@@ -394,7 +396,7 @@ export const listMemberships = async (req: TypedRequest, res: Response): Promise
     const offset = parseInt(req.query.offset as string) || 0;
 
     // Get memberships (placeholder - membership repo may not have findAll)
-    const memberships: any[] = []; // TODO: Implement when membership repo has findAll
+    const memberships: unknown[] = []; // TODO: Implement when membership repo has findAll
 
     // Get plans for filtering
     const plans = await membershipPlanRepo.findAll(true);
@@ -408,12 +410,12 @@ export const listMemberships = async (req: TypedRequest, res: Response): Promise
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load memberships',
+      error: (error as Error).message || 'Failed to load memberships',
     });
   }
 };
@@ -424,7 +426,8 @@ export const listMemberships = async (req: TypedRequest, res: Response): Promise
 
 export const bulkMembershipOperations = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { operation, membershipIds, newTierId, notes } = req.body;
+    const body = req.body as RequestBody;
+    const { operation, membershipIds, newTierId, _notes } = body;
 
     if (!Array.isArray(membershipIds) || membershipIds.length === 0) {
       throw new Error('No memberships selected');
@@ -465,9 +468,9 @@ export const bulkMembershipOperations = async (req: TypedRequest, res: Response)
           default:
             throw new Error(`Unknown operation: ${operation}`);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Error:', error);
-        results.push({ id: membershipId, status: 'error', error: error.message });
+        results.push({ id: membershipId, status: 'error', error: (error as Error).message });
         failureCount++;
       }
     }
@@ -477,17 +480,18 @@ export const bulkMembershipOperations = async (req: TypedRequest, res: Response)
       message: `Bulk operation completed: ${successCount} successful, ${failureCount} failed`,
       results,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to perform bulk operations' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to perform bulk operations' });
   }
 };
 
 export const membershipUpgradeDowngrade = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { membershipId } = req.params;
-    const { newTierId, effectiveDate, prorate, notes } = req.body;
+    const body = req.body as RequestBody;
+    const { newTierId, effectiveDate, prorate, notes } = body;
 
     // Get current membership
     const currentMembership = await findUserMembershipById(membershipId);
@@ -536,10 +540,10 @@ export const membershipUpgradeDowngrade = async (req: TypedRequest, res: Respons
         prorated: prorate && isUpgrade,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to change membership tier' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to change membership tier' });
   }
 };
 
@@ -562,7 +566,7 @@ export const membershipAnalytics = async (req: TypedRequest, res: Response): Pro
 
     // Get tier statistics
     const tiers = await findAllTiers(true);
-    const tierStats: any = {};
+    const tierStats: Record<string, unknown> = {};
 
     for (const tier of tiers) {
       // Count memberships per tier (would need repository method)
@@ -580,12 +584,12 @@ export const membershipAnalytics = async (req: TypedRequest, res: Response): Pro
       stats,
       tiers,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load membership analytics',
+      error: (error as Error).message || 'Failed to load membership analytics',
     });
   }
 };

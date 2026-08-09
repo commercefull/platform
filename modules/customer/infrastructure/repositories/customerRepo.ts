@@ -136,7 +136,7 @@ export class CustomerRepo {
   async updateCustomer(customerId: string, updates: Partial<Customer>): Promise<Customer> {
     const fields = ['email', 'firstName', 'lastName', 'phone', 'dateOfBirth', 'isActive', 'isVerified', 'lastLoginAt', 'note'];
     const setClauses: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     for (const field of fields) {
@@ -292,7 +292,7 @@ export class CustomerRepo {
 
     const fields = ['addressLine1', 'addressLine2', 'city', 'state', 'postalCode', 'country', 'addressType', 'isDefault', 'phone'];
     const setClauses: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     for (const field of fields) {
@@ -358,7 +358,7 @@ export class CustomerRepo {
 
     const fields = ['name', 'description', 'discountPercent', 'isActive'];
     const setClauses: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     for (const field of fields) {
@@ -464,7 +464,7 @@ export class CustomerRepo {
 
     const fields = ['wishlistName', 'isPublic'];
     const setClauses: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     for (const field of fields) {

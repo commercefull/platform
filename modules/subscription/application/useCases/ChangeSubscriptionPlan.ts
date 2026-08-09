@@ -19,10 +19,33 @@ export interface ChangeSubscriptionPlanOutput {
   proratedAmount?: number;
 }
 
+interface SubscriptionRecord {
+  status: string;
+  planId: string;
+  customerId: string;
+  nextBillingDate: string;
+  currentPeriodStart?: string;
+  startDate?: string;
+  price?: number;
+}
+
+interface PlanRecord {
+  price?: number;
+}
+
+interface SubscriptionRepoPort {
+  findById(id: string): Promise<SubscriptionRecord | null>;
+  update(id: string, data: Record<string, unknown>): Promise<void>;
+}
+
+interface PlanRepoPort {
+  findById(id: string): Promise<PlanRecord | null>;
+}
+
 export class ChangeSubscriptionPlanUseCase {
   constructor(
-    private readonly subscriptionRepo: any,
-    private readonly planRepo: any,
+    private readonly subscriptionRepo: SubscriptionRepoPort,
+    private readonly planRepo: PlanRepoPort,
   ) {}
 
   async execute(input: ChangeSubscriptionPlanInput): Promise<ChangeSubscriptionPlanOutput> {
@@ -76,9 +99,9 @@ export class ChangeSubscriptionPlanUseCase {
     };
   }
 
-  private calculateProration(subscription: any, newPlan: any): number {
+  private calculateProration(subscription: SubscriptionRecord, newPlan: PlanRecord): number {
     const now = new Date();
-    const billingStart = new Date(subscription.currentPeriodStart || subscription.startDate);
+    const billingStart = new Date(subscription.currentPeriodStart || subscription.startDate || now.toISOString());
     const billingEnd = new Date(subscription.nextBillingDate);
 
     const totalDays = (billingEnd.getTime() - billingStart.getTime()) / (1000 * 60 * 60 * 24);

@@ -103,7 +103,7 @@ export interface OrderDetailResponse {
   shippingAddress?: OrderAddressResponse;
   billingAddress?: OrderAddressResponse;
   tags: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }

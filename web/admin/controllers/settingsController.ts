@@ -6,10 +6,12 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
-import { query, queryOne } from '../../../libs/db';
-import { generateUUID as uuidv4 } from '../../../libs/uuid';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../respond';
+import * as merchantSettingsRepo from '../../../modules/merchant/infrastructure/repositories/merchantSettingsRepo';
+import * as languageRepo from '../../../modules/localization/infrastructure/repositories/languageRepo';
+import * as currencyRepo from '../../../modules/localization/infrastructure/repositories/currencyRepo';
+import CountryRepo from '../../../modules/localization/infrastructure/repositories/countryRepo';
 
 // ============================================================================
 // Types
@@ -50,35 +52,36 @@ interface StoreSettings {
 
 export const storeSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = (req as any).merchantId || 'default';
+    const merchantId = req.user?.merchantId || 'default';
 
-    const settings = await queryOne<any>(`SELECT * FROM "merchantSettings" WHERE "merchantId" = $1`, [merchantId]);
+    const settings = await merchantSettingsRepo.findByMerchantId(merchantId);
 
     // Get available timezones and currencies
     const timezones = getTimezones();
-    const currencies = await getCurrencies();
+    const currencies = await currencyRepo.listActiveCurrencyCodes();
     const locales = getLocales();
 
     adminRespond(req, res, 'settings/store', {
       pageName: 'Store Settings',
       settings: settings || getDefaultSettings(merchantId),
       timezones,
-      currencies,
+      currencies: currencies.length > 0 ? currencies : getDefaultCurrencyList(),
       locales,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load settings',
+      error: (error as Error).message || 'Failed to load settings',
     });
   }
 };
 
 export const updateStoreSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = (req as any).merchantId || 'default';
+    const merchantId = req.user?.merchantId || 'default';
+    const body = req.body as RequestBody;
     const {
       storeName,
       storeUrl,
@@ -93,9 +96,9 @@ export const updateStoreSettings = async (req: TypedRequest, res: Response): Pro
       state,
       postalCode,
       country,
-    } = req.body;
+    } = body;
 
-    const now = new Date();
+    // const _now = new Date();
     const storeAddress = JSON.stringify({
       line1: addressLine1,
       line2: addressLine2,
@@ -105,41 +108,22 @@ export const updateStoreSettings = async (req: TypedRequest, res: Response): Pro
       country,
     });
 
-    // Check if settings exist
-    const existing = await queryOne<{ merchantId: string }>(`SELECT "merchantId" FROM "merchantSettings" WHERE "merchantId" = $1`, [
-      merchantId,
-    ]);
-
-    if (existing) {
-      await query(
-        `UPDATE "merchantSettings" SET
-          "storeName" = COALESCE($1, "storeName"),
-          "storeUrl" = $2,
-          "storeEmail" = $3,
-          "storePhone" = $4,
-          "timezone" = COALESCE($5, "timezone"),
-          "currency" = COALESCE($6, "currency"),
-          "locale" = COALESCE($7, "locale"),
-          "storeAddress" = $8,
-          "updatedAt" = $9
-         WHERE "merchantId" = $10`,
-        [storeName, storeUrl, storeEmail, storePhone, timezone, currency, locale, storeAddress, now, merchantId],
-      );
-    } else {
-      await query(
-        `INSERT INTO "merchantSettings" (
-          "merchantId", "storeName", "storeUrl", "storeEmail", "storePhone",
-          "timezone", "currency", "locale", "storeAddress", "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-        [merchantId, storeName, storeUrl, storeEmail, storePhone, timezone, currency, locale, storeAddress, now, now],
-      );
-    }
+    await merchantSettingsRepo.upsert(merchantId, {
+      storeName,
+      storeUrl,
+      storeEmail,
+      storePhone,
+      timezone,
+      currency,
+      locale,
+      storeAddress,
+    });
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -149,45 +133,40 @@ export const updateStoreSettings = async (req: TypedRequest, res: Response): Pro
 
 export const businessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = (req as any).merchantId || 'default';
+    const merchantId = req.user?.merchantId || 'default';
 
-    const settings = await queryOne<any>(`SELECT * FROM "merchantSettings" WHERE "merchantId" = $1`, [merchantId]);
+    const settings = await merchantSettingsRepo.findByMerchantId(merchantId);
 
     adminRespond(req, res, 'settings/business', {
       pageName: 'Business Information',
       settings: settings || getDefaultSettings(merchantId),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load business info',
+      error: (error as Error).message || 'Failed to load business info',
     });
   }
 };
 
 export const updateBusinessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = (req as any).merchantId || 'default';
-    const { legalName, taxId, registrationNumber } = req.body;
-    const now = new Date();
+    const merchantId = req.user?.merchantId || 'default';
+    const body = req.body as RequestBody;
+    const { legalName, taxId, registrationNumber } = body;
+    // const _now = new Date();
 
     const businessInfo = JSON.stringify({ legalName, taxId, registrationNumber });
 
-    await query(
-      `UPDATE "merchantSettings" SET
-        "businessInfo" = $1,
-        "updatedAt" = $2
-       WHERE "merchantId" = $3`,
-      [businessInfo, now, merchantId],
-    );
+    await merchantSettingsRepo.updateBusinessInfo(merchantId, businessInfo);
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -198,26 +177,26 @@ export const updateBusinessInfo = async (req: TypedRequest, res: Response): Prom
 export const localizationSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get languages
-    const languages = await query<Array<any>>(`SELECT * FROM "language" ORDER BY "name"`);
+    const languages = await languageRepo.listLanguages();
 
     // Get currencies
-    const currencies = await query<Array<any>>(`SELECT * FROM "currency" ORDER BY "name"`);
+    const currencies = await currencyRepo.listCurrencies();
 
     // Get countries
-    const countries = await query<Array<any>>(`SELECT * FROM "country" ORDER BY "name"`);
+    const countries = await CountryRepo.findAll();
 
     adminRespond(req, res, 'settings/localization', {
       pageName: 'Localization',
-      languages: languages || [],
-      currencies: currencies || [],
-      countries: countries || [],
+      languages,
+      currencies,
+      countries,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load localization settings',
+      error: (error as Error).message || 'Failed to load localization settings',
     });
   }
 };
@@ -228,62 +207,38 @@ export const localizationSettings = async (req: TypedRequest, res: Response): Pr
 
 export const createLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { code, name, nativeName, isDefault, isActive } = req.body;
+    const body = req.body as RequestBody;
+    const { code, name, nativeName, isDefault, isActive } = body;
 
     if (!code || !name) {
       res.status(400).json({ success: false, message: 'Code and name are required' });
       return;
     }
 
-    const languageId = uuidv4();
-    const now = new Date();
-
-    // If setting as default, unset other defaults
-    if (isDefault) {
-      await query(`UPDATE "language" SET "isDefault" = false`);
-    }
-
-    await query(
-      `INSERT INTO "language" ("languageId", "code", "name", "nativeName", "isDefault", "isActive", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [languageId, code, name, nativeName || name, isDefault || false, isActive !== false, now, now],
-    );
+    const languageId = await languageRepo.createLanguage({ code, name, nativeName, isDefault, isActive });
 
     res.json({ success: true, languageId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 export const updateLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { languageId } = req.params;
-    const { name, nativeName, isDefault, isActive } = req.body;
-    const now = new Date();
+    const body = req.body as RequestBody;
+    const { name, nativeName, isDefault, isActive } = body;
+    // const _now = new Date();
 
-    // If setting as default, unset other defaults
-    if (isDefault) {
-      await query(`UPDATE "language" SET "isDefault" = false`);
-    }
-
-    await query(
-      `UPDATE "language" SET
-        "name" = COALESCE($1, "name"),
-        "nativeName" = COALESCE($2, "nativeName"),
-        "isDefault" = COALESCE($3, "isDefault"),
-        "isActive" = COALESCE($4, "isActive"),
-        "updatedAt" = $5
-       WHERE "languageId" = $6`,
-      [name, nativeName, isDefault, isActive, now, languageId],
-    );
+    await languageRepo.updateLanguage(languageId, { name, nativeName, isDefault, isActive });
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -291,21 +246,20 @@ export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<
   try {
     const { languageId } = req.params;
 
-    // Check if it's the default language
-    const language = await queryOne<{ isDefault: boolean }>(`SELECT "isDefault" FROM "language" WHERE "languageId" = $1`, [languageId]);
+    const language = await languageRepo.findLanguageById(languageId);
 
     if (language?.isDefault) {
       res.status(400).json({ success: false, message: 'Cannot delete the default language' });
       return;
     }
 
-    await query(`DELETE FROM "language" WHERE "languageId" = $1`, [languageId]);
+    await languageRepo.deleteLanguage(languageId);
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -315,63 +269,38 @@ export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<
 
 export const createCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { code, name, symbol, exchangeRate, isDefault, isActive } = req.body;
+    const body = req.body as RequestBody;
+    const { code, name, symbol, exchangeRate, isDefault, isActive } = body;
 
     if (!code || !name) {
       res.status(400).json({ success: false, message: 'Code and name are required' });
       return;
     }
 
-    const currencyId = uuidv4();
-    const now = new Date();
-
-    // If setting as default, unset other defaults
-    if (isDefault) {
-      await query(`UPDATE "currency" SET "isDefault" = false`);
-    }
-
-    await query(
-      `INSERT INTO "currency" ("currencyId", "code", "name", "symbol", "exchangeRate", "isDefault", "isActive", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [currencyId, code.toUpperCase(), name, symbol || code, exchangeRate || 1, isDefault || false, isActive !== false, now, now],
-    );
+    const currencyId = await currencyRepo.createCurrency({ code, name, symbol, exchangeRate, isDefault, isActive });
 
     res.json({ success: true, currencyId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 export const updateCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { currencyId } = req.params;
-    const { name, symbol, exchangeRate, isDefault, isActive } = req.body;
-    const now = new Date();
+    const body = req.body as RequestBody;
+    const { name, symbol, exchangeRate, isDefault, isActive } = body;
+    // const _now = new Date();
 
-    // If setting as default, unset other defaults
-    if (isDefault) {
-      await query(`UPDATE "currency" SET "isDefault" = false`);
-    }
-
-    await query(
-      `UPDATE "currency" SET
-        "name" = COALESCE($1, "name"),
-        "symbol" = COALESCE($2, "symbol"),
-        "exchangeRate" = COALESCE($3, "exchangeRate"),
-        "isDefault" = COALESCE($4, "isDefault"),
-        "isActive" = COALESCE($5, "isActive"),
-        "updatedAt" = $6
-       WHERE "currencyId" = $7`,
-      [name, symbol, exchangeRate, isDefault, isActive, now, currencyId],
-    );
+    await currencyRepo.updateCurrency(currencyId, { name, symbol, exchangeRate, isDefault, isActive });
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -379,21 +308,20 @@ export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<
   try {
     const { currencyId } = req.params;
 
-    // Check if it's the default currency
-    const currency = await queryOne<{ isDefault: boolean }>(`SELECT "isDefault" FROM "currency" WHERE "currencyId" = $1`, [currencyId]);
+    const currency = await currencyRepo.findCurrencyById(currencyId);
 
     if (currency?.isDefault) {
       res.status(400).json({ success: false, message: 'Cannot delete the default currency' });
       return;
     }
 
-    await query(`DELETE FROM "currency" WHERE "currencyId" = $1`, [currencyId]);
+    await currencyRepo.deleteCurrency(currencyId);
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -430,16 +358,7 @@ function getTimezones(): string[] {
   ];
 }
 
-async function getCurrencies(): Promise<Array<{ code: string; name: string }>> {
-  const currencies = await query<Array<{ code: string; name: string }>>(
-    `SELECT "code", "name" FROM "currency" WHERE "isActive" = true ORDER BY "name"`,
-  );
-
-  if (currencies && currencies.length > 0) {
-    return currencies;
-  }
-
-  // Default currencies if none in database
+function getDefaultCurrencyList(): Array<{ code: string; name: string }> {
   return [
     { code: 'USD', name: 'US Dollar' },
     { code: 'EUR', name: 'Euro' },

@@ -2,7 +2,7 @@
  * Get Customer Use Case
  */
 
-import { Customer } from '../../domain/entities/Customer';
+import { Customer, CustomerAddress } from '../../../../libs/db/types';
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
 
 // ============================================================================
@@ -82,44 +82,49 @@ export class GetCustomerUseCase {
       return null;
     }
 
-    return this.mapToResponse(customer);
+    const addresses = await this.customerRepository.getAddresses(customer.customerId);
+    const groupIds = await this.customerRepository.getCustomerGroupIds(customer.customerId);
+
+    return this.mapToResponse(customer, addresses, groupIds);
   }
 
-  private mapToResponse(customer: Customer): CustomerDetailResponse {
+  private mapToResponse(customer: Customer, addresses: CustomerAddress[], groupIds: string[]): CustomerDetailResponse {
+    const firstName = customer.firstName || '';
+    const lastName = customer.lastName || '';
     return {
       customerId: customer.customerId,
       email: customer.email,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
-      fullName: customer.fullName,
-      phone: customer.phone,
-      dateOfBirth: customer.dateOfBirth?.toISOString(),
-      status: customer.status,
+      firstName,
+      lastName,
+      fullName: `${firstName} ${lastName}`.trim(),
+      phone: customer.phone || undefined,
+      dateOfBirth: customer.dateOfBirth ? new Date(customer.dateOfBirth).toISOString() : undefined,
+      status: customer.isActive ? 'active' : 'inactive',
       isActive: customer.isActive,
       isVerified: customer.isVerified,
-      addresses: customer.addresses.map(addr => ({
-        addressId: addr.addressId,
+      addresses: addresses.map(addr => ({
+        addressId: addr.customerAddressId,
         addressLine1: addr.addressLine1,
-        addressLine2: addr.addressLine2,
+        addressLine2: addr.addressLine2 || undefined,
         city: addr.city,
-        state: addr.state,
+        state: addr.state || '',
         postalCode: addr.postalCode,
         country: addr.country,
         addressType: addr.addressType,
         isDefault: addr.isDefault,
-        phone: addr.phone,
+        phone: addr.phone || undefined,
       })),
-      defaultShippingAddressId: customer.defaultShippingAddressId,
-      defaultBillingAddressId: customer.defaultBillingAddressId,
-      groupIds: customer.groupIds,
-      preferredCurrency: customer.preferredCurrency,
-      preferredLanguage: customer.preferredLanguage,
+      defaultShippingAddressId: undefined,
+      defaultBillingAddressId: undefined,
+      groupIds,
+      preferredCurrency: undefined,
+      preferredLanguage: customer.timezone || undefined,
       taxExempt: customer.taxExempt,
-      tags: customer.tags,
-      lastLoginAt: customer.lastLoginAt?.toISOString(),
-      loginCount: customer.loginCount,
-      createdAt: customer.createdAt.toISOString(),
-      updatedAt: customer.updatedAt.toISOString(),
+      tags: customer.tags || [],
+      lastLoginAt: customer.lastLoginAt ? new Date(customer.lastLoginAt).toISOString() : undefined,
+      loginCount: customer.failedLoginAttempts,
+      createdAt: new Date(customer.createdAt).toISOString(),
+      updatedAt: new Date(customer.updatedAt).toISOString(),
     };
   }
 }

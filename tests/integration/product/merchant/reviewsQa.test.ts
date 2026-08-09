@@ -87,7 +87,7 @@ describe('Reviews & Q&A', () => {
       expect(res.data.data).toHaveProperty('ratingDistribution');
       expect(res.data.data).toHaveProperty('totalCount');
       // Only approved reviews should be returned
-      res.data.data.reviews.forEach((r: any) => {
+      res.data.data.reviews.forEach((r: Record<string, unknown>) => {
         expect(r.status).toBe('approved');
       });
     });
@@ -262,7 +262,7 @@ describe('Reviews & Q&A', () => {
       expect(res.data.success).toBe(true);
       expect(Array.isArray(res.data.data)).toBe(true);
       // Only answered Q&A should be returned to customers
-      res.data.data.forEach((qa: any) => {
+      res.data.data.forEach((qa: Record<string, unknown>) => {
         expect(qa.status).toBe('answered');
       });
     });

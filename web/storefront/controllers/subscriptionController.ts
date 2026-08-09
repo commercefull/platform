@@ -5,23 +5,16 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import { query, queryOne } from '../../../libs/db';
+import * as storefrontSubscriptionRepo from '../../../modules/subscription/infrastructure/repositories/storefrontSubscriptionRepo';
 
 /**
  * GET: List available subscription plans
  */
 export const listPlans = async (req: TypedRequest, res: Response) => {
   try {
-    const plans = await query(
-      `SELECT sp.*, sprod."name" as "productName", sprod."description" as "productDescription"
-       FROM "subscriptionPlan" sp
-       LEFT JOIN "subscriptionProduct" sprod ON sp."subscriptionProductId" = sprod."subscriptionProductId"
-       WHERE sp."isActive" = true
-       ORDER BY sp."sortOrder", sp."price" ASC`,
-      [],
-    );
+    const plans = await storefrontSubscriptionRepo.findActivePlansWithProduct();
 
     storefrontRespond(req, res, 'subscriptions/plans', {
       pageName: 'Subscription Plans',
@@ -41,14 +34,7 @@ export const mySubscriptions = async (req: TypedRequest, res: Response) => {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');
 
-    const subscriptions = await query(
-      `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."price", sp."currency"
-       FROM "customerSubscription" cs
-       LEFT JOIN "subscriptionPlan" sp ON cs."subscriptionPlanId" = sp."subscriptionPlanId"
-       WHERE cs."customerId" = $1
-       ORDER BY cs."createdAt" DESC`,
-      [customerId],
-    );
+    const subscriptions = await storefrontSubscriptionRepo.findByCustomerIdWithPlan(customerId);
 
     storefrontRespond(req, res, 'subscriptions/my-subscriptions', {
       pageName: 'My Subscriptions',
@@ -70,27 +56,14 @@ export const viewSubscription = async (req: TypedRequest, res: Response) => {
 
     const { subscriptionId } = req.params;
 
-    const subscription = await queryOne(
-      `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."price", sp."currency",
-              sp."features", sp."description" as "planDescription"
-       FROM "customerSubscription" cs
-       LEFT JOIN "subscriptionPlan" sp ON cs."subscriptionPlanId" = sp."subscriptionPlanId"
-       WHERE cs."customerSubscriptionId" = $1 AND cs."customerId" = $2`,
-      [subscriptionId, customerId],
-    );
+    const subscription = await storefrontSubscriptionRepo.findByIdWithPlan(subscriptionId, customerId);
 
     if (!subscription) {
-      (req as any).flash?.('error', 'Subscription not found');
+      req.flash?.('error', 'Subscription not found');
       return res.redirect('/subscriptions');
     }
 
-    // Get billing history
-    const billingHistory = await query(
-      `SELECT * FROM "subscriptionBilling"
-       WHERE "customerSubscriptionId" = $1
-       ORDER BY "billingDate" DESC LIMIT 12`,
-      [subscriptionId],
-    );
+    const billingHistory = await storefrontSubscriptionRepo.findBillingHistory(subscriptionId);
 
     storefrontRespond(req, res, 'subscriptions/view', {
       pageName: 'Subscription Details',
@@ -112,31 +85,23 @@ export const cancelSubscription = async (req: TypedRequest, res: Response) => {
     if (!customerId) return res.redirect('/signin');
 
     const { subscriptionId } = req.params;
-    const { reason } = req.body;
+    const body = req.body as RequestBody;
+    const { reason } = body;
 
-    const subscription = await queryOne(
-      `SELECT * FROM "customerSubscription"
-       WHERE "customerSubscriptionId" = $1 AND "customerId" = $2 AND "status" = 'active'`,
-      [subscriptionId, customerId],
-    );
+    const subscription = await storefrontSubscriptionRepo.findActiveByCustomerId(subscriptionId, customerId);
 
     if (!subscription) {
-      (req as any).flash?.('error', 'Subscription not found or already cancelled');
+      req.flash?.('error', 'Subscription not found or already cancelled');
       return res.redirect('/subscriptions');
     }
 
-    await query(
-      `UPDATE "customerSubscription"
-       SET "status" = 'cancelled', "cancelledAt" = NOW(), "cancellationReason" = $1, "updatedAt" = NOW()
-       WHERE "customerSubscriptionId" = $2`,
-      [reason || '', subscriptionId],
-    );
+    await storefrontSubscriptionRepo.cancelSubscription(subscriptionId, (reason as string) || '');
 
-    (req as any).flash?.('success', 'Subscription cancelled successfully');
+    req.flash?.('success', 'Subscription cancelled successfully');
     res.redirect('/subscriptions');
   } catch (error) {
     logger.error('Error:', error);
-    (req as any).flash?.('error', 'Failed to cancel subscription');
+    req.flash?.('error', 'Failed to cancel subscription');
     res.redirect('/subscriptions');
   }
 };

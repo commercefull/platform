@@ -36,7 +36,7 @@ export interface ValidateCouponResponse {
 
 export class ValidateCouponUseCase {
   async execute(command: ValidateCouponCommand): Promise<ValidateCouponResponse> {
-    const errors: string[] = [];
+    const _errors: string[] = [];
 
     // Validate input
     if (!command.code?.trim()) {

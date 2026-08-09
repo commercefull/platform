@@ -1,13 +1,20 @@
 import { eventBus } from '../../../../libs/events/eventBus';
 import { StoreDispatchRepository } from '../../domain/repositories/StoreDispatchRepository';
+import { InventoryLocation } from '../../domain/entities/Inventory';
+import { Inventory } from '../../domain/entities/Inventory';
+
+interface ApproveDispatchInventoryPort {
+  getLocationByStoreId(storeId: string): Promise<InventoryLocation | null>;
+  findByProductAndLocation(productId: string, locationId: string, variantId?: string): Promise<Inventory | null>;
+}
 
 export class ApproveStoreDispatchUseCase {
   constructor(
     private readonly dispatchRepository: StoreDispatchRepository,
-    private readonly inventoryRepository: any,
+    private readonly inventoryRepository: ApproveDispatchInventoryPort,
   ) {}
 
-  async execute(dispatchId: string, approvedBy: string): Promise<Record<string, any>> {
+  async execute(dispatchId: string, approvedBy: string): Promise<Record<string, unknown>> {
     const dispatch = await this.dispatchRepository.findById(dispatchId);
     if (!dispatch) {
       throw new Error('Dispatch not found');

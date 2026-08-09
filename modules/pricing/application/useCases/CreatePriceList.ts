@@ -6,12 +6,10 @@ export interface CreatePriceListInput {
   name: string;
   description?: string;
   currencyCode: string;
-  type: 'standard' | 'sale' | 'b2b' | 'volume' | 'promotional';
+  type: 'standard' | 'sale' | 'volume' | 'promotional';
   isDefault?: boolean;
   validFrom?: Date;
   validTo?: Date;
-  companyIds?: string[];
-  customerSegmentIds?: string[];
   storeIds?: string[];
 }
 
@@ -24,8 +22,23 @@ export interface CreatePriceListOutput {
   createdAt: string;
 }
 
+interface CreatePriceListRepositoryPort {
+  createPriceList(data: {
+    priceListId: string;
+    name: string;
+    description?: string;
+    currencyCode: string;
+    type: string;
+    isDefault: boolean;
+    validFrom?: Date;
+    validTo?: Date;
+    storeIds: string[];
+    isActive: boolean;
+  }): Promise<{ priceListId: string; name: string; type: string; currencyCode: string; isDefault: boolean; createdAt: Date }>;
+}
+
 export class CreatePriceListUseCase {
-  constructor(private readonly pricingRepository: any) {}
+  constructor(private readonly pricingRepository: CreatePriceListRepositoryPort) {}
 
   async execute(input: CreatePriceListInput): Promise<CreatePriceListOutput> {
     if (!input.name || !input.currencyCode) {
@@ -43,8 +56,6 @@ export class CreatePriceListUseCase {
       isDefault: input.isDefault ?? false,
       validFrom: input.validFrom,
       validTo: input.validTo,
-      companyIds: input.companyIds || [],
-      customerSegmentIds: input.customerSegmentIds || [],
       storeIds: input.storeIds || [],
       isActive: true,
     });

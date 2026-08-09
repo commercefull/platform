@@ -19,7 +19,7 @@ export type ProductQaAnswerCreateParams = Omit<ProductQaAnswer, 'productQaAnswer
 export class ProductQaAnswerRepo {
   async findByQuestion(productQaId: string, status?: ProductQaAnswerStatus): Promise<ProductQaAnswer[]> {
     let sql = `SELECT * FROM "productQaAnswer" WHERE "productQaId" = $1`;
-    const params: any[] = [productQaId];
+    const params: unknown[] = [productQaId];
 
     if (status) {
       sql += ` AND "status" = $2`;

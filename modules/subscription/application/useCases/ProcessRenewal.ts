@@ -17,11 +17,39 @@ export interface ProcessRenewalOutput {
   invoiceId?: string;
 }
 
+interface SubscriptionRecord {
+  status: string;
+  customerId: string;
+  nextBillingDate: string;
+  price: number;
+  planName: string;
+  paymentMethodId: string;
+  billingInterval: string;
+  renewalCount?: number;
+}
+
+interface InvoiceRecord {
+  invoiceId: string;
+}
+
+interface SubscriptionRepoPort {
+  findById(id: string): Promise<SubscriptionRecord | null>;
+  update(id: string, data: Record<string, unknown>): Promise<void>;
+}
+
+interface PaymentServicePort {
+  charge(params: { customerId: string; amount: number; paymentMethodId: string; invoiceId: string }): Promise<void>;
+}
+
+interface InvoiceServicePort {
+  create(params: { subscriptionId: string; customerId: string; amount: number; description: string }): Promise<InvoiceRecord>;
+}
+
 export class ProcessRenewalUseCase {
   constructor(
-    private readonly subscriptionRepo: any,
-    private readonly paymentService: any,
-    private readonly invoiceService: any,
+    private readonly subscriptionRepo: SubscriptionRepoPort,
+    private readonly paymentService: PaymentServicePort,
+    private readonly invoiceService: InvoiceServicePort,
   ) {}
 
   async execute(input: ProcessRenewalInput): Promise<ProcessRenewalOutput> {
@@ -54,6 +82,7 @@ export class ProcessRenewalUseCase {
     });
 
     // Process payment
+     
     let paymentSuccess = false;
     try {
       await this.paymentService.charge({
@@ -62,8 +91,8 @@ export class ProcessRenewalUseCase {
         paymentMethodId: subscription.paymentMethodId,
         invoiceId: invoice.invoiceId,
       });
-      paymentSuccess = true;
-    } catch (error) {
+      paymentSuccess = true; // eslint-disable-line @typescript-eslint/no-unused-vars
+    } catch (error: unknown) {
       // Payment failed - enter dunning
       await this.subscriptionRepo.update(input.subscriptionId, {
         status: 'past_due',

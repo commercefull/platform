@@ -9,17 +9,28 @@ export interface OrderFulfillmentPackage {
   packageNumber: string;
   trackingNumber?: string;
   weight?: number;
-  dimensions?: Record<string, any>;
+  dimensions?: Record<string, unknown>;
   packageType?: string;
   shippingLabelUrl?: string;
   commercialInvoiceUrl?: string;
-  customsInfo?: Record<string, any>;
+  customsInfo?: Record<string, unknown>;
 }
 
 export type OrderFulfillmentPackageCreateParams = Omit<OrderFulfillmentPackage, 'orderFulfillmentPackageId' | 'createdAt' | 'updatedAt'>;
 export type OrderFulfillmentPackageTrackingParams = Partial<
   Pick<OrderFulfillmentPackage, 'trackingNumber' | 'shippingLabelUrl' | 'commercialInvoiceUrl'>
 >;
+
+export const findByOrder = async (orderId: string): Promise<OrderFulfillmentPackage[]> => {
+  const results = await query<OrderFulfillmentPackage[]>(
+    `SELECT p.* FROM "orderFulfillmentPackage" p
+     JOIN "orderFulfillment" f ON f."orderFulfillmentId" = p."orderFulfillmentId"
+     WHERE f."orderId" = $1
+     ORDER BY p."createdAt" ASC`,
+    [orderId],
+  );
+  return results || [];
+};
 
 export const findByFulfillment = async (orderFulfillmentId: string): Promise<OrderFulfillmentPackage[]> => {
   const results = await query<OrderFulfillmentPackage[]>(
@@ -61,7 +72,7 @@ export const updateTracking = async (
   params: OrderFulfillmentPackageTrackingParams,
 ): Promise<OrderFulfillmentPackage | null> => {
   const fields: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
   let i = 1;
 
   for (const [key, value] of Object.entries(params)) {
@@ -87,4 +98,4 @@ export const updateTracking = async (
   );
 };
 
-export default { findByFulfillment, create, updateTracking };
+export default { findByOrder, findByFulfillment, create, updateTracking };

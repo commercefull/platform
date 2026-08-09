@@ -1,11 +1,11 @@
-import { queryOne } from '../../../../libs/db';
+import { query, queryOne } from '../../../../libs/db';
 
 export interface PaymentSettings {
   paymentSettingsId: string;
   merchantId: string;
   provider: string;
   isEnabled: boolean;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,4 +27,8 @@ export async function upsert(
   );
 }
 
-export default { findByMerchant, upsert };
+export async function findAll(): Promise<PaymentSettings[]> {
+  return (await query<PaymentSettings[]>(`SELECT * FROM "paymentSettings" ORDER BY "createdAt" DESC`)) || [];
+}
+
+export default { findByMerchant, upsert, findAll };

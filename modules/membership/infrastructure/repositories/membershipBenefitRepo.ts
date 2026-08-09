@@ -99,7 +99,7 @@ export class MembershipBenefitRepo {
 
   async update(id: string, params: MembershipBenefitUpdateParams): Promise<MembershipBenefit | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

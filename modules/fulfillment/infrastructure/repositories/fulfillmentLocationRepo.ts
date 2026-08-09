@@ -7,9 +7,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FulfillmentLocation } from '../../../../libs/db/dataModelTypes';
 
-function generateId(): string {
-  return `loc_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
-}
+import { generateUUID } from '../../../../libs/uuid';
 
 export interface CreateFulfillmentLocationParams {
   organizationId: string;
@@ -42,19 +40,19 @@ export interface UpdateFulfillmentLocationParams {
 }
 
 export async function create(params: CreateFulfillmentLocationParams): Promise<FulfillmentLocation> {
-  const locationId = generateId();
+  const locationId = generateUUID();
   const now = new Date();
 
   const sql = `
     INSERT INTO "fulfillmentLocation" (
-      "locationId", "organizationId", "type", "name", "code", "addressId",
+      "fulfillmentLocationId", "organizationId", "type", "name", "code", "addressId",
       "timezone", "sellerId", "isActive", "capabilities", "operatingHours",
       "latitude", "longitude", "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
     RETURNING *
   `;
 
-  const result = await query<{ rows: FulfillmentLocation[] }>(sql, [
+  const result = await query<FulfillmentLocation[]>(sql, [
     locationId,
     params.organizationId,
     params.type,
@@ -72,11 +70,14 @@ export async function create(params: CreateFulfillmentLocationParams): Promise<F
     now,
   ]);
 
-  return result!.rows[0];
+  if (!result || result.length === 0) {
+    throw new Error('Failed to create fulfillment location');
+  }
+  return result[0];
 }
 
 export async function findById(locationId: string): Promise<FulfillmentLocation | null> {
-  return queryOne<FulfillmentLocation>('SELECT * FROM "fulfillmentLocation" WHERE "locationId" = $1', [locationId]);
+  return queryOne<FulfillmentLocation>('SELECT * FROM "fulfillmentLocation" WHERE "fulfillmentLocationId" = $1', [locationId]);
 }
 
 export async function findByCode(code: string): Promise<FulfillmentLocation | null> {
@@ -102,16 +103,16 @@ export async function findByOrganization(
 
   sql += ' ORDER BY "name" ASC';
 
-  const result = await query<{ rows: FulfillmentLocation[] }>(sql, params);
-  return result?.rows ?? [];
+  const result = await query<FulfillmentLocation[]>(sql, params);
+  return result ?? [];
 }
 
 export async function findBySeller(sellerId: string): Promise<FulfillmentLocation[]> {
-  const result = await query<{ rows: FulfillmentLocation[] }>(
+  const result = await query<FulfillmentLocation[]>(
     'SELECT * FROM "fulfillmentLocation" WHERE "sellerId" = $1 AND "isActive" = true ORDER BY "name" ASC',
     [sellerId],
   );
-  return result?.rows ?? [];
+  return result ?? [];
 }
 
 export async function update(locationId: string, params: UpdateFulfillmentLocationParams): Promise<FulfillmentLocation | null> {
@@ -140,28 +141,28 @@ export async function update(locationId: string, params: UpdateFulfillmentLocati
   const sql = `
     UPDATE "fulfillmentLocation" 
     SET ${updates.join(', ')}
-    WHERE "locationId" = $${paramIndex}
+    WHERE "fulfillmentLocationId" = $${paramIndex}
     RETURNING *
   `;
 
-  const result = await query<{ rows: FulfillmentLocation[] }>(sql, values);
-  return result?.rows?.[0] ?? null;
+  const result = await query<FulfillmentLocation[]>(sql, values);
+  return result?.[0] ?? null;
 }
 
 export async function activate(locationId: string): Promise<boolean> {
-  const result = await query<{ rowCount: number }>(
-    'UPDATE "fulfillmentLocation" SET "isActive" = true, "updatedAt" = $1 WHERE "locationId" = $2',
+  const result = await queryOne<FulfillmentLocation>(
+    'UPDATE "fulfillmentLocation" SET "isActive" = true, "updatedAt" = $1 WHERE "fulfillmentLocationId" = $2 RETURNING *',
     [new Date(), locationId],
   );
-  return (result?.rowCount ?? 0) > 0;
+  return result !== null;
 }
 
 export async function deactivate(locationId: string): Promise<boolean> {
-  const result = await query<{ rowCount: number }>(
-    'UPDATE "fulfillmentLocation" SET "isActive" = false, "updatedAt" = $1 WHERE "locationId" = $2',
+  const result = await queryOne<FulfillmentLocation>(
+    'UPDATE "fulfillmentLocation" SET "isActive" = false, "updatedAt" = $1 WHERE "fulfillmentLocationId" = $2 RETURNING *',
     [new Date(), locationId],
   );
-  return (result?.rowCount ?? 0) > 0;
+  return result !== null;
 }
 
 export async function findNearestLocations(
@@ -197,8 +198,8 @@ export async function findNearestLocations(
   sql += ` ORDER BY distance ASC LIMIT $${paramIndex}`;
   params.push(limit);
 
-  const result = await query<{ rows: Array<FulfillmentLocation & { distance: number }> }>(sql, params);
-  return result?.rows ?? [];
+  const result = await query<Array<FulfillmentLocation & { distance: number }>>(sql, params);
+  return result ?? [];
 }
 
 export default {

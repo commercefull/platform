@@ -20,7 +20,7 @@ export interface TaxRateProps {
   isActive: boolean;
   startDate?: Date;
   endDate?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -76,7 +76,7 @@ export class TaxRate {
     return true;
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return { ...this.props };
   }
 }

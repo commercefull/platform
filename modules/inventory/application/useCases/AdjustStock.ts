@@ -32,9 +32,42 @@ export interface AdjustStockOutput {
   adjustedAt: string;
 }
 
+interface InventoryRecord {
+  inventoryItemId: string;
+  quantity: number;
+  lowStockThreshold?: number;
+}
+
+interface AdjustStockRepositoryPort {
+  findByProduct(productId: string, variantId: string | undefined, locationId: string): Promise<InventoryRecord | null>;
+  updateQuantity(inventoryItemId: string, newQuantity: number): Promise<InventoryRecord>;
+  create(input: {
+    productId: string;
+    variantId?: string;
+    sku?: string;
+    locationId: string;
+    quantity: number;
+    reservedQuantity: number;
+  }): Promise<InventoryRecord>;
+  recordTransaction(input: {
+    transactionId: string;
+    type: string;
+    productId: string;
+    variantId?: string;
+    locationId: string;
+    quantity: number;
+    previousQuantity: number;
+    newQuantity: number;
+    reason: string;
+    notes?: string;
+    adjustedBy?: string;
+    referenceId?: string;
+  }): Promise<void>;
+}
+
 export class AdjustStockUseCase {
   constructor(
-    private readonly inventoryRepository: any, // InventoryRepository
+    private readonly inventoryRepository: AdjustStockRepositoryPort,
   ) {}
 
   async execute(input: AdjustStockInput): Promise<AdjustStockOutput> {

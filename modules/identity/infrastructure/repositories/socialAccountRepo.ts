@@ -30,7 +30,7 @@ export interface CreateSocialAccountInput {
   refreshToken?: string;
   tokenExpiresAt?: Date;
   scopes?: string[];
-  providerData?: Record<string, any>;
+  providerData?: Record<string, unknown>;
   lastLoginIp?: string;
 }
 
@@ -61,7 +61,7 @@ export class SocialAccountRepo {
       scopes: record.scopes ? JSON.parse(record.scopes) : undefined,
       isActive: record.isActive,
       isPrimary: record.isPrimary,
-      providerData: record.providerData as Record<string, any> | undefined,
+      providerData: record.providerData as Record<string, unknown> | undefined,
       lastUsedAt: record.lastUsedAt ? new Date(record.lastUsedAt) : undefined,
       lastLoginIp: record.lastLoginIp || undefined,
       createdAt: new Date(record.createdAt),
@@ -168,7 +168,7 @@ export class SocialAccountRepo {
    * Update social account
    */
   async update(socialAccountId: string, updates: Partial<CreateSocialAccountInput>): Promise<SocialAccount | null> {
-    const updateData: Record<string, any> = {
+    const updateData: Record<string, unknown> = {
       ...updates,
       updatedAt: new Date(),
     };

@@ -11,8 +11,8 @@ export interface ContentTypeProps {
   icon?: string;
   allowedBlocks?: string[];
   defaultTemplate?: string;
-  requiredFields?: Record<string, any>;
-  metaFields?: Record<string, any>;
+  requiredFields?: Record<string, unknown>;
+  metaFields?: Record<string, unknown>;
   isSystem: boolean;
   isActive: boolean;
   createdAt: Date;
@@ -50,10 +50,10 @@ export class ContentType {
   get defaultTemplate(): string | undefined {
     return this.props.defaultTemplate;
   }
-  get requiredFields(): Record<string, any> | undefined {
+  get requiredFields(): Record<string, unknown> | undefined {
     return this.props.requiredFields;
   }
-  get metaFields(): Record<string, any> | undefined {
+  get metaFields(): Record<string, unknown> | undefined {
     return this.props.metaFields;
   }
   get isSystem(): boolean {
@@ -122,12 +122,12 @@ export class ContentType {
     this.props.updatedAt = new Date();
   }
 
-  updateRequiredFields(fields: Record<string, any>): void {
+  updateRequiredFields(fields: Record<string, unknown>): void {
     this.props.requiredFields = fields;
     this.props.updatedAt = new Date();
   }
 
-  updateMetaFields(fields: Record<string, any>): void {
+  updateMetaFields(fields: Record<string, unknown>): void {
     this.props.metaFields = fields;
     this.props.updatedAt = new Date();
   }

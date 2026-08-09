@@ -4,18 +4,17 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLES = {
+/* const _TABLE = {
   AGENT: Table.SupportAgent,
   TICKET: Table.SupportTicket,
   MESSAGE: Table.SupportMessage,
   ATTACHMENT: Table.SupportAttachment,
-};
+}; */
 
 // ============================================================================
 // Types
@@ -49,9 +48,9 @@ export interface SupportAgent {
   satisfactionScore?: number;
   satisfactionCount: number;
   timezone: string;
-  workingHours?: Record<string, any>;
-  notificationPreferences?: Record<string, any>;
-  metadata?: Record<string, any>;
+  workingHours?: Record<string, unknown>;
+  notificationPreferences?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   lastActiveAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -93,8 +92,8 @@ export interface SupportTicket {
   escalationReason?: string;
   isSpam: boolean;
   reopenCount: number;
-  customFields?: Record<string, any>;
-  metadata?: Record<string, any>;
+  customFields?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
   closedAt?: Date;
@@ -116,7 +115,7 @@ export interface SupportMessage {
   isRead: boolean;
   readAt?: Date;
   readBy?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
 }
 
@@ -135,7 +134,7 @@ export interface SupportAttachment {
   isPublic: boolean;
   isScanned: boolean;
   isSafe: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
 }
 
@@ -144,18 +143,18 @@ export interface SupportAttachment {
 // ============================================================================
 
 export async function getAgent(supportAgentId: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "supportAgent" WHERE "supportAgentId" = $1', [supportAgentId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportAgent" WHERE "supportAgentId" = $1', [supportAgentId]);
   return row ? mapToAgent(row) : null;
 }
 
 export async function getAgentByEmail(email: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "supportAgent" WHERE "email" = $1', [email]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportAgent" WHERE "email" = $1', [email]);
   return row ? mapToAgent(row) : null;
 }
 
 export async function getAgents(filters?: { isActive?: boolean; isAvailable?: boolean; department?: string }): Promise<SupportAgent[]> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters?.isActive !== undefined) {
@@ -171,15 +170,15 @@ export async function getAgents(filters?: { isActive?: boolean; isAvailable?: bo
     params.push(filters.department);
   }
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "supportAgent" WHERE ${whereClause} ORDER BY "lastName", "firstName"`,
     params,
   );
   return (rows || []).map(mapToAgent);
 }
 
-export async function getAvailableAgent(category?: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, any>>(
+export async function getAvailableAgent(_category?: string): Promise<SupportAgent | null> {
+  const row = await queryOne<Record<string, unknown>>(
     `SELECT * FROM "supportAgent" 
      WHERE "isActive" = true AND "isAvailable" = true 
      AND "currentTickets" < "maxTickets"
@@ -225,7 +224,7 @@ export async function saveAgent(
     );
     return (await getAgent(agent.supportAgentId))!;
   } else {
-    const result = await queryOne<Record<string, any>>(
+    const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "supportAgent" (
         "email", "firstName", "lastName", "displayName", "avatarUrl", "role",
         "department", "skills", "languages", "isActive", "isAvailable", "maxTickets",
@@ -271,12 +270,12 @@ export async function updateAgentTicketCount(supportAgentId: string, delta: numb
 // ============================================================================
 
 export async function getTicket(supportTicketId: string): Promise<SupportTicket | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "supportTicket" WHERE "supportTicketId" = $1', [supportTicketId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportTicket" WHERE "supportTicketId" = $1', [supportTicketId]);
   return row ? mapToTicket(row) : null;
 }
 
 export async function getTicketByNumber(ticketNumber: string): Promise<SupportTicket | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "supportTicket" WHERE "ticketNumber" = $1', [ticketNumber]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportTicket" WHERE "ticketNumber" = $1', [ticketNumber]);
   return row ? mapToTicket(row) : null;
 }
 
@@ -292,7 +291,7 @@ export async function getTickets(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: SupportTicket[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters?.customerId) {
@@ -325,7 +324,7 @@ export async function getTickets(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "supportTicket" WHERE ${whereClause} 
      ORDER BY 
        CASE "priority" WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
@@ -358,7 +357,7 @@ export async function createTicket(ticket: {
   // Auto-assign to available agent
   const agent = await getAvailableAgent(ticket.category);
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "supportTicket" (
       "ticketNumber", "customerId", "orderId", "email", "name", "phone",
       "subject", "description", "status", "priority", "category", "channel",
@@ -498,7 +497,7 @@ export async function submitFeedback(supportTicketId: string, satisfaction: numb
 // ============================================================================
 
 export async function getMessage(supportMessageId: string): Promise<SupportMessage | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "supportMessage" WHERE "supportMessageId" = $1', [supportMessageId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportMessage" WHERE "supportMessageId" = $1', [supportMessageId]);
   return row ? mapToMessage(row) : null;
 }
 
@@ -508,7 +507,7 @@ export async function getMessages(supportTicketId: string, includeInternal: bool
     whereClause += ' AND "isInternal" = false';
   }
 
-  const rows = await query<Record<string, any>[]>(`SELECT * FROM "supportMessage" WHERE ${whereClause} ORDER BY "createdAt" ASC`, [
+  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "supportMessage" WHERE ${whereClause} ORDER BY "createdAt" ASC`, [
     supportTicketId,
   ]);
   return (rows || []).map(mapToMessage);
@@ -530,7 +529,7 @@ export async function addMessage(message: {
   const ticket = await getTicket(message.supportTicketId);
   if (!ticket) throw new Error('Ticket not found');
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "supportMessage" (
       "supportTicketId", "senderId", "senderType", "senderName", "senderEmail",
       "message", "messageHtml", "messageType", "isInternal", "isAutoReply", "createdAt"
@@ -552,7 +551,15 @@ export async function addMessage(message: {
   );
 
   // Update ticket
-  const updateFields: any = {
+  const updateFields: {
+    lastMessageBy: string | undefined;
+    lastMessageByType: string | undefined;
+    lastMessageAt: string;
+    updatedAt: string;
+    firstResponseAt?: string;
+    responseTimeMinutes?: number;
+    status?: string;
+  } = {
     lastMessageBy: message.senderId,
     lastMessageByType: message.senderType,
     lastMessageAt: now.toISOString(),
@@ -622,7 +629,7 @@ export async function addAttachment(attachment: {
 }): Promise<SupportAttachment> {
   const now = new Date().toISOString();
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "supportAttachment" (
       "supportTicketId", "supportMessageId", "fileName", "originalName",
       "mimeType", "fileSize", "storageUrl", "thumbnailUrl",
@@ -648,7 +655,7 @@ export async function addAttachment(attachment: {
 }
 
 export async function getAttachments(supportTicketId: string): Promise<SupportAttachment[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     'SELECT * FROM "supportAttachment" WHERE "supportTicketId" = $1 ORDER BY "createdAt" ASC',
     [supportTicketId],
   );
@@ -668,121 +675,121 @@ async function generateTicketNumber(): Promise<string> {
   return `TKT${year}-${count.toString().padStart(6, '0')}`;
 }
 
-function mapToAgent(row: Record<string, any>): SupportAgent {
+function mapToAgent(row: Record<string, unknown>): SupportAgent {
   return {
-    supportAgentId: row.supportAgentId,
-    email: row.email,
-    firstName: row.firstName,
-    lastName: row.lastName,
-    displayName: row.displayName,
-    avatarUrl: row.avatarUrl,
-    role: row.role,
-    department: row.department,
-    skills: row.skills,
-    languages: row.languages,
+    supportAgentId: row.supportAgentId as string,
+    email: row.email as string,
+    firstName: row.firstName as string,
+    lastName: row.lastName as string,
+    displayName: row.displayName as string | undefined,
+    avatarUrl: row.avatarUrl as string | undefined,
+    role: row.role as AgentRole,
+    department: row.department as string | undefined,
+    skills: row.skills as string[] | undefined,
+    languages: row.languages as string[] | undefined,
     isActive: Boolean(row.isActive),
     isAvailable: Boolean(row.isAvailable),
-    maxTickets: parseInt(row.maxTickets) || 20,
-    currentTickets: parseInt(row.currentTickets) || 0,
-    totalTicketsHandled: parseInt(row.totalTicketsHandled) || 0,
-    averageResponseTimeMinutes: row.averageResponseTimeMinutes ? parseInt(row.averageResponseTimeMinutes) : undefined,
-    averageResolutionTimeMinutes: row.averageResolutionTimeMinutes ? parseInt(row.averageResolutionTimeMinutes) : undefined,
-    satisfactionScore: row.satisfactionScore ? parseFloat(row.satisfactionScore) : undefined,
-    satisfactionCount: parseInt(row.satisfactionCount) || 0,
-    timezone: row.timezone || 'UTC',
-    workingHours: row.workingHours,
-    notificationPreferences: row.notificationPreferences,
-    metadata: row.metadata,
-    lastActiveAt: row.lastActiveAt ? new Date(row.lastActiveAt) : undefined,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    maxTickets: parseInt(row.maxTickets as string) || 20,
+    currentTickets: parseInt(row.currentTickets as string) || 0,
+    totalTicketsHandled: parseInt(row.totalTicketsHandled as string) || 0,
+    averageResponseTimeMinutes: row.averageResponseTimeMinutes ? parseInt(row.averageResponseTimeMinutes as string) : undefined,
+    averageResolutionTimeMinutes: row.averageResolutionTimeMinutes ? parseInt(row.averageResolutionTimeMinutes as string) : undefined,
+    satisfactionScore: row.satisfactionScore ? parseFloat(row.satisfactionScore as string) : undefined,
+    satisfactionCount: parseInt(row.satisfactionCount as string) || 0,
+    timezone: (row.timezone as string) || 'UTC',
+    workingHours: row.workingHours as Record<string, unknown> | undefined,
+    notificationPreferences: row.notificationPreferences as Record<string, unknown> | undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    lastActiveAt: row.lastActiveAt ? new Date(row.lastActiveAt as string) : undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
   };
 }
 
-function mapToTicket(row: Record<string, any>): SupportTicket {
+function mapToTicket(row: Record<string, unknown>): SupportTicket {
   return {
-    supportTicketId: row.supportTicketId,
-    ticketNumber: row.ticketNumber,
-    customerId: row.customerId,
-    orderId: row.orderId,
-    email: row.email,
-    name: row.name,
-    phone: row.phone,
-    subject: row.subject,
-    description: row.description,
-    status: row.status,
-    priority: row.priority,
-    category: row.category,
-    subcategory: row.subcategory,
-    channel: row.channel,
-    assignedAgentId: row.assignedAgentId,
-    lastMessageBy: row.lastMessageBy,
-    lastMessageByType: row.lastMessageByType,
-    lastMessageAt: row.lastMessageAt ? new Date(row.lastMessageAt) : undefined,
-    firstResponseAt: row.firstResponseAt ? new Date(row.firstResponseAt) : undefined,
-    responseTimeMinutes: row.responseTimeMinutes ? parseInt(row.responseTimeMinutes) : undefined,
-    resolvedAt: row.resolvedAt ? new Date(row.resolvedAt) : undefined,
-    resolutionTimeMinutes: row.resolutionTimeMinutes ? parseInt(row.resolutionTimeMinutes) : undefined,
-    resolutionType: row.resolutionType,
-    resolutionNotes: row.resolutionNotes,
-    customerSatisfaction: row.customerSatisfaction ? parseInt(row.customerSatisfaction) : undefined,
-    customerFeedback: row.customerFeedback,
+    supportTicketId: row.supportTicketId as string,
+    ticketNumber: row.ticketNumber as string,
+    customerId: row.customerId as string | undefined,
+    orderId: row.orderId as string | undefined,
+    email: row.email as string,
+    name: row.name as string | undefined,
+    phone: row.phone as string | undefined,
+    subject: row.subject as string,
+    description: row.description as string | undefined,
+    status: row.status as TicketStatus,
+    priority: row.priority as TicketPriority,
+    category: row.category as TicketCategory,
+    subcategory: row.subcategory as string | undefined,
+    channel: row.channel as TicketChannel,
+    assignedAgentId: row.assignedAgentId as string | undefined,
+    lastMessageBy: row.lastMessageBy as string | undefined,
+    lastMessageByType: row.lastMessageByType as SenderType | undefined,
+    lastMessageAt: row.lastMessageAt ? new Date(row.lastMessageAt as string) : undefined,
+    firstResponseAt: row.firstResponseAt ? new Date(row.firstResponseAt as string) : undefined,
+    responseTimeMinutes: row.responseTimeMinutes ? parseInt(row.responseTimeMinutes as string) : undefined,
+    resolvedAt: row.resolvedAt ? new Date(row.resolvedAt as string) : undefined,
+    resolutionTimeMinutes: row.resolutionTimeMinutes ? parseInt(row.resolutionTimeMinutes as string) : undefined,
+    resolutionType: row.resolutionType as string | undefined,
+    resolutionNotes: row.resolutionNotes as string | undefined,
+    customerSatisfaction: row.customerSatisfaction ? parseInt(row.customerSatisfaction as string) : undefined,
+    customerFeedback: row.customerFeedback as string | undefined,
     feedbackRequested: Boolean(row.feedbackRequested),
-    feedbackRequestedAt: row.feedbackRequestedAt ? new Date(row.feedbackRequestedAt) : undefined,
-    tags: row.tags,
+    feedbackRequestedAt: row.feedbackRequestedAt ? new Date(row.feedbackRequestedAt as string) : undefined,
+    tags: row.tags as string[] | undefined,
     isEscalated: Boolean(row.isEscalated),
-    escalatedTo: row.escalatedTo,
-    escalatedAt: row.escalatedAt ? new Date(row.escalatedAt) : undefined,
-    escalationReason: row.escalationReason,
+    escalatedTo: row.escalatedTo as string | undefined,
+    escalatedAt: row.escalatedAt ? new Date(row.escalatedAt as string) : undefined,
+    escalationReason: row.escalationReason as string | undefined,
     isSpam: Boolean(row.isSpam),
-    reopenCount: parseInt(row.reopenCount) || 0,
-    customFields: row.customFields,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
-    closedAt: row.closedAt ? new Date(row.closedAt) : undefined,
-    dueAt: row.dueAt ? new Date(row.dueAt) : undefined,
+    reopenCount: parseInt(row.reopenCount as string) || 0,
+    customFields: row.customFields as Record<string, unknown> | undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
+    closedAt: row.closedAt ? new Date(row.closedAt as string) : undefined,
+    dueAt: row.dueAt ? new Date(row.dueAt as string) : undefined,
   };
 }
 
-function mapToMessage(row: Record<string, any>): SupportMessage {
+function mapToMessage(row: Record<string, unknown>): SupportMessage {
   return {
-    supportMessageId: row.supportMessageId,
-    supportTicketId: row.supportTicketId,
-    senderId: row.senderId,
-    senderType: row.senderType,
-    senderName: row.senderName,
-    senderEmail: row.senderEmail,
-    message: row.message,
-    messageHtml: row.messageHtml,
-    messageType: row.messageType,
+    supportMessageId: row.supportMessageId as string,
+    supportTicketId: row.supportTicketId as string,
+    senderId: row.senderId as string,
+    senderType: row.senderType as SenderType,
+    senderName: row.senderName as string,
+    senderEmail: row.senderEmail as string,
+    message: row.message as string,
+    messageHtml: row.messageHtml as string | undefined,
+    messageType: row.messageType as string,
     isInternal: Boolean(row.isInternal),
     isAutoReply: Boolean(row.isAutoReply),
     isRead: Boolean(row.isRead),
-    readAt: row.readAt ? new Date(row.readAt) : undefined,
-    readBy: row.readBy,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
+    readAt: row.readAt ? new Date(row.readAt as string) : undefined,
+    readBy: row.readBy as string | undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
   };
 }
 
-function mapToAttachment(row: Record<string, any>): SupportAttachment {
+function mapToAttachment(row: Record<string, unknown>): SupportAttachment {
   return {
-    supportAttachmentId: row.supportAttachmentId,
-    supportTicketId: row.supportTicketId,
-    supportMessageId: row.supportMessageId,
-    fileName: row.fileName,
-    originalName: row.originalName,
-    mimeType: row.mimeType,
-    fileSize: parseInt(row.fileSize) || 0,
-    storageUrl: row.storageUrl,
-    thumbnailUrl: row.thumbnailUrl,
-    uploadedBy: row.uploadedBy,
-    uploadedByType: row.uploadedByType,
+    supportAttachmentId: row.supportAttachmentId as string,
+    supportTicketId: row.supportTicketId as string,
+    supportMessageId: row.supportMessageId as string | undefined,
+    fileName: row.fileName as string,
+    originalName: row.originalName as string,
+    mimeType: row.mimeType as string,
+    fileSize: parseInt(row.fileSize as string) || 0,
+    storageUrl: row.storageUrl as string,
+    thumbnailUrl: row.thumbnailUrl as string | undefined,
+    uploadedBy: row.uploadedBy as string | undefined,
+    uploadedByType: row.uploadedByType as string | undefined,
     isPublic: Boolean(row.isPublic),
     isScanned: Boolean(row.isScanned),
     isSafe: Boolean(row.isSafe),
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
   };
 }

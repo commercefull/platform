@@ -15,7 +15,7 @@ export interface BasketItemProps {
   quantity: number;
   unitPrice: Money;
   imageUrl?: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
   itemType: 'physical' | 'digital' | 'subscription' | 'service';
   isGift: boolean;
   giftMessage?: string;
@@ -79,7 +79,7 @@ export class BasketItem {
     return this.props.imageUrl;
   }
 
-  get attributes(): Record<string, any> | undefined {
+  get attributes(): Record<string, unknown> | undefined {
     return this.props.attributes;
   }
 
@@ -140,7 +140,7 @@ export class BasketItem {
     this.props.updatedAt = new Date();
   }
 
-  updateAttributes(attributes: Record<string, any>): void {
+  updateAttributes(attributes: Record<string, unknown>): void {
     this.props.attributes = { ...this.props.attributes, ...attributes };
     this.props.updatedAt = new Date();
   }
@@ -154,7 +154,7 @@ export class BasketItem {
     return !this.props.productVariantId;
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       basketItemId: this.props.basketItemId,
       basketId: this.props.basketId,

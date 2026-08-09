@@ -14,15 +14,15 @@ export interface PaymentTransactionProps {
   amount: number;
   currency: string;
   status: TransactionStatus;
-  paymentMethodDetails?: Record<string, any>;
-  gatewayResponse?: Record<string, any>;
+  paymentMethodDetails?: Record<string, unknown>;
+  gatewayResponse?: Record<string, unknown>;
   errorCode?: string;
   errorMessage?: string;
   refundedAmount: number;
   customerIp?: string;
   authorizedAt?: Date;
   capturedAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,7 +43,7 @@ export class PaymentTransaction {
     amount: number;
     currency: string;
     customerIp?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): PaymentTransaction {
     const now = new Date();
     return new PaymentTransaction({
@@ -95,10 +95,10 @@ export class PaymentTransaction {
   get status(): TransactionStatus {
     return this.props.status;
   }
-  get paymentMethodDetails(): Record<string, any> | undefined {
+  get paymentMethodDetails(): Record<string, unknown> | undefined {
     return this.props.paymentMethodDetails;
   }
-  get gatewayResponse(): Record<string, any> | undefined {
+  get gatewayResponse(): Record<string, unknown> | undefined {
     return this.props.gatewayResponse;
   }
   get errorCode(): string | undefined {
@@ -119,7 +119,7 @@ export class PaymentTransaction {
   get capturedAt(): Date | undefined {
     return this.props.capturedAt;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -153,7 +153,7 @@ export class PaymentTransaction {
   }
 
   // Domain methods
-  authorize(externalTransactionId: string, gatewayResponse?: Record<string, any>): void {
+  authorize(externalTransactionId: string, gatewayResponse?: Record<string, unknown>): void {
     this.updateStatus(TransactionStatus.AUTHORIZED);
     this.props.externalTransactionId = externalTransactionId;
     this.props.gatewayResponse = gatewayResponse;
@@ -161,14 +161,14 @@ export class PaymentTransaction {
     this.touch();
   }
 
-  capture(gatewayResponse?: Record<string, any>): void {
+  capture(gatewayResponse?: Record<string, unknown>): void {
     this.updateStatus(TransactionStatus.PAID);
     this.props.gatewayResponse = gatewayResponse;
     this.props.capturedAt = new Date();
     this.touch();
   }
 
-  markAsPaid(externalTransactionId: string, gatewayResponse?: Record<string, any>): void {
+  markAsPaid(externalTransactionId: string, gatewayResponse?: Record<string, unknown>): void {
     this.updateStatus(TransactionStatus.PAID);
     this.props.externalTransactionId = externalTransactionId;
     this.props.gatewayResponse = gatewayResponse;
@@ -176,13 +176,13 @@ export class PaymentTransaction {
     this.touch();
   }
 
-  void(gatewayResponse?: Record<string, any>): void {
+  void(gatewayResponse?: Record<string, unknown>): void {
     this.updateStatus(TransactionStatus.VOIDED);
     this.props.gatewayResponse = gatewayResponse;
     this.touch();
   }
 
-  fail(errorCode: string, errorMessage: string, gatewayResponse?: Record<string, any>): void {
+  fail(errorCode: string, errorMessage: string, gatewayResponse?: Record<string, unknown>): void {
     this.updateStatus(TransactionStatus.FAILED);
     this.props.errorCode = errorCode;
     this.props.errorMessage = errorMessage;
@@ -214,12 +214,12 @@ export class PaymentTransaction {
     this.touch();
   }
 
-  setPaymentMethodDetails(details: Record<string, any>): void {
+  setPaymentMethodDetails(details: Record<string, unknown>): void {
     this.props.paymentMethodDetails = details;
     this.touch();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -235,7 +235,7 @@ export class PaymentTransaction {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       transactionId: this.props.transactionId,
       orderId: this.props.orderId,

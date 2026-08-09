@@ -80,12 +80,12 @@ describe('Attribute Option Tests', () => {
       expect(response.data.data.length).toBeGreaterThan(0);
 
       // Should find the newly created option
-      const foundNewOption = response.data.data.find((o: any) => (o.productAttributeOptionId || o.id) === createdOptionId);
+      const foundNewOption = response.data.data.find((o: Record<string, unknown>) => (o.productAttributeOptionId || o.id) === createdOptionId);
       expect(foundNewOption).toBeDefined();
 
       // Only check for setup option if it was successfully created
       if (testAttributeOptionId) {
-        const foundOriginalOption = response.data.data.find((o: any) => (o.productAttributeOptionId || o.id) === testAttributeOptionId);
+        const foundOriginalOption = response.data.data.find((o: Record<string, unknown>) => (o.productAttributeOptionId || o.id) === testAttributeOptionId);
         expect(foundOriginalOption).toBeDefined();
       }
     });

@@ -9,6 +9,7 @@ import productToCategoryRepo from '../../infrastructure/repositories/productToCa
 import productCategoryRepo from '../../infrastructure/repositories/productCategoryRepo';
 import productTagRepo from '../../infrastructure/repositories/productTagRepo';
 import productQaRepo from '../../infrastructure/repositories/productQaRepo';
+import type { ProductQaStatus } from '../../infrastructure/repositories/productQaRepo';
 import productQaAnswerRepo from '../../infrastructure/repositories/productQaAnswerRepo';
 import type { Product } from '../../infrastructure/repositories/productRepo';
 import type { ProductBrand } from '../../infrastructure/repositories/productBrandRepo';
@@ -78,8 +79,8 @@ export class GetProductCatalogEnrichmentUseCase {
     const tags = await productTagRepo.findAll();
 
     // Fetch Q&A questions with their answers
-    const qaStatus = command.approvedQaOnly ? 'answered' : undefined;
-    const questions = await productQaRepo.findByProduct(command.productId, qaStatus as any);
+    const qaStatus: ProductQaStatus | undefined = command.approvedQaOnly ? 'answered' : undefined;
+    const questions = await productQaRepo.findByProduct(command.productId, qaStatus);
 
     const qa: QaWithAnswers[] = [];
     for (const question of questions) {

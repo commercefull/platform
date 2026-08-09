@@ -17,8 +17,29 @@ export interface CheckPointsBalanceOutput {
   pointsToNextTier?: number;
 }
 
+export interface LoyaltyMember {
+  availablePoints: number;
+  pendingPoints?: number;
+  lifetimePoints: number;
+  tier?: {
+    tierId: string;
+    name: string;
+    multiplier: number;
+  };
+}
+
+export interface NextTierInfo {
+  name: string;
+  requiredPoints: number;
+}
+
+export interface CheckPointsBalanceRepository {
+  findMemberByCustomerId(customerId: string): Promise<LoyaltyMember | null>;
+  findNextTier(tierId: string): Promise<NextTierInfo | null>;
+}
+
 export class CheckPointsBalanceUseCase {
-  constructor(private readonly loyaltyRepository: any) {}
+  constructor(private readonly loyaltyRepository: CheckPointsBalanceRepository) {}
 
   async execute(input: CheckPointsBalanceInput): Promise<CheckPointsBalanceOutput> {
     const member = await this.loyaltyRepository.findMemberByCustomerId(input.customerId);
@@ -35,7 +56,7 @@ export class CheckPointsBalanceUseCase {
     }
 
     const tier = member.tier || { name: 'Standard', multiplier: 1 };
-    const nextTier = await this.loyaltyRepository.findNextTier(tier.tierId);
+    const nextTier = member.tier ? await this.loyaltyRepository.findNextTier(member.tier.tierId) : null;
 
     return {
       customerId: input.customerId,

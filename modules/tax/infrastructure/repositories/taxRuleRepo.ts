@@ -4,10 +4,8 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
-const TABLE = Table.TaxRule;
 
 export type TaxRuleConditionType = 'product' | 'category' | 'brand';
 
@@ -19,7 +17,7 @@ export interface TaxRule {
   name?: string;
   description?: string;
   conditionType: TaxRuleConditionType;
-  conditionValue: any; // JSON
+  conditionValue: unknown; // JSON
   sortOrder: number;
   isActive: boolean;
 }
@@ -71,7 +69,7 @@ export class TaxRuleRepo {
 
   async update(id: string, params: TaxRuleUpdateParams): Promise<TaxRule | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -107,7 +105,7 @@ export class TaxRuleRepo {
 
   async count(taxRateId?: string): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "taxRule"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (taxRateId) {
       sql += ` WHERE "taxRateId" = $1`;

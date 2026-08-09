@@ -16,7 +16,7 @@ export interface InventoryItemProps {
   reorderPoint: number;
   reorderQuantity: number;
   lastRestockAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,7 +38,7 @@ export class InventoryItem {
     lowStockThreshold?: number;
     reorderPoint?: number;
     reorderQuantity?: number;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): InventoryItem {
     const now = new Date();
     return new InventoryItem({
@@ -96,7 +96,7 @@ export class InventoryItem {
   get lastRestockAt(): Date | undefined {
     return this.props.lastRestockAt;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -187,7 +187,7 @@ export class InventoryItem {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       inventoryId: this.props.inventoryId,
       productId: this.props.productId,

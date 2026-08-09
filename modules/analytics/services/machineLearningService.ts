@@ -4,7 +4,7 @@
  * for the CommerceFull platform - Phase 7
  */
 
-import { query, queryOne } from '../../../libs/db';
+import { query } from '../../../libs/db';
 
 // ============================================================================
 // Sales Forecasting
@@ -27,7 +27,7 @@ export async function forecastSalesRevenue(
   // Calculate trend using simple moving average
   const recentData = historicalData.slice(-30); // Last 30 days
   const avgRevenue = recentData.reduce((sum, d) => sum + d.revenue, 0) / recentData.length;
-  const avgOrders = recentData.reduce((sum, d) => sum + d.orders, 0) / recentData.length;
+  const _avgOrders = recentData.reduce((sum, d) => sum + d.orders, 0) / recentData.length;
 
   // Simple trend calculation
   const slope = calculateTrendSlope(recentData);
@@ -182,7 +182,7 @@ export async function optimizeInventoryLevels(): Promise<{
 
     // Calculate recommended stock level (service level optimization)
     const leadTimeDays = 7; // Assume 7-day lead time
-    const serviceLevel = 0.95; // 95% service level
+    const _serviceLevel = 0.95; // 95% service level
     const safetyStock = salesVolatility * Math.sqrt(leadTimeDays) * 1.645; // Z-score for 95%
     const recommendedStock = dailySalesAvg * leadTimeDays + safetyStock + reorderPoint;
 
@@ -338,7 +338,7 @@ export async function performCustomerSegmentation(): Promise<{
     id: string;
     name: string;
     size: number;
-    characteristics: Record<string, any>;
+    characteristics: Record<string, unknown>;
     avgLifetimeValue: number;
     churnRate: number;
   }>;

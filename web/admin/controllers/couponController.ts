@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { couponRepo } from '../../../modules/promotion/infrastructure/repositories/couponRepo';
 import { adminRespond } from '../../respond';
 
@@ -38,12 +38,12 @@ export const listCoupons = async (req: TypedRequest, res: Response): Promise<voi
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load coupons',
+      error: (error as Error).message || 'Failed to load coupons',
     });
   }
 };
@@ -53,18 +53,19 @@ export const createCouponForm = async (req: TypedRequest, res: Response): Promis
     adminRespond(req, res, 'promotions/coupons/create', {
       pageName: 'Create Coupon',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
 
 export const createCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
     const {
       code,
       name,
@@ -80,7 +81,7 @@ export const createCoupon = async (req: TypedRequest, res: Response): Promise<vo
       isOneTimeUse,
       maxUsage,
       maxUsagePerCustomer,
-    } = req.body;
+    } = body;
 
     const coupon = await couponRepo.create({
       code,
@@ -101,13 +102,13 @@ export const createCoupon = async (req: TypedRequest, res: Response): Promise<vo
     });
 
     res.redirect(`/hub/promotions/coupons/${coupon.promotionCouponId}?success=Coupon created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'promotions/coupons/create', {
       pageName: 'Create Coupon',
-      error: error.message || 'Failed to create coupon',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create coupon',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -136,12 +137,12 @@ export const viewCoupon = async (req: TypedRequest, res: Response): Promise<void
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load coupon',
+      error: (error as Error).message || 'Failed to load coupon',
     });
   }
 };
@@ -164,12 +165,12 @@ export const editCouponForm = async (req: TypedRequest, res: Response): Promise<
       pageName: `Edit: ${coupon.name}`,
       coupon,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -177,8 +178,9 @@ export const editCouponForm = async (req: TypedRequest, res: Response): Promise<
 export const updateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { couponId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
+    const body = req.body as RequestBody;
     const {
       name,
       description,
@@ -193,7 +195,7 @@ export const updateCoupon = async (req: TypedRequest, res: Response): Promise<vo
       isOneTimeUse,
       maxUsage,
       maxUsagePerCustomer,
-    } = req.body;
+    } = body;
 
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description || undefined;
@@ -209,10 +211,10 @@ export const updateCoupon = async (req: TypedRequest, res: Response): Promise<vo
     if (maxUsage !== undefined) updates.maxUsage = maxUsage ? parseInt(maxUsage) : undefined;
     if (maxUsagePerCustomer !== undefined) updates.maxUsagePerCustomer = maxUsagePerCustomer ? parseInt(maxUsagePerCustomer) : undefined;
 
-    const coupon = await couponRepo.update(couponId, updates);
+    const _coupon = await couponRepo.update(couponId, updates);
 
     res.redirect(`/hub/promotions/coupons/${couponId}?success=Coupon updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -221,13 +223,13 @@ export const updateCoupon = async (req: TypedRequest, res: Response): Promise<vo
       adminRespond(req, res, 'promotions/coupons/edit', {
         pageName: `Edit: ${coupon?.name || 'Coupon'}`,
         coupon,
-        error: error.message || 'Failed to update coupon',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update coupon',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update coupon',
+        error: (error as Error).message || 'Failed to update coupon',
       });
     }
   }
@@ -244,16 +246,17 @@ export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<vo
     }
 
     res.json({ success: true, message: 'Coupon deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete coupon' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete coupon' });
   }
 };
 
 export const validateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { code, orderTotal, customerId } = req.body;
+    const body = req.body as RequestBody;
+    const { code, orderTotal, customerId } = body;
 
     const result = await couponRepo.validate(code, orderTotal, customerId, 'default-merchant');
 
@@ -263,9 +266,9 @@ export const validateCoupon = async (req: TypedRequest, res: Response): Promise<
       message: result.message,
       discountAmount: result.coupon ? couponRepo.calculateDiscount(result.coupon, orderTotal) : 0,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ valid: false, message: error.message || 'Failed to validate coupon' });
+    res.status(500).json({ valid: false, message: (error as Error).message || 'Failed to validate coupon' });
   }
 };

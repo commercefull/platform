@@ -20,7 +20,7 @@ export interface ReportSchedule {
   isActive: boolean;
   lastRunAt?: Date;
   nextRunAt: Date;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,12 +42,12 @@ export interface ReportData {
   title: string;
   generatedAt: Date;
   period: string;
-  summary: Record<string, any>;
-  data: any[];
+  summary: Record<string, unknown>;
+  data: unknown[];
   charts?: Array<{
     title: string;
     type: 'line' | 'bar' | 'pie' | 'area';
-    data: any;
+    data: unknown;
   }>;
 }
 
@@ -55,9 +55,9 @@ export interface ReportData {
 // Report Generation
 // ============================================================================
 
-export async function generateReport(reportType: string, parameters: Record<string, any>): Promise<ReportData> {
-  const generatedAt = new Date();
-  const period = parameters.period || '30d';
+export async function generateReport(reportType: string, parameters: Record<string, unknown>): Promise<ReportData> {
+  const _generatedAt = new Date();
+  const period = (parameters.period as string) || '30d';
 
   switch (reportType) {
     case 'sales':
@@ -79,7 +79,7 @@ export async function generateReport(reportType: string, parameters: Record<stri
 // Sales Report
 // ============================================================================
 
-async function generateSalesReport(period: string, parameters: Record<string, any>): Promise<ReportData> {
+async function generateSalesReport(period: string, _parameters: Record<string, unknown>): Promise<ReportData> {
   const [startDate, endDate] = parsePeriod(period);
   const generatedAt = new Date();
 
@@ -171,11 +171,11 @@ async function generateSalesReport(period: string, parameters: Record<string, an
         title: 'Top Products by Revenue',
         type: 'bar',
         data: {
-          labels: (topProducts || []).map((p: any) => p.name?.substring(0, 20) || ''),
+          labels: (topProducts || []).map((p) => p.name?.substring(0, 20) || ''),
           datasets: [
             {
               label: 'Revenue',
-              data: (topProducts || []).map((p: any) => parseFloat(p.revenue || '0')),
+              data: (topProducts || []).map((p) => parseFloat(p.revenue || '0')),
             },
           ],
         },
@@ -188,7 +188,7 @@ async function generateSalesReport(period: string, parameters: Record<string, an
 // Customer Report
 // ============================================================================
 
-async function generateCustomerReport(period: string, parameters: Record<string, any>): Promise<ReportData> {
+async function generateCustomerReport(period: string, _parameters: Record<string, unknown>): Promise<ReportData> {
   const [startDate, endDate] = parsePeriod(period);
 
   // Customer acquisition and retention
@@ -322,7 +322,7 @@ async function generateCustomerReport(period: string, parameters: Record<string,
 // Product Report
 // ============================================================================
 
-async function generateProductReport(period: string, parameters: Record<string, any>): Promise<ReportData> {
+async function generateProductReport(period: string, _parameters: Record<string, unknown>): Promise<ReportData> {
   const [startDate, endDate] = parsePeriod(period);
 
   const productData = await query<
@@ -381,7 +381,7 @@ async function generateProductReport(period: string, parameters: Record<string, 
 // Inventory Report
 // ============================================================================
 
-async function generateInventoryReport(period: string, parameters: Record<string, any>): Promise<ReportData> {
+async function generateInventoryReport(_period: string, _parameters: Record<string, unknown>): Promise<ReportData> {
   const inventoryData = await query<
     Array<{
       product_id: string;
@@ -440,7 +440,7 @@ async function generateInventoryReport(period: string, parameters: Record<string
 // Executive Report
 // ============================================================================
 
-async function generateExecutiveReport(period: string, parameters: Record<string, any>): Promise<ReportData> {
+async function generateExecutiveReport(period: string, _parameters: Record<string, unknown>): Promise<ReportData> {
   const [startDate, endDate] = parsePeriod(period);
 
   // Get comprehensive executive metrics

@@ -56,4 +56,10 @@ export async function getBalance(merchantId: string, currency: string): Promise<
   return result ? parseFloat(result.amount) : 0;
 }
 
-export default { findByMerchant, credit, debit, getBalance };
+export async function findAll(): Promise<PaymentBalance[]> {
+  return (
+    (await query<PaymentBalance[]>(`SELECT * FROM "paymentBalance" ORDER BY "merchantId", currency`)) || []
+  );
+}
+
+export default { findByMerchant, credit, debit, getBalance, findAll };

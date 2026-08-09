@@ -13,7 +13,7 @@ export interface OrderPaymentRefund {
   notes?: string;
   transactionId?: string;
   status: OrderPaymentRefundStatus;
-  gatewayResponse?: Record<string, any>;
+  gatewayResponse?: Record<string, unknown>;
   refundedBy?: string;
 }
 

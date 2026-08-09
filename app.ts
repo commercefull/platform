@@ -292,28 +292,29 @@ app.use((req, res, next) => {
 configureRoutes(app);
 
 // Global error handler - never expose stack traces in production
-app.use(function (err: any, req: Request, res: Response, _next: NextFunction) {
+app.use(function (err: unknown, req: Request, res: Response, _next: NextFunction) {
+  const error = err instanceof Error ? err : new Error(String(err));
   // Log error for debugging (use proper logging in production)
   console.error('Error:', {
-    message: err.message,
-    stack: isProduction ? undefined : err.stack,
+    message: error.message,
+    stack: isProduction ? undefined : error.stack,
     path: req.path,
     method: req.method,
   });
 
   // Don't leak error details in production
-  res.locals.message = isProduction ? 'An error occurred' : err.message;
-  res.locals.error = isProduction ? {} : err;
+  res.locals.message = isProduction ? 'An error occurred' : error.message;
+  res.locals.error = isProduction ? {} : error;
 
-  const status = err.status || 500;
+  const status = (error as unknown as Record<string, number>).status || 500;
   res.status(status);
 
   // Return JSON for API requests
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     res.json({
       success: false,
-      message: isProduction ? 'Internal server error' : err.message,
-      ...(isProduction ? {} : { stack: err.stack }),
+      message: isProduction ? 'Internal server error' : error.message,
+      ...(isProduction ? {} : { stack: error.stack }),
     });
   } else {
     res.render('storefront/views/error', {

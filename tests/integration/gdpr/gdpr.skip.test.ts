@@ -225,7 +225,7 @@ describe('GDPR Feature Tests', () => {
       expect(response.data.data.length).toBeGreaterThan(0);
 
       // Verify our test request is in the list
-      const ourRequest = response.data.data.find((r: any) => r.gdprDataRequestId === testRequestId);
+      const ourRequest = response.data.data.find((r: Record<string, unknown>) => r.gdprDataRequestId === testRequestId);
       expect(ourRequest).toBeDefined();
     });
 
@@ -310,7 +310,7 @@ describe('GDPR Feature Tests', () => {
       expect(response.data.success).toBe(true);
 
       // All returned requests should be pending
-      response.data.data.forEach((req: any) => {
+      response.data.data.forEach((req: Record<string, unknown>) => {
         expect(req.status).toBe('pending');
       });
     });
@@ -325,7 +325,7 @@ describe('GDPR Feature Tests', () => {
       expect(response.data.success).toBe(true);
 
       // All returned requests should be access type
-      response.data.data.forEach((req: any) => {
+      response.data.data.forEach((req: Record<string, unknown>) => {
         expect(req.requestType).toBe('access');
       });
     });
@@ -410,7 +410,7 @@ describe('GDPR Feature Tests', () => {
       });
 
       // Find a pending request that we can reject
-      const pendingRequest = listResponse.data.data.find((r: any) => r.status === 'pending' && r.gdprDataRequestId !== testRequestId);
+      const pendingRequest = listResponse.data.data.find((r: Record<string, unknown>) => r.status === 'pending' && r.gdprDataRequestId !== testRequestId);
 
       if (!pendingRequest) {
         // Skip if no pending request available

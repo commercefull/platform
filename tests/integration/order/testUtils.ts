@@ -14,7 +14,7 @@ export const loginTestUser = async (
     });
 
     return response.data?.accessToken || '';
-  } catch (error) {
+  } catch {
     return '';
   }
 };
@@ -32,7 +32,7 @@ export const loginTestMerchant = async (
     });
 
     return response.data?.accessToken || '';
-  } catch (error) {
+  } catch {
     return '';
   }
 };
@@ -115,11 +115,11 @@ export const setupOrderTests = async () => {
 
   try {
     adminToken = await loginTestAdmin(client);
-  } catch (error) {}
+  } catch {}
 
   try {
     customerToken = await loginTestUser(client);
-  } catch (error) {}
+  } catch {}
 
   if (customerToken) {
     try {
@@ -143,7 +143,7 @@ export const setupOrderTests = async () => {
         testOrderItemId = orderItems.length > 0 ? orderItems[0].orderItemId : '';
       } else {
       }
-    } catch (error) {}
+    } catch {}
   }
 
   return {
@@ -165,5 +165,5 @@ export const cleanupOrderTests = async (client: AxiosInstance, adminToken: strin
     await client.delete(`/business/orders/${testOrderId}`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
-  } catch (error) {}
+  } catch {}
 };

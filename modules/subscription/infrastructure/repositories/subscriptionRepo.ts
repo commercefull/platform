@@ -4,19 +4,18 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLES = {
+/* const _TABLE = {
   SUBSCRIPTION_PRODUCT: Table.SubscriptionProduct,
   SUBSCRIPTION_PLAN: Table.SubscriptionPlan,
   CUSTOMER_SUBSCRIPTION: Table.CustomerSubscription,
   SUBSCRIPTION_ORDER: Table.SubscriptionOrder,
   SUBSCRIPTION_PAUSE: Table.SubscriptionPause,
-};
+}; */
 
 // ============================================================================
 // Types
@@ -51,7 +50,7 @@ export interface SubscriptionProduct {
   earlyTerminationFee?: number;
   autoRenew: boolean;
   renewalReminderDays: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -78,7 +77,7 @@ export interface SubscriptionPlan {
   includesFreeShipping: boolean;
   includedProducts?: string[];
   features?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   sortOrder: number;
   isPopular: boolean;
   isActive: boolean;
@@ -126,8 +125,8 @@ export interface CustomerSubscription {
   failedPaymentCount: number;
   lastPaymentAt?: Date;
   lastPaymentFailedAt?: Date;
-  customizations?: Record<string, any>;
-  metadata?: Record<string, any>;
+  customizations?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -156,8 +155,8 @@ export interface SubscriptionOrder {
   paymentIntentId?: string;
   invoiceId?: string;
   isProrated: boolean;
-  lineItems?: any[];
-  metadata?: Record<string, any>;
+  lineItems?: unknown[];
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -177,7 +176,7 @@ export interface SubscriptionPause {
   billingCyclesSkipped: number;
   creditAmount: number;
   creditApplied: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -204,7 +203,7 @@ export interface DunningAttempt {
   action?: string;
   actionTakenBy?: string;
   actionTakenAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -214,14 +213,14 @@ export interface DunningAttempt {
 // ============================================================================
 
 export async function getSubscriptionProduct(subscriptionProductId: string): Promise<SubscriptionProduct | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "subscriptionProduct" WHERE "subscriptionProductId" = $1', [
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionProduct" WHERE "subscriptionProductId" = $1', [
     subscriptionProductId,
   ]);
   return row ? mapToSubscriptionProduct(row) : null;
 }
 
 export async function getSubscriptionProductByProductId(productId: string): Promise<SubscriptionProduct | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "subscriptionProduct" WHERE "productId" = $1', [productId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionProduct" WHERE "productId" = $1', [productId]);
   return row ? mapToSubscriptionProduct(row) : null;
 }
 
@@ -231,7 +230,7 @@ export async function getSubscriptionProducts(activeOnly: boolean = true): Promi
     whereClause = '"isActive" = true';
   }
 
-  const rows = await query<Record<string, any>[]>(`SELECT * FROM "subscriptionProduct" WHERE ${whereClause} ORDER BY "createdAt" DESC`);
+  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "subscriptionProduct" WHERE ${whereClause} ORDER BY "createdAt" DESC`);
   return (rows || []).map(mapToSubscriptionProduct);
 }
 
@@ -277,7 +276,7 @@ export async function saveSubscriptionProduct(product: Partial<SubscriptionProdu
     );
     return (await getSubscriptionProduct(product.subscriptionProductId))!;
   } else {
-    const result = await queryOne<Record<string, any>>(
+    const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "subscriptionProduct" (
         "productId", "isSubscriptionOnly", "allowOneTimePurchase", "minSubscriptionLength",
         "maxSubscriptionLength", "trialDays", "trialRequiresPayment", "billingAnchor",
@@ -330,7 +329,7 @@ export async function deleteSubscriptionProduct(subscriptionProductId: string): 
 // ============================================================================
 
 export async function getSubscriptionPlan(subscriptionPlanId: string): Promise<SubscriptionPlan | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "subscriptionPlan" WHERE "subscriptionPlanId" = $1', [subscriptionPlanId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionPlan" WHERE "subscriptionPlanId" = $1', [subscriptionPlanId]);
   return row ? mapToSubscriptionPlan(row) : null;
 }
 
@@ -340,7 +339,7 @@ export async function getSubscriptionPlans(subscriptionProductId: string, active
     whereClause += ' AND "isActive" = true';
   }
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "subscriptionPlan" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "price" ASC`,
     [subscriptionProductId],
   );
@@ -397,7 +396,7 @@ export async function saveSubscriptionPlan(
     );
     return (await getSubscriptionPlan(plan.subscriptionPlanId))!;
   } else {
-    const result = await queryOne<Record<string, any>>(
+    const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "subscriptionPlan" (
         "subscriptionProductId", "name", "slug", "description", "billingInterval",
         "billingIntervalCount", "price", "compareAtPrice", "currency", "setupFee",
@@ -451,14 +450,14 @@ export async function deleteSubscriptionPlan(subscriptionPlanId: string): Promis
 // ============================================================================
 
 export async function getCustomerSubscription(customerSubscriptionId: string): Promise<CustomerSubscription | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1', [
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1', [
     customerSubscriptionId,
   ]);
   return row ? mapToCustomerSubscription(row) : null;
 }
 
 export async function getCustomerSubscriptionByNumber(subscriptionNumber: string): Promise<CustomerSubscription | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "customerSubscription" WHERE "subscriptionNumber" = $1', [
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "customerSubscription" WHERE "subscriptionNumber" = $1', [
     subscriptionNumber,
   ]);
   return row ? mapToCustomerSubscription(row) : null;
@@ -469,7 +468,7 @@ export async function getCustomerSubscriptions(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: CustomerSubscription[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters?.customerId) {
@@ -489,7 +488,7 @@ export async function getCustomerSubscriptions(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "customerSubscription" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -502,7 +501,7 @@ export async function getCustomerSubscriptions(
 }
 
 export async function getSubscriptionsDueBilling(beforeDate: Date): Promise<CustomerSubscription[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "customerSubscription" 
      WHERE "status" IN ('active', 'trialing') 
      AND "nextBillingAt" <= $1 
@@ -521,7 +520,7 @@ export async function createCustomerSubscription(subscription: {
   shippingAddressId?: string;
   billingAddressId?: string;
   paymentMethodId?: string;
-  customizations?: Record<string, any>;
+  customizations?: Record<string, unknown>;
 }): Promise<CustomerSubscription> {
   const now = new Date();
   const plan = await getSubscriptionPlan(subscription.subscriptionPlanId);
@@ -541,7 +540,7 @@ export async function createCustomerSubscription(subscription: {
   const currentPeriodEnd = calculateNextBillingDate(currentPeriodStart, plan.billingInterval, plan.billingIntervalCount);
   const nextBillingAt = trialEndAt || currentPeriodEnd;
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "customerSubscription" (
       "subscriptionNumber", "customerId", "subscriptionPlanId", "subscriptionProductId",
       "productVariantId", "status", "quantity", "unitPrice", "discountAmount",
@@ -591,7 +590,7 @@ export async function updateSubscriptionStatus(
 ): Promise<void> {
   const now = new Date().toISOString();
   let setClause = '"status" = $1, "updatedAt" = $2';
-  const params: any[] = [status, now];
+  const params: unknown[] = [status, now];
   let paramIndex = 3;
 
   if (additionalFields?.cancelledAt) {
@@ -663,7 +662,7 @@ export async function pauseSubscription(
   );
 
   // Create pause record
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "subscriptionPause" (
       "customerSubscriptionId", "status", "pausedAt", "scheduledResumeAt",
       "reason", "pausedBy", "createdAt", "updatedAt"
@@ -681,7 +680,7 @@ export async function resumeSubscription(customerSubscriptionId: string, resumed
   if (!subscription) throw new Error('Subscription not found');
 
   // Calculate new billing period
-  const plan = await getSubscriptionPlan(subscription.subscriptionPlanId);
+  const _plan = await getSubscriptionPlan(subscription.subscriptionPlanId);
   const nextBillingAt = calculateNextBillingDate(now, subscription.billingInterval, subscription.billingIntervalCount);
 
   await query(
@@ -723,14 +722,14 @@ export async function advanceBillingCycle(customerSubscriptionId: string): Promi
 // ============================================================================
 
 export async function getSubscriptionOrder(subscriptionOrderId: string): Promise<SubscriptionOrder | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "subscriptionOrder" WHERE "subscriptionOrderId" = $1', [
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionOrder" WHERE "subscriptionOrderId" = $1', [
     subscriptionOrderId,
   ]);
   return row ? mapToSubscriptionOrder(row) : null;
 }
 
 export async function getSubscriptionOrders(customerSubscriptionId: string): Promise<SubscriptionOrder[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     'SELECT * FROM "subscriptionOrder" WHERE "customerSubscriptionId" = $1 ORDER BY "billingCycleNumber" DESC',
     [customerSubscriptionId],
   );
@@ -738,7 +737,7 @@ export async function getSubscriptionOrders(customerSubscriptionId: string): Pro
 }
 
 export async function getSubscriptionOrdersPending(): Promise<SubscriptionOrder[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "subscriptionOrder" 
      WHERE "status" = 'pending' 
      ORDER BY "scheduledAt" ASC`,
@@ -747,7 +746,7 @@ export async function getSubscriptionOrdersPending(): Promise<SubscriptionOrder[
 }
 
 export async function getFailedSubscriptionPayments(): Promise<SubscriptionOrder[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "subscriptionOrder" 
      WHERE "status" = 'failed' 
      ORDER BY "failedAt" DESC 
@@ -770,7 +769,7 @@ export async function createSubscriptionOrder(order: {
   const now = new Date().toISOString();
   const totalAmount = order.subtotal - (order.discountAmount || 0) + (order.taxAmount || 0) + (order.shippingAmount || 0);
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "subscriptionOrder" (
       "customerSubscriptionId", "billingCycleNumber", "periodStart", "periodEnd",
       "status", "subtotal", "discountAmount", "taxAmount", "shippingAmount",
@@ -803,7 +802,7 @@ export async function updateSubscriptionOrderStatus(
 ): Promise<void> {
   const now = new Date().toISOString();
   let setClause = '"status" = $1, "updatedAt" = $2';
-  const params: any[] = [status, now];
+  const params: unknown[] = [status, now];
   let paramIndex = 3;
 
   if (status === 'paid') {
@@ -849,7 +848,7 @@ export async function createDunningAttempt(attempt: {
 }): Promise<DunningAttempt> {
   const now = new Date().toISOString();
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "dunningAttempt" (
       "customerSubscriptionId", "subscriptionOrderId", "attemptNumber",
       "status", "amount", "currency", "scheduledAt", "createdAt", "updatedAt"
@@ -871,7 +870,7 @@ export async function createDunningAttempt(attempt: {
 }
 
 export async function getDunningAttempts(customerSubscriptionId: string): Promise<DunningAttempt[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     'SELECT * FROM "dunningAttempt" WHERE "customerSubscriptionId" = $1 ORDER BY "attemptNumber" ASC',
     [customerSubscriptionId],
   );
@@ -879,7 +878,7 @@ export async function getDunningAttempts(customerSubscriptionId: string): Promis
 }
 
 export async function getPendingDunningAttempts(beforeDate: Date): Promise<DunningAttempt[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "dunningAttempt" 
      WHERE "status" = 'pending' AND "scheduledAt" <= $1 
      ORDER BY "scheduledAt" ASC`,
@@ -895,7 +894,7 @@ export async function updateDunningAttempt(
 ): Promise<void> {
   const now = new Date().toISOString();
   let setClause = '"status" = $1, "updatedAt" = $2';
-  const params: any[] = [status, now];
+  const params: unknown[] = [status, now];
   let paramIndex = 3;
 
   if (status !== 'pending') {
@@ -952,6 +951,7 @@ function calculateNextBillingDate(from: Date, interval: BillingInterval, count: 
   return date;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapToSubscriptionProduct(row: Record<string, any>): SubscriptionProduct {
   return {
     subscriptionProductId: row.subscriptionProductId,
@@ -982,6 +982,7 @@ function mapToSubscriptionProduct(row: Record<string, any>): SubscriptionProduct
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapToSubscriptionPlan(row: Record<string, any>): SubscriptionPlan {
   return {
     subscriptionPlanId: row.subscriptionPlanId,
@@ -1013,6 +1014,7 @@ function mapToSubscriptionPlan(row: Record<string, any>): SubscriptionPlan {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapToCustomerSubscription(row: Record<string, any>): CustomerSubscription {
   return {
     customerSubscriptionId: row.customerSubscriptionId,
@@ -1061,6 +1063,7 @@ function mapToCustomerSubscription(row: Record<string, any>): CustomerSubscripti
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapToSubscriptionOrder(row: Record<string, any>): SubscriptionOrder {
   return {
     subscriptionOrderId: row.subscriptionOrderId,
@@ -1093,6 +1096,7 @@ function mapToSubscriptionOrder(row: Record<string, any>): SubscriptionOrder {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapToSubscriptionPause(row: Record<string, any>): SubscriptionPause {
   return {
     subscriptionPauseId: row.subscriptionPauseId,
@@ -1115,6 +1119,7 @@ function mapToSubscriptionPause(row: Record<string, any>): SubscriptionPause {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapToDunningAttempt(row: Record<string, any>): DunningAttempt {
   return {
     dunningAttemptId: row.dunningAttemptId,

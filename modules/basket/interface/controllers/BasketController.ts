@@ -42,6 +42,58 @@ import {
 } from '../../domain/errors/BasketErrors';
 
 // ============================================================================
+// Request Body Interfaces
+// ============================================================================
+
+interface GetOrCreateBasketBody {
+  sessionId?: string;
+  currency?: string;
+}
+
+interface AddItemBody {
+  productId: string;
+  productVariantId?: string;
+  sku: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  imageUrl?: string;
+  attributes?: Record<string, unknown>;
+  itemType?: 'physical' | 'digital' | 'subscription' | 'service';
+}
+
+interface UpdateItemQuantityBody {
+  quantity: number;
+}
+
+interface MergeBasketsBody {
+  sourceBasketId: string;
+  targetBasketId: string;
+}
+
+interface AssignToCustomerBody {
+  customerId: string;
+}
+
+interface SetItemAsGiftBody {
+  giftMessage?: string;
+}
+
+interface ExtendExpirationBody {
+  days?: number;
+}
+
+interface ApplyCouponBody {
+  couponCode: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+}
+
+interface DomainErrorWithStatusCode extends Error {
+  statusCode: number;
+}
+
+// ============================================================================
 // Response Mappers
 // ============================================================================
 
@@ -84,7 +136,7 @@ function mapBasketToSummary(basket: Basket): { basketId: string; itemCount: numb
 // Content Negotiation Helpers
 // ============================================================================
 
-type ResponseData = Record<string, any>;
+type ResponseData = Record<string, unknown> | BasketResponse | { basketId: string; itemCount: number; subtotal: number; currency: string };
 
 /**
  * Respond with JSON or HTML based on Accept header
@@ -125,8 +177,9 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
 export const getOrCreateBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const customerId = req.user?.customerId;
-    const sessionId = req.sessionID || req.body.sessionId;
-    const currency = req.body.currency || 'USD';
+    const body = req.body as GetOrCreateBasketBody;
+    const sessionId = req.sessionID || body.sessionId;
+    const currency = body.currency || 'USD';
 
     if (!customerId && !sessionId) {
       respondError(req, res, 'Either customer ID or session ID is required', 400, 'basket/error');
@@ -138,10 +191,10 @@ export const getOrCreateBasket = async (req: TypedRequest, res: Response): Promi
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get or create basket', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to get or create basket', 500, 'basket/error');
   }
 };
 
@@ -161,10 +214,10 @@ export const getBasket = async (req: TypedRequest, res: Response): Promise<void>
     }
 
     respond(req, res, mapBasketToResponse(basket), 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get basket', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to get basket', 500, 'basket/error');
   }
 };
 
@@ -184,10 +237,10 @@ export const getBasketSummary = async (req: TypedRequest, res: Response): Promis
     }
 
     respond(req, res, mapBasketToSummary(basket), 200, 'basket/summary');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get basket summary', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to get basket summary', 500, 'basket/error');
   }
 };
 
@@ -198,7 +251,8 @@ export const getBasketSummary = async (req: TypedRequest, res: Response): Promis
 export const addItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
-    const { productId, productVariantId, sku, name, quantity, unitPrice, imageUrl, attributes, itemType } = req.body;
+    const body = req.body as AddItemBody;
+    const { productId, productVariantId, sku, name, quantity, unitPrice, imageUrl, attributes, itemType } = body;
 
     // Validation
     if (!productId || !sku || !name || !quantity || unitPrice === undefined) {
@@ -228,10 +282,10 @@ export const addItem = async (req: TypedRequest, res: Response): Promise<void> =
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 201, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to add item to basket', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to add item to basket', 500, 'basket/error');
   }
 };
 
@@ -242,7 +296,8 @@ export const addItem = async (req: TypedRequest, res: Response): Promise<void> =
 export const updateItemQuantity = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId, basketItemId } = req.params;
-    const { quantity } = req.body;
+    const body = req.body as UpdateItemQuantityBody;
+    const { quantity } = body;
 
     if (quantity === undefined) {
       respondError(req, res, 'Quantity is required', 400, 'basket/error');
@@ -254,10 +309,10 @@ export const updateItemQuantity = async (req: TypedRequest, res: Response): Prom
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to update item quantity', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to update item quantity', 500, 'basket/error');
   }
 };
 
@@ -274,14 +329,14 @@ export const removeItem = async (req: TypedRequest, res: Response): Promise<void
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     if (error instanceof BasketNotFoundError || error instanceof BasketItemNotFoundError) {
-      respondError(req, res, error.message, error.statusCode, 'basket/error');
+      respondError(req, res, (error as Error).message, (error as DomainErrorWithStatusCode).statusCode, 'basket/error');
       return;
     }
-    respondError(req, res, error.message || 'Failed to remove item from basket', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to remove item from basket', 500, 'basket/error');
   }
 };
 
@@ -298,14 +353,14 @@ export const clearBasket = async (req: TypedRequest, res: Response): Promise<voi
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message === 'Basket not found') {
+    if ((error as Error).message === 'Basket not found') {
       respondError(req, res, 'Basket not found', 404, 'basket/error');
       return;
     }
-    respondError(req, res, error.message || 'Failed to clear basket', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to clear basket', 500, 'basket/error');
   }
 };
 
@@ -328,10 +383,10 @@ export const getMyBasket = async (req: TypedRequest, res: Response): Promise<voi
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get basket', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to get basket', 500, 'basket/error');
   }
 };
 
@@ -341,7 +396,8 @@ export const getMyBasket = async (req: TypedRequest, res: Response): Promise<voi
  */
 export const mergeBaskets = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { sourceBasketId, targetBasketId } = req.body;
+    const body = req.body as MergeBasketsBody;
+    const { sourceBasketId, targetBasketId } = body;
 
     if (!sourceBasketId || !targetBasketId) {
       respondError(req, res, 'Both sourceBasketId and targetBasketId are required', 400, 'basket/error');
@@ -353,14 +409,14 @@ export const mergeBaskets = async (req: TypedRequest, res: Response): Promise<vo
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     if (error instanceof BasketNotFoundError || error instanceof BasketNotActiveError || error instanceof BasketExpiredError) {
-      respondError(req, res, error.message, error.statusCode, 'basket/error');
+      respondError(req, res, (error as Error).message, (error as DomainErrorWithStatusCode).statusCode, 'basket/error');
       return;
     }
-    respondError(req, res, error.message || 'Failed to merge baskets', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to merge baskets', 500, 'basket/error');
   }
 };
 
@@ -371,7 +427,8 @@ export const mergeBaskets = async (req: TypedRequest, res: Response): Promise<vo
 export const assignToCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
-    const { customerId } = req.body;
+    const body = req.body as AssignToCustomerBody;
+    const { customerId } = body;
 
     if (!customerId) {
       respondError(req, res, 'customerId is required', 400, 'basket/error');
@@ -383,14 +440,14 @@ export const assignToCustomer = async (req: TypedRequest, res: Response): Promis
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message === 'Basket not found') {
+    if ((error as Error).message === 'Basket not found') {
       respondError(req, res, 'Basket not found', 404, 'basket/error');
       return;
     }
-    respondError(req, res, error.message || 'Failed to assign basket to customer', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to assign basket to customer', 500, 'basket/error');
   }
 };
 
@@ -401,21 +458,22 @@ export const assignToCustomer = async (req: TypedRequest, res: Response): Promis
 export const setItemAsGift = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId, basketItemId } = req.params;
-    const { giftMessage } = req.body;
+    const body = req.body as SetItemAsGiftBody;
+    const { giftMessage } = body;
 
     const command = new SetItemAsGiftCommand(basketId, basketItemId, giftMessage);
     const useCase = new SetItemAsGiftUseCase(BasketRepo);
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message === 'Basket not found' || error.message === 'Item not found in basket') {
-      respondError(req, res, error.message, 404, 'basket/error');
+    if ((error as Error).message === 'Basket not found' || (error as Error).message === 'Item not found in basket') {
+      respondError(req, res, (error as Error).message, 404, 'basket/error');
       return;
     }
-    respondError(req, res, error.message || 'Failed to set item as gift', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to set item as gift', 500, 'basket/error');
   }
 };
 
@@ -426,21 +484,22 @@ export const setItemAsGift = async (req: TypedRequest, res: Response): Promise<v
 export const extendExpiration = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
-    const { days } = req.body;
+    const body = req.body as ExtendExpirationBody;
+    const { days } = body;
 
     const command = new ExtendExpirationCommand(basketId, days || 7);
     const useCase = new ExtendExpirationUseCase(BasketRepo);
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     if (error instanceof BasketNotFoundError || error instanceof InvalidExpirationDaysError) {
-      respondError(req, res, error.message, error.statusCode, 'basket/error');
+      respondError(req, res, (error as Error).message, (error as DomainErrorWithStatusCode).statusCode, 'basket/error');
       return;
     }
-    respondError(req, res, error.message || 'Failed to extend basket expiration', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to extend basket expiration', 500, 'basket/error');
   }
 };
 
@@ -461,10 +520,10 @@ export const deleteBasket = async (req: TypedRequest, res: Response): Promise<vo
     await BasketRepo.delete(basketId);
 
     respond(req, res, { message: 'Basket deleted successfully' }, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to delete basket', 500, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to delete basket', 500, 'basket/error');
   }
 };
 
@@ -475,7 +534,8 @@ export const deleteBasket = async (req: TypedRequest, res: Response): Promise<vo
 export const applyCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
-    const { couponCode, discountType, discountValue } = req.body;
+    const body = req.body as ApplyCouponBody;
+    const { couponCode, discountType, discountValue } = body;
 
     if (!couponCode || !discountType || discountValue === undefined) {
       respondError(req, res, 'couponCode, discountType, and discountValue are required', 400, 'basket/error');
@@ -487,9 +547,9 @@ export const applyCoupon = async (req: TypedRequest, res: Response): Promise<voi
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to apply coupon', 400, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to apply coupon', 400, 'basket/error');
   }
 };
 
@@ -502,8 +562,8 @@ export const removeCoupon = async (req: TypedRequest, res: Response): Promise<vo
     const basket = await useCase.execute(command);
 
     respond(req, res, basket, 200, 'basket/view');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to remove coupon', 400, 'basket/error');
+    respondError(req, res, (error as Error).message || 'Failed to remove coupon', 400, 'basket/error');
   }
 };

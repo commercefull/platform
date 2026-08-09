@@ -24,7 +24,6 @@ import * as supplierController from './controllers/supplierController';
 import * as membershipController from './controllers/membershipController';
 import * as subscriptionController from './controllers/subscriptionController';
 import * as loyaltyController from './controllers/loyaltyController';
-import * as b2bController from './controllers/b2bController';
 import * as analyticsController from './controllers/analyticsController';
 import * as usersController from './controllers/usersController';
 import * as settingsController from './controllers/settingsController';
@@ -37,14 +36,11 @@ import * as supportController from './controllers/supportController';
 import * as assortmentController from './controllers/assortmentController';
 import * as brandController from './controllers/brandController';
 import * as pricingController from './controllers/pricingController';
-import * as channelController from './controllers/channelController';
 import * as localizationController from './controllers/localizationController';
-import * as segmentController from './controllers/segmentController';
 import * as merchantController from './controllers/merchantController';
 import * as mediaController from './controllers/mediaController';
 import * as checkoutController from './controllers/checkoutController';
 import * as storeController from './controllers/storeController';
-import * as marketingController from './controllers/marketingController';
 
 const router = express.Router();
 
@@ -274,7 +270,6 @@ router.delete('/tax/classes/:taxClassId', taxController.deleteTaxClass);
 router.get('/programs/membership', programsController.membershipDashboard);
 router.get('/programs/subscription', programsController.subscriptionDashboard);
 router.get('/programs/loyalty', programsController.loyaltyDashboard);
-router.get('/programs/b2b', programsController.b2bDashboard);
 
 // ============================================================================
 // Operations Dashboard
@@ -449,31 +444,6 @@ router.get('/marketing/seo/robots.txt', seoController.generateRobotsTxt);
 router.get('/marketing/seo/sitemap.xml', seoController.generateSitemap);
 
 // ============================================================================
-// Marketing - Campaigns Routes
-// ============================================================================
-
-router.get('/marketing/campaigns', marketingController.listCampaigns);
-router.get('/marketing/campaigns/create', marketingController.createCampaignForm);
-router.post('/marketing/campaigns', marketingController.createCampaign);
-router.get('/marketing/campaigns/:campaignId', marketingController.viewCampaign);
-router.post('/marketing/campaigns/:campaignId/send', marketingController.sendCampaign);
-
-// ============================================================================
-// Marketing - Affiliates Routes
-// ============================================================================
-
-router.get('/marketing/affiliates', marketingController.listAffiliates);
-router.get('/marketing/affiliates/create', marketingController.createAffiliateForm);
-router.post('/marketing/affiliates', marketingController.createAffiliate);
-router.get('/marketing/affiliates/:affiliateId', marketingController.viewAffiliate);
-
-// ============================================================================
-// Marketing - Referrals Routes
-// ============================================================================
-
-router.get('/marketing/referrals', marketingController.listReferrals);
-
-// ============================================================================
 // Notification Routes
 // ============================================================================
 
@@ -622,57 +592,6 @@ router.get('/loyalty/customers/:customerId', loyaltyController.viewCustomerLoyal
 // Loyalty Analytics
 router.get('/loyalty/analytics', loyaltyController.loyaltyAnalytics);
 
-// B2B Companies
-router.get('/b2b/companies', b2bController.listB2bCompanies);
-router.get('/b2b/companies/create', b2bController.createB2bCompanyForm);
-router.post('/b2b/companies', b2bController.createB2bCompany);
-router.get('/b2b/companies/:companyId', b2bController.viewB2bCompany);
-router.get('/b2b/companies/:companyId/edit', b2bController.editB2bCompanyForm);
-router.post('/b2b/companies/:companyId', b2bController.updateB2bCompany);
-router.post('/b2b/companies/:companyId/approve', b2bController.approveB2bCompany);
-router.post('/b2b/companies/:companyId/suspend', b2bController.suspendB2bCompany);
-router.delete('/b2b/companies/:companyId', b2bController.deleteB2bCompany);
-
-// B2B Company Users
-router.get('/b2b/companies/:companyId/users', b2bController.listB2bCompanyUsers);
-router.post('/b2b/companies/:companyId/users', b2bController.createB2bCompanyUser);
-router.delete('/b2b/companies/:companyId/users/:userId', b2bController.deleteB2bCompanyUser);
-
-// B2B Quotes
-router.get('/b2b/quotes', b2bController.listB2bQuotes);
-router.get('/b2b/quotes/create', b2bController.createB2bQuoteForm);
-router.post('/b2b/quotes', b2bController.createB2bQuote);
-router.get('/b2b/quotes/:quoteId', b2bController.viewB2bQuote);
-router.get('/b2b/quotes/:quoteId/edit', b2bController.editB2bQuoteForm);
-router.post('/b2b/quotes/:quoteId', b2bController.updateB2bQuote);
-router.post('/b2b/quotes/:quoteId/send', b2bController.sendB2bQuote);
-router.post('/b2b/quotes/:quoteId/accept', b2bController.acceptB2bQuote);
-router.post('/b2b/quotes/:quoteId/reject', b2bController.rejectB2bQuote);
-router.post('/b2b/quotes/:quoteId/convert', b2bController.convertB2bQuoteToOrder);
-router.post('/b2b/quotes/:quoteId/revision', b2bController.createB2bQuoteRevision);
-router.delete('/b2b/quotes/:quoteId', b2bController.deleteB2bQuote);
-
-// B2B Quote Items
-router.post('/b2b/quotes/:quoteId/items', b2bController.addB2bQuoteItem);
-router.put('/b2b/quotes/:quoteId/items/:itemId', b2bController.updateB2bQuoteItem);
-router.delete('/b2b/quotes/:quoteId/items/:itemId', b2bController.deleteB2bQuoteItem);
-
-// B2B Analytics
-router.get('/b2b/analytics', b2bController.b2bQuoteAnalytics);
-
-// B2B Credit Management
-router.get('/b2b/companies/:companyId/credit', b2bController.viewCompanyCreditLimit);
-router.post('/b2b/companies/:companyId/credit', b2bController.updateCompanyCreditLimit);
-router.get('/b2b/companies/:companyId/credit/transactions', b2bController.listCompanyCreditTransactions);
-
-// B2B Price Lists
-router.get('/b2b/price-lists', b2bController.listB2bPriceLists);
-router.get('/b2b/price-lists/create', b2bController.createB2bPriceListForm);
-router.post('/b2b/price-lists', b2bController.createB2bPriceList);
-router.get('/b2b/price-lists/:priceListId', b2bController.viewB2bPriceList);
-router.get('/b2b/price-lists/:priceListId/edit', b2bController.editB2bPriceListForm);
-router.post('/b2b/price-lists/:priceListId', b2bController.updateB2bPriceList);
-
 // ============================================================================
 // Advanced Analytics & Intelligence (Phase 7)
 // ============================================================================
@@ -767,21 +686,6 @@ router.put('/settings/currencies/:currencyId', settingsController.updateCurrency
 router.delete('/settings/currencies/:currencyId', settingsController.deleteCurrency);
 
 // ============================================================================
-// Sales Channels Routes
-// ============================================================================
-
-router.get('/settings/channels', channelController.listChannels);
-router.get('/settings/channels/create', channelController.createChannelForm);
-router.post('/settings/channels', channelController.createChannel);
-router.get('/settings/channels/:channelId', channelController.viewChannel);
-router.get('/settings/channels/:channelId/edit', channelController.editChannelForm);
-router.post('/settings/channels/:channelId', channelController.updateChannel);
-router.put('/settings/channels/:channelId', channelController.updateChannel);
-router.delete('/settings/channels/:channelId', channelController.deleteChannel);
-router.post('/settings/channels/:channelId/activate', channelController.activateChannel);
-router.post('/settings/channels/:channelId/deactivate', channelController.deactivateChannel);
-
-// ============================================================================
 // Checkout Settings Routes
 // ============================================================================
 
@@ -793,34 +697,12 @@ router.get('/settings/checkout/shipping-options', checkoutController.listShippin
 router.post('/settings/checkout/shipping-options/order', checkoutController.updateShippingOptionOrder);
 
 // ============================================================================
-// Customer Segments Routes
-// ============================================================================
-
-router.get('/sales/segments', segmentController.listSegments);
-router.get('/sales/segments/create', segmentController.createSegmentForm);
-router.post('/sales/segments', segmentController.createSegment);
-router.get('/sales/segments/:segmentId', segmentController.viewSegment);
-router.get('/sales/segments/:segmentId/edit', segmentController.editSegmentForm);
-router.post('/sales/segments/:segmentId', segmentController.updateSegment);
-router.put('/sales/segments/:segmentId', segmentController.updateSegment);
-router.delete('/sales/segments/:segmentId', segmentController.deleteSegment);
-router.get('/sales/segments/:segmentId/customers', segmentController.viewSegmentCustomers);
-router.post('/sales/segments/:segmentId/refresh', segmentController.refreshSegment);
-
-// ============================================================================
 // Merchants Routes
 // ============================================================================
 
 router.get('/operations/merchants', merchantController.listMerchants);
 router.get('/operations/merchants/create', merchantController.createMerchantForm);
 router.post('/operations/merchants', merchantController.createMerchant);
-
-// Commission Profiles (static routes must come before :merchantId to avoid param capture)
-router.get('/operations/merchants/commission-profiles', merchantController.listCommissionProfiles);
-router.get('/operations/merchants/commission-profiles/create', merchantController.createCommissionProfileForm);
-router.post('/operations/merchants/commission-profiles', merchantController.createCommissionProfile);
-router.get('/operations/merchants/commission-profiles/:profileId/edit', merchantController.editCommissionProfileForm);
-router.post('/operations/merchants/commission-profiles/:profileId', merchantController.updateCommissionProfile);
 
 router.get('/operations/merchants/:merchantId', merchantController.viewMerchant);
 router.get('/operations/merchants/:merchantId/edit', merchantController.editMerchantForm);
@@ -841,17 +723,6 @@ router.post('/operations/merchants/:merchantId/documents/:docId/status', merchan
 // Merchant Reviews
 router.get('/operations/merchants/:merchantId/reviews', merchantController.listMerchantReviews);
 router.post('/operations/merchants/:merchantId/reviews/:reviewId/status', merchantController.updateReviewStatus);
-
-// Merchant Payouts
-router.get('/operations/merchants/:merchantId/payouts', merchantController.listMerchantPayouts);
-router.get('/operations/merchants/:merchantId/payouts/:payoutId', merchantController.viewMerchantPayout);
-
-// Merchant Invoices
-router.get('/operations/merchants/:merchantId/invoices', merchantController.listMerchantInvoices);
-
-// Seller Policies
-router.get('/operations/merchants/:merchantId/policies', merchantController.listSellerPolicies);
-router.post('/operations/merchants/:merchantId/policies', merchantController.upsertSellerPolicy);
 
 // ============================================================================
 // Media Library Routes

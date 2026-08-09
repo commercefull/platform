@@ -2,13 +2,48 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import WarehouseRepo from '../../infrastructure/repositories/warehouseRepo';
+import { WarehouseUpdateParams } from '../../infrastructure/repositories/warehouseRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 
 const warehouseRepo = WarehouseRepo;
 
+interface CreateWarehouseBody {
+  name: string;
+  code: string;
+  description?: string;
+  isActive?: boolean;
+  isDefault?: boolean;
+  isFulfillmentCenter?: boolean;
+  isReturnCenter?: boolean;
+  isVirtual?: boolean;
+  merchantId?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  latitude?: number;
+  longitude?: number;
+  email?: string;
+  phone?: string;
+  contactName?: string;
+  timezone?: string;
+  cutoffTime?: string;
+  processingTime?: number;
+  operatingHours?: Record<string, unknown>;
+  capabilities?: Record<string, unknown>;
+  shippingMethods?: string[];
+  createdBy?: string;
+}
+
+interface ShippingMethodBody {
+  method: string;
+}
+
 export const getWarehouses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { activeOnly = 'true', fulfillmentCenters, returnCenters, merchantId, country, search, limit = '50', offset = '0' } = req.query;
+    const { activeOnly = 'true', fulfillmentCenters, returnCenters, merchantId, country, search, _limit = '50', _offset = '0' } = req.query;
 
     let warehouses;
 
@@ -33,7 +68,7 @@ export const getWarehouses = async (req: TypedRequest, res: Response): Promise<v
     }
 
     successResponse(res, warehouses);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch warehouses');
@@ -51,7 +86,7 @@ export const getWarehouseById = async (req: TypedRequest, res: Response): Promis
     }
 
     successResponse(res, warehouse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch warehouse');
@@ -69,7 +104,7 @@ export const getWarehouseByCode = async (req: TypedRequest, res: Response): Prom
     }
 
     successResponse(res, warehouse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch warehouse');
@@ -86,7 +121,7 @@ export const getDefaultWarehouse = async (req: TypedRequest, res: Response): Pro
     }
 
     successResponse(res, warehouse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch default warehouse');
@@ -97,7 +132,7 @@ export const getFulfillmentCenters = async (req: TypedRequest, res: Response): P
   try {
     const warehouses = await warehouseRepo.findFulfillmentCenters();
     successResponse(res, warehouses);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch fulfillment centers');
@@ -108,7 +143,7 @@ export const getReturnCenters = async (req: TypedRequest, res: Response): Promis
   try {
     const warehouses = await warehouseRepo.findReturnCenters();
     successResponse(res, warehouses);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch return centers');
@@ -119,7 +154,7 @@ export const getWarehouseStatistics = async (req: TypedRequest, res: Response): 
   try {
     const statistics = await warehouseRepo.getStatistics();
     successResponse(res, statistics);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch warehouse statistics');
@@ -143,7 +178,7 @@ export const findNearestWarehouses = async (req: TypedRequest, res: Response): P
     );
 
     successResponse(res, warehouses);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to find nearest warehouses');
@@ -155,7 +190,7 @@ export const getWarehousesByCountry = async (req: TypedRequest, res: Response): 
     const { country } = req.params;
     const warehouses = await warehouseRepo.findByCountry(country);
     successResponse(res, warehouses);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch warehouses');
@@ -167,14 +202,14 @@ export const getWarehousesByMerchant = async (req: TypedRequest, res: Response):
     const { merchantId } = req.params;
     const warehouses = await warehouseRepo.findByMerchantId(merchantId);
     successResponse(res, warehouses);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch warehouses');
   }
 };
 
-export const createWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createWarehouse = async (req: TypedRequest<Record<string, string>, unknown, CreateWarehouseBody>, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -222,27 +257,27 @@ export const createWarehouse = async (req: TypedRequest, res: Response): Promise
     }
 
     const warehouseParams = {
-      name,
-      code,
+      name: name as string,
+      code: code as string,
       description,
-      isActive,
-      isDefault,
-      isFulfillmentCenter,
-      isReturnCenter,
-      isVirtual,
+      isActive: isActive ?? true,
+      isDefault: isDefault ?? false,
+      isFulfillmentCenter: isFulfillmentCenter ?? true,
+      isReturnCenter: isReturnCenter ?? true,
+      isVirtual: isVirtual ?? false,
       merchantId,
-      addressLine1,
+      addressLine1: addressLine1 as string,
       addressLine2,
-      city,
-      state,
-      postalCode,
-      country,
+      city: city as string,
+      state: state as string,
+      postalCode: postalCode as string,
+      country: country as string,
       latitude,
       longitude,
       email,
       phone,
       contactName,
-      timezone,
+      timezone: timezone ?? 'UTC',
       cutoffTime,
       processingTime,
       operatingHours,
@@ -253,18 +288,18 @@ export const createWarehouse = async (req: TypedRequest, res: Response): Promise
 
     const warehouse = await warehouseRepo.create(warehouseParams);
     successResponse(res, warehouse, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message.includes('already exists')) {
-      errorResponse(res, error.message, 409);
+    if ((error as Error).message.includes('already exists')) {
+      errorResponse(res, (error as Error).message, 409);
     } else {
       errorResponse(res, 'Failed to create warehouse');
     }
   }
 };
 
-export const updateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateWarehouse = async (req: TypedRequest<Record<string, string>, unknown, WarehouseUpdateParams>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateParams = req.body;
@@ -277,7 +312,7 @@ export const updateWarehouse = async (req: TypedRequest, res: Response): Promise
     }
 
     successResponse(res, warehouse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to update warehouse');
@@ -295,7 +330,7 @@ export const deleteWarehouse = async (req: TypedRequest, res: Response): Promise
     }
 
     successResponse(res, { message: 'Warehouse deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to delete warehouse');
@@ -313,7 +348,7 @@ export const setDefaultWarehouse = async (req: TypedRequest, res: Response): Pro
     }
 
     successResponse(res, warehouse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to set default warehouse');
@@ -331,7 +366,7 @@ export const activateWarehouse = async (req: TypedRequest, res: Response): Promi
     }
 
     successResponse(res, warehouse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to activate warehouse');
@@ -349,14 +384,14 @@ export const deactivateWarehouse = async (req: TypedRequest, res: Response): Pro
     }
 
     successResponse(res, warehouse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to deactivate warehouse');
   }
 };
 
-export const addShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addShippingMethod = async (req: TypedRequest<Record<string, string>, unknown, ShippingMethodBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { method } = req.body;
@@ -374,7 +409,7 @@ export const addShippingMethod = async (req: TypedRequest, res: Response): Promi
     }
 
     successResponse(res, warehouse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to add shipping method');
@@ -393,7 +428,7 @@ export const removeShippingMethod = async (req: TypedRequest, res: Response): Pr
     }
 
     successResponse(res, warehouse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to remove shipping method');

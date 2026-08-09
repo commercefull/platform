@@ -66,19 +66,19 @@ exports.seed = async function (knex) {
     .whereIn('supportAgentId', Object.values(SUPPORT_AGENT_IDS))
     .del()
     .catch(() => {});
-  await knex('faqArticle')
+  await knex('supportFaqArticle')
     .whereIn('faqArticleId', Object.values(FAQ_ARTICLE_IDS))
     .del()
     .catch(() => {});
-  await knex('faqCategory')
+  await knex('supportFaqCategory')
     .whereIn('faqCategoryId', Object.values(FAQ_CATEGORY_IDS))
     .del()
     .catch(() => {});
-  await knex('stockAlert')
+  await knex('inventoryStockAlert')
     .whereIn('stockAlertId', Object.values(STOCK_ALERT_IDS))
     .del()
     .catch(() => {});
-  await knex('priceAlert')
+  await knex('supportPriceAlert')
     .whereIn('priceAlertId', Object.values(PRICE_ALERT_IDS))
     .del()
     .catch(() => {});
@@ -249,7 +249,7 @@ exports.seed = async function (knex) {
   ]);
 
   // Seed FAQ Categories
-  await knex('faqCategory').insert([
+  await knex('supportFaqCategory').insert([
     {
       faqCategoryId: FAQ_CATEGORY_IDS.ORDERS,
       name: 'Orders & Payments',
@@ -286,7 +286,7 @@ exports.seed = async function (knex) {
   ]);
 
   // Seed FAQ Articles
-  await knex('faqArticle').insert([
+  await knex('supportFaqArticle').insert([
     {
       faqArticleId: FAQ_ARTICLE_IDS.HOW_TO_ORDER,
       faqCategoryId: FAQ_CATEGORY_IDS.ORDERS,
@@ -354,7 +354,7 @@ exports.seed = async function (knex) {
 
   if (productExists) {
     // Seed Stock Alerts
-    await knex('stockAlert').insert([
+    await knex('inventoryStockAlert').insert([
       {
         stockAlertId: STOCK_ALERT_IDS.ALERT_1,
         customerId: customerId,
@@ -383,7 +383,7 @@ exports.seed = async function (knex) {
     ]);
 
     // Seed Price Alerts
-    await knex('priceAlert').insert([
+    await knex('supportPriceAlert').insert([
       {
         priceAlertId: PRICE_ALERT_IDS.ALERT_1,
         customerId: customerId,

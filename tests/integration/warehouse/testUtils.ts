@@ -52,7 +52,7 @@ export async function setupWarehouseTests() {
   return { client, adminToken };
 }
 
-export function createTestWarehouse(overrides: Partial<any> = {}) {
+export function createTestWarehouse(overrides: Partial<unknown> = {}) {
   return {
     name: `Test Warehouse ${Date.now()}`,
     code: `WH${Date.now()}`,
@@ -68,7 +68,7 @@ export function createTestWarehouse(overrides: Partial<any> = {}) {
   };
 }
 
-export function createTestZone(overrides: Partial<any> = {}) {
+export function createTestZone(overrides: Partial<unknown> = {}) {
   return {
     name: `Test Zone ${Date.now()}`,
     code: `Z${Date.now()}`,
@@ -84,6 +84,6 @@ export async function cleanupWarehouseTests(client: AxiosInstance, adminToken: s
   for (const id of resources.warehouseIds || []) {
     try {
       await client.delete(`/business/warehouses/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 }

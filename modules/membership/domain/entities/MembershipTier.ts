@@ -25,7 +25,7 @@ export interface MembershipTierProps {
   isActive: boolean;
   color?: string;
   icon?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -90,7 +90,7 @@ export class MembershipTier {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return { ...this.props };
   }
 }

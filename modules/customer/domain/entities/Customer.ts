@@ -43,7 +43,7 @@ export interface CustomerProps {
   taxExemptionNumber?: string;
   notes?: string;
   tags: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   lastLoginAt?: Date;
   loginCount: number;
   createdAt: Date;
@@ -66,7 +66,7 @@ export class Customer {
     dateOfBirth?: Date;
     preferredCurrency?: string;
     preferredLanguage?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Customer {
     const now = new Date();
     return new Customer({
@@ -153,7 +153,7 @@ export class Customer {
   get tags(): string[] {
     return [...this.props.tags];
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get lastLoginAt(): Date | undefined {
@@ -256,7 +256,7 @@ export class Customer {
   removeAddress(addressId: string): void {
     const index = this.props.addresses.findIndex(a => a.addressId === addressId);
     if (index > -1) {
-      const removed = this.props.addresses.splice(index, 1)[0];
+      const _removed = this.props.addresses.splice(index, 1)[0];
       if (this.props.defaultShippingAddressId === addressId) {
         this.props.defaultShippingAddressId = undefined;
       }
@@ -335,7 +335,7 @@ export class Customer {
     this.touch();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -344,7 +344,7 @@ export class Customer {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       customerId: this.props.customerId,
       email: this.props.email,

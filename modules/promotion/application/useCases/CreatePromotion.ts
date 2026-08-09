@@ -4,6 +4,7 @@
  */
 
 import { PromotionRepo } from '../../infrastructure/repositories/promotionRepo';
+import { Promotion } from '../../../../libs/db/types';
 
 // Command
 export class CreatePromotionCommand {
@@ -95,7 +96,7 @@ export class CreatePromotionUseCase {
     }
   }
 
-  private mapToResponse(promotion: any): CreatePromotionResponse {
+  private mapToResponse(promotion: Promotion & { code?: string }): CreatePromotionResponse {
     return {
       promotionId: promotion.promotionId,
       code: promotion.code,

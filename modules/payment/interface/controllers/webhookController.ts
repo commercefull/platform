@@ -49,7 +49,7 @@ export async function handleGatewayWebhook(req: Request, res: Response): Promise
 
   // 2. Look up the webhook secret for this gateway from the DB (or env fallback)
   const gatewayRow = await PaymentRepo.getDefaultGateway('default').catch(() => null);
-  const secret: string = (gatewayRow as any)?.webhookSecret || process.env.PAYMENT_WEBHOOK_SECRET || '';
+  const secret: string = (gatewayRow as { webhookSecret?: string } | null)?.webhookSecret || process.env.PAYMENT_WEBHOOK_SECRET || '';
 
   // 3. Verify signature
   if (secret) {
@@ -63,7 +63,7 @@ export async function handleGatewayWebhook(req: Request, res: Response): Promise
   }
 
   // 4. Parse body
-  let rawPayload: Record<string, any>;
+  let rawPayload: Record<string, unknown>;
   try {
     rawPayload = JSON.parse(rawBody.toString('utf8'));
   } catch {
@@ -72,16 +72,22 @@ export async function handleGatewayWebhook(req: Request, res: Response): Promise
   }
 
   // 5. Record the raw webhook for audit / idempotency
+  const dataObj = rawPayload.data as Record<string, unknown> | undefined;
+  const dataObject = dataObj?.object as Record<string, unknown> | undefined;
+  const notificationItems = rawPayload.notificationItems as Array<Record<string, unknown>> | undefined;
+  const firstNotification = notificationItems?.[0] as Record<string, unknown> | undefined;
+  const notificationItem = firstNotification?.NotificationRequestItem as Record<string, unknown> | undefined;
+
   const externalId: string =
-    rawPayload.data?.object?.id ||
-    rawPayload.externalTransactionId ||
-    rawPayload.notificationItems?.[0]?.NotificationRequestItem?.pspReference ||
+    (dataObject?.id as string) ||
+    (rawPayload.externalTransactionId as string) ||
+    (notificationItem?.pspReference as string) ||
     '';
 
   if (externalId) {
     const recordUseCase = new ProcessPaymentWebhookUseCase();
     const recorded = await recordUseCase
-      .execute(new ProcessPaymentWebhookCommand(externalId, provider, rawPayload.type || rawPayload.eventCode || 'unknown', rawPayload))
+      .execute(new ProcessPaymentWebhookCommand(externalId, provider, (rawPayload.type as string) || (rawPayload.eventCode as string) || 'unknown', rawPayload))
       .catch(() => null);
 
     if (recorded?.alreadyExisted) {
@@ -145,7 +151,7 @@ export async function handleGatewayWebhook(req: Request, res: Response): Promise
           paymentIntentId: event.externalTransactionId,
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('[webhook] payment_succeeded handler error:', err);
     }
 
@@ -182,7 +188,7 @@ export async function handleGatewayWebhook(req: Request, res: Response): Promise
           reason: event.errorMessage,
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('[webhook] payment_failed handler error:', err);
     }
 

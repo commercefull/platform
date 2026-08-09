@@ -40,7 +40,7 @@ export async function setupPricingTests() {
 /**
  * Create test pricing rule data
  */
-export function createTestPricingRule(overrides: Partial<any> = {}) {
+export function createTestPricingRule(overrides: Partial<unknown> = {}) {
   return {
     name: `Test Rule ${Date.now()}`,
     type: 'quantity_based',
@@ -59,7 +59,7 @@ const TEST_PRODUCT_UUID = '00000000-0000-0000-0000-000000000001';
 /**
  * Create test tier price data
  */
-export function createTestTierPrice(productId: string = TEST_PRODUCT_UUID, overrides: Partial<any> = {}) {
+export function createTestTierPrice(productId: string = TEST_PRODUCT_UUID, overrides: Partial<unknown> = {}) {
   return {
     productId,
     quantityMin: 10,
@@ -71,7 +71,7 @@ export function createTestTierPrice(productId: string = TEST_PRODUCT_UUID, overr
 /**
  * Create test price list data
  */
-export function createTestPriceList(overrides: Partial<any> = {}) {
+export function createTestPriceList(overrides: Partial<unknown> = {}) {
   return {
     name: `Test Price List ${Date.now()}`,
     description: 'Integration test price list',
@@ -84,7 +84,7 @@ export function createTestPriceList(overrides: Partial<any> = {}) {
 /**
  * Create test currency data
  */
-export function createTestCurrency(overrides: Partial<any> = {}) {
+export function createTestCurrency(overrides: Partial<unknown> = {}) {
   return {
     code: 'TST',
     symbol: 'T$',
@@ -102,7 +102,7 @@ export function createTestCurrency(overrides: Partial<any> = {}) {
 /**
  * Create test currency region data
  */
-export function createTestCurrencyRegion(overrides: Partial<any> = {}) {
+export function createTestCurrencyRegion(overrides: Partial<unknown> = {}) {
   return {
     code: `TR${Date.now().toString().slice(-6)}`,
     name: `Test Region ${Date.now()}`,
@@ -116,7 +116,7 @@ export function createTestCurrencyRegion(overrides: Partial<any> = {}) {
 /**
  * Create test currency price rule data
  */
-export function createTestCurrencyPriceRule(overrides: Partial<any> = {}) {
+export function createTestCurrencyPriceRule(overrides: Partial<unknown> = {}) {
   return {
     name: `Test Currency Price Rule ${Date.now()}`,
     currencyCode: 'USD',
@@ -150,7 +150,7 @@ export async function cleanupPricingTests(
   for (const id of resources.ruleIds || []) {
     try {
       await client.delete(`/business/pricing/rules/${id}`, { headers });
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   }
@@ -159,7 +159,7 @@ export async function cleanupPricingTests(
   for (const id of resources.tierIds || []) {
     try {
       await client.delete(`/business/pricing/tier-prices/${id}`, { headers });
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   }
@@ -168,7 +168,7 @@ export async function cleanupPricingTests(
   for (const id of resources.priceListIds || []) {
     try {
       await client.delete(`/business/pricing/price-lists/${id}`, { headers });
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   }
@@ -177,7 +177,7 @@ export async function cleanupPricingTests(
   for (const code of resources.currencyCodes || []) {
     try {
       await client.delete(`/business/pricing/currencies/${code}`, { headers });
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   }
@@ -186,7 +186,7 @@ export async function cleanupPricingTests(
   for (const id of resources.regionIds || []) {
     try {
       await client.delete(`/business/pricing/currency-regions/${id}`, { headers });
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   }
@@ -195,7 +195,7 @@ export async function cleanupPricingTests(
   for (const id of resources.priceRuleIds || []) {
     try {
       await client.delete(`/business/pricing/currency-price-rules/${id}`, { headers });
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   }

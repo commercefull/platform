@@ -2,16 +2,44 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import pricingRuleRepo from '../../infrastructure/repositories/pricingRuleRepo';
-import tierPriceRepo from '../../infrastructure/repositories/tierPriceRepo';
+import productTierPriceRepo from '../../infrastructure/repositories/productTierPriceRepo';
 import customerPriceRepo from '../../infrastructure/repositories/customerPriceRepo';
-import { CustomerPriceList, PricingRuleStatus } from '../../domain/pricingRule';
+import { CustomerPriceList, CustomerPrice, PricingRuleCreateProps, PricingRuleStatus, PricingRuleUpdateProps, TierPrice } from '../../domain/pricingRule';
+
+interface PricingRuleBody {
+  name?: string;
+  type?: string;
+  scope?: string;
+  adjustments?: { type: string; value: number }[];
+  [key: string]: unknown;
+}
+
+interface TierPriceBody {
+  productId?: string;
+  quantityMin?: number;
+  price?: number;
+  [key: string]: unknown;
+}
+
+interface PriceListBody {
+  name?: string;
+  [key: string]: unknown;
+}
+
+interface PriceBody {
+  productId?: string;
+  adjustmentType?: string;
+  adjustmentValue?: number;
+  priceListId?: string;
+  [key: string]: unknown;
+}
 
 /**
  * Get all pricing rules with pagination and filtering
  */
 export const getPricingRules = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { page = '1', limit = '20', status, scope, type, productId, categoryId, customerId, customerGroupId, search } = req.query;
+    const { page = '1', limit = '20', status, scope, type, productId, categoryId, customerId, customerGroupId, _search } = req.query;
 
     const pageNum = parseInt(page as string, 10);
     const limitNum = parseInt(limit as string, 10);
@@ -92,7 +120,7 @@ export const getPricingRule = async (req: TypedRequest, res: Response): Promise<
 /**
  * Create a new pricing rule
  */
-export const createPricingRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPricingRule = async (req: TypedRequest<Record<string, string>, unknown, PricingRuleBody>, res: Response): Promise<void> => {
   try {
     const ruleData = req.body;
 
@@ -114,7 +142,7 @@ export const createPricingRule = async (req: TypedRequest, res: Response): Promi
       return;
     }
 
-    const newRule = await pricingRuleRepo.create(ruleData);
+    const newRule = await pricingRuleRepo.create(ruleData as PricingRuleCreateProps);
 
     res.status(201).json({
       success: true,
@@ -134,7 +162,7 @@ export const createPricingRule = async (req: TypedRequest, res: Response): Promi
 /**
  * Update a pricing rule
  */
-export const updatePricingRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePricingRule = async (req: TypedRequest<Record<string, string>, unknown, PricingRuleBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const ruleData = req.body;
@@ -148,7 +176,7 @@ export const updatePricingRule = async (req: TypedRequest, res: Response): Promi
       return;
     }
 
-    const updatedRule = await pricingRuleRepo.update(id, ruleData);
+    const updatedRule = await pricingRuleRepo.update(id, ruleData as PricingRuleUpdateProps);
 
     res.json({
       success: true,
@@ -208,7 +236,7 @@ export const getTierPrices = async (req: TypedRequest, res: Response): Promise<v
     const pageNum = parseInt(page as string, 10);
     const limitNum = parseInt(limit as string, 10);
 
-    const { tierPrices, total } = await tierPriceRepo.findAll({
+    const { tierPrices, total } = await productTierPriceRepo.findAll({
       page: pageNum,
       limit: limitNum,
       productId: productId as string,
@@ -243,7 +271,7 @@ export const getTierPrices = async (req: TypedRequest, res: Response): Promise<v
 export const getTierPrice = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const tierPrice = await tierPriceRepo.findById(id);
+    const tierPrice = await productTierPriceRepo.findById(id);
 
     if (!tierPrice) {
       res.status(404).json({
@@ -271,7 +299,7 @@ export const getTierPrice = async (req: TypedRequest, res: Response): Promise<vo
 /**
  * Create a new tier price
  */
-export const createTierPrice = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createTierPrice = async (req: TypedRequest<Record<string, string>, unknown, TierPriceBody>, res: Response): Promise<void> => {
   try {
     const tierPriceData = req.body;
 
@@ -284,7 +312,7 @@ export const createTierPrice = async (req: TypedRequest, res: Response): Promise
       return;
     }
 
-    const newTierPrice = await tierPriceRepo.create(tierPriceData);
+    const newTierPrice = await productTierPriceRepo.create(tierPriceData as Omit<TierPrice, 'id' | 'createdAt' | 'updatedAt'>);
 
     res.status(201).json({
       success: true,
@@ -304,12 +332,12 @@ export const createTierPrice = async (req: TypedRequest, res: Response): Promise
 /**
  * Update a tier price
  */
-export const updateTierPrice = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateTierPrice = async (req: TypedRequest<Record<string, string>, unknown, TierPriceBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const tierPriceData = req.body;
 
-    const existingTierPrice = await tierPriceRepo.findById(id);
+    const existingTierPrice = await productTierPriceRepo.findById(id);
     if (!existingTierPrice) {
       res.status(404).json({
         success: false,
@@ -318,7 +346,7 @@ export const updateTierPrice = async (req: TypedRequest, res: Response): Promise
       return;
     }
 
-    const updatedTierPrice = await tierPriceRepo.update(id, tierPriceData);
+    const updatedTierPrice = await productTierPriceRepo.update(id, tierPriceData as Partial<Omit<TierPrice, 'id' | 'createdAt' | 'updatedAt'>>);
 
     res.json({
       success: true,
@@ -342,7 +370,7 @@ export const deleteTierPrice = async (req: TypedRequest, res: Response): Promise
   try {
     const { id } = req.params;
 
-    const existingTierPrice = await tierPriceRepo.findById(id);
+    const existingTierPrice = await productTierPriceRepo.findById(id);
     if (!existingTierPrice) {
       res.status(404).json({
         success: false,
@@ -351,7 +379,7 @@ export const deleteTierPrice = async (req: TypedRequest, res: Response): Promise
       return;
     }
 
-    await tierPriceRepo.delete(id);
+    await productTierPriceRepo.delete(id);
 
     res.json({
       success: true,
@@ -373,7 +401,7 @@ export const deleteTierPrice = async (req: TypedRequest, res: Response): Promise
  */
 export const getPriceLists = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { page = '1', limit = '20', customerId, customerGroupId, status } = req.query;
+    const { page = '1', limit = '20', customerId, customerGroupId, _status } = req.query;
 
     const pageNum = parseInt(page as string, 10);
     const limitNum = parseInt(limit as string, 10);
@@ -451,7 +479,7 @@ export const getPriceList = async (req: TypedRequest, res: Response): Promise<vo
 /**
  * Create a new price list
  */
-export const createPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPriceList = async (req: TypedRequest<Record<string, string>, unknown, PriceListBody>, res: Response): Promise<void> => {
   try {
     const priceListData = req.body;
 
@@ -464,7 +492,7 @@ export const createPriceList = async (req: TypedRequest, res: Response): Promise
       return;
     }
 
-    const newPriceList = await customerPriceRepo.createPriceList(priceListData);
+    const newPriceList = await customerPriceRepo.createPriceList(priceListData as Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>);
 
     res.status(201).json({
       success: true,
@@ -484,7 +512,7 @@ export const createPriceList = async (req: TypedRequest, res: Response): Promise
 /**
  * Update a price list
  */
-export const updatePriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePriceList = async (req: TypedRequest<Record<string, string>, unknown, PriceListBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const priceListData = req.body;
@@ -498,7 +526,7 @@ export const updatePriceList = async (req: TypedRequest, res: Response): Promise
       return;
     }
 
-    const updatedPriceList = await customerPriceRepo.updatePriceList(id, priceListData);
+    const updatedPriceList = await customerPriceRepo.updatePriceList(id, priceListData as Partial<Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>>);
 
     res.json({
       success: true,
@@ -551,7 +579,7 @@ export const deletePriceList = async (req: TypedRequest, res: Response): Promise
 /**
  * Add a price to a price list
  */
-export const addPriceToList = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addPriceToList = async (req: TypedRequest<Record<string, string>, unknown, PriceBody>, res: Response): Promise<void> => {
   try {
     const { priceListId } = req.params;
     const priceData = req.body;
@@ -578,7 +606,7 @@ export const addPriceToList = async (req: TypedRequest, res: Response): Promise<
     const newPrice = await customerPriceRepo.createPrice({
       ...priceData,
       priceListId,
-    });
+    } as Omit<CustomerPrice, 'id' | 'createdAt' | 'updatedAt'>);
 
     res.status(201).json({
       success: true,

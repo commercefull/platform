@@ -26,9 +26,9 @@ export const getPreferences = async (req: Request, res: Response): Promise<void>
 
     const preferences = await notificationPreferenceRepo.findByUser(userId, 'customer');
     successResponse(res, { preferences });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('getPreferences error:', error);
-    errorResponse(res, error.message || 'Failed to fetch preferences');
+    errorResponse(res, (error as Error).message || 'Failed to fetch preferences');
   }
 };
 
@@ -49,9 +49,9 @@ export const updatePreference = async (req: Request, res: Response): Promise<voi
     const result = await useCase.execute(new ManageNotificationPreferenceCommand(userId, 'customer', channel, type, isEnabled));
 
     successResponse(res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('updatePreference error:', error);
-    errorResponse(res, error.message || 'Failed to update preference');
+    errorResponse(res, (error as Error).message || 'Failed to update preference');
   }
 };
 
@@ -69,9 +69,9 @@ export const listDevices = async (req: Request, res: Response): Promise<void> =>
 
     const devices = await notificationDeviceRepo.findByUser(userId);
     successResponse(res, { devices });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('listDevices error:', error);
-    errorResponse(res, error.message || 'Failed to fetch devices');
+    errorResponse(res, (error as Error).message || 'Failed to fetch devices');
   }
 };
 
@@ -92,9 +92,9 @@ export const registerDevice = async (req: Request, res: Response): Promise<void>
     const result = await useCase.execute(new RegisterNotificationDeviceCommand(userId, 'customer', deviceToken, platform));
 
     successResponse(res, result, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('registerDevice error:', error);
-    errorResponse(res, error.message || 'Failed to register device');
+    errorResponse(res, (error as Error).message || 'Failed to register device');
   }
 };
 
@@ -107,8 +107,8 @@ export const deleteDevice = async (req: Request, res: Response): Promise<void> =
     const { deviceToken } = req.params;
     await notificationDeviceRepo.deactivate(String(deviceToken));
     successResponse(res, { deviceToken });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('deleteDevice error:', error);
-    errorResponse(res, error.message || 'Failed to delete device');
+    errorResponse(res, (error as Error).message || 'Failed to delete device');
   }
 };

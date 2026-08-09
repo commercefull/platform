@@ -156,7 +156,7 @@ export class ShippingMethod {
     this.props.updatedAt = new Date();
   }
 
-  calculateRate(weight: number, orderValue: number): number {
+  calculateRate(weight: number, _orderValue: number): number {
     if (this.props.type === 'free') return 0;
     if (this.props.type === 'flat_rate') return this.props.basePrice;
 

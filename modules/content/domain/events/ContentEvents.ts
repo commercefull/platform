@@ -7,7 +7,7 @@ export interface DomainEvent {
   eventType: string;
   occurredAt: Date;
   aggregateId: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
 }
 
 // ============================================================================

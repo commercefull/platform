@@ -5,10 +5,10 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
-import { query, queryOne } from '../../../libs/db';
-import { generateUUID as uuidv4 } from '../../../libs/uuid';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../respond';
+import * as adminSupportRepo from '../../../modules/support/infrastructure/repositories/adminSupportRepo';
+import * as faqRepo from '../../../modules/support/infrastructure/repositories/faqRepo';
 
 // ============================================================================
 // Support Dashboard
@@ -16,59 +16,27 @@ import { adminRespond } from '../../respond';
 
 export const supportDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // Get support stats
-    const statsResult = await queryOne<any>(
-      `SELECT
-        COUNT(CASE WHEN "status" IN ('open', 'pending') THEN 1 END) as "openTickets",
-        COUNT(CASE WHEN "status" = 'resolved' AND DATE("updatedAt") = CURRENT_DATE THEN 1 END) as "resolvedToday"
-       FROM "supportTicket"`,
-    );
-
-    // Get average response time (in hours)
-    const responseTimeResult = await queryOne<any>(
-      `SELECT AVG(EXTRACT(EPOCH FROM ("firstResponseAt" - "createdAt")) / 3600) as "avgResponseTime"
-       FROM "supportTicket"
-       WHERE "firstResponseAt" IS NOT NULL`,
-    );
-
-    // Get customer satisfaction (mock data for now)
-    const satisfactionResult = { customerSatisfaction: 85 };
-
-    // Get recent tickets
-    const tickets = await query<Array<any>>(
-      `SELECT st.*, c."email" as "customerEmail",
-              COALESCE(c."firstName" || ' ' || c."lastName", c."email") as "customerName"
-       FROM "supportTicket" st
-       LEFT JOIN "customer" c ON st."customerId" = c."customerId"
-       WHERE st."deletedAt" IS NULL
-       ORDER BY st."createdAt" DESC
-       LIMIT 20`,
-    );
-
-    // Get FAQs
-    const faqs = await query<Array<any>>(
-      `SELECT * FROM "faq"
-       WHERE "deletedAt" IS NULL AND "isPublished" = true
-       ORDER BY "category", "sortOrder"`,
-    );
+    const stats = await adminSupportRepo.getSupportStats();
+    const tickets = await adminSupportRepo.listRecentTickets(20);
+    const { data: faqArticles } = await faqRepo.getArticles({ isPublished: true });
 
     adminRespond(req, res, 'support/index', {
       pageName: 'Support Center',
       stats: {
-        openTickets: parseInt(statsResult?.openTickets || '0'),
-        resolvedToday: parseInt(statsResult?.resolvedToday || '0'),
-        avgResponseTime: Math.round(parseFloat(responseTimeResult?.avgResponseTime || '0')),
-        customerSatisfaction: satisfactionResult.customerSatisfaction,
+        openTickets: stats.openTickets,
+        resolvedToday: stats.resolvedToday,
+        avgResponseTime: stats.avgResponseTime,
+        customerSatisfaction: 85,
       },
-      tickets: tickets || [],
-      faqs: faqs || [],
+      tickets,
+      faqs: faqArticles,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load support dashboard',
+      error: (error as Error).message || 'Failed to load support dashboard',
     });
   }
 };
@@ -81,51 +49,26 @@ export const listSupportTickets = async (req: TypedRequest, res: Response): Prom
   try {
     const { status, priority, search, limit, offset } = req.query;
 
-    let whereClause = 'st."deletedAt" IS NULL';
-    const params: any[] = [];
-    let paramIndex = 1;
-
-    if (status) {
-      whereClause += ` AND st."status" = $${paramIndex}`;
-      params.push(status);
-      paramIndex++;
-    }
-
-    if (priority) {
-      whereClause += ` AND st."priority" = $${paramIndex}`;
-      params.push(priority);
-      paramIndex++;
-    }
-
-    if (search) {
-      whereClause += ` AND (st."subject" ILIKE $${paramIndex} OR st."description" ILIKE $${paramIndex} OR c."email" ILIKE $${paramIndex})`;
-      params.push(`%${search}%`);
-      paramIndex++;
-    }
-
-    const tickets = await query<Array<any>>(
-      `SELECT st.*, c."email" as "customerEmail",
-              COALESCE(c."firstName" || ' ' || c."lastName", c."email") as "customerName"
-       FROM "supportTicket" st
-       LEFT JOIN "customer" c ON st."customerId" = c."customerId"
-       WHERE ${whereClause}
-       ORDER BY st."createdAt" DESC
-       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      [...params, parseInt(limit as string) || 50, parseInt(offset as string) || 0],
-    );
+    const tickets = await adminSupportRepo.listTickets({
+      status: status as string | undefined,
+      priority: priority as string | undefined,
+      search: search as string | undefined,
+      limit: parseInt(limit as string) || 50,
+      offset: parseInt(offset as string) || 0,
+    });
 
     adminRespond(req, res, 'support/tickets', {
       pageName: 'Support Tickets',
-      tickets: tickets || [],
+      tickets,
       filters: { status, priority, search },
       pagination: { limit: parseInt(limit as string) || 50, offset: parseInt(offset as string) || 0 },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load support tickets',
+      error: (error as Error).message || 'Failed to load support tickets',
     });
   }
 };
@@ -134,14 +77,7 @@ export const viewSupportTicket = async (req: TypedRequest, res: Response): Promi
   try {
     const { ticketId } = req.params;
 
-    const ticket = await queryOne<any>(
-      `SELECT st.*, c."email" as "customerEmail",
-              COALESCE(c."firstName" || ' ' || c."lastName", c."email") as "customerName"
-       FROM "supportTicket" st
-       LEFT JOIN "customer" c ON st."customerId" = c."customerId"
-       WHERE st."ticketId" = $1 AND st."deletedAt" IS NULL`,
-      [ticketId],
-    );
+    const ticket = await adminSupportRepo.findTicketById(ticketId);
 
     if (!ticket) {
       adminRespond(req, res, 'error', {
@@ -151,26 +87,19 @@ export const viewSupportTicket = async (req: TypedRequest, res: Response): Promi
       return;
     }
 
-    // Get ticket messages
-    const messages = await query<Array<any>>(
-      `SELECT stm.*, 'admin' as "senderType"
-       FROM "supportTicketMessage" stm
-       WHERE stm."ticketId" = $1
-       ORDER BY stm."createdAt" ASC`,
-      [ticketId],
-    );
+    const messages = await adminSupportRepo.listTicketMessages(ticketId);
 
     adminRespond(req, res, 'support/view-ticket', {
       pageName: `Ticket: ${ticket.ticketNumber}`,
       ticket,
-      messages: messages || [],
+      messages,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load support ticket',
+      error: (error as Error).message || 'Failed to load support ticket',
     });
   }
 };
@@ -178,32 +107,20 @@ export const viewSupportTicket = async (req: TypedRequest, res: Response): Promi
 export const updateTicketStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { ticketId } = req.params;
-    const { status, response } = req.body;
+    const body = req.body as RequestBody;
+    const { status, response } = body;
 
-    // Update ticket status
-    await query(`UPDATE "supportTicket" SET "status" = $1, "updatedAt" = NOW() WHERE "ticketId" = $2`, [status, ticketId]);
+    await adminSupportRepo.updateTicketStatus(ticketId, status);
 
-    // Add response message if provided
     if (response) {
-      await query(
-        `INSERT INTO "supportTicketMessage" ("messageId", "ticketId", "message", "senderId", "senderType", "createdAt")
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [uuidv4(), ticketId, response, (req as any).user?.id, 'admin'],
-      );
-
-      // Update first response time if not set
-      await query(
-        `UPDATE "supportTicket" SET "firstResponseAt" = COALESCE("firstResponseAt", NOW())
-         WHERE "ticketId" = $1`,
-        [ticketId],
-      );
+      await adminSupportRepo.addTicketMessage(ticketId, response, req.user?.id || '');
     }
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -213,71 +130,72 @@ export const updateTicketStatus = async (req: TypedRequest, res: Response): Prom
 
 export const listFaqs = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const faqs = await query<Array<any>>(
-      `SELECT * FROM "faq"
-       WHERE "deletedAt" IS NULL
-       ORDER BY "category", "sortOrder"`,
-    );
+    const { data: faqs } = await faqRepo.getArticles(undefined, { limit: 100 });
 
     adminRespond(req, res, 'support/faqs', {
       pageName: 'FAQ Management',
-      faqs: faqs || [],
+      faqs,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load FAQs',
+      error: (error as Error).message || 'Failed to load FAQs',
     });
   }
 };
 
 export const createFaq = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { question, answer, category, sortOrder, isPublished } = req.body;
+    const body = req.body as RequestBody;
+    const { question, answer, _category, sortOrder, isPublished } = body;
 
-    await query(
-      `INSERT INTO "faq" ("faqId", "question", "answer", "category", "sortOrder", "isPublished", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`,
-      [uuidv4(), question, answer, category || 'general', parseInt(sortOrder) || 0, isPublished === 'true'],
-    );
+    await faqRepo.saveArticle({
+      title: question,
+      content: answer,
+      isPublished: isPublished === 'true',
+      sortOrder: parseInt(sortOrder) || 0,
+    });
 
     res.redirect('/hub/support?success=FAQ created');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.redirect('/hub/support?error=' + encodeURIComponent(error.message));
+    res.redirect('/hub/support?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
 export const updateFaq = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { faqId } = req.params;
-    const { question, answer, category, sortOrder, isPublished } = req.body;
+    const body = req.body as RequestBody;
+    const { question, answer, _category, sortOrder, isPublished } = body;
 
-    await query(
-      `UPDATE "faq" SET "question" = $1, "answer" = $2, "category" = $3, "sortOrder" = $4, "isPublished" = $5, "updatedAt" = NOW()
-       WHERE "faqId" = $6`,
-      [question, answer, category, parseInt(sortOrder) || 0, isPublished === 'true', faqId],
-    );
+    await faqRepo.saveArticle({
+      faqArticleId: faqId,
+      title: question,
+      content: answer,
+      isPublished: isPublished === 'true',
+      sortOrder: parseInt(sortOrder) || 0,
+    });
 
     res.redirect('/hub/support?success=FAQ updated');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.redirect('/hub/support?error=' + encodeURIComponent(error.message));
+    res.redirect('/hub/support?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
 export const deleteFaq = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { faqId } = req.params;
-    await query(`UPDATE "faq" SET "deletedAt" = NOW() WHERE "faqId" = $1`, [faqId]);
+    await faqRepo.deleteArticle(faqId);
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };

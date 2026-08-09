@@ -6,6 +6,7 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
+import { CustomerAddress } from '../../../../libs/db/types';
 import CustomerRepo from '../../infrastructure/repositories/CustomerRepository';
 import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../application/useCases/RegisterCustomer';
 import { GetCustomerCommand, GetCustomerUseCase } from '../../application/useCases/GetCustomer';
@@ -27,7 +28,7 @@ import {
 // Helpers
 // ============================================================================
 
-function respond(req: TypedRequest, res: Response, data: any, statusCode: number = 200): void {
+function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
@@ -41,7 +42,16 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
 
 export const registerCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body;
+    const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body as {
+      email: string;
+      firstName: string;
+      lastName: string;
+      password: string;
+      phone?: string;
+      dateOfBirth?: string;
+      preferredCurrency?: string;
+      preferredLanguage?: string;
+    };
 
     const command = new RegisterCustomerCommand(
       email,
@@ -58,10 +68,10 @@ export const registerCustomer = async (req: TypedRequest, res: Response): Promis
     const result = await useCase.execute(command);
 
     respond(req, res, result, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to register', error.message.includes('exists') ? 409 : 500);
+    respondError(req, res, (error as Error).message || 'Failed to register', (error as Error).message.includes('exists') ? 409 : 500);
   }
 };
 
@@ -78,10 +88,10 @@ export const getCustomer = async (req: TypedRequest, res: Response): Promise<voi
     }
 
     respond(req, res, customer);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get customer', 500);
+    respondError(req, res, (error as Error).message || 'Failed to get customer', 500);
   }
 };
 
@@ -103,10 +113,10 @@ export const getMyProfile = async (req: TypedRequest, res: Response): Promise<vo
     }
 
     respond(req, res, customer);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get profile', 500);
+    respondError(req, res, (error as Error).message || 'Failed to get profile', 500);
   }
 };
 
@@ -118,15 +128,24 @@ export const updateMyProfile = async (req: TypedRequest, res: Response): Promise
       return;
     }
 
-    const command = new UpdateCustomerCommand(customerId, req.body);
+    const command = new UpdateCustomerCommand(customerId, req.body as {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      dateOfBirth?: Date;
+      preferredCurrency?: string;
+      preferredLanguage?: string;
+      notes?: string;
+      metadata?: Record<string, unknown>;
+    });
     const useCase = new UpdateCustomerUseCase(CustomerRepo);
     const result = await useCase.execute(command);
 
     respond(req, res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to update profile', 500);
+    respondError(req, res, (error as Error).message || 'Failed to update profile', 500);
   }
 };
 
@@ -146,10 +165,10 @@ export const getAddresses = async (req: TypedRequest, res: Response): Promise<vo
     const addresses = await useCase.getAddresses(customerId);
 
     respond(req, res, { addresses });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get addresses', 500);
+    respondError(req, res, (error as Error).message || 'Failed to get addresses', 500);
   }
 };
 
@@ -175,7 +194,21 @@ export const addAddress = async (req: TypedRequest, res: Response): Promise<void
       lastName,
       company,
       isDefault,
-    } = req.body;
+    } = req.body as {
+      addressLine1: string;
+      addressLine2?: string;
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+      countryCode?: string;
+      addressType: 'billing' | 'shipping';
+      phone?: string;
+      firstName?: string;
+      lastName?: string;
+      company?: string;
+      isDefault?: boolean;
+    };
 
     const command = new AddAddressCommand(
       customerId,
@@ -198,10 +231,10 @@ export const addAddress = async (req: TypedRequest, res: Response): Promise<void
     const address = await useCase.addAddress(command);
 
     respond(req, res, address, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to add address', 500);
+    respondError(req, res, (error as Error).message || 'Failed to add address', 500);
   }
 };
 
@@ -215,15 +248,15 @@ export const updateAddress = async (req: TypedRequest, res: Response): Promise<v
       return;
     }
 
-    const command = new UpdateAddressCommand(customerId, addressId, req.body);
+    const command = new UpdateAddressCommand(customerId, addressId, req.body as Partial<Omit<CustomerAddress, 'customerAddressId' | 'customerId' | 'createdAt' | 'updatedAt'>>);
     const useCase = new ManageAddressesUseCase(CustomerRepo);
     const address = await useCase.updateAddress(command);
 
     respond(req, res, address);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to update address', 500);
+    respondError(req, res, (error as Error).message || 'Failed to update address', 500);
   }
 };
 
@@ -242,10 +275,10 @@ export const deleteAddress = async (req: TypedRequest, res: Response): Promise<v
     await useCase.deleteAddress(command);
 
     respond(req, res, { deleted: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to delete address', 500);
+    respondError(req, res, (error as Error).message || 'Failed to delete address', 500);
   }
 };
 
@@ -253,7 +286,7 @@ export const setDefaultAddress = async (req: TypedRequest, res: Response): Promi
   try {
     const customerId = req.user?.customerId || req.user?._id;
     const { addressId } = req.params;
-    const { addressType } = req.body;
+    const { addressType } = req.body as { addressType: 'billing' | 'shipping' };
 
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
@@ -270,10 +303,10 @@ export const setDefaultAddress = async (req: TypedRequest, res: Response): Promi
     await useCase.setDefaultAddress(command);
 
     respond(req, res, { success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to set default address', 500);
+    respondError(req, res, (error as Error).message || 'Failed to set default address', 500);
   }
 };
 
@@ -285,9 +318,9 @@ export const listCustomers = async (req: TypedRequest, res: Response): Promise<v
   try {
     const { limit = 20, offset = 0, search, status, isVerified } = req.query;
 
-    const filters: any = {};
+    const filters: { search?: string; status?: 'active' | 'inactive' | 'suspended'; isVerified?: boolean } = {};
     if (search) filters.search = search as string;
-    if (status) filters.status = status as string;
+    if (status) filters.status = status as 'active' | 'inactive' | 'suspended';
     if (isVerified !== undefined) filters.isVerified = isVerified === 'true';
 
     const customers = await CustomerRepo.findAll(filters, {
@@ -296,16 +329,25 @@ export const listCustomers = async (req: TypedRequest, res: Response): Promise<v
     });
 
     respond(req, res, customers);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to list customers', 500);
+    respondError(req, res, (error as Error).message || 'Failed to list customers', 500);
   }
 };
 
 export const createCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body;
+    const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body as {
+      email: string;
+      firstName: string;
+      lastName: string;
+      password: string;
+      phone?: string;
+      dateOfBirth?: string;
+      preferredCurrency?: string;
+      preferredLanguage?: string;
+    };
 
     const command = new RegisterCustomerCommand(
       email,
@@ -322,76 +364,85 @@ export const createCustomer = async (req: TypedRequest, res: Response): Promise<
     const result = await useCase.execute(command);
 
     respond(req, res, result, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to create customer', error.message?.includes('exists') ? 409 : 500);
+    respondError(req, res, (error as Error).message || 'Failed to create customer', (error as Error).message?.includes('exists') ? 409 : 500);
   }
 };
 
 export const updateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
-    const command = new UpdateCustomerCommand(customerId, req.body);
+    const command = new UpdateCustomerCommand(customerId, req.body as {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      dateOfBirth?: Date;
+      preferredCurrency?: string;
+      preferredLanguage?: string;
+      notes?: string;
+      metadata?: Record<string, unknown>;
+    });
     const useCase = new UpdateCustomerUseCase(CustomerRepo);
     const result = await useCase.execute(command);
 
     respond(req, res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to update customer', 500);
+    respondError(req, res, (error as Error).message || 'Failed to update customer', 500);
   }
 };
 
 export const deleteCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
-    const { reason } = req.body;
+    const { reason } = (req.body || {}) as { reason?: string };
 
     const command = new DeleteCustomerCommand(customerId, reason);
     const useCase = new DeleteCustomerUseCase(CustomerRepo);
     const result = await useCase.execute(command);
 
     respond(req, res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to delete customer', error.message?.includes('not found') ? 404 : 500);
+    respondError(req, res, (error as Error).message || 'Failed to delete customer', (error as Error).message?.includes('not found') ? 404 : 500);
   }
 };
 
 export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
-    const { verificationType = 'email' } = req.body;
+    const { verificationType = 'email' } = req.body as { verificationType?: 'email' | 'phone' };
 
     const command = new VerifyCustomerCommand(customerId, verificationType);
     const useCase = new VerifyCustomerUseCase(CustomerRepo);
     const result = await useCase.execute(command);
 
     respond(req, res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to verify customer', error.message?.includes('not found') ? 404 : 500);
+    respondError(req, res, (error as Error).message || 'Failed to verify customer', (error as Error).message?.includes('not found') ? 404 : 500);
   }
 };
 
 export const deactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
-    const { reason } = req.body;
+    const { reason } = (req.body || {}) as { reason?: string };
 
     const command = new DeactivateCustomerCommand(customerId, reason);
     const useCase = new DeactivateCustomerUseCase(CustomerRepo);
     const result = await useCase.execute(command);
 
     respond(req, res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to deactivate customer', error.message?.includes('not found') ? 404 : 500);
+    respondError(req, res, (error as Error).message || 'Failed to deactivate customer', (error as Error).message?.includes('not found') ? 404 : 500);
   }
 };
 
@@ -404,10 +455,10 @@ export const reactivateCustomer = async (req: TypedRequest, res: Response): Prom
     const result = await useCase.execute(command);
 
     respond(req, res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to reactivate customer', error.message?.includes('not found') ? 404 : 500);
+    respondError(req, res, (error as Error).message || 'Failed to reactivate customer', (error as Error).message?.includes('not found') ? 404 : 500);
   }
 };
 
@@ -419,16 +470,16 @@ export const changePassword = async (req: TypedRequest, res: Response): Promise<
       return;
     }
 
-    const { currentPassword, newPassword } = req.body;
+    const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
     const command = new ChangePasswordCommand(customerId, currentPassword, newPassword);
     const useCase = new ChangePasswordUseCase(CustomerRepo);
     const result = await useCase.execute(command);
 
     respond(req, res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to change password', error.message?.includes('incorrect') ? 401 : 500);
+    respondError(req, res, (error as Error).message || 'Failed to change password', (error as Error).message?.includes('incorrect') ? 401 : 500);
   }
 };
 
@@ -443,10 +494,10 @@ export const getCustomerAddresses = async (req: TypedRequest, res: Response): Pr
     const addresses = await useCase.getAddresses(customerId);
 
     respond(req, res, { addresses });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get addresses', 500);
+    respondError(req, res, (error as Error).message || 'Failed to get addresses', 500);
   }
 };
 
@@ -467,7 +518,21 @@ export const addCustomerAddress = async (req: TypedRequest, res: Response): Prom
       lastName,
       company,
       isDefault,
-    } = req.body;
+    } = req.body as {
+      addressLine1: string;
+      addressLine2?: string;
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+      countryCode?: string;
+      addressType: 'billing' | 'shipping';
+      phone?: string;
+      firstName?: string;
+      lastName?: string;
+      company?: string;
+      isDefault?: boolean;
+    };
 
     const command = new AddAddressCommand(
       customerId,
@@ -490,9 +555,9 @@ export const addCustomerAddress = async (req: TypedRequest, res: Response): Prom
     const address = await useCase.addAddress(command);
 
     respond(req, res, address, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to add address', 500);
+    respondError(req, res, (error as Error).message || 'Failed to add address', 500);
   }
 };

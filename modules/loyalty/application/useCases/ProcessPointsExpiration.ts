@@ -27,8 +27,25 @@ export interface ProcessPointsExpirationOutput {
   dryRun: boolean;
 }
 
+export interface ExpiringPointsBatch {
+  customerId: string;
+  points: number;
+}
+
+export interface CustomerLoyaltyInfo {
+  pointsBalance: number;
+}
+
+export interface ProcessPointsExpirationRepository {
+  getExpiringPoints(programId: string | undefined, now: Date): Promise<ExpiringPointsBatch[]>;
+  getCustomerLoyalty(customerId: string, programId?: string): Promise<CustomerLoyaltyInfo | null>;
+  updatePointsBalance(customerId: string, newBalance: number): Promise<void>;
+  markPointsAsExpired(customerId: string, now: Date): Promise<void>;
+  createTransaction(data: Record<string, unknown>): Promise<void>;
+}
+
 export class ProcessPointsExpirationUseCase {
-  constructor(private readonly loyaltyRepository: any) {}
+  constructor(private readonly loyaltyRepository: ProcessPointsExpirationRepository) {}
 
   async execute(input: ProcessPointsExpirationInput): Promise<ProcessPointsExpirationOutput> {
     const { programId, dryRun = false, notifyCustomers = true } = input;

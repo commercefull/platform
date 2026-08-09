@@ -17,8 +17,18 @@ export interface ConvertCurrencyOutput {
   convertedAt: string;
 }
 
+export interface CurrencyWithRate {
+  currencyId: string;
+  code: string;
+  exchangeRate: number;
+}
+
+export interface ConvertCurrencyRepository {
+  findCurrencyByCode(code: string): Promise<CurrencyWithRate | null>;
+}
+
 export class ConvertCurrencyUseCase {
-  constructor(private readonly localizationRepository: any) {}
+  constructor(private readonly localizationRepository: ConvertCurrencyRepository) {}
 
   async execute(input: ConvertCurrencyInput): Promise<ConvertCurrencyOutput> {
     if (input.amount === undefined || !input.fromCurrency || !input.toCurrency) {

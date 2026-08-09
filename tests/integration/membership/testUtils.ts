@@ -102,7 +102,7 @@ export const setupMembershipTests = async () => {
     // Login as merchant (admin) for business routes and customer for public routes
     adminToken = await loginTestAdmin(client);
     userToken = await loginTestUser(client, 'customer@example.com', 'password123');
-  } catch (error) {}
+  } catch {}
 
   if (adminToken) {
     try {
@@ -146,7 +146,7 @@ export const setupMembershipTests = async () => {
           testUserMembershipId = membershipResponse.data.data.id;
         }
       }
-    } catch (error) {}
+    } catch {}
   }
 
   return {
@@ -187,5 +187,5 @@ export const cleanupMembershipTests = async (
     await client.delete(`/business/membership/tiers/${testTierId}`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
-  } catch (error) {}
+  } catch {}
 };

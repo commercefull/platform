@@ -24,7 +24,7 @@ export class VariantRepo {
     return queryOne<ProductVariant>(`SELECT * FROM "${Table.ProductVariant}" WHERE "productId" = $1 AND "isDefault" = true`, [productId]);
   }
 
-  async findInStock(minQuantity = 1): Promise<ProductVariant[]> {
+  async findInStock(_minQuantity = 1): Promise<ProductVariant[]> {
     return (await query<ProductVariant[]>(`SELECT * FROM "${Table.ProductVariant}" WHERE "status" = 'active'`, [])) || [];
   }
 
@@ -54,7 +54,7 @@ export class VariantRepo {
   async update(id: string, props: UpdateProps): Promise<ProductVariant | null> {
     const now = new Date();
     const updates: string[] = ['"updatedAt" = $1'];
-    const values: any[] = [now];
+    const values: unknown[] = [now];
     let paramIndex = 2;
 
     for (const [key, value] of Object.entries(props)) {

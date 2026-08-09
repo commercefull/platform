@@ -16,7 +16,7 @@ export class ProcessPaymentRefundCommand {
     public readonly transactionId: string,
     public readonly amount: number,
     public readonly reason?: string,
-    public readonly metadata?: Record<string, any>,
+    public readonly metadata?: Record<string, unknown>,
   ) {}
 }
 

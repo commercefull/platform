@@ -17,6 +17,7 @@ import * as planRepo from './membershipPlanRepo';
 import membershipBenefitRepo from './membershipBenefitRepo';
 import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
 import membershipSubscriptionRepo from './membershipSubscriptionRepo';
+import { MembershipBenefit as DbMembershipBenefit, MembershipSubscription as DbMembershipSubscription } from '../../../../libs/db/types';
 
 // Re-export types
 export { MembershipPlan, BillingCycle } from './membershipPlanRepo';
@@ -127,7 +128,7 @@ export class MembershipRepo {
   }
 
   async updateTier(id: string, params: Partial<Omit<MembershipTier, 'id' | 'createdAt' | 'updatedAt'>>): Promise<MembershipTier> {
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (params.name !== undefined) updateData.name = params.name;
     if (params.description !== undefined) updateData.description = params.description;
     if (params.monthlyPrice !== undefined) updateData.price = params.monthlyPrice;
@@ -188,7 +189,7 @@ export class MembershipRepo {
       shortDescription: null,
       isActive: params.isActive ?? true,
       priority: 0,
-      benefitType: params.benefitType as any,
+      benefitType: params.benefitType,
       valueType: params.discountPercentage ? 'percentage' : 'fixed',
       value: params.discountPercentage
         ? { percentage: params.discountPercentage }
@@ -225,7 +226,7 @@ export class MembershipRepo {
       isActive: boolean;
     }>,
   ): Promise<LegacyMembershipBenefit> {
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (params.name !== undefined) updateData.name = params.name;
     if (params.description !== undefined) updateData.description = params.description;
     if (params.isActive !== undefined) updateData.isActive = params.isActive;
@@ -288,7 +289,7 @@ export class MembershipRepo {
   }
 
   async findAllUserMemberships(limit = 50, offset = 0, filter?: { isActive?: boolean; tierId?: string }): Promise<UserMembership[]> {
-    let subs: any[];
+    let subs: DbMembershipSubscription[];
 
     if (filter?.tierId) {
       subs = await membershipSubscriptionRepo.findByPlanId(filter.tierId, limit, offset);
@@ -328,7 +329,7 @@ export class MembershipRepo {
     id: string,
     params: Partial<Omit<UserMembership, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
   ): Promise<UserMembership> {
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (params.tierId !== undefined) updateData.membershipPlanId = params.tierId;
     if (params.isActive !== undefined) updateData.status = params.isActive ? 'active' : 'cancelled';
     if (params.autoRenew !== undefined) updateData.isAutoRenew = params.autoRenew;
@@ -371,8 +372,8 @@ export class MembershipRepo {
     };
   }
 
-  private benefitToLegacy(benefit: any, tierIds: string[] = []): LegacyMembershipBenefit {
-    const value = benefit.value || {};
+  private benefitToLegacy(benefit: DbMembershipBenefit, tierIds: string[] = []): LegacyMembershipBenefit {
+    const value = (benefit.value || {}) as { percentage?: number; amount?: number };
     return {
       id: benefit.membershipBenefitId,
       tierIds,
@@ -387,7 +388,7 @@ export class MembershipRepo {
     };
   }
 
-  private subscriptionToUserMembership(sub: any): UserMembership {
+  private subscriptionToUserMembership(sub: DbMembershipSubscription): UserMembership {
     return {
       id: sub.membershipSubscriptionId,
       userId: sub.customerId,
@@ -399,7 +400,7 @@ export class MembershipRepo {
       membershipType: 'monthly',
       lastRenewalDate: sub.lastBillingDate?.toString(),
       nextRenewalDate: sub.nextBillingDate?.toString(),
-      paymentMethod: sub.paymentMethodId,
+      paymentMethod: sub.paymentMethodId ?? undefined,
       createdAt: sub.createdAt.toString(),
       updatedAt: sub.updatedAt.toString(),
     };

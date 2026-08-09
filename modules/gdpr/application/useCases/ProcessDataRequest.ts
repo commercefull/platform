@@ -4,7 +4,6 @@
  */
 
 import { GdprDataRequestRepository, GdprService } from '../../domain/repositories/GdprRepository';
-import { GdprDataRequest } from '../../domain/entities/GdprDataRequest';
 
 // ============================================================================
 // Commands
@@ -105,7 +104,7 @@ export class ProcessDataRequestUseCase {
 
     try {
       // Export customer data
-      const exportedData = await this.gdprService.exportCustomerData(request.customerId);
+      const _exportedData = await this.gdprService.exportCustomerData(request.customerId);
 
       // In a real implementation, this would:
       // 1. Generate the file in the requested format

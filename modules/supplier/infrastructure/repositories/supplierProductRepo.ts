@@ -19,8 +19,8 @@ export interface SupplierProduct {
   currency: string;
   minimumOrderQuantity: number;
   leadTime?: number;
-  packagingInfo?: Record<string, any>;
-  dimensions?: Record<string, any>;
+  packagingInfo?: Record<string, unknown>;
+  dimensions?: Record<string, unknown>;
   weight?: number;
   lastOrderedAt?: string;
   notes?: string;
@@ -45,7 +45,7 @@ export class SupplierProductRepo {
 
   async findByProduct(productId: string, productVariantId?: string): Promise<SupplierProduct[]> {
     let sql = `SELECT * FROM "supplierProduct" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (productVariantId) {
       sql += ` AND "productVariantId" = $2`;
@@ -66,7 +66,7 @@ export class SupplierProductRepo {
 
   async findPreferred(productId: string, productVariantId?: string): Promise<SupplierProduct | null> {
     let sql = `SELECT * FROM "supplierProduct" WHERE "productId" = $1 AND "isPreferred" = true AND "status" = 'active'`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (productVariantId) {
       sql += ` AND "productVariantId" = $2`;
@@ -123,7 +123,7 @@ export class SupplierProductRepo {
 
   async update(id: string, params: SupplierProductUpdateParams): Promise<SupplierProduct | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

@@ -19,11 +19,33 @@ export interface LoginMerchantOutput {
   permissions: string[];
 }
 
+export interface MerchantRecord {
+  merchantId: string;
+  email: string;
+  passwordHash: string;
+  status: string;
+  permissions?: string[];
+}
+
+export interface MerchantRepository {
+  findByEmail(email: string): Promise<MerchantRecord | null>;
+  updateLastLogin(merchantId: string): Promise<void>;
+}
+
+export interface AuthService {
+  verifyPassword(password: string, hash: string): Promise<boolean>;
+}
+
+export interface TokenService {
+  generateAccessToken(payload: Record<string, unknown>): Promise<string>;
+  generateRefreshToken(payload: Record<string, unknown>): Promise<string>;
+}
+
 export class LoginMerchantUseCase {
   constructor(
-    private readonly merchantRepo: any,
-    private readonly authService: any,
-    private readonly tokenService: any,
+    private readonly merchantRepo: MerchantRepository,
+    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
   ) {}
 
   async execute(input: LoginMerchantInput): Promise<LoginMerchantOutput> {

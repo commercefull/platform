@@ -11,7 +11,7 @@ export class RemoveCouponCommand {
 export class RemoveCouponUseCase {
   constructor(private readonly repository: BasketRepository) {}
 
-  async execute(command: RemoveCouponCommand): Promise<any> {
+  async execute(command: RemoveCouponCommand): Promise<Record<string, unknown>> {
     const basket = await this.repository.findById(command.basketId);
     if (!basket) {
       throw new Error('Basket not found');

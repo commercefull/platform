@@ -9,68 +9,80 @@ import { TypedRequest } from 'libs/types/express';
 import * as supportRepo from '../../infrastructure/repositories/supportRepo';
 import * as faqRepo from '../../infrastructure/repositories/faqRepo';
 import * as alertRepo from '../../infrastructure/repositories/alertRepo';
+import type { AlertStatus, NotificationChannel, PriceAlertType } from '../../infrastructure/repositories/alertRepo';
+import type { TicketStatus } from '../../infrastructure/repositories/supportRepo';
 
-type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
 
 // ============================================================================
 // Support Tickets (Customer)
 // ============================================================================
 
-export const createTicket: AsyncHandler = async (req, res, next) => {
+export const createTicket: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
+    const body = req.body as {
+      orderId?: string;
+      email: string;
+      name?: string;
+      phone?: string;
+      subject: string;
+      description?: string;
+      priority?: string;
+      category?: string;
+    };
 
     const ticket = await supportRepo.createTicket({
       customerId,
-      orderId: req.body.orderId,
-      email: req.body.email,
-      name: req.body.name,
-      phone: req.body.phone,
-      subject: req.body.subject,
-      description: req.body.description,
-      priority: req.body.priority,
-      category: req.body.category,
+      orderId: body.orderId,
+      email: body.email,
+      name: body.name,
+      phone: body.phone,
+      subject: body.subject,
+      description: body.description,
+      priority: body.priority as supportRepo.TicketPriority | undefined,
+      category: body.category as supportRepo.TicketCategory | undefined,
       channel: 'web',
     });
 
     // Add initial message if description provided
-    if (req.body.description) {
+    if (body.description) {
       await supportRepo.addMessage({
         supportTicketId: ticket.supportTicketId,
         senderId: customerId,
         senderType: 'customer',
-        senderName: req.body.name,
-        senderEmail: req.body.email,
-        message: req.body.description,
+        senderName: body.name,
+        senderEmail: body.email,
+        message: body.description,
       });
     }
 
     res.status(201).json({ success: true, data: ticket });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getMyTickets: AsyncHandler = async (req, res, next) => {
+export const getMyTickets: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const { status, limit, offset } = req.query;
 
     const result = await supportRepo.getTickets(
-      { customerId, status: status as any },
+      { customerId, status: status as TicketStatus | undefined },
       { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getMyTicket: AsyncHandler = async (req, res, next) => {
+export const getMyTicket: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const ticket = await supportRepo.getTicket(req.params.id);
@@ -87,14 +99,14 @@ export const getMyTicket: AsyncHandler = async (req, res, next) => {
     await supportRepo.markMessagesRead(req.params.id, customerId || '');
 
     res.json({ success: true, data: { ...ticket, messages, attachments } });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const addCustomerMessage: AsyncHandler = async (req, res, next) => {
+export const addCustomerMessage: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const ticket = await supportRepo.getTicket(req.params.id);
@@ -109,24 +121,25 @@ export const addCustomerMessage: AsyncHandler = async (req, res, next) => {
       return;
     }
 
+    const body = req.body as { name?: string; email?: string; message: string };
     const message = await supportRepo.addMessage({
       supportTicketId: req.params.id,
       senderId: customerId,
       senderType: 'customer',
-      senderName: req.body.name || ticket.name,
-      senderEmail: req.body.email || ticket.email,
-      message: req.body.message,
+      senderName: body.name || ticket.name,
+      senderEmail: body.email || ticket.email,
+      message: body.message,
     });
 
     res.status(201).json({ success: true, data: message });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const submitTicketFeedback: AsyncHandler = async (req, res, next) => {
+export const submitTicketFeedback: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const ticket = await supportRepo.getTicket(req.params.id);
@@ -141,7 +154,7 @@ export const submitTicketFeedback: AsyncHandler = async (req, res, next) => {
       return;
     }
 
-    const { satisfaction, feedback } = req.body;
+    const { satisfaction, feedback } = req.body as { satisfaction: number; feedback?: string };
     if (satisfaction < 1 || satisfaction > 5) {
       res.status(400).json({ success: false, message: 'Satisfaction must be between 1 and 5' });
       return;
@@ -149,10 +162,10 @@ export const submitTicketFeedback: AsyncHandler = async (req, res, next) => {
 
     await supportRepo.submitFeedback(req.params.id, satisfaction, feedback);
     res.json({ success: true, message: 'Feedback submitted' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -160,29 +173,29 @@ export const submitTicketFeedback: AsyncHandler = async (req, res, next) => {
 // FAQ (Public)
 // ============================================================================
 
-export const getFaqCategories: AsyncHandler = async (req, res, next) => {
+export const getFaqCategories: AsyncHandler = async (req, res, _next) => {
   try {
     const categories = await faqRepo.getCategories(true);
     res.json({ success: true, data: categories });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getFeaturedFaqCategories: AsyncHandler = async (req, res, next) => {
+export const getFeaturedFaqCategories: AsyncHandler = async (req, res, _next) => {
   try {
     const categories = await faqRepo.getFeaturedCategories();
     res.json({ success: true, data: categories });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getFaqCategoryBySlug: AsyncHandler = async (req, res, next) => {
+export const getFaqCategoryBySlug: AsyncHandler = async (req, res, _next) => {
   try {
     const category = await faqRepo.getCategoryBySlug(req.params.slug);
     if (!category || !category.isActive) {
@@ -193,14 +206,14 @@ export const getFaqCategoryBySlug: AsyncHandler = async (req, res, next) => {
     const articles = await faqRepo.getArticles({ faqCategoryId: category.faqCategoryId, isPublished: true }, { limit: 100, offset: 0 });
 
     res.json({ success: true, data: { ...category, articles: articles.data } });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getFaqArticleBySlug: AsyncHandler = async (req, res, next) => {
+export const getFaqArticleBySlug: AsyncHandler = async (req, res, _next) => {
   try {
     const article = await faqRepo.getArticleBySlug(req.params.slug);
     if (!article || !article.isPublished) {
@@ -210,24 +223,25 @@ export const getFaqArticleBySlug: AsyncHandler = async (req, res, next) => {
 
     // Increment views
     const sessionKey = `faq_view_${article.faqArticleId}`;
-    const isUnique = !(req.session as any)?.[sessionKey];
+    const session = req.session as unknown as Record<string, unknown> | undefined;
+    const isUnique = !session?.[sessionKey];
     await faqRepo.incrementViews(article.faqArticleId, isUnique);
-    if (req.session) {
-      (req.session as any)[sessionKey] = true;
+    if (session) {
+      session[sessionKey] = true;
     }
 
     // Get related articles
     const relatedArticles = await faqRepo.getRelatedArticles(article.faqArticleId);
 
     res.json({ success: true, data: { ...article, relatedArticles } });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const searchFaq: AsyncHandler = async (req, res, next) => {
+export const searchFaq: AsyncHandler = async (req, res, _next) => {
   try {
     const { q, limit } = req.query;
     if (!q) {
@@ -237,34 +251,34 @@ export const searchFaq: AsyncHandler = async (req, res, next) => {
 
     const articles = await faqRepo.searchArticles(q as string, parseInt(limit as string) || 10);
     res.json({ success: true, data: articles });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getPopularFaqArticles: AsyncHandler = async (req, res, next) => {
+export const getPopularFaqArticles: AsyncHandler = async (req, res, _next) => {
   try {
     const { limit } = req.query;
     const articles = await faqRepo.getPopularArticles(parseInt(limit as string) || 10);
     res.json({ success: true, data: articles });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const submitFaqFeedback: AsyncHandler = async (req, res, next) => {
+export const submitFaqFeedback: AsyncHandler = async (req, res, _next) => {
   try {
-    const { isHelpful } = req.body;
+    const { isHelpful } = req.body as { isHelpful: boolean };
     await faqRepo.submitHelpfulVote(req.params.id, isHelpful);
     res.json({ success: true, message: 'Feedback submitted' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -272,49 +286,60 @@ export const submitFaqFeedback: AsyncHandler = async (req, res, next) => {
 // Stock Alerts (Customer)
 // ============================================================================
 
-export const createStockAlert: AsyncHandler = async (req, res, next) => {
+export const createStockAlert: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
+    const body = req.body as {
+      email?: string;
+      phone?: string;
+      productId: string;
+      productVariantId?: string;
+      productName?: string;
+      variantName?: string;
+      sku?: string;
+      desiredQuantity?: number;
+      notificationChannel?: NotificationChannel;
+    };
 
     const alert = await alertRepo.createStockAlert({
       customerId,
-      email: req.body.email,
-      phone: req.body.phone,
-      productId: req.body.productId,
-      productVariantId: req.body.productVariantId,
-      productName: req.body.productName,
-      variantName: req.body.variantName,
-      sku: req.body.sku,
-      desiredQuantity: req.body.desiredQuantity,
-      notificationChannel: req.body.notificationChannel,
+      email: body.email,
+      phone: body.phone,
+      productId: body.productId,
+      productVariantId: body.productVariantId,
+      productName: body.productName,
+      variantName: body.variantName,
+      sku: body.sku,
+      desiredQuantity: body.desiredQuantity,
+      notificationChannel: body.notificationChannel,
     });
 
     res.status(201).json({ success: true, data: alert });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getMyStockAlerts: AsyncHandler = async (req, res, next) => {
+export const getMyStockAlerts: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const { status, limit, offset } = req.query;
 
     const result = await alertRepo.getStockAlerts(
-      { customerId, status: status as any },
+      { customerId, status: status as AlertStatus | undefined },
       { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const cancelMyStockAlert: AsyncHandler = async (req, res, next) => {
+export const cancelMyStockAlert: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const alert = await alertRepo.getStockAlert(req.params.id);
@@ -326,10 +351,10 @@ export const cancelMyStockAlert: AsyncHandler = async (req, res, next) => {
 
     await alertRepo.cancelStockAlert(req.params.id);
     res.json({ success: true, message: 'Alert cancelled' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -337,54 +362,70 @@ export const cancelMyStockAlert: AsyncHandler = async (req, res, next) => {
 // Price Alerts (Customer)
 // ============================================================================
 
-export const createPriceAlert: AsyncHandler = async (req, res, next) => {
+export const createPriceAlert: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
+    const body = req.body as {
+      email?: string;
+      phone?: string;
+      productId: string;
+      productVariantId?: string;
+      productName?: string;
+      variantName?: string;
+      sku?: string;
+      alertType?: PriceAlertType;
+      targetPrice?: number;
+      percentageDrop?: number;
+      originalPrice?: number;
+      currentPrice?: number;
+      currency?: string;
+      notificationChannel?: NotificationChannel;
+    };
 
     const alert = await alertRepo.createPriceAlert({
       customerId,
-      email: req.body.email,
-      phone: req.body.phone,
-      productId: req.body.productId,
-      productVariantId: req.body.productVariantId,
-      productName: req.body.productName,
-      variantName: req.body.variantName,
-      sku: req.body.sku,
-      alertType: req.body.alertType,
-      targetPrice: req.body.targetPrice,
-      percentageDrop: req.body.percentageDrop,
-      originalPrice: req.body.originalPrice,
-      currentPrice: req.body.currentPrice,
-      currency: req.body.currency,
-      notificationChannel: req.body.notificationChannel,
+      email: body.email,
+      phone: body.phone,
+      productId: body.productId,
+      productVariantId: body.productVariantId,
+      productName: body.productName,
+      variantName: body.variantName,
+      sku: body.sku,
+      alertType: body.alertType,
+      targetPrice: body.targetPrice,
+      percentageDrop: body.percentageDrop,
+      originalPrice: body.originalPrice,
+      currentPrice: body.currentPrice,
+      currency: body.currency,
+      notificationChannel: body.notificationChannel,
     });
 
     res.status(201).json({ success: true, data: alert });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const getMyPriceAlerts: AsyncHandler = async (req, res, next) => {
+export const getMyPriceAlerts: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const { status, limit, offset } = req.query;
 
     const result = await alertRepo.getPriceAlerts(
-      { customerId, status: status as any },
+      { customerId, status: status as AlertStatus | undefined },
       { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const cancelMyPriceAlert: AsyncHandler = async (req, res, next) => {
+export const cancelMyPriceAlert: AsyncHandler = async (req, res, _next) => {
   try {
     const customerId = req.user?.customerId;
     const alert = await alertRepo.getPriceAlert(req.params.id);
@@ -396,9 +437,9 @@ export const cancelMyPriceAlert: AsyncHandler = async (req, res, next) => {
 
     await alertRepo.cancelPriceAlert(req.params.id);
     res.json({ success: true, message: 'Alert cancelled' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };

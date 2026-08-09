@@ -3,8 +3,21 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import currencyRepo from '../../infrastructure/repositories/currencyRepo';
 import currencyPriceRuleRepo from '../../infrastructure/repositories/currencyPriceRuleRepo';
-import { CurrencyPriceRule } from '../../domain/pricingRule';
+import { CurrencyPriceRule, CurrencyPriceRuleCreateProps, CurrencyPriceRuleUpdateProps } from '../../domain/pricingRule';
+import { Currency, CurrencyRegion } from '../../domain/currency';
 import pricingService from '../../services/pricingService';
+
+interface ExchangeRateBody {
+  source: string;
+}
+
+interface CurrencyPriceRuleBody {
+  currencyCode: string;
+  regionCode?: string;
+  priority?: number;
+  adjustments?: { type: string; value: number }[];
+  [key: string]: unknown;
+}
 
 /**
  * Get all currencies
@@ -99,7 +112,7 @@ export const getCurrencyByCode = async (req: TypedRequest, res: Response): Promi
 /**
  * Save currency
  */
-export const saveCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
+export const saveCurrency = async (req: TypedRequest<Record<string, string>, unknown, Currency>, res: Response): Promise<void> => {
   try {
     const currencyData = req.body;
 
@@ -177,7 +190,7 @@ export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<
 /**
  * Update exchange rates
  */
-export const updateExchangeRates = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateExchangeRates = async (req: TypedRequest<Record<string, string>, unknown, ExchangeRateBody>, res: Response): Promise<void> => {
   try {
     const { source } = req.body;
 
@@ -262,7 +275,7 @@ export const getCurrencyRegionById = async (req: TypedRequest, res: Response): P
 /**
  * Create currency region
  */
-export const createCurrencyRegion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCurrencyRegion = async (req: TypedRequest<Record<string, string>, unknown, CurrencyRegion>, res: Response): Promise<void> => {
   try {
     const regionData = req.body;
 
@@ -307,7 +320,7 @@ export const createCurrencyRegion = async (req: TypedRequest, res: Response): Pr
 /**
  * Update currency region
  */
-export const updateCurrencyRegion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCurrencyRegion = async (req: TypedRequest<Record<string, string>, unknown, Partial<CurrencyRegion>>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const regionData = req.body;
@@ -469,9 +482,9 @@ export const getPriceRuleById = async (req: TypedRequest, res: Response): Promis
 /**
  * Create price rule
  */
-export const createPriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPriceRule = async (req: TypedRequest<Record<string, string>, unknown, CurrencyPriceRuleBody>, res: Response): Promise<void> => {
   try {
-    const ruleData: CurrencyPriceRule = req.body;
+    const ruleData = req.body;
 
     // Validate required fields
     if (!ruleData.currencyCode || ruleData.priority === undefined || !ruleData.adjustments || ruleData.adjustments.length === 0) {
@@ -506,7 +519,7 @@ export const createPriceRule = async (req: TypedRequest, res: Response): Promise
       }
     }
 
-    const newRule = await currencyPriceRuleRepo.create(ruleData);
+    const newRule = await currencyPriceRuleRepo.create(ruleData as CurrencyPriceRuleCreateProps);
 
     res.status(201).json({
       success: true,
@@ -527,7 +540,7 @@ export const createPriceRule = async (req: TypedRequest, res: Response): Promise
 /**
  * Update price rule
  */
-export const updatePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePriceRule = async (req: TypedRequest<Record<string, string>, unknown, CurrencyPriceRuleBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const ruleData = req.body;
@@ -569,7 +582,7 @@ export const updatePriceRule = async (req: TypedRequest, res: Response): Promise
       }
     }
 
-    const updatedRule = await currencyPriceRuleRepo.update(id, ruleData);
+    const updatedRule = await currencyPriceRuleRepo.update(id, ruleData as CurrencyPriceRuleUpdateProps);
 
     res.json({
       success: true,

@@ -2,13 +2,12 @@
  * Payment Domain Events
  */
 
-import { TransactionStatus } from '../valueObjects/PaymentStatus';
 
 export interface DomainEvent {
   eventType: string;
   occurredAt: Date;
   aggregateId: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
 }
 
 export class PaymentInitiatedEvent implements DomainEvent {

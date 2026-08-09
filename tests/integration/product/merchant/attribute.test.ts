@@ -99,8 +99,8 @@ describe('Attribute Tests', () => {
       expect(response.data.data.length).toBeGreaterThan(0);
 
       // Should find our test attributes - uses productAttributeId
-      const foundOriginalAttr = response.data.data.find((a: any) => (a.productAttributeId || a.id) === testAttributeId);
-      const foundNewAttr = response.data.data.find((a: any) => (a.productAttributeId || a.id) === createdAttributeId);
+      const foundOriginalAttr = response.data.data.find((a: Record<string, unknown>) => (a.productAttributeId || a.id) === testAttributeId);
+      const foundNewAttr = response.data.data.find((a: Record<string, unknown>) => (a.productAttributeId || a.id) === createdAttributeId);
 
       expect(foundOriginalAttr).toBeDefined();
       expect(foundNewAttr).toBeDefined();
@@ -117,8 +117,8 @@ describe('Attribute Tests', () => {
       expect(response.data.data.length).toBeGreaterThan(0);
 
       // Should find our test attributes in the group - uses productAttributeId
-      const foundOriginalAttr = response.data.data.find((a: any) => (a.productAttributeId || a.id) === testAttributeId);
-      const foundNewAttr = response.data.data.find((a: any) => (a.productAttributeId || a.id) === createdAttributeId);
+      const foundOriginalAttr = response.data.data.find((a: Record<string, unknown>) => (a.productAttributeId || a.id) === testAttributeId);
+      const foundNewAttr = response.data.data.find((a: Record<string, unknown>) => (a.productAttributeId || a.id) === createdAttributeId);
 
       expect(foundOriginalAttr).toBeDefined();
       expect(foundNewAttr).toBeDefined();

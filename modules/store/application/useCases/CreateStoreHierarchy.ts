@@ -4,6 +4,8 @@
  * Creates a store hierarchy for multi-store businesses.
  */
 
+import type { StoreRepository } from '../../domain/repositories/StoreRepository';
+
 export interface CreateStoreHierarchyInput {
   businessId: string;
   name: string;
@@ -28,7 +30,7 @@ export interface CreateStoreHierarchyOutput {
 }
 
 export class CreateStoreHierarchyUseCase {
-  constructor(private readonly storeRepository: any) {}
+  constructor(private readonly storeRepository: StoreRepository) {}
 
   async execute(input: CreateStoreHierarchyInput): Promise<CreateStoreHierarchyOutput> {
     if (!input.businessId || !input.name || !input.defaultStoreId) {

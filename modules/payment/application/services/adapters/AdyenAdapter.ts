@@ -24,21 +24,27 @@ export class AdyenAdapter implements GatewayAdapter {
 
     // Adyen payload-embedded HMAC
     try {
-      const body = JSON.parse(rawBody.toString('utf8'));
-      const item = body?.notificationItems?.[0]?.NotificationRequestItem;
-      const hmacSignature: string = item?.additionalData?.hmacSignature || '';
+      const body = JSON.parse(rawBody.toString('utf8')) as Record<string, unknown>;
+      const notificationItems = body?.notificationItems as Array<Record<string, unknown>> | undefined;
+      const firstItem = notificationItems?.[0] as Record<string, unknown> | undefined;
+      const item = firstItem?.NotificationRequestItem as Record<string, unknown> | undefined;
+      if (!item) return false;
+
+      const additionalData = item.additionalData as Record<string, unknown> | undefined;
+      const hmacSignature: string = (additionalData?.hmacSignature as string) || '';
       if (!hmacSignature) return false;
 
       // Build the signing string per Adyen spec
+      const amount = item.amount as Record<string, unknown> | undefined;
       const fields = [
-        item.pspReference,
-        item.originalReference || '',
-        item.merchantAccountCode,
-        item.merchantReference,
-        String(item.amount?.value ?? ''),
-        item.amount?.currency ?? '',
-        item.eventCode,
-        item.success,
+        item.pspReference as string,
+        (item.originalReference as string) || '',
+        item.merchantAccountCode as string,
+        item.merchantReference as string,
+        String(amount?.value ?? ''),
+        (amount?.currency as string) ?? '',
+        item.eventCode as string,
+        item.success as string,
       ];
       const signingString = fields.join(':');
       const key = Buffer.from(secret, 'hex');
@@ -49,15 +55,17 @@ export class AdyenAdapter implements GatewayAdapter {
     }
   }
 
-  normalize(payload: Record<string, any>): WebhookEvent | null {
+  normalize(payload: Record<string, unknown>): WebhookEvent | null {
     // Adyen notification format
-    const item = payload?.notificationItems?.[0]?.NotificationRequestItem;
+    const notificationItems = payload?.notificationItems as Array<Record<string, unknown>> | undefined;
+    const firstItem = notificationItems?.[0] as Record<string, unknown> | undefined;
+    const item = firstItem?.NotificationRequestItem as Record<string, unknown> | undefined;
     if (!item) return null;
 
-    const externalTransactionId: string = item.pspReference || '';
+    const externalTransactionId: string = (item.pspReference as string) || '';
     if (!externalTransactionId) return null;
 
-    const eventCode: string = item.eventCode || '';
+    const eventCode: string = (item.eventCode as string) || '';
     const success: boolean = item.success === 'true' || item.success === true;
 
     if (eventCode === 'AUTHORISATION' && success) {
@@ -68,8 +76,8 @@ export class AdyenAdapter implements GatewayAdapter {
       return {
         type: 'payment_failed',
         externalTransactionId,
-        errorCode: item.reason || 'authorisation_failed',
-        errorMessage: item.reason || 'Authorisation failed',
+        errorCode: (item.reason as string) || 'authorisation_failed',
+        errorMessage: (item.reason as string) || 'Authorisation failed',
         gatewayResponse: item,
       };
     }

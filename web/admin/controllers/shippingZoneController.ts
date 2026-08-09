@@ -5,9 +5,8 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import shippingZoneRepo from '../../../modules/shipping/infrastructure/repositories/shippingZoneRepo';
-import shippingMethodRepo from '../../../modules/shipping/infrastructure/repositories/shippingMethodRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================
@@ -26,12 +25,12 @@ export const listShippingZones = async (req: TypedRequest, res: Response): Promi
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load shipping zones',
+      error: (error as Error).message || 'Failed to load shipping zones',
     });
   }
 };
@@ -41,19 +40,20 @@ export const createShippingZoneForm = async (req: TypedRequest, res: Response): 
     adminRespond(req, res, 'shipping/zones/create', {
       pageName: 'Create Shipping Zone',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
 
 export const createShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { name, description, locationType, locations, excludedLocations, priority, isActive } = req.body;
+    const body = req.body as RequestBody;
+    const { name, description, locationType, locations, excludedLocations, priority, isActive } = body;
 
     const zone = await shippingZoneRepo.create({
       name,
@@ -67,13 +67,13 @@ export const createShippingZone = async (req: TypedRequest, res: Response): Prom
     });
 
     res.redirect(`/hub/shipping/zones/${zone.shippingZoneId}?success=Shipping zone created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'shipping/zones/create', {
       pageName: 'Create Shipping Zone',
-      error: error.message || 'Failed to create shipping zone',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create shipping zone',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -102,12 +102,12 @@ export const viewShippingZone = async (req: TypedRequest, res: Response): Promis
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load shipping zone',
+      error: (error as Error).message || 'Failed to load shipping zone',
     });
   }
 };
@@ -130,12 +130,12 @@ export const editShippingZoneForm = async (req: TypedRequest, res: Response): Pr
       pageName: `Edit: ${zone.name}`,
       zone,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -143,9 +143,10 @@ export const editShippingZoneForm = async (req: TypedRequest, res: Response): Pr
 export const updateShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { zoneId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
-    const { name, description, locationType, locations, excludedLocations, priority, isActive } = req.body;
+    const body = req.body as RequestBody;
+    const { name, description, locationType, locations, excludedLocations, priority, isActive } = body;
 
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description || undefined;
@@ -162,7 +163,7 @@ export const updateShippingZone = async (req: TypedRequest, res: Response): Prom
     }
 
     res.redirect(`/hub/shipping/zones/${zoneId}?success=Shipping zone updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -171,13 +172,13 @@ export const updateShippingZone = async (req: TypedRequest, res: Response): Prom
       adminRespond(req, res, 'shipping/zones/edit', {
         pageName: `Edit: ${zone?.name || 'Zone'}`,
         zone,
-        error: error.message || 'Failed to update shipping zone',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update shipping zone',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update shipping zone',
+        error: (error as Error).message || 'Failed to update shipping zone',
       });
     }
   }
@@ -194,10 +195,10 @@ export const activateShippingZone = async (req: TypedRequest, res: Response): Pr
     }
 
     res.json({ success: true, message: 'Shipping zone activated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to activate shipping zone' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate shipping zone' });
   }
 };
 
@@ -212,10 +213,10 @@ export const deactivateShippingZone = async (req: TypedRequest, res: Response): 
     }
 
     res.json({ success: true, message: 'Shipping zone deactivated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to deactivate shipping zone' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate shipping zone' });
   }
 };
 
@@ -230,9 +231,9 @@ export const deleteShippingZone = async (req: TypedRequest, res: Response): Prom
     }
 
     res.json({ success: true, message: 'Shipping zone deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete shipping zone' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete shipping zone' });
   }
 };

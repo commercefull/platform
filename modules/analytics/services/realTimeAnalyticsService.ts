@@ -24,7 +24,7 @@
  * Initialize WebSocket server for real-time analytics
  * TODO: Implement WebSocket server for real-time analytics updates
  */
-export function initializeAnalyticsWebSocket(server: any) {
+export function initializeAnalyticsWebSocket(_server: unknown) {
   // Placeholder - WebSocket implementation would go here
 }
 
@@ -39,7 +39,7 @@ export function stopAnalyticsWebSocket() {
  * Broadcast a specific event to all connected clients
  * TODO: Implement WebSocket broadcasting
  */
-export function broadcastAnalyticsEvent(eventType: string, data: any) {
+export function broadcastAnalyticsEvent(_eventType: string, _data: unknown) {
   // Placeholder - WebSocket broadcasting would go here
 }
 

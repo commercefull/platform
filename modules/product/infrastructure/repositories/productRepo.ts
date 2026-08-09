@@ -76,8 +76,8 @@ export interface Product {
   preorderAllowance?: number;
   averageRating?: number;
   reviewCount: number;
-  customFields?: Record<string, any>;
-  seoData?: Record<string, any>;
+  customFields?: Record<string, unknown>;
+  seoData?: Record<string, unknown>;
   relatedProducts?: string[];
   crossSellProducts?: string[];
   upSellProducts?: string[];
@@ -93,7 +93,7 @@ export interface Product {
   warranty?: string;
   externalId?: string;
   hasVariants: boolean;
-  variantAttributes?: Record<string, any>;
+  variantAttributes?: Record<string, unknown>;
   createdBy?: string;
   updatedBy?: string;
 }
@@ -196,7 +196,7 @@ export class ProductRepo {
     } = options;
 
     let sql = `SELECT * FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (status) {
@@ -292,7 +292,7 @@ export class ProductRepo {
     const { status, visibility, type, brandId, isFeatured, isVirtual, hasVariants, priceMin, priceMax, merchantId, searchTerm } = options;
 
     let sql = `SELECT COUNT(*) as count FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (status) {
@@ -497,7 +497,7 @@ export class ProductRepo {
    */
   async update(id: string, data: ProductUpdateProps): Promise<Product> {
     const setStatements: string[] = ['"updatedAt" = now()'];
-    const values: any[] = [id];
+    const values: unknown[] = [id];
     let paramIndex = 2;
 
     // Build dynamic SET clause

@@ -118,6 +118,12 @@ router.post('/products/:productId/configure', productController.configureVariant
 router.get('/products/:productId/downloads', productController.getProductDownloads);
 
 /**
+ * Get product availability
+ * GET /products/:productId/availability
+ */
+router.get('/products/:productId/availability', productController.getProductAvailability);
+
+/**
  * Get product by ID or slug
  * GET /products/:identifier
  */

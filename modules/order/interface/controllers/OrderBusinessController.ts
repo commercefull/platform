@@ -16,6 +16,7 @@ import { ProcessRefundCommand, ProcessRefundUseCase } from '../../application/us
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
+import { OrderFilters } from '../../domain/repositories/OrderRepository';
 import orderNoteRepo from '../../infrastructure/repositories/orderNoteRepo';
 import orderPaymentRefundRepo from '../../infrastructure/repositories/orderPaymentRefundRepo';
 import orderFulfillmentPackageRepo from '../../infrastructure/repositories/orderFulfillmentPackageRepo';
@@ -27,7 +28,7 @@ import { TrackFulfillmentPackageCommand, TrackFulfillmentPackageUseCase } from '
 // Content Negotiation Helpers
 // ============================================================================
 
-type ResponseData = Record<string, any>;
+type ResponseData = Record<string, unknown> | unknown[] | unknown;
 
 function respond(req: TypedRequest, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
@@ -79,7 +80,7 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
       orderDirection,
     } = req.query;
 
-    const filters: any = {};
+    const filters: OrderFilters = {};
     if (customerId) filters.customerId = customerId as string;
     if (storeId) filters.storeId = storeId as string;
     if (channelId) filters.channelId = channelId as string;
@@ -106,10 +107,10 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'admin/order/list');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to list orders', 500, 'admin/order/error');
+    respondError(req, res, (error as Error).message || 'Failed to list orders', 500, 'admin/order/error');
   }
 };
 
@@ -131,10 +132,10 @@ export const getOrder = async (req: TypedRequest, res: Response): Promise<void> 
     }
 
     respond(req, res, order, 200, 'admin/order/detail');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get order', 500, 'admin/order/error');
+    respondError(req, res, (error as Error).message || 'Failed to get order', 500, 'admin/order/error');
   }
 };
 
@@ -145,10 +146,11 @@ export const getOrder = async (req: TypedRequest, res: Response): Promise<void> 
 export const updateOrderStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const { status, reason } = req.body;
+    const body = req.body as { status: string; reason?: string };
+    const { status, reason } = body;
 
     // Validate status
-    const validStatuses = Object.values(OrderStatus);
+    const validStatuses = Object.values(OrderStatus) as string[];
     if (!validStatuses.includes(status)) {
       respondError(req, res, `Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400, 'admin/order/error');
       return;
@@ -159,20 +161,20 @@ export const updateOrderStatus = async (req: TypedRequest, res: Response): Promi
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'admin/order/detail');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message.includes('Cannot transition')) {
-      respondError(req, res, error.message, 400, 'admin/order/error');
+    if ((error as Error).message.includes('Cannot transition')) {
+      respondError(req, res, (error as Error).message, 400, 'admin/order/error');
       return;
     }
 
-    if (error.message.includes('not found')) {
-      respondError(req, res, error.message, 404, 'admin/order/error');
+    if ((error as Error).message.includes('not found')) {
+      respondError(req, res, (error as Error).message, 404, 'admin/order/error');
       return;
     }
 
-    respondError(req, res, error.message || 'Failed to update order status', 500, 'admin/order/error');
+    respondError(req, res, (error as Error).message || 'Failed to update order status', 500, 'admin/order/error');
   }
 };
 
@@ -183,7 +185,8 @@ export const updateOrderStatus = async (req: TypedRequest, res: Response): Promi
 export const cancelOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const { reason } = req.body;
+    const body = req.body as { reason?: string };
+    const { reason } = body;
 
     if (!reason) {
       respondError(req, res, 'Cancellation reason is required', 400, 'admin/order/error');
@@ -195,20 +198,20 @@ export const cancelOrder = async (req: TypedRequest, res: Response): Promise<voi
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'admin/order/cancelled');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message.includes('cannot be cancelled')) {
-      respondError(req, res, error.message, 400, 'admin/order/error');
+    if ((error as Error).message.includes('cannot be cancelled')) {
+      respondError(req, res, (error as Error).message, 400, 'admin/order/error');
       return;
     }
 
-    if (error.message.includes('not found')) {
-      respondError(req, res, error.message, 404, 'admin/order/error');
+    if ((error as Error).message.includes('not found')) {
+      respondError(req, res, (error as Error).message, 404, 'admin/order/error');
       return;
     }
 
-    respondError(req, res, error.message || 'Failed to cancel order', 500, 'admin/order/error');
+    respondError(req, res, (error as Error).message || 'Failed to cancel order', 500, 'admin/order/error');
   }
 };
 
@@ -219,7 +222,8 @@ export const cancelOrder = async (req: TypedRequest, res: Response): Promise<voi
 export const processRefund = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const { amount, reason, transactionId } = req.body;
+    const body = req.body as { amount: number; reason: string; transactionId?: string };
+    const { amount, reason, transactionId } = body;
 
     if (!amount || amount <= 0) {
       respondError(req, res, 'Refund amount must be greater than zero', 400, 'admin/order/error');
@@ -236,20 +240,20 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'admin/order/refund');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message.includes('cannot be refunded') || error.message.includes('cannot exceed')) {
-      respondError(req, res, error.message, 400, 'admin/order/error');
+    if ((error as Error).message.includes('cannot be refunded') || (error as Error).message.includes('cannot exceed')) {
+      respondError(req, res, (error as Error).message, 400, 'admin/order/error');
       return;
     }
 
-    if (error.message.includes('not found')) {
-      respondError(req, res, error.message, 404, 'admin/order/error');
+    if ((error as Error).message.includes('not found')) {
+      respondError(req, res, (error as Error).message, 404, 'admin/order/error');
       return;
     }
 
-    respondError(req, res, error.message || 'Failed to process refund', 500, 'admin/order/error');
+    respondError(req, res, (error as Error).message || 'Failed to process refund', 500, 'admin/order/error');
   }
 };
 
@@ -261,7 +265,7 @@ export const getOrderStats = async (req: TypedRequest, res: Response): Promise<v
   try {
     const { startDate, endDate, customerId, storeId, channelId, createdByUserId, orderSource } = req.query;
 
-    const filters: any = {};
+    const filters: OrderFilters = {};
     if (startDate) filters.startDate = new Date(startDate as string);
     if (endDate) filters.endDate = new Date(endDate as string);
     if (customerId) filters.customerId = customerId as string;
@@ -273,10 +277,10 @@ export const getOrderStats = async (req: TypedRequest, res: Response): Promise<v
     const stats = await OrderRepo.getOrderStats(Object.keys(filters).length > 0 ? filters : undefined);
 
     respond(req, res, stats, 200, 'admin/order/stats');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get order statistics', 500, 'admin/order/error');
+    respondError(req, res, (error as Error).message || 'Failed to get order statistics', 500, 'admin/order/error');
   }
 };
 
@@ -293,9 +297,9 @@ export const getStoreSalesSummary = async (req: TypedRequest, res: Response): Pr
     });
 
     respond(req, res, summary, 200, 'admin/order/stats');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(req, res, error.message || 'Failed to get store sales summary', 500, 'admin/order/error');
+    respondError(req, res, (error as Error).message || 'Failed to get store sales summary', 500, 'admin/order/error');
   }
 };
 
@@ -310,10 +314,10 @@ export const getOrderHistory = async (req: TypedRequest, res: Response): Promise
     const history = await OrderRepo.getStatusHistory(orderId);
 
     respond(req, res, { orderId, history }, 200, 'admin/order/history');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, error.message || 'Failed to get order history', 500, 'admin/order/error');
+    respondError(req, res, (error as Error).message || 'Failed to get order history', 500, 'admin/order/error');
   }
 };
 
@@ -330,9 +334,9 @@ export const listOrderNotes = async (req: TypedRequest, res: Response): Promise<
     const { orderId } = req.params;
     const notes = await orderNoteRepo.findByOrder(orderId);
     respond(req, res, { orderId, notes });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing order notes:', error);
-    respondError(req, res, error.message || 'Failed to list order notes', 500);
+    respondError(req, res, (error as Error).message || 'Failed to list order notes', 500);
   }
 };
 
@@ -343,20 +347,21 @@ export const listOrderNotes = async (req: TypedRequest, res: Response): Promise<
 export const addOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const { content, isCustomerVisible } = req.body;
+    const body = req.body as { content: string; isCustomerVisible?: boolean };
+    const { content, isCustomerVisible } = body;
 
-    const command = new AddOrderNoteCommand(orderId, content, isCustomerVisible ?? false, (req as any).user?.userId);
+    const command = new AddOrderNoteCommand(orderId, content, isCustomerVisible ?? false, req.user?.userId);
     const useCase = new AddOrderNoteUseCase();
     const result = await useCase.execute(command);
 
     respond(req, res, result, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error adding order note:', error);
-    if (error.message.includes('not found')) {
-      respondError(req, res, error.message, 404);
+    if ((error as Error).message.includes('not found')) {
+      respondError(req, res, (error as Error).message, 404);
       return;
     }
-    respondError(req, res, error.message || 'Failed to add order note', 500);
+    respondError(req, res, (error as Error).message || 'Failed to add order note', 500);
   }
 };
 
@@ -373,9 +378,9 @@ export const deleteOrderNote = async (req: TypedRequest, res: Response): Promise
       return;
     }
     respond(req, res, { deleted: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting order note:', error);
-    respondError(req, res, error.message || 'Failed to delete order note', 500);
+    respondError(req, res, (error as Error).message || 'Failed to delete order note', 500);
   }
 };
 
@@ -392,9 +397,9 @@ export const listOrderRefunds = async (req: TypedRequest, res: Response): Promis
     const { orderId } = req.params;
     const refunds = await orderPaymentRefundRepo.findByOrder(orderId);
     respond(req, res, { orderId, refunds });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing order refunds:', error);
-    respondError(req, res, error.message || 'Failed to list order refunds', 500);
+    respondError(req, res, (error as Error).message || 'Failed to list order refunds', 500);
   }
 };
 
@@ -404,7 +409,8 @@ export const listOrderRefunds = async (req: TypedRequest, res: Response): Promis
  */
 export const createOrderRefund = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { orderPaymentId, amount, reason, notes, transactionId } = req.body;
+    const body = req.body as { orderPaymentId: string; amount: string; reason: string; notes?: string; transactionId?: string };
+    const { orderPaymentId, amount, reason, notes, transactionId } = body;
 
     const command = new CreateOrderRefundCommand(
       orderPaymentId,
@@ -412,23 +418,23 @@ export const createOrderRefund = async (req: TypedRequest, res: Response): Promi
       reason,
       notes,
       transactionId,
-      (req as any).user?.userId,
+      req.user?.userId,
     );
     const useCase = new CreateOrderRefundUseCase();
     const result = await useCase.execute(command);
 
     respond(req, res, result, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating order refund:', error);
-    if (error.message.includes('not found')) {
-      respondError(req, res, error.message, 404);
+    if ((error as Error).message.includes('not found')) {
+      respondError(req, res, (error as Error).message, 404);
       return;
     }
-    if (error.message.includes('exceeds') || error.message.includes('greater than zero')) {
-      respondError(req, res, error.message, 400);
+    if ((error as Error).message.includes('exceeds') || (error as Error).message.includes('greater than zero')) {
+      respondError(req, res, (error as Error).message, 400);
       return;
     }
-    respondError(req, res, error.message || 'Failed to create order refund', 500);
+    respondError(req, res, (error as Error).message || 'Failed to create order refund', 500);
   }
 };
 
@@ -449,9 +455,9 @@ export const listFulfillmentPackages = async (req: TypedRequest, res: Response):
     }
     const packages = await orderFulfillmentPackageRepo.findByFulfillment(fulfillmentId as string);
     respond(req, res, { fulfillmentId, packages });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing fulfillment packages:', error);
-    respondError(req, res, error.message || 'Failed to list fulfillment packages', 500);
+    respondError(req, res, (error as Error).message || 'Failed to list fulfillment packages', 500);
   }
 };
 
@@ -461,6 +467,17 @@ export const listFulfillmentPackages = async (req: TypedRequest, res: Response):
  */
 export const createFulfillmentPackage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as {
+      orderFulfillmentId: string;
+      packageNumber: string;
+      trackingNumber?: string;
+      weight?: string;
+      dimensions?: Record<string, unknown>;
+      packageType?: string;
+      shippingLabelUrl?: string;
+      commercialInvoiceUrl?: string;
+      customsInfo?: Record<string, unknown>;
+    };
     const {
       orderFulfillmentId,
       packageNumber,
@@ -471,7 +488,7 @@ export const createFulfillmentPackage = async (req: TypedRequest, res: Response)
       shippingLabelUrl,
       commercialInvoiceUrl,
       customsInfo,
-    } = req.body;
+    } = body;
 
     const command = new TrackFulfillmentPackageCommand(
       orderFulfillmentId,
@@ -488,9 +505,9 @@ export const createFulfillmentPackage = async (req: TypedRequest, res: Response)
     const result = await useCase.execute(command);
 
     respond(req, res, result, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating fulfillment package:', error);
-    respondError(req, res, error.message || 'Failed to create fulfillment package', 500);
+    respondError(req, res, (error as Error).message || 'Failed to create fulfillment package', 500);
   }
 };
 
@@ -501,7 +518,14 @@ export const createFulfillmentPackage = async (req: TypedRequest, res: Response)
 export const trackFulfillmentPackage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { packageId } = req.params;
-    const { orderFulfillmentId, packageNumber, trackingNumber, shippingLabelUrl, commercialInvoiceUrl } = req.body;
+    const body = req.body as {
+      orderFulfillmentId?: string;
+      packageNumber?: string;
+      trackingNumber?: string;
+      shippingLabelUrl?: string;
+      commercialInvoiceUrl?: string;
+    };
+    const { orderFulfillmentId, packageNumber, trackingNumber, shippingLabelUrl, commercialInvoiceUrl } = body;
 
     const command = new TrackFulfillmentPackageCommand(
       orderFulfillmentId || '',
@@ -519,12 +543,12 @@ export const trackFulfillmentPackage = async (req: TypedRequest, res: Response):
     const result = await useCase.execute(command);
 
     respond(req, res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error tracking fulfillment package:', error);
-    if (error.message.includes('not found')) {
-      respondError(req, res, error.message, 404);
+    if ((error as Error).message.includes('not found')) {
+      respondError(req, res, (error as Error).message, 404);
       return;
     }
-    respondError(req, res, error.message || 'Failed to update package tracking', 500);
+    respondError(req, res, (error as Error).message || 'Failed to update package tracking', 500);
   }
 };

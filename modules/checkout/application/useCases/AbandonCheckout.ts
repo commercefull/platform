@@ -45,9 +45,9 @@ export class AbandonCheckoutUseCase {
         try {
           const cancelUseCase = new CancelOrderUseCase(this.orderRepository);
           await cancelUseCase.execute(new CancelOrderCommand(session.orderId, 'Checkout abandoned by customer'));
-        } catch (err: any) {
+        } catch (err: unknown) {
           // Log but don't fail — order may already be cancelled
-          logger.warn(`AbandonCheckout: could not cancel order ${session.orderId}: ${err.message}`);
+          logger.warn(`AbandonCheckout: could not cancel order ${session.orderId}: ${(err as Error).message}`);
         }
       }
 

@@ -7,7 +7,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { WebhookEndpointProps } from '../../domain/entities/WebhookEndpoint';
-import { WebhookDeliveryProps, DeliveryStatus } from '../../domain/entities/WebhookDelivery';
+import { WebhookDeliveryProps } from '../../domain/entities/WebhookDelivery';
 import {
   WebhookRepositoryInterface,
   WebhookEndpointFilters,
@@ -73,7 +73,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
     pagination?: PaginationOptions,
   ): Promise<{ data: WebhookEndpointProps[]; total: number }> {
     const conditions: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
 
     if (filters?.merchantId) {
       conditions.push(`"merchantId" = $${values.length + 1}`);
@@ -111,10 +111,10 @@ class WebhookRepository implements WebhookRepositoryInterface {
 
   async updateEndpoint(id: string, updates: Partial<WebhookEndpointProps>): Promise<WebhookEndpointProps | null> {
     const setStatements: string[] = ['"updatedAt" = now()'];
-    const values: any[] = [id];
+    const values: unknown[] = [id];
     let paramIdx = 2;
 
-    const fieldMap: Record<string, (v: any) => any> = {
+    const fieldMap: Record<string, (v: unknown) => unknown> = {
       name: v => v,
       url: v => v,
       secret: v => v,
@@ -124,10 +124,11 @@ class WebhookRepository implements WebhookRepositoryInterface {
       retryPolicy: v => JSON.stringify(v),
     };
 
+    const updatesRecord = updates as Record<string, unknown>;
     for (const [field, transform] of Object.entries(fieldMap)) {
-      if ((updates as any)[field] !== undefined) {
+      if (updatesRecord[field] !== undefined) {
         setStatements.push(`"${field}" = $${paramIdx++}`);
-        values.push(transform((updates as any)[field]));
+        values.push(transform(updatesRecord[field]));
       }
     }
 
@@ -192,7 +193,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
     pagination?: PaginationOptions,
   ): Promise<{ data: WebhookDeliveryProps[]; total: number }> {
     const conditions: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
 
     if (filters?.webhookEndpointId) {
       conditions.push(`"webhookEndpointId" = $${values.length + 1}`);
@@ -231,7 +232,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
 
   async updateDelivery(id: string, updates: Partial<WebhookDeliveryProps>): Promise<WebhookDeliveryProps | null> {
     const setStatements: string[] = ['"updatedAt" = now()'];
-    const values: any[] = [id];
+    const values: unknown[] = [id];
     let paramIdx = 2;
 
     const fields: (keyof WebhookDeliveryProps)[] = [
@@ -278,14 +279,14 @@ class WebhookRepository implements WebhookRepositoryInterface {
   // Helpers
   // =========================================================================
 
-  private parseEndpoint(row: any): WebhookEndpointProps {
+  private parseEndpoint(row: WebhookEndpointProps): WebhookEndpointProps {
     return {
       ...row,
-      events: typeof row.events === 'string' ? JSON.parse(row.events) : row.events || [],
-      headers: typeof row.headers === 'string' ? JSON.parse(row.headers) : row.headers,
+      events: typeof row.events === 'string' ? JSON.parse(row.events as string) : row.events || [],
+      headers: typeof row.headers === 'string' ? JSON.parse(row.headers as string) : row.headers,
       retryPolicy:
         typeof row.retryPolicy === 'string'
-          ? JSON.parse(row.retryPolicy)
+          ? JSON.parse(row.retryPolicy as string)
           : row.retryPolicy || { maxRetries: 5, retryIntervalMs: 5000, backoffMultiplier: 2 },
     };
   }

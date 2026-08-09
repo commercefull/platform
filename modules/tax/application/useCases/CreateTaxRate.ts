@@ -26,8 +26,35 @@ export interface CreateTaxRateOutput {
   createdAt: string;
 }
 
+interface TaxRateRecord {
+  taxRateId: string;
+  name: string;
+  rate: number;
+  country: string;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+interface TaxRepository {
+  createTaxRate(data: {
+    taxRateId: string;
+    name: string;
+    rate: number;
+    type: string;
+    country: string;
+    state?: string;
+    postalCode?: string;
+    city?: string;
+    taxCategory?: string;
+    isCompound: boolean;
+    includesShipping: boolean;
+    priority: number;
+    isActive: boolean;
+  }): Promise<TaxRateRecord>;
+}
+
 export class CreateTaxRateUseCase {
-  constructor(private readonly taxRepository: any) {}
+  constructor(private readonly taxRepository: TaxRepository) {}
 
   async execute(input: CreateTaxRateInput): Promise<CreateTaxRateOutput> {
     if (!input.name || input.rate === undefined || !input.country) {

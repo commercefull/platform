@@ -11,7 +11,7 @@ export class AddBlockToPageCommand {
     public readonly contentPageId: string,
     public readonly blockTypeId: string,
     public readonly title: string,
-    public readonly content: Record<string, any>,
+    public readonly content: Record<string, unknown>,
     public readonly sortOrder?: number,
     public readonly isVisible?: boolean,
     public readonly createdBy?: string,
@@ -24,7 +24,7 @@ export interface BlockResponse {
   blockTypeId: string;
   title: string | null;
   sortOrder: number;
-  content: Record<string, any>;
+  content: Record<string, unknown>;
   isVisible: boolean;
   createdAt: Date;
 }

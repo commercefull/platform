@@ -1,6 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
-import { generateUUID } from '../../../../libs/uuid';
 
 export type OrderReturnStatus = 'requested' | 'approved' | 'denied' | 'inTransit' | 'received' | 'inspected' | 'completed' | 'cancelled';
 export type OrderReturnType = 'refund' | 'exchange' | 'storeCredit' | 'repair';
@@ -32,8 +31,8 @@ export interface OrderReturn {
   customerNotes?: string;
   adminNotes?: string;
   requiresInspection: boolean;
-  inspectionPassedItems?: Record<string, any>;
-  inspectionFailedItems?: Record<string, any>;
+  inspectionPassedItems?: Record<string, unknown>;
+  inspectionFailedItems?: Record<string, unknown>;
 }
 
 export type OrderReturnCreateParams = Omit<
@@ -224,7 +223,7 @@ export class OrderReturnRepo {
    */
   async update(orderReturnId: string, params: OrderReturnUpdateParams): Promise<OrderReturn | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -258,7 +257,7 @@ export class OrderReturnRepo {
    * Update status with auto-timestamps
    */
   async updateStatus(orderReturnId: string, status: OrderReturnStatus): Promise<OrderReturn | null> {
-    const updates: any = { status };
+    const updates: Record<string, string> = { status };
     const now = unixTimestamp();
 
     // Set appropriate timestamp based on status
@@ -276,7 +275,7 @@ export class OrderReturnRepo {
 
     // Build update query
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(updates).forEach(([key, value]) => {
@@ -303,7 +302,7 @@ export class OrderReturnRepo {
    * Approve return
    */
   async approve(orderReturnId: string, rmaNumber?: string): Promise<OrderReturn | null> {
-    const updates: any = { status: 'approved' };
+    const updates: OrderReturnUpdateParams = { status: 'approved' as OrderReturnStatus };
     if (rmaNumber) updates.rmaNumber = rmaNumber;
 
     return this.updateStatus(orderReturnId, 'approved');
@@ -313,7 +312,7 @@ export class OrderReturnRepo {
    * Deny return
    */
   async deny(orderReturnId: string, adminNotes?: string): Promise<OrderReturn | null> {
-    const updates: any = { status: 'denied' };
+    const updates: OrderReturnUpdateParams = { status: 'denied' as OrderReturnStatus };
     if (adminNotes) updates.adminNotes = adminNotes;
 
     return this.update(orderReturnId, updates);
@@ -323,7 +322,7 @@ export class OrderReturnRepo {
    * Mark as in transit
    */
   async markInTransit(orderReturnId: string, trackingNumber?: string, trackingUrl?: string): Promise<OrderReturn | null> {
-    const updates: any = { status: 'inTransit' };
+    const updates: OrderReturnUpdateParams = { status: 'inTransit' as OrderReturnStatus };
     if (trackingNumber) updates.returnTrackingNumber = trackingNumber;
     if (trackingUrl) updates.returnTrackingUrl = trackingUrl;
 
@@ -342,8 +341,8 @@ export class OrderReturnRepo {
    */
   async completeInspection(
     orderReturnId: string,
-    passedItems?: Record<string, any>,
-    failedItems?: Record<string, any>,
+    passedItems?: Record<string, unknown>,
+    failedItems?: Record<string, unknown>,
   ): Promise<OrderReturn | null> {
     return this.update(orderReturnId, {
       status: 'inspected',
@@ -363,7 +362,7 @@ export class OrderReturnRepo {
    * Cancel return
    */
   async cancel(orderReturnId: string, reason?: string): Promise<OrderReturn | null> {
-    const updates: any = { status: 'cancelled' };
+    const updates: OrderReturnUpdateParams = { status: 'cancelled' as OrderReturnStatus };
     if (reason) updates.adminNotes = reason;
 
     return this.update(orderReturnId, updates);
@@ -376,13 +375,12 @@ export class OrderReturnRepo {
     orderReturnId: string,
     trackingNumber: string,
     trackingUrl?: string,
-    carrier?: ReturnCarrier,
+    _carrier?: ReturnCarrier,
   ): Promise<OrderReturn | null> {
-    const updates: any = {
+    const updates: OrderReturnUpdateParams = {
       returnTrackingNumber: trackingNumber,
       returnTrackingUrl: trackingUrl,
     };
-    if (carrier) updates.returnCarrier = carrier;
 
     return this.update(orderReturnId, updates);
   }
@@ -462,7 +460,17 @@ export class OrderReturnRepo {
       });
     }
 
-    return stats as any;
+    return stats as {
+      total: number;
+      requested: number;
+      approved: number;
+      denied: number;
+      inTransit: number;
+      received: number;
+      inspected: number;
+      completed: number;
+      cancelled: number;
+    };
   }
 
   /**
@@ -488,6 +496,61 @@ export class OrderReturnRepo {
     }
 
     return stats as Record<OrderReturnType, number>;
+  }
+
+  async findByCustomerIdWithOrderNumber(customerId: string): Promise<unknown[]> {
+    const results = await query<unknown[]>(
+      `SELECT r.*, o."orderNumber"
+       FROM "orderReturn" r
+       JOIN "order" o ON r."orderId" = o."orderId"
+       WHERE o."customerId" = $1
+       ORDER BY r."createdAt" DESC`,
+      [customerId],
+    );
+    return results || [];
+  }
+
+  async findByIdWithOrderNumber(orderReturnId: string, customerId: string): Promise<unknown | null> {
+    return await queryOne<unknown>(
+      `SELECT r.*, o."orderNumber"
+       FROM "orderReturn" r
+       JOIN "order" o ON r."orderId" = o."orderId"
+       WHERE r."orderReturnId" = $1 AND o."customerId" = $2`,
+      [orderReturnId, customerId],
+    );
+  }
+
+  async createSimple(orderId: string, reason: string, description?: string): Promise<OrderReturn | null> {
+    const now = unixTimestamp();
+    const returnNumber = await this.generateReturnNumber();
+
+    return await queryOne<OrderReturn>(
+      `INSERT INTO "orderReturn" (
+        "orderId", "returnNumber", "status", "returnType", "requestedAt",
+        "returnReason", "customerNotes", "returnShippingPaid", "returnCarrier",
+        "requiresInspection", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, 'requested', 'refund', $3, $4, $5, false, 'usps', false, $6, $7)
+      RETURNING *`,
+      [orderId, returnNumber, now, reason, description || null, now, now],
+    );
+  }
+
+  async findOrderForCustomer(orderId: string, customerId: string): Promise<unknown | null> {
+    return await queryOne<unknown>(
+      `SELECT * FROM "order" WHERE "orderId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL`,
+      [orderId, customerId],
+    );
+  }
+
+  async findOrderItemsWithProduct(orderId: string): Promise<unknown[]> {
+    const results = await query<unknown[]>(
+      `SELECT oi.*, p."name" as "productName", p."sku"
+       FROM "orderItem" oi
+       JOIN "product" p ON oi."productId" = p."productId"
+       WHERE oi."orderId" = $1`,
+      [orderId],
+    );
+    return results || [];
   }
 }
 

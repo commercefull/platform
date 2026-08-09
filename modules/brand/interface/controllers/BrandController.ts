@@ -10,7 +10,20 @@ import { TypedRequest } from 'libs/types/express';
 import { brandRepository } from '../../infrastructure/repositories/BrandRepository';
 import { CreateBrandUseCase, GetBrandUseCase, ListBrandsUseCase, UpdateBrandUseCase, DeleteBrandUseCase } from '../../application/useCases';
 
-export const createBrand = async (req: TypedRequest, res: Response): Promise<void> => {
+interface BrandBody {
+  name: string;
+  slug?: string;
+  description?: string;
+  logoMediaId?: string;
+  coverImageMediaId?: string;
+  website?: string;
+  countryOfOrigin?: string;
+  isActive?: boolean;
+  isFeatured?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export const createBrand = async (req: TypedRequest<Record<string, string>, unknown, BrandBody>, res: Response): Promise<void> => {
   try {
     const useCase = new CreateBrandUseCase(brandRepository);
     const result = await useCase.execute({
@@ -26,9 +39,9 @@ export const createBrand = async (req: TypedRequest, res: Response): Promise<voi
       metadata: req.body.metadata,
     });
     res.status(201).json({ success: true, data: result.brand });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -44,14 +57,14 @@ export const getBrand = async (req: TypedRequest, res: Response): Promise<void> 
       return;
     }
     res.json({ success: true, data: result.brand });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    const status = error.message.includes('not found') ? 404 : 400;
-    res.status(status).json({ success: false, error: error.message });
+    const status = (error as Error).message.includes('not found') ? 404 : 400;
+    res.status(status).json({ success: false, error: (error as Error).message });
   }
 };
 
-export const updateBrand = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateBrand = async (req: TypedRequest<Record<string, string>, unknown, BrandBody>, res: Response): Promise<void> => {
   try {
     const useCase = new UpdateBrandUseCase(brandRepository);
     const result = await useCase.execute({
@@ -68,9 +81,9 @@ export const updateBrand = async (req: TypedRequest, res: Response): Promise<voi
       metadata: req.body.metadata,
     });
     res.json({ success: true, data: result.brand });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -79,9 +92,9 @@ export const deleteBrand = async (req: TypedRequest, res: Response): Promise<voi
     const useCase = new DeleteBrandUseCase(brandRepository);
     await useCase.execute({ brandId: req.params.brandId });
     res.json({ success: true, message: 'Brand deleted' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -96,9 +109,9 @@ export const listBrands = async (req: TypedRequest, res: Response): Promise<void
       limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
     });
     res.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 

@@ -9,6 +9,7 @@ describe('Attribute Group Tests', () => {
   let testProductId: string | null;
   let testCategoryId: string | null;
   let testAttributeGroupId: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testAttributeId: string | null;
   let createdGroupId: string;
 
@@ -75,13 +76,13 @@ describe('Attribute Group Tests', () => {
       expect(response.data.data.length).toBeGreaterThan(0);
 
       // Should find our test groups - uses productAttributeGroupId
-      const foundOriginalGroup = response.data.data.find((g: any) => (g.productAttributeGroupId || g.id) === testAttributeGroupId);
+      const foundOriginalGroup = response.data.data.find((g: Record<string, unknown>) => (g.productAttributeGroupId || g.id) === testAttributeGroupId);
 
       expect(foundOriginalGroup).toBeDefined();
 
       // Only check for new group if it was created
       if (createdGroupId) {
-        const foundNewGroup = response.data.data.find((g: any) => (g.productAttributeGroupId || g.id) === createdGroupId);
+        const foundNewGroup = response.data.data.find((g: Record<string, unknown>) => (g.productAttributeGroupId || g.id) === createdGroupId);
         expect(foundNewGroup).toBeDefined();
       }
     });

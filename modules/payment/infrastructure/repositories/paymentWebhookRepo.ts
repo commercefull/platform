@@ -1,11 +1,11 @@
-import { query, queryOne } from '../../../../libs/db';
+import { queryOne } from '../../../../libs/db';
 
 export interface PaymentWebhook {
   paymentWebhookId: string;
   externalId: string;
   provider: string;
   eventType: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   processedAt?: Date;
   createdAt: Date;
   updatedAt: Date;

@@ -40,16 +40,17 @@ export class ReactivateCustomerUseCase {
       throw new Error('Customer not found');
     }
 
-    if (customer.status === 'active') {
+    if (customer.isActive) {
       throw new Error('Customer is already active');
     }
 
     // Reactivate customer
-    customer.activate();
+    customer.isActive = true;
+    customer.updatedAt = new Date();
     await this.customerRepository.save(customer);
 
     // Emit event
-    (eventBus as any).emit('customer.reactivated', {
+    eventBus.emit('customer.reactivated', {
       customerId: customer.customerId,
     });
 

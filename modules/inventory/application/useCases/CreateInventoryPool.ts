@@ -4,6 +4,8 @@
  * Creates a shared inventory pool for multi-store businesses.
  */
 
+import { generateUUID } from '../../../../libs/uuid';
+
 export interface CreateInventoryPoolInput {
   ownerType: 'business' | 'merchant';
   ownerId: string;
@@ -23,15 +25,38 @@ export interface CreateInventoryPoolOutput {
   createdAt: string;
 }
 
+interface PoolRecord {
+  poolId: string;
+  name: string;
+  poolType: string;
+  linkedInventoryIds: string[];
+  allocationStrategy: string;
+  createdAt: Date;
+}
+
+interface CreatePoolRepositoryPort {
+  createPool(input: {
+    poolId: string;
+    ownerType: 'business' | 'merchant';
+    ownerId: string;
+    name: string;
+    poolType: 'shared' | 'virtual' | 'aggregated';
+    linkedInventoryIds: string[];
+    allocationStrategy: 'fifo' | 'nearest' | 'even_split' | 'priority';
+    reservationPolicy: 'immediate' | 'deferred';
+    isActive: boolean;
+  }): Promise<PoolRecord>;
+}
+
 export class CreateInventoryPoolUseCase {
-  constructor(private readonly inventoryRepository: any) {}
+  constructor(private readonly inventoryRepository: CreatePoolRepositoryPort) {}
 
   async execute(input: CreateInventoryPoolInput): Promise<CreateInventoryPoolOutput> {
     if (!input.ownerId || !input.name || !input.poolType) {
       throw new Error('Owner ID, name, and pool type are required');
     }
 
-    const poolId = `pool_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+    const poolId = generateUUID();
 
     const pool = await this.inventoryRepository.createPool({
       poolId,

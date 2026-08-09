@@ -180,7 +180,7 @@ export class ProductCurrencyPriceRepo {
    */
   async update(productCurrencyPriceId: string, params: ProductCurrencyPriceUpdateParams): Promise<ProductCurrencyPrice | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -278,7 +278,7 @@ export class ProductCurrencyPriceRepo {
    */
   async deleteByProduct(productId: string, productVariantId?: string): Promise<number> {
     let sql = `DELETE FROM "${Table.ProductCurrencyPrice}" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (productVariantId) {
       sql += ` AND "productVariantId" = $2`;

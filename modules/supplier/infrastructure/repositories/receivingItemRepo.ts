@@ -4,14 +4,12 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLE = Table.SupplierReceivingItem;
 
 // ============================================================================
 // Types
@@ -85,7 +83,7 @@ export class SupplierReceivingItemRepo {
 
   async findByProduct(productId: string, productVariantId?: string): Promise<SupplierReceivingItem[]> {
     let sql = `SELECT * FROM "supplierReceivingItem" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (productVariantId) {
       sql += ` AND "productVariantId" = $2`;
@@ -161,7 +159,7 @@ export class SupplierReceivingItemRepo {
 
   async update(id: string, params: SupplierReceivingItemUpdateParams): Promise<SupplierReceivingItem | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

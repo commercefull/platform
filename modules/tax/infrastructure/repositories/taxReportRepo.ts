@@ -4,10 +4,8 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
-const TABLE = Table.TaxReport;
 
 export type TaxReportType = 'sales' | 'filing' | 'jurisdiction' | 'summary' | 'exemption' | 'audit';
 export type TaxReportStatus = 'pending' | 'processing' | 'completed' | 'failed';
@@ -22,13 +20,13 @@ export interface TaxReport {
   reportType: TaxReportType;
   dateFrom: string;
   dateTo: string;
-  taxJurisdictions?: any; // JSON
+  taxJurisdictions?: unknown; // JSON
   fileUrl?: string;
   fileFormat?: TaxReportFileFormat;
   status: TaxReportStatus;
   generatedBy?: string;
-  parameters?: any; // JSON
-  results?: any; // JSON
+  parameters?: unknown; // JSON
+  results?: unknown; // JSON
   errorMessage?: string;
 }
 
@@ -42,7 +40,7 @@ export class TaxReportRepo {
 
   async findByMerchant(merchantId: string, reportType?: TaxReportType, limit = 100): Promise<TaxReport[]> {
     let sql = `SELECT * FROM "taxReport" WHERE "merchantId" = $1`;
-    const params: any[] = [merchantId];
+    const params: unknown[] = [merchantId];
     if (reportType) {
       sql += ` AND "reportType" = $2`;
       params.push(reportType);
@@ -102,7 +100,7 @@ export class TaxReportRepo {
 
   async update(id: string, params: TaxReportUpdateParams): Promise<TaxReport | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -127,7 +125,7 @@ export class TaxReportRepo {
     );
   }
 
-  async markCompleted(id: string, fileUrl: string, results: any): Promise<TaxReport | null> {
+  async markCompleted(id: string, fileUrl: string, results: unknown): Promise<TaxReport | null> {
     return this.update(id, { status: 'completed', fileUrl, results });
   }
 
@@ -144,7 +142,7 @@ export class TaxReportRepo {
 
   async count(merchantId?: string, reportType?: TaxReportType): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "taxReport" WHERE 1=1`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (merchantId) {
       sql += ` AND "merchantId" = $${params.length + 1}`;

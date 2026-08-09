@@ -41,9 +41,32 @@ export interface ReserveStockOutput {
   expiresAt: string;
 }
 
+interface InventoryRecord {
+  inventoryItemId: string;
+  quantity: number;
+  reservedQuantity: number;
+}
+
+interface ReserveStockRepositoryPort {
+  findByProduct(productId: string, variantId: string | undefined, locationId: string | undefined): Promise<InventoryRecord | null>;
+  createReservation(input: {
+    reservationId: string;
+    orderId: string;
+    inventoryItemId: string;
+    productId: string;
+    variantId?: string;
+    sku?: string;
+    quantity: number;
+    locationId?: string;
+    expiresAt: Date;
+    status: string;
+  }): Promise<void>;
+  updateReservedQuantity(inventoryItemId: string, newReservedQuantity: number): Promise<void>;
+}
+
 export class ReserveStockUseCase {
   constructor(
-    private readonly inventoryRepository: any, // InventoryRepository
+    private readonly inventoryRepository: ReserveStockRepositoryPort,
   ) {}
 
   async execute(input: ReserveStockInput): Promise<ReserveStockOutput> {

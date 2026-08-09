@@ -3,7 +3,6 @@
  * Records a page view event for analytics
  */
 
-import * as analyticsRepo from '../../infrastructure/repositories/analyticsRepo';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface TrackPageViewCommand {
@@ -44,7 +43,7 @@ export class TrackPageViewUseCase {
       const pageViewId = `pv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       // Emit event
-      (eventBus as any).emit('analytics.pageview.tracked', {
+      (eventBus as unknown as { emit(type: string, data: unknown): Promise<void> }).emit('analytics.pageview.tracked', {
         sessionId: command.sessionId,
         customerId: command.customerId,
         pageUrl: command.pageUrl,
@@ -58,8 +57,8 @@ export class TrackPageViewUseCase {
         success: true,
         pageViewId,
       };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: (error as Error).message };
     }
   }
 }

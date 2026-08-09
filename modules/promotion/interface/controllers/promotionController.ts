@@ -8,6 +8,18 @@ import promotionRepo, {
   UpdatePromotionInput,
 } from '../../infrastructure/repositories/promotionRepo';
 
+interface ApplyPromotionBody {
+  cartId: string;
+  promotionId: string;
+}
+
+interface ValidatePromotionBody {
+  promotionId: string;
+  cartTotal: string;
+  customerId?: string;
+  items?: unknown[];
+}
+
 /**
  * Get all active promotions with optional filtering
  */
@@ -31,11 +43,11 @@ export const getActivePromotions = async (req: TypedRequest, res: Response): Pro
       success: true,
       data: promotions,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while fetching active promotions',
+      message: (error as Error).message || 'An error occurred while fetching active promotions',
     });
   }
 };
@@ -102,11 +114,11 @@ export const getPromotions = async (req: TypedRequest, res: Response): Promise<v
         offset: parseInt(offset as string),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while fetching promotions',
+      message: (error as Error).message || 'An error occurred while fetching promotions',
     });
   }
 };
@@ -132,11 +144,11 @@ export const getPromotionById = async (req: TypedRequest, res: Response): Promis
       success: true,
       data: promotionData,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while fetching the promotion',
+      message: (error as Error).message || 'An error occurred while fetching the promotion',
     });
   }
 };
@@ -144,9 +156,9 @@ export const getPromotionById = async (req: TypedRequest, res: Response): Promis
 /**
  * Create a new promotion with rules and actions
  */
-export const createPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPromotion = async (req: TypedRequest<Record<string, string>, unknown, CreatePromotionInput>, res: Response): Promise<void> => {
   try {
-    const promotionData: CreatePromotionInput = req.body;
+    const promotionData = req.body;
 
     // Validate required fields
     if (!promotionData.name || !promotionData.status || !promotionData.scope || !promotionData.startDate) {
@@ -174,11 +186,11 @@ export const createPromotion = async (req: TypedRequest, res: Response): Promise
       data: promotion,
       message: 'Promotion created successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while creating the promotion',
+      message: (error as Error).message || 'An error occurred while creating the promotion',
     });
   }
 };
@@ -186,10 +198,10 @@ export const createPromotion = async (req: TypedRequest, res: Response): Promise
 /**
  * Update an existing promotion
  */
-export const updatePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePromotion = async (req: TypedRequest<Record<string, string>, unknown, UpdatePromotionInput>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const promotionData: UpdatePromotionInput = req.body;
+    const promotionData = req.body;
 
     // Check if promotion exists
     const existingPromotion = await promotionRepo.findById(id);
@@ -210,11 +222,11 @@ export const updatePromotion = async (req: TypedRequest, res: Response): Promise
       data: updatedPromotion,
       message: 'Promotion updated successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while updating the promotion',
+      message: (error as Error).message || 'An error occurred while updating the promotion',
     });
   }
 };
@@ -252,11 +264,11 @@ export const deletePromotion = async (req: TypedRequest, res: Response): Promise
       success: true,
       message: 'Promotion deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while deleting the promotion',
+      message: (error as Error).message || 'An error occurred while deleting the promotion',
     });
   }
 };
@@ -264,7 +276,7 @@ export const deletePromotion = async (req: TypedRequest, res: Response): Promise
 /**
  * Apply a promotion to a cart
  */
-export const applyPromotionToCart = async (req: TypedRequest, res: Response): Promise<void> => {
+export const applyPromotionToCart = async (req: TypedRequest<Record<string, string>, unknown, ApplyPromotionBody>, res: Response): Promise<void> => {
   try {
     const { cartId, promotionId } = req.body;
 
@@ -305,11 +317,11 @@ export const applyPromotionToCart = async (req: TypedRequest, res: Response): Pr
         promotion: promotionData.promotion,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while applying the promotion',
+      message: (error as Error).message || 'An error occurred while applying the promotion',
     });
   }
 };
@@ -344,11 +356,11 @@ export const removePromotionFromCart = async (req: TypedRequest, res: Response):
         promotionId,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while removing the promotion',
+      message: (error as Error).message || 'An error occurred while removing the promotion',
     });
   }
 };
@@ -356,9 +368,9 @@ export const removePromotionFromCart = async (req: TypedRequest, res: Response):
 /**
  * Validate a promotion for a cart
  */
-export const validatePromotionForCart = async (req: TypedRequest, res: Response): Promise<void> => {
+export const validatePromotionForCart = async (req: TypedRequest<Record<string, string>, unknown, ValidatePromotionBody>, res: Response): Promise<void> => {
   try {
-    const { promotionId, cartTotal, customerId, items } = req.body;
+    const { promotionId, cartTotal, customerId, items: _items } = req.body;
 
     // Validation
     if (!promotionId || cartTotal === undefined) {
@@ -391,11 +403,11 @@ export const validatePromotionForCart = async (req: TypedRequest, res: Response)
         message: 'Promotion is not valid for this cart',
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while validating the promotion',
+      message: (error as Error).message || 'An error occurred while validating the promotion',
     });
   }
 };
@@ -420,11 +432,11 @@ export const activatePromotion = async (req: TypedRequest, res: Response): Promi
       data: updatedPromotion,
       message: 'Promotion activated successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while activating the promotion',
+      message: (error as Error).message || 'An error occurred while activating the promotion',
     });
   }
 };
@@ -449,11 +461,11 @@ export const pausePromotion = async (req: TypedRequest, res: Response): Promise<
       data: updatedPromotion,
       message: 'Promotion paused successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while pausing the promotion',
+      message: (error as Error).message || 'An error occurred while pausing the promotion',
     });
   }
 };

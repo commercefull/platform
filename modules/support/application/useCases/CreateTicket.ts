@@ -23,8 +23,34 @@ export interface CreateTicketOutput {
   createdAt: string;
 }
 
+interface TicketRecord {
+  ticketId: string;
+  ticketNumber: string;
+  subject: string;
+  type: string;
+  priority: string;
+  status: string;
+  createdAt: Date;
+}
+
+interface SupportRepository {
+  createTicket(data: {
+    ticketId: string;
+    ticketNumber: string;
+    customerId: string;
+    subject: string;
+    description: string;
+    type: string;
+    priority: string;
+    status: string;
+    orderId?: string;
+    attachments: string[];
+    tags: string[];
+  }): Promise<TicketRecord>;
+}
+
 export class CreateTicketUseCase {
-  constructor(private readonly supportRepository: any) {}
+  constructor(private readonly supportRepository: SupportRepository) {}
 
   async execute(input: CreateTicketInput): Promise<CreateTicketOutput> {
     if (!input.customerId || !input.subject || !input.description || !input.type) {

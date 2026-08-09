@@ -85,7 +85,7 @@ export class S3StorageService implements StorageService {
     }
 
     // Convert stream to buffer
-    const chunks: Uint8Array[] = [];
+    const _chunks: Uint8Array[] = [];
     const reader = response.Body.transformToByteArray();
     const buffer = await reader;
     return Buffer.from(buffer);
@@ -118,15 +118,15 @@ export class S3StorageService implements StorageService {
 
       await this.s3Client.send(command);
       return true;
-    } catch (error: any) {
-      if (error.name === 'NotFound') {
+    } catch (error: unknown) {
+      if ((error as { name?: string }).name === 'NotFound') {
         return false;
       }
       throw error;
     }
   }
 
-  async getMetadata(key: string): Promise<Record<string, any>> {
+  async getMetadata(key: string): Promise<Record<string, unknown>> {
     const command = new HeadObjectCommand({
       Bucket: this.bucketName,
       Key: key,

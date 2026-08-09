@@ -40,7 +40,20 @@ export async function ensureAllProductsHaveMasterVariants(): Promise<{
 
           if (!masterVariant) {
             // Create master variant
-            const newMasterVariant = await productVariantRepo.ensureMasterVariantExists(product);
+            const newMasterVariant = await productVariantRepo.ensureMasterVariantExists({
+              id: product.productId,
+              name: product.name,
+              sku: product.sku,
+              basePrice: product.basePrice,
+              salePrice: product.salePrice,
+              cost: product.costPrice,
+              weight: product.weight,
+              weightUnit: product.weightUnit,
+              length: product.length,
+              width: product.width,
+              height: product.height,
+              dimensionUnit: product.dimensionUnit,
+            });
 
             if (newMasterVariant) {
               result.fixed++;
@@ -91,9 +104,9 @@ if (require.main === module) {
       console.log(`Products fixed (master variant created): ${result.fixed}`);
 
       if (result.failed > 0) {
-        result.details.filter(detail => detail.status.startsWith('ERROR') || detail.status === 'FAILED').forEach(detail => {});
+        result.details.filter(detail => detail.status.startsWith('ERROR') || detail.status === 'FAILED').forEach(_detail => {});
       }
-    } catch (error) {
+    } catch {
       process.exit(1);
     }
     process.exit(0);

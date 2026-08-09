@@ -4,16 +4,15 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLES = {
-  FAQ_CATEGORY: Table.FaqCategory,
-  FAQ_ARTICLE: Table.FaqArticle,
-};
+/* const _TABLE = {
+  FAQ_CATEGORY: Table.SupportFaqCategory,
+  FAQ_ARTICLE: Table.SupportFaqArticle,
+}; */
 
 // ============================================================================
 // Types
@@ -32,7 +31,7 @@ export interface FaqCategory {
   articleCount: number;
   isActive: boolean;
   isFeatured: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,7 +59,7 @@ export interface FaqArticle {
   authorId?: string;
   authorName?: string;
   lastEditedBy?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -70,12 +69,12 @@ export interface FaqArticle {
 // ============================================================================
 
 export async function getCategory(faqCategoryId: string): Promise<FaqCategory | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "faqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
   return row ? mapToCategory(row) : null;
 }
 
 export async function getCategoryBySlug(slug: string): Promise<FaqCategory | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "faqCategory" WHERE "slug" = $1', [slug]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqCategory" WHERE "slug" = $1', [slug]);
   return row ? mapToCategory(row) : null;
 }
 
@@ -85,13 +84,13 @@ export async function getCategories(activeOnly: boolean = true): Promise<FaqCate
     whereClause = '"isActive" = true';
   }
 
-  const rows = await query<Record<string, any>[]>(`SELECT * FROM "faqCategory" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "name" ASC`);
+  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "supportFaqCategory" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "name" ASC`);
   return (rows || []).map(mapToCategory);
 }
 
 export async function getFeaturedCategories(): Promise<FaqCategory[]> {
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "faqCategory" WHERE "isActive" = true AND "isFeatured" = true 
+  const rows = await query<Record<string, unknown>[]>(
+    `SELECT * FROM "supportFaqCategory" WHERE "isActive" = true AND "isFeatured" = true 
      ORDER BY "sortOrder" ASC`,
   );
   return (rows || []).map(mapToCategory);
@@ -108,7 +107,7 @@ export async function saveCategory(category: Partial<FaqCategory> & { name: stri
 
   if (category.faqCategoryId) {
     await query(
-      `UPDATE "faqCategory" SET
+      `UPDATE "supportFaqCategory" SET
         "parentCategoryId" = $1, "name" = $2, "slug" = $3, "description" = $4,
         "icon" = $5, "color" = $6, "imageUrl" = $7, "sortOrder" = $8,
         "isActive" = $9, "isFeatured" = $10, "metadata" = $11, "updatedAt" = $12
@@ -131,8 +130,8 @@ export async function saveCategory(category: Partial<FaqCategory> & { name: stri
     );
     return (await getCategory(category.faqCategoryId))!;
   } else {
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "faqCategory" (
+    const result = await queryOne<Record<string, unknown>>(
+      `INSERT INTO "supportFaqCategory" (
         "parentCategoryId", "name", "slug", "description", "icon", "color",
         "imageUrl", "sortOrder", "isActive", "isFeatured", "metadata",
         "createdAt", "updatedAt"
@@ -160,8 +159,8 @@ export async function saveCategory(category: Partial<FaqCategory> & { name: stri
 
 export async function deleteCategory(faqCategoryId: string): Promise<void> {
   // Move articles to uncategorized
-  await query('UPDATE "faqArticle" SET "faqCategoryId" = NULL WHERE "faqCategoryId" = $1', [faqCategoryId]);
-  await query('DELETE FROM "faqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
+  await query('UPDATE "supportFaqArticle" SET "faqCategoryId" = NULL WHERE "faqCategoryId" = $1', [faqCategoryId]);
+  await query('DELETE FROM "supportFaqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
 }
 
 // ============================================================================
@@ -169,12 +168,12 @@ export async function deleteCategory(faqCategoryId: string): Promise<void> {
 // ============================================================================
 
 export async function getArticle(faqArticleId: string): Promise<FaqArticle | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "faqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
   return row ? mapToArticle(row) : null;
 }
 
 export async function getArticleBySlug(slug: string): Promise<FaqArticle | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "faqArticle" WHERE "slug" = $1', [slug]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqArticle" WHERE "slug" = $1', [slug]);
   return row ? mapToArticle(row) : null;
 }
 
@@ -183,7 +182,7 @@ export async function getArticles(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: FaqArticle[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters?.faqCategoryId) {
@@ -199,13 +198,13 @@ export async function getArticles(
     params.push(filters.isFeatured);
   }
 
-  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "faqArticle" WHERE ${whereClause}`, params);
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "supportFaqArticle" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "faqArticle" WHERE ${whereClause} 
+  const rows = await query<Record<string, unknown>[]>(
+    `SELECT * FROM "supportFaqArticle" WHERE ${whereClause} 
      ORDER BY "isPinned" DESC, "sortOrder" ASC, "views" DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -218,8 +217,8 @@ export async function getArticles(
 }
 
 export async function searchArticles(searchQuery: string, limit: number = 10): Promise<FaqArticle[]> {
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "faqArticle" 
+  const rows = await query<Record<string, unknown>[]>(
+    `SELECT * FROM "supportFaqArticle" 
      WHERE "isPublished" = true 
      AND ("title" ILIKE $1 OR "content" ILIKE $1 OR $2 = ANY("keywords"))
      ORDER BY "views" DESC
@@ -230,8 +229,8 @@ export async function searchArticles(searchQuery: string, limit: number = 10): P
 }
 
 export async function getPopularArticles(limit: number = 10): Promise<FaqArticle[]> {
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "faqArticle" WHERE "isPublished" = true 
+  const rows = await query<Record<string, unknown>[]>(
+    `SELECT * FROM "supportFaqArticle" WHERE "isPublished" = true 
      ORDER BY "views" DESC LIMIT $1`,
     [limit],
   );
@@ -244,8 +243,8 @@ export async function getRelatedArticles(faqArticleId: string, limit: number = 5
 
   // Get explicitly related articles first
   if (article.relatedArticleIds?.length) {
-    const rows = await query<Record<string, any>[]>(
-      `SELECT * FROM "faqArticle" 
+    const rows = await query<Record<string, unknown>[]>(
+      `SELECT * FROM "supportFaqArticle" 
        WHERE "faqArticleId" = ANY($1) AND "isPublished" = true
        LIMIT $2`,
       [article.relatedArticleIds, limit],
@@ -256,8 +255,8 @@ export async function getRelatedArticles(faqArticleId: string, limit: number = 5
   }
 
   // Fall back to same category
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "faqArticle" 
+  const rows = await query<Record<string, unknown>[]>(
+    `SELECT * FROM "supportFaqArticle" 
      WHERE "faqCategoryId" = $1 AND "faqArticleId" != $2 AND "isPublished" = true
      ORDER BY "views" DESC LIMIT $3`,
     [article.faqCategoryId, faqArticleId, limit],
@@ -276,7 +275,7 @@ export async function saveArticle(article: Partial<FaqArticle> & { title: string
 
   if (article.faqArticleId) {
     await query(
-      `UPDATE "faqArticle" SET
+      `UPDATE "supportFaqArticle" SET
         "faqCategoryId" = $1, "title" = $2, "slug" = $3, "content" = $4,
         "contentHtml" = $5, "excerpt" = $6, "keywords" = $7, "relatedArticleIds" = $8,
         "sortOrder" = $9, "isPublished" = $10, "isFeatured" = $11, "isPinned" = $12,
@@ -310,8 +309,8 @@ export async function saveArticle(article: Partial<FaqArticle> & { title: string
 
     return (await getArticle(article.faqArticleId))!;
   } else {
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "faqArticle" (
+    const result = await queryOne<Record<string, unknown>>(
+      `INSERT INTO "supportFaqArticle" (
         "faqCategoryId", "title", "slug", "content", "contentHtml", "excerpt",
         "keywords", "relatedArticleIds", "sortOrder", "isPublished", "isFeatured",
         "isPinned", "publishedAt", "authorId", "authorName", "metadata",
@@ -354,7 +353,7 @@ export async function publishArticle(faqArticleId: string): Promise<void> {
   const article = await getArticle(faqArticleId);
 
   await query(
-    `UPDATE "faqArticle" SET "isPublished" = true, "publishedAt" = $1, "updatedAt" = $1
+    `UPDATE "supportFaqArticle" SET "isPublished" = true, "publishedAt" = $1, "updatedAt" = $1
      WHERE "faqArticleId" = $2`,
     [now, faqArticleId],
   );
@@ -368,7 +367,7 @@ export async function unpublishArticle(faqArticleId: string): Promise<void> {
   const article = await getArticle(faqArticleId);
 
   await query(
-    `UPDATE "faqArticle" SET "isPublished" = false, "updatedAt" = $1
+    `UPDATE "supportFaqArticle" SET "isPublished" = false, "updatedAt" = $1
      WHERE "faqArticleId" = $2`,
     [new Date().toISOString(), faqArticleId],
   );
@@ -380,7 +379,7 @@ export async function unpublishArticle(faqArticleId: string): Promise<void> {
 
 export async function deleteArticle(faqArticleId: string): Promise<void> {
   const article = await getArticle(faqArticleId);
-  await query('DELETE FROM "faqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
+  await query('DELETE FROM "supportFaqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
 
   if (article?.faqCategoryId) {
     await updateCategoryArticleCount(article.faqCategoryId);
@@ -390,19 +389,19 @@ export async function deleteArticle(faqArticleId: string): Promise<void> {
 export async function incrementViews(faqArticleId: string, isUnique: boolean = false): Promise<void> {
   if (isUnique) {
     await query(
-      `UPDATE "faqArticle" SET "views" = "views" + 1, "uniqueViews" = "uniqueViews" + 1
+      `UPDATE "supportFaqArticle" SET "views" = "views" + 1, "uniqueViews" = "uniqueViews" + 1
        WHERE "faqArticleId" = $1`,
       [faqArticleId],
     );
   } else {
-    await query('UPDATE "faqArticle" SET "views" = "views" + 1 WHERE "faqArticleId" = $1', [faqArticleId]);
+    await query('UPDATE "supportFaqArticle" SET "views" = "views" + 1 WHERE "faqArticleId" = $1', [faqArticleId]);
   }
 }
 
 export async function submitHelpfulVote(faqArticleId: string, isHelpful: boolean): Promise<void> {
   if (isHelpful) {
     await query(
-      `UPDATE "faqArticle" SET 
+      `UPDATE "supportFaqArticle" SET 
         "helpfulYes" = "helpfulYes" + 1,
         "helpfulScore" = ("helpfulYes" + 1)::decimal / NULLIF("helpfulYes" + "helpfulNo" + 1, 0)
        WHERE "faqArticleId" = $1`,
@@ -410,7 +409,7 @@ export async function submitHelpfulVote(faqArticleId: string, isHelpful: boolean
     );
   } else {
     await query(
-      `UPDATE "faqArticle" SET 
+      `UPDATE "supportFaqArticle" SET 
         "helpfulNo" = "helpfulNo" + 1,
         "helpfulScore" = "helpfulYes"::decimal / NULLIF("helpfulYes" + "helpfulNo" + 1, 0)
        WHERE "faqArticleId" = $1`,
@@ -421,9 +420,9 @@ export async function submitHelpfulVote(faqArticleId: string, isHelpful: boolean
 
 async function updateCategoryArticleCount(faqCategoryId: string): Promise<void> {
   await query(
-    `UPDATE "faqCategory" SET 
+    `UPDATE "supportFaqCategory" SET 
       "articleCount" = (
-        SELECT COUNT(*) FROM "faqArticle" 
+        SELECT COUNT(*) FROM "supportFaqArticle" 
         WHERE "faqCategoryId" = $1 AND "isPublished" = true
       ),
       "updatedAt" = $2
@@ -436,52 +435,52 @@ async function updateCategoryArticleCount(faqCategoryId: string): Promise<void> 
 // Helpers
 // ============================================================================
 
-function mapToCategory(row: Record<string, any>): FaqCategory {
+function mapToCategory(row: Record<string, unknown>): FaqCategory {
   return {
-    faqCategoryId: row.faqCategoryId,
-    parentCategoryId: row.parentCategoryId,
-    name: row.name,
-    slug: row.slug,
-    description: row.description,
-    icon: row.icon,
-    color: row.color,
-    imageUrl: row.imageUrl,
-    sortOrder: parseInt(row.sortOrder) || 0,
-    articleCount: parseInt(row.articleCount) || 0,
+    faqCategoryId: row.faqCategoryId as string,
+    parentCategoryId: row.parentCategoryId as string | undefined,
+    name: row.name as string,
+    slug: row.slug as string | undefined,
+    description: row.description as string | undefined,
+    icon: row.icon as string | undefined,
+    color: row.color as string | undefined,
+    imageUrl: row.imageUrl as string | undefined,
+    sortOrder: parseInt(row.sortOrder as string) || 0,
+    articleCount: parseInt(row.articleCount as string) || 0,
     isActive: Boolean(row.isActive),
     isFeatured: Boolean(row.isFeatured),
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
   };
 }
 
-function mapToArticle(row: Record<string, any>): FaqArticle {
+function mapToArticle(row: Record<string, unknown>): FaqArticle {
   return {
-    faqArticleId: row.faqArticleId,
-    faqCategoryId: row.faqCategoryId,
-    title: row.title,
-    slug: row.slug,
-    content: row.content,
-    contentHtml: row.contentHtml,
-    excerpt: row.excerpt,
-    keywords: row.keywords,
-    relatedArticleIds: row.relatedArticleIds,
-    views: parseInt(row.views) || 0,
-    uniqueViews: parseInt(row.uniqueViews) || 0,
-    helpfulYes: parseInt(row.helpfulYes) || 0,
-    helpfulNo: parseInt(row.helpfulNo) || 0,
-    helpfulScore: parseFloat(row.helpfulScore) || 0,
-    sortOrder: parseInt(row.sortOrder) || 0,
+    faqArticleId: row.faqArticleId as string,
+    faqCategoryId: row.faqCategoryId as string | undefined,
+    title: row.title as string,
+    slug: row.slug as string | undefined,
+    content: row.content as string,
+    contentHtml: row.contentHtml as string | undefined,
+    excerpt: row.excerpt as string | undefined,
+    keywords: row.keywords as string[] | undefined,
+    relatedArticleIds: row.relatedArticleIds as string[] | undefined,
+    views: parseInt(row.views as string) || 0,
+    uniqueViews: parseInt(row.uniqueViews as string) || 0,
+    helpfulYes: parseInt(row.helpfulYes as string) || 0,
+    helpfulNo: parseInt(row.helpfulNo as string) || 0,
+    helpfulScore: parseFloat(row.helpfulScore as string) || 0,
+    sortOrder: parseInt(row.sortOrder as string) || 0,
     isPublished: Boolean(row.isPublished),
     isFeatured: Boolean(row.isFeatured),
     isPinned: Boolean(row.isPinned),
-    publishedAt: row.publishedAt ? new Date(row.publishedAt) : undefined,
-    authorId: row.authorId,
-    authorName: row.authorName,
-    lastEditedBy: row.lastEditedBy,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    publishedAt: row.publishedAt ? new Date(row.publishedAt as string) : undefined,
+    authorId: row.authorId as string | undefined,
+    authorName: row.authorName as string | undefined,
+    lastEditedBy: row.lastEditedBy as string | undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
   };
 }

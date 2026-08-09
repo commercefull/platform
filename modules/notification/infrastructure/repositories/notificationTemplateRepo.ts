@@ -36,10 +36,10 @@ export interface NotificationTemplate {
   textTemplate?: string;
   pushTemplate?: string;
   smsTemplate?: string;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
   isActive: boolean;
   categoryCode?: string;
-  previewData?: Record<string, any>;
+  previewData?: Record<string, unknown>;
   createdBy?: string;
 }
 
@@ -93,7 +93,7 @@ export class NotificationTemplateRepo {
    */
   async findByCategory(categoryCode: string, activeOnly: boolean = true): Promise<NotificationTemplate[]> {
     let sql = `SELECT * FROM "notificationTemplate" WHERE "categoryCode" = $1`;
-    const params: any[] = [categoryCode];
+    const params: unknown[] = [categoryCode];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -110,7 +110,7 @@ export class NotificationTemplateRepo {
    */
   async findByChannel(channel: NotificationChannel, activeOnly: boolean = true): Promise<NotificationTemplate[]> {
     let sql = `SELECT * FROM "notificationTemplate" WHERE "supportedChannels" = $1`;
-    const params: any[] = [channel];
+    const params: unknown[] = [channel];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -178,7 +178,7 @@ export class NotificationTemplateRepo {
    */
   async update(notificationTemplateId: string, params: NotificationTemplateUpdateParams): Promise<NotificationTemplate | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -303,7 +303,7 @@ export class NotificationTemplateRepo {
   async search(searchTerm: string, activeOnly: boolean = true): Promise<NotificationTemplate[]> {
     let sql = `SELECT * FROM "notificationTemplate" 
                WHERE ("name" ILIKE $1 OR "description" ILIKE $1)`;
-    const params: any[] = [`%${searchTerm}%`];
+    const params: unknown[] = [`%${searchTerm}%`];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -320,7 +320,7 @@ export class NotificationTemplateRepo {
    */
   async getPreview(
     notificationTemplateId: string,
-    data?: Record<string, any>,
+    data?: Record<string, unknown>,
   ): Promise<{
     template: NotificationTemplate;
     compiledHtml?: string;

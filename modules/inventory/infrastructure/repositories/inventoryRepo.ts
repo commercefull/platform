@@ -5,15 +5,11 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { generateUUID } from '../../../../libs/uuid';
 import {
   InventoryLocation as DbInventoryLocation,
   InventoryTransaction as DbInventoryTransaction,
   InventoryLevel as DbInventoryLevel,
-  InventoryLot as DbInventoryLot,
   InventoryTransactionType as DbInventoryTransactionType,
-  InventoryTransfer as DbInventoryTransfer,
-  InventoryCount as DbInventoryCount,
 } from '../../../../libs/db/types';
 
 // ============================================================================
@@ -23,10 +19,7 @@ import {
 export type InventoryLocation = DbInventoryLocation;
 export type InventoryTransaction = DbInventoryTransaction;
 export type InventoryLevel = DbInventoryLevel;
-export type InventoryLot = DbInventoryLot;
 export type InventoryTransactionType = DbInventoryTransactionType;
-export type InventoryTransfer = DbInventoryTransfer;
-export type InventoryCount = DbInventoryCount;
 
 // ============================================================================
 // Input Types
@@ -284,7 +277,7 @@ export class InventoryRepo {
     return result;
   }
 
-  async adjustQuantity(inventoryLocationId: string, quantityChange: number, reason?: string): Promise<InventoryLocation> {
+  async adjustQuantity(inventoryLocationId: string, quantityChange: number, _reason?: string): Promise<InventoryLocation> {
     const sql = `
       UPDATE "inventoryLocation" 
       SET 

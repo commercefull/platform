@@ -46,7 +46,7 @@ export async function findByZoneAndMethod(zoneId: string, methodId: string): Pro
 
 export async function findActive(zoneId?: string, methodId?: string): Promise<ShippingRate[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "isActive" = true`;
-  const params: any[] = [];
+  const params: unknown[] = [];
 
   if (zoneId) {
     sql += ` AND "shippingZoneId" = $${params.length + 1}`;
@@ -99,7 +99,7 @@ export async function create(input: CreateShippingRateInput): Promise<ShippingRa
 
 export async function update(id: string, input: UpdateShippingRateInput): Promise<ShippingRate | null> {
   const updateFields: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
   let paramIndex = 1;
   const jsonFields = ['rateMatrix', 'conditions'];
 
@@ -139,7 +139,7 @@ export async function deleteRate(id: string): Promise<boolean> {
 
 export async function count(zoneId?: string, methodId?: string): Promise<number> {
   let sql = `SELECT COUNT(*) as count FROM "${TABLE}" WHERE 1=1`;
-  const params: any[] = [];
+  const params: unknown[] = [];
 
   if (zoneId) {
     sql += ` AND "shippingZoneId" = $${params.length + 1}`;

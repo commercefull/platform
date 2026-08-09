@@ -31,8 +31,31 @@ export interface GetLowStockItemsOutput {
   criticalCount: number;
 }
 
+interface LowStockRecord {
+  inventoryItemId: string;
+  productId: string;
+  productName?: string;
+  variantId?: string;
+  warehouseId: string;
+  warehouseName?: string;
+  sku: string;
+  quantity: number;
+  reservedQuantity: number;
+  reorderPoint: number;
+  reorderQuantity: number;
+}
+
+interface GetLowStockRepositoryPort {
+  findLowStock(options: {
+    warehouseId?: string;
+    threshold?: number;
+    page: number;
+    limit: number;
+  }): Promise<LowStockRecord[]>;
+}
+
 export class GetLowStockItemsUseCase {
-  constructor(private readonly inventoryRepository: any) {}
+  constructor(private readonly inventoryRepository: GetLowStockRepositoryPort) {}
 
   async execute(input: GetLowStockItemsInput): Promise<GetLowStockItemsOutput> {
     const page = input.page || 1;
@@ -45,7 +68,7 @@ export class GetLowStockItemsUseCase {
       limit,
     });
 
-    const criticalItems = items.filter((item: any) => item.quantity - (item.reservedQuantity || 0) <= 0);
+    const criticalItems = items.filter((item: LowStockRecord) => item.quantity - (item.reservedQuantity || 0) <= 0);
 
     // Emit event for monitoring
     if (items.length > 0) {
@@ -57,7 +80,7 @@ export class GetLowStockItemsUseCase {
     }
 
     return {
-      items: items.map((item: any) => ({
+      items: items.map((item: LowStockRecord) => ({
         inventoryItemId: item.inventoryItemId,
         productId: item.productId,
         productName: item.productName,

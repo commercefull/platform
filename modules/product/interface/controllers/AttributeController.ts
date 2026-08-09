@@ -3,18 +3,21 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import dynamicAttributeRepository from '../../infrastructure/repositories/DynamicAttributeRepository';
 import createAttributeUseCase from '../../application/useCases/attribute/CreateAttribute';
+import type { CreateAttributeCommand } from '../../application/useCases/attribute/CreateAttribute';
 import updateAttributeUseCase from '../../application/useCases/attribute/UpdateAttribute';
 import {
   addAttributeValueUseCase,
   removeAttributeValueUseCase,
   getAttributeValuesUseCase,
 } from '../../application/useCases/attribute/ManageAttributeValues';
+import type { AddAttributeValueCommand } from '../../application/useCases/attribute/ManageAttributeValues';
 import {
   setProductAttributeUseCase,
   setProductAttributesUseCase,
   getProductAttributesUseCase,
   removeProductAttributeUseCase,
 } from '../../application/useCases/attribute/AssignProductAttributes';
+import type { SetProductAttributeCommand } from '../../application/useCases/attribute/AssignProductAttributes';
 
 export class AttributeController {
   // ==================== ATTRIBUTE CRUD ====================
@@ -95,7 +98,7 @@ export class AttributeController {
 
       // Get attribute values if it's a select/radio type
       const optionTypes = ['select', 'multiselect', 'radio', 'checkbox', 'color'];
-      let values: any[] = [];
+      let values: unknown[] = [];
       if (optionTypes.includes(attribute.type)) {
         values = await dynamicAttributeRepository.findAttributeValues(id);
       }
@@ -153,10 +156,9 @@ export class AttributeController {
   async createAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       // Map attributeGroupId → groupId for backward compatibility
-      const body = { ...req.body };
-      if (body.attributeGroupId !== undefined && body.groupId === undefined) {
+      const body = req.body as CreateAttributeCommand & { attributeGroupId?: string };
+      if (body.attributeGroupId !== undefined && !body.groupId) {
         body.groupId = body.attributeGroupId;
-        delete body.attributeGroupId;
       }
       const result = await createAttributeUseCase.execute(body);
 
@@ -182,12 +184,12 @@ export class AttributeController {
   async updateAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { sortOrder, ...rest } = req.body;
+      const { sortOrder, ...rest } = req.body as Record<string, unknown>;
       const result = await updateAttributeUseCase.execute({
         attributeId: id,
         ...rest,
         // Map sortOrder to position for backward compatibility
-        ...(sortOrder !== undefined ? { position: sortOrder } : {}),
+        ...(sortOrder !== undefined ? { position: sortOrder as number } : {}),
       });
 
       if (!result.success) {
@@ -280,10 +282,14 @@ export class AttributeController {
   async addAttributeValue(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      const body = req.body as { value?: string; displayValue?: string; position?: number; isDefault?: boolean };
       const result = await addAttributeValueUseCase.execute({
         attributeId: id,
-        ...req.body,
-      });
+        value: body.value || '',
+        displayValue: body.displayValue,
+        position: body.position,
+        isDefault: body.isDefault,
+      } as AddAttributeValueCommand);
 
       if (!result.success) {
         res.status(400).json(result);
@@ -362,10 +368,13 @@ export class AttributeController {
   async setProductAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { productId } = req.params;
+      const body = req.body as { attributeId?: string; attributeCode?: string; value?: string };
       const result = await setProductAttributeUseCase.execute({
         productId,
-        ...req.body,
-      });
+        attributeId: body.attributeId,
+        attributeCode: body.attributeCode,
+        value: body.value || '',
+      } as SetProductAttributeCommand);
 
       if (!result.success) {
         res.status(400).json(result);
@@ -389,11 +398,11 @@ export class AttributeController {
   async setProductAttributes(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { productId } = req.params;
-      const { attributes, clearExisting } = req.body;
+      const { attributes, clearExisting } = req.body as { attributes?: Array<{ attributeId?: string; attributeCode?: string; value: string }>; clearExisting?: boolean };
 
       const result = await setProductAttributesUseCase.execute({
         productId,
-        attributes,
+        attributes: attributes || [],
         clearExisting,
       });
 

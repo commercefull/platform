@@ -18,8 +18,8 @@ export interface CreateSubscriptionInput {
   paymentMethodId?: string;
   shippingAddressId?: string;
   billingAddressId?: string;
-  customizations?: Record<string, any>;
-  metadata?: Record<string, any>;
+  customizations?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
 export class CreateSubscriptionCommand {
@@ -99,25 +99,27 @@ export class CreateSubscriptionUseCase {
       const discountAmount = plan.discountAmount || 0;
       const subtotal = unitPrice * quantity - discountAmount;
       const taxAmount = 0; // Would be calculated by tax service
-      const totalPrice = subtotal + taxAmount;
+      const _totalPrice = subtotal + taxAmount;
 
       // 4. Determine trial period
       const trialDays = plan.trialDays || product.trialDays || 0;
       const now = new Date();
+       
       let trialStartAt: Date | undefined;
       let trialEndAt: Date | undefined;
-      let currentPeriodStart = now;
+      let _currentPeriodStart = now;
+       
       let currentPeriodEnd: Date;
       let status: 'pending' | 'trialing' | 'active' = 'pending';
 
       if (trialDays > 0) {
-        trialStartAt = now;
+        trialStartAt = now; // eslint-disable-line @typescript-eslint/no-unused-vars
         trialEndAt = new Date(now);
         trialEndAt.setDate(trialEndAt.getDate() + trialDays);
         currentPeriodEnd = trialEndAt;
         status = 'trialing';
       } else {
-        currentPeriodEnd = this.calculatePeriodEnd(now, plan.billingInterval, plan.billingIntervalCount);
+        currentPeriodEnd = this.calculatePeriodEnd(now, plan.billingInterval, plan.billingIntervalCount); // eslint-disable-line @typescript-eslint/no-unused-vars
         status = 'active';
       }
 
@@ -143,10 +145,10 @@ export class CreateSubscriptionUseCase {
         product,
         message: status === 'trialing' ? `Subscription created with ${trialDays}-day trial` : 'Subscription created successfully',
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        message: error.message || 'Failed to create subscription',
+        message: (error as Error).message || 'Failed to create subscription',
         errors: ['creation_failed'],
       };
     }

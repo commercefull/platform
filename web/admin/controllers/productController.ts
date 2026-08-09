@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
 import { ListProductsCommand, ListProductsUseCase } from '../../../modules/product/application/useCases/ListProducts';
 import { CreateProductCommand, CreateProductUseCase } from '../../../modules/product/application/useCases/CreateProduct';
@@ -19,7 +19,6 @@ import categoryRepo from '../../../modules/product/infrastructure/repositories/c
 import brandRepository from '../../../modules/brand/infrastructure/repositories/BrandRepository';
 import dynamicAttributeRepo from '../../../modules/product/infrastructure/repositories/DynamicAttributeRepository';
 import productReviewRepo from '../../../modules/product/infrastructure/repositories/productReviewRepo';
-import productImageRepo from '../../../modules/product/infrastructure/repositories/productImageRepo';
 
 // ============================================================================
 // List Products
@@ -29,7 +28,7 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
   try {
     const { status, visibility, categoryId, search, limit, offset, orderBy, orderDirection } = req.query;
 
-    const filters: any = {};
+    const filters: Record<string, unknown> = {};
     if (status) filters.status = status as ProductStatus;
     if (visibility) filters.visibility = visibility as ProductVisibility;
     if (categoryId) filters.categoryId = categoryId as string;
@@ -72,12 +71,12 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load products',
+      error: (error as Error).message || 'Failed to load products',
     });
   }
 };
@@ -123,12 +122,12 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
       brandName: brand ? brand.name : null,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load product',
+      error: (error as Error).message || 'Failed to load product',
     });
   }
 };
@@ -154,12 +153,12 @@ export const createProductForm = async (req: TypedRequest, res: Response): Promi
 
       formData: {},
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -170,7 +169,8 @@ export const createProductForm = async (req: TypedRequest, res: Response): Promi
 
 export const createProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = (req as any).user?.merchantId;
+    const merchantId = req.user?.merchantId;
+    const body = req.body as RequestBody;
     const {
       name,
       description,
@@ -201,7 +201,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       metaKeywords,
       tags,
       metadata,
-    } = req.body;
+    } = body;
 
     if (!name?.trim()) {
       const [productTypes, categories, brandsResult] = await Promise.all([
@@ -212,7 +212,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       adminRespond(req, res, 'products/create', {
         pageName: 'Create Product',
         error: 'Product name is required',
-        formData: req.body,
+        formData: req.body as RequestBody,
         productTypes,
         categories,
         brands: brandsResult.data || [],
@@ -258,7 +258,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     const product = await useCase.execute(command);
 
     res.redirect(`/admin/products/${product.productId}?success=Product created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     const [productTypes, categories, brandsResult] = await Promise.all([
@@ -268,11 +268,11 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     ]);
     adminRespond(req, res, 'products/create', {
       pageName: 'Create Product',
-      error: error.message || 'Failed to create product',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create product',
+      formData: req.body as RequestBody,
       productTypes,
       categories,
-      brands: (brandsResult as any).data || brandsResult || [],
+      brands: (brandsResult as { data?: unknown[] }).data || brandsResult || [],
       attributes: [],
     });
   }
@@ -315,12 +315,12 @@ export const editProductForm = async (req: TypedRequest, res: Response): Promise
       productAttributes,
       allAttributes,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -332,14 +332,14 @@ export const editProductForm = async (req: TypedRequest, res: Response): Promise
 export const updateProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const updates = req.body;
+    const updates = req.body as RequestBody;
 
     const command = new UpdateProductCommand(productId, updates);
     const useCase = new UpdateProductUseCase(ProductRepo);
     await useCase.execute(command);
 
     res.redirect(`/admin/products/${productId}?success=Product updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     // Reload product and show error
@@ -356,16 +356,16 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
       adminRespond(req, res, 'products/edit', {
         pageName: `Edit: ${product?.name || 'Product'}`,
         product,
-        error: error.message || 'Failed to update product',
+        error: (error as Error).message || 'Failed to update product',
         productTypes,
         categories,
-        brands: (brandsResult as any).data || brandsResult || [],
+        brands: (brandsResult as { data?: unknown[] }).data || brandsResult || [],
         attributes: [],
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update product',
+        error: (error as Error).message || 'Failed to update product',
       });
     }
   }
@@ -393,10 +393,10 @@ export const deleteProduct = async (req: TypedRequest, res: Response): Promise<v
     }
 
     res.json({ success: true, message: 'Product deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete product' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete product' });
   }
 };
 
@@ -407,7 +407,8 @@ export const deleteProduct = async (req: TypedRequest, res: Response): Promise<v
 export const updateProductStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { status } = req.body;
+    const body = req.body as RequestBody;
+    const { status } = body;
 
     const validStatuses = Object.values(ProductStatus);
     if (!validStatuses.includes(status)) {
@@ -425,10 +426,10 @@ export const updateProductStatus = async (req: TypedRequest, res: Response): Pro
     await ProductRepo.save(product);
 
     res.json({ success: true, message: 'Status updated', data: { status: product.status } });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to update status' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to update status' });
   }
 };
 
@@ -450,10 +451,10 @@ export const publishProduct = async (req: TypedRequest, res: Response): Promise<
     await ProductRepo.save(product);
 
     res.json({ success: true, message: 'Product published' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to publish product' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to publish product' });
   }
 };
 
@@ -475,10 +476,10 @@ export const unpublishProduct = async (req: TypedRequest, res: Response): Promis
     await ProductRepo.save(product);
 
     res.json({ success: true, message: 'Product unpublished' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to unpublish product' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to unpublish product' });
   }
 };
 
@@ -504,9 +505,9 @@ export const listProductCategories = async (req: TypedRequest, res: Response): P
       categories,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load categories' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load categories' });
   }
 };
 
@@ -519,15 +520,16 @@ export const createProductCategoryForm = async (req: TypedRequest, res: Response
       categories,
       formData: {},
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load form' });
   }
 };
 
 export const createProductCategory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { name, slug, description, parentId, position, isActive, imageUrl, metaTitle, metaDescription } = req.body;
+    const body = req.body as RequestBody;
+    const { name, slug, description, parentId, position, isActive, imageUrl, metaTitle, metaDescription } = body;
     await productCategoryRepo.create({
       name,
       slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
@@ -540,9 +542,9 @@ export const createProductCategory = async (req: TypedRequest, res: Response): P
       metaDescription: metaDescription || null,
     });
     res.redirect('/admin/products/categories?success=Category created successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect('/admin/products/categories?error=' + encodeURIComponent(error.message || 'Failed to create category'));
+    res.redirect('/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to create category'));
   }
 };
 
@@ -560,16 +562,17 @@ export const editProductCategoryForm = async (req: TypedRequest, res: Response):
       categories: categories.filter(c => c.productCategoryId !== categoryId),
       formData: category,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load form' });
   }
 };
 
 export const updateProductCategory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId } = req.params;
-    const { name, slug, description, parentId, position, isActive, imageUrl, metaTitle, metaDescription } = req.body;
+    const body = req.body as RequestBody;
+    const { name, slug, description, parentId, position, isActive, imageUrl, metaTitle, metaDescription } = body;
     await productCategoryRepo.update(categoryId, {
       name,
       slug,
@@ -582,9 +585,9 @@ export const updateProductCategory = async (req: TypedRequest, res: Response): P
       metaDescription: metaDescription || null,
     });
     res.redirect('/admin/products/categories?success=Category updated successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect('/admin/products/categories?error=' + encodeURIComponent(error.message || 'Failed to update category'));
+    res.redirect('/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to update category'));
   }
 };
 
@@ -593,9 +596,9 @@ export const deleteProductCategory = async (req: TypedRequest, res: Response): P
     const { categoryId } = req.params;
     await productCategoryRepo.softDelete(categoryId);
     res.redirect('/admin/products/categories?success=Category deleted successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect('/admin/products/categories?error=' + encodeURIComponent(error.message || 'Failed to delete category'));
+    res.redirect('/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to delete category'));
   }
 };
 
@@ -611,24 +614,25 @@ export const listProductTags = async (req: TypedRequest, res: Response): Promise
       tags,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load tags' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load tags' });
   }
 };
 
 export const createProductTag = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { name, slug, description } = req.body;
+    const body = req.body as RequestBody;
+    const { name, slug, description } = body;
     await productTagRepo.create({
       name,
       slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
       description: description || null,
     });
     res.redirect('/admin/products/tags?success=Tag created successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect('/admin/products/tags?error=' + encodeURIComponent(error.message || 'Failed to create tag'));
+    res.redirect('/admin/products/tags?error=' + encodeURIComponent((error as Error).message || 'Failed to create tag'));
   }
 };
 
@@ -637,9 +641,9 @@ export const deleteProductTag = async (req: TypedRequest, res: Response): Promis
     const { tagId } = req.params;
     await productTagRepo.softDelete(tagId);
     res.redirect('/admin/products/tags?success=Tag deleted successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect('/admin/products/tags?error=' + encodeURIComponent(error.message || 'Failed to delete tag'));
+    res.redirect('/admin/products/tags?error=' + encodeURIComponent((error as Error).message || 'Failed to delete tag'));
   }
 };
 
@@ -655,9 +659,9 @@ export const listProductCollections = async (req: TypedRequest, res: Response): 
       collections,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load collections' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load collections' });
   }
 };
 
@@ -668,15 +672,16 @@ export const createProductCollectionForm = async (req: TypedRequest, res: Respon
       collection: null,
       formData: {},
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load form' });
   }
 };
 
 export const createProductCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { name, slug, description, imageUrl, isActive, position } = req.body;
+    const body = req.body as RequestBody;
+    const { name, slug, description, imageUrl, isActive, _position } = body;
     await productCollectionRepo.create({
       name,
       slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
@@ -686,9 +691,9 @@ export const createProductCollection = async (req: TypedRequest, res: Response):
       merchantId: null,
     });
     res.redirect('/admin/products/collections?success=Collection created successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect('/admin/products/collections?error=' + encodeURIComponent(error.message || 'Failed to create collection'));
+    res.redirect('/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to create collection'));
   }
 };
 
@@ -705,16 +710,17 @@ export const editProductCollectionForm = async (req: TypedRequest, res: Response
       collection,
       formData: collection,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load form' });
   }
 };
 
 export const updateProductCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { collectionId } = req.params;
-    const { name, slug, description, imageUrl, isActive, position } = req.body;
+    const body = req.body as RequestBody;
+    const { name, slug, description, imageUrl, isActive, _position } = body;
     await productCollectionRepo.update(collectionId, {
       name,
       slug,
@@ -723,9 +729,9 @@ export const updateProductCollection = async (req: TypedRequest, res: Response):
       isActive: isActive !== 'false',
     });
     res.redirect('/admin/products/collections?success=Collection updated successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect('/admin/products/collections?error=' + encodeURIComponent(error.message || 'Failed to update collection'));
+    res.redirect('/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to update collection'));
   }
 };
 
@@ -734,9 +740,9 @@ export const deleteProductCollection = async (req: TypedRequest, res: Response):
     const { collectionId } = req.params;
     await productCollectionRepo.softDelete(collectionId);
     res.redirect('/admin/products/collections?success=Collection deleted successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect('/admin/products/collections?error=' + encodeURIComponent(error.message || 'Failed to delete collection'));
+    res.redirect('/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to delete collection'));
   }
 };
 
@@ -749,21 +755,22 @@ export const listProductQa = async (req: TypedRequest, res: Response): Promise<v
     const { productId } = req.params;
     const qaList = await productQaRepo.findByProduct(productId);
     res.render('admin/views/products/partials/qa', { qaList, productId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).send(error.message || 'Failed to load Q&A');
+    res.status(500).send((error as Error).message || 'Failed to load Q&A');
   }
 };
 
 export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId, qaId } = req.params;
-    const { status } = req.body;
+    const body = req.body as RequestBody;
+    const { status } = body;
     await productQaRepo.updateStatus(qaId, status);
     res.redirect(`/admin/products/${productId}?success=Q%26A status updated`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent(error.message || 'Failed to update Q&A status'));
+    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to update Q&A status'));
   }
 };
 
@@ -782,9 +789,9 @@ export const listReviewMedia = async (req: TypedRequest, res: Response): Promise
       })),
     );
     res.render('admin/views/products/partials/review-media', { mediaByReview, productId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).send(error.message || 'Failed to load review media');
+    res.status(500).send((error as Error).message || 'Failed to load review media');
   }
 };
 
@@ -793,9 +800,9 @@ export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promi
     const { productId, mediaId } = req.params;
     await productReviewMediaRepo.delete(mediaId);
     res.redirect(`/admin/products/${productId}?success=Media deleted`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent(error.message || 'Failed to delete media'));
+    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to delete media'));
   }
 };
 
@@ -808,15 +815,16 @@ export const listProductPrices = async (req: TypedRequest, res: Response): Promi
     const { productId } = req.params;
     const prices = await productPriceRepo.findByProduct(productId);
     res.render('admin/views/products/partials/prices', { prices, productId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).send(error.message || 'Failed to load prices');
+    res.status(500).send((error as Error).message || 'Failed to load prices');
   }
 };
 
 export const upsertProductPrice = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
+    const body = req.body as RequestBody;
     const {
       productPriceId,
       currencyCode,
@@ -828,7 +836,7 @@ export const upsertProductPrice = async (req: TypedRequest, res: Response): Prom
       endsAt,
       priceListId,
       productVariantId,
-    } = req.body;
+    } = body;
 
     if (productPriceId) {
       await productPriceRepo.update(productPriceId, {
@@ -856,8 +864,8 @@ export const upsertProductPrice = async (req: TypedRequest, res: Response): Prom
       });
     }
     res.redirect(`/admin/products/${productId}?success=Price saved`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent(error.message || 'Failed to save price'));
+    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to save price'));
   }
 };

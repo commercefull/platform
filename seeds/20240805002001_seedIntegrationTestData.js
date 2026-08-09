@@ -18,8 +18,6 @@ const TEST_GUEST_BASKET_ID = '00000000-0000-0000-0000-000000002001';
 const TEST_CUSTOMER_BASKET_ID = '00000000-0000-0000-0000-000000002002';
 const TEST_CHECKOUT_BASKET_ID = '00000000-0000-0000-0000-000000002003';
 const TEST_CHECKOUT_ID = '00000000-0000-0000-0000-000000003001';
-const TEST_B2B_COMPANY_ID = '00000000-0000-0000-0000-000000004001';
-const TEST_B2B_QUOTE_ID = '00000000-0000-0000-0000-000000004002';
 
 // Content test IDs
 const TEST_CONTENT_TYPE_ID = '00000000-0000-0000-0000-000000005001';
@@ -277,128 +275,6 @@ exports.seed = async function (knex) {
       })
       .onConflict('checkoutSessionId')
       .ignore();
-  }
-
-  // =========================================================================
-  // Test B2B Company
-  // =========================================================================
-
-  await knex('b2bCompany')
-    .insert({
-      b2bCompanyId: TEST_B2B_COMPANY_ID,
-      name: 'Integration Test Company',
-      legalName: 'Integration Test Company LLC',
-      registrationNumber: 'REG-TEST-001',
-      vatNumber: null,
-      taxId: 'TAX-TEST-001',
-      dunsNumber: null,
-      status: 'active',
-      companyType: 'corporation',
-      industry: 'Technology',
-      industryCode: null,
-      employeeCount: 50,
-      employeeRange: '11-50',
-      annualRevenue: 5000000,
-      revenueRange: null,
-      creditLimit: 50000,
-      availableCredit: 50000,
-      usedCredit: 0,
-      paymentTermsDays: 30,
-      paymentTermsType: 'net',
-      currency: 'USD',
-      primaryContactId: null,
-      billingContactId: null,
-      website: null,
-      phone: null,
-      fax: null,
-      email: null,
-      logoUrl: null,
-      description: null,
-      notes: null,
-      metadata: null,
-      customFields: null,
-      taxExempt: false,
-      taxExemptCertificate: null,
-      taxExemptExpiry: null,
-      parentCompanyId: null,
-      accountManagerId: null,
-      tier: 'standard',
-      discountRate: 0,
-      requiresApproval: false,
-      orderMinimum: null,
-      orderMaximum: null,
-      approvedAt: new Date(),
-      approvedBy: null,
-      lastOrderAt: null,
-      totalOrders: 0,
-      lifetimeValue: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      deletedAt: null,
-    })
-    .onConflict('b2bCompanyId')
-    .ignore();
-
-  // =========================================================================
-  // Test B2B Quote
-  // =========================================================================
-  try {
-    const existingQuote = await knex('b2bQuote').where('b2bQuoteId', TEST_B2B_QUOTE_ID).first();
-
-    if (!existingQuote) {
-      await knex('b2bQuote')
-        .insert({
-          b2bQuoteId: TEST_B2B_QUOTE_ID,
-          quoteNumber: 'QT-TEST-001',
-          b2bCompanyId: TEST_B2B_COMPANY_ID,
-          customerId: null,
-          b2bCompanyUserId: null,
-          salesRepId: null,
-          status: 'draft',
-          currency: 'USD',
-          subtotal: 999.9,
-          discountTotal: 0,
-          discountType: null,
-          discountValue: null,
-          discountReason: null,
-          taxTotal: 0,
-          shippingTotal: 0,
-          handlingTotal: 0,
-          grandTotal: 999.9,
-          margin: null,
-          marginPercent: null,
-          validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          validityDays: 30,
-          billingAddressId: null,
-          shippingAddressId: null,
-          shippingMethod: null,
-          customerNotes: 'Integration test quote',
-          internalNotes: null,
-          terms: null,
-          conditions: null,
-          paymentTerms: null,
-          paymentTermsDays: null,
-          convertedOrderId: null,
-          rejectionReason: null,
-          revisionNumber: 1,
-          previousVersionId: null,
-          attachments: JSON.stringify([]),
-          metadata: null,
-          sentAt: null,
-          viewedAt: null,
-          acceptedAt: null,
-          rejectedAt: null,
-          convertedAt: null,
-          expiresAt: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          deletedAt: null,
-        })
-        .onConflict('b2bQuoteId')
-        .ignore();
-    }
-  } catch (e) {
-    // b2bQuote table may not exist
   }
 
   // =========================================================================
@@ -737,8 +613,6 @@ exports.seed = async function (knex) {
     TEST_CUSTOMER_BASKET_ID,
     TEST_CHECKOUT_BASKET_ID,
     TEST_CHECKOUT_ID,
-    TEST_B2B_COMPANY_ID,
-    TEST_B2B_QUOTE_ID,
     TEST_CONTENT_TYPE_ID,
     TEST_CONTENT_PAGE_ID,
     TEST_CONTENT_BLOCK_ID,

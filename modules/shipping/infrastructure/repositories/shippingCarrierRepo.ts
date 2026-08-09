@@ -115,7 +115,7 @@ export async function create(input: CreateShippingCarrierInput): Promise<Shippin
  */
 export async function update(id: string, input: UpdateShippingCarrierInput): Promise<ShippingCarrier | null> {
   const updateFields: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
   let paramIndex = 1;
 
   const jsonFields = ['apiCredentials', 'supportedRegions', 'supportedServices', 'customFields'];

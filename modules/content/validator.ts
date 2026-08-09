@@ -23,8 +23,8 @@ export const userContactFormValidationRules = () => {
 export const validateContactUs = (req: TypedRequest, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    let messages: string[] = [];
-    errors.array().forEach((error: any) => {
+    const messages: string[] = [];
+    errors.array().forEach((error) => {
       messages.push(error.msg);
     });
 
@@ -37,8 +37,8 @@ export const validateContactUs = (req: TypedRequest, res: Response, next: NextFu
 export const validateContactForm = (req: TypedRequest, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    let messages: string[] = [];
-    errors.array().forEach((error: any) => {
+    const messages: string[] = [];
+    errors.array().forEach((error) => {
       messages.push(error.msg);
     });
 

@@ -16,10 +16,19 @@ export interface LogoutCustomerOutput {
   message: string;
 }
 
+export interface TokenBlacklistRepository {
+  add(entry: { token: string; customerId: string; type: string; blacklistedAt: Date }): Promise<void>;
+}
+
+export interface RefreshTokenRepository {
+  revokeAllForCustomer(customerId: string): Promise<number>;
+  revoke(token: string): Promise<void>;
+}
+
 export class LogoutCustomerUseCase {
   constructor(
-    private readonly tokenBlacklistRepo: any,
-    private readonly refreshTokenRepo: any,
+    private readonly tokenBlacklistRepo: TokenBlacklistRepository,
+    private readonly refreshTokenRepo: RefreshTokenRepository,
   ) {}
 
   async execute(input: LogoutCustomerInput): Promise<LogoutCustomerOutput> {

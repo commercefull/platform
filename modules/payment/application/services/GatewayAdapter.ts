@@ -23,7 +23,7 @@ export interface WebhookEvent {
   /** Human-readable failure reason */
   errorMessage?: string;
   /** Full raw gateway object for audit storage */
-  gatewayResponse: Record<string, any>;
+  gatewayResponse: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -46,5 +46,5 @@ export interface GatewayAdapter {
    * Normalize the raw payload into a canonical WebhookEvent.
    * Return `null` for event types the adapter does not handle (they will be silently acked).
    */
-  normalize(payload: Record<string, any>): WebhookEvent | null;
+  normalize(payload: Record<string, unknown>): WebhookEvent | null;
 }

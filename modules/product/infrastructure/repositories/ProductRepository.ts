@@ -4,7 +4,11 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { generateUUID } from '../../../../libs/uuid';
+import {
+  Product as DbProduct,
+  ProductVariant as DbProductVariant,
+  ProductImage as DbProductImage,
+} from '../../../../libs/db/types';
 import {
   ProductRepository as IProductRepository,
   ProductFilters,
@@ -12,7 +16,7 @@ import {
   PaginatedResult,
 } from '../../domain/repositories/ProductRepository';
 import { Product, ProductImage } from '../../domain/entities/Product';
-import { ProductVariant, VariantAttribute } from '../../domain/entities/ProductVariant';
+import { ProductVariant } from '../../domain/entities/ProductVariant';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import { Price } from '../../domain/valueObjects/Price';
@@ -20,31 +24,31 @@ import { Dimensions } from '../../domain/valueObjects/Dimensions';
 
 export class ProductRepo implements IProductRepository {
   async findById(productId: string): Promise<Product | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM product WHERE "productId" = $1 AND "deletedAt" IS NULL', [productId]);
+    const row = await queryOne<DbProduct>('SELECT * FROM product WHERE "productId" = $1 AND "deletedAt" IS NULL', [productId]);
     if (!row) return null;
     const images = await this.getProductImages(productId);
     return this.mapToProduct(row, images);
   }
 
   async findBySlug(slug: string): Promise<Product | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM product WHERE slug = $1 AND "deletedAt" IS NULL', [slug]);
+    const row = await queryOne<DbProduct>('SELECT * FROM product WHERE slug = $1 AND "deletedAt" IS NULL', [slug]);
     if (!row) return null;
     const images = await this.getProductImages(row.productId);
     return this.mapToProduct(row, images);
   }
 
   async findBySku(sku: string): Promise<Product | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM product WHERE sku = $1 AND "deletedAt" IS NULL', [sku]);
+    const row = await queryOne<DbProduct>('SELECT * FROM product WHERE sku = $1 AND "deletedAt" IS NULL', [sku]);
     if (!row) return null;
     const images = await this.getProductImages(row.productId);
     return this.mapToProduct(row, images);
   }
 
   async findByBarcode(barcode: string): Promise<{ product: Product; variant: ProductVariant } | null> {
-    const variantRow = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE barcode = $1', [barcode]);
+    const variantRow = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE barcode = $1', [barcode]);
     if (!variantRow) return null;
 
-    const productRow = await queryOne<Record<string, any>>('SELECT * FROM product WHERE "productId" = $1 AND "deletedAt" IS NULL', [
+    const productRow = await queryOne<DbProduct>('SELECT * FROM product WHERE "productId" = $1 AND "deletedAt" IS NULL', [
       variantRow.productId,
     ]);
     if (!productRow) return null;
@@ -67,7 +71,7 @@ export class ProductRepo implements IProductRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM product ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<DbProduct[]>(
       `SELECT * FROM product ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -86,7 +90,7 @@ export class ProductRepo implements IProductRepository {
   async save(product: Product): Promise<Product> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>('SELECT "productId" FROM product WHERE "productId" = $1', [product.productId]);
+    const existing = await queryOne<DbProduct>('SELECT "productId" FROM product WHERE "productId" = $1', [product.productId]);
 
     if (existing) {
       await query(
@@ -251,7 +255,7 @@ export class ProductRepo implements IProductRepository {
     const product = await this.findById(productId);
     if (!product?.categoryId) return [];
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<DbProduct[]>(
       `SELECT * FROM product 
        WHERE "brandId" = $1 AND "productId" != $2 AND "deletedAt" IS NULL 
        AND status = $3 AND visibility IN ($4, $5)
@@ -273,26 +277,26 @@ export class ProductRepo implements IProductRepository {
 
   // Variant methods
   async findVariantsByProductId(productId: string): Promise<ProductVariant[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "productVariant" WHERE "productId" = $1 ORDER BY "position" ASC', [
+    const rows = await query<DbProductVariant[]>('SELECT * FROM "productVariant" WHERE "productId" = $1 ORDER BY "position" ASC', [
       productId,
     ]);
     return (rows || []).map(row => this.mapToVariant(row));
   }
 
   async findVariantById(variantId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE "productVariantId" = $1', [variantId]);
+    const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE "productVariantId" = $1', [variantId]);
     return row ? this.mapToVariant(row) : null;
   }
 
   async findVariantBySku(sku: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE sku = $1', [sku]);
+    const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE sku = $1', [sku]);
     return row ? this.mapToVariant(row) : null;
   }
 
   async saveVariant(variant: ProductVariant): Promise<ProductVariant> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>('SELECT "productVariantId" FROM "productVariant" WHERE "productVariantId" = $1', [
+    const existing = await queryOne<DbProductVariant>('SELECT "productVariantId" FROM "productVariant" WHERE "productVariantId" = $1', [
       variant.variantId,
     ]);
 
@@ -352,7 +356,7 @@ export class ProductRepo implements IProductRepository {
   }
 
   async getDefaultVariant(productId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true', [
+    const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true', [
       productId,
     ]);
     return row ? this.mapToVariant(row) : null;
@@ -360,13 +364,13 @@ export class ProductRepo implements IProductRepository {
 
   // Image methods
   async getProductImages(productId: string): Promise<ProductImage[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "productImage" WHERE "productId" = $1 ORDER BY position ASC', [
+    const rows = await query<DbProductImage[]>('SELECT * FROM "productImage" WHERE "productId" = $1 ORDER BY position ASC', [
       productId,
     ]);
     return (rows || []).map(row => ({
       imageId: row.productImageId,
       url: row.url,
-      altText: row.altText,
+      altText: row.alt ?? undefined,
       position: row.position,
       isPrimary: Boolean(row.isPrimary),
     }));
@@ -383,7 +387,7 @@ export class ProductRepo implements IProductRepository {
 
   async updateProductImage(imageId: string, updates: { altText?: string; position?: number; isPrimary?: boolean }): Promise<void> {
     const setClauses: string[] = ['"updatedAt" = $1'];
-    const params: any[] = [new Date().toISOString()];
+    const params: unknown[] = [new Date().toISOString()];
     let paramIndex = 2;
 
     if (updates.altText !== undefined) {
@@ -419,9 +423,9 @@ export class ProductRepo implements IProductRepository {
   }
 
   // Private helper methods
-  private buildWhereClause(filters?: ProductFilters): { whereClause: string; params: any[] } {
+  private buildWhereClause(filters?: ProductFilters): { whereClause: string; params: unknown[] } {
     const conditions: string[] = ['"deletedAt" IS NULL'];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters?.status) {
@@ -489,62 +493,62 @@ export class ProductRepo implements IProductRepository {
     };
   }
 
-  private mapToProduct(row: Record<string, any>, images: ProductImage[]): Product {
+  private mapToProduct(row: DbProduct, images: ProductImage[]): Product {
     const currency = row.currency || 'USD';
 
     return Product.reconstitute({
       productId: row.productId,
       name: row.name,
       description: row.description || '',
-      shortDescription: row.shortDescription,
+      shortDescription: row.shortDescription ?? undefined,
       sku: row.sku,
       slug: row.slug,
       productTypeId: row.type,
       categoryId: undefined, // Not in current schema
-      brandId: row.brandId,
-      merchantId: row.merchantId,
-      businessId: row.businessId,
-      storeId: row.storeId,
+      brandId: row.brandId ?? undefined,
+      merchantId: row.merchantId ?? undefined,
+      businessId: row.businessId ?? undefined,
+      storeId: row.storeId ?? undefined,
       status: row.status as ProductStatus,
       visibility: row.visibility as ProductVisibility,
       price: Price.create(
-        parseFloat(row.price || row.basePrice || 0),
+        parseFloat(String(row.price || row.basePrice || 0)),
         currency,
         row.salePrice ? parseFloat(row.salePrice) : undefined,
         row.costPrice ? parseFloat(row.costPrice) : undefined,
       ),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
-        weightUnit: row.weightUnit || 'g',
+        weightUnit: (row.weightUnit || 'g') as 'kg' | 'lb' | 'oz' | 'g',
         length: row.length ? parseFloat(row.length) : undefined,
         width: row.width ? parseFloat(row.width) : undefined,
         height: row.height ? parseFloat(row.height) : undefined,
-        dimensionUnit: row.dimensionUnit || 'cm',
+        dimensionUnit: (row.dimensionUnit || 'cm') as 'cm' | 'in' | 'm' | 'mm',
       }),
       isFeatured: Boolean(row.isFeatured),
       isVirtual: Boolean(row.isVirtual),
       isDownloadable: Boolean(row.isDownloadable),
       isSubscription: Boolean(row.isSubscription),
       isTaxable: Boolean(row.isTaxable),
-      taxClass: row.taxClass,
+      taxClass: row.taxClass ?? undefined,
       hasVariants: Boolean(row.hasVariants),
       variantAttributes: row.variantAttributes
         ? typeof row.variantAttributes === 'string'
-          ? JSON.parse(row.variantAttributes)
-          : row.variantAttributes
+          ? JSON.parse(row.variantAttributes as string)
+          : (row.variantAttributes as Record<string, unknown>)
         : undefined,
       images,
-      primaryImageId: row.primaryImageId,
-      metaTitle: row.metaTitle,
-      metaDescription: row.metaDescription,
-      metaKeywords: row.metaKeywords,
-      minOrderQuantity: parseInt(row.minOrderQuantity || 1),
-      maxOrderQuantity: row.maxOrderQuantity ? parseInt(row.maxOrderQuantity) : undefined,
-      returnPolicy: row.returnPolicy,
-      warranty: row.warranty,
-      externalId: row.externalId,
-      tags: row.tags ? (typeof row.tags === 'string' ? JSON.parse(row.tags) : row.tags) : [],
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
+      primaryImageId: row.primaryImageId ?? undefined,
+      metaTitle: row.metaTitle ?? undefined,
+      metaDescription: row.metaDescription ?? undefined,
+      metaKeywords: row.metaKeywords ?? undefined,
+      minOrderQuantity: row.minOrderQuantity ?? 1,
+      maxOrderQuantity: row.maxOrderQuantity ?? undefined,
+      returnPolicy: row.returnPolicy ?? undefined,
+      warranty: row.warranty ?? undefined,
+      externalId: row.externalId ?? undefined,
+      tags: [],
+      metadata: undefined,
       publishedAt: row.publishedAt ? new Date(row.publishedAt) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
@@ -552,45 +556,37 @@ export class ProductRepo implements IProductRepository {
     });
   }
 
-  private mapToVariant(row: Record<string, any>): ProductVariant {
+  private mapToVariant(row: DbProductVariant): ProductVariant {
     const currency = 'USD';
 
     return ProductVariant.reconstitute({
       variantId: row.productVariantId,
       productId: row.productId,
       sku: row.sku,
-      name: row.name,
+      name: row.name || '',
       price: Price.create(
-        parseFloat(row.price || 0),
+        parseFloat(String(row.price || 0)),
         currency,
-        // salePrice should be less than basePrice; compareAtPrice is the "was" price (higher)
-        // Don't pass compareAtPrice as salePrice to avoid Price validation errors
         undefined,
         undefined,
       ),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
-        weightUnit: row.weightUnit || 'g',
-        length: undefined,
-        width: undefined,
-        height: undefined,
+        weightUnit: 'g',
+        length: row.length ? parseFloat(row.length) : undefined,
+        width: row.width ? parseFloat(row.width) : undefined,
+        height: row.height ? parseFloat(row.height) : undefined,
         dimensionUnit: 'cm',
       }),
-      attributes: row.attributes ? (typeof row.attributes === 'string' ? JSON.parse(row.attributes) : row.attributes) : [],
-      imageId: row.imageId,
-      imageUrl: row.imageUrl,
-      stockQuantity: parseInt(row.stockQuantity || 0),
-      lowStockThreshold: parseInt(row.lowStockThreshold || 5),
+      attributes: [],
+      stockQuantity: 0,
+      lowStockThreshold: 5,
       isDefault: Boolean(row.isDefault),
-      isActive: row.status === 'active' || Boolean(row.isActive),
-      position: parseInt(row.position || 0),
-      barcode: row.barcode,
-      externalId: row.externalId,
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
+      isActive: row.status === 'active',
+      position: row.position ?? 0,
+      barcode: row.barcode ?? undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });
   }
-}
-
-export default new ProductRepo();
+}export default new ProductRepo();

@@ -20,10 +20,36 @@ export interface CapturePaymentOutput {
   remainingAmount?: number;
 }
 
+interface PaymentRepositoryPort {
+  findTransactionById(id: string): Promise<TransactionRecord | null>;
+  updateTransaction(transaction: TransactionRecord): Promise<void>;
+}
+
+interface PaymentGatewayPort {
+  capture(params: {
+    transactionId: string;
+    amount: number;
+    currency: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<{ success: boolean; response?: Record<string, unknown>; error?: string }>;
+}
+
+interface TransactionRecord {
+  transactionId: string;
+  orderId: string;
+  gatewayTransactionId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  capturedAmount?: number;
+  capturedAt?: Date;
+  gatewayResponse?: Record<string, unknown> | string;
+}
+
 export class CapturePaymentUseCase {
   constructor(
-    private readonly paymentRepository: any, // PaymentRepository
-    private readonly paymentGateway: any, // PaymentGatewayService
+    private readonly paymentRepository: PaymentRepositoryPort,
+    private readonly paymentGateway: PaymentGatewayPort,
   ) {}
 
   async execute(input: CapturePaymentInput): Promise<CapturePaymentOutput> {
@@ -81,7 +107,7 @@ export class CapturePaymentUseCase {
     return {
       transactionId: transaction.transactionId,
       capturedAmount: captureAmount,
-      status: transaction.status,
+      status: transaction.status as 'captured' | 'partial_captured',
       capturedAt: transaction.capturedAt.toISOString(),
       remainingAmount: isPartialCapture ? transaction.amount - captureAmount : undefined,
     };

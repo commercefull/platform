@@ -123,5 +123,5 @@ export const cleanupMerchantTests = async (client: AxiosInstance, adminToken: st
     await client.delete(`/business/merchants/${testMerchantId}`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
-  } catch (error) {}
+  } catch {}
 };

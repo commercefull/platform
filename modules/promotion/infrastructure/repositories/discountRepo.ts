@@ -44,7 +44,7 @@ export interface CreateProductDiscountInput {
   displayOnProductPage?: boolean;
   displayInListing?: boolean;
   badgeText?: string;
-  badgeStyle?: Record<string, any>;
+  badgeStyle?: Record<string, unknown>;
   merchantId?: string;
 }
 
@@ -124,7 +124,7 @@ export class DiscountRepo {
    */
   async update(id: string, input: UpdateProductDiscountInput): Promise<PromotionProductDiscount> {
     const updateFields: string[] = [];
-    const params: any[] = [id];
+    const params: unknown[] = [id];
     let paramIndex = 2;
 
     const allowedFields = [
@@ -217,7 +217,7 @@ export class DiscountRepo {
     const { limit = 50, offset = 0, orderBy = 'priority', direction = 'DESC' } = options;
 
     let sql = `SELECT * FROM "${DISCOUNT_TABLE}" WHERE 1=1`;
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (promotionId) {
@@ -425,7 +425,7 @@ export class DiscountRepo {
         )
     `;
 
-    const params: any[] = [now, productId];
+    const params: unknown[] = [now, productId];
     let paramIndex = 3;
 
     if (merchantId) {
@@ -456,7 +456,7 @@ export class DiscountRepo {
         )
     `;
 
-    const params: any[] = [now, categoryId];
+    const params: unknown[] = [now, categoryId];
     let paramIndex = 3;
 
     if (merchantId) {

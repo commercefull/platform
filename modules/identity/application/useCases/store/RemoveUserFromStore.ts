@@ -1,7 +1,7 @@
-import { UserStoreRepository } from '../../../domain/repositories/UserStoreRepository';
+import { StoreUserRepository } from '../../../domain/repositories/StoreUserRepository';
 
 export class RemoveUserFromStoreUseCase {
-  constructor(private readonly userStoreRepository: UserStoreRepository) {}
+  constructor(private readonly userStoreRepository: StoreUserRepository) {}
 
   async execute(userId: string, storeId: string): Promise<void> {
     const assignment = await this.userStoreRepository.findByUserAndStore(userId, storeId);

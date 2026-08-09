@@ -22,7 +22,7 @@ export class AddNavigationItemCommand {
     public readonly openInNewTab?: boolean,
     public readonly isActive?: boolean,
     public readonly sortOrder?: number,
-    public readonly conditions?: Record<string, any>,
+    public readonly conditions?: Record<string, unknown>,
   ) {}
 }
 

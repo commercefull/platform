@@ -24,8 +24,8 @@ export interface ProductAttribute {
   useForConfigurations: boolean;
   position: number;
   defaultValue?: string;
-  validationRules?: Record<string, any>;
-  options?: Record<string, any>;
+  validationRules?: Record<string, unknown>;
+  options?: Record<string, unknown>;
   merchantId?: string;
   isGlobal: boolean;
   createdAt: Date;
@@ -75,7 +75,7 @@ export interface ProductAttributeData {
   valueText?: string;
   valueNumeric?: number;
   valueBoolean?: boolean;
-  valueJson?: Record<string, any>;
+  valueJson?: Record<string, unknown>;
   valueDate?: Date;
   isSystem: boolean;
   language: string;
@@ -101,8 +101,8 @@ export interface ProductAttributeCreateInput {
   useForConfigurations?: boolean;
   position?: number;
   defaultValue?: string;
-  validationRules?: Record<string, any>;
-  options?: Record<string, any>;
+  validationRules?: Record<string, unknown>;
+  options?: Record<string, unknown>;
   merchantId?: string;
   isGlobal?: boolean;
 }
@@ -228,7 +228,7 @@ export class DynamicAttributeRepository {
 
   async updateAttribute(id: string, input: ProductAttributeUpdateInput): Promise<ProductAttribute | null> {
     const setStatements: string[] = ['"updatedAt" = now()'];
-    const values: any[] = [id];
+    const values: unknown[] = [id];
     let paramIndex = 2;
 
     const fields: (keyof ProductAttributeUpdateInput)[] = [
@@ -255,7 +255,7 @@ export class DynamicAttributeRepository {
 
     for (const field of fields) {
       if (input[field] !== undefined) {
-        let value: any = input[field];
+        let value: unknown = input[field];
         if (field === 'validationRules' || field === 'options') {
           value = value ? JSON.stringify(value) : null;
         }
@@ -348,23 +348,23 @@ export class DynamicAttributeRepository {
       WHERE pav."productId" = $1
     `;
 
-    const results = (await query<any[]>(sql, [productId])) || [];
+    const results = (await query<Array<Record<string, unknown>>>(sql, [productId])) || [];
 
     return results.map(row => ({
-      productAttributeValueMapId: row.productAttributeValueMapId,
-      productId: row.productId,
-      productVariantId: row.productVariantId,
-      attributeId: row.attributeId,
-      value: row.value,
-      valueText: row.valueText,
-      valueNumeric: row.valueNumeric,
-      valueBoolean: row.valueBoolean,
-      valueJson: row.valueJson,
-      valueDate: row.valueDate,
-      isSystem: row.isSystem,
-      language: row.language,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
+      productAttributeValueMapId: row.productAttributeValueMapId as string,
+      productId: row.productId as string,
+      productVariantId: row.productVariantId as string | undefined,
+      attributeId: row.attributeId as string,
+      value: row.value as string | undefined,
+      valueText: row.valueText as string | undefined,
+      valueNumeric: row.valueNumeric as number | undefined,
+      valueBoolean: row.valueBoolean as boolean | undefined,
+      valueJson: row.valueJson as Record<string, unknown> | undefined,
+      valueDate: row.valueDate as Date | undefined,
+      isSystem: row.isSystem as boolean,
+      language: row.language as string,
+      createdAt: row.createdAt as Date,
+      updatedAt: row.updatedAt as Date,
       attribute: {
         productAttributeId: row.attribute_productAttributeId,
         name: row.attribute_name,

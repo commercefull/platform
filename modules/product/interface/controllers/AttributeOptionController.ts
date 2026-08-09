@@ -6,7 +6,7 @@ import { AttributeOptionRepo, ProductAttributeOption } from '../../infrastructur
 const attributeOptionRepo = new AttributeOptionRepo();
 
 /** Expose `sortOrder` as an alias for `position` in API responses */
-function mapOption(option: ProductAttributeOption): Record<string, any> {
+function mapOption(option: ProductAttributeOption): Record<string, unknown> {
   return { ...option, sortOrder: option.position };
 }
 
@@ -82,7 +82,7 @@ export class AttributeOptionController {
    */
   async createAttributeOption(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const { attributeId, value, label, sortOrder } = req.body;
+      const { attributeId, value, label, sortOrder } = req.body as { attributeId?: string; value?: string; label?: string; sortOrder?: number };
 
       if (!attributeId || !value) {
         res.status(400).json({ success: false, error: 'attributeId and value are required' });
@@ -112,7 +112,7 @@ export class AttributeOptionController {
   async updateAttributeOption(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { value, label, sortOrder } = req.body;
+      const { value, label, sortOrder } = req.body as { value?: string; label?: string; sortOrder?: number };
 
       const existing = await attributeOptionRepo.findOne(id);
       if (!existing) {

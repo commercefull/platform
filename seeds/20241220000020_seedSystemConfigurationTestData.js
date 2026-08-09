@@ -35,7 +35,6 @@ exports.seed = async function (knex) {
         enableWishlist: true,
         enableProductReviews: true,
         enableStoreLocator: false,
-        enableB2B: false,
       }),
       businessSettings: JSON.stringify({
         defaultBusinessType: 'single_store',
@@ -107,7 +106,6 @@ exports.seed = async function (knex) {
         enableWishlist: true,
         enableProductReviews: true,
         enableStoreLocator: false,
-        enableB2B: true,
       }),
       businessSettings: JSON.stringify({
         defaultBusinessType: 'marketplace',

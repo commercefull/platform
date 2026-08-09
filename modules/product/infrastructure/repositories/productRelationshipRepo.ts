@@ -30,7 +30,7 @@ export class ProductRelationshipRepo {
    */
   async findByProductId(productId: string, type?: RelationType): Promise<ProductRelationship[]> {
     let sql = `SELECT * FROM "productRelated" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (type) {
       sql += ` AND "type" = $2`;
@@ -55,7 +55,7 @@ export class ProductRelationshipRepo {
    */
   async findReverseRelationships(productId: string, type?: RelationType): Promise<ProductRelationship[]> {
     let sql = `SELECT * FROM "productRelated" WHERE "relatedProductId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (type) {
       sql += ` AND "type" = $2`;
@@ -150,7 +150,7 @@ export class ProductRelationshipRepo {
       try {
         const result = await this.create(relationship);
         created.push(result);
-      } catch (error) {
+      } catch (_error) {
         // Skip if already exists or other error, continue with next
       }
     }
@@ -163,7 +163,7 @@ export class ProductRelationshipRepo {
    */
   async update(productRelatedId: string, params: ProductRelationshipUpdateParams): Promise<ProductRelationship | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -300,7 +300,7 @@ export class ProductRelationshipRepo {
    */
   async countByProductId(productId: string, type?: RelationType): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "productRelated" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (type) {
       sql += ` AND "type" = $2`;

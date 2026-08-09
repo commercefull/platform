@@ -1,5 +1,4 @@
 import { queryOne, query } from '../../../../libs/db';
-import { generateUUID } from '../../../../libs/uuid';
 import { Table } from '../../../../libs/db/types';
 import { PricingRule, PricingRuleCreateProps, PricingRuleStatus, PricingRuleUpdateProps } from '../../domain/pricingRule';
 
@@ -30,7 +29,7 @@ export class PricingRuleRepo {
    */
   async findActiveRules(productId?: string, categoryId?: string, customerId?: string, customerGroupIds?: string[]): Promise<PricingRule[]> {
     const now = new Date();
-    const params: any[] = [now];
+    const params: unknown[] = [now];
 
     let whereConditions = [`"isActive" = true`, `("startDate" IS NULL OR "startDate" <= $1)`, `("endDate" IS NULL OR "endDate" >= $1)`];
 
@@ -111,7 +110,7 @@ export class PricingRuleRepo {
   ): Promise<PricingRule[]> {
     const { limit = 50, offset = 0, orderBy = 'priority', direction = 'DESC' } = pagination;
 
-    const params: any[] = [];
+    const params: unknown[] = [];
     const conditions: string[] = [];
 
     // Add filter for active rules only
@@ -203,7 +202,7 @@ export class PricingRuleRepo {
       activeOnly?: boolean;
     } = {},
   ): Promise<number> {
-    const params: any[] = [];
+    const params: unknown[] = [];
     const conditions: string[] = [];
 
     // Add filter for active rules only
@@ -289,9 +288,11 @@ export class PricingRuleRepo {
       data.endDate || null,
       data.priority || 0,
       data.isActive !== false,
-      (data as any).metadata ? JSON.stringify((data as any).metadata) : null,
-      (data as any).currencyCode || null,
-      (data as any).regionCode || null,
+      (data as PricingRuleCreateProps & { metadata?: Record<string, unknown>; currencyCode?: string; regionCode?: string }).metadata
+        ? JSON.stringify((data as PricingRuleCreateProps & { metadata?: Record<string, unknown> }).metadata)
+        : null,
+      (data as PricingRuleCreateProps & { currencyCode?: string }).currencyCode || null,
+      (data as PricingRuleCreateProps & { regionCode?: string }).regionCode || null,
       now,
       now,
     ];
@@ -312,7 +313,7 @@ export class PricingRuleRepo {
     const now = new Date();
 
     const setStatements: string[] = ['"updatedAt" = $2'];
-    const values: any[] = [id, now];
+    const values: unknown[] = [id, now];
     let paramIndex = 3;
 
     const fieldMap: Record<string, string> = {

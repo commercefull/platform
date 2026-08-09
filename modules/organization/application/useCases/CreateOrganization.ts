@@ -7,7 +7,7 @@ import organizationRepo from '../../infrastructure/repositories/organizationRepo
 export interface CreateOrganizationInput {
   name: string;
   slug: string;
-  type?: 'single' | 'multi_store' | 'marketplace' | 'b2b';
+  type?: 'single' | 'multi_store' | 'marketplace';
   settings?: Record<string, unknown>;
 }
 

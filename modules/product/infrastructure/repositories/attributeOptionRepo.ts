@@ -69,7 +69,7 @@ export class AttributeOptionRepo {
   async update(id: string, props: UpdateProps): Promise<ProductAttributeOption | null> {
     const now = new Date();
     const updates: string[] = ['"updatedAt" = $1'];
-    const values: any[] = [now];
+    const values: unknown[] = [now];
     let paramIndex = 2;
 
     for (const [key, value] of Object.entries(props)) {
@@ -97,7 +97,9 @@ export class AttributeOptionRepo {
   }
 
   async deleteByAttribute(attributeId: string): Promise<number> {
-    const result = await query<any>(`DELETE FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1`, [attributeId]);
-    return result?.rowCount || 0;
+    const existing = await this.findByAttribute(attributeId);
+    const count = existing.length;
+    await query(`DELETE FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1`, [attributeId]);
+    return count;
   }
 }

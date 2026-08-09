@@ -55,9 +55,26 @@ export interface CreateWarehouseOutput {
   createdAt: string;
 }
 
+interface WarehouseRecord {
+  distributionWarehouseId: string;
+  name: string;
+  code: string;
+  description?: string;
+  isActive: boolean;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+interface WarehouseRepositoryPort {
+  findByCode(code: string): Promise<WarehouseRecord | null>;
+  findDefault(): Promise<WarehouseRecord | null>;
+  update(warehouseId: string, params: Record<string, unknown>): Promise<WarehouseRecord | null>;
+  create(data: Record<string, unknown>): Promise<WarehouseRecord>;
+}
+
 export class CreateWarehouseUseCase {
   constructor(
-    private readonly warehouseRepository: any, // WarehouseRepository
+    private readonly warehouseRepository: WarehouseRepositoryPort,
   ) {}
 
   async execute(input: CreateWarehouseInput): Promise<CreateWarehouseOutput> {
@@ -71,7 +88,7 @@ export class CreateWarehouseUseCase {
     if (input.isDefault) {
       const currentDefault = await this.warehouseRepository.findDefault();
       if (currentDefault) {
-        await this.warehouseRepository.updateDefault(currentDefault.warehouseId, false);
+        await this.warehouseRepository.update(currentDefault.distributionWarehouseId, { isDefault: false });
       }
     }
 
@@ -100,20 +117,20 @@ export class CreateWarehouseUseCase {
 
     // Emit event
     eventBus.emit('warehouse.created', {
-      warehouseId: warehouse.warehouseId,
+      warehouseId: warehouse.distributionWarehouseId,
       name: warehouse.name,
       code: warehouse.code,
-      type: warehouse.type,
+      type: input.type,
     });
 
     return {
-      warehouseId: warehouse.warehouseId,
+      warehouseId: warehouse.distributionWarehouseId,
       name: warehouse.name,
       code: warehouse.code,
-      type: warehouse.type,
+      type: input.type,
       isActive: warehouse.isActive,
       isDefault: warehouse.isDefault,
-      createdAt: warehouse.createdAt.toISOString(),
+      createdAt: warehouse.createdAt,
     };
   }
 

@@ -31,8 +31,30 @@ export interface GetOutOfStockItemsOutput {
   hasReservedStock: number;
 }
 
+interface OutOfStockRecord {
+  inventoryItemId: string;
+  productId: string;
+  productName?: string;
+  variantId?: string;
+  warehouseId: string;
+  warehouseName?: string;
+  sku: string;
+  reservedQuantity: number;
+  reorderQuantity: number;
+  lastStockedAt?: string;
+}
+
+interface GetOutOfStockRepositoryPort {
+  findOutOfStock(options: {
+    warehouseId?: string;
+    includeReserved: boolean;
+    page: number;
+    limit: number;
+  }): Promise<OutOfStockRecord[]>;
+}
+
 export class GetOutOfStockItemsUseCase {
-  constructor(private readonly inventoryRepository: any) {}
+  constructor(private readonly inventoryRepository: GetOutOfStockRepositoryPort) {}
 
   async execute(input: GetOutOfStockItemsInput): Promise<GetOutOfStockItemsOutput> {
     const page = input.page || 1;
@@ -45,7 +67,7 @@ export class GetOutOfStockItemsUseCase {
       limit,
     });
 
-    const withReserved = items.filter((item: any) => (item.reservedQuantity || 0) > 0);
+    const withReserved = items.filter((item: OutOfStockRecord) => (item.reservedQuantity || 0) > 0);
 
     // Emit event for monitoring
     if (items.length > 0) {
@@ -58,7 +80,7 @@ export class GetOutOfStockItemsUseCase {
     const now = new Date();
 
     return {
-      items: items.map((item: any) => {
+      items: items.map((item: OutOfStockRecord) => {
         const lastStockedAt = item.lastStockedAt ? new Date(item.lastStockedAt) : null;
         const daysSinceLastStock = lastStockedAt
           ? Math.floor((now.getTime() - lastStockedAt.getTime()) / (1000 * 60 * 60 * 24))

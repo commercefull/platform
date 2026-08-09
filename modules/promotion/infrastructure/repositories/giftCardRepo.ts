@@ -47,8 +47,8 @@ export interface PromotionGiftCard {
   minReloadAmount?: number;
   maxReloadAmount?: number;
   maxBalance?: number;
-  restrictions?: Record<string, any>;
-  metadata?: Record<string, any>;
+  restrictions?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -70,7 +70,7 @@ export interface PromotionGiftCardTransaction {
   performedByType?: string;
   notes?: string;
   referenceNumber?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
 }
 
@@ -82,12 +82,12 @@ export type GiftCardTransaction = PromotionGiftCardTransaction;
 // ============================================================================
 
 export async function getGiftCard(giftCardId: string): Promise<PromotionGiftCard | null> {
-  const row = await queryOne<Record<string, any>>(`SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "promotionGiftCardId" = $1`, [giftCardId]);
+  const row = await queryOne<Record<string, unknown>>(`SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "promotionGiftCardId" = $1`, [giftCardId]);
   return row ? mapToGiftCard(row) : null;
 }
 
 export async function getGiftCardByCode(code: string): Promise<PromotionGiftCard | null> {
-  const row = await queryOne<Record<string, any>>(`SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "code" = $1`, [code.toUpperCase()]);
+  const row = await queryOne<Record<string, unknown>>(`SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "code" = $1`, [code.toUpperCase()]);
   return row ? mapToGiftCard(row) : null;
 }
 
@@ -96,7 +96,7 @@ export async function getGiftCards(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: PromotionGiftCard[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters?.status) {
@@ -117,7 +117,7 @@ export async function getGiftCards(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "${GIFT_CARD_TABLE}" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -142,12 +142,12 @@ export async function createGiftCard(giftCard: {
   deliveryMethod?: DeliveryMethod;
   expiresAt?: Date;
   isReloadable?: boolean;
-  restrictions?: Record<string, any>;
+  restrictions?: Record<string, unknown>;
 }): Promise<PromotionGiftCard> {
   const now = new Date().toISOString();
   const code = generateGiftCardCode();
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "${GIFT_CARD_TABLE}" (
       "code", "type", "initialBalance", "currentBalance", "currency", "status",
       "purchasedBy", "purchaseOrderId", "recipientEmail", "recipientName",
@@ -324,12 +324,12 @@ export async function cancelGiftCard(giftCardId: string): Promise<void> {
 }
 
 export async function expireGiftCards(): Promise<number> {
-  const result = await query(
+  const result = await query<{ rowCount?: number }>(
     `UPDATE "${GIFT_CARD_TABLE}" SET "status" = 'expired', "updatedAt" = $1
      WHERE "status" = 'active' AND "expiresAt" < NOW()`,
     [new Date().toISOString()],
   );
-  return (result as any)?.rowCount || 0;
+  return result?.rowCount || 0;
 }
 
 // ============================================================================
@@ -352,7 +352,7 @@ async function createTransaction(transaction: {
   const now = new Date().toISOString();
   const referenceNumber = `GCT${Date.now()}`;
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "${GIFT_CARD_TRANSACTION_TABLE}" (
       "promotionGiftCardId", "type", "amount", "balanceBefore", "balanceAfter", "currency",
       "orderId", "customerId", "performedBy", "performedByType", "notes",
@@ -380,7 +380,7 @@ async function createTransaction(transaction: {
 }
 
 export async function getTransactions(giftCardId: string): Promise<PromotionGiftCardTransaction[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "${GIFT_CARD_TRANSACTION_TABLE}" WHERE "promotionGiftCardId" = $1 ORDER BY "createdAt" DESC`,
     [giftCardId],
   );
@@ -401,58 +401,58 @@ function generateGiftCardCode(): string {
   return code;
 }
 
-function mapToGiftCard(row: Record<string, any>): PromotionGiftCard {
+function mapToGiftCard(row: Record<string, unknown>): PromotionGiftCard {
   return {
-    promotionGiftCardId: row.promotionGiftCardId,
-    code: row.code,
-    type: row.type,
-    initialBalance: parseFloat(row.initialBalance) || 0,
-    currentBalance: parseFloat(row.currentBalance) || 0,
-    currency: row.currency || 'USD',
-    status: row.status,
-    purchasedBy: row.purchasedBy,
-    purchaseOrderId: row.purchaseOrderId,
-    recipientEmail: row.recipientEmail,
-    recipientName: row.recipientName,
-    personalMessage: row.personalMessage,
-    deliveryDate: row.deliveryDate ? new Date(row.deliveryDate) : undefined,
+    promotionGiftCardId: row.promotionGiftCardId as string,
+    code: row.code as string,
+    type: row.type as GiftCardType,
+    initialBalance: parseFloat(row.initialBalance as string) || 0,
+    currentBalance: parseFloat(row.currentBalance as string) || 0,
+    currency: (row.currency as string) || 'USD',
+    status: row.status as GiftCardStatus,
+    purchasedBy: row.purchasedBy as string | undefined,
+    purchaseOrderId: row.purchaseOrderId as string | undefined,
+    recipientEmail: row.recipientEmail as string | undefined,
+    recipientName: row.recipientName as string | undefined,
+    personalMessage: row.personalMessage as string | undefined,
+    deliveryDate: row.deliveryDate ? new Date(row.deliveryDate as string) : undefined,
     isDelivered: Boolean(row.isDelivered),
-    deliveredAt: row.deliveredAt ? new Date(row.deliveredAt) : undefined,
-    deliveryMethod: row.deliveryMethod,
-    assignedTo: row.assignedTo,
-    assignedAt: row.assignedAt ? new Date(row.assignedAt) : undefined,
-    activatedAt: row.activatedAt ? new Date(row.activatedAt) : undefined,
-    expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
-    lastUsedAt: row.lastUsedAt ? new Date(row.lastUsedAt) : undefined,
-    usageCount: parseInt(row.usageCount) || 0,
-    totalRedeemed: parseFloat(row.totalRedeemed) || 0,
+    deliveredAt: row.deliveredAt ? new Date(row.deliveredAt as string) : undefined,
+    deliveryMethod: row.deliveryMethod as DeliveryMethod,
+    assignedTo: row.assignedTo as string | undefined,
+    assignedAt: row.assignedAt ? new Date(row.assignedAt as string) : undefined,
+    activatedAt: row.activatedAt ? new Date(row.activatedAt as string) : undefined,
+    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : undefined,
+    lastUsedAt: row.lastUsedAt ? new Date(row.lastUsedAt as string) : undefined,
+    usageCount: parseInt(row.usageCount as string) || 0,
+    totalRedeemed: parseFloat(row.totalRedeemed as string) || 0,
     isReloadable: Boolean(row.isReloadable),
-    minReloadAmount: row.minReloadAmount ? parseFloat(row.minReloadAmount) : undefined,
-    maxReloadAmount: row.maxReloadAmount ? parseFloat(row.maxReloadAmount) : undefined,
-    maxBalance: row.maxBalance ? parseFloat(row.maxBalance) : undefined,
-    restrictions: row.restrictions,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    minReloadAmount: row.minReloadAmount ? parseFloat(row.minReloadAmount as string) : undefined,
+    maxReloadAmount: row.maxReloadAmount ? parseFloat(row.maxReloadAmount as string) : undefined,
+    maxBalance: row.maxBalance ? parseFloat(row.maxBalance as string) : undefined,
+    restrictions: row.restrictions as Record<string, unknown> | undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
   };
 }
 
-function mapToTransaction(row: Record<string, any>): PromotionGiftCardTransaction {
+function mapToTransaction(row: Record<string, unknown>): PromotionGiftCardTransaction {
   return {
-    promotionGiftCardTransactionId: row.promotionGiftCardTransactionId,
-    promotionGiftCardId: row.promotionGiftCardId,
-    type: row.type,
-    amount: parseFloat(row.amount) || 0,
-    balanceBefore: parseFloat(row.balanceBefore) || 0,
-    balanceAfter: parseFloat(row.balanceAfter) || 0,
-    currency: row.currency || 'USD',
-    orderId: row.orderId,
-    customerId: row.customerId,
-    performedBy: row.performedBy,
-    performedByType: row.performedByType,
-    notes: row.notes,
-    referenceNumber: row.referenceNumber,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
+    promotionGiftCardTransactionId: row.promotionGiftCardTransactionId as string,
+    promotionGiftCardId: row.promotionGiftCardId as string,
+    type: row.type as TransactionType,
+    amount: parseFloat(row.amount as string) || 0,
+    balanceBefore: parseFloat(row.balanceBefore as string) || 0,
+    balanceAfter: parseFloat(row.balanceAfter as string) || 0,
+    currency: (row.currency as string) || 'USD',
+    orderId: row.orderId as string | undefined,
+    customerId: row.customerId as string | undefined,
+    performedBy: row.performedBy as string | undefined,
+    performedByType: row.performedByType as string | undefined,
+    notes: row.notes as string | undefined,
+    referenceNumber: row.referenceNumber as string | undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
   };
 }

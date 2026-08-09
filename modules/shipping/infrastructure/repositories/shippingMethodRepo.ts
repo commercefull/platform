@@ -89,7 +89,7 @@ export async function update(id: string, input: UpdateShippingMethodInput): Prom
   }
 
   const updateFields: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
   let paramIndex = 1;
   const jsonFields = ['estimatedDeliveryDays', 'dimensionRestrictions', 'customFields'];
 

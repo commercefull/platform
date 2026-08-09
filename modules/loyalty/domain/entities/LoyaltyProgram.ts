@@ -37,7 +37,7 @@ export interface LoyaltyProgramProps {
   redemptionRules: RedemptionRule[];
   pointsExpirationDays?: number;
   isActive: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -98,7 +98,7 @@ export class LoyaltyProgram {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return { ...this.props };
   }
 }

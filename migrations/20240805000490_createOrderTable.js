@@ -7,7 +7,7 @@ exports.up = function (knex) {
     t.uuid('customerId').references('customerId').inTable('customer');
     t.uuid('basketId').references('basketId').inTable('basket');
     t.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
-    t.uuid('channelId').nullable().references('channelId').inTable('channel').onDelete('SET NULL');
+    t.uuid('channelId').nullable();
     t.uuid('createdByUserId').nullable();
     t.string('orderSource', 50).notNullable().defaultTo('web');
     t.enum('status', [

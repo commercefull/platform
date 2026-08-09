@@ -4,10 +4,8 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
-const TABLE = Table.TaxProviderLog;
 
 export type TaxProvider = 'internal' | 'avalara' | 'taxjar' | 'external';
 export type TaxProviderRequestType = 'calculation' | 'verification' | 'filing' | 'refund' | 'adjustment' | 'validation';
@@ -21,8 +19,8 @@ export interface TaxProviderLog {
   requestType: TaxProviderRequestType;
   entityType: string;
   entityId?: string;
-  requestData?: any;
-  responseData?: any;
+  requestData?: unknown;
+  responseData?: unknown;
   responseStatus?: number;
   isSuccess: boolean;
   errorCode?: string;
@@ -40,7 +38,7 @@ export class TaxProviderLogRepo {
 
   async findByMerchant(merchantId: string, provider?: TaxProvider, limit = 100): Promise<TaxProviderLog[]> {
     let sql = `SELECT * FROM "taxProviderLog" WHERE "merchantId" = $1`;
-    const params: any[] = [merchantId];
+    const params: unknown[] = [merchantId];
     if (provider) {
       sql += ` AND "provider" = $2`;
       params.push(provider);
@@ -82,7 +80,7 @@ export class TaxProviderLogRepo {
 
   async count(merchantId?: string): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "taxProviderLog"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
     if (merchantId) {
       sql += ` WHERE "merchantId" = $1`;
       params.push(merchantId);

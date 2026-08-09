@@ -19,7 +19,7 @@ export class InitiatePaymentCommand {
     public readonly paymentMethodConfigId: string,
     public readonly customerId?: string,
     public readonly customerIp?: string,
-    public readonly metadata?: Record<string, any>,
+    public readonly metadata?: Record<string, unknown>,
   ) {}
 }
 

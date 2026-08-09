@@ -20,7 +20,7 @@ export interface CategoryProps {
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,7 +46,7 @@ export class ProductCategory {
     metaTitle?: string;
     metaDescription?: string;
     metaKeywords?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): ProductCategory {
     const now = new Date();
     const slug = props.slug || ProductCategory.generateSlug(props.name);
@@ -129,7 +129,7 @@ export class ProductCategory {
   get metaKeywords(): string | undefined {
     return this.props.metaKeywords;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -236,7 +236,7 @@ export class ProductCategory {
     this.touch();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -253,7 +253,7 @@ export class ProductCategory {
       .substring(0, 200);
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       categoryId: this.props.categoryId,
       name: this.props.name,

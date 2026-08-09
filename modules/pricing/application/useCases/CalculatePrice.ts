@@ -9,7 +9,6 @@ export interface CalculatePriceInput {
   variantId?: string;
   quantity: number;
   customerId?: string;
-  companyId?: string;
   channelId?: string;
   storeId?: string;
   priceListId?: string;
@@ -32,10 +31,21 @@ export interface CalculatePriceOutput {
   breakdown: PriceBreakdown;
 }
 
+interface PricingRepositoryPort {
+  getPriceListItem(priceListId: string, productId: string, variantId?: string): Promise<{ price: number } | null>;
+  getVolumeDiscount(productId: string, quantity: number): Promise<{ discountPercent: number } | null>;
+  getActiveSalePrice(productId: string, variantId?: string): Promise<number | null>;
+}
+
+interface ProductRepositoryPort {
+  findById(id: string): Promise<{ price: number; currencyCode?: string } | null>;
+  findVariantById(id: string): Promise<{ price?: number } | null>;
+}
+
 export class CalculatePriceUseCase {
   constructor(
-    private readonly pricingRepository: any,
-    private readonly productRepository: any,
+    private readonly pricingRepository: PricingRepositoryPort,
+    private readonly productRepository: ProductRepositoryPort,
   ) {}
 
   async execute(input: CalculatePriceInput): Promise<CalculatePriceOutput> {
@@ -67,15 +77,6 @@ export class CalculatePriceUseCase {
       }
     }
 
-    // Check for B2B company pricing
-    if (input.companyId) {
-      const companyPrice = await this.pricingRepository.getCompanyPrice(input.companyId, input.productId, input.variantId);
-      if (companyPrice) {
-        finalPrice = companyPrice.price;
-        appliedRules.push(`b2b_company:${input.companyId}`);
-      }
-    }
-
     // Check for volume discounts
     if (input.quantity > 1) {
       const volumeDiscount = await this.pricingRepository.getVolumeDiscount(input.productId, input.quantity);
@@ -101,7 +102,7 @@ export class CalculatePriceUseCase {
       currency: product.currencyCode || 'USD',
       breakdown: {
         basePrice,
-        salePrice,
+        salePrice: salePrice ?? undefined,
         finalPrice,
         currency: product.currencyCode || 'USD',
         appliedRules,

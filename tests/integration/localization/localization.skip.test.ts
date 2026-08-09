@@ -40,7 +40,7 @@ beforeAll(async () => {
     merchantToken = loginResponse.data?.accessToken || '';
     if (!merchantToken) {
     }
-  } catch (error) {
+  } catch {
     merchantToken = '';
   }
 });
@@ -55,6 +55,7 @@ describe('Localization Feature Tests', () => {
   // ==========================================================================
 
   describe('Locale Management (Business)', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let testLocaleId: string;
 
     describe('GET /business/locales', () => {

@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import * as giftCardRepo from '../../../modules/promotion/infrastructure/repositories/giftCardRepo';
 import { adminRespond } from '../../respond';
 
@@ -19,11 +19,13 @@ export const listGiftCards = async (req: TypedRequest, res: Response): Promise<v
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const result = await giftCardRepo.getGiftCards({ status: status as any }, { limit, offset });
+    const result = await giftCardRepo.getGiftCards({ status: status as 'pending' | 'active' | 'depleted' | 'expired' | 'cancelled' | 'suspended' | undefined }, { limit, offset });
 
     // Get total stats
     const totalResult = await giftCardRepo.getGiftCards();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const totalValue = totalResult.data.reduce((sum: number, card: any) => sum + card.currentBalance, 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const activeCards = totalResult.data.filter((card: any) => card.status === 'active').length;
 
     adminRespond(req, res, 'promotions/gift-cards/index', {
@@ -39,12 +41,12 @@ export const listGiftCards = async (req: TypedRequest, res: Response): Promise<v
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load gift cards',
+      error: (error as Error).message || 'Failed to load gift cards',
     });
   }
 };
@@ -54,18 +56,19 @@ export const createGiftCardForm = async (req: TypedRequest, res: Response): Prom
     adminRespond(req, res, 'promotions/gift-cards/create', {
       pageName: 'Create Gift Card',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
 
 export const createGiftCard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
     const {
       type,
       initialBalance,
@@ -80,7 +83,7 @@ export const createGiftCard = async (req: TypedRequest, res: Response): Promise<
       minReloadAmount,
       maxReloadAmount,
       maxBalance,
-    } = req.body;
+    } = body;
 
     const giftCard = await giftCardRepo.createGiftCard({
       type: type || 'standard',
@@ -90,7 +93,7 @@ export const createGiftCard = async (req: TypedRequest, res: Response): Promise<
       recipientName: recipientName || undefined,
       personalMessage: personalMessage || undefined,
       deliveryDate: deliveryDate ? new Date(deliveryDate) : undefined,
-      deliveryMethod: (deliveryMethod as any) || 'email',
+      deliveryMethod: (deliveryMethod || 'email') as 'email' | 'sms' | 'print' | 'physical',
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
       isReloadable: isReloadable === 'true',
       restrictions:
@@ -104,13 +107,13 @@ export const createGiftCard = async (req: TypedRequest, res: Response): Promise<
     });
 
     res.redirect(`/hub/promotions/gift-cards/${giftCard.promotionGiftCardId}?success=Gift card created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'promotions/gift-cards/create', {
       pageName: 'Create Gift Card',
-      error: error.message || 'Failed to create gift card',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create gift card',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -139,12 +142,12 @@ export const viewGiftCard = async (req: TypedRequest, res: Response): Promise<vo
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load gift card',
+      error: (error as Error).message || 'Failed to load gift card',
     });
   }
 };
@@ -167,12 +170,12 @@ export const editGiftCardForm = async (req: TypedRequest, res: Response): Promis
       pageName: `Edit: ${giftCard.code}`,
       giftCard,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -184,32 +187,34 @@ export const activateGiftCardAction = async (req: TypedRequest, res: Response): 
     await giftCardRepo.activateGiftCard(giftCardId);
 
     res.json({ success: true, message: 'Gift card activated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to activate gift card' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate gift card' });
   }
 };
 
 export const assignGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { giftCardId } = req.params;
-    const { customerId } = req.body;
+    const body = req.body as RequestBody;
+    const { customerId } = body;
 
     await giftCardRepo.assignGiftCard(giftCardId, customerId);
 
     res.json({ success: true, message: 'Gift card assigned successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to assign gift card' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to assign gift card' });
   }
 };
 
 export const reloadGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { giftCardId } = req.params;
-    const { amount, orderId } = req.body;
+    const body = req.body as RequestBody;
+    const { amount, orderId } = body;
 
     const transaction = await giftCardRepo.reloadGiftCard(giftCardId, parseFloat(amount), orderId, 'admin');
 
@@ -218,17 +223,18 @@ export const reloadGiftCardAction = async (req: TypedRequest, res: Response): Pr
       message: 'Gift card reloaded successfully',
       transaction,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to reload gift card' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to reload gift card' });
   }
 };
 
 export const refundToGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { giftCardId } = req.params;
-    const { amount, orderId, notes } = req.body;
+    const body = req.body as RequestBody;
+    const { amount, orderId, notes } = body;
 
     const transaction = await giftCardRepo.refundToGiftCard(giftCardId, parseFloat(amount), orderId, 'admin', notes);
 
@@ -237,10 +243,10 @@ export const refundToGiftCardAction = async (req: TypedRequest, res: Response): 
       message: 'Refund applied to gift card successfully',
       transaction,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to refund to gift card' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to refund to gift card' });
   }
 };
 
@@ -251,10 +257,10 @@ export const cancelGiftCardAction = async (req: TypedRequest, res: Response): Pr
     await giftCardRepo.cancelGiftCard(giftCardId);
 
     res.json({ success: true, message: 'Gift card cancelled successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to cancel gift card' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to cancel gift card' });
   }
 };
 
@@ -276,7 +282,7 @@ export const checkGiftCardBalance = async (req: TypedRequest, res: Response): Pr
       status: giftCard.status,
       expiresAt: giftCard.expiresAt,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({ valid: false, message: 'Failed to check gift card balance' });

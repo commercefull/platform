@@ -3,7 +3,7 @@
  * Defines the contract for customer persistence operations
  */
 
-import { Customer, CustomerAddress } from '../entities/Customer';
+import { Customer, CustomerAddress } from '../../../../libs/db/types';
 
 export interface CustomerFilters {
   status?: 'active' | 'inactive' | 'suspended';
@@ -54,6 +54,7 @@ export interface CustomerRepository {
 
   // Groups
   getCustomerGroups(customerId: string): Promise<Array<{ groupId: string; name: string }>>;
+  getCustomerGroupIds(customerId: string): Promise<string[]>;
   addToGroup(customerId: string, groupId: string): Promise<void>;
   removeFromGroup(customerId: string, groupId: string): Promise<void>;
 

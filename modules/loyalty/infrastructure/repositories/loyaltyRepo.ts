@@ -275,7 +275,7 @@ export class LoyaltyRepo {
       // Get default tier
       const defaultTier = await this.findTierByPointsThreshold(0);
       if (!defaultTier) throw new Error('No default tier found');
-      customerPoints = await this.initializeCustomerPoints(customerId, defaultTier.loyaltyTierId);
+      customerPoints = await this.initializeCustomerPoints(customerId, defaultTier.tierId);
     }
 
     const newCurrentPoints = Math.max(0, customerPoints.currentPoints + pointsChange);
@@ -316,7 +316,7 @@ export class LoyaltyRepo {
       SET "tierId" = $2, "updatedAt" = $3
       WHERE "customerId" = $1 AND "tierId" != $2
     `;
-    await query(sql, [customerId, newTier.loyaltyTierId, new Date()]);
+    await query(sql, [customerId, newTier.tierId, new Date()]);
   }
 
   // ==========================================================================
@@ -527,7 +527,7 @@ export class LoyaltyRepo {
     // Generate redemption code
     const redemptionCode = `RDM-${generateUUID().substring(0, 8).toUpperCase()}`;
     const now = new Date();
-    const expiresAt = reward.expiresAt || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const expiresAt = reward.validTo || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
     // Create redemption
     const sql = `
@@ -557,7 +557,7 @@ export class LoyaltyRepo {
       LoyaltyPointsAction.REDEMPTION,
       `Redeemed: ${reward.name}`,
       undefined,
-      redemption.loyaltyRedemptionId,
+      redemption.redemptionId,
     );
 
     return redemption;
@@ -589,7 +589,7 @@ export class LoyaltyRepo {
     // Get customer's tier for multiplier
     const pointsData = await this.findCustomerPointsWithTier(customerId);
     // Convert multiplier to number (PostgreSQL decimal fields are returned as strings)
-    const multiplier = pointsData?.tier?.multiplier ? parseFloat(String(pointsData.tier.multiplier)) : 1;
+    const multiplier = pointsData?.tier?.pointsMultiplier ? parseFloat(String(pointsData.tier.pointsMultiplier)) : 1;
 
     // Calculate points (1 point per dollar, multiplied by tier multiplier)
     const basePoints = Math.floor(orderAmount);

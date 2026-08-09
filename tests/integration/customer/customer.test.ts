@@ -37,7 +37,7 @@ describe('Customer Feature Tests', () => {
 
       adminToken = loginResponse.data?.accessToken || '';
     } catch (error) {
-      console.log('Warning: Login failed for customer tests:', error instanceof Error ? error.message : String(error));
+      console.log('Warning: Login failed for customer tests:', error instanceof Error ? (error as Error).message : String(error));
     }
 
     // Create test customer and related entities
@@ -80,7 +80,7 @@ describe('Customer Feature Tests', () => {
                   },
                 );
               }
-            } catch (e) {
+            } catch {
               testCustomerGroupId = null;
             }
 
@@ -99,13 +99,13 @@ describe('Customer Feature Tests', () => {
               if (wishlistResponse.data?.success && wishlistResponse.data?.data) {
                 testWishlistId = wishlistResponse.data.data.customerWishlistId || wishlistResponse.data.data.id;
               }
-            } catch (e) {
+            } catch {
               testWishlistId = null;
             }
           }
         }
       }
-    } catch (error) {}
+    } catch {}
   });
 
   afterAll(async () => {
@@ -191,7 +191,7 @@ describe('Customer Feature Tests', () => {
       expect(Array.isArray(customers)).toBe(true);
 
       // Find our test customer in the results
-      const customer = customers.find((c: any) => (c.customerId || c.id) === testCustomerId);
+      const customer = customers.find((c: Record<string, unknown>) => (c.customerId || c.id) === testCustomerId);
       expect(customer).toBeDefined();
 
       if (customer) {
@@ -222,7 +222,7 @@ describe('Customer Feature Tests', () => {
       expect(Array.isArray(customers)).toBe(true);
 
       // Should find our updated customer
-      const foundCustomer = customers.find((c: any) => (c.customerId || c.id) === testCustomerId);
+      const foundCustomer = customers.find((c: Record<string, unknown>) => (c.customerId || c.id) === testCustomerId);
       expect(foundCustomer).toBeDefined();
 
       if (foundCustomer) {
@@ -251,7 +251,7 @@ describe('Customer Feature Tests', () => {
       expect(Array.isArray(addresses)).toBe(true);
 
       // Find our test address in the results
-      const address = addresses.find((a: any) => (a.customerAddressId || a.addressId || a.id) === testCustomerAddressId);
+      const address = addresses.find((a: Record<string, unknown>) => (a.customerAddressId || a.addressId || a.id) === testCustomerAddressId);
       expect(address).toBeDefined();
 
       if (address) {
@@ -285,7 +285,7 @@ describe('Customer Feature Tests', () => {
       // Verify properties from TypeScript interface are in camelCase
       expect(response.data.data).toHaveProperty('name', testCustomerGroup.name);
       expect(response.data.data).toHaveProperty('description', testCustomerGroup.description);
-      expect(response.data.data).toHaveProperty('discountPercentage', testCustomerGroup.discountPercentage);
+      expect(response.data.data).toHaveProperty('discountPercent', testCustomerGroup.discountPercent);
       expect(response.data.data).toHaveProperty('isActive', testCustomerGroup.isActive);
 
       // Make sure no snake_case properties leaked through
@@ -308,7 +308,7 @@ describe('Customer Feature Tests', () => {
 
       // Should find our customer in this group
       const customers = response.data.data?.data || response.data.data;
-      const foundCustomer = customers.find((c: any) => (c.customerId || c.id) === testCustomerId);
+      const foundCustomer = customers.find((c: Record<string, unknown>) => (c.customerId || c.id) === testCustomerId);
       expect(foundCustomer).toBeDefined();
 
       if (foundCustomer) {

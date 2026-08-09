@@ -11,11 +11,11 @@ interface OrderItem {
   unitPrice: number | string;
   quantity: number;
   subtotal: number | string;
-  options: Record<string, any>;
+  options: Record<string, unknown>;
   costPrice?: number | string;
   profit?: number | string;
-  metadata?: Record<string, any>;
-  [key: string]: any;
+  metadata?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 describe('Order Item Tests', () => {
@@ -146,7 +146,7 @@ describe('Order Item Tests', () => {
         return;
       }
 
-      const beforeTotals = beforeResponse.data.data;
+      const _beforeTotals = beforeResponse.data.data;
 
       // Update an item quantity
       const updateData = {

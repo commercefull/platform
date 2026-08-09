@@ -21,7 +21,7 @@ export class GeneratePaymentReportCommand {
     public readonly periodEnd: Date,
     public readonly totalAmount: number,
     public readonly transactionCount: number,
-    public readonly data?: Record<string, any>,
+    public readonly data?: Record<string, unknown>,
   ) {}
 }
 

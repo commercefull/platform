@@ -208,7 +208,7 @@ export class OrderRepo {
   async update(orderId: string, params: OrderUpdateParams): Promise<Order | null> {
     const now = new Date();
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     const jsonFields = ['shippingAddress', 'billingAddress', 'metadata'];

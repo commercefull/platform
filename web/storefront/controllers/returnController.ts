@@ -5,9 +5,9 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
-import { query, queryOne } from '../../../libs/db';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
+import orderReturnRepo from '../../../modules/order/infrastructure/repositories/orderReturnRepo';
 
 interface CustomerUser {
   id: string;
@@ -25,18 +25,11 @@ export const listReturns = async (req: TypedRequest, res: Response) => {
       return res.redirect('/signin');
     }
 
-    const returns = await query<any[]>(
-      `SELECT r.*, o."orderNumber"
-       FROM "orderReturn" r
-       JOIN "order" o ON r."orderId" = o."orderId"
-       WHERE o."customerId" = $1
-       ORDER BY r."createdAt" DESC`,
-      [user.customerId],
-    );
+    const returns = await orderReturnRepo.findByCustomerIdWithOrderNumber(user.customerId);
 
     storefrontRespond(req, res, 'returns/index', {
       pageName: 'My Returns',
-      returns: returns || [],
+      returns,
     });
   } catch (error) {
     logger.error('Error loading returns:', error);
@@ -59,11 +52,7 @@ export const returnRequestForm = async (req: TypedRequest, res: Response) => {
 
     const { orderId } = req.params;
 
-    const order = await queryOne<any>(
-      `SELECT * FROM "order"
-       WHERE "orderId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL`,
-      [orderId, user.customerId],
-    );
+    const order = await orderReturnRepo.findOrderForCustomer(orderId, user.customerId);
 
     if (!order) {
       return storefrontRespond(req, res, 'error', {
@@ -72,13 +61,7 @@ export const returnRequestForm = async (req: TypedRequest, res: Response) => {
       });
     }
 
-    const items = await query<any[]>(
-      `SELECT oi.*, p."name" as "productName", p."sku"
-       FROM "orderItem" oi
-       JOIN "product" p ON oi."productId" = p."productId"
-       WHERE oi."orderId" = $1`,
-      [orderId],
-    );
+    const items = await orderReturnRepo.findOrderItemsWithProduct(orderId);
 
     storefrontRespond(req, res, 'returns/create', {
       pageName: 'Request Return',
@@ -105,14 +88,10 @@ export const submitReturnRequest = async (req: TypedRequest, res: Response) => {
     }
 
     const { orderId } = req.params;
-    const { reason, description, itemIds } = req.body;
+    const body = req.body as RequestBody;
+    const { reason, description, _itemIds } = body;
 
-    // Verify order belongs to customer
-    const order = await queryOne<any>(
-      `SELECT "orderId" FROM "order"
-       WHERE "orderId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL`,
-      [orderId, user.customerId],
-    );
+    const order = await orderReturnRepo.findOrderForCustomer(orderId, user.customerId);
 
     if (!order) {
       return storefrontRespond(req, res, 'error', {
@@ -121,13 +100,7 @@ export const submitReturnRequest = async (req: TypedRequest, res: Response) => {
       });
     }
 
-    const result = await queryOne<any>(
-      `INSERT INTO "orderReturn" (
-        "orderId", "reason", "description", "status", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, 'requested', NOW(), NOW())
-      RETURNING "orderReturnId"`,
-      [orderId, reason || 'other', description || null],
-    );
+    const result = await orderReturnRepo.createSimple(orderId, (reason as string) || 'other', (description as string) || undefined);
 
     if (result) {
       return res.redirect(`/returns`);
@@ -155,13 +128,7 @@ export const viewReturn = async (req: TypedRequest, res: Response) => {
 
     const { returnId } = req.params;
 
-    const returnRequest = await queryOne<any>(
-      `SELECT r.*, o."orderNumber"
-       FROM "orderReturn" r
-       JOIN "order" o ON r."orderId" = o."orderId"
-       WHERE r."orderReturnId" = $1 AND o."customerId" = $2`,
-      [returnId, user.customerId],
-    );
+    const returnRequest = await orderReturnRepo.findByIdWithOrderNumber(returnId, user.customerId);
 
     if (!returnRequest) {
       return storefrontRespond(req, res, 'error', {

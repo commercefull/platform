@@ -33,8 +33,28 @@ export interface ListMediaOutput {
   hasMore: boolean;
 }
 
+interface MediaRecord {
+  mediaId: string;
+  fileName: string;
+  mimeType: string;
+  fileSize: number;
+  url: string;
+  thumbnailUrl?: string;
+  altText?: string;
+  mediaType: string;
+  createdAt: Date;
+}
+
+interface ListMediaRepository {
+  findAll(
+    filters: Record<string, unknown>,
+    options: { page: number; limit: number; sortBy: string; sortOrder: string },
+  ): Promise<MediaRecord[]>;
+  count(filters: Record<string, unknown>): Promise<number>;
+}
+
 export class ListMediaUseCase {
-  constructor(private readonly mediaRepository: any) {}
+  constructor(private readonly mediaRepository: ListMediaRepository) {}
 
   async execute(input: ListMediaInput): Promise<ListMediaOutput> {
     const page = input.page || 1;
@@ -57,7 +77,7 @@ export class ListMediaUseCase {
     ]);
 
     return {
-      items: items.map((item: any) => ({
+      items: items.map((item: MediaRecord) => ({
         mediaId: item.mediaId,
         fileName: item.fileName,
         mimeType: item.mimeType,

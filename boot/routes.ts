@@ -9,11 +9,6 @@ import { identityCustomerRouter } from '../modules/identity/interface/routers/id
 import { identitySocialRouter } from '../modules/identity/interface/routers/identitySocialRouter';
 import { customerRouter } from '../modules/customer/interface/routers/customerRouter';
 import { taxCustomerRouter } from '../modules/tax/interface/routers/taxCustomerRouter';
-import { b2bCustomerRouter } from '../modules/b2b/interface/routers/b2bCustomerRouter';
-import { b2bCreditRouter } from '../modules/b2b/interface/routers/b2bCreditRouter';
-import { b2bPriceListRouter } from '../modules/b2b/interface/routers/b2bPriceListRouter';
-import { b2bPurchaseOrderRouter } from '../modules/b2b/interface/routers/b2bPurchaseOrderRouter';
-import { b2bMerchantRouter } from '../modules/b2b/interface/routers/b2bMerchantRouter';
 import { gdprCustomerRouter } from '../modules/gdpr/interface/routers/gdprCustomerRouter';
 import { orderCustomerRouter } from '../modules/order/interface/routers/customerRouter';
 import { basketCustomerRouter } from '../modules/basket/interface/routers/basketRouter';
@@ -39,7 +34,6 @@ import { orderBusinessRouter } from '../modules/order/interface/routers/business
 import { taxBusinessRouter } from '../modules/tax/interface/routers/taxBusinessRouter';
 import { customerBusinessRouter } from '../modules/customer/interface/routers/businessRouter';
 import { gdprBusinessRouter } from '../modules/gdpr/interface/routers/gdprBusinessRouter';
-import { b2bBusinessRouter } from '../modules/b2b/interface/routers/b2bBusinessRouter';
 import { subscriptionBusinessRouter } from '../modules/subscription/interface/routers/subscriptionBusinessRouter';
 import { supportBusinessRouter } from '../modules/support/interface/routers/supportBusinessRouter';
 import { analyticsBusinessRouter } from '../modules/analytics/interface/routers/analyticsBusinessRouter';
@@ -60,31 +54,25 @@ import { storeRouter } from '../modules/store/interface/http/StoreRouter';
 import { systemConfigurationRouter } from '../modules/configuration/interface/http/SystemConfigurationRouter';
 import { mediaRouter } from '../modules/media/interface/http/MediaRouter';
 import { adminRouter } from '../web/admin/adminRouters';
-import { merchantRouter } from '../web/merchant/merchantRouters';
-import { b2bPortalRouter } from '../web/b2b/b2bRouters';
-
 // New module routers
 import { brandBusinessRouter } from '../modules/brand/interface/routers/brandRouter';
-import { channelBusinessRouter } from '../modules/channel/interface/routers/channelRouter';
-import { segmentBusinessRouter } from '../modules/segment/interface/routers/segmentRouter';
 import { couponBusinessRouter } from '../modules/coupon/interface/routers/couponRouter';
 import { fulfillmentBusinessRouter } from '../modules/fulfillment/interface/routers/fulfillmentBusinessRouter';
 import fulfillmentCustomerRouter from '../modules/fulfillment/interface/routers/fulfillmentCustomerRouter';
+import { fulfillmentLocationRouter } from '../modules/fulfillment/interface/routers/fulfillmentLocationRouter';
 import { organizationBusinessRouter } from '../modules/organization/interface/routers/organizationRouter';
 import { brandCustomerRouter } from '../modules/brand/interface/routers/brandCustomerRouter';
 import { couponCustomerRouter } from '../modules/coupon/interface/routers/couponCustomerRouter';
 import { promotionCustomerRouter } from '../modules/promotion/interface/routers/customerRouter';
 import { storeCustomerRouter } from '../modules/store/interface/routers/storeCustomerRouter';
-import { assortmentBusinessRouter } from '../modules/assortment/interface/routers/assortmentRouter';
 import { basketBusinessRouter } from '../modules/basket/interface/routers/basketBusinessRouter';
 import { merchantCustomerRouter } from '../modules/merchant/interface/http/merchantCustomerRouter';
 import { attributeBusinessRouter } from '../modules/product/interface/routers/attributeRouter';
 import { categoryCustomerRouter } from '../modules/product/interface/routers/categoryCustomerRouter';
 import { webhookBusinessRouter } from '../modules/webhook/interface/routers/webhookBusinessRouter';
-import { merchantFinancialsRouter } from '../modules/merchant/interface/routers/merchantFinancialsRouter';
-import { marketingBusinessRouter } from '../modules/marketing/interface/routers/marketingBusinessRouter';
-import { marketingCustomerRouter } from '../modules/marketing/interface/routers/marketingCustomerRouter';
+import { reportingBusinessRouter } from '../modules/reporting/interface/routers/reportingBusinessRouter';
 import * as gatewayWebhookController from '../modules/payment/interface/controllers/webhookController';
+import { configureGraphQL } from './graphql';
 
 /**
  * Configure all application routes
@@ -93,22 +81,19 @@ export function configureRoutes(app: Express): void {
   // Gateway webhook — unauthenticated, HMAC-verified, raw body required
   app.post('/payment/webhook', express.raw({ type: 'application/json' }), gatewayWebhookController.handleGatewayWebhook);
 
+  // GraphQL endpoint — alongside REST, shares auth via context
+  configureGraphQL(app);
+
   // Storefront routes (public website)
   app.use('/', storefrontCustomerRouter);
 
   app.use('/admin', adminRouter);
-  app.use('/merchant', merchantRouter);
-  app.use('/b2b', b2bPortalRouter);
-
-  // B2B API routes (JSON)
-  app.use('/', [b2bCreditRouter, b2bPriceListRouter, b2bPurchaseOrderRouter]);
 
   app.use('/customer', [
     identityCustomerRouter, // Must be first - public auth routes
     identitySocialRouter, // Social login routes
     customerRouter,
     taxCustomerRouter,
-    b2bCustomerRouter,
     gdprCustomerRouter,
     orderCustomerRouter,
     basketCustomerRouter,
@@ -131,12 +116,12 @@ export function configureRoutes(app: Express): void {
     storeCustomerRouter,
     fulfillmentCustomerRouter,
     merchantCustomerRouter,
-    marketingCustomerRouter,
     contentCustomerRouter,
   ]);
 
   // Business/Merchant API routes
   app.use('/business', [
+    fulfillmentLocationRouter,
     identityBusinessRouter,
     merchantMerchantRouter,
     promotionBusinessRouter,
@@ -145,7 +130,6 @@ export function configureRoutes(app: Express): void {
     taxBusinessRouter,
     customerBusinessRouter,
     gdprBusinessRouter,
-    b2bBusinessRouter,
     subscriptionBusinessRouter,
     supportBusinessRouter,
     analyticsBusinessRouter,
@@ -165,18 +149,13 @@ export function configureRoutes(app: Express): void {
     storeRouter,
     systemConfigurationRouter,
     brandBusinessRouter,
-    channelBusinessRouter,
-    segmentBusinessRouter,
     couponBusinessRouter,
     fulfillmentBusinessRouter,
     organizationBusinessRouter,
-    assortmentBusinessRouter,
     basketBusinessRouter,
     attributeBusinessRouter,
     webhookBusinessRouter,
-    merchantFinancialsRouter,
-    b2bMerchantRouter,
-    marketingBusinessRouter,
+    reportingBusinessRouter,
   ]);
 
   // Health check endpoint (before other routes for load balancers)

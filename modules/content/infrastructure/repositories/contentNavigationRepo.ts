@@ -36,7 +36,7 @@ export class ContentNavigationRepo {
 
   async findAllNavigations(isActive?: boolean): Promise<ContentNavigation[]> {
     let sql = 'SELECT * FROM "contentNavigation"';
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (isActive !== undefined) {
       sql += ' WHERE "isActive" = $1';
@@ -86,7 +86,7 @@ export class ContentNavigationRepo {
   async updateNavigation(id: string, params: ContentNavigationUpdateParams): Promise<ContentNavigation> {
     const now = unixTimestamp();
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     if (params.name !== undefined) {
@@ -144,7 +144,7 @@ export class ContentNavigationRepo {
 
   async findNavigationItems(navigationId: string, parentId?: string): Promise<ContentNavigationItem[]> {
     let sql = 'SELECT * FROM "contentNavigationItem" WHERE "navigationId" = $1';
-    const params: any[] = [navigationId];
+    const params: unknown[] = [navigationId];
 
     if (parentId) {
       sql += ' AND "parentId" = $2';
@@ -206,7 +206,7 @@ export class ContentNavigationRepo {
   async updateNavigationItem(id: string, params: ContentNavigationItemUpdateParams): Promise<ContentNavigationItem> {
     const now = unixTimestamp();
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     if (params.title !== undefined) {

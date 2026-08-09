@@ -25,8 +25,35 @@ export interface UploadMediaOutput {
   createdAt: string;
 }
 
+interface UploadedMedia {
+  mediaId: string;
+  fileName: string;
+  mimeType: string;
+  fileSize: number;
+  url: string;
+  thumbnailUrl?: string;
+  createdAt: Date;
+}
+
+interface UploadMediaRepository {
+  create(data: {
+    mediaId: string;
+    fileName: string;
+    mimeType: string;
+    fileSize: number;
+    filePath: string;
+    url: string;
+    mediaType: string;
+    altText?: string;
+    caption?: string;
+    folderId?: string;
+    uploadedBy?: string;
+    tags: string[];
+  }): Promise<UploadedMedia>;
+}
+
 export class UploadMediaUseCase {
-  constructor(private readonly mediaRepository: any) {}
+  constructor(private readonly mediaRepository: UploadMediaRepository) {}
 
   async execute(input: UploadMediaInput): Promise<UploadMediaOutput> {
     if (!input.fileName || !input.mimeType || !input.url) {

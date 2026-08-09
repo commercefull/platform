@@ -4,13 +4,12 @@
  */
 
 import { ProductStatus } from '../valueObjects/ProductStatus';
-import { ProductVisibility } from '../valueObjects/ProductVisibility';
 
 export interface DomainEvent {
   eventType: string;
   occurredAt: Date;
   aggregateId: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
 }
 
 export class ProductCreatedEvent implements DomainEvent {
@@ -156,10 +155,10 @@ export class ProductVariantCreatedEvent implements DomainEvent {
     productId: string;
     variantId: string;
     sku: string;
-    attributes: Record<string, any>[];
+    attributes: Record<string, unknown>[];
   };
 
-  constructor(productId: string, variantId: string, sku: string, attributes: Record<string, any>[]) {
+  constructor(productId: string, variantId: string, sku: string, attributes: Record<string, unknown>[]) {
     this.occurredAt = new Date();
     this.aggregateId = productId;
     this.payload = { productId, variantId, sku, attributes };

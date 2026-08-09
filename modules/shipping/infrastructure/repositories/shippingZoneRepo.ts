@@ -40,7 +40,7 @@ export async function findByLocation(country: string, state?: string): Promise<S
     SELECT * FROM "${TABLE}" 
     WHERE "isActive" = true 
     AND ("locations" @> $1::jsonb OR "locations" @> $2::jsonb)
-    AND NOT ("excludedLocations" @> $1::jsonb OR "excludedLocations" @> $2::jsonb)
+    AND NOT (COALESCE("excludedLocations", '[]'::jsonb) @> $1::jsonb OR COALESCE("excludedLocations", '[]'::jsonb) @> $2::jsonb)
     ORDER BY "priority" ASC
   `;
   return (await query<ShippingZone[]>(sql, [JSON.stringify([country]), state ? JSON.stringify([state]) : JSON.stringify([])])) || [];
@@ -70,7 +70,7 @@ export async function create(input: CreateShippingZoneInput): Promise<ShippingZo
 
 export async function update(id: string, input: UpdateShippingZoneInput): Promise<ShippingZone | null> {
   const updateFields: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
   let paramIndex = 1;
   const jsonFields = ['locations', 'excludedLocations'];
 

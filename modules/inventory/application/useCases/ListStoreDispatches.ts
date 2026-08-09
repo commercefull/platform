@@ -10,7 +10,7 @@ export interface ListStoreDispatchesInput extends DispatchFilters {
 export class ListStoreDispatchesUseCase {
   constructor(private readonly dispatchRepository: StoreDispatchRepository) {}
 
-  async execute(input: ListStoreDispatchesInput): Promise<Record<string, any>> {
+  async execute(input: ListStoreDispatchesInput): Promise<Record<string, unknown>> {
     const filters: DispatchFilters = {
       fromStoreId: input.fromStoreId,
       toStoreId: input.toStoreId,

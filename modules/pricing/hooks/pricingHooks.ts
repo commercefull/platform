@@ -17,7 +17,7 @@ const pricingService = new PricingService();
  */
 export async function calculateBasketPrices(
   basket: Basket,
-  options: {
+  _options: {
     applyPromotions?: boolean;
     applyMembershipBenefits?: boolean;
     applyLoyaltyDiscount?: boolean;
@@ -71,12 +71,12 @@ export async function calculateBasketPrices(
     
     // Track discounts applied
     if (result.appliedRules && result.appliedRules.length > 0) {
-      totalDiscount += result.appliedRules.reduce((sum: number, rule: any) => sum + rule.impact, 0);
+      totalDiscount += result.appliedRules.reduce((sum: number, rule: unknown) => sum + rule.impact, 0);
     }
   }
   
   // Recalculate basket totals
-  basket.subTotal = basket.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+  basket.subTotal = basket.items.reduce((sum: number, item: unknown) => sum + (item.price * item.quantity), 0);
   basket.discountAmount = totalDiscount;
   basket.grandTotal = Math.max(0, basket.subTotal - basket.discountAmount);
   basket.updatedAt = String(Math.floor(Date.now() / 1000));
@@ -101,7 +101,7 @@ type OrderWithItems = Order & {
     price: number;
     unitPrice: number;
     totalPrice?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
 };
 

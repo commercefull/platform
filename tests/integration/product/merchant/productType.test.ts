@@ -1,6 +1,6 @@
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../../testUtils';
-import { SEEDED_ATTRIBUTE_SET_APPAREL_ID, SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID } from '../testUtils';
+import { SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID } from '../testUtils';
 
 ;
 ;

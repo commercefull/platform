@@ -66,7 +66,7 @@ export async function setupShippingTests() {
   return { client, adminToken };
 }
 
-export function createTestCarrier(overrides: Partial<any> = {}) {
+export function createTestCarrier(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();
   return {
     name: `Test Carrier ${timestamp}`,
@@ -79,7 +79,7 @@ export function createTestCarrier(overrides: Partial<any> = {}) {
   };
 }
 
-export function createTestMethod(carrierId: string, overrides: Partial<any> = {}) {
+export function createTestMethod(carrierId: string, overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();
   return {
     shippingCarrierId: carrierId,
@@ -97,7 +97,7 @@ export function createTestMethod(carrierId: string, overrides: Partial<any> = {}
   };
 }
 
-export function createTestZone(overrides: Partial<any> = {}) {
+export function createTestZone(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();
   return {
     name: `Test Zone ${timestamp}`,
@@ -110,7 +110,7 @@ export function createTestZone(overrides: Partial<any> = {}) {
   };
 }
 
-export function createTestRate(zoneId: string, methodId: string, overrides: Partial<any> = {}) {
+export function createTestRate(zoneId: string, methodId: string, overrides: Partial<unknown> = {}) {
   return {
     shippingZoneId: zoneId,
     shippingMethodId: methodId,
@@ -141,24 +141,24 @@ export async function cleanupShippingTests(
   for (const id of resources.rateIds || []) {
     try {
       await client.delete(`/business/shipping/rates/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 
   for (const id of resources.methodIds || []) {
     try {
       await client.delete(`/business/shipping/methods/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 
   for (const id of resources.zoneIds || []) {
     try {
       await client.delete(`/business/shipping/zones/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 
   for (const id of resources.carrierIds || []) {
     try {
       await client.delete(`/business/shipping/carriers/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 }

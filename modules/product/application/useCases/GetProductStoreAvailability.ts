@@ -35,14 +35,23 @@ export class GetProductStoreAvailabilityUseCase {
       ? await this.productRepository.findVariantById(input.variantId)
       : await this.productRepository.getDefaultVariant(input.productId);
 
-    const params: any[] = [input.productId, input.variantId || null];
+    const params: unknown[] = [input.productId, input.variantId || null];
     let storeClause = '';
     if (input.storeId) {
       params.push(input.storeId);
       storeClause = ` AND l."storeId" = $${params.length}`;
     }
 
-    const rows = await query<Record<string, any>[]>(
+    interface StoreAvailabilityRow {
+      storeId: string;
+      storeName: string | null;
+      locationId: string;
+      quantity: string | null;
+      reservedQuantity: string | null;
+      availableQuantity: string | null;
+    }
+
+    const rows = await query<StoreAvailabilityRow[]>(
       `SELECT l."storeId", s.name as "storeName", i."locationId",
               i.quantity, i."reservedQuantity", i."availableQuantity"
        FROM inventory i

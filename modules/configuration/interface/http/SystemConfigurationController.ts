@@ -10,6 +10,33 @@ import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { UpdateSystemConfigurationUseCase, UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
 import { SystemConfigurationRepo } from '../../infrastructure/repositories/SystemConfigurationRepo';
 
+interface CreateConfigBody {
+  configId?: string;
+  platformName: string;
+  platformDomain: string;
+  supportEmail: string;
+  defaultCurrency?: string;
+  defaultLanguage?: string;
+  timezone?: string;
+}
+
+interface UpdateConfigBody {
+  platformName?: string;
+  platformDomain?: string;
+  supportEmail?: string;
+  defaultCurrency?: string;
+  defaultLanguage?: string;
+  timezone?: string;
+  systemMode?: 'marketplace' | 'multi_store' | 'single_store';
+  features?: Record<string, unknown>;
+  businessSettings?: Record<string, unknown>;
+  platformSettings?: Record<string, unknown>;
+  securitySettings?: Record<string, unknown>;
+  notificationSettings?: Record<string, unknown>;
+  integrationSettings?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
 export class SystemConfigurationController {
   private updateSystemConfigurationUseCase: UpdateSystemConfigurationUseCase;
 
@@ -22,16 +49,17 @@ export class SystemConfigurationController {
    * Create system configuration
    * POST /business/configuration
    */
-  async createSystemConfiguration(req: TypedRequest, res: Response) {
+  async createSystemConfiguration(req: TypedRequest<Record<string, string>, unknown, CreateConfigBody>, res: Response) {
     try {
+      const body = req.body;
       const config = SystemConfiguration.create({
-        configId: req.body.configId || `config_${Date.now()}`,
-        platformName: req.body.platformName,
-        platformDomain: req.body.platformDomain,
-        supportEmail: req.body.supportEmail,
-        defaultCurrency: req.body.defaultCurrency,
-        defaultLanguage: req.body.defaultLanguage,
-        timezone: req.body.timezone,
+        configId: body.configId || `config_${Date.now()}`,
+        platformName: body.platformName,
+        platformDomain: body.platformDomain,
+        supportEmail: body.supportEmail,
+        defaultCurrency: body.defaultCurrency,
+        defaultLanguage: body.defaultLanguage,
+        timezone: body.timezone,
       });
 
       const systemConfigRepository = new SystemConfigurationRepo();
@@ -44,7 +72,7 @@ export class SystemConfigurationController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(400).json({
         success: false,
         message: 'Failed to create system configuration',
@@ -57,23 +85,24 @@ export class SystemConfigurationController {
    * Update system configuration
    * PUT /business/configuration/:configId
    */
-  async updateSystemConfiguration(req: TypedRequest, res: Response) {
+  async updateSystemConfiguration(req: TypedRequest<Record<string, string>, unknown, UpdateConfigBody>, res: Response) {
     try {
+      const body = req.body;
       const command = new UpdateSystemConfigurationCommand(req.params.configId, {
-        platformName: req.body.platformName,
-        platformDomain: req.body.platformDomain,
-        supportEmail: req.body.supportEmail,
-        defaultCurrency: req.body.defaultCurrency,
-        defaultLanguage: req.body.defaultLanguage,
-        timezone: req.body.timezone,
-        systemMode: req.body.systemMode,
-        features: req.body.features,
-        businessSettings: req.body.businessSettings,
-        platformSettings: req.body.platformSettings,
-        securitySettings: req.body.securitySettings,
-        notificationSettings: req.body.notificationSettings,
-        integrationSettings: req.body.integrationSettings,
-        metadata: req.body.metadata,
+        platformName: body.platformName,
+        platformDomain: body.platformDomain,
+        supportEmail: body.supportEmail,
+        defaultCurrency: body.defaultCurrency,
+        defaultLanguage: body.defaultLanguage,
+        timezone: body.timezone,
+        systemMode: body.systemMode,
+        features: body.features,
+        businessSettings: body.businessSettings,
+        platformSettings: body.platformSettings,
+        securitySettings: body.securitySettings,
+        notificationSettings: body.notificationSettings,
+        integrationSettings: body.integrationSettings,
+        metadata: body.metadata,
       });
 
       const result = await this.updateSystemConfigurationUseCase.execute(command);
@@ -85,7 +114,7 @@ export class SystemConfigurationController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(400).json({
         success: false,
         message: 'Failed to update system configuration',
@@ -117,7 +146,7 @@ export class SystemConfigurationController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get system configuration',
@@ -149,7 +178,7 @@ export class SystemConfigurationController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get active system configuration',
@@ -175,7 +204,7 @@ export class SystemConfigurationController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to list system configurations',

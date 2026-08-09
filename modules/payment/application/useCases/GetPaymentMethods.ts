@@ -39,10 +39,42 @@ export interface GetPaymentMethodsOutput {
   availableMethods: PaymentMethodInfo[];
 }
 
+interface SavedMethod {
+  paymentMethodId: string;
+  type: 'card' | 'bank_account' | 'wallet' | 'buy_now_pay_later' | 'crypto';
+  provider: string;
+  name?: string;
+  isDefault: boolean;
+  last4?: string;
+  brand?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+}
+
+interface PaymentConfig {
+  paymentMethodConfigId: string;
+  type: 'card' | 'bank_account' | 'wallet' | 'buy_now_pay_later' | 'crypto';
+  provider: string;
+  displayName: string;
+  isActive: boolean;
+  minAmount?: number;
+  maxAmount?: number;
+  supportedCurrencies?: string[];
+  supportedCountries?: string[];
+}
+
+interface PaymentRepositoryPort {
+  findSavedPaymentMethods(customerId: string): Promise<SavedMethod[]>;
+}
+
+interface PaymentConfigRepositoryPort {
+  findActiveConfigs(params: { storeId?: string; channelId?: string }): Promise<PaymentConfig[]>;
+}
+
 export class GetPaymentMethodsUseCase {
   constructor(
-    private readonly paymentRepository: any, // PaymentRepository
-    private readonly paymentConfigRepository: any, // PaymentConfigRepository
+    private readonly paymentRepository: PaymentRepositoryPort,
+    private readonly paymentConfigRepository: PaymentConfigRepositoryPort,
   ) {}
 
   async execute(input: GetPaymentMethodsInput): Promise<GetPaymentMethodsOutput> {
@@ -101,25 +133,27 @@ export class GetPaymentMethodsUseCase {
     };
   }
 
-  private formatMethodName(method: any): string {
+  private formatMethodName(method: SavedMethod): string {
     if (method.type === 'card') {
       return `${method.brand || 'Card'} •••• ${method.last4}`;
     }
     return method.type;
   }
 
-  private isMethodValid(method: any): boolean {
+  private isMethodValid(method: SavedMethod): boolean {
     if (method.type === 'card') {
       const now = new Date();
-      const expiryDate = new Date(method.expiryYear, method.expiryMonth - 1);
-      return expiryDate > now;
+      if (method.expiryYear && method.expiryMonth) {
+        const expiryDate = new Date(method.expiryYear, method.expiryMonth - 1);
+        return expiryDate > now;
+      }
     }
     return true;
   }
 
-  private checkMethodAvailability(config: any, input: GetPaymentMethodsInput): boolean {
+  private checkMethodAvailability(config: PaymentConfig, input: GetPaymentMethodsInput): boolean {
     // Check currency support
-    if (input.currency && config.supportedCurrencies?.length > 0) {
+    if (input.currency && config.supportedCurrencies && config.supportedCurrencies.length > 0) {
       if (!config.supportedCurrencies.includes(input.currency)) {
         return false;
       }
@@ -136,7 +170,7 @@ export class GetPaymentMethodsUseCase {
     }
 
     // Check country support
-    if (input.country && config.supportedCountries?.length > 0) {
+    if (input.country && config.supportedCountries && config.supportedCountries.length > 0) {
       if (!config.supportedCountries.includes(input.country)) {
         return false;
       }

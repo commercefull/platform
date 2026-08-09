@@ -4,25 +4,14 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
-import {
-  TaxZone,
-  TaxRate,
-  TaxCategory,
-  CustomerTaxExemption,
-  TaxSettings,
-  AddressInput,
-  TaxCalculationResult,
-  TaxBreakdownItem,
-  LineItemTax,
-  TaxExemptionStatus,
-} from '../../taxTypes';
+
+import { TaxZone, TaxRate, TaxCategory, CustomerTaxExemption, AddressInput, TaxCalculationResult, LineItemTax, TaxExemptionStatus } from '../../taxTypes';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLES = {
+/* const _TABLE = {
   TAX_CATEGORY: Table.TaxCategory,
   TAX_ZONE: Table.TaxZone,
   TAX_RATE: Table.TaxRate,
@@ -32,7 +21,7 @@ const TABLES = {
   TAX_CALCULATION_LINE: Table.TaxCalculationLine,
   TAX_CALCULATION_APPLIED: Table.TaxCalculationApplied,
   CUSTOMER_TAX_EXEMPTION: Table.CustomerTaxExemption,
-};
+}; */
 
 /**
  * Repository for tax-related read operations only
@@ -41,7 +30,7 @@ const TABLES = {
 export class TaxQueryRepo {
   // Tax Rate query methods
   async findTaxRateById(id: string): Promise<TaxRate | null> {
-    const result = await queryOne<any>(`SELECT * FROM "taxRate" WHERE "taxRateId" = $1`, [id]);
+    const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxRate" WHERE "taxRateId" = $1`, [id]);
     if (!result) return null;
     return { ...result, id: result.taxRateId } as TaxRate;
   }
@@ -53,7 +42,7 @@ export class TaxQueryRepo {
     limit: number = 50,
     offset: number = 0,
   ): Promise<TaxRate[]> {
-    const params: any[] = [status];
+    const params: unknown[] = [status];
     let sql = `
       SELECT tr.*
       FROM "taxRate" tr
@@ -75,12 +64,12 @@ export class TaxQueryRepo {
              LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
 
-    const results = await query<any[]>(sql, params);
+    const results = await query<Record<string, unknown>[]>(sql, params);
     return (results || []).map(r => ({ ...r, id: r.taxRateId })) as TaxRate[];
   }
 
   async findTaxRatesByCategoryAndZone(categoryId: string, zoneId: string, status: TaxRate['isActive'] = true): Promise<TaxRate[]> {
-    const results = await query<any[]>(
+    const results = await query<Record<string, unknown>[]>(
       `SELECT * 
        FROM "taxRate" 
        WHERE "taxCategoryId" = $1 
@@ -95,19 +84,19 @@ export class TaxQueryRepo {
 
   // Tax Zone query methods
   async findTaxZoneById(id: string): Promise<TaxZone | null> {
-    const result = await queryOne<any>(`SELECT * FROM "taxZone" WHERE "taxZoneId" = $1`, [id]);
+    const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxZone" WHERE "taxZoneId" = $1`, [id]);
     if (!result) return null;
     return { ...result, id: result.taxZoneId } as TaxZone;
   }
 
   async findTaxZoneByCode(code: string): Promise<TaxZone | null> {
-    const result = await queryOne<any>(`SELECT * FROM "taxZone" WHERE "code" = $1`, [code]);
+    const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxZone" WHERE "code" = $1`, [code]);
     if (!result) return null;
     return { ...result, id: result.taxZoneId } as TaxZone;
   }
 
   async findAllTaxZones(status: TaxZone['isActive'] = true, limit: number = 50, offset: number = 0): Promise<TaxZone[]> {
-    const results = await query<any[]>(
+    const results = await query<Record<string, unknown>[]>(
       `SELECT * 
        FROM "taxZone" 
        WHERE "isActive" = $1
@@ -126,7 +115,7 @@ export class TaxQueryRepo {
       AND $1 = ANY("countries")
     `;
 
-    const params: any[] = [country];
+    const params: unknown[] = [country];
 
     if (state) {
       sql += ` AND ($${params.length + 1} = ANY("states") OR "states" IS NULL OR array_length("states", 1) IS NULL)`;
@@ -167,26 +156,26 @@ export class TaxQueryRepo {
       "isDefault" DESC
       LIMIT 1`;
 
-    const result = await queryOne<any>(sql, params);
+    const result = await queryOne<Record<string, unknown>>(sql, params);
     if (!result) return null;
     return { ...result, id: result.taxZoneId } as TaxZone;
   }
 
   // Tax Category query methods
   async findTaxCategoryById(id: string): Promise<TaxCategory | null> {
-    const result = await queryOne<any>(`SELECT * FROM "taxCategory" WHERE "taxCategoryId" = $1`, [id]);
+    const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxCategory" WHERE "taxCategoryId" = $1`, [id]);
     if (!result) return null;
     return { ...result, id: result.taxCategoryId } as TaxCategory;
   }
 
   async findTaxCategoryByCode(code: string): Promise<TaxCategory | null> {
-    const result = await queryOne<any>(`SELECT * FROM "taxCategory" WHERE "code" = $1`, [code]);
+    const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxCategory" WHERE "code" = $1`, [code]);
     if (!result) return null;
     return { ...result, id: result.taxCategoryId } as TaxCategory;
   }
 
   async findAllTaxCategories(status: TaxCategory['isActive'] = true, limit: number = 50, offset: number = 0): Promise<TaxCategory[]> {
-    const results = await query<any[]>(
+    const results = await query<Record<string, unknown>[]>(
       `SELECT * 
        FROM "taxCategory" 
        WHERE "isActive" = $1
@@ -199,7 +188,7 @@ export class TaxQueryRepo {
   }
 
   async findDefaultTaxCategory(): Promise<TaxCategory | null> {
-    const result = await queryOne<any>(
+    const result = await queryOne<Record<string, unknown>>(
       `SELECT * 
        FROM "taxCategory" 
        WHERE "isDefault" = true AND "isActive" = true
@@ -211,7 +200,7 @@ export class TaxQueryRepo {
 
   // Customer Tax Exemption query methods
   async findCustomerTaxExemptions(customerId: string, status: TaxExemptionStatus = 'active'): Promise<CustomerTaxExemption[]> {
-    const results = await query<any[]>(
+    const results = await query<Record<string, unknown>[]>(
       `SELECT * 
        FROM "customerTaxExemption" 
        WHERE "customerId" = $1 
@@ -227,7 +216,7 @@ export class TaxQueryRepo {
   /**
    * Alias for findCustomerTaxExemptions to maintain backward compatibility
    */
-  async findTaxExemptionsByCustomerId(customerId: string, status: TaxExemptionStatus = 'active'): Promise<any[]> {
+  async findTaxExemptionsByCustomerId(customerId: string, status: TaxExemptionStatus = 'active'): Promise<unknown[]> {
     return this.findCustomerTaxExemptions(customerId, status);
   }
 
@@ -236,7 +225,7 @@ export class TaxQueryRepo {
     taxCategoryId: string,
     status: TaxExemptionStatus = 'active',
   ): Promise<CustomerTaxExemption[]> {
-    const results = await query<any[]>(
+    const results = await query<Record<string, unknown>[]>(
       `SELECT * 
        FROM "customerTaxExemption" 
        WHERE "customerId" = $1 
@@ -303,7 +292,7 @@ export class TaxQueryRepo {
       region?: string;
       postalCode?: string;
     },
-    customerId?: string,
+    _customerId?: string,
   ): Promise<{
     taxAmount: number;
     rate: number;
@@ -311,7 +300,7 @@ export class TaxQueryRepo {
     total: number;
   }> {
     // Find the appropriate tax zone for this address
-    const taxZone = await this.findTaxZoneForAddress(address.country, address.region, address.postalCode);
+    const _taxZone = await this.findTaxZoneForAddress(address.country, address.region, address.postalCode);
 
     // Get the tax rate for this address
     const taxRate = await this.getTaxRateForAddress({
@@ -440,7 +429,7 @@ export class TaxQueryRepo {
     subtotal: number,
     shippingAmount: number = 0,
     customerId?: string,
-    merchantId?: string,
+    _merchantId?: string,
   ): Promise<TaxCalculationResult> {
     // Convert DB format back to TS format for internal processing
     const items = dbItems.map(item => ({
@@ -474,7 +463,7 @@ export class TaxQueryRepo {
       postal_code?: string;
       city?: string;
     },
-    customerId?: string,
+    _customerId?: string,
   ): Promise<TaxCalculationResult> {
     // This would typically involve getting the basket from the database first
     // Since we don't have direct access to the basket repository here, we'll implement

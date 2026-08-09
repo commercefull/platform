@@ -21,9 +21,9 @@ export const listDisputes = async (req: Request, res: Response): Promise<void> =
     const { paymentId } = req.query;
     const disputes = paymentId ? await paymentDisputeRepo.findByPayment(paymentId as string) : [];
     successResponse(res, { disputes });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('listDisputes error:', error);
-    errorResponse(res, error.message || 'Failed to list disputes');
+    errorResponse(res, (error as Error).message || 'Failed to list disputes');
   }
 };
 
@@ -36,9 +36,9 @@ export const getDispute = async (req: Request, res: Response): Promise<void> => 
       return;
     }
     successResponse(res, { dispute });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('getDispute error:', error);
-    errorResponse(res, error.message || 'Failed to get dispute');
+    errorResponse(res, (error as Error).message || 'Failed to get dispute');
   }
 };
 
@@ -56,9 +56,9 @@ export const updateDisputeStatus = async (req: Request, res: Response): Promise<
       return;
     }
     successResponse(res, { dispute });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('updateDisputeStatus error:', error);
-    errorResponse(res, error.message || 'Failed to update dispute status');
+    errorResponse(res, (error as Error).message || 'Failed to update dispute status');
   }
 };
 
@@ -75,9 +75,9 @@ export const listFees = async (req: Request, res: Response): Promise<void> => {
     }
     const fees = await paymentFeeRepo.findByTransaction(transactionId as string);
     successResponse(res, { fees });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('listFees error:', error);
-    errorResponse(res, error.message || 'Failed to list fees');
+    errorResponse(res, (error as Error).message || 'Failed to list fees');
   }
 };
 
@@ -87,22 +87,22 @@ export const listFees = async (req: Request, res: Response): Promise<void> => {
 
 export const getSettings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = (req.user as any)?.merchantId || (req.user as any)?._id;
+    const merchantId = req.user?.merchantId || req.user?._id;
     if (!merchantId) {
       errorResponse(res, 'Authentication required', 401);
       return;
     }
     const settings = await paymentSettingsRepo.findByMerchant(merchantId);
     successResponse(res, { settings });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('getSettings error:', error);
-    errorResponse(res, error.message || 'Failed to get settings');
+    errorResponse(res, (error as Error).message || 'Failed to get settings');
   }
 };
 
 export const updateSettings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = (req.user as any)?.merchantId || (req.user as any)?._id;
+    const merchantId = req.user?.merchantId || req.user?._id;
     if (!merchantId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -119,9 +119,9 @@ export const updateSettings = async (req: Request, res: Response): Promise<void>
       config: config || {},
     });
     successResponse(res, { settings });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('updateSettings error:', error);
-    errorResponse(res, error.message || 'Failed to update settings');
+    errorResponse(res, (error as Error).message || 'Failed to update settings');
   }
 };
 
@@ -131,7 +131,7 @@ export const updateSettings = async (req: Request, res: Response): Promise<void>
 
 export const getBalance = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = (req.user as any)?.merchantId || (req.user as any)?._id;
+    const merchantId = req.user?.merchantId || req.user?._id;
     if (!merchantId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -140,9 +140,9 @@ export const getBalance = async (req: Request, res: Response): Promise<void> => 
     const useCase = new GetPaymentBalanceUseCase();
     const result = await useCase.execute(new GetPaymentBalanceCommand(merchantId, currency as string | undefined));
     successResponse(res, result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('getBalance error:', error);
-    errorResponse(res, error.message || 'Failed to get balance');
+    errorResponse(res, (error as Error).message || 'Failed to get balance');
   }
 };
 
@@ -152,22 +152,22 @@ export const getBalance = async (req: Request, res: Response): Promise<void> => 
 
 export const listReports = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = (req.user as any)?.merchantId || (req.user as any)?._id;
+    const merchantId = req.user?.merchantId || req.user?._id;
     if (!merchantId) {
       errorResponse(res, 'Authentication required', 401);
       return;
     }
     const reports = await paymentReportRepo.findByMerchant(merchantId);
     successResponse(res, { reports });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('listReports error:', error);
-    errorResponse(res, error.message || 'Failed to list reports');
+    errorResponse(res, (error as Error).message || 'Failed to list reports');
   }
 };
 
 export const getReport = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = (req.user as any)?.merchantId || (req.user as any)?._id;
+    const merchantId = req.user?.merchantId || req.user?._id;
     if (!merchantId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -179,8 +179,8 @@ export const getReport = async (req: Request, res: Response): Promise<void> => {
     }
     const reports = await paymentReportRepo.findByDateRange(merchantId, new Date(from as string), new Date(to as string));
     successResponse(res, { reports });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('getReport error:', error);
-    errorResponse(res, error.message || 'Failed to get report');
+    errorResponse(res, (error as Error).message || 'Failed to get report');
   }
 };

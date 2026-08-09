@@ -10,14 +10,14 @@ import { TypedRequest } from 'libs/types/express';
 import { CustomerRepo } from '../../../customer/infrastructure/repositories/customerRepo';
 import { MerchantRepo } from '../../../merchant/infrastructure/repositories/merchantRepo';
 import { SocialAccountRepo } from '../../infrastructure/repositories/socialAccountRepo';
-import { SocialProvider, UserType, SocialProfileData } from '../../domain/entities/SocialAccount';
+import { SocialProvider, SocialProfileData } from '../../domain/entities/SocialAccount';
 import {
   SocialLoginUseCase,
   LinkSocialAccountUseCase,
   UnlinkSocialAccountUseCase,
   GetLinkedAccountsUseCase,
 } from '../../application/useCases/SocialLogin';
-import { generateAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
+import { generateAccessToken } from '../../utils/jwtHelpers';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // Environment configuration
@@ -32,6 +32,46 @@ const socialAccountRepo = new SocialAccountRepo();
 
 // Supported providers
 const SUPPORTED_PROVIDERS: SocialProvider[] = ['google', 'facebook', 'apple', 'github', 'twitter', 'linkedin', 'microsoft'];
+
+interface SocialLoginBody {
+  accessToken?: string;
+  idToken?: string;
+  profile?: {
+    id: string;
+    email: string;
+    name?: string;
+    displayName?: string;
+    firstName?: string;
+    given_name?: string;
+    lastName?: string;
+    family_name?: string;
+    picture?: string;
+    avatar?: string;
+    profileUrl?: string;
+    [key: string]: unknown;
+  };
+  refreshToken?: string;
+  expiresAt?: string;
+  scopes?: string;
+}
+
+interface LinkAccountBody {
+  accessToken?: string;
+  profile?: {
+    id: string;
+    email?: string;
+    name?: string;
+    displayName?: string;
+    firstName?: string;
+    lastName?: string;
+    picture?: string;
+    avatar?: string;
+    [key: string]: unknown;
+  };
+  refreshToken?: string;
+  expiresAt?: string;
+  scopes?: string;
+}
 
 /**
  * Validate provider
@@ -112,7 +152,7 @@ export async function getOAuthConfig(req: TypedRequest, res: Response): Promise<
 /**
  * Handle social login callback for customers
  */
-export async function customerSocialLogin(req: TypedRequest, res: Response): Promise<void> {
+export async function customerSocialLogin(req: TypedRequest<Record<string, string>, unknown, SocialLoginBody>, res: Response): Promise<void> {
   try {
     const { provider } = req.params;
     const { accessToken, idToken, profile: clientProfile } = req.body;
@@ -154,15 +194,15 @@ export async function customerSocialLogin(req: TypedRequest, res: Response): Pro
       lastName: clientProfile.lastName || clientProfile.family_name,
       avatarUrl: clientProfile.picture || clientProfile.avatar,
       profileUrl: clientProfile.profileUrl,
-      accessToken,
+      accessToken: accessToken || '',
       refreshToken: req.body.refreshToken,
       tokenExpiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
-      scopes: req.body.scopes,
+      scopes: req.body.scopes ? req.body.scopes.split(',') : undefined,
       rawData: clientProfile,
     };
 
     // Create use case with customer finder/creator
-    const socialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData, userType) => {
+    const socialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData, _userType) => {
       // Try to find existing customer
       let customer = await customerRepo.findCustomerByEmail(email);
 
@@ -225,7 +265,7 @@ export async function customerSocialLogin(req: TypedRequest, res: Response): Pro
 
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : 'Social login failed',
+      message: error instanceof Error ? (error as Error).message : 'Social login failed',
     });
   }
 }
@@ -233,7 +273,7 @@ export async function customerSocialLogin(req: TypedRequest, res: Response): Pro
 /**
  * Handle social login callback for merchants
  */
-export async function merchantSocialLogin(req: TypedRequest, res: Response): Promise<void> {
+export async function merchantSocialLogin(req: TypedRequest<Record<string, string>, unknown, SocialLoginBody>, res: Response): Promise<void> {
   try {
     const { provider } = req.params;
     const { accessToken, idToken, profile: clientProfile } = req.body;
@@ -270,15 +310,15 @@ export async function merchantSocialLogin(req: TypedRequest, res: Response): Pro
       lastName: clientProfile.lastName || clientProfile.family_name,
       avatarUrl: clientProfile.picture || clientProfile.avatar,
       profileUrl: clientProfile.profileUrl,
-      accessToken,
+      accessToken: accessToken || '',
       refreshToken: req.body.refreshToken,
       tokenExpiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
-      scopes: req.body.scopes,
+      scopes: req.body.scopes ? req.body.scopes.split(',') : undefined,
       rawData: clientProfile,
     };
 
     // Create use case with merchant finder/creator
-    const socialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData, userType) => {
+    const socialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData, _userType) => {
       // Try to find existing merchant
       let merchant = await merchantRepo.findByEmail(email);
 
@@ -342,7 +382,7 @@ export async function merchantSocialLogin(req: TypedRequest, res: Response): Pro
 
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : 'Social login failed',
+      message: error instanceof Error ? (error as Error).message : 'Social login failed',
     });
   }
 }
@@ -350,7 +390,7 @@ export async function merchantSocialLogin(req: TypedRequest, res: Response): Pro
 /**
  * Link a social account to an existing customer
  */
-export async function linkCustomerSocialAccount(req: TypedRequest, res: Response): Promise<void> {
+export async function linkCustomerSocialAccount(req: TypedRequest<Record<string, string>, unknown, LinkAccountBody>, res: Response): Promise<void> {
   try {
     const { provider } = req.params;
     const customerId = req.user?.id;
@@ -388,10 +428,10 @@ export async function linkCustomerSocialAccount(req: TypedRequest, res: Response
       firstName: clientProfile.firstName,
       lastName: clientProfile.lastName,
       avatarUrl: clientProfile.picture || clientProfile.avatar,
-      accessToken,
+      accessToken: accessToken || '',
       refreshToken: req.body.refreshToken,
       tokenExpiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
-      scopes: req.body.scopes,
+      scopes: req.body.scopes ? req.body.scopes.split(',') : undefined,
       rawData: clientProfile,
     };
 
@@ -423,7 +463,7 @@ export async function linkCustomerSocialAccount(req: TypedRequest, res: Response
 
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : 'Failed to link social account',
+      message: error instanceof Error ? (error as Error).message : 'Failed to link social account',
     });
   }
 }
@@ -476,7 +516,7 @@ export async function unlinkCustomerSocialAccount(req: TypedRequest, res: Respon
 
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : 'Failed to unlink social account',
+      message: error instanceof Error ? (error as Error).message : 'Failed to unlink social account',
     });
   }
 }

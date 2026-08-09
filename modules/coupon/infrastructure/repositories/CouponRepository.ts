@@ -4,7 +4,45 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Coupon, CouponUsage } from '../../domain/entities/Coupon';
+import { Coupon, CouponUsage, DiscountType, CouponType } from '../../domain/entities/Coupon';
+
+interface CouponRow {
+  couponId: string;
+  code: string;
+  name: string;
+  description: string | null;
+  type: DiscountType;
+  value: string;
+  currency: string | null;
+  minOrderValue: string | null;
+  maxDiscountAmount: string | null;
+  usageType: CouponType;
+  usageLimit: string | null;
+  usageCount: string;
+  customerUsageLimit: string | null;
+  conditions: string | null;
+  isActive: boolean;
+  startsAt: string | null;
+  expiresAt: string | null;
+  applicableProducts: string | null;
+  applicableCategories: string | null;
+  applicableCustomerGroups: string | null;
+  excludedProducts: string | null;
+  excludedCategories: string | null;
+  createdBy: string;
+  metadata: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CouponUsageRow {
+  usageId: string;
+  couponId: string;
+  orderId: string;
+  customerId: string;
+  discountAmount: string;
+  usedAt: string;
+}
 
 export interface CouponFilters {
   code?: string;
@@ -34,14 +72,14 @@ export interface PaginatedResult<T> {
 
 export class CouponRepository {
   async findById(couponId: string): Promise<Coupon | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM coupon WHERE "couponId" = $1', [couponId]);
+    const row = await queryOne<CouponRow>('SELECT * FROM coupon WHERE "couponId" = $1', [couponId]);
 
     if (!row) return null;
     return this.mapToCoupon(row);
   }
 
   async findByCode(code: string): Promise<Coupon | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM coupon WHERE code = $1', [code.toUpperCase()]);
+    const row = await queryOne<CouponRow>('SELECT * FROM coupon WHERE code = $1', [code.toUpperCase()]);
 
     if (!row) return null;
     return this.mapToCoupon(row);
@@ -58,7 +96,7 @@ export class CouponRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM coupon ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<CouponRow[]>(
       `SELECT * FROM coupon ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -80,7 +118,7 @@ export class CouponRepository {
   async save(coupon: Coupon): Promise<Coupon> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>('SELECT "couponId" FROM coupon WHERE "couponId" = $1', [coupon.couponId]);
+    const existing = await queryOne<{ couponId: string }>('SELECT "couponId" FROM coupon WHERE "couponId" = $1', [coupon.couponId]);
 
     if (existing) {
       // Update existing coupon
@@ -172,24 +210,53 @@ export class CouponRepository {
   }
 
   // Coupon Usage tracking
-  async recordUsage(usage: CouponUsage): Promise<CouponUsage> {
+  async recordUsage(usage: CouponUsage | { couponId: string; basketId?: string; customerId?: string; discountAmount: number }): Promise<CouponUsage> {
     const now = new Date().toISOString();
+    const fullUsage: CouponUsage = {
+      usageId: 'usageId' in usage ? (usage as CouponUsage).usageId : `usg_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`,
+      couponId: usage.couponId,
+      orderId: 'orderId' in usage ? (usage as CouponUsage).orderId : ('basketId' in usage ? (usage.basketId || '') : ''),
+      customerId: usage.customerId || '',
+      discountAmount: usage.discountAmount,
+      usedAt: 'usedAt' in usage ? (usage as CouponUsage).usedAt : new Date(),
+    };
 
     await query(
       `INSERT INTO "couponUsage" (
         "usageId", "couponId", "orderId", "customerId", "discountAmount", "usedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [usage.usageId, usage.couponId, usage.orderId, usage.customerId, usage.discountAmount, now],
+      [fullUsage.usageId, fullUsage.couponId, fullUsage.orderId, fullUsage.customerId, fullUsage.discountAmount, now],
     );
 
     // Update coupon usage count
-    await query('UPDATE coupon SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "couponId" = $2', [now, usage.couponId]);
+    await query('UPDATE coupon SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "couponId" = $2', [now, fullUsage.couponId]);
 
-    return usage;
+    return fullUsage;
+  }
+
+  async createRedemption(redemption: {
+    redemptionId: string;
+    couponId: string;
+    orderId: string;
+    customerId?: string;
+    discountAmount: number;
+    redeemedAt: Date;
+  }): Promise<void> {
+    await query(
+      `INSERT INTO "couponUsage" (
+        "usageId", "couponId", "orderId", "customerId", "discountAmount", "usedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [redemption.redemptionId, redemption.couponId, redemption.orderId, redemption.customerId || '', redemption.discountAmount, redemption.redeemedAt.toISOString()],
+    );
+  }
+
+  async incrementUsageCount(couponId: string): Promise<void> {
+    const now = new Date().toISOString();
+    await query('UPDATE coupon SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "couponId" = $2', [now, couponId]);
   }
 
   async getUsageHistory(couponId: string, limit: number = 50): Promise<CouponUsage[]> {
-    const rows = await query<Record<string, any>[]>(`SELECT * FROM "couponUsage" WHERE "couponId" = $1 ORDER BY "usedAt" DESC LIMIT $2`, [
+    const rows = await query<CouponUsageRow[]>(`SELECT * FROM "couponUsage" WHERE "couponId" = $1 ORDER BY "usedAt" DESC LIMIT $2`, [
       couponId,
       limit,
     ]);
@@ -214,7 +281,7 @@ export class CouponRepository {
   }
 
   async getActiveCoupons(limit: number = 100): Promise<Coupon[]> {
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<CouponRow[]>(
       `SELECT * FROM coupon
       WHERE "isActive" = true
       AND ("startsAt" IS NULL OR "startsAt" <= NOW())
@@ -269,9 +336,9 @@ export class CouponRepository {
   }
 
   // Helper methods
-  private buildWhereClause(filters?: CouponFilters): { whereClause: string; params: any[] } {
+  private buildWhereClause(filters?: CouponFilters): { whereClause: string; params: unknown[] } {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (filters?.code) {
       conditions.push('code = $' + (params.length + 1));
@@ -309,15 +376,15 @@ export class CouponRepository {
     };
   }
 
-  private mapToCoupon(row: Record<string, any>): Coupon {
+  private mapToCoupon(row: CouponRow): Coupon {
     return Coupon.reconstitute({
       couponId: row.couponId,
       code: row.code,
       name: row.name,
-      description: row.description,
+      description: row.description ?? undefined,
       type: row.type,
       value: parseFloat(row.value),
-      currency: row.currency,
+      currency: row.currency ?? undefined,
       minOrderValue: row.minOrderValue ? parseFloat(row.minOrderValue) : undefined,
       maxDiscountAmount: row.maxDiscountAmount ? parseFloat(row.maxDiscountAmount) : undefined,
       usageType: row.usageType,

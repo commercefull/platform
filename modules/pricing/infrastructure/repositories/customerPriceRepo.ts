@@ -1,7 +1,6 @@
 import { queryOne, query } from '../../../../libs/db';
-import { generateUUID } from '../../../../libs/uuid';
 import { Table } from '../../../../libs/db/types';
-import { CustomerPrice, CustomerPriceList, PricingRuleStatus } from '../../domain/pricingRule';
+import { CustomerPrice, CustomerPriceList } from '../../domain/pricingRule';
 
 /**
  * Customer Price Repository
@@ -10,7 +9,7 @@ import { CustomerPrice, CustomerPriceList, PricingRuleStatus } from '../../domai
  * Tables: priceList, customerPriceList, customerPrice (from db/types.ts)
  */
 export class CustomerPriceRepo {
-  private readonly priceListTable = Table.PriceList;
+  private readonly priceListTable = Table.PricingPriceList;
   private readonly customerPriceListTable = Table.CustomerPriceList;
   private readonly customerPriceTable = Table.CustomerPrice;
 
@@ -30,7 +29,7 @@ export class CustomerPriceRepo {
 
     let conditions = [`"isActive" = true`, `("startDate" IS NULL OR "startDate" <= $1)`, `("endDate" IS NULL OR "endDate" >= $1)`];
 
-    const params: any[] = [now];
+    const params: unknown[] = [now];
 
     // Customer ID condition
     params.push(customerId);
@@ -86,7 +85,7 @@ export class CustomerPriceRepo {
     const now = new Date();
 
     const setStatements: string[] = ['"updatedAt" = $2'];
-    const values: any[] = [id, now];
+    const values: unknown[] = [id, now];
     let paramIndex = 3;
 
     for (const [key, value] of Object.entries(priceList)) {
@@ -147,7 +146,7 @@ export class CustomerPriceRepo {
    */
   async findPricesForProduct(productId: string, variantId?: string, customerPriceLists?: string[]): Promise<CustomerPrice[]> {
     const conditions = [`"productId" = $1`];
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (variantId) {
       params.push(variantId);
@@ -172,7 +171,6 @@ export class CustomerPriceRepo {
    * Create a new customer price
    */
   async createPrice(customerPrice: Omit<CustomerPrice, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomerPrice> {
-    const now = new Date();
 
     const sql = `
       INSERT INTO "${this.customerPriceTable}" (
@@ -184,7 +182,7 @@ export class CustomerPriceRepo {
     const values = [
       customerPrice.priceListId,
       customerPrice.productId,
-      customerPrice.variantId || (customerPrice as any).productVariantId || null,
+      customerPrice.variantId || (customerPrice as CustomerPrice & { productVariantId?: string }).productVariantId || null,
       customerPrice.adjustmentType,
       customerPrice.adjustmentValue,
     ];
@@ -205,7 +203,7 @@ export class CustomerPriceRepo {
     const now = new Date();
 
     const setStatements: string[] = ['"updatedAt" = $2'];
-    const values: any[] = [id, now];
+    const values: unknown[] = [id, now];
     let paramIndex = 3;
 
     for (const [key, value] of Object.entries(customerPrice)) {

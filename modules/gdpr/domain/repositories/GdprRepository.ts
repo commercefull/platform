@@ -4,7 +4,7 @@
  */
 
 import { GdprDataRequest, GdprRequestType, GdprRequestStatus } from '../entities/GdprDataRequest';
-import { GdprCookieConsent, CookiePreferences } from '../entities/GdprCookieConsent';
+import { GdprCookieConsent } from '../entities/GdprCookieConsent';
 
 // ============================================================================
 // Filters and Pagination
@@ -107,11 +107,11 @@ export interface GdprService {
 
   // Data export helpers
   exportCustomerData(customerId: string): Promise<{
-    customer: Record<string, any>;
-    orders: Record<string, any>[];
-    addresses: Record<string, any>[];
-    consents: Record<string, any>[];
-    activities: Record<string, any>[];
+    customer: Record<string, unknown>;
+    orders: Record<string, unknown>[];
+    addresses: Record<string, unknown>[];
+    consents: Record<string, unknown>[];
+    activities: Record<string, unknown>[];
   }>;
 
   // Data deletion helpers

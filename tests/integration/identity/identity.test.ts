@@ -3,10 +3,14 @@ import { setupIdentityTests, cleanupIdentityTests, TEST_CUSTOMER, TEST_MERCHANT 
 
 describe('Identity Feature Tests', () => {
   let client: AxiosInstance;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let adminToken: string;
   let customerToken: string;
+   
   let merchantToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let customerRefreshToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let merchantRefreshToken: string;
 
   beforeAll(async () => {

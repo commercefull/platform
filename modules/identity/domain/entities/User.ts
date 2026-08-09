@@ -25,7 +25,7 @@ export interface UserProps {
   lockedUntil?: Date;
   refreshToken?: string;
   refreshTokenExpiresAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,7 +45,7 @@ export class User {
     firstName?: string;
     lastName?: string;
     phone?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): User {
     const now = new Date();
     return new User({
@@ -198,7 +198,7 @@ export class User {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       userId: this.props.userId,
       email: this.props.email,

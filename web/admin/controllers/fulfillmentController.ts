@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import orderFulfillmentRepo from '../../../modules/order/infrastructure/repositories/orderFulfillmentRepo';
 import orderRepo from '../../../modules/order/infrastructure/repositories/orderRepo';
 import warehouseRepo from '../../../modules/warehouse/infrastructure/repositories/warehouseRepo';
@@ -22,10 +22,10 @@ export const listFulfillments = async (req: TypedRequest, res: Response): Promis
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    let fulfillments: any[] = [];
+    let fulfillments: unknown[] = [];
 
     if (status) {
-      fulfillments = await orderFulfillmentRepo.findByStatus(status as any, limit, offset);
+      fulfillments = await orderFulfillmentRepo.findByStatus(status as 'pending' | 'processing' | 'shipped' | 'delivered' | 'failed' | 'cancelled', limit, offset);
     } else {
       // Get recent fulfillments (this would need to be implemented in the repo)
       // For now, get pending fulfillments
@@ -48,12 +48,12 @@ export const listFulfillments = async (req: TypedRequest, res: Response): Promis
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load fulfillments',
+      error: (error as Error).message || 'Failed to load fulfillments',
     });
   }
 };
@@ -82,12 +82,12 @@ export const viewFulfillment = async (req: TypedRequest, res: Response): Promise
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load fulfillment',
+      error: (error as Error).message || 'Failed to load fulfillment',
     });
   }
 };
@@ -95,7 +95,8 @@ export const viewFulfillment = async (req: TypedRequest, res: Response): Promise
 export const updateFulfillmentStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { fulfillmentId } = req.params;
-    const { status, trackingNumber, carrierCode, carrierName, trackingUrl, notes } = req.body;
+    const body = req.body as RequestBody;
+    const { status, trackingNumber, carrierCode, carrierName, trackingUrl, notes } = body;
 
     // Update fulfillment status
     const fulfillment = await orderFulfillmentRepo.updateStatus(fulfillmentId, status);
@@ -119,17 +120,18 @@ export const updateFulfillmentStatus = async (req: TypedRequest, res: Response):
       message: `Fulfillment status updated to ${status}`,
       fulfillment,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to update fulfillment status' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to update fulfillment status' });
   }
 };
 
 export const markAsShipped = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { fulfillmentId } = req.params;
-    const { trackingNumber, carrierCode, carrierName, trackingUrl } = req.body;
+    const body = req.body as RequestBody;
+    const { trackingNumber, carrierCode, carrierName, trackingUrl } = body;
 
     // Mark as shipped
     const fulfillment = await orderFulfillmentRepo.markAsShipped(fulfillmentId);
@@ -148,10 +150,10 @@ export const markAsShipped = async (req: TypedRequest, res: Response): Promise<v
       message: 'Fulfillment marked as shipped',
       fulfillment,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to mark as shipped' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to mark as shipped' });
   }
 };
 
@@ -170,17 +172,18 @@ export const markAsDelivered = async (req: TypedRequest, res: Response): Promise
       message: 'Fulfillment marked as delivered',
       fulfillment,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to mark as delivered' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to mark as delivered' });
   }
 };
 
 export const cancelFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { fulfillmentId } = req.params;
-    const { notes } = req.body;
+    const body = req.body as RequestBody;
+    const { notes } = body;
 
     const fulfillment = await orderFulfillmentRepo.cancel(fulfillmentId, notes);
 
@@ -193,10 +196,10 @@ export const cancelFulfillment = async (req: TypedRequest, res: Response): Promi
       message: 'Fulfillment cancelled',
       fulfillment,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to cancel fulfillment' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to cancel fulfillment' });
   }
 };
 
@@ -212,10 +215,10 @@ export const getFulfillmentStats = async (req: TypedRequest, res: Response): Pro
       overdueCount: overdue.length,
       shippedTodayCount: shippedToday.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to get fulfillment stats' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to get fulfillment stats' });
   }
 };
 
@@ -251,12 +254,12 @@ export const warehouseDashboard = async (req: TypedRequest, res: Response): Prom
       pendingFulfillments,
       selectedWarehouse: warehouseId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load warehouse dashboard',
+      error: (error as Error).message || 'Failed to load warehouse dashboard',
     });
   }
 };

@@ -72,12 +72,12 @@ export interface CheckoutRepository {
   /**
    * Validate shipping address
    */
-  validateShippingAddress(address: any): Promise<{ valid: boolean; errors: string[] }>;
+  validateShippingAddress(address: unknown): Promise<{ valid: boolean; errors: string[] }>;
 
   /**
    * Calculate tax for checkout
    */
-  calculateTax(subtotal: number, shippingAmount: number, address: any): Promise<number>;
+  calculateTax(subtotal: number, shippingAmount: number, address: unknown): Promise<number>;
 
   /**
    * Find checkout session by payment intent ID

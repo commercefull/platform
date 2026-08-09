@@ -105,7 +105,7 @@ export class ProductTypeController {
    */
   async createProductType(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const { name, slug } = req.body;
+      const { name, slug } = req.body as { name?: string; slug?: string };
 
       if (!name) {
         res.status(400).json({
@@ -151,7 +151,7 @@ export class ProductTypeController {
   async updateProductType(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { name, slug } = req.body;
+      const { name, slug } = req.body as { name?: string; slug?: string };
 
       const existing = await productTypeRepository.findById(id);
       if (!existing) {

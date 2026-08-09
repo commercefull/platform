@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import PromotionRepo from '../../../modules/promotion/infrastructure/repositories/promotionRepo';
 import { ListPromotionsUseCase, ListPromotionsCommand } from '../../../modules/promotion/application/useCases/ListPromotions';
 import { CreatePromotionUseCase, CreatePromotionCommand } from '../../../modules/promotion/application/useCases/CreatePromotion';
@@ -21,7 +21,7 @@ export const listPromotions = async (req: TypedRequest, res: Response): Promise<
   try {
     const { status, type, search, limit, offset, orderBy, orderDirection } = req.query;
 
-    const filters: any = {};
+    const filters: Record<string, unknown> = {};
     if (status) filters.status = status;
     if (type) filters.type = type;
     if (search) filters.search = search as string;
@@ -59,12 +59,12 @@ export const listPromotions = async (req: TypedRequest, res: Response): Promise<
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load promotions',
+      error: (error as Error).message || 'Failed to load promotions',
     });
   }
 };
@@ -78,12 +78,12 @@ export const createPromotionForm = async (req: TypedRequest, res: Response): Pro
     adminRespond(req, res, 'promotions/create', {
       pageName: 'Create Promotion',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -94,8 +94,8 @@ export const createPromotionForm = async (req: TypedRequest, res: Response): Pro
 
 export const createPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { code, name, description, type, value, minOrderAmount, maxDiscountAmount, usageLimit, usageLimitPerCustomer, startsAt, endsAt } =
-      req.body;
+    const body = req.body as RequestBody;
+    const { code, name, description, type, value, minOrderAmount, maxDiscountAmount, usageLimit, usageLimitPerCustomer, startsAt, endsAt } = body;
 
     const command = new CreatePromotionCommand(
       name,
@@ -115,14 +115,14 @@ export const createPromotion = async (req: TypedRequest, res: Response): Promise
     const result = await useCase.execute(command);
 
     res.redirect(`/hub/promotions/${result.promotionId}?success=Promotion created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     // Reload form with error
     adminRespond(req, res, 'promotions/create', {
       pageName: 'Create Promotion',
-      error: error.message || 'Failed to create promotion',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create promotion',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -152,12 +152,12 @@ export const viewPromotion = async (req: TypedRequest, res: Response): Promise<v
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load promotion',
+      error: (error as Error).message || 'Failed to load promotion',
     });
   }
 };
@@ -184,12 +184,12 @@ export const editPromotionForm = async (req: TypedRequest, res: Response): Promi
       pageName: `Edit: ${promotion.name}`,
       promotion,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -201,9 +201,10 @@ export const editPromotionForm = async (req: TypedRequest, res: Response): Promi
 export const updatePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { promotionId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
     // Map form fields to update object
+    const body = req.body as RequestBody;
     const {
       name,
       description,
@@ -216,7 +217,7 @@ export const updatePromotion = async (req: TypedRequest, res: Response): Promise
       startsAt,
       endsAt,
       isActive,
-    } = req.body;
+    } = body;
 
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description;
@@ -236,7 +237,7 @@ export const updatePromotion = async (req: TypedRequest, res: Response): Promise
     await useCase.execute(command);
 
     res.redirect(`/hub/promotions/${promotionId}?success=Promotion updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     // Reload form with error
@@ -246,13 +247,13 @@ export const updatePromotion = async (req: TypedRequest, res: Response): Promise
       adminRespond(req, res, 'promotions/edit', {
         pageName: `Edit: ${promotion?.name || 'Promotion'}`,
         promotion,
-        error: error.message || 'Failed to update promotion',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update promotion',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update promotion',
+        error: (error as Error).message || 'Failed to update promotion',
       });
     }
   }
@@ -271,9 +272,9 @@ export const deletePromotion = async (req: TypedRequest, res: Response): Promise
     await useCase.execute(command);
 
     res.json({ success: true, message: 'Promotion deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete promotion' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete promotion' });
   }
 };

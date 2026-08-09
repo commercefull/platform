@@ -23,6 +23,14 @@ import { PostgreSQLMediaRepository } from '../../infrastructure/repositories/med
 import { SharpImageProcessingService } from '../../infrastructure/services/SharpImageProcessingService';
 import { StorageServiceFactory } from '../../infrastructure/services/StorageServiceFactory';
 
+interface MediaUploadBody {
+  altText?: string;
+  title?: string;
+  description?: string;
+  tags?: string;
+  metadata?: string;
+}
+
 // Configure multer for memory storage (required for Sharp processing)
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -59,7 +67,7 @@ export class MediaController {
   /**
    * Upload and process a single image
    */
-  uploadImage = async (req: TypedRequest, res: Response) => {
+  uploadImage = async (req: TypedRequest<Record<string, string>, unknown, MediaUploadBody>, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({
@@ -68,6 +76,7 @@ export class MediaController {
         });
       }
 
+      const body = req.body;
       const result = await this.processImageUseCase.execute({
         file: {
           buffer: req.file.buffer,
@@ -75,11 +84,11 @@ export class MediaController {
           mimetype: req.file.mimetype,
           size: req.file.size,
         },
-        altText: req.body.altText,
-        title: req.body.title,
-        description: req.body.description,
-        tags: req.body.tags ? JSON.parse(req.body.tags) : undefined,
-        metadata: req.body.metadata ? JSON.parse(req.body.metadata) : undefined,
+        altText: body.altText,
+        title: body.title,
+        description: body.description,
+        tags: body.tags ? JSON.parse(body.tags) : undefined,
+        metadata: body.metadata ? JSON.parse(body.metadata) : undefined,
       });
 
       res.json({
@@ -92,7 +101,7 @@ export class MediaController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to process image',
@@ -104,7 +113,7 @@ export class MediaController {
   /**
    * Upload and process multiple images
    */
-  uploadImages = async (req: TypedRequest, res: Response) => {
+  uploadImages = async (req: TypedRequest<Record<string, string>, unknown, MediaUploadBody>, res: Response) => {
     try {
       if (!req.files || !Array.isArray(req.files)) {
         return res.status(400).json({
@@ -113,6 +122,7 @@ export class MediaController {
         });
       }
 
+      const body = req.body;
       const results = await Promise.all(
         req.files.map(async (file: Express.Multer.File) => {
           return this.processImageUseCase.execute({
@@ -122,11 +132,11 @@ export class MediaController {
               mimetype: file.mimetype,
               size: file.size,
             },
-            altText: req.body.altText,
-            title: req.body.title,
-            description: req.body.description,
-            tags: req.body.tags ? JSON.parse(req.body.tags) : undefined,
-            metadata: req.body.metadata ? JSON.parse(req.body.metadata) : undefined,
+            altText: body.altText,
+            title: body.title,
+            description: body.description,
+            tags: body.tags ? JSON.parse(body.tags) : undefined,
+            metadata: body.metadata ? JSON.parse(body.metadata) : undefined,
           });
         }),
       );
@@ -141,7 +151,7 @@ export class MediaController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to process images',

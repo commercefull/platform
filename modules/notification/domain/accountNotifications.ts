@@ -1,4 +1,4 @@
-import { BaseNotification, NotificationBuilder, NotificationChannel, NotificationType } from './notification';
+import { NotificationBuilder, NotificationChannel } from './notification';
 
 /**
  * Parameters for account registration notification

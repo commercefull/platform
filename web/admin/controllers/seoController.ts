@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../respond';
 
 // ============================================================================
@@ -39,18 +39,19 @@ export const listSEOSettings = async (req: TypedRequest, res: Response): Promise
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load SEO settings',
+      error: (error as Error).message || 'Failed to load SEO settings',
     });
   }
 };
 
 export const updateSEOSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
     const {
       siteName,
       siteDescription,
@@ -64,7 +65,7 @@ export const updateSEOSettings = async (req: TypedRequest, res: Response): Promi
       ogImageUrl,
       structuredData,
       canonicalUrls,
-    } = req.body;
+    } = body;
 
     // In a real implementation, this would save to database
     console.log('SEO Settings Update:', {
@@ -83,13 +84,13 @@ export const updateSEOSettings = async (req: TypedRequest, res: Response): Promi
     });
 
     res.redirect('/hub/marketing/seo?success=SEO settings updated successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'marketing/seo/index', {
       pageName: 'SEO Settings',
-      error: error.message || 'Failed to update SEO settings',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to update SEO settings',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -114,7 +115,7 @@ Sitemap: https://Commercefull.com/sitemap.xml`;
     res.setHeader('Content-Type', 'text/plain');
     res.setHeader('Content-Disposition', 'attachment; filename="robots.txt"');
     res.send(robotsTxt);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({ error: 'Failed to generate robots.txt' });
@@ -161,7 +162,7 @@ export const generateSitemap = async (req: TypedRequest, res: Response): Promise
     res.setHeader('Content-Type', 'application/xml');
     res.setHeader('Content-Disposition', 'attachment; filename="sitemap.xml"');
     res.send(sitemapXml);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({ error: 'Failed to generate sitemap' });

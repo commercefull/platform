@@ -4,11 +4,10 @@
  */
 
 import { unixTimestamp } from '../../../../libs/date';
-import { query, queryOne } from '../../../../libs/db';
+import { queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { generateUUID } from '../../../../libs/uuid';
 import { TaxZone, TaxRate, TaxCategory, CustomerTaxExemption, TaxSettings } from '../../taxTypes';
-import taxQueryRepo from './taxQueryRepo';
 
 // ============================================================================
 // Table Constants
@@ -24,8 +23,8 @@ const TABLES = {
 };
 
 // Helper to add id field to result
-function addId<T>(result: any, idField: string): T {
-  if (!result) return null as any;
+function addId<T>(result: Record<string, unknown>, idField: string): T {
+  if (!result) return null as unknown as T;
   return { ...result, id: result[idField] } as T;
 }
 
@@ -41,7 +40,7 @@ export class TaxCommandRepo {
 
     // Use taxRate directly - DB uses camelCase
 
-    const result = await queryOne<any>(
+    const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "${TABLES.TAX_RATE}" (
         "taxRateId", "taxCategoryId", "taxZoneId", "name",
         "rate", "type", "priority", "isCompound", "includeInPrice",
@@ -89,7 +88,7 @@ export class TaxCommandRepo {
 
     // Build update fields dynamically
     const sets: string[] = [];
-    const params: any[] = [id];
+    const params: unknown[] = [id];
     let paramIndex = 2;
 
     // Use camelCase database field names for updates
@@ -181,7 +180,7 @@ export class TaxCommandRepo {
       throw new Error('No fields to update');
     }
 
-    const result = await queryOne<any>(`UPDATE "${TABLES.TAX_RATE}" SET ${sets.join(', ')} WHERE "taxRateId" = $1 RETURNING *`, params);
+    const result = await queryOne<Record<string, unknown>>(`UPDATE "${TABLES.TAX_RATE}" SET ${sets.join(', ')} WHERE "taxRateId" = $1 RETURNING *`, params);
 
     if (!result) {
       throw new Error(`Tax rate with ID ${id} not found`);
@@ -205,7 +204,7 @@ export class TaxCommandRepo {
 
     // Use category directly - DB uses camelCase
 
-    const result = await queryOne<any>(
+    const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "${TABLES.TAX_CATEGORY}" (
         "taxCategoryId", "name", "code", "description", "isDefault", "sortOrder",
         "isActive", "createdAt", "updatedAt"
@@ -229,7 +228,7 @@ export class TaxCommandRepo {
 
     // Build update fields dynamically
     const sets: string[] = [];
-    const params: any[] = [id];
+    const params: unknown[] = [id];
     let paramIndex = 2;
 
     if (category.name !== undefined) {
@@ -270,7 +269,7 @@ export class TaxCommandRepo {
       throw new Error('No fields to update');
     }
 
-    const result = await queryOne<any>(
+    const result = await queryOne<Record<string, unknown>>(
       `UPDATE "${TABLES.TAX_CATEGORY}" SET ${sets.join(', ')} WHERE "taxCategoryId" = $1 RETURNING *`,
       params,
     );
@@ -298,7 +297,7 @@ export class TaxCommandRepo {
 
     // Use taxZone directly - DB uses camelCase
 
-    const result = await queryOne<any>(
+    const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "${TABLES.TAX_ZONE}" (
         "taxZoneId", "name", "code", "description", "isDefault", "countries", "states", 
         "postcodes", "cities", "isActive", "createdAt", "updatedAt"
@@ -333,7 +332,7 @@ export class TaxCommandRepo {
 
     // Build update fields dynamically
     const sets: string[] = [];
-    const params: any[] = [id];
+    const params: unknown[] = [id];
     let paramIndex = 2;
 
     if (taxZone.name !== undefined) {
@@ -389,7 +388,7 @@ export class TaxCommandRepo {
       throw new Error('No fields to update');
     }
 
-    const result = await queryOne<any>(`UPDATE "${TABLES.TAX_ZONE}" SET ${sets.join(', ')} WHERE "taxZoneId" = $1 RETURNING *`, params);
+    const result = await queryOne<Record<string, unknown>>(`UPDATE "${TABLES.TAX_ZONE}" SET ${sets.join(', ')} WHERE "taxZoneId" = $1 RETURNING *`, params);
 
     if (!result) {
       throw new Error(`Tax zone with ID ${id} not found`);
@@ -413,7 +412,7 @@ export class TaxCommandRepo {
 
     // Use exemption directly - DB uses camelCase
 
-    const result = await queryOne<any>(
+    const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "${TABLES.CUSTOMER_TAX_EXEMPTION}" (
         "customerTaxExemptionId", "customerId", "taxZoneId", "type", "status", 
         "name", "exemptionNumber", "businessName", "exemptionReason", "documentUrl", 
@@ -461,7 +460,7 @@ export class TaxCommandRepo {
 
     // Build update fields dynamically
     const sets: string[] = [];
-    const params: any[] = [id];
+    const params: unknown[] = [id];
     let paramIndex = 2;
 
     if (exemption.taxZoneId !== undefined) {
@@ -542,7 +541,7 @@ export class TaxCommandRepo {
       throw new Error('No fields to update');
     }
 
-    const result = await queryOne<any>(
+    const result = await queryOne<Record<string, unknown>>(
       `UPDATE "${TABLES.CUSTOMER_TAX_EXEMPTION}" SET ${sets.join(', ')} WHERE "customerTaxExemptionId" = $1 RETURNING *`,
       params,
     );
@@ -570,7 +569,7 @@ export class TaxCommandRepo {
 
     // Use settings directly - DB uses camelCase
 
-    const result = await queryOne<any>(
+    const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "${TABLES.TAX_SETTINGS}" (
         "taxSettingsId", "merchantId", "calculationMethod", "pricesIncludeTax", 
         "displayPricesWithTax", "taxBasedOn", "shippingTaxClass", 
@@ -620,7 +619,7 @@ export class TaxCommandRepo {
 
     // Build update fields dynamically
     const sets: string[] = [];
-    const params: any[] = [id];
+    const params: unknown[] = [id];
     let paramIndex = 2;
 
     if (settings.calculationMethod !== undefined) {
@@ -701,7 +700,7 @@ export class TaxCommandRepo {
       throw new Error('No fields to update');
     }
 
-    const result = await queryOne<any>(
+    const result = await queryOne<Record<string, unknown>>(
       `UPDATE "${TABLES.TAX_SETTINGS}" SET ${sets.join(', ')} WHERE "taxSettingsId" = $1 RETURNING *`,
       params,
     );

@@ -17,7 +17,7 @@ export interface InventoryLocation {
   };
   isActive: boolean;
   priority: number; // For fulfillment priority
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface InventoryItem {
@@ -40,7 +40,7 @@ export interface InventoryItem {
   expiryDate?: Date;
   batchNumber?: string;
   isActive: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -103,7 +103,7 @@ export class Inventory {
     binLocation?: string;
     expiryDate?: Date;
     batchNumber?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Inventory {
     const now = new Date();
 
@@ -187,7 +187,7 @@ export class Inventory {
   get isActive(): boolean {
     return this.props.isActive;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -246,7 +246,7 @@ export class Inventory {
     return this.updateQuantity(this.props.quantity + adjustment, reason, performedBy);
   }
 
-  reserveQuantity(quantity: number, orderId?: string, performedBy?: string): boolean {
+  reserveQuantity(quantity: number, _orderId?: string, _performedBy?: string): boolean {
     if (this.props.availableQuantity < quantity) {
       return false;
     }
@@ -259,13 +259,13 @@ export class Inventory {
     return true;
   }
 
-  releaseReservation(quantity: number, performedBy?: string): void {
+  releaseReservation(quantity: number, _performedBy?: string): void {
     this.props.reservedQuantity = Math.max(0, this.props.reservedQuantity - quantity);
     this.updateAvailableQuantity();
     this.touch();
   }
 
-  fulfillReservation(quantity: number, performedBy?: string): void {
+  fulfillReservation(quantity: number, _performedBy?: string): void {
     // Convert reservation to actual outbound
     this.props.reservedQuantity = Math.max(0, this.props.reservedQuantity - quantity);
     this.props.quantity -= quantity;
@@ -304,7 +304,7 @@ export class Inventory {
     this.touch();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -317,7 +317,7 @@ export class Inventory {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       inventoryId: this.props.inventoryId,
       productId: this.props.productId,

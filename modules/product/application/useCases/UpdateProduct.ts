@@ -4,9 +4,6 @@
  */
 
 import { ProductRepository } from '../../domain/repositories/ProductRepository';
-import { Product } from '../../domain/entities/Product';
-import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
-import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -44,7 +41,7 @@ export class UpdateProductCommand {
       returnPolicy?: string;
       warranty?: string;
       tags?: string[];
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
     },
   ) {}
 }

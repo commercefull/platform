@@ -180,7 +180,7 @@ describe('Collections & Product Lists', () => {
       expect(res.data.success).toBe(true);
       // Verify the map items count decreased
       const remainingItems = res.data.data?.mapItems || [];
-      const remainingIds = remainingItems.map((m: any) =>
+      const remainingIds = remainingItems.map((m: Record<string, unknown>) =>
         m.productCollectionMapId || m.mapId || m.id,
       );
       expect(remainingIds).not.toContain(mapItemId);

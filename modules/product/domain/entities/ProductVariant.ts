@@ -30,7 +30,7 @@ export interface ProductVariantProps {
   position: number;
   barcode?: string;
   externalId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -66,7 +66,7 @@ export class ProductVariant {
     position?: number;
     barcode?: string;
     externalId?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): ProductVariant {
     const now = new Date();
     const variantName = props.name || ProductVariant.generateName(props.attributes);
@@ -154,7 +154,7 @@ export class ProductVariant {
   get externalId(): string | undefined {
     return this.props.externalId;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -284,7 +284,7 @@ export class ProductVariant {
     this.touch();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -297,7 +297,7 @@ export class ProductVariant {
     return attributes.map(attr => attr.displayValue || attr.value).join(' / ');
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       variantId: this.props.variantId,
       productId: this.props.productId,

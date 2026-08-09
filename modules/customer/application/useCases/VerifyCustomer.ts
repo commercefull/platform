@@ -56,7 +56,7 @@ export class VerifyCustomerUseCase {
     }
 
     // Emit event
-    (eventBus as any).emit('customer.verified', {
+    eventBus.emit('customer.verified', {
       customerId: customer.customerId,
       email: customer.email,
       verificationType: command.verificationType,

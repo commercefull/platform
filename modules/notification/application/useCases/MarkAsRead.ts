@@ -12,8 +12,13 @@ export interface MarkAsReadOutput {
   markedAt: string;
 }
 
+export interface MarkAsReadRepository {
+  findById(notificationId: string): Promise<{ notificationId: string; userId?: string; recipientId?: string; isRead: boolean } | null>;
+  markAsRead(notificationId: string, readAt?: Date): Promise<unknown>;
+}
+
 export class MarkAsReadUseCase {
-  constructor(private readonly notificationRepository: any) {}
+  constructor(private readonly notificationRepository: MarkAsReadRepository) {}
 
   async execute(input: MarkAsReadInput): Promise<MarkAsReadOutput> {
     if (!input.notificationIds || input.notificationIds.length === 0) {
@@ -27,7 +32,7 @@ export class MarkAsReadUseCase {
       const notification = await this.notificationRepository.findById(notificationId);
 
       // Verify ownership and not already read
-      if (notification && notification.recipientId === input.recipientId && !notification.isRead) {
+      if (notification && (notification.recipientId === input.recipientId || notification.userId === input.recipientId) && !notification.isRead) {
         await this.notificationRepository.markAsRead(notificationId, now);
         markedCount++;
       }

@@ -1,20 +1,13 @@
 import productRepo from '../../product/infrastructure/repositories/productRepo';
 import productVariantRepo from '../../product/infrastructure/repositories/productVariantRepo';
 import pricingRuleRepo from '../infrastructure/repositories/pricingRuleRepo';
-import tierPriceRepo from '../infrastructure/repositories/tierPriceRepo';
+import productTierPriceRepo from '../infrastructure/repositories/productTierPriceRepo';
 import customerPriceRepo from '../infrastructure/repositories/customerPriceRepo';
 import currencyRepo from '../infrastructure/repositories/currencyRepo';
 import currencyPriceRuleRepo from '../infrastructure/repositories/currencyPriceRuleRepo';
-import {
-  PriceContext,
-  PricingAdjustmentType,
-  PricingResult,
-  PricingRule,
-  PricingRuleType,
-  PricingRuleScope,
-  CurrencyPriceRule,
-} from '../domain/pricingRule';
-import { Currency, convertCurrency, formatCurrency } from '../domain/currency';
+import { PriceContext, PricingAdjustmentType, PricingResult, PricingRule, PricingRuleScope } from '../domain/pricingRule';
+
+import { Currency, formatCurrency } from '../domain/currency';
 import { MembershipRepo } from '../../membership/infrastructure/repositories/membershipRepo';
 import { LoyaltyRepo } from '../../loyalty/infrastructure/repositories/loyaltyRepo';
 
@@ -165,10 +158,10 @@ export class PricingService {
       customerId,
       customerGroupIds = [],
       quantity = 1,
-      date = new Date(),
-      cartTotal = 0,
+      date: _date = new Date(),
+      cartTotal: _cartTotal = 0,
       currencyCode,
-      regionCode,
+      regionCode: _regionCode,
       additionalData = {},
     } = context;
 
@@ -214,7 +207,7 @@ export class PricingService {
       if (currencyCode !== priceCurrency) {
         const {
           convertedPrice,
-          exchangeRate,
+          exchangeRate: _exchangeRate,
           appliedRules: currencyRules,
         } = await this.convertPrice(currentPrice, priceCurrency, currencyCode);
 
@@ -230,7 +223,7 @@ export class PricingService {
 
     // Step 2: Apply tier pricing (quantity discounts)
     if (quantity > 1) {
-      const tierPrice = await tierPriceRepo.findApplicableTier(productId, quantity, variantId, customerGroupIds[0]);
+      const tierPrice = await productTierPriceRepo.findApplicableTier(productId, quantity, variantId, customerGroupIds[0]);
 
       if (tierPrice) {
         const previousPrice = currentPrice;
@@ -357,7 +350,7 @@ export class PricingService {
             impact: previousPrice - currentPrice,
           });
         }
-      } catch (error) {
+      } catch (_error) {
         // Membership module might not be available or error occurred
       }
     }
@@ -370,10 +363,10 @@ export class PricingService {
 
         // Default points-to-money ratio (e.g., 100 points = $1)
         // This should ideally come from a configuration or settings
-        const pointsToMoneyRatio = additionalData.pointsToMoneyRatio || 0.01;
+        const pointsToMoneyRatio = (additionalData.pointsToMoneyRatio as number) || 0.01;
 
         if (customerPoints) {
-          const pointsToApply = additionalData.loyaltyPointsToApply || 0;
+          const pointsToApply = (additionalData.loyaltyPointsToApply as number) || 0;
 
           // Make sure customer has enough points
           if (pointsToApply > 0 && pointsToApply <= customerPoints.currentPoints) {
@@ -395,7 +388,7 @@ export class PricingService {
             // This should happen during checkout/order processing
           }
         }
-      } catch (error) {
+      } catch (_error) {
         // Loyalty module might not be available or error occurred
       }
     }
@@ -534,7 +527,7 @@ export class PricingService {
   /**
    * Calculate price after applying a specific rule
    */
-  private async calculateAdjustedPrice(originalPrice: number, rule: PricingRule, context: PriceContext): Promise<number> {
+  private async calculateAdjustedPrice(originalPrice: number, rule: PricingRule, _context: PriceContext): Promise<number> {
     let priceAfterRule = originalPrice;
 
     // Apply each adjustment in the rule
@@ -608,11 +601,12 @@ export class PricingService {
 
     // Evaluate custom conditions in the rule
     for (const condition of rule.conditions) {
+      const params = condition.parameters;
       switch (condition.type) {
         case 'date_range':
           if (
-            (condition.parameters.startDate && new Date(condition.parameters.startDate) > date) ||
-            (condition.parameters.endDate && new Date(condition.parameters.endDate) < date)
+            (params.startDate && new Date(params.startDate as string) > date) ||
+            (params.endDate && new Date(params.endDate as string) < date)
           ) {
             return false;
           }
@@ -620,14 +614,14 @@ export class PricingService {
 
         case 'day_of_week':
           const dayOfWeek = date.getDay();
-          if (!condition.parameters.days.includes(dayOfWeek)) {
+          if (!(params.days as number[]).includes(dayOfWeek)) {
             return false;
           }
           break;
 
         case 'time_of_day':
           const hours = date.getHours();
-          if (hours < condition.parameters.startHour || hours >= condition.parameters.endHour) {
+          if (hours < (params.startHour as number) || hours >= (params.endHour as number)) {
             return false;
           }
           break;
@@ -637,8 +631,8 @@ export class PricingService {
           // For now, just check if the attribute exists in additionalData
           if (
             !additionalData.customerAttributes ||
-            !additionalData.customerAttributes[condition.parameters.attribute] ||
-            additionalData.customerAttributes[condition.parameters.attribute] !== condition.parameters.value
+            !(additionalData.customerAttributes as Record<string, unknown>)[params.attribute as string] ||
+            (additionalData.customerAttributes as Record<string, unknown>)[params.attribute as string] !== params.value
           ) {
             return false;
           }

@@ -1,11 +1,146 @@
-import { eventBus, EventPayload, EventType } from '../../libs/events/eventBus';
+import { eventBus, EventPayload } from '../../libs/events/eventBus';
 import { JobScheduler } from '../../libs/jobs/cronScheduler';
+
+// Event payload interfaces
+interface OrderCreatedPayload {
+  orderId: string;
+  customerId: string;
+  orderNumber: string;
+  total: number;
+}
+
+interface OrderPaidPayload {
+  orderId: string;
+  customerId: string;
+  orderNumber: string;
+  amount: number;
+  transactionId: string;
+}
+
+interface OrderShippedPayload {
+  orderId: string;
+  customerId: string;
+  orderNumber: string;
+  trackingNumber: string;
+  carrier: string;
+}
+
+interface OrderCompletedPayload {
+  orderId: string;
+  customerId: string;
+  orderNumber: string;
+}
+
+interface OrderCancelledPayload {
+  orderId: string;
+  customerId: string;
+  orderNumber: string;
+  reason: string;
+}
+
+interface OrderRefundedPayload {
+  orderId: string;
+  customerId: string;
+  orderNumber: string;
+  amount: number;
+  reason: string;
+}
+
+interface OrderReadyForPickupPayload {
+  orderId: string;
+  orderNumber: string;
+  pickupLocationId: string;
+  pickupLocationName: string;
+  customerId: string;
+  customerEmail: string;
+}
+
+interface PaymentReceivedPayload {
+  orderId: string;
+  amount: number;
+  transactionId: string;
+}
+
+interface PaymentFailedPayload {
+  orderId: string;
+  customerId: string;
+  amount: number;
+  reason: string;
+}
+
+interface InventoryLowPayload {
+  productId: string;
+  sku: string;
+  currentStock: number;
+  reorderPoint: number;
+}
+
+interface InventoryOutOfStockPayload {
+  productId: string;
+  sku: string;
+}
+
+interface InventoryReservedPayload {
+  productId: string;
+  quantity: number;
+  orderId: string;
+  cartId: string;
+}
+
+interface InventoryReleasedPayload {
+  productId: string;
+  quantity: number;
+  reason: string;
+}
+
+interface CustomerRegisteredPayload {
+  customerId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface CustomerUpdatedPayload {
+  customerId: string;
+  changes: Record<string, unknown>;
+}
+
+interface SupplierCreatedPayload {
+  supplierId: string;
+  name: string;
+  email: string;
+}
+
+interface SupplierApprovedPayload {
+  supplierId: string;
+  name: string;
+  email: string;
+}
+
+interface PurchaseOrderCreatedPayload {
+  purchaseOrderId: string;
+  supplierId: string;
+  poNumber: string;
+  supplierEmail: string;
+}
+
+interface PurchaseOrderApprovedPayload {
+  purchaseOrderId: string;
+  poNumber: string;
+  supplierEmail: string;
+}
+
+interface ReceivingCompletedPayload {
+  receivingRecordId: string;
+  purchaseOrderId: string;
+  receiptNumber: string;
+}
 
 // Event handlers for order events
 export const registerOrderEventHandlers = () => {
   // Order created event
   eventBus.registerHandler('order.created', async (payload: EventPayload) => {
-    const { orderId, customerId, orderNumber, total } = payload.data;
+    const { orderId, customerId, orderNumber, total } = payload.data as OrderCreatedPayload;
 
     // Send order confirmation notification
     await JobScheduler.scheduleNotification({
@@ -27,7 +162,7 @@ export const registerOrderEventHandlers = () => {
 
   // Order paid event
   eventBus.registerHandler('order.paid', async (payload: EventPayload) => {
-    const { orderId, customerId, orderNumber, amount, transactionId } = payload.data;
+    const { orderId, customerId, orderNumber, amount, transactionId } = payload.data as OrderPaidPayload;
 
     // Send payment confirmation notification
     await JobScheduler.scheduleNotification({
@@ -41,7 +176,7 @@ export const registerOrderEventHandlers = () => {
 
   // Order shipped event
   eventBus.registerHandler('order.shipped', async (payload: EventPayload) => {
-    const { orderId, customerId, orderNumber, trackingNumber, carrier } = payload.data;
+    const { orderId, customerId, orderNumber, trackingNumber, carrier } = payload.data as OrderShippedPayload;
 
     // Send shipping notification
     await JobScheduler.scheduleNotification({
@@ -56,7 +191,7 @@ export const registerOrderEventHandlers = () => {
 
   // Order completed event
   eventBus.registerHandler('order.completed', async (payload: EventPayload) => {
-    const { orderId, customerId, orderNumber } = payload.data;
+    const { orderId, customerId, orderNumber } = payload.data as OrderCompletedPayload;
 
     // Send order completion notification
     await JobScheduler.scheduleNotification({
@@ -70,7 +205,7 @@ export const registerOrderEventHandlers = () => {
 
   // Order cancelled event
   eventBus.registerHandler('order.cancelled', async (payload: EventPayload) => {
-    const { orderId, customerId, orderNumber, reason } = payload.data;
+    const { orderId, customerId, orderNumber, reason } = payload.data as OrderCancelledPayload;
 
     // Send cancellation notification
     await JobScheduler.scheduleNotification({
@@ -84,7 +219,7 @@ export const registerOrderEventHandlers = () => {
 
   // Order refunded event
   eventBus.registerHandler('order.refunded', async (payload: EventPayload) => {
-    const { orderId, customerId, orderNumber, amount, reason } = payload.data;
+    const { orderId, customerId, orderNumber, amount, reason } = payload.data as OrderRefundedPayload;
 
     // Send refund notification
     await JobScheduler.scheduleNotification({
@@ -95,12 +230,35 @@ export const registerOrderEventHandlers = () => {
       data: { orderId, orderNumber, amount, reason },
     });
   });
+
+  // Order ready for pickup event (BOPIS)
+  eventBus.registerHandler('order.ready_for_pickup', async (payload: EventPayload) => {
+    const { orderId, orderNumber, pickupLocationId, pickupLocationName, customerId, customerEmail } = payload.data as OrderReadyForPickupPayload;
+
+    await JobScheduler.scheduleNotification({
+      userId: customerId,
+      type: 'order_ready_for_pickup',
+      title: 'Order Ready for Pickup',
+      message: `Your order ${orderNumber} is ready for pickup at ${pickupLocationName}.`,
+      data: { orderId, orderNumber, pickupLocationId, pickupLocationName },
+      channels: ['email', 'push', 'in_app'],
+    });
+
+    if (customerEmail) {
+      await JobScheduler.scheduleEmail({
+        to: customerEmail,
+        subject: `Order Ready for Pickup - ${orderNumber}`,
+        template: 'order-ready-for-pickup',
+        data: { orderId, orderNumber, pickupLocationName },
+      });
+    }
+  });
 };
 
 // Event handlers for payment events
 export const registerPaymentEventHandlers = () => {
   eventBus.registerHandler('payment.received', async (payload: EventPayload) => {
-    const { orderId, amount, transactionId } = payload.data;
+    const { orderId, amount, transactionId } = payload.data as PaymentReceivedPayload;
 
     // Emit order paid event
     await eventBus.emit('order.paid', {
@@ -111,7 +269,7 @@ export const registerPaymentEventHandlers = () => {
   });
 
   eventBus.registerHandler('payment.failed', async (payload: EventPayload) => {
-    const { orderId, customerId, amount, reason } = payload.data;
+    const { orderId, customerId, amount, reason } = payload.data as PaymentFailedPayload;
 
     // Send payment failure notification
     await JobScheduler.scheduleNotification({
@@ -127,7 +285,7 @@ export const registerPaymentEventHandlers = () => {
 // Event handlers for inventory events
 export const registerInventoryEventHandlers = () => {
   eventBus.registerHandler('inventory.low', async (payload: EventPayload) => {
-    const { productId, sku, currentStock, reorderPoint } = payload.data;
+    const { productId, sku, currentStock, reorderPoint } = payload.data as InventoryLowPayload;
 
     console.log(`Low inventory alert: ${sku} (${currentStock} remaining, reorder at ${reorderPoint})`);
 
@@ -142,7 +300,7 @@ export const registerInventoryEventHandlers = () => {
   });
 
   eventBus.registerHandler('inventory.out_of_stock', async (payload: EventPayload) => {
-    const { productId, sku } = payload.data;
+    const { productId, sku } = payload.data as InventoryOutOfStockPayload;
 
     // Send out of stock notification
     await JobScheduler.scheduleNotification({
@@ -155,11 +313,11 @@ export const registerInventoryEventHandlers = () => {
   });
 
   eventBus.registerHandler('inventory.reserved', async (payload: EventPayload) => {
-    const { productId, quantity, orderId, cartId } = payload.data;
+    const { productId: _productId, quantity: _quantity, orderId: _orderId, cartId: _cartId } = payload.data as InventoryReservedPayload;
   });
 
   eventBus.registerHandler('inventory.released', async (payload: EventPayload) => {
-    const { productId, quantity, reason } = payload.data;
+    const { productId, quantity, reason } = payload.data as InventoryReleasedPayload;
 
     console.log(`Inventory released: ${quantity} units of ${productId} (${reason})`);
   });
@@ -168,7 +326,7 @@ export const registerInventoryEventHandlers = () => {
 // Event handlers for customer events
 export const registerCustomerEventHandlers = () => {
   eventBus.registerHandler('customer.registered', async (payload: EventPayload) => {
-    const { customerId, email, firstName, lastName } = payload.data;
+    const { customerId, email, firstName, lastName } = payload.data as CustomerRegisteredPayload;
 
     // Send welcome notification
     await JobScheduler.scheduleNotification({
@@ -189,7 +347,7 @@ export const registerCustomerEventHandlers = () => {
   });
 
   eventBus.registerHandler('customer.updated', async (payload: EventPayload) => {
-    const { customerId, changes } = payload.data;
+    const { customerId: _customerId, changes: _changes } = payload.data as CustomerUpdatedPayload;
 
     // Invalidate customer cache if needed
     // TODO: Implement customer caching
@@ -199,7 +357,7 @@ export const registerCustomerEventHandlers = () => {
 // Event handlers for supplier events
 export const registerSupplierEventHandlers = () => {
   eventBus.registerHandler('supplier.created', async (payload: EventPayload) => {
-    const { supplierId, name, email } = payload.data;
+    const { supplierId, name, email } = payload.data as SupplierCreatedPayload;
 
     // Send supplier welcome email
     await JobScheduler.scheduleEmail({
@@ -211,7 +369,7 @@ export const registerSupplierEventHandlers = () => {
   });
 
   eventBus.registerHandler('supplier.approved', async (payload: EventPayload) => {
-    const { supplierId, name, email } = payload.data;
+    const { supplierId, name, email } = payload.data as SupplierApprovedPayload;
 
     // Send approval notification
     await JobScheduler.scheduleEmail({
@@ -223,7 +381,7 @@ export const registerSupplierEventHandlers = () => {
   });
 
   eventBus.registerHandler('purchase_order.created', async (payload: EventPayload) => {
-    const { purchaseOrderId, supplierId, poNumber, supplierEmail } = payload.data;
+    const { purchaseOrderId, supplierId: _supplierId, poNumber, supplierEmail } = payload.data as PurchaseOrderCreatedPayload;
 
     // Send PO to supplier
     await JobScheduler.scheduleEmail({
@@ -235,7 +393,7 @@ export const registerSupplierEventHandlers = () => {
   });
 
   eventBus.registerHandler('purchase_order.approved', async (payload: EventPayload) => {
-    const { purchaseOrderId, poNumber, supplierEmail } = payload.data;
+    const { purchaseOrderId, poNumber, supplierEmail } = payload.data as PurchaseOrderApprovedPayload;
 
     // Notify supplier of approval
     await JobScheduler.scheduleEmail({
@@ -247,7 +405,7 @@ export const registerSupplierEventHandlers = () => {
   });
 
   eventBus.registerHandler('receiving.completed', async (payload: EventPayload) => {
-    const { receivingRecordId, purchaseOrderId, receiptNumber } = payload.data;
+    const { receivingRecordId: _receivingRecordId, purchaseOrderId: _purchaseOrderId, receiptNumber: _receiptNumber } = payload.data as ReceivingCompletedPayload;
 
     // Update inventory and send notifications
     // TODO: Trigger inventory updates

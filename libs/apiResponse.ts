@@ -6,7 +6,7 @@ import { Response } from 'express';
  * @param data Response data
  * @param statusCode HTTP status code (default: 200)
  */
-export function successResponse(res: Response, data: any, statusCode: number = 200): Response {
+export function successResponse(res: Response, data: unknown, statusCode: number = 200): Response {
   return res.status(statusCode).json({
     success: true,
     data,

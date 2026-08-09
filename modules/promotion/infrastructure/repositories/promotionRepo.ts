@@ -1,12 +1,11 @@
 import { query, queryOne } from '../../../../libs/db';
-import { Table, Promotion, PromotionRule, PromotionAction, PromotionUsage } from '../../../../libs/db/types';
-import { generateUUID } from '../../../../libs/uuid';
+import { Table, Promotion, PromotionRule, PromotionAction } from '../../../../libs/db/types';
 
 // Table name constants
 const PROMOTION_TABLE = Table.Promotion;
 const PROMOTION_RULE_TABLE = Table.PromotionRule;
 const PROMOTION_ACTION_TABLE = Table.PromotionAction;
-const PROMOTION_USAGE_TABLE = Table.PromotionUsage;
+const PROMOTION_USAGE_TABLE = 'promotionUsage';
 
 /**
  * Promotion status types
@@ -17,6 +16,18 @@ export type PromotionStatus = 'active' | 'scheduled' | 'expired' | 'disabled' | 
  * Promotion scope types
  */
 export type PromotionScope = 'cart' | 'product' | 'category' | 'merchant' | 'shipping' | 'global';
+
+export type PromotionUsage = {
+  promotionUsageId: string;
+  promotionId: string;
+  orderId: string | null;
+  customerId: string | null;
+  discountAmount: string;
+  currencyCode: string;
+  usedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 /**
  * Rule condition types
@@ -70,7 +81,7 @@ export interface CreateRuleInput {
   name?: string;
   condition: RuleCondition;
   operator: string;
-  value: any;
+  value: unknown;
   isActive?: boolean;
 }
 
@@ -82,7 +93,7 @@ export interface CreateActionInput {
   value: number;
   targetType?: string;
   targetId?: string;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 /**
@@ -125,7 +136,7 @@ export class PromotionRepo {
     const { limit = 50, offset = 0, orderBy = 'priority', direction = 'DESC' } = options;
 
     let sql = `SELECT * FROM "${PROMOTION_TABLE}" WHERE 1=1`;
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (status) {
@@ -285,7 +296,7 @@ export class PromotionRepo {
    */
   async update(id: string, input: UpdatePromotionInput): Promise<Promotion> {
     const updateFields: string[] = [];
-    const params: any[] = [id];
+    const params: unknown[] = [id];
     let paramIndex = 2;
 
     const allowedFields = [
@@ -548,7 +559,7 @@ export class PromotionRepo {
 
     if (!details) return false;
 
-    const { promotion, rules } = details;
+    const { promotion, rules: _rules } = details;
 
     // Check basic validity
     if (!promotion.isActive || promotion.status !== 'active') return false;

@@ -1,9 +1,10 @@
-import { query, queryOne } from '../../../../libs/db';
-import { generateUUID } from '../../../../libs/uuid';
 import {
   CurrencyPriceRule,
   CurrencyPriceRuleCreateProps,
   CurrencyPriceRuleUpdateProps,
+  PricingRule,
+  PricingRuleCreateProps,
+  PricingRuleUpdateProps,
   PricingRuleStatus,
   PricingRuleType,
 } from '../../domain/pricingRule';
@@ -68,7 +69,7 @@ export class CurrencyPriceRuleRepo {
       metadata,
     };
 
-    const rule = await pricingRuleRepo.create(pricingRuleData as any);
+    const rule = await pricingRuleRepo.create(pricingRuleData as PricingRuleCreateProps);
 
     return this.transformToCurrencyPriceRule(rule);
   }
@@ -93,9 +94,10 @@ export class CurrencyPriceRuleRepo {
     };
 
     // Update the rule - remove type/ruleType to avoid column issues
-    const { type, ruleType, ...updateData } = data as any;
+     
+    const { type: _type, ruleType: _ruleType, ...updateData } = data as CurrencyPriceRuleUpdateProps & { type?: unknown; ruleType?: unknown };
     const updatedRule = await pricingRuleRepo.update(id, {
-      ...updateData,
+      ...(updateData as PricingRuleUpdateProps),
       metadata,
     });
 
@@ -118,9 +120,9 @@ export class CurrencyPriceRuleRepo {
       return null;
     }
 
-    // Check if this is a currency price rule by checking currencyCode or metadata
-    const hasCurrencyCode = (rule as any).currencyCode || ((rule as any).metadata && (rule as any).metadata.currencyCode);
-
+    // Check if this is a currency price rule by checking metadata
+    const meta = rule.metadata as Record<string, unknown> | undefined;
+    const hasCurrencyCode = meta?.currencyCode;
     if (!hasCurrencyCode) {
       return null;
     }
@@ -145,18 +147,14 @@ export class CurrencyPriceRuleRepo {
   /**
    * Helper method to transform a PricingRule to CurrencyPriceRule
    */
-  private transformToCurrencyPriceRule(rule: any): CurrencyPriceRule {
-    if (!rule) return null as any;
-
-    // Extract currency-specific properties from direct fields or metadata
-    const metadata = rule.metadata || {};
-
+  private transformToCurrencyPriceRule(rule: PricingRule): CurrencyPriceRule {
+    const meta = (rule.metadata || {}) as Record<string, unknown>;
     return {
       ...rule,
-      currencyCode: rule.currencyCode || metadata.currencyCode || '',
-      regionCode: rule.regionCode || metadata.regionCode,
-      minOrderValue: metadata.minOrderValue,
-      maxOrderValue: metadata.maxOrderValue,
+      currencyCode: (meta.currencyCode as string) || '',
+      regionCode: meta.regionCode as string | undefined,
+      minOrderValue: meta.minOrderValue as number | undefined,
+      maxOrderValue: meta.maxOrderValue as number | undefined,
     };
   }
 }

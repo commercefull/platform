@@ -1,10 +1,10 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../libs/session';
 import AdminRepository from '../../../modules/identity/infrastructure/repositories/AdminRepository';
-import UserStoreRepository from '../../../modules/identity/infrastructure/repositories/UserStoreRepository';
+import StoreUserRepository from '../../../modules/identity/infrastructure/repositories/StoreUserRepository';
 import DashboardQueryRepository from '../../../modules/analytics/infrastructure/repositories/DashboardQueryRepository';
 import { adminRespond } from '../../respond';
 
@@ -64,7 +64,8 @@ export const getAdminLogin = async (req: TypedRequest, res: Response) => {
 // POST: admin login form submission
 export const postAdminLogin = async (req: TypedRequest, res: Response) => {
   try {
-    const { email, password, rememberMe } = req.body;
+    const body = req.body as RequestBody;
+    const { email, password, rememberMe } = body;
 
     // Basic validation
     if (!email || !password) {
@@ -105,7 +106,7 @@ export const postAdminLogin = async (req: TypedRequest, res: Response) => {
       });
     }
 
-    const storeAssignments = await UserStoreRepository.findByUserId(admin.adminId);
+    const storeAssignments = await StoreUserRepository.findByUserId(admin.adminId);
     const primaryStore = storeAssignments.find(assignment => assignment.isPrimary) || storeAssignments[0];
 
     // Create session

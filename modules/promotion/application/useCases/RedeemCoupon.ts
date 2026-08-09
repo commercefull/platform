@@ -71,10 +71,10 @@ export class RedeemCouponUseCase {
         usage,
         message: 'Coupon redeemed successfully',
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        message: error.message || 'Failed to redeem coupon',
+        message: (error as Error).message || 'Failed to redeem coupon',
         errors: ['redemption_failed'],
       };
     }

@@ -101,7 +101,7 @@ export class Price {
     }).format(this._basePrice);
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       basePrice: this._basePrice,
       salePrice: this._salePrice,

@@ -58,7 +58,7 @@ export const create = async (params: OrderShippingCreateParams): Promise<OrderSh
 
 export const update = async (orderShippingId: string, params: OrderShippingUpdateParams): Promise<OrderShipping | null> => {
   const fields: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
   let i = 1;
 
   for (const [key, value] of Object.entries(params)) {

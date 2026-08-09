@@ -20,8 +20,27 @@ export interface RetryPaymentOutput {
   retriedAt: string;
 }
 
+interface TransactionRecord {
+  transactionId: string;
+  orderId: string;
+  customerId: string;
+  amount: number;
+  currency: string;
+  paymentMethodId: string;
+  provider: string;
+  status: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface PaymentRepositoryPort {
+  findById(id: string): Promise<TransactionRecord | null>;
+  countRetries(transactionId: string): Promise<number>;
+  create(params: Record<string, unknown>): Promise<TransactionRecord>;
+  updateStatus(transactionId: string, status: string, extra?: Record<string, unknown>): Promise<void>;
+}
+
 export class RetryPaymentUseCase {
-  constructor(private readonly paymentRepository: any) {}
+  constructor(private readonly paymentRepository: PaymentRepositoryPort) {}
 
   async execute(input: RetryPaymentInput): Promise<RetryPaymentOutput> {
     // Get original transaction
@@ -95,7 +114,7 @@ export class RetryPaymentUseCase {
           retriedAt: new Date().toISOString(),
         };
       }
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Payment processing failed';
 
       await this.paymentRepository.updateStatus(newTransactionId, 'failed', {
@@ -112,7 +131,7 @@ export class RetryPaymentUseCase {
     }
   }
 
-  private async processWithProvider(transaction: any): Promise<{ success: boolean; providerTransactionId?: string; error?: string }> {
+  private async processWithProvider(_transaction: TransactionRecord): Promise<{ success: boolean; providerTransactionId?: string; error?: string }> {
     // This would be implemented with actual provider SDK
     // For now, return pending to be updated via webhook
     return {

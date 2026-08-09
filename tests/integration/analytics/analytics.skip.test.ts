@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { TEST_PRODUCT_1_ID, TEST_CUSTOMER_ID, ADMIN_CREDENTIALS } from '../testConstants';
+import { ADMIN_CREDENTIALS } from '../testConstants';
 
 // Create axios client for tests
 const createClient = () =>
@@ -44,7 +44,7 @@ describe('Analytics Feature Tests', () => {
         await client.delete(`/business/analytics/dashboards/${dashboardId}`, {
           headers: { Authorization: `Bearer ${adminToken}` },
         });
-      } catch (error) {
+      } catch {
         console.warn(`Failed to cleanup dashboard ${dashboardId}`);
       }
     }
@@ -212,7 +212,7 @@ describe('Analytics Feature Tests', () => {
       expect(Array.isArray(response.data.data)).toBe(true);
 
       // All results should be zero-result searches
-      response.data.data.forEach((search: any) => {
+      response.data.data.forEach((search: Record<string, unknown>) => {
         expect(search.isZeroResult).toBe(true);
       });
     });

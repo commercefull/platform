@@ -84,7 +84,6 @@ export interface PriceListScope {
   channelId: string | null;
   accountId: string | null;
   sellerId: string | null;
-  customerSegmentId: string | null;
   priority: number;
   createdAt: Date;
 }

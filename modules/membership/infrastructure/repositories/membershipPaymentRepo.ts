@@ -102,7 +102,7 @@ export class MembershipPaymentRepo {
 
   async update(id: string, params: MembershipPaymentUpdateParams): Promise<MembershipPayment | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -145,7 +145,7 @@ export class MembershipPaymentRepo {
 
   async getTotalRevenue(subscriptionId?: string): Promise<number> {
     let sql = `SELECT SUM("amount") as total FROM "membershipPayment" WHERE "status" = 'completed' AND "paymentType" != 'refund'`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (subscriptionId) {
       sql += ` AND "subscriptionId" = $1`;

@@ -28,9 +28,9 @@ export const listCategories = async (req: TypedRequest, res: Response): Promise<
     }
 
     res.json({ success: true, data: categories });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, error: error.message || 'Failed to list categories' });
+    res.status(500).json({ success: false, error: (error as Error).message || 'Failed to list categories' });
   }
 };
 
@@ -51,9 +51,9 @@ export const getCategory = async (req: TypedRequest, res: Response): Promise<voi
     }
 
     res.json({ success: true, data: category });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, error: error.message || 'Failed to get category' });
+    res.status(500).json({ success: false, error: (error as Error).message || 'Failed to get category' });
   }
 };
 
@@ -69,8 +69,8 @@ export const getCategoryChildren = async (req: TypedRequest, res: Response): Pro
     const activeChildren = children.filter(c => c.isActive);
 
     res.json({ success: true, data: activeChildren });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, error: error.message || 'Failed to get subcategories' });
+    res.status(500).json({ success: false, error: (error as Error).message || 'Failed to get subcategories' });
   }
 };

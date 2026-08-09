@@ -1,4 +1,4 @@
-import { query, queryOne } from '../../../../libs/db';
+import { query } from '../../../../libs/db';
 
 export interface StoreSalesSummaryInput {
   storeId?: string;
@@ -17,9 +17,35 @@ export interface StoreSalesSummaryOutput {
   ordersByDate: Array<{ date: string; orders: number; revenue: number }>;
 }
 
+interface StoreAggRow {
+  storeId: string;
+  storeName: string;
+  totalOrders: string;
+  totalRevenue: string;
+  averageOrderValue: string;
+}
+
+interface StatusRow {
+  status: string;
+  count: string;
+}
+
+interface TopProductRow {
+  productId: string;
+  name: string;
+  quantity: string;
+  revenue: string;
+}
+
+interface OrdersByDateRow {
+  date: string;
+  orders: string;
+  revenue: string;
+}
+
 export class GetStoreSalesSummaryUseCase {
   async execute(input: StoreSalesSummaryInput): Promise<StoreSalesSummaryOutput[]> {
-    const params: any[] = [input.dateFrom.toISOString(), input.dateTo.toISOString()];
+    const params: unknown[] = [input.dateFrom.toISOString(), input.dateTo.toISOString()];
     let storeFilter = '';
 
     if (input.storeId) {
@@ -27,7 +53,7 @@ export class GetStoreSalesSummaryUseCase {
       storeFilter = ` AND o."storeId" = $${params.length}`;
     }
 
-    const storeRows = await query<Record<string, any>[]>(
+    const storeRows = await query<StoreAggRow[]>(
       `SELECT o."storeId", COALESCE(s.name, 'Unknown Store') as "storeName",
               COUNT(*) as "totalOrders",
               COALESCE(SUM(o."totalAmount"), 0) as "totalRevenue",
@@ -50,7 +76,7 @@ export class GetStoreSalesSummaryUseCase {
         continue;
       }
 
-      const statusRows = await query<Record<string, any>[]>(
+      const statusRows = await query<StatusRow[]>(
         `SELECT "status", COUNT(*) as count
          FROM "order"
          WHERE "deletedAt" IS NULL
@@ -61,7 +87,7 @@ export class GetStoreSalesSummaryUseCase {
         [storeId, input.dateFrom.toISOString(), input.dateTo.toISOString()],
       );
 
-      const topProducts = await query<Record<string, any>[]>(
+      const topProducts = await query<TopProductRow[]>(
         `SELECT oi."productId", MAX(oi.name) as name,
                 SUM(oi.quantity) as quantity,
                 COALESCE(SUM(oi."lineTotal"), 0) as revenue
@@ -77,7 +103,7 @@ export class GetStoreSalesSummaryUseCase {
         [storeId, input.dateFrom.toISOString(), input.dateTo.toISOString()],
       );
 
-      const ordersByDate = await query<Record<string, any>[]>(
+      const ordersByDate = await query<OrdersByDateRow[]>(
         `SELECT DATE("createdAt")::text as date,
                 COUNT(*) as orders,
                 COALESCE(SUM("totalAmount"), 0) as revenue

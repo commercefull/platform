@@ -4,6 +4,7 @@
  */
 
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
+import { Basket } from '../../domain/entities/Basket';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BasketResponse } from './GetOrCreateBasket';
 import { BasketNotFoundError, BasketItemNotFoundError } from '../../domain/errors/BasketErrors';
@@ -49,14 +50,14 @@ export class RemoveItemUseCase {
     return this.mapToResponse(updatedBasket!);
   }
 
-  private mapToResponse(basket: any): BasketResponse {
+  private mapToResponse(basket: Basket): BasketResponse {
     return {
       basketId: basket.basketId,
       customerId: basket.customerId,
       sessionId: basket.sessionId,
       status: basket.status,
       currency: basket.currency,
-      items: basket.items.map((item: any) => ({
+      items: basket.items.map((item) => ({
         basketItemId: item.basketItemId,
         productId: item.productId,
         productVariantId: item.productVariantId,

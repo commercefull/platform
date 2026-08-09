@@ -113,7 +113,7 @@ export class ContentPageTranslationRepo {
 
   async updateTranslation(id: string, params: PageTranslationUpdateParams): Promise<ContentPageTranslation> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     const fieldMap: Record<string, string> = {
@@ -134,9 +134,10 @@ export class ContentPageTranslationRepo {
     };
 
     for (const [key, dbField] of Object.entries(fieldMap)) {
-      if ((params as any)[key] !== undefined) {
+      const value = (params as Record<string, unknown>)[key];
+      if (value !== undefined) {
         updateFields.push(`"${dbField}" = $${paramIndex++}`);
-        values.push((params as any)[key]);
+        values.push(value);
       }
     }
 

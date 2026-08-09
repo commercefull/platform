@@ -10,58 +10,24 @@ import { PaymentGateway, PaymentMethodConfig, PaymentTransaction, PaymentRefund 
 // Types
 // ============================================================================
 
+type MakeOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
 export type PaymentGatewayCreateParams = Omit<PaymentGateway, 'paymentGatewayId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 export type PaymentGatewayUpdateParams = Partial<PaymentGatewayCreateParams>;
 
 export type PaymentMethodConfigCreateParams = Omit<PaymentMethodConfig, 'paymentMethodConfigId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 export type PaymentMethodConfigUpdateParams = Partial<PaymentMethodConfigCreateParams>;
 
-export type PaymentTransactionCreateParams = {
-  orderPaymentId: string;
-  orderId: string;
-  type: string;
-  amount: string;
-  currencyCode: string;
-  status: string;
-  transactionId?: string | null;
-  authorizationCode?: string | null;
-  responseCode?: string | null;
-  responseMessage?: string | null;
-  errorCode?: string | null;
-  errorMessage?: string | null;
-  gatewayResponse?: unknown | null;
-  customerId?: string | null;
-  paymentMethodId?: string | null;
-  paymentGatewayId?: string | null;
-  externalTransactionId?: string | null;
-  currency?: string | null;
-  paymentMethodDetails?: unknown | null;
-  refundedAmount?: string | null;
-  metadata?: unknown | null;
-  customerIp?: string | null;
-  authorizedAt?: Date | null;
-  capturedAt?: Date | null;
-};
+export type PaymentTransactionCreateParams = MakeOptional<
+  Omit<PaymentTransaction, 'paymentTransactionId' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
+  'transactionId' | 'authorizationCode' | 'responseCode' | 'responseMessage' | 'errorCode' | 'errorMessage' | 'gatewayResponse' | 'customerId' | 'paymentMethodId' | 'paymentGatewayId' | 'externalTransactionId' | 'currency' | 'paymentMethodDetails' | 'refundedAmount' | 'metadata' | 'customerIp' | 'authorizedAt' | 'capturedAt'
+>;
 export type PaymentTransactionUpdateParams = Partial<PaymentTransactionCreateParams>;
 
-export type PaymentRefundCreateParams = {
-  orderPaymentId: string;
-  orderId: string;
-  amount: string;
-  currencyCode: string;
-  status: string;
-  transactionId?: string | null;
-  reason?: string | null;
-  refundId?: string | null;
-  paymentTransactionId?: string | null;
-  externalRefundId?: string | null;
-  currency?: string | null;
-  gatewayResponse?: unknown | null;
-  errorCode?: string | null;
-  errorMessage?: string | null;
-  processedAt?: Date | null;
-  metadata?: unknown | null;
-};
+export type PaymentRefundCreateParams = MakeOptional<
+  Omit<PaymentRefund, 'paymentRefundId' | 'createdAt' | 'updatedAt'>,
+  'transactionId' | 'reason' | 'refundId' | 'paymentTransactionId' | 'externalRefundId' | 'currency' | 'gatewayResponse' | 'errorCode' | 'errorMessage' | 'processedAt' | 'metadata'
+>;
 export type PaymentRefundUpdateParams = Partial<PaymentRefundCreateParams>;
 
 // ============================================================================
@@ -149,7 +115,7 @@ export class PaymentRepo {
   async updateGateway(id: string, params: PaymentGatewayUpdateParams): Promise<PaymentGateway> {
     const now = new Date();
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -277,7 +243,7 @@ export class PaymentRepo {
   async updateMethodConfig(id: string, params: PaymentMethodConfigUpdateParams): Promise<PaymentMethodConfig> {
     const now = new Date();
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -396,7 +362,7 @@ export class PaymentRepo {
   async updateTransaction(id: string, params: PaymentTransactionUpdateParams): Promise<PaymentTransaction> {
     const now = new Date();
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -500,7 +466,7 @@ export class PaymentRepo {
   async updateRefund(id: string, params: PaymentRefundUpdateParams): Promise<PaymentRefund> {
     const now = new Date();
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -560,8 +526,8 @@ export class PaymentRepo {
       });
 
       return { success: true, transactionId: transaction.paymentTransactionId };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: (error as Error).message };
     }
   }
 
@@ -586,8 +552,8 @@ export class PaymentRepo {
       });
 
       return { success: true, refundId: refund.paymentRefundId };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: (error as Error).message };
     }
   }
 }

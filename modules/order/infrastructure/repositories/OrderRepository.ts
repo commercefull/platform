@@ -18,10 +18,11 @@ import { Money } from '../../domain/valueObjects/Money';
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
+import { Order as DbOrder, OrderItem as DbOrderItem, OrderAddress as DbOrderAddress, OrderStatusHistory as DbOrderStatusHistory } from '../../../../libs/db/types';
 
 export class OrderRepo implements IOrderRepository {
   async findById(orderId: string): Promise<Order | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "order" WHERE "orderId" = $1 AND "deletedAt" IS NULL', [orderId]);
+    const row = await queryOne<DbOrder>('SELECT * FROM "order" WHERE "orderId" = $1 AND "deletedAt" IS NULL', [orderId]);
     if (!row) return null;
 
     const items = await this.getOrderItems(orderId);
@@ -32,7 +33,7 @@ export class OrderRepo implements IOrderRepository {
   }
 
   async findByOrderNumber(orderNumber: string): Promise<Order | null> {
-    const row = await queryOne<Record<string, any>>('SELECT * FROM "order" WHERE "orderNumber" = $1 AND "deletedAt" IS NULL', [
+    const row = await queryOne<DbOrder>('SELECT * FROM "order" WHERE "orderNumber" = $1 AND "deletedAt" IS NULL', [
       orderNumber,
     ]);
     if (!row) return null;
@@ -56,7 +57,7 @@ export class OrderRepo implements IOrderRepository {
     );
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<DbOrder[]>(
       `SELECT * FROM "order" WHERE "customerId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()} LIMIT $2 OFFSET $3`,
       [customerId, limit, offset],
@@ -84,7 +85,7 @@ export class OrderRepo implements IOrderRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<Record<string, any>[]>(
+    const rows = await query<DbOrder[]>(
       `SELECT * FROM "order" ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -121,7 +122,7 @@ export class OrderRepo implements IOrderRepository {
   async save(order: Order): Promise<Order> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>('SELECT "orderId" FROM "order" WHERE "orderId" = $1', [order.orderId]);
+    const existing = await queryOne<{ orderId: string }>('SELECT "orderId" FROM "order" WHERE "orderId" = $1', [order.orderId]);
 
     if (existing) {
       await query(
@@ -272,8 +273,8 @@ export class OrderRepo implements IOrderRepository {
 
   // Order Items
   async getOrderItems(orderId: string): Promise<OrderItem[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "orderItem" WHERE "orderId" = $1 ORDER BY "createdAt" ASC', [orderId]);
-    const order = await queryOne<Record<string, any>>('SELECT "currencyCode" FROM "order" WHERE "orderId" = $1', [orderId]);
+    const rows = await query<DbOrderItem[]>('SELECT * FROM "orderItem" WHERE "orderId" = $1 ORDER BY "createdAt" ASC', [orderId]);
+    const order = await queryOne<{ currencyCode: string }>('SELECT "currencyCode" FROM "order" WHERE "orderId" = $1', [orderId]);
     const currency = order?.currencyCode || 'USD';
     return (rows || []).map(row => this.mapToOrderItem(row, currency));
   }
@@ -355,13 +356,13 @@ export class OrderRepo implements IOrderRepository {
 
   // Order Addresses
   async getOrderAddresses(orderId: string): Promise<OrderAddress[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "orderAddress" WHERE "orderId" = $1', [orderId]);
+    const rows = await query<DbOrderAddress[]>('SELECT * FROM "orderAddress" WHERE "orderId" = $1', [orderId]);
     return (rows || []).map(row => this.mapToOrderAddress(row));
   }
 
   async saveOrderAddress(address: OrderAddress): Promise<OrderAddress> {
     const now = new Date().toISOString();
-    const existing = await queryOne<Record<string, any>>('SELECT "orderAddressId" FROM "orderAddress" WHERE "orderAddressId" = $1', [
+    const existing = await queryOne<{ orderAddressId: string }>('SELECT "orderAddressId" FROM "orderAddress" WHERE "orderAddressId" = $1', [
       address.orderAddressId,
     ]);
 
@@ -425,14 +426,14 @@ export class OrderRepo implements IOrderRepository {
   }
 
   async getShippingAddress(orderId: string): Promise<OrderAddress | null> {
-    const row = await queryOne<Record<string, any>>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'shipping'`, [
+    const row = await queryOne<DbOrderAddress>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'shipping'`, [
       orderId,
     ]);
     return row ? this.mapToOrderAddress(row) : null;
   }
 
   async getBillingAddress(orderId: string): Promise<OrderAddress | null> {
-    const row = await queryOne<Record<string, any>>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'billing'`, [
+    const row = await queryOne<DbOrderAddress>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'billing'`, [
       orderId,
     ]);
     return row ? this.mapToOrderAddress(row) : null;
@@ -467,14 +468,14 @@ export class OrderRepo implements IOrderRepository {
   }
 
   async getStatusHistory(orderId: string): Promise<Array<{ status: OrderStatus; reason?: string; createdAt: Date }>> {
-    const rows = await query<Record<string, any>[]>(
-      `SELECT "status", "reason", "createdAt" FROM "orderStatusHistory" 
+    const rows = await query<DbOrderStatusHistory[]>(
+      `SELECT "status", "notes", "createdAt" FROM "orderStatusHistory" 
        WHERE "orderId" = $1 ORDER BY "createdAt" DESC`,
       [orderId],
     );
     return (rows || []).map(row => ({
       status: row.status as OrderStatus,
-      reason: row.reason,
+      reason: row.notes ?? undefined,
       createdAt: new Date(row.createdAt),
     }));
   }
@@ -487,13 +488,13 @@ export class OrderRepo implements IOrderRepository {
   }> {
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const statsResult = await queryOne<Record<string, any>>(
+    const statsResult = await queryOne<{ totalOrders: string; totalRevenue: string; averageOrderValue: string }>(
       `SELECT COUNT(*) as "totalOrders", COALESCE(SUM("totalAmount"), 0) as "totalRevenue",
        COALESCE(AVG("totalAmount"), 0) as "averageOrderValue" FROM "order" ${whereClause}`,
       params,
     );
 
-    const statusRows = await query<Record<string, any>[]>(
+    const statusRows = await query<Array<{ status: string; count: string }>>(
       `SELECT "status", COUNT(*) as count FROM "order" ${whereClause} GROUP BY "status"`,
       params,
     );
@@ -515,7 +516,7 @@ export class OrderRepo implements IOrderRepository {
   }
 
   private async syncItems(order: Order): Promise<void> {
-    const existingItems = await query<Record<string, any>[]>('SELECT "orderItemId" FROM "orderItem" WHERE "orderId" = $1', [order.orderId]);
+    const existingItems = await query<Array<{ orderItemId: string }>>('SELECT "orderItemId" FROM "orderItem" WHERE "orderId" = $1', [order.orderId]);
     const existingIds = new Set((existingItems || []).map(i => i.orderItemId));
     const itemsToKeep = new Set<string>();
 
@@ -535,9 +536,9 @@ export class OrderRepo implements IOrderRepository {
     }
   }
 
-  private buildWhereClause(filters?: OrderFilters): { whereClause: string; params: any[] } {
+  private buildWhereClause(filters?: OrderFilters): { whereClause: string; params: unknown[] } {
     const conditions: string[] = ['"deletedAt" IS NULL'];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters?.customerId) {
@@ -602,7 +603,7 @@ export class OrderRepo implements IOrderRepository {
   }
 
   private mapToOrder(
-    row: Record<string, any>,
+    row: DbOrder,
     items: OrderItem[],
     shippingAddress: OrderAddress | null,
     billingAddress: OrderAddress | null,
@@ -612,24 +613,24 @@ export class OrderRepo implements IOrderRepository {
     return Order.reconstitute({
       orderId: row.orderId,
       orderNumber: row.orderNumber,
-      customerId: row.customerId || undefined,
-      basketId: row.basketId || undefined,
-      storeId: row.storeId || undefined,
-      channelId: row.channelId || undefined,
-      createdByUserId: row.createdByUserId || undefined,
+      customerId: row.customerId ?? undefined,
+      basketId: row.basketId ?? undefined,
+      storeId: row.storeId ?? undefined,
+      channelId: row.channelId ?? undefined,
+      createdByUserId: row.createdByUserId ?? undefined,
       orderSource: row.orderSource || 'web',
       status: row.status as OrderStatus,
       paymentStatus: row.paymentStatus as PaymentStatus,
       fulfillmentStatus: row.fulfillmentStatus as FulfillmentStatus,
       currencyCode: currency,
-      subtotal: Money.create(parseFloat(row.subtotal || 0), currency),
-      discountTotal: Money.create(parseFloat(row.discountTotal || 0), currency),
-      taxTotal: Money.create(parseFloat(row.taxTotal || 0), currency),
-      shippingTotal: Money.create(parseFloat(row.shippingTotal || 0), currency),
-      handlingFee: Money.create(parseFloat(row.handlingFee || 0), currency),
-      totalAmount: Money.create(parseFloat(row.totalAmount || 0), currency),
-      totalItems: parseInt(row.totalItems || 0),
-      totalQuantity: parseInt(row.totalQuantity || 0),
+      subtotal: Money.create(parseFloat(row.subtotal || '0'), currency),
+      discountTotal: Money.create(parseFloat(row.discountTotal || '0'), currency),
+      taxTotal: Money.create(parseFloat(row.taxTotal || '0'), currency),
+      shippingTotal: Money.create(parseFloat(row.shippingTotal || '0'), currency),
+      handlingFee: Money.create(parseFloat(row.handlingFee || '0'), currency),
+      totalAmount: Money.create(parseFloat(row.totalAmount || '0'), currency),
+      totalItems: row.totalItems || 0,
+      totalQuantity: row.totalQuantity || 0,
       taxExempt: Boolean(row.taxExempt),
       orderDate: new Date(row.orderDate),
       completedAt: row.completedAt ? new Date(row.completedAt) : undefined,
@@ -638,84 +639,84 @@ export class OrderRepo implements IOrderRepository {
       shippingAddress: shippingAddress || undefined,
       billingAddress: billingAddress || undefined,
       customerEmail: row.customerEmail,
-      customerPhone: row.customerPhone || undefined,
-      customerName: row.customerName || undefined,
-      customerNotes: row.customerNotes || undefined,
-      adminNotes: row.adminNotes || undefined,
-      ipAddress: row.ipAddress || undefined,
-      userAgent: row.userAgent || undefined,
-      referralSource: row.referralSource || undefined,
+      customerPhone: row.customerPhone ?? undefined,
+      customerName: row.customerName ?? undefined,
+      customerNotes: row.customerNotes ?? undefined,
+      adminNotes: row.adminNotes ?? undefined,
+      ipAddress: row.ipAddress ?? undefined,
+      userAgent: row.userAgent ?? undefined,
+      referralSource: row.referralSource ?? undefined,
       estimatedDeliveryDate: row.estimatedDeliveryDate ? new Date(row.estimatedDeliveryDate) : undefined,
       hasGiftWrapping: Boolean(row.hasGiftWrapping),
-      giftMessage: row.giftMessage || undefined,
+      giftMessage: row.giftMessage ?? undefined,
       isGift: Boolean(row.isGift),
       isSubscriptionOrder: Boolean(row.isSubscriptionOrder),
-      parentOrderId: row.parentOrderId || undefined,
+      parentOrderId: row.parentOrderId ?? undefined,
       items,
       tags: row.tags ? (typeof row.tags === 'string' ? JSON.parse(row.tags) : row.tags) : [],
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
+      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata) as Record<string, unknown> : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
       deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined,
     });
   }
 
-  private mapToOrderItem(row: Record<string, any>, currency: string): OrderItem {
+  private mapToOrderItem(row: DbOrderItem, currency: string): OrderItem {
     return OrderItem.reconstitute({
       orderItemId: row.orderItemId,
       orderId: row.orderId,
-      productId: row.productId,
-      productVariantId: row.productVariantId || undefined,
+      productId: row.productId ?? '',
+      productVariantId: row.productVariantId ?? undefined,
       sku: row.sku,
       name: row.name,
-      description: row.description || undefined,
-      quantity: parseInt(row.quantity),
+      description: row.description ?? undefined,
+      quantity: row.quantity,
       unitPrice: Money.create(parseFloat(row.unitPrice), currency),
       unitCost: row.unitCost ? Money.create(parseFloat(row.unitCost), currency) : undefined,
       discountedUnitPrice: row.discountedUnitPrice ? Money.create(parseFloat(row.discountedUnitPrice), currency) : undefined,
-      lineTotal: Money.create(parseFloat(row.lineTotal || 0), currency),
-      discountTotal: Money.create(parseFloat(row.discountTotal || 0), currency),
-      taxTotal: Money.create(parseFloat(row.taxTotal || 0), currency),
+      lineTotal: Money.create(parseFloat(row.lineTotal || '0'), currency),
+      discountTotal: Money.create(parseFloat(row.discountTotal || '0'), currency),
+      taxTotal: Money.create(parseFloat(row.taxTotal || '0'), currency),
       taxRate: row.taxRate ? parseFloat(row.taxRate) : undefined,
       taxExempt: Boolean(row.taxExempt),
       fulfillmentStatus: row.fulfillmentStatus as FulfillmentStatus,
-      options: row.options ? (typeof row.options === 'string' ? JSON.parse(row.options) : row.options) : undefined,
-      attributes: row.attributes ? (typeof row.attributes === 'string' ? JSON.parse(row.attributes) : row.attributes) : undefined,
+      options: row.options ? (typeof row.options === 'string' ? JSON.parse(row.options as string) : row.options) : undefined,
+      attributes: row.attributes ? (typeof row.attributes === 'string' ? JSON.parse(row.attributes as string) : row.attributes) : undefined,
       giftWrapped: Boolean(row.giftWrapped),
-      giftMessage: row.giftMessage || undefined,
+      giftMessage: row.giftMessage ?? undefined,
       weight: row.weight ? parseFloat(row.weight) : undefined,
-      dimensions: row.dimensions ? (typeof row.dimensions === 'string' ? JSON.parse(row.dimensions) : row.dimensions) : undefined,
+      dimensions: row.dimensions ? (typeof row.dimensions === 'string' ? JSON.parse(row.dimensions as string) : row.dimensions) : undefined,
       isDigital: Boolean(row.isDigital),
       subscriptionInfo: row.subscriptionInfo
         ? typeof row.subscriptionInfo === 'string'
-          ? JSON.parse(row.subscriptionInfo)
+          ? JSON.parse(row.subscriptionInfo as string)
           : row.subscriptionInfo
         : undefined,
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
+      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata) as Record<string, unknown> : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });
   }
 
-  private mapToOrderAddress(row: Record<string, any>): OrderAddress {
+  private mapToOrderAddress(row: DbOrderAddress): OrderAddress {
     return OrderAddress.reconstitute({
       orderAddressId: row.orderAddressId,
       orderId: row.orderId,
-      addressType: row.addressType,
+      addressType: row.addressType as 'shipping' | 'billing',
       firstName: row.firstName,
       lastName: row.lastName,
-      company: row.company || undefined,
+      company: row.company ?? undefined,
       address1: row.addressLine1,
-      address2: row.addressLine2 || undefined,
+      address2: row.addressLine2 ?? undefined,
       city: row.city,
       state: row.state,
       postalCode: row.postalCode,
       country: row.country,
       countryCode: row.country, // country is 2-char code
-      phone: row.phoneNumber || undefined,
-      email: row.email || undefined,
+      phone: row.phoneNumber ?? undefined,
+      email: row.email ?? undefined,
       isDefault: Boolean(row.isDefault),
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
+      metadata: row.additionalInfo ? (typeof row.additionalInfo === 'string' ? JSON.parse(row.additionalInfo) : undefined) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

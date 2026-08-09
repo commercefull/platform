@@ -88,7 +88,7 @@ export class OrderAddressRepo {
 
   async update(id: string, params: OrderAddressUpdateParams): Promise<OrderAddress | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -131,7 +131,7 @@ export class OrderAddressRepo {
 
   async count(orderId?: string): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "orderAddress"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (orderId) {
       sql += ` WHERE "orderId" = $1`;

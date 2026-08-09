@@ -11,13 +11,6 @@ const WAREHOUSE_IDS = {
   RETURNS: '0193b000-0000-7000-8000-000000000004',
 };
 
-const ZONE_IDS = {
-  MAIN_STORAGE: '0193b001-0000-7000-8000-000000000001',
-  MAIN_PICKING: '0193b001-0000-7000-8000-000000000002',
-  MAIN_SHIPPING: '0193b001-0000-7000-8000-000000000003',
-  WEST_STORAGE: '0193b001-0000-7000-8000-000000000004',
-};
-
 const BIN_IDS = {
   A1_01: '0193b002-0000-7000-8000-000000000001',
   A1_02: '0193b002-0000-7000-8000-000000000002',
@@ -35,10 +28,6 @@ exports.seed = async function (knex) {
   // Clean up existing test data in reverse order of dependencies
   await knex('distributionWarehouseBin')
     .whereIn('distributionWarehouseBinId', Object.values(BIN_IDS))
-    .del()
-    .catch(() => {});
-  await knex('distributionWarehouseZone')
-    .whereIn('distributionWarehouseZoneId', Object.values(ZONE_IDS))
     .del()
     .catch(() => {});
   await knex('distributionWarehouse')
@@ -152,64 +141,11 @@ exports.seed = async function (knex) {
     },
   ]);
 
-  // Seed Warehouse Zones
-  await knex('distributionWarehouseZone').insert([
-    {
-      distributionWarehouseZoneId: ZONE_IDS.MAIN_STORAGE,
-      distributionWarehouseId: WAREHOUSE_IDS.MAIN,
-      name: 'Main Storage Zone',
-      code: 'STORAGE-A',
-      description: 'Primary storage area',
-      isActive: true,
-      zoneType: 'storage',
-      priority: 1,
-      capacity: 10000,
-      capacityUnit: 'sqft',
-    },
-    {
-      distributionWarehouseZoneId: ZONE_IDS.MAIN_PICKING,
-      distributionWarehouseId: WAREHOUSE_IDS.MAIN,
-      name: 'Main Picking Zone',
-      code: 'PICKING-A',
-      description: 'Order picking area',
-      isActive: true,
-      zoneType: 'picking',
-      priority: 2,
-      capacity: 5000,
-      capacityUnit: 'sqft',
-    },
-    {
-      distributionWarehouseZoneId: ZONE_IDS.MAIN_SHIPPING,
-      distributionWarehouseId: WAREHOUSE_IDS.MAIN,
-      name: 'Main Shipping Zone',
-      code: 'SHIPPING-A',
-      description: 'Outbound shipping area',
-      isActive: true,
-      zoneType: 'shipping',
-      priority: 3,
-      capacity: 3000,
-      capacityUnit: 'sqft',
-    },
-    {
-      distributionWarehouseZoneId: ZONE_IDS.WEST_STORAGE,
-      distributionWarehouseId: WAREHOUSE_IDS.WEST_COAST,
-      name: 'West Storage Zone',
-      code: 'STORAGE-W',
-      description: 'West coast storage area',
-      isActive: true,
-      zoneType: 'storage',
-      priority: 1,
-      capacity: 8000,
-      capacityUnit: 'sqft',
-    },
-  ]);
-
   // Seed Warehouse Bins
   await knex('distributionWarehouseBin').insert([
     {
       distributionWarehouseBinId: BIN_IDS.A1_01,
       distributionWarehouseId: WAREHOUSE_IDS.MAIN,
-      distributionWarehouseZoneId: ZONE_IDS.MAIN_STORAGE,
       locationCode: 'A1-01',
       isActive: true,
       binType: 'storage',
@@ -226,7 +162,6 @@ exports.seed = async function (knex) {
     {
       distributionWarehouseBinId: BIN_IDS.A1_02,
       distributionWarehouseId: WAREHOUSE_IDS.MAIN,
-      distributionWarehouseZoneId: ZONE_IDS.MAIN_STORAGE,
       locationCode: 'A1-02',
       isActive: true,
       binType: 'storage',
@@ -243,7 +178,6 @@ exports.seed = async function (knex) {
     {
       distributionWarehouseBinId: BIN_IDS.B1_01,
       distributionWarehouseId: WAREHOUSE_IDS.MAIN,
-      distributionWarehouseZoneId: ZONE_IDS.MAIN_PICKING,
       locationCode: 'B1-01',
       isActive: true,
       binType: 'picking',
@@ -260,7 +194,6 @@ exports.seed = async function (knex) {
     {
       distributionWarehouseBinId: BIN_IDS.SHIP_01,
       distributionWarehouseId: WAREHOUSE_IDS.MAIN,
-      distributionWarehouseZoneId: ZONE_IDS.MAIN_SHIPPING,
       locationCode: 'SHIP-01',
       isActive: true,
       binType: 'shipping',

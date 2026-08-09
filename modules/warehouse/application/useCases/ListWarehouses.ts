@@ -38,39 +38,71 @@ export interface ListWarehousesOutput {
   totalPages: number;
 }
 
+interface WarehouseRecord {
+  distributionWarehouseId: string;
+  name: string;
+  code: string;
+  description?: string;
+  city: string;
+  country: string;
+  isActive: boolean;
+  isDefault: boolean;
+  currentCapacity?: number;
+  maxCapacity?: number;
+  merchantId?: string;
+  businessId?: string;
+}
+
+interface WarehouseRepositoryPort {
+  findAll(activeOnly?: boolean): Promise<WarehouseRecord[]>;
+}
+
 export class ListWarehousesUseCase {
   constructor(
-    private readonly warehouseRepository: any, // WarehouseRepository
+    private readonly warehouseRepository: WarehouseRepositoryPort,
   ) {}
 
   async execute(input: ListWarehousesInput): Promise<ListWarehousesOutput> {
     const page = input.pagination?.page || 1;
     const limit = input.pagination?.limit || 20;
 
-    const result = await this.warehouseRepository.findAll({
-      ...input.filters,
-      offset: (page - 1) * limit,
-      limit,
-    });
+    const allWarehouses = await this.warehouseRepository.findAll(input.filters?.isActive);
 
-    const warehouses = result.warehouses.map((wh: any) => ({
-      warehouseId: wh.warehouseId,
+    // Apply filters
+    let filtered = allWarehouses;
+    if (input.filters?.type) {
+      const filterType = input.filters.type;
+      filtered = filtered.filter(wh => wh.description === filterType);
+    }
+    if (input.filters?.merchantId) {
+      filtered = filtered.filter(wh => wh.merchantId === input.filters?.merchantId);
+    }
+    if (input.filters?.businessId) {
+      filtered = filtered.filter(wh => wh.businessId === input.filters?.businessId);
+    }
+
+    const total = filtered.length;
+    const offset = (page - 1) * limit;
+    const paged = filtered.slice(offset, offset + limit);
+
+    const warehouses = paged.map((wh: WarehouseRecord) => ({
+      warehouseId: wh.distributionWarehouseId,
       name: wh.name,
       code: wh.code,
-      type: wh.type,
-      city: wh.address?.city || '',
-      countryCode: wh.address?.countryCode || '',
+      type: wh.description || '',
+      city: wh.city || '',
+      countryCode: wh.country || '',
       isActive: wh.isActive,
       isDefault: wh.isDefault,
       currentCapacity: wh.currentCapacity,
       maxCapacity: wh.maxCapacity,
     }));
 
-    const totalPages = Math.ceil(result.total / limit);
+    const totalPages = Math.ceil(total / limit);
 
     return {
       warehouses,
-      total: result.total,
+      total,
       page,
       limit,
       totalPages,

@@ -4,14 +4,12 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLE = Table.TaxRate;
 
 // ============================================================================
 // Types
@@ -108,7 +106,7 @@ export class TaxRateRepo {
 
   async update(id: string, params: TaxRateUpdateParams): Promise<TaxRate | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -144,7 +142,7 @@ export class TaxRateRepo {
 
   async count(filters?: { taxCategoryId?: string; taxZoneId?: string; activeOnly?: boolean }): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "taxRate" WHERE 1=1`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (filters?.taxCategoryId) {
       sql += ` AND "taxCategoryId" = $${params.length + 1}`;

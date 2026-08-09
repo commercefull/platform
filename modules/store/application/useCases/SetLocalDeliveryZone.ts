@@ -4,6 +4,8 @@
  * Configures local delivery zone for a store.
  */
 
+import type { StoreRepository } from '../../domain/repositories/StoreRepository';
+
 export interface SetLocalDeliveryZoneInput {
   storeId: string;
   enabled: boolean;
@@ -31,7 +33,7 @@ export interface SetLocalDeliveryZoneOutput {
 }
 
 export class SetLocalDeliveryZoneUseCase {
-  constructor(private readonly storeRepository: any) {}
+  constructor(private readonly storeRepository: StoreRepository) {}
 
   async execute(input: SetLocalDeliveryZoneInput): Promise<SetLocalDeliveryZoneOutput> {
     const store = await this.storeRepository.findById(input.storeId);

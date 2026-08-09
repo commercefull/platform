@@ -148,7 +148,7 @@ export class WebhookEndpointEntity {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       webhookEndpointId: this.props.webhookEndpointId,
       merchantId: this.props.merchantId,

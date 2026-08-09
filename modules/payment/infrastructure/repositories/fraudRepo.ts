@@ -21,14 +21,14 @@ export interface FraudRule {
   description?: string;
   ruleType: RuleType;
   entityType: string;
-  conditions: Record<string, any>;
+  conditions: Record<string, unknown>;
   action: RuleAction;
   riskScore: number;
   priority: number;
   isActive: boolean;
   triggerCount: number;
   lastTriggeredAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,9 +41,9 @@ export interface FraudCheck {
   status: CheckStatus;
   riskScore: number;
   riskLevel: RiskLevel;
-  triggeredRules?: any[];
-  signals?: Record<string, any>;
-  deviceFingerprint?: Record<string, any>;
+  triggeredRules?: unknown[];
+  signals?: Record<string, unknown>;
+  deviceFingerprint?: Record<string, unknown>;
   ipAddress?: string;
   ipCountry?: string;
   ipCity?: string;
@@ -68,7 +68,7 @@ export interface FraudCheck {
   reviewedAt?: Date;
   reviewDecision?: string;
   reviewNotes?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -84,7 +84,7 @@ export interface FraudBlacklist {
   isActive: boolean;
   expiresAt?: Date;
   addedBy?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -94,7 +94,7 @@ export interface FraudBlacklist {
 // ============================================================================
 
 export async function getRule(fraudRuleId: string): Promise<FraudRule | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "fraudRule" WHERE "fraudRuleId" = $1', [fraudRuleId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "fraudRule" WHERE "fraudRuleId" = $1', [fraudRuleId]);
   return row ? mapToRule(row) : null;
 }
 
@@ -104,7 +104,7 @@ export async function getRules(activeOnly: boolean = true): Promise<FraudRule[]>
     whereClause = '"isActive" = true';
   }
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "fraudRule" WHERE ${whereClause} ORDER BY "priority" DESC, "riskScore" DESC`,
   );
   return (rows || []).map(mapToRule);
@@ -114,7 +114,7 @@ export async function saveRule(
   rule: Partial<FraudRule> & {
     name: string;
     ruleType: RuleType;
-    conditions: Record<string, any>;
+    conditions: Record<string, unknown>;
   },
 ): Promise<FraudRule> {
   const now = new Date().toISOString();
@@ -143,7 +143,7 @@ export async function saveRule(
     );
     return (await getRule(rule.fraudRuleId))!;
   } else {
-    const result = await queryOne<Record<string, any>>(
+    const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "fraudRule" (
         "name", "description", "ruleType", "entityType", "conditions",
         "action", "riskScore", "priority", "isActive", "metadata",
@@ -190,12 +190,12 @@ export async function incrementRuleTrigger(fraudRuleId: string): Promise<void> {
 // ============================================================================
 
 export async function getCheck(fraudCheckId: string): Promise<FraudCheck | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "fraudCheck" WHERE "fraudCheckId" = $1', [fraudCheckId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "fraudCheck" WHERE "fraudCheckId" = $1', [fraudCheckId]);
   return row ? mapToCheck(row) : null;
 }
 
 export async function getCheckByOrderId(orderId: string): Promise<FraudCheck | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "fraudCheck" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1', [
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "fraudCheck" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1', [
     orderId,
   ]);
   return row ? mapToCheck(row) : null;
@@ -206,7 +206,7 @@ export async function getChecks(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: FraudCheck[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters?.status) {
@@ -227,7 +227,7 @@ export async function getChecks(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "fraudCheck" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -240,7 +240,7 @@ export async function getChecks(
 }
 
 export async function getPendingReviews(): Promise<FraudCheck[]> {
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "fraudCheck" WHERE "status" IN ('flagged', 'blocked') 
      AND "reviewedAt" IS NULL ORDER BY "riskScore" DESC, "createdAt" ASC`,
   );
@@ -254,7 +254,7 @@ export async function createCheck(check: {
   orderAmount?: number;
   currency?: string;
   ipAddress?: string;
-  deviceFingerprint?: Record<string, any>;
+  deviceFingerprint?: Record<string, unknown>;
   billingCountry?: string;
   shippingCountry?: string;
   paymentMethod?: string;
@@ -281,7 +281,7 @@ export async function createCheck(check: {
     isFirstOrder = previousOrders === 0;
   }
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "fraudCheck" (
       "orderId", "customerId", "checkType", "status", "riskScore", "riskLevel",
       "deviceFingerprint", "ipAddress", "billingCountry", "shippingCountry",
@@ -320,7 +320,7 @@ export async function runFraudCheck(fraudCheckId: string): Promise<FraudCheck> {
   if (!check) throw new Error('Fraud check not found');
 
   const rules = await getRules(true);
-  const triggeredRules: any[] = [];
+  const triggeredRules: unknown[] = [];
   let totalRiskScore = 0;
   let highestAction: RuleAction = 'allow';
 
@@ -394,7 +394,7 @@ export async function reviewCheck(
 // ============================================================================
 
 export async function getBlacklistEntry(fraudBlacklistId: string): Promise<FraudBlacklist | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "fraudBlacklist" WHERE "fraudBlacklistId" = $1', [fraudBlacklistId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "fraudBlacklist" WHERE "fraudBlacklistId" = $1', [fraudBlacklistId]);
   return row ? mapToBlacklist(row) : null;
 }
 
@@ -403,7 +403,7 @@ export async function getBlacklist(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: FraudBlacklist[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters?.type) {
@@ -420,7 +420,7 @@ export async function getBlacklist(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
+  const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "fraudBlacklist" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -454,7 +454,7 @@ export async function addToBlacklist(entry: {
 }): Promise<FraudBlacklist> {
   const now = new Date().toISOString();
 
-  const result = await queryOne<Record<string, any>>(
+  const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "fraudBlacklist" (
       "type", "value", "reason", "source", "relatedOrderId", "relatedCustomerId",
       "isActive", "expiresAt", "addedBy", "createdAt", "updatedAt"
@@ -493,7 +493,7 @@ export async function expireBlacklistEntries(): Promise<number> {
      WHERE "isActive" = true AND "expiresAt" < NOW()`,
     [new Date().toISOString()],
   );
-  return (result as any)?.rowCount || 0;
+  return ((result as { rowCount?: number })?.rowCount) || 0;
 }
 
 // ============================================================================
@@ -505,23 +505,23 @@ function evaluateRule(rule: FraudRule, check: FraudCheck): boolean {
 
   switch (rule.ruleType) {
     case 'amount':
-      if (conditions.minAmount && (check.orderAmount || 0) < conditions.minAmount) return false;
-      if (conditions.maxAmount && (check.orderAmount || 0) > conditions.maxAmount) return true;
+      if (conditions.minAmount && (check.orderAmount || 0) < (conditions.minAmount as number)) return false;
+      if (conditions.maxAmount && (check.orderAmount || 0) > (conditions.maxAmount as number)) return true;
       return false;
 
     case 'location':
-      if (conditions.highRiskCountries?.includes(check.billingCountry)) return true;
-      if (conditions.highRiskCountries?.includes(check.shippingCountry)) return true;
+      if ((conditions.highRiskCountries as string[] | undefined)?.includes(check.billingCountry || '')) return true;
+      if ((conditions.highRiskCountries as string[] | undefined)?.includes(check.shippingCountry || '')) return true;
       if (conditions.requireAddressMatch && check.addressMismatch) return true;
       return false;
 
     case 'velocity':
-      if (conditions.maxOrdersPerDay && check.previousOrders >= conditions.maxOrdersPerDay) return true;
+      if (conditions.maxOrdersPerDay && check.previousOrders >= (conditions.maxOrdersPerDay as number)) return true;
       return false;
 
     case 'pattern':
-      if (conditions.firstOrderHighValue && check.isFirstOrder && (check.orderAmount || 0) > (conditions.threshold || 500)) return true;
-      if (conditions.guestCheckoutHighValue && check.isGuestCheckout && (check.orderAmount || 0) > (conditions.threshold || 300))
+      if (conditions.firstOrderHighValue && check.isFirstOrder && (check.orderAmount || 0) > ((conditions.threshold as number) || 500)) return true;
+      if (conditions.guestCheckoutHighValue && check.isGuestCheckout && (check.orderAmount || 0) > ((conditions.threshold as number) || 300))
         return true;
       return false;
 
@@ -565,82 +565,82 @@ function getCheckStatus(action: RuleAction, riskLevel: RiskLevel): CheckStatus {
   return 'passed';
 }
 
-function mapToRule(row: Record<string, any>): FraudRule {
+function mapToRule(row: Record<string, unknown>): FraudRule {
   return {
-    fraudRuleId: row.fraudRuleId,
-    name: row.name,
-    description: row.description,
-    ruleType: row.ruleType,
-    entityType: row.entityType,
-    conditions: row.conditions || {},
-    action: row.action,
-    riskScore: parseInt(row.riskScore) || 0,
-    priority: parseInt(row.priority) || 0,
+    fraudRuleId: row.fraudRuleId as string,
+    name: row.name as string,
+    description: row.description as string | undefined,
+    ruleType: row.ruleType as RuleType,
+    entityType: row.entityType as string,
+    conditions: (row.conditions as Record<string, unknown>) || {},
+    action: row.action as RuleAction,
+    riskScore: parseInt(String(row.riskScore)) || 0,
+    priority: parseInt(String(row.priority)) || 0,
     isActive: Boolean(row.isActive),
-    triggerCount: parseInt(row.triggerCount) || 0,
-    lastTriggeredAt: row.lastTriggeredAt ? new Date(row.lastTriggeredAt) : undefined,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    triggerCount: parseInt(String(row.triggerCount)) || 0,
+    lastTriggeredAt: row.lastTriggeredAt ? new Date(row.lastTriggeredAt as string) : undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
   };
 }
 
-function mapToCheck(row: Record<string, any>): FraudCheck {
+function mapToCheck(row: Record<string, unknown>): FraudCheck {
   return {
-    fraudCheckId: row.fraudCheckId,
-    orderId: row.orderId,
-    customerId: row.customerId,
-    checkType: row.checkType,
-    status: row.status,
-    riskScore: parseInt(row.riskScore) || 0,
-    riskLevel: row.riskLevel,
-    triggeredRules: row.triggeredRules,
-    signals: row.signals,
-    deviceFingerprint: row.deviceFingerprint,
-    ipAddress: row.ipAddress,
-    ipCountry: row.ipCountry,
-    ipCity: row.ipCity,
+    fraudCheckId: row.fraudCheckId as string,
+    orderId: row.orderId as string | undefined,
+    customerId: row.customerId as string | undefined,
+    checkType: row.checkType as string,
+    status: row.status as CheckStatus,
+    riskScore: parseInt(String(row.riskScore)) || 0,
+    riskLevel: row.riskLevel as RiskLevel,
+    triggeredRules: row.triggeredRules as unknown[] | undefined,
+    signals: row.signals as Record<string, unknown> | undefined,
+    deviceFingerprint: row.deviceFingerprint as Record<string, unknown> | undefined,
+    ipAddress: row.ipAddress as string | undefined,
+    ipCountry: row.ipCountry as string | undefined,
+    ipCity: row.ipCity as string | undefined,
     ipIsProxy: Boolean(row.ipIsProxy),
     ipIsVpn: Boolean(row.ipIsVpn),
     ipIsTor: Boolean(row.ipIsTor),
-    billingCountry: row.billingCountry,
-    shippingCountry: row.shippingCountry,
+    billingCountry: row.billingCountry as string | undefined,
+    shippingCountry: row.shippingCountry as string | undefined,
     addressMismatch: Boolean(row.addressMismatch),
     highRiskCountry: Boolean(row.highRiskCountry),
-    previousOrders: parseInt(row.previousOrders) || 0,
-    previousChargebacks: parseInt(row.previousChargebacks) || 0,
-    orderAmount: row.orderAmount ? parseFloat(row.orderAmount) : undefined,
-    currency: row.currency,
+    previousOrders: parseInt(String(row.previousOrders)) || 0,
+    previousChargebacks: parseInt(String(row.previousChargebacks)) || 0,
+    orderAmount: row.orderAmount ? parseFloat(String(row.orderAmount)) : undefined,
+    currency: row.currency as string | undefined,
     isFirstOrder: Boolean(row.isFirstOrder),
     isGuestCheckout: Boolean(row.isGuestCheckout),
-    paymentMethod: row.paymentMethod,
-    cardBin: row.cardBin,
-    cardCountry: row.cardCountry,
+    paymentMethod: row.paymentMethod as string | undefined,
+    cardBin: row.cardBin as string | undefined,
+    cardCountry: row.cardCountry as string | undefined,
     cardBinMismatch: Boolean(row.cardBinMismatch),
-    reviewedBy: row.reviewedBy,
-    reviewedAt: row.reviewedAt ? new Date(row.reviewedAt) : undefined,
-    reviewDecision: row.reviewDecision,
-    reviewNotes: row.reviewNotes,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    reviewedBy: row.reviewedBy as string | undefined,
+    reviewedAt: row.reviewedAt ? new Date(row.reviewedAt as string) : undefined,
+    reviewDecision: row.reviewDecision as string | undefined,
+    reviewNotes: row.reviewNotes as string | undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
   };
 }
 
-function mapToBlacklist(row: Record<string, any>): FraudBlacklist {
+function mapToBlacklist(row: Record<string, unknown>): FraudBlacklist {
   return {
-    fraudBlacklistId: row.fraudBlacklistId,
-    type: row.type,
-    value: row.value,
-    reason: row.reason,
-    source: row.source,
-    relatedOrderId: row.relatedOrderId,
-    relatedCustomerId: row.relatedCustomerId,
+    fraudBlacklistId: row.fraudBlacklistId as string,
+    type: row.type as BlacklistType,
+    value: row.value as string,
+    reason: row.reason as string | undefined,
+    source: row.source as string,
+    relatedOrderId: row.relatedOrderId as string | undefined,
+    relatedCustomerId: row.relatedCustomerId as string | undefined,
     isActive: Boolean(row.isActive),
-    expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
-    addedBy: row.addedBy,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : undefined,
+    addedBy: row.addedBy as string | undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
   };
 }

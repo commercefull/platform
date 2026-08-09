@@ -54,7 +54,7 @@ beforeAll(async () => {
     customerId = customerLogin.data?.customer?.customerId || customerLogin.data?.customer?.id || customerLogin.data?.customerId || '';
     if (!customerToken) {
     }
-  } catch (error) {
+  } catch {
     merchantToken = '';
     customerToken = '';
     customerId = '';

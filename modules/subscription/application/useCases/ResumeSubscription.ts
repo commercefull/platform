@@ -15,8 +15,19 @@ export interface ResumeSubscriptionOutput {
   nextBillingDate: Date;
 }
 
+interface SubscriptionRecord {
+  status: string;
+  customerId: string;
+  billingInterval?: string;
+}
+
+interface SubscriptionRepoPort {
+  findById(id: string): Promise<SubscriptionRecord | null>;
+  update(id: string, data: Record<string, unknown>): Promise<void>;
+}
+
 export class ResumeSubscriptionUseCase {
-  constructor(private readonly subscriptionRepo: any) {}
+  constructor(private readonly subscriptionRepo: SubscriptionRepoPort) {}
 
   async execute(input: ResumeSubscriptionInput): Promise<ResumeSubscriptionOutput> {
     if (!input.subscriptionId) {
@@ -56,7 +67,7 @@ export class ResumeSubscriptionUseCase {
     };
   }
 
-  private calculateNextBillingDate(subscription: any): Date {
+  private calculateNextBillingDate(subscription: SubscriptionRecord): Date {
     const now = new Date();
     const interval = subscription.billingInterval || 'monthly';
     const nextDate = new Date(now);

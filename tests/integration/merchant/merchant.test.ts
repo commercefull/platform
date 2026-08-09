@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { setupMerchantTests, cleanupMerchantTests, testMerchant, testMerchantAddress, testMerchantPaymentInfo } from './testUtils';
+import { setupMerchantTests, cleanupMerchantTests } from './testUtils';
 
 describe('Merchant Tests', () => {
   let client: AxiosInstance;
@@ -84,7 +84,7 @@ describe('Merchant Tests', () => {
 
       // All returned merchants should have status 'active'
       if (response.data.data.length > 0) {
-        response.data.data.forEach((merchant: any) => {
+        response.data.data.forEach((merchant: Record<string, unknown>) => {
           expect(merchant.status).toBe('active');
         });
       }
@@ -195,7 +195,7 @@ describe('Merchant Tests', () => {
 
       if (response.data.data.length > 0) {
         // Public API should only return merchants with status 'active'
-        response.data.data.forEach((merchant: any) => {
+        response.data.data.forEach((merchant: Record<string, unknown>) => {
           expect(merchant.status).toBe('active');
         });
 

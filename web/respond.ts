@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 
-type ResponseData = Record<string, any>;
+type ResponseData = Record<string, unknown>;
 
 /**
  * Admin Portal Response Helper
@@ -9,15 +9,15 @@ type ResponseData = Record<string, any>;
  */
 export async function adminRespond(req: TypedRequest, res: Response, view: string, data: ResponseData) {
   // Get flash messages from middleware
-  const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
-  const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
+  const successMsg = req.flash ? req.flash('success')[0] : null;
+  const errorMsg = req.flash ? req.flash('error')[0] : null;
 
   const noAdminLayoutViews = ['login', 'register', 'forgot-password', 'reset-password'];
 
   // Render the specific view content first
   const viewData = {
     // Common variables needed by admin portal
-    user: (req as any).user,
+    user: req.user,
     session: req.session,
     successMsg,
     errorMsg,
@@ -47,106 +47,17 @@ export async function adminRespond(req: TypedRequest, res: Response, view: strin
 }
 
 /**
- * Merchant Hub Response Helper
- * Renders merchant portal views with merchant-scoped data
- */
-export async function merchantRespond(req: TypedRequest, res: Response, view: string, data: ResponseData) {
-  // Get flash messages from middleware
-  const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
-  const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
-
-  const noMerchantLayoutViews = ['login', 'register', 'forgot-password', 'reset-password'];
-
-  // Render the specific view content first
-  const viewData = {
-    // Common variables needed by merchant portal
-    user: (req as any).user,
-    session: req.session,
-    successMsg,
-    errorMsg,
-    merchantId: (req as any).user?.merchantId,
-    // User-provided data
-    ...data,
-  };
-
-  // Render the view content
-  res.render(`merchant/views/${view}`, viewData, (err, bodyContent) => {
-    if (err) {
-      console.error('Error rendering merchant view:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    // Now render the layout with the body content
-    const layoutData = {
-      ...viewData,
-      body: bodyContent,
-    };
-
-    if (noMerchantLayoutViews.includes(view)) {
-      res.render('merchant/views/layout-public', layoutData);
-    } else {
-      res.render('merchant/views/layout', layoutData);
-    }
-  });
-}
-
-/**
- * B2B Portal Response Helper
- * Renders B2B portal views with company-scoped data
- */
-export async function b2bRespond(req: TypedRequest, res: Response, view: string, data: ResponseData) {
-  // Get flash messages from middleware
-  const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
-  const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
-
-  const noB2BLayoutViews = ['login', 'register', 'forgot-password', 'reset-password'];
-
-  // Render the specific view content first
-  const viewData = {
-    // Common variables needed by B2B portal
-    user: (req as any).user,
-    session: req.session,
-    successMsg,
-    errorMsg,
-    companyId: (req as any).user?.companyId,
-    userRole: (req as any).user?.role,
-    // User-provided data
-    ...data,
-  };
-
-  // Render the view content
-  res.render(`b2b/views/${view}`, viewData, (err, bodyContent) => {
-    if (err) {
-      console.error('Error rendering B2B view:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    // Now render the layout with the body content
-    const layoutData = {
-      ...viewData,
-      body: bodyContent,
-    };
-
-    if (noB2BLayoutViews.includes(view)) {
-      res.render('b2b/views/layout-public', layoutData);
-    } else {
-      res.render('b2b/views/layout', layoutData);
-    }
-  });
-}
-
-/**
  * Storefront Response Helper (existing)
  * Renders customer-facing storefront views
  */
 export async function storefrontRespond(req: TypedRequest, res: Response, view: string, data: ResponseData) {
   // Get flash messages from middleware
-  const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
-  const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
+  const successMsg = req.flash ? req.flash('success')[0] : null;
+  const errorMsg = req.flash ? req.flash('error')[0] : null;
 
   res.render(`storefront/views/${view}`, {
     // Common variables needed by header/navbar partials
-    user: (req as any).user,
+    user: req.user,
     session: req.session,
     categories: res.locals.categories || [],
     successMsg,

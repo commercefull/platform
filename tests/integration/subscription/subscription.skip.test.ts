@@ -2,8 +2,6 @@ import { AxiosInstance } from 'axios';
 import {
   setupSubscriptionTests,
   cleanupSubscriptionTests,
-  createTestSubscriptionProduct,
-  createTestSubscriptionPlan,
   SEEDED_SUBSCRIPTION_PRODUCT_IDS,
   SEEDED_SUBSCRIPTION_PLAN_IDS,
   SEEDED_CUSTOMER_SUBSCRIPTION_IDS,
@@ -31,7 +29,7 @@ describe('Subscription Feature Tests', () => {
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });
-  const customerHeaders = () => ({ Authorization: `Bearer ${customerToken}` });
+  const _customerHeaders = () => ({ Authorization: `Bearer ${customerToken}` });
 
   // ============================================================================
   // Subscription Products Tests (UC-SUB-001 to UC-SUB-005)

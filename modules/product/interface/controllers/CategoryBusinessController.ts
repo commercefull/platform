@@ -2,14 +2,15 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import categoryRepo from '../../infrastructure/repositories/categoryRepo';
+import type { CategoryUpdateProps } from '../../infrastructure/repositories/categoryRepo';
 
 export const listCategories = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const categories = await categoryRepo.findAll();
     res.json({ success: true, data: categories });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -17,9 +18,9 @@ export const getRootCategories = async (req: TypedRequest, res: Response): Promi
   try {
     const categories = await categoryRepo.findRootCategories();
     res.json({ success: true, data: categories });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -32,9 +33,9 @@ export const getCategory = async (req: TypedRequest, res: Response): Promise<voi
       return;
     }
     res.json({ success: true, data: category });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -47,9 +48,9 @@ export const getCategoryBySlug = async (req: TypedRequest, res: Response): Promi
       return;
     }
     res.json({ success: true, data: category });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -58,9 +59,9 @@ export const getCategoryChildren = async (req: TypedRequest, res: Response): Pro
     const { id } = req.params;
     const children = await categoryRepo.findChildren(id);
     res.json({ success: true, data: children });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -68,7 +69,12 @@ export const createCategory = async (req: TypedRequest, res: Response): Promise<
   try {
     const { name, description, parentId, isActive, isFeatured, includeInMenu, position,
             imageUrl, bannerUrl, iconUrl, metaTitle, metaDescription, metaKeywords,
-            merchantId, isGlobal, customLayout, displaySettings } = req.body;
+            merchantId, isGlobal, customLayout, displaySettings } = req.body as {
+      name?: string; description?: string; parentId?: string; isActive?: boolean; isFeatured?: boolean;
+      includeInMenu?: boolean; position?: number; imageUrl?: string; bannerUrl?: string; iconUrl?: string;
+      metaTitle?: string; metaDescription?: string; metaKeywords?: string; merchantId?: string;
+      isGlobal?: boolean; customLayout?: string; displaySettings?: Record<string, unknown>;
+    };
 
     if (!name?.trim()) {
       res.status(400).json({ success: false, error: 'name is required' });
@@ -82,9 +88,9 @@ export const createCategory = async (req: TypedRequest, res: Response): Promise<
     });
 
     res.status(201).json({ success: true, data: category });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -96,11 +102,11 @@ export const updateCategory = async (req: TypedRequest, res: Response): Promise<
       res.status(404).json({ success: false, error: 'Category not found' });
       return;
     }
-    const updated = await categoryRepo.update(id, req.body);
+    const updated = await categoryRepo.update(id, req.body as CategoryUpdateProps);
     res.json({ success: true, data: updated });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -114,8 +120,8 @@ export const deleteCategory = async (req: TypedRequest, res: Response): Promise<
     }
     await categoryRepo.delete(id);
     res.json({ success: true, message: 'Category deleted' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };

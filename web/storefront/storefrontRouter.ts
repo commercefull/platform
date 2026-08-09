@@ -39,7 +39,6 @@ import * as loyaltyController from './controllers/loyaltyController';
 import * as subscriptionController from './controllers/subscriptionController';
 import * as membershipController from './controllers/membershipController';
 import * as notificationController from './controllers/notificationController';
-import * as referralController from './controllers/referralController';
 import { isCustomerLoggedIn } from '../../libs/auth';
 
 const router = express.Router();
@@ -83,10 +82,12 @@ router.get('/returns', getReturnsPage);
 router.get('/support', getSupportPage);
 
 // POST: handle contact us form
-router.post('/pages/contact-us', [userContactUsValidationRules, validateContactUs], submitContactForm);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+router.post('/pages/contact-us', [...userContactUsValidationRules(), validateContactUs] as any[], submitContactForm);
 
 // POST: handle contact form submission
-router.post('/contact-form', [userContactFormValidationRules, validateContactForm], submitContactFormAdvanced);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+router.post('/contact-form', [...userContactFormValidationRules(), validateContactForm] as any[], submitContactFormAdvanced);
 
 // ============================================================================
 // Product Routes
@@ -329,13 +330,6 @@ router.post('/notifications/devices', isCustomerLoggedIn, notificationController
 
 // POST: delete a push notification device
 router.post('/notifications/devices/:deviceToken/delete', isCustomerLoggedIn, notificationController.deleteDevice);
-
-// ============================================================================
-// Referral Routes
-// ============================================================================
-
-// GET: referral status page (auth required)
-router.get('/referrals', isCustomerLoggedIn, referralController.getReferralStatus);
 
 // ============================================================================
 // Content Routes

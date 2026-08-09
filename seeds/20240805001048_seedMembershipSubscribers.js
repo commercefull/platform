@@ -30,26 +30,6 @@ exports.up = async function (knex) {
       transactionId: 'txn_123456789',
     });
 
-    await knex('membershipBenefitUsage').insert({
-      subscriptionId: subscription.id,
-      customerId: sampleCustomer.id,
-      benefitId: freeShippingBenefit.id,
-      usage_type: 'free_shipping',
-      relatedEntityType: 'order',
-    });
-
-    await knex('membershipDiscountCode').insert({
-      planId: standardPlan.id,
-      code: 'WELCOME10',
-      description: '10% off for new members',
-      isActive: true,
-      discountType: 'percentage',
-      discountValue: 10.0,
-      validTo: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-      maxUses: 100,
-      uses_remaining: 100,
-      first_time_only: true,
-    });
   }
 };
 
@@ -58,9 +38,6 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function (knex) {
-  await knex('membershipDiscountCodeUsage').del();
-  await knex('membershipDiscountCode').del();
-  await knex('membershipBenefitUsage').del();
   await knex('membershipPayment').del();
   await knex('membershipSubscription').del();
 };

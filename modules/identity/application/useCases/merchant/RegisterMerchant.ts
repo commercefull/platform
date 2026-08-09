@@ -22,11 +22,41 @@ export interface RegisterMerchantOutput {
   requiresApproval: boolean;
 }
 
+export interface MerchantRecord {
+  merchantId: string;
+  email: string;
+}
+
+export interface MerchantRepository {
+  findByEmail(email: string): Promise<MerchantRecord | null>;
+  create(data: {
+    merchantId: string;
+    email: string;
+    passwordHash: string;
+    businessName: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    businessType?: string;
+    website?: string;
+    status: string;
+    emailVerified: boolean;
+  }): Promise<void>;
+}
+
+export interface AuthService {
+  hashPassword(password: string): Promise<string>;
+}
+
+export interface EmailService {
+  sendMerchantWelcomeEmail(params: { to: string; businessName: string; firstName?: string }): Promise<void>;
+}
+
 export class RegisterMerchantUseCase {
   constructor(
-    private readonly merchantRepo: any,
-    private readonly authService: any,
-    private readonly emailService: any,
+    private readonly merchantRepo: MerchantRepository,
+    private readonly authService: AuthService,
+    private readonly emailService: EmailService,
   ) {}
 
   async execute(input: RegisterMerchantInput): Promise<RegisterMerchantOutput> {
@@ -78,7 +108,7 @@ export class RegisterMerchantUseCase {
         businessName: input.businessName,
         firstName: input.firstName,
       });
-    } catch (error) {}
+    } catch {}
 
     // Emit event
     eventBus.emit('merchant.registered', {

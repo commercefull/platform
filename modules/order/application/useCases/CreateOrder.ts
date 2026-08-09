@@ -25,8 +25,8 @@ export interface OrderItemInput {
   unitPrice: number;
   discountedUnitPrice?: number;
   taxRate?: number;
-  options?: Record<string, any>;
-  attributes?: Record<string, any>;
+  options?: Record<string, unknown>;
+  attributes?: Record<string, unknown>;
   isDigital?: boolean;
 }
 
@@ -68,7 +68,7 @@ export class CreateOrderCommand {
     public readonly ipAddress?: string,
     public readonly userAgent?: string,
     public readonly referralSource?: string,
-    public readonly metadata?: Record<string, any>,
+    public readonly metadata?: Record<string, unknown>,
   ) {}
 }
 

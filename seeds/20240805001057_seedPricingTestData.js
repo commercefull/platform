@@ -33,7 +33,7 @@ exports.seed = async function (knex) {
     .whereIn('productId', TEST_PRODUCT_IDS)
     .delete()
     .catch(() => {});
-  await knex('tierPrice')
+  await knex('productTierPrice')
     .whereIn('productId', TEST_PRODUCT_IDS)
     .delete()
     .catch(() => {});
@@ -49,7 +49,7 @@ exports.seed = async function (knex) {
     .whereIn('productId', TEST_PRODUCT_IDS)
     .delete()
     .catch(() => {});
-  await knex('priceList')
+  await knex('pricingPriceList')
     .where('priceListId', TEST_PRICE_LIST_ID)
     .delete()
     .catch(() => {});
@@ -92,7 +92,7 @@ exports.seed = async function (knex) {
   await knex('productCategoryMap').insert(categoryMappings);
 
   // Create a test price list
-  await knex('priceList').insert({
+  await knex('pricingPriceList').insert({
     priceListId: TEST_PRICE_LIST_ID,
     name: 'Test Price List',
     description: 'Price list for integration tests',
@@ -117,9 +117,9 @@ exports.up = exports.seed;
 exports.down = async function (knex) {
   // Clean up test data
   await knex('customerPrice').whereIn('productId', TEST_PRODUCT_IDS).delete();
-  await knex('tierPrice').whereIn('productId', TEST_PRODUCT_IDS).delete();
+  await knex('productTierPrice').whereIn('productId', TEST_PRODUCT_IDS).delete();
   await knex('productCategoryMap').whereIn('productId', TEST_PRODUCT_IDS).delete();
   await knex('product').whereIn('productId', TEST_PRODUCT_IDS).delete();
-  await knex('priceList').where('priceListId', TEST_PRICE_LIST_ID).delete();
+  await knex('pricingPriceList').where('priceListId', TEST_PRICE_LIST_ID).delete();
   await knex('pricingRule').where('pricingRuleId', TEST_PRICING_RULE_ID).delete();
 };

@@ -123,7 +123,7 @@ describe('Category Management', () => {
       expect(res.data.success).toBe(true);
       expect(Array.isArray(res.data.data)).toBe(true);
       // All returned categories should have no parentId
-      res.data.data.forEach((cat: any) => {
+      res.data.data.forEach((cat: Record<string, unknown>) => {
         expect(cat.parentId == null).toBe(true);
       });
     });
@@ -137,7 +137,7 @@ describe('Category Management', () => {
       expect(res.data.success).toBe(true);
       expect(Array.isArray(res.data.data)).toBe(true);
       if (childCategoryId) {
-        const ids = res.data.data.map((c: any) => c.productCategoryId || c.categoryId || c.id);
+        const ids = res.data.data.map((c: Record<string, unknown>) => c.productCategoryId || c.categoryId || c.id);
         expect(ids).toContain(childCategoryId);
       }
     });
@@ -187,7 +187,7 @@ describe('Category Management', () => {
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
       expect(Array.isArray(res.data.data)).toBe(true);
-      res.data.data.forEach((cat: any) => {
+      res.data.data.forEach((cat: Record<string, unknown>) => {
         expect(cat.isFeatured).toBe(true);
       });
     });

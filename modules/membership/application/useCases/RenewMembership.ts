@@ -22,8 +22,31 @@ export interface RenewMembershipOutput {
   paymentStatus: string;
 }
 
+interface MembershipRecord {
+  membershipId: string;
+  status: string;
+  customerId: string;
+  tierId: string;
+  currentPeriodEnd?: string;
+  billingPeriod?: string;
+  autoRenew?: boolean;
+  defaultPaymentMethodId?: string;
+}
+
+interface TierRecord {
+  price: number;
+  billingPeriod?: string;
+}
+
+interface RenewMembershipRepository {
+  getMembershipById(membershipId: string): Promise<MembershipRecord | null>;
+  getTierById(tierId: string): Promise<TierRecord | null>;
+  updateMembership(membershipId: string, data: Record<string, unknown>): Promise<void>;
+  createStatusLog(data: Record<string, unknown>): Promise<void>;
+}
+
 export class RenewMembershipUseCase {
-  constructor(private readonly membershipRepository: any) {}
+  constructor(private readonly membershipRepository: RenewMembershipRepository) {}
 
   async execute(input: RenewMembershipInput): Promise<RenewMembershipOutput> {
     const { membershipId, paymentMethodId, autoRenew } = input;
@@ -80,7 +103,7 @@ export class RenewMembershipUseCase {
     try {
       const payment = await this.processRenewalPayment(membership, tier.price, paymentMethodId || membership.defaultPaymentMethodId);
       paymentStatus = payment.status;
-    } catch (error: any) {
+    } catch (error: unknown) {
       paymentStatus = 'failed';
       // Log failed payment but continue with renewal record
       await this.membershipRepository.createStatusLog({
@@ -89,7 +112,7 @@ export class RenewMembershipUseCase {
         newStatus: membership.status,
         reason: 'renewal_payment_failed',
         changedAt: now,
-        metadata: { error: error.message },
+        metadata: { error: (error as Error).message },
       });
     }
 
@@ -134,7 +157,7 @@ export class RenewMembershipUseCase {
   }
 
   private async processRenewalPayment(
-    membership: any,
+    membership: MembershipRecord,
     amount: number,
     paymentMethodId?: string,
   ): Promise<{ status: string; transactionId?: string }> {

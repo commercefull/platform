@@ -6,8 +6,8 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { query, queryOne } from '../../../libs/db';
 import { storefrontRespond } from '../../respond';
+import * as storefrontLoyaltyRepo from '../../../modules/loyalty/infrastructure/repositories/storefrontLoyaltyRepo';
 
 interface CustomerUser {
   id: string;
@@ -25,34 +25,15 @@ export const loyaltyDashboard = async (req: TypedRequest, res: Response) => {
       return res.redirect('/signin');
     }
 
-    const membership = await queryOne<any>(
-      `SELECT lm.*, lt."name" as "tierName", lt."minimumPoints", lt."multiplier"
-       FROM "loyaltyMember" lm
-       LEFT JOIN "loyaltyTier" lt ON lm."loyaltyTierId" = lt."loyaltyTierId"
-       WHERE lm."customerId" = $1`,
-      [user.customerId],
-    );
-
-    const recentTransactions = await query<any[]>(
-      `SELECT * FROM "loyaltyTransaction"
-       WHERE "customerId" = $1
-       ORDER BY "createdAt" DESC
-       LIMIT 20`,
-      [user.customerId],
-    );
-
-    const availableRewards = await query<any[]>(
-      `SELECT * FROM "loyaltyReward"
-       WHERE "isActive" = true AND "pointsCost" <= $1
-       ORDER BY "pointsCost" ASC`,
-      [membership?.pointsBalance || 0],
-    );
+    const membership = await storefrontLoyaltyRepo.findMemberWithTier(user.customerId);
+    const recentTransactions = await storefrontLoyaltyRepo.findCustomerTransactions(user.customerId, 20, 0);
+    const availableRewards = await storefrontLoyaltyRepo.findAvailableRewards((membership as Record<string, unknown>)?.pointsBalance as number || 0);
 
     storefrontRespond(req, res, 'loyalty/index', {
       pageName: 'My Loyalty',
       membership,
-      transactions: recentTransactions || [],
-      rewards: availableRewards || [],
+      transactions: recentTransactions,
+      rewards: availableRewards,
     });
   } catch (error) {
     logger.error('Error loading loyalty dashboard:', error);
@@ -77,18 +58,8 @@ export const pointsHistory = async (req: TypedRequest, res: Response) => {
     const limit = 20;
     const offset = (parseInt(page as string) - 1) * limit;
 
-    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "loyaltyTransaction" WHERE "customerId" = $1`, [
-      user.customerId,
-    ]);
-    const total = parseInt(countResult?.count || '0');
-
-    const transactions = await query<any[]>(
-      `SELECT * FROM "loyaltyTransaction"
-       WHERE "customerId" = $1
-       ORDER BY "createdAt" DESC
-       LIMIT $2 OFFSET $3`,
-      [user.customerId, limit, offset],
-    );
+    const total = await storefrontLoyaltyRepo.countCustomerTransactions(user.customerId);
+    const transactions = await storefrontLoyaltyRepo.findCustomerTransactions(user.customerId, limit, offset);
 
     const pages = Math.ceil(total / limit);
     const currentPage = parseInt(page as string);
@@ -125,33 +96,22 @@ export const redeemReward = async (req: TypedRequest, res: Response) => {
 
     const { rewardId } = req.params;
 
-    const reward = await queryOne<any>(`SELECT * FROM "loyaltyReward" WHERE "loyaltyRewardId" = $1 AND "isActive" = true`, [rewardId]);
+    const reward = await storefrontLoyaltyRepo.findRewardById(rewardId);
 
     if (!reward) {
       return res.status(404).json({ error: 'Reward not found' });
     }
 
-    const membership = await queryOne<any>(`SELECT * FROM "loyaltyMember" WHERE "customerId" = $1`, [user.customerId]);
+    const membership = await storefrontLoyaltyRepo.findMemberByCustomerId(user.customerId);
+    const rewardData = reward as Record<string, unknown>;
+    const membershipData = membership as Record<string, unknown> | null;
 
-    if (!membership || membership.pointsBalance < reward.pointsCost) {
+    if (!membershipData || (membershipData.pointsBalance as number) < (rewardData.pointsCost as number)) {
       return res.status(400).json({ error: 'Insufficient points' });
     }
 
-    // Deduct points
-    await queryOne<any>(
-      `UPDATE "loyaltyMember" SET "pointsBalance" = "pointsBalance" - $1, "updatedAt" = NOW()
-       WHERE "customerId" = $2 RETURNING "loyaltyMemberId"`,
-      [reward.pointsCost, user.customerId],
-    );
-
-    // Record transaction
-    await queryOne<any>(
-      `INSERT INTO "loyaltyTransaction" (
-        "customerId", "type", "points", "description", "createdAt", "updatedAt"
-      ) VALUES ($1, 'redeem', $2, $3, NOW(), NOW())
-      RETURNING "loyaltyTransactionId"`,
-      [user.customerId, -reward.pointsCost, `Redeemed: ${reward.name}`],
-    );
+    await storefrontLoyaltyRepo.deductPoints(user.customerId, rewardData.pointsCost as number);
+    await storefrontLoyaltyRepo.createRedeemTransaction(user.customerId, -(rewardData.pointsCost as number), `Redeemed: ${rewardData.name}`);
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       return res.json({ success: true });

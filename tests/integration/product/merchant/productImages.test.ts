@@ -8,7 +8,7 @@
 
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../../testUtils';
-import { SEEDED_PRODUCT_1_ID, SEEDED_VARIANT_1_ID } from '../testUtils';
+import { SEEDED_PRODUCT_1_ID } from '../testUtils';
 
 ;
 ;
@@ -77,7 +77,7 @@ describe('Product Images & Media', () => {
       const images = listRes.data.data;
       if (!images || images.length < 1) return;
 
-      const imageIds = images.map((img: any) => img.imageId || img.id).reverse();
+      const imageIds = images.map((img: Record<string, unknown>) => img.imageId || img.id).reverse();
       const res = await client.post(
         `/business/products/${SEEDED_PRODUCT_1_ID}/images/reorder`,
         { imageIds },
@@ -161,7 +161,7 @@ describe('Product Images & Media', () => {
       );
       expect(listRes.status).toBe(200);
       const images = listRes.data.data;
-      const hasPrimary = images.some((img: any) => img.isPrimary === true);
+      const _hasPrimary = images.some((img: Record<string, unknown>) => img.isPrimary === true);
       // If the repo auto-promotes, there should be a new primary
       // If not, this is still valid behavior — just verify the list is consistent
       expect(Array.isArray(images)).toBe(true);

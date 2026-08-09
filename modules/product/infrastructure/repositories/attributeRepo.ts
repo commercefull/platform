@@ -69,7 +69,7 @@ export class AttributeRepo {
 
     // Build dynamic update
     const updates: string[] = ['"updatedAt" = $1'];
-    const values: any[] = [now];
+    const values: unknown[] = [now];
     let paramIndex = 2;
 
     for (const [key, value] of Object.entries(attribute)) {

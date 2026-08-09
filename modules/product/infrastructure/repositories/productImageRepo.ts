@@ -78,7 +78,7 @@ export class ProductImageRepo {
   async update(id: string, props: UpdateProps): Promise<ProductImage> {
     const now = new Date();
     const setClauses: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     for (const [key, value] of Object.entries(props)) {

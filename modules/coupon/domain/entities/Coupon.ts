@@ -12,7 +12,7 @@ export type CouponStatus = 'active' | 'inactive' | 'expired' | 'depleted';
 export interface CouponCondition {
   type: 'min_order_value' | 'min_quantity' | 'product_category' | 'product_id' | 'customer_group' | 'first_order' | 'customer_email';
   operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'in' | 'not_in' | 'contains';
-  value: any;
+  value: unknown;
 }
 
 export interface CouponUsage {
@@ -48,7 +48,7 @@ export interface CouponProps {
   excludedProducts?: string[]; // Product IDs to exclude
   excludedCategories?: string[]; // Category IDs to exclude
   createdBy: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -82,7 +82,7 @@ export class Coupon {
     excludedProducts?: string[];
     excludedCategories?: string[];
     createdBy: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Coupon {
     // Validate inputs
     if (!props.code?.trim()) {
@@ -207,7 +207,7 @@ export class Coupon {
   get createdBy(): string {
     return this.props.createdBy;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -309,7 +309,7 @@ export class Coupon {
     }
   }
 
-  canBeApplied(orderValue: number, customerId?: string, customerGroupIds?: string[]): boolean {
+  canBeApplied(orderValue: number, customerId?: string, _customerGroupIds?: string[]): boolean {
     if (this.status !== 'active') return false;
 
     // Check minimum order value
@@ -361,7 +361,7 @@ export class Coupon {
     };
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -370,7 +370,7 @@ export class Coupon {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       couponId: this.props.couponId,
       code: this.props.code,

@@ -5,7 +5,7 @@ export interface NotificationEventLog {
   eventType: string;
   entityId?: string;
   entityType?: string;
-  payload?: Record<string, any>;
+  payload?: Record<string, unknown>;
   processedAt?: Date;
   createdAt: Date;
 }

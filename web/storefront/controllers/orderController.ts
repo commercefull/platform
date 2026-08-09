@@ -21,15 +21,19 @@ export const orderHistory = async (req: TypedRequest, res: Response): Promise<vo
       return res.redirect('/signin?redirect=/orders');
     }
 
-    const customerId = (req as any).user.customerId;
+    const customerId = req.user.customerId;
     const { page = '1', limit = '10', status } = req.query;
 
-    const filters: any = { customerId };
+    const filters: { customerId?: string; status?: string } = { customerId };
     if (status && status !== 'all') {
-      filters.status = status;
+      filters.status = status as string;
     }
 
-    const command = new ListOrdersCommand(filters, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
+    const command = new ListOrdersCommand(
+      filters as Record<string, unknown>,
+      parseInt(limit as string),
+      (parseInt(page as string) - 1) * parseInt(limit as string),
+    );
 
     const useCase = new ListOrdersUseCase(OrderRepo);
     const result = await useCase.execute(command);
@@ -47,12 +51,12 @@ export const orderHistory = async (req: TypedRequest, res: Response): Promise<vo
       filters: { status },
       user: req.user,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load order history',
+      error: (error as Error).message || 'Failed to load order history',
       user: req.user,
     });
   }
@@ -69,7 +73,7 @@ export const orderDetails = async (req: TypedRequest, res: Response): Promise<vo
     }
 
     const { orderId } = req.params;
-    const customerId = (req as any).user.customerId;
+    const customerId = req.user.customerId;
 
     const command = new GetOrderCommand(orderId);
     const useCase = new GetOrderUseCase(OrderRepo);
@@ -89,19 +93,19 @@ export const orderDetails = async (req: TypedRequest, res: Response): Promise<vo
     }
 
     // Calculate totals
-    const totals = calculateOrderTotals(order);
+    const totals = calculateOrderTotals(order as unknown as Record<string, unknown>);
 
     storefrontRespond(req, res, 'user/order-details', {
       pageName: `Order ${order.orderNumber}`,
       order: { ...order, totals },
       user: req.user,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load order details',
+      error: (error as Error).message || 'Failed to load order details',
       user: req.user,
     });
   }
@@ -133,20 +137,20 @@ export const orderTracking = async (req: TypedRequest, res: Response): Promise<v
     // For security, we might want to hide sensitive info for guest tracking
     // or require email verification
 
-    const totals = calculateOrderTotals(order);
-    const timeline = generateOrderTimeline(order);
+    const totals = calculateOrderTotals(order as unknown as Record<string, unknown>);
+    const timeline = generateOrderTimeline(order as unknown as Record<string, unknown>);
 
     storefrontRespond(req, res, 'shop/order-tracking', {
       pageName: `Track Order ${order.orderNumber}`,
       order: { ...order, totals, timeline },
       user: req.user,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load order tracking',
+      error: (error as Error).message || 'Failed to load order tracking',
       user: req.user,
     });
   }
@@ -156,19 +160,20 @@ export const orderTracking = async (req: TypedRequest, res: Response): Promise<v
 // Helper Functions
 // ============================================================================
 
-function calculateOrderTotals(order: any) {
+function calculateOrderTotals(order: Record<string, unknown>) {
   // Orders should have tax already calculated and stored
   // Use the order's stored values directly
+  const orderItems = order.items as Record<string, unknown>[] | undefined;
   const subtotal =
-    order.subtotal ||
-    order.items?.reduce((sum: number, item: any) => {
-      return sum + (item.unitPrice || item.price) * item.quantity;
+    (order.subtotal as number) ||
+    orderItems?.reduce((sum: number, item: Record<string, unknown>) => {
+      return sum + ((item.unitPrice as number) || (item.price as number)) * (item.quantity as number);
     }, 0) ||
     0;
 
-  const tax = order.taxTotal || order.tax || 0;
-  const shipping = order.shippingTotal || order.shipping || 0;
-  const total = order.totalAmount || order.total || subtotal + tax + shipping;
+  const tax = (order.taxTotal as number) || (order.tax as number) || 0;
+  const shipping = (order.shippingTotal as number) || (order.shipping as number) || 0;
+  const total = (order.totalAmount as number) || (order.total as number) || subtotal + tax + shipping;
 
   return {
     subtotal: typeof subtotal === 'number' ? subtotal.toFixed(2) : subtotal,
@@ -178,35 +183,35 @@ function calculateOrderTotals(order: any) {
   };
 }
 
-function generateOrderTimeline(order: any) {
+function generateOrderTimeline(order: Record<string, unknown>) {
   const timeline = [
     {
       status: 'ordered',
       title: 'Order Placed',
       description: 'Your order has been received',
-      date: order.createdAt,
+      date: order.createdAt as string,
       completed: true,
     },
   ];
 
   // Add more timeline events based on order status
-  if (['processing', 'shipped', 'delivered'].includes(order.status)) {
+  if (['processing', 'shipped', 'delivered'].includes(order.status as string)) {
     timeline.push({
       status: 'processing',
       title: 'Processing',
       description: 'Your order is being prepared',
-      date: order.updatedAt,
-      completed: ['processing', 'shipped', 'delivered'].includes(order.status),
+      date: order.updatedAt as string,
+      completed: ['processing', 'shipped', 'delivered'].includes(order.status as string),
     });
   }
 
-  if (['shipped', 'delivered'].includes(order.status)) {
+  if (['shipped', 'delivered'].includes(order.status as string)) {
     timeline.push({
       status: 'shipped',
       title: 'Shipped',
       description: 'Your order has been shipped',
-      date: order.shippedAt,
-      completed: ['shipped', 'delivered'].includes(order.status),
+      date: order.shippedAt as string,
+      completed: ['shipped', 'delivered'].includes(order.status as string),
     });
   }
 
@@ -215,7 +220,7 @@ function generateOrderTimeline(order: any) {
       status: 'delivered',
       title: 'Delivered',
       description: 'Your order has been delivered',
-      date: order.deliveredAt,
+      date: order.deliveredAt as string,
       completed: true,
     });
   }

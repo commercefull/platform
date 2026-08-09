@@ -1,4 +1,4 @@
-import { NotificationRepo, Notification, NotificationCreateParams } from '../infrastructure/repositories/notificationRepo';
+import { NotificationRepo, Notification } from '../infrastructure/repositories/notificationRepo';
 import { NotificationBuilder, NotificationChannel } from '../domain/notification';
 
 /**
@@ -134,7 +134,7 @@ export class NotificationService {
       try {
         const notification = await this.sendNotification(builder);
         results.push(notification);
-      } catch (error) {}
+      } catch {}
     }
 
     return results;

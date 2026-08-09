@@ -3,7 +3,7 @@
  * Lists promotions with filtering and pagination
  */
 
-import { PromotionRepo } from '../../infrastructure/repositories/promotionRepo';
+import { PromotionRepo, PromotionStatus } from '../../infrastructure/repositories/promotionRepo';
 
 // Command
 export class ListPromotionsCommand {
@@ -24,7 +24,7 @@ export class ListPromotionsCommand {
 
 // Response
 export interface ListPromotionsResponse {
-  data: any[];
+  data: unknown[];
   total: number;
   limit: number;
   offset: number;
@@ -38,7 +38,7 @@ export class ListPromotionsUseCase {
   async execute(command: ListPromotionsCommand): Promise<ListPromotionsResponse> {
     const promotions = await this.promotionRepo.findAll(
       {
-        status: command.filters?.status as any, // Cast to match repo interface
+        status: command.filters?.status as PromotionStatus[] | PromotionStatus | undefined,
         isActive: command.filters?.isActive,
         merchantId: command.filters?.merchantId,
       },

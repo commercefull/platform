@@ -135,7 +135,7 @@ export interface FindSimilarProductsQuery {
 
 export interface FindSimilarProductsResponse {
   success: boolean;
-  data?: any[];
+  data?: unknown[];
   error?: string;
 }
 
@@ -166,7 +166,7 @@ export interface FindByAttributeQuery {
 
 export interface FindByAttributeResponse {
   success: boolean;
-  data?: any[];
+  data?: unknown[];
   error?: string;
 }
 

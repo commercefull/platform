@@ -28,7 +28,7 @@ export interface PriceRuleProps {
   priority: number;
   isActive: boolean;
   merchantId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,7 +55,7 @@ export class PriceRule {
     endDate?: Date;
     priority?: number;
     merchantId?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): PriceRule {
     const now = new Date();
     return new PriceRule({
@@ -179,7 +179,7 @@ export class PriceRule {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       ruleId: this.props.ruleId,
       name: this.props.name,

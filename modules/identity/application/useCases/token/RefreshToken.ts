@@ -12,12 +12,51 @@ export interface RefreshTokenOutput {
   expiresIn: number;
 }
 
+export interface RefreshTokenRecord {
+  token: string;
+  customerId?: string;
+  merchantId?: string;
+  revoked: boolean;
+  expiresAt: Date;
+}
+
+export interface RefreshTokenRepository {
+  findByToken(token: string): Promise<RefreshTokenRecord | null>;
+  revoke(token: string): Promise<void>;
+}
+
+export interface TokenService {
+  generateAccessToken(payload: Record<string, unknown>): Promise<string>;
+  generateRefreshToken(payload: Record<string, unknown>): Promise<string>;
+}
+
+export interface CustomerRecord {
+  customerId: string;
+  email: string;
+  status: string;
+}
+
+export interface MerchantRecord {
+  merchantId: string;
+  email: string;
+  status: string;
+  permissions?: string[];
+}
+
+export interface CustomerRepository {
+  findById(customerId: string): Promise<CustomerRecord | null>;
+}
+
+export interface MerchantRepository {
+  findById(merchantId: string): Promise<MerchantRecord | null>;
+}
+
 export class RefreshTokenUseCase {
   constructor(
-    private readonly refreshTokenRepo: any,
-    private readonly tokenService: any,
-    private readonly customerRepo: any,
-    private readonly merchantRepo: any,
+    private readonly refreshTokenRepo: RefreshTokenRepository,
+    private readonly tokenService: TokenService,
+    private readonly customerRepo: CustomerRepository,
+    private readonly merchantRepo: MerchantRepository,
   ) {}
 
   async execute(input: RefreshTokenInput): Promise<RefreshTokenOutput> {

@@ -20,10 +20,44 @@ export interface EarnPointsOutput {
   newBalance: number;
 }
 
+export interface EarnPointsMember {
+  memberId: string;
+  tierId: string;
+  availablePoints: number;
+  lifetimePoints: number;
+  tier?: {
+    multiplier: number;
+  };
+}
+
+export interface EarnPointsProgram {
+  programId: string;
+  defaultTierId: string;
+  baseEarnRate?: number;
+  earnRates?: Record<string, number>;
+}
+
+export interface EarnPointsRepository {
+  findMemberByCustomerId(customerId: string): Promise<EarnPointsMember | null>;
+  createMember(data: {
+    customerId: string;
+    programId: string;
+    tierId: string;
+    availablePoints: number;
+    lifetimePoints: number;
+  }): Promise<EarnPointsMember>;
+  createTransaction(data: Record<string, unknown>): Promise<void>;
+  updateMemberPoints(memberId: string, data: { availablePoints: number; lifetimePoints?: number }): Promise<void>;
+}
+
+export interface EarnPointsProgramRepository {
+  findActive(): Promise<EarnPointsProgram | null>;
+}
+
 export class EarnPointsUseCase {
   constructor(
-    private readonly loyaltyRepository: any,
-    private readonly loyaltyProgramRepository: any,
+    private readonly loyaltyRepository: EarnPointsRepository,
+    private readonly loyaltyProgramRepository: EarnPointsProgramRepository,
   ) {}
 
   async execute(input: EarnPointsInput): Promise<EarnPointsOutput> {

@@ -19,6 +19,18 @@ const router = express.Router();
 router.get('/checkout/payment-methods', checkoutController.getPaymentMethods);
 
 /**
+ * Get available pickup locations
+ * GET /checkout/pickup-locations
+ */
+router.get('/checkout/pickup-locations', checkoutController.getPickupLocations);
+
+/**
+ * Set pickup location (BOPIS)
+ * PUT /checkout/:checkoutId/pickup-location
+ */
+router.put('/checkout/:checkoutId/pickup-location', checkoutController.setPickupLocation);
+
+/**
  * Initiate checkout session
  * POST /checkout
  */

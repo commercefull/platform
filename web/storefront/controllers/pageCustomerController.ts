@@ -1,6 +1,6 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
 import { ListProductsCommand, ListProductsUseCase } from '../../../modules/product/application/useCases/ListProducts';
@@ -20,12 +20,12 @@ export const getHomePage = async (req: TypedRequest, res: Response): Promise<voi
       categories: [],
       user: req.user,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load home page',
+      error: (error as Error).message || 'Failed to load home page',
       user: req.user,
     });
   }
@@ -125,16 +125,17 @@ export const getSupportPage = (req: TypedRequest, res: Response): void => {
 // POST: handle contact form submission
 export const submitContactFormAdvanced = (req: TypedRequest, res: Response): void => {
   // Validation is handled by middleware, so we can proceed with processing
-  const { name, email, phone, subject, message } = req.body;
+  const body = req.body as RequestBody;
+  const { name, email, phone, subject, message } = body;
 
   // TODO: Add email sending logic here using nodemailer
   // For now, we'll just log the form data and show success
   console.log('Advanced contact form submission:', {
-    name: name.trim(),
-    email: email.trim(),
-    phone: phone?.trim() || null,
+    name: (name as string).trim(),
+    email: (email as string).trim(),
+    phone: (phone as string)?.trim() || null,
     subject,
-    message: message.trim(),
+    message: (message as string).trim(),
     submittedAt: new Date(),
   });
 

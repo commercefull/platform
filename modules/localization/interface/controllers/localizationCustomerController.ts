@@ -9,6 +9,7 @@ import { TypedRequest } from 'libs/types/express';
 import localeRepo from '../../infrastructure/repositories/localeRepo';
 import countryRepo from '../../infrastructure/repositories/countryRepo';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
+import { Locale, Country } from '../../../../libs/db/types';
 
 /**
  * Get all active locales
@@ -19,7 +20,7 @@ export const getActiveLocales = async (_req: TypedRequest, res: Response): Promi
     const locales = await localeRepo.findAll(true); // Only active locales
 
     // Map to public-facing data (exclude internal fields)
-    const publicLocales = locales.map((locale: any) => ({
+    const publicLocales = locales.map((locale: Locale) => ({
       code: locale.code,
       name: locale.name,
       language: locale.language,
@@ -32,7 +33,7 @@ export const getActiveLocales = async (_req: TypedRequest, res: Response): Promi
     }));
 
     successResponse(res, publicLocales);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch locales');
@@ -48,7 +49,7 @@ export const getActiveCountries = async (_req: TypedRequest, res: Response): Pro
     const countries = await countryRepo.findAll(true); // Only active countries
 
     // Map to public-facing data
-    const publicCountries = countries.map((country: any) => ({
+    const publicCountries = countries.map((country: Country) => ({
       code: country.code,
       name: country.name,
       alpha3Code: country.alpha3Code,
@@ -57,7 +58,7 @@ export const getActiveCountries = async (_req: TypedRequest, res: Response): Pro
     }));
 
     successResponse(res, publicCountries);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch countries');
@@ -131,7 +132,7 @@ export const detectLocale = async (req: TypedRequest, res: Response): Promise<vo
       },
       source: preferredLanguages.length > 0 ? 'accept-language' : 'default',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to detect locale');
@@ -169,7 +170,7 @@ export const getLocaleByCode = async (req: TypedRequest, res: Response): Promise
       timeFormat: locale.timeFormat,
       timeZone: locale.timeZone,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch locale');
@@ -204,7 +205,7 @@ export const getCountryByCode = async (req: TypedRequest, res: Response): Promis
       flagIcon: country.flagIcon,
       region: country.region,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch country');
@@ -262,7 +263,7 @@ function parseAcceptLanguage(header: string): ParsedLanguage[] {
 /**
  * Find first active locale matching a language code
  */
-async function findLocaleByLanguage(language: string): Promise<any | null> {
+async function findLocaleByLanguage(language: string): Promise<Locale | null> {
   const locales = await localeRepo.findAll(true);
-  return locales.find((l: any) => l.language.toLowerCase() === language.toLowerCase()) || null;
+  return locales.find((l: Locale) => l.language.toLowerCase() === language.toLowerCase()) || null;
 }

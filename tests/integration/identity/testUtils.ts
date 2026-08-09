@@ -27,8 +27,7 @@ export const testAdmin = TEST_MERCHANT; // Use merchant as admin for now
 // Setup Functions
 // ============================================================================
 
-let _client: AxiosInstance | null = null;
-let _adminToken: string = '';
+
 
 /**
  * Setup function for identity integration tests
@@ -56,10 +55,7 @@ export async function setupIdentityTests() {
     adminToken = adminLoginResponse.data?.accessToken || '';
     if (!adminToken) {
     }
-  } catch (error) {}
-
-  _client = client;
-  _adminToken = adminToken;
+  } catch {}
 
   return { client, adminToken };
 }

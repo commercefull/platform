@@ -30,7 +30,6 @@ exports.seed = async function (knex) {
   await knex('promotionProductDiscount').del();
   await knex('promotionGiftCardTransaction').del();
   await knex('promotionGiftCard').del();
-  await knex('promotionUsage').del();
   await knex('promotionAction').del();
   await knex('promotionRule').del();
   await knex('promotion').del();

@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import supplierRepo from '../../../modules/supplier/infrastructure/repositories/supplierRepo';
 import { adminRespond } from '../../respond';
 
@@ -21,10 +21,10 @@ export const listSuppliers = async (req: TypedRequest, res: Response): Promise<v
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    let suppliers: any[] = [];
+    let suppliers: unknown[] = [];
 
     if (status) {
-      suppliers = await supplierRepo.findByStatus(status as any);
+      suppliers = await supplierRepo.findByStatus(status as 'active' | 'inactive' | 'pending' | 'suspended' | 'blacklisted');
     } else {
       suppliers = await supplierRepo.findAll(isActive, isApproved);
     }
@@ -41,12 +41,12 @@ export const listSuppliers = async (req: TypedRequest, res: Response): Promise<v
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load suppliers',
+      error: (error as Error).message || 'Failed to load suppliers',
     });
   }
 };
@@ -56,18 +56,19 @@ export const createSupplierForm = async (req: TypedRequest, res: Response): Prom
     adminRespond(req, res, 'operations/suppliers/create', {
       pageName: 'Create Supplier',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
 
 export const createSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
     const {
       name,
       code,
@@ -85,7 +86,7 @@ export const createSupplier = async (req: TypedRequest, res: Response): Promise<
       notes,
       categories,
       tags,
-    } = req.body;
+    } = body;
 
     const supplier = await supplierRepo.create({
       name,
@@ -109,13 +110,13 @@ export const createSupplier = async (req: TypedRequest, res: Response): Promise<
     });
 
     res.redirect(`/hub/suppliers/${supplier.supplierId}?success=Supplier created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'operations/suppliers/create', {
       pageName: 'Create Supplier',
-      error: error.message || 'Failed to create supplier',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create supplier',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -140,12 +141,12 @@ export const viewSupplier = async (req: TypedRequest, res: Response): Promise<vo
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load supplier',
+      error: (error as Error).message || 'Failed to load supplier',
     });
   }
 };
@@ -168,12 +169,12 @@ export const editSupplierForm = async (req: TypedRequest, res: Response): Promis
       pageName: `Edit: ${supplier.name}`,
       supplier,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -181,8 +182,9 @@ export const editSupplierForm = async (req: TypedRequest, res: Response): Promis
 export const updateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { supplierId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
+    const body = req.body as RequestBody;
     const {
       name,
       description,
@@ -200,7 +202,7 @@ export const updateSupplier = async (req: TypedRequest, res: Response): Promise<
       categories,
       tags,
       rating,
-    } = req.body;
+    } = body;
 
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description || undefined;
@@ -226,7 +228,7 @@ export const updateSupplier = async (req: TypedRequest, res: Response): Promise<
     }
 
     res.redirect(`/hub/suppliers/${supplierId}?success=Supplier updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -235,13 +237,13 @@ export const updateSupplier = async (req: TypedRequest, res: Response): Promise<
       adminRespond(req, res, 'operations/suppliers/edit', {
         pageName: `Edit: ${supplier?.name || 'Supplier'}`,
         supplier,
-        error: error.message || 'Failed to update supplier',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update supplier',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update supplier',
+        error: (error as Error).message || 'Failed to update supplier',
       });
     }
   }
@@ -258,10 +260,10 @@ export const approveSupplier = async (req: TypedRequest, res: Response): Promise
     }
 
     res.json({ success: true, message: 'Supplier approved successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to approve supplier' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to approve supplier' });
   }
 };
 
@@ -276,10 +278,10 @@ export const suspendSupplier = async (req: TypedRequest, res: Response): Promise
     }
 
     res.json({ success: true, message: 'Supplier suspended successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to suspend supplier' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to suspend supplier' });
   }
 };
 
@@ -294,10 +296,10 @@ export const activateSupplier = async (req: TypedRequest, res: Response): Promis
     }
 
     res.json({ success: true, message: 'Supplier activated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to activate supplier' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate supplier' });
   }
 };
 
@@ -312,10 +314,10 @@ export const deactivateSupplier = async (req: TypedRequest, res: Response): Prom
     }
 
     res.json({ success: true, message: 'Supplier deactivated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to deactivate supplier' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate supplier' });
   }
 };
 
@@ -330,9 +332,9 @@ export const deleteSupplier = async (req: TypedRequest, res: Response): Promise<
     }
 
     res.json({ success: true, message: 'Supplier deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete supplier' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete supplier' });
   }
 };

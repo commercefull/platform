@@ -5,6 +5,7 @@
 
 import { generateUUID } from '../../../../libs/uuid';
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
+import { Basket } from '../../domain/entities/Basket';
 import { BasketItem } from '../../domain/entities/BasketItem';
 import { Money } from '../../domain/valueObjects/Money';
 import { eventBus } from '../../../../libs/events/eventBus';
@@ -24,7 +25,7 @@ export class AddItemCommand {
     public readonly unitPrice: number,
     public readonly productVariantId?: string,
     public readonly imageUrl?: string,
-    public readonly attributes?: Record<string, any>,
+    public readonly attributes?: Record<string, unknown>,
     public readonly itemType: 'physical' | 'digital' | 'subscription' | 'service' = 'physical',
   ) {}
 }
@@ -77,14 +78,14 @@ export class AddItemUseCase {
     return this.mapToResponse(updatedBasket!);
   }
 
-  private mapToResponse(basket: any): BasketResponse {
+  private mapToResponse(basket: Basket): BasketResponse {
     return {
       basketId: basket.basketId,
       customerId: basket.customerId,
       sessionId: basket.sessionId,
       status: basket.status,
       currency: basket.currency,
-      items: basket.items.map((item: any) => ({
+      items: basket.items.map((item) => ({
         basketItemId: item.basketItemId,
         productId: item.productId,
         productVariantId: item.productVariantId,

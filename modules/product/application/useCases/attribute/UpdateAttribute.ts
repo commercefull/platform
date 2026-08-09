@@ -1,6 +1,7 @@
 import dynamicAttributeRepository, {
   ProductAttributeUpdateInput,
   ProductAttribute,
+  AttributeType,
 } from '../../../infrastructure/repositories/DynamicAttributeRepository';
 
 export interface UpdateAttributeCommand {
@@ -22,7 +23,7 @@ export interface UpdateAttributeCommand {
   useForConfigurations?: boolean;
   position?: number;
   defaultValue?: string;
-  validationRules?: Record<string, any>;
+  validationRules?: Record<string, unknown>;
 }
 
 export interface UpdateAttributeResponse {
@@ -69,8 +70,8 @@ export class UpdateAttributeUseCase {
       if (command.code !== undefined) input.code = command.code;
       if (command.description !== undefined) input.description = command.description;
       if (command.groupId !== undefined) input.groupId = command.groupId;
-      if (command.type !== undefined) input.type = command.type as any;
-      if (command.inputType !== undefined) input.inputType = command.inputType as any;
+      if (command.type !== undefined) input.type = command.type as AttributeType;
+      if (command.inputType !== undefined) input.inputType = command.inputType as AttributeType;
       if (command.isRequired !== undefined) input.isRequired = command.isRequired;
       if (command.isUnique !== undefined) input.isUnique = command.isUnique;
       if (command.isSearchable !== undefined) input.isSearchable = command.isSearchable;

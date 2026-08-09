@@ -24,7 +24,7 @@ describe('Customer: Category Browsing', () => {
     const res = await client.get('/customer/categories?featured=true');
     expect(res.status).toBe(200);
     expect(Array.isArray(res.data.data)).toBe(true);
-    res.data.data.forEach((cat: any) => {
+    res.data.data.forEach((cat: Record<string, unknown>) => {
       expect(cat.isFeatured).toBe(true);
     });
   });
@@ -101,7 +101,7 @@ describe('Customer: Category Browsing', () => {
       expect(res.data.success).toBe(true);
       expect(Array.isArray(res.data.data)).toBe(true);
       if (childId) {
-        const ids = res.data.data.map((c: any) => c.productCategoryId || c.categoryId || c.id);
+        const ids = res.data.data.map((c: Record<string, unknown>) => c.productCategoryId || c.categoryId || c.id);
         expect(ids).toContain(childId);
       }
     });

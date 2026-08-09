@@ -114,7 +114,7 @@ describe('Dynamic Attribute System', () => {
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
       // All returned attributes should be filterable
-      response.data.data.forEach((attr: any) => {
+      response.data.data.forEach((attr: Record<string, unknown>) => {
         expect(attr.isFilterable).toBe(true);
       });
     });
@@ -128,7 +128,7 @@ describe('Dynamic Attribute System', () => {
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
       // All returned attributes should be for variants
-      response.data.data.forEach((attr: any) => {
+      response.data.data.forEach((attr: Record<string, unknown>) => {
         expect(attr.useForVariants).toBe(true);
       });
     });
@@ -148,7 +148,7 @@ describe('Dynamic Attribute System', () => {
       expect(response.data.data.length).toBeGreaterThan(0);
 
       // Check for expected color values
-      const values = response.data.data.map((v: any) => v.value);
+      const values = response.data.data.map((v: Record<string, unknown>) => v.value);
       expect(values).toContain('red');
       expect(values).toContain('blue');
       expect(values).toContain('black');
@@ -247,8 +247,8 @@ describe('Dynamic Attribute System', () => {
       expect(response.data.success).toBe(true);
 
       const attributes = response.data.data;
-      const colorAttr = attributes.find((a: any) => a.attributeId === SEEDED_ATTRIBUTE_COLOR_ID);
-      const sizeAttr = attributes.find((a: any) => a.attributeId === SEEDED_ATTRIBUTE_SIZE_ID);
+      const colorAttr = attributes.find((a: Record<string, unknown>) => a.attributeId === SEEDED_ATTRIBUTE_COLOR_ID);
+      const sizeAttr = attributes.find((a: Record<string, unknown>) => a.attributeId === SEEDED_ATTRIBUTE_SIZE_ID);
 
       expect(colorAttr).toBeDefined();
       expect(colorAttr.value).toBe('blue');

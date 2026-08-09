@@ -6,9 +6,9 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
-import { query, queryOne } from '../../../libs/db';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import { getSalesSummary, getTopProducts, getCustomerCohorts } from '../../../modules/analytics/infrastructure/repositories/analyticsRepo';
+import * as adminAnalyticsRepo from '../../../modules/analytics/infrastructure/repositories/adminAnalyticsRepo';
 import {
   getScheduledReports,
   getReportExecutionHistory,
@@ -44,7 +44,7 @@ export const analyticsDashboard = async (req: TypedRequest, res: Response): Prom
     const topProducts = await getTopProducts(startDate, endDate, 'revenue', 10);
 
     // Get customer cohorts for retention analysis
-    const customerCohorts = await getCustomerCohorts();
+    const _customerCohorts = await getCustomerCohorts();
 
     // Build comprehensive dashboard data
     const dashboardData = {
@@ -63,7 +63,7 @@ export const analyticsDashboard = async (req: TypedRequest, res: Response): Prom
         segments: [], // Would implement segmentation
       },
       products: {
-        topSelling: topProducts.map((p: any) => ({
+        topSelling: topProducts.map((p) => ({
           productId: p.productId,
           name: `Product ${p.productId.slice(-8)}`, // Would join with product table
           sales: p.quantitySold,
@@ -71,7 +71,7 @@ export const analyticsDashboard = async (req: TypedRequest, res: Response): Prom
         })),
         lowStock: [], // Would implement inventory alerts
         recommendations: [], // Would implement AI recommendations
-        performance: topProducts.map((p: any) => ({
+        performance: topProducts.map((p) => ({
           productId: p.productId,
           name: `Product ${p.productId.slice(-8)}`,
           views: p.views,
@@ -103,12 +103,12 @@ export const analyticsDashboard = async (req: TypedRequest, res: Response): Prom
       dashboardData,
       filters: { period, segment, category },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load analytics dashboard',
+      error: (error as Error).message || 'Failed to load analytics dashboard',
     });
   }
 };
@@ -134,9 +134,9 @@ export const storeSalesDashboard = async (req: TypedRequest, res: Response): Pro
         dateTo: dateTo.toISOString().slice(0, 10),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load store sales dashboard' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load store sales dashboard' });
   }
 };
 
@@ -163,40 +163,26 @@ export const predictiveAnalytics = async (req: TypedRequest, res: Response): Pro
     const inventoryPredictions = await optimizeInventoryLevels();
 
     // Get customer churn analysis for top customers
-    const customerChurnData = await query<Array<{ customer_id: string }>>(
-      `SELECT DISTINCT customer_id FROM "order"
-       WHERE status = 'completed'
-       ORDER BY customer_id LIMIT 10`,
-    );
+    const customerChurnData = await adminAnalyticsRepo.findRecentCustomerIds(10);
 
-    const customerChurnPromises = (customerChurnData || []).map(async customer => {
+    const customerChurnPromises = customerChurnData.map(async customerId => {
       try {
-        // Get customer's purchase history
-        const history = await query<Array<{ date: Date; orders: number; revenue: number }>>(
-          `SELECT
-            DATE(created_at) as date,
-            COUNT(*) as orders,
-            SUM(total_amount) as revenue
-           FROM "order"
-           WHERE customer_id = $1 AND status = 'completed'
-           GROUP BY DATE(created_at)
-           ORDER BY date DESC LIMIT 30`,
-          [customer.customer_id],
-        );
+        const history = await adminAnalyticsRepo.findCustomerPurchaseHistory(customerId, 30);
 
         const analysis = await predictCustomerChurn(
-          customer.customer_id,
-          (history || []).map(h => ({ date: h.date, orders: parseInt(h.orders.toString()), revenue: parseFloat(h.revenue.toString()) })),
+          customerId,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (history as any[]).map((h) => ({ date: h.date, orders: parseInt(h.orders.toString()), revenue: parseFloat(h.revenue.toString()) })),
         );
 
         return {
-          customerId: customer.customer_id,
+          customerId,
           ...analysis,
         };
       } catch (error) {
         logger.error('Error:', error);
         return {
-          customerId: customer.customer_id,
+          customerId,
           churnProbability: 0,
           riskLevel: 'low' as const,
           factors: [],
@@ -213,12 +199,12 @@ export const predictiveAnalytics = async (req: TypedRequest, res: Response): Pro
       inventoryPredictions,
       customerChurnRisk,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load predictive analytics',
+      error: (error as Error).message || 'Failed to load predictive analytics',
     });
   }
 };
@@ -229,7 +215,7 @@ export const predictiveAnalytics = async (req: TypedRequest, res: Response): Pro
 
 export const customerAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { segmentId } = req.params;
+    const { _segmentId } = req.params;
 
     // Get customer segmentation analysis
     const segmentationAnalysis = await performCustomerSegmentation();
@@ -267,12 +253,12 @@ export const customerAnalytics = async (req: TypedRequest, res: Response): Promi
       lifetimeValue,
       segmentationAnalysis,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load customer analytics',
+      error: (error as Error).message || 'Failed to load customer analytics',
     });
   }
 };
@@ -284,11 +270,7 @@ export const customerAnalytics = async (req: TypedRequest, res: Response): Promi
 export const aiRecommendations = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get a sample customer for demonstration
-    const sampleCustomer = await queryOne<{ customer_id: string }>(
-      `SELECT customer_id FROM "order"
-       WHERE status = 'completed'
-       ORDER BY created_at DESC LIMIT 1`,
-    );
+    const sampleCustomerId = await adminAnalyticsRepo.findRecentCustomerId();
 
     let productRecommendations: {
       personalized: Array<{ productId: string; score: number; reason: string }>;
@@ -296,8 +278,8 @@ export const aiRecommendations = async (req: TypedRequest, res: Response): Promi
       complementary: Array<{ productId: string; baseProductId: string; lift: number }>;
     } = { personalized: [], trending: [], complementary: [] };
 
-    if (sampleCustomer?.customer_id) {
-      productRecommendations = await generateProductRecommendations(sampleCustomer.customer_id);
+    if (sampleCustomerId) {
+      productRecommendations = await generateProductRecommendations(sampleCustomerId);
     }
 
     // Get personalized campaigns (placeholder for now)
@@ -339,12 +321,12 @@ export const aiRecommendations = async (req: TypedRequest, res: Response): Promi
       personalizedCampaigns,
       crossSellOpportunities,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load AI recommendations',
+      error: (error as Error).message || 'Failed to load AI recommendations',
     });
   }
 };
@@ -360,7 +342,7 @@ export const executiveDashboard = async (req: TypedRequest, res: Response): Prom
     const currentKPIs = await calculateExecutiveKPIs(startDate, endDate);
 
     // Get previous period for comparison
-    const [prevStartDate, prevEndDate] = parsePeriod('60d');
+    const [prevStartDate, _prevEndDate] = parsePeriod('60d');
     const previousKPIs = await calculateExecutiveKPIs(prevStartDate, startDate);
 
     // Calculate KPI changes
@@ -415,12 +397,12 @@ export const executiveDashboard = async (req: TypedRequest, res: Response): Prom
       alerts,
       trends,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load executive dashboard',
+      error: (error as Error).message || 'Failed to load executive dashboard',
     });
   }
 };
@@ -439,12 +421,12 @@ export const realTimeMetrics = async (req: TypedRequest, res: Response): Promise
       data: metrics,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch real-time metrics',
+      message: (error as Error).message || 'Failed to fetch real-time metrics',
     });
   }
 };
@@ -463,12 +445,12 @@ export const automatedReports = async (req: TypedRequest, res: Response): Promis
       reports,
       reportHistory,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load automated reports',
+      error: (error as Error).message || 'Failed to load automated reports',
     });
   }
 };
@@ -479,7 +461,8 @@ export const automatedReports = async (req: TypedRequest, res: Response): Promis
 
 export const createReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { name, type, reportType, recipients, format, parameters } = req.body;
+    const body = req.body as RequestBody;
+    const { name, type, reportType, recipients, format, parameters } = body;
 
     // Validate input
     if (!name || !type || !reportType || !recipients || !Array.isArray(recipients)) {
@@ -488,13 +471,13 @@ export const createReportSchedule = async (req: TypedRequest, res: Response): Pr
 
     const schedule = await scheduleReport({
       name,
-      type,
-      reportType,
+      type: type as 'daily' | 'monthly' | 'quarterly' | 'weekly',
+      reportType: reportType as 'customers' | 'executive' | 'inventory' | 'products' | 'sales',
       recipients,
-      format: format || 'pdf',
+      format: (format || 'pdf') as 'csv' | 'excel' | 'html' | 'pdf',
       isActive: true,
       nextRunAt: calculateNextRunTime(type),
-      parameters: parameters || {},
+      parameters: (parameters ? JSON.parse(parameters) : {}) as Record<string, unknown>,
     });
 
     res.json({
@@ -502,20 +485,20 @@ export const createReportSchedule = async (req: TypedRequest, res: Response): Pr
       message: 'Report schedule created successfully',
       schedule,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to create report schedule',
+      message: (error as Error).message || 'Failed to create report schedule',
     });
   }
 };
 
 export const updateReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { scheduleId } = req.params;
-    const updates = req.body;
+    const { _scheduleId } = req.params;
+    const _updates = req.body as RequestBody;
 
     // Placeholder - would update schedule in database
 
@@ -523,19 +506,19 @@ export const updateReportSchedule = async (req: TypedRequest, res: Response): Pr
       success: true,
       message: 'Report schedule updated successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to update report schedule',
+      message: (error as Error).message || 'Failed to update report schedule',
     });
   }
 };
 
 export const deleteReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { scheduleId } = req.params;
+    const { _scheduleId } = req.params;
 
     // Placeholder - would delete schedule from database
 
@@ -543,19 +526,20 @@ export const deleteReportSchedule = async (req: TypedRequest, res: Response): Pr
       success: true,
       message: 'Report schedule deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to delete report schedule',
+      message: (error as Error).message || 'Failed to delete report schedule',
     });
   }
 };
 
 export const runReportNow = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { reportType, period, parameters } = req.body;
+    const body = req.body as RequestBody;
+    const { reportType, period, parameters } = body;
 
     if (!reportType) {
       throw new Error('Report type is required');
@@ -564,7 +548,7 @@ export const runReportNow = async (req: TypedRequest, res: Response): Promise<vo
     // Generate report immediately
     const reportData = await generateReport(reportType, {
       period: period || '30d',
-      ...parameters,
+      ...(parameters ? JSON.parse(parameters) : {}),
     });
 
     res.json({
@@ -572,12 +556,12 @@ export const runReportNow = async (req: TypedRequest, res: Response): Promise<vo
       message: 'Report generated successfully',
       report: reportData,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to run report',
+      message: (error as Error).message || 'Failed to run report',
     });
   }
 };
@@ -664,98 +648,36 @@ function calculateNextRunTime(type: string): Date {
 
 async function calculateExecutiveKPIs(startDate: Date, endDate: Date) {
   // Get revenue data
-  const revenueData = await queryOne<{
-    revenue: string;
-    orders: string;
-    average_order: string;
-    customers: string;
-  }>(
-    `SELECT
-      COALESCE(SUM(total_amount), 0) as revenue,
-      COUNT(*) as orders,
-      CASE WHEN COUNT(*) > 0 THEN AVG(total_amount) ELSE 0 END as average_order,
-      COUNT(DISTINCT customer_id) as customers
-    FROM "order"
-    WHERE created_at >= $1 AND created_at <= $2 AND status = 'completed'`,
-    [startDate, endDate],
-  );
+  const revenueData = await adminAnalyticsRepo.getRevenueData(startDate, endDate);
 
   // Get customer data
-  const customerData = await queryOne<{
-    total: string;
-    active: string;
-    ltv: string;
-  }>(
-    `WITH customer_stats AS (
-      SELECT
-        customer_id,
-        COUNT(*) as order_count,
-        SUM(total_amount) as total_spent,
-        MAX(created_at) as last_order
-      FROM "order"
-      WHERE created_at >= $1 AND created_at <= $2 AND status = 'completed'
-      GROUP BY customer_id
-    )
-    SELECT
-      COUNT(*) as total,
-      COUNT(CASE WHEN last_order >= $3 - INTERVAL '30 days' THEN 1 END) as active,
-      COALESCE(AVG(total_spent), 0) as ltv
-    FROM customer_stats`,
-    [startDate, endDate, endDate],
-  );
+  const customerData = await adminAnalyticsRepo.getCustomerData(startDate, endDate);
 
   // Get inventory data
-  const inventoryData = await queryOne<{
-    turnover: string;
-    stockouts: string;
-    value: string;
-  }>(
-    `WITH sales_data AS (
-      SELECT
-        SUM(oi.quantity) as total_sold,
-        AVG(p.cost_price * oi.quantity) as avg_cost
-      FROM order_item oi
-      JOIN product p ON oi.product_id = p.product_id
-      JOIN "order" o ON oi.order_id = o.order_id
-      WHERE o.created_at >= $1 AND o.created_at <= $2 AND o.status = 'completed'
-    ),
-    inventory_data AS (
-      SELECT
-        SUM(stock_quantity * cost_price) as total_value,
-        COUNT(CASE WHEN stock_quantity <= reorder_point THEN 1 END) as stockouts
-      FROM product
-      WHERE is_active = true
-    )
-    SELECT
-      CASE WHEN i.total_value > 0 THEN s.total_sold / i.total_value ELSE 0 END as turnover,
-      i.stockouts,
-      i.total_value as value
-    FROM sales_data s, inventory_data i`,
-    [startDate, endDate],
-  );
+  const inventoryData = await adminAnalyticsRepo.getInventoryData(startDate, endDate);
 
   return {
-    revenue: parseFloat(revenueData?.revenue || '0'),
-    profit: parseFloat(revenueData?.revenue || '0') * 0.25, // Simplified profit calculation
+    revenue: revenueData.revenue,
+    profit: revenueData.revenue * 0.25,
     customers: {
-      total: parseInt(customerData?.total || '0'),
-      active: parseInt(customerData?.active || '0'),
-      ltv: parseFloat(customerData?.ltv || '0'),
+      total: customerData.total,
+      active: customerData.active,
+      ltv: customerData.ltv,
     },
     orders: {
-      total: parseInt(revenueData?.orders || '0'),
-      average: parseFloat(revenueData?.average_order || '0'),
-      conversion: 0.03, // Simplified conversion rate
+      total: revenueData.orders,
+      average: revenueData.averageOrder,
+      conversion: 0.03,
     },
     inventory: {
-      turnover: parseFloat(inventoryData?.turnover || '0'),
-      stockouts: parseInt(inventoryData?.stockouts || '0'),
-      value: parseFloat(inventoryData?.value || '0'),
+      turnover: inventoryData.turnover,
+      stockouts: inventoryData.stockouts,
+      value: inventoryData.value,
     },
     marketing: {
-      roi: 2.5, // Simplified ROI
-      cac: 25, // Simplified CAC
-      spend: 1000, // Simplified spend
+      roi: 2.5,
+      cac: 25,
+      spend: 1000,
     },
   };
 }
@@ -764,7 +686,8 @@ async function calculateExecutiveKPIs(startDate: Date, endDate: Date) {
 // Business Alerts
 // ============================================================================
 
-async function getBusinessAlerts(kpis: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function getBusinessAlerts(kpis: Record<string, any>) {
   const alerts = [];
 
   // Revenue alerts
@@ -830,7 +753,8 @@ async function getBusinessAlerts(kpis: any) {
 // Business Trends Analysis
 // ============================================================================
 
-async function analyzeBusinessTrends(currentKPIs: any, previousKPIs: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function analyzeBusinessTrends(currentKPIs: Record<string, any>, previousKPIs: Record<string, any>) {
   const trends = [];
 
   // Revenue trend
@@ -879,61 +803,13 @@ async function analyzeBusinessTrends(currentKPIs: any, previousKPIs: any) {
 // ============================================================================
 
 async function getCurrentRealTimeMetrics() {
-  // Get metrics for the last hour
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-
-  // Active users (simplified - users with recent activity)
-  const activeUsersResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(DISTINCT customer_id) as count
-     FROM "order"
-     WHERE created_at >= $1 AND status IN ('pending', 'processing', 'completed')`,
-    [oneHourAgo],
-  );
-
-  // Current orders (orders created in last hour)
-  const currentOrdersResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count
-     FROM "order"
-     WHERE created_at >= $1 AND status IN ('pending', 'processing')`,
-    [oneHourAgo],
-  );
-
-  // Revenue today
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
-  const revenueTodayResult = await queryOne<{ revenue: string }>(
-    `SELECT COALESCE(SUM(total_amount), 0) as revenue
-     FROM "order"
-     WHERE created_at >= $1 AND status = 'completed'`,
-    [todayStart],
-  );
-
-  // Conversion rate (simplified)
-  const checkoutStartedResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "analyticsSalesDaily"
-     WHERE "date" >= $1 AND "checkoutStarted" > 0`,
-    [todayStart],
-  );
-
-  const checkoutCompletedResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "analyticsSalesDaily"
-     WHERE "date" >= $1 AND "checkoutCompleted" > 0`,
-    [todayStart],
-  );
-
-  const checkoutStarted = parseInt(checkoutStartedResult?.count || '0');
-  const checkoutCompleted = parseInt(checkoutCompletedResult?.count || '0');
-  const conversionRate = checkoutStarted > 0 ? (checkoutCompleted / checkoutStarted) * 100 : 0;
+  const metrics = await adminAnalyticsRepo.getRealTimeMetrics();
 
   // Server performance (mock for now)
   const serverPerformance = 95 + Math.random() * 5; // 95-100%
 
   return {
-    activeUsers: parseInt(activeUsersResult?.count || '0'),
-    currentOrders: parseInt(currentOrdersResult?.count || '0'),
-    revenueToday: parseFloat(revenueTodayResult?.revenue || '0'),
-    conversionRate: parseFloat(conversionRate.toFixed(2)),
+    ...metrics,
     serverPerformance: parseFloat(serverPerformance.toFixed(1)),
     timestamp: new Date().toISOString(),
   };

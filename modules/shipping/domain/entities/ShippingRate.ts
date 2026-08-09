@@ -23,7 +23,7 @@ export interface ShippingRateProps {
   countries?: string[];
   isActive: boolean;
   freeShippingThreshold?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -94,7 +94,7 @@ export class ShippingRate {
     return true;
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return { ...this.props };
   }
 }

@@ -20,7 +20,7 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
     const { category, search, page = '1', limit = '12', sort = 'name', order = 'asc' } = req.query;
 
     // Build filters
-    const filters: any = {};
+    const filters: Record<string, unknown> = {};
     if (category && category !== 'all') {
       // Use search as fallback since categorySlug filter doesn't exist
       filters.search = category as string;
@@ -29,7 +29,7 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
       filters.search = search as string;
     }
 
-    const command = new ListProductsCommand(filters, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
+    const command = new ListProductsCommand(filters as Record<string, unknown>, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
 
     const useCase = new ListProductsUseCase(ProductRepo);
     const result = await useCase.execute(command);
@@ -50,12 +50,12 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
       },
       filters: { category, search, sort, order },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load products',
+      error: (error as Error).message || 'Failed to load products',
     });
   }
 };
@@ -66,7 +66,7 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
 
 export const getProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { categorySlug, productId } = req.params;
+    const { _categorySlug, productId } = req.params;
 
     const command = new GetProductCommand(productId);
     const useCase = new GetProductUseCase(ProductRepo);
@@ -85,19 +85,19 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
     const relatedUseCase = new ListProductsUseCase(ProductRepo);
     const relatedResult = await relatedUseCase.execute(relatedCommand);
     // Filter out the current product
-    const relatedProducts = (relatedResult.products || []).filter((p: any) => p.productId !== product.productId).slice(0, 4);
+    const relatedProducts = (relatedResult.products || []).filter((p) => p.productId !== product.productId).slice(0, 4);
 
     storefrontRespond(req, res, 'product/pdp', {
       pageName: product.name,
       product,
       relatedProducts,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load product',
+      error: (error as Error).message || 'Failed to load product',
     });
   }
 };
@@ -136,12 +136,12 @@ export const getCategoryProducts = async (req: TypedRequest, res: Response): Pro
       },
       filters: { category: categorySlug, sort, order },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load category products',
+      error: (error as Error).message || 'Failed to load category products',
     });
   }
 };
@@ -182,12 +182,12 @@ export const searchProducts = async (req: TypedRequest, res: Response): Promise<
       filters: { search, sort: 'relevance' },
       searchQuery: search,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to search products',
+      error: (error as Error).message || 'Failed to search products',
     });
   }
 };

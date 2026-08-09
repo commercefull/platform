@@ -8,7 +8,7 @@ export interface UpdateOrganizationInput {
   organizationId: string;
   name?: string;
   slug?: string;
-  type?: 'single' | 'multi_store' | 'marketplace' | 'b2b';
+  type?: 'single' | 'multi_store' | 'marketplace';
   settings?: Record<string, unknown>;
 }
 

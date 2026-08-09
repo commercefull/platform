@@ -15,8 +15,19 @@ export interface ActivateWarehouseOutput {
   activatedAt: string;
 }
 
+interface WarehouseRecord {
+  warehouseId: string;
+  name: string;
+  isActive: boolean;
+}
+
+interface WarehouseRepositoryPort {
+  findById(id: string): Promise<WarehouseRecord | null>;
+  update(id: string, data: Partial<WarehouseRecord>): Promise<WarehouseRecord>;
+}
+
 export class ActivateWarehouseUseCase {
-  constructor(private readonly warehouseRepository: any) {}
+  constructor(private readonly warehouseRepository: WarehouseRepositoryPort) {}
 
   async execute(input: ActivateWarehouseInput): Promise<ActivateWarehouseOutput> {
     const warehouse = await this.warehouseRepository.findById(input.warehouseId);

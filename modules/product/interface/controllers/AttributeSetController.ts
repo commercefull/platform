@@ -1,7 +1,7 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import attributeSetRepo from '../../infrastructure/repositories/ProductAttributeSetRepository';
+import attributeSetRepo, { ProductAttributeSetUpdateInput } from '../../infrastructure/repositories/ProductAttributeSetRepository';
 
 export class AttributeSetController {
   async listAttributeSets(req: TypedRequest, res: Response): Promise<void> {
@@ -31,7 +31,7 @@ export class AttributeSetController {
 
   async createAttributeSet(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const { name, code, description, productTypeId, isActive, isGlobal } = req.body;
+      const { name, code, description, productTypeId, isActive, isGlobal } = req.body as { name?: string; code?: string; description?: string; productTypeId?: string; isActive?: boolean; isGlobal?: boolean };
       if (!name || !code) {
         res.status(400).json({ success: false, error: 'Name and code are required' });
         return;
@@ -57,7 +57,7 @@ export class AttributeSetController {
         res.status(404).json({ success: false, error: 'Attribute set not found' });
         return;
       }
-      const updated = await attributeSetRepo.update(id, req.body);
+      const updated = await attributeSetRepo.update(id, req.body as ProductAttributeSetUpdateInput);
       res.json({ success: true, data: updated });
     } catch (error) {
       logger.error('Error:', error);
@@ -84,7 +84,7 @@ export class AttributeSetController {
   async addAttributeToSet(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { attributeId, position, isRequired, defaultValue } = req.body;
+      const { attributeId, position, isRequired, defaultValue } = req.body as { attributeId?: string; position?: number; isRequired?: boolean; defaultValue?: string };
       if (!attributeId) {
         res.status(400).json({ success: false, error: 'attributeId is required' });
         return;
@@ -112,7 +112,7 @@ export class AttributeSetController {
   async reorderAttributes(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { attributeIds } = req.body;
+      const { attributeIds } = req.body as { attributeIds?: string[] };
       if (!Array.isArray(attributeIds)) {
         res.status(400).json({ success: false, error: 'attributeIds must be an array' });
         return;

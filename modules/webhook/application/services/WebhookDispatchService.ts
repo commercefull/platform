@@ -147,10 +147,10 @@ export class WebhookDispatchService {
           endpoint.retryPolicy.backoffMultiplier,
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const durationMs = Date.now() - startTime;
       delivery.recordFailure(
-        error.message || 'Network error',
+        (error as Error).message || 'Network error',
         null,
         null,
         durationMs,

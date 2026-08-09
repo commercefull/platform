@@ -3,6 +3,68 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { MerchantRepo, Merchant } from '../../infrastructure/repositories/merchantRepo';
 
+// Typed body interfaces for controller endpoints
+interface CreateMerchantBody {
+  name: string;
+  email: string;
+  phone?: string;
+  website?: string;
+  logoUrl?: string;
+  logo?: string;
+  description?: string;
+  password?: string;
+  status?: string;
+}
+
+interface UpdateMerchantBody {
+  name?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  logoUrl?: string;
+  description?: string;
+  status?: string;
+}
+
+interface AddMerchantAddressBody {
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  isPrimary?: boolean;
+}
+
+interface UpdateMerchantAddressBody {
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  isDefault?: boolean;
+}
+
+interface AddMerchantPaymentInfoBody {
+  accountHolderName: string;
+  bankName?: string;
+  accountNumber?: string;
+  routingNumber?: string;
+  paymentProcessor?: string;
+  processorAccountId?: string;
+  isVerified?: boolean;
+}
+
+interface UpdateMerchantPaymentInfoBody {
+  accountHolderName?: string;
+  bankName?: string;
+  accountNumber?: string;
+  routingNumber?: string;
+  paymentProcessor?: string;
+  isVerified?: boolean;
+}
+
 // Create a single instance of the repository to be shared across handlers
 const merchantRepo = new MerchantRepo();
 
@@ -77,7 +139,7 @@ export const getMerchantById = async (req: TypedRequest, res: Response): Promise
 /**
  * Create a new merchant
  */
-export const createMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createMerchant = async (req: TypedRequest<Record<string, string>, unknown, CreateMerchantBody>, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -140,7 +202,7 @@ export const createMerchant = async (req: TypedRequest, res: Response): Promise<
 /**
  * Update a merchant
  */
-export const updateMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateMerchant = async (req: TypedRequest<Record<string, string>, unknown, UpdateMerchantBody>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, email, phone, website, logoUrl, description, status } = req.body;
@@ -271,7 +333,7 @@ export const getMerchantAddresses = async (req: TypedRequest, res: Response): Pr
 /**
  * Add an address for a merchant
  */
-export const addMerchantAddress = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addMerchantAddress = async (req: TypedRequest<Record<string, string>, unknown, AddMerchantAddressBody>, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
     const { addressLine1, addressLine2, city, state, postalCode, country, isPrimary = false } = req.body;
@@ -360,7 +422,7 @@ export const getMerchantPaymentInfo = async (req: TypedRequest, res: Response): 
 /**
  * Add payment info for a merchant
  */
-export const addMerchantPaymentInfo = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addMerchantPaymentInfo = async (req: TypedRequest<Record<string, string>, unknown, AddMerchantPaymentInfoBody>, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
     const {
@@ -369,7 +431,7 @@ export const addMerchantPaymentInfo = async (req: TypedRequest, res: Response): 
       accountNumber,
       routingNumber,
       paymentProcessor,
-      processorAccountId,
+      processorAccountId: _processorAccountId,
       isVerified = false,
     } = req.body;
 
@@ -432,7 +494,7 @@ export const addMerchantPaymentInfo = async (req: TypedRequest, res: Response): 
 /**
  * Update a merchant address
  */
-export const updateMerchantAddress = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateMerchantAddress = async (req: TypedRequest<Record<string, string>, unknown, UpdateMerchantAddressBody>, res: Response): Promise<void> => {
   try {
     const { merchantId, addressId } = req.params;
     const { addressLine1, addressLine2, city, state, postalCode, country, isDefault } = req.body;
@@ -487,7 +549,7 @@ export const updateMerchantAddress = async (req: TypedRequest, res: Response): P
 /**
  * Update merchant payment info
  */
-export const updateMerchantPaymentInfo = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateMerchantPaymentInfo = async (req: TypedRequest<Record<string, string>, unknown, UpdateMerchantPaymentInfoBody>, res: Response): Promise<void> => {
   try {
     const { merchantId, paymentInfoId } = req.params;
     const { accountHolderName, bankName, accountNumber, routingNumber, paymentProcessor, isVerified } = req.body;

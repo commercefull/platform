@@ -19,8 +19,11 @@ const createClient = () =>
 describe('Content Page Actions API', () => {
   let client: AxiosInstance;
   let adminToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testContentTypeId: string;
+   
   let testContentPageId: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testContentTemplateId: string;
   let duplicatePageId: string;
 

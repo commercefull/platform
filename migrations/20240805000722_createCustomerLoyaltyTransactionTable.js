@@ -3,7 +3,6 @@ exports.up = function (knex) {
     t.uuid('customerLoyaltyTransactionId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('accountId').notNullable().references('customerLoyaltyAccountId').inTable('customerLoyaltyAccount').onDelete('CASCADE');
     t.uuid('orderId').references('orderId').inTable('order');
     t.string('type', 20).notNullable().checkIn(['earn', 'redeem', 'adjust', 'expire', 'bonus', 'referral', 'refund']);
     t.integer('points').notNullable();
@@ -13,7 +12,6 @@ exports.up = function (knex) {
     t.string('status', 20).notNullable().defaultTo('completed').checkIn(['pending', 'completed', 'cancelled', 'expired']);
     t.timestamp('expiresAt');
 
-    t.index('accountId');
     t.index('orderId');
     t.index('type');
     t.index('status');

@@ -137,7 +137,7 @@ export class ProductSearchService {
         totalPages,
         facets,
       };
-    } catch (error) {
+    } catch {
       return {
         products: [],
         total: 0,
@@ -151,9 +151,9 @@ export class ProductSearchService {
   /**
    * Build the search SQL query
    */
-  private buildSearchQuery(filters: ProductSearchFilters, limit: number, offset: number): { sql: string; countSql: string; params: any[] } {
+  private buildSearchQuery(filters: ProductSearchFilters, limit: number, offset: number): { sql: string; countSql: string; params: unknown[] } {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     // Base query with joins for attribute filtering
@@ -446,7 +446,7 @@ export class ProductSearchService {
     };
   }
 
-  private async getCategoryFacets(filters: ProductSearchFilters): Promise<FacetValue[]> {
+  private async getCategoryFacets(_filters: ProductSearchFilters): Promise<FacetValue[]> {
     const sql = `
       SELECT 
         pc."productCategoryId" as id,
@@ -469,7 +469,7 @@ export class ProductSearchService {
     }));
   }
 
-  private async getBrandFacets(filters: ProductSearchFilters): Promise<FacetValue[]> {
+  private async getBrandFacets(_filters: ProductSearchFilters): Promise<FacetValue[]> {
     const sql = `
       SELECT 
         pb."productBrandId" as id,
@@ -491,7 +491,7 @@ export class ProductSearchService {
     }));
   }
 
-  private async getPriceRangeFacets(filters: ProductSearchFilters): Promise<PriceRangeFacet[]> {
+  private async getPriceRangeFacets(_filters: ProductSearchFilters): Promise<PriceRangeFacet[]> {
     const sql = `
       SELECT 
         MIN(p."price") as min_price,
@@ -534,7 +534,7 @@ export class ProductSearchService {
     return ranges;
   }
 
-  private async getAttributeFacets(filters: ProductSearchFilters): Promise<AttributeFacet[]> {
+  private async getAttributeFacets(_filters: ProductSearchFilters): Promise<AttributeFacet[]> {
     // Get filterable attributes with their values
     const sql = `
       SELECT 

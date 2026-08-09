@@ -35,8 +35,13 @@ export interface CreateShippingMethodOutput {
   shippingMethod: ShippingMethod;
 }
 
+interface ShippingMethodRepository {
+  findMethodByCode(code: string): Promise<ShippingMethod | null>;
+  saveMethod(method: ShippingMethod): Promise<ShippingMethod>;
+}
+
 export class CreateShippingMethodUseCase {
-  constructor(private readonly shippingRepository: any) {}
+  constructor(private readonly shippingRepository: ShippingMethodRepository) {}
 
   async execute(input: CreateShippingMethodInput): Promise<CreateShippingMethodOutput> {
     // Check code uniqueness

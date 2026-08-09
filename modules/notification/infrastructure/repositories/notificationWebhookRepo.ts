@@ -41,4 +41,8 @@ export async function deactivate(notificationWebhookId: string): Promise<void> {
   ]);
 }
 
-export default { findActive, findByMerchant, create, deactivate };
+export async function findAll(): Promise<NotificationWebhook[]> {
+  return (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`)) || [];
+}
+
+export default { findActive, findByMerchant, create, deactivate, findAll };

@@ -37,10 +37,34 @@ export interface CreatePurchaseOrderOutput {
   createdAt: string;
 }
 
+interface SupplierRecord {
+  status: string;
+  isActive: boolean;
+  minimumOrderValue?: number;
+  leadTimeDays?: number;
+}
+
+interface PurchaseOrderRecord {
+  purchaseOrderId: string;
+  poNumber: string;
+  supplierId: string;
+  totalAmount: number;
+  status: string;
+  createdAt: Date;
+}
+
+interface SupplierRepoPort {
+  findById(id: string): Promise<SupplierRecord | null>;
+}
+
+interface PurchaseOrderRepoPort {
+  create(data: Record<string, unknown>): Promise<PurchaseOrderRecord>;
+}
+
 export class CreatePurchaseOrderUseCase {
   constructor(
-    private readonly supplierRepository: any,
-    private readonly purchaseOrderRepository: any,
+    private readonly supplierRepository: SupplierRepoPort,
+    private readonly purchaseOrderRepository: PurchaseOrderRepoPort,
   ) {}
 
   async execute(input: CreatePurchaseOrderInput): Promise<CreatePurchaseOrderOutput> {

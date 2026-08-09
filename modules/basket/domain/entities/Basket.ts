@@ -24,7 +24,7 @@ export interface BasketProps {
   items: BasketItem[];
   coupon?: AppliedCoupon;
   discountAmount?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   expiresAt?: Date;
   convertedToOrderId?: string;
   createdAt: Date;
@@ -84,7 +84,7 @@ export class Basket {
     return [...this.props.items]; // Return copy to preserve immutability
   }
 
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
 
@@ -247,7 +247,7 @@ export class Basket {
     this.props.updatedAt = new Date();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -308,7 +308,7 @@ export class Basket {
     this.props.lastActivityAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       basketId: this.props.basketId,
       customerId: this.props.customerId,

@@ -17,7 +17,7 @@ export class ApplyCouponCommand {
 export class ApplyCouponUseCase {
   constructor(private readonly repository: BasketRepository) {}
 
-  async execute(command: ApplyCouponCommand): Promise<any> {
+  async execute(command: ApplyCouponCommand): Promise<Record<string, unknown>> {
     const basket = await this.repository.findById(command.basketId);
     if (!basket) {
       throw new Error('Basket not found');

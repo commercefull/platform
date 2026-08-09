@@ -92,7 +92,7 @@ export class NotificationRepo {
   async update(notificationId: string, params: NotificationUpdateParams): Promise<Notification | null> {
     const now = new Date();
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

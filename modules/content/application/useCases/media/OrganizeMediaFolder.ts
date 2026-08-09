@@ -164,13 +164,13 @@ export class OrganizeMediaFolderUseCase {
     return this.mediaRepo.deleteFolder(folderId);
   }
 
-  private buildFolderTree(folders: any[]): FolderTreeNode[] {
+  private buildFolderTree(folders: Array<{ contentMediaFolderId?: string; id?: string; name: string; path?: string | null; depth: number; parentId?: string | null }>): FolderTreeNode[] {
     const folderMap = new Map<string, FolderTreeNode>();
     const rootNodes: FolderTreeNode[] = [];
 
     // First pass: create all nodes
     for (const folder of folders) {
-      const folderId = folder.contentMediaFolderId || folder.id;
+      const folderId = folder.contentMediaFolderId || folder.id || '';
       folderMap.set(folderId, {
         id: folderId,
         name: folder.name,
@@ -182,7 +182,7 @@ export class OrganizeMediaFolderUseCase {
 
     // Second pass: build hierarchy
     for (const folder of folders) {
-      const folderId = folder.contentMediaFolderId || folder.id;
+      const folderId = folder.contentMediaFolderId || folder.id || '';
       const node = folderMap.get(folderId)!;
 
       if (folder.parentId && folderMap.has(folder.parentId)) {

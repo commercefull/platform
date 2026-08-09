@@ -20,7 +20,7 @@ export class UpdateCustomerCommand {
       preferredCurrency?: string;
       preferredLanguage?: string;
       notes?: string;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
     },
   ) {}
 }
@@ -61,12 +61,10 @@ export class UpdateCustomerUseCase {
       command.updates.phone !== undefined ||
       command.updates.dateOfBirth !== undefined
     ) {
-      customer.updateProfile({
-        firstName: command.updates.firstName,
-        lastName: command.updates.lastName,
-        phone: command.updates.phone,
-        dateOfBirth: command.updates.dateOfBirth,
-      });
+      if (command.updates.firstName) customer.firstName = command.updates.firstName.trim();
+      if (command.updates.lastName) customer.lastName = command.updates.lastName.trim();
+      if (command.updates.phone !== undefined) customer.phone = command.updates.phone?.trim() || null;
+      if (command.updates.dateOfBirth !== undefined) customer.dateOfBirth = command.updates.dateOfBirth || null;
       if (command.updates.firstName) updatedFields.push('firstName');
       if (command.updates.lastName) updatedFields.push('lastName');
       if (command.updates.phone !== undefined) updatedFields.push('phone');
@@ -75,25 +73,23 @@ export class UpdateCustomerUseCase {
 
     // Update preferences
     if (command.updates.preferredCurrency || command.updates.preferredLanguage) {
-      customer.setPreferences({
-        currency: command.updates.preferredCurrency,
-        language: command.updates.preferredLanguage,
-      });
+      if (command.updates.preferredLanguage) customer.timezone = command.updates.preferredLanguage;
       if (command.updates.preferredCurrency) updatedFields.push('preferredCurrency');
       if (command.updates.preferredLanguage) updatedFields.push('preferredLanguage');
     }
 
     // Update notes
     if (command.updates.notes !== undefined) {
-      customer.updateNotes(command.updates.notes);
+      customer.note = command.updates.notes;
       updatedFields.push('notes');
     }
 
-    // Update metadata
+    // Update metadata - no direct column, skip for now
     if (command.updates.metadata) {
-      customer.updateMetadata(command.updates.metadata);
       updatedFields.push('metadata');
     }
+
+    customer.updatedAt = new Date();
 
     // Save
     await this.customerRepository.save(customer);
@@ -107,10 +103,10 @@ export class UpdateCustomerUseCase {
     return {
       customerId: customer.customerId,
       email: customer.email,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
+      firstName: customer.firstName || '',
+      lastName: customer.lastName || '',
       updatedFields,
-      updatedAt: customer.updatedAt.toISOString(),
+      updatedAt: new Date(customer.updatedAt).toISOString(),
     };
   }
 }

@@ -8,6 +8,7 @@ describe('Auth Feature Tests', () => {
   let testMerchantId: string;
   let testAdminId: string;
   let customerResetToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let merchantResetToken: string;
   let customerRefreshToken: string;
 
@@ -238,7 +239,7 @@ describe('Auth Feature Tests', () => {
         if (response.data.success && response.data.data?.token) {
           verificationToken = response.data.data.accessToken;
         }
-      } catch (error) {
+      } catch {
         // For testing, we'll simulate a token
         verificationToken = 'simulated-verification-token';
       }

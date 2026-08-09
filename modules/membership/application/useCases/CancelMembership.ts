@@ -23,8 +23,29 @@ export interface CancelMembershipOutput {
   refundAmount?: number;
 }
 
+interface MembershipRecord {
+  status: string;
+  customerId: string;
+  tierId: string;
+  currentPeriodEnd?: string;
+  billingPeriod?: string;
+  createdAt: Date;
+}
+
+interface TierRecord {
+  price: number;
+}
+
+interface CancelMembershipRepository {
+  getMembershipById(membershipId: string): Promise<MembershipRecord | null>;
+  getTierById(tierId: string): Promise<TierRecord>;
+  updateMembership(membershipId: string, data: Record<string, unknown>): Promise<void>;
+  createStatusLog(data: Record<string, unknown>): Promise<void>;
+  recordCancellationFeedback(data: Record<string, unknown>): Promise<void>;
+}
+
 export class CancelMembershipUseCase {
-  constructor(private readonly membershipRepository: any) {}
+  constructor(private readonly membershipRepository: CancelMembershipRepository) {}
 
   async execute(input: CancelMembershipInput): Promise<CancelMembershipOutput> {
     const { membershipId, reason, feedback, immediate = false, cancelledBy } = input;

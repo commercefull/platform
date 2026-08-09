@@ -13,23 +13,40 @@ interface TaxableItem {
   taxCategoryId?: string;
 }
 
-interface BasketItem {
+interface _BasketItem {
   productId: string;
   quantity: number;
   price: number;
   taxCategoryId?: string;
-  [key: string]: any;
+  [key: string]: unknown;
+}
+
+interface ShippingAddressBody {
+  country: string;
+  region?: string;
+  postalCode?: string;
+  city?: string;
 }
 
 export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) => {
   try {
-    const { productId, quantity, price, shippingAddress, customerId, merchantId } = req.body;
+    const body = req.body as {
+      productId?: string;
+      quantity?: number;
+      price?: number;
+      shippingAddress?: ShippingAddressBody;
+      customerId?: string;
+      merchantId?: string;
+    };
+
+    const { productId, quantity, price, shippingAddress, customerId, merchantId } = body;
 
     // Validate required fields
     if (!productId || !quantity || !price || !shippingAddress || !shippingAddress.country) {
       res.status(400).json({
         error: 'Product ID, quantity, price, and shipping country are required',
       });
+      return;
     }
 
     // Ensure quantity and price are valid numbers
@@ -38,10 +55,12 @@ export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) 
 
     if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
       res.status(400).json({ error: 'Quantity must be a positive number' });
+      return;
     }
 
     if (isNaN(parsedPrice) || parsedPrice < 0) {
       res.status(400).json({ error: 'Price must be a non-negative number' });
+      return;
     }
 
     // For backward compatibility, use simple tax calculation if available
@@ -59,6 +78,7 @@ export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) 
       );
 
       res.json(taxResult);
+      return;
     }
 
     // Otherwise use the new complex tax calculation
@@ -104,7 +124,7 @@ export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) 
     );
 
     res.json(taxResult);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({ error: 'Internal Server Error' });
@@ -117,13 +137,20 @@ export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) 
 export const calculateTaxForBasket = async (req: TypedRequest, res: Response) => {
   try {
     const { basketId } = req.params;
-    const { shippingAddress, billingAddress, customerId, merchantId } = req.body;
+    const body = req.body as {
+      shippingAddress?: ShippingAddressBody;
+      billingAddress?: ShippingAddressBody;
+      customerId?: string;
+      merchantId?: string;
+    };
+    const { shippingAddress, billingAddress, customerId, merchantId } = body;
 
     // Validate required fields
     if (!basketId || !shippingAddress || !shippingAddress.country) {
       res.status(400).json({
         error: 'Basket ID and shipping country are required',
       });
+      return;
     }
 
     // For backward compatibility
@@ -139,6 +166,7 @@ export const calculateTaxForBasket = async (req: TypedRequest, res: Response) =>
       );
 
       res.json(taxResult);
+      return;
     }
 
     // For the enhanced tax system, we need to get the basket items first
@@ -155,12 +183,7 @@ export const calculateTaxForBasket = async (req: TypedRequest, res: Response) =>
 
       // Format the items for tax calculation (in application camelCase format)
       // TODO: Basket interface doesn't have items property - needs basketItemRepo
-      const items: TaxableItem[] = []; // basket.items.map((item: BasketItem) => ({
-      // productId: item.productId,
-      // quantity: item.quantity,
-      // price: item.price,
-      // taxCategoryId: item.taxCategoryId
-      // }));
+      const items: TaxableItem[] = [];
 
       // Transform addresses to the expected format (camelCase for application layer)
       const shippingAddrInput: AddressInput = {
@@ -211,12 +234,12 @@ export const calculateTaxForBasket = async (req: TypedRequest, res: Response) =>
       );
 
       res.json(taxResult);
-    } catch (error) {
-      logger.error('Error:', error);
+    } catch (innerError: unknown) {
+      logger.error('Error:', innerError);
 
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({ error: 'Internal Server Error' });
@@ -232,6 +255,7 @@ export const getTaxCategoryByCode = async (req: TypedRequest, res: Response) => 
 
     if (!code) {
       res.status(400).json({ error: 'Tax category code is required' });
+      return;
     }
 
     // Call repository - returns data with id field already added
@@ -239,10 +263,11 @@ export const getTaxCategoryByCode = async (req: TypedRequest, res: Response) => 
 
     if (!taxCategory) {
       res.status(404).json({ error: 'Tax category not found' });
+      return;
     }
 
     res.json(taxCategory);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({ error: 'Internal Server Error' });
@@ -260,7 +285,7 @@ export const getTaxRates = async (req: TypedRequest, res: Response) => {
     const taxRates = await taxQueryRepo.findAllTaxRates(true, country as string, region as string);
 
     res.json(taxRates);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({ error: 'Internal Server Error' });
@@ -276,6 +301,7 @@ export const checkCustomerTaxExemption = async (req: TypedRequest, res: Response
 
     if (!customerId) {
       res.status(400).json({ error: 'Customer ID is required' });
+      return;
     }
 
     // Repository returns data with id field already added
@@ -286,7 +312,7 @@ export const checkCustomerTaxExemption = async (req: TypedRequest, res: Response
       hasExemption: exemptions.length > 0,
       exemptions,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({ error: 'Internal Server Error' });
@@ -298,10 +324,12 @@ export const checkCustomerTaxExemption = async (req: TypedRequest, res: Response
  */
 export const findTaxZoneForAddress = async (req: TypedRequest, res: Response) => {
   try {
-    const { country, region, postalCode, city } = req.body;
+    const body = req.body as { country?: string; region?: string; postalCode?: string; city?: string };
+    const { country, region, postalCode, city } = body;
 
     if (!country) {
       res.status(400).json({ error: 'Country is required' });
+      return;
     }
 
     // Format the address input in camelCase for application layer
@@ -320,6 +348,7 @@ export const findTaxZoneForAddress = async (req: TypedRequest, res: Response) =>
 
       if (taxRates.length === 0) {
         res.status(404).json({ error: 'No matching tax zone found' });
+        return;
       }
 
       //  the first matching tax rate's zone information
@@ -331,10 +360,10 @@ export const findTaxZoneForAddress = async (req: TypedRequest, res: Response) =>
         countries: [country],
         isDefault: true,
       });
-    } catch (err) {
+    } catch (_err: unknown) {
       res.status(404).json({ error: 'No matching tax zone found' });
     }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({ error: 'Internal Server Error' });
@@ -350,6 +379,7 @@ export const getCustomerTaxSettings = async (req: TypedRequest, res: Response) =
 
     if (!merchantId) {
       res.status(400).json({ error: 'Merchant ID is required' });
+      return;
     }
 
     //  default settings for now
@@ -362,7 +392,7 @@ export const getCustomerTaxSettings = async (req: TypedRequest, res: Response) =
         showTaxSeparately: true,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     res.status(500).json({ error: 'Internal Server Error' });

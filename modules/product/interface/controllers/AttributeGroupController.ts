@@ -93,7 +93,7 @@ export class AttributeGroupController {
    */
   async createAttributeGroup(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const { name, code, description, sortOrder } = req.body;
+      const { name, code, description, sortOrder } = req.body as { name?: string; code?: string; description?: string; sortOrder?: number };
 
       // Validate required fields
       if (!name || !code) {
@@ -141,7 +141,7 @@ export class AttributeGroupController {
   async updateAttributeGroup(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { name, description, sortOrder } = req.body;
+      const { name, description, sortOrder } = req.body as { name?: string; description?: string; sortOrder?: number };
 
       // Check if group exists
       const existing = await attributeGroupRepo.findOne(id);

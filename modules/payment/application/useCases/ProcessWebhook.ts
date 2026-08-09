@@ -22,9 +22,36 @@ export interface ProcessWebhookOutput {
   processedAt: string;
 }
 
+interface TransactionRecord {
+  transactionId: string;
+  orderId: string;
+  amount: number;
+}
+
+interface RefundRecord {
+  refundId: string;
+  transactionId: string;
+  amount: number;
+}
+
+interface PaymentRepositoryPort {
+  findByProviderTransactionId(id: string): Promise<TransactionRecord | null>;
+  updateStatus(transactionId: string, status: string, extra?: Record<string, unknown>): Promise<void>;
+  findRefundByProviderRefundId(id: string): Promise<RefundRecord | null>;
+  updateRefundStatus(refundId: string, status: string): Promise<void>;
+  createDispute(params: {
+    transactionId: string;
+    provider: string;
+    providerDisputeId: string;
+    amount: unknown;
+    reason: unknown;
+    status: string;
+  }): Promise<void>;
+}
+
 export class ProcessWebhookUseCase {
   constructor(
-    private readonly paymentRepository: any,
+    private readonly paymentRepository: PaymentRepositoryPort,
     private readonly webhookSecrets: Record<string, string>,
   ) {}
 
@@ -117,7 +144,9 @@ export class ProcessWebhookUseCase {
 
     const transaction = await this.paymentRepository.findByProviderTransactionId(providerTransactionId);
     if (transaction) {
-      const failureReason = (input.payload as any).last_payment_error?.message || 'Payment failed';
+      const payloadData = input.payload as Record<string, unknown>;
+      const lastPaymentError = payloadData.last_payment_error as Record<string, unknown> | undefined;
+      const failureReason = (lastPaymentError?.message as string) || 'Payment failed';
       await this.paymentRepository.updateStatus(transaction.transactionId, 'failed', { failureReason });
 
       eventBus.emit('payment.failed', {
@@ -151,13 +180,14 @@ export class ProcessWebhookUseCase {
 
   private async handleDisputeCreated(input: ProcessWebhookInput): Promise<string> {
     const transactionId = this.extractTransactionId(input);
+    const payloadData = input.payload as Record<string, unknown>;
 
     await this.paymentRepository.createDispute({
       transactionId,
       provider: input.provider,
-      providerDisputeId: (input.payload as any).id,
-      amount: (input.payload as any).amount,
-      reason: (input.payload as any).reason,
+      providerDisputeId: (payloadData.id as string) || '',
+      amount: payloadData.amount,
+      reason: payloadData.reason,
       status: 'open',
     });
 
@@ -169,31 +199,41 @@ export class ProcessWebhookUseCase {
     return transactionId;
   }
 
-  private async handleSubscriptionUpdated(input: ProcessWebhookInput): Promise<void> {
+  private async handleSubscriptionUpdated(_input: ProcessWebhookInput): Promise<void> {
     // Subscription webhook handling would be implemented here
   }
 
   private extractTransactionId(input: ProcessWebhookInput): string {
-    const payload = input.payload as any;
+    const payload = input.payload as Record<string, unknown>;
     switch (input.provider) {
-      case 'stripe':
-        return payload.data?.object?.id || payload.id;
-      case 'paypal':
-        return payload.resource?.id;
+      case 'stripe': {
+        const data = payload.data as Record<string, unknown> | undefined;
+        const obj = data?.object as Record<string, unknown> | undefined;
+        return (obj?.id as string) || (payload.id as string) || '';
+      }
+      case 'paypal': {
+        const resource = payload.resource as Record<string, unknown> | undefined;
+        return (resource?.id as string) || '';
+      }
       default:
-        return payload.id || payload.transactionId;
+        return (payload.id as string) || (payload.transactionId as string) || '';
     }
   }
 
   private extractRefundId(input: ProcessWebhookInput): string {
-    const payload = input.payload as any;
+    const payload = input.payload as Record<string, unknown>;
     switch (input.provider) {
-      case 'stripe':
-        return payload.data?.object?.id;
-      case 'paypal':
-        return payload.resource?.id;
+      case 'stripe': {
+        const data = payload.data as Record<string, unknown> | undefined;
+        const obj = data?.object as Record<string, unknown> | undefined;
+        return (obj?.id as string) || '';
+      }
+      case 'paypal': {
+        const resource = payload.resource as Record<string, unknown> | undefined;
+        return (resource?.id as string) || '';
+      }
       default:
-        return payload.id || payload.refundId;
+        return (payload.id as string) || (payload.refundId as string) || '';
     }
   }
 }

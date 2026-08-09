@@ -12,12 +12,35 @@ import { RegisterWebhookUseCase } from '../../application/useCases/RegisterWebho
 import { UnregisterWebhookUseCase } from '../../application/useCases/UnregisterWebhook';
 import { ListWebhooksUseCase } from '../../application/useCases/ListWebhooks';
 import { SYNC_RELEVANT_EVENTS } from '../../domain/valueObjects/WebhookEventType';
+import { DeliveryStatus } from '../../domain/entities/WebhookDelivery';
+
+interface RegisterWebhookBody {
+  name: string;
+  url: string;
+  events: string[];
+  merchantId?: string;
+  headers?: Record<string, string>;
+  retryPolicy?: Record<string, unknown>;
+}
+
+interface UpdateWebhookBody {
+  name?: string;
+  url?: string;
+  events?: string[];
+  isActive?: boolean;
+  headers?: Record<string, string>;
+  retryPolicy?: Record<string, unknown>;
+}
+
+interface _AddShippingMethodBody {
+  method: string;
+}
 
 /**
  * Register a new webhook endpoint
  * POST /business/webhooks
  */
-export const registerWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
+export const registerWebhook = async (req: TypedRequest<Record<string, string>, unknown, RegisterWebhookBody>, res: Response): Promise<void> => {
   try {
     const useCase = new RegisterWebhookUseCase(WebhookRepo);
     const result = await useCase.execute({
@@ -30,9 +53,9 @@ export const registerWebhook = async (req: TypedRequest, res: Response): Promise
     });
 
     res.status(201).json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error registering webhook:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -47,10 +70,10 @@ export const unregisterWebhook = async (req: TypedRequest, res: Response): Promi
     await useCase.execute(webhookEndpointId);
 
     res.json({ success: true, message: 'Webhook endpoint removed' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error unregistering webhook:', error);
-    const status = error.message.includes('not found') ? 404 : 400;
-    res.status(status).json({ success: false, error: error.message });
+    const status = (error as Error).message.includes('not found') ? 404 : 400;
+    res.status(status).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -72,9 +95,9 @@ export const listWebhooks = async (req: TypedRequest, res: Response): Promise<vo
     );
 
     res.json({ success: true, data: result.data, total: result.total });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing webhooks:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -93,9 +116,9 @@ export const getWebhook = async (req: TypedRequest, res: Response): Promise<void
     }
 
     res.json({ success: true, data: endpoint });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error getting webhook:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -103,10 +126,10 @@ export const getWebhook = async (req: TypedRequest, res: Response): Promise<void
  * Update a webhook endpoint
  * PUT /business/webhooks/:webhookEndpointId
  */
-export const updateWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateWebhook = async (req: TypedRequest<Record<string, string>, unknown, UpdateWebhookBody>, res: Response): Promise<void> => {
   try {
     const { webhookEndpointId } = req.params;
-    const updates: Record<string, any> = {};
+    const updates: Record<string, unknown> = {};
 
     if (req.body.name !== undefined) updates.name = req.body.name;
     if (req.body.url !== undefined) updates.url = req.body.url;
@@ -123,9 +146,9 @@ export const updateWebhook = async (req: TypedRequest, res: Response): Promise<v
     }
 
     res.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating webhook:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -141,7 +164,7 @@ export const getDeliveries = async (req: TypedRequest, res: Response): Promise<v
     const result = await WebhookRepo.findDeliveries(
       {
         webhookEndpointId,
-        status: status as any,
+        status: status as DeliveryStatus | undefined,
         eventType: eventType as string,
       },
       {
@@ -151,9 +174,9 @@ export const getDeliveries = async (req: TypedRequest, res: Response): Promise<v
     );
 
     res.json({ success: true, data: result.data, total: result.total });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error getting deliveries:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -170,9 +193,9 @@ export const getAvailableEvents = async (_req: TypedRequest, res: Response): Pro
         wildcards: ['*', 'product.*', 'order.*', 'inventory.*', 'customer.*', 'payment.*', 'fulfillment.*'],
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error getting available events:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };
 
@@ -231,18 +254,18 @@ export const testWebhook = async (req: TypedRequest, res: Response): Promise<voi
           responseBody: responseBody.substring(0, 1024),
         },
       });
-    } catch (fetchError: any) {
+    } catch (fetchError: unknown) {
       clearTimeout(timeout);
       res.json({
         success: false,
         data: {
-          error: fetchError.message,
+          error: (fetchError as Error).message,
           durationMs: Date.now() - startTime,
         },
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error testing webhook:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 };

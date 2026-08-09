@@ -2,6 +2,7 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import SupplierRepo from '../../infrastructure/repositories/supplierRepo';
+import { SupplierFilters, SupplierStatus, SupplierCreateParams, SupplierUpdateParams } from '../../infrastructure/repositories/supplierRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 
 const supplierRepo = SupplierRepo;
@@ -17,8 +18,8 @@ export const getSuppliers = async (req: TypedRequest, res: Response): Promise<vo
       suppliers = await supplierRepo.search(search as string);
     } else {
       // Use filters
-      const filters: any = {};
-      if (status) filters.status = status as string;
+      const filters: SupplierFilters = {};
+      if (status) filters.status = status as SupplierStatus;
       if (isActive !== undefined) filters.isActive = isActive === 'true';
       if (isApproved !== undefined) filters.isApproved = isApproved === 'true';
       if (minRating) filters.minRating = parseFloat(minRating as string);
@@ -30,7 +31,7 @@ export const getSuppliers = async (req: TypedRequest, res: Response): Promise<vo
     }
 
     successResponse(res, suppliers);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch suppliers');
@@ -48,7 +49,7 @@ export const getSupplierById = async (req: TypedRequest, res: Response): Promise
     }
 
     successResponse(res, supplier);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch supplier');
@@ -66,7 +67,7 @@ export const getSupplierByCode = async (req: TypedRequest, res: Response): Promi
     }
 
     successResponse(res, supplier);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch supplier');
@@ -96,7 +97,7 @@ export const createSupplier = async (req: TypedRequest, res: Response): Promise<
       categories,
       tags,
       customFields,
-    } = req.body;
+    } = req.body as SupplierCreateParams;
 
     // Validate required fields
     const errors: string[] = [];
@@ -133,11 +134,11 @@ export const createSupplier = async (req: TypedRequest, res: Response): Promise<
 
     const supplier = await supplierRepo.create(supplierParams);
     successResponse(res, supplier, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if (error.message.includes('already exists')) {
-      errorResponse(res, error.message, 409);
+    if ((error as Error).message.includes('already exists')) {
+      errorResponse(res, (error as Error).message, 409);
     } else {
       errorResponse(res, 'Failed to create supplier');
     }
@@ -147,7 +148,7 @@ export const createSupplier = async (req: TypedRequest, res: Response): Promise<
 export const updateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const updateParams = req.body;
+    const updateParams = req.body as SupplierUpdateParams;
 
     const supplier = await supplierRepo.update(id, updateParams);
 
@@ -157,7 +158,7 @@ export const updateSupplier = async (req: TypedRequest, res: Response): Promise<
     }
 
     successResponse(res, supplier);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to update supplier');
@@ -175,7 +176,7 @@ export const deleteSupplier = async (req: TypedRequest, res: Response): Promise<
     }
 
     successResponse(res, { message: 'Supplier deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to delete supplier');
@@ -185,7 +186,7 @@ export const deleteSupplier = async (req: TypedRequest, res: Response): Promise<
 export const updateSupplierStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status } = req.body as { status?: SupplierStatus };
 
     if (!status) {
       validationErrorResponse(res, ['status is required']);
@@ -200,7 +201,7 @@ export const updateSupplierStatus = async (req: TypedRequest, res: Response): Pr
     }
 
     successResponse(res, supplier);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to update supplier status');
@@ -210,7 +211,7 @@ export const updateSupplierStatus = async (req: TypedRequest, res: Response): Pr
 export const updateSupplierVisibility = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { isActive } = req.body;
+    const { isActive } = req.body as { isActive?: boolean };
 
     if (isActive === undefined) {
       validationErrorResponse(res, ['isActive is required']);
@@ -225,7 +226,7 @@ export const updateSupplierVisibility = async (req: TypedRequest, res: Response)
     }
 
     successResponse(res, supplier);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to update supplier visibility');
@@ -243,7 +244,7 @@ export const approveSupplier = async (req: TypedRequest, res: Response): Promise
     }
 
     successResponse(res, supplier);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to approve supplier');
@@ -261,7 +262,7 @@ export const suspendSupplier = async (req: TypedRequest, res: Response): Promise
     }
 
     successResponse(res, supplier);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to suspend supplier');
@@ -272,7 +273,7 @@ export const getSupplierStatistics = async (req: TypedRequest, res: Response): P
   try {
     const statistics = await supplierRepo.getStatistics();
     successResponse(res, statistics);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch supplier statistics');
@@ -283,10 +284,9 @@ export const getSupplierStatistics = async (req: TypedRequest, res: Response): P
 
 export const getSupplierAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
     // TODO: Implement when supplier address repo is available
     successResponse(res, []);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch supplier addresses');
@@ -295,10 +295,9 @@ export const getSupplierAddresses = async (req: TypedRequest, res: Response): Pr
 
 export const createSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
     // TODO: Implement when supplier address repo is available
     successResponse(res, {}, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to create supplier address');
@@ -307,10 +306,9 @@ export const createSupplierAddress = async (req: TypedRequest, res: Response): P
 
 export const updateSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
     // TODO: Implement when supplier address repo is available
     successResponse(res, {});
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to update supplier address');
@@ -319,10 +317,9 @@ export const updateSupplierAddress = async (req: TypedRequest, res: Response): P
 
 export const deleteSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
     // TODO: Implement when supplier address repo is available
     successResponse(res, { message: 'Supplier address deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to delete supplier address');
@@ -333,10 +330,9 @@ export const deleteSupplierAddress = async (req: TypedRequest, res: Response): P
 
 export const getSupplierProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
     // TODO: Implement when supplier product repo is available
     successResponse(res, []);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to fetch supplier products');
@@ -345,10 +341,9 @@ export const getSupplierProducts = async (req: TypedRequest, res: Response): Pro
 
 export const addProductToSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
     // TODO: Implement when supplier product repo is available
     successResponse(res, {}, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to add product to supplier');
@@ -357,10 +352,9 @@ export const addProductToSupplier = async (req: TypedRequest, res: Response): Pr
 
 export const updateSupplierProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
     // TODO: Implement when supplier product repo is available
     successResponse(res, {});
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to update supplier product');
@@ -369,10 +363,9 @@ export const updateSupplierProduct = async (req: TypedRequest, res: Response): P
 
 export const removeProductFromSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
     // TODO: Implement when supplier product repo is available
     successResponse(res, { message: 'Product removed from supplier successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     errorResponse(res, 'Failed to remove product from supplier');

@@ -22,9 +22,9 @@ export class TrackFulfillmentPackageCommand {
     public readonly shippingLabelUrl?: string,
     public readonly commercialInvoiceUrl?: string,
     public readonly weight?: number,
-    public readonly dimensions?: Record<string, any>,
+    public readonly dimensions?: Record<string, unknown>,
     public readonly packageType?: string,
-    public readonly customsInfo?: Record<string, any>,
+    public readonly customsInfo?: Record<string, unknown>,
     /** If provided, updates an existing package instead of creating a new one */
     public readonly orderFulfillmentPackageId?: string,
   ) {}
@@ -42,9 +42,9 @@ export interface TrackFulfillmentPackageResponse {
   shippingLabelUrl?: string;
   commercialInvoiceUrl?: string;
   weight?: number;
-  dimensions?: Record<string, any>;
+  dimensions?: Record<string, unknown>;
   packageType?: string;
-  customsInfo?: Record<string, any>;
+  customsInfo?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }

@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import {
   getSubscriptionPlan,
   getSubscriptionPlans,
@@ -17,7 +17,6 @@ import {
   getSubscriptionOrders,
   getCustomerSubscription,
   pauseSubscription,
-  resumeSubscription,
   getSubscriptionsDueBilling,
   getSubscriptionOrdersPending,
   getFailedSubscriptionPayments,
@@ -77,12 +76,12 @@ export const listSubscriptionPlans = async (req: TypedRequest, res: Response): P
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load subscription plans',
+      error: (error as Error).message || 'Failed to load subscription plans',
     });
   }
 };
@@ -95,18 +94,19 @@ export const createSubscriptionPlanForm = async (req: TypedRequest, res: Respons
       pageName: 'Create Subscription Plan',
       productId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
 
 export const createSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
     const {
       subscriptionProductId,
       name,
@@ -128,7 +128,7 @@ export const createSubscriptionPlan = async (req: TypedRequest, res: Response): 
       features,
       sortOrder,
       isPopular,
-    } = req.body;
+    } = body;
 
     const plan = await saveSubscriptionPlan({
       subscriptionProductId,
@@ -154,13 +154,13 @@ export const createSubscriptionPlan = async (req: TypedRequest, res: Response): 
     });
 
     res.redirect(`/hub/subscription/plans/${plan.subscriptionPlanId}?success=Subscription plan created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'programs/subscription/plans/create', {
       pageName: 'Create Subscription Plan',
-      error: error.message || 'Failed to create subscription plan',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create subscription plan',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -185,12 +185,12 @@ export const viewSubscriptionPlan = async (req: TypedRequest, res: Response): Pr
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load subscription plan',
+      error: (error as Error).message || 'Failed to load subscription plan',
     });
   }
 };
@@ -213,12 +213,12 @@ export const editSubscriptionPlanForm = async (req: TypedRequest, res: Response)
       pageName: `Edit: ${plan.name}`,
       plan,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -226,8 +226,9 @@ export const editSubscriptionPlanForm = async (req: TypedRequest, res: Response)
 export const updateSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
+    const body = req.body as RequestBody;
     const {
       name,
       description,
@@ -249,7 +250,7 @@ export const updateSubscriptionPlan = async (req: TypedRequest, res: Response): 
       sortOrder,
       isPopular,
       isActive,
-    } = req.body;
+    } = body;
 
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description || undefined;
@@ -273,13 +274,14 @@ export const updateSubscriptionPlan = async (req: TypedRequest, res: Response): 
     if (isPopular !== undefined) updates.isPopular = isPopular === 'true';
     if (isActive !== undefined) updates.isActive = isActive !== 'false';
 
-    const plan = await saveSubscriptionPlan({
+    const _plan = await saveSubscriptionPlan({
       subscriptionPlanId: planId,
       ...updates,
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     res.redirect(`/hub/subscription/plans/${planId}?success=Subscription plan updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -288,13 +290,13 @@ export const updateSubscriptionPlan = async (req: TypedRequest, res: Response): 
       adminRespond(req, res, 'programs/subscription/plans/edit', {
         pageName: `Edit: ${plan?.name || 'Plan'}`,
         plan,
-        error: error.message || 'Failed to update subscription plan',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update subscription plan',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update subscription plan',
+        error: (error as Error).message || 'Failed to update subscription plan',
       });
     }
   }
@@ -307,10 +309,10 @@ export const deleteSubscriptionPlan = async (req: TypedRequest, res: Response): 
     await deleteSubscriptionPlanRepo(planId);
 
     res.json({ success: true, message: 'Subscription plan deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete subscription plan' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete subscription plan' });
   }
 };
 
@@ -328,7 +330,7 @@ export const listCustomerSubscriptions = async (req: TypedRequest, res: Response
     const result = await getCustomerSubscriptions(
       {
         customerId,
-        status: status as any,
+        status: status as 'pending' | 'trialing' | 'active' | 'paused' | 'past_due' | 'cancelled' | 'expired' | undefined,
       },
       { limit, offset },
     );
@@ -342,12 +344,12 @@ export const listCustomerSubscriptions = async (req: TypedRequest, res: Response
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load customer subscriptions',
+      error: (error as Error).message || 'Failed to load customer subscriptions',
     });
   }
 };
@@ -369,12 +371,12 @@ export const viewCustomerSubscription = async (req: TypedRequest, res: Response)
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load customer subscription',
+      error: (error as Error).message || 'Failed to load customer subscription',
     });
   }
 };
@@ -382,30 +384,32 @@ export const viewCustomerSubscription = async (req: TypedRequest, res: Response)
 export const updateSubscriptionStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { subscriptionId } = req.params;
-    const { status } = req.body;
+    const body = req.body as RequestBody;
+    const { status } = body;
 
     await updateSubscriptionStatusRepo(subscriptionId, status);
 
     res.json({ success: true, message: `Subscription status updated to ${status}` });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to update subscription status' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to update subscription status' });
   }
 };
 
 export const cancelCustomerSubscription = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { subscriptionId } = req.params;
-    const { reason, cancelAtPeriodEnd } = req.body;
+    const body = req.body as RequestBody;
+    const { reason, cancelAtPeriodEnd } = body;
 
     await cancelSubscription(subscriptionId, reason, 'admin', cancelAtPeriodEnd === 'true');
 
     res.json({ success: true, message: 'Subscription cancelled successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to cancel subscription' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to cancel subscription' });
   }
 };
 
@@ -434,12 +438,12 @@ export const subscriptionBilling = async (req: TypedRequest, res: Response): Pro
         failedPayments: failedPayments.length,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load subscription billing',
+      error: (error as Error).message || 'Failed to load subscription billing',
     });
   }
 };
@@ -447,7 +451,8 @@ export const subscriptionBilling = async (req: TypedRequest, res: Response): Pro
 export const processSubscriptionBilling = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { subscriptionId } = req.params;
-    const { processPayment, billingCycle } = req.body;
+    const body = req.body as RequestBody;
+    const { processPayment, _billingCycle } = body;
 
     const subscription = await getCustomerSubscription(subscriptionId);
     if (!subscription) {
@@ -491,17 +496,18 @@ export const processSubscriptionBilling = async (req: TypedRequest, res: Respons
       message: `Billing processed for subscription ${subscriptionId}`,
       orderId: order.subscriptionOrderId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to process billing' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to process billing' });
   }
 };
 
 export const manageFailedPayments = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { subscriptionId } = req.params;
-    const { action, retryDate } = req.body;
+    const body = req.body as RequestBody;
+    const { action, retryDate } = body;
 
     if (action === 'retry') {
       // Create dunning attempt
@@ -528,9 +534,9 @@ export const manageFailedPayments = async (req: TypedRequest, res: Response): Pr
     } else {
       throw new Error('Invalid action');
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to manage failed payment' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to manage failed payment' });
   }
 };

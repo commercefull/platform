@@ -56,7 +56,7 @@ export interface AttributeSetMappingInput {
 
 export class ProductAttributeSetRepository {
   private readonly tableName = Table.ProductAttributeSet;
-  private readonly mappingTableName = Table.ProductAttributeSetMapping;
+  private readonly mappingTableName = 'productAttributeSetMapping';
 
   async findById(id: string): Promise<ProductAttributeSet | null> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "productAttributeSetId" = $1`;
@@ -168,7 +168,7 @@ export class ProductAttributeSetRepository {
 
   async update(id: string, input: ProductAttributeSetUpdateInput): Promise<ProductAttributeSet | null> {
     const setStatements: string[] = ['"updatedAt" = now()'];
-    const values: any[] = [id];
+    const values: unknown[] = [id];
     let paramIndex = 2;
 
     if (input.name !== undefined) {

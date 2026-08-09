@@ -21,8 +21,20 @@ export interface SearchFAQOutput {
   total: number;
 }
 
+interface FaqRecord {
+  faqId: string;
+  question: string;
+  answer: string;
+  categoryName?: string;
+  helpfulness?: number;
+}
+
+interface SupportRepository {
+  searchFAQ(params: { query: string; categoryId?: string; limit: number }): Promise<FaqRecord[]>;
+}
+
 export class SearchFAQUseCase {
-  constructor(private readonly supportRepository: any) {}
+  constructor(private readonly supportRepository: SupportRepository) {}
 
   async execute(input: SearchFAQInput): Promise<SearchFAQOutput> {
     if (!input.query || input.query.trim().length < 2) {
@@ -38,7 +50,7 @@ export class SearchFAQUseCase {
     });
 
     return {
-      results: results.map((faq: any) => ({
+      results: results.map((faq: FaqRecord) => ({
         faqId: faq.faqId,
         question: faq.question,
         answer: faq.answer,

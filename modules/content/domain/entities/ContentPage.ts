@@ -7,9 +7,9 @@ export type ContentStatus = 'draft' | 'published' | 'scheduled' | 'archived';
 export interface ContentBlock {
   blockId: string;
   type: string;
-  content: Record<string, any>;
+  content: Record<string, unknown>;
   position: number;
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
 }
 
 export interface ContentPageProps {
@@ -31,7 +31,7 @@ export interface ContentPageProps {
   parentId?: string;
   order: number;
   isHomepage: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -128,7 +128,7 @@ export class ContentPage {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return { ...this.props };
   }
 }

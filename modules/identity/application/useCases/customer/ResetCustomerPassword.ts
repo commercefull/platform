@@ -23,12 +23,45 @@ export interface ResetPasswordOutput {
   message: string;
 }
 
+export interface CustomerRecord {
+  customerId: string;
+  email: string;
+  firstName?: string;
+}
+
+export interface PasswordResetRecord {
+  customerId: string;
+  token: string;
+  expiresAt: Date;
+  used: boolean;
+}
+
+export interface CustomerRepository {
+  findByEmail(email: string): Promise<CustomerRecord | null>;
+  updatePassword(customerId: string, passwordHash: string): Promise<void>;
+}
+
+export interface PasswordResetRepository {
+  create(data: { customerId: string; token: string; expiresAt: Date; used: boolean }): Promise<void>;
+  findByToken(token: string): Promise<PasswordResetRecord | null>;
+  markAsUsed(token: string): Promise<void>;
+}
+
+export interface AuthService {
+  generateResetToken(): Promise<string>;
+  hashPassword(password: string): Promise<string>;
+}
+
+export interface EmailService {
+  sendPasswordResetEmail(params: { to: string; token: string; firstName?: string }): Promise<void>;
+}
+
 export class ResetCustomerPasswordUseCase {
   constructor(
-    private readonly customerRepo: any,
-    private readonly passwordResetRepo: any,
-    private readonly authService: any,
-    private readonly emailService: any,
+    private readonly customerRepo: CustomerRepository,
+    private readonly passwordResetRepo: PasswordResetRepository,
+    private readonly authService: AuthService,
+    private readonly emailService: EmailService,
   ) {}
 
   async requestReset(input: RequestPasswordResetInput): Promise<RequestPasswordResetOutput> {
@@ -66,7 +99,7 @@ export class ResetCustomerPasswordUseCase {
         token,
         firstName: customer.firstName,
       });
-    } catch (error) {}
+    } catch {}
 
     // Emit event
     eventBus.emit('customer.password_reset_requested', {

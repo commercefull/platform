@@ -103,7 +103,7 @@ export interface ProductDetailResponse {
   taxClass?: string;
   isPurchasable: boolean;
   hasVariants: boolean;
-  variantAttributes?: Record<string, any>;
+  variantAttributes?: Record<string, unknown>;
   minOrderQuantity: number;
   maxOrderQuantity?: number;
   returnPolicy?: string;
@@ -119,7 +119,7 @@ export interface ProductDetailResponse {
   metaDescription?: string;
   metaKeywords?: string;
   tags: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   variants?: ProductVariantResponse[];
   images?: ProductImageResponse[];
   primaryImage?: ProductImageResponse;

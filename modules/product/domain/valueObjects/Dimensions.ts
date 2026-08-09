@@ -128,7 +128,7 @@ export class Dimensions {
     return `${parts.join(' x ')} ${this._dimensionUnit}`;
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       weight: this._weight,
       weightUnit: this._weightUnit,

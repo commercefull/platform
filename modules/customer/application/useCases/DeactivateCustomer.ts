@@ -43,16 +43,17 @@ export class DeactivateCustomerUseCase {
       throw new Error('Customer not found');
     }
 
-    if (customer.status === 'inactive') {
+    if (!customer.isActive) {
       throw new Error('Customer is already deactivated');
     }
 
     // Deactivate customer
-    customer.deactivate();
+    customer.isActive = false;
+    customer.updatedAt = new Date();
     await this.customerRepository.save(customer);
 
     // Emit event
-    (eventBus as any).emit('customer.deactivated', {
+    eventBus.emit('customer.deactivated', {
       customerId: customer.customerId,
       reason: command.reason,
     });

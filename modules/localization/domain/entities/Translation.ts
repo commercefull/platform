@@ -29,7 +29,7 @@ export interface TranslationProps {
   metaDescription?: string;
   metaKeywords?: string;
   // Additional content (JSON for flexible storage)
-  additionalFields?: Record<string, any>;
+  additionalFields?: Record<string, unknown>;
   // Translation metadata
   isAutoTranslated: boolean;
   translationSource?: string; // manual, google, deepl, ai
@@ -61,7 +61,7 @@ export class Translation {
     metaTitle?: string;
     metaDescription?: string;
     metaKeywords?: string;
-    additionalFields?: Record<string, any>;
+    additionalFields?: Record<string, unknown>;
     isAutoTranslated?: boolean;
     translationSource?: string;
     translationQuality?: number;
@@ -131,7 +131,7 @@ export class Translation {
   get metaKeywords(): string | undefined {
     return this.props.metaKeywords;
   }
-  get additionalFields(): Record<string, any> | undefined {
+  get additionalFields(): Record<string, unknown> | undefined {
     return this.props.additionalFields;
   }
   get isAutoTranslated(): boolean {
@@ -170,7 +170,7 @@ export class Translation {
     metaTitle?: string;
     metaDescription?: string;
     metaKeywords?: string;
-    additionalFields?: Record<string, any>;
+    additionalFields?: Record<string, unknown>;
   }): void {
     if (params.name !== undefined) this.props.name = params.name;
     if (params.slug !== undefined) this.props.slug = params.slug;
@@ -212,7 +212,7 @@ export class Translation {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return { ...this.props };
   }
 }

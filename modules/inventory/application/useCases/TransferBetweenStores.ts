@@ -30,8 +30,31 @@ export interface TransferBetweenStoresOutput {
   createdAt: string;
 }
 
+interface TransferResult {
+  transferId: string;
+  sourceStoreId: string;
+  targetStoreId: string;
+  status: string;
+  createdAt: Date;
+}
+
+interface TransferBetweenStoresRepositoryPort {
+  getAvailableQuantity(storeId: string, productId: string, variantId?: string): Promise<number>;
+  reserveForTransfer(storeId: string, productId: string, variantId: string | undefined, quantity: number, transferId: string): Promise<void>;
+  createTransfer(input: {
+    transferId: string;
+    sourceStoreId: string;
+    targetStoreId: string;
+    items: Array<{ productId: string; variantId?: string; quantity: number }>;
+    status: string;
+    reason?: string;
+    priority?: string;
+    requestedBy?: string;
+  }): Promise<TransferResult>;
+}
+
 export class TransferBetweenStoresUseCase {
-  constructor(private readonly inventoryRepository: any) {}
+  constructor(private readonly inventoryRepository: TransferBetweenStoresRepositoryPort) {}
 
   async execute(input: TransferBetweenStoresInput): Promise<TransferBetweenStoresOutput> {
     if (input.sourceStoreId === input.targetStoreId) {
@@ -84,7 +107,7 @@ export class TransferBetweenStoresUseCase {
       transferId: transfer.transferId,
       sourceStoreId: transfer.sourceStoreId,
       targetStoreId: transfer.targetStoreId,
-      status: transfer.status,
+      status: transfer.status as TransferBetweenStoresOutput['status'],
       itemCount: input.items.length,
       totalQuantity,
       estimatedArrival: this.calculateEstimatedArrival(input.priority),

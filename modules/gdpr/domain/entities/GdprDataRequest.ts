@@ -279,7 +279,7 @@ export class GdprDataRequest {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       ...this.props,
       isOverdue: this.isOverdue(),

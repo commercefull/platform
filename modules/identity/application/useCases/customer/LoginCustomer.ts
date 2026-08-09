@@ -18,11 +18,32 @@ export interface LoginCustomerOutput {
   expiresIn: number;
 }
 
+export interface CustomerRecord {
+  customerId: string;
+  email: string;
+  passwordHash: string;
+  status: string;
+}
+
+export interface CustomerRepository {
+  findByEmail(email: string): Promise<CustomerRecord | null>;
+  updateLastLogin(customerId: string): Promise<void>;
+}
+
+export interface AuthService {
+  verifyPassword(password: string, hash: string): Promise<boolean>;
+}
+
+export interface TokenService {
+  generateAccessToken(payload: Record<string, unknown>): Promise<string>;
+  generateRefreshToken(payload: Record<string, unknown>): Promise<string>;
+}
+
 export class LoginCustomerUseCase {
   constructor(
-    private readonly customerRepo: any,
-    private readonly authService: any,
-    private readonly tokenService: any,
+    private readonly customerRepo: CustomerRepository,
+    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
   ) {}
 
   async execute(input: LoginCustomerInput): Promise<LoginCustomerOutput> {

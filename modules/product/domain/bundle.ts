@@ -20,7 +20,7 @@ export interface BundleItemProps {
   priceAdjustment: number;
   discountPercent: number;
   sortOrder: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,7 +54,7 @@ export interface BundleProps {
   startDate?: Date;
   endDate?: Date;
   items: BundleItemProps[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -216,7 +216,7 @@ export class Bundle {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return { ...this.props, items: this.props.items.map(i => ({ ...i })) };
   }
 }

@@ -58,7 +58,7 @@ describe('Tax Rates API Integration Tests', () => {
       if (data.length > 0) {
         // We'd need to check the taxZoneId for each rate and verify it's a US zone
         // This is a simplified check and would need to be adapted based on your actual implementation
-        const taxRateIds = data.map((tr: any) => tr.taxRateId || tr.id);
+        const taxRateIds = data.map((tr: Record<string, unknown>) => tr.taxRateId || tr.id);
 
         // Get the tax zones for these rates to verify
         const taxZonePromises = taxRateIds.map((id: string) =>

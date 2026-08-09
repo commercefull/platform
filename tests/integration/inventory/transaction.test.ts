@@ -4,6 +4,7 @@ import { setupInventoryTests, cleanupInventoryTests } from './testUtils';
 describe('Inventory Transaction Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testProductId: string;
   let testLocationId: string;
   let testInventoryItemId: string;
@@ -130,7 +131,7 @@ describe('Inventory Transaction Tests', () => {
       expect(response.data.data.length).toBeGreaterThan(0);
 
       // All returned transactions should have the reference
-      response.data.data.forEach((transaction: any) => {
+      response.data.data.forEach((transaction: Record<string, unknown>) => {
         expect(transaction.reference).toBe('PO-12345');
       });
     });

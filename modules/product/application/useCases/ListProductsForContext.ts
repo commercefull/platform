@@ -3,10 +3,12 @@
  * Context-aware product listing that works for both marketplace and multi-store scenarios
  */
 
-import { ProductRepository, PaginationOptions } from '../../domain/repositories/ProductRepository';
+import { ProductRepository, PaginationOptions, ProductFilters } from '../../domain/repositories/ProductRepository';
+import { Product } from '../../domain/entities/Product';
 import { BusinessRepository } from '../../../business/domain/repositories/BusinessRepository';
 import { StoreRepository } from '../../../store/domain/repositories/StoreRepository';
 import { SystemConfigurationRepository } from '../../../configuration/domain/repositories/SystemConfigurationRepository';
+import { SystemConfiguration } from '../../../configuration/domain/entities/SystemConfiguration';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import { ProductListItemResponse, ListProductsResponse } from './ListProducts';
@@ -78,20 +80,20 @@ export class ListProductsForContextUseCase {
     };
   }
 
-  private async buildContextFilters(command: ListProductsForContextCommand, systemConfig: any) {
-    const filters: any = {
+  private async buildContextFilters(command: ListProductsForContextCommand, systemConfig: SystemConfiguration | null): Promise<ProductFilters> {
+    const filters: ProductFilters = {
       status: command.includeInactive ? undefined : ProductStatus.ACTIVE,
       visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED],
     };
 
     // Apply context-based ownership filtering
-    if (systemConfig.isMarketplace) {
+    if (systemConfig?.isMarketplace) {
       // Marketplace mode: products belong to merchants
       if (command.context.merchantId) {
         filters.merchantId = command.context.merchantId;
       }
       // In marketplace, we might show products from multiple merchants
-    } else if (systemConfig.isMultiStore) {
+    } else if (systemConfig?.isMultiStore) {
       // Multi-store mode: products belong to businesses
       if (command.context.businessId) {
         filters.businessId = command.context.businessId;
@@ -121,7 +123,7 @@ export class ListProductsForContextUseCase {
     return filters;
   }
 
-  private mapToListItem(product: any): ProductListItemResponse {
+  private mapToListItem(product: Product): ProductListItemResponse {
     return {
       productId: product.productId,
       name: product.name,

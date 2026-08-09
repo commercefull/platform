@@ -78,7 +78,7 @@ export class CustomerCurrencyPreferenceRepo {
 
   async update(id: string, params: CustomerCurrencyPreferenceUpdateParams): Promise<CustomerCurrencyPreference | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

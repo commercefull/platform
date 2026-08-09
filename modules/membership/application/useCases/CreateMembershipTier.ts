@@ -29,8 +29,34 @@ export interface CreateMembershipTierOutput {
   createdAt: string;
 }
 
+interface CreatedTier {
+  tierId: string;
+  name: string;
+  level: number;
+  price?: number;
+  benefits: TierBenefit[];
+  createdAt: Date;
+}
+
+interface CreateMembershipTierRepository {
+  findTierByLevel(level: number): Promise<CreatedTier | null>;
+  createTier(data: {
+    tierId: string;
+    name: string;
+    description?: string;
+    level: number;
+    price?: number;
+    billingPeriod?: string;
+    benefits: TierBenefit[];
+    requiredPoints?: number;
+    maxMembers?: number;
+    currentMembers: number;
+    isActive: boolean;
+  }): Promise<CreatedTier>;
+}
+
 export class CreateMembershipTierUseCase {
-  constructor(private readonly membershipRepository: any) {}
+  constructor(private readonly membershipRepository: CreateMembershipTierRepository) {}
 
   async execute(input: CreateMembershipTierInput): Promise<CreateMembershipTierOutput> {
     if (!input.name || input.level === undefined) {

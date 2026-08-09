@@ -15,7 +15,7 @@ export interface NotificationProps {
   templateId?: string;
   subject?: string;
   content: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   status: NotificationStatus;
   sentAt?: Date;
   deliveredAt?: Date;
@@ -23,7 +23,7 @@ export interface NotificationProps {
   errorMessage?: string;
   retryCount: number;
   scheduledFor?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,9 +45,9 @@ export class Notification {
     templateId?: string;
     subject?: string;
     content: string;
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
     scheduledFor?: Date;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Notification {
     const now = new Date();
     return new Notification({
@@ -111,7 +111,7 @@ export class Notification {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return { ...this.props };
   }
 }

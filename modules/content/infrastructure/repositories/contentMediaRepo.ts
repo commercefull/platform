@@ -29,7 +29,7 @@ export class ContentMediaRepo {
   async findAllMedia(folderId?: string, fileType?: string, limit: number = 50, offset: number = 0): Promise<ContentMedia[]> {
     let sql = 'SELECT * FROM "contentMedia"';
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (folderId) {
@@ -112,7 +112,7 @@ export class ContentMediaRepo {
   async updateMedia(id: string, params: ContentMediaUpdateParams): Promise<ContentMedia> {
     const now = unixTimestamp();
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     if (params.title !== undefined) {
@@ -174,7 +174,7 @@ export class ContentMediaRepo {
 
   async findAllFolders(parentId?: string): Promise<ContentMediaFolder[]> {
     let sql = 'SELECT * FROM "contentMediaFolder"';
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (parentId) {
       sql += ' WHERE "parentId" = $1';
@@ -220,7 +220,7 @@ export class ContentMediaRepo {
   async updateFolder(id: string, params: ContentMediaFolderUpdateParams): Promise<ContentMediaFolder> {
     const now = unixTimestamp();
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     if (params.name !== undefined) {

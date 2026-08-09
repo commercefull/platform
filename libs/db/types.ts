@@ -2,830 +2,557 @@
 // Do not touch them, or risk, your modifications being lost.
 
 export enum Table {
-  AdminUser = 'adminUser',
-  AdminUserRole = 'adminUserRole',
-  AnalyticsChannelAttribution = 'analyticsChannelAttribution',
-  AnalyticsCustomer = 'analyticsCustomer',
-  AnalyticsCustomerCohort = 'analyticsCustomerCohort',
-  AnalyticsProductPerformance = 'analyticsProductPerformance',
-  AnalyticsReportDashboard = 'analyticsReportDashboard',
-  AnalyticsReportEvent = 'analyticsReportEvent',
-  AnalyticsReportSnapshot = 'analyticsReportSnapshot',
-  AnalyticsSalesDaily = 'analyticsSalesDaily',
-  AnalyticsSearchQuery = 'analyticsSearchQuery',
-  ApiKey = 'apiKey',
-  Assortment = 'assortment',
-  AssortmentItem = 'assortmentItem',
-  AssortmentRule = 'assortmentRule',
-  AssortmentScope = 'assortmentScope',
-  AttributeOptionTranslation = 'attributeOptionTranslation',
-  AttributeTranslation = 'attributeTranslation',
-  AuditLog = 'auditLog',
-  B2BApprovalAction = 'b2bApprovalAction',
-  B2BApprovalRequest = 'b2bApprovalRequest',
-  B2BApprovalWorkflow = 'b2bApprovalWorkflow',
-  B2BApprovalWorkflowStep = 'b2bApprovalWorkflowStep',
-  B2BCompany = 'b2bCompany',
-  B2BCompanyAddress = 'b2bCompanyAddress',
-  B2BCompanyCreditLimit = 'b2bCompanyCreditLimit',
-  B2BCompanyCreditTransaction = 'b2bCompanyCreditTransaction',
-  B2BCompanyUser = 'b2bCompanyUser',
-  B2BPriceList = 'b2bPriceList',
-  B2BPriceListItem = 'b2bPriceListItem',
-  B2BPurchaseOrder = 'b2bPurchaseOrder',
-  B2BPurchaseOrderItem = 'b2bPurchaseOrderItem',
-  B2BQuote = 'b2bQuote',
-  B2BQuoteItem = 'b2bQuoteItem',
-  B2BUser = 'b2bUser',
-  Basket = 'basket',
-  BasketAnalytics = 'basketAnalytics',
-  BasketDiscount = 'basketDiscount',
-  BasketHistory = 'basketHistory',
-  BasketItem = 'basketItem',
-  BasketMerge = 'basketMerge',
-  BasketSavedItem = 'basketSavedItem',
-  Brand = 'brand',
-  BrandTranslation = 'brandTranslation',
-  BundleItem = 'bundleItem',
-  Business = 'business',
-  CartPromotion = 'cartPromotion',
-  CartPromotionItem = 'cartPromotionItem',
-  CategoryPromotion = 'categoryPromotion',
-  CategoryPromotionProduct = 'categoryPromotionProduct',
-  CategoryTranslation = 'categoryTranslation',
-  Channel = 'channel',
-  ChannelProduct = 'channelProduct',
-  ChannelWarehouse = 'channelWarehouse',
-  CheckoutSession = 'checkoutSession',
-  CollectionTranslation = 'collectionTranslation',
-  CommissionPlan = 'commissionPlan',
-  CommissionProfile = 'commissionProfile',
-  ContentBlock = 'contentBlock',
-  ContentBlockType = 'contentBlockType',
-  ContentCategorization = 'contentCategorization',
-  ContentCategory = 'contentCategory',
-  ContentMedia = 'contentMedia',
-  ContentMediaFolder = 'contentMediaFolder',
-  ContentMediaUsage = 'contentMediaUsage',
-  ContentNavigation = 'contentNavigation',
-  ContentNavigationItem = 'contentNavigationItem',
-  ContentPage = 'contentPage',
-  ContentPageTranslation = 'contentPageTranslation',
-  ContentPageVersion = 'contentPageVersion',
-  ContentRedirect = 'contentRedirect',
-  ContentTemplate = 'contentTemplate',
-  ContentType = 'contentType',
-  Country = 'country',
-  Currency = 'currency',
-  CurrencyExchangeRate = 'currencyExchangeRate',
-  CurrencyExchangeRateHistory = 'currencyExchangeRateHistory',
-  CurrencyLocalization = 'currencyLocalization',
-  CurrencyProvider = 'currencyProvider',
-  CurrencyRegion = 'currencyRegion',
-  Customer = 'customer',
-  CustomerActivity = 'customerActivity',
-  CustomerAddress = 'customerAddress',
-  CustomerConsent = 'customerConsent',
-  CustomerContact = 'customerContact',
-  CustomerCurrencyPreference = 'customerCurrencyPreference',
-  CustomerEmailVerification = 'customerEmailVerification',
-  CustomerGroup = 'customerGroup',
-  CustomerGroupMembership = 'customerGroupMembership',
-  CustomerGroupTaxOverride = 'customerGroupTaxOverride',
-  CustomerLoyaltyAccount = 'customerLoyaltyAccount',
-  CustomerLoyaltyProgram = 'customerLoyaltyProgram',
-  CustomerLoyaltyTransaction = 'customerLoyaltyTransaction',
-  CustomerNote = 'customerNote',
-  CustomerPasswordReset = 'customerPasswordReset',
-  CustomerPreference = 'customerPreference',
-  CustomerPrice = 'customerPrice',
-  CustomerPriceList = 'customerPriceList',
-  CustomerProductView = 'customerProductView',
-  CustomerSegmentMembership = 'customerSegmentMembership',
-  CustomerSegments = 'customerSegments',
-  CustomerSubscription = 'customerSubscription',
-  CustomerTaxExemption = 'customerTaxExemption',
-  CustomerTaxExemptionCategory = 'customerTaxExemptionCategory',
-  CustomerWishlist = 'customerWishlist',
-  CustomerWishlistItem = 'customerWishlistItem',
-  DistributionChannel = 'distributionChannel',
-  DistributionChannelProduct = 'distributionChannelProduct',
-  DistributionFulfillmentPartner = 'distributionFulfillmentPartner',
-  DistributionInventoryMovement = 'distributionInventoryMovement',
-  DistributionOrderFulfillment = 'distributionOrderFulfillment',
-  DistributionPickupOrder = 'distributionPickupOrder',
-  DistributionPreOrder = 'distributionPreOrder',
-  DistributionPreOrderReservation = 'distributionPreOrderReservation',
-  DistributionRule = 'distributionRule',
-  DistributionShippingCarrier = 'distributionShippingCarrier',
-  DistributionShippingMethod = 'distributionShippingMethod',
-  DistributionShippingRate = 'distributionShippingRate',
-  DistributionShippingZone = 'distributionShippingZone',
-  DistributionWarehouse = 'distributionWarehouse',
-  DistributionWarehouseBin = 'distributionWarehouseBin',
-  DistributionWarehouseZone = 'distributionWarehouseZone',
-  DunningAttempt = 'dunningAttempt',
-  FaqArticle = 'faqArticle',
-  FaqCategory = 'faqCategory',
-  FraudBlacklist = 'fraudBlacklist',
-  FraudCheck = 'fraudCheck',
-  FraudRule = 'fraudRule',
-  Fulfillment = 'fulfillment',
-  FulfillmentItem = 'fulfillmentItem',
-  FulfillmentLocation = 'fulfillmentLocation',
-  FulfillmentNetworkRule = 'fulfillmentNetworkRule',
-  FulfillmentPartner = 'fulfillmentPartner',
-  FulfillmentRule = 'fulfillmentRule',
-  FulfillmentStatusHistory = 'fulfillmentStatusHistory',
-  GdprCookieConsent = 'gdprCookieConsent',
-  GdprDataRequest = 'gdprDataRequest',
-  IdentityCustomerSession = 'identityCustomerSession',
-  IdentityMerchantSession = 'identityMerchantSession',
-  IdentityRefreshTokens = 'identityRefreshTokens',
-  IdentitySocialAccount = 'identitySocialAccount',
-  IdentityTokenBlacklist = 'identityTokenBlacklist',
-  InventoryAllocation = 'inventoryAllocation',
-  InventoryCount = 'inventoryCount',
-  InventoryCountItem = 'inventoryCountItem',
-  InventoryLevel = 'inventoryLevel',
-  InventoryLocation = 'inventoryLocation',
-  InventoryLot = 'inventoryLot',
-  InventoryPool = 'inventoryPool',
-  InventoryPoolLocation = 'inventoryPoolLocation',
-  InventoryReservation = 'inventoryReservation',
-  InventoryTransaction = 'inventoryTransaction',
-  InventoryTransactionType = 'inventoryTransactionType',
-  InventoryTransfer = 'inventoryTransfer',
-  InventoryTransferItem = 'inventoryTransferItem',
-  KnexMigrations = 'knexMigrations',
-  KnexMigrationsLock = 'knexMigrations_lock',
-  Language = 'language',
-  Locale = 'locale',
-  LowStockNotification = 'lowStockNotification',
-  LoyaltyPoints = 'loyaltyPoints',
-  LoyaltyPointsBatch = 'loyaltyPointsBatch',
-  LoyaltyRedemption = 'loyaltyRedemption',
-  LoyaltyReward = 'loyaltyReward',
-  LoyaltyTier = 'loyaltyTier',
-  LoyaltyTransaction = 'loyaltyTransaction',
-  MarketingAbandonedCart = 'marketingAbandonedCart',
-  MarketingAbandonedCartEmail = 'marketingAbandonedCartEmail',
-  MarketingAffiliate = 'marketingAffiliate',
-  MarketingAffiliateCommission = 'marketingAffiliateCommission',
-  MarketingAffiliateLink = 'marketingAffiliateLink',
-  MarketingAffiliatePayout = 'marketingAffiliatePayout',
-  MarketingEmailCampaign = 'marketingEmailCampaign',
-  MarketingEmailCampaignLink = 'marketingEmailCampaignLink',
-  MarketingEmailCampaignRecipient = 'marketingEmailCampaignRecipient',
-  MarketingEmailTemplate = 'marketingEmailTemplate',
-  MarketingProductRecommendation = 'marketingProductRecommendation',
-  Media = 'media',
-  MembershipBenefit = 'membershipBenefit',
-  MembershipBenefitUsage = 'membershipBenefitUsage',
-  MembershipContentAccess = 'membershipContentAccess',
-  MembershipDiscountCode = 'membershipDiscountCode',
-  MembershipDiscountCodeUsage = 'membershipDiscountCodeUsage',
-  MembershipDiscountRule = 'membershipDiscountRule',
-  MembershipGroup = 'membershipGroup',
-  MembershipGroupMember = 'membershipGroupMember',
-  MembershipPayment = 'membershipPayment',
-  MembershipPlan = 'membershipPlan',
-  MembershipPlanBenefit = 'membershipPlanBenefit',
-  MembershipStatusLog = 'membershipStatusLog',
-  MembershipSubscription = 'membershipSubscription',
-  Merchant = 'merchant',
-  MerchantAddress = 'merchantAddress',
-  MerchantBalance = 'merchantBalance',
-  MerchantContact = 'merchantContact',
-  MerchantEmailVerification = 'merchantEmailVerification',
-  MerchantFollower = 'merchantFollower',
-  MerchantInvoice = 'merchantInvoice',
-  MerchantOrder = 'merchantOrder',
-  MerchantPasswordReset = 'merchantPasswordReset',
-  MerchantPaymentInfo = 'merchantPaymentInfo',
-  MerchantPayout = 'merchantPayout',
-  MerchantPayoutItem = 'merchantPayoutItem',
-  MerchantProduct = 'merchantProduct',
-  MerchantProductVariant = 'merchantProductVariant',
-  MerchantReview = 'merchantReview',
-  MerchantSettings = 'merchantSettings',
-  MerchantSettlement = 'merchantSettlement',
-  MerchantSettlementLine = 'merchantSettlementLine',
-  MerchantSettlementPayout = 'merchantSettlementPayout',
-  MerchantShippingTemplate = 'merchantShippingTemplate',
-  MerchantStore = 'merchantStore',
-  MerchantTaxInfo = 'merchantTaxInfo',
-  MerchantTransaction = 'merchantTransaction',
-  MerchantVerificationDocument = 'merchantVerificationDocument',
-  Notification = 'notification',
-  NotificationBatch = 'notificationBatch',
-  NotificationCategory = 'notificationCategory',
-  NotificationDeliveryLog = 'notificationDeliveryLog',
-  NotificationDevice = 'notificationDevice',
-  NotificationEventLog = 'notificationEventLog',
-  NotificationPreference = 'notificationPreference',
-  NotificationTemplate = 'notificationTemplate',
-  NotificationTemplateTranslation = 'notificationTemplateTranslation',
-  NotificationUnsubscribe = 'notificationUnsubscribe',
-  NotificationWebhook = 'notificationWebhook',
-  Order = 'order',
-  OrderAddress = 'orderAddress',
-  OrderAllocation = 'orderAllocation',
-  OrderDiscount = 'orderDiscount',
-  OrderFulfillment = 'orderFulfillment',
-  OrderFulfillmentItem = 'orderFulfillmentItem',
-  OrderFulfillmentPackage = 'orderFulfillmentPackage',
-  OrderItem = 'orderItem',
-  OrderNote = 'orderNote',
-  OrderPayment = 'orderPayment',
-  OrderPaymentRefund = 'orderPaymentRefund',
-  OrderReturn = 'orderReturn',
-  OrderReturnItem = 'orderReturnItem',
-  OrderShipping = 'orderShipping',
-  OrderShippingRate = 'orderShippingRate',
-  OrderStatusHistory = 'orderStatusHistory',
-  OrderTax = 'orderTax',
-  Organization = 'organization',
-  OrganizationMember = 'organizationMember',
-  OrganizationSettings = 'organizationSettings',
-  PaymentBalance = 'paymentBalance',
-  PaymentDispute = 'paymentDispute',
-  PaymentFee = 'paymentFee',
-  PaymentGateway = 'paymentGateway',
-  PaymentMethod = 'paymentMethod',
-  PaymentMethodConfig = 'paymentMethodConfig',
-  PaymentPlan = 'paymentPlan',
-  PaymentRefund = 'paymentRefund',
-  PaymentReport = 'paymentReport',
-  PaymentSettings = 'paymentSettings',
-  PaymentSubscription = 'paymentSubscription',
-  PaymentTerms = 'paymentTerms',
-  PaymentTransaction = 'paymentTransaction',
-  PaymentWebhook = 'paymentWebhook',
-  Payout = 'payout',
-  PayoutItem = 'payoutItem',
-  PayoutSettings = 'payoutSettings',
-  PlatformConfig = 'platformConfig',
-  PriceAlert = 'priceAlert',
-  PriceList = 'priceList',
-  PriceListScope = 'priceListScope',
-  PricingRule = 'pricingRule',
-  Product = 'product',
-  ProductAttribute = 'productAttribute',
-  ProductAttributeGroup = 'productAttributeGroup',
-  ProductAttributeOption = 'productAttributeOption',
-  ProductAttributeSet = 'productAttributeSet',
-  ProductAttributeSetMapping = 'productAttributeSetMapping',
-  ProductAttributeToGroup = 'productAttributeToGroup',
-  ProductAttributeValue = 'productAttributeValue',
-  ProductAttributeValueMap = 'productAttributeValueMap',
-  ProductBrand = 'productBrand',
-  ProductBundle = 'productBundle',
-  ProductCategory = 'productCategory',
-  ProductCategoryMap = 'productCategoryMap',
-  ProductCollection = 'productCollection',
-  ProductCollectionMap = 'productCollectionMap',
-  ProductCurrencyPrice = 'productCurrencyPrice',
-  ProductDownload = 'productDownload',
-  ProductImage = 'productImage',
-  ProductList = 'productList',
-  ProductListItem = 'productListItem',
-  ProductMedia = 'productMedia',
-  ProductPrice = 'productPrice',
-  ProductQa = 'productQa',
-  ProductQaAnswer = 'productQaAnswer',
-  ProductQaVote = 'productQaVote',
-  ProductRelated = 'productRelated',
-  ProductReview = 'productReview',
-  ProductReviewMedia = 'productReviewMedia',
-  ProductReviewVote = 'productReviewVote',
-  ProductSeo = 'productSeo',
-  ProductTag = 'productTag',
-  ProductTagMap = 'productTagMap',
-  ProductTaxCategory = 'productTaxCategory',
-  ProductTaxExemption = 'productTaxExemption',
-  ProductTieredPrice = 'productTieredPrice',
-  ProductToCategory = 'productToCategory',
-  ProductToTag = 'productToTag',
-  ProductTranslation = 'productTranslation',
-  ProductType = 'productType',
-  ProductVariant = 'productVariant',
-  Promotion = 'promotion',
-  PromotionAction = 'promotionAction',
-  PromotionBuyXGetYDiscount = 'promotionBuyXGetYDiscount',
-  PromotionCoupon = 'promotionCoupon',
-  PromotionCouponBatch = 'promotionCouponBatch',
-  PromotionCouponRestriction = 'promotionCouponRestriction',
-  PromotionCouponUsage = 'promotionCouponUsage',
-  PromotionGiftCard = 'promotionGiftCard',
-  PromotionGiftCardTransaction = 'promotionGiftCardTransaction',
-  PromotionProductDiscount = 'promotionProductDiscount',
-  PromotionProductDiscountCustomerGroup = 'promotionProductDiscountCustomerGroup',
-  PromotionProductDiscountItem = 'promotionProductDiscountItem',
-  PromotionRule = 'promotionRule',
-  PromotionUsage = 'promotionUsage',
-  Referral = 'referral',
-  ReferralReward = 'referralReward',
-  ReportExecution = 'reportExecution',
-  ReportSchedule = 'reportSchedule',
-  Role = 'role',
-  RuleAdjustment = 'ruleAdjustment',
-  RuleCondition = 'ruleCondition',
-  Segment = 'segment',
-  SegmentMember = 'segmentMember',
-  SellerPolicy = 'sellerPolicy',
-  Session = 'session',
-  ShippingCarrier = 'shippingCarrier',
-  ShippingMethod = 'shippingMethod',
-  ShippingPackagingType = 'shippingPackagingType',
-  ShippingRate = 'shippingRate',
-  ShippingZone = 'shippingZone',
-  StockAlert = 'stockAlert',
-  StockReservation = 'stockReservation',
-  Store = 'store',
-  StoreChannel = 'storeChannel',
-  StoreCurrencySettings = 'storeCurrencySettings',
-  StoreDeliveryZone = 'storeDeliveryZone',
-  StoreHierarchy = 'storeHierarchy',
-  StoreLocation = 'storeLocation',
-  StorePickupLocation = 'storePickupLocation',
-  StoreSettings = 'storeSettings',
-  StoredPaymentMethod = 'storedPaymentMethod',
-  SubscriptionInvoice = 'subscriptionInvoice',
-  SubscriptionOrder = 'subscriptionOrder',
-  SubscriptionPause = 'subscriptionPause',
-  SubscriptionPlan = 'subscriptionPlan',
-  SubscriptionProduct = 'subscriptionProduct',
-  Supplier = 'supplier',
-  SupplierAddress = 'supplierAddress',
-  SupplierProduct = 'supplierProduct',
-  SupplierPurchaseOrder = 'supplierPurchaseOrder',
-  SupplierPurchaseOrderItem = 'supplierPurchaseOrderItem',
-  SupplierReceivingItem = 'supplierReceivingItem',
-  SupplierReceivingRecord = 'supplierReceivingRecord',
-  SupportAgent = 'supportAgent',
-  SupportAttachment = 'supportAttachment',
-  SupportMessage = 'supportMessage',
-  SupportTicket = 'supportTicket',
-  SystemConfiguration = 'systemConfiguration',
-  TaxCalculation = 'taxCalculation',
-  TaxCalculationApplied = 'taxCalculationApplied',
-  TaxCalculationLine = 'taxCalculationLine',
-  TaxCategory = 'taxCategory',
-  TaxExemption = 'taxExemption',
-  TaxNexus = 'taxNexus',
-  TaxProviderLog = 'taxProviderLog',
-  TaxRate = 'taxRate',
-  TaxReport = 'taxReport',
-  TaxRule = 'taxRule',
-  TaxSettings = 'taxSettings',
-  TaxZone = 'taxZone',
-  TierPrice = 'tierPrice',
-  User = 'user',
-  UserSession = 'userSession',
-  VatOssReport = 'vatOssReport',
-  VatOssReportLine = 'vatOssReportLine',
-  VatRegistration = 'vatRegistration',
-  VatValidationLog = 'vatValidationLog',
-  WebhookDelivery = 'webhookDelivery',
-  WebhookEndpoint = 'webhookEndpoint',
+  AnalyticsCustomer = "analyticsCustomer",
+  AnalyticsCustomerCohort = "analyticsCustomerCohort",
+  AnalyticsProductPerformance = "analyticsProductPerformance",
+  AnalyticsReportDashboard = "analyticsReportDashboard",
+  AnalyticsReportEvent = "analyticsReportEvent",
+  AnalyticsReportSnapshot = "analyticsReportSnapshot",
+  AnalyticsSalesDaily = "analyticsSalesDaily",
+  AnalyticsSearchQuery = "analyticsSearchQuery",
+  Basket = "basket",
+  BasketAnalytics = "basketAnalytics",
+  BasketDiscount = "basketDiscount",
+  BasketHistory = "basketHistory",
+  BasketItem = "basketItem",
+  BasketMerge = "basketMerge",
+  Brand = "brand",
+  BrandTranslation = "brandTranslation",
+  Business = "business",
+  BusinessApiKey = "businessApiKey",
+  CheckoutSession = "checkoutSession",
+  ContentBlock = "contentBlock",
+  ContentBlockType = "contentBlockType",
+  ContentCategorization = "contentCategorization",
+  ContentCategory = "contentCategory",
+  ContentMedia = "contentMedia",
+  ContentMediaFolder = "contentMediaFolder",
+  ContentMediaUsage = "contentMediaUsage",
+  ContentNavigation = "contentNavigation",
+  ContentNavigationItem = "contentNavigationItem",
+  ContentPage = "contentPage",
+  ContentPageTranslation = "contentPageTranslation",
+  ContentPageVersion = "contentPageVersion",
+  ContentRedirect = "contentRedirect",
+  ContentTemplate = "contentTemplate",
+  ContentType = "contentType",
+  Country = "country",
+  Currency = "currency",
+  CurrencyExchangeRate = "currencyExchangeRate",
+  CurrencyRegion = "currencyRegion",
+  Customer = "customer",
+  CustomerAddress = "customerAddress",
+  CustomerCurrencyPreference = "customerCurrencyPreference",
+  CustomerGroup = "customerGroup",
+  CustomerGroupMembership = "customerGroupMembership",
+  CustomerLoyaltyTransaction = "customerLoyaltyTransaction",
+  CustomerNote = "customerNote",
+  CustomerPasswordReset = "customerPasswordReset",
+  CustomerPrice = "customerPrice",
+  CustomerPriceList = "customerPriceList",
+  CustomerSubscription = "customerSubscription",
+  CustomerTaxExemption = "customerTaxExemption",
+  CustomerWishlist = "customerWishlist",
+  CustomerWishlistItem = "customerWishlistItem",
+  DistributionWarehouse = "distributionWarehouse",
+  DistributionWarehouseBin = "distributionWarehouseBin",
+  FraudBlacklist = "fraudBlacklist",
+  FraudCheck = "fraudCheck",
+  FraudRule = "fraudRule",
+  Fulfillment = "fulfillment",
+  FulfillmentItem = "fulfillmentItem",
+  FulfillmentLocation = "fulfillmentLocation",
+  FulfillmentNetworkRule = "fulfillmentNetworkRule",
+  FulfillmentPartner = "fulfillmentPartner",
+  FulfillmentRule = "fulfillmentRule",
+  FulfillmentStatusHistory = "fulfillmentStatusHistory",
+  GdprCookieConsent = "gdprCookieConsent",
+  GdprDataRequest = "gdprDataRequest",
+  IdentityAdminUser = "identityAdminUser",
+  IdentityCustomerSession = "identityCustomerSession",
+  IdentityMerchantSession = "identityMerchantSession",
+  IdentityRefreshTokens = "identityRefreshTokens",
+  IdentitySocialAccount = "identitySocialAccount",
+  IdentityTokenBlacklist = "identityTokenBlacklist",
+  IdentityUserSession = "identityUserSession",
+  InventoryAllocation = "inventoryAllocation",
+  InventoryLevel = "inventoryLevel",
+  InventoryLocation = "inventoryLocation",
+  InventoryPool = "inventoryPool",
+  InventoryPoolLocation = "inventoryPoolLocation",
+  InventoryReservation = "inventoryReservation",
+  InventoryStockAlert = "inventoryStockAlert",
+  InventoryStockReservation = "inventoryStockReservation",
+  InventoryTransaction = "inventoryTransaction",
+  InventoryTransactionType = "inventoryTransactionType",
+  KnexMigrations = "knexMigrations",
+  KnexMigrationsLock = "knexMigrations_lock",
+  Language = "language",
+  Locale = "locale",
+  LocalizationCategoryTranslation = "localizationCategoryTranslation",
+  LocalizationCollectionTranslation = "localizationCollectionTranslation",
+  LoyaltyPoints = "loyaltyPoints",
+  LoyaltyRedemption = "loyaltyRedemption",
+  LoyaltyReward = "loyaltyReward",
+  LoyaltyTier = "loyaltyTier",
+  LoyaltyTransaction = "loyaltyTransaction",
+  Media = "media",
+  MembershipBenefit = "membershipBenefit",
+  MembershipPayment = "membershipPayment",
+  MembershipPlan = "membershipPlan",
+  MembershipPlanBenefit = "membershipPlanBenefit",
+  MembershipSubscription = "membershipSubscription",
+  Merchant = "merchant",
+  MerchantAddress = "merchantAddress",
+  MerchantContact = "merchantContact",
+  MerchantFollower = "merchantFollower",
+  MerchantOrder = "merchantOrder",
+  MerchantPasswordReset = "merchantPasswordReset",
+  MerchantPaymentInfo = "merchantPaymentInfo",
+  MerchantProduct = "merchantProduct",
+  MerchantProductVariant = "merchantProductVariant",
+  MerchantReview = "merchantReview",
+  MerchantSettings = "merchantSettings",
+  MerchantShippingTemplate = "merchantShippingTemplate",
+  MerchantStore = "merchantStore",
+  MerchantTaxInfo = "merchantTaxInfo",
+  MerchantVerificationDocument = "merchantVerificationDocument",
+  Notification = "notification",
+  NotificationBatch = "notificationBatch",
+  NotificationCategory = "notificationCategory",
+  NotificationDeliveryLog = "notificationDeliveryLog",
+  NotificationDevice = "notificationDevice",
+  NotificationEventLog = "notificationEventLog",
+  NotificationPreference = "notificationPreference",
+  NotificationTemplate = "notificationTemplate",
+  NotificationTemplateTranslation = "notificationTemplateTranslation",
+  NotificationUnsubscribe = "notificationUnsubscribe",
+  NotificationWebhook = "notificationWebhook",
+  Order = "order",
+  OrderAddress = "orderAddress",
+  OrderAllocation = "orderAllocation",
+  OrderDiscount = "orderDiscount",
+  OrderFulfillment = "orderFulfillment",
+  OrderFulfillmentItem = "orderFulfillmentItem",
+  OrderFulfillmentPackage = "orderFulfillmentPackage",
+  OrderItem = "orderItem",
+  OrderNote = "orderNote",
+  OrderPayment = "orderPayment",
+  OrderPaymentRefund = "orderPaymentRefund",
+  OrderReturn = "orderReturn",
+  OrderReturnItem = "orderReturnItem",
+  OrderShipping = "orderShipping",
+  OrderShippingRate = "orderShippingRate",
+  OrderStatusHistory = "orderStatusHistory",
+  OrderTax = "orderTax",
+  Organization = "organization",
+  PaymentBalance = "paymentBalance",
+  PaymentDispute = "paymentDispute",
+  PaymentFee = "paymentFee",
+  PaymentGateway = "paymentGateway",
+  PaymentMethod = "paymentMethod",
+  PaymentMethodConfig = "paymentMethodConfig",
+  PaymentPayout = "paymentPayout",
+  PaymentPayoutItem = "paymentPayoutItem",
+  PaymentPayoutSettings = "paymentPayoutSettings",
+  PaymentPlan = "paymentPlan",
+  PaymentRefund = "paymentRefund",
+  PaymentReport = "paymentReport",
+  PaymentSettings = "paymentSettings",
+  PaymentSubscription = "paymentSubscription",
+  PaymentTerms = "paymentTerms",
+  PaymentTransaction = "paymentTransaction",
+  PaymentWebhook = "paymentWebhook",
+  PricingCommissionPlan = "pricingCommissionPlan",
+  PricingPriceList = "pricingPriceList",
+  PricingPriceListScope = "pricingPriceListScope",
+  PricingRule = "pricingRule",
+  PricingRuleAdjustment = "pricingRuleAdjustment",
+  PricingRuleCondition = "pricingRuleCondition",
+  PricingSellerPolicy = "pricingSellerPolicy",
+  Product = "product",
+  ProductAttribute = "productAttribute",
+  ProductAttributeGroup = "productAttributeGroup",
+  ProductAttributeOption = "productAttributeOption",
+  ProductAttributeOptionTranslation = "productAttributeOptionTranslation",
+  ProductAttributeSet = "productAttributeSet",
+  ProductAttributeToGroup = "productAttributeToGroup",
+  ProductAttributeTranslation = "productAttributeTranslation",
+  ProductAttributeValue = "productAttributeValue",
+  ProductAttributeValueMap = "productAttributeValueMap",
+  ProductBrand = "productBrand",
+  ProductBundle = "productBundle",
+  ProductBundleItem = "productBundleItem",
+  ProductCategory = "productCategory",
+  ProductCategoryMap = "productCategoryMap",
+  ProductCollection = "productCollection",
+  ProductCollectionMap = "productCollectionMap",
+  ProductCurrencyPrice = "productCurrencyPrice",
+  ProductDownload = "productDownload",
+  ProductImage = "productImage",
+  ProductList = "productList",
+  ProductListItem = "productListItem",
+  ProductMedia = "productMedia",
+  ProductPrice = "productPrice",
+  ProductQa = "productQa",
+  ProductQaAnswer = "productQaAnswer",
+  ProductQaVote = "productQaVote",
+  ProductRelated = "productRelated",
+  ProductReview = "productReview",
+  ProductReviewMedia = "productReviewMedia",
+  ProductReviewVote = "productReviewVote",
+  ProductSeo = "productSeo",
+  ProductTag = "productTag",
+  ProductTierPrice = "productTierPrice",
+  ProductToCategory = "productToCategory",
+  ProductTranslation = "productTranslation",
+  ProductType = "productType",
+  ProductVariant = "productVariant",
+  Promotion = "promotion",
+  PromotionAction = "promotionAction",
+  PromotionCart = "promotionCart",
+  PromotionCategory = "promotionCategory",
+  PromotionCoupon = "promotionCoupon",
+  PromotionCouponUsage = "promotionCouponUsage",
+  PromotionGiftCard = "promotionGiftCard",
+  PromotionGiftCardTransaction = "promotionGiftCardTransaction",
+  PromotionProductDiscount = "promotionProductDiscount",
+  PromotionProductDiscountCustomerGroup = "promotionProductDiscountCustomerGroup",
+  PromotionProductDiscountItem = "promotionProductDiscountItem",
+  PromotionRule = "promotionRule",
+  ReportingReportExecution = "reportingReportExecution",
+  ReportingReportSchedule = "reportingReportSchedule",
+  Role = "role",
+  Session = "session",
+  ShippingCarrier = "shippingCarrier",
+  ShippingMethod = "shippingMethod",
+  ShippingPackagingType = "shippingPackagingType",
+  ShippingRate = "shippingRate",
+  ShippingZone = "shippingZone",
+  Store = "store",
+  StoreCurrencySettings = "storeCurrencySettings",
+  StoreDispatch = "storeDispatch",
+  StoreDispatchItem = "storeDispatchItem",
+  StoreHierarchy = "storeHierarchy",
+  StoreLocation = "storeLocation",
+  StorePickupLocation = "storePickupLocation",
+  StoreSettings = "storeSettings",
+  StoreUser = "storeUser",
+  StoredPaymentMethod = "storedPaymentMethod",
+  SubscriptionDunningAttempt = "subscriptionDunningAttempt",
+  SubscriptionInvoice = "subscriptionInvoice",
+  SubscriptionOrder = "subscriptionOrder",
+  SubscriptionPause = "subscriptionPause",
+  SubscriptionPlan = "subscriptionPlan",
+  SubscriptionProduct = "subscriptionProduct",
+  Supplier = "supplier",
+  SupplierAddress = "supplierAddress",
+  SupplierProduct = "supplierProduct",
+  SupplierPurchaseOrder = "supplierPurchaseOrder",
+  SupplierPurchaseOrderItem = "supplierPurchaseOrderItem",
+  SupplierReceivingItem = "supplierReceivingItem",
+  SupplierReceivingRecord = "supplierReceivingRecord",
+  SupportAgent = "supportAgent",
+  SupportAttachment = "supportAttachment",
+  SupportFaqArticle = "supportFaqArticle",
+  SupportFaqCategory = "supportFaqCategory",
+  SupportMessage = "supportMessage",
+  SupportPriceAlert = "supportPriceAlert",
+  SupportTicket = "supportTicket",
+  SystemConfiguration = "systemConfiguration",
+  TaxCalculation = "taxCalculation",
+  TaxCalculationApplied = "taxCalculationApplied",
+  TaxCalculationLine = "taxCalculationLine",
+  TaxCategory = "taxCategory",
+  TaxExemption = "taxExemption",
+  TaxNexus = "taxNexus",
+  TaxProviderLog = "taxProviderLog",
+  TaxRate = "taxRate",
+  TaxReport = "taxReport",
+  TaxRule = "taxRule",
+  TaxSettings = "taxSettings",
+  TaxVatRegistration = "taxVatRegistration",
+  TaxVatValidationLog = "taxVatValidationLog",
+  TaxZone = "taxZone",
+  WebhookDelivery = "webhookDelivery",
+  WebhookEndpoint = "webhookEndpoint",
 }
 
 export type Tables = {
-  adminUser: AdminUser;
-  adminUserRole: AdminUserRole;
-  analyticsChannelAttribution: AnalyticsChannelAttribution;
-  analyticsCustomer: AnalyticsCustomer;
-  analyticsCustomerCohort: AnalyticsCustomerCohort;
-  analyticsProductPerformance: AnalyticsProductPerformance;
-  analyticsReportDashboard: AnalyticsReportDashboard;
-  analyticsReportEvent: AnalyticsReportEvent;
-  analyticsReportSnapshot: AnalyticsReportSnapshot;
-  analyticsSalesDaily: AnalyticsSalesDaily;
-  analyticsSearchQuery: AnalyticsSearchQuery;
-  apiKey: ApiKey;
-  assortment: Assortment;
-  assortmentItem: AssortmentItem;
-  assortmentRule: AssortmentRule;
-  assortmentScope: AssortmentScope;
-  attributeOptionTranslation: AttributeOptionTranslation;
-  attributeTranslation: AttributeTranslation;
-  auditLog: AuditLog;
-  b2bApprovalAction: B2BApprovalAction;
-  b2bApprovalRequest: B2BApprovalRequest;
-  b2bApprovalWorkflow: B2BApprovalWorkflow;
-  b2bApprovalWorkflowStep: B2BApprovalWorkflowStep;
-  b2bCompany: B2BCompany;
-  b2bCompanyAddress: B2BCompanyAddress;
-  b2bCompanyCreditLimit: B2BCompanyCreditLimit;
-  b2bCompanyCreditTransaction: B2BCompanyCreditTransaction;
-  b2bCompanyUser: B2BCompanyUser;
-  b2bPriceList: B2BPriceList;
-  b2bPriceListItem: B2BPriceListItem;
-  b2bPurchaseOrder: B2BPurchaseOrder;
-  b2bPurchaseOrderItem: B2BPurchaseOrderItem;
-  b2bQuote: B2BQuote;
-  b2bQuoteItem: B2BQuoteItem;
-  b2bUser: B2BUser;
-  basket: Basket;
-  basketAnalytics: BasketAnalytics;
-  basketDiscount: BasketDiscount;
-  basketHistory: BasketHistory;
-  basketItem: BasketItem;
-  basketMerge: BasketMerge;
-  basketSavedItem: BasketSavedItem;
-  brand: Brand;
-  brandTranslation: BrandTranslation;
-  bundleItem: BundleItem;
-  business: Business;
-  cartPromotion: CartPromotion;
-  cartPromotionItem: CartPromotionItem;
-  categoryPromotion: CategoryPromotion;
-  categoryPromotionProduct: CategoryPromotionProduct;
-  categoryTranslation: CategoryTranslation;
-  channel: Channel;
-  channelProduct: ChannelProduct;
-  channelWarehouse: ChannelWarehouse;
-  checkoutSession: CheckoutSession;
-  collectionTranslation: CollectionTranslation;
-  commissionPlan: CommissionPlan;
-  commissionProfile: CommissionProfile;
-  contentBlock: ContentBlock;
-  contentBlockType: ContentBlockType;
-  contentCategorization: ContentCategorization;
-  contentCategory: ContentCategory;
-  contentMedia: ContentMedia;
-  contentMediaFolder: ContentMediaFolder;
-  contentMediaUsage: ContentMediaUsage;
-  contentNavigation: ContentNavigation;
-  contentNavigationItem: ContentNavigationItem;
-  contentPage: ContentPage;
-  contentPageTranslation: ContentPageTranslation;
-  contentPageVersion: ContentPageVersion;
-  contentRedirect: ContentRedirect;
-  contentTemplate: ContentTemplate;
-  contentType: ContentType;
-  country: Country;
-  currency: Currency;
-  currencyExchangeRate: CurrencyExchangeRate;
-  currencyExchangeRateHistory: CurrencyExchangeRateHistory;
-  currencyLocalization: CurrencyLocalization;
-  currencyProvider: CurrencyProvider;
-  currencyRegion: CurrencyRegion;
-  customer: Customer;
-  customerActivity: CustomerActivity;
-  customerAddress: CustomerAddress;
-  customerConsent: CustomerConsent;
-  customerContact: CustomerContact;
-  customerCurrencyPreference: CustomerCurrencyPreference;
-  customerEmailVerification: CustomerEmailVerification;
-  customerGroup: CustomerGroup;
-  customerGroupMembership: CustomerGroupMembership;
-  customerGroupTaxOverride: CustomerGroupTaxOverride;
-  customerLoyaltyAccount: CustomerLoyaltyAccount;
-  customerLoyaltyProgram: CustomerLoyaltyProgram;
-  customerLoyaltyTransaction: CustomerLoyaltyTransaction;
-  customerNote: CustomerNote;
-  customerPasswordReset: CustomerPasswordReset;
-  customerPreference: CustomerPreference;
-  customerPrice: CustomerPrice;
-  customerPriceList: CustomerPriceList;
-  customerProductView: CustomerProductView;
-  customerSegmentMembership: CustomerSegmentMembership;
-  customerSegments: CustomerSegments;
-  customerSubscription: CustomerSubscription;
-  customerTaxExemption: CustomerTaxExemption;
-  customerTaxExemptionCategory: CustomerTaxExemptionCategory;
-  customerWishlist: CustomerWishlist;
-  customerWishlistItem: CustomerWishlistItem;
-  distributionChannel: DistributionChannel;
-  distributionChannelProduct: DistributionChannelProduct;
-  distributionFulfillmentPartner: DistributionFulfillmentPartner;
-  distributionInventoryMovement: DistributionInventoryMovement;
-  distributionOrderFulfillment: DistributionOrderFulfillment;
-  distributionPickupOrder: DistributionPickupOrder;
-  distributionPreOrder: DistributionPreOrder;
-  distributionPreOrderReservation: DistributionPreOrderReservation;
-  distributionRule: DistributionRule;
-  distributionShippingCarrier: DistributionShippingCarrier;
-  distributionShippingMethod: DistributionShippingMethod;
-  distributionShippingRate: DistributionShippingRate;
-  distributionShippingZone: DistributionShippingZone;
-  distributionWarehouse: DistributionWarehouse;
-  distributionWarehouseBin: DistributionWarehouseBin;
-  distributionWarehouseZone: DistributionWarehouseZone;
-  dunningAttempt: DunningAttempt;
-  faqArticle: FaqArticle;
-  faqCategory: FaqCategory;
-  fraudBlacklist: FraudBlacklist;
-  fraudCheck: FraudCheck;
-  fraudRule: FraudRule;
-  fulfillment: Fulfillment;
-  fulfillmentItem: FulfillmentItem;
-  fulfillmentLocation: FulfillmentLocation;
-  fulfillmentNetworkRule: FulfillmentNetworkRule;
-  fulfillmentPartner: FulfillmentPartner;
-  fulfillmentRule: FulfillmentRule;
-  fulfillmentStatusHistory: FulfillmentStatusHistory;
-  gdprCookieConsent: GdprCookieConsent;
-  gdprDataRequest: GdprDataRequest;
-  identityCustomerSession: IdentityCustomerSession;
-  identityMerchantSession: IdentityMerchantSession;
-  identityRefreshTokens: IdentityRefreshTokens;
-  identitySocialAccount: IdentitySocialAccount;
-  identityTokenBlacklist: IdentityTokenBlacklist;
-  inventoryAllocation: InventoryAllocation;
-  inventoryCount: InventoryCount;
-  inventoryCountItem: InventoryCountItem;
-  inventoryLevel: InventoryLevel;
-  inventoryLocation: InventoryLocation;
-  inventoryLot: InventoryLot;
-  inventoryPool: InventoryPool;
-  inventoryPoolLocation: InventoryPoolLocation;
-  inventoryReservation: InventoryReservation;
-  inventoryTransaction: InventoryTransaction;
-  inventoryTransactionType: InventoryTransactionType;
-  inventoryTransfer: InventoryTransfer;
-  inventoryTransferItem: InventoryTransferItem;
-  knexMigrations: KnexMigrations;
-  knexMigrations_lock: KnexMigrationsLock;
-  language: Language;
-  locale: Locale;
-  lowStockNotification: LowStockNotification;
-  loyaltyPoints: LoyaltyPoints;
-  loyaltyPointsBatch: LoyaltyPointsBatch;
-  loyaltyRedemption: LoyaltyRedemption;
-  loyaltyReward: LoyaltyReward;
-  loyaltyTier: LoyaltyTier;
-  loyaltyTransaction: LoyaltyTransaction;
-  marketingAbandonedCart: MarketingAbandonedCart;
-  marketingAbandonedCartEmail: MarketingAbandonedCartEmail;
-  marketingAffiliate: MarketingAffiliate;
-  marketingAffiliateCommission: MarketingAffiliateCommission;
-  marketingAffiliateLink: MarketingAffiliateLink;
-  marketingAffiliatePayout: MarketingAffiliatePayout;
-  marketingEmailCampaign: MarketingEmailCampaign;
-  marketingEmailCampaignLink: MarketingEmailCampaignLink;
-  marketingEmailCampaignRecipient: MarketingEmailCampaignRecipient;
-  marketingEmailTemplate: MarketingEmailTemplate;
-  marketingProductRecommendation: MarketingProductRecommendation;
-  media: Media;
-  membershipBenefit: MembershipBenefit;
-  membershipBenefitUsage: MembershipBenefitUsage;
-  membershipContentAccess: MembershipContentAccess;
-  membershipDiscountCode: MembershipDiscountCode;
-  membershipDiscountCodeUsage: MembershipDiscountCodeUsage;
-  membershipDiscountRule: MembershipDiscountRule;
-  membershipGroup: MembershipGroup;
-  membershipGroupMember: MembershipGroupMember;
-  membershipPayment: MembershipPayment;
-  membershipPlan: MembershipPlan;
-  membershipPlanBenefit: MembershipPlanBenefit;
-  membershipStatusLog: MembershipStatusLog;
-  membershipSubscription: MembershipSubscription;
-  merchant: Merchant;
-  merchantAddress: MerchantAddress;
-  merchantBalance: MerchantBalance;
-  merchantContact: MerchantContact;
-  merchantEmailVerification: MerchantEmailVerification;
-  merchantFollower: MerchantFollower;
-  merchantInvoice: MerchantInvoice;
-  merchantOrder: MerchantOrder;
-  merchantPasswordReset: MerchantPasswordReset;
-  merchantPaymentInfo: MerchantPaymentInfo;
-  merchantPayout: MerchantPayout;
-  merchantPayoutItem: MerchantPayoutItem;
-  merchantProduct: MerchantProduct;
-  merchantProductVariant: MerchantProductVariant;
-  merchantReview: MerchantReview;
-  merchantSettings: MerchantSettings;
-  merchantSettlement: MerchantSettlement;
-  merchantSettlementLine: MerchantSettlementLine;
-  merchantSettlementPayout: MerchantSettlementPayout;
-  merchantShippingTemplate: MerchantShippingTemplate;
-  merchantStore: MerchantStore;
-  merchantTaxInfo: MerchantTaxInfo;
-  merchantTransaction: MerchantTransaction;
-  merchantVerificationDocument: MerchantVerificationDocument;
-  notification: Notification;
-  notificationBatch: NotificationBatch;
-  notificationCategory: NotificationCategory;
-  notificationDeliveryLog: NotificationDeliveryLog;
-  notificationDevice: NotificationDevice;
-  notificationEventLog: NotificationEventLog;
-  notificationPreference: NotificationPreference;
-  notificationTemplate: NotificationTemplate;
-  notificationTemplateTranslation: NotificationTemplateTranslation;
-  notificationUnsubscribe: NotificationUnsubscribe;
-  notificationWebhook: NotificationWebhook;
-  order: Order;
-  orderAddress: OrderAddress;
-  orderAllocation: OrderAllocation;
-  orderDiscount: OrderDiscount;
-  orderFulfillment: OrderFulfillment;
-  orderFulfillmentItem: OrderFulfillmentItem;
-  orderFulfillmentPackage: OrderFulfillmentPackage;
-  orderItem: OrderItem;
-  orderNote: OrderNote;
-  orderPayment: OrderPayment;
-  orderPaymentRefund: OrderPaymentRefund;
-  orderReturn: OrderReturn;
-  orderReturnItem: OrderReturnItem;
-  orderShipping: OrderShipping;
-  orderShippingRate: OrderShippingRate;
-  orderStatusHistory: OrderStatusHistory;
-  orderTax: OrderTax;
-  organization: Organization;
-  organizationMember: OrganizationMember;
-  organizationSettings: OrganizationSettings;
-  paymentBalance: PaymentBalance;
-  paymentDispute: PaymentDispute;
-  paymentFee: PaymentFee;
-  paymentGateway: PaymentGateway;
-  paymentMethod: PaymentMethod;
-  paymentMethodConfig: PaymentMethodConfig;
-  paymentPlan: PaymentPlan;
-  paymentRefund: PaymentRefund;
-  paymentReport: PaymentReport;
-  paymentSettings: PaymentSettings;
-  paymentSubscription: PaymentSubscription;
-  paymentTerms: PaymentTerms;
-  paymentTransaction: PaymentTransaction;
-  paymentWebhook: PaymentWebhook;
-  payout: Payout;
-  payoutItem: PayoutItem;
-  payoutSettings: PayoutSettings;
-  platformConfig: PlatformConfig;
-  priceAlert: PriceAlert;
-  priceList: PriceList;
-  priceListScope: PriceListScope;
-  pricingRule: PricingRule;
-  product: Product;
-  productAttribute: ProductAttribute;
-  productAttributeGroup: ProductAttributeGroup;
-  productAttributeOption: ProductAttributeOption;
-  productAttributeSet: ProductAttributeSet;
-  productAttributeSetMapping: ProductAttributeSetMapping;
-  productAttributeToGroup: ProductAttributeToGroup;
-  productAttributeValue: ProductAttributeValue;
-  productAttributeValueMap: ProductAttributeValueMap;
-  productBrand: ProductBrand;
-  productBundle: ProductBundle;
-  productCategory: ProductCategory;
-  productCategoryMap: ProductCategoryMap;
-  productCollection: ProductCollection;
-  productCollectionMap: ProductCollectionMap;
-  productCurrencyPrice: ProductCurrencyPrice;
-  productDownload: ProductDownload;
-  productImage: ProductImage;
-  productList: ProductList;
-  productListItem: ProductListItem;
-  productMedia: ProductMedia;
-  productPrice: ProductPrice;
-  productQa: ProductQa;
-  productQaAnswer: ProductQaAnswer;
-  productQaVote: ProductQaVote;
-  productRelated: ProductRelated;
-  productReview: ProductReview;
-  productReviewMedia: ProductReviewMedia;
-  productReviewVote: ProductReviewVote;
-  productSeo: ProductSeo;
-  productTag: ProductTag;
-  productTagMap: ProductTagMap;
-  productTaxCategory: ProductTaxCategory;
-  productTaxExemption: ProductTaxExemption;
-  productTieredPrice: ProductTieredPrice;
-  productToCategory: ProductToCategory;
-  productToTag: ProductToTag;
-  productTranslation: ProductTranslation;
-  productType: ProductType;
-  productVariant: ProductVariant;
-  promotion: Promotion;
-  promotionAction: PromotionAction;
-  promotionBuyXGetYDiscount: PromotionBuyXGetYDiscount;
-  promotionCoupon: PromotionCoupon;
-  promotionCouponBatch: PromotionCouponBatch;
-  promotionCouponRestriction: PromotionCouponRestriction;
-  promotionCouponUsage: PromotionCouponUsage;
-  promotionGiftCard: PromotionGiftCard;
-  promotionGiftCardTransaction: PromotionGiftCardTransaction;
-  promotionProductDiscount: PromotionProductDiscount;
-  promotionProductDiscountCustomerGroup: PromotionProductDiscountCustomerGroup;
-  promotionProductDiscountItem: PromotionProductDiscountItem;
-  promotionRule: PromotionRule;
-  promotionUsage: PromotionUsage;
-  referral: Referral;
-  referralReward: ReferralReward;
-  reportExecution: ReportExecution;
-  reportSchedule: ReportSchedule;
-  role: Role;
-  ruleAdjustment: RuleAdjustment;
-  ruleCondition: RuleCondition;
-  segment: Segment;
-  segmentMember: SegmentMember;
-  sellerPolicy: SellerPolicy;
-  session: Session;
-  shippingCarrier: ShippingCarrier;
-  shippingMethod: ShippingMethod;
-  shippingPackagingType: ShippingPackagingType;
-  shippingRate: ShippingRate;
-  shippingZone: ShippingZone;
-  stockAlert: StockAlert;
-  stockReservation: StockReservation;
-  store: Store;
-  storeChannel: StoreChannel;
-  storeCurrencySettings: StoreCurrencySettings;
-  storeDeliveryZone: StoreDeliveryZone;
-  storeHierarchy: StoreHierarchy;
-  storeLocation: StoreLocation;
-  storePickupLocation: StorePickupLocation;
-  storeSettings: StoreSettings;
-  storedPaymentMethod: StoredPaymentMethod;
-  subscriptionInvoice: SubscriptionInvoice;
-  subscriptionOrder: SubscriptionOrder;
-  subscriptionPause: SubscriptionPause;
-  subscriptionPlan: SubscriptionPlan;
-  subscriptionProduct: SubscriptionProduct;
-  supplier: Supplier;
-  supplierAddress: SupplierAddress;
-  supplierProduct: SupplierProduct;
-  supplierPurchaseOrder: SupplierPurchaseOrder;
-  supplierPurchaseOrderItem: SupplierPurchaseOrderItem;
-  supplierReceivingItem: SupplierReceivingItem;
-  supplierReceivingRecord: SupplierReceivingRecord;
-  supportAgent: SupportAgent;
-  supportAttachment: SupportAttachment;
-  supportMessage: SupportMessage;
-  supportTicket: SupportTicket;
-  systemConfiguration: SystemConfiguration;
-  taxCalculation: TaxCalculation;
-  taxCalculationApplied: TaxCalculationApplied;
-  taxCalculationLine: TaxCalculationLine;
-  taxCategory: TaxCategory;
-  taxExemption: TaxExemption;
-  taxNexus: TaxNexus;
-  taxProviderLog: TaxProviderLog;
-  taxRate: TaxRate;
-  taxReport: TaxReport;
-  taxRule: TaxRule;
-  taxSettings: TaxSettings;
-  taxZone: TaxZone;
-  tierPrice: TierPrice;
-  user: User;
-  userSession: UserSession;
-  vatOssReport: VatOssReport;
-  vatOssReportLine: VatOssReportLine;
-  vatRegistration: VatRegistration;
-  vatValidationLog: VatValidationLog;
-  webhookDelivery: WebhookDelivery;
-  webhookEndpoint: WebhookEndpoint;
-};
-
-export type AdminUser = {
-  adminId: string;
-  email: string;
-  name: string;
-  passwordHash: string;
-  role: string;
-  permissions: unknown[] | null;
-  status: string;
-  lastLoginAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
-export type AdminUserRole = {
-  userId: string;
-  roleId: string;
-  createdAt: Date;
-};
-
-export type AnalyticsChannelAttribution = {
-  analyticsChannelAttributionId: string;
-  merchantId: string | null;
-  date: Date;
-  channel: string;
-  source: string | null;
-  medium: string | null;
-  campaign: string | null;
-  sessions: number | null;
-  uniqueVisitors: number | null;
-  pageViews: number | null;
-  bounceRate: string | null;
-  averageSessionDuration: number | null;
-  conversions: number | null;
-  conversionRate: string | null;
-  revenue: string | null;
-  averageOrderValue: string | null;
-  firstTouchRevenue: string | null;
-  lastTouchRevenue: string | null;
-  linearRevenue: string | null;
-  adSpend: string | null;
-  costPerAcquisition: string | null;
-  returnOnAdSpend: string | null;
-  computedAt: Date | null;
-  createdAt: Date | null;
+  "analyticsCustomer": AnalyticsCustomer,
+  "analyticsCustomerCohort": AnalyticsCustomerCohort,
+  "analyticsProductPerformance": AnalyticsProductPerformance,
+  "analyticsReportDashboard": AnalyticsReportDashboard,
+  "analyticsReportEvent": AnalyticsReportEvent,
+  "analyticsReportSnapshot": AnalyticsReportSnapshot,
+  "analyticsSalesDaily": AnalyticsSalesDaily,
+  "analyticsSearchQuery": AnalyticsSearchQuery,
+  "basket": Basket,
+  "basketAnalytics": BasketAnalytics,
+  "basketDiscount": BasketDiscount,
+  "basketHistory": BasketHistory,
+  "basketItem": BasketItem,
+  "basketMerge": BasketMerge,
+  "brand": Brand,
+  "brandTranslation": BrandTranslation,
+  "business": Business,
+  "businessApiKey": BusinessApiKey,
+  "checkoutSession": CheckoutSession,
+  "contentBlock": ContentBlock,
+  "contentBlockType": ContentBlockType,
+  "contentCategorization": ContentCategorization,
+  "contentCategory": ContentCategory,
+  "contentMedia": ContentMedia,
+  "contentMediaFolder": ContentMediaFolder,
+  "contentMediaUsage": ContentMediaUsage,
+  "contentNavigation": ContentNavigation,
+  "contentNavigationItem": ContentNavigationItem,
+  "contentPage": ContentPage,
+  "contentPageTranslation": ContentPageTranslation,
+  "contentPageVersion": ContentPageVersion,
+  "contentRedirect": ContentRedirect,
+  "contentTemplate": ContentTemplate,
+  "contentType": ContentType,
+  "country": Country,
+  "currency": Currency,
+  "currencyExchangeRate": CurrencyExchangeRate,
+  "currencyRegion": CurrencyRegion,
+  "customer": Customer,
+  "customerAddress": CustomerAddress,
+  "customerCurrencyPreference": CustomerCurrencyPreference,
+  "customerGroup": CustomerGroup,
+  "customerGroupMembership": CustomerGroupMembership,
+  "customerLoyaltyTransaction": CustomerLoyaltyTransaction,
+  "customerNote": CustomerNote,
+  "customerPasswordReset": CustomerPasswordReset,
+  "customerPrice": CustomerPrice,
+  "customerPriceList": CustomerPriceList,
+  "customerSubscription": CustomerSubscription,
+  "customerTaxExemption": CustomerTaxExemption,
+  "customerWishlist": CustomerWishlist,
+  "customerWishlistItem": CustomerWishlistItem,
+  "distributionWarehouse": DistributionWarehouse,
+  "distributionWarehouseBin": DistributionWarehouseBin,
+  "fraudBlacklist": FraudBlacklist,
+  "fraudCheck": FraudCheck,
+  "fraudRule": FraudRule,
+  "fulfillment": Fulfillment,
+  "fulfillmentItem": FulfillmentItem,
+  "fulfillmentLocation": FulfillmentLocation,
+  "fulfillmentNetworkRule": FulfillmentNetworkRule,
+  "fulfillmentPartner": FulfillmentPartner,
+  "fulfillmentRule": FulfillmentRule,
+  "fulfillmentStatusHistory": FulfillmentStatusHistory,
+  "gdprCookieConsent": GdprCookieConsent,
+  "gdprDataRequest": GdprDataRequest,
+  "identityAdminUser": IdentityAdminUser,
+  "identityCustomerSession": IdentityCustomerSession,
+  "identityMerchantSession": IdentityMerchantSession,
+  "identityRefreshTokens": IdentityRefreshTokens,
+  "identitySocialAccount": IdentitySocialAccount,
+  "identityTokenBlacklist": IdentityTokenBlacklist,
+  "identityUserSession": IdentityUserSession,
+  "inventoryAllocation": InventoryAllocation,
+  "inventoryLevel": InventoryLevel,
+  "inventoryLocation": InventoryLocation,
+  "inventoryPool": InventoryPool,
+  "inventoryPoolLocation": InventoryPoolLocation,
+  "inventoryReservation": InventoryReservation,
+  "inventoryStockAlert": InventoryStockAlert,
+  "inventoryStockReservation": InventoryStockReservation,
+  "inventoryTransaction": InventoryTransaction,
+  "inventoryTransactionType": InventoryTransactionType,
+  "knexMigrations": KnexMigrations,
+  "knexMigrations_lock": KnexMigrationsLock,
+  "language": Language,
+  "locale": Locale,
+  "localizationCategoryTranslation": LocalizationCategoryTranslation,
+  "localizationCollectionTranslation": LocalizationCollectionTranslation,
+  "loyaltyPoints": LoyaltyPoints,
+  "loyaltyRedemption": LoyaltyRedemption,
+  "loyaltyReward": LoyaltyReward,
+  "loyaltyTier": LoyaltyTier,
+  "loyaltyTransaction": LoyaltyTransaction,
+  "media": Media,
+  "membershipBenefit": MembershipBenefit,
+  "membershipPayment": MembershipPayment,
+  "membershipPlan": MembershipPlan,
+  "membershipPlanBenefit": MembershipPlanBenefit,
+  "membershipSubscription": MembershipSubscription,
+  "merchant": Merchant,
+  "merchantAddress": MerchantAddress,
+  "merchantContact": MerchantContact,
+  "merchantFollower": MerchantFollower,
+  "merchantOrder": MerchantOrder,
+  "merchantPasswordReset": MerchantPasswordReset,
+  "merchantPaymentInfo": MerchantPaymentInfo,
+  "merchantProduct": MerchantProduct,
+  "merchantProductVariant": MerchantProductVariant,
+  "merchantReview": MerchantReview,
+  "merchantSettings": MerchantSettings,
+  "merchantShippingTemplate": MerchantShippingTemplate,
+  "merchantStore": MerchantStore,
+  "merchantTaxInfo": MerchantTaxInfo,
+  "merchantVerificationDocument": MerchantVerificationDocument,
+  "notification": Notification,
+  "notificationBatch": NotificationBatch,
+  "notificationCategory": NotificationCategory,
+  "notificationDeliveryLog": NotificationDeliveryLog,
+  "notificationDevice": NotificationDevice,
+  "notificationEventLog": NotificationEventLog,
+  "notificationPreference": NotificationPreference,
+  "notificationTemplate": NotificationTemplate,
+  "notificationTemplateTranslation": NotificationTemplateTranslation,
+  "notificationUnsubscribe": NotificationUnsubscribe,
+  "notificationWebhook": NotificationWebhook,
+  "order": Order,
+  "orderAddress": OrderAddress,
+  "orderAllocation": OrderAllocation,
+  "orderDiscount": OrderDiscount,
+  "orderFulfillment": OrderFulfillment,
+  "orderFulfillmentItem": OrderFulfillmentItem,
+  "orderFulfillmentPackage": OrderFulfillmentPackage,
+  "orderItem": OrderItem,
+  "orderNote": OrderNote,
+  "orderPayment": OrderPayment,
+  "orderPaymentRefund": OrderPaymentRefund,
+  "orderReturn": OrderReturn,
+  "orderReturnItem": OrderReturnItem,
+  "orderShipping": OrderShipping,
+  "orderShippingRate": OrderShippingRate,
+  "orderStatusHistory": OrderStatusHistory,
+  "orderTax": OrderTax,
+  "organization": Organization,
+  "paymentBalance": PaymentBalance,
+  "paymentDispute": PaymentDispute,
+  "paymentFee": PaymentFee,
+  "paymentGateway": PaymentGateway,
+  "paymentMethod": PaymentMethod,
+  "paymentMethodConfig": PaymentMethodConfig,
+  "paymentPayout": PaymentPayout,
+  "paymentPayoutItem": PaymentPayoutItem,
+  "paymentPayoutSettings": PaymentPayoutSettings,
+  "paymentPlan": PaymentPlan,
+  "paymentRefund": PaymentRefund,
+  "paymentReport": PaymentReport,
+  "paymentSettings": PaymentSettings,
+  "paymentSubscription": PaymentSubscription,
+  "paymentTerms": PaymentTerms,
+  "paymentTransaction": PaymentTransaction,
+  "paymentWebhook": PaymentWebhook,
+  "pricingCommissionPlan": PricingCommissionPlan,
+  "pricingPriceList": PricingPriceList,
+  "pricingPriceListScope": PricingPriceListScope,
+  "pricingRule": PricingRule,
+  "pricingRuleAdjustment": PricingRuleAdjustment,
+  "pricingRuleCondition": PricingRuleCondition,
+  "pricingSellerPolicy": PricingSellerPolicy,
+  "product": Product,
+  "productAttribute": ProductAttribute,
+  "productAttributeGroup": ProductAttributeGroup,
+  "productAttributeOption": ProductAttributeOption,
+  "productAttributeOptionTranslation": ProductAttributeOptionTranslation,
+  "productAttributeSet": ProductAttributeSet,
+  "productAttributeToGroup": ProductAttributeToGroup,
+  "productAttributeTranslation": ProductAttributeTranslation,
+  "productAttributeValue": ProductAttributeValue,
+  "productAttributeValueMap": ProductAttributeValueMap,
+  "productBrand": ProductBrand,
+  "productBundle": ProductBundle,
+  "productBundleItem": ProductBundleItem,
+  "productCategory": ProductCategory,
+  "productCategoryMap": ProductCategoryMap,
+  "productCollection": ProductCollection,
+  "productCollectionMap": ProductCollectionMap,
+  "productCurrencyPrice": ProductCurrencyPrice,
+  "productDownload": ProductDownload,
+  "productImage": ProductImage,
+  "productList": ProductList,
+  "productListItem": ProductListItem,
+  "productMedia": ProductMedia,
+  "productPrice": ProductPrice,
+  "productQa": ProductQa,
+  "productQaAnswer": ProductQaAnswer,
+  "productQaVote": ProductQaVote,
+  "productRelated": ProductRelated,
+  "productReview": ProductReview,
+  "productReviewMedia": ProductReviewMedia,
+  "productReviewVote": ProductReviewVote,
+  "productSeo": ProductSeo,
+  "productTag": ProductTag,
+  "productTierPrice": ProductTierPrice,
+  "productToCategory": ProductToCategory,
+  "productTranslation": ProductTranslation,
+  "productType": ProductType,
+  "productVariant": ProductVariant,
+  "promotion": Promotion,
+  "promotionAction": PromotionAction,
+  "promotionCart": PromotionCart,
+  "promotionCategory": PromotionCategory,
+  "promotionCoupon": PromotionCoupon,
+  "promotionCouponUsage": PromotionCouponUsage,
+  "promotionGiftCard": PromotionGiftCard,
+  "promotionGiftCardTransaction": PromotionGiftCardTransaction,
+  "promotionProductDiscount": PromotionProductDiscount,
+  "promotionProductDiscountCustomerGroup": PromotionProductDiscountCustomerGroup,
+  "promotionProductDiscountItem": PromotionProductDiscountItem,
+  "promotionRule": PromotionRule,
+  "reportingReportExecution": ReportingReportExecution,
+  "reportingReportSchedule": ReportingReportSchedule,
+  "role": Role,
+  "session": Session,
+  "shippingCarrier": ShippingCarrier,
+  "shippingMethod": ShippingMethod,
+  "shippingPackagingType": ShippingPackagingType,
+  "shippingRate": ShippingRate,
+  "shippingZone": ShippingZone,
+  "store": Store,
+  "storeCurrencySettings": StoreCurrencySettings,
+  "storeDispatch": StoreDispatch,
+  "storeDispatchItem": StoreDispatchItem,
+  "storeHierarchy": StoreHierarchy,
+  "storeLocation": StoreLocation,
+  "storePickupLocation": StorePickupLocation,
+  "storeSettings": StoreSettings,
+  "storeUser": StoreUser,
+  "storedPaymentMethod": StoredPaymentMethod,
+  "subscriptionDunningAttempt": SubscriptionDunningAttempt,
+  "subscriptionInvoice": SubscriptionInvoice,
+  "subscriptionOrder": SubscriptionOrder,
+  "subscriptionPause": SubscriptionPause,
+  "subscriptionPlan": SubscriptionPlan,
+  "subscriptionProduct": SubscriptionProduct,
+  "supplier": Supplier,
+  "supplierAddress": SupplierAddress,
+  "supplierProduct": SupplierProduct,
+  "supplierPurchaseOrder": SupplierPurchaseOrder,
+  "supplierPurchaseOrderItem": SupplierPurchaseOrderItem,
+  "supplierReceivingItem": SupplierReceivingItem,
+  "supplierReceivingRecord": SupplierReceivingRecord,
+  "supportAgent": SupportAgent,
+  "supportAttachment": SupportAttachment,
+  "supportFaqArticle": SupportFaqArticle,
+  "supportFaqCategory": SupportFaqCategory,
+  "supportMessage": SupportMessage,
+  "supportPriceAlert": SupportPriceAlert,
+  "supportTicket": SupportTicket,
+  "systemConfiguration": SystemConfiguration,
+  "taxCalculation": TaxCalculation,
+  "taxCalculationApplied": TaxCalculationApplied,
+  "taxCalculationLine": TaxCalculationLine,
+  "taxCategory": TaxCategory,
+  "taxExemption": TaxExemption,
+  "taxNexus": TaxNexus,
+  "taxProviderLog": TaxProviderLog,
+  "taxRate": TaxRate,
+  "taxReport": TaxReport,
+  "taxRule": TaxRule,
+  "taxSettings": TaxSettings,
+  "taxVatRegistration": TaxVatRegistration,
+  "taxVatValidationLog": TaxVatValidationLog,
+  "taxZone": TaxZone,
+  "webhookDelivery": WebhookDelivery,
+  "webhookEndpoint": WebhookEndpoint,
 };
 
 export type AnalyticsCustomer = {
@@ -1040,565 +767,6 @@ export type AnalyticsSearchQuery = {
   updatedAt: Date | null;
 };
 
-export type ApiKey = {
-  apiKeyId: string;
-  merchantId: string | null;
-  name: string;
-  keyHash: string;
-  keyPrefix: string;
-  permissions: unknown[];
-  rateLimit: number;
-  expiresAt: Date | null;
-  lastUsedAt: Date | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type Assortment = {
-  assortmentId: string;
-  organizationId: string;
-  name: string;
-  description: string | null;
-  scopeType: string;
-  isDefault: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-  isActive: boolean | null;
-  metadata: Record<string, unknown> | null;
-};
-
-export type AssortmentItem = {
-  assortmentItemId: string;
-  assortmentId: string;
-  productVariantId: string;
-  visibility: string | null;
-  buyable: boolean | null;
-  minQty: number | null;
-  maxQty: number | null;
-  incrementQty: number | null;
-  leadTimeDays: number | null;
-  discontinueDate: Date | null;
-  sortOrder: number | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type AssortmentRule = {
-  ruleId: string;
-  assortmentId: string;
-  name: string;
-  ruleType: string;
-  conditionType: string;
-  conditions: unknown;
-  priority: number | null;
-  isActive: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type AssortmentScope = {
-  assortmentScopeId: string;
-  assortmentId: string;
-  storeId: string | null;
-  sellerId: string | null;
-  accountId: string | null;
-  channelId: string | null;
-  createdAt: Date | null;
-};
-
-export type AttributeOptionTranslation = {
-  attributeOptionTranslationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productAttributeOptionId: string;
-  localeId: string;
-  label: string;
-  description: string | null;
-  isAutoTranslated: boolean;
-  translationSource: string | null;
-  isApproved: boolean;
-};
-
-export type AttributeTranslation = {
-  attributeTranslationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productAttributeId: string;
-  localeId: string;
-  name: string;
-  description: string | null;
-  placeholder: string | null;
-  helpText: string | null;
-  isAutoTranslated: boolean;
-  translationSource: string | null;
-  isApproved: boolean;
-};
-
-export type AuditLog = {
-  auditLogId: string;
-  entityType: string;
-  entityId: string;
-  action: string;
-  actorType: string;
-  actorId: string | null;
-  actorEmail: string | null;
-  actorIp: string | null;
-  userAgent: string | null;
-  previousData: unknown | null;
-  newData: unknown | null;
-  changedFields: unknown | null;
-  metadata: unknown | null;
-  status: string;
-  errorMessage: string | null;
-  duration: number | null;
-  createdAt: Date;
-};
-
-export type B2BApprovalAction = {
-  b2bApprovalActionId: string;
-  b2bApprovalRequestId: string;
-  b2bApprovalWorkflowStepId: string | null;
-  stepNumber: number;
-  approverId: string;
-  approverType: string;
-  action: string;
-  comment: string | null;
-  delegatedTo: string | null;
-  requestedInfo: unknown | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  metadata: unknown | null;
-  actionAt: Date | null;
-  createdAt: Date | null;
-};
-
-export type B2BApprovalRequest = {
-  b2bApprovalRequestId: string;
-  b2bApprovalWorkflowId: string;
-  b2bCompanyId: string | null;
-  requestType: string;
-  entityId: string;
-  entityType: string;
-  requesterId: string;
-  requesterType: string;
-  status: string | null;
-  currentStep: number | null;
-  totalSteps: number;
-  amount: string | null;
-  currency: string | null;
-  requestNotes: string | null;
-  approvalNotes: string | null;
-  rejectionReason: string | null;
-  approvalHistory: unknown[] | null;
-  finalApproverId: string | null;
-  submittedAt: Date | null;
-  approvedAt: Date | null;
-  rejectedAt: Date | null;
-  cancelledAt: Date | null;
-  expiresAt: Date | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type B2BApprovalWorkflow = {
-  b2bApprovalWorkflowId: string;
-  b2bCompanyId: string | null;
-  name: string;
-  description: string | null;
-  workflowType: string;
-  isActive: boolean | null;
-  isDefault: boolean | null;
-  priority: number | null;
-  conditions: Record<string, unknown> | null;
-  rules: unknown[] | null;
-  minAmount: string | null;
-  maxAmount: string | null;
-  currency: string | null;
-  requiresAllApprovers: boolean | null;
-  autoApproveAfterHours: number | null;
-  autoRejectAfterExpiry: boolean | null;
-  expiryHours: number | null;
-  notifyOnSubmit: boolean | null;
-  notifyOnApprove: boolean | null;
-  notifyOnReject: boolean | null;
-  notifyRequester: boolean | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
-export type B2BApprovalWorkflowStep = {
-  b2bApprovalWorkflowStepId: string;
-  b2bApprovalWorkflowId: string;
-  stepNumber: number;
-  name: string;
-  description: string | null;
-  approverType: string;
-  approverId: string | null;
-  approverRole: string | null;
-  approverIds: unknown[] | null;
-  requiresAll: boolean | null;
-  minApprovers: number | null;
-  timeoutHours: number | null;
-  escalateTo: string | null;
-  escalateToUserId: string | null;
-  canDelegate: boolean | null;
-  canSkip: boolean | null;
-  conditions: unknown | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type B2BCompany = {
-  b2bCompanyId: string;
-  name: string;
-  legalName: string | null;
-  registrationNumber: string | null;
-  vatNumber: string | null;
-  taxId: string | null;
-  dunsNumber: string | null;
-  status: string | null;
-  companyType: string | null;
-  industry: string | null;
-  industryCode: string | null;
-  employeeCount: number | null;
-  employeeRange: string | null;
-  annualRevenue: string | null;
-  revenueRange: string | null;
-  creditLimit: string | null;
-  availableCredit: string | null;
-  usedCredit: string | null;
-  paymentTermsDays: number | null;
-  paymentTermsType: string | null;
-  currency: string | null;
-  primaryContactId: string | null;
-  billingContactId: string | null;
-  website: string | null;
-  phone: string | null;
-  fax: string | null;
-  email: string | null;
-  logoUrl: string | null;
-  description: string | null;
-  notes: string | null;
-  metadata: unknown | null;
-  customFields: unknown | null;
-  taxExempt: boolean | null;
-  taxExemptCertificate: string | null;
-  taxExemptExpiry: Date | null;
-  parentCompanyId: string | null;
-  accountManagerId: string | null;
-  tier: string | null;
-  discountRate: string | null;
-  requiresApproval: boolean | null;
-  orderMinimum: string | null;
-  orderMaximum: string | null;
-  approvedAt: Date | null;
-  approvedBy: string | null;
-  lastOrderAt: Date | null;
-  totalOrders: number | null;
-  lifetimeValue: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-  organizationId: string | null;
-  paymentTermsId: string | null;
-};
-
-export type B2BCompanyAddress = {
-  b2bCompanyAddressId: string;
-  b2bCompanyId: string;
-  addressType: string | null;
-  label: string | null;
-  contactName: string | null;
-  contactPhone: string | null;
-  contactEmail: string | null;
-  company: string | null;
-  addressLine1: string;
-  addressLine2: string | null;
-  addressLine3: string | null;
-  city: string;
-  state: string | null;
-  postalCode: string | null;
-  countryCode: string;
-  country: string | null;
-  latitude: string | null;
-  longitude: string | null;
-  isDefault: boolean | null;
-  isDefaultBilling: boolean | null;
-  isDefaultShipping: boolean | null;
-  isVerified: boolean | null;
-  verifiedAt: Date | null;
-  verificationSource: string | null;
-  deliveryInstructions: string | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
-export type B2BCompanyCreditLimit = {
-  b2bCompanyCreditLimitId: string;
-  b2bCompanyId: string;
-  creditLimit: string;
-  availableCredit: string;
-  usedCredit: string | null;
-  pendingCredit: string | null;
-  currency: string | null;
-  status: string | null;
-  paymentTermsDays: number | null;
-  interestRate: string | null;
-  latePaymentFee: string | null;
-  reviewDate: Date | null;
-  lastReviewDate: Date | null;
-  reviewedBy: string | null;
-  reviewNotes: string | null;
-  previousLimit: string | null;
-  limitChangeReason: string | null;
-  autoApproveOrders: boolean | null;
-  autoApproveLimit: string | null;
-  notifyOnLowCredit: boolean | null;
-  lowCreditThreshold: string | null;
-  notifyOnExceeded: boolean | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type B2BCompanyCreditTransaction = {
-  b2bCompanyCreditTransactionId: string;
-  b2bCompanyId: string;
-  b2bCompanyCreditLimitId: string;
-  transactionType: string;
-  amount: string;
-  currency: string | null;
-  balanceBefore: string;
-  balanceAfter: string;
-  orderId: string | null;
-  invoiceId: string | null;
-  paymentId: string | null;
-  reference: string | null;
-  description: string | null;
-  notes: string | null;
-  dueDate: Date | null;
-  isPaid: boolean | null;
-  paidAt: Date | null;
-  paymentMethod: string | null;
-  paymentReference: string | null;
-  createdBy: string | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type B2BCompanyUser = {
-  b2bCompanyUserId: string;
-  b2bCompanyId: string;
-  customerId: string | null;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  phone: string | null;
-  jobTitle: string | null;
-  department: string | null;
-  role: string | null;
-  permissions: unknown[] | null;
-  isActive: boolean | null;
-  isPrimaryContact: boolean | null;
-  isBillingContact: boolean | null;
-  canPlaceOrders: boolean | null;
-  canViewPrices: boolean | null;
-  canApproveOrders: boolean | null;
-  canManageUsers: boolean | null;
-  canManageCompany: boolean | null;
-  orderLimit: string | null;
-  monthlyLimit: string | null;
-  currentMonthSpend: string | null;
-  requiresApproval: boolean | null;
-  approverId: string | null;
-  inviteToken: string | null;
-  invitedAt: Date | null;
-  inviteExpiresAt: Date | null;
-  acceptedAt: Date | null;
-  lastLoginAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
-export type B2BPriceList = {
-  priceListId: string;
-  name: string;
-  description: string | null;
-  companyIds: unknown[] | null;
-  companyTiers: unknown[] | null;
-  baseDiscountPercent: string | null;
-  categoryDiscounts: unknown | null;
-  volumeTiers: unknown | null;
-  contractId: string | null;
-  validFrom: Date;
-  validTo: Date;
-  paymentTermsDays: number | null;
-  minOrderValue: string | null;
-  freeShippingThreshold: string | null;
-  isActive: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type B2BPriceListItem = {
-  priceListItemId: string;
-  priceListId: string;
-  productId: string;
-  variantId: string | null;
-  price: string;
-  minQuantity: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type B2BPurchaseOrder = {
-  purchaseOrderId: string;
-  companyId: string;
-  buyerId: string;
-  poNumber: string;
-  status: string | null;
-  subtotal: string;
-  tax: string | null;
-  shipping: string | null;
-  total: string;
-  currency: string | null;
-  shippingAddress: unknown;
-  billingAddress: unknown;
-  paymentTerms: string | null;
-  requestedDeliveryDate: Date | null;
-  actualDeliveryDate: Date | null;
-  approvalRequestId: string | null;
-  notes: string | null;
-  submittedAt: Date | null;
-  acknowledgedAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type B2BPurchaseOrderItem = {
-  b2bPurchaseOrderItemId: string;
-  purchaseOrderId: string;
-  productId: string;
-  variantId: string | null;
-  sku: string;
-  name: string;
-  quantity: number;
-  unitPrice: string;
-  discount: string | null;
-  total: string;
-  createdAt: Date | null;
-};
-
-export type B2BQuote = {
-  b2bQuoteId: string;
-  quoteNumber: string | null;
-  b2bCompanyId: string | null;
-  customerId: string | null;
-  b2bCompanyUserId: string | null;
-  salesRepId: string | null;
-  status: string | null;
-  currency: string | null;
-  subtotal: string | null;
-  discountTotal: string | null;
-  discountType: string | null;
-  discountValue: string | null;
-  discountReason: string | null;
-  taxTotal: string | null;
-  shippingTotal: string | null;
-  handlingTotal: string | null;
-  grandTotal: string | null;
-  margin: string | null;
-  marginPercent: string | null;
-  validUntil: Date | null;
-  validityDays: number | null;
-  billingAddressId: string | null;
-  shippingAddressId: string | null;
-  shippingMethod: string | null;
-  customerNotes: string | null;
-  internalNotes: string | null;
-  terms: string | null;
-  conditions: string | null;
-  paymentTerms: string | null;
-  paymentTermsDays: number | null;
-  convertedOrderId: string | null;
-  rejectionReason: string | null;
-  revisionNumber: number | null;
-  previousVersionId: string | null;
-  attachments: unknown[] | null;
-  metadata: unknown | null;
-  sentAt: Date | null;
-  viewedAt: Date | null;
-  acceptedAt: Date | null;
-  rejectedAt: Date | null;
-  convertedAt: Date | null;
-  expiresAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
-export type B2BQuoteItem = {
-  b2bQuoteItemId: string;
-  b2bQuoteId: string;
-  productId: string | null;
-  productVariantId: string | null;
-  sku: string | null;
-  name: string;
-  description: string | null;
-  quantity: number;
-  unit: string | null;
-  listPrice: string | null;
-  unitPrice: string;
-  costPrice: string | null;
-  discountPercent: string | null;
-  discountAmount: string | null;
-  lineTotal: string;
-  taxRate: string | null;
-  taxAmount: string | null;
-  margin: string | null;
-  marginPercent: string | null;
-  isCustomItem: boolean | null;
-  isPriceOverride: boolean | null;
-  priceOverrideReason: string | null;
-  position: number | null;
-  notes: string | null;
-  requestedDeliveryDate: Date | null;
-  leadTimeDays: number | null;
-  customFields: unknown | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type B2BUser = {
-  b2bUserId: string;
-  b2bCompanyId: string;
-  email: string;
-  name: string;
-  passwordHash: string | null;
-  role: string;
-  permissions: unknown[] | null;
-  spendingLimit: string | null;
-  status: string;
-  inviteToken: string | null;
-  invitedAt: Date | null;
-  activatedAt: Date | null;
-  lastLoginAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
 export type Basket = {
   basketId: string;
   createdAt: Date;
@@ -1614,12 +782,12 @@ export type Basket = {
   shippingAmount: string;
   grandTotal: string;
   metadata: unknown | null;
-  expiresAt: Date | null;
-  convertedToOrderId: string | null;
-  lastActivityAt: Date;
   storeId: string | null;
   channelId: string | null;
   accountId: string | null;
+  expiresAt: Date | null;
+  convertedToOrderId: string | null;
+  lastActivityAt: Date;
 };
 
 export type BasketAnalytics = {
@@ -1705,17 +873,6 @@ export type BasketMerge = {
   mergedBy: string | null;
 };
 
-export type BasketSavedItem = {
-  basketSavedItemId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  customerId: string | null;
-  sessionId: string | null;
-  productId: string;
-  productVariantId: string | null;
-  addedFrom: string | null;
-};
-
 export type Brand = {
   brandId: string;
   name: string;
@@ -1750,25 +907,6 @@ export type BrandTranslation = {
   isApproved: boolean;
 };
 
-export type BundleItem = {
-  bundleItemId: string;
-  productBundleId: string;
-  productId: string;
-  productVariantId: string | null;
-  slotName: string | null;
-  quantity: number | null;
-  minQuantity: number | null;
-  maxQuantity: number | null;
-  isRequired: boolean | null;
-  isDefault: boolean | null;
-  priceAdjustment: string | null;
-  discountPercent: string | null;
-  sortOrder: number | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
 export type Business = {
   businessId: string;
   createdAt: Date;
@@ -1794,131 +932,19 @@ export type Business = {
   metadata: unknown | null;
 };
 
-export type CartPromotion = {
-  cartPromotionId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  basketId: string;
-  promotionId: string;
-  promotionCouponId: string | null;
-  couponCode: string | null;
-  discountAmount: string;
-  currencyCode: string;
-  isAutoApplied: boolean;
-  isCustomerInitiated: boolean;
-  appliedBy: string | null;
-  appliedAt: Date;
-  status: string;
-  validUntil: Date | null;
-};
-
-export type CartPromotionItem = {
-  cartPromotionItemId: string;
-  cartPromotionId: string;
-  basketItemId: string;
-  discountAmount: string;
-  currencyCode: string;
-  discountPercentage: string | null;
-  originalPrice: string;
-  finalPrice: string;
-};
-
-export type CategoryPromotion = {
-  categoryPromotionId: string;
-  productCategoryId: string;
-  promotionId: string;
-  displayOrder: number;
-  bannerText: string | null;
-  bannerColor: string | null;
-  bannerBackgroundColor: string | null;
-  bannerImageUrl: string | null;
-  isDisplayedOnCategoryPage: boolean;
-  isDisplayedOnProductPage: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type CategoryPromotionProduct = {
-  categoryPromotionProductId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  categoryPromotionId: string;
-  productId: string;
-  isFeatured: boolean;
-  displayOrder: number;
-};
-
-export type CategoryTranslation = {
-  categoryTranslationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productCategoryId: string;
-  localeId: string;
+export type BusinessApiKey = {
+  apiKeyId: string;
+  merchantId: string | null;
   name: string;
-  slug: string | null;
-  description: string | null;
-  metaTitle: string | null;
-  metaDescription: string | null;
-  metaKeywords: string | null;
-  isAutoTranslated: boolean;
-  translationSource: string | null;
-  isApproved: boolean;
-};
-
-export type Channel = {
-  channelId: string;
-  name: string;
-  code: string;
-  type: string;
-  ownerType: string;
-  ownerId: string | null;
-  storeIds: unknown[] | null;
-  defaultStoreId: string | null;
-  catalogId: string | null;
-  priceListId: string | null;
-  currencyCode: string;
-  localeCode: string;
-  warehouseIds: unknown[] | null;
-  fulfillmentStrategy: string | null;
-  requiresApproval: boolean | null;
-  allowCreditPayment: boolean | null;
-  b2bPricingEnabled: boolean | null;
-  commissionRate: string | null;
-  merchantVisible: boolean | null;
-  isActive: boolean | null;
-  isDefault: boolean | null;
-  settings: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  organizationId: string | null;
-  region: string | null;
-  domain: string | null;
-  appId: string | null;
-};
-
-export type ChannelProduct = {
-  channelProductId: string;
-  channelId: string;
-  productId: string;
-  isVisible: boolean | null;
-  isFeatured: boolean | null;
-  priceOverride: string | null;
-  salePriceOverride: string | null;
-  inventoryOverride: number | null;
-  sortOrder: number | null;
-  publishedAt: Date | null;
-  unpublishedAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type ChannelWarehouse = {
-  channelWarehouseId: string;
-  channelId: string;
-  warehouseId: string;
-  priority: number | null;
-  isActive: boolean | null;
-  createdAt: Date | null;
+  keyHash: string;
+  keyPrefix: string;
+  permissions: unknown[];
+  rateLimit: number;
+  expiresAt: Date | null;
+  lastUsedAt: Date | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type CheckoutSession = {
@@ -1944,48 +970,11 @@ export type CheckoutSession = {
   referrer: string | null;
   convertedToOrderId: string | null;
   expiresAt: Date | null;
+  paymentIntentId: string | null;
+  metadata: unknown | null;
   createdAt: Date;
   updatedAt: Date;
   lastActivityAt: Date;
-};
-
-export type CollectionTranslation = {
-  collectionTranslationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productCollectionId: string;
-  localeId: string;
-  name: string;
-  slug: string | null;
-  description: string | null;
-  metaTitle: string | null;
-  metaDescription: string | null;
-  isAutoTranslated: boolean;
-  translationSource: string | null;
-  isApproved: boolean;
-};
-
-export type CommissionPlan = {
-  commissionPlanId: string;
-  organizationId: string;
-  name: string;
-  rules: unknown;
-  isDefault: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type CommissionProfile = {
-  commissionProfileId: string;
-  name: string;
-  baseRate: string;
-  categoryRates: unknown | null;
-  volumeDiscounts: unknown | null;
-  fixedFeePerOrder: string | null;
-  isDefault: boolean | null;
-  isActive: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
 };
 
 export type ContentBlock = {
@@ -2305,47 +1294,6 @@ export type CurrencyExchangeRate = {
   updatedBy: string | null;
 };
 
-export type CurrencyExchangeRateHistory = {
-  currencyExchangeRateHistoryId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  sourceCurrencyId: string;
-  targetCurrencyId: string;
-  rate: string;
-  provider: string;
-  providerReference: string | null;
-  updatedBy: string | null;
-};
-
-export type CurrencyLocalization = {
-  currencyLocalizationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  currencyId: string;
-  localeId: string;
-  localizedName: string | null;
-  localizedSymbol: string | null;
-  decimalSeparator: string | null;
-  thousandsSeparator: string | null;
-  symbolPosition: string | null;
-  format: string | null;
-};
-
-export type CurrencyProvider = {
-  currencyProviderId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  code: string;
-  description: string | null;
-  apiUrl: string | null;
-  apiKey: string | null;
-  additionalConfig: unknown | null;
-  isActive: boolean;
-  lastSyncAt: Date | null;
-  syncFrequency: number | null;
-};
-
 export type CurrencyRegion = {
   currencyRegionId: string;
   createdAt: Date;
@@ -2397,26 +1345,6 @@ export type Customer = {
   agreeToTerms: boolean;
 };
 
-export type CustomerActivity = {
-  customerActivityId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  customerId: string;
-  sessionId: string | null;
-  activityType: string;
-  ipAddress: string | null;
-  userAgent: string | null;
-  deviceType: string | null;
-  osName: string | null;
-  browser: string | null;
-  location: unknown | null;
-  entityType: string | null;
-  entityId: string | null;
-  additionalData: unknown | null;
-  success: boolean | null;
-  message: string | null;
-};
-
 export type CustomerAddress = {
   customerAddressId: string;
   createdAt: Date;
@@ -2446,43 +1374,6 @@ export type CustomerAddress = {
   name: string | null;
 };
 
-export type CustomerConsent = {
-  customerConsentId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  customerId: string;
-  type: string;
-  given: boolean;
-  ipAddress: string | null;
-  userAgent: string | null;
-  source: string | null;
-  version: string | null;
-  docUrl: string | null;
-  expiresAt: Date | null;
-  withdrawnAt: Date | null;
-  additionalData: unknown | null;
-  legalBasis: string | null;
-  consentText: string | null;
-  country: string | null;
-};
-
-export type CustomerContact = {
-  customerContactId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  customerId: string;
-  type: string;
-  value: string;
-  label: string | null;
-  isDefault: boolean;
-  isVerified: boolean;
-  verifiedAt: Date | null;
-  verificationToken: string | null;
-  socialNetwork: string | null;
-  countryCode: string | null;
-  extension: string | null;
-};
-
 export type CustomerCurrencyPreference = {
   customerCurrencyPreferenceId: string;
   createdAt: Date;
@@ -2490,16 +1381,6 @@ export type CustomerCurrencyPreference = {
   customerId: string;
   currencyId: string;
   automaticDetection: boolean;
-};
-
-export type CustomerEmailVerification = {
-  customerEmailVerificationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  customerId: string;
-  token: string;
-  expiresAt: Date;
-  isUsed: boolean;
 };
 
 export type CustomerGroup = {
@@ -2529,64 +1410,10 @@ export type CustomerGroupMembership = {
   deletedAt: Date | null;
 };
 
-export type CustomerGroupTaxOverride = {
-  customerGroupTaxOverrideId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  customerGroupId: string;
-  taxCategoryId: string;
-  taxRateId: string | null;
-  isExempt: boolean;
-  exemptionReason: string | null;
-  overrideRate: string | null;
-  startDate: Date;
-  endDate: Date | null;
-  isActive: boolean;
-  notes: string | null;
-};
-
-export type CustomerLoyaltyAccount = {
-  customerLoyaltyAccountId: string;
-  updatedAt: Date;
-  createdAt: Date;
-  customerId: string;
-  programId: string;
-  memberNumber: string | null;
-  tier: string | null;
-  pointsBalance: number;
-  pointsEarned: number;
-  pointsSpent: number;
-  pointsExpired: number;
-  lastActivity: Date | null;
-  enrolledAt: Date;
-  expiresAt: Date | null;
-  isActive: boolean;
-};
-
-export type CustomerLoyaltyProgram = {
-  customerLoyaltyProgramId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  description: string | null;
-  isActive: boolean;
-  startDate: Date;
-  endDate: Date | null;
-  pointsName: string;
-  pointsAbbreviation: string;
-  pointToValueRatio: string;
-  minimumRedemption: number;
-  redemptionMultiple: number;
-  enrollmentBonus: number | null;
-  rules: unknown | null;
-  tiers: unknown | null;
-};
-
 export type CustomerLoyaltyTransaction = {
   customerLoyaltyTransactionId: string;
   createdAt: Date;
   updatedAt: Date;
-  accountId: string;
   orderId: string | null;
   type: string;
   points: number;
@@ -2621,17 +1448,6 @@ export type CustomerPasswordReset = {
   isUsed: boolean;
 };
 
-export type CustomerPreference = {
-  customerPreferenceId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  customerId: string;
-  preferenceCategory: string;
-  preferenceKey: string;
-  preferenceValue: unknown;
-  preferenceSource: string | null;
-};
-
 export type CustomerPrice = {
   customerPriceId: string;
   createdAt: Date;
@@ -2651,52 +1467,6 @@ export type CustomerPriceList = {
   priceListId: string;
   customerId: string | null;
   customerGroupId: string | null;
-};
-
-export type CustomerProductView = {
-  customerProductViewId: string;
-  customerId: string | null;
-  sessionId: string | null;
-  productId: string;
-  productVariantId: string | null;
-  source: string | null;
-  referrer: string | null;
-  viewDurationSeconds: number | null;
-  scrollDepthPercent: number | null;
-  addedToCart: boolean | null;
-  purchased: boolean | null;
-  deviceType: string | null;
-  country: string | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  metadata: unknown | null;
-  viewedAt: Date | null;
-};
-
-export type CustomerSegmentMembership = {
-  customerSegmentMembershipId: string;
-  addedAt: Date;
-  updatedAt: Date;
-  customerId: string;
-  segmentId: string;
-  isActive: boolean;
-  source: string;
-  score: string | null;
-  expiresAt: Date | null;
-};
-
-export type CustomerSegments = {
-  customerSegmentId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  description: string | null;
-  conditions: unknown | null;
-  isActive: boolean;
-  isAutomatic: boolean;
-  lastRun: Date | null;
-  memberCount: number | null;
-  priority: number | null;
 };
 
 export type CustomerSubscription = {
@@ -2766,16 +1536,6 @@ export type CustomerTaxExemption = {
   notes: string | null;
 };
 
-export type CustomerTaxExemptionCategory = {
-  customerTaxExemptionCategoryId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  exemptionId: string;
-  taxCategoryId: string;
-  isExempt: boolean;
-  notes: string | null;
-};
-
 export type CustomerWishlist = {
   customerWishlistId: string;
   createdAt: Date;
@@ -2798,346 +1558,6 @@ export type CustomerWishlistItem = {
   note: string | null;
   priority: number | null;
   additionalData: unknown | null;
-};
-
-export type DistributionChannel = {
-  distributionChannelId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  code: string;
-  type: string;
-  description: string | null;
-  isActive: boolean;
-  settings: unknown | null;
-};
-
-export type DistributionChannelProduct = {
-  distributionChannelProductId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  distributionChannelId: string;
-  productId: string;
-  isActive: boolean;
-  overrideSku: string | null;
-  overridePrice: string | null;
-  sortOrder: number | null;
-};
-
-export type DistributionFulfillmentPartner = {
-  distributionFulfillmentPartnerId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-  name: string;
-  code: string;
-  description: string | null;
-  isActive: boolean;
-  contactName: string | null;
-  contactEmail: string | null;
-  contactPhone: string | null;
-  apiKey: string | null;
-  apiSecret: string | null;
-  apiEndpoint: string | null;
-  apiCredentials: unknown | null;
-  supportedCarriers: string[] | null;
-  supportedRegions: string[] | null;
-  supportedServices: string[] | null;
-  supportsReturns: boolean;
-  supportsInternational: boolean;
-  supportsTracking: boolean;
-  averageProcessingTimeHours: number | null;
-  fulfillmentRate: string | null;
-  onTimeDeliveryRate: string | null;
-  baseFee: string | null;
-  perOrderFee: string | null;
-  perItemFee: string | null;
-  currency: string;
-  settings: unknown | null;
-  metadata: unknown | null;
-  createdBy: string | null;
-};
-
-export type DistributionInventoryMovement = {
-  distributionInventoryMovementId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  distributionWarehouseId: string;
-  productId: string;
-  productVariantId: string | null;
-  fromLocationId: string | null;
-  toLocationId: string | null;
-  quantity: number;
-  reason: string | null;
-  reference: string | null;
-};
-
-export type DistributionOrderFulfillment = {
-  distributionOrderFulfillmentId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-  orderId: string;
-  orderNumber: string | null;
-  status: string;
-  statusReason: string | null;
-  distributionWarehouseId: string | null;
-  distributionRuleId: string | null;
-  distributionShippingMethodId: string | null;
-  distributionShippingCarrierId: string | null;
-  distributionFulfillmentPartnerId: string | null;
-  trackingNumber: string | null;
-  trackingUrl: string | null;
-  carrierCode: string | null;
-  serviceCode: string | null;
-  shipToName: string | null;
-  shipToCompany: string | null;
-  shipToAddressLine1: string | null;
-  shipToAddressLine2: string | null;
-  shipToCity: string | null;
-  shipToState: string | null;
-  shipToPostalCode: string | null;
-  shipToCountry: string | null;
-  shipToPhone: string | null;
-  shipToEmail: string | null;
-  packageWeight: string | null;
-  packageWeightUnit: string | null;
-  packageLength: string | null;
-  packageWidth: string | null;
-  packageHeight: string | null;
-  packageDimensionUnit: string | null;
-  packageCount: number;
-  shippingCost: string | null;
-  insuranceCost: string | null;
-  handlingCost: string | null;
-  totalCost: string | null;
-  currency: string;
-  pickedAt: Date | null;
-  packedAt: Date | null;
-  shippedAt: Date | null;
-  deliveredAt: Date | null;
-  estimatedDeliveryAt: Date | null;
-  actualDeliveryAt: Date | null;
-  internalNotes: string | null;
-  customerNotes: string | null;
-  shippingLabel: unknown | null;
-  trackingEvents: unknown | null;
-  metadata: unknown | null;
-  pickedBy: string | null;
-  packedBy: string | null;
-  shippedBy: string | null;
-  createdBy: string | null;
-};
-
-export type DistributionPickupOrder = {
-  distributionPickupOrderId: string;
-  orderId: string;
-  storeLocationId: string;
-  customerId: string;
-  pickupNumber: string | null;
-  status: string | null;
-  scheduledPickupAt: Date | null;
-  pickupWindowStart: Date | null;
-  pickupWindowEnd: Date | null;
-  readyAt: Date | null;
-  notifiedAt: Date | null;
-  pickedUpAt: Date | null;
-  expiresAt: Date | null;
-  pickedUpBy: string | null;
-  pickupCode: string | null;
-  lockerNumber: string | null;
-  lockerCode: string | null;
-  alternatePickupName: string | null;
-  alternatePickupPhone: string | null;
-  alternatePickupEmail: string | null;
-  customerNotes: string | null;
-  storeNotes: string | null;
-  remindersSent: number | null;
-  lastReminderAt: Date | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type DistributionPreOrder = {
-  distributionPreOrderId: string;
-  productId: string;
-  productVariantId: string | null;
-  status: string | null;
-  preOrderType: string | null;
-  releaseDate: Date | null;
-  estimatedShipDate: Date | null;
-  estimatedShipText: string | null;
-  requiresDeposit: boolean | null;
-  depositAmount: string | null;
-  depositPercent: string | null;
-  isDepositRefundable: boolean | null;
-  maxQuantity: number | null;
-  reservedQuantity: number | null;
-  orderedQuantity: number | null;
-  allowOversell: boolean | null;
-  oversellLimit: number | null;
-  preOrderPrice: string | null;
-  regularPrice: string | null;
-  discountPercent: string | null;
-  currency: string | null;
-  chargeOnRelease: boolean | null;
-  notifyOnRelease: boolean | null;
-  preOrderMessage: string | null;
-  termsAndConditions: string | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type DistributionPreOrderReservation = {
-  distributionPreOrderReservationId: string;
-  distributionPreOrderId: string;
-  customerId: string;
-  orderId: string | null;
-  reservationNumber: string | null;
-  status: string | null;
-  quantity: number | null;
-  unitPrice: string;
-  totalPrice: string;
-  depositPaid: string | null;
-  balanceDue: string | null;
-  currency: string | null;
-  depositPaidAt: Date | null;
-  balancePaidAt: Date | null;
-  paymentIntentId: string | null;
-  estimatedFulfillmentAt: Date | null;
-  fulfilledAt: Date | null;
-  cancelledAt: Date | null;
-  cancellationReason: string | null;
-  notificationSent: boolean | null;
-  notificationSentAt: Date | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type DistributionRule = {
-  distributionRuleId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-  name: string;
-  description: string | null;
-  priority: number;
-  isActive: boolean;
-  isDefault: boolean;
-  distributionWarehouseId: string | null;
-  distributionShippingZoneId: string | null;
-  distributionShippingMethodId: string | null;
-  distributionShippingCarrierId: string | null;
-  distributionFulfillmentPartnerId: string | null;
-  applicableCountries: string[] | null;
-  applicableRegions: string[] | null;
-  applicablePostalCodes: string[] | null;
-  applicableProductCategories: string[] | null;
-  applicableProductTags: string[] | null;
-  excludedProductIds: string[] | null;
-  minOrderValue: string | null;
-  maxOrderValue: string | null;
-  minOrderItems: number | null;
-  maxOrderItems: number | null;
-  minOrderWeight: string | null;
-  maxOrderWeight: string | null;
-  applicableCustomerGroups: string[] | null;
-  applicableMembershipTiers: string[] | null;
-  validFrom: Date | null;
-  validTo: Date | null;
-  applicableDaysOfWeek: number[] | null;
-  settings: unknown | null;
-  metadata: unknown | null;
-  createdBy: string | null;
-};
-
-export type DistributionShippingCarrier = {
-  distributionShippingCarrierId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  code: string;
-  description: string | null;
-  websiteUrl: string | null;
-  trackingUrl: string | null;
-  isActive: boolean;
-  accountNumber: string | null;
-  apiCredentials: unknown | null;
-  supportedRegions: unknown | null;
-  supportedServices: unknown | null;
-  requiresContract: boolean;
-  hasApiIntegration: boolean;
-  customFields: unknown | null;
-  createdBy: string | null;
-};
-
-export type DistributionShippingMethod = {
-  distributionShippingMethodId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  distributionShippingCarrierId: string | null;
-  name: string;
-  code: string;
-  description: string | null;
-  isActive: boolean;
-  isDefault: boolean;
-  serviceCode: string | null;
-  domesticInternational: string;
-  estimatedDeliveryDays: unknown | null;
-  handlingDays: number | null;
-  priority: number | null;
-  displayOnFrontend: boolean;
-  allowFreeShipping: boolean;
-  minWeight: string | null;
-  maxWeight: string | null;
-  minOrderValue: string | null;
-  maxOrderValue: string | null;
-  dimensionRestrictions: unknown | null;
-  shippingClass: string | null;
-  customFields: unknown | null;
-  createdBy: string | null;
-};
-
-export type DistributionShippingRate = {
-  distributionShippingRateId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  distributionShippingZoneId: string;
-  distributionShippingMethodId: string;
-  name: string | null;
-  description: string | null;
-  isActive: boolean;
-  rateType: string;
-  baseRate: string;
-  perItemRate: string | null;
-  freeThreshold: string | null;
-  rateMatrix: unknown | null;
-  minRate: string | null;
-  maxRate: string | null;
-  currency: string;
-  taxable: boolean;
-  priority: number | null;
-  validFrom: Date | null;
-  validTo: Date | null;
-  conditions: unknown | null;
-  createdBy: string | null;
-};
-
-export type DistributionShippingZone = {
-  distributionShippingZoneId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  description: string | null;
-  isActive: boolean;
-  priority: number | null;
-  locationType: string;
-  locations: unknown[];
-  excludedLocations: unknown | null;
-  createdBy: string | null;
 };
 
 export type DistributionWarehouse = {
@@ -3178,7 +1598,6 @@ export type DistributionWarehouse = {
 export type DistributionWarehouseBin = {
   distributionWarehouseBinId: string;
   distributionWarehouseId: string;
-  distributionWarehouseZoneId: string | null;
   locationCode: string;
   isActive: boolean;
   binType: string;
@@ -3193,97 +1612,6 @@ export type DistributionWarehouseBin = {
   priority: number | null;
   createdAt: Date;
   updatedAt: Date;
-};
-
-export type DistributionWarehouseZone = {
-  distributionWarehouseZoneId: string;
-  distributionWarehouseId: string;
-  name: string;
-  code: string;
-  description: string | null;
-  isActive: boolean;
-  zoneType: string;
-  capabilities: unknown | null;
-  priority: number | null;
-  capacity: string | null;
-  capacityUnit: string | null;
-  temperature: string | null;
-  humidity: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type DunningAttempt = {
-  dunningAttemptId: string;
-  customerSubscriptionId: string;
-  subscriptionOrderId: string | null;
-  attemptNumber: number;
-  status: string | null;
-  amount: string;
-  currency: string | null;
-  scheduledAt: Date;
-  attemptedAt: Date | null;
-  paymentMethodId: string | null;
-  paymentIntentId: string | null;
-  failureCode: string | null;
-  failureMessage: string | null;
-  emailSent: boolean | null;
-  emailSentAt: Date | null;
-  emailType: string | null;
-  smsSent: boolean | null;
-  smsSentAt: Date | null;
-  action: string | null;
-  actionTakenBy: string | null;
-  actionTakenAt: Date | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type FaqArticle = {
-  faqArticleId: string;
-  faqCategoryId: string | null;
-  title: string;
-  slug: string | null;
-  content: string;
-  contentHtml: string | null;
-  excerpt: string | null;
-  keywords: string[] | null;
-  relatedArticleIds: string[] | null;
-  views: number | null;
-  uniqueViews: number | null;
-  helpfulYes: number | null;
-  helpfulNo: number | null;
-  helpfulScore: string | null;
-  sortOrder: number | null;
-  isPublished: boolean | null;
-  isFeatured: boolean | null;
-  isPinned: boolean | null;
-  publishedAt: Date | null;
-  authorId: string | null;
-  authorName: string | null;
-  lastEditedBy: string | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type FaqCategory = {
-  faqCategoryId: string;
-  parentCategoryId: string | null;
-  name: string;
-  slug: string | null;
-  description: string | null;
-  icon: string | null;
-  color: string | null;
-  imageUrl: string | null;
-  sortOrder: number | null;
-  articleCount: number | null;
-  isActive: boolean | null;
-  isFeatured: boolean | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
 };
 
 export type FraudBlacklist = {
@@ -3546,6 +1874,20 @@ export type GdprDataRequest = {
   userAgent: string | null;
 };
 
+export type IdentityAdminUser = {
+  adminId: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+  role: string;
+  permissions: unknown[] | null;
+  status: string;
+  lastLoginAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
 export type IdentityCustomerSession = {
   customerSessionId: string;
   createdAt: Date;
@@ -3624,6 +1966,26 @@ export type IdentityTokenBlacklist = {
   reason: string | null;
 };
 
+export type IdentityUserSession = {
+  sessionId: string;
+  userId: string;
+  userType: string;
+  email: string;
+  name: string | null;
+  role: string | null;
+  merchantId: string | null;
+  companyId: string | null;
+  storeId: string | null;
+  storeRole: string | null;
+  storeIds: unknown[];
+  permissions: unknown[] | null;
+  expiresAt: Date;
+  createdAt: Date | null;
+  lastActivityAt: Date | null;
+  userAgent: string | null;
+  ipAddress: string | null;
+};
+
 export type InventoryAllocation = {
   inventoryAllocationId: string;
   inventoryPoolId: string | null;
@@ -3637,43 +1999,6 @@ export type InventoryAllocation = {
   expiresAt: Date | null;
   createdAt: Date | null;
   updatedAt: Date | null;
-};
-
-export type InventoryCount = {
-  inventoryCountId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  distributionWarehouseId: string;
-  referenceNumber: string | null;
-  countType: string;
-  status: string;
-  scheduledDate: Date | null;
-  startDate: Date | null;
-  endDate: Date | null;
-  notes: string | null;
-};
-
-export type InventoryCountItem = {
-  inventoryCountItemId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  inventoryCountId: string;
-  distributionWarehouseBinId: string | null;
-  productId: string;
-  productVariantId: string | null;
-  sku: string;
-  expectedQuantity: number | null;
-  countedQuantity: number | null;
-  adjustmentQuantity: number | null;
-  lotNumber: string | null;
-  serialNumber: string | null;
-  expiryDate: Date | null;
-  status: string;
-  notes: string | null;
-  countedAt: Date | null;
-  countedBy: string | null;
-  verifiedAt: Date | null;
-  verifiedBy: string | null;
 };
 
 export type InventoryLevel = {
@@ -3715,6 +2040,7 @@ export type InventoryLocation = {
   updatedAt: Date;
   distributionWarehouseId: string;
   distributionWarehouseBinId: string | null;
+  storeId: string | null;
   productId: string;
   productVariantId: string | null;
   sku: string;
@@ -3729,28 +2055,6 @@ export type InventoryLocation = {
   receivedDate: Date | null;
   status: string;
   lastCountDate: Date | null;
-};
-
-export type InventoryLot = {
-  inventoryLotId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productId: string;
-  productVariantId: string | null;
-  distributionWarehouseId: string;
-  distributionWarehouseBinId: string | null;
-  lotNumber: string;
-  serialNumbers: string[] | null;
-  quantity: number;
-  expiryDate: Date | null;
-  manufacturingDate: Date | null;
-  receiptDate: Date;
-  supplierLotNumber: string | null;
-  supplierId: string | null;
-  supplierPurchaseOrderId: string | null;
-  status: string;
-  cost: string | null;
-  createdBy: string | null;
 };
 
 export type InventoryPool = {
@@ -3795,6 +2099,47 @@ export type InventoryReservation = {
   updatedAt: Date | null;
 };
 
+export type InventoryStockAlert = {
+  stockAlertId: string;
+  customerId: string | null;
+  email: string | null;
+  phone: string | null;
+  productId: string;
+  productVariantId: string | null;
+  productName: string | null;
+  variantName: string | null;
+  sku: string | null;
+  status: string | null;
+  desiredQuantity: number | null;
+  stockThreshold: number | null;
+  notifyOnAnyStock: boolean | null;
+  notificationChannel: string | null;
+  notifiedAt: Date | null;
+  notificationCount: number | null;
+  lastNotifiedAt: Date | null;
+  purchasedAt: Date | null;
+  purchaseOrderId: string | null;
+  expiresAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type InventoryStockReservation = {
+  stockReservationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  productId: string;
+  productVariantId: string | null;
+  distributionWarehouseId: string;
+  quantity: number;
+  reservationType: string;
+  referenceId: string | null;
+  referenceType: string | null;
+  expiresAt: Date | null;
+  createdBy: string | null;
+};
+
 export type InventoryTransaction = {
   inventoryTransactionId: string;
   createdAt: Date;
@@ -3829,43 +2174,6 @@ export type InventoryTransactionType = {
   direction: string;
   requiresApproval: boolean;
   requiresDocumentation: boolean;
-};
-
-export type InventoryTransfer = {
-  inventoryTransferId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  referenceNumber: string | null;
-  sourceDistributionWarehouseId: string;
-  sourceDistributionWarehouseBinId: string | null;
-  destinationDistributionWarehouseId: string;
-  destinationDistributionWarehouseBinId: string | null;
-  status: string;
-  transferType: string;
-  priority: string;
-  scheduledDate: Date | null;
-  notes: string | null;
-  shippingCarrier: string | null;
-  trackingNumber: string | null;
-  expectedDeliveryDate: Date | null;
-  actualDeliveryDate: Date | null;
-};
-
-export type InventoryTransferItem = {
-  inventoryTransferItemId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  transferId: string;
-  productId: string;
-  productVariantId: string | null;
-  sku: string;
-  quantity: number;
-  receivedQuantity: number | null;
-  lotNumber: string | null;
-  serialNumber: string | null;
-  expiryDate: Date | null;
-  status: string;
-  notes: string | null;
 };
 
 export type KnexMigrations = {
@@ -3912,21 +2220,37 @@ export type Locale = {
   flagIcon: string | null;
 };
 
-export type LowStockNotification = {
-  lowStockNotificationId: string;
+export type LocalizationCategoryTranslation = {
+  categoryTranslationId: string;
   createdAt: Date;
   updatedAt: Date;
-  productId: string;
-  productVariantId: string | null;
-  distributionWarehouseId: string;
-  threshold: number;
-  currentQuantity: number;
-  status: string;
-  notifiedUsers: string[] | null;
-  resolvedAt: Date | null;
-  resolvedBy: string | null;
-  notes: string | null;
-  createdBy: string | null;
+  productCategoryId: string;
+  localeId: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  metaKeywords: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
+};
+
+export type LocalizationCollectionTranslation = {
+  collectionTranslationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  productCollectionId: string;
+  localeId: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
 };
 
 export type LoyaltyPoints = {
@@ -3941,64 +2265,59 @@ export type LoyaltyPoints = {
   expiryDate: Date | null;
 };
 
-export type LoyaltyPointsBatch = {
-  batchId: string;
-  customerId: string;
-  programId: string | null;
-  points: number;
-  remainingPoints: number;
-  source: string;
-  referenceType: string | null;
-  referenceId: string | null;
-  earnedAt: Date;
-  expiresAt: Date | null;
-  isExpired: boolean | null;
-  expiredAt: Date | null;
-};
-
 export type LoyaltyRedemption = {
-  loyaltyRedemptionId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  redemptionId: string;
   customerId: string;
   rewardId: string;
+  orderId: string | null;
   pointsSpent: number;
-  redemptionCode: string;
-  status: string;
-  usedAt: Date | null;
+  status: string | null;
+  couponCode: string | null;
+  redeemedAt: Date;
   expiresAt: Date | null;
+  usedAt: Date | null;
+  metadata: Record<string, unknown> | null;
 };
 
 export type LoyaltyReward = {
-  loyaltyRewardId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  description: string | null;
-  pointsCost: number;
-  discountAmount: string | null;
-  discountPercent: string | null;
-  discountCode: string | null;
-  freeShipping: boolean;
-  productIds: unknown;
-  expiresAt: Date | null;
-  isActive: boolean;
-};
-
-export type LoyaltyTier = {
-  loyaltyTierId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  rewardId: string;
+  programId: string | null;
   name: string;
   description: string | null;
   type: string;
+  pointsCost: number;
+  value: string | null;
+  valueType: string | null;
+  productId: string | null;
+  categoryId: string | null;
+  minOrderValue: string | null;
+  maxUsagePerCustomer: number | null;
+  totalQuantity: number | null;
+  remainingQuantity: number | null;
+  redemptionExpiryDays: number | null;
+  validFrom: Date | null;
+  validTo: Date | null;
+  isActive: boolean | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type LoyaltyTier = {
+  tierId: string;
+  programId: string | null;
+  name: string;
+  description: string | null;
+  level: number;
   pointsThreshold: number;
-  multiplier: string;
-  benefits: unknown;
-  isActive: boolean;
+  purchasesThreshold: number | null;
+  pointsMultiplier: string | null;
+  benefits: unknown[] | null;
   iconUrl: string | null;
   color: string | null;
-  purchasesThreshold: number | null;
+  isActive: boolean | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type LoyaltyTransaction = {
@@ -4011,307 +2330,6 @@ export type LoyaltyTransaction = {
   points: number;
   description: string | null;
   referenceId: string | null;
-};
-
-export type MarketingAbandonedCart = {
-  marketingAbandonedCartId: string;
-  basketId: string;
-  customerId: string | null;
-  email: string | null;
-  firstName: string | null;
-  status: string | null;
-  cartValue: string | null;
-  currency: string | null;
-  itemCount: number | null;
-  cartSnapshot: unknown | null;
-  abandonedAt: Date;
-  emailSequence: number | null;
-  emailsSent: number | null;
-  lastEmailSentAt: Date | null;
-  nextEmailScheduledAt: Date | null;
-  recoveredOrderId: string | null;
-  recoveredAt: Date | null;
-  recoveredValue: string | null;
-  recoverySource: string | null;
-  discountCode: string | null;
-  discountAmount: string | null;
-  optedOut: boolean | null;
-  optedOutAt: Date | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  deviceType: string | null;
-  country: string | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type MarketingAbandonedCartEmail = {
-  marketingAbandonedCartEmailId: string;
-  marketingAbandonedCartId: string;
-  marketingEmailTemplateId: string | null;
-  sequenceNumber: number;
-  subject: string | null;
-  bodyHtml: string | null;
-  bodyText: string | null;
-  status: string | null;
-  scheduledAt: Date | null;
-  sentAt: Date | null;
-  deliveredAt: Date | null;
-  openedAt: Date | null;
-  openCount: number | null;
-  clickedAt: Date | null;
-  clickCount: number | null;
-  messageId: string | null;
-  failureReason: string | null;
-  discountCode: string | null;
-  discountAmount: string | null;
-  discountType: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type MarketingAffiliate = {
-  marketingAffiliateId: string;
-  customerId: string | null;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  companyName: string | null;
-  website: string | null;
-  socialMedia: string | null;
-  affiliateCode: string;
-  status: string | null;
-  tier: string | null;
-  commissionRate: string | null;
-  commissionType: string | null;
-  cookieDurationDays: number | null;
-  lifetimeEarnings: string | null;
-  pendingBalance: string | null;
-  availableBalance: string | null;
-  totalPaidOut: string | null;
-  totalClicks: number | null;
-  totalConversions: number | null;
-  conversionRate: string | null;
-  averageOrderValue: string | null;
-  paymentMethod: string | null;
-  paypalEmail: string | null;
-  bankDetails: unknown | null;
-  minimumPayout: string | null;
-  currency: string | null;
-  bio: string | null;
-  categories: unknown | null;
-  rejectionReason: string | null;
-  approvedAt: Date | null;
-  approvedBy: string | null;
-  lastLoginAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
-export type MarketingAffiliateCommission = {
-  marketingAffiliateCommissionId: string;
-  marketingAffiliateId: string;
-  marketingAffiliateLinkId: string | null;
-  orderId: string;
-  customerId: string | null;
-  orderTotal: string;
-  commissionableAmount: string;
-  commissionRate: string;
-  commissionType: string;
-  commissionAmount: string;
-  currency: string | null;
-  status: string | null;
-  isFirstOrder: boolean | null;
-  notes: string | null;
-  rejectionReason: string | null;
-  approvedAt: Date | null;
-  approvedBy: string | null;
-  payoutId: string | null;
-  paidAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type MarketingAffiliateLink = {
-  marketingAffiliateLinkId: string;
-  marketingAffiliateId: string;
-  name: string | null;
-  shortCode: string;
-  destinationUrl: string;
-  productId: string | null;
-  productCategoryId: string | null;
-  campaignId: string | null;
-  utmSource: string | null;
-  utmMedium: string | null;
-  utmCampaign: string | null;
-  clickCount: number | null;
-  uniqueClickCount: number | null;
-  conversionCount: number | null;
-  revenue: string | null;
-  commission: string | null;
-  isActive: boolean | null;
-  lastClickedAt: Date | null;
-  expiresAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type MarketingAffiliatePayout = {
-  marketingAffiliatePayoutId: string;
-  marketingAffiliateId: string;
-  amount: string;
-  currency: string | null;
-  paymentMethod: string;
-  status: string | null;
-  paypalEmail: string | null;
-  paypalTransactionId: string | null;
-  bankDetails: unknown | null;
-  bankReference: string | null;
-  checkNumber: string | null;
-  storeCreditCode: string | null;
-  commissionsCount: number | null;
-  periodStart: string | null;
-  periodEnd: string | null;
-  notes: string | null;
-  failureReason: string | null;
-  processedAt: Date | null;
-  processedBy: string | null;
-  completedAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type MarketingEmailCampaign = {
-  marketingEmailCampaignId: string;
-  merchantId: string | null;
-  name: string;
-  subject: string;
-  preheader: string | null;
-  fromName: string | null;
-  fromEmail: string | null;
-  replyTo: string | null;
-  bodyHtml: string | null;
-  bodyText: string | null;
-  status: string | null;
-  campaignType: string | null;
-  templateId: string | null;
-  segmentIds: unknown[] | null;
-  tags: unknown[] | null;
-  scheduledAt: Date | null;
-  sentAt: Date | null;
-  totalRecipients: number | null;
-  sentCount: number | null;
-  deliveredCount: number | null;
-  openCount: number | null;
-  uniqueOpenCount: number | null;
-  clickCount: number | null;
-  uniqueClickCount: number | null;
-  bounceCount: number | null;
-  softBounceCount: number | null;
-  hardBounceCount: number | null;
-  unsubscribeCount: number | null;
-  complaintCount: number | null;
-  revenue: string | null;
-  conversionCount: number | null;
-  openRate: string | null;
-  clickRate: string | null;
-  abTestConfig: unknown | null;
-  winningVariant: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
-export type MarketingEmailCampaignLink = {
-  marketingEmailCampaignLinkId: string;
-  marketingEmailCampaignId: string;
-  originalUrl: string;
-  trackingUrl: string | null;
-  linkText: string | null;
-  position: number | null;
-  clickCount: number | null;
-  uniqueClickCount: number | null;
-  firstClickedAt: Date | null;
-  lastClickedAt: Date | null;
-  createdAt: Date | null;
-};
-
-export type MarketingEmailCampaignRecipient = {
-  marketingEmailCampaignRecipientId: string;
-  marketingEmailCampaignId: string;
-  customerId: string | null;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  status: string | null;
-  variant: string | null;
-  sentAt: Date | null;
-  deliveredAt: Date | null;
-  firstOpenedAt: Date | null;
-  lastOpenedAt: Date | null;
-  openCount: number | null;
-  firstClickedAt: Date | null;
-  lastClickedAt: Date | null;
-  clickCount: number | null;
-  bouncedAt: Date | null;
-  bounceType: string | null;
-  bounceReason: string | null;
-  unsubscribedAt: Date | null;
-  complainedAt: Date | null;
-  failureReason: string | null;
-  messageId: string | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  deviceType: string | null;
-  country: string | null;
-  city: string | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type MarketingEmailTemplate = {
-  marketingEmailTemplateId: string;
-  merchantId: string | null;
-  name: string;
-  slug: string | null;
-  category: string | null;
-  description: string | null;
-  subject: string | null;
-  preheader: string | null;
-  bodyHtml: string | null;
-  bodyText: string | null;
-  variables: unknown[] | null;
-  thumbnailUrl: string | null;
-  isDefault: boolean | null;
-  isActive: boolean | null;
-  usageCount: number | null;
-  lastUsedAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
-export type MarketingProductRecommendation = {
-  marketingProductRecommendationId: string;
-  productId: string;
-  recommendedProductId: string;
-  recommendationType: string;
-  score: string | null;
-  rank: number | null;
-  purchaseCount: number | null;
-  viewCount: number | null;
-  clickCount: number | null;
-  conversionRate: string | null;
-  isActive: boolean | null;
-  isManual: boolean | null;
-  computedAt: Date | null;
-  expiresAt: Date | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
 };
 
 export type Media = {
@@ -4347,120 +2365,6 @@ export type MembershipBenefit = {
   createdAt: Date;
   updatedAt: Date;
   createdBy: string | null;
-};
-
-export type MembershipBenefitUsage = {
-  membershipBenefitUsageId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  subscriptionId: string;
-  customerId: string;
-  benefitId: string;
-  usageDate: Date;
-  usageValue: string;
-  usageType: string;
-  relatedEntityType: string | null;
-  relatedEntityId: string | null;
-  details: unknown | null;
-  notes: string | null;
-};
-
-export type MembershipContentAccess = {
-  membershipContentAccessId: string;
-  planId: string;
-  name: string;
-  description: string | null;
-  isActive: boolean;
-  accessType: string;
-  accessibleIds: string[] | null;
-  conditions: unknown | null;
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: string | null;
-};
-
-export type MembershipDiscountCode = {
-  membershipDiscountCodeId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  membershipPlanId: string;
-  code: string;
-  description: string | null;
-  isActive: boolean;
-  discountType: string;
-  discountValue: string;
-  validFrom: Date | null;
-  validTo: Date | null;
-  maxUses: number | null;
-  usesRemaining: number | null;
-  usesPerCustomer: number | null;
-  firstTimeOnly: boolean;
-  createdBy: string | null;
-};
-
-export type MembershipDiscountCodeUsage = {
-  membershipDiscountCodeUsageId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  discountCodeId: string;
-  subscriptionId: string;
-  customerId: string;
-  usedAt: Date;
-  discountAmount: string;
-};
-
-export type MembershipDiscountRule = {
-  membershipDiscountRuleId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  planId: string;
-  name: string;
-  description: string | null;
-  isActive: boolean;
-  priority: number | null;
-  discountType: string;
-  discountValue: string;
-  maxDiscountAmount: string | null;
-  minOrderValue: string | null;
-  maxUses: number | null;
-  usesPerCustomer: number | null;
-  appliesTo: string;
-  applicableIds: string[] | null;
-  excludedIds: string[] | null;
-  startDate: Date | null;
-  endDate: Date | null;
-  conditions: unknown | null;
-};
-
-export type MembershipGroup = {
-  membershipGroupId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  subscriptionId: string;
-  name: string | null;
-  primaryMemberId: string;
-  maxMembers: number | null;
-  currentMembers: number;
-  isActive: boolean;
-  notes: string | null;
-};
-
-export type MembershipGroupMember = {
-  membershipGroupMemberId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  groupId: string;
-  customerId: string;
-  isPrimary: boolean;
-  membershipNumber: string | null;
-  status: string;
-  joinedAt: Date;
-  expiresAt: Date | null;
-  invitationEmail: string | null;
-  invitationStatus: string | null;
-  invitationSentAt: Date | null;
-  invitationAcceptedAt: Date | null;
-  notes: string | null;
 };
 
 export type MembershipPayment = {
@@ -4526,18 +2430,6 @@ export type MembershipPlanBenefit = {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
-};
-
-export type MembershipStatusLog = {
-  membershipStatusLogId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  subscriptionId: string;
-  previousStatus: string | null;
-  newStatus: string;
-  changeReason: string | null;
-  changeSource: string;
-  createdBy: string | null;
 };
 
 export type MembershipSubscription = {
@@ -4649,23 +2541,6 @@ export type MerchantAddress = {
   notes: string | null;
 };
 
-export type MerchantBalance = {
-  merchantBalanceId: string;
-  merchantId: string;
-  availableBalance: string;
-  pendingBalance: string;
-  reserveBalance: string;
-  lifetimeRevenue: string;
-  lifetimeCommission: string;
-  lifetimePayout: string;
-  currency: string;
-  lastPayoutDate: Date | null;
-  nextScheduledPayoutDate: Date | null;
-  isPayoutHeld: boolean;
-  payoutHoldReason: string | null;
-  updatedAt: Date;
-};
-
 export type MerchantContact = {
   merchantContactId: string;
   createdAt: Date;
@@ -4681,16 +2556,6 @@ export type MerchantContact = {
   notes: string | null;
 };
 
-export type MerchantEmailVerification = {
-  merchantEmailVerificationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  token: string;
-  expiresAt: Date;
-  isUsed: boolean;
-};
-
 export type MerchantFollower = {
   merchantFollowerId: string;
   merchantId: string;
@@ -4698,28 +2563,6 @@ export type MerchantFollower = {
   followedAt: Date;
   emailNotifications: boolean;
   pushNotifications: boolean;
-};
-
-export type MerchantInvoice = {
-  merchantInvoiceId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  invoiceNumber: string;
-  payoutId: string | null;
-  amount: string;
-  tax: string;
-  total: string;
-  currency: string;
-  status: string;
-  invoiceDate: Date;
-  dueDate: Date | null;
-  paidDate: Date | null;
-  startDate: Date | null;
-  endDate: Date | null;
-  notes: string | null;
-  createdBy: string | null;
-  updatedBy: string | null;
 };
 
 export type MerchantOrder = {
@@ -4783,42 +2626,6 @@ export type MerchantPaymentInfo = {
   lastPayoutDate: Date | null;
   notes: string | null;
   createdBy: string | null;
-};
-
-export type MerchantPayout = {
-  merchantPayoutId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  paymentInfoId: string | null;
-  amount: string;
-  fee: string;
-  netAmount: string;
-  currency: string;
-  payoutMethod: string;
-  transactionId: string | null;
-  reference: string | null;
-  status: string;
-  notes: string | null;
-  startDate: Date | null;
-  endDate: Date | null;
-  requestedAt: Date;
-  processedAt: Date | null;
-  completedAt: Date | null;
-  failureReason: string | null;
-  createdBy: string | null;
-  updatedBy: string | null;
-};
-
-export type MerchantPayoutItem = {
-  merchantPayoutItemId: string;
-  createdAt: Date;
-  merchantPayoutId: string;
-  orderId: string | null;
-  merchantOrderId: string | null;
-  amount: string;
-  description: string | null;
-  type: string;
 };
 
 export type MerchantProduct = {
@@ -4893,57 +2700,6 @@ export type MerchantSettings = {
   businessInfo: unknown | null;
   createdAt: Date;
   updatedAt: Date;
-};
-
-export type MerchantSettlement = {
-  merchantSettlementId: string;
-  merchantId: string;
-  periodStart: Date;
-  periodEnd: Date;
-  grossSales: string;
-  totalCommission: string;
-  totalFees: string | null;
-  refunds: string | null;
-  chargebacks: string | null;
-  adjustments: string | null;
-  netPayout: string;
-  currency: string | null;
-  status: string;
-  approvedAt: Date | null;
-  approvedBy: string | null;
-  paidAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type MerchantSettlementLine = {
-  merchantSettlementLineId: string;
-  merchantSettlementId: string;
-  orderId: string;
-  orderDate: Date;
-  grossAmount: string;
-  commissionRate: string;
-  commissionAmount: string;
-  fees: string | null;
-  netAmount: string;
-  type: string | null;
-  createdAt: Date | null;
-};
-
-export type MerchantSettlementPayout = {
-  merchantSettlementPayoutId: string;
-  merchantSettlementId: string;
-  merchantId: string;
-  amount: string;
-  currency: string | null;
-  status: string;
-  payoutMethod: string | null;
-  externalReference: string | null;
-  failureReason: string | null;
-  processedAt: Date | null;
-  notes: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
 };
 
 export type MerchantShippingTemplate = {
@@ -5022,27 +2778,6 @@ export type MerchantTaxInfo = {
   taxFormFiledAt: Date | null;
   taxExempt: boolean;
   taxExemptionReason: string | null;
-};
-
-export type MerchantTransaction = {
-  merchantTransactionId: string;
-  createdAt: Date;
-  merchantId: string;
-  transactionType: string;
-  amount: string;
-  currency: string;
-  referenceId: string | null;
-  referenceType: string | null;
-  description: string | null;
-  status: string;
-  availableBalanceBefore: string | null;
-  availableBalanceAfter: string | null;
-  pendingBalanceBefore: string | null;
-  pendingBalanceAfter: string | null;
-  reserveBalanceBefore: string | null;
-  reserveBalanceAfter: string | null;
-  notes: string | null;
-  createdBy: string | null;
 };
 
 export type MerchantVerificationDocument = {
@@ -5266,6 +3001,10 @@ export type Order = {
   orderNumber: string;
   customerId: string | null;
   basketId: string | null;
+  storeId: string | null;
+  channelId: string | null;
+  createdByUserId: string | null;
+  orderSource: string;
   status: string;
   paymentStatus: string;
   fulfillmentStatus: string;
@@ -5301,14 +3040,12 @@ export type Order = {
   isGift: boolean;
   isSubscriptionOrder: boolean;
   parentOrderId: string | null;
-  tags: string[] | null;
-  metadata: Record<string, unknown> | null;
-  deletedAt: Date | null;
-  storeId: string | null;
-  channelId: string | null;
   accountId: string | null;
   merchantId: string | null;
   purchaseOrderNumber: string | null;
+  tags: string[] | null;
+  metadata: Record<string, unknown> | null;
+  deletedAt: Date | null;
 };
 
 export type OrderAddress = {
@@ -5619,31 +3356,6 @@ export type Organization = {
   isActive: boolean | null;
 };
 
-export type OrganizationMember = {
-  memberId: string;
-  organizationId: string;
-  userId: string;
-  role: string;
-  permissions: unknown[] | null;
-  isActive: boolean | null;
-  invitedAt: Date | null;
-  acceptedAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type OrganizationSettings = {
-  settingId: string;
-  organizationId: string;
-  category: string;
-  key: string;
-  value: string | null;
-  valueJson: unknown | null;
-  isEncrypted: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
 export type PaymentBalance = {
   paymentBalanceId: string;
   createdAt: Date;
@@ -5756,6 +3468,58 @@ export type PaymentMethodConfig = {
   configuration: unknown | null;
   metadata: unknown | null;
   deletedAt: Date | null;
+};
+
+export type PaymentPayout = {
+  payoutId: string;
+  sellerId: string;
+  orderId: string | null;
+  settlementId: string | null;
+  grossAmount: string;
+  commissionAmount: string;
+  feeAmount: string | null;
+  netAmount: string;
+  currency: string;
+  status: string | null;
+  scheduledDate: Date | null;
+  processedAt: Date | null;
+  paymentReference: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type PaymentPayoutItem = {
+  payoutItemId: string;
+  payoutId: string;
+  type: string;
+  amount: string;
+  fee: string;
+  netAmount: string;
+  currencyCode: string;
+  description: string | null;
+  orderId: string | null;
+  orderPaymentId: string | null;
+  paymentRefundId: string | null;
+  disputeId: string | null;
+  createdAt: Date;
+  deletedAt: Date | null;
+};
+
+export type PaymentPayoutSettings = {
+  payoutSettingsId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  merchantId: string;
+  frequency: string;
+  minimumAmount: string;
+  bankAccountId: string | null;
+  payoutDay: number | null;
+  holdPeriod: number;
+  automaticPayouts: boolean;
+  currencyCode: string;
+  payoutProvider: string;
+  payoutMethod: string;
+  providerSettings: unknown | null;
 };
 
 export type PaymentPlan = {
@@ -5929,111 +3693,17 @@ export type PaymentWebhook = {
   relatedEntityId: string | null;
 };
 
-export type Payout = {
-  payoutId: string;
-  merchantId: string;
-  amount: string;
-  fee: string;
-  netAmount: string;
-  currencyCode: string;
-  status: string;
-  payoutMethod: string;
-  bankAccountId: string | null;
-  bankAccountDetails: unknown | null;
-  description: string | null;
-  statementDescriptor: string | null;
-  periodStart: Date | null;
-  periodEnd: Date | null;
-  expectedArrivalDate: Date | null;
-  completedAt: Date | null;
-  failureReason: string | null;
-  transactionReference: string | null;
-  gatewayPayoutId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-};
-
-export type PayoutItem = {
-  payoutItemId: string;
-  payoutId: string;
-  type: string;
-  amount: string;
-  fee: string;
-  netAmount: string;
-  currencyCode: string;
-  description: string | null;
-  orderId: string | null;
-  orderPaymentId: string | null;
-  paymentRefundId: string | null;
-  disputeId: string | null;
-  createdAt: Date;
-  deletedAt: Date | null;
-};
-
-export type PayoutSettings = {
-  payoutSettingsId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  frequency: string;
-  minimumAmount: string;
-  bankAccountId: string | null;
-  payoutDay: number | null;
-  holdPeriod: number;
-  automaticPayouts: boolean;
-  currencyCode: string;
-  payoutProvider: string;
-  payoutMethod: string;
-  providerSettings: unknown | null;
-};
-
-export type PlatformConfig = {
-  configId: string;
-  key: string;
-  value: string;
-  type: string;
-  category: string;
-  description: string | null;
-  isSecret: boolean;
-  isEditable: boolean;
-  validationRules: unknown | null;
-  merchantId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type PriceAlert = {
-  priceAlertId: string;
-  customerId: string | null;
-  email: string | null;
-  phone: string | null;
-  productId: string;
-  productVariantId: string | null;
-  productName: string | null;
-  variantName: string | null;
-  sku: string | null;
-  status: string | null;
-  alertType: string | null;
-  targetPrice: string | null;
-  percentageDrop: string | null;
-  originalPrice: string | null;
-  currentPrice: string | null;
-  currency: string | null;
-  notificationChannel: string | null;
-  notifiedAt: Date | null;
-  notifiedPrice: string | null;
-  notificationCount: number | null;
-  lastNotifiedAt: Date | null;
-  purchasedAt: Date | null;
-  purchaseOrderId: string | null;
-  expiresAt: Date | null;
-  metadata: unknown | null;
+export type PricingCommissionPlan = {
+  commissionPlanId: string;
+  organizationId: string;
+  name: string;
+  rules: unknown;
+  isDefault: boolean | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 };
 
-export type PriceList = {
+export type PricingPriceList = {
   priceListId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -6047,7 +3717,7 @@ export type PriceList = {
   type: string | null;
 };
 
-export type PriceListScope = {
+export type PricingPriceListScope = {
   priceListScopeId: string;
   priceListId: string;
   storeId: string | null;
@@ -6067,13 +3737,13 @@ export type PricingRule = {
   description: string | null;
   ruleType: string;
   scope: string;
-  product_ids: string[] | null;
-  category_ids: string[] | null;
-  customer_ids: string[] | null;
-  customer_group_ids: string[] | null;
-  minimum_quantity: number | null;
-  maximum_quantity: number | null;
-  minimum_order_amount: string | null;
+  productIds: string[] | null;
+  categoryIds: string[] | null;
+  customerIds: string[] | null;
+  customerGroupIds: string[] | null;
+  minimumQuantity: number | null;
+  maximumQuantity: number | null;
+  minimumOrderAmount: string | null;
   startDate: Date | null;
   endDate: Date | null;
   priority: number | null;
@@ -6081,6 +3751,35 @@ export type PricingRule = {
   metadata: unknown | null;
   currencyCode: string | null;
   regionCode: string | null;
+};
+
+export type PricingRuleAdjustment = {
+  ruleAdjustmentId: string;
+  pricingRuleId: string;
+  type: string;
+  value: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type PricingRuleCondition = {
+  ruleConditionId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  pricingRuleId: string;
+  type: string;
+  parameters: unknown;
+};
+
+export type PricingSellerPolicy = {
+  sellerPolicyId: string;
+  sellerId: string;
+  returnsPolicy: string | null;
+  shippingPolicy: string | null;
+  slaDays: number | null;
+  customPolicies: Record<string, unknown> | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type Product = {
@@ -6148,13 +3847,13 @@ export type Product = {
   externalId: string | null;
   hasVariants: boolean;
   variantAttributes: unknown | null;
-  createdBy: string | null;
-  updatedBy: string | null;
   businessId: string | null;
   storeId: string | null;
   organizationId: string | null;
   approvalStatus: string | null;
   platformVisible: boolean | null;
+  createdBy: string | null;
+  updatedBy: string | null;
 };
 
 export type ProductAttribute = {
@@ -6210,6 +3909,19 @@ export type ProductAttributeOption = {
   updatedAt: Date;
 };
 
+export type ProductAttributeOptionTranslation = {
+  attributeOptionTranslationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  productAttributeOptionId: string;
+  localeId: string;
+  label: string;
+  description: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
+};
+
 export type ProductAttributeSet = {
   productAttributeSetId: string;
   createdAt: Date;
@@ -6223,17 +3935,6 @@ export type ProductAttributeSet = {
   isGlobal: boolean;
 };
 
-export type ProductAttributeSetMapping = {
-  productAttributeSetMappingId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  attributeSetId: string;
-  attributeId: string;
-  position: number;
-  isRequired: boolean;
-  defaultValue: string | null;
-};
-
 export type ProductAttributeToGroup = {
   productAttributeToGroupId: string;
   createdAt: Date;
@@ -6241,6 +3942,21 @@ export type ProductAttributeToGroup = {
   attributeId: string;
   groupId: string;
   position: number | null;
+};
+
+export type ProductAttributeTranslation = {
+  attributeTranslationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  productAttributeId: string;
+  localeId: string;
+  name: string;
+  description: string | null;
+  placeholder: string | null;
+  helpText: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
 };
 
 export type ProductAttributeValue = {
@@ -6319,6 +4035,25 @@ export type ProductBundle = {
   isActive: boolean | null;
   startDate: Date | null;
   endDate: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type ProductBundleItem = {
+  bundleItemId: string;
+  productBundleId: string;
+  productId: string;
+  productVariantId: string | null;
+  slotName: string | null;
+  quantity: number | null;
+  minQuantity: number | null;
+  maxQuantity: number | null;
+  isRequired: boolean | null;
+  isDefault: boolean | null;
+  priceAdjustment: string | null;
+  discountPercent: string | null;
+  sortOrder: number | null;
   metadata: unknown | null;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -6635,62 +4370,15 @@ export type ProductTag = {
   isGlobal: boolean;
 };
 
-export type ProductTagMap = {
-  productTagMapId: string;
+export type ProductTierPrice = {
+  tierPriceId: string;
   createdAt: Date;
   updatedAt: Date;
   productId: string;
-  productTagId: string;
-};
-
-export type ProductTaxCategory = {
-  productTaxCategoryId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productId: string;
-  productVariantId: string;
-  taxCategoryId: string;
-  merchantId: string;
-  isDefault: boolean;
-  overrideStoreSettings: boolean;
-  notes: string | null;
-};
-
-export type ProductTaxExemption = {
-  productTaxExemptionId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productId: string;
-  productVariantId: string;
-  taxZoneId: string;
-  taxCategoryId: string | null;
-  isExempt: boolean;
-  exemptionReason: string | null;
-  startDate: Date;
-  endDate: Date | null;
-  isActive: boolean;
-  notes: string | null;
-};
-
-export type ProductTieredPrice = {
-  productTieredPriceId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productId: string;
-  productVariantId: string;
-  customerGroupId: string;
+  productVariantId: string | null;
+  customerGroupId: string | null;
   quantityMin: number;
-  quantityMax: number | null;
   price: string;
-  discountPercentage: string | null;
-  discountType: string;
-  discountValue: string | null;
-  currencyCode: string;
-  startDate: Date;
-  endDate: Date | null;
-  isActive: boolean;
-  priority: number;
-  merchantId: string;
 };
 
 export type ProductToCategory = {
@@ -6701,14 +4389,6 @@ export type ProductToCategory = {
   productCategoryId: string;
   isPrimary: boolean;
   position: number | null;
-};
-
-export type ProductToTag = {
-  productToTagId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productId: string;
-  productTagId: string;
 };
 
 export type ProductTranslation = {
@@ -6807,19 +4487,37 @@ export type PromotionAction = {
   sortOrder: number;
 };
 
-export type PromotionBuyXGetYDiscount = {
-  promotionBuyXGetYDiscountId: string;
+export type PromotionCart = {
+  cartPromotionId: string;
   createdAt: Date;
   updatedAt: Date;
-  promotionProductDiscountId: string;
-  buyQuantity: number;
-  getQuantity: number;
-  getType: string;
-  productId: string;
-  productVariantId: string;
+  basketId: string;
+  promotionId: string;
+  promotionCouponId: string | null;
+  couponCode: string | null;
+  discountAmount: string;
+  currencyCode: string;
+  isAutoApplied: boolean;
+  isCustomerInitiated: boolean;
+  appliedBy: string | null;
+  appliedAt: Date;
+  status: string;
+  validUntil: Date | null;
+};
+
+export type PromotionCategory = {
+  categoryPromotionId: string;
   productCategoryId: string;
-  discountPercentage: string;
-  maxFreeItems: number | null;
+  promotionId: string;
+  displayOrder: number;
+  bannerText: string | null;
+  bannerColor: string | null;
+  bannerBackgroundColor: string | null;
+  bannerImageUrl: string | null;
+  isDisplayedOnCategoryPage: boolean;
+  isDisplayedOnProductPage: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type PromotionCoupon = {
@@ -6847,32 +4545,6 @@ export type PromotionCoupon = {
   referrerId: string | null;
   isPublic: boolean;
   merchantId: string | null;
-};
-
-export type PromotionCouponBatch = {
-  promotionCouponBatchId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  description: string | null;
-  prefix: string | null;
-  suffix: string | null;
-  codePattern: string | null;
-  codeLength: number;
-  quantity: number;
-  generatedCount: number;
-  status: string;
-  expiryDate: Date | null;
-  merchantId: string | null;
-};
-
-export type PromotionCouponRestriction = {
-  promotionCouponRestrictionId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  promotionCouponId: string;
-  restrictionType: string;
-  restrictionValue: unknown;
 };
 
 export type PromotionCouponUsage = {
@@ -7001,64 +4673,7 @@ export type PromotionRule = {
   sortOrder: number;
 };
 
-export type PromotionUsage = {
-  promotionUsageId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  promotionId: string;
-  customerId: string | null;
-  orderId: string | null;
-  discountAmount: string;
-  currencyCode: string;
-  usedAt: Date;
-};
-
-export type Referral = {
-  referralId: string;
-  referrerId: string;
-  referredId: string | null;
-  referralCode: string;
-  referredEmail: string | null;
-  referredFirstName: string | null;
-  status: string | null;
-  firstOrderId: string | null;
-  firstOrderValue: string | null;
-  source: string | null;
-  channel: string | null;
-  invitedAt: Date | null;
-  signedUpAt: Date | null;
-  purchasedAt: Date | null;
-  rewardedAt: Date | null;
-  expiresAt: Date | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type ReferralReward = {
-  referralRewardId: string;
-  referralId: string;
-  customerId: string;
-  recipientType: string;
-  rewardType: string;
-  rewardValue: string;
-  currency: string | null;
-  discountCode: string | null;
-  pointsAwarded: number | null;
-  freeProductId: string | null;
-  status: string | null;
-  issuedAt: Date | null;
-  claimedAt: Date | null;
-  claimedOrderId: string | null;
-  expiresAt: Date | null;
-  notes: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type ReportExecution = {
+export type ReportingReportExecution = {
   reportExecutionId: string;
   reportScheduleId: string;
   status: string;
@@ -7070,7 +4685,7 @@ export type ReportExecution = {
   metadata: unknown | null;
 };
 
-export type ReportSchedule = {
+export type ReportingReportSchedule = {
   reportScheduleId: string;
   merchantId: string | null;
   name: string;
@@ -7094,59 +4709,6 @@ export type Role = {
   isSystem: boolean;
   createdAt: Date;
   updatedAt: Date;
-};
-
-export type RuleAdjustment = {
-  ruleAdjustmentId: string;
-  pricingRuleId: string;
-  type: string;
-  value: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type RuleCondition = {
-  ruleConditionId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  pricingRuleId: string;
-  type: string;
-  parameters: unknown;
-};
-
-export type Segment = {
-  segmentId: string;
-  name: string;
-  description: string | null;
-  type: string;
-  rules: unknown[] | null;
-  staticMemberIds: unknown[] | null;
-  evaluationFrequency: string | null;
-  lastEvaluatedAt: Date | null;
-  memberCount: number | null;
-  isActive: boolean | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type SegmentMember = {
-  segmentMemberId: string;
-  segmentId: string;
-  customerId: string;
-  membershipType: string | null;
-  addedAt: Date | null;
-};
-
-export type SellerPolicy = {
-  sellerPolicyId: string;
-  sellerId: string;
-  returnsPolicy: string | null;
-  shippingPolicy: string | null;
-  slaDays: number | null;
-  customPolicies: Record<string, unknown> | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
 };
 
 export type Session = {
@@ -7265,47 +4827,6 @@ export type ShippingZone = {
   createdBy: string | null;
 };
 
-export type StockAlert = {
-  stockAlertId: string;
-  customerId: string | null;
-  email: string | null;
-  phone: string | null;
-  productId: string;
-  productVariantId: string | null;
-  productName: string | null;
-  variantName: string | null;
-  sku: string | null;
-  status: string | null;
-  desiredQuantity: number | null;
-  stockThreshold: number | null;
-  notifyOnAnyStock: boolean | null;
-  notificationChannel: string | null;
-  notifiedAt: Date | null;
-  notificationCount: number | null;
-  lastNotifiedAt: Date | null;
-  purchasedAt: Date | null;
-  purchaseOrderId: string | null;
-  expiresAt: Date | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type StockReservation = {
-  stockReservationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productId: string;
-  productVariantId: string | null;
-  distributionWarehouseId: string;
-  quantity: number;
-  reservationType: string;
-  referenceId: string | null;
-  referenceType: string | null;
-  expiresAt: Date | null;
-  createdBy: string | null;
-};
-
 export type Store = {
   storeId: string;
   createdAt: Date;
@@ -7316,6 +4837,8 @@ export type Store = {
   storeType: string;
   merchantId: string | null;
   businessId: string | null;
+  isHeadquarters: boolean;
+  parentStoreId: string | null;
   logo: string | null;
   banner: string | null;
   favicon: string | null;
@@ -7355,17 +4878,6 @@ export type Store = {
   defaultLanguage: string | null;
 };
 
-export type StoreChannel = {
-  storeChannelId: string;
-  storeId: string;
-  channelId: string;
-  status: string | null;
-  launchDate: Date | null;
-  settings: Record<string, unknown> | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
 export type StoreCurrencySettings = {
   storeCurrencySettingsId: string;
   createdAt: Date;
@@ -7386,22 +4898,39 @@ export type StoreCurrencySettings = {
   updatedBy: string | null;
 };
 
-export type StoreDeliveryZone = {
-  storeDeliveryZoneId: string;
-  storeId: string;
-  name: string;
-  type: string;
-  radiusKm: string | null;
-  polygon: unknown | null;
-  postalCodes: unknown | null;
-  deliveryFee: string | null;
-  minOrderValue: string | null;
-  estimatedMinutes: number | null;
-  deliveryHours: unknown | null;
-  isActive: boolean | null;
-  priority: number | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
+export type StoreDispatch = {
+  dispatchId: string;
+  fromStoreId: string;
+  toStoreId: string;
+  dispatchNumber: string;
+  status: string;
+  requestedBy: string | null;
+  approvedBy: string | null;
+  dispatchedBy: string | null;
+  receivedBy: string | null;
+  requestedAt: Date | null;
+  approvedAt: Date | null;
+  dispatchedAt: Date | null;
+  receivedAt: Date | null;
+  notes: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type StoreDispatchItem = {
+  dispatchItemId: string;
+  dispatchId: string;
+  productId: string;
+  variantId: string | null;
+  sku: string | null;
+  productName: string | null;
+  requestedQuantity: number;
+  dispatchedQuantity: number;
+  receivedQuantity: number;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type StoreHierarchy = {
@@ -7452,19 +4981,24 @@ export type StoreLocation = {
 };
 
 export type StorePickupLocation = {
-  storePickupLocationId: string;
+  pickupLocationId: string;
   storeId: string;
   name: string;
-  description: string | null;
-  address: unknown;
+  addressLine1: string;
+  addressLine2: string | null;
+  city: string;
+  state: string | null;
+  postalCode: string;
+  country: string;
   latitude: string | null;
   longitude: string | null;
   operatingHours: unknown | null;
   contactPhone: string | null;
   contactEmail: string | null;
   instructions: string | null;
+  maxOrdersPerSlot: number | null;
+  prepareTimeMinutes: number | null;
   isActive: boolean | null;
-  sortOrder: number | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 };
@@ -7490,6 +5024,18 @@ export type StoreSettings = {
   updatedAt: Date | null;
 };
 
+export type StoreUser = {
+  userStoreId: string;
+  userId: string;
+  storeId: string;
+  role: string;
+  isPrimary: boolean;
+  isActive: boolean;
+  permissions: unknown[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type StoredPaymentMethod = {
   storedPaymentMethodId: string;
   createdAt: Date;
@@ -7509,6 +5055,33 @@ export type StoredPaymentMethod = {
   isDefault: boolean;
   isExpired: boolean;
   customerPaymentProfileId: string | null;
+};
+
+export type SubscriptionDunningAttempt = {
+  dunningAttemptId: string;
+  customerSubscriptionId: string;
+  subscriptionOrderId: string | null;
+  attemptNumber: number;
+  status: string | null;
+  amount: string;
+  currency: string | null;
+  scheduledAt: Date;
+  attemptedAt: Date | null;
+  paymentMethodId: string | null;
+  paymentIntentId: string | null;
+  failureCode: string | null;
+  failureMessage: string | null;
+  emailSent: boolean | null;
+  emailSentAt: Date | null;
+  emailType: string | null;
+  smsSent: boolean | null;
+  smsSentAt: Date | null;
+  action: string | null;
+  actionTakenBy: string | null;
+  actionTakenAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type SubscriptionInvoice = {
@@ -7862,6 +5435,52 @@ export type SupportAttachment = {
   createdAt: Date | null;
 };
 
+export type SupportFaqArticle = {
+  faqArticleId: string;
+  faqCategoryId: string | null;
+  title: string;
+  slug: string | null;
+  content: string;
+  contentHtml: string | null;
+  excerpt: string | null;
+  keywords: string[] | null;
+  relatedArticleIds: string[] | null;
+  views: number | null;
+  uniqueViews: number | null;
+  helpfulYes: number | null;
+  helpfulNo: number | null;
+  helpfulScore: string | null;
+  sortOrder: number | null;
+  isPublished: boolean | null;
+  isFeatured: boolean | null;
+  isPinned: boolean | null;
+  publishedAt: Date | null;
+  authorId: string | null;
+  authorName: string | null;
+  lastEditedBy: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type SupportFaqCategory = {
+  faqCategoryId: string;
+  parentCategoryId: string | null;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  imageUrl: string | null;
+  sortOrder: number | null;
+  articleCount: number | null;
+  isActive: boolean | null;
+  isFeatured: boolean | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
 export type SupportMessage = {
   supportMessageId: string;
   supportTicketId: string;
@@ -7879,6 +5498,36 @@ export type SupportMessage = {
   readBy: string | null;
   metadata: unknown | null;
   createdAt: Date | null;
+};
+
+export type SupportPriceAlert = {
+  priceAlertId: string;
+  customerId: string | null;
+  email: string | null;
+  phone: string | null;
+  productId: string;
+  productVariantId: string | null;
+  productName: string | null;
+  variantName: string | null;
+  sku: string | null;
+  status: string | null;
+  alertType: string | null;
+  targetPrice: string | null;
+  percentageDrop: string | null;
+  originalPrice: string | null;
+  currentPrice: string | null;
+  currency: string | null;
+  notificationChannel: string | null;
+  notifiedAt: Date | null;
+  notifiedPrice: string | null;
+  notificationCount: number | null;
+  lastNotifiedAt: Date | null;
+  purchasedAt: Date | null;
+  purchaseOrderId: string | null;
+  expiresAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type SupportTicket = {
@@ -8149,113 +5798,7 @@ export type TaxSettings = {
   taxProviderSettings: unknown | null;
 };
 
-export type TaxZone = {
-  taxZoneId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  code: string;
-  description: string | null;
-  isDefault: boolean;
-  countries: unknown;
-  states: unknown | null;
-  postcodes: unknown | null;
-  cities: unknown | null;
-  isActive: boolean;
-};
-
-export type TierPrice = {
-  tierPriceId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productId: string;
-  productVariantId: string | null;
-  customerGroupId: string | null;
-  quantityMin: number;
-  price: string;
-};
-
-export type User = {
-  userId: string;
-  email: string;
-  passwordHash: string;
-  userType: string;
-  status: string;
-  firstName: string | null;
-  lastName: string | null;
-  phone: string | null;
-  emailVerified: boolean;
-  phoneVerified: boolean;
-  mfaEnabled: boolean;
-  mfaSecret: string | null;
-  loginCount: number;
-  failedLoginAttempts: number;
-  lastLoginAt: Date | null;
-  lockedUntil: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type UserSession = {
-  sessionId: string;
-  userId: string;
-  userType: string;
-  email: string;
-  name: string | null;
-  role: string | null;
-  merchantId: string | null;
-  companyId: string | null;
-  permissions: unknown[] | null;
-  expiresAt: Date;
-  createdAt: Date | null;
-  lastActivityAt: Date | null;
-  userAgent: string | null;
-  ipAddress: string | null;
-};
-
-export type VatOssReport = {
-  vatOssReportId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  year: number;
-  quarter: number;
-  reportingCountry: string;
-  totalSales: string;
-  totalVat: string;
-  transactionCount: number;
-  status: string;
-  submissionReference: string | null;
-  submittedAt: Date | null;
-  acceptedAt: Date | null;
-  rejectionReason: string | null;
-  vatPaid: string | null;
-  paidAt: Date | null;
-  paymentReference: string | null;
-  reportingDeadline: Date | null;
-  paymentDeadline: Date | null;
-  generatedBy: string | null;
-  submittedBy: string | null;
-  metadata: unknown | null;
-};
-
-export type VatOssReportLine = {
-  vatOssReportLineId: string;
-  createdAt: Date;
-  vatOssReportId: string;
-  consumptionCountry: string;
-  vatRateType: string;
-  vatRate: string;
-  taxableAmount: string;
-  vatAmount: string;
-  grossAmount: string;
-  orderCount: number;
-  itemCount: number;
-  currency: string;
-  exchangeRate: string | null;
-};
-
-export type VatRegistration = {
+export type TaxVatRegistration = {
   vatRegistrationId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -8283,7 +5826,7 @@ export type VatRegistration = {
   certificateUrl: string | null;
 };
 
-export type VatValidationLog = {
+export type TaxVatValidationLog = {
   vatValidationLogId: string;
   createdAt: Date;
   customerId: string | null;
@@ -8307,6 +5850,21 @@ export type VatValidationLog = {
   reverseChargeApplicable: boolean | null;
   ipAddress: string | null;
   context: string | null;
+};
+
+export type TaxZone = {
+  taxZoneId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  code: string;
+  description: string | null;
+  isDefault: boolean;
+  countries: unknown;
+  states: unknown | null;
+  postcodes: unknown | null;
+  cities: unknown | null;
+  isActive: boolean;
 };
 
 export type WebhookDelivery = {
@@ -8340,3 +5898,4 @@ export type WebhookEndpoint = {
   createdAt: Date;
   updatedAt: Date;
 };
+

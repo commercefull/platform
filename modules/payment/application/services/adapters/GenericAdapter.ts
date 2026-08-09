@@ -22,10 +22,12 @@ export class GenericAdapter implements GatewayAdapter {
     }
   }
 
-  normalize(payload: Record<string, any>): WebhookEvent | null {
+  normalize(payload: Record<string, unknown>): WebhookEvent | null {
     // Accepts a pre-normalized shape: { type, externalTransactionId, errorCode?, errorMessage? }
-    const type: string = payload.type || payload.eventType || '';
-    const externalTransactionId: string = payload.externalTransactionId || payload.data?.object?.id || '';
+    const type: string = (payload.type as string) || (payload.eventType as string) || '';
+    const dataObj = payload.data as Record<string, unknown> | undefined;
+    const nestedObj = dataObj?.object as Record<string, unknown> | undefined;
+    const externalTransactionId: string = (payload.externalTransactionId as string) || (nestedObj?.id as string) || '';
     if (!externalTransactionId) return null;
 
     if (type === 'payment_intent.succeeded' || type === 'payment_succeeded') {
@@ -35,8 +37,8 @@ export class GenericAdapter implements GatewayAdapter {
       return {
         type: 'payment_failed',
         externalTransactionId,
-        errorCode: payload.errorCode || 'payment_failed',
-        errorMessage: payload.errorMessage || 'Payment failed',
+        errorCode: (payload.errorCode as string) || 'payment_failed',
+        errorMessage: (payload.errorMessage as string) || 'Payment failed',
         gatewayResponse: payload,
       };
     }

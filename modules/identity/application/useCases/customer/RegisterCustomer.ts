@@ -19,11 +19,40 @@ export interface RegisterCustomerOutput {
   requiresVerification: boolean;
 }
 
+export interface CustomerRecord {
+  customerId: string;
+  email: string;
+}
+
+export interface CustomerRepository {
+  findByEmail(email: string): Promise<CustomerRecord | null>;
+  create(data: {
+    customerId: string;
+    email: string;
+    passwordHash: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    acceptsMarketing: boolean;
+    status: string;
+    emailVerified: boolean;
+  }): Promise<void>;
+}
+
+export interface AuthService {
+  hashPassword(password: string): Promise<string>;
+  generateVerificationToken(customerId: string): Promise<string>;
+}
+
+export interface EmailService {
+  sendVerificationEmail(params: { to: string; token: string; firstName?: string }): Promise<void>;
+}
+
 export class RegisterCustomerUseCase {
   constructor(
-    private readonly customerRepo: any,
-    private readonly authService: any,
-    private readonly emailService: any,
+    private readonly customerRepo: CustomerRepository,
+    private readonly authService: AuthService,
+    private readonly emailService: EmailService,
   ) {}
 
   async execute(input: RegisterCustomerInput): Promise<RegisterCustomerOutput> {
@@ -76,7 +105,7 @@ export class RegisterCustomerUseCase {
         token: verificationToken,
         firstName: input.firstName,
       });
-    } catch (error) {}
+    } catch {}
 
     // Emit event
     eventBus.emit('customer.registered', {

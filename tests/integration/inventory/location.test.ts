@@ -54,7 +54,7 @@ describe('Inventory Location Tests', () => {
       expect(Array.isArray(response.data.data)).toBe(true);
 
       // Our test location should be in the list - uses inventoryLocationId
-      const testLocation = response.data.data.find((loc: any) => (loc.inventoryLocationId || loc.id) === testLocationId);
+      const testLocation = response.data.data.find((loc: Record<string, unknown>) => (loc.inventoryLocationId || loc.id) === testLocationId);
       expect(testLocation).toBeDefined();
     });
 
@@ -111,14 +111,14 @@ describe('Inventory Location Tests', () => {
       expect(response.data.success).toBe(true);
 
       // All returned locations should be active (if isActive property exists)
-      response.data.data.forEach((location: any) => {
+      response.data.data.forEach((location: Record<string, unknown>) => {
         if (Object.prototype.hasOwnProperty.call(location, 'isActive')) {
           expect(location.isActive).toBe(true);
         }
       });
 
       // Our inactive location should not be in the results
-      const inactiveLocation = response.data.data.find((loc: any) => (loc.inventoryLocationId || loc.id) === additionalLocationId);
+      const inactiveLocation = response.data.data.find((loc: Record<string, unknown>) => (loc.inventoryLocationId || loc.id) === additionalLocationId);
       expect(inactiveLocation).toBeUndefined();
     });
   });

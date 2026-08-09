@@ -10,6 +10,22 @@ import { CreateBusinessUseCase, CreateBusinessCommand } from '../../application/
 import { BusinessRepo } from '../../infrastructure/repositories/BusinessRepo';
 import { SystemConfigurationRepo } from '../../../configuration/infrastructure/repositories/SystemConfigurationRepo';
 
+interface CreateBusinessBody {
+  name: string;
+  slug?: string;
+  description?: string;
+  businessType: 'marketplace' | 'multi_store' | 'single_store';
+  domain?: string;
+  logo?: string;
+  favicon?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  theme?: string;
+  isActive?: boolean;
+  settings?: { defaultCurrency?: string; defaultLanguage?: string; timezone?: string };
+  metadata?: Record<string, unknown>;
+}
+
 export class BusinessController {
   private createBusinessUseCase: CreateBusinessUseCase;
 
@@ -23,22 +39,23 @@ export class BusinessController {
    * Create a new business
    * POST /business/businesses
    */
-  async createBusiness(req: TypedRequest, res: Response) {
+  async createBusiness(req: TypedRequest<Record<string, string>, unknown, CreateBusinessBody>, res: Response) {
     try {
+      const body = req.body;
       const command = new CreateBusinessCommand({
-        name: req.body.name,
-        slug: req.body.slug,
-        description: req.body.description,
-        businessType: req.body.businessType,
-        domain: req.body.domain,
-        logo: req.body.logo,
-        favicon: req.body.favicon,
-        primaryColor: req.body.primaryColor,
-        secondaryColor: req.body.secondaryColor,
-        theme: req.body.theme,
-        isActive: req.body.isActive,
-        settings: req.body.settings,
-        metadata: req.body.metadata,
+        name: body.name,
+        slug: body.slug,
+        description: body.description,
+        businessType: body.businessType,
+        domain: body.domain,
+        logo: body.logo,
+        favicon: body.favicon,
+        primaryColor: body.primaryColor,
+        secondaryColor: body.secondaryColor,
+        theme: body.theme,
+        isActive: body.isActive,
+        settings: body.settings,
+        metadata: body.metadata,
       });
 
       const result = await this.createBusinessUseCase.execute(command);
@@ -50,7 +67,7 @@ export class BusinessController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(400).json({
         success: false,
         message: 'Failed to create business',
@@ -82,7 +99,7 @@ export class BusinessController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get business',
@@ -114,7 +131,7 @@ export class BusinessController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get business',
@@ -140,7 +157,7 @@ export class BusinessController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to list businesses',

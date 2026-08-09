@@ -15,8 +15,20 @@ export interface DeleteWarehouseOutput {
   deletedAt: string;
 }
 
+interface WarehouseRecord {
+  warehouseId: string;
+  name: string;
+}
+
+interface WarehouseRepositoryPort {
+  findById(id: string): Promise<WarehouseRecord | null>;
+  hasInventory(warehouseId: string): Promise<boolean>;
+  hasAssignedStores(warehouseId: string): Promise<boolean>;
+  delete(warehouseId: string): Promise<void>;
+}
+
 export class DeleteWarehouseUseCase {
-  constructor(private readonly warehouseRepository: any) {}
+  constructor(private readonly warehouseRepository: WarehouseRepositoryPort) {}
 
   async execute(input: DeleteWarehouseInput): Promise<DeleteWarehouseOutput> {
     const warehouse = await this.warehouseRepository.findById(input.warehouseId);

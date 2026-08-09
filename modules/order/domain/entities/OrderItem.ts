@@ -24,15 +24,15 @@ export interface OrderItemProps {
   taxRate?: number;
   taxExempt: boolean;
   fulfillmentStatus: FulfillmentStatus;
-  options?: Record<string, any>;
-  attributes?: Record<string, any>;
+  options?: Record<string, unknown>;
+  attributes?: Record<string, unknown>;
   giftWrapped: boolean;
   giftMessage?: string;
   weight?: number;
   dimensions?: { length: number; width: number; height: number };
   isDigital: boolean;
-  subscriptionInfo?: Record<string, any>;
-  metadata?: Record<string, any>;
+  subscriptionInfo?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -58,15 +58,15 @@ export class OrderItem {
     discountedUnitPrice?: Money;
     taxRate?: number;
     taxExempt?: boolean;
-    options?: Record<string, any>;
-    attributes?: Record<string, any>;
+    options?: Record<string, unknown>;
+    attributes?: Record<string, unknown>;
     giftWrapped?: boolean;
     giftMessage?: string;
     weight?: number;
     dimensions?: { length: number; width: number; height: number };
     isDigital?: boolean;
-    subscriptionInfo?: Record<string, any>;
-    metadata?: Record<string, any>;
+    subscriptionInfo?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
   }): OrderItem {
     const now = new Date();
     const effectivePrice = props.discountedUnitPrice || props.unitPrice;
@@ -164,10 +164,10 @@ export class OrderItem {
   get fulfillmentStatus(): FulfillmentStatus {
     return this.props.fulfillmentStatus;
   }
-  get options(): Record<string, any> | undefined {
+  get options(): Record<string, unknown> | undefined {
     return this.props.options;
   }
-  get attributes(): Record<string, any> | undefined {
+  get attributes(): Record<string, unknown> | undefined {
     return this.props.attributes;
   }
   get giftWrapped(): boolean {
@@ -185,10 +185,10 @@ export class OrderItem {
   get isDigital(): boolean {
     return this.props.isDigital;
   }
-  get subscriptionInfo(): Record<string, any> | undefined {
+  get subscriptionInfo(): Record<string, unknown> | undefined {
     return this.props.subscriptionInfo;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -249,7 +249,7 @@ export class OrderItem {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       orderItemId: this.props.orderItemId,
       orderId: this.props.orderId,

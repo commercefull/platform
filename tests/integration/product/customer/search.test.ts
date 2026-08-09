@@ -51,7 +51,7 @@ describe('Customer: Product Search', () => {
     it('should filter by price range', async () => {
       const res = await client.get('/customer/products/search?minPrice=10&maxPrice=200');
       expect(res.status).toBe(200);
-      res.data.data.products.forEach((p: any) => {
+      res.data.data.products.forEach((p: Record<string, unknown>) => {
         expect(p.price).toBeGreaterThanOrEqual(10);
         expect(p.price).toBeLessThanOrEqual(200);
       });
@@ -60,7 +60,7 @@ describe('Customer: Product Search', () => {
     it('should filter featured products', async () => {
       const res = await client.get('/customer/products/search?isFeatured=true');
       expect(res.status).toBe(200);
-      res.data.data.products.forEach((p: any) => {
+      res.data.data.products.forEach((p: Record<string, unknown>) => {
         expect(p.isFeatured).toBe(true);
       });
     });
@@ -142,7 +142,7 @@ describe('Customer: Product Search', () => {
       const res = await client.get(`/customer/products/${SEEDED_PRODUCT_1_ID}/similar`);
       expect(res.status).toBe(200);
       expect(Array.isArray(res.data.data)).toBe(true);
-      const ids = res.data.data.map((p: any) => p.productId);
+      const ids = res.data.data.map((p: Record<string, unknown>) => p.productId);
       expect(ids).not.toContain(SEEDED_PRODUCT_1_ID);
     });
 

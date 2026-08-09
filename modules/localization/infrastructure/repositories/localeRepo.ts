@@ -55,7 +55,7 @@ export class LocaleRepo {
    */
   async findByLanguage(language: string, activeOnly: boolean = true): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}" WHERE "language" = $1`;
-    const params: any[] = [language.toLowerCase()];
+    const params: unknown[] = [language.toLowerCase()];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -72,7 +72,7 @@ export class LocaleRepo {
    */
   async findByCountryCode(countryCode: string, activeOnly: boolean = true): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}" WHERE "countryCode" = $1`;
-    const params: any[] = [countryCode.toUpperCase()];
+    const params: unknown[] = [countryCode.toUpperCase()];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -89,7 +89,7 @@ export class LocaleRepo {
    */
   async findByCurrency(currencyId: string, activeOnly: boolean = true): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}" WHERE "defaultCurrencyId" = $1`;
-    const params: any[] = [currencyId];
+    const params: unknown[] = [currencyId];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -106,7 +106,7 @@ export class LocaleRepo {
    */
   async findByTextDirection(textDirection: TextDirection, activeOnly: boolean = true): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}" WHERE "textDirection" = $1`;
-    const params: any[] = [textDirection];
+    const params: unknown[] = [textDirection];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -123,7 +123,7 @@ export class LocaleRepo {
    */
   async search(searchTerm: string, activeOnly: boolean = true): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}" WHERE ("name" ILIKE $1 OR "code" ILIKE $1)`;
-    const params: any[] = [`%${searchTerm}%`];
+    const params: unknown[] = [`%${searchTerm}%`];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -193,7 +193,7 @@ export class LocaleRepo {
     }
 
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -241,7 +241,7 @@ export class LocaleRepo {
    */
   private async unsetAllDefaults(exceptId?: string): Promise<void> {
     let sql = `UPDATE "${Table.Locale}" SET "isDefault" = false, "updatedAt" = $1 WHERE "isDefault" = true`;
-    const params: any[] = [unixTimestamp()];
+    const params: unknown[] = [unixTimestamp()];
 
     if (exceptId) {
       sql += ` AND "localeId" != $2`;

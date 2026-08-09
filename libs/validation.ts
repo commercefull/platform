@@ -8,11 +8,12 @@
  * @param requiredFields Array of required field names
  * @returns Validation result with isValid flag and message
  */
-export function validateRequest(data: any, requiredFields: string[]): { isValid: boolean; message: string } {
+export function validateRequest(data: unknown, requiredFields: string[]): { isValid: boolean; message: string } {
   const missingFields: string[] = [];
+  const record = data as Record<string, unknown>;
 
   for (const field of requiredFields) {
-    if (data[field] === undefined || data[field] === null || data[field] === '') {
+    if (record[field] === undefined || record[field] === null || record[field] === '') {
       missingFields.push(field);
     }
   }

@@ -26,7 +26,7 @@ export class CreateProductVariantCommand {
     public readonly lowStockThreshold?: number,
     public readonly isDefault?: boolean,
     public readonly sortOrder?: number,
-    public readonly metadata?: Record<string, any>,
+    public readonly metadata?: Record<string, unknown>,
   ) {}
 }
 

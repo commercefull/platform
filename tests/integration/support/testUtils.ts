@@ -75,12 +75,12 @@ export async function setupSupportTests() {
     }
     if (!customerToken) {
     }
-  } catch (error) {}
+  } catch {}
 
   return { client, adminToken, customerToken };
 }
 
-export function createTestTicket(overrides: Partial<any> = {}) {
+export function createTestTicket(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();
   return {
     subject: `Test Ticket ${timestamp}`,
@@ -94,7 +94,7 @@ export function createTestTicket(overrides: Partial<any> = {}) {
   };
 }
 
-export function createTestAgent(overrides: Partial<any> = {}) {
+export function createTestAgent(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();
   return {
     email: `agent-${timestamp}@example.com`,
@@ -111,7 +111,7 @@ export function createTestAgent(overrides: Partial<any> = {}) {
   };
 }
 
-export function createTestFaqCategory(overrides: Partial<any> = {}) {
+export function createTestFaqCategory(overrides: Partial<unknown> = {}) {
   return {
     name: `Test Category ${Date.now()}`,
     slug: `test-category-${Date.now()}`,
@@ -121,7 +121,7 @@ export function createTestFaqCategory(overrides: Partial<any> = {}) {
   };
 }
 
-export function createTestFaqArticle(categoryId: string, overrides: Partial<any> = {}) {
+export function createTestFaqArticle(categoryId: string, overrides: Partial<unknown> = {}) {
   return {
     title: `Test Article ${Date.now()}`,
     slug: `test-article-${Date.now()}`,
@@ -142,12 +142,12 @@ export async function cleanupSupportTests(
   for (const id of resources.articleIds || []) {
     try {
       await client.delete(`/business/support/faq/articles/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 
   for (const id of resources.categoryIds || []) {
     try {
       await client.delete(`/business/support/faq/categories/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 }

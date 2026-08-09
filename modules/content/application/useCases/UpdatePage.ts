@@ -23,7 +23,7 @@ export class UpdatePageCommand {
     public readonly metaTitle?: string,
     public readonly metaDescription?: string,
     public readonly metaKeywords?: string,
-    public readonly customFields?: Record<string, any>,
+    public readonly customFields?: Record<string, unknown>,
     public readonly publishedAt?: string,
     public readonly scheduledAt?: string,
     public readonly isHomePage?: boolean,

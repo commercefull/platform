@@ -4,8 +4,9 @@
  */
 
 import shippingZoneRepo, { ShippingZone } from '../../infrastructure/repositories/shippingZoneRepo';
-import shippingMethodRepo, { ShippingMethod } from '../../infrastructure/repositories/shippingMethodRepo';
+import shippingMethodRepo from '../../infrastructure/repositories/shippingMethodRepo';
 import shippingRateRepo, { ShippingRate } from '../../infrastructure/repositories/shippingRateRepo';
+import { evaluateConditions, ShippingConditionContext } from '../../domain/services/ShippingConditionsEvaluator';
 
 // ============================================================================
 // Command
@@ -90,7 +91,7 @@ export class CalculateShippingRatesUseCase {
         };
       }
 
-      // Use highest priority zone
+      // Use first zone for response metadata
       const zone = zones[0];
 
       // 2. Get active shipping methods
@@ -105,13 +106,47 @@ export class CalculateShippingRatesUseCase {
         };
       }
 
-      // 3. Get rates for each method in this zone
+      // 3. Get rates for each method across all matching zones
       const rateOptions: ShippingRateOption[] = [];
 
       for (const method of methods) {
-        const rate = await shippingRateRepo.findByZoneAndMethod(zone.shippingZoneId, method.shippingMethodId);
+        // Evaluate method-level conditions (minWeight, maxWeight, minOrderValue, maxOrderValue)
+        const minOrderValue = method.minOrderValue ? parseFloat(String(method.minOrderValue)) : null;
+        const maxOrderValue = method.maxOrderValue ? parseFloat(String(method.maxOrderValue)) : null;
+        const minWeight = method.minWeight ? parseFloat(String(method.minWeight)) : null;
+        const maxWeight = method.maxWeight ? parseFloat(String(method.maxWeight)) : null;
+        const orderWeight = orderDetails.totalWeight ?? 0;
+
+        if (minOrderValue !== null && orderDetails.subtotal < minOrderValue) continue;
+        if (maxOrderValue !== null && orderDetails.subtotal > maxOrderValue) continue;
+        if (minWeight !== null && orderWeight < minWeight) continue;
+        if (maxWeight !== null && orderWeight > maxWeight) continue;
+
+        // Find rate for this method across all matching zones
+        let rate: ShippingRate | null = null;
+        for (const z of zones) {
+          rate = await shippingRateRepo.findByZoneAndMethod(z.shippingZoneId, method.shippingMethodId);
+          if (rate) break;
+        }
 
         if (rate) {
+          // Evaluate conditions JSON field to filter/adjust the rate
+          const condCtx: ShippingConditionContext = {
+            subtotal: orderDetails.subtotal,
+            itemCount: orderDetails.itemCount,
+            totalWeight: orderDetails.totalWeight,
+            country: destinationAddress.country,
+            state: destinationAddress.state,
+            postalCode: destinationAddress.postalCode,
+            currency: orderDetails.currency,
+            orderDate: new Date(),
+          };
+
+          const condResult = evaluateConditions(rate.conditions, condCtx);
+          if (!condResult.applicable) {
+            continue;
+          }
+
           const calculatedAmount = shippingRateRepo.calculateRate(
             rate,
             orderDetails.subtotal,
@@ -119,10 +154,12 @@ export class CalculateShippingRatesUseCase {
             orderDetails.totalWeight,
           );
 
+          const adjustedAmount = Math.max(0, calculatedAmount + condResult.adjustment);
+
           const estimatedDays = method.estimatedDeliveryDays
             ? typeof method.estimatedDeliveryDays === 'object'
-              ? (method.estimatedDeliveryDays as any).min
-              : method.estimatedDeliveryDays
+              ? (method.estimatedDeliveryDays as { min?: number }).min ?? null
+              : method.estimatedDeliveryDays as number
             : method.handlingDays;
 
           rateOptions.push({
@@ -133,10 +170,10 @@ export class CalculateShippingRatesUseCase {
             rateId: rate.shippingRateId,
             rateName: rate.name,
             rateType: rate.rateType,
-            amount: calculatedAmount,
+            amount: adjustedAmount,
             currency: rate.currency,
             estimatedDeliveryDays: estimatedDays,
-            isFreeShipping: calculatedAmount === 0,
+            isFreeShipping: adjustedAmount === 0,
             taxable: rate.taxable,
           });
         }
@@ -152,11 +189,11 @@ export class CalculateShippingRatesUseCase {
         message:
           rateOptions.length > 0 ? `Found ${rateOptions.length} shipping option(s)` : 'No shipping rates available for this location',
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         rates: [],
-        message: error.message || 'Failed to calculate shipping rates',
+        message: (error as Error).message || 'Failed to calculate shipping rates',
         errors: ['calculation_failed'],
       };
     }

@@ -20,11 +20,11 @@ const PRICE_LISTS = [
 exports.up = async function (knex) {
   // Upsert default price lists
   for (const priceList of PRICE_LISTS) {
-    const existing = await knex('priceList').where({ name: priceList.name }).first('priceListId');
+    const existing = await knex('pricingPriceList').where({ name: priceList.name }).first('priceListId');
     if (existing) {
-      await knex('priceList').where({ priceListId: existing.priceListId }).update(priceList);
+      await knex('pricingPriceList').where({ priceListId: existing.priceListId }).update(priceList);
     } else {
-      await knex('priceList').insert(priceList);
+      await knex('pricingPriceList').insert(priceList);
     }
   }
 
@@ -62,7 +62,7 @@ exports.down = async function (knex) {
   if (sampleProduct) {
     await knex('inventoryLevel').where({ productId: sampleProduct.productId }).delete();
   }
-  await knex('priceList')
+  await knex('pricingPriceList')
     .whereIn(
       'name',
       PRICE_LISTS.map(pl => pl.name),

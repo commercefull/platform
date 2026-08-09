@@ -43,10 +43,18 @@ export interface RoutingResult {
   reason: string;
 }
 
+export interface InventoryRepository {
+  getAvailableQuantity(storeId: string, productId: string, variantId?: string): Promise<number>;
+}
+
+export interface StoreRepository {
+  findById(storeId: string): Promise<Store | null>;
+}
+
 export class OrderRouter {
   constructor(
-    private readonly storeRepository: any,
-    private readonly inventoryRepository: any,
+    private readonly storeRepository: StoreRepository,
+    private readonly inventoryRepository: InventoryRepository,
   ) {}
 
   /**

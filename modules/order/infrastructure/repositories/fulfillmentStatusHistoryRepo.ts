@@ -72,7 +72,7 @@ export class FulfillmentStatusHistoryRepo {
 
   async count(orderFulfillmentId?: string): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "fulfillmentStatusHistory"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
     if (orderFulfillmentId) {
       sql += ` WHERE "orderFulfillmentId" = $1`;
       params.push(orderFulfillmentId);

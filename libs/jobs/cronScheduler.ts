@@ -97,12 +97,12 @@ class CronScheduler {
       job.runCount++;
       job.lastRun = new Date();
       job.nextRun = new Date(Date.now() + job.intervalMs);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const result: JobResult = {
         jobId: id,
         success: false,
         duration: Date.now() - startTime,
-        error: error.message,
+        error: (error as Error).message,
         timestamp: new Date(),
       };
 
@@ -204,7 +204,7 @@ class CronScheduler {
    * Stop all jobs and shutdown scheduler
    */
   shutdown(): void {
-    Array.from(this.intervals.entries()).forEach(([id, interval]) => {
+    Array.from(this.intervals.entries()).forEach(([_id, interval]) => {
       clearInterval(interval);
     });
     this.intervals.clear();
@@ -242,8 +242,11 @@ export const initializeScheduledJobs = (): void => {
     'cleanup-expired-reservations',
     'Cleanup Expired Reservations',
     async () => {
-      // TODO: Import and call inventory service
-      // await inventoryService.releaseExpiredReservations();
+      const { releaseExpired } = await import('../../modules/inventory/infrastructure/repositories/inventoryReservationRepo.js');
+      const count = await releaseExpired();
+      if (count > 0) {
+        console.log(`[cron] Released ${count} expired inventory reservations`);
+      }
     },
     5 * MINUTES,
   );
@@ -316,7 +319,7 @@ export interface EmailJobData {
   to: string;
   subject: string;
   template: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   priority?: 'low' | 'normal' | 'high';
 }
 
@@ -324,7 +327,7 @@ export interface InventorySyncJobData {
   type: 'sync' | 'reorder' | 'alert';
   warehouseId?: string;
   productId?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 export interface ReportJobData {
@@ -334,7 +337,7 @@ export interface ReportJobData {
     end: string;
   };
   format: 'pdf' | 'csv' | 'xlsx';
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   recipientEmail: string;
 }
 
@@ -343,7 +346,7 @@ export interface NotificationJobData {
   type: string;
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   channels?: ('email' | 'sms' | 'push' | 'in_app')[];
 }
 
@@ -402,25 +405,25 @@ export const asyncJobQueue = new AsyncJobQueue();
  * Job scheduler utilities (compatible API with previous Bull-based implementation)
  */
 export class JobScheduler {
-  static async scheduleEmail(data: EmailJobData, _delay?: number): Promise<void> {
+  static async scheduleEmail(_data: EmailJobData, _delay?: number): Promise<void> {
     await asyncJobQueue.add(async () => {
       // TODO: Integrate with actual email service (SendGrid, SES, etc.)
     });
   }
 
-  static async scheduleInventorySync(data: InventorySyncJobData, _priority: 'low' | 'normal' | 'high' = 'normal'): Promise<void> {
+  static async scheduleInventorySync(_data: InventorySyncJobData, _priority: 'low' | 'normal' | 'high' = 'normal'): Promise<void> {
     await asyncJobQueue.add(async () => {
       // TODO: Implement inventory sync logic
     });
   }
 
-  static async scheduleReport(data: ReportJobData): Promise<void> {
+  static async scheduleReport(_data: ReportJobData): Promise<void> {
     await asyncJobQueue.add(async () => {
       // TODO: Generate and send report
     });
   }
 
-  static async scheduleNotification(data: NotificationJobData): Promise<void> {
+  static async scheduleNotification(_data: NotificationJobData): Promise<void> {
     await asyncJobQueue.add(async () => {
       // TODO: Send notification via appropriate channels
     });

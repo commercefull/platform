@@ -27,8 +27,35 @@ export interface CreateLocaleOutput {
   createdAt: string;
 }
 
+export interface CreateLocaleData {
+  localeId: string;
+  code: string;
+  name: string;
+  nativeName?: string;
+  direction: string;
+  dateFormat: string;
+  timeFormat: string;
+  numberFormat: { decimal: string; thousands: string; precision: number };
+  isDefault: boolean;
+  isActive: boolean;
+}
+
+export interface CreatedLocale {
+  localeId: string;
+  code: string;
+  name: string;
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+export interface CreateLocaleRepository {
+  findLocaleByCode(code: string): Promise<CreatedLocale | null>;
+  createLocale(data: CreateLocaleData): Promise<CreatedLocale>;
+}
+
 export class CreateLocaleUseCase {
-  constructor(private readonly localizationRepository: any) {}
+  constructor(private readonly localizationRepository: CreateLocaleRepository) {}
 
   async execute(input: CreateLocaleInput): Promise<CreateLocaleOutput> {
     if (!input.code || !input.name) {

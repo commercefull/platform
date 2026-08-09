@@ -12,6 +12,314 @@ import { ContentCategorizationRepo } from '../../infrastructure/repositories/con
 import { ContentMediaUsageRepo } from '../../infrastructure/repositories/contentMediaUsageRepo';
 import { eventBus } from '../../../../libs/events/eventBus';
 
+// ============================================================================
+// Request Body Interfaces
+// ============================================================================
+
+interface CreateContentTypeBody {
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  allowedBlocks?: string[];
+  defaultTemplate?: string;
+  requiredFields?: string[];
+  metaFields?: Record<string, unknown>;
+  isSystem?: boolean;
+  isActive?: boolean;
+}
+
+interface UpdateContentTypeBody {
+  name?: string;
+  slug?: string;
+  description?: string;
+  icon?: string;
+  requiredFields?: string[];
+  metaFields?: Record<string, unknown>;
+  isActive?: boolean;
+}
+
+interface CreatePageBody {
+  title: string;
+  slug: string;
+  description?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  status?: string;
+  publishedAt?: string;
+  layout?: string;
+  contentTypeId: string;
+  visibility?: string;
+}
+
+interface UpdatePageBody {
+  title?: string;
+  slug?: string;
+  description?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  status?: string;
+  publishedAt?: string;
+  layout?: string;
+}
+
+interface CreateBlockBody {
+  contentPageId: string;
+  blockTypeId: string;
+  title?: string;
+  area?: string;
+  sortOrder: number;
+  content: Record<string, unknown>;
+  isVisible?: boolean;
+}
+
+interface UpdateBlockBody {
+  blockTypeId?: string;
+  title?: string;
+  area?: string;
+  sortOrder?: number;
+  content?: Record<string, unknown>;
+  isVisible?: boolean;
+}
+
+interface ReorderBlocksBody {
+  blockOrders: Array<{ id: string; order: number }>;
+}
+
+interface CreateTemplateBody {
+  name: string;
+  slug: string;
+  description?: string;
+  thumbnail?: string;
+  htmlStructure?: string;
+  cssStyles?: string;
+  jsScripts?: string;
+  areas?: Record<string, unknown>;
+  defaultBlocks?: Record<string, unknown>;
+  compatibleContentTypes?: string[];
+  isSystem?: boolean;
+  isActive?: boolean;
+}
+
+interface UpdateTemplateBody {
+  name?: string;
+  slug?: string;
+  description?: string;
+  htmlStructure?: string;
+  areas?: Record<string, unknown>;
+  isActive?: boolean;
+}
+
+interface DuplicateTemplateBody {
+  name: string;
+  slug: string;
+}
+
+interface SchedulePageBody {
+  scheduledAt: string;
+}
+
+interface DuplicatePageBody {
+  title: string;
+  slug: string;
+}
+
+interface CreateCategoryBody {
+  name: string;
+  slug: string;
+  parentId?: string;
+  description?: string;
+  featuredImage?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  sortOrder?: number;
+  isActive?: boolean;
+}
+
+interface UpdateCategoryBody {
+  name?: string;
+  slug?: string;
+  description?: string;
+  featuredImage?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  sortOrder?: number;
+  isActive?: boolean;
+}
+
+interface MoveCategoryBody {
+  newParentId: string | null;
+}
+
+interface CreateNavigationBody {
+  name: string;
+  slug: string;
+  description?: string;
+  location?: string;
+  isActive?: boolean;
+}
+
+interface UpdateNavigationBody {
+  name?: string;
+  slug?: string;
+  description?: string;
+  location?: string;
+  isActive?: boolean;
+}
+
+interface AddNavigationItemBody {
+  parentId?: string;
+  title: string;
+  type: string;
+  url?: string;
+  contentPageId?: string;
+  targetId?: string;
+  targetSlug?: string;
+  icon?: string;
+  cssClasses?: string;
+  openInNewTab?: boolean;
+  isActive?: boolean;
+  sortOrder?: number;
+  conditions?: Record<string, unknown>;
+}
+
+interface UpdateNavigationItemBody {
+  title?: string;
+  type?: string;
+  url?: string;
+  contentPageId?: string;
+  icon?: string;
+  openInNewTab?: boolean;
+  isActive?: boolean;
+  sortOrder?: number;
+}
+
+interface ReorderNavigationItemsBody {
+  itemOrders: Array<{ id: string; order: number }>;
+}
+
+interface UploadMediaBody {
+  title: string;
+  fileName: string;
+  filePath?: string;
+  fileType?: string;
+  fileSize?: number;
+  url: string;
+  width?: number;
+  height?: number;
+  duration?: number;
+  altText?: string;
+  caption?: string;
+  description?: string;
+  folderId?: string;
+  thumbnailUrl?: string;
+  tags?: string[];
+  isExternal?: boolean;
+  externalService?: string;
+  externalId?: string;
+}
+
+interface UpdateMediaBody {
+  title?: string;
+  altText?: string;
+  caption?: string;
+  description?: string;
+  folderId?: string;
+  tags?: string[];
+  sortOrder?: number;
+}
+
+interface MoveMediaToFolderBody {
+  mediaIds: string[];
+  folderId?: string;
+}
+
+interface CreateMediaFolderBody {
+  name: string;
+  parentId?: string;
+}
+
+interface UpdateMediaFolderBody {
+  name?: string;
+  parentId?: string;
+  sortOrder?: number;
+}
+
+interface CreateRedirectBody {
+  sourceUrl: string;
+  targetUrl: string;
+  statusCode?: number | string;
+  isRegex?: boolean;
+  isActive?: boolean;
+  notes?: string;
+}
+
+interface UpdateRedirectBody {
+  sourceUrl?: string;
+  targetUrl?: string;
+  statusCode?: string;
+  isRegex?: boolean;
+  isActive?: boolean;
+  notes?: string;
+}
+
+interface CreatePageVersionBody {
+  comment?: string;
+}
+
+interface CreatePageTranslationBody {
+  localeId: string;
+  title: string;
+  slug?: string;
+  summary?: string;
+  content?: Record<string, unknown>;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  openGraphTitle?: string;
+  openGraphDescription?: string;
+  featuredImage?: string;
+  isAutoTranslated?: boolean;
+  translationSource?: string;
+  isApproved?: boolean;
+  isPublished?: boolean;
+}
+
+interface UpdatePageTranslationBody {
+  title?: string;
+  slug?: string;
+  summary?: string;
+  content?: Record<string, unknown>;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  openGraphTitle?: string;
+  openGraphDescription?: string;
+  featuredImage?: string;
+  isAutoTranslated?: boolean;
+  translationSource?: string;
+  isApproved?: boolean;
+  isPublished?: boolean;
+  publishedAt?: string;
+}
+
+interface AssignCategoryBody {
+  categoryId: string;
+  isPrimary?: boolean;
+}
+
+interface SetPrimaryCategoryBody {
+  categorizationId: string;
+}
+
+interface TrackMediaUsageBody {
+  mediaId: string;
+  entityType: 'contentPage' | 'contentBlock' | 'product' | 'category' | 'merchant' | 'blog';
+  entityId: string;
+  field?: string;
+  sortOrder?: number;
+}
+
 export class ContentController {
   private contentRepo: ContentRepo;
   private categoryRepo: ContentCategoryRepo;
@@ -133,7 +441,7 @@ export class ContentController {
   /**
    * Create a new content type
    */
-  createContentType = async (req: TypedRequest, res: Response): Promise<void> => {
+  createContentType = async (req: TypedRequest<Record<string, string>, unknown, CreateContentTypeBody>, res: Response): Promise<void> => {
     try {
       const {
         name,
@@ -160,12 +468,12 @@ export class ContentController {
       const contentType = await this.contentRepo.createContentType({
         name,
         slug,
-        description,
-        icon,
-        allowedBlocks,
-        defaultTemplate,
-        requiredFields,
-        metaFields,
+        description: description ?? null,
+        icon: icon ?? null,
+        allowedBlocks: allowedBlocks ?? null,
+        defaultTemplate: defaultTemplate ?? null,
+        requiredFields: requiredFields ?? null,
+        metaFields: metaFields ?? null,
         isSystem,
         isActive,
       });
@@ -175,11 +483,11 @@ export class ContentController {
         data: contentType,
         message: 'Content type created successfully',
       });
-    } catch (error: any) {
-      res.status(error.message.includes('already exists') ? 409 : 500).json({
+    } catch (error: unknown) {
+      res.status((error as Error).message.includes('already exists') ? 409 : 500).json({
         success: false,
         message: 'Failed to create content type',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -187,7 +495,7 @@ export class ContentController {
   /**
    * Update a content type
    */
-  updateContentType = async (req: TypedRequest, res: Response): Promise<void> => {
+  updateContentType = async (req: TypedRequest<Record<string, string>, unknown, UpdateContentTypeBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug, description, icon, requiredFields, metaFields, isActive } = req.body;
@@ -217,8 +525,8 @@ export class ContentController {
         data: updatedContentType,
         message: 'Content type updated successfully',
       });
-    } catch (error: any) {
-      res.status(error.message.includes('already exists') ? 409 : 500).json({
+    } catch (error: unknown) {
+      res.status((error as Error).message.includes('already exists') ? 409 : 500).json({
         success: false,
         message: 'Failed to update content type',
         error: (error as Error).message,
@@ -249,12 +557,12 @@ export class ContentController {
         success: true,
         message: 'Content type deleted successfully',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle case where content type is in use
-      if (error.message.includes('being used')) {
+      if ((error as Error).message.includes('being used')) {
         res.status(409).json({
           success: false,
-          message: error.message,
+          message: (error as Error).message,
           error: 'Content type is in use',
         });
         return;
@@ -292,11 +600,11 @@ export class ContentController {
           total: pages.length, // This should ideally be the total count from DB
         },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch pages',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -321,11 +629,11 @@ export class ContentController {
         success: true,
         data: page,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch page',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -374,11 +682,11 @@ export class ContentController {
         success: true,
         data: fullPage,
       });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      if ((error as Error).message.includes('not found')) {
         res.status(404).json({
           success: false,
-          message: error.message,
+          message: (error as Error).message,
         });
         return;
       }
@@ -386,7 +694,7 @@ export class ContentController {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch page with content',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -394,7 +702,7 @@ export class ContentController {
   /**
    * Create a new page
    */
-  createPage = async (req: TypedRequest, res: Response): Promise<void> => {
+  createPage = async (req: TypedRequest<Record<string, string>, unknown, CreatePageBody>, res: Response): Promise<void> => {
     try {
       const {
         title,
@@ -433,12 +741,12 @@ export class ContentController {
       const page = await this.contentRepo.createPage({
         title,
         slug,
-        summary: description, // Using description value but assigning to the correct field name 'summary'
-        metaTitle,
-        metaDescription,
+        summary: description ?? null, // Using description value but assigning to the correct field name 'summary'
+        metaTitle: metaTitle ?? null,
+        metaDescription: metaDescription ?? null,
         status,
-        publishedAt,
-        templateId: layout, // Layout corresponds to templateId
+        publishedAt: publishedAt ? new Date(publishedAt) : null,
+        templateId: layout ?? null, // Layout corresponds to templateId
         contentTypeId,
         visibility,
       });
@@ -448,11 +756,11 @@ export class ContentController {
         data: page,
         message: 'Page created successfully',
       });
-    } catch (error: any) {
-      res.status(error.message.includes('already exists') ? 409 : 500).json({
+    } catch (error: unknown) {
+      res.status((error as Error).message.includes('already exists') ? 409 : 500).json({
         success: false,
         message: 'Failed to create page',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -460,7 +768,7 @@ export class ContentController {
   /**
    * Update a page
    */
-  updatePage = async (req: TypedRequest, res: Response): Promise<void> => {
+  updatePage = async (req: TypedRequest<Record<string, string>, unknown, UpdatePageBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { title, slug, description, metaTitle, metaDescription, status, publishedAt, layout } = req.body;
@@ -494,7 +802,7 @@ export class ContentController {
         metaTitle,
         metaDescription,
         status,
-        publishedAt,
+        publishedAt: publishedAt ? new Date(publishedAt) : undefined,
         templateId: layout, // Layout corresponds to templateId
       });
 
@@ -503,11 +811,11 @@ export class ContentController {
         data: updatedPage,
         message: 'Page updated successfully',
       });
-    } catch (error: any) {
-      res.status(error.message.includes('already exists') ? 409 : 500).json({
+    } catch (error: unknown) {
+      res.status((error as Error).message.includes('already exists') ? 409 : 500).json({
         success: false,
         message: 'Failed to update page',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -535,11 +843,11 @@ export class ContentController {
         success: true,
         message: 'Page deleted successfully',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
         message: 'Failed to delete page',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -569,11 +877,11 @@ export class ContentController {
         success: true,
         data: blocks,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch page blocks',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -598,11 +906,11 @@ export class ContentController {
         success: true,
         data: block,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch content block',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -610,9 +918,9 @@ export class ContentController {
   /**
    * Create a new content block
    */
-  createBlock = async (req: TypedRequest, res: Response): Promise<void> => {
+  createBlock = async (req: TypedRequest<Record<string, string>, unknown, CreateBlockBody>, res: Response): Promise<void> => {
     try {
-      const { contentPageId, blockTypeId, title, area, sortOrder, content, isVisible = true } = req.body;
+      const { contentPageId, blockTypeId, title, area: _area, sortOrder, content, isVisible = true } = req.body;
 
       // Basic validation
       if (!contentPageId || !blockTypeId || sortOrder === undefined || !content) {
@@ -635,10 +943,10 @@ export class ContentController {
 
       // Check schema required fields if defined on the block type
       if (blockType.schema && typeof blockType.schema === 'object') {
-        const schema = blockType.schema as Record<string, any>;
+        const schema = blockType.schema as Record<string, unknown>;
         const missingFields: string[] = [];
         for (const [field, config] of Object.entries(schema)) {
-          if (config && typeof config === 'object' && (config as any).required === true) {
+          if (config && typeof config === 'object' && (config as Record<string, unknown>).required === true) {
             if (content[field] === undefined || content[field] === null || content[field] === '') {
               missingFields.push(field);
             }
@@ -667,11 +975,11 @@ export class ContentController {
         data: block,
         message: 'Content block created successfully',
       });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      if ((error as Error).message.includes('not found')) {
         res.status(404).json({
           success: false,
-          message: error.message,
+          message: (error as Error).message,
         });
         return;
       }
@@ -679,7 +987,7 @@ export class ContentController {
       res.status(500).json({
         success: false,
         message: 'Failed to create content block',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -687,7 +995,7 @@ export class ContentController {
   /**
    * Update a content block
    */
-  updateBlock = async (req: TypedRequest, res: Response): Promise<void> => {
+  updateBlock = async (req: TypedRequest<Record<string, string>, unknown, UpdateBlockBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { blockTypeId, title, area, sortOrder, content, isVisible } = req.body;
@@ -704,7 +1012,7 @@ export class ContentController {
 
       // Validate against content type if blockTypeId or content is being updated
       const effectiveBlockTypeId = blockTypeId || existingBlock.blockTypeId;
-      const effectiveTitle = title || existingBlock.title;
+      const _effectiveTitle = title || existingBlock.title;
       const effectiveContent = content || existingBlock.content;
 
       if (blockTypeId || content) {
@@ -719,10 +1027,10 @@ export class ContentController {
 
         // Check schema required fields
         if (blockType.schema && typeof blockType.schema === 'object' && effectiveContent) {
-          const schema = blockType.schema as Record<string, any>;
+          const schema = blockType.schema as Record<string, unknown>;
           const missingFields: string[] = [];
           for (const [field, config] of Object.entries(schema)) {
-            if (config && typeof config === 'object' && (config as any).required === true) {
+            if (config && typeof config === 'object' && (config as Record<string, unknown>).required === true) {
               if (effectiveContent[field] === undefined || effectiveContent[field] === null || effectiveContent[field] === '') {
                 missingFields.push(field);
               }
@@ -752,11 +1060,11 @@ export class ContentController {
         data: updatedBlock,
         message: 'Content block updated successfully',
       });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      if ((error as Error).message.includes('not found')) {
         res.status(404).json({
           success: false,
-          message: error.message,
+          message: (error as Error).message,
         });
         return;
       }
@@ -764,7 +1072,7 @@ export class ContentController {
       res.status(500).json({
         success: false,
         message: 'Failed to update content block',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -792,11 +1100,11 @@ export class ContentController {
         success: true,
         message: 'Content block deleted successfully',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
         message: 'Failed to delete content block',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -804,7 +1112,7 @@ export class ContentController {
   /**
    * Reorder content blocks
    */
-  reorderBlocks = async (req: TypedRequest, res: Response): Promise<void> => {
+  reorderBlocks = async (req: TypedRequest<Record<string, string>, unknown, ReorderBlocksBody>, res: Response): Promise<void> => {
     try {
       const { pageId } = req.params;
       const { blockOrders } = req.body;
@@ -844,11 +1152,11 @@ export class ContentController {
         success: true,
         message: 'Content blocks reordered successfully',
       });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      if ((error as Error).message.includes('not found')) {
         res.status(404).json({
           success: false,
-          message: error.message,
+          message: (error as Error).message,
         });
         return;
       }
@@ -856,7 +1164,7 @@ export class ContentController {
       res.status(500).json({
         success: false,
         message: 'Failed to reorder content blocks',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -881,11 +1189,11 @@ export class ContentController {
           total: templates.length, // This should ideally be the total count from DB
         },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch templates',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -910,11 +1218,11 @@ export class ContentController {
         success: true,
         data: template,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch template',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -922,7 +1230,7 @@ export class ContentController {
   /**
    * Create a new template
    */
-  createTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+  createTemplate = async (req: TypedRequest<Record<string, string>, unknown, CreateTemplateBody>, res: Response): Promise<void> => {
     try {
       const {
         name,
@@ -951,14 +1259,14 @@ export class ContentController {
       const template = await this.contentRepo.createTemplate({
         name,
         slug,
-        description,
-        thumbnail,
-        htmlStructure,
-        cssStyles,
-        jsScripts,
-        areas,
-        defaultBlocks,
-        compatibleContentTypes,
+        description: description ?? null,
+        thumbnail: thumbnail ?? null,
+        htmlStructure: htmlStructure ?? null,
+        cssStyles: cssStyles ?? null,
+        jsScripts: jsScripts ?? null,
+        areas: areas ?? null,
+        defaultBlocks: defaultBlocks ?? null,
+        compatibleContentTypes: compatibleContentTypes ?? null,
         isSystem,
         isActive,
       });
@@ -968,11 +1276,11 @@ export class ContentController {
         data: template,
         message: 'Template created successfully',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
         message: 'Failed to create template',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -980,7 +1288,7 @@ export class ContentController {
   /**
    * Update a template
    */
-  updateTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+  updateTemplate = async (req: TypedRequest<Record<string, string>, unknown, UpdateTemplateBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug, description, htmlStructure, areas, isActive } = req.body;
@@ -1009,11 +1317,11 @@ export class ContentController {
         data: updatedTemplate,
         message: 'Template updated successfully',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
         message: 'Failed to update template',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -1041,12 +1349,12 @@ export class ContentController {
         success: true,
         message: 'Template deleted successfully',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle case where template is in use
-      if (error.message.includes('being used')) {
+      if ((error as Error).message.includes('being used')) {
         res.status(409).json({
           success: false,
-          message: error.message,
+          message: (error as Error).message,
           error: 'Template is in use',
         });
         return;
@@ -1055,7 +1363,7 @@ export class ContentController {
       res.status(500).json({
         success: false,
         message: 'Failed to delete template',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   };
@@ -1063,7 +1371,7 @@ export class ContentController {
   /**
    * Duplicate a template
    */
-  duplicateTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+  duplicateTemplate = async (req: TypedRequest<Record<string, string>, unknown, DuplicateTemplateBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug } = req.body;
@@ -1096,10 +1404,10 @@ export class ContentController {
 
       eventBus.emit('content.template.created', { templateId: duplicate.contentTemplateId, name: duplicate.name, slug: duplicate.slug });
       res.status(201).json({ success: true, data: duplicate, message: 'Template duplicated successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to duplicate template', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to duplicate template', error: (error as Error).message });
     }
   };
 
@@ -1124,10 +1432,10 @@ export class ContentController {
 
       eventBus.emit('content.page.published', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
       res.status(200).json({ success: true, data: updatedPage, message: 'Page published successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to publish page', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to publish page', error: (error as Error).message });
     }
   };
 
@@ -1146,17 +1454,17 @@ export class ContentController {
       const updatedPage = await this.contentRepo.updatePage(id, { status: 'draft' });
       eventBus.emit('content.page.unpublished', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
       res.status(200).json({ success: true, data: updatedPage, message: 'Page unpublished successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to unpublish page', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to unpublish page', error: (error as Error).message });
     }
   };
 
   /**
    * Schedule a page for future publication
    */
-  schedulePage = async (req: TypedRequest, res: Response): Promise<void> => {
+  schedulePage = async (req: TypedRequest<Record<string, string>, unknown, SchedulePageBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { scheduledAt } = req.body;
@@ -1172,19 +1480,19 @@ export class ContentController {
         return;
       }
 
-      const updatedPage = await this.contentRepo.updatePage(id, { status: 'scheduled', scheduledAt });
+      const updatedPage = await this.contentRepo.updatePage(id, { status: 'scheduled', scheduledAt: new Date(scheduledAt) });
       res.status(200).json({ success: true, data: updatedPage, message: 'Page scheduled successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to schedule page', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to schedule page', error: (error as Error).message });
     }
   };
 
   /**
    * Duplicate a page with all its blocks
    */
-  duplicatePage = async (req: TypedRequest, res: Response): Promise<void> => {
+  duplicatePage = async (req: TypedRequest<Record<string, string>, unknown, DuplicatePageBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { title, slug } = req.body;
@@ -1231,10 +1539,10 @@ export class ContentController {
 
       eventBus.emit('content.page.created', { pageId: duplicatePage.contentPageId, title: duplicatePage.title, slug: duplicatePage.slug });
       res.status(201).json({ success: true, data: duplicatePage, message: 'Page duplicated successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to duplicate page', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to duplicate page', error: (error as Error).message });
     }
   };
 
@@ -1249,10 +1557,10 @@ export class ContentController {
 
       const categories = await this.categoryRepo.findAllCategories(parentId, isActive, limit, offset);
       res.status(200).json({ success: true, data: categories });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch categories', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch categories', error: (error as Error).message });
     }
   };
 
@@ -1261,14 +1569,14 @@ export class ContentController {
       const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
       const categories = await this.categoryRepo.getCategoryTree(isActive);
       res.status(200).json({ success: true, data: categories });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch category tree', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch category tree', error: (error as Error).message });
     }
   };
 
-  createCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  createCategory = async (req: TypedRequest<Record<string, string>, unknown, CreateCategoryBody>, res: Response): Promise<void> => {
     try {
       const { name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
 
@@ -1280,11 +1588,11 @@ export class ContentController {
       const category = await this.categoryRepo.createCategory({
         name,
         slug,
-        parentId,
-        description,
-        featuredImage,
-        metaTitle,
-        metaDescription,
+        parentId: parentId ?? null,
+        description: description ?? null,
+        featuredImage: featuredImage ?? null,
+        metaTitle: metaTitle ?? null,
+        metaDescription: metaDescription ?? null,
         sortOrder: sortOrder || 0,
         isActive: isActive !== undefined ? isActive : true,
         path: null,
@@ -1298,10 +1606,10 @@ export class ContentController {
         parentId: category.parentId,
       });
       res.status(201).json({ success: true, data: category, message: 'Category created successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to create category', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to create category', error: (error as Error).message });
     }
   };
 
@@ -1314,14 +1622,14 @@ export class ContentController {
         return;
       }
       res.status(200).json({ success: true, data: category });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch category', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch category', error: (error as Error).message });
     }
   };
 
-  updateCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  updateCategory = async (req: TypedRequest<Record<string, string>, unknown, UpdateCategoryBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
@@ -1344,10 +1652,10 @@ export class ContentController {
       });
       eventBus.emit('content.category.updated', { categoryId: id, name: updated.name, slug: updated.slug });
       res.status(200).json({ success: true, data: updated, message: 'Category updated successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to update category', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to update category', error: (error as Error).message });
     }
   };
 
@@ -1363,24 +1671,24 @@ export class ContentController {
       await this.categoryRepo.deleteCategory(id);
       eventBus.emit('content.category.deleted', { categoryId: id, name: existing.name });
       res.status(200).json({ success: true, message: 'Category deleted successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to delete category', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to delete category', error: (error as Error).message });
     }
   };
 
-  moveCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  moveCategory = async (req: TypedRequest<Record<string, string>, unknown, MoveCategoryBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { newParentId } = req.body;
 
       const updated = await this.categoryRepo.moveCategory(id, newParentId);
       res.status(200).json({ success: true, data: updated, message: 'Category moved successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to move category', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to move category', error: (error as Error).message });
     }
   };
 
@@ -1391,14 +1699,14 @@ export class ContentController {
       const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
       const navigations = await this.navigationRepo.findAllNavigations(isActive);
       res.status(200).json({ success: true, data: navigations });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch navigations', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch navigations', error: (error as Error).message });
     }
   };
 
-  createNavigation = async (req: TypedRequest, res: Response): Promise<void> => {
+  createNavigation = async (req: TypedRequest<Record<string, string>, unknown, CreateNavigationBody>, res: Response): Promise<void> => {
     try {
       const { name, slug, description, location, isActive } = req.body;
 
@@ -1410,8 +1718,8 @@ export class ContentController {
       const navigation = await this.navigationRepo.createNavigation({
         name,
         slug,
-        description,
-        location,
+        description: description ?? null,
+        location: location ?? null,
         isActive: isActive !== undefined ? isActive : true,
         createdBy: null,
         updatedBy: null,
@@ -1423,10 +1731,10 @@ export class ContentController {
         location: navigation.location,
       });
       res.status(201).json({ success: true, data: navigation, message: 'Navigation created successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to create navigation', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to create navigation', error: (error as Error).message });
     }
   };
 
@@ -1439,10 +1747,10 @@ export class ContentController {
         return;
       }
       res.status(200).json({ success: true, data: navigation });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch navigation', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch navigation', error: (error as Error).message });
     }
   };
 
@@ -1457,14 +1765,14 @@ export class ContentController {
 
       const items = await this.navigationRepo.findAllNavigationItems(id);
       res.status(200).json({ success: true, data: { navigation, items } });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch navigation with items', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch navigation with items', error: (error as Error).message });
     }
   };
 
-  updateNavigation = async (req: TypedRequest, res: Response): Promise<void> => {
+  updateNavigation = async (req: TypedRequest<Record<string, string>, unknown, UpdateNavigationBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug, description, location, isActive } = req.body;
@@ -1478,10 +1786,10 @@ export class ContentController {
       const updated = await this.navigationRepo.updateNavigation(id, { name, slug, description, location, isActive });
       eventBus.emit('content.navigation.updated', { navigationId: id, name: updated.name });
       res.status(200).json({ success: true, data: updated, message: 'Navigation updated successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to update navigation', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to update navigation', error: (error as Error).message });
     }
   };
 
@@ -1490,14 +1798,14 @@ export class ContentController {
       const { id } = req.params;
       await this.navigationRepo.deleteNavigation(id);
       res.status(200).json({ success: true, message: 'Navigation deleted successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to delete navigation', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to delete navigation', error: (error as Error).message });
     }
   };
 
-  addNavigationItem = async (req: TypedRequest, res: Response): Promise<void> => {
+  addNavigationItem = async (req: TypedRequest<Record<string, string>, unknown, AddNavigationItemBody>, res: Response): Promise<void> => {
     try {
       const { navigationId } = req.params;
       const {
@@ -1523,19 +1831,19 @@ export class ContentController {
 
       const item = await this.navigationRepo.createNavigationItem({
         navigationId,
-        parentId,
+        parentId: parentId ?? null,
         title,
         type,
-        url,
-        contentPageId,
-        targetId,
-        targetSlug,
-        icon,
-        cssClasses,
+        url: url ?? null,
+        contentPageId: contentPageId ?? null,
+        targetId: targetId ?? null,
+        targetSlug: targetSlug ?? null,
+        icon: icon ?? null,
+        cssClasses: cssClasses ?? null,
         openInNewTab: openInNewTab || false,
         isActive: isActive !== undefined ? isActive : true,
         sortOrder: sortOrder || 0,
-        conditions,
+        conditions: conditions ?? null,
         depth: 0,
       });
 
@@ -1546,14 +1854,14 @@ export class ContentController {
         type: item.type,
       });
       res.status(201).json({ success: true, data: item, message: 'Navigation item added successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to add navigation item', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to add navigation item', error: (error as Error).message });
     }
   };
 
-  updateNavigationItem = async (req: TypedRequest, res: Response): Promise<void> => {
+  updateNavigationItem = async (req: TypedRequest<Record<string, string>, unknown, UpdateNavigationItemBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { title, type, url, contentPageId, icon, openInNewTab, isActive, sortOrder } = req.body;
@@ -1569,10 +1877,10 @@ export class ContentController {
         sortOrder,
       });
       res.status(200).json({ success: true, data: updated, message: 'Navigation item updated successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to update navigation item', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to update navigation item', error: (error as Error).message });
     }
   };
 
@@ -1581,14 +1889,14 @@ export class ContentController {
       const { id } = req.params;
       await this.navigationRepo.deleteNavigationItem(id);
       res.status(200).json({ success: true, message: 'Navigation item deleted successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to delete navigation item', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to delete navigation item', error: (error as Error).message });
     }
   };
 
-  reorderNavigationItems = async (req: TypedRequest, res: Response): Promise<void> => {
+  reorderNavigationItems = async (req: TypedRequest<Record<string, string>, unknown, ReorderNavigationItemsBody>, res: Response): Promise<void> => {
     try {
       const { navigationId } = req.params;
       const { itemOrders } = req.body;
@@ -1600,10 +1908,10 @@ export class ContentController {
 
       await this.navigationRepo.reorderNavigationItems(navigationId, itemOrders);
       res.status(200).json({ success: true, message: 'Navigation items reordered successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to reorder navigation items', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to reorder navigation items', error: (error as Error).message });
     }
   };
 
@@ -1618,14 +1926,14 @@ export class ContentController {
 
       const media = await this.mediaRepo.findAllMedia(folderId, fileType, limit, offset);
       res.status(200).json({ success: true, data: media });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch media', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch media', error: (error as Error).message });
     }
   };
 
-  uploadMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+  uploadMedia = async (req: TypedRequest<Record<string, string>, unknown, UploadMediaBody>, res: Response): Promise<void> => {
     try {
       const {
         title,
@@ -1660,19 +1968,19 @@ export class ContentController {
         fileType: fileType || 'application/octet-stream',
         fileSize: fileSize || 0,
         url,
-        width,
-        height,
-        duration,
-        altText,
-        caption,
-        description,
+        width: width ?? null,
+        height: height ?? null,
+        duration: duration ?? null,
+        altText: altText ?? null,
+        caption: caption ?? null,
+        description: description ?? null,
         contentMediaFolderId: folderId || null,
-        thumbnailUrl,
+        thumbnailUrl: thumbnailUrl ?? null,
         sortOrder: 0,
-        tags,
+        tags: tags ?? null,
         isExternal: isExternal || false,
-        externalService,
-        externalId,
+        externalService: externalService ?? null,
+        externalId: externalId ?? null,
         createdBy: null,
         updatedBy: null,
       });
@@ -1685,10 +1993,10 @@ export class ContentController {
         fileSize: media.fileSize,
       });
       res.status(201).json({ success: true, data: media, message: 'Media uploaded successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to upload media', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to upload media', error: (error as Error).message });
     }
   };
 
@@ -1701,14 +2009,14 @@ export class ContentController {
         return;
       }
       res.status(200).json({ success: true, data: media });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch media', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch media', error: (error as Error).message });
     }
   };
 
-  updateMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+  updateMedia = async (req: TypedRequest<Record<string, string>, unknown, UpdateMediaBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { title, altText, caption, description, folderId, tags, sortOrder } = req.body;
@@ -1723,10 +2031,10 @@ export class ContentController {
         sortOrder,
       });
       res.status(200).json({ success: true, data: updated, message: 'Media updated successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to update media', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to update media', error: (error as Error).message });
     }
   };
 
@@ -1742,14 +2050,14 @@ export class ContentController {
       await this.mediaRepo.deleteMedia(id);
       eventBus.emit('content.media.deleted', { mediaId: id, fileName: media.fileName });
       res.status(200).json({ success: true, message: 'Media deleted successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to delete media', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to delete media', error: (error as Error).message });
     }
   };
 
-  moveMediaToFolder = async (req: TypedRequest, res: Response): Promise<void> => {
+  moveMediaToFolder = async (req: TypedRequest<Record<string, string>, unknown, MoveMediaToFolderBody>, res: Response): Promise<void> => {
     try {
       const { mediaIds, folderId } = req.body;
 
@@ -1769,10 +2077,10 @@ export class ContentController {
       }
 
       res.status(200).json({ success: true, data: { movedCount }, message: `${movedCount} media items moved successfully` });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to move media', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to move media', error: (error as Error).message });
     }
   };
 
@@ -1783,10 +2091,10 @@ export class ContentController {
       const parentId = req.query.parentId as string | undefined;
       const folders = await this.mediaRepo.findAllFolders(parentId);
       res.status(200).json({ success: true, data: folders });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch media folders', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch media folders', error: (error as Error).message });
     }
   };
 
@@ -1794,14 +2102,14 @@ export class ContentController {
     try {
       const folders = await this.mediaRepo.findAllFolders();
       res.status(200).json({ success: true, data: folders });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch media folder tree', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch media folder tree', error: (error as Error).message });
     }
   };
 
-  createMediaFolder = async (req: TypedRequest, res: Response): Promise<void> => {
+  createMediaFolder = async (req: TypedRequest<Record<string, string>, unknown, CreateMediaFolderBody>, res: Response): Promise<void> => {
     try {
       const { name, parentId } = req.body;
 
@@ -1812,7 +2120,7 @@ export class ContentController {
 
       const folder = await this.mediaRepo.createFolder({
         name,
-        parentId,
+        parentId: parentId ?? null,
         path: null,
         depth: 0,
         sortOrder: 0,
@@ -1820,24 +2128,24 @@ export class ContentController {
         updatedBy: null,
       });
       res.status(201).json({ success: true, data: folder, message: 'Folder created successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to create media folder', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to create media folder', error: (error as Error).message });
     }
   };
 
-  updateMediaFolder = async (req: TypedRequest, res: Response): Promise<void> => {
+  updateMediaFolder = async (req: TypedRequest<Record<string, string>, unknown, UpdateMediaFolderBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, parentId, sortOrder } = req.body;
 
       const updated = await this.mediaRepo.updateFolder(id, { name, parentId, sortOrder });
       res.status(200).json({ success: true, data: updated, message: 'Folder updated successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to update media folder', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to update media folder', error: (error as Error).message });
     }
   };
 
@@ -1846,10 +2154,10 @@ export class ContentController {
       const { id } = req.params;
       await this.mediaRepo.deleteFolder(id);
       res.status(200).json({ success: true, message: 'Folder deleted successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to delete media folder', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to delete media folder', error: (error as Error).message });
     }
   };
 
@@ -1863,14 +2171,14 @@ export class ContentController {
 
       const redirects = await this.redirectRepo.findAllRedirects(isActive, limit, offset);
       res.status(200).json({ success: true, data: redirects });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch redirects', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch redirects', error: (error as Error).message });
     }
   };
 
-  createRedirect = async (req: TypedRequest, res: Response): Promise<void> => {
+  createRedirect = async (req: TypedRequest<Record<string, string>, unknown, CreateRedirectBody>, res: Response): Promise<void> => {
     try {
       const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
 
@@ -1885,7 +2193,7 @@ export class ContentController {
         statusCode: String(statusCode || '301'),
         isRegex: isRegex || false,
         isActive: isActive !== undefined ? isActive : true,
-        notes,
+        notes: notes ?? null,
         createdBy: null,
         updatedBy: null,
       });
@@ -1897,10 +2205,10 @@ export class ContentController {
         statusCode: redirect.statusCode,
       });
       res.status(201).json({ success: true, data: redirect, message: 'Redirect created successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to create redirect', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to create redirect', error: (error as Error).message });
     }
   };
 
@@ -1913,14 +2221,14 @@ export class ContentController {
         return;
       }
       res.status(200).json({ success: true, data: redirect });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to fetch redirect', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch redirect', error: (error as Error).message });
     }
   };
 
-  updateRedirect = async (req: TypedRequest, res: Response): Promise<void> => {
+  updateRedirect = async (req: TypedRequest<Record<string, string>, unknown, UpdateRedirectBody>, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
@@ -1928,10 +2236,10 @@ export class ContentController {
       const updated = await this.redirectRepo.updateRedirect(id, { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes });
       eventBus.emit('content.redirect.updated', { redirectId: id, sourceUrl: updated.sourceUrl, targetUrl: updated.targetUrl });
       res.status(200).json({ success: true, data: updated, message: 'Redirect updated successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to update redirect', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to update redirect', error: (error as Error).message });
     }
   };
 
@@ -1947,10 +2255,10 @@ export class ContentController {
       await this.redirectRepo.deleteRedirect(id);
       eventBus.emit('content.redirect.deleted', { redirectId: id, sourceUrl: redirect.sourceUrl });
       res.status(200).json({ success: true, message: 'Redirect deleted successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
 
-      res.status(500).json({ success: false, message: 'Failed to delete redirect', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to delete redirect', error: (error as Error).message });
     }
   };
 
@@ -1970,13 +2278,13 @@ export class ContentController {
 
       const versions = await this.pageVersionRepo.findVersionsByPageId(pageId, limit, offset);
       res.status(200).json({ success: true, data: versions });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch page versions', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch page versions', error: (error as Error).message });
     }
   };
 
-  createPageVersion = async (req: TypedRequest, res: Response): Promise<void> => {
+  createPageVersion = async (req: TypedRequest<Record<string, string>, unknown, CreatePageVersionBody>, res: Response): Promise<void> => {
     try {
       const { pageId } = req.params;
       const { comment } = req.body;
@@ -2000,9 +2308,9 @@ export class ContentController {
 
       eventBus.emit('content.page.version_created', { pageId, versionId: version.contentPageVersionId, version: version.version });
       res.status(201).json({ success: true, data: version, message: 'Page version created successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to create page version', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to create page version', error: (error as Error).message });
     }
   };
 
@@ -2024,16 +2332,16 @@ export class ContentController {
 
       const restoredPage = await this.contentRepo.updatePage(pageId, {
         title: version.title,
-        status: version.status as any,
-        summary: version.summary || undefined,
-        customFields: version.customFields as Record<string, any> || undefined,
+        status: version.status,
+        summary: version.summary ?? undefined,
+        customFields: (version.customFields as Record<string, unknown>) || undefined,
       });
 
       eventBus.emit('content.page.version_restored', { pageId, versionId, version: version.version });
       res.status(200).json({ success: true, data: restoredPage, message: `Page restored to version ${version.version}` });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to restore page version', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to restore page version', error: (error as Error).message });
     }
   };
 
@@ -2049,9 +2357,9 @@ export class ContentController {
 
       await this.pageVersionRepo.deleteVersion(versionId);
       res.status(200).json({ success: true, message: 'Page version deleted successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to delete page version', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to delete page version', error: (error as Error).message });
     }
   };
 
@@ -2069,9 +2377,9 @@ export class ContentController {
 
       const translations = await this.pageTranslationRepo.findTranslationsByPageId(pageId);
       res.status(200).json({ success: true, data: translations });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch page translations', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch page translations', error: (error as Error).message });
     }
   };
 
@@ -2086,13 +2394,13 @@ export class ContentController {
       }
 
       res.status(200).json({ success: true, data: translation });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch page translation', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch page translation', error: (error as Error).message });
     }
   };
 
-  createPageTranslation = async (req: TypedRequest, res: Response): Promise<void> => {
+  createPageTranslation = async (req: TypedRequest<Record<string, string>, unknown, CreatePageTranslationBody>, res: Response): Promise<void> => {
     try {
       const { pageId } = req.params;
       const { localeId, title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
@@ -2131,17 +2439,17 @@ export class ContentController {
 
       eventBus.emit('content.page.translation_created', { pageId, translationId: translation.contentPageTranslationId, localeId });
       res.status(201).json({ success: true, data: translation, message: 'Page translation created successfully' });
-    } catch (error: any) {
-      if (error.message.includes('already exists')) {
-        res.status(409).json({ success: false, message: error.message });
+    } catch (error: unknown) {
+      if ((error as Error).message.includes('already exists')) {
+        res.status(409).json({ success: false, message: (error as Error).message });
         return;
       }
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to create page translation', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to create page translation', error: (error as Error).message });
     }
   };
 
-  updatePageTranslation = async (req: TypedRequest, res: Response): Promise<void> => {
+  updatePageTranslation = async (req: TypedRequest<Record<string, string>, unknown, UpdatePageTranslationBody>, res: Response): Promise<void> => {
     try {
       const { translationId } = req.params;
       const { title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
@@ -2157,14 +2465,14 @@ export class ContentController {
       const updated = await this.pageTranslationRepo.updateTranslation(translationId, {
         title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
         openGraphTitle, openGraphDescription, featuredImage, isAutoTranslated,
-        translationSource, isApproved, isPublished, publishedAt,
+        translationSource, isApproved, isPublished, publishedAt: publishedAt ? new Date(publishedAt) : undefined,
       });
 
       eventBus.emit('content.page.translation_updated', { translationId, pageId: existing.contentPageId });
       res.status(200).json({ success: true, data: updated, message: 'Page translation updated successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to update page translation', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to update page translation', error: (error as Error).message });
     }
   };
 
@@ -2181,9 +2489,9 @@ export class ContentController {
       await this.pageTranslationRepo.deleteTranslation(translationId);
       eventBus.emit('content.page.translation_deleted', { translationId, pageId: existing.contentPageId });
       res.status(200).json({ success: true, message: 'Page translation deleted successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to delete page translation', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to delete page translation', error: (error as Error).message });
     }
   };
 
@@ -2201,13 +2509,13 @@ export class ContentController {
 
       const categorizations = await this.categorizationRepo.findCategorizationsByPageId(pageId);
       res.status(200).json({ success: true, data: categorizations });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch page categories', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch page categories', error: (error as Error).message });
     }
   };
 
-  assignPageToCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  assignPageToCategory = async (req: TypedRequest<Record<string, string>, unknown, AssignCategoryBody>, res: Response): Promise<void> => {
     try {
       const { pageId } = req.params;
       const { categoryId, isPrimary } = req.body;
@@ -2237,9 +2545,9 @@ export class ContentController {
 
       eventBus.emit('content.page.categorized', { pageId, categoryId, isPrimary: categorization.isPrimary });
       res.status(201).json({ success: true, data: categorization, message: 'Page assigned to category successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to assign page to category', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to assign page to category', error: (error as Error).message });
     }
   };
 
@@ -2255,13 +2563,13 @@ export class ContentController {
 
       eventBus.emit('content.page.uncategorized', { pageId, categoryId });
       res.status(200).json({ success: true, message: 'Page removed from category successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to remove page from category', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to remove page from category', error: (error as Error).message });
     }
   };
 
-  setPrimaryCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  setPrimaryCategory = async (req: TypedRequest<Record<string, string>, unknown, SetPrimaryCategoryBody>, res: Response): Promise<void> => {
     try {
       const { pageId } = req.params;
       const { categorizationId } = req.body;
@@ -2274,9 +2582,9 @@ export class ContentController {
       const updated = await this.categorizationRepo.setPrimaryCategory(pageId, categorizationId);
       eventBus.emit('content.page.primary_category_set', { pageId, categorizationId });
       res.status(200).json({ success: true, data: updated, message: 'Primary category set successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to set primary category', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to set primary category', error: (error as Error).message });
     }
   };
 
@@ -2298,9 +2606,9 @@ export class ContentController {
 
       const validPages = pages.filter(p => p !== null);
       res.status(200).json({ success: true, data: validPages });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch pages by category', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch pages by category', error: (error as Error).message });
     }
   };
 
@@ -2318,9 +2626,9 @@ export class ContentController {
 
       const usages = await this.mediaUsageRepo.findUsageByMediaId(mediaId);
       res.status(200).json({ success: true, data: usages });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch media usage', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch media usage', error: (error as Error).message });
     }
   };
 
@@ -2330,13 +2638,13 @@ export class ContentController {
 
       const usages = await this.mediaUsageRepo.findUsageByEntity(entityType, entityId);
       res.status(200).json({ success: true, data: usages });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch media usage by entity', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch media usage by entity', error: (error as Error).message });
     }
   };
 
-  trackMediaUsage = async (req: TypedRequest, res: Response): Promise<void> => {
+  trackMediaUsage = async (req: TypedRequest<Record<string, string>, unknown, TrackMediaUsageBody>, res: Response): Promise<void> => {
     try {
       const { mediaId, entityType, entityId, field, sortOrder } = req.body;
 
@@ -2355,9 +2663,9 @@ export class ContentController {
 
       eventBus.emit('content.media.usage_tracked', { mediaId, entityType, entityId });
       res.status(201).json({ success: true, data: usage, message: 'Media usage tracked successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to track media usage', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to track media usage', error: (error as Error).message });
     }
   };
 
@@ -2372,9 +2680,9 @@ export class ContentController {
       }
 
       res.status(200).json({ success: true, message: 'Media usage untracked successfully' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to untrack media usage', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to untrack media usage', error: (error as Error).message });
     }
   };
 
@@ -2384,9 +2692,9 @@ export class ContentController {
 
       const count = await this.mediaUsageRepo.getUsageCount(mediaId);
       res.status(200).json({ success: true, data: { mediaId, usageCount: count } });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch media usage count', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to fetch media usage count', error: (error as Error).message });
     }
   };
 }

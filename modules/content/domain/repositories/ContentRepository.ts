@@ -39,38 +39,38 @@ export interface IContentRepository {
   deletePage(pageId: string): Promise<boolean>;
 
   // Block operations
-  findBlocksByPageId(pageId: string): Promise<any[]>;
-  saveBlock(pageId: string, block: any): Promise<any>;
+  findBlocksByPageId(pageId: string): Promise<unknown[]>;
+  saveBlock(pageId: string, block: unknown): Promise<unknown>;
   deleteBlock(blockId: string): Promise<boolean>;
   reorderBlocks(pageId: string, blockIds: string[]): Promise<boolean>;
 
   // Template operations
-  findTemplateById(templateId: string): Promise<any | null>;
-  findTemplates(): Promise<any[]>;
-  saveTemplate(template: any): Promise<any>;
+  findTemplateById(templateId: string): Promise<unknown | null>;
+  findTemplates(): Promise<unknown[]>;
+  saveTemplate(template: unknown): Promise<unknown>;
   deleteTemplate(templateId: string): Promise<boolean>;
 
   // Category operations
-  findCategoryById(categoryId: string): Promise<any | null>;
-  findCategories(parentId?: string): Promise<any[]>;
-  saveCategory(category: any): Promise<any>;
+  findCategoryById(categoryId: string): Promise<unknown | null>;
+  findCategories(parentId?: string): Promise<unknown[]>;
+  saveCategory(category: unknown): Promise<unknown>;
   deleteCategory(categoryId: string): Promise<boolean>;
 
   // Navigation operations
-  findNavigationById(navigationId: string): Promise<any | null>;
-  findNavigations(): Promise<any[]>;
-  saveNavigation(navigation: any): Promise<any>;
+  findNavigationById(navigationId: string): Promise<unknown | null>;
+  findNavigations(): Promise<unknown[]>;
+  saveNavigation(navigation: unknown): Promise<unknown>;
   deleteNavigation(navigationId: string): Promise<boolean>;
 
   // Media operations
-  findMediaById(mediaId: string): Promise<any | null>;
-  findMedia(folderId?: string): Promise<any[]>;
-  saveMedia(media: any): Promise<any>;
+  findMediaById(mediaId: string): Promise<unknown | null>;
+  findMedia(folderId?: string): Promise<unknown[]>;
+  saveMedia(media: unknown): Promise<unknown>;
   deleteMedia(mediaId: string): Promise<boolean>;
 
   // Redirect operations
-  findRedirectBySource(sourcePath: string): Promise<any | null>;
-  findRedirects(): Promise<any[]>;
-  saveRedirect(redirect: any): Promise<any>;
+  findRedirectBySource(sourcePath: string): Promise<unknown | null>;
+  findRedirects(): Promise<unknown[]>;
+  saveRedirect(redirect: unknown): Promise<unknown>;
   deleteRedirect(redirectId: string): Promise<boolean>;
 }

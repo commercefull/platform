@@ -17,7 +17,7 @@ export interface BlockWithType {
   contentBlockId: string;
   title: string | null;
   sortOrder: number;
-  content: Record<string, any>;
+  content: Record<string, unknown>;
   isVisible: boolean;
   contentType: {
     contentTypeId: string;

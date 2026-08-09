@@ -47,7 +47,7 @@ export class DeleteCustomerUseCase {
     await this.customerRepository.delete(command.customerId);
 
     // Emit event
-    (eventBus as any).emit('customer.deleted', {
+    eventBus.emit('customer.deleted', {
       customerId: customer.customerId,
       email: customer.email,
       reason: command.reason,

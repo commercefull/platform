@@ -1,6 +1,6 @@
 /**
  * Dashboard Query Repository
- * Provides dashboard statistics for admin, merchant, and B2B portals
+ * Provides dashboard statistics for admin and merchant portals
  */
 
 import { query, queryOne } from '../../../../libs/db';
@@ -159,7 +159,7 @@ class DashboardQueryRepositoryClass {
    * Get recent orders for a specific merchant
    */
   async getMerchantRecentOrders(merchantId: string, limit: number = 5): Promise<RecentOrder[]> {
-    const orders = await query<any[]>(
+    const orders = await query<RecentOrder[]>(
       `SELECT DISTINCT ON (o."orderId")
          o."orderId", o."orderNumber", 
          COALESCE(c."firstName" || ' ' || c."lastName", 'Guest') as "customerName",
@@ -200,7 +200,7 @@ class DashboardQueryRepositoryClass {
    * Get top products for a specific merchant
    */
   async getMerchantTopProducts(merchantId: string, limit: number = 5): Promise<TopProduct[]> {
-    const products = await query<any[]>(
+    const products = await query<TopProduct[]>(
       `SELECT 
          p."productId", p."name",
          COALESCE(SUM(oi."quantity"), 0)::int as "totalSold",

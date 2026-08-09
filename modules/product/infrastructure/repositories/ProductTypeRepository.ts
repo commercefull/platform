@@ -62,7 +62,7 @@ export class ProductTypeRepository {
 
   async update(id: string, input: ProductTypeUpdateInput): Promise<ProductType | null> {
     const setStatements: string[] = ['"updatedAt" = now()'];
-    const values: any[] = [id];
+    const values: unknown[] = [id];
     let paramIndex = 2;
 
     if (input.name !== undefined) {

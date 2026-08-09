@@ -34,7 +34,7 @@ describe('Customer: Product Browsing', () => {
     it('should only return ACTIVE + VISIBLE/FEATURED products', async () => {
       const res = await client.get('/customer/products');
       expect(res.status).toBe(200);
-      res.data.data.products.forEach((p: any) => {
+      res.data.data.products.forEach((p: Record<string, unknown>) => {
         expect(p.status).toBe('active');
         expect(['visible', 'featured']).toContain(p.visibility);
       });
@@ -88,7 +88,7 @@ describe('Customer: Product Browsing', () => {
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
       expect(Array.isArray(res.data.data.products)).toBe(true);
-      res.data.data.products.forEach((p: any) => {
+      res.data.data.products.forEach((p: Record<string, unknown>) => {
         expect(p.isFeatured).toBe(true);
       });
     });
@@ -112,7 +112,7 @@ describe('Customer: Product Browsing', () => {
       const res = await client.get(`/customer/products/${SEEDED_PRODUCT_1_ID}/related`);
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
-      const ids = res.data.data.products.map((p: any) => p.productId);
+      const ids = res.data.data.products.map((p: Record<string, unknown>) => p.productId);
       expect(ids).not.toContain(SEEDED_PRODUCT_1_ID);
     });
 

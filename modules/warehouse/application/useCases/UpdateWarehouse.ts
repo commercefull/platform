@@ -32,8 +32,21 @@ export interface UpdateWarehouseOutput {
   updatedAt: string;
 }
 
+interface WarehouseRecord {
+  warehouseId: string;
+  name: string;
+  code: string;
+  isActive: boolean;
+  updatedAt: Date;
+}
+
+interface WarehouseRepositoryPort {
+  findById(id: string): Promise<WarehouseRecord | null>;
+  update(id: string, data: Record<string, unknown>): Promise<WarehouseRecord>;
+}
+
 export class UpdateWarehouseUseCase {
-  constructor(private readonly warehouseRepository: any) {}
+  constructor(private readonly warehouseRepository: WarehouseRepositoryPort) {}
 
   async execute(input: UpdateWarehouseInput): Promise<UpdateWarehouseOutput> {
     const warehouse = await this.warehouseRepository.findById(input.warehouseId);

@@ -7,7 +7,7 @@ import axios, { AxiosInstance } from 'axios';
 import * as crypto from 'crypto';
 import { InitiatePaymentUseCase, InitiatePaymentCommand } from '../../../modules/payment/application/useCases/InitiatePayment';
 import PaymentRepo from '../../../modules/payment/infrastructure/repositories/PaymentRepository';
-import { eventBus } from '../../../libs/events/eventBus';
+import { eventBus, EventPayload } from '../../../libs/events/eventBus';
 import { PaymentTransaction } from '../../../modules/payment/domain/entities/PaymentTransaction';
 import { generateUUID } from '../../../libs/uuid';
 
@@ -39,6 +39,7 @@ function makeWebhookSignature(body: string, secret: string): string {
 describe('Payment Integration Tests', () => {
   let client: AxiosInstance;
   let customerToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let adminToken: string;
 
   beforeAll(async () => {
@@ -53,15 +54,15 @@ describe('Payment Integration Tests', () => {
 
   describe('InitiatePaymentUseCase', () => {
     it('REQ 2.1.1 — creates a PENDING transaction and emits payment.received', async () => {
-      const received: any[] = [];
-      eventBus.registerHandler('payment.received', (p: any) => {
+      const received: EventPayload[] = [];
+      eventBus.registerHandler('payment.received', (p: EventPayload) => {
         received.push(p);
       });
 
       const useCase = new InitiatePaymentUseCase(PaymentRepo);
-      let result: any;
+      let result: Record<string, unknown>;
       try {
-        result = await useCase.execute(new InitiatePaymentCommand('00000000-0000-0000-0000-000000000001', 50, 'USD', 'default'));
+        result = await useCase.execute(new InitiatePaymentCommand('00000000-0000-0000-0000-000000000001', 50, 'USD', 'default')) as unknown as Record<string, unknown>;
       } catch {
         // No gateway configured in test env — acceptable
         return;
@@ -69,7 +70,7 @@ describe('Payment Integration Tests', () => {
 
       expect(result.status).toBe('pending');
       expect(result.transactionId).toBeDefined();
-      const event = received.find((e: any) => e.data?.transactionId === result.transactionId);
+      const event = received.find((e: EventPayload) => (e.data as Record<string, unknown>)?.transactionId === result.transactionId);
       expect(event).toBeDefined();
     });
 
@@ -130,8 +131,8 @@ describe('Payment Integration Tests', () => {
         return;
       }
 
-      const emitted: any[] = [];
-      eventBus.registerHandler('order.paid', (p: any) => {
+      const emitted: unknown[] = [];
+      eventBus.registerHandler('order.paid', (p: unknown) => {
         emitted.push(p);
       });
 
@@ -165,8 +166,8 @@ describe('Payment Integration Tests', () => {
         return;
       }
 
-      const emitted: any[] = [];
-      eventBus.registerHandler('order.payment_failed', (p: any) => {
+      const emitted: unknown[] = [];
+      eventBus.registerHandler('order.payment_failed', (p: unknown) => {
         emitted.push(p);
       });
 
@@ -195,7 +196,7 @@ describe('Payment Integration Tests', () => {
       expect(resp.data.success).toBe(true);
       const txs = resp.data.data?.data || resp.data.data || [];
       if (Array.isArray(txs) && txs.length > 0) {
-        txs.forEach((tx: any) => {
+        txs.forEach((tx: unknown) => {
           expect(tx).toHaveProperty('transactionId');
         });
       }
@@ -242,7 +243,7 @@ describe('Payment Integration Tests', () => {
       if (listResp.status !== 200) return;
 
       const methods = listResp.data.data || [];
-      const defaults = methods.filter((m: any) => m.isDefault === true);
+      const defaults = methods.filter((m: Record<string, unknown>) => m.isDefault === true);
       expect(defaults.length).toBeLessThanOrEqual(1);
     });
   });

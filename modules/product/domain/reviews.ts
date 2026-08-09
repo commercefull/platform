@@ -22,7 +22,7 @@ export interface ReviewProps {
   isHighlighted: boolean;
   adminResponse?: string;
   adminRespondedAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -200,7 +200,7 @@ export class Review {
     this.props.updatedAt = new Date();
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       ...this.props,
       isApproved: this.isApproved,

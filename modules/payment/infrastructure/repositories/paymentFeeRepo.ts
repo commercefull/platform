@@ -41,4 +41,10 @@ export async function sumByMerchant(merchantId: string, currency: string): Promi
   return result ? parseFloat(result.total) : 0;
 }
 
-export default { findByTransaction, create, sumByMerchant };
+export async function findAll(limit: number = 100): Promise<PaymentFee[]> {
+  return (
+    (await query<PaymentFee[]>(`SELECT * FROM "paymentFee" ORDER BY "createdAt" DESC LIMIT $1`, [limit])) || []
+  );
+}
+
+export default { findByTransaction, create, sumByMerchant, findAll };

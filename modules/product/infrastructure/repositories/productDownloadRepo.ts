@@ -29,7 +29,7 @@ export class ProductDownloadRepo {
 
   async findByProductId(productId: string, productVariantId?: string, activeOnly = false): Promise<ProductDownload[]> {
     let sql = `SELECT * FROM "productDownload" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (productVariantId) {
       sql += ` AND "productVariantId" = $2`;
@@ -83,7 +83,7 @@ export class ProductDownloadRepo {
 
   async update(id: string, params: ProductDownloadUpdateParams): Promise<ProductDownload | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -105,7 +105,6 @@ export class ProductDownloadRepo {
   }
 
   async reorder(downloads: Array<{ productDownloadId: string; sortOrder: number }>): Promise<void> {
-    const now = unixTimestamp();
     for (const download of downloads) {
       await this.update(download.productDownloadId, { sortOrder: download.sortOrder });
     }
@@ -129,7 +128,7 @@ export class ProductDownloadRepo {
 
   async deleteByProductId(productId: string, productVariantId?: string): Promise<number> {
     let sql = `DELETE FROM "productDownload" WHERE "productId" = $1`;
-    const params: any[] = [productId];
+    const params: unknown[] = [productId];
 
     if (productVariantId) {
       sql += ` AND "productVariantId" = $2`;
@@ -143,7 +142,7 @@ export class ProductDownloadRepo {
 
   async count(productId?: string): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "productDownload"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (productId) {
       sql += ` WHERE "productId" = $1`;

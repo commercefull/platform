@@ -17,11 +17,11 @@ export const checkoutSettings = async (req: TypedRequest, res: Response): Promis
       shippingOptions: [],
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error loading checkout settings:', error);
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load checkout settings',
+      error: (error as Error).message || 'Failed to load checkout settings',
     });
   }
 };
@@ -29,14 +29,14 @@ export const checkoutSettings = async (req: TypedRequest, res: Response): Promis
 export const updateCheckoutSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/checkout?success=Checkout settings updated successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating checkout settings:', error);
     adminRespond(req, res, 'settings/checkout/index', {
       pageName: 'Checkout Settings',
       settings: {},
       paymentMethods: [],
       shippingOptions: [],
-      error: error.message || 'Failed to update checkout settings',
+      error: (error as Error).message || 'Failed to update checkout settings',
     });
   }
 };
@@ -48,11 +48,11 @@ export const listPaymentMethods = async (req: TypedRequest, res: Response): Prom
       paymentMethods: [],
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing payment methods:', error);
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load payment methods',
+      error: (error as Error).message || 'Failed to load payment methods',
     });
   }
 };
@@ -60,9 +60,9 @@ export const listPaymentMethods = async (req: TypedRequest, res: Response): Prom
 export const updatePaymentMethodOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Payment method order updated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating payment method order:', error);
-    res.status(500).json({ success: false, message: error.message || 'Failed to update order' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to update order' });
   }
 };
 
@@ -73,11 +73,11 @@ export const listShippingOptions = async (req: TypedRequest, res: Response): Pro
       shippingOptions: [],
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing shipping options:', error);
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load shipping options',
+      error: (error as Error).message || 'Failed to load shipping options',
     });
   }
 };
@@ -85,8 +85,8 @@ export const listShippingOptions = async (req: TypedRequest, res: Response): Pro
 export const updateShippingOptionOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Shipping option order updated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating shipping option order:', error);
-    res.status(500).json({ success: false, message: error.message || 'Failed to update order' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to update order' });
   }
 };

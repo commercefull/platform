@@ -29,7 +29,7 @@ describe('Cart Promotion Tests', () => {
       } else {
         promotionId = '';
       }
-    } catch (error) {
+    } catch {
       promotionId = '';
     }
   });
@@ -71,7 +71,7 @@ describe('Cart Promotion Tests', () => {
     expect(Array.isArray(response.data.data)).toBe(true);
 
     if (cartPromotionId && response.data.data.length > 0) {
-      const foundPromotion = response.data.data.find((p: any) => p.cartPromotionId === cartPromotionId);
+      const foundPromotion = response.data.data.find((p: Record<string, unknown>) => p.cartPromotionId === cartPromotionId);
       if (foundPromotion) {
         expect(foundPromotion.cartId).toBe(testCartId);
         expect(foundPromotion.promotionId).toBe(promotionId);
@@ -97,7 +97,7 @@ describe('Cart Promotion Tests', () => {
     });
 
     if (getResponse.status === 200 && getResponse.data?.data) {
-      const foundPromotion = getResponse.data.data.find((p: any) => p.cartPromotionId === cartPromotionId);
+      const foundPromotion = getResponse.data.data.find((p: Record<string, unknown>) => p.cartPromotionId === cartPromotionId);
       expect(foundPromotion).toBeUndefined();
     }
   });
@@ -108,7 +108,7 @@ describe('Cart Promotion Tests', () => {
       await client.delete(`/business/promotions/${promotionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
-    } catch (error) {}
+    } catch {}
 
     await cleanupPromotionTests(client, adminToken, testCartId, testProductId, testCategoryId);
   });

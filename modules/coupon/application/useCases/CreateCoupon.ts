@@ -27,7 +27,7 @@ export class CreateCouponCommand {
     public readonly applicableCustomerGroups?: string[],
     public readonly excludedProducts?: string[],
     public readonly excludedCategories?: string[],
-    public readonly metadata?: Record<string, any>,
+    public readonly metadata?: Record<string, unknown>,
   ) {}
 }
 

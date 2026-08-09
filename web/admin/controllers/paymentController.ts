@@ -1,12 +1,11 @@
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import PaymentRepo from '../../../modules/payment/infrastructure/repositories/paymentRepo';
 import * as paymentDisputeRepo from '../../../modules/payment/infrastructure/repositories/paymentDisputeRepo';
 import * as paymentFeeRepo from '../../../modules/payment/infrastructure/repositories/paymentFeeRepo';
 import * as paymentSettingsRepo from '../../../modules/payment/infrastructure/repositories/paymentSettingsRepo';
 import * as paymentBalanceRepo from '../../../modules/payment/infrastructure/repositories/paymentBalanceRepo';
 import * as paymentReportRepo from '../../../modules/payment/infrastructure/repositories/paymentReportRepo';
-import { query as dbQuery, queryOne as dbQueryOne } from '../../../libs/db';
 import { logger } from '../../../libs/logger';
 import { adminRespond } from '../../respond';
 
@@ -27,12 +26,12 @@ export const listPaymentGateways = async (req: TypedRequest, res: Response): Pro
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load payment gateways',
+      error: (error as Error).message || 'Failed to load payment gateways',
     });
   }
 };
@@ -42,12 +41,12 @@ export const createPaymentGatewayForm = async (req: TypedRequest, res: Response)
     adminRespond(req, res, 'payments/gateways/create', {
       pageName: 'Create Payment Gateway',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -55,7 +54,8 @@ export const createPaymentGatewayForm = async (req: TypedRequest, res: Response)
 export const createPaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const merchantId = 'default-merchant';
-    const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint } = req.body;
+    const body = req.body as RequestBody;
+    const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint } = body;
 
     const gateway = await PaymentRepo.createGateway({
       merchantId,
@@ -69,21 +69,21 @@ export const createPaymentGateway = async (req: TypedRequest, res: Response): Pr
       publicKey: publicKey || undefined,
       webhookSecret: webhookSecret || undefined,
       apiEndpoint: apiEndpoint || undefined,
-      supportedPaymentMethods: ['credit_card', 'debit_card', 'paypal'] as any,
-      supportedCurrencies: ['USD', 'EUR', 'GBP'] as any,
-      processingFees: { percentage: 2.9, fixed: 0.3 } as any,
-      metadata: {} as any,
-      checkoutSettings: {} as any,
+      supportedPaymentMethods: JSON.stringify(['credit_card', 'debit_card', 'paypal']),
+      supportedCurrencies: ['USD', 'EUR', 'GBP'],
+      processingFees: { percentage: 2.9, fixed: 0.3 },
+      metadata: {},
+      checkoutSettings: {},
     });
 
     res.redirect(`/hub/payments/gateways/${gateway.paymentGatewayId}?success=Payment gateway created successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'payments/gateways/create', {
       pageName: 'Create Payment Gateway',
-      error: error.message || 'Failed to create payment gateway',
-      formData: req.body,
+      error: (error as Error).message || 'Failed to create payment gateway',
+      formData: req.body as RequestBody,
     });
   }
 };
@@ -108,12 +108,12 @@ export const viewPaymentGateway = async (req: TypedRequest, res: Response): Prom
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load payment gateway',
+      error: (error as Error).message || 'Failed to load payment gateway',
     });
   }
 };
@@ -136,12 +136,12 @@ export const editPaymentGatewayForm = async (req: TypedRequest, res: Response): 
       pageName: `Edit: ${gateway.name}`,
       gateway,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load form',
+      error: (error as Error).message || 'Failed to load form',
     });
   }
 };
@@ -149,9 +149,10 @@ export const editPaymentGatewayForm = async (req: TypedRequest, res: Response): 
 export const updatePaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { gatewayId } = req.params;
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
-    const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint } = req.body;
+    const body = req.body as RequestBody;
+    const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint } = body;
 
     if (name !== undefined) updates.name = name;
     if (provider !== undefined) updates.provider = provider;
@@ -164,10 +165,10 @@ export const updatePaymentGateway = async (req: TypedRequest, res: Response): Pr
     if (webhookSecret !== undefined) updates.webhookSecret = webhookSecret || undefined;
     if (apiEndpoint !== undefined) updates.apiEndpoint = apiEndpoint || undefined;
 
-    const gateway = await PaymentRepo.updateGateway(gatewayId, updates);
+    const _gateway = await PaymentRepo.updateGateway(gatewayId, updates);
 
     res.redirect(`/hub/payments/gateways/${gatewayId}?success=Payment gateway updated successfully`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     try {
@@ -176,13 +177,13 @@ export const updatePaymentGateway = async (req: TypedRequest, res: Response): Pr
       adminRespond(req, res, 'payments/gateways/edit', {
         pageName: `Edit: ${gateway?.name || 'Gateway'}`,
         gateway,
-        error: error.message || 'Failed to update payment gateway',
-        formData: req.body,
+        error: (error as Error).message || 'Failed to update payment gateway',
+        formData: req.body as RequestBody,
       });
     } catch {
       adminRespond(req, res, 'error', {
         pageName: 'Error',
-        error: error.message || 'Failed to update payment gateway',
+        error: (error as Error).message || 'Failed to update payment gateway',
       });
     }
   }
@@ -199,10 +200,10 @@ export const deletePaymentGateway = async (req: TypedRequest, res: Response): Pr
     }
 
     res.json({ success: true, message: 'Payment gateway deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message || 'Failed to delete payment gateway' });
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete payment gateway' });
   }
 };
 
@@ -222,12 +223,12 @@ export const listPaymentMethods = async (req: TypedRequest, res: Response): Prom
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load payment methods',
+      error: (error as Error).message || 'Failed to load payment methods',
     });
   }
 };
@@ -240,7 +241,7 @@ export const listPaymentTransactions = async (req: TypedRequest, res: Response):
   try {
     // For demonstration, we'll get recent transactions
     // In a real app, you'd implement pagination and filtering
-    const transactions: any[] = []; // Would fetch from repository
+    const transactions: unknown[] = []; // Would fetch from repository
 
     adminRespond(req, res, 'payments/transactions/index', {
       pageName: 'Payment Transactions',
@@ -248,12 +249,12 @@ export const listPaymentTransactions = async (req: TypedRequest, res: Response):
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load payment transactions',
+      error: (error as Error).message || 'Failed to load payment transactions',
     });
   }
 };
@@ -265,15 +266,7 @@ export const listPaymentTransactions = async (req: TypedRequest, res: Response):
 export const listDisputes = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { status } = req.query;
-    const disputes = await paymentDisputeRepo.findByPayment('');
-    // Fetch all disputes across all payments via a broader query
-    const allDisputes = await (async () => {
-      const rows = await dbQuery<paymentDisputeRepo.PaymentDispute[]>(
-        `SELECT * FROM "paymentDispute" ${status ? `WHERE status = $1` : ''} ORDER BY "createdAt" DESC LIMIT 100`,
-        status ? [status as string] : [],
-      );
-      return rows || [];
-    })();
+    const allDisputes = await paymentDisputeRepo.findAll(status as string | undefined, 100);
 
     adminRespond(req, res, 'payments/disputes/index', {
       pageName: 'Payment Disputes',
@@ -281,9 +274,9 @@ export const listDisputes = async (req: TypedRequest, res: Response): Promise<vo
       filters: { status: status || '' },
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load disputes' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load disputes' });
   }
 };
 
@@ -302,23 +295,24 @@ export const viewDispute = async (req: TypedRequest, res: Response): Promise<voi
       dispute,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load dispute' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load dispute' });
   }
 };
 
 export const updateDisputeStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { disputeId } = req.params;
-    const { status } = req.body;
+    const body = req.body as RequestBody;
+    const { status } = body;
     const resolvedAt = status === 'resolved' ? new Date() : undefined;
 
     await paymentDisputeRepo.updateStatus(disputeId, status, resolvedAt);
     res.redirect(`/admin/payments/disputes/${disputeId}?success=Status updated`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect(`/admin/payments/disputes/${req.params.disputeId}?error=${encodeURIComponent(error.message)}`);
+    res.redirect(`/admin/payments/disputes/${req.params.disputeId}?error=${encodeURIComponent((error as Error).message)}`);
   }
 };
 
@@ -328,19 +322,16 @@ export const updateDisputeStatus = async (req: TypedRequest, res: Response): Pro
 
 export const listPaymentFees = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const fees = await (async () => {
-      const rows = await dbQuery<paymentFeeRepo.PaymentFee[]>(`SELECT * FROM "paymentFee" ORDER BY "createdAt" DESC LIMIT 100`, []);
-      return rows || [];
-    })();
+    const fees = await paymentFeeRepo.findAll(100);
 
     adminRespond(req, res, 'payments/fees/index', {
       pageName: 'Payment Fees',
       fees,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load fees' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load fees' });
   }
 };
 
@@ -350,26 +341,24 @@ export const listPaymentFees = async (req: TypedRequest, res: Response): Promise
 
 export const listPaymentSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const allSettings = await dbQuery<paymentSettingsRepo.PaymentSettings[]>(
-      `SELECT * FROM "paymentSettings" ORDER BY "createdAt" DESC`,
-      [],
-    );
+    const allSettings = await paymentSettingsRepo.findAll();
 
     adminRespond(req, res, 'payments/settings/index', {
       pageName: 'Payment Settings',
-      settings: allSettings || [],
+      settings: allSettings,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load settings' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load settings' });
   }
 };
 
 export const updatePaymentSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
-    const { provider, isEnabled, config } = req.body;
+    const body = req.body as RequestBody;
+    const { provider, isEnabled, config } = body;
 
     await paymentSettingsRepo.upsert({
       merchantId,
@@ -379,9 +368,9 @@ export const updatePaymentSettings = async (req: TypedRequest, res: Response): P
     });
 
     res.redirect(`/admin/payments/settings?success=Settings updated`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.redirect(`/admin/payments/settings?error=${encodeURIComponent(error.message)}`);
+    res.redirect(`/admin/payments/settings?error=${encodeURIComponent((error as Error).message)}`);
   }
 };
 
@@ -391,19 +380,16 @@ export const updatePaymentSettings = async (req: TypedRequest, res: Response): P
 
 export const viewPaymentBalance = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const balances = await dbQuery<paymentBalanceRepo.PaymentBalance[]>(
-      `SELECT * FROM "paymentBalance" ORDER BY "merchantId", currency`,
-      [],
-    );
+    const balances = await paymentBalanceRepo.findAll();
 
     adminRespond(req, res, 'payments/balance/index', {
       pageName: 'Payment Balances',
-      balances: balances || [],
+      balances,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load balances' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load balances' });
   }
 };
 
@@ -413,28 +399,23 @@ export const viewPaymentBalance = async (req: TypedRequest, res: Response): Prom
 
 export const listPaymentReports = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const reports = await dbQuery<paymentReportRepo.PaymentReport[]>(
-      `SELECT * FROM "paymentReport" ORDER BY "periodStart" DESC LIMIT 100`,
-      [],
-    );
+    const reports = await paymentReportRepo.findAll(100);
 
     adminRespond(req, res, 'payments/reports/index', {
       pageName: 'Payment Reports',
-      reports: reports || [],
+      reports,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load reports' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load reports' });
   }
 };
 
 export const viewPaymentReport = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { reportId } = req.params;
-    const report = await dbQueryOne<paymentReportRepo.PaymentReport>(`SELECT * FROM "paymentReport" WHERE "paymentReportId" = $1`, [
-      reportId,
-    ]);
+    const report = await paymentReportRepo.findById(reportId);
 
     if (!report) {
       adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Report not found' });
@@ -446,8 +427,8 @@ export const viewPaymentReport = async (req: TypedRequest, res: Response): Promi
       report,
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load report' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load report' });
   }
 };

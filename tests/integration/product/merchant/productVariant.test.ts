@@ -8,8 +8,7 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../../testUtils';
-import { SEEDED_PRODUCT_2_ID, SEEDED_VARIANT_1_ID, cleanupProductTests, setupProductTests } from '../testUtils';
+import { SEEDED_PRODUCT_2_ID, cleanupProductTests, setupProductTests } from '../testUtils';
 
 ;
 ;

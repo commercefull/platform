@@ -62,7 +62,7 @@ export async function setupTaxTests() {
   return { client, adminToken };
 }
 
-export function createTestTaxCategory(overrides: Partial<any> = {}) {
+export function createTestTaxCategory(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();
   return {
     name: `Test Category ${timestamp}`,
@@ -75,7 +75,7 @@ export function createTestTaxCategory(overrides: Partial<any> = {}) {
   };
 }
 
-export function createTestTaxZone(overrides: Partial<any> = {}) {
+export function createTestTaxZone(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();
   return {
     name: `Test Zone ${timestamp}`,
@@ -88,7 +88,7 @@ export function createTestTaxZone(overrides: Partial<any> = {}) {
   };
 }
 
-export function createTestTaxRate(taxCategoryId: string, taxZoneId: string, overrides: Partial<any> = {}) {
+export function createTestTaxRate(taxCategoryId: string, taxZoneId: string, overrides: Partial<unknown> = {}) {
   return {
     taxCategoryId,
     taxZoneId,
@@ -104,7 +104,7 @@ export function createTestTaxRate(taxCategoryId: string, taxZoneId: string, over
   };
 }
 
-export function createTestTaxRule(taxRateId: string, overrides: Partial<any> = {}) {
+export function createTestTaxRule(taxRateId: string, overrides: Partial<unknown> = {}) {
   return {
     taxRateId,
     name: `Test Rule ${Date.now()}`,
@@ -132,24 +132,24 @@ export async function cleanupTaxTests(
   for (const id of resources.ruleIds || []) {
     try {
       await client.delete(`/business/tax/rules/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 
   for (const id of resources.rateIds || []) {
     try {
       await client.delete(`/business/tax/rates/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 
   for (const id of resources.zoneIds || []) {
     try {
       await client.delete(`/business/tax/zones/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 
   for (const id of resources.categoryIds || []) {
     try {
       await client.delete(`/business/tax/categories/${id}`, { headers });
-    } catch (error) {}
+    } catch {}
   }
 }

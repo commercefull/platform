@@ -9,8 +9,8 @@ export interface MembershipPlanBenefit {
   benefitId: string;
   isActive: boolean;
   priority: number;
-  valueOverride?: Record<string, any>;
-  rulesOverride?: Record<string, any>;
+  valueOverride?: Record<string, unknown>;
+  rulesOverride?: Record<string, unknown>;
   notes?: string;
 }
 
@@ -79,7 +79,7 @@ export class MembershipPlanBenefitRepo {
 
   async update(id: string, params: MembershipPlanBenefitUpdateParams): Promise<MembershipPlanBenefit | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
@@ -102,7 +102,6 @@ export class MembershipPlanBenefitRepo {
   }
 
   async reorder(planId: string, benefitPriorities: Array<{ benefitId: string; priority: number }>): Promise<void> {
-    const now = unixTimestamp();
     for (const item of benefitPriorities) {
       const planBenefit = await this.findByPlanAndBenefit(planId, item.benefitId);
       if (planBenefit) {
@@ -137,7 +136,7 @@ export class MembershipPlanBenefitRepo {
 
   async count(planId?: string): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "membershipPlanBenefit"`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (planId) {
       sql += ` WHERE "planId" = $1`;

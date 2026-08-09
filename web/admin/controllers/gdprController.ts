@@ -5,9 +5,8 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
-import { query, queryOne } from '../../../libs/db';
-import { generateUUID as uuidv4 } from '../../../libs/uuid';
+import { TypedRequest, RequestBody } from 'libs/types/express';
+import * as adminGdprRepo from '../../../modules/gdpr/infrastructure/repositories/adminGdprRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================
@@ -16,51 +15,26 @@ import { adminRespond } from '../../respond';
 
 export const gdprDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // Get GDPR stats
-    const statsResult = await queryOne<any>(
-      `SELECT
-        COUNT(CASE WHEN "status" = 'pending' THEN 1 END) as "pendingRequests",
-        COUNT(CASE WHEN "status" = 'completed' AND "updatedAt" >= DATE_TRUNC('month', CURRENT_DATE) THEN 1 END) as "completedRequests",
-        AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / 86400) as "avgProcessingDays"
-       FROM "gdprRequest"`,
-    );
-
-    // Get consent stats
-    const consentResult = await queryOne<any>(
-      `SELECT
-        COUNT(CASE WHEN "acceptsMarketing" = true THEN 1 END) as "marketingConsent",
-        ROUND(100.0 * COUNT(CASE WHEN "acceptsMarketing" = true THEN 1 END) / COUNT(*), 1) as "marketingConsentRate",
-        COUNT(CASE WHEN "acceptsAnalytics" = true THEN 1 END) as "analyticsConsent",
-        ROUND(100.0 * COUNT(CASE WHEN "acceptsAnalytics" = true THEN 1 END) / COUNT(*), 1) as "analyticsConsentRate"
-       FROM "customer"`,
-    );
-
-    // Get recent requests
-    const requests = await query<Array<any>>(
-      `SELECT gr.*, c."firstName" || ' ' || c."lastName" as "customerName", c."email" as "customerEmail"
-       FROM "gdprRequest" gr
-       LEFT JOIN "customer" c ON gr."customerId" = c."customerId"
-       WHERE gr."deletedAt" IS NULL
-       ORDER BY gr."createdAt" DESC
-       LIMIT 20`,
-    );
+    const stats = await adminGdprRepo.getGdprStats();
+    const consent = await adminGdprRepo.getConsentStats();
+    const requests = await adminGdprRepo.findRecentRequests(20);
 
     adminRespond(req, res, 'gdpr/index', {
       pageName: 'GDPR Compliance',
       stats: {
-        pendingRequests: parseInt(statsResult?.pendingRequests || '0'),
-        completedRequests: parseInt(statsResult?.completedRequests || '0'),
-        avgProcessingDays: Math.round(parseFloat(statsResult?.avgProcessingDays || '0')),
-        consentRate: parseFloat(consentResult?.marketingConsentRate || '0'),
+        pendingRequests: stats.pendingRequests,
+        completedRequests: stats.completedRequests,
+        avgProcessingDays: stats.avgProcessingDays,
+        consentRate: consent.marketingConsentRate,
       },
-      requests: requests || [],
+      requests,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load GDPR dashboard',
+      error: (error as Error).message || 'Failed to load GDPR dashboard',
     });
   }
 };
@@ -71,35 +45,25 @@ export const gdprDashboard = async (req: TypedRequest, res: Response): Promise<v
 
 export const createGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { requestType, customerEmail, customerName, description } = req.body;
+    const body = req.body as RequestBody;
+    const { requestType, customerEmail, customerName, description } = body;
 
-    // Find customer by email
-    const customer = await queryOne<{ customerId: string }>(
-      `SELECT "customerId" FROM "customer" WHERE "email" = $1 AND "deletedAt" IS NULL`,
-      [customerEmail],
-    );
+    const customerId = await adminGdprRepo.findCustomerIdByEmail(customerEmail);
 
-    const requestId = uuidv4();
-    await query(
-      `INSERT INTO "gdprRequest" ("requestId", "customerId", "requestType", "status", "description", "customerEmail", "customerName", "dueDate", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`,
-      [
-        requestId,
-        customer?.customerId || null,
-        requestType,
-        'pending',
-        description || null,
-        customerEmail,
-        customerName || null,
-        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      ],
-    );
+    await adminGdprRepo.createRequest({
+      customerId: customerId || null,
+      requestType,
+      description: description || undefined,
+      customerEmail,
+      customerName: customerName || undefined,
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    });
 
     res.redirect('/hub/gdpr?success=GDPR request created');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.redirect('/hub/gdpr?error=' + encodeURIComponent(error.message));
+    res.redirect('/hub/gdpr?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -107,13 +71,7 @@ export const viewGdprRequest = async (req: TypedRequest, res: Response): Promise
   try {
     const { requestId } = req.params;
 
-    const request = await queryOne<any>(
-      `SELECT gr.*, c."firstName" || ' ' || c."lastName" as "customerName", c."email" as "customerEmail"
-       FROM "gdprRequest" gr
-       LEFT JOIN "customer" c ON gr."customerId" = c."customerId"
-       WHERE gr."requestId" = $1 AND gr."deletedAt" IS NULL`,
-      [requestId],
-    );
+    const request = await adminGdprRepo.findRequestById(requestId);
 
     if (!request) {
       adminRespond(req, res, 'error', {
@@ -124,15 +82,15 @@ export const viewGdprRequest = async (req: TypedRequest, res: Response): Promise
     }
 
     adminRespond(req, res, 'gdpr/view', {
-      pageName: `GDPR Request: ${request.requestType}`,
+      pageName: `GDPR Request: ${(request as Record<string, unknown>).requestType}`,
       request,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load GDPR request',
+      error: (error as Error).message || 'Failed to load GDPR request',
     });
   }
 };
@@ -141,31 +99,29 @@ export const processGdprRequest = async (req: TypedRequest, res: Response): Prom
   try {
     const { requestId } = req.params;
 
-    await query(`UPDATE "gdprRequest" SET "status" = 'processing', "updatedAt" = NOW() WHERE "requestId" = $1`, [requestId]);
+    await adminGdprRepo.updateStatus(requestId, 'processing');
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 export const completeGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { requestId } = req.params;
-    const { notes } = req.body;
+    const body = req.body as RequestBody;
+    const { notes } = body;
 
-    await query(`UPDATE "gdprRequest" SET "status" = 'completed', "notes" = $1, "updatedAt" = NOW() WHERE "requestId" = $2`, [
-      notes,
-      requestId,
-    ]);
+    await adminGdprRepo.completeRequest(requestId, notes);
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -186,12 +142,12 @@ export const consentManagement = async (req: TypedRequest, res: Response): Promi
       pageName: 'Consent Management',
       consentSettings,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load consent management',
+      error: (error as Error).message || 'Failed to load consent management',
     });
   }
 };

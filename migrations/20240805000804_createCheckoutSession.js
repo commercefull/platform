@@ -26,6 +26,8 @@ exports.up = function (knex) {
     t.text('referrer');
     t.uuid('convertedToOrderId').references('orderId').inTable('order');
     t.timestamp('expiresAt');
+    t.string('paymentIntentId').nullable();
+    t.jsonb('metadata').nullable();
 
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
@@ -37,6 +39,7 @@ exports.up = function (knex) {
     t.index('status');
     t.index('step');
     t.index('convertedToOrderId');
+    t.index('paymentIntentId');
     t.index('expiresAt');
     t.index('lastActivityAt');
   });

@@ -3,9 +3,17 @@
  * Listens to platform events and tracks them for analytics
  */
 
-import { eventBus, EventType } from '../libs/events/eventBus';
+import { eventBus } from '../libs/events/eventBus';
 import * as reportingRepo from '../modules/analytics/infrastructure/repositories/reportingRepo';
 import * as analyticsRepo from '../modules/analytics/infrastructure/repositories/analyticsRepo';
+
+// ============================================================================
+// Event Payload Interfaces
+// ============================================================================
+
+interface EventPayload {
+  data: Record<string, unknown>;
+}
 
 // ============================================================================
 // Event Handlers
@@ -62,9 +70,9 @@ export function initializeAnalyticsHandlers(): void {
 // Order Event Handlers
 // ============================================================================
 
-async function handleOrderCreated(payload: any): Promise<void> {
+async function handleOrderCreated(payload: unknown): Promise<void> {
   try {
-    const { data } = payload;
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -73,13 +81,13 @@ async function handleOrderCreated(payload: any): Promise<void> {
       eventType: 'order.created',
       eventCategory: 'order',
       eventAction: 'created',
-      merchantId: data.merchantId,
-      customerId: data.customerId,
-      orderId: data.orderId,
-      eventValue: data.grandTotal || data.total,
-      eventQuantity: data.itemCount,
-      currency: data.currency,
-      channel: data.channel || 'web',
+      merchantId: data.merchantId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      orderId: data.orderId as string | undefined,
+      eventValue: (data.grandTotal || data.total) as number | undefined,
+      eventQuantity: data.itemCount as number | undefined,
+      currency: data.currency as string | undefined,
+      channel: (data.channel as string) || 'web',
       eventData: {
         orderNumber: data.orderNumber,
         paymentMethod: data.paymentMethod,
@@ -88,21 +96,21 @@ async function handleOrderCreated(payload: any): Promise<void> {
     });
 
     // Update daily sales
-    const isNewCustomer = data.isFirstOrder || false;
+    const isNewCustomer = (data.isFirstOrder as boolean) || false;
     const isGuest = !data.customerId;
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: data.merchantId,
-      channel: data.channel || 'all',
-      currency: data.currency || 'USD',
+      merchantId: data.merchantId as string | undefined,
+      channel: (data.channel as string) || 'all',
+      currency: (data.currency as string) || 'USD',
       orderCount: 1,
-      itemsSold: data.itemCount || 0,
-      grossRevenue: data.grandTotal || data.total || 0,
-      discountTotal: data.discountTotal || 0,
-      taxTotal: data.taxTotal || 0,
-      shippingRevenue: data.shippingTotal || 0,
-      netRevenue: (data.grandTotal || data.total || 0) - (data.taxTotal || 0),
+      itemsSold: (data.itemCount as number) || 0,
+      grossRevenue: ((data.grandTotal || data.total) as number) || 0,
+      discountTotal: (data.discountTotal as number) || 0,
+      taxTotal: (data.taxTotal as number) || 0,
+      shippingRevenue: (data.shippingTotal as number) || 0,
+      netRevenue: (((data.grandTotal || data.total) as number) || 0) - ((data.taxTotal as number) || 0),
       newCustomers: isNewCustomer ? 1 : 0,
       returningCustomers: !isNewCustomer && !isGuest ? 1 : 0,
       guestOrders: isGuest ? 1 : 0,
@@ -111,52 +119,54 @@ async function handleOrderCreated(payload: any): Promise<void> {
 
     // Update product performance for each item
     if (data.items && Array.isArray(data.items)) {
-      for (const item of data.items) {
+      for (const item of data.items as Array<Record<string, unknown>>) {
         await analyticsRepo.upsertProductPerformance({
-          productId: item.productId,
-          productVariantId: item.productVariantId,
+          productId: item.productId as string,
+          productVariantId: item.productVariantId as string | undefined,
           date: today,
-          channel: data.channel || 'all',
+          channel: (data.channel as string) || 'all',
           purchases: 1,
-          quantitySold: item.quantity || 1,
-          revenue: item.total || item.price * (item.quantity || 1),
-          averagePrice: item.price,
+          quantitySold: (item.quantity as number) || 1,
+          revenue: (item.total as number) || (item.price as number) * ((item.quantity as number) || 1),
+          averagePrice: item.price as number,
         });
       }
     }
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleOrderCompleted(payload: any): Promise<void> {
+async function handleOrderCompleted(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     await reportingRepo.trackEvent({
       eventType: 'order.completed',
       eventCategory: 'order',
       eventAction: 'completed',
-      orderId: payload.data.orderId,
-      customerId: payload.data.customerId,
-      eventValue: payload.data.grandTotal,
+      orderId: data.orderId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      eventValue: data.grandTotal as number | undefined,
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleOrderCancelled(payload: any): Promise<void> {
+async function handleOrderCancelled(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     await reportingRepo.trackEvent({
       eventType: 'order.cancelled',
       eventCategory: 'order',
       eventAction: 'cancelled',
-      orderId: payload.data.orderId,
-      customerId: payload.data.customerId,
-      eventValue: payload.data.grandTotal,
-      eventData: { reason: payload.data.reason },
+      orderId: data.orderId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      eventValue: data.grandTotal as number | undefined,
+      eventData: { reason: data.reason },
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleOrderRefunded(payload: any): Promise<void> {
+async function handleOrderRefunded(payload: unknown): Promise<void> {
   try {
-    const { data } = payload;
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -164,25 +174,26 @@ async function handleOrderRefunded(payload: any): Promise<void> {
       eventType: 'order.refunded',
       eventCategory: 'order',
       eventAction: 'refunded',
-      orderId: data.orderId,
-      customerId: data.customerId,
-      eventValue: data.refundAmount,
+      orderId: data.orderId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      eventValue: data.refundAmount as number | undefined,
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: data.merchantId,
-      refundTotal: data.refundAmount || 0,
+      merchantId: data.merchantId as string | undefined,
+      refundTotal: (data.refundAmount as number) || 0,
     });
-  } catch (error) {}
+  } catch {}
 }
 
 // ============================================================================
 // Cart Event Handlers
 // ============================================================================
 
-async function handleCartCreated(payload: any): Promise<void> {
+async function handleCartCreated(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -190,23 +201,23 @@ async function handleCartCreated(payload: any): Promise<void> {
       eventType: 'cart.created',
       eventCategory: 'cart',
       eventAction: 'created',
-      basketId: payload.data.basketId,
-      customerId: payload.data.customerId,
-      sessionId: payload.data.sessionId,
-      visitorId: payload.data.visitorId,
+      basketId: data.basketId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      sessionId: data.sessionId as string | undefined,
+      visitorId: data.visitorId as string | undefined,
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: payload.data.merchantId,
+      merchantId: data.merchantId as string | undefined,
       cartCreated: 1,
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleCartItemAdded(payload: any): Promise<void> {
+async function handleCartItemAdded(payload: unknown): Promise<void> {
   try {
-    const { data } = payload;
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -214,25 +225,25 @@ async function handleCartItemAdded(payload: any): Promise<void> {
       eventType: 'cart.item.added',
       eventCategory: 'cart',
       eventAction: 'item_added',
-      basketId: data.basketId,
-      productId: data.productId,
-      customerId: data.customerId,
-      eventQuantity: data.quantity,
-      eventValue: data.price,
+      basketId: data.basketId as string | undefined,
+      productId: data.productId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      eventQuantity: data.quantity as number | undefined,
+      eventValue: data.price as number | undefined,
     });
 
     await analyticsRepo.upsertProductPerformance({
-      productId: data.productId,
-      productVariantId: data.productVariantId,
+      productId: data.productId as string,
+      productVariantId: data.productVariantId as string | undefined,
       date: today,
       addToCarts: 1,
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleCartItemRemoved(payload: any): Promise<void> {
+async function handleCartItemRemoved(payload: unknown): Promise<void> {
   try {
-    const { data } = payload;
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -240,23 +251,24 @@ async function handleCartItemRemoved(payload: any): Promise<void> {
       eventType: 'cart.item.removed',
       eventCategory: 'cart',
       eventAction: 'item_removed',
-      basketId: data.basketId,
-      productId: data.productId,
-      customerId: data.customerId,
-      eventQuantity: data.quantity,
+      basketId: data.basketId as string | undefined,
+      productId: data.productId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      eventQuantity: data.quantity as number | undefined,
     });
 
     await analyticsRepo.upsertProductPerformance({
-      productId: data.productId,
-      productVariantId: data.productVariantId,
+      productId: data.productId as string,
+      productVariantId: data.productVariantId as string | undefined,
       date: today,
       removeFromCarts: 1,
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleCartAbandoned(payload: any): Promise<void> {
+async function handleCartAbandoned(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -264,25 +276,26 @@ async function handleCartAbandoned(payload: any): Promise<void> {
       eventType: 'cart.abandoned',
       eventCategory: 'cart',
       eventAction: 'abandoned',
-      basketId: payload.data.basketId,
-      customerId: payload.data.customerId,
-      eventValue: payload.data.cartValue,
+      basketId: data.basketId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      eventValue: data.cartValue as number | undefined,
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: payload.data.merchantId,
+      merchantId: data.merchantId as string | undefined,
       cartAbandoned: 1,
     });
-  } catch (error) {}
+  } catch {}
 }
 
 // ============================================================================
 // Checkout Event Handlers
 // ============================================================================
 
-async function handleCheckoutStarted(payload: any): Promise<void> {
+async function handleCheckoutStarted(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -290,38 +303,40 @@ async function handleCheckoutStarted(payload: any): Promise<void> {
       eventType: 'checkout.started',
       eventCategory: 'checkout',
       eventAction: 'started',
-      basketId: payload.data.basketId,
-      customerId: payload.data.customerId,
-      eventValue: payload.data.cartValue,
+      basketId: data.basketId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      eventValue: data.cartValue as number | undefined,
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: payload.data.merchantId,
+      merchantId: data.merchantId as string | undefined,
       checkoutStarted: 1,
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleCheckoutCompleted(payload: any): Promise<void> {
+async function handleCheckoutCompleted(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     await reportingRepo.trackEvent({
       eventType: 'checkout.completed',
       eventCategory: 'checkout',
       eventAction: 'completed',
-      orderId: payload.data.orderId,
-      customerId: payload.data.customerId,
-      eventValue: payload.data.orderTotal,
+      orderId: data.orderId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      eventValue: data.orderTotal as number | undefined,
     });
-  } catch (error) {}
+  } catch {}
 }
 
 // ============================================================================
 // Payment Event Handlers
 // ============================================================================
 
-async function handlePaymentSuccess(payload: any): Promise<void> {
+async function handlePaymentSuccess(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -329,22 +344,23 @@ async function handlePaymentSuccess(payload: any): Promise<void> {
       eventType: 'payment.success',
       eventCategory: 'payment',
       eventAction: 'success',
-      orderId: payload.data.orderId,
-      customerId: payload.data.customerId,
-      eventValue: payload.data.amount,
-      eventData: { paymentMethod: payload.data.paymentMethod },
+      orderId: data.orderId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      eventValue: data.amount as number | undefined,
+      eventData: { paymentMethod: data.paymentMethod },
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: payload.data.merchantId,
+      merchantId: data.merchantId as string | undefined,
       paymentSuccessCount: 1,
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handlePaymentFailed(payload: any): Promise<void> {
+async function handlePaymentFailed(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -352,27 +368,27 @@ async function handlePaymentFailed(payload: any): Promise<void> {
       eventType: 'payment.failed',
       eventCategory: 'payment',
       eventAction: 'failed',
-      orderId: payload.data.orderId,
-      customerId: payload.data.customerId,
-      eventValue: payload.data.amount,
-      eventData: { reason: payload.data.failureReason },
+      orderId: data.orderId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      eventValue: data.amount as number | undefined,
+      eventData: { reason: data.failureReason },
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: payload.data.merchantId,
+      merchantId: data.merchantId as string | undefined,
       paymentFailedCount: 1,
     });
-  } catch (error) {}
+  } catch {}
 }
 
 // ============================================================================
 // Product Event Handlers
 // ============================================================================
 
-async function handleProductViewed(payload: any): Promise<void> {
+async function handleProductViewed(payload: unknown): Promise<void> {
   try {
-    const { data } = payload;
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -380,129 +396,136 @@ async function handleProductViewed(payload: any): Promise<void> {
       eventType: 'product.viewed',
       eventCategory: 'product',
       eventAction: 'viewed',
-      productId: data.productId,
-      customerId: data.customerId,
-      sessionId: data.sessionId,
-      visitorId: data.visitorId,
+      productId: data.productId as string | undefined,
+      customerId: data.customerId as string | undefined,
+      sessionId: data.sessionId as string | undefined,
+      visitorId: data.visitorId as string | undefined,
     });
 
     await analyticsRepo.upsertProductPerformance({
-      productId: data.productId,
-      productVariantId: data.productVariantId,
+      productId: data.productId as string,
+      productVariantId: data.productVariantId as string | undefined,
       date: today,
       views: 1,
       uniqueViews: data.isFirstView ? 1 : 0,
       detailViews: 1,
       outOfStockViews: data.isOutOfStock ? 1 : 0,
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleProductCreated(payload: any): Promise<void> {
+async function handleProductCreated(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     await reportingRepo.trackEvent({
       eventType: 'product.created',
       eventCategory: 'product',
       eventAction: 'created',
-      productId: payload.data.productId,
-      eventData: { name: payload.data.name, sku: payload.data.sku },
+      productId: data.productId as string | undefined,
+      eventData: { name: data.name, sku: data.sku },
     });
-  } catch (error) {}
+  } catch {}
 }
 
 // ============================================================================
 // Customer Event Handlers
 // ============================================================================
 
-async function handleCustomerCreated(payload: any): Promise<void> {
+async function handleCustomerCreated(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     await reportingRepo.trackEvent({
       eventType: 'customer.created',
       eventCategory: 'customer',
       eventAction: 'created',
-      customerId: payload.data.customerId,
-      channel: payload.data.channel,
-      eventData: { source: payload.data.source },
+      customerId: data.customerId as string | undefined,
+      channel: data.channel as string | undefined,
+      eventData: { source: data.source },
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleCustomerUpdated(payload: any): Promise<void> {
+async function handleCustomerUpdated(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     await reportingRepo.trackEvent({
       eventType: 'customer.updated',
       eventCategory: 'customer',
       eventAction: 'updated',
-      customerId: payload.data.customerId,
+      customerId: data.customerId as string | undefined,
     });
-  } catch (error) {}
+  } catch {}
 }
 
 // ============================================================================
 // Subscription Event Handlers
 // ============================================================================
 
-async function handleSubscriptionCreated(payload: any): Promise<void> {
+async function handleSubscriptionCreated(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     await reportingRepo.trackEvent({
       eventType: 'subscription.created',
       eventCategory: 'subscription',
       eventAction: 'created',
-      customerId: payload.data.customerId,
-      eventValue: payload.data.monthlyValue,
-      eventData: { planId: payload.data.planId },
+      customerId: data.customerId as string | undefined,
+      eventValue: data.monthlyValue as number | undefined,
+      eventData: { planId: data.planId },
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleSubscriptionCancelled(payload: any): Promise<void> {
+async function handleSubscriptionCancelled(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     await reportingRepo.trackEvent({
       eventType: 'subscription.cancelled',
       eventCategory: 'subscription',
       eventAction: 'cancelled',
-      customerId: payload.data.customerId,
-      eventData: { reason: payload.data.reason },
+      customerId: data.customerId as string | undefined,
+      eventData: { reason: data.reason },
     });
-  } catch (error) {}
+  } catch {}
 }
 
 // ============================================================================
 // Support Event Handlers
 // ============================================================================
 
-async function handleTicketCreated(payload: any): Promise<void> {
+async function handleTicketCreated(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     await reportingRepo.trackEvent({
       eventType: 'ticket.created',
       eventCategory: 'support',
       eventAction: 'created',
-      customerId: payload.data.customerId,
-      orderId: payload.data.orderId,
-      eventData: { category: payload.data.category, priority: payload.data.priority },
+      customerId: data.customerId as string | undefined,
+      orderId: data.orderId as string | undefined,
+      eventData: { category: data.category, priority: data.priority },
     });
-  } catch (error) {}
+  } catch {}
 }
 
-async function handleTicketResolved(payload: any): Promise<void> {
+async function handleTicketResolved(payload: unknown): Promise<void> {
   try {
+    const { data } = payload as EventPayload;
     await reportingRepo.trackEvent({
       eventType: 'ticket.resolved',
       eventCategory: 'support',
       eventAction: 'resolved',
-      customerId: payload.data.customerId,
-      eventData: { resolutionTime: payload.data.resolutionTimeMinutes },
+      customerId: data.customerId as string | undefined,
+      eventData: { resolutionTime: data.resolutionTimeMinutes },
     });
-  } catch (error) {}
+  } catch {}
 }
 
 // ============================================================================
 // Review Event Handlers
 // ============================================================================
 
-async function handleReviewCreated(payload: any): Promise<void> {
+async function handleReviewCreated(payload: unknown): Promise<void> {
   try {
-    const { data } = payload;
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -510,27 +533,27 @@ async function handleReviewCreated(payload: any): Promise<void> {
       eventType: 'review.created',
       eventCategory: 'review',
       eventAction: 'created',
-      productId: data.productId,
-      customerId: data.customerId,
+      productId: data.productId as string | undefined,
+      customerId: data.customerId as string | undefined,
       eventData: { rating: data.rating },
     });
 
     await analyticsRepo.upsertProductPerformance({
-      productId: data.productId,
+      productId: data.productId as string,
       date: today,
       reviews: 1,
-      averageRating: data.rating,
+      averageRating: data.rating as number,
     });
-  } catch (error) {}
+  } catch {}
 }
 
 // ============================================================================
 // Alert Event Handlers
 // ============================================================================
 
-async function handleStockAlertCreated(payload: any): Promise<void> {
+async function handleStockAlertCreated(payload: unknown): Promise<void> {
   try {
-    const { data } = payload;
+    const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -538,14 +561,14 @@ async function handleStockAlertCreated(payload: any): Promise<void> {
       eventType: 'alert.stock.created',
       eventCategory: 'alert',
       eventAction: 'stock_alert_created',
-      productId: data.productId,
-      customerId: data.customerId,
+      productId: data.productId as string | undefined,
+      customerId: data.customerId as string | undefined,
     });
 
     await analyticsRepo.upsertProductPerformance({
-      productId: data.productId,
+      productId: data.productId as string,
       date: today,
       stockAlerts: 1,
     });
-  } catch (error) {}
+  } catch {}
 }

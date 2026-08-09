@@ -27,7 +27,7 @@ export interface BusinessProps {
     defaultLanguage: string;
     timezone: string;
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -52,7 +52,7 @@ export class Business {
     defaultCurrency?: string;
     defaultLanguage?: string;
     timezone?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Business {
     const now = new Date();
     return new Business({
@@ -122,7 +122,7 @@ export class Business {
   get settings(): BusinessProps['settings'] {
     return this.props.settings;
   }
-  get metadata(): Record<string, any> | undefined {
+  get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
   }
   get createdAt(): Date {
@@ -189,7 +189,7 @@ export class Business {
     this.touch();
   }
 
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, unknown>): void {
     this.props.metadata = { ...this.props.metadata, ...metadata };
     this.touch();
   }
@@ -206,7 +206,7 @@ export class Business {
       .substring(0, 100);
   }
 
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       businessId: this.props.businessId,
       name: this.props.name,

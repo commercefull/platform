@@ -30,8 +30,40 @@ export interface CalculateTierStatusOutput {
   qualifyingPurchases: number;
 }
 
+export interface LoyaltyTierData {
+  tierId: string;
+  name: string;
+  level: number;
+  pointsThreshold: number;
+  purchasesThreshold?: number;
+  benefits?: string[];
+  pointsMultiplier?: number;
+}
+
+export interface CustomerLoyaltyData {
+  currentTier?: LoyaltyTierData;
+}
+
+export interface QualificationPeriod {
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface QualifyingMetrics {
+  points: number;
+  purchases: number;
+}
+
+export interface CalculateTierRepository {
+  getCustomerLoyalty(customerId: string, programId?: string): Promise<CustomerLoyaltyData | null>;
+  getTiers(programId?: string): Promise<LoyaltyTierData[]>;
+  getQualificationPeriod(programId?: string): Promise<QualificationPeriod>;
+  getQualifyingMetrics(customerId: string, startDate: Date, endDate: Date): Promise<QualifyingMetrics>;
+  updateCustomerTier(customerId: string, tierId: string): Promise<void>;
+}
+
 export class CalculateTierStatusUseCase {
-  constructor(private readonly loyaltyRepository: any) {}
+  constructor(private readonly loyaltyRepository: CalculateTierRepository) {}
 
   async execute(input: CalculateTierStatusInput): Promise<CalculateTierStatusOutput> {
     const { customerId, programId } = input;
@@ -44,7 +76,7 @@ export class CalculateTierStatusUseCase {
 
     // Get all tier thresholds
     const tiers = await this.loyaltyRepository.getTiers(programId);
-    const sortedTiers = tiers.sort((a: any, b: any) => a.level - b.level);
+    const sortedTiers = tiers.sort((a: LoyaltyTierData, b: LoyaltyTierData) => a.level - b.level);
 
     // Calculate qualifying metrics (points earned in qualification period)
     const qualificationPeriod = await this.loyaltyRepository.getQualificationPeriod(programId);
@@ -82,7 +114,7 @@ export class CalculateTierStatusUseCase {
     }
 
     // Calculate points to next tier
-    const nextTierIndex = sortedTiers.findIndex((t: any) => t.tierId === newTier.tierId) + 1;
+    const nextTierIndex = sortedTiers.findIndex((t: LoyaltyTierData) => t.tierId === newTier.tierId) + 1;
     const nextTier = nextTierIndex < sortedTiers.length ? sortedTiers[nextTierIndex] : undefined;
     const pointsToNextTier = nextTier ? Math.max(0, nextTier.pointsThreshold - qualifyingMetrics.points) : undefined;
 

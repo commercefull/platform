@@ -1,6 +1,6 @@
 import { eventBus } from '../../../../libs/events/eventBus';
 import { generateUUID } from '../../../../libs/uuid';
-import { Inventory } from '../../domain/entities/Inventory';
+import { Inventory, InventoryLocation, InventoryMovement } from '../../domain/entities/Inventory';
 import { StoreDispatchRepository } from '../../domain/repositories/StoreDispatchRepository';
 
 export interface ReceiveStoreDispatchInput {
@@ -13,13 +13,20 @@ export interface ReceiveStoreDispatchInput {
   notes?: string;
 }
 
+interface ReceiveDispatchInventoryPort {
+  getLocationByStoreId(storeId: string): Promise<InventoryLocation | null>;
+  findByProductAndLocation(productId: string, locationId: string, variantId?: string): Promise<Inventory | null>;
+  save(inventory: Inventory): Promise<Inventory>;
+  recordMovement(movement: Omit<InventoryMovement, 'movementId' | 'createdAt'>): Promise<InventoryMovement>;
+}
+
 export class ReceiveStoreDispatchUseCase {
   constructor(
     private readonly dispatchRepository: StoreDispatchRepository,
-    private readonly inventoryRepository: any,
+    private readonly inventoryRepository: ReceiveDispatchInventoryPort,
   ) {}
 
-  async execute(input: ReceiveStoreDispatchInput): Promise<Record<string, any>> {
+  async execute(input: ReceiveStoreDispatchInput): Promise<Record<string, unknown>> {
     const dispatch = await this.dispatchRepository.findById(input.dispatchId);
     if (!dispatch) {
       throw new Error('Dispatch not found');

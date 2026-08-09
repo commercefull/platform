@@ -5,9 +5,8 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
-import { query, queryOne } from '../../../libs/db';
-import { generateUUID as uuidv4 } from '../../../libs/uuid';
+import { TypedRequest, RequestBody } from 'libs/types/express';
+import * as adminTaxRepo from '../../../modules/tax/infrastructure/repositories/adminTaxRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================
@@ -16,33 +15,24 @@ import { adminRespond } from '../../respond';
 
 export const listTaxSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const taxRates = await query<Array<any>>(`SELECT * FROM "taxRate" WHERE "deletedAt" IS NULL ORDER BY "name"`);
-
-    const taxZones = await query<Array<any>>(`SELECT * FROM "taxZone" WHERE "deletedAt" IS NULL ORDER BY "name"`);
-
-    const taxClasses = await query<Array<any>>(
-      `SELECT tc.*, COUNT(p."productId") as "productCount"
-       FROM "taxClass" tc
-       LEFT JOIN "product" p ON tc."taxClassId" = p."taxClass"
-       WHERE tc."deletedAt" IS NULL
-       GROUP BY tc."taxClassId"
-       ORDER BY tc."name"`,
-    );
+    const taxRates = await adminTaxRepo.findAllTaxRates();
+    const taxZones = await adminTaxRepo.findAllTaxZones();
+    const taxClasses = await adminTaxRepo.findAllTaxClasses();
 
     adminRespond(req, res, 'tax/index', {
       pageName: 'Tax Management',
-      taxRates: taxRates || [],
-      taxZones: taxZones || [],
-      taxClasses: taxClasses || [],
+      taxRates,
+      taxZones,
+      taxClasses,
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load tax settings',
+      error: (error as Error).message || 'Failed to load tax settings',
     });
   }
 };
@@ -53,50 +43,58 @@ export const listTaxSettings = async (req: TypedRequest, res: Response): Promise
 
 export const createTaxRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { name, rate, country, state, taxClass, isActive } = req.body;
+    const body = req.body as RequestBody;
+    const { name, rate, country, state, taxClass, isActive } = body;
 
-    await query(
-      `INSERT INTO "taxRate" ("taxRateId", "name", "rate", "country", "state", "taxClass", "isActive", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
-      [uuidv4(), name, parseFloat(rate), country || null, state || null, taxClass || null, isActive === 'true'],
-    );
+    await adminTaxRepo.createTaxRate({
+      name,
+      rate: parseFloat(rate),
+      country: country || undefined,
+      state: state || undefined,
+      taxClass: taxClass || undefined,
+      isActive: isActive === 'true',
+    });
 
     res.redirect('/hub/tax?success=Tax rate created');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.redirect('/hub/tax?error=' + encodeURIComponent(error.message));
+    res.redirect('/hub/tax?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
 export const updateTaxRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxRateId } = req.params;
-    const { name, rate, country, state, taxClass, isActive } = req.body;
+    const body = req.body as RequestBody;
+    const { name, rate, country, state, taxClass, isActive } = body;
 
-    await query(
-      `UPDATE "taxRate" SET "name" = $1, "rate" = $2, "country" = $3, "state" = $4, "taxClass" = $5, "isActive" = $6, "updatedAt" = NOW()
-       WHERE "taxRateId" = $7`,
-      [name, parseFloat(rate), country || null, state || null, taxClass || null, isActive === 'true', taxRateId],
-    );
+    await adminTaxRepo.updateTaxRate(taxRateId, {
+      name,
+      rate: parseFloat(rate),
+      country: country || undefined,
+      state: state || undefined,
+      taxClass: taxClass || undefined,
+      isActive: isActive === 'true',
+    });
 
     res.redirect('/hub/tax?success=Tax rate updated');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 export const deleteTaxRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxRateId } = req.params;
-    await query(`UPDATE "taxRate" SET "deletedAt" = NOW() WHERE "taxRateId" = $1`, [taxRateId]);
+    await adminTaxRepo.softDeleteTaxRate(taxRateId);
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -106,52 +104,56 @@ export const deleteTaxRate = async (req: TypedRequest, res: Response): Promise<v
 
 export const createTaxZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { name, description, countries, isActive } = req.body;
+    const body = req.body as RequestBody;
+    const { name, description, countries, isActive } = body;
     const countriesArray = countries ? countries.split(',').map((c: string) => c.trim()) : [];
 
-    await query(
-      `INSERT INTO "taxZone" ("taxZoneId", "name", "description", "countries", "isActive", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
-      [uuidv4(), name, description || null, JSON.stringify(countriesArray), isActive === 'true'],
-    );
+    await adminTaxRepo.createTaxZone({
+      name,
+      description: description || undefined,
+      countries: countriesArray,
+      isActive: isActive === 'true',
+    });
 
     res.redirect('/hub/tax?success=Tax zone created');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.redirect('/hub/tax?error=' + encodeURIComponent(error.message));
+    res.redirect('/hub/tax?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
 export const updateTaxZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxZoneId } = req.params;
-    const { name, description, countries, isActive } = req.body;
+    const body = req.body as RequestBody;
+    const { name, description, countries, isActive } = body;
     const countriesArray = countries ? countries.split(',').map((c: string) => c.trim()) : [];
 
-    await query(
-      `UPDATE "taxZone" SET "name" = $1, "description" = $2, "countries" = $3, "isActive" = $4, "updatedAt" = NOW()
-       WHERE "taxZoneId" = $5`,
-      [name, description || null, JSON.stringify(countriesArray), isActive === 'true', taxZoneId],
-    );
+    await adminTaxRepo.updateTaxZone(taxZoneId, {
+      name,
+      description: description || undefined,
+      countries: countriesArray,
+      isActive: isActive === 'true',
+    });
 
     res.redirect('/hub/tax?success=Tax zone updated');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 export const deleteTaxZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxZoneId } = req.params;
-    await query(`UPDATE "taxZone" SET "deletedAt" = NOW() WHERE "taxZoneId" = $1`, [taxZoneId]);
+    await adminTaxRepo.softDeleteTaxZone(taxZoneId);
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -161,49 +163,49 @@ export const deleteTaxZone = async (req: TypedRequest, res: Response): Promise<v
 
 export const createTaxClass = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { name, description } = req.body;
+    const body = req.body as RequestBody;
+    const { name, description } = body;
 
-    await query(
-      `INSERT INTO "taxClass" ("taxClassId", "name", "description", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, NOW(), NOW())`,
-      [uuidv4(), name, description || null],
-    );
+    await adminTaxRepo.createTaxClass({
+      name,
+      description: description || undefined,
+    });
 
     res.redirect('/hub/tax?success=Tax class created');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.redirect('/hub/tax?error=' + encodeURIComponent(error.message));
+    res.redirect('/hub/tax?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
 export const updateTaxClass = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxClassId } = req.params;
-    const { name, description } = req.body;
+    const body = req.body as RequestBody;
+    const { name, description } = body;
 
-    await query(`UPDATE "taxClass" SET "name" = $1, "description" = $2, "updatedAt" = NOW() WHERE "taxClassId" = $3`, [
+    await adminTaxRepo.updateTaxClass(taxClassId, {
       name,
-      description || null,
-      taxClassId,
-    ]);
+      description: description || undefined,
+    });
 
     res.redirect('/hub/tax?success=Tax class updated');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
 export const deleteTaxClass = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxClassId } = req.params;
-    await query(`UPDATE "taxClass" SET "deletedAt" = NOW() WHERE "taxClassId" = $1`, [taxClassId]);
+    await adminTaxRepo.softDeleteTaxClass(taxClassId);
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };

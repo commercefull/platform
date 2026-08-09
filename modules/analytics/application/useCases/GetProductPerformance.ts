@@ -43,8 +43,22 @@ export interface GetProductPerformanceOutput {
   };
 }
 
+interface RawProductData {
+  productId: string;
+  name: string;
+  sku: string;
+  views: number;
+  addToCarts: number;
+  purchases: number;
+  revenue: number;
+  units: number;
+  returns?: number;
+}
+
 export class GetProductPerformanceUseCase {
-  constructor(private readonly analyticsRepository: any) {}
+  constructor(private readonly analyticsRepository: {
+    getProductPerformance(filters: Record<string, unknown>, startDate: Date, endDate: Date, sortBy: string, limit: number): Promise<RawProductData[]>;
+  }) {}
 
   async execute(input: GetProductPerformanceInput): Promise<GetProductPerformanceOutput> {
     const { storeId, productId, categoryId, startDate, endDate, sortBy = 'revenue', limit = 50 } = input;
@@ -59,7 +73,7 @@ export class GetProductPerformanceUseCase {
     const products = await this.analyticsRepository.getProductPerformance(filters, startDate, endDate, sortBy, limit);
 
     // Calculate metrics for each product
-    const enrichedProducts: ProductPerformanceItem[] = products.map((p: any) => ({
+    const enrichedProducts: ProductPerformanceItem[] = products.map((p: RawProductData) => ({
       productId: p.productId,
       name: p.name,
       sku: p.sku,

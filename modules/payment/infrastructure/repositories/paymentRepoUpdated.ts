@@ -8,7 +8,7 @@ export interface PaymentMethod {
   provider: string;
   is_active: boolean;
   requires_customer_saved: boolean;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   test_mode: boolean;
   created_at: Date;
   updated_at: Date;
@@ -58,10 +58,10 @@ export interface Payment {
   payment_method_id: string;
   gateway_id: string;
   transaction_id?: string;
-  gateway_response?: Record<string, any>;
+  gateway_response?: Record<string, unknown>;
   error_message?: string;
   refunded_amount?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: Date;
   updated_at: Date;
   deleted_at?: Date;
@@ -74,9 +74,9 @@ export interface Refund {
   reason: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   transaction_id?: string;
-  gateway_response?: Record<string, any>;
+  gateway_response?: Record<string, unknown>;
   error_message?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: Date;
   updated_at: Date;
   deleted_at?: Date;
@@ -138,7 +138,7 @@ export class PaymentRepo {
     method: Partial<Omit<PaymentMethod, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>>,
   ): Promise<PaymentMethod> {
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramCount = 1;
 
     Object.entries(method).forEach(([key, value]) => {
@@ -252,7 +252,7 @@ export class PaymentRepo {
     gateway: Partial<Omit<PaymentGateway, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>>,
   ): Promise<PaymentGateway> {
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramCount = 1;
 
     Object.entries(gateway).forEach(([key, value]) => {

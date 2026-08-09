@@ -97,7 +97,7 @@ function createRedisStore(config?: SessionStoreConfig['redis']): SessionStoreRes
   // Handle Redis connection events
   client.on('connect', () => {});
 
-  client.on('error', err => {});
+  client.on('error', _err => {});
 
   client.on('ready', () => {});
 

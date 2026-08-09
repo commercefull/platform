@@ -1,4 +1,3 @@
-import { unixTimestamp } from '../../libs/date';
 
 // Tax Types
 export type TaxCalculationMethod = 'unit_based' | 'row_based' | 'total_based';
@@ -40,7 +39,7 @@ export type TaxRate = {
   startDate: number;
   endDate?: number;
   isActive: boolean;
-  metadata?: any;
+  metadata?: unknown;
   createdAt: number;
   updatedAt: number;
 };
@@ -53,7 +52,7 @@ export type TaxCategory = {
   isDefault: boolean;
   sortOrder: number;
   isActive: boolean;
-  metadata?: any;
+  metadata?: unknown;
   createdAt: number;
   updatedAt: number;
 };
@@ -75,7 +74,7 @@ export type CustomerTaxExemption = {
   verifiedBy?: string;
   verifiedAt?: number;
   notes?: string;
-  metadata?: any;
+  metadata?: unknown;
   createdAt: number;
   updatedAt: number;
 };
@@ -96,8 +95,8 @@ export type TaxSettings = {
   defaultTaxCategory?: string;
   defaultTaxZone?: string;
   taxProvider?: 'internal' | 'avalara' | 'taxjar' | 'external';
-  taxProviderSettings?: any;
-  metadata?: any;
+  taxProviderSettings?: unknown;
+  metadata?: unknown;
   createdAt: number;
   updatedAt: number;
 };

@@ -7,6 +7,8 @@ import {
   findSimilarProductsUseCase,
   findByAttributeUseCase,
 } from '../../application/useCases/attribute/SearchProducts';
+import type { SearchProductsQuery } from '../../application/useCases/attribute/SearchProducts';
+import type { AttributeFilter } from '../../application/services/ProductSearchService';
 
 export class ProductSearchController {
   /**
@@ -41,10 +43,10 @@ export class ProductSearchController {
 
       // Parse attribute filters from query string
       // Format: attributes[0][code]=color&attributes[0][value]=red&attributes[0][operator]=eq
-      let parsedAttributes: any[] | undefined;
+      let parsedAttributes: unknown[] | undefined;
       if (attributes) {
         try {
-          parsedAttributes = typeof attributes === 'string' ? JSON.parse(attributes) : (attributes as any[]);
+          parsedAttributes = typeof attributes === 'string' ? JSON.parse(attributes) : (attributes as unknown[]);
         } catch {
           // If not JSON, try to parse from query params
           parsedAttributes = [];
@@ -67,9 +69,9 @@ export class ProductSearchController {
         isBestseller: isBestseller === 'true' ? true : isBestseller === 'false' ? false : undefined,
         hasVariants: hasVariants === 'true' ? true : hasVariants === 'false' ? false : undefined,
         inStock: inStock === 'true' ? true : inStock === 'false' ? false : undefined,
-        attributes: parsedAttributes,
-        sortBy: sortBy as any,
-        sortOrder: sortOrder as any,
+        attributes: parsedAttributes as AttributeFilter[] | undefined,
+        sortBy: sortBy as SearchProductsQuery['sortBy'],
+        sortOrder: sortOrder as SearchProductsQuery['sortOrder'],
         page: page ? parseInt(page as string, 10) : 1,
         limit: limit ? parseInt(limit as string, 10) : 20,
       });
@@ -95,7 +97,7 @@ export class ProductSearchController {
    */
   async searchPost(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const result = await searchProductsUseCase.execute(req.body);
+      const result = await searchProductsUseCase.execute(req.body as SearchProductsQuery);
 
       if (!result.success) {
         res.status(400).json(result);

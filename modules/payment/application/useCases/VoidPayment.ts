@@ -18,10 +18,33 @@ export interface VoidPaymentOutput {
   voidedAt: string;
 }
 
+interface TransactionRecord {
+  transactionId: string;
+  orderId: string;
+  gatewayTransactionId: string;
+  status: string;
+  voidedAt?: Date;
+  voidReason?: string;
+  gatewayResponse?: Record<string, unknown> | string;
+}
+
+interface PaymentRepositoryPort {
+  findTransactionById(id: string): Promise<TransactionRecord | null>;
+  updateTransaction(transaction: TransactionRecord): Promise<void>;
+}
+
+interface PaymentGatewayPort {
+  void(params: {
+    transactionId: string;
+    reason?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<{ success: boolean; response?: Record<string, unknown>; error?: string }>;
+}
+
 export class VoidPaymentUseCase {
   constructor(
-    private readonly paymentRepository: any, // PaymentRepository
-    private readonly paymentGateway: any, // PaymentGatewayService
+    private readonly paymentRepository: PaymentRepositoryPort,
+    private readonly paymentGateway: PaymentGatewayPort,
   ) {}
 
   async execute(input: VoidPaymentInput): Promise<VoidPaymentOutput> {

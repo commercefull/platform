@@ -1,4 +1,4 @@
-import { UserStoreRepository } from '../../../domain/repositories/UserStoreRepository';
+import { StoreUserRepository } from '../../../domain/repositories/StoreUserRepository';
 
 export interface GetUserStoresOutput {
   userStoreId: string;
@@ -11,7 +11,7 @@ export interface GetUserStoresOutput {
 }
 
 export class GetUserStoresUseCase {
-  constructor(private readonly userStoreRepository: UserStoreRepository) {}
+  constructor(private readonly userStoreRepository: StoreUserRepository) {}
 
   async execute(userId: string): Promise<GetUserStoresOutput[]> {
     const assignments = await this.userStoreRepository.findByUserId(userId);

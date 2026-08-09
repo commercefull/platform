@@ -4,16 +4,15 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
 
-const TABLES = {
-  STOCK_ALERT: Table.StockAlert,
-  PRICE_ALERT: Table.PriceAlert,
-};
+/* const _TABLE = {
+  STOCK_ALERT: Table.InventoryStockAlert,
+  PRICE_ALERT: Table.SupportPriceAlert,
+}; */
 
 // ============================================================================
 // Types
@@ -44,7 +43,7 @@ export interface StockAlert {
   purchasedAt?: Date;
   purchaseOrderId?: string;
   expiresAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -74,7 +73,7 @@ export interface PriceAlert {
   purchasedAt?: Date;
   purchaseOrderId?: string;
   expiresAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -84,7 +83,7 @@ export interface PriceAlert {
 // ============================================================================
 
 export async function getStockAlert(stockAlertId: string): Promise<StockAlert | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "stockAlert" WHERE "stockAlertId" = $1', [stockAlertId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "inventoryStockAlert" WHERE "stockAlertId" = $1', [stockAlertId]);
   return row ? mapToStockAlert(row) : null;
 }
 
@@ -93,7 +92,7 @@ export async function getStockAlerts(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: StockAlert[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters?.customerId) {
@@ -109,13 +108,13 @@ export async function getStockAlerts(
     params.push(filters.status);
   }
 
-  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "stockAlert" WHERE ${whereClause}`, params);
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "inventoryStockAlert" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "stockAlert" WHERE ${whereClause} 
+  const rows = await query<Record<string, unknown>[]>(
+    `SELECT * FROM "inventoryStockAlert" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
@@ -128,14 +127,14 @@ export async function getStockAlerts(
 
 export async function getActiveStockAlertsForProduct(productId: string, productVariantId?: string): Promise<StockAlert[]> {
   let whereClause = '"productId" = $1 AND "status" = \'active\'';
-  const params: any[] = [productId];
+  const params: unknown[] = [productId];
 
   if (productVariantId) {
     whereClause += ' AND ("productVariantId" = $2 OR "productVariantId" IS NULL)';
     params.push(productVariantId);
   }
 
-  const rows = await query<Record<string, any>[]>(`SELECT * FROM "stockAlert" WHERE ${whereClause}`, params);
+  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "inventoryStockAlert" WHERE ${whereClause}`, params);
   return (rows || []).map(mapToStockAlert);
 }
 
@@ -156,8 +155,8 @@ export async function createStockAlert(alert: {
   const now = new Date().toISOString();
   const expiresAt = alert.expiresAt || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days default
 
-  const result = await queryOne<Record<string, any>>(
-    `INSERT INTO "stockAlert" (
+  const result = await queryOne<Record<string, unknown>>(
+    `INSERT INTO "inventoryStockAlert" (
       "customerId", "email", "phone", "productId", "productVariantId",
       "productName", "variantName", "sku", "status", "desiredQuantity",
       "stockThreshold", "notifyOnAnyStock", "notificationChannel", "expiresAt",
@@ -189,7 +188,7 @@ export async function createStockAlert(alert: {
 export async function notifyStockAlert(stockAlertId: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
-    `UPDATE "stockAlert" SET 
+    `UPDATE "inventoryStockAlert" SET 
       "status" = 'notified', "notifiedAt" = $1, "lastNotifiedAt" = $1,
       "notificationCount" = "notificationCount" + 1, "updatedAt" = $1
      WHERE "stockAlertId" = $2`,
@@ -200,7 +199,7 @@ export async function notifyStockAlert(stockAlertId: string): Promise<void> {
 export async function markStockAlertPurchased(stockAlertId: string, orderId: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
-    `UPDATE "stockAlert" SET 
+    `UPDATE "inventoryStockAlert" SET 
       "status" = 'purchased', "purchasedAt" = $1, "purchaseOrderId" = $2, "updatedAt" = $1
      WHERE "stockAlertId" = $3`,
     [now, orderId, stockAlertId],
@@ -209,19 +208,19 @@ export async function markStockAlertPurchased(stockAlertId: string, orderId: str
 
 export async function cancelStockAlert(stockAlertId: string): Promise<void> {
   await query(
-    `UPDATE "stockAlert" SET "status" = 'cancelled', "updatedAt" = $1
+    `UPDATE "inventoryStockAlert" SET "status" = 'cancelled', "updatedAt" = $1
      WHERE "stockAlertId" = $2`,
     [new Date().toISOString(), stockAlertId],
   );
 }
 
 export async function expireStockAlerts(): Promise<number> {
-  const result = await query(
-    `UPDATE "stockAlert" SET "status" = 'expired', "updatedAt" = $1
+  const result = await query<{ rowCount: number }>(
+    `UPDATE "inventoryStockAlert" SET "status" = 'expired', "updatedAt" = $1
      WHERE "status" = 'active' AND "expiresAt" < NOW()`,
     [new Date().toISOString()],
   );
-  return (result as any)?.rowCount || 0;
+  return (result as { rowCount: number } | null)?.rowCount || 0;
 }
 
 // ============================================================================
@@ -229,7 +228,7 @@ export async function expireStockAlerts(): Promise<number> {
 // ============================================================================
 
 export async function getPriceAlert(priceAlertId: string): Promise<PriceAlert | null> {
-  const row = await queryOne<Record<string, any>>('SELECT * FROM "priceAlert" WHERE "priceAlertId" = $1', [priceAlertId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportPriceAlert" WHERE "priceAlertId" = $1', [priceAlertId]);
   return row ? mapToPriceAlert(row) : null;
 }
 
@@ -238,7 +237,7 @@ export async function getPriceAlerts(
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: PriceAlert[]; total: number }> {
   let whereClause = '1=1';
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters?.customerId) {
@@ -254,13 +253,13 @@ export async function getPriceAlerts(
     params.push(filters.status);
   }
 
-  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "priceAlert" WHERE ${whereClause}`, params);
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "supportPriceAlert" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "priceAlert" WHERE ${whereClause} 
+  const rows = await query<Record<string, unknown>[]>(
+    `SELECT * FROM "supportPriceAlert" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
@@ -273,20 +272,20 @@ export async function getPriceAlerts(
 
 export async function getActivePriceAlertsForProduct(productId: string, productVariantId?: string): Promise<PriceAlert[]> {
   let whereClause = '"productId" = $1 AND "status" = \'active\'';
-  const params: any[] = [productId];
+  const params: unknown[] = [productId];
 
   if (productVariantId) {
     whereClause += ' AND ("productVariantId" = $2 OR "productVariantId" IS NULL)';
     params.push(productVariantId);
   }
 
-  const rows = await query<Record<string, any>[]>(`SELECT * FROM "priceAlert" WHERE ${whereClause}`, params);
+  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "supportPriceAlert" WHERE ${whereClause}`, params);
   return (rows || []).map(mapToPriceAlert);
 }
 
 export async function getPriceAlertsToNotify(productId: string, newPrice: number): Promise<PriceAlert[]> {
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "priceAlert" 
+  const rows = await query<Record<string, unknown>[]>(
+    `SELECT * FROM "supportPriceAlert" 
      WHERE "productId" = $1 AND "status" = 'active'
      AND (
        ("alertType" = 'target' AND "targetPrice" >= $2)
@@ -319,8 +318,8 @@ export async function createPriceAlert(alert: {
   const now = new Date().toISOString();
   const expiresAt = alert.expiresAt || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days default
 
-  const result = await queryOne<Record<string, any>>(
-    `INSERT INTO "priceAlert" (
+  const result = await queryOne<Record<string, unknown>>(
+    `INSERT INTO "supportPriceAlert" (
       "customerId", "email", "phone", "productId", "productVariantId",
       "productName", "variantName", "sku", "status", "alertType",
       "targetPrice", "percentageDrop", "originalPrice", "currentPrice",
@@ -355,7 +354,7 @@ export async function createPriceAlert(alert: {
 export async function notifyPriceAlert(priceAlertId: string, notifiedPrice: number): Promise<void> {
   const now = new Date().toISOString();
   await query(
-    `UPDATE "priceAlert" SET 
+    `UPDATE "supportPriceAlert" SET 
       "status" = 'notified', "notifiedAt" = $1, "lastNotifiedAt" = $1,
       "notifiedPrice" = $2, "notificationCount" = "notificationCount" + 1, "updatedAt" = $1
      WHERE "priceAlertId" = $3`,
@@ -366,7 +365,7 @@ export async function notifyPriceAlert(priceAlertId: string, notifiedPrice: numb
 export async function markPriceAlertPurchased(priceAlertId: string, orderId: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
-    `UPDATE "priceAlert" SET 
+    `UPDATE "supportPriceAlert" SET 
       "status" = 'purchased', "purchasedAt" = $1, "purchaseOrderId" = $2, "updatedAt" = $1
      WHERE "priceAlertId" = $3`,
     [now, orderId, priceAlertId],
@@ -375,7 +374,7 @@ export async function markPriceAlertPurchased(priceAlertId: string, orderId: str
 
 export async function cancelPriceAlert(priceAlertId: string): Promise<void> {
   await query(
-    `UPDATE "priceAlert" SET "status" = 'cancelled', "updatedAt" = $1
+    `UPDATE "supportPriceAlert" SET "status" = 'cancelled', "updatedAt" = $1
      WHERE "priceAlertId" = $2`,
     [new Date().toISOString(), priceAlertId],
   );
@@ -383,81 +382,81 @@ export async function cancelPriceAlert(priceAlertId: string): Promise<void> {
 
 export async function updatePriceAlertCurrentPrice(productId: string, newPrice: number): Promise<void> {
   await query(
-    `UPDATE "priceAlert" SET "currentPrice" = $1, "updatedAt" = $2
+    `UPDATE "supportPriceAlert" SET "currentPrice" = $1, "updatedAt" = $2
      WHERE "productId" = $3 AND "status" = 'active'`,
     [newPrice, new Date().toISOString(), productId],
   );
 }
 
 export async function expirePriceAlerts(): Promise<number> {
-  const result = await query(
-    `UPDATE "priceAlert" SET "status" = 'expired', "updatedAt" = $1
+  const result = await query<{ rowCount: number }>(
+    `UPDATE "supportPriceAlert" SET "status" = 'expired', "updatedAt" = $1
      WHERE "status" = 'active' AND "expiresAt" < NOW()`,
     [new Date().toISOString()],
   );
-  return (result as any)?.rowCount || 0;
+  return (result as { rowCount: number } | null)?.rowCount || 0;
 }
 
 // ============================================================================
 // Helpers
 // ============================================================================
 
-function mapToStockAlert(row: Record<string, any>): StockAlert {
+function mapToStockAlert(row: Record<string, unknown>): StockAlert {
   return {
-    stockAlertId: row.stockAlertId,
-    customerId: row.customerId,
-    email: row.email,
-    phone: row.phone,
-    productId: row.productId,
-    productVariantId: row.productVariantId,
-    productName: row.productName,
-    variantName: row.variantName,
-    sku: row.sku,
-    status: row.status,
-    desiredQuantity: parseInt(row.desiredQuantity) || 1,
-    stockThreshold: parseInt(row.stockThreshold) || 1,
+    stockAlertId: row.stockAlertId as string,
+    customerId: row.customerId as string | undefined,
+    email: row.email as string | undefined,
+    phone: row.phone as string | undefined,
+    productId: row.productId as string,
+    productVariantId: row.productVariantId as string | undefined,
+    productName: row.productName as string | undefined,
+    variantName: row.variantName as string | undefined,
+    sku: row.sku as string | undefined,
+    status: row.status as AlertStatus,
+    desiredQuantity: parseInt(row.desiredQuantity as string) || 1,
+    stockThreshold: parseInt(row.stockThreshold as string) || 1,
     notifyOnAnyStock: Boolean(row.notifyOnAnyStock),
-    notificationChannel: row.notificationChannel,
-    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt) : undefined,
-    notificationCount: parseInt(row.notificationCount) || 0,
-    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt) : undefined,
-    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt) : undefined,
-    purchaseOrderId: row.purchaseOrderId,
-    expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    notificationChannel: row.notificationChannel as NotificationChannel,
+    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : undefined,
+    notificationCount: parseInt(row.notificationCount as string) || 0,
+    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : undefined,
+    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : undefined,
+    purchaseOrderId: row.purchaseOrderId as string | undefined,
+    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
   };
 }
 
-function mapToPriceAlert(row: Record<string, any>): PriceAlert {
+function mapToPriceAlert(row: Record<string, unknown>): PriceAlert {
   return {
-    priceAlertId: row.priceAlertId,
-    customerId: row.customerId,
-    email: row.email,
-    phone: row.phone,
-    productId: row.productId,
-    productVariantId: row.productVariantId,
-    productName: row.productName,
-    variantName: row.variantName,
-    sku: row.sku,
-    status: row.status,
-    alertType: row.alertType,
-    targetPrice: row.targetPrice ? parseFloat(row.targetPrice) : undefined,
-    percentageDrop: row.percentageDrop ? parseFloat(row.percentageDrop) : undefined,
-    originalPrice: row.originalPrice ? parseFloat(row.originalPrice) : undefined,
-    currentPrice: row.currentPrice ? parseFloat(row.currentPrice) : undefined,
-    currency: row.currency || 'USD',
-    notificationChannel: row.notificationChannel,
-    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt) : undefined,
-    notifiedPrice: row.notifiedPrice ? parseFloat(row.notifiedPrice) : undefined,
-    notificationCount: parseInt(row.notificationCount) || 0,
-    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt) : undefined,
-    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt) : undefined,
-    purchaseOrderId: row.purchaseOrderId,
-    expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
-    metadata: row.metadata,
-    createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt),
+    priceAlertId: row.priceAlertId as string,
+    customerId: row.customerId as string | undefined,
+    email: row.email as string | undefined,
+    phone: row.phone as string | undefined,
+    productId: row.productId as string,
+    productVariantId: row.productVariantId as string | undefined,
+    productName: row.productName as string | undefined,
+    variantName: row.variantName as string | undefined,
+    sku: row.sku as string | undefined,
+    status: row.status as AlertStatus,
+    alertType: row.alertType as PriceAlertType,
+    targetPrice: row.targetPrice ? parseFloat(row.targetPrice as string) : undefined,
+    percentageDrop: row.percentageDrop ? parseFloat(row.percentageDrop as string) : undefined,
+    originalPrice: row.originalPrice ? parseFloat(row.originalPrice as string) : undefined,
+    currentPrice: row.currentPrice ? parseFloat(row.currentPrice as string) : undefined,
+    currency: (row.currency as string) || 'USD',
+    notificationChannel: row.notificationChannel as NotificationChannel,
+    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : undefined,
+    notifiedPrice: row.notifiedPrice ? parseFloat(row.notifiedPrice as string) : undefined,
+    notificationCount: parseInt(row.notificationCount as string) || 0,
+    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : undefined,
+    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : undefined,
+    purchaseOrderId: row.purchaseOrderId as string | undefined,
+    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : undefined,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
   };
 }

@@ -57,7 +57,7 @@ export class ContentRedirectRepo {
 
   async findAllRedirects(isActive?: boolean, limit: number = 100, offset: number = 0): Promise<ContentRedirect[]> {
     let sql = 'SELECT * FROM "contentRedirect"';
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (isActive !== undefined) {
@@ -121,7 +121,7 @@ export class ContentRedirectRepo {
   async updateRedirect(id: string, params: ContentRedirectUpdateParams): Promise<ContentRedirect> {
     const now = unixTimestamp();
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     if (params.sourceUrl !== undefined) {

@@ -19,7 +19,7 @@ export interface ProductSeo {
   twitterImage?: string;
   canonicalUrl?: string;
   robots: string;
-  structuredData?: Record<string, any>;
+  structuredData?: Record<string, unknown>;
 }
 
 export type ProductSeoCreateParams = Omit<ProductSeo, 'productSeoId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
@@ -83,7 +83,7 @@ export class ProductSeoRepo {
   async upsert(params: ProductSeoCreateParams): Promise<ProductSeo> {
     const existing = await this.findByProductId(params.productId);
     if (existing) {
-      const { productId, ...updateData } = params;
+      const { productId: _productId, ...updateData } = params;
       const updated = await this.update(existing.productSeoId, updateData as ProductSeoUpdateParams);
       if (!updated) throw new Error('Failed to update SEO');
       return updated;
@@ -93,7 +93,7 @@ export class ProductSeoRepo {
 
   async update(id: string, params: ProductSeoUpdateParams): Promise<ProductSeo | null> {
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {

@@ -64,7 +64,7 @@ export class ProductPriceRepo {
 
   async update(productPriceId: string, params: ProductPriceUpdateParams): Promise<ProductPrice | null> {
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let i = 1;
 
     for (const [key, value] of Object.entries(params)) {

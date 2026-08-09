@@ -6,12 +6,12 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import shippingCarrierRepo from '../../infrastructure/repositories/shippingCarrierRepo';
-import shippingMethodRepo from '../../infrastructure/repositories/shippingMethodRepo';
-import shippingZoneRepo from '../../infrastructure/repositories/shippingZoneRepo';
-import shippingRateRepo from '../../infrastructure/repositories/shippingRateRepo';
-import packagingTypeRepo from '../../infrastructure/repositories/packagingTypeRepo';
-import { CalculateShippingRatesCommand, calculateShippingRatesUseCase } from '../../application/useCases/CalculateShippingRates';
+import shippingCarrierRepo, { CreateShippingCarrierInput, UpdateShippingCarrierInput } from '../../infrastructure/repositories/shippingCarrierRepo';
+import shippingMethodRepo, { CreateShippingMethodInput, UpdateShippingMethodInput } from '../../infrastructure/repositories/shippingMethodRepo';
+import shippingZoneRepo, { CreateShippingZoneInput, UpdateShippingZoneInput } from '../../infrastructure/repositories/shippingZoneRepo';
+import shippingRateRepo, { CreateShippingRateInput, UpdateShippingRateInput } from '../../infrastructure/repositories/shippingRateRepo';
+import packagingTypeRepo, { CreateShippingPackagingTypeInput, UpdateShippingPackagingTypeInput } from '../../infrastructure/repositories/packagingTypeRepo';
+import { CalculateShippingRatesCommand, calculateShippingRatesUseCase, ShippingAddress, OrderDetails } from '../../application/useCases/CalculateShippingRates';
 import { GetShippingMethodsQuery, getShippingMethodsUseCase } from '../../application/useCases/GetShippingMethods';
 
 // ============================================================================
@@ -23,9 +23,9 @@ export const getCarriers = async (req: TypedRequest, res: Response): Promise<voi
     const { activeOnly } = req.query;
     const carriers = await shippingCarrierRepo.findAll(activeOnly === 'true');
     res.status(200).json({ success: true, data: carriers });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -40,23 +40,23 @@ export const getCarrierById = async (req: TypedRequest, res: Response): Promise<
     }
 
     res.status(200).json({ success: true, data: carrier });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const createCarrier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCarrier = async (req: TypedRequest<Record<string, string>, unknown, CreateShippingCarrierInput>, res: Response): Promise<void> => {
   try {
     const carrier = await shippingCarrierRepo.create(req.body);
     res.status(201).json({ success: true, data: carrier });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const updateCarrier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCarrier = async (req: TypedRequest<Record<string, string>, unknown, UpdateShippingCarrierInput>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const carrier = await shippingCarrierRepo.update(id, req.body);
@@ -67,9 +67,9 @@ export const updateCarrier = async (req: TypedRequest, res: Response): Promise<v
     }
 
     res.status(200).json({ success: true, data: carrier });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -84,9 +84,9 @@ export const deleteCarrier = async (req: TypedRequest, res: Response): Promise<v
     }
 
     res.status(200).json({ success: true, message: 'Carrier deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -102,9 +102,9 @@ export const getMethods = async (req: TypedRequest, res: Response): Promise<void
 
     const result = await getShippingMethodsUseCase.execute(query);
     res.status(200).json({ success: result.success, data: result.methods, total: result.total });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -119,23 +119,23 @@ export const getMethodById = async (req: TypedRequest, res: Response): Promise<v
     }
 
     res.status(200).json({ success: true, data: method });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const createMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createMethod = async (req: TypedRequest<Record<string, string>, unknown, CreateShippingMethodInput>, res: Response): Promise<void> => {
   try {
     const method = await shippingMethodRepo.create(req.body);
     res.status(201).json({ success: true, data: method });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const updateMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateMethod = async (req: TypedRequest<Record<string, string>, unknown, UpdateShippingMethodInput>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const method = await shippingMethodRepo.update(id, req.body);
@@ -146,9 +146,9 @@ export const updateMethod = async (req: TypedRequest, res: Response): Promise<vo
     }
 
     res.status(200).json({ success: true, data: method });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -163,9 +163,9 @@ export const deleteMethod = async (req: TypedRequest, res: Response): Promise<vo
     }
 
     res.status(200).json({ success: true, message: 'Method deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -178,9 +178,9 @@ export const getZones = async (req: TypedRequest, res: Response): Promise<void> 
     const { activeOnly } = req.query;
     const zones = await shippingZoneRepo.findAll(activeOnly === 'true');
     res.status(200).json({ success: true, data: zones });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -195,23 +195,23 @@ export const getZoneById = async (req: TypedRequest, res: Response): Promise<voi
     }
 
     res.status(200).json({ success: true, data: zone });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const createZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createZone = async (req: TypedRequest<Record<string, string>, unknown, CreateShippingZoneInput>, res: Response): Promise<void> => {
   try {
     const zone = await shippingZoneRepo.create(req.body);
     res.status(201).json({ success: true, data: zone });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const updateZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateZone = async (req: TypedRequest<Record<string, string>, unknown, UpdateShippingZoneInput>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const zone = await shippingZoneRepo.update(id, req.body);
@@ -222,9 +222,9 @@ export const updateZone = async (req: TypedRequest, res: Response): Promise<void
     }
 
     res.status(200).json({ success: true, data: zone });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -239,9 +239,9 @@ export const deleteZone = async (req: TypedRequest, res: Response): Promise<void
     }
 
     res.status(200).json({ success: true, message: 'Zone deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -254,9 +254,9 @@ export const getRates = async (req: TypedRequest, res: Response): Promise<void> 
     const { zoneId, methodId } = req.query;
     const rates = await shippingRateRepo.findActive(zoneId as string | undefined, methodId as string | undefined);
     res.status(200).json({ success: true, data: rates });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -271,23 +271,23 @@ export const getRateById = async (req: TypedRequest, res: Response): Promise<voi
     }
 
     res.status(200).json({ success: true, data: rate });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const createRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createRate = async (req: TypedRequest<Record<string, string>, unknown, CreateShippingRateInput>, res: Response): Promise<void> => {
   try {
     const rate = await shippingRateRepo.create(req.body);
     res.status(201).json({ success: true, data: rate });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const updateRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateRate = async (req: TypedRequest<Record<string, string>, unknown, UpdateShippingRateInput>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const rate = await shippingRateRepo.update(id, req.body);
@@ -298,9 +298,9 @@ export const updateRate = async (req: TypedRequest, res: Response): Promise<void
     }
 
     res.status(200).json({ success: true, data: rate });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -315,9 +315,9 @@ export const deleteRate = async (req: TypedRequest, res: Response): Promise<void
     }
 
     res.status(200).json({ success: true, message: 'Rate deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -330,9 +330,9 @@ export const getPackagingTypes = async (req: TypedRequest, res: Response): Promi
     const { activeOnly } = req.query;
     const types = await packagingTypeRepo.findAll(activeOnly === 'true');
     res.status(200).json({ success: true, data: types });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -347,23 +347,23 @@ export const getPackagingTypeById = async (req: TypedRequest, res: Response): Pr
     }
 
     res.status(200).json({ success: true, data: type });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const createPackagingType = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPackagingType = async (req: TypedRequest<Record<string, string>, unknown, CreateShippingPackagingTypeInput>, res: Response): Promise<void> => {
   try {
     const type = await packagingTypeRepo.create(req.body);
     res.status(201).json({ success: true, data: type });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const updatePackagingType = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePackagingType = async (req: TypedRequest<Record<string, string>, unknown, UpdateShippingPackagingTypeInput>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const type = await packagingTypeRepo.update(id, req.body);
@@ -374,9 +374,9 @@ export const updatePackagingType = async (req: TypedRequest, res: Response): Pro
     }
 
     res.status(200).json({ success: true, data: type });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -391,9 +391,9 @@ export const deletePackagingType = async (req: TypedRequest, res: Response): Pro
     }
 
     res.status(200).json({ success: true, message: 'Packaging type deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
@@ -401,7 +401,12 @@ export const deletePackagingType = async (req: TypedRequest, res: Response): Pro
 // Rate Calculation
 // ============================================================================
 
-export const estimateDelivery = async (req: TypedRequest, res: Response): Promise<void> => {
+interface EstimateDeliveryBody {
+  methodId: string;
+  destinationAddress?: ShippingAddress;
+}
+
+export const estimateDelivery = async (req: TypedRequest<Record<string, string>, unknown, EstimateDeliveryBody>, res: Response): Promise<void> => {
   try {
     const { methodId, destinationAddress } = req.body;
 
@@ -450,13 +455,18 @@ export const estimateDelivery = async (req: TypedRequest, res: Response): Promis
         destinationAddress,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };
 
-export const calculateRates = async (req: TypedRequest, res: Response): Promise<void> => {
+interface CalculateRatesBody {
+  destinationAddress: ShippingAddress;
+  orderDetails: OrderDetails;
+}
+
+export const calculateRates = async (req: TypedRequest<Record<string, string>, unknown, CalculateRatesBody>, res: Response): Promise<void> => {
   try {
     const { destinationAddress, orderDetails } = req.body;
 
@@ -477,8 +487,8 @@ export const calculateRates = async (req: TypedRequest, res: Response): Promise<
       zone: result.zone,
       message: result.message,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: (error as Error).message });
   }
 };

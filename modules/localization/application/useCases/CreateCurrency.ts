@@ -25,8 +25,37 @@ export interface CreateCurrencyOutput {
   createdAt: string;
 }
 
+export interface CreateCurrencyData {
+  currencyId: string;
+  code: string;
+  name: string;
+  symbol: string;
+  symbolPosition: string;
+  decimalPlaces: number;
+  decimalSeparator: string;
+  thousandsSeparator: string;
+  exchangeRate: number;
+  isDefault: boolean;
+  isActive: boolean;
+}
+
+export interface CreatedCurrency {
+  currencyId: string;
+  code: string;
+  name: string;
+  symbol: string;
+  exchangeRate: number;
+  isDefault: boolean;
+  createdAt: Date;
+}
+
+export interface CreateCurrencyRepository {
+  findCurrencyByCode(code: string): Promise<CreatedCurrency | null>;
+  createCurrency(data: CreateCurrencyData): Promise<CreatedCurrency>;
+}
+
 export class CreateCurrencyUseCase {
-  constructor(private readonly localizationRepository: any) {}
+  constructor(private readonly localizationRepository: CreateCurrencyRepository) {}
 
   async execute(input: CreateCurrencyInput): Promise<CreateCurrencyOutput> {
     if (!input.code || !input.name || !input.symbol) {

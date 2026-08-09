@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
 import { ListOrdersCommand, ListOrdersUseCase } from '../../../modules/order/application/useCases/ListOrders';
 import { GetOrderCommand, GetOrderUseCase } from '../../../modules/order/application/useCases/GetOrder';
@@ -20,7 +20,6 @@ import {
 import * as orderNoteRepo from '../../../modules/order/infrastructure/repositories/orderNoteRepo';
 import * as orderPaymentRefundRepo from '../../../modules/order/infrastructure/repositories/orderPaymentRefundRepo';
 import * as orderFulfillmentPackageRepo from '../../../modules/order/infrastructure/repositories/orderFulfillmentPackageRepo';
-import { query as dbQuery } from '../../../libs/db';
 import { OrderStatus } from '../../../modules/order/domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../../modules/order/domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../../modules/order/domain/valueObjects/FulfillmentStatus';
@@ -35,7 +34,7 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
     const { status, paymentStatus, fulfillmentStatus, customerId, search, startDate, endDate, limit, offset, orderBy, orderDirection } =
       req.query;
 
-    const filters: any = {};
+    const filters: Record<string, unknown> = {};
     if (status) filters.status = status as OrderStatus;
     if (paymentStatus) filters.paymentStatus = paymentStatus as PaymentStatus;
     if (fulfillmentStatus) filters.fulfillmentStatus = fulfillmentStatus as FulfillmentStatus;
@@ -88,12 +87,12 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load orders',
+      error: (error as Error).message || 'Failed to load orders',
     });
   }
 };
@@ -127,12 +126,12 @@ export const viewOrder = async (req: TypedRequest, res: Response): Promise<void>
 
       success: req.query.success || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load order',
+      error: (error as Error).message || 'Failed to load order',
     });
   }
 };
@@ -144,8 +143,9 @@ export const viewOrder = async (req: TypedRequest, res: Response): Promise<void>
 export const updateOrderStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const { status, note } = req.body;
-    const updatedBy = (req as any).user?.id || 'admin';
+    const body = req.body as RequestBody;
+    const { status, note } = body;
+    const _updatedBy = req.user?.id || 'admin';
 
     const validStatuses = Object.values(OrderStatus);
     if (!validStatuses.includes(status)) {
@@ -163,13 +163,13 @@ export const updateOrderStatus = async (req: TypedRequest, res: Response): Promi
     } else {
       res.redirect(`/hub/orders/${orderId}?success=Order status updated`);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: error.message || 'Failed to update status' });
+      res.status(500).json({ success: false, message: (error as Error).message || 'Failed to update status' });
     } else {
-      res.redirect(`/hub/orders/${req.params.orderId}?error=${encodeURIComponent(error.message)}`);
+      res.redirect(`/hub/orders/${req.params.orderId}?error=${encodeURIComponent((error as Error).message)}`);
     }
   }
 };
@@ -181,8 +181,9 @@ export const updateOrderStatus = async (req: TypedRequest, res: Response): Promi
 export const cancelOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const { reason } = req.body;
-    const cancelledBy = (req as any).user?.id || 'admin';
+    const body = req.body as RequestBody;
+    const { reason } = body;
+    const _cancelledBy = req.user?.id || 'admin';
 
     const command = new CancelOrderCommand(orderId, reason || 'Cancelled by admin');
     const useCase = new CancelOrderUseCase(OrderRepo);
@@ -193,13 +194,13 @@ export const cancelOrder = async (req: TypedRequest, res: Response): Promise<voi
     } else {
       res.redirect(`/hub/orders/${orderId}?success=Order cancelled`);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: error.message || 'Failed to cancel order' });
+      res.status(500).json({ success: false, message: (error as Error).message || 'Failed to cancel order' });
     } else {
-      res.redirect(`/hub/orders/${req.params.orderId}?error=${encodeURIComponent(error.message)}`);
+      res.redirect(`/hub/orders/${req.params.orderId}?error=${encodeURIComponent((error as Error).message)}`);
     }
   }
 };
@@ -228,12 +229,12 @@ export const refundForm = async (req: TypedRequest, res: Response): Promise<void
       pageName: `Refund Order #${order.orderNumber}`,
       order,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     adminRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load refund form',
+      error: (error as Error).message || 'Failed to load refund form',
     });
   }
 };
@@ -245,8 +246,9 @@ export const refundForm = async (req: TypedRequest, res: Response): Promise<void
 export const processRefund = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const { amount, reason, refundItems } = req.body;
-    const processedBy = (req as any).user?.id || 'admin';
+    const body = req.body as RequestBody;
+    const { amount, reason, _refundItems } = body;
+    const _processedBy = req.user?.id || 'admin';
 
     const command = new ProcessRefundCommand(orderId, parseFloat(amount), reason || 'Refund processed by admin');
 
@@ -258,11 +260,11 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
     } else {
       res.redirect(`/hub/orders/${orderId}?success=Refund processed successfully`);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: error.message || 'Failed to process refund' });
+      res.status(500).json({ success: false, message: (error as Error).message || 'Failed to process refund' });
     } else {
       // Reload refund form with error
       try {
@@ -273,11 +275,11 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
         adminRespond(req, res, 'orders/refund', {
           pageName: `Refund Order #${order?.orderNumber || 'Unknown'}`,
           order,
-          error: error.message || 'Failed to process refund',
-          formData: req.body,
+          error: (error as Error).message || 'Failed to process refund',
+          formData: req.body as RequestBody,
         });
       } catch {
-        res.redirect(`/hub/orders/${req.params.orderId}?error=${encodeURIComponent(error.message)}`);
+        res.redirect(`/hub/orders/${req.params.orderId}?error=${encodeURIComponent((error as Error).message)}`);
       }
     }
   }
@@ -292,27 +294,28 @@ export const listOrderNotes = async (req: TypedRequest, res: Response): Promise<
     const { orderId } = req.params;
     const notes = await orderNoteRepo.findByOrder(orderId);
     adminRespond(req, res, 'orders/partials/notes', { orderId, notes });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load notes' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load notes' });
   }
 };
 
 export const addOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const { content, isCustomerVisible } = req.body;
-    const createdBy = (req as any).user?.id || 'admin';
+    const body = req.body as RequestBody;
+    const { content, isCustomerVisible } = body;
+    const createdBy = req.user?.id || 'admin';
 
     const command = new AddOrderNoteCommand(orderId, content, isCustomerVisible === 'true' || isCustomerVisible === true, createdBy);
     const useCase = new AddOrderNoteUseCase();
     await useCase.execute(command);
 
-    (req as any).flash?.('success', 'Note added');
+    req.flash?.('success', 'Note added');
     res.redirect(`/admin/orders/${orderId}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    (req as any).flash?.('error', error.message || 'Failed to add note');
+    req.flash?.('error', (error as Error).message || 'Failed to add note');
     res.redirect(`/admin/orders/${req.params.orderId}`);
   }
 };
@@ -321,11 +324,11 @@ export const deleteOrderNote = async (req: TypedRequest, res: Response): Promise
   try {
     const { orderId, noteId } = req.params;
     await orderNoteRepo.softDelete(noteId);
-    (req as any).flash?.('success', 'Note deleted');
+    req.flash?.('success', 'Note deleted');
     res.redirect(`/admin/orders/${orderId}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    (req as any).flash?.('error', error.message || 'Failed to delete note');
+    req.flash?.('error', (error as Error).message || 'Failed to delete note');
     res.redirect(`/admin/orders/${req.params.orderId}`);
   }
 };
@@ -339,9 +342,9 @@ export const listOrderRefunds = async (req: TypedRequest, res: Response): Promis
     const { orderId } = req.params;
     const refunds = await orderPaymentRefundRepo.findByOrder(orderId);
     adminRespond(req, res, 'orders/partials/refunds', { orderId, refunds });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load refunds' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load refunds' });
   }
 };
 
@@ -352,25 +355,19 @@ export const listOrderRefunds = async (req: TypedRequest, res: Response): Promis
 export const listFulfillmentPackages = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    // Fetch all fulfillment packages for all fulfillments on this order
-    const packages = await dbQuery<orderFulfillmentPackageRepo.OrderFulfillmentPackage[]>(
-      `SELECT p.* FROM "orderFulfillmentPackage" p
-       JOIN "orderFulfillment" f ON f."orderFulfillmentId" = p."orderFulfillmentId"
-       WHERE f."orderId" = $1
-       ORDER BY p."createdAt" ASC`,
-      [orderId],
-    );
-    adminRespond(req, res, 'orders/partials/packages', { orderId, packages: packages || [] });
-  } catch (error: any) {
+    const packages = await orderFulfillmentPackageRepo.findByOrder(orderId);
+    adminRespond(req, res, 'orders/partials/packages', { orderId, packages });
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load packages' });
+    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load packages' });
   }
 };
 
 export const updatePackageTracking = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId, packageId } = req.params;
-    const { trackingNumber, shippingLabelUrl, commercialInvoiceUrl } = req.body;
+    const body = req.body as RequestBody;
+    const { trackingNumber, shippingLabelUrl, commercialInvoiceUrl } = body;
 
     const command = new TrackFulfillmentPackageCommand(
       '', // orderFulfillmentId not needed for update path
@@ -387,11 +384,11 @@ export const updatePackageTracking = async (req: TypedRequest, res: Response): P
     const useCase = new TrackFulfillmentPackageUseCase();
     await useCase.execute(command);
 
-    (req as any).flash?.('success', 'Tracking updated');
+    req.flash?.('success', 'Tracking updated');
     res.redirect(`/admin/orders/${orderId}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error:', error);
-    (req as any).flash?.('error', error.message || 'Failed to update tracking');
+    req.flash?.('error', (error as Error).message || 'Failed to update tracking');
     res.redirect(`/admin/orders/${req.params.orderId}`);
   }
 };
