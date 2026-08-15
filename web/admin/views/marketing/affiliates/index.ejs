@@ -2,7 +2,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Affiliates</h2>
+      <h2 class="page-title"><%= t('marketing:affiliates.title') %></h2>
     </div>
     <div class="col-auto">
       <a href="/admin/marketing/affiliates/create" class="btn btn-primary">
@@ -12,7 +12,7 @@
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        New Affiliate
+        <%= t('marketing:affiliates.create') %>
       </a>
     </div>
   </div>
@@ -28,21 +28,21 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Affiliates</h3>
-        <span class="float-end text-muted"><%= (affiliates || []).length %> records</span>
+        <h3 class="card-title"><%= t('marketing:affiliates.title') %></h3>
+        <span class="float-end text-muted"><%= (affiliates || []).length %> <%= t('common.records') %></span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Code</th>
-              <th>Commission Rate</th>
-              <th>Total Earned</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Actions</th>
+              <th><%= t('marketing:affiliates.name') %></th>
+              <th><%= t('shared:common.email') %></th>
+              <th><%= t('marketing:affiliates.code') %></th>
+              <th><%= t('marketing:affiliates.commissionRate') %></th>
+              <th><%= t('marketing:affiliates.totalEarnings') %></th>
+              <th><%= t('common.status') %></th>
+              <th><%= t('common.dateCreated') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
@@ -60,12 +60,12 @@
               </td>
               <td><%= new Date(a.createdAt).toLocaleDateString() %></td>
               <td>
-                <a href="/admin/marketing/affiliates/<%= a.marketingAffiliateId %>" class="btn btn-sm btn-outline-info">View</a>
+                <a href="/admin/marketing/affiliates/<%= a.marketingAffiliateId %>" class="btn btn-sm btn-outline-info"><%= t('common.view') %></a>
               </td>
             </tr>
             <% }); %>
             <% if ((affiliates || []).length === 0) { %>
-            <tr><td colspan="8" class="text-center text-muted py-4">No affiliates found. <a href="/admin/marketing/affiliates/create">Create your first affiliate</a>.</td></tr>
+            <tr><td colspan="8" class="text-center text-muted py-4"><%= t('marketing:affiliates.noAffiliates') %> <a href="/admin/marketing/affiliates/create"><%= t('marketing:affiliates.create') %></a>.</td></tr>
             <% } %>
           </tbody>
         </table>

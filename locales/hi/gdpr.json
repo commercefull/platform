@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "लंबित अनुरोध",
+  "completedThisMonth": "इस महीने पूरा हुआ",
+  "avgProcessingDays": "औसत प्रसंस्करण दिन",
+  "marketingConsentRate": "विपणन सहमति दर",
+  "dataAccessRequests": "डेटा एक्सेस अनुरोध",
+  "dataAccess": "डेटा एक्सेस",
+  "dataDeletion": "डेटा हटाना",
+  "noGdprRequests": "अभी तक कोई जीडीपीआर अनुरोध नहीं।",
+  "consentManagement": "सहमति प्रबंधन",
+  "marketingConsent": "विपणन सहमति",
+  "analyticsConsent": "विश्लेषिकी सहमति",
+  "manageConsentSettings": "सहमति सेटिंग प्रबंधित करें",
+  "createGdprRequest": "जीडीपीआर अनुरोध बनाएं",
+  "dataAccessRequestSar": "डेटा एक्सेस अनुरोध (एसएआर)",
+  "dataDeletionRequest": "डेटा हटाने का अनुरोध",
+  "dataRectificationRequest": "डेटा सुधार अनुरोध",
+  "customerEmail": "ग्राहक ईमेल",
+  "createRequest": "अनुरोध बनाएँ",
+  "confirmProcessRequest": "इस अनुरोध को प्रसंस्करण के रूप में चिह्नित करें?",
+  "consentRecords": "सहमति अभिलेख",
+  "manageConsentRecords": "ग्राहक सहमति रिकॉर्ड और प्राथमिकताएँ प्रबंधित करें।"
+}

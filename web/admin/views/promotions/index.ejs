@@ -3,7 +3,7 @@
   <div class="row g-2 align-items-center">
     <div class="col">
       <h2 class="page-title">
-        Promotions
+        <%= t('shared:common.promotions') %>
       </h2>
     </div>
     <div class="col-auto">
@@ -13,7 +13,7 @@
           <path d="M12 5v14" />
           <path d="M5 12h14" />
         </svg>
-        Create Promotion
+        <%= t('promotion:create') %>
       </a>
     </div>
   </div>
@@ -35,7 +35,7 @@
               <path d="M4 12h16" />
               <path d="M4 18h12" />
             </svg>
-            Filters
+            <%= t('shared:common.filters') %>
           </h3>
         </div>
         <div class="col-auto">
@@ -44,7 +44,7 @@
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
             </svg>
-            Show Filters
+            <%= t('shared:common.showFilters') %>
           </button>
         </div>
       </div>
@@ -58,13 +58,13 @@
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M9 12l2 2l4 -4" />
             </svg>
-            Status
+            <%= t('common.status') %>
           </label>
           <select class="form-select" name="status" id="status">
-            <option value="">All Status</option>
-            <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
-            <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
-            <option value="expired" <%= filters.status === 'expired' ? 'selected' : '' %>>Expired</option>
+            <option value=""><%= t('shared:common.allStatus') %></option>
+            <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>><%= t('shared:common.active') %></option>
+            <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>><%= t('shared:common.inactive') %></option>
+            <option value="expired" <%= filters.status === 'expired' ? 'selected' : '' %>><%= t('shared:common.expired') %></option>
           </select>
         </div>
 
@@ -75,13 +75,13 @@
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M9 12l2 2l4 -4" />
             </svg>
-            Type
+            <%= t('shared:common.type') %>
           </label>
           <select class="form-select" name="type" id="type">
-            <option value="">All Types</option>
-            <option value="percentage" <%= filters.type === 'percentage' ? 'selected' : '' %>>Percentage</option>
-            <option value="fixed_amount" <%= filters.type === 'fixed_amount' ? 'selected' : '' %>>Fixed Amount</option>
-            <option value="free_shipping" <%= filters.type === 'free_shipping' ? 'selected' : '' %>>Free Shipping</option>
+            <option value=""><%= t('promotion:promotions.allTypes') %></option>
+            <option value="percentage" <%= filters.type === 'percentage' ? 'selected' : '' %>><%= t('promotion:promotions.percentage') %></option>
+            <option value="fixed_amount" <%= filters.type === 'fixed_amount' ? 'selected' : '' %>><%= t('shared:common.fixedAmount') %></option>
+            <option value="free_shipping" <%= filters.type === 'free_shipping' ? 'selected' : '' %>><%= t('shared:common.freeShipping') %></option>
           </select>
         </div>
 
@@ -93,9 +93,9 @@
               <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
               <path d="M21 21l-6 -6" />
             </svg>
-            Search
+            <%= t('common.search') %>
           </label>
-          <input type="text" class="form-control" name="search" id="search" placeholder="Code or name..." value="<%= filters.search %>">
+          <input type="text" class="form-control" name="search" id="search" placeholder="<%= t('promotion:promotions.searchPlaceholder') %>" value="<%= filters.search %>">
         </div>
 
         <!-- Actions -->
@@ -107,7 +107,7 @@
                 <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
                 <path d="M21 21l-6 -6" />
               </svg>
-              Apply Filters
+              <%= t('shared:common.applyFilters') %>
             </button>
             <a href="/admin/promotions" class="btn btn-outline-secondary">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
@@ -115,12 +115,12 @@
                 <path d="M19 19h-11l-4 -4a2 2 0 0 1 0 -2.828l4 -4h11a2 2 0 0 0 2 -2v-3a2 2 0 0 0 -2 -2h-3l-3 -3" />
                 <path d="M3 3l18 18" />
               </svg>
-              Clear All
+              <%= t('shared:common.clearAll') %>
             </a>
             <% if (filters.search || filters.status || filters.type) { %>
             <div class="ms-auto">
               <span class="badge bg-info">
-                <%= [filters.search && 'Search', filters.status && 'Status', filters.type && 'Type'].filter(Boolean).join(' + ') %> filters active
+                <%= [filters.search && t('common.search'), filters.status && t('common.status'), filters.type && t('shared:common.type')].filter(Boolean).join(' + ') %> <%= t('shared:common.filtersActive') %>
               </span>
             </div>
             <% } %>
@@ -134,28 +134,28 @@
   <div class="card">
     <div class="card-header">
       <div class="col">
-        <h3 class="card-title mb-0">Promotions (<%= pagination.total %>)</h3>
+        <h3 class="card-title mb-0"><%= t('shared:common.promotions') %> (<%= pagination.total %>)</h3>
       </div>
     </div>
     <div class="card-body table-responsive p-0">
       <table class="table table-hover text-nowrap">
         <thead>
           <tr>
-            <th>Code</th>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Discount</th>
-            <th>Usage</th>
-            <th>Valid Until</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th><%= t('shared:common.code') %></th>
+            <th><%= t('shared:common.name') %></th>
+            <th><%= t('shared:common.type') %></th>
+            <th><%= t('shared:common.discount') %></th>
+            <th><%= t('promotion:giftCard.usage') %></th>
+            <th><%= t('shared:common.validUntil') %></th>
+            <th><%= t('common.status') %></th>
+            <th><%= t('common.actions') %></th>
           </tr>
         </thead>
         <tbody>
           <% if (promotions.length === 0) { %>
           <tr>
             <td colspan="8" class="text-center py-4">
-              <em>No promotions found. <a href="/admin/promotions/create">Create your first promotion</a>.</em>
+              <em><%= t('promotion:promotions.noPromotions') %> <a href="/admin/promotions/create"><%= t('promotion:promotions.createFirstPromotion') %></a>.</em>
             </td>
           </tr>
           <% } else { %>
@@ -175,11 +175,11 @@
             </td>
             <td>
               <% if (promotion.type === 'percentage') { %>
-              <%= promotion.value %>% off
+              <%= promotion.value %>% <%= t('promotion:promotions.off') %>
               <% } else if (promotion.type === 'fixed_amount') { %>
               $<%= promotion.value.toFixed(2) %>
               <% } else { %>
-              Free Shipping
+              <%= t('shared:common.freeShipping') %>
               <% } %>
             </td>
             <td>
@@ -192,7 +192,7 @@
               <% if (promotion.endDate) { %>
               <%= new Date(promotion.endDate).toLocaleDateString() %>
               <% } else { %>
-              <em>No expiry</em>
+              <em><%= t('promotion:promotions.noExpiry') %></em>
               <% } %>
             </td>
             <td>
@@ -202,13 +202,13 @@
             </td>
             <td>
               <div class="btn-group">
-                <a href="/admin/promotions/<%= promotion.promotionId %>" class="btn btn-sm btn-info" title="View">
+                <a href="/admin/promotions/<%= promotion.promotionId %>" class="btn btn-sm btn-info" title="<%= t('common.view') %>">
                   <i class="fas fa-eye"></i>
                 </a>
-                <a href="/admin/promotions/<%= promotion.promotionId %>/edit" class="btn btn-sm btn-primary" title="Edit">
+                <a href="/admin/promotions/<%= promotion.promotionId %>/edit" class="btn btn-sm btn-primary" title="<%= t('common.edit') %>">
                   <i class="fas fa-edit"></i>
                 </a>
-                <button class="btn btn-sm btn-danger" onclick="deletePromotion('<%= promotion.promotionId %>', '<%= promotion.name %>')" title="Delete">
+                <button class="btn btn-sm btn-danger" onclick="deletePromotion('<%= promotion.promotionId %>', '<%= promotion.name %>')" title="<%= t('common.delete') %>">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
@@ -242,16 +242,16 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Delete Promotion</h4>
+        <h4 class="modal-title"><%= t('promotion:promotions.deletePromotion') %></h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to delete the promotion "<strong id="deletePromotionName"></strong>"?</p>
-        <p class="text-danger"><small>This action cannot be undone.</small></p>
+        <p><%= t('promotion:promotions.confirmDeleteShort') %> "<strong id="deletePromotionName"></strong>"?</p>
+        <p class="text-danger"><small><%= t('shared:common.thisActionCannotBeUndone') %></small></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Promotion</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn"><%= t('promotion:promotions.deletePromotion') %></button>
       </div>
     </div>
   </div>

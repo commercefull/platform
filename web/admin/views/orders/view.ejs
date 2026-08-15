@@ -15,8 +15,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-            <li class="breadcrumb-item"><a href="/admin/orders">Orders</a></li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/orders"><%= t('shared:common.orders') %></a></li>
             <li class="breadcrumb-item active">#<%= order.orderNumber %></li>
           </ol>
         </div>
@@ -35,7 +35,7 @@
           <!-- Order Details Card -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Order #<%= order.orderNumber %></h3>
+              <h3 class="card-title"><%= t('shared:common.orders').replace('s', '') %> #<%= order.orderNumber %></h3>
               <div class="card-tools">
                 <span class="badge badge-<%= 
                   order.status === 'completed' ? 'success' :
@@ -48,25 +48,25 @@
             <div class="card-body">
               <div class="row">
                 <div class="col-md-6">
-                  <p><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
-                  <p><strong>Customer:</strong> <%= order.customerName || 'Guest' %></p>
-                  <p><strong>Email:</strong> <%= order.customerEmail %></p>
+                  <p><strong><%= t('order:orderDate') %></strong> <%= new Date(order.orderDate).toLocaleString() %></p>
+                  <p><strong><%= t('shared:common.customer') %>:</strong> <%= order.customerName || t('shared:common.guest') %></p>
+                  <p><strong><%= t('shared:common.email2') %></strong> <%= order.customerEmail %></p>
                   <% if (order.customerPhone) { %>
-                    <p><strong>Phone:</strong> <%= order.customerPhone %></p>
+                    <p><strong><%= t('shared:common.phone2') %></strong> <%= order.customerPhone %></p>
                   <% } %>
                 </div>
                 <div class="col-md-6">
-                  <p><strong>Payment:</strong> 
+                  <p><strong><%= t('shared:common.payment') %>:</strong>
                     <span class="badge badge-<%= order.paymentStatus === 'paid' ? 'success' : 'warning' %>">
                       <%= order.paymentStatus %>
                     </span>
                   </p>
-                  <p><strong>Fulfillment:</strong> 
+                  <p><strong><%= t('shared:common.fulfillment') %>:</strong>
                     <span class="badge badge-<%= order.fulfillmentStatus === 'fulfilled' ? 'success' : 'info' %>">
                       <%= order.fulfillmentStatus %>
                     </span>
                   </p>
-                  <p><strong>Currency:</strong> <%= order.currencyCode %></p>
+                  <p><strong><%= t('order:currency') %></strong> <%= order.currencyCode %></p>
                 </div>
               </div>
             </div>
@@ -75,19 +75,19 @@
           <!-- Order Items -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Order Items (<%= order.totalItems %>)</h3>
+              <h3 class="card-title"><%= t('shared:common.orderItems') %> (<%= order.totalItems %>)</h3>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th>SKU</th>
-                    <th>Qty</th>
-                    <th>Unit Price</th>
-                    <th>Discount</th>
-                    <th>Tax</th>
-                    <th>Total</th>
+                    <th><%= t('shared:common.product') %></th>
+                    <th><%= t('shared:common.sku') %></th>
+                    <th><%= t('shared:common.qty') %></th>
+                    <th><%= t('order:unitPrice') %></th>
+                    <th><%= t('shared:common.discount') %></th>
+                    <th><%= t('shared:common.tax') %></th>
+                    <th><%= t('common.total') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -110,23 +110,23 @@
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colspan="6" class="text-right"><strong>Subtotal:</strong></td>
+                    <td colspan="6" class="text-right"><strong><%= t('order:subtotal') %></strong></td>
                     <td>$<%= order.subtotal.toFixed(2) %></td>
                   </tr>
                   <tr>
-                    <td colspan="6" class="text-right">Discount:</td>
+                    <td colspan="6" class="text-right"><%= t('shared:common.discount') %>:</td>
                     <td class="text-danger">-$<%= order.discountTotal.toFixed(2) %></td>
                   </tr>
                   <tr>
-                    <td colspan="6" class="text-right">Tax:</td>
+                    <td colspan="6" class="text-right"><%= t('shared:common.tax') %>:</td>
                     <td>$<%= order.taxTotal.toFixed(2) %></td>
                   </tr>
                   <tr>
-                    <td colspan="6" class="text-right">Shipping:</td>
+                    <td colspan="6" class="text-right"><%= t('order:shipping') %></td>
                     <td>$<%= order.shippingTotal.toFixed(2) %></td>
                   </tr>
                   <tr class="table-active">
-                    <td colspan="6" class="text-right"><strong>Total:</strong></td>
+                    <td colspan="6" class="text-right"><strong><%= t('common.total') %>:</strong></td>
                     <td><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
                   </tr>
                 </tfoot>
@@ -140,7 +140,7 @@
             <div class="col-md-6">
               <div class="card">
                 <div class="card-header">
-                  <h3 class="card-title"><i class="fas fa-shipping-fast mr-2"></i>Shipping Address</h3>
+                  <h3 class="card-title"><i class="fas fa-shipping-fast mr-2"></i><%= t('shared:common.shippingAddress') %></h3>
                 </div>
                 <div class="card-body">
                   <p><strong><%= order.shippingAddress.fullName %></strong></p>
@@ -164,7 +164,7 @@
             <div class="col-md-6">
               <div class="card">
                 <div class="card-header">
-                  <h3 class="card-title"><i class="fas fa-file-invoice mr-2"></i>Billing Address</h3>
+                  <h3 class="card-title"><i class="fas fa-file-invoice mr-2"></i><%= t('shared:common.billingAddress') %></h3>
                 </div>
                 <div class="card-body">
                   <p><strong><%= order.billingAddress.fullName %></strong></p>
@@ -189,13 +189,13 @@
           <!-- Actions Card -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Actions</h3>
+              <h3 class="card-title"><%= t('common.actions') %></h3>
             </div>
             <div class="card-body">
               <!-- Update Status -->
               <form action="/admin/orders/<%= order.orderId %>/status" method="POST" class="mb-3">
                 <div class="form-group">
-                  <label>Update Status</label>
+                  <label><%= t('order:updateStatus') %></label>
                   <select name="status" class="form-control" required>
                     <% orderStatuses.forEach(s => { %>
                       <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option>
@@ -203,10 +203,10 @@
                   </select>
                 </div>
                 <div class="form-group">
-                  <label>Note (optional)</label>
-                  <input type="text" name="note" class="form-control" placeholder="Status change reason">
+                  <label><%= t('order:noteOptional') %></label>
+                  <input type="text" name="note" class="form-control" placeholder="<%= t('order:notePlaceholder') %>">
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Update Status</button>
+                <button type="submit" class="btn btn-primary btn-block"><%= t('order:updateStatus') %></button>
               </form>
 
               <hr>
@@ -215,20 +215,20 @@
               <% if (order.status !== 'cancelled' && order.status !== 'refunded') { %>
                 <form action="/admin/orders/<%= order.orderId %>/cancel" method="POST" class="mb-2">
                   <input type="hidden" name="reason" value="Cancelled by admin">
-                  <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('Cancel this order?')">
-                    <i class="fas fa-times mr-1"></i>Cancel Order
+                  <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('<%= t('order:confirmCancel') %>')">
+                    <i class="fas fa-times mr-1"></i><%= t('order:cancel') %>
                   </button>
                 </form>
               <% } %>
 
               <% if (order.paymentStatus === 'paid' && order.status !== 'refunded') { %>
                 <a href="/admin/orders/<%= order.orderId %>/refund" class="btn btn-warning btn-block">
-                  <i class="fas fa-undo mr-1"></i>Process Refund
+                  <i class="fas fa-undo mr-1"></i><%= t('order:processRefund') %>
                 </a>
               <% } %>
 
               <a href="/admin/orders" class="btn btn-secondary btn-block mt-3">
-                <i class="fas fa-arrow-left mr-1"></i>Back to Orders
+                <i class="fas fa-arrow-left mr-1"></i><%= t('shared:common.backToOrders') %>
               </a>
             </div>
           </div>
@@ -237,7 +237,7 @@
           <% if (order.customerNotes) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Customer Notes</h3>
+              <h3 class="card-title"><%= t('order:customerNotes') %></h3>
             </div>
             <div class="card-body">
               <p><%= order.customerNotes %></p>
@@ -249,7 +249,7 @@
           <% if (order.tags && order.tags.length > 0) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Tags</h3>
+              <h3 class="card-title"><%= t('shared:common.tags') %></h3>
             </div>
             <div class="card-body">
               <% order.tags.forEach(tag => { %>

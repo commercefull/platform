@@ -4,7 +4,7 @@
     <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
     <div class="col-auto ms-auto">
       <a href="/admin/notifications/webhooks/create" class="btn btn-primary">
-        <i class="ti ti-plus"></i> Add Webhook
+        <i class="ti ti-plus"></i> <%= t('notifications:addWebhook') %>
       </a>
     </div>
   </div>
@@ -13,24 +13,24 @@
   <div class="container-fluid">
     <%- include("../../partials/alerts") %>
     <div class="card">
-      <div class="card-header"><h3 class="card-title">Notification Webhooks</h3></div>
+      <div class="card-header"><h3 class="card-title"><%= t('notifications:notificationWebhooks') %></h3></div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover text-nowrap">
           <thead>
             <tr>
-              <th>URL</th>
-              <th>Events</th>
-              <th>Merchant</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Actions</th>
+              <th><%= t('shared:common.url') %></th>
+              <th><%= t('shared:common.events') %></th>
+              <th><%= t('shared:common.merchant') %></th>
+              <th><%= t('common.status') %></th>
+              <th><%= t('shared:common.dateCreated') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
             <% if (!webhooks || webhooks.length === 0) { %>
               <tr>
                 <td colspan="6" class="text-center py-4">
-                  <em>No webhooks configured. <a href="/admin/notifications/webhooks/create">Add your first webhook</a>.</em>
+                  <em><%= t('notifications:noWebhooks') %> <a href="/admin/notifications/webhooks/create"><%= t('notifications:addFirstWebhook') %></a>.</em>
                 </td>
               </tr>
             <% } else { %>
@@ -47,23 +47,23 @@
                       <span class="badge bg-azure-lt me-1"><%= ev %></span>
                     <% }); %>
                     <% if (events.length > 3) { %>
-                      <span class="text-muted">+<%= events.length - 3 %> more</span>
+                      <span class="text-muted">+<%= events.length - 3 %> <%= t('shared:common.more') %></span>
                     <% } %>
                   </td>
-                  <td><%= webhook.merchantId || '<em class="text-muted">Global</em>' %></td>
+                  <td><%= webhook.merchantId || '<em class="text-muted">' + t('shared:common.global') + '</em>' %></td>
                   <td>
                     <% if (webhook.isActive) { %>
-                      <span class="badge bg-success">Active</span>
+                      <span class="badge bg-success"><%= t('common.active') %></span>
                     <% } else { %>
-                      <span class="badge bg-secondary">Inactive</span>
+                      <span class="badge bg-secondary"><%= t('common.inactive') %></span>
                     <% } %>
                   </td>
                   <td><%= webhook.createdAt ? new Date(webhook.createdAt).toLocaleString() : '-' %></td>
                   <td>
                     <% if (webhook.isActive) { %>
                       <form method="POST" action="/admin/notifications/webhooks/<%= webhook.notificationWebhookId %>/deactivate" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Deactivate this webhook?')">
-                          <i class="ti ti-player-pause"></i> Deactivate
+                        <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('<%= t('notifications:confirmDeactivateWebhook') %>')">
+                          <i class="ti ti-player-pause"></i> <%= t('shared:common.deactivate') %>
                         </button>
                       </form>
                     <% } %>

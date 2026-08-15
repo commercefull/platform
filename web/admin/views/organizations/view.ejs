@@ -1,0 +1,62 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= organization?.name || pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/organizations/<%= organization.organizationId %>/edit" class="btn btn-primary me-2"><%= t('common.edit') %></a>
+      <form method="POST" action="/admin/organizations/<%= organization.organizationId %>?_method=DELETE" class="d-inline" onsubmit="return confirm('<%= t('organization:confirmDelete') %>')">
+        <button type="submit" class="btn btn-outline-danger"><%= t('common.delete') %></button>
+      </form>
+      <a href="/admin/organizations" class="btn btn-outline-secondary ms-2"><%= t('common.back') %></a>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card mb-3">
+          <div class="card-header"><h3 class="card-title"><%= t('organization:view') %></h3></div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4"><%= t('shared:common.name') %></dt>
+              <dd class="col-sm-8"><%= organization.name %></dd>
+              <dt class="col-sm-4"><%= t('shared:common.slug') %></dt>
+              <dd class="col-sm-8"><code><%= organization.slug %></code></dd>
+              <dt class="col-sm-4"><%= t('shared:common.type') %></dt>
+              <dd class="col-sm-8"><span class="badge bg-secondary"><%= organization.type %></span></dd>
+              <dt class="col-sm-4"><%= t('shared:common.dateCreated') %></dt>
+              <dd class="col-sm-8"><%= new Date(organization.createdAt).toLocaleDateString() %></dd>
+              <dt class="col-sm-4"><%= t('shared:common.dateUpdated') %></dt>
+              <dd class="col-sm-8"><%= new Date(organization.updatedAt).toLocaleDateString() %></dd>
+            </dl>
+            <% if (organization.settings && Object.keys(organization.settings).length > 0) { %>
+              <hr>
+              <h4><%= t('organization:settings') %></h4>
+              <pre class="bg-light p-3 rounded"><code><%= JSON.stringify(organization.settings, null, 2) %></code></pre>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><%= t('shared:common.stores') %> (<%= (stores || []).length %>)</h3></div>
+          <div class="card-body">
+            <% if ((stores || []).length === 0) { %>
+              <p class="text-muted mb-0"><%= t('organization:noStoresLinked') %></p>
+            <% } else { %>
+              <ul class="list-group list-group-flush">
+                <% stores.forEach(function(store) { %>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="/admin/stores/<%= store.storeId %>"><%= store.name %></a>
+                    <span class="badge bg-<%= store.status === 'active' ? 'success' : 'secondary' %>"><%= store.status %></span>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

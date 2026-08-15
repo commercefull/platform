@@ -1,0 +1,11 @@
+{
+  "title": "監査ログ",
+  "user": "ユーザー",
+  "resource": "リソース",
+  "resourceId": "リソースID",
+  "ipAddress": "IPアドレス",
+  "noLogs": "監査ログが見つかりません。",
+  "changes": "変更点",
+  "oldValue": "古い値",
+  "newValue": "新しい価値"
+}

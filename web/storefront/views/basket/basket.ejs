@@ -4,8 +4,8 @@
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Shopping Cart</h1>
-      <p class="mt-2 text-sm text-gray-600">Review and manage the items in your cart</p>
+      <h1 class="text-3xl font-bold text-gray-900"><%= t('storefront:shoppingCart') %></h1>
+      <p class="mt-2 text-sm text-gray-600"><%= t('storefront:reviewManageCart') %></p>
     </div>
 
     <% if (basket && basket.items && basket.items.length > 0) { %>
@@ -32,11 +32,11 @@
                     <%= item.name %>
                   </a>
                 </h3>
-                <p class="text-sm text-gray-600 mb-3">SKU: <%= item.sku || item.productId %></p>
+                <p class="text-sm text-gray-600 mb-3"><%= t('shared:common.sku') %>: <%= item.sku || item.productId %></p>
 
                 <!-- Quantity Controls -->
                 <div class="flex items-center space-x-3">
-                  <label class="text-sm font-medium text-gray-700">Quantity:</label>
+                  <label class="text-sm font-medium text-gray-700"><%= t('storefront:quantityLabel') %></label>
                   <div class="flex items-center border border-gray-300 rounded-lg">
                     <button
                       onclick="updateQuantity('<%= item.basketItemId %>', <%= item.quantity - 1 %>)"
@@ -63,9 +63,9 @@
               <!-- Pricing & Actions -->
               <div class="flex flex-col items-end space-y-3">
                 <div class="text-right">
-                  <p class="text-sm text-gray-600">Price</p>
+                  <p class="text-sm text-gray-600"><%= t('shared:common.price') %></p>
                   <p class="text-lg font-semibold text-gray-900">$<%= parseFloat(item.price).toFixed(2) %></p>
-                  <p class="text-sm text-gray-600">Total</p>
+                  <p class="text-sm text-gray-600"><%= t('shared:common.total') %></p>
                   <p class="text-xl font-bold text-gray-900">$<%= (parseFloat(item.price) * item.quantity).toFixed(2) %></p>
                 </div>
 
@@ -76,7 +76,7 @@
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                   </svg>
-                  Remove
+                  <%= t('shared:common.remove') %>
                 </button>
               </div>
             </div>
@@ -94,29 +94,29 @@
               <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
               </svg>
-              Order Summary
+              <%= t('shared:common.orderSummary') %>
             </h2>
           </div>
           <div class="p-6 space-y-4">
             <div class="flex justify-between items-center py-2 border-b border-gray-100">
-              <span class="text-sm font-medium text-gray-600">Subtotal (<%= basket.items.length %> items)</span>
+              <span class="text-sm font-medium text-gray-600"><%= t('storefront:subtotalItems', { count: basket.items.length }) %></span>
               <span class="text-sm text-gray-900">$<%= basket.totals ? basket.totals.subtotal : '0.00' %></span>
             </div>
 
             <div class="flex justify-between items-center py-2 border-b border-gray-100">
-              <span class="text-sm font-medium text-gray-600">Tax</span>
+              <span class="text-sm font-medium text-gray-600"><%= t('shared:common.tax') %></span>
               <span class="text-sm text-gray-900">$<%= basket.totals ? basket.totals.tax : '0.00' %></span>
             </div>
 
             <div class="flex justify-between items-center py-2 border-b border-gray-100">
-              <span class="text-sm font-medium text-gray-600">Shipping</span>
+              <span class="text-sm font-medium text-gray-600"><%= t('shared:common.shipping') %></span>
               <span class="text-sm text-gray-900">$<%= basket.totals ? basket.totals.shipping : '0.00' %></span>
             </div>
 
             <hr class="border-gray-200">
 
             <div class="flex justify-between items-center py-2">
-              <span class="text-lg font-semibold text-gray-900">Total</span>
+              <span class="text-lg font-semibold text-gray-900"><%= t('shared:common.total') %></span>
               <span class="text-lg font-bold text-green-600">$<%= basket.totals ? basket.totals.total : '0.00' %></span>
             </div>
           </div>
@@ -131,7 +131,7 @@
             <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Proceed to Checkout
+            <%= t('storefront:proceedToCheckout') %>
           </a>
 
           <a
@@ -141,7 +141,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
-            Continue Shopping
+            <%= t('storefront:continueShopping') %>
           </a>
         </div>
 
@@ -152,8 +152,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
             </svg>
             <div>
-              <h4 class="text-sm font-medium text-blue-900 mb-1">Secure Checkout</h4>
-              <p class="text-sm text-blue-700">Your payment information is encrypted and secure. We protect your data with industry-standard security measures.</p>
+              <h4 class="text-sm font-medium text-blue-900 mb-1"><%= t('storefront:secureCheckout') %></h4>
+              <p class="text-sm text-blue-700"><%= t('storefront:secureCheckoutDesc') %></p>
             </div>
           </div>
         </div>
@@ -169,8 +169,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
           </svg>
         </div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
-        <p class="text-gray-600 mb-8 max-w-md mx-auto">Looks like you haven't added anything to your cart yet. Start exploring our amazing collection of products.</p>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4"><%= t('storefront:cartEmpty') %></h2>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto"><%= t('storefront:cartEmptyDesc') %></p>
         <a
           href="/products"
           class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors"
@@ -178,7 +178,7 @@
           <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
           </svg>
-          Start Shopping
+          <%= t('storefront:startShopping') %>
         </a>
       </div>
     </div>
@@ -203,16 +203,16 @@ async function updateQuantity(basketItemId, newQuantity) {
       location.reload();
     } else {
       // Show error message
-      showNotification('Failed to update quantity', 'error');
+      showNotification('<%= t('storefront:failedToUpdateQty') %>', 'error');
     }
   } catch (error) {
     console.error('Error updating quantity:', error);
-    showNotification('Failed to update quantity', 'error');
+    showNotification('<%= t('storefront:failedToUpdateQty') %>', 'error');
   }
 }
 
 async function removeItem(basketItemId) {
-  if (!confirm('Remove this item from your cart?')) return;
+  if (!confirm('<%= t('storefront:removeItemConfirm') %>')) return;
 
   try {
     const response = await fetch(`/basket/item/${basketItemId}`, {
@@ -222,11 +222,11 @@ async function removeItem(basketItemId) {
     if (response.ok) {
       location.reload();
     } else {
-      showNotification('Failed to remove item', 'error');
+      showNotification('<%= t('storefront:failedToRemoveItem') %>', 'error');
     }
   } catch (error) {
     console.error('Error removing item:', error);
-    showNotification('Failed to remove item', 'error');
+    showNotification('<%= t('storefront:failedToRemoveItem') %>', 'error');
   }
 }
 

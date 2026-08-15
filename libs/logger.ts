@@ -1,7 +1,12 @@
+import type { Request, Response } from 'express';
 import winston, { format } from 'winston';
 import 'winston-daily-rotate-file';
 import expressWinston from 'express-winston';
 import path from 'path';
+
+interface ExtendedResponse extends Response {
+  responseTime?: number;
+}
 
 function stringify(obj: unknown) {
   let cache: unknown[] = [];
@@ -43,7 +48,7 @@ export interface TransformableInfo {
 }
 
 // Define log level type for TypeScript
-type LogLevel = 'emergency' | 'alert' | 'critical' | 'error' | 'warning' | 'notice' | 'info' | 'debug' | 'http';
+type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'http';
 
 const { combine, timestamp, printf, errors } = format;
 
@@ -53,9 +58,10 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 // Define log levels similar to Monolog
 const levels = {
   error: 0, // Error conditions
-  http: 1, // HTTP requests (moved up for higher priority)
+  warning: 1, // Warning conditions
   info: 2, // Informational messages
   debug: 3, // Debug-level messages
+  http: 4, // HTTP requests
 };
 
 // Unified JSON formatter
@@ -83,22 +89,34 @@ const jsonFormatter = printf(({ level, message, timestamp, stack, ...meta }: Tra
 const transports: winston.transport[] = [
   // Console transport for all environments
   new winston.transports.Console({
-    level: isDevelopment ? 'debug' : 'error', // Log everything in dev, only error in prod
+    level: process.env.LOG_LEVEL || 'error', // Configurable dev level, warning default
     format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), errors({ stack: true }), jsonFormatter),
   } as winston.transports.ConsoleTransportOptions),
 ];
 
-// File transports for production
+// Error file transport — always enabled (dev + prod) so errors are traceable
+transports.push(
+  new winston.transports.DailyRotateFile({
+    level: 'error',
+    filename: path.join(logDir, 'error-%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d',
+    format: combine(timestamp(), errors({ stack: true }), jsonFormatter),
+  }),
+);
+
+// Additional info-level file transport in production only
 if (!isDevelopment) {
-  // Error logs (error level only)
   transports.push(
     new winston.transports.DailyRotateFile({
-      level: 'error', // Only log errors
-      filename: path.join(logDir, 'error-%DATE%.log'),
+      level: process.env.LOG_LEVEL || 'error',
+      filename: path.join(logDir, 'app-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
       maxSize: '20m',
-      maxFiles: '14d', // Keep logs for 14 days
+      maxFiles: '14d',
       format: combine(timestamp(), errors({ stack: true }), jsonFormatter),
     }),
   );
@@ -107,19 +125,39 @@ if (!isDevelopment) {
 // Create the logger with proper type annotations
 const logger: winston.Logger & Record<LogLevel, winston.LeveledLogMethod> = winston.createLogger({
   levels,
-  level: isDevelopment ? 'debug' : 'error',
+  level: process.env.LOG_LEVEL || 'error',
   format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), errors({ stack: true }), jsonFormatter),
-  defaultMeta: { service: 'commercefull' }, // Add service name to all logs
+  defaultMeta: { service: 'clinic-organize' }, // Add service name to all logs
   transports,
   exitOnError: false, // Do not exit on handled exceptions
 }) as winston.Logger & Record<LogLevel, winston.LeveledLogMethod>;
 
+// Dedicated logger for HTTP access logs — always prints regardless of LOG_LEVEL.
+const httpAccessLogger = winston.createLogger({
+  levels,
+  level: 'http', // Accept all levels up to http
+  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), jsonFormatter),
+  defaultMeta: { service: 'clinic-organize' },
+  transports: [
+    new winston.transports.Console({
+      level: 'http',
+      format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), jsonFormatter),
+    } as winston.transports.ConsoleTransportOptions),
+  ],
+});
+
 // HTTP request logger middleware
 const expressHttpLogger = expressWinston.logger({
-  winstonInstance: logger,
-  level: 'http', // Always log HTTP requests
+  winstonInstance: httpAccessLogger,
   meta: false, // Disable meta to reduce verbosity
-  msg: '{{res.statusCode}} {{req.method}} {{req.url}} - {{res.responseTime}}ms',
+  msg: (req, res) => {
+    const isAjax =
+      req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+      req.path.startsWith('/api/') ||
+      req.headers.accept?.includes('application/json');
+    const requestType = isAjax ? '[AJAX]' : '[PAGE]';
+    return `| ${res.statusCode} | ${requestType} ${req.method} ${req.url} ${(res as ExtendedResponse).responseTime}ms`;
+  },
   expressFormat: false, // Disable express format to use our custom format
   colorize: false, // Disable color codes in logs
   ignoreRoute: req => {
@@ -130,7 +168,7 @@ const expressHttpLogger = expressWinston.logger({
   responseWhitelist: ['statusCode'], // Only log status code from response
 });
 
-const logRequest = (req: unknown) => {
+const logRequest = (req: Request) => {
   logger.info('Request', stringify(req));
 };
 

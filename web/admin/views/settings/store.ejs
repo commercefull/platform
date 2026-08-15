@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">Store Settings</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.storeSettings') %></li>
           </ol>
         </div>
       </div>
@@ -25,27 +25,27 @@
             <!-- Basic Info -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Basic Information</h3>
+                <h3 class="card-title"><i class="fas fa-info-circle me-2"></i><%= t('shared:common.basicInformation') %></h3>
               </div>
               <div class="card-body">
                 <div class="form-group mb-3">
-                  <label class="form-label">Store Name</label>
+                  <label class="form-label"><%= t('shared:common.storeName') %></label>
                   <input type="text" class="form-control" name="storeName" value="<%= settings.storeName || '' %>" required>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Store URL</label>
+                  <label class="form-label"><%= t('settings:storeUrl') %></label>
                   <input type="url" class="form-control" name="storeUrl" value="<%= settings.storeUrl || '' %>" placeholder="https://www.example.com">
                 </div>
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Store Email</label>
+                      <label class="form-label"><%= t('settings:storeEmail') %></label>
                       <input type="email" class="form-control" name="storeEmail" value="<%= settings.storeEmail || '' %>" placeholder="store@example.com">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Store Phone</label>
+                      <label class="form-label"><%= t('settings:storePhone') %></label>
                       <input type="tel" class="form-control" name="storePhone" value="<%= settings.storePhone || '' %>" placeholder="+1 (555) 123-4567">
                     </div>
                   </div>
@@ -56,28 +56,28 @@
             <!-- Address -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-map-marker-alt me-2"></i>Store Address</h3>
+                <h3 class="card-title"><i class="fas fa-map-marker-alt me-2"></i><%= t('settings:storeAddress') %></h3>
               </div>
               <div class="card-body">
                 <% const address = settings.storeAddress ? (typeof settings.storeAddress === 'string' ? JSON.parse(settings.storeAddress) : settings.storeAddress) : {}; %>
                 <div class="form-group mb-3">
-                  <label class="form-label">Address Line 1</label>
+                  <label class="form-label"><%= t('shared:common.addressLine1') %></label>
                   <input type="text" class="form-control" name="addressLine1" value="<%= address.line1 || '' %>">
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Address Line 2</label>
+                  <label class="form-label"><%= t('shared:common.addressLine2') %></label>
                   <input type="text" class="form-control" name="addressLine2" value="<%= address.line2 || '' %>">
                 </div>
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">City</label>
+                      <label class="form-label"><%= t('shared:common.city') %></label>
                       <input type="text" class="form-control" name="city" value="<%= address.city || '' %>">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">State/Province</label>
+                      <label class="form-label"><%= t('shared:common.stateprovince') %></label>
                       <input type="text" class="form-control" name="state" value="<%= address.state || '' %>">
                     </div>
                   </div>
@@ -85,13 +85,13 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Postal Code</label>
+                      <label class="form-label"><%= t('shared:common.postalCode') %></label>
                       <input type="text" class="form-control" name="postalCode" value="<%= address.postalCode || '' %>">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Country</label>
+                      <label class="form-label"><%= t('shared:common.country') %></label>
                       <input type="text" class="form-control" name="country" value="<%= address.country || '' %>">
                     </div>
                   </div>
@@ -102,13 +102,13 @@
             <!-- Regional Settings -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-globe me-2"></i>Regional Settings</h3>
+                <h3 class="card-title"><i class="fas fa-globe me-2"></i><%= t('settings:regionalSettings') %></h3>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Timezone</label>
+                      <label class="form-label"><%= t('settings:timezone') %></label>
                       <select class="form-control" name="timezone">
                         <% (timezones || []).forEach(function(tz) { %>
                         <option value="<%= tz %>" <%= settings.timezone === tz ? 'selected' : '' %>><%= tz %></option>
@@ -118,7 +118,7 @@
                   </div>
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Currency</label>
+                      <label class="form-label"><%= t('shared:common.currency') %></label>
                       <select class="form-control" name="currency">
                         <% (currencies || []).forEach(function(curr) { %>
                         <option value="<%= curr.code %>" <%= settings.currency === curr.code ? 'selected' : '' %>><%= curr.code %> - <%= curr.name %></option>
@@ -128,7 +128,7 @@
                   </div>
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Locale</label>
+                      <label class="form-label"><%= t('shared:common.locale') %></label>
                       <select class="form-control" name="locale">
                         <% (locales || []).forEach(function(loc) { %>
                         <option value="<%= loc.code %>" <%= settings.locale === loc.code ? 'selected' : '' %>><%= loc.name %></option>
@@ -141,7 +141,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-lg">
-              <i class="fas fa-save me-2"></i>Save Settings
+              <i class="fas fa-save me-2"></i><%= t('shared:common.saveSettings') %>
             </button>
           </form>
         </div>
@@ -149,20 +149,20 @@
           <!-- Quick Links -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-link me-2"></i>Settings</h3>
+              <h3 class="card-title"><i class="fas fa-link me-2"></i><%= t('shared:common.settings') %></h3>
             </div>
             <div class="list-group list-group-flush">
               <a href="/admin/settings/store" class="list-group-item list-group-item-action active">
-                <i class="fas fa-store me-2"></i>Store Settings
+                <i class="fas fa-store me-2"></i><%= t('shared:common.storeSettings') %>
               </a>
               <a href="/admin/settings/business" class="list-group-item list-group-item-action">
-                <i class="fas fa-building me-2"></i>Business Information
+                <i class="fas fa-building me-2"></i><%= t('settings:businessInformation') %>
               </a>
               <a href="/admin/settings/localization" class="list-group-item list-group-item-action">
-                <i class="fas fa-language me-2"></i>Localization
+                <i class="fas fa-language me-2"></i><%= t('shared:common.localization') %>
               </a>
               <a href="/admin/platform/configuration" class="list-group-item list-group-item-action">
-                <i class="fas fa-cog me-2"></i>Platform Configuration
+                <i class="fas fa-cog me-2"></i><%= t('settings:platformConfig') %>
               </a>
             </div>
           </div>
@@ -187,12 +187,12 @@
       });
       const result = await response.json();
       if (result.success) {
-        alert('Settings saved successfully');
+        alert('<%= t('settings:settingsSavedSuccess') %>');
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   });
 </script>

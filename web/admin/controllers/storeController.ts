@@ -3,7 +3,7 @@ import { TypedRequest, RequestBody } from 'libs/types/express';
 import { logger } from '../../../libs/logger';
 import { adminRespond } from '../../respond';
 import StoreRepo from '../../../modules/store/infrastructure/repositories/StoreRepo';
-import BusinessRepo from '../../../modules/business/infrastructure/repositories/BusinessRepo';
+import organizationRepo from '../../../modules/organization/infrastructure/repositories/organizationRepo';
 import SystemConfigurationRepo from '../../../modules/configuration/infrastructure/repositories/SystemConfigurationRepo';
 import userStoreRepository from '../../../modules/identity/infrastructure/repositories/StoreUserRepository';
 import { ListStoresQuery, ListStoresUseCase } from '../../../modules/store/application/useCases/ListStores';
@@ -18,7 +18,7 @@ import storeDispatchRepository from '../../../modules/inventory/infrastructure/r
 
 const listStoresUseCase = new ListStoresUseCase(StoreRepo);
 const getStoreUseCase = new GetStoreUseCase(StoreRepo);
-const createStoreUseCase = new CreateStoreUseCase(StoreRepo, BusinessRepo, SystemConfigurationRepo);
+const createStoreUseCase = new CreateStoreUseCase(StoreRepo, SystemConfigurationRepo);
 const updateStoreUseCase = new UpdateStoreUseCase(StoreRepo);
 const listStoreUsersUseCase = new ListStoreUsersUseCase(userStoreRepository);
 const assignUserToStoreUseCase = new AssignUserToStoreUseCase(
@@ -88,9 +88,9 @@ export const viewStore = async (req: TypedRequest, res: Response): Promise<void>
 
 export const createStoreForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const businesses = await BusinessRepo.findActive();
+    const organizations = await organizationRepo.findAll();
     const stores = await StoreRepo.findActive();
-    adminRespond(req, res, 'stores/create', { pageName: 'Create Store', businesses, stores, formData: {} });
+    adminRespond(req, res, 'stores/create', { pageName: 'Create Store', organizations, stores, formData: {} });
   } catch (error: unknown) {
     logger.error('Error:', error);
     adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load store form' });
@@ -126,12 +126,12 @@ export const createStore = async (req: TypedRequest, res: Response): Promise<voi
     res.redirect(`/admin/stores/${result.storeId}?success=Store created successfully`);
   } catch (error: unknown) {
     logger.error('Error:', error);
-    const businesses = await BusinessRepo.findActive().catch(() => []);
+    const organizations = await organizationRepo.findAll().catch(() => []);
     const stores = await StoreRepo.findActive().catch(() => []);
     adminRespond(req, res, 'stores/create', {
       pageName: 'Create Store',
       error: (error as Error).message || 'Failed to create store',
-      businesses,
+      organizations,
       stores,
       formData: req.body as RequestBody,
     });
@@ -141,12 +141,12 @@ export const createStore = async (req: TypedRequest, res: Response): Promise<voi
 export const editStoreForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
-    const businesses = await BusinessRepo.findActive();
+    const organizations = await organizationRepo.findAll();
     const stores = await StoreRepo.findActive();
     adminRespond(req, res, 'stores/edit', {
       pageName: 'Edit Store',
       store: storeResult.store,
-      businesses,
+      organizations,
       stores,
       formData: storeResult.store,
     });
@@ -179,12 +179,12 @@ export const updateStore = async (req: TypedRequest, res: Response): Promise<voi
     res.redirect(`/admin/stores/${req.params.storeId}?success=Store updated successfully`);
   } catch (error: unknown) {
     logger.error('Error:', error);
-    const businesses = await BusinessRepo.findActive().catch(() => []);
+    const organizations = await organizationRepo.findAll().catch(() => []);
     const stores = await StoreRepo.findActive().catch(() => []);
     adminRespond(req, res, 'stores/edit', {
       pageName: 'Edit Store',
       error: (error as Error).message || 'Failed to update store',
-      businesses,
+      organizations,
       stores,
       store: { storeId: req.params.storeId },
       formData: req.body as RequestBody,

@@ -1,0 +1,23 @@
+{
+  "programMembers": "プログラムメンバー",
+  "pointsIssued": "発行ポイント",
+  "pointsRedeemed": "交換されたポイント",
+  "programSettings": "プログラム設定",
+  "pointsPerDollar": "使用金額あたりのポイント",
+  "pointsValue": "ポイント価値 (1 ポイントあたりのドル)",
+  "minimumRedemption": "最低償還額",
+  "addReward": "報酬を追加",
+  "reward": "褒美",
+  "redemptions": "償還",
+  "noRewards": "報酬が設定されていません。",
+  "recentTransactions": "最近の取引",
+  "noTransactions": "まだ取引はありません。",
+  "rewardName": "報酬名",
+  "rewardType": "報酬の種類",
+  "freeProduct": "無料製品",
+  "giftCard": "ギフトカード",
+  "rewardValue": "報酬の価値",
+  "confirmDeleteReward": "この報酬を削除しますか?",
+  "analytics": "ロイヤルティ プログラム分析",
+  "analyticsDescription": "ポイントの配分、引き換え率、および段階の進行。"
+}

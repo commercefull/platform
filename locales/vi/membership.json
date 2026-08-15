@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "Tư cách thành viên",
+  "totalMembers": "Tổng số thành viên",
+  "activeMembers": "Thành viên tích cực",
+  "membershipTiers": "Cấp độ thành viên",
+  "expiringThisMonth": "Hết hạn vào tháng này",
+  "addTier": "Thêm cấp độ",
+  "members": "thành viên",
+  "noTiers": "Không có cấp độ thành viên nào được định cấu hình.",
+  "recentMembers": "Thành viên gần đây",
+  "tier": "cấp",
+  "noMembers": "Chưa có thành viên nào",
+  "addMembershipTier": "Thêm cấp thành viên",
+  "tierName": "Tên cấp độ",
+  "billingPeriod": "Thời hạn thanh toán",
+  "lifetime": "Trọn đời",
+  "benefitsOnePerLine": "Lợi ích (mỗi dòng một cái)",
+  "setAsDefault": "Đặt làm cấp mặc định",
+  "createTier": "Tạo cấp độ",
+  "confirmDeleteTier": "Xóa cấp độ này?",
+  "analytics": "Phân tích thành viên",
+  "analyticsDescription": "Thành viên tích cực, doanh thu, tỷ lệ rời bỏ và phân bổ cấp bậc."
+}

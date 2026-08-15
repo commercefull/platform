@@ -21,6 +21,7 @@ Quick reference. For the full rules, see the individual standards documents.
 - Keep migrations as JavaScript files (not TypeScript).
 - Use `knex.fn.now()` for default timestamps.
 - Follow the master variant architecture for products.
+- Use `t('namespace:key')` for all user-facing text in EJS templates (labels, buttons, headings, placeholders, alerts, fallbacks).
 - Use ES module `import` syntax for all imports in TypeScript files.
 - Place all imports at the top of the file.
 - Fold schema changes into the original `create` migration when it hasn't been released yet; otherwise add a new `alter` migration.
@@ -31,6 +32,7 @@ Quick reference. For the full rules, see the individual standards documents.
 - Use an ORM — use raw SQL with `libs/db` helpers.
 - Put business logic in controllers (use domain entities and use cases).
 - Hard-code API endpoints or secrets.
+- Hard-code user-facing text in EJS templates — always use `t('namespace:key')` and add keys to locale JSON files.
 - Use `console.log` in production code.
 - Skip error handling in controllers.
 - Delete seed data without checking FK constraints.

@@ -26,7 +26,7 @@
                 <path d="M4 12h16"/>
                 <path d="M4 18h12"/>
               </svg>
-              Filters
+              <%= t('common.filter') %>
             </h3>
           </div>
           <div class="col-auto">
@@ -35,7 +35,7 @@
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/>
               </svg>
-              Toggle Filters
+              <%= t('customer:toggleFilters') %>
             </button>
           </div>
         </div>
@@ -50,9 +50,9 @@
                 <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
                 <path d="M21 21l-6 -6"/>
               </svg>
-              Search
+              <%= t('common.search') %>
             </label>
-            <input type="text" class="form-control" id="search" name="search" value="<%= filters.search %>" placeholder="Name, Email, Phone...">
+            <input type="text" class="form-control" id="search" name="search" value="<%= filters.search %>" placeholder="<%= t('customer:searchPlaceholder') %>">
           </div>
 
           <!-- Status -->
@@ -62,12 +62,12 @@
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <path d="M9 12l2 2l4 -4"/>
               </svg>
-              Status
+              <%= t('common.status') %>
             </label>
             <select class="form-select" id="status" name="status">
-              <option value="">All Status</option>
-              <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
-              <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+              <option value=""><%= t('common.allStatus') %></option>
+              <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>><%= t('common.active') %></option>
+              <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>><%= t('common.inactive') %></option>
             </select>
           </div>
 
@@ -78,12 +78,12 @@
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <path d="M9 12l2 2l4 -4"/>
               </svg>
-              Verified
+              <%= t('customer:verified') %>
             </label>
             <select class="form-select" id="verified" name="verified">
-              <option value="">All</option>
-              <option value="verified" <%= filters.verified === 'verified' ? 'selected' : '' %>>Verified</option>
-              <option value="unverified" <%= filters.verified === 'unverified' ? 'selected' : '' %>>Unverified</option>
+              <option value=""><%= t('common.all') %></option>
+              <option value="verified" <%= filters.verified === 'verified' ? 'selected' : '' %>><%= t('customer:verified') %></option>
+              <option value="unverified" <%= filters.verified === 'unverified' ? 'selected' : '' %>><%= t('customer:unverified') %></option>
             </select>
           </div>
 
@@ -96,14 +96,14 @@
                 <path d="M7 12h10"/>
                 <path d="M7 16h10"/>
               </svg>
-              Sort By
+              <%= t('shared:common.sortBy') %>
             </label>
             <select class="form-select" id="orderBy" name="orderBy">
-              <option value="createdAt" <%= filters.orderBy === 'createdAt' ? 'selected' : '' %>>Date Registered</option>
-              <option value="lastName" <%= filters.orderBy === 'lastName' ? 'selected' : '' %>>Last Name</option>
-              <option value="firstName" <%= filters.orderBy === 'firstName' ? 'selected' : '' %>>First Name</option>
-              <option value="email" <%= filters.orderBy === 'email' ? 'selected' : '' %>>Email</option>
-              <option value="lastLoginAt" <%= filters.orderBy === 'lastLoginAt' ? 'selected' : '' %>>Last Login</option>
+              <option value="createdAt" <%= filters.orderBy === 'createdAt' ? 'selected' : '' %>><%= t('customer:dateRegistered') %></option>
+              <option value="lastName" <%= filters.orderBy === 'lastName' ? 'selected' : '' %>><%= t('shared:common.lastName') %></option>
+              <option value="firstName" <%= filters.orderBy === 'firstName' ? 'selected' : '' %>><%= t('shared:common.firstName') %></option>
+              <option value="email" <%= filters.orderBy === 'email' ? 'selected' : '' %>><%= t('shared:common.email') %></option>
+              <option value="lastLoginAt" <%= filters.orderBy === 'lastLoginAt' ? 'selected' : '' %>><%= t('shared:common.lastLogin') %></option>
             </select>
           </div>
 
@@ -119,15 +119,15 @@
                 <path d="M11 15h1"/>
                 <path d="M12 15v3"/>
               </svg>
-              Registered
+              <%= t('shared:common.registered') %>
             </label>
             <select class="form-select" id="dateRange" name="dateRange">
-              <option value="">All Time</option>
-              <option value="today" <%= filters.dateRange === 'today' ? 'selected' : '' %>>Today</option>
-              <option value="week" <%= filters.dateRange === 'week' ? 'selected' : '' %>>This Week</option>
-              <option value="month" <%= filters.dateRange === 'month' ? 'selected' : '' %>>This Month</option>
-              <option value="quarter" <%= filters.dateRange === 'quarter' ? 'selected' : '' %>>This Quarter</option>
-              <option value="year" <%= filters.dateRange === 'year' ? 'selected' : '' %>>This Year</option>
+              <option value=""><%= t('customer:allTime') %></option>
+              <option value="today" <%= filters.dateRange === 'today' ? 'selected' : '' %>><%= t('customer:today') %></option>
+              <option value="week" <%= filters.dateRange === 'week' ? 'selected' : '' %>><%= t('customer:thisWeek') %></option>
+              <option value="month" <%= filters.dateRange === 'month' ? 'selected' : '' %>><%= t('customer:thisMonth') %></option>
+              <option value="quarter" <%= filters.dateRange === 'quarter' ? 'selected' : '' %>><%= t('customer:thisQuarter') %></option>
+              <option value="year" <%= filters.dateRange === 'year' ? 'selected' : '' %>><%= t('customer:thisYear') %></option>
             </select>
           </div>
 
@@ -140,7 +140,7 @@
                   <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
                   <path d="M21 21l-6 -6"/>
                 </svg>
-                Apply Filters
+                <%= t('shared:common.applyFilters') %>
               </button>
               <a href="/admin/customers" class="btn btn-outline-secondary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
@@ -148,12 +148,12 @@
                   <path d="M19 19h-11l-4 -4a2 2 0 0 1 0 -2.828l4 -4h11a2 2 0 0 0 2 -2v-3a2 2 0 0 0 -2 -2h-3l-3 -3"/>
                   <path d="M3 3l18 18"/>
                 </svg>
-                Clear All
+                <%= t('shared:common.clearAll') %>
               </a>
               <% if (filters.search || filters.status || filters.verified || filters.dateRange) { %>
                 <div class="ms-auto">
                   <span class="badge bg-info">
-                    <%= [filters.search && 'Search', filters.status && 'Status', filters.verified && 'Verification', filters.dateRange && 'Date'].filter(Boolean).join(' + ') %> filters active
+                    <%= [filters.search && t('common.search'), filters.status && t('common.status'), filters.verified && t('customer:verified'), filters.dateRange && t('common.date')].filter(Boolean).join(' + ') %> <%= t('shared:common.filtersActive') %>
                   </span>
                 </div>
               <% } %>
@@ -166,20 +166,20 @@
     <!-- Customers Table -->
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Customers (<%= pagination.total %>)</h3>
+        <h3 class="card-title"><%= t('shared:common.customers') %> (<%= pagination.total %>)</h3>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover text-nowrap">
           <thead>
             <tr>
-              <th>Customer</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Status</th>
-              <th>Verified</th>
-              <th>Registered</th>
-              <th>Last Login</th>
-              <th>Actions</th>
+              <th><%= t('shared:common.customers').replace('s', '') %></th>
+              <th><%= t('shared:common.email') %></th>
+              <th><%= t('shared:common.phone') %></th>
+              <th><%= t('common.status') %></th>
+              <th><%= t('customer:verified') %></th>
+              <th><%= t('shared:common.registered') %></th>
+              <th><%= t('shared:common.lastLogin') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
@@ -194,14 +194,14 @@
               <td><%= customer.phone || '-' %></td>
               <td>
                 <span class="badge badge-<%= customer.isActive ? 'success' : 'secondary' %>">
-                  <%= customer.isActive ? 'Active' : 'Inactive' %>
+                  <%= customer.isActive ? t('common.active') : t('common.inactive') %>
                 </span>
               </td>
               <td>
                 <% if (customer.isVerified) { %>
-                  <i class="fas fa-check-circle text-success" title="Verified"></i>
+                  <i class="fas fa-check-circle text-success" title="<%= t('customer:verified') %>"></i>
                 <% } else { %>
-                  <i class="fas fa-times-circle text-muted" title="Not Verified"></i>
+                  <i class="fas fa-times-circle text-muted" title="<%= t('customer:unverified') %>"></i>
                 <% } %>
               </td>
               <td><%= new Date(customer.createdAt).toLocaleDateString() %></td>
@@ -209,23 +209,23 @@
                 <% if (customer.lastLoginAt) { %>
                   <%= new Date(customer.lastLoginAt).toLocaleDateString() %>
                 <% } else { %>
-                  Never
+                  <%= t('shared:common.never') %>
                 <% } %>
               </td>
               <td>
                 <div class="btn-group">
-                  <a href="/admin/customers/<%= customer.customerId %>" class="btn btn-sm btn-info" title="View">
+                  <a href="/admin/customers/<%= customer.customerId %>" class="btn btn-sm btn-info" title="<%= t('common.view') %>">
                     <i class="fas fa-eye"></i>
                   </a>
-                  <a href="/admin/customers/<%= customer.customerId %>/edit" class="btn btn-sm btn-primary" title="Edit">
+                  <a href="/admin/customers/<%= customer.customerId %>/edit" class="btn btn-sm btn-primary" title="<%= t('common.edit') %>">
                     <i class="fas fa-edit"></i>
                   </a>
                   <% if (customer.isActive) { %>
-                    <button class="btn btn-sm btn-warning" onclick="deactivateCustomer('<%= customer.customerId %>')" title="Deactivate">
+                    <button class="btn btn-sm btn-warning" onclick="deactivateCustomer('<%= customer.customerId %>')" title="<%= t('shared:common.deactivate') %>">
                       <i class="fas fa-user-slash"></i>
                     </button>
                   <% } else { %>
-                    <button class="btn btn-sm btn-success" onclick="reactivateCustomer('<%= customer.customerId %>')" title="Reactivate">
+                    <button class="btn btn-sm btn-success" onclick="reactivateCustomer('<%= customer.customerId %>')" title="<%= t('customer:reactivate') %>">
                       <i class="fas fa-user-check"></i>
                     </button>
                   <% } %>

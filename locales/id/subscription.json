@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Jumlah Langganan",
+  "monthlyRecurringRevenue": "Pendapatan Berulang Bulanan",
+  "addPlan": "Tambahkan Paket",
+  "planName": "Nama Rencana",
+  "subscribers": "Pelanggan",
+  "noPlans": "Tidak ada paket berlangganan yang dikonfigurasi.",
+  "plan": "Rencana",
+  "started": "Dimulai",
+  "nextBilling": "Penagihan Berikutnya",
+  "noActiveSubscriptions": "Tidak ada langganan aktif.",
+  "addSubscriptionPlan": "Tambahkan Paket Berlangganan",
+  "yearly": "Tahunan",
+  "trialDays": "Hari Percobaan",
+  "confirmDeletePlan": "Hapus paket ini?",
+  "billingOverview": "Ikhtisar Penagihan",
+  "billingDescription": "Kelola penagihan langganan, pembayaran yang gagal, dan proses perpanjangan."
+}

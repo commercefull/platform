@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin/analytics">Analytics</a></li>
-            <li class="breadcrumb-item active">AI Recommendations</li>
+            <li class="breadcrumb-item"><a href="/admin/analytics"><%= t('shared:common.analytics') %></a></li>
+            <li class="breadcrumb-item active"><%= t('analytics:aiRecommendations') %></li>
           </ol>
         </div>
       </div>
@@ -24,21 +24,21 @@
         <div class="col-lg-4">
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-user me-2"></i>Personalized Recommendations</h3>
+              <h3 class="card-title"><i class="fas fa-user me-2"></i><%= t('analytics:personalizedRecommendations') %></h3>
             </div>
             <div class="card-body p-0">
               <ul class="list-group list-group-flush">
                 <% (productRecommendations.personalized || []).slice(0, 5).forEach(function(rec) { %>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                   <div>
-                    <strong>Product <%= rec.productId.slice(-8) %></strong>
+                    <strong><%= t('common.product') %> <%= rec.productId.slice(-8) %></strong>
                     <br><small class="text-muted"><%= rec.reason %></small>
                   </div>
                   <span class="badge bg-primary rounded-pill"><%= (rec.score * 100).toFixed(0) %>%</span>
                 </li>
                 <% }); %>
                 <% if ((productRecommendations.personalized || []).length === 0) { %>
-                <li class="list-group-item text-muted text-center">No personalized recommendations available</li>
+                <li class="list-group-item text-muted text-center"><%= t('analytics:noPersonalizedRecommendations') %></li>
                 <% } %>
               </ul>
             </div>
@@ -47,21 +47,21 @@
         <div class="col-lg-4">
           <div class="card card-success">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-fire me-2"></i>Trending Products</h3>
+              <h3 class="card-title"><i class="fas fa-fire me-2"></i><%= t('analytics:trendingProducts') %></h3>
             </div>
             <div class="card-body p-0">
               <ul class="list-group list-group-flush">
                 <% (productRecommendations.trending || []).slice(0, 5).forEach(function(product) { %>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                   <div>
-                    <strong>Product <%= product.productId.slice(-8) %></strong>
+                    <strong><%= t('common.product') %> <%= product.productId.slice(-8) %></strong>
                     <br><small class="text-muted"><%= product.category %></small>
                   </div>
                   <span class="badge bg-success rounded-pill"><i class="fas fa-arrow-up me-1"></i><%= product.trend %></span>
                 </li>
                 <% }); %>
                 <% if ((productRecommendations.trending || []).length === 0) { %>
-                <li class="list-group-item text-muted text-center">No trending products available</li>
+                <li class="list-group-item text-muted text-center"><%= t('analytics:noTrendingProducts') %></li>
                 <% } %>
               </ul>
             </div>
@@ -70,21 +70,21 @@
         <div class="col-lg-4">
           <div class="card card-warning">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-link me-2"></i>Complementary Products</h3>
+              <h3 class="card-title"><i class="fas fa-link me-2"></i><%= t('analytics:complementaryProducts') %></h3>
             </div>
             <div class="card-body p-0">
               <ul class="list-group list-group-flush">
                 <% (productRecommendations.complementary || []).slice(0, 5).forEach(function(product) { %>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                   <div>
-                    <strong>Product <%= product.productId.slice(-8) %></strong>
-                    <br><small class="text-muted">Pairs with <%= product.baseProductId.slice(-8) %></small>
+                    <strong><%= t('shared:common.product') %> <%= product.productId.slice(-8) %></strong>
+                    <br><small class="text-muted"><%= t('analytics:pairsWith') %> <%= product.baseProductId.slice(-8) %></small>
                   </div>
-                  <span class="badge bg-warning text-dark rounded-pill">Lift: <%= product.lift %></span>
+                  <span class="badge bg-warning text-dark rounded-pill"><%= t('analytics:lift') %>: <%= product.lift %></span>
                 </li>
                 <% }); %>
                 <% if ((productRecommendations.complementary || []).length === 0) { %>
-                <li class="list-group-item text-muted text-center">No complementary products available</li>
+                <li class="list-group-item text-muted text-center"><%= t('analytics:noComplementaryProducts') %></li>
                 <% } %>
               </ul>
             </div>
@@ -97,7 +97,7 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-bullhorn me-2"></i>AI-Generated Campaign Suggestions</h3>
+              <h3 class="card-title"><i class="fas fa-bullhorn me-2"></i><%= t('analytics:aiCampaignSuggestions') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
@@ -108,13 +108,13 @@
                       <h5 class="card-title"><%= campaign.name %></h5>
                     </div>
                     <div class="card-body">
-                      <p><strong>Target Audience:</strong> <%= campaign.targetAudience %></p>
+                      <p><strong><%= t('analytics:targetAudience') %>:</strong> <%= campaign.targetAudience %></p>
                       <div class="row">
                         <div class="col-6">
                           <div class="info-box bg-light mb-0">
                             <span class="info-box-icon bg-success"><i class="fas fa-chart-line"></i></span>
                             <div class="info-box-content">
-                              <span class="info-box-text">Expected ROI</span>
+                              <span class="info-box-text"><%= t('analytics:expectedROI') %></span>
                               <span class="info-box-number"><%= (campaign.expectedROI * 100).toFixed(0) %>%</span>
                             </div>
                           </div>
@@ -123,7 +123,7 @@
                           <div class="info-box bg-light mb-0">
                             <span class="info-box-icon bg-info"><i class="fas fa-percentage"></i></span>
                             <div class="info-box-content">
-                              <span class="info-box-text">Confidence</span>
+                              <span class="info-box-text"><%= t('analytics:confidence') %></span>
                               <span class="info-box-number"><%= (campaign.confidence * 100).toFixed(0) %>%</span>
                             </div>
                           </div>
@@ -131,8 +131,8 @@
                       </div>
                     </div>
                     <div class="card-footer">
-                      <button class="btn btn-primary btn-sm"><i class="fas fa-play me-1"></i>Launch Campaign</button>
-                      <button class="btn btn-outline-secondary btn-sm"><i class="fas fa-edit me-1"></i>Customize</button>
+                      <button class="btn btn-primary btn-sm"><i class="fas fa-play me-1"></i><%= t('analytics:launchCampaign') %></button>
+                      <button class="btn btn-outline-secondary btn-sm"><i class="fas fa-edit me-1"></i><%= t('shared:common.customize') %></button>
                     </div>
                   </div>
                 </div>
@@ -148,16 +148,16 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-shopping-cart me-2"></i>Cross-sell Opportunities</h3>
+              <h3 class="card-title"><i class="fas fa-shopping-cart me-2"></i><%= t('analytics:crossSellOpportunities') %></h3>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th>Base Product</th>
-                    <th>Confidence</th>
-                    <th>Actions</th>
+                    <th><%= t('shared:common.product') %></th>
+                    <th><%= t('analytics:baseProduct') %></th>
+                    <th><%= t('analytics:confidence') %></th>
+                    <th><%= t('common.actions') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -173,13 +173,13 @@
                       </div>
                     </td>
                     <td>
-                      <button class="btn btn-sm btn-outline-primary"><i class="fas fa-plus me-1"></i>Create Bundle</button>
+                      <button class="btn btn-sm btn-outline-primary"><i class="fas fa-plus me-1"></i><%= t('analytics:createBundle') %></button>
                     </td>
                   </tr>
                   <% }); %>
                   <% if ((crossSellOpportunities.accessoryRecommendations || []).length === 0) { %>
                   <tr>
-                    <td colspan="4" class="text-center text-muted">No cross-sell opportunities identified yet</td>
+                    <td colspan="4" class="text-center text-muted"><%= t('analytics:noCrossSellOpportunities') %></td>
                   </tr>
                   <% } %>
                 </tbody>

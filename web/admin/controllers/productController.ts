@@ -16,7 +16,6 @@ import { ProductVisibility } from '../../../modules/product/domain/valueObjects/
 import { adminRespond } from '../../respond';
 import productTypeRepo from '../../../modules/product/infrastructure/repositories/ProductTypeRepository';
 import categoryRepo from '../../../modules/product/infrastructure/repositories/categoryRepo';
-import brandRepository from '../../../modules/brand/infrastructure/repositories/BrandRepository';
 import dynamicAttributeRepo from '../../../modules/product/infrastructure/repositories/DynamicAttributeRepository';
 import productReviewRepo from '../../../modules/product/infrastructure/repositories/productReviewRepo';
 
@@ -102,14 +101,13 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
     }
 
     // Load additional rich data in parallel
-    const [productAttributes, reviewStats, productType, category, brand] = await Promise.all([
+    const [productAttributes, reviewStats, productType, category] = await Promise.all([
       dynamicAttributeRepo.getProductAttributes(productId).catch(() => []),
       productReviewRepo
         .getProductStatistics(productId)
         .catch(() => ({ totalReviews: 0, averageRating: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, verifiedPurchaseCount: 0 })),
       product.productTypeId ? productTypeRepo.findById(product.productTypeId).catch(() => null) : Promise.resolve(null),
       product.categoryId ? categoryRepo.findOne(product.categoryId).catch(() => null) : Promise.resolve(null),
-      product.brandId ? brandRepository.findById(product.brandId).catch(() => null) : Promise.resolve(null),
     ]);
 
     adminRespond(req, res, 'products/view', {
@@ -119,7 +117,7 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
       reviewStats,
       productTypeName: productType?.name || null,
       categoryName: category?.name || null,
-      brandName: brand ? brand.name : null,
+      brandName: null,
       success: req.query.success || null,
     });
   } catch (error: unknown) {
@@ -138,17 +136,15 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
 
 export const createProductForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const [productTypes, categories, brandsResult] = await Promise.all([
+    const [productTypes, categories] = await Promise.all([
       productTypeRepo.findAll(),
       categoryRepo.findActive(),
-      brandRepository.findAll({ isActive: true }),
     ]);
 
     adminRespond(req, res, 'products/create', {
       pageName: 'Create Product',
       productTypes,
       categories,
-      brands: brandsResult.data || [],
       attributes: [],
 
       formData: {},
@@ -179,7 +175,6 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       slug,
       shortDescription,
       categoryId,
-      brandId,
       basePrice,
       salePrice,
       cost,
@@ -204,10 +199,9 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     } = body;
 
     if (!name?.trim()) {
-      const [productTypes, categories, brandsResult] = await Promise.all([
+      const [productTypes, categories] = await Promise.all([
         productTypeRepo.findAll(),
         categoryRepo.findActive(),
-        brandRepository.findAll({ isActive: true }),
       ]);
       adminRespond(req, res, 'products/create', {
         pageName: 'Create Product',
@@ -215,7 +209,6 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
         formData: req.body as RequestBody,
         productTypes,
         categories,
-        brands: brandsResult.data || [],
         attributes: [],
       });
       return;
@@ -229,7 +222,6 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       slug,
       shortDescription,
       categoryId,
-      brandId,
       merchantId,
       parseFloat(basePrice) || 0,
       salePrice ? parseFloat(salePrice) : undefined,
@@ -261,10 +253,9 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
   } catch (error: unknown) {
     logger.error('Error:', error);
 
-    const [productTypes, categories, brandsResult] = await Promise.all([
+    const [productTypes, categories] = await Promise.all([
       productTypeRepo.findAll().catch(() => []),
       categoryRepo.findActive().catch(() => []),
-      brandRepository.findAll({ isActive: true }).catch(() => ({ data: [] })),
     ]);
     adminRespond(req, res, 'products/create', {
       pageName: 'Create Product',
@@ -272,7 +263,6 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       formData: req.body as RequestBody,
       productTypes,
       categories,
-      brands: (brandsResult as { data?: unknown[] }).data || brandsResult || [],
       attributes: [],
     });
   }
@@ -298,20 +288,18 @@ export const editProductForm = async (req: TypedRequest, res: Response): Promise
       return;
     }
 
-    const [productTypes, categories, brandsResult, productAttributes, allAttributes] = await Promise.all([
+    const [productTypes, categories, productAttributes, allAttributes] = await Promise.all([
       productTypeRepo.findAll(),
       categoryRepo.findActive(),
-      brandRepository.findAll({ isActive: true }),
       dynamicAttributeRepo.getProductAttributes(productId).catch(() => []),
       dynamicAttributeRepo.findAllAttributes().catch(() => []),
     ]);
 
     adminRespond(req, res, 'products/edit', {
-      pageName: `Edit: ${product.name}`,
+      pageName: `Edit: ${product?.name || 'Product'}`,
       product,
       productTypes,
       categories,
-      brands: brandsResult.data || [],
       productAttributes,
       allAttributes,
     });
@@ -348,18 +336,17 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
       const getUseCase = new GetProductUseCase(ProductRepo);
       const product = await getUseCase.execute(getCommand);
 
-      const [productTypes, categories, brandsResult] = await Promise.all([
+      const [productTypes, categories] = await Promise.all([
         productTypeRepo.findAll().catch(() => []),
         categoryRepo.findActive().catch(() => []),
-        brandRepository.findAll({ isActive: true }).catch(() => ({ data: [] })),
       ]);
       adminRespond(req, res, 'products/edit', {
         pageName: `Edit: ${product?.name || 'Product'}`,
-        product,
         error: (error as Error).message || 'Failed to update product',
+        product: product || { storeId: req.params.productId },
+        formData: req.body as RequestBody,
         productTypes,
         categories,
-        brands: (brandsResult as { data?: unknown[] }).data || brandsResult || [],
         attributes: [],
       });
     } catch {

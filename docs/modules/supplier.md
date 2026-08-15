@@ -8,268 +8,45 @@ The Supplier feature manages supplier/vendor relationships for inventory sourcin
 
 ## Use Cases
 
-### Supplier Management (Business)
-
-### UC-SUP-001: List Suppliers (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request suppliers  
-**Then** the system returns all supplier accounts
-
-#### API Endpoint
-
-```
-GET /business/suppliers
-Query: status?, search?, limit, offset
-```
-
----
-
-### UC-SUP-002: Get Supplier (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/suppliers/:id
-```
-
----
-
-### UC-SUP-003: Create Supplier (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** valid supplier data  
-**When** they create a supplier  
-**Then** the supplier account is created
-
-#### API Endpoint
-
-```
-POST /business/suppliers
-Body: {
-  name, code,
-  contactName, contactEmail, contactPhone?,
-  address: {},
-  paymentTerms?,
-  leadTime?,
-  isActive
-}
-```
-
----
-
-### UC-SUP-004: Update Supplier (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-PUT /business/suppliers/:id
-```
-
----
-
-### UC-SUP-005: Delete Supplier (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-DELETE /business/suppliers/:id
-```
-
----
-
-### Supplier Products (Business)
-
-### UC-SUP-006: List Supplier Products (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/suppliers/:supplierId/products
-```
-
----
-
-### UC-SUP-007: Link Product to Supplier (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** a product and supplier  
-**When** linking them  
-**Then** the product can be sourced from that supplier
-
-#### API Endpoint
-
-```
-POST /business/suppliers/:supplierId/products
-Body: { productId, supplierSku?, cost, minOrderQuantity? }
-```
-
----
-
-### UC-SUP-008: Update Supplier Product (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-PUT /business/suppliers/:supplierId/products/:productId
-```
-
----
-
-### UC-SUP-009: Unlink Product from Supplier (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-DELETE /business/suppliers/:supplierId/products/:productId
-```
-
----
-
-### Purchase Orders (Business)
-
-### UC-SUP-010: List Purchase Orders (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/suppliers/purchase-orders
-Query: supplierId?, status?, limit, offset
-```
-
----
-
-### UC-SUP-011: Get Purchase Order (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/suppliers/purchase-orders/:id
-```
-
----
-
-### UC-SUP-012: Create Purchase Order (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** products to order  
-**When** creating a purchase order  
-**Then** the PO is created and can be sent to supplier
-
-#### API Endpoint
-
-```
-POST /business/suppliers/purchase-orders
-Body: {
-  supplierId,
-  items: [{ productId, quantity, unitCost }],
-  expectedDeliveryDate?,
-  notes?
-}
-```
-
----
-
-### UC-SUP-013: Update Purchase Order (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-PUT /business/suppliers/purchase-orders/:id
-```
-
----
-
-### UC-SUP-014: Send Purchase Order (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-POST /business/suppliers/purchase-orders/:id/send
-```
-
----
-
-### UC-SUP-015: Receive Purchase Order (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** a sent purchase order  
-**When** receiving inventory  
-**Then** stock levels are updated
-
-#### API Endpoint
-
-```
-POST /business/suppliers/purchase-orders/:id/receive
-Body: { items: [{ productId, quantityReceived }] }
-```
-
----
-
-### UC-SUP-016: Cancel Purchase Order (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-POST /business/suppliers/purchase-orders/:id/cancel
-Body: { reason }
-```
+| ID | Use Case | Actor | Purpose |
+|---|---|---|---|
+| UC-SUP-001 | List Suppliers | Merchant/Admin | List all supplier accounts with optional status/search filtering |
+| UC-SUP-002 | Get Supplier | Merchant/Admin | Retrieve a specific supplier by ID |
+| UC-SUP-003 | Create Supplier | Merchant/Admin | Create a supplier with contact info, address, payment terms, and lead time |
+| UC-SUP-004 | Update Supplier | Merchant/Admin | Update an existing supplier's profile or contact details |
+| UC-SUP-005 | Delete Supplier | Merchant/Admin | Permanently delete a supplier account |
+| UC-SUP-006 | List Supplier Products | Merchant/Admin | List all products linked to a specific supplier |
+| UC-SUP-007 | Link Product to Supplier | Merchant/Admin | Link a product to a supplier with cost and minimum order quantity |
+| UC-SUP-008 | Update Supplier Product | Merchant/Admin | Update a supplier-product link's cost or min order quantity |
+| UC-SUP-009 | Unlink Product from Supplier | Merchant/Admin | Remove a product-supplier association |
+| UC-SUP-010 | List Purchase Orders | Merchant/Admin | List all purchase orders with optional supplier/status filtering |
+| UC-SUP-011 | Get Purchase Order | Merchant/Admin | Retrieve a specific purchase order by ID |
+| UC-SUP-012 | Create Purchase Order | Merchant/Admin | Create a purchase order with line items for a supplier |
+| UC-SUP-013 | Update Purchase Order | Merchant/Admin | Update an existing purchase order's details |
+| UC-SUP-014 | Send Purchase Order | Merchant/Admin | Send a purchase order to the supplier |
+| UC-SUP-015 | Receive Purchase Order | Merchant/Admin | Record received inventory from a purchase order, updating stock levels |
+| UC-SUP-016 | Cancel Purchase Order | Merchant/Admin | Cancel a purchase order with a reason |
+
+### API Endpoints
+
+| ID | Method | Endpoint |
+|---|---|---|
+| UC-SUP-001 | GET | `/business/suppliers` |
+| UC-SUP-002 | GET | `/business/suppliers/:id` |
+| UC-SUP-003 | POST | `/business/suppliers` |
+| UC-SUP-004 | PUT | `/business/suppliers/:id` |
+| UC-SUP-005 | DELETE | `/business/suppliers/:id` |
+| UC-SUP-006 | GET | `/business/suppliers/:supplierId/products` |
+| UC-SUP-007 | POST | `/business/suppliers/:supplierId/products` |
+| UC-SUP-008 | PUT | `/business/suppliers/:supplierId/products/:productId` |
+| UC-SUP-009 | DELETE | `/business/suppliers/:supplierId/products/:productId` |
+| UC-SUP-010 | GET | `/business/suppliers/purchase-orders` |
+| UC-SUP-011 | GET | `/business/suppliers/purchase-orders/:id` |
+| UC-SUP-012 | POST | `/business/suppliers/purchase-orders` |
+| UC-SUP-013 | PUT | `/business/suppliers/purchase-orders/:id` |
+| UC-SUP-014 | POST | `/business/suppliers/purchase-orders/:id/send` |
+| UC-SUP-015 | POST | `/business/suppliers/purchase-orders/:id/receive` |
+| UC-SUP-016 | POST | `/business/suppliers/purchase-orders/:id/cancel` |
 
 ---
 
@@ -289,6 +66,6 @@ Body: { reason }
 
 | Use Case                 | Test File                          | Status |
 | ------------------------ | ---------------------------------- | ------ |
-| UC-SUP-001 to UC-SUP-005 | `supplier/supplier.test.ts`        | ❌     |
-| UC-SUP-006 to UC-SUP-009 | `supplier/products.test.ts`        | ❌     |
-| UC-SUP-010 to UC-SUP-016 | `supplier/purchase-orders.test.ts` | ❌     |
+| UC-SUP-001 to UC-SUP-005 | `supplier/supplier.test.ts`        | ✅     |
+| UC-SUP-006 to UC-SUP-009 | `supplier/supplier.test.ts`        | ✅     |
+| UC-SUP-010 to UC-SUP-016 | `supplier/supplier.test.ts`        | ✅     |

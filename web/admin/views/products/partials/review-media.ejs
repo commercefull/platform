@@ -1,13 +1,13 @@
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">Review Media</h3>
+    <h3 class="card-title"><%= t('product:reviewMedia') %></h3>
   </div>
   <div class="card-body">
     <% if (mediaByReview && mediaByReview.length > 0) { %>
       <% mediaByReview.forEach(function(entry) { %>
         <% if (entry.media && entry.media.length > 0) { %>
         <div class="mb-4">
-          <h6 class="text-muted mb-2">Review by <%= entry.review.reviewerName || 'Anonymous' %> — <small><%= new Date(entry.review.createdAt).toLocaleDateString() %></small></h6>
+          <h6 class="text-muted mb-2"><%= t('product:reviewBy') %> <%= entry.review.reviewerName || t('product:anonymous') %> — <small><%= new Date(entry.review.createdAt).toLocaleDateString() %></small></h6>
           <div class="d-flex flex-wrap gap-2">
             <% entry.media.forEach(function(m) { %>
             <div class="position-relative">
@@ -18,7 +18,7 @@
                   <i class="fas fa-video text-muted fa-2x"></i>
                 </div>
               <% } %>
-              <form method="POST" action="/admin/products/<%= productId %>/reviews/media/<%= m.productReviewMediaId %>?_method=DELETE" class="position-absolute top-0 end-0" onsubmit="return confirm('Delete this media?')">
+              <form method="POST" action="/admin/products/<%= productId %>/reviews/media/<%= m.productReviewMediaId %>?_method=DELETE" class="position-absolute top-0 end-0" onsubmit="return confirm('<%= t('product:deleteMediaConfirm') %>')">
                 <input type="hidden" name="_method" value="DELETE">
                 <button type="submit" class="btn btn-danger btn-sm p-0" style="width:20px;height:20px;font-size:10px;">&times;</button>
               </form>
@@ -29,7 +29,7 @@
         <% } %>
       <% }); %>
     <% } else { %>
-    <div class="text-muted">No review media for this product.</div>
+    <div class="text-muted"><%= t('product:noReviewMedia') %></div>
     <% } %>
   </div>
 </div>

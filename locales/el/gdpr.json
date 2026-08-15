@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "Αιτήματα σε εκκρεμότητα",
+  "completedThisMonth": "Ολοκληρώθηκε Αυτόν τον Μήνα",
+  "avgProcessingDays": "Μέσος όρος ημερών επεξεργασίας",
+  "marketingConsentRate": "Ποσοστό συναίνεσης μάρκετινγκ",
+  "dataAccessRequests": "Αιτήματα πρόσβασης δεδομένων",
+  "dataAccess": "Πρόσβαση δεδομένων",
+  "dataDeletion": "Διαγραφή δεδομένων",
+  "noGdprRequests": "Δεν υπάρχουν ακόμη αιτήματα GDPR.",
+  "consentManagement": "Διαχείριση συναίνεσης",
+  "marketingConsent": "Συναίνεση μάρκετινγκ",
+  "analyticsConsent": "Συναίνεση Analytics",
+  "manageConsentSettings": "Διαχείριση ρυθμίσεων συναίνεσης",
+  "createGdprRequest": "Δημιουργήστε αίτημα GDPR",
+  "dataAccessRequestSar": "Αίτημα πρόσβασης δεδομένων (SAR)",
+  "dataDeletionRequest": "Αίτημα διαγραφής δεδομένων",
+  "dataRectificationRequest": "Αίτημα διόρθωσης δεδομένων",
+  "customerEmail": "Email πελάτη",
+  "createRequest": "Δημιουργία Αίτησης",
+  "confirmProcessRequest": "Επισήμανση αυτού του αιτήματος ως επεξεργασίας;",
+  "consentRecords": "Αρχεία συναίνεσης",
+  "manageConsentRecords": "Διαχειριστείτε τα αρχεία συναίνεσης και τις προτιμήσεις πελατών."
+}

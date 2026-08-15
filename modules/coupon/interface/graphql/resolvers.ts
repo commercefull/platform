@@ -50,7 +50,7 @@ export const couponResolvers = {
       };
     },
 
-    applyCoupon: async (_parent: unknown, args: { input: ApplyCouponInput }, context: GraphQLAuthContext) => {
+    applyCouponCode: async (_parent: unknown, args: { input: ApplyCouponInput }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
       const useCase = new ApplyCouponUseCase(CouponRepo);
       return useCase.execute(args.input);

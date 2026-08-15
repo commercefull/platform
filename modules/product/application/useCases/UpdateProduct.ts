@@ -20,7 +20,6 @@ export class UpdateProductCommand {
       sku?: string;
       slug?: string;
       categoryId?: string;
-      brandId?: string;
       basePrice?: number;
       salePrice?: number | null;
       cost?: number;
@@ -139,12 +138,6 @@ export class UpdateProductUseCase {
         product.removeCategory();
       }
       updatedFields.push('categoryId');
-    }
-
-    // Update brand
-    if (command.updates.brandId !== undefined) {
-      product.assignBrand(command.updates.brandId);
-      updatedFields.push('brandId');
     }
 
     // Update featured status

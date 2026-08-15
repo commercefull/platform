@@ -1,0 +1,11 @@
+{
+  "title": "감사 로그",
+  "user": "사용자",
+  "resource": "의지",
+  "resourceId": "리소스 ID",
+  "ipAddress": "IP 주소",
+  "noLogs": "감사 로그를 찾을 수 없습니다.",
+  "changes": "변경 사항",
+  "oldValue": "이전 값",
+  "newValue": "새로운 가치"
+}

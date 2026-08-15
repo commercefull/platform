@@ -1,10 +1,10 @@
 /**
  * Create Store Use Case
- * Creates a new store that can belong to either a merchant (marketplace) or business (multi-store)
+ * Creates a new store that can belong to either a merchant (marketplace) or organization (multi-store)
  */
 
 import { StoreRepository } from '../../domain/repositories/StoreRepository';
-import { BusinessRepository } from '../../../business/domain/repositories/BusinessRepository';
+import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
 import { SystemConfigurationRepository } from '../../../configuration/domain/repositories/SystemConfigurationRepository';
 import { Store, type StoreProps } from '../../domain/entities/Store';
 
@@ -77,7 +77,6 @@ export interface CreateStoreResponse {
 export class CreateStoreUseCase {
   constructor(
     private readonly storeRepository: StoreRepository,
-    private readonly businessRepository: BusinessRepository,
     private readonly systemConfigRepository: SystemConfigurationRepository,
   ) {}
 
@@ -166,32 +165,21 @@ export class CreateStoreUseCase {
       if (businessId) {
         throw new Error('Business ID should not be provided for merchant-owned stores.');
       }
-
-      // Check if merchant exists (would need merchant repository)
-      // const merchant = await this.merchantRepository.findById(merchantId);
-      // if (!merchant) {
-      //   throw new Error('Merchant not found.');
-      // }
     } else if (storeType === 'business_store') {
-      // Multi-store mode: store must belong to a business
+      // Multi-store mode: store must belong to an organization
       if (!businessId) {
-        throw new Error('Business ID is required for business-owned stores.');
+        throw new Error('Organization ID is required for organization-owned stores.');
       }
 
       // In multi-store mode, merchantId should not be provided
       if (merchantId) {
-        throw new Error('Merchant ID should not be provided for business-owned stores.');
+        throw new Error('Merchant ID should not be provided for organization-owned stores.');
       }
 
-      // Check if business exists
-      const business = await this.businessRepository.findById(businessId);
-      if (!business) {
-        throw new Error('Business not found.');
-      }
-
-      // Check if business is active
-      if (!business.isActive) {
-        throw new Error('Cannot create store for inactive business.');
+      // Check if organization exists
+      const organization = await organizationRepo.findById(businessId);
+      if (!organization) {
+        throw new Error('Organization not found.');
       }
 
       if (isHeadquarters && parentStoreId) {
@@ -204,7 +192,7 @@ export class CreateStoreUseCase {
           throw new Error('Parent store not found.');
         }
         if (parentStore.businessId !== businessId) {
-          throw new Error('Parent store must belong to the same business.');
+          throw new Error('Parent store must belong to the same organization.');
         }
       }
     } else {

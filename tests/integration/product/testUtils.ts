@@ -107,12 +107,8 @@ export const testCategory = {
 };
 
 // Helper function to create a test product
-export async function createTestProduct(client: AxiosInstance, adminToken: string, brandId?: string) {
+export async function createTestProduct(client: AxiosInstance, adminToken: string) {
   const productData: Record<string, unknown> = { ...testProduct };
-
-  if (brandId) {
-    productData.brandId = brandId;
-  }
 
   const response = await client.post('/business/products', productData, {
     headers: { Authorization: `Bearer ${adminToken}` },

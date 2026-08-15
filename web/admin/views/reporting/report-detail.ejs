@@ -1,0 +1,69 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/reporting" class="btn btn-outline-secondary"><%= t('common.back') %></a>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3 class="card-title"><%= report.reportType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) %></h3>
+        <small class="text-muted"><%= t('analytics:generated') %>: <%= new Date(report.generatedAt).toLocaleString() %></small>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong><%= t('shared:common.from') %>:</strong>
+            <%= new Date(report.dateRange.from).toLocaleDateString() %> — <%= new Date(report.dateRange.to).toLocaleDateString() %>
+          </div>
+        </div>
+        <% if (report.summary && Object.keys(report.summary).length > 0) { %>
+          <h4><%= t('analytics:reportHistory') %></h4>
+          <div class="row mb-4">
+            <% Object.entries(report.summary).forEach(function(entry) { const key = entry[0]; const val = entry[1]; %>
+              <div class="col-md-3 mb-2">
+                <div class="card bg-light">
+                  <div class="card-body p-3">
+                    <div class="text-muted small"><%= key.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()) %></div>
+                    <div class="h3 mb-0"><%= typeof val === 'number' ? val.toLocaleString() : val %></div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+        <% if (report.rows && report.rows.length > 0) { %>
+          <h4><%= t('analytics:report') %> (<%= report.rows.length %> <%= t('table.entries') %>)</h4>
+          <div class="card">
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <% Object.keys(report.rows[0]).forEach(function(col) { %>
+                      <th><%= col.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()) %></th>
+                    <% }) %>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% report.rows.forEach(function(row) { %>
+                    <tr>
+                      <% Object.keys(report.rows[0]).forEach(function(col) { %>
+                        <td><%= typeof row[col] === 'object' ? JSON.stringify(row[col]) : row[col] %></td>
+                      <% }) %>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% } else { %>
+          <p class="text-muted"><%= t('table.noRecords') %></p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>

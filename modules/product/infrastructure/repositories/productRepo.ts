@@ -37,7 +37,6 @@ export interface Product {
   slug: string;
   description?: string;
   shortDescription?: string;
-  brandId?: string;
   categoryId?: string; // Primary category ID (from productCategoryMap)
   type: ProductType;
   status: ProductStatus;
@@ -123,7 +122,6 @@ export interface ProductFilterOptions {
   status?: ProductStatus | ProductStatus[];
   visibility?: ProductVisibility | ProductVisibility[];
   type?: ProductType | ProductType[];
-  brandId?: string;
   isFeatured?: boolean;
   isVirtual?: boolean;
   hasVariants?: boolean;
@@ -181,7 +179,6 @@ export class ProductRepo {
       status,
       visibility,
       type,
-      brandId,
       isFeatured,
       isVirtual,
       hasVariants,
@@ -230,11 +227,6 @@ export class ProductRepo {
         sql += ` AND "type" = $${paramIndex++}`;
         params.push(type);
       }
-    }
-
-    if (brandId) {
-      sql += ` AND "brandId" = $${paramIndex++}`;
-      params.push(brandId);
     }
 
     if (isFeatured !== undefined) {
@@ -289,7 +281,7 @@ export class ProductRepo {
    * Count products based on filter options
    */
   async count(options: Omit<ProductFilterOptions, 'limit' | 'offset' | 'orderBy' | 'orderDirection'> = {}): Promise<number> {
-    const { status, visibility, type, brandId, isFeatured, isVirtual, hasVariants, priceMin, priceMax, merchantId, searchTerm } = options;
+    const { status, visibility, type, isFeatured, isVirtual, hasVariants, priceMin, priceMax, merchantId, searchTerm } = options;
 
     let sql = `SELECT COUNT(*) as count FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
     const params: unknown[] = [];
@@ -326,11 +318,6 @@ export class ProductRepo {
         sql += ` AND "type" = $${paramIndex++}`;
         params.push(type);
       }
-    }
-
-    if (brandId) {
-      sql += ` AND "brandId" = $${paramIndex++}`;
-      params.push(brandId);
     }
 
     if (isFeatured !== undefined) {
@@ -380,7 +367,7 @@ export class ProductRepo {
     const sql = `
       INSERT INTO "${this.tableName}" (
         "sku", "name", "slug", "description", "shortDescription",
-        "brandId", "type", "status", "visibility",
+        "type", "status", "visibility",
         "price", "basePrice", "salePrice", "costPrice", "compareAtPrice",
         "taxClass", "taxRate", "isTaxable", "currency", "currencyCode",
         "isInventoryManaged", "minOrderQuantity", "maxOrderQuantity", "orderIncrementQuantity",
@@ -399,23 +386,23 @@ export class ProductRepo {
         "createdBy", "updatedBy"
       ) VALUES (
         $1, $2, $3, $4, $5,
-        $6, $7, $8, $9,
-        $10, $11, $12, $13, $14,
-        $15, $16, $17, $18, $19,
-        $20, $21, $22, $23,
-        $24, $25, $26, $27, $28, $29,
-        $30, $31, $32,
-        $33, $34,
-        $35, $36, $37,
-        $38, $39, $40, $41,
-        $42, $43,
-        $44, $45, $46,
-        $47, $48, $49,
-        $50, $51,
-        $52, $53,
-        $54, $55, $56,
-        $57, $58,
-        $59, $60
+        $6, $7, $8,
+        $9, $10, $11, $12, $13,
+        $14, $15, $16, $17, $18,
+        $19, $20, $21, $22,
+        $23, $24, $25, $26, $27, $28,
+        $29, $30, $31,
+        $32, $33,
+        $34, $35, $36,
+        $37, $38, $39, $40,
+        $41, $42,
+        $43, $44, $45,
+        $46, $47, $48,
+        $49, $50,
+        $51, $52,
+        $53, $54, $55,
+        $56, $57,
+        $58, $59
       )
       RETURNING *
     `;
@@ -426,7 +413,6 @@ export class ProductRepo {
       data.slug,
       data.description || null,
       data.shortDescription || null,
-      data.brandId || null,
       data.type || ProductType.SIMPLE,
       data.status || ProductStatus.DRAFT,
       data.visibility || ProductVisibility.VISIBLE,
@@ -507,7 +493,6 @@ export class ProductRepo {
       'slug',
       'description',
       'shortDescription',
-      'brandId',
       'type',
       'status',
       'visibility',
@@ -704,29 +689,22 @@ export class ProductRepo {
       return (await query<Product[]>(sql, [...product.relatedProducts, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
     }
 
-    // Otherwise, find products with same brand
-    if (product.brandId) {
+    // Otherwise, find products in the same category
+    if (product.categoryId) {
       const sql = `
         SELECT * FROM "${this.tableName}"
-        WHERE "brandId" = $1
+        WHERE "categoryId" = $1
           AND "productId" != $2
           AND "status" = $3
           AND "visibility" = $4
           AND "deletedAt" IS NULL
-        ORDER BY RANDOM()
+        ORDER BY "isFeatured" DESC, RANDOM()
         LIMIT $5
       `;
-      return (await query<Product[]>(sql, [product.brandId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
+      return (await query<Product[]>(sql, [product.categoryId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
     }
 
     return [];
-  }
-
-  /**
-   * Find products by brand
-   */
-  async findByBrand(brandId: string, options: Omit<ProductFilterOptions, 'brandId'> = {}): Promise<Product[]> {
-    return this.findAll({ ...options, brandId });
   }
 
   /**

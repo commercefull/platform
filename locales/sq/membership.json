@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "Anëtarësimet",
+  "totalMembers": "Totali i anëtarëve",
+  "activeMembers": "Anëtarë aktivë",
+  "membershipTiers": "Nivelet e anëtarësimit",
+  "expiringThisMonth": "Skadon këtë muaj",
+  "addTier": "Shto nivelin",
+  "members": "anëtarët",
+  "noTiers": "Asnjë nivel i anëtarësimit nuk është konfiguruar.",
+  "recentMembers": "Anëtarët e fundit",
+  "tier": "Niveli",
+  "noMembers": "Ende nuk ka anëtarë.",
+  "addMembershipTier": "Shto nivelin e anëtarësimit",
+  "tierName": "Emri i nivelit",
+  "billingPeriod": "Periudha e Faturimit",
+  "lifetime": "Jetëgjatësia",
+  "benefitsOnePerLine": "Përfitimet (një për rresht)",
+  "setAsDefault": "Cakto si nivel të paracaktuar",
+  "createTier": "Krijo nivel",
+  "confirmDeleteTier": "Të fshihet ky nivel?",
+  "analytics": "Analiza e anëtarësimit",
+  "analyticsDescription": "Anëtarët aktivë, të ardhurat, shkalla e largimit dhe shpërndarja e nivelit."
+}

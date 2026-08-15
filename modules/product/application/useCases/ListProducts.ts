@@ -18,7 +18,6 @@ export class ListProductsCommand {
       status?: ProductStatus | ProductStatus[];
       visibility?: ProductVisibility | ProductVisibility[];
       categoryId?: string;
-      brandId?: string;
       merchantId?: string;
       businessId?: string;
       storeId?: string;

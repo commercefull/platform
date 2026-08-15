@@ -4,14 +4,14 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Edit Promotion</h1>
+          <h1 class="m-0"><%= t('promotion:edit') %></h1>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/promotions">Promotions</a></li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('dashboard.title') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/promotions"><%= t('shared:common.promotions') %></a></li>
             <li class="breadcrumb-item"><a href="<%= `/admin/promotions/${promotion.promotionId}` %>"><%= promotion.code %></a></li>
-            <li class="breadcrumb-item active">Edit</li>
+            <li class="breadcrumb-item active"><%= t('common.edit') %></li>
           </ol>
         </div>
       </div>
@@ -33,7 +33,7 @@
         <div class="col-md-12">
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title">Edit Promotion: <%= promotion.name %></h3>
+              <h3 class="card-title"><%= t('promotion:promotions.editPromotionName', { name: promotion.name }) %></h3>
             </div>
 
             <form action="<%= `/admin/promotions/${promotion.promotionId}` %>" method="POST">
@@ -43,86 +43,86 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="code">Promotion Code *</label>
+                      <label for="code"><%= t('promotion:promotions.promotionCode') %></label>
                       <input type="text" class="form-control" id="code" name="code"
                              value="<%= formData?.code || promotion.code %>" required>
-                      <small class="form-text text-muted">Unique code that customers will enter</small>
+                      <small class="form-text text-muted"><%= t('promotion:promotions.promotionCodeHelp') %></small>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="name">Promotion Name *</label>
+                      <label for="name"><%= t('promotion:promotions.promotionNameLabel') %></label>
                       <input type="text" class="form-control" id="name" name="name"
                              value="<%= formData?.name || promotion.name %>" required>
-                      <small class="form-text text-muted">Internal name for this promotion</small>
+                      <small class="form-text text-muted"><%= t('promotion:promotions.promotionNameHelp') %></small>
                     </div>
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="description">Description</label>
+                  <label for="description"><%= t('shared:common.description') %></label>
                   <textarea class="form-control" id="description" name="description" rows="3"><%= formData?.description || promotion.description || '' %></textarea>
-                  <small class="form-text text-muted">Optional description of the promotion</small>
+                  <small class="form-text text-muted"><%= t('promotion:promotions.descriptionHelp') %></small>
                 </div>
 
                 <!-- Promotion Type and Value -->
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="type">Promotion Type *</label>
+                      <label for="type"><%= t('promotion:promotions.promotionType') %></label>
                       <select class="form-control" id="type" name="type" required onchange="updateDiscountLabel()">
-                        <option value="">Select Type</option>
-                        <option value="percentage" <%= (formData?.type || promotion.type) === 'percentage' ? 'selected' : '' %>>Percentage Discount</option>
-                        <option value="fixed_amount" <%= (formData?.type || promotion.type) === 'fixed_amount' ? 'selected' : '' %>>Fixed Amount Discount</option>
-                        <option value="free_shipping" <%= (formData?.type || promotion.type) === 'free_shipping' ? 'selected' : '' %>>Free Shipping</option>
+                        <option value=""><%= t('shared:common.selectType') %></option>
+                        <option value="percentage" <%= (formData?.type || promotion.type) === 'percentage' ? 'selected' : '' %>><%= t('promotion:promotions.percentageDiscount') %></option>
+                        <option value="fixed_amount" <%= (formData?.type || promotion.type) === 'fixed_amount' ? 'selected' : '' %>><%= t('promotion:promotions.fixedAmountDiscount') %></option>
+                        <option value="free_shipping" <%= (formData?.type || promotion.type) === 'free_shipping' ? 'selected' : '' %>><%= t('shared:common.freeShipping') %></option>
                       </select>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="discountValue" id="discountLabel">Discount Value *</label>
+                      <label for="discountValue" id="discountLabel"><%= t('promotion:promotions.discountValue') %></label>
                       <input type="number" class="form-control" id="discountValue" name="value"
                              value="<%= formData?.value || promotion.value %>" step="0.01" min="0" required>
-                      <small class="form-text text-muted" id="discountHelp">Amount to discount</small>
+                      <small class="form-text text-muted" id="discountHelp"><%= t('promotion:promotions.discountHelp') %></small>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="isActive">Status</label>
+                      <label for="isActive"><%= t('common.status') %></label>
                       <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="isActive" name="isActive" value="true"
                                <%= (formData?.isActive !== undefined ? formData.isActive : promotion.isActive) ? 'checked' : '' %>>
-                        <label class="custom-control-label" for="isActive">Active</label>
+                        <label class="custom-control-label" for="isActive"><%= t('shared:common.active') %></label>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Conditions -->
-                <h5 class="mt-4 mb-3">Conditions</h5>
+                <h5 class="mt-4 mb-3"><%= t('promotion:promotions.conditions') %></h5>
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="minimumOrderAmount">Minimum Order Amount</label>
+                      <label for="minimumOrderAmount"><%= t('promotion:coupon.minOrderAmount') %></label>
                       <input type="number" class="form-control" id="minimumOrderAmount" name="minOrderAmount"
                              value="<%= formData?.minOrderAmount || promotion.minOrderAmount || '' %>" step="0.01" min="0">
-                      <small class="form-text text-muted">Minimum order total to qualify</small>
+                      <small class="form-text text-muted"><%= t('promotion:promotions.minimumOrderHelp') %></small>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="maximumDiscountAmount">Maximum Discount Amount</label>
+                      <label for="maximumDiscountAmount"><%= t('promotion:coupon.maxDiscountAmount') %></label>
                       <input type="number" class="form-control" id="maximumDiscountAmount" name="maxDiscountAmount"
                              value="<%= formData?.maxDiscountAmount || promotion.maxDiscountAmount || '' %>" step="0.01" min="0">
-                      <small class="form-text text-muted">Maximum discount for percentage promotions</small>
+                      <small class="form-text text-muted"><%= t('promotion:promotions.maximumDiscountHelp') %></small>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="usageLimit">Usage Limit</label>
+                      <label for="usageLimit"><%= t('promotion:promotions.usageLimit') %></label>
                       <input type="number" class="form-control" id="usageLimit" name="usageLimit"
                              value="<%= formData?.usageLimit || promotion.maxUsage || '' %>" min="1">
-                      <small class="form-text text-muted">Total times this promotion can be used</small>
+                      <small class="form-text text-muted"><%= t('promotion:promotions.usageLimitHelp') %></small>
                     </div>
                   </div>
                 </div>
@@ -130,47 +130,47 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="usageLimitPerCustomer">Usage Limit Per Customer</label>
+                      <label for="usageLimitPerCustomer"><%= t('promotion:promotions.usageLimitPerCustomer') %></label>
                       <input type="number" class="form-control" id="usageLimitPerCustomer" name="usageLimitPerCustomer"
                              value="<%= formData?.usageLimitPerCustomer || promotion.maxUsagePerCustomer || '' %>" min="1">
-                      <small class="form-text text-muted">Times each customer can use this promotion</small>
+                      <small class="form-text text-muted"><%= t('promotion:promotions.usageLimitPerCustomerHelp') %></small>
                     </div>
                   </div>
                 </div>
 
                 <!-- Validity Period -->
-                <h5 class="mt-4 mb-3">Validity Period</h5>
+                <h5 class="mt-4 mb-3"><%= t('promotion:promotions.validityPeriod') %></h5>
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="startsAt">Start Date</label>
+                      <label for="startsAt"><%= t('shared:common.startDate') %></label>
                       <input type="datetime-local" class="form-control" id="startsAt" name="startsAt"
                              value="<%= formData?.startsAt ? new Date(formData.startsAt).toISOString().slice(0,16) : (promotion.startsAt ? new Date(promotion.startsAt).toISOString().slice(0,16) : '') %>">
-                      <small class="form-text text-muted">When the promotion becomes active</small>
+                      <small class="form-text text-muted"><%= t('promotion:promotions.startDateHelpEdit') %></small>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="endsAt">End Date</label>
+                      <label for="endsAt"><%= t('shared:common.endDate') %></label>
                       <input type="datetime-local" class="form-control" id="endsAt" name="endsAt"
                              value="<%= formData?.endsAt ? new Date(formData.endsAt).toISOString().slice(0,16) : (promotion.endsAt ? new Date(promotion.endsAt).toISOString().slice(0,16) : '') %>">
-                      <small class="form-text text-muted">When the promotion expires</small>
+                      <small class="form-text text-muted"><%= t('promotion:promotions.endDateHelpEdit') %></small>
                     </div>
                   </div>
                 </div>
 
                 <div class="alert alert-info">
                   <i class="icon fas fa-info"></i>
-                  <strong>Note:</strong> Product, category, and customer group restrictions will be available in a future update.
+                  <strong><%= t('common.note') %>:</strong> <%= t('promotion:promotions.futureUpdateNote') %>
                 </div>
               </div>
 
               <div class="card-footer">
                 <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save"></i> Update Promotion
+                  <i class="fas fa-save"></i> <%= t('promotion:promotions.updatePromotion') %>
                 </button>
                 <a href="<%= `/admin/promotions/${promotion.promotionId}` %>" class="btn btn-secondary">
-                  <i class="fas fa-times"></i> Cancel
+                  <i class="fas fa-times"></i> <%= t('common.cancel') %>
                 </a>
               </div>
             </form>

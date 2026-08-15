@@ -12,10 +12,10 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                 </svg>
               </div>
-              <span class="text-xl font-bold">Commercefull</span>
+              <span class="text-xl font-bold"><%= t('storefront:brandName') %></span>
             </div>
             <p class="text-gray-400 mb-4 max-w-md">
-              Your premier destination for premium bags and accessories. Quality craftsmanship meets modern design.
+              <%= t('storefront:footerDesc') %>
             </p>
             <div class="flex space-x-4">
               <a href="https://facebook.com/" target="_blank" class="text-gray-400 hover:text-white transition-colors">
@@ -38,23 +38,23 @@
 
           <!-- Quick Links -->
           <div>
-            <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 class="text-lg font-semibold mb-4"><%= t('storefront:quickLinks') %></h3>
             <ul class="space-y-2">
-              <li><a href="/pages/about-us" class="text-gray-400 hover:text-white transition-colors">About Our Store</a></li>
-              <li><a href="/pages/contact-us" class="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
-              <li><a href="/pages/shipping-policy" class="text-gray-400 hover:text-white transition-colors">Shipping Policy</a></li>
-              <li><a href="/pages/careers" class="text-gray-400 hover:text-white transition-colors">Careers</a></li>
+              <li><a href="/pages/about-us" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:aboutOurStore') %></a></li>
+              <li><a href="/pages/contact-us" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:contactUs') %></a></li>
+              <li><a href="/pages/shipping-policy" class="text-gray-400 hover:text-white transition-colors"><%= t('shared:common.shippingPolicy') %></a></li>
+              <li><a href="/pages/careers" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:careers') %></a></li>
             </ul>
           </div>
 
           <!-- Customer Service -->
           <div>
-            <h3 class="text-lg font-semibold mb-4">Customer Service</h3>
+            <h3 class="text-lg font-semibold mb-4"><%= t('storefront:customerService') %></h3>
             <ul class="space-y-2">
-              <li><a href="/orders" class="text-gray-400 hover:text-white transition-colors">Track Order</a></li>
-              <li><a href="/returns" class="text-gray-400 hover:text-white transition-colors">Returns & Exchanges</a></li>
-              <li><a href="/faq" class="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
-              <li><a href="/support" class="text-gray-400 hover:text-white transition-colors">Support</a></li>
+              <li><a href="/orders" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:trackOrder') %></a></li>
+              <li><a href="/returns" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:returnsExchanges') %></a></li>
+              <li><a href="/faq" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:faq') %></a></li>
+              <li><a href="/support" class="text-gray-400 hover:text-white transition-colors"><%= t('shared:common.support') %></a></li>
             </ul>
           </div>
         </div>
@@ -64,8 +64,8 @@
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <!-- Text Section -->
             <div class="flex-1">
-              <h3 class="text-lg font-semibold mb-2">Stay Updated</h3>
-              <p class="text-gray-400 mb-4 md:mb-0">Subscribe to get special offers and updates about new products.</p>
+              <h3 class="text-lg font-semibold mb-2"><%= t('storefront:stayUpdated') %></h3>
+              <p class="text-gray-400 mb-4 md:mb-0"><%= t('storefront:subscribeDesc') %></p>
             </div>
 
             <!-- Input Section -->
@@ -73,11 +73,11 @@
               <div class="flex max-w-sm">
                 <input
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="<%= t('storefront:emailAddress') %>"
                   class="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
                 >
                 <button class="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-r-lg transition-colors font-medium whitespace-nowrap">
-                  Subscribe
+                  <%= t('storefront:subscribe') %>
                 </button>
               </div>
             </div>
@@ -87,10 +87,10 @@
         <!-- Bottom Footer -->
         <div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p class="text-gray-400 text-sm">
-            © <%= new Date().getFullYear() %> Commercefull. All rights reserved.
+            © <%= new Date().getFullYear() %> Commercefull. <%= t('shared:common.allRightsReserved') %>
           </p>
           <p class="text-gray-500 text-xs mt-2 md:mt-0">
-            **This is just a fake ecommerce website. All the products and contact details given are not real.
+            **<%= t('storefront:fakeSiteDisclaimer') %>
           </p>
         </div>
       </div>

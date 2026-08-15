@@ -44,7 +44,6 @@ interface CreateProductBody {
   slug?: string;
   shortDescription?: string;
   categoryId?: string;
-  brandId?: string;
   basePrice?: number;
   salePrice?: number;
   cost?: number;
@@ -75,7 +74,6 @@ interface UpdateProductBody {
   sku?: string;
   slug?: string;
   categoryId?: string;
-  brandId?: string;
   basePrice?: number;
   salePrice?: number | null;
   cost?: number;
@@ -218,20 +216,18 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  */
 export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { status, visibility, categoryId, brandId, merchantId, search, limit, offset, orderBy, orderDirection } = req.query;
+    const { status, visibility, categoryId, merchantId, search, limit, offset, orderBy, orderDirection } = req.query;
 
     const filters: {
       status?: ProductStatus;
       visibility?: ProductVisibility;
       categoryId?: string;
-      brandId?: string;
       merchantId?: string;
       search?: string;
     } = {};
     if (status) filters.status = status as ProductStatus;
     if (visibility) filters.visibility = visibility as ProductVisibility;
     if (categoryId) filters.categoryId = categoryId as string;
-    if (brandId) filters.brandId = brandId as string;
     if (merchantId) filters.merchantId = merchantId as string;
     if (search) filters.search = search as string;
 
@@ -320,7 +316,6 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       slug,
       shortDescription,
       categoryId,
-      brandId,
       basePrice,
       salePrice,
       cost,
@@ -364,7 +359,6 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       slug,
       shortDescription,
       categoryId,
-      brandId,
       merchantId,
       basePrice,
       salePrice,

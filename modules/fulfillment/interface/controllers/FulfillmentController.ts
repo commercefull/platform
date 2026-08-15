@@ -293,6 +293,35 @@ export const getTrackingInfo = async (req: TypedRequest, res: Response): Promise
   }
 };
 
+export const assignFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { fulfillmentId } = req.params;
+    const { sourceType, sourceId } = req.body as {
+      sourceType: SourceType;
+      sourceId: string;
+    };
+
+    if (!sourceType || !sourceId) {
+      res.status(400).json({ success: false, error: 'sourceType and sourceId are required' });
+      return;
+    }
+
+    const fulfillment = await fulfillmentRepository.findById(fulfillmentId);
+    if (!fulfillment) {
+      res.status(404).json({ success: false, error: 'Fulfillment not found' });
+      return;
+    }
+
+    fulfillment.assign(sourceType, sourceId);
+
+    const saved = await fulfillmentRepository.save(fulfillment);
+    res.json({ success: true, data: saved });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    res.status(400).json({ success: false, error: (error as Error).message });
+  }
+};
+
 export default {
   createFulfillment,
   getFulfillment,
@@ -306,4 +335,5 @@ export default {
   getTrackingInfo,
   listFulfillmentsByOrder,
   listFulfillments,
+  assignFulfillment,
 };

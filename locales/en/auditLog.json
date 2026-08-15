@@ -1,0 +1,11 @@
+{
+  "title": "Audit Logs",
+  "user": "User",
+  "resource": "Resource",
+  "resourceId": "Resource ID",
+  "ipAddress": "IP Address",
+  "noLogs": "No audit logs found.",
+  "changes": "Changes",
+  "oldValue": "Old Value",
+  "newValue": "New Value"
+}

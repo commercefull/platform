@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "Mitgliedschaften",
+  "totalMembers": "Gesamtzahl der Mitglieder",
+  "activeMembers": "Aktive Mitglieder",
+  "membershipTiers": "Mitgliedschaftsstufen",
+  "expiringThisMonth": "Läuft diesen Monat ab",
+  "addTier": "Stufe hinzufügen",
+  "members": "Mitglieder",
+  "noTiers": "Keine Mitgliedschaftsstufen konfiguriert.",
+  "recentMembers": "Aktuelle Mitglieder",
+  "tier": "Stufe",
+  "noMembers": "Noch keine Mitglieder.",
+  "addMembershipTier": "Mitgliedschaftsstufe hinzufügen",
+  "tierName": "Tiername",
+  "billingPeriod": "Abrechnungszeitraum",
+  "lifetime": "Lebensdauer",
+  "benefitsOnePerLine": "Vorteile (einer pro Zeile)",
+  "setAsDefault": "Als Standardstufe festlegen",
+  "createTier": "Stufe erstellen",
+  "confirmDeleteTier": "Diese Stufe löschen?",
+  "analytics": "Mitgliedschaftsanalyse",
+  "analyticsDescription": "Aktive Mitglieder, Umsatz, Abwanderungsrate und Stufenverteilung."
+}

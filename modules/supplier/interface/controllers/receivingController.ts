@@ -33,8 +33,7 @@ export const getReceivingRecords = async (req: TypedRequest, res: Response): Pro
     } else if (supplierId) {
       receivingRecords = await receivingRecordRepo.findBySupplierId(supplierId as string, parseInt(limit as string));
     } else {
-      // TODO: Implement findAll method if needed
-      receivingRecords = await receivingRecordRepo.findByStatus('pending', parseInt(limit as string));
+      receivingRecords = await receivingRecordRepo.findAll(parseInt(limit as string));
     }
 
     successResponse(res, receivingRecords);

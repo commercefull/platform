@@ -6,7 +6,7 @@
     <nav class="mb-6">
       <ol class="flex items-center space-x-2 text-sm text-gray-600">
         <li>
-          <a href="/" class="hover:text-blue-600 transition-colors">Home</a>
+          <a href="/" class="hover:text-blue-600 transition-colors"><%= t('storefront:home') %></a>
         </li>
         <li>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,7 +14,7 @@
           </svg>
         </li>
         <li>
-          <a href="/orders" class="hover:text-blue-600 transition-colors">Orders</a>
+          <a href="/orders" class="hover:text-blue-600 transition-colors"><%= t('shared:common.orders') %></a>
         </li>
         <li>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,8 +30,8 @@
       <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-white">Order <%= order.orderNumber %></h1>
-            <p class="text-blue-100 text-sm mt-1">Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+            <h1 class="text-2xl font-bold text-white"><%= t('shared:common.order') %> <%= order.orderNumber %></h1>
+            <p class="text-blue-100 text-sm mt-1"><%= t('storefront:placedOn') %> <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
           </div>
           <a
             href="/track/<%= order.orderNumber %>"
@@ -40,7 +40,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
             </svg>
-            Track Order
+            <%= t('storefront:trackOrder') %>
           </a>
         </div>
       </div>
@@ -50,7 +50,7 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <div class="flex items-center">
-              <div class="text-sm font-medium text-gray-500 mr-2">Status:</div>
+              <div class="text-sm font-medium text-gray-500 mr-2"><%= t('shared:common.status') %>:</div>
               <%
                 let statusColor = 'gray';
                 let statusText = order.status;
@@ -65,7 +65,7 @@
               </span>
             </div>
             <div class="flex items-center">
-              <div class="text-sm font-medium text-gray-500 mr-2">Payment:</div>
+              <div class="text-sm font-medium text-gray-500 mr-2"><%= t('shared:common.payment') %>:</div>
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= order.paymentStatus === 'paid' ? 'green' : 'yellow' %>-100 text-<%= order.paymentStatus === 'paid' ? 'green' : 'yellow' %>-800">
                 <%= (order.paymentStatus || 'pending').charAt(0).toUpperCase() + (order.paymentStatus || 'pending').slice(1) %>
               </span>
@@ -85,7 +85,7 @@
               <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
               </svg>
-              Order Items
+              <%= t('shared:common.orderItems') %>
             </h2>
           </div>
           <div class="p-6">
@@ -104,22 +104,22 @@
                     <div class="flex-1 min-w-0">
                       <h3 class="text-lg font-semibold text-gray-900 truncate"><%= item.name %></h3>
                       <% if (item.sku) { %>
-                        <p class="text-sm text-gray-500">SKU: <%= item.sku %></p>
+                        <p class="text-sm text-gray-500"><%= t('shared:common.sku') %>: <%= item.sku %></p>
                       <% } %>
                     </div>
 
                     <!-- Quantity & Pricing -->
                     <div class="flex items-center space-x-6 text-sm">
                       <div class="text-center">
-                        <p class="text-gray-500">Qty</p>
+                        <p class="text-gray-500"><%= t('shared:common.qty') %></p>
                         <p class="font-semibold text-gray-900"><%= item.quantity %></p>
                       </div>
                       <div class="text-center">
-                        <p class="text-gray-500">Price</p>
+                        <p class="text-gray-500"><%= t('shared:common.price') %></p>
                         <p class="font-semibold text-gray-900">$<%= (item.unitPrice || item.price || 0).toFixed(2) %></p>
                       </div>
                       <div class="text-center">
-                        <p class="text-gray-500">Total</p>
+                        <p class="text-gray-500"><%= t('shared:common.total') %></p>
                         <p class="font-bold text-gray-900">$<%= (item.lineTotal || (item.unitPrice || item.price || 0) * item.quantity).toFixed(2) %></p>
                       </div>
                     </div>
@@ -131,7 +131,7 @@
                 <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m8-5v2m0 0v2m0-2h2m-2 0h-2"></path>
                 </svg>
-                <p class="text-gray-500">No items found in this order</p>
+                <p class="text-gray-500"><%= t('storefront:noItemsInOrder') %></p>
               </div>
             <% } %>
           </div>
@@ -147,7 +147,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
-                Shipping Address
+                <%= t('shared:common.shippingAddress') %>
               </h3>
             </div>
             <div class="p-6">
@@ -162,7 +162,7 @@
                   <p><%= order.shippingAddress.country %></p>
                 </div>
               <% } else { %>
-                <p class="text-gray-500 italic">No shipping address available</p>
+                <p class="text-gray-500 italic"><%= t('storefront:noShippingAddress') %></p>
               <% } %>
             </div>
           </div>
@@ -174,7 +174,7 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                 </svg>
-                Billing Address
+                <%= t('shared:common.billingAddress') %>
               </h3>
             </div>
             <div class="p-6">
@@ -189,7 +189,7 @@
                   <p><%= order.billingAddress.country %></p>
                 </div>
               <% } else { %>
-                <p class="text-gray-500 italic">Same as shipping address</p>
+                <p class="text-gray-500 italic"><%= t('storefront:sameAsShipping') %></p>
               <% } %>
             </div>
           </div>
@@ -205,22 +205,22 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
               </svg>
-              Order Summary
+              <%= t('shared:common.orderSummary') %>
             </h3>
           </div>
           <div class="p-6 space-y-4">
             <div class="flex justify-between items-center py-2 border-b border-gray-100">
-              <span class="text-sm font-medium text-gray-600">Order Date</span>
+              <span class="text-sm font-medium text-gray-600"><%= t('storefront:orderDate') %></span>
               <span class="text-sm text-gray-900"><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
             </div>
 
             <div class="flex justify-between items-center py-2 border-b border-gray-100">
-              <span class="text-sm font-medium text-gray-600">Order Number</span>
+              <span class="text-sm font-medium text-gray-600"><%= t('storefront:orderNumber') %></span>
               <span class="text-sm text-gray-900 font-mono"><%= order.orderNumber %></span>
             </div>
 
             <div class="flex justify-between items-center py-2 border-b border-gray-100">
-              <span class="text-sm font-medium text-gray-600">Status</span>
+              <span class="text-sm font-medium text-gray-600"><%= t('shared:common.status') %></span>
               <%
                 let statusColor = 'gray';
                 if (order.status === 'delivered') statusColor = 'green';
@@ -235,7 +235,7 @@
             </div>
 
             <div class="flex justify-between items-center py-2">
-              <span class="text-sm font-medium text-gray-600">Payment</span>
+              <span class="text-sm font-medium text-gray-600"><%= t('shared:common.payment') %></span>
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= order.paymentStatus === 'paid' ? 'green' : 'yellow' %>-100 text-<%= order.paymentStatus === 'paid' ? 'green' : 'yellow' %>-800">
                 <%= (order.paymentStatus || 'pending').charAt(0).toUpperCase() + (order.paymentStatus || 'pending').slice(1) %>
               </span>
@@ -250,29 +250,29 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
               </svg>
-              Order Totals
+              <%= t('storefront:orderTotals') %>
             </h3>
           </div>
           <div class="p-6 space-y-3">
             <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600">Subtotal</span>
+              <span class="text-sm text-gray-600"><%= t('shared:common.subtotal') %></span>
               <span class="text-sm text-gray-900">$<%= order.totals ? order.totals.subtotal : '0.00' %></span>
             </div>
 
             <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600">Shipping</span>
+              <span class="text-sm text-gray-600"><%= t('shared:common.shipping') %></span>
               <span class="text-sm text-gray-900">$<%= order.totals ? order.totals.shipping : '0.00' %></span>
             </div>
 
             <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600">Tax</span>
+              <span class="text-sm text-gray-600"><%= t('shared:common.tax') %></span>
               <span class="text-sm text-gray-900">$<%= order.totals ? order.totals.tax : '0.00' %></span>
             </div>
 
             <hr class="border-gray-200">
 
             <div class="flex justify-between items-center">
-              <span class="text-lg font-semibold text-gray-900">Total</span>
+              <span class="text-lg font-semibold text-gray-900"><%= t('shared:common.total') %></span>
               <span class="text-lg font-bold text-gray-900">$<%= order.totals ? order.totals.total : '0.00' %></span>
             </div>
           </div>
@@ -287,7 +287,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
-            Back to Orders
+            <%= t('shared:common.backToOrders') %>
           </a>
         </div>
       </div>

@@ -1,0 +1,168 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Back Link -->
+    <a href="/support/tickets" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <%= t('storefront:backToTickets') %>
+    </a>
+
+    <!-- Flash Messages -->
+    <% if (successMsg) { %>
+      <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+        <%= successMsg %>
+      </div>
+    <% } %>
+    <% if (errorMsg) { %>
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+        <%= errorMsg %>
+      </div>
+    <% } %>
+
+    <!-- Ticket Header -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900"><%= ticket.subject %></h1>
+          <p class="text-sm text-gray-500 mt-1"><%= t('shared:common.ticket') %><%= ticket.ticketNumber %> &middot; <%= t('shared:common.dateCreated') %> <%= new Date(ticket.createdAt).toLocaleDateString() %></p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <% const statusColors = { open: 'bg-blue-100 text-blue-800', in_progress: 'bg-yellow-100 text-yellow-800', waiting_customer: 'bg-purple-100 text-purple-800', resolved: 'bg-green-100 text-green-800', closed: 'bg-gray-100 text-gray-600' }; %>
+          <% const statusLabels = { open: t('shared:common.open'), in_progress: t('storefront:inProgress'), waiting_customer: t('storefront:waitingOnYou'), resolved: t('shared:common.resolved'), closed: t('shared:common.closed') }; %>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= statusColors[ticket.status] || 'bg-gray-100 text-gray-800' %>">
+            <%= statusLabels[ticket.status] || ticket.status %>
+          </span>
+          <% const priorityColors = { low: 'bg-gray-100 text-gray-600', medium: 'bg-blue-100 text-blue-700', high: 'bg-orange-100 text-orange-700', urgent: 'bg-red-100 text-red-700' }; %>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= priorityColors[ticket.priority] || 'bg-gray-100 text-gray-600' %>">
+            <%= t('storefront:priorityLabel', { priority: ticket.priority }) %>
+          </span>
+        </div>
+      </div>
+
+      <!-- Ticket Meta -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm border-t border-gray-200 pt-4">
+        <div>
+          <dt class="text-gray-500"><%= t('shared:common.category') %></dt>
+          <dd class="text-gray-900 font-medium capitalize"><%= ticket.category || '—' %></dd>
+        </div>
+        <div>
+          <dt class="text-gray-500"><%= t('storefront:channel') %></dt>
+          <dd class="text-gray-900 font-medium capitalize"><%= ticket.channel || 'web' %></dd>
+        </div>
+        <% if (ticket.orderId) { %>
+          <div>
+            <dt class="text-gray-500"><%= t('shared:common.orderId') %></dt>
+            <dd class="text-gray-900 font-medium"><a href="/orders/<%= ticket.orderId %>" class="text-blue-600 hover:text-blue-800"><%= ticket.orderId %></a></dd>
+          </div>
+        <% } %>
+        <div>
+          <dt class="text-gray-500"><%= t('shared:common.lastUpdated') %></dt>
+          <dd class="text-gray-900 font-medium"><%= new Date(ticket.updatedAt).toLocaleDateString() %></dd>
+        </div>
+      </div>
+
+      <% if (ticket.description) { %>
+        <div class="mt-4 border-t border-gray-200 pt-4">
+          <h3 class="text-sm font-medium text-gray-700 mb-2"><%= t('shared:common.description') %></h3>
+          <p class="text-gray-600 whitespace-pre-wrap"><%= ticket.description %></p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Messages Thread -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4"><%= t('storefront:conversation', { count: messages.length }) %></h2>
+
+      <% if (messages.length === 0) { %>
+        <p class="text-gray-500 text-center py-6"><%= t('storefront:noMessagesYet') %></p>
+      <% } else { %>
+        <div class="space-y-4">
+          <% messages.forEach(function(msg) { %>
+            <div class="<%= msg.senderType === 'customer' ? 'ml-8' : 'mr-8' %>">
+              <div class="<%= msg.senderType === 'customer' ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200' %> border rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-2">
+                    <div class="<%= msg.senderType === 'customer' ? 'bg-blue-600' : 'bg-gray-600' %> h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                      <%= (msg.senderName || '?').charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                      <span class="text-sm font-medium text-gray-900"><%= msg.senderName || (msg.senderType === 'customer' ? t('storefront:you') : t('storefront:supportAgent')) %></span>
+                      <span class="text-xs text-gray-500 ml-2"><%= new Date(msg.createdAt).toLocaleString() %></span>
+                    </div>
+                  </div>
+                  <span class="text-xs text-gray-400 capitalize"><%= msg.senderType %></span>
+                </div>
+                <p class="text-gray-700 whitespace-pre-wrap"><%= msg.message %></p>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Reply Form (if ticket is not closed) -->
+    <% if (ticket.status !== 'closed') { %>
+      <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4"><%= t('storefront:reply') %></h2>
+        <form method="POST" action="/support/tickets/<%= ticket.supportTicketId %>/messages">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('storefront:yourMessage') %></label>
+            <textarea name="message" rows="4" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="<%= t('storefront:typeReply') %>" required></textarea>
+          </div>
+          <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+            </svg>
+            <%= t('storefront:sendReply') %>
+          </button>
+        </form>
+      </div>
+    <% } else { %>
+      <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6 text-center">
+        <p class="text-gray-500"><%- t('storefront:ticketClosedMsg') %></p>
+      </div>
+    <% } %>
+
+    <!-- Feedback Form (if resolved/closed and no feedback yet) -->
+    <% if ((ticket.status === 'resolved' || ticket.status === 'closed') && !ticket.customerSatisfaction) { %>
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-2"><%= t('storefront:rateExperience') %></h2>
+        <p class="text-gray-600 mb-4"><%= t('storefront:rateExperienceDesc') %></p>
+        <form method="POST" action="/support/tickets/<%= ticket.supportTicketId %>/feedback">
+          <div class="flex gap-2 mb-4">
+            <% [1, 2, 3, 4, 5].forEach(function(star) { %>
+              <label class="cursor-pointer">
+                <input type="radio" name="satisfaction" value="<%= star %>" class="peer sr-only" required>
+                <span class="inline-block w-10 h-10 rounded-lg border-2 border-gray-200 peer-checked:border-yellow-400 peer-checked:bg-yellow-50 flex items-center justify-center text-2xl hover:border-yellow-300 transition-colors">
+                  <%= star %>&#9733;
+                </span>
+              </label>
+            <% }) %>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('storefront:additionalComments') %></label>
+            <textarea name="feedback" rows="3" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="<%= t('storefront:tellUsMore') %>"></textarea>
+          </div>
+          <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <%= t('storefront:submitFeedback') %>
+          </button>
+        </form>
+      </div>
+    <% } %>
+
+    <% if (ticket.customerSatisfaction) { %>
+      <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+        <p class="text-green-700 font-medium"><%= t('storefront:thankYouFeedback') %></p>
+        <p class="text-green-600 mt-1"><%= t('storefront:youRated', { rating: ticket.customerSatisfaction }) %></p>
+        <% if (ticket.customerFeedback) { %>
+          <p class="text-green-600 mt-2 italic">"<%= ticket.customerFeedback %>"</p>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

@@ -11,18 +11,18 @@
     <div class="card">
       <div class="card-body p-0">
         <table class="table table-striped table-vcenter">
-          <thead><tr><th>Name</th><th>Status</th><th>Actions</th></tr></thead>
+          <thead><tr><th><%= t('common.name') %></th><th><%= t('common.status') %></th><th><%= t('common.actions') %></th></tr></thead>
           <tbody>
             <% if (memberships && memberships.length > 0) { %>
               <% memberships.forEach(item => { %>
                 <tr>
                   <td><%= item.customerEmail || item.name || '-' %></td>
-                  <td><span class="badge bg-<%= item.status === 'active' || item.isActive ? 'success' : 'secondary' %>"><%= item.status || (item.isActive ? 'Active' : 'Inactive') %></span></td>
-                  <td><a href="<%= item.membershipId %>" class="btn btn-sm btn-outline-primary">View</a></td>
+                  <td><span class="badge bg-<%= item.status === 'active' || item.isActive ? 'success' : 'secondary' %>"><%= item.status || (item.isActive ? t('common.active') : t('common.inactive')) %></span></td>
+                  <td><a href="<%= item.membershipId %>" class="btn btn-sm btn-outline-primary"><%= t('common.view') %></a></td>
                 </tr>
               <% }) %>
             <% } else { %>
-              <tr><td colspan="10" class="text-center text-muted py-4">No items found</td></tr>
+              <tr><td colspan="10" class="text-center text-muted py-4"><%= t('common.noData') %></td></tr>
             <% } %>
           </tbody>
         </table>

@@ -202,6 +202,11 @@ export async function findNearestLocations(
   return result ?? [];
 }
 
+export async function deleteLocation(fulfillmentLocationId: string): Promise<boolean> {
+  await query('DELETE FROM "fulfillmentLocation" WHERE "fulfillmentLocationId" = $1', [fulfillmentLocationId]);
+  return true;
+}
+
 export default {
   create,
   findById,
@@ -212,4 +217,5 @@ export default {
   activate,
   deactivate,
   findNearestLocations,
+  deleteLocation,
 };

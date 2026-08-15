@@ -6,6 +6,7 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
+import { eventBus } from '../../../../libs/events/eventBus';
 import { CreateStoreUseCase, CreateStoreCommand } from '../../application/useCases/CreateStore';
 import { UpdateStoreUseCase, UpdateStoreCommand } from '../../application/useCases/UpdateStore';
 import { ConfigureStorePickupUseCase, type ConfigureStorePickupInput } from '../../application/useCases/ConfigureStorePickup';
@@ -13,7 +14,6 @@ import { SetLocalDeliveryZoneUseCase, type SetLocalDeliveryZoneInput } from '../
 import { CreateStoreHierarchyUseCase, type CreateStoreHierarchyInput } from '../../application/useCases/CreateStoreHierarchy';
 import { ListStoresUseCase, ListStoresQuery } from '../../application/useCases/ListStores';
 import { StoreRepo } from '../../infrastructure/repositories/StoreRepo';
-import { BusinessRepo } from '../../../business/infrastructure/repositories/BusinessRepo';
 import { SystemConfigurationRepo } from '../../../configuration/infrastructure/repositories/SystemConfigurationRepo';
 
 export class StoreController {
@@ -26,9 +26,8 @@ export class StoreController {
 
   constructor() {
     const storeRepository = new StoreRepo();
-    const businessRepository = new BusinessRepo();
     const systemConfigRepository = new SystemConfigurationRepo();
-    this.createStoreUseCase = new CreateStoreUseCase(storeRepository, businessRepository, systemConfigRepository);
+    this.createStoreUseCase = new CreateStoreUseCase(storeRepository, systemConfigRepository);
     this.updateStoreUseCase = new UpdateStoreUseCase(storeRepository);
     this.configurePickupUseCase = new ConfigureStorePickupUseCase(storeRepository);
     this.setLocalDeliveryUseCase = new SetLocalDeliveryZoneUseCase(storeRepository);
@@ -245,6 +244,10 @@ export class StoreController {
     try {
       const storeRepository = new StoreRepo();
       await storeRepository.delete(req.params.storeId);
+
+      eventBus.emit('store.deleted', {
+        storeId: req.params.storeId,
+      });
 
       res.json({
         success: true,

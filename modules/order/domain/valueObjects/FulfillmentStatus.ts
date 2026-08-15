@@ -5,14 +5,14 @@
 
 export enum FulfillmentStatus {
   UNFULFILLED = 'unfulfilled',
-  PARTIALLY_FULFILLED = 'partially_fulfilled',
+  PARTIALLY_FULFILLED = 'partiallyFulfilled',
   FULFILLED = 'fulfilled',
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
   CANCELLED = 'cancelled',
   RETURNED = 'returned',
-  PENDING_PICKUP = 'pending_pickup',
-  PICKED_UP = 'picked_up',
+  PENDING_PICKUP = 'pendingPickup',
+  PICKED_UP = 'pickedUp',
 }
 
 /**

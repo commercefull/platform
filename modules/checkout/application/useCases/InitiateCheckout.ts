@@ -59,7 +59,9 @@ export interface CheckoutResponse {
   total: number;
   currency: string;
   couponCode?: string;
+  fulfillmentType: string;
   notes?: string;
+  sameAsShipping: boolean;
   createdAt: string;
   updatedAt: string;
   expiresAt: string;
@@ -103,7 +105,9 @@ export function mapCheckoutToResponse(session: CheckoutSession): CheckoutRespons
     total: session.total.amount,
     currency: session.subtotal.currency,
     couponCode: session.couponCode,
+    fulfillmentType: session.fulfillmentType,
     notes: session.notes,
+    sameAsShipping: session.sameAsShipping,
     createdAt: session.createdAt.toISOString(),
     updatedAt: session.updatedAt.toISOString(),
     expiresAt: session.expiresAt.toISOString(),

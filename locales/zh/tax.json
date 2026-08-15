@@ -1,0 +1,10 @@
+{
+  "rates": "税率",
+  "zones": "税区",
+  "addRate": "添加税率",
+  "addZone": "添加税区",
+  "addClass": "添加税级",
+  "stateRegion": "州/地区",
+  "classes": "税种",
+  "zoneName": "区域名称"
+}

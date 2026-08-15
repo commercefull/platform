@@ -67,4 +67,20 @@ router.delete('/packaging-types/:id', shippingController.deletePackagingType);
 
 router.post('/calculate-rates', shippingController.calculateRates);
 
+// ============================================================================
+// Shipping Labels
+// ============================================================================
+
+router.post('/labels', shippingController.createLabel);
+router.get('/labels/:id', shippingController.getLabel);
+router.get('/labels/order/:orderId', shippingController.getLabelsByOrder);
+router.post('/labels/:id/void', shippingController.voidLabel);
+
+// ============================================================================
+// Tracking
+// ============================================================================
+
+router.get('/track/:id', shippingController.trackShipment);
+router.get('/track', shippingController.trackShipment);
+
 export const shippingBusinessRouter = router;

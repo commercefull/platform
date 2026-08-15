@@ -5,6 +5,7 @@ import { CustomerRepo } from '../../../customer/infrastructure/repositories/cust
 import { AuthRefreshTokenRepo } from '../../infrastructure/repositories/identityRefreshTokenRepo';
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
 import { emitCustomerLogin, emitCustomerRegistered, emitCustomerTokenRefreshed } from '../../domain/events/emitIdentityEvent';
+import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 
 // Environment configuration with secure defaults
 const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
@@ -391,8 +392,13 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
     // Generate secure reset token
     const resetToken = await customerRepo.createPasswordResetToken(customer.customerId);
 
-    // TODO: Send reset token via email
-    // await emailService.sendPasswordResetEmail(email, resetToken);
+    // Send password reset email
+    await JobScheduler.scheduleEmail({
+      to: email,
+      subject: 'Password Reset Request',
+      template: 'password-reset',
+      data: { resetToken, email },
+    });
 
     res.json({
       success: true,

@@ -54,13 +54,12 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  */
 export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { categoryId, brandId, priceMin, priceMax, isFeatured, tags, limit, offset, orderBy, orderDirection } = req.query;
+    const { categoryId, priceMin, priceMax, isFeatured, tags, limit, offset, orderBy, orderDirection } = req.query;
 
     const filters: {
       status?: ProductStatus | ProductStatus[];
       visibility?: ProductVisibility | ProductVisibility[];
       categoryId?: string;
-      brandId?: string;
       priceMin?: number;
       priceMax?: number;
       isFeatured?: boolean;
@@ -70,7 +69,6 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
       visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED],
     };
     if (categoryId) filters.categoryId = categoryId as string;
-    if (brandId) filters.brandId = brandId as string;
     if (priceMin) filters.priceMin = parseFloat(priceMin as string);
     if (priceMax) filters.priceMax = parseFloat(priceMax as string);
     if (isFeatured === 'true') filters.isFeatured = true;
@@ -136,7 +134,7 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
  */
 export const searchProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { q, categoryId, brandId, priceMin, priceMax, limit, offset, orderBy } = req.query;
+    const { q, categoryId, priceMin, priceMax, limit, offset, orderBy } = req.query;
 
     if (!q) {
       respond(req, res, { products: [], total: 0, query: '' }, 200, 'product/search');
@@ -145,12 +143,10 @@ export const searchProducts = async (req: TypedRequest, res: Response): Promise<
 
     const filters: {
       categoryId?: string;
-      brandId?: string;
       priceMin?: number;
       priceMax?: number;
     } = {};
     if (categoryId) filters.categoryId = categoryId as string;
-    if (brandId) filters.brandId = brandId as string;
     if (priceMin) filters.priceMin = parseFloat(priceMin as string);
     if (priceMax) filters.priceMax = parseFloat(priceMax as string);
 

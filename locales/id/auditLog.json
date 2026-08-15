@@ -1,0 +1,11 @@
+{
+  "title": "Log Audit",
+  "user": "Pengguna",
+  "resource": "Sumber",
+  "resourceId": "ID Sumber Daya",
+  "ipAddress": "Alamat IP",
+  "noLogs": "Tidak ada log audit yang ditemukan.",
+  "changes": "Perubahan",
+  "oldValue": "Nilai Lama",
+  "newValue": "Nilai Baru"
+}

@@ -1,0 +1,71 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/reporting/schedules" class="btn btn-outline-secondary"><%= t('common.back') %></a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="card">
+      <div class="card-body">
+        <form method="POST" action="/admin/reporting/schedules">
+          <div class="row">
+            <div class="col-md-8 mb-3">
+              <label class="form-label"><%= t('analytics:reportName') %></label>
+              <input class="form-control" name="name" value="<%= formData.name || '' %>" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label"><%= t('shared:common.reportType') %></label>
+              <select class="form-select" name="reportType" required>
+                <option value=""><%= t('common.selectPlaceholder') %></option>
+                <% Object.entries(templates || {}).forEach(function(entry) { const key = entry[0]; const tpl = entry[1]; %>
+                  <option value="<%= key %>" <%= formData.reportType === key ? 'selected' : '' %>><%= tpl.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label"><%= t('shared:common.frequency') %></label>
+              <select class="form-select" name="frequency">
+                <option value="daily" <%= formData.frequency === 'daily' ? 'selected' : '' %>><%= t('analytics:daily') %></option>
+                <option value="weekly" <%= formData.frequency === 'weekly' ? 'selected' : '' %>><%= t('shared:common.weekly') %></option>
+                <option value="monthly" <%= formData.frequency === 'monthly' ? 'selected' : '' %>><%= t('shared:common.monthly') %></option>
+                <option value="quarterly" <%= formData.frequency === 'quarterly' ? 'selected' : '' %>><%= t('shared:common.quarterly') %></option>
+                <option value="yearly" <%= formData.frequency === 'yearly' ? 'selected' : '' %>><%= t('subscription:yearly') %></option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label"><%= t('shared:common.format') %></label>
+              <select class="form-select" name="format">
+                <option value="pdf" <%= formData.format === 'pdf' ? 'selected' : '' %>>PDF</option>
+                <option value="excel" <%= formData.format === 'excel' ? 'selected' : '' %>>Excel</option>
+                <option value="csv" <%= formData.format === 'csv' ? 'selected' : '' %>>CSV</option>
+                <option value="html" <%= formData.format === 'html' ? 'selected' : '' %>>HTML</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label"><%= t('common.active') %></label>
+              <select class="form-select" name="isActive">
+                <option value="true" <%= formData.isActive === true || formData.isActive === 'true' ? 'selected' : '' %>><%= t('common.yes') %></option>
+                <option value="false" <%= formData.isActive === false || formData.isActive === 'false' ? 'selected' : '' %>><%= t('common.no') %></option>
+              </select>
+            </div>
+            <div class="col-12 mb-3">
+              <label class="form-label"><%= t('analytics:recipients') %></label>
+              <input class="form-control" name="recipients" value="<%= Array.isArray(formData.recipients) ? formData.recipients.join(', ') : (formData.recipients || '') %>" placeholder="admin@example.com, manager@example.com">
+            </div>
+            <div class="col-12 mb-3">
+              <label class="form-label"><%= t('organization:settings') %></label>
+              <textarea class="form-control" name="parameters" rows="4" placeholder='{"dateFrom": "2024-01-01", "dateTo": "2024-12-31"}'><%= formData.parameters ? (typeof formData.parameters === 'string' ? formData.parameters : JSON.stringify(formData.parameters, null, 2)) : '' %></textarea>
+              <small class="form-hint"><%= t('organization:settingsHint') %></small>
+            </div>
+          </div>
+          <div class="d-flex">
+            <button type="submit" class="btn btn-primary"><%= t('shared:common.createSchedule') %></button>
+            <a href="/admin/reporting/schedules" class="btn btn-link"><%= t('common.cancel') %></a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

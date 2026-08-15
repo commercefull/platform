@@ -39,7 +39,7 @@ export const loginTestMerchant = async (
 
 // Test data for order items (used in order creation)
 export const testOrderItemData = {
-  productId: '00000000-0000-0000-0000-000000000001', // Valid UUID for test product
+  productId: '10000000-0000-0000-0000-000000000001', // Existing product in seeded DB
   sku: 'TEST-SKU-123',
   name: 'Test Product',
   description: 'Test product description',

@@ -9,9 +9,9 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
         </svg>
       </div>
-      <h2 class="mt-6 text-3xl font-bold text-gray-900">Welcome back</h2>
+      <h2 class="mt-6 text-3xl font-bold text-gray-900"><%= t('storefront:welcomeBack') %></h2>
       <p class="mt-2 text-sm text-gray-600">
-        Sign in to your account to continue shopping
+        <%= t('storefront:signInToContinue') %>
       </p>
     </div>
 
@@ -49,7 +49,7 @@
 
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-            Email address
+            <%= t('storefront:emailAddress') %>
           </label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -65,14 +65,14 @@
               required
               value="<%= typeof email !== 'undefined' ? email : '' %>"
               class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 sm:text-sm"
-              placeholder="Enter your email"
+              placeholder="<%= t('storefront:enterEmail') %>"
             >
           </div>
         </div>
 
         <div>
           <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-            Password
+            <%= t('shared:common.password') %>
           </label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -87,7 +87,7 @@
               autocomplete="current-password"
               required
               class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 sm:text-sm"
-              placeholder="Enter your password"
+              placeholder="<%= t('storefront:enterPassword') %>"
             >
           </div>
         </div>
@@ -102,20 +102,20 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
               </svg>
             </span>
-            Sign In
+            <%= t('shared:common.signIn') %>
           </button>
         </div>
 
         <div class="text-center space-y-2">
           <div>
             <a href="/forgot-password" class="text-sm text-blue-600 hover:text-blue-500 transition-colors">
-              Forgot your password?
+              <%= t('storefront:forgotPassword') %>
             </a>
           </div>
           <div>
-            <span class="text-sm text-gray-600">Don't have an account?</span>
+            <span class="text-sm text-gray-600"><%= t('shared:common.dontHaveAnAccount') %></span>
             <a href="/signup" class="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors ml-1">
-              Sign up here
+              <%= t('storefront:signUpHere') %>
             </a>
           </div>
         </div>

@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Suscripciones totales",
+  "monthlyRecurringRevenue": "Ingresos mensuales recurrentes",
+  "addPlan": "Agregar plan",
+  "planName": "Nombre del plan",
+  "subscribers": "Suscriptores",
+  "noPlans": "No hay planes de suscripción configurados.",
+  "plan": "Plan",
+  "started": "Comenzó",
+  "nextBilling": "Próxima facturación",
+  "noActiveSubscriptions": "No hay suscripciones activas.",
+  "addSubscriptionPlan": "Agregar plan de suscripción",
+  "yearly": "Anual",
+  "trialDays": "Días de prueba",
+  "confirmDeletePlan": "¿Eliminar este plan?",
+  "billingOverview": "Resumen de facturación",
+  "billingDescription": "Administre la facturación de suscripciones, los pagos fallidos y el procesamiento de renovaciones."
+}

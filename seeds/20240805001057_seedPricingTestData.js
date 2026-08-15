@@ -15,8 +15,7 @@ const TEST_PRICE_LIST_ID = '00000000-0000-0000-0000-000000000010';
 const TEST_PRICING_RULE_ID = '00000000-0000-0000-0000-000000000020';
 
 exports.seed = async function (knex) {
-  // Get brand and category IDs for product creation
-  const genericBrand = await knex('productBrand').where({ slug: 'generic' }).first('productBrandId');
+  // Get category ID for product creation
   const electronicsCategory = await knex('productCategory').where({ slug: 'electronics' }).first('productCategoryId');
 
   // Clean up existing test data (in reverse order of dependencies)
@@ -66,7 +65,6 @@ exports.seed = async function (knex) {
     slug: `pricing-test-product-${index + 1}`,
     description: `Test product for pricing integration tests (${index + 1})`,
     shortDescription: `Test pricing product ${index + 1}`,
-    brandId: genericBrand.productBrandId,
     type: 'simple',
     status: 'active',
     visibility: 'visible',
@@ -80,7 +78,7 @@ exports.seed = async function (knex) {
     hasVariants: false,
   }));
 
-  await knex('product').insert(testProducts);
+  await knex('product').insert(testProducts).onConflict('productId').ignore();
 
   // Link products to category
   const categoryMappings = TEST_PRODUCT_IDS.map((productId, index) => ({
@@ -89,7 +87,7 @@ exports.seed = async function (knex) {
     isPrimary: index === 0,
   }));
 
-  await knex('productCategoryMap').insert(categoryMappings);
+  await knex('productCategoryMap').insert(categoryMappings).onConflict(['productId', 'productCategoryId']).ignore();
 
   // Create a test price list
   await knex('pricingPriceList').insert({
@@ -98,7 +96,7 @@ exports.seed = async function (knex) {
     description: 'Price list for integration tests',
     priority: 1,
     isActive: true,
-  });
+  }).onConflict('priceListId').ignore();
 
   // Create a test pricing rule with currency_conversion type
   await knex('pricingRule').insert({
@@ -109,7 +107,7 @@ exports.seed = async function (knex) {
     scope: 'global',
     priority: 1,
     isActive: true,
-  });
+  }).onConflict('pricingRuleId').ignore();
 };
 
 exports.up = exports.seed;

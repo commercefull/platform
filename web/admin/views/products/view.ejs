@@ -15,8 +15,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-            <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/products"><%= t('shared:common.products') %></a></li>
             <li class="breadcrumb-item active"><%= product.name %></li>
           </ol>
         </div>
@@ -36,7 +36,7 @@
           <!-- Product Header -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Product Details</h3>
+              <h3 class="card-title"><%= t('product:view') %></h3>
               <div class="card-tools">
                 <span class="badge badge-<%= product.status === 'active' ? 'success' : product.status === 'draft' ? 'warning' : product.status === 'inactive' ? 'danger' : 'secondary' %>">
                   <%= product.status.toUpperCase() %>
@@ -80,8 +80,7 @@
                   </p>
                   <p class="text-muted mb-2">
                     <% if (productTypeName) { %>Type: <span class="badge badge-outline-primary"><%= productTypeName %></span> | <% } %>
-                    <% if (categoryName) { %>Category: <span class="badge badge-outline-info"><%= categoryName %></span> | <% } %>
-                    <% if (brandName) { %>Brand: <span class="badge badge-outline-dark"><%= brandName %></span><% } %>
+                    <% if (categoryName) { %>Category: <span class="badge badge-outline-info"><%= categoryName %></span><% } %>
                   </p>
 
                   <hr>
@@ -95,33 +94,33 @@
                         <span class="text-danger">-<%= product.discountPercentage %>%</span></small>
                       <% } %>
                       <% if (product.cost !== null && product.cost !== undefined) { %>
-                        <br><small class="text-muted">Cost: <%= product.currency %> <%= product.cost.toFixed(2) %></small>
+                        <br><small class="text-muted"><%= t('shared:common.cost') %>: <%= product.currency %> <%= product.cost.toFixed(2) %></small>
                         <% if (product.profitMargin !== null) { %>
                           <small class="text-<%= product.profitMargin > 0 ? 'success' : 'danger' %> ml-1">
-                            (Margin: <%= product.profitMarginPercentage %>%)
+                            (<%= t('product:margin') %>: <%= product.profitMarginPercentage %>%)
                           </small>
                         <% } %>
                       <% } %>
                     </div>
                     <div class="col-6 text-right">
                       <% if (product.isFeatured) { %>
-                        <span class="badge badge-warning"><i class="fas fa-star"></i> Featured</span>
+                        <span class="badge badge-warning"><i class="fas fa-star"></i> <%= t('product:featured') %></span>
                       <% } %>
                       <% if (product.isOnSale) { %>
-                        <span class="badge badge-danger">On Sale</span>
+                        <span class="badge badge-danger"><%= t('shared:common.onSale') %></span>
                       <% } %>
                       <% if (product.isPurchasable) { %>
-                        <span class="badge badge-success">Purchasable</span>
+                        <span class="badge badge-success"><%= t('product:purchasable') %></span>
                       <% } %>
                     </div>
                   </div>
 
                   <!-- Product Flags -->
                   <div class="mt-2">
-                    <% if (product.isVirtual) { %><span class="badge badge-info mr-1">Virtual</span><% } %>
-                    <% if (product.isDownloadable) { %><span class="badge badge-info mr-1">Downloadable</span><% } %>
-                    <% if (product.isSubscription) { %><span class="badge badge-info mr-1">Subscription</span><% } %>
-                    <% if (product.isTaxable) { %><span class="badge badge-secondary mr-1">Taxable<%= product.taxClass ? ' (' + product.taxClass + ')' : '' %></span><% } %>
+                    <% if (product.isVirtual) { %><span class="badge badge-info mr-1"><%= t('shared:common.virtual') %></span><% } %>
+                    <% if (product.isDownloadable) { %><span class="badge badge-info mr-1"><%= t('product:downloadable') %></span><% } %>
+                    <% if (product.isSubscription) { %><span class="badge badge-info mr-1"><%= t('product:subscription') %></span><% } %>
+                    <% if (product.isTaxable) { %><span class="badge badge-secondary mr-1"><%= t('product:taxable') %><%= product.taxClass ? ' (' + product.taxClass + ')' : '' %></span><% } %>
                   </div>
                 </div>
               </div>
@@ -131,7 +130,7 @@
           <!-- Description -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Description</h3>
+              <h3 class="card-title"><%= t('shared:common.description') %></h3>
             </div>
             <div class="card-body">
               <% if (product.shortDescription) { %>
@@ -141,7 +140,7 @@
               <% if (product.description) { %>
                 <div><%- product.description %></div>
               <% } else { %>
-                <p class="text-muted">No description available.</p>
+                <p class="text-muted"><%= t('product:noDescription') %></p>
               <% } %>
             </div>
           </div>
@@ -150,16 +149,16 @@
           <% if (productAttributes && productAttributes.length > 0) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-sliders-h mr-1"></i>Attributes (<%= productAttributes.length %>)</h3>
+              <h3 class="card-title"><i class="fas fa-sliders-h mr-1"></i><%= t('product:attribute') %>s (<%= productAttributes.length %>)</h3>
             </div>
             <div class="card-body p-0">
               <table class="table table-striped mb-0">
                 <thead>
                   <tr>
-                    <th>Attribute</th>
-                    <th>Code</th>
-                    <th>Value</th>
-                    <th>Type</th>
+                    <th><%= t('product:attribute') %></th>
+                    <th><%= t('shared:common.code') %></th>
+                    <th><%= t('product:value') %></th>
+                    <th><%= t('shared:common.type') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -181,19 +180,19 @@
           <% if (product.variants && product.variants.length > 0) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-layer-group mr-1"></i>Variants (<%= product.variants.length %>)</h3>
+              <h3 class="card-title"><i class="fas fa-layer-group mr-1"></i><%= t('product:variants') %> (<%= product.variants.length %>)</h3>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover mb-0">
                 <thead>
                   <tr>
-                    <th>Variant</th>
-                    <th>SKU</th>
-                    <th>Barcode</th>
-                    <th>Attributes</th>
-                    <th class="text-right">Price</th>
-                    <th class="text-center">Stock</th>
-                    <th class="text-center">Status</th>
+                    <th><%= t('product:variants') %></th>
+                    <th><%= t('shared:common.sku') %></th>
+                    <th><%= t('shared:common.barcode') %></th>
+                    <th><%= t('product:attribute') %></th>
+                    <th class="text-right"><%= t('common.price') %></th>
+                    <th class="text-center"><%= t('shared:common.stock') %></th>
+                    <th class="text-center"><%= t('common.status') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -202,7 +201,7 @@
                     <td>
                       <strong><%= variant.name %></strong>
                       <% if (variant.isDefault) { %>
-                        <span class="badge badge-primary ml-1">Default</span>
+                        <span class="badge badge-primary ml-1"><%= t('shared:common.default') %></span>
                       <% } %>
                     </td>
                     <td><code><%= variant.sku %></code></td>
@@ -233,9 +232,9 @@
                     </td>
                     <td class="text-center">
                       <% if (variant.isActive) { %>
-                        <span class="badge badge-success">Active</span>
+                        <span class="badge badge-success"><%= t('common.active') %></span>
                       <% } else { %>
-                        <span class="badge badge-secondary">Inactive</span>
+                        <span class="badge badge-secondary"><%= t('common.inactive') %></span>
                       <% } %>
                     </td>
                   </tr>
@@ -250,7 +249,7 @@
           <% if (product.images && product.images.length > 0) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-images mr-1"></i>Images (<%= product.images.length %>)</h3>
+              <h3 class="card-title"><i class="fas fa-images mr-1"></i><%= t('product:images') %> (<%= product.images.length %>)</h3>
             </div>
             <div class="card-body">
               <div class="row">
@@ -259,7 +258,7 @@
                   <div class="position-relative">
                     <img src="<%= img.url %>" alt="<%= img.altText || product.name %>" class="img-fluid rounded" style="border: <%= img.isPrimary ? '3px solid #007bff' : '1px solid #ddd' %>;">
                     <% if (img.isPrimary) { %>
-                      <span class="badge badge-primary position-absolute" style="top: 5px; left: 5px;">Primary</span>
+                      <span class="badge badge-primary position-absolute" style="top: 5px; left: 5px;"><%= t('shared:common.primary') %></span>
                     <% } %>
                   </div>
                   <% if (img.altText) { %>
@@ -276,31 +275,31 @@
           <% if (product.weight || product.length || product.width || product.height) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-ruler-combined mr-1"></i>Dimensions & Weight</h3>
+              <h3 class="card-title"><i class="fas fa-ruler-combined mr-1"></i><%= t('product:dimensionsWeight') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
                 <% if (product.weight) { %>
                 <div class="col-md-3 col-6 mb-2">
-                  <small class="text-muted d-block">Weight</small>
+                  <small class="text-muted d-block"><%= t('shared:common.weight') %></small>
                   <strong><%= product.weight %> <%= product.weightUnit || 'kg' %></strong>
                 </div>
                 <% } %>
                 <% if (product.length) { %>
                 <div class="col-md-3 col-6 mb-2">
-                  <small class="text-muted d-block">Length</small>
+                  <small class="text-muted d-block"><%= t('product:length') %></small>
                   <strong><%= product.length %> <%= product.dimensionUnit || 'cm' %></strong>
                 </div>
                 <% } %>
                 <% if (product.width) { %>
                 <div class="col-md-3 col-6 mb-2">
-                  <small class="text-muted d-block">Width</small>
+                  <small class="text-muted d-block"><%= t('product:width') %></small>
                   <strong><%= product.width %> <%= product.dimensionUnit || 'cm' %></strong>
                 </div>
                 <% } %>
                 <% if (product.height) { %>
                 <div class="col-md-3 col-6 mb-2">
-                  <small class="text-muted d-block">Height</small>
+                  <small class="text-muted d-block"><%= t('product:height') %></small>
                   <strong><%= product.height %> <%= product.dimensionUnit || 'cm' %></strong>
                 </div>
                 <% } %>
@@ -313,24 +312,24 @@
           <% if (product.metaTitle || product.metaDescription || product.metaKeywords) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-search mr-1"></i>SEO</h3>
+              <h3 class="card-title"><i class="fas fa-search mr-1"></i><%= t('common.seo') %></h3>
             </div>
             <div class="card-body">
               <% if (product.metaTitle) { %>
               <div class="mb-2">
-                <small class="text-muted d-block">Meta Title</small>
+                <small class="text-muted d-block"><%= t('shared:common.metaTitle') %></small>
                 <strong><%= product.metaTitle %></strong>
               </div>
               <% } %>
               <% if (product.metaDescription) { %>
               <div class="mb-2">
-                <small class="text-muted d-block">Meta Description</small>
+                <small class="text-muted d-block"><%= t('shared:common.metaDescription') %></small>
                 <%= product.metaDescription %>
               </div>
               <% } %>
               <% if (product.metaKeywords) { %>
               <div class="mb-2">
-                <small class="text-muted d-block">Meta Keywords</small>
+                <small class="text-muted d-block"><%= t('product:metaKeywords') %></small>
                 <%= product.metaKeywords %>
               </div>
               <% } %>
@@ -342,18 +341,18 @@
           <% if (product.returnPolicy || product.warranty) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-shield-alt mr-1"></i>Policies</h3>
+              <h3 class="card-title"><i class="fas fa-shield-alt mr-1"></i><%= t('shared:common.policies') %></h3>
             </div>
             <div class="card-body">
               <% if (product.warranty) { %>
               <div class="mb-2">
-                <small class="text-muted d-block">Warranty</small>
+                <small class="text-muted d-block"><%= t('product:warranty') %></small>
                 <%= product.warranty %>
               </div>
               <% } %>
               <% if (product.returnPolicy) { %>
               <div class="mb-2">
-                <small class="text-muted d-block">Return Policy</small>
+                <small class="text-muted d-block"><%= t('shared:common.returnPolicy') %></small>
                 <%= product.returnPolicy %>
               </div>
               <% } %>
@@ -369,27 +368,27 @@
           <!-- Actions -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Actions</h3>
+              <h3 class="card-title"><%= t('shared:common.actions') %></h3>
             </div>
             <div class="card-body">
               <a href="/admin/products/<%= product.productId %>/edit" class="btn btn-primary btn-block mb-2">
-                <i class="fas fa-edit"></i> Edit Product
+                <i class="fas fa-edit"></i> <%= t('product:edit') %>
               </a>
               <% if (product.status === 'draft') { %>
                 <button onclick="publishProduct('<%= product.productId %>')" class="btn btn-success btn-block mb-2">
-                  <i class="fas fa-globe"></i> Publish
+                  <i class="fas fa-globe"></i> <%= t('product:publish') %>
                 </button>
               <% } else if (product.status === 'active') { %>
                 <button onclick="unpublishProduct('<%= product.productId %>')" class="btn btn-warning btn-block mb-2">
-                  <i class="fas fa-eye-slash"></i> Unpublish
+                  <i class="fas fa-eye-slash"></i> <%= t('product:unpublish') %>
                 </button>
               <% } %>
               <button onclick="deleteProduct('<%= product.productId %>', '<%= product.name %>')" class="btn btn-danger btn-block mb-2">
-                <i class="fas fa-trash"></i> Delete
+                <i class="fas fa-trash"></i> <%= t('common.delete') %>
               </button>
               <hr>
               <a href="/admin/products" class="btn btn-secondary btn-block">
-                <i class="fas fa-arrow-left"></i> Back to Products
+                <i class="fas fa-arrow-left"></i> <%= t('product:backToProducts') %>
               </a>
             </div>
           </div>
@@ -397,59 +396,53 @@
           <!-- Quick Info -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Quick Info</h3>
+              <h3 class="card-title"><%= t('product:quickInfo') %></h3>
             </div>
             <div class="card-body p-0">
               <ul class="list-group list-group-flush">
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>Product ID</span>
+                  <span><%= t('shared:common.productId') %></span>
                   <code title="<%= product.productId %>"><%= product.productId.substring(0, 8) %>...</code>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>Created</span>
+                  <span><%= t('shared:common.dateCreated') %></span>
                   <span><%= new Date(product.createdAt).toLocaleDateString() %></span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>Updated</span>
+                  <span><%= t('shared:common.dateUpdated') %></span>
                   <span><%= new Date(product.updatedAt).toLocaleDateString() %></span>
                 </li>
                 <% if (product.publishedAt) { %>
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>Published</span>
+                  <span><%= t('shared:common.published') %></span>
                   <span><%= new Date(product.publishedAt).toLocaleDateString() %></span>
                 </li>
                 <% } %>
                 <% if (productTypeName) { %>
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>Product Type</span>
+                  <span><%= t('product:productType') %></span>
                   <span><%= productTypeName %></span>
                 </li>
                 <% } %>
                 <% if (categoryName) { %>
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>Category</span>
+                  <span><%= t('common.category') %></span>
                   <span><%= categoryName %></span>
                 </li>
                 <% } %>
-                <% if (brandName) { %>
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>Brand</span>
-                  <span><%= brandName %></span>
-                </li>
-                <% } %>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span>Has Variants</span>
+                  <span><%= t('product:hasVariants') %></span>
                   <span><%= product.hasVariants ? 'Yes (' + (product.variants ? product.variants.length : 0) + ')' : 'No' %></span>
                 </li>
                 <% if (product.externalId) { %>
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>External ID</span>
+                  <span><%= t('shared:common.externalId') %></span>
                   <code><%= product.externalId %></code>
                 </li>
                 <% } %>
                 <% if (product.merchantId) { %>
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>Merchant</span>
+                  <span><%= t('shared:common.merchant') %></span>
                   <code title="<%= product.merchantId %>"><%= product.merchantId.substring(0, 8) %>...</code>
                 </li>
                 <% } %>
@@ -461,17 +454,17 @@
           <% if (product.minOrderQuantity > 1 || product.maxOrderQuantity) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Order Limits</h3>
+              <h3 class="card-title"><%= t('product:orderLimits') %></h3>
             </div>
             <div class="card-body p-0">
               <ul class="list-group list-group-flush">
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>Min Quantity</span>
+                  <span><%= t('product:minQuantity') %></span>
                   <span><%= product.minOrderQuantity %></span>
                 </li>
                 <% if (product.maxOrderQuantity) { %>
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>Max Quantity</span>
+                  <span><%= t('product:maxQuantity') %></span>
                   <span><%= product.maxOrderQuantity %></span>
                 </li>
                 <% } %>
@@ -484,7 +477,7 @@
           <% if (product.tags && product.tags.length > 0) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Tags</h3>
+              <h3 class="card-title"><%= t('shared:common.tags') %></h3>
             </div>
             <div class="card-body">
               <% product.tags.forEach(function(tag) { %>
@@ -498,7 +491,7 @@
           <% if (reviewStats && reviewStats.totalReviews > 0) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-star mr-1"></i>Reviews</h3>
+              <h3 class="card-title"><i class="fas fa-star mr-1"></i><%= t('shared:common.reviews') %></h3>
             </div>
             <div class="card-body">
               <div class="text-center mb-3">
@@ -531,7 +524,7 @@
           <% if (product.metadata && Object.keys(product.metadata).length > 0) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Metadata</h3>
+              <h3 class="card-title"><%= t('shared:common.metadata') %></h3>
             </div>
             <div class="card-body p-0">
               <ul class="list-group list-group-flush">
@@ -563,7 +556,7 @@ function publishProduct(productId) {
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
-        else alert('Error: ' + data.message);
+        else alert('<%= t("common.error") %>: ' + data.message);
       });
   }
 }
@@ -574,7 +567,7 @@ function unpublishProduct(productId) {
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
-        else alert('Error: ' + data.message);
+        else alert('<%= t("common.error") %>: ' + data.message);
       });
   }
 }
@@ -589,8 +582,8 @@ function deleteProduct(productId, productName) {
     fetch(`/admin/products/${productId}`, { method: 'DELETE' })
       .then(r => r.json())
       .then(data => {
-        if (data.success) window.location.href = '/admin/products?success=Product deleted';
-        else alert('Error: ' + data.message);
+        if (data.success) window.location.href = '/admin/products?success=' + encodeURIComponent('<%= t("common.deletedShort") %>');
+        else alert('<%= t("common.error") %>: ' + data.message);
       });
   };
 

@@ -1,0 +1,10 @@
+{
+  "rates": "Steuersätze",
+  "zones": "Steuerzonen",
+  "addRate": "Steuersatz hinzufügen",
+  "addZone": "Steuerzone hinzufügen",
+  "addClass": "Steuerklasse hinzufügen",
+  "stateRegion": "Bundesstaat/Region",
+  "classes": "Steuerklassen",
+  "zoneName": "Zonenname"
+}

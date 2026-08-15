@@ -16,7 +16,7 @@
           <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
           <polyline points="15 6 9 12 15 18"/>
         </svg>
-        Back
+        <%= t('common.back') %>
       </a>
       <% if (campaign.status === 'draft') { %>
       <button class="btn btn-success" onclick="sendCampaign()">
@@ -26,7 +26,7 @@
           <line x1="10" y1="14" x2="21" y2="3"/>
           <path d="M21 3l-6.5 18a0.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a0.55 .55 0 0 1 0 -1l18 -6.5"/>
         </svg>
-        Send Campaign
+        <%= t('marketing:sendCampaign') %>
       </button>
       <% } %>
     </div>
@@ -44,20 +44,20 @@
     <div class="row">
       <div class="col-md-8">
         <div class="card">
-          <div class="card-header"><h3 class="card-title">Campaign Details</h3></div>
+          <div class="card-header"><h3 class="card-title"><%= t('marketing:campaignDetails') %></h3></div>
           <div class="card-body">
             <dl class="row">
-              <dt class="col-sm-3">Name</dt>
+              <dt class="col-sm-3"><%= t('shared:common.name') %></dt>
               <dd class="col-sm-9"><%= campaign.name %></dd>
-              <dt class="col-sm-3">Subject</dt>
+              <dt class="col-sm-3"><%= t('shared:common.subject') %></dt>
               <dd class="col-sm-9"><%= campaign.subject %></dd>
-              <dt class="col-sm-3">Template ID</dt>
+              <dt class="col-sm-3"><%= t('marketing:templateId') %></dt>
               <dd class="col-sm-9"><%= campaign.templateId || '—' %></dd>
-              <dt class="col-sm-3">Scheduled At</dt>
+              <dt class="col-sm-3"><%= t('marketing:scheduledAt') %></dt>
               <dd class="col-sm-9"><%= campaign.scheduledAt ? new Date(campaign.scheduledAt).toLocaleString() : '—' %></dd>
-              <dt class="col-sm-3">Sent At</dt>
+              <dt class="col-sm-3"><%= t('shared:common.sentAt') %></dt>
               <dd class="col-sm-9"><%= campaign.sentAt ? new Date(campaign.sentAt).toLocaleString() : '—' %></dd>
-              <dt class="col-sm-3">Created</dt>
+              <dt class="col-sm-3"><%= t('shared:common.dateCreated') %></dt>
               <dd class="col-sm-9"><%= new Date(campaign.createdAt).toLocaleString() %></dd>
             </dl>
           </div>
@@ -65,19 +65,19 @@
       </div>
       <div class="col-md-4">
         <div class="card">
-          <div class="card-header"><h3 class="card-title">Stats</h3></div>
+          <div class="card-header"><h3 class="card-title"><%= t('marketing:stats') %></h3></div>
           <div class="card-body">
             <div class="row g-3">
               <div class="col-6">
-                <div class="text-muted">Recipients</div>
+                <div class="text-muted"><%= t('marketing:recipients') %></div>
                 <div class="h3"><%= (campaign.recipientCount || 0).toLocaleString() %></div>
               </div>
               <div class="col-6">
-                <div class="text-muted">Opens</div>
+                <div class="text-muted"><%= t('marketing:opens') %></div>
                 <div class="h3"><%= (campaign.openCount || 0).toLocaleString() %></div>
               </div>
               <div class="col-6">
-                <div class="text-muted">Clicks</div>
+                <div class="text-muted"><%= t('marketing:clicks') %></div>
                 <div class="h3"><%= (campaign.clickCount || 0).toLocaleString() %></div>
               </div>
             </div>
@@ -89,17 +89,17 @@
     <% if (campaign.status === 'draft') { %>
     <!-- Send Form -->
     <div class="card" id="sendForm" style="display:none;">
-      <div class="card-header"><h3 class="card-title">Send Campaign</h3></div>
+      <div class="card-header"><h3 class="card-title"><%= t('marketing:sendCampaign') %></h3></div>
       <div class="card-body">
         <form method="POST" action="/admin/marketing/campaigns/<%= campaign.marketingEmailCampaignId %>/send">
           <div class="mb-3">
-            <label class="form-label">Recipients (one email per line)</label>
+            <label class="form-label"><%= t('marketing:recipientsOnePerLine') %></label>
             <textarea name="recipientEmails" class="form-control" rows="6"
               placeholder="customer@example.com&#10;another@example.com"></textarea>
-            <small class="text-muted">Enter recipient email addresses, one per line.</small>
+            <small class="text-muted"><%= t('marketing:recipientsHint') %></small>
           </div>
-          <button type="submit" class="btn btn-success">Send Now</button>
-          <button type="button" class="btn btn-link" onclick="document.getElementById('sendForm').style.display='none'">Cancel</button>
+          <button type="submit" class="btn btn-success"><%= t('marketing:sendNow') %></button>
+          <button type="button" class="btn btn-link" onclick="document.getElementById('sendForm').style.display='none'"><%= t('common.cancel') %></button>
         </form>
       </div>
     </div>

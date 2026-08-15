@@ -31,11 +31,11 @@
   <!-- Breadcrumb -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
     <nav class="flex text-sm text-gray-500">
-      <a href="/" class="hover:text-blue-600">Home</a>
+      <a href="/" class="hover:text-blue-600"><%= t('storefront:home') %></a>
       <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
       </svg>
-      <a href="/products" class="hover:text-blue-600">Products</a>
+      <a href="/products" class="hover:text-blue-600"><%= t('shared:common.products') %></a>
       <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
       </svg>
@@ -88,30 +88,30 @@
 
         <!-- Product Description -->
         <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('shared:common.description') %></h3>
           <p class="text-gray-600 leading-relaxed">
-            <%= product.description || 'No description available for this product.' %>
+            <%= product.description || t('storefront:noDescriptionAvailable') %>
           </p>
         </div>
 
         <!-- Product Details -->
         <div class="grid grid-cols-2 gap-4 py-4 border-t border-b border-gray-200">
           <div>
-            <span class="text-sm text-gray-500">Category</span>
-            <p class="font-medium text-gray-900"><%= product.categoryName || 'General' %></p>
+            <span class="text-sm text-gray-500"><%= t('shared:common.category') %></span>
+            <p class="font-medium text-gray-900"><%= product.categoryName || t('storefront:general') %></p>
           </div>
           <div>
-            <span class="text-sm text-gray-500">Brand</span>
-            <p class="font-medium text-gray-900"><%= product.manufacturer || 'N/A' %></p>
+            <span class="text-sm text-gray-500"><%= t('storefront:brand') %></span>
+            <p class="font-medium text-gray-900"><%= product.manufacturer || t('storefront:notAvailable') %></p>
           </div>
           <div>
-            <span class="text-sm text-gray-500">SKU</span>
+            <span class="text-sm text-gray-500"><%= t('shared:common.sku') %></span>
             <p class="font-medium text-gray-900"><%= product.sku || product.productId %></p>
           </div>
           <div>
-            <span class="text-sm text-gray-500">Availability</span>
+            <span class="text-sm text-gray-500"><%= t('storefront:availabilityLabel') %></span>
             <p class="font-medium <%= product.isActive && product.stock > 0 ? 'text-green-600' : 'text-red-600' %>">
-              <%= product.isActive && product.stock > 0 ? `In Stock (${product.stock})` : (product.stock > 0 ? 'Coming Soon' : 'Sold Out') %>
+              <%= product.isActive && product.stock > 0 ? t('storefront:inStockQty', { count: product.stock }) : (product.stock > 0 ? t('storefront:comingSoon') : t('storefront:soldOut')) %>
             </p>
           </div>
         </div>
@@ -144,7 +144,7 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
               </svg>
-              Add to Cart
+              <%= t('shared:common.addToCart') %>
             </a>
             <button class="p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
               <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,12 +159,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
           </svg>
           <h3 class="text-lg font-medium text-gray-900 mb-2">
-            <%= product.stock > 0 ? 'Coming Soon' : 'Currently Unavailable' %>
+            <%= product.stock > 0 ? t('storefront:comingSoon') : t('storefront:currentlyUnavailable') %>
           </h3>
-          <p class="text-gray-600">This product is not available for purchase at the moment.</p>
+          <p class="text-gray-600"><%= t('storefront:productNotAvailable') %></p>
           <% if (product.stock > 0) { %>
           <button class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            Notify When Available
+            <%= t('storefront:notifyWhenAvailable') %>
           </button>
           <% } %>
         </div>
@@ -177,22 +177,22 @@
               <svg class="w-8 h-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              <span class="text-sm font-medium text-gray-900">Free Shipping</span>
-              <span class="text-xs text-gray-600">On orders over $50</span>
+              <span class="text-sm font-medium text-gray-900"><%= t('storefront:freeShipping') %></span>
+              <span class="text-xs text-gray-600"><%= t('storefront:onOrdersOverFifty') %></span>
             </div>
             <div class="flex flex-col items-center">
               <svg class="w-8 h-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              <span class="text-sm font-medium text-gray-900">30-Day Returns</span>
-              <span class="text-xs text-gray-600">Easy return policy</span>
+              <span class="text-sm font-medium text-gray-900"><%= t('storefront:thirtyDayReturnsLabel') %></span>
+              <span class="text-xs text-gray-600"><%= t('storefront:easyReturnPolicy') %></span>
             </div>
             <div class="flex flex-col items-center">
               <svg class="w-8 h-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              <span class="text-sm font-medium text-gray-900">Premium Quality</span>
-              <span class="text-xs text-gray-600">Handcrafted excellence</span>
+              <span class="text-sm font-medium text-gray-900"><%= t('storefront:premiumQuality') %></span>
+              <span class="text-xs text-gray-600"><%= t('storefront:handcraftedExcellence') %></span>
             </div>
           </div>
         </div>

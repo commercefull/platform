@@ -82,7 +82,7 @@ export const couponTypeDefs = `#graphql
 
   type Mutation {
     createCoupon(input: CreateCouponInput!): CreateCouponResult!
-    applyCoupon(input: ApplyCouponInput!): ApplyCouponResult!
+    applyCouponCode(input: ApplyCouponInput!): ApplyCouponResult!
     redeemCoupon(input: RedeemCouponInput!): RedeemCouponResult!
   }
 `;

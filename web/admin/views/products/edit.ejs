@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
-            <li class="breadcrumb-item active">Edit</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/products"><%= t('shared:common.products') %></a></li>
+            <li class="breadcrumb-item active"><%= t('common.edit') %></li>
           </ol>
         </div>
       </div>
@@ -34,33 +34,33 @@
             <!-- Basic Info -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Basic Information</h3>
+                <h3 class="card-title"><i class="fas fa-info-circle me-2"></i><%= t('shared:common.basicInformation') %></h3>
               </div>
               <div class="card-body">
                 <div class="form-group mb-3">
-                  <label class="form-label">Product Name <span class="text-danger">*</span></label>
+                  <label class="form-label"><%= t('shared:common.productName') %> <span class="text-danger">*</span></label>
                   <input type="text" class="form-control" name="name" value="<%= product.name || '' %>" required>
                 </div>
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">SKU</label>
+                      <label class="form-label"><%= t('shared:common.sku') %></label>
                       <input type="text" class="form-control" name="sku" value="<%= product.sku || '' %>">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Slug</label>
+                      <label class="form-label"><%= t('shared:common.slug') %></label>
                       <input type="text" class="form-control" name="slug" value="<%= product.slug || '' %>">
                     </div>
                   </div>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Short Description</label>
+                  <label class="form-label"><%= t('product:shortDescription') %></label>
                   <textarea class="form-control" name="shortDescription" rows="2"><%= product.shortDescription || '' %></textarea>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Full Description</label>
+                  <label class="form-label"><%= t('product:fullDescription') %></label>
                   <textarea class="form-control" name="description" rows="5"><%= product.description || '' %></textarea>
                 </div>
               </div>
@@ -69,13 +69,13 @@
             <!-- Pricing -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-dollar-sign me-2"></i>Pricing</h3>
+                <h3 class="card-title"><i class="fas fa-dollar-sign me-2"></i><%= t('common.pricing') %></h3>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Base Price <span class="text-danger">*</span></label>
+                      <label class="form-label"><%= t('product:basePrice') %> <span class="text-danger">*</span></label>
                       <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" class="form-control" name="basePrice" value="<%= product.basePrice || 0 %>" step="0.01" min="0" required>
@@ -84,7 +84,7 @@
                   </div>
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Sale Price</label>
+                      <label class="form-label"><%= t('product:salePrice') %></label>
                       <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" class="form-control" name="salePrice" value="<%= product.salePrice || '' %>" step="0.01" min="0">
@@ -93,7 +93,7 @@
                   </div>
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Cost</label>
+                      <label class="form-label"><%= t('shared:common.cost') %></label>
                       <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" class="form-control" name="cost" value="<%= product.cost || '' %>" step="0.01" min="0">
@@ -107,13 +107,13 @@
             <!-- Dimensions -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-ruler-combined me-2"></i>Dimensions & Weight</h3>
+                <h3 class="card-title"><i class="fas fa-ruler-combined me-2"></i><%= t('product:dimensionsWeight') %></h3>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Weight</label>
+                      <label class="form-label"><%= t('shared:common.weight') %></label>
                       <div class="input-group">
                         <input type="number" class="form-control" name="weight" value="<%= product.weight || '' %>" step="0.01" min="0">
                         <select class="form-select" name="weightUnit" style="max-width: 100px;">
@@ -129,19 +129,19 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Length</label>
+                      <label class="form-label"><%= t('product:length') %></label>
                       <input type="number" class="form-control" name="length" value="<%= product.length || '' %>" step="0.01" min="0">
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Width</label>
+                      <label class="form-label"><%= t('product:width') %></label>
                       <input type="number" class="form-control" name="width" value="<%= product.width || '' %>" step="0.01" min="0">
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Height</label>
+                      <label class="form-label"><%= t('product:height') %></label>
                       <div class="input-group">
                         <input type="number" class="form-control" name="height" value="<%= product.height || '' %>" step="0.01" min="0">
                         <select class="form-select" name="dimensionUnit" style="max-width: 80px;">
@@ -159,34 +159,34 @@
             <!-- Order Limits & Policies -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i>Order Limits & Policies</h3>
+                <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i><%= t('product:orderLimits') %></h3>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Min Order Quantity</label>
+                      <label class="form-label"><%= t('product:minOrderQuantity') %></label>
                       <input type="number" class="form-control" name="minOrderQuantity" value="<%= product.minOrderQuantity || 1 %>" min="1" step="1">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Max Order Quantity</label>
-                      <input type="number" class="form-control" name="maxOrderQuantity" value="<%= product.maxOrderQuantity || '' %>" min="1" step="1" placeholder="No limit">
+                      <label class="form-label"><%= t('product:maxOrderQuantity') %></label>
+                      <input type="number" class="form-control" name="maxOrderQuantity" value="<%= product.maxOrderQuantity || '' %>" min="1" step="1" placeholder="<%= t('product:noLimit') %>">
                     </div>
                   </div>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Warranty</label>
+                  <label class="form-label"><%= t('product:warranty') %></label>
                   <textarea class="form-control" name="warranty" rows="2"><%= product.warranty || '' %></textarea>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Return Policy</label>
+                  <label class="form-label"><%= t('shared:common.returnPolicy') %></label>
                   <textarea class="form-control" name="returnPolicy" rows="2"><%= product.returnPolicy || '' %></textarea>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">External ID</label>
-                  <input type="text" class="form-control" name="externalId" value="<%= product.externalId || '' %>" placeholder="ID from external system">
+                  <label class="form-label"><%= t('shared:common.externalId') %></label>
+                  <input type="text" class="form-control" name="externalId" value="<%= product.externalId || '' %>" placeholder="<%= t('shared:common.externalId') %>">
                 </div>
               </div>
             </div>
@@ -195,7 +195,7 @@
             <% if ((productAttributes && productAttributes.length > 0) || (allAttributes && allAttributes.length > 0)) { %>
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-sliders-h me-2"></i>Product Attributes</h3>
+                <h3 class="card-title"><i class="fas fa-sliders-h me-2"></i><%= t('product:productAttributes') %></h3>
               </div>
               <div class="card-body">
                 <% if (productAttributes && productAttributes.length > 0) { %>
@@ -209,7 +209,7 @@
                     <% } else if (pa.attribute.type === 'checkbox') { %>
                       <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="attr_<%= pa.attributeId %>" value="true" <%= pa.valueBoolean ? 'checked' : '' %>>
-                        <label class="form-check-label">Enabled</label>
+                        <label class="form-check-label"><%= t('shared:common.enabled') %></label>
                       </div>
                     <% } else { %>
                       <input type="text" class="form-control" name="attr_<%= pa.attributeId %>" value="<%= pa.value || '' %>">
@@ -217,7 +217,7 @@
                   </div>
                   <% }); %>
                 <% } else { %>
-                  <p class="text-muted mb-0">No attributes assigned to this product. Use the Attributes management to add attributes.</p>
+                  <p class="text-muted mb-0"><%= t('product:noAttributes') %></p>
                 <% } %>
               </div>
             </div>
@@ -227,19 +227,19 @@
             <% if (product.variants && product.variants.length > 0) { %>
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-layer-group me-2"></i>Variants (<%= product.variants.length %>)</h3>
+                <h3 class="card-title"><i class="fas fa-layer-group me-2"></i><%= t('product:variants') %> (<%= product.variants.length %>)</h3>
               </div>
               <div class="card-body table-responsive p-0">
                 <table class="table table-sm table-hover mb-0">
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>SKU</th>
-                      <th>Barcode</th>
-                      <th>Attributes</th>
-                      <th class="text-right">Price</th>
-                      <th class="text-center">Stock</th>
-                      <th class="text-center">Status</th>
+                      <th><%= t('common.name') %></th>
+                      <th><%= t('shared:common.sku') %></th>
+                      <th><%= t('shared:common.barcode') %></th>
+                      <th><%= t('product:attribute') %></th>
+                      <th class="text-right"><%= t('common.price') %></th>
+                      <th class="text-center"><%= t('shared:common.stock') %></th>
+                      <th class="text-center"><%= t('common.status') %></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -247,7 +247,7 @@
                     <tr>
                       <td>
                         <strong><%= variant.name %></strong>
-                        <% if (variant.isDefault) { %><span class="badge badge-primary ml-1">Default</span><% } %>
+                        <% if (variant.isDefault) { %><span class="badge badge-primary ml-1"><%= t('shared:common.default') %></span><% } %>
                       </td>
                       <td><code><%= variant.sku %></code></td>
                       <td><code><%= variant.barcode || '-' %></code></td>
@@ -272,9 +272,9 @@
                       </td>
                       <td class="text-center">
                         <% if (variant.isActive) { %>
-                          <span class="badge badge-success">Active</span>
+                          <span class="badge badge-success"><%= t('common.active') %></span>
                         <% } else { %>
-                          <span class="badge badge-secondary">Inactive</span>
+                          <span class="badge badge-secondary"><%= t('common.inactive') %></span>
                         <% } %>
                       </td>
                     </tr>
@@ -283,7 +283,7 @@
                 </table>
               </div>
               <div class="card-footer text-muted">
-                <small>Variants are managed via the Product API. Use the business API endpoints to add, update, or remove variants.</small>
+                <small><%= t('common.variantsManagedViaApi') %></small>
               </div>
             </div>
             <% } %>
@@ -292,7 +292,7 @@
             <% if (product.images && product.images.length > 0) { %>
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-images me-2"></i>Images (<%= product.images.length %>)</h3>
+                <h3 class="card-title"><i class="fas fa-images me-2"></i><%= t('product:images') %> (<%= product.images.length %>)</h3>
               </div>
               <div class="card-body">
                 <div class="row">
@@ -301,7 +301,7 @@
                     <div class="position-relative">
                       <img src="<%= img.url %>" alt="<%= img.altText || product.name %>" class="img-fluid rounded" style="border: 1px solid #ddd;">
                       <% if (img.isPrimary) { %>
-                        <span class="badge badge-primary position-absolute" style="top: 5px; left: 20px;">Primary</span>
+                        <span class="badge badge-primary position-absolute" style="top: 5px; left: 20px;"><%= t('shared:common.primary') %></span>
                       <% } %>
                     </div>
                   </div>
@@ -309,7 +309,7 @@
                 </div>
               </div>
               <div class="card-footer text-muted">
-                <small>Images are managed via the Product API. Use the business API endpoints to add, remove, or reorder images.</small>
+                <small><%= t('common.imagesManagedViaApi') %></small>
               </div>
             </div>
             <% } %>
@@ -317,21 +317,21 @@
             <!-- SEO -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-search me-2"></i>SEO</h3>
+                <h3 class="card-title"><i class="fas fa-search me-2"></i><%= t('common.seo') %></h3>
               </div>
               <div class="card-body">
                 <div class="form-group mb-3">
-                  <label class="form-label">Meta Title</label>
+                  <label class="form-label"><%= t('shared:common.metaTitle') %></label>
                   <input type="text" class="form-control" name="metaTitle" value="<%= product.metaTitle || '' %>" maxlength="70">
-                  <small class="text-muted">Recommended: 50-60 characters</small>
+                  <small class="text-muted"><%= t('product:seoRecommendedTitle') %></small>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Meta Description</label>
+                  <label class="form-label"><%= t('shared:common.metaDescription') %></label>
                   <textarea class="form-control" name="metaDescription" rows="2" maxlength="160"><%= product.metaDescription || '' %></textarea>
-                  <small class="text-muted">Recommended: 150-160 characters</small>
+                  <small class="text-muted"><%= t('product:seoRecommendedDesc') %></small>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Meta Keywords</label>
+                  <label class="form-label"><%= t('product:metaKeywords') %></label>
                   <input type="text" class="form-control" name="metaKeywords" value="<%= product.metaKeywords || '' %>">
                 </div>
               </div>
@@ -343,42 +343,42 @@
             <!-- Publish -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-paper-plane me-2"></i>Publish</h3>
+                <h3 class="card-title"><i class="fas fa-paper-plane me-2"></i><%= t('product:publish') %></h3>
               </div>
               <div class="card-body">
                 <div class="d-flex justify-content-between mb-3">
-                  <span>Status:</span>
+                  <span><%= t('common.status') %>:</span>
                   <span class="badge bg-<%= product.status === 'active' ? 'success' : product.status === 'draft' ? 'warning' : 'secondary' %>">
                     <%= product.status %>
                   </span>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
-                  <span>Visibility:</span>
+                  <span><%= t('product:visibility') %>:</span>
                   <span class="badge bg-info"><%= product.visibility %></span>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Status</label>
+                  <label class="form-label"><%= t('common.status') %></label>
                   <select class="form-select" name="status">
-                    <option value="draft" <%= product.status === 'draft' ? 'selected' : '' %>>Draft</option>
-                    <option value="active" <%= product.status === 'active' ? 'selected' : '' %>>Active</option>
-                    <option value="inactive" <%= product.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
-                    <option value="archived" <%= product.status === 'archived' ? 'selected' : '' %>>Archived</option>
+                    <option value="draft" <%= product.status === 'draft' ? 'selected' : '' %>><%= t('shared:common.draft') %></option>
+                    <option value="active" <%= product.status === 'active' ? 'selected' : '' %>><%= t('common.active') %></option>
+                    <option value="inactive" <%= product.status === 'inactive' ? 'selected' : '' %>><%= t('common.inactive') %></option>
+                    <option value="archived" <%= product.status === 'archived' ? 'selected' : '' %>><%= t('product:archived') %></option>
                   </select>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Visibility</label>
+                  <label class="form-label"><%= t('product:visibility') %></label>
                   <select class="form-select" name="visibility">
-                    <option value="visible" <%= product.visibility === 'visible' ? 'selected' : '' %>>Visible</option>
-                    <option value="hidden" <%= product.visibility === 'hidden' ? 'selected' : '' %>>Hidden</option>
-                    <option value="catalog" <%= product.visibility === 'catalog' ? 'selected' : '' %>>Catalog Only</option>
-                    <option value="search" <%= product.visibility === 'search' ? 'selected' : '' %>>Search Only</option>
+                    <option value="visible" <%= product.visibility === 'visible' ? 'selected' : '' %>><%= t('product:visible') %></option>
+                    <option value="hidden" <%= product.visibility === 'hidden' ? 'selected' : '' %>><%= t('product:hidden') %></option>
+                    <option value="catalog" <%= product.visibility === 'catalog' ? 'selected' : '' %>><%= t('product:catalogOnly') %></option>
+                    <option value="search" <%= product.visibility === 'search' ? 'selected' : '' %>><%= t('product:searchOnly') %></option>
                   </select>
                 </div>
                 <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
-                  <i class="fas fa-save me-2"></i>Save Changes
+                  <i class="fas fa-save me-2"></i><%= t('shared:common.saveChanges') %>
                 </button>
                 <a href="/admin/products/<%= product.productId %>" class="btn btn-secondary w-100">
-                  <i class="fas fa-times me-2"></i>Cancel
+                  <i class="fas fa-times me-2"></i><%= t('common.cancel') %>
                 </a>
               </div>
             </div>
@@ -386,40 +386,31 @@
             <!-- Organization -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-folder me-2"></i>Organization</h3>
+                <h3 class="card-title"><i class="fas fa-folder me-2"></i><%= t('product:organization') %></h3>
               </div>
               <div class="card-body">
                 <div class="form-group mb-3">
-                  <label class="form-label">Product Type</label>
+                  <label class="form-label"><%= t('product:productType') %></label>
                   <select class="form-select" name="productTypeId">
-                    <option value="">Select Type</option>
+                    <option value=""><%= t('shared:common.selectType') %></option>
                     <% (productTypes || []).forEach(function(type) { %>
                     <option value="<%= type.productTypeId %>" <%= product.productTypeId === type.productTypeId ? 'selected' : '' %>><%= type.name %></option>
                     <% }); %>
                   </select>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Category</label>
+                  <label class="form-label"><%= t('common.category') %></label>
                   <select class="form-select" name="categoryId">
-                    <option value="">Select Category</option>
+                    <option value=""><%= t('product:selectCategory') %></option>
                     <% (categories || []).forEach(function(cat) { %>
                     <option value="<%= cat.productCategoryId %>" <%= product.categoryId === cat.productCategoryId ? 'selected' : '' %>><%= cat.name %></option>
                     <% }); %>
                   </select>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Brand</label>
-                  <select class="form-select" name="brandId">
-                    <option value="">Select Brand</option>
-                    <% (brands || []).forEach(function(brand) { %>
-                    <option value="<%= brand.brandId %>" <%= product.brandId === brand.brandId ? 'selected' : '' %>><%= brand.name %></option>
-                    <% }); %>
-                  </select>
-                </div>
-                <div class="form-group mb-3">
-                  <label class="form-label">Tags</label>
+                  <label class="form-label"><%= t('shared:common.tags') %></label>
                   <input type="text" class="form-control" name="tags" value="<%= (product.tags || []).join(', ') %>" placeholder="tag1, tag2, tag3">
-                  <small class="text-muted">Comma-separated</small>
+                  <small class="text-muted"><%= t('product:commaSeparated') %></small>
                 </div>
               </div>
             </div>
@@ -427,28 +418,28 @@
             <!-- Options -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-cog me-2"></i>Options</h3>
+                <h3 class="card-title"><i class="fas fa-cog me-2"></i><%= t('product:options') %></h3>
               </div>
               <div class="card-body">
                 <div class="form-check mb-2">
                   <input class="form-check-input" type="checkbox" name="isFeatured" value="true" id="isFeatured" <%= product.isFeatured ? 'checked' : '' %>>
-                  <label class="form-check-label" for="isFeatured">Featured Product</label>
+                  <label class="form-check-label" for="isFeatured"><%= t('product:featuredProduct') %></label>
                 </div>
                 <div class="form-check mb-2">
                   <input class="form-check-input" type="checkbox" name="isTaxable" value="true" id="isTaxable" <%= product.isTaxable !== false ? 'checked' : '' %>>
-                  <label class="form-check-label" for="isTaxable">Taxable</label>
+                  <label class="form-check-label" for="isTaxable"><%= t('product:taxable') %></label>
                 </div>
                 <div class="form-check mb-2">
                   <input class="form-check-input" type="checkbox" name="isVirtual" value="true" id="isVirtual" <%= product.isVirtual ? 'checked' : '' %>>
-                  <label class="form-check-label" for="isVirtual">Virtual Product</label>
+                  <label class="form-check-label" for="isVirtual"><%= t('product:virtualProduct') %></label>
                 </div>
                 <div class="form-check mb-2">
                   <input class="form-check-input" type="checkbox" name="isDownloadable" value="true" id="isDownloadable" <%= product.isDownloadable ? 'checked' : '' %>>
-                  <label class="form-check-label" for="isDownloadable">Downloadable</label>
+                  <label class="form-check-label" for="isDownloadable"><%= t('product:downloadable') %></label>
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" name="isSubscription" value="true" id="isSubscription" <%= product.isSubscription ? 'checked' : '' %>>
-                  <label class="form-check-label" for="isSubscription">Subscription Product</label>
+                  <label class="form-check-label" for="isSubscription"><%= t('product:subscriptionProduct') %></label>
                 </div>
               </div>
             </div>
@@ -456,11 +447,11 @@
             <!-- Danger Zone -->
             <div class="card card-danger">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-exclamation-triangle me-2"></i>Danger Zone</h3>
+                <h3 class="card-title"><i class="fas fa-exclamation-triangle me-2"></i><%= t('product:dangerZone') %></h3>
               </div>
               <div class="card-body">
                 <button type="button" class="btn btn-outline-danger w-100" onclick="deleteProduct()">
-                  <i class="fas fa-trash me-2"></i>Delete Product
+                  <i class="fas fa-trash me-2"></i><%= t('product:deleteProduct') %>
                 </button>
               </div>
             </div>
@@ -479,12 +470,12 @@
       const response = await fetch('/admin/products/<%= product.productId %>', { method: 'DELETE' });
       const result = await response.json();
       if (result.success) {
-        window.location.href = '/admin/products?success=Product deleted successfully';
+        window.location.href = '/admin/products?success=' + encodeURIComponent('<%= t("common.deletedSuccess") %>');
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   }
 </script>

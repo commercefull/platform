@@ -1,0 +1,23 @@
+{
+  "programMembers": "计划成员",
+  "pointsIssued": "已发放积分",
+  "pointsRedeemed": "兑换积分",
+  "programSettings": "程序设置",
+  "pointsPerDollar": "每消费一美元可赚取积分",
+  "pointsValue": "积分价值（每点 $）",
+  "minimumRedemption": "最低赎回额",
+  "addReward": "添加奖励",
+  "reward": "报酬",
+  "redemptions": "赎回",
+  "noRewards": "没有配置奖励。",
+  "recentTransactions": "最近交易",
+  "noTransactions": "还没有交易。",
+  "rewardName": "奖励名称",
+  "rewardType": "奖励类型",
+  "freeProduct": "免费产品",
+  "giftCard": "礼品卡",
+  "rewardValue": "奖励价值",
+  "confirmDeleteReward": "删除这个奖励吗？",
+  "analytics": "忠诚度计划分析",
+  "analyticsDescription": "积分分配、兑换率和等级升级。"
+}

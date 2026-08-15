@@ -36,6 +36,8 @@ function makeWebhookSignature(body: string, secret: string): string {
   return crypto.createHmac('sha256', secret).update(body).digest('hex');
 }
 
+const WEBHOOK_SECRET = process.env.PAYMENT_WEBHOOK_SECRET || 'test-secret-key';
+
 describe('Payment Integration Tests', () => {
   let client: AxiosInstance;
   let customerToken: string;
@@ -89,16 +91,15 @@ describe('Payment Integration Tests', () => {
   describe('Webhook signature validation', () => {
     it('REQ 4.1.1 — webhook with invalid X-Webhook-Signature → 400', async () => {
       const body = JSON.stringify({ type: 'payment_intent.succeeded', externalTransactionId: 'pi_test' });
-      const resp = await client.post('/payment/webhook', body, {
+      const resp = await client.post('/payment/webhook', Buffer.from(body), {
         headers: { 'Content-Type': 'application/json', 'X-Webhook-Signature': 'invalidsignature' },
       });
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(400);
     });
 
     it('REQ 4.1.2 — unknown externalTransactionId → 200 { received: true }', async () => {
       const body = JSON.stringify({ type: 'payment_intent.succeeded', externalTransactionId: 'pi_unknown_xyz_123' });
-      const secret = process.env.PAYMENT_WEBHOOK_SECRET || '';
-      const sig = secret ? makeWebhookSignature(body, secret) : 'test';
+      const sig = makeWebhookSignature(body, WEBHOOK_SECRET);
 
       const resp = await client.post('/payment/webhook', Buffer.from(body), {
         headers: { 'Content-Type': 'application/json', 'X-Webhook-Signature': sig },
@@ -137,8 +138,7 @@ describe('Payment Integration Tests', () => {
       });
 
       const body = JSON.stringify({ type: 'payment_intent.succeeded', externalTransactionId: extId });
-      const secret = process.env.PAYMENT_WEBHOOK_SECRET || '';
-      const sig = secret ? makeWebhookSignature(body, secret) : 'test';
+      const sig = makeWebhookSignature(body, WEBHOOK_SECRET);
 
       const resp = await client.post('/payment/webhook', Buffer.from(body), {
         headers: { 'Content-Type': 'application/json', 'X-Webhook-Signature': sig },
@@ -172,8 +172,7 @@ describe('Payment Integration Tests', () => {
       });
 
       const body = JSON.stringify({ type: 'payment_intent.payment_failed', externalTransactionId: extId });
-      const secret = process.env.PAYMENT_WEBHOOK_SECRET || '';
-      const sig = secret ? makeWebhookSignature(body, secret) : 'test';
+      const sig = makeWebhookSignature(body, WEBHOOK_SECRET);
 
       const resp = await client.post('/payment/webhook', Buffer.from(body), {
         headers: { 'Content-Type': 'application/json', 'X-Webhook-Signature': sig },

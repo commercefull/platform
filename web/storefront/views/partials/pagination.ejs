@@ -21,11 +21,11 @@
 <nav class="flex items-center justify-center space-x-2 mt-8">
   <% if (current == 1) { %>
   <span class="px-3 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
-    First
+    <%= t('storefront:first') %>
   </span>
   <% } else { %>
   <a class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors" href="<%= home %>page=1">
-    First
+    <%= t('storefront:first') %>
   </a>
   <% } %>
 
@@ -68,11 +68,11 @@
 
   <% if (current == pages) { %>
   <span class="px-3 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
-    Last
+    <%= t('storefront:last') %>
   </span>
   <% } else { %>
   <a class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors" href="<%= home %>page=<%= pages %>">
-    Last
+    <%= t('storefront:last') %>
   </a>
   <% } %>
 </nav>

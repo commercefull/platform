@@ -1,0 +1,13 @@
+{
+  "create": "Create Organization",
+  "view": "Organization Details",
+  "single": "Single",
+  "multiStore": "Multi-Store",
+  "marketplace": "Marketplace",
+  "settings": "Settings (JSON)",
+  "settingsHint": "Optional JSON object for organization-level settings.",
+  "slugHint": "Lowercase letters, numbers, and hyphens only.",
+  "noOrganizations": "No organizations found.",
+  "confirmDelete": "Delete this organization?",
+  "noStoresLinked": "No stores linked to this organization."
+}

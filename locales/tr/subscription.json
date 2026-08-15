@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Toplam Abonelikler",
+  "monthlyRecurringRevenue": "Aylık Düzenli Gelir",
+  "addPlan": "Plan Ekle",
+  "planName": "Plan Adı",
+  "subscribers": "Aboneler",
+  "noPlans": "Hiçbir abonelik planı yapılandırılmadı.",
+  "plan": "Planı",
+  "started": "Başlatıldı",
+  "nextBilling": "Sonraki Faturalandırma",
+  "noActiveSubscriptions": "Aktif abonelik yok.",
+  "addSubscriptionPlan": "Abonelik Planı Ekle",
+  "yearly": "Yıllık",
+  "trialDays": "Deneme Günleri",
+  "confirmDeletePlan": "Bu plan silinsin mi?",
+  "billingOverview": "Faturalandırmaya Genel Bakış",
+  "billingDescription": "Abonelik faturalandırmasını, başarısız ödemeleri ve yenileme işlemlerini yönetin."
+}

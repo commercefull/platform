@@ -2,7 +2,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Payment Reports</h2>
+      <h2 class="page-title"><%= t('payment:reports') %></h2>
     </div>
   </div>
 </div>
@@ -13,21 +13,21 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Reports</h3>
-        <span class="float-end text-muted"><%= (reports || []).length %> records</span>
+        <h3 class="card-title"><%= t('payment:reports') %></h3>
+        <span class="float-end text-muted"><%= (reports || []).length %> <%= t('common.records') %></span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Report ID</th>
-              <th>Merchant</th>
-              <th>Type</th>
-              <th>Currency</th>
-              <th>Total Amount</th>
-              <th>Transactions</th>
-              <th>Period</th>
-              <th>Actions</th>
+              <th><%= t('payment:reports') %> <%= t('common.id') %></th>
+              <th><%= t('shared:common.merchants') %></th>
+              <th><%= t('common.type') %></th>
+              <th><%= t('shared:common.currency') %></th>
+              <th><%= t('common.amount') %></th>
+              <th><%= t('shared:common.transactions') %></th>
+              <th><%= t('shared:common.period') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
@@ -44,12 +44,12 @@
                 <%= new Date(r.periodEnd).toLocaleDateString() %>
               </td>
               <td>
-                <a href="/admin/payments/reports/<%= r.paymentReportId %>" class="btn btn-sm btn-outline-info">View</a>
+                <a href="/admin/payments/reports/<%= r.paymentReportId %>" class="btn btn-sm btn-outline-info"><%= t('common.view') %></a>
               </td>
             </tr>
             <% }); %>
             <% if ((reports || []).length === 0) { %>
-            <tr><td colspan="8" class="text-center text-muted py-4">No reports found.</td></tr>
+            <tr><td colspan="8" class="text-center text-muted py-4"><%= t('payment:noReports') %></td></tr>
             <% } %>
           </tbody>
         </table>

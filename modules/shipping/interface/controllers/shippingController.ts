@@ -13,6 +13,11 @@ import shippingRateRepo, { CreateShippingRateInput, UpdateShippingRateInput } fr
 import packagingTypeRepo, { CreateShippingPackagingTypeInput, UpdateShippingPackagingTypeInput } from '../../infrastructure/repositories/packagingTypeRepo';
 import { CalculateShippingRatesCommand, calculateShippingRatesUseCase, ShippingAddress, OrderDetails } from '../../application/useCases/CalculateShippingRates';
 import { GetShippingMethodsQuery, getShippingMethodsUseCase } from '../../application/useCases/GetShippingMethods';
+import { createShippingLabelUseCase } from '../../application/useCases/CreateShippingLabel';
+import { getShippingLabelUseCase } from '../../application/useCases/GetShippingLabel';
+import { voidShippingLabelUseCase } from '../../application/useCases/VoidShippingLabel';
+import { trackShipmentUseCase } from '../../application/useCases/TrackShipment';
+import shippingLabelRepo from '../../infrastructure/repositories/shippingLabelRepo';
 
 // ============================================================================
 // Carriers
@@ -487,6 +492,105 @@ export const calculateRates = async (req: TypedRequest<Record<string, string>, u
       zone: result.zone,
       message: result.message,
     });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    res.status(500).json({ success: false, message: (error as Error).message });
+  }
+};
+
+// ============================================================================
+// Shipping Labels
+// ============================================================================
+
+interface CreateLabelBody {
+  shippingCarrierId: string;
+  carrierService?: string;
+  orderId?: string;
+  fulfillmentId?: string;
+  trackingNumber: string;
+  labelUrl?: string;
+  labelFormat?: string;
+  shipFromName?: string;
+  shipToName?: string;
+  shipToAddressLine1?: string;
+  shipToCity?: string;
+  shipToState?: string;
+  shipToPostalCode?: string;
+  shipToCountry?: string;
+  weight?: number;
+  dimensions?: Record<string, unknown>;
+  shippingCost?: number;
+}
+
+export const createLabel = async (req: TypedRequest<Record<string, string>, unknown, CreateLabelBody>, res: Response): Promise<void> => {
+  try {
+    const result = await createShippingLabelUseCase.execute(req.body);
+    res.status(201).json({ success: true, data: result });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    res.status(400).json({ success: false, message: (error as Error).message });
+  }
+};
+
+export const getLabel = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const result = await getShippingLabelUseCase.execute({
+      shippingLabelId: req.params.id,
+      trackingNumber: req.query.trackingNumber as string | undefined,
+    });
+    if (!result.found) {
+      res.status(404).json({ success: false, message: 'Shipping label not found' });
+      return;
+    }
+    res.status(200).json({ success: true, data: result.label });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    res.status(500).json({ success: false, message: (error as Error).message });
+  }
+};
+
+export const getLabelsByOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const labels = await shippingLabelRepo.findByOrderId(orderId);
+    res.status(200).json({ success: true, data: labels });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    res.status(500).json({ success: false, message: (error as Error).message });
+  }
+};
+
+export const voidLabel = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body as { reason?: string };
+    const result = await voidShippingLabelUseCase.execute({ shippingLabelId: id, reason });
+    if (!result.voided) {
+      res.status(404).json({ success: false, message: 'Label not found or already voided' });
+      return;
+    }
+    res.status(200).json({ success: true, data: result.label });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    res.status(400).json({ success: false, message: (error as Error).message });
+  }
+};
+
+// ============================================================================
+// Tracking
+// ============================================================================
+
+export const trackShipment = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const result = await trackShipmentUseCase.execute({
+      shippingLabelId: req.params.id,
+      trackingNumber: req.query.trackingNumber as string | undefined,
+    });
+    if (!result.found) {
+      res.status(404).json({ success: false, message: 'Tracking info not found' });
+      return;
+    }
+    res.status(200).json({ success: true, data: result.tracking });
   } catch (error: unknown) {
     logger.error('Error:', error);
     res.status(500).json({ success: false, message: (error as Error).message });

@@ -2,9 +2,9 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Dispute Detail</h2>
+      <h2 class="page-title"><%= t('payment:disputes') %></h2>
       <div class="text-muted mt-1">
-        <a href="/admin/payments/disputes">Disputes</a> &rsaquo; <%= dispute.paymentDisputeId.substring(0, 8) %>...
+        <a href="/admin/payments/disputes"><%= t('payment:disputes') %></a> &rsaquo; <%= dispute.paymentDisputeId.substring(0, 8) %>...
       </div>
     </div>
   </div>
@@ -19,42 +19,42 @@
       <div class="col-md-8">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Dispute Information</h3>
+            <h3 class="card-title"><%= t('payment:disputes') %></h3>
           </div>
           <div class="card-body">
             <dl class="row">
-              <dt class="col-sm-4">Dispute ID</dt>
+              <dt class="col-sm-4"><%= t('payment:disputeId') %></dt>
               <dd class="col-sm-8"><code><%= dispute.paymentDisputeId %></code></dd>
 
-              <dt class="col-sm-4">Payment ID</dt>
+              <dt class="col-sm-4"><%= t('shared:common.transactionId') %></dt>
               <dd class="col-sm-8"><code><%= dispute.paymentId %></code></dd>
 
-              <dt class="col-sm-4">Merchant ID</dt>
+              <dt class="col-sm-4"><%= t('shared:common.merchants') %> <%= t('common.id') %></dt>
               <dd class="col-sm-8"><%= dispute.merchantId %></dd>
 
-              <dt class="col-sm-4">External ID</dt>
+              <dt class="col-sm-4"><%= t('shared:common.externalId') %></dt>
               <dd class="col-sm-8"><%= dispute.externalDisputeId || '-' %></dd>
 
-              <dt class="col-sm-4">Amount</dt>
+              <dt class="col-sm-4"><%= t('common.amount') %></dt>
               <dd class="col-sm-8"><strong><%= dispute.currency %> <%= (dispute.amount || 0).toFixed(2) %></strong></dd>
 
-              <dt class="col-sm-4">Reason</dt>
+              <dt class="col-sm-4"><%= t('shared:common.reason') %></dt>
               <dd class="col-sm-8"><%= dispute.reason || '-' %></dd>
 
-              <dt class="col-sm-4">Status</dt>
+              <dt class="col-sm-4"><%= t('common.status') %></dt>
               <dd class="col-sm-8">
                 <span class="badge bg-<%= dispute.status === 'resolved' || dispute.status === 'won' ? 'success' : dispute.status === 'lost' ? 'danger' : dispute.status === 'open' ? 'warning' : 'info' %>">
                   <%= dispute.status %>
                 </span>
               </dd>
 
-              <dt class="col-sm-4">Due By</dt>
+              <dt class="col-sm-4"><%= t('common.dueDate') %></dt>
               <dd class="col-sm-8"><%= dispute.dueBy ? new Date(dispute.dueBy).toLocaleString() : '-' %></dd>
 
-              <dt class="col-sm-4">Resolved At</dt>
+              <dt class="col-sm-4"><%= t('shared:common.resolved') %></dt>
               <dd class="col-sm-8"><%= dispute.resolvedAt ? new Date(dispute.resolvedAt).toLocaleString() : '-' %></dd>
 
-              <dt class="col-sm-4">Created</dt>
+              <dt class="col-sm-4"><%= t('common.dateCreated') %></dt>
               <dd class="col-sm-8"><%= new Date(dispute.createdAt).toLocaleString() %></dd>
             </dl>
           </div>
@@ -65,27 +65,27 @@
       <div class="col-md-4">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Update Status</h3>
+            <h3 class="card-title"><%= t('common.update') %></h3>
           </div>
           <div class="card-body">
             <form method="POST" action="/admin/payments/disputes/<%= dispute.paymentDisputeId %>/status">
               <div class="mb-3">
-                <label class="form-label">New Status</label>
+                <label class="form-label"><%= t('common.status') %></label>
                 <select class="form-select" name="status" required>
-                  <option value="open" <%= dispute.status === 'open' ? 'selected' : '' %>>Open</option>
-                  <option value="under_review" <%= dispute.status === 'under_review' ? 'selected' : '' %>>Under Review</option>
-                  <option value="resolved" <%= dispute.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
-                  <option value="won" <%= dispute.status === 'won' ? 'selected' : '' %>>Won</option>
-                  <option value="lost" <%= dispute.status === 'lost' ? 'selected' : '' %>>Lost</option>
+                  <option value="open" <%= dispute.status === 'open' ? 'selected' : '' %>><%= t('shared:common.open') %></option>
+                  <option value="under_review" <%= dispute.status === 'under_review' ? 'selected' : '' %>><%= t('payment:disputeStatus') %></option>
+                  <option value="resolved" <%= dispute.status === 'resolved' ? 'selected' : '' %>><%= t('shared:common.resolved') %></option>
+                  <option value="won" <%= dispute.status === 'won' ? 'selected' : '' %>><%= t('payment:won') %></option>
+                  <option value="lost" <%= dispute.status === 'lost' ? 'selected' : '' %>><%= t('payment:lost') %></option>
                 </select>
               </div>
-              <button type="submit" class="btn btn-primary w-100">Update Status</button>
+              <button type="submit" class="btn btn-primary w-100"><%= t('common.update') %></button>
             </form>
           </div>
         </div>
 
         <div class="mt-3">
-          <a href="/admin/payments/disputes" class="btn btn-outline-secondary w-100">Back to Disputes</a>
+          <a href="/admin/payments/disputes" class="btn btn-outline-secondary w-100"><%= t('common.back') %></a>
         </div>
       </div>
     </div>

@@ -156,6 +156,22 @@ export const isCustomerLoggedIn = (req: Request, res: Response, next: NextFuncti
   res.redirect('/login');
 };
 
+export const optionalCustomerAuth = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, String(CUSTOMER_JWT_SECRET));
+      req.user = decoded as Express.User;
+    } catch {
+      // Invalid token — continue without user
+    }
+  }
+
+  next();
+};
+
 /**
  * Middleware to check if a customer is NOT logged in
  * Useful for pages that should only be accessible to non-authenticated users (signup, login)

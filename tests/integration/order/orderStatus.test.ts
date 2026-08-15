@@ -236,11 +236,7 @@ describe('Order Status Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
-      // May return 200 or 404 depending on order state
-      if (response.status !== 200) {
-        expect(response.status).toBe(404);
-        return;
-      }
+      expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('status');
       expect(response.data.data).toHaveProperty('paymentStatus');

@@ -7,16 +7,16 @@ import { TypedRequest } from 'libs/types/express';
 import { logger } from '../../../../libs/logger';
 
 import type { ReportType } from '../../domain/entities/ReportEntities';
-import type { CreateReportScheduleInput } from 'modules/reporting/application/useCases/CreateReportSchedule';
+import type { CreateReportScheduleInput } from '../../application/useCases/CreateReportSchedule';
 import type { UpdateReportScheduleParams } from '../../infrastructure/repositories/reportingRepo';
-import { GenerateReportUseCase } from 'modules/reporting/application/useCases/GenerateReport';
-import { GetReportTemplatesUseCase } from 'modules/reporting/application/useCases/GetReportTemplates';
-import { CreateReportScheduleUseCase } from 'modules/reporting/application/useCases/CreateReportSchedule';
-import { ListReportSchedulesUseCase } from 'modules/reporting/application/useCases/ListReportSchedules';
-import { GetReportScheduleUseCase } from 'modules/reporting/application/useCases/GetReportSchedule';
-import { UpdateReportScheduleUseCase } from 'modules/reporting/application/useCases/UpdateReportSchedule';
-import { DeleteReportScheduleUseCase } from 'modules/reporting/application/useCases/DeleteReportSchedule';
-import { ListReportExecutionsUseCase } from 'modules/reporting/application/useCases/ListReportExecutions';
+import { GenerateReportUseCase } from '../../application/useCases/GenerateReport';
+import { GetReportTemplatesUseCase } from '../../application/useCases/GetReportTemplates';
+import { CreateReportScheduleUseCase } from '../../application/useCases/CreateReportSchedule';
+import { ListReportSchedulesUseCase } from '../../application/useCases/ListReportSchedules';
+import { GetReportScheduleUseCase } from '../../application/useCases/GetReportSchedule';
+import { UpdateReportScheduleUseCase } from '../../application/useCases/UpdateReportSchedule';
+import { DeleteReportScheduleUseCase } from '../../application/useCases/DeleteReportSchedule';
+import { ListReportExecutionsUseCase } from '../../application/useCases/ListReportExecutions';
 
 interface GenerateReportBody {
   reportType: ReportType;

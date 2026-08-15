@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Totali i abonimeve",
+  "monthlyRecurringRevenue": "Të ardhurat e përsëritura mujore",
+  "addPlan": "Shto plan",
+  "planName": "Emri i planit",
+  "subscribers": "Abonentët",
+  "noPlans": "Asnjë plan abonimi nuk është konfiguruar.",
+  "plan": "Planifikoni",
+  "started": "Filloi",
+  "nextBilling": "Faturimi i radhës",
+  "noActiveSubscriptions": "Nuk ka abonime aktive.",
+  "addSubscriptionPlan": "Shto planin e abonimit",
+  "yearly": "vjetore",
+  "trialDays": "Ditët e provës",
+  "confirmDeletePlan": "Të fshihet ky plan?",
+  "billingOverview": "Përmbledhje e faturimit",
+  "billingDescription": "Menaxho faturimin e abonimit, pagesat e dështuara dhe përpunimin e rinovimit."
+}

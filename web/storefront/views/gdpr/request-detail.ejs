@@ -1,0 +1,186 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-3xl mx-auto">
+    <!-- Back Link -->
+    <a href="/gdpr/requests" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <%= t('storefront:backToRequests') %>
+    </a>
+
+    <!-- Flash Messages -->
+    <% if (successMsg) { %>
+      <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+        <%= successMsg %>
+      </div>
+    <% } %>
+    <% if (errorMsg) { %>
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+        <%= errorMsg %>
+      </div>
+    <% } %>
+
+    <!-- Request Header -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900"><%= requestTypeLabel %></h1>
+          <p class="text-sm text-gray-500 mt-1"><%= t('shared:common.requestId') %>: <%= request.gdprDataRequestId.substring(0, 8) %> &middot; <%= t('shared:common.dateCreated') %> <%= new Date(request.createdAt).toLocaleDateString() %></p>
+        </div>
+        <% const statusColors = { pending: 'bg-yellow-100 text-yellow-800', processing: 'bg-blue-100 text-blue-800', completed: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800', cancelled: 'bg-gray-100 text-gray-600', failed: 'bg-red-100 text-red-800' }; %>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= statusColors[request.status] || 'bg-gray-100 text-gray-800' %>">
+          <%= request.status %>
+        </span>
+      </div>
+
+      <!-- Status Timeline -->
+      <div class="border-t border-gray-200 pt-4">
+        <div class="flex items-center justify-between">
+          <% const steps = ['pending', 'processing', 'completed']; %>
+          <% const currentStepIndex = steps.indexOf(request.status); %>
+          <% const isRejected = request.status === 'rejected'; %>
+          <% const isCancelled = request.status === 'cancelled'; %>
+
+          <% steps.forEach(function(step, idx) { %>
+            <div class="flex items-center <%= idx < steps.length - 1 ? 'flex-1' : '' %>">
+              <div class="flex flex-col items-center">
+                <div class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium
+                  <%= isRejected || isCancelled ? 'bg-gray-100 text-gray-400' :
+                     idx <= currentStepIndex ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400' %>">
+                  <% if (idx < currentStepIndex) { %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <% } else { %>
+                    <%= idx + 1 %>
+                  <% } %>
+                </div>
+                <span class="text-xs text-gray-500 mt-1 capitalize"><%= step %></span>
+              </div>
+              <% if (idx < steps.length - 1) { %>
+                <div class="flex-1 h-0.5 mx-2 <%= idx < currentStepIndex ? 'bg-blue-600' : 'bg-gray-200' %>"></div>
+              <% } %>
+            </div>
+          <% }) %>
+        </div>
+        <% if (isRejected) { %>
+          <p class="text-center text-red-600 text-sm mt-3"><%= t('storefront:requestRejected') %></p>
+        <% } else if (isCancelled) { %>
+          <p class="text-center text-gray-500 text-sm mt-3"><%= t('storefront:requestCancelled') %></p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Request Details -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4"><%= t('storefront:requestDetails') %></h2>
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <div>
+          <dt class="text-gray-500"><%= t('shared:common.requestType') %></dt>
+          <dd class="text-gray-900 font-medium capitalize"><%= request.requestType %></dd>
+        </div>
+        <div>
+          <dt class="text-gray-500"><%= t('shared:common.status') %></dt>
+          <dd class="text-gray-900 font-medium capitalize"><%= request.status %></dd>
+        </div>
+        <div>
+          <dt class="text-gray-500"><%= t('shared:common.dateCreated') %></dt>
+          <dd class="text-gray-900 font-medium"><%= new Date(request.createdAt).toLocaleDateString() %></dd>
+        </div>
+        <div>
+          <dt class="text-gray-500"><%= t('shared:common.deadline') %></dt>
+          <dd class="text-gray-900 font-medium">
+            <%= new Date(request.deadlineAt).toLocaleDateString() %>
+            <% if (request.isOverdue) { %>
+              <span class="ml-1 text-red-600 text-xs font-normal"><%= t('storefront:overdue') %></span>
+            <% } %>
+          </dd>
+        </div>
+        <% if (request.identityVerified) { %>
+          <div>
+            <dt class="text-gray-500"><%= t('storefront:identityVerified') %></dt>
+            <dd class="text-gray-900 font-medium">
+              <%= t('shared:common.yes') %> — <%= new Date(request.verifiedAt).toLocaleDateString() %>
+            </dd>
+          </div>
+        <% } %>
+        <% if (request.processedAt) { %>
+          <div>
+            <dt class="text-gray-500"><%= t('shared:common.processed') %></dt>
+            <dd class="text-gray-900 font-medium"><%= new Date(request.processedAt).toLocaleDateString() %></dd>
+          </div>
+        <% } %>
+      </dl>
+
+      <% if (request.reason) { %>
+        <div class="mt-4 border-t border-gray-200 pt-4">
+          <h3 class="text-sm font-medium text-gray-700 mb-2"><%= t('shared:common.reason') %></h3>
+          <p class="text-gray-600 whitespace-pre-wrap"><%= request.reason %></p>
+        </div>
+      <% } %>
+
+      <% if (request.requestedData && request.requestedData.length > 0) { %>
+        <div class="mt-4 border-t border-gray-200 pt-4">
+          <h3 class="text-sm font-medium text-gray-700 mb-2"><%= t('storefront:requestedDataCategories') %></h3>
+          <div class="flex flex-wrap gap-2">
+            <% request.requestedData.forEach(function(cat) { %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700"><%= cat %></span>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+      <% if (request.rejectionReason) { %>
+        <div class="mt-4 border-t border-gray-200 pt-4">
+          <h3 class="text-sm font-medium text-red-700 mb-2"><%= t('storefront:rejectionReason') %></h3>
+          <p class="text-red-600 whitespace-pre-wrap"><%= request.rejectionReason %></p>
+        </div>
+      <% } %>
+
+      <% if (request.adminNotes) { %>
+        <div class="mt-4 border-t border-gray-200 pt-4">
+          <h3 class="text-sm font-medium text-gray-700 mb-2"><%= t('storefront:adminNotes') %></h3>
+          <p class="text-gray-600 whitespace-pre-wrap"><%= request.adminNotes %></p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Download Link (if completed export) -->
+    <% if (request.status === 'completed' && request.downloadUrl) { %>
+      <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-green-900"><%= t('storefront:dataReady') %></h3>
+            <p class="text-green-700 text-sm mt-1">
+              <%= t('storefront:downloadAvailableUntil') %> <%= request.downloadExpiresAt ? new Date(request.downloadExpiresAt).toLocaleDateString() : t('storefront:notAvailable') %>
+              <% if (request.downloadFormat) { %>
+                (<%= t('shared:common.format') %>: <%= request.downloadFormat.toUpperCase() %>)
+              <% } %>
+            </p>
+          </div>
+          <a href="<%= request.downloadUrl %>" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            <%= t('storefront:download') %>
+          </a>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Cancel Button (if pending or processing) -->
+    <% if (request.status === 'pending' || request.status === 'processing') { %>
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-2"><%= t('storefront:cancelRequest') %></h2>
+        <p class="text-gray-600 mb-4"><%= t('storefront:cancelRequestDesc') %></p>
+        <form method="POST" action="/gdpr/requests/<%= request.gdprDataRequestId %>/cancel" onsubmit="return confirm('<%= t('storefront:cancelRequestConfirm') %>');">
+          <button type="submit" class="inline-flex items-center px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors font-medium">
+            <%= t('storefront:cancelRequest') %>
+          </button>
+        </form>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

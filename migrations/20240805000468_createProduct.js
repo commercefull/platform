@@ -11,7 +11,6 @@ exports.up = function (knex) {
     t.string('name', 255).notNullable();
     t.string('slug', 255).notNullable().unique();
     t.text('description');
-    t.uuid('brandId').references('productBrandId').inTable('productBrand');
     t.enu('type', ['simple', 'configurable', 'grouped', 'virtual', 'downloadable', 'bundle', 'subscription'])
       .notNullable()
       .defaultTo('simple');
@@ -88,7 +87,6 @@ exports.up = function (knex) {
     t.index('sku');
     t.index('name');
     t.index('slug');
-    t.index('brandId');
     t.index('type');
     t.index('status');
     t.index('visibility');

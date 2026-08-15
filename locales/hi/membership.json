@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "सदस्यता",
+  "totalMembers": "कुल सदस्य",
+  "activeMembers": "सक्रिय सदस्य",
+  "membershipTiers": "सदस्यता स्तर",
+  "expiringThisMonth": "इस माह समाप्त हो रहा है",
+  "addTier": "टियर जोड़ें",
+  "members": "सदस्यों",
+  "noTiers": "कोई सदस्यता स्तर कॉन्फ़िगर नहीं किया गया.",
+  "recentMembers": "हाल के सदस्य",
+  "tier": "टीयर",
+  "noMembers": "अभी तक कोई सदस्य नहीं.",
+  "addMembershipTier": "सदस्यता स्तर जोड़ें",
+  "tierName": "स्तर का नाम",
+  "billingPeriod": "बिलिंग अवधि",
+  "lifetime": "जीवनभर",
+  "benefitsOnePerLine": "लाभ (प्रति पंक्ति एक)",
+  "setAsDefault": "डिफ़ॉल्ट स्तर के रूप में सेट करें",
+  "createTier": "टियर बनाएं",
+  "confirmDeleteTier": "यह स्तर हटाएं?",
+  "analytics": "सदस्यता विश्लेषण",
+  "analyticsDescription": "सक्रिय सदस्य, राजस्व, मंथन दर और स्तरीय वितरण।"
+}

@@ -11,16 +11,19 @@ exports.seed = async function (knex) {
   const TEST_VARIANT_2_ID = '20000000-0000-0000-0000-000000000002';
 
   // Get required references
-  const genericBrand = await knex('productBrand').where({ slug: 'generic' }).first('productBrandId');
-  const acmeBrand = await knex('productBrand').where({ slug: 'acme-corporation' }).first('productBrandId');
   const electronicsCategory = await knex('productCategory').where({ slug: 'electronics' }).first('productCategoryId');
   const fashionCategory = await knex('productCategory').where({ slug: 'fashion' }).first('productCategoryId');
 
-  // Clean up existing test data
-  await knex('productVariant').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
-  await knex('productCategoryMap').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
-  await knex('productImage').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
-  await knex('product').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
+  // Check if products already exist
+  const existingProducts = await knex('product').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).select('productId');
+  const existingIds = existingProducts.map(p => p.productId);
+
+  // Only delete and re-insert variants/images if products don't exist yet
+  if (existingIds.length === 0) {
+    await knex('productVariant').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
+    await knex('productCategoryMap').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
+    await knex('productImage').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
+  }
 
   // Insert test products
   await knex('product').insert([
@@ -31,7 +34,6 @@ exports.seed = async function (knex) {
       slug: 'test-product-one',
       description: 'This is the first test product for integration testing.',
       shortDescription: 'First test product',
-      brandId: genericBrand?.productBrandId || null,
       type: 'simple',
       status: 'active',
       visibility: 'visible',
@@ -63,7 +65,6 @@ exports.seed = async function (knex) {
       slug: 'test-product-two',
       description: 'This is the second test product with variants.',
       shortDescription: 'Second test product with variants',
-      brandId: acmeBrand?.productBrandId || genericBrand?.productBrandId || null,
       type: 'configurable',
       status: 'active',
       visibility: 'visible',
@@ -96,7 +97,6 @@ exports.seed = async function (knex) {
       slug: 'test-virtual-product',
       description: 'This is a virtual/downloadable test product.',
       shortDescription: 'Virtual test product',
-      brandId: null,
       type: 'virtual',
       status: 'draft',
       visibility: 'not_visible',
@@ -121,14 +121,14 @@ exports.seed = async function (knex) {
       isDownloadable: true,
       isSubscription: false,
     },
-  ]);
+  ]).onConflict('productId').ignore();
 
   // Link products to categories
   if (electronicsCategory) {
     await knex('productCategoryMap').insert([
       { productId: TEST_PRODUCT_1_ID, productCategoryId: electronicsCategory.productCategoryId, isPrimary: true },
       { productId: TEST_PRODUCT_2_ID, productCategoryId: electronicsCategory.productCategoryId, isPrimary: true },
-    ]);
+    ]).onConflict().ignore();
   }
 
   if (fashionCategory) {
@@ -168,5 +168,5 @@ exports.seed = async function (knex) {
       barcode: '1234567890124',
       optionValues: JSON.stringify({ color: 'blue', size: 'l' }),
     },
-  ]);
+  ]).onConflict('productVariantId').ignore();
 };

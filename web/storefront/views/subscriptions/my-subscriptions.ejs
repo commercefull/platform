@@ -5,14 +5,14 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900">My Subscriptions</h1>
-        <p class="mt-2 text-sm text-gray-600">Manage your active subscriptions</p>
+        <h1 class="text-3xl font-bold text-gray-900"><%= t('storefront:mySubscriptions') %></h1>
+        <p class="mt-2 text-sm text-gray-600"><%= t('storefront:manageSubscriptions') %></p>
       </div>
       <a href="/subscriptions/plans" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
-        Browse Plans
+        <%= t('storefront:browsePlans') %>
       </a>
     </div>
 
@@ -24,7 +24,7 @@
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h3 class="text-lg font-semibold text-gray-900"><%= sub.planName || sub.name || 'Subscription' %></h3>
-                  <p class="text-sm text-gray-600">Started <%= sub.startDate ? new Date(sub.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' %></p>
+                  <p class="text-sm text-gray-600"><%= t('storefront:started', { date: sub.startDate ? new Date(sub.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' }) %></p>
                 </div>
                 <div class="flex items-center space-x-3">
                   <%
@@ -45,22 +45,22 @@
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div class="flex items-center space-x-6 text-sm text-gray-600">
                   <div>
-                    <span class="font-medium">Next billing:</span>
-                    <%= sub.nextBillingDate ? new Date(sub.nextBillingDate).toLocaleDateString() : 'N/A' %>
+                    <span class="font-medium"><%= t('storefront:nextBilling') %></span>
+                    <%= sub.nextBillingDate ? new Date(sub.nextBillingDate).toLocaleDateString() : t('storefront:notAvailable') %>
                   </div>
                   <div>
-                    <span class="font-medium">Period ends:</span>
-                    <%= sub.currentPeriodEnd ? new Date(sub.currentPeriodEnd).toLocaleDateString() : 'N/A' %>
+                    <span class="font-medium"><%= t('storefront:periodEnds') %></span>
+                    <%= sub.currentPeriodEnd ? new Date(sub.currentPeriodEnd).toLocaleDateString() : t('storefront:notAvailable') %>
                   </div>
                 </div>
                 <div class="flex gap-3">
                   <a href="/subscriptions/<%= sub.subscriptionId %>" class="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm">
-                    View Details
+                    <%= t('shared:common.viewDetails') %>
                   </a>
                   <% if (sub.status === 'active') { %>
-                    <form method="POST" action="/subscriptions/<%= sub.subscriptionId %>/cancel" onsubmit="return confirm('Are you sure you want to cancel this subscription?')">
+                    <form method="POST" action="/subscriptions/<%= sub.subscriptionId %>/cancel" onsubmit="return confirm('<%= t('storefront:cancelSubscriptionConfirm') %>')">
                       <button type="submit" class="inline-flex items-center px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm">
-                        Cancel
+                        <%= t('shared:common.cancel') %>
                       </button>
                     </form>
                   <% } %>
@@ -77,10 +77,10 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No active subscriptions</h3>
-        <p class="text-gray-600 mb-6">You don't have any subscriptions yet. Browse our plans to get started.</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-2"><%= t('storefront:noActiveSubscriptions') %></h3>
+        <p class="text-gray-600 mb-6"><%= t('storefront:noSubscriptionsDesc') %></p>
         <a href="/subscriptions/plans" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-          Browse Plans
+            <%= t('storefront:browsePlans') %>
         </a>
       </div>
     <% } %>

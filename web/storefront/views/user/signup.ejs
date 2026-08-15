@@ -9,9 +9,9 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
         </svg>
       </div>
-      <h2 class="mt-6 text-3xl font-bold text-gray-900">Create your account</h2>
+      <h2 class="mt-6 text-3xl font-bold text-gray-900"><%= t('storefront:createAccount') %></h2>
       <p class="mt-2 text-sm text-gray-600">
-        Join thousands of satisfied customers shopping with us
+        <%= t('storefront:joinCustomers') %>
       </p>
     </div>
 
@@ -49,7 +49,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
-              First Name
+              <%= t('shared:common.firstName') %>
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -65,14 +65,14 @@
                 required
                 value="<%= typeof firstName !== 'undefined' ? firstName : '' %>"
                 class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:z-10 sm:text-sm"
-                placeholder="Enter your first name"
+                placeholder="<%= t('storefront:enterFirstName') %>"
               >
             </div>
           </div>
 
           <div>
             <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
-              Last Name
+              <%= t('shared:common.lastName') %>
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -88,7 +88,7 @@
                 required
                 value="<%= typeof lastName !== 'undefined' ? lastName : '' %>"
                 class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:z-10 sm:text-sm"
-                placeholder="Enter your last name"
+                placeholder="<%= t('storefront:enterLastName') %>"
               >
             </div>
           </div>
@@ -97,7 +97,7 @@
         <!-- Email Field -->
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-            Email address
+            <%= t('storefront:emailAddress') %>
           </label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -113,17 +113,17 @@
               required
               value="<%= typeof email !== 'undefined' ? email : '' %>"
               class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:z-10 sm:text-sm"
-              placeholder="Enter your email"
+              placeholder="<%= t('storefront:enterEmail') %>"
             >
           </div>
-          <p class="mt-1 text-sm text-gray-500">We'll never share your email with anyone else.</p>
+          <p class="mt-1 text-sm text-gray-500"><%= t('storefront:emailPrivacyNote') %></p>
         </div>
 
         <!-- Password Fields -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-              Password
+              <%= t('shared:common.password') %>
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -140,17 +140,17 @@
                 minlength="8"
                 pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                 class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:z-10 sm:text-sm"
-                placeholder="Create a password"
+                placeholder="<%= t('storefront:createPassword') %>"
               >
             </div>
             <p class="mt-1 text-sm text-gray-500">
-              At least 8 characters with uppercase, lowercase, and number.
+              <%= t('storefront:passwordRequirements') %>
             </p>
           </div>
 
           <div>
             <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
-              Confirm Password
+              <%= t('shared:common.confirmPassword') %>
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -165,7 +165,7 @@
                 autocomplete="new-password"
                 required
                 class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:z-10 sm:text-sm"
-                placeholder="Confirm your password"
+                placeholder="<%= t('storefront:confirmYourPassword') %>"
               >
             </div>
           </div>
@@ -185,9 +185,9 @@
             </div>
             <div class="ml-3 text-sm">
               <label for="acceptsMarketing" class="font-medium text-gray-700">
-                Marketing emails
+                <%= t('storefront:marketingEmails') %>
               </label>
-              <p class="text-gray-500">Receive updates about new products and special offers.</p>
+              <p class="text-gray-500"><%= t('storefront:marketingEmailsDesc') %></p>
             </div>
           </div>
 
@@ -204,9 +204,9 @@
             </div>
             <div class="ml-3 text-sm">
               <label for="acceptsAnalytics" class="font-medium text-gray-700">
-                Analytics tracking
+                <%= t('storefront:analyticsTracking') %>
               </label>
-              <p class="text-gray-500">Help us improve your experience with anonymous usage data.</p>
+              <p class="text-gray-500"><%= t('storefront:analyticsTrackingDesc') %></p>
             </div>
           </div>
         </div>
@@ -222,15 +222,15 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
               </svg>
             </span>
-            Create Account
+            <%= t('storefront:createAccount') %>
           </button>
         </div>
 
         <!-- Sign In Link -->
         <div class="text-center">
-          <span class="text-sm text-gray-600">Already have an account?</span>
+          <span class="text-sm text-gray-600"><%= t('storefront:alreadyHaveAccount') %></span>
           <a href="/signin" class="text-sm font-medium text-green-600 hover:text-green-500 transition-colors ml-1">
-            Sign in here
+            <%= t('storefront:signInHere') %>
           </a>
         </div>
       </form>

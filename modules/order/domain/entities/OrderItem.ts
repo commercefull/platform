@@ -87,7 +87,7 @@ export class OrderItem {
       quantity: props.quantity,
       unitPrice: props.unitPrice,
       unitCost: props.unitCost,
-      discountedUnitPrice: props.discountedUnitPrice,
+      discountedUnitPrice: props.discountedUnitPrice || props.unitPrice,
       lineTotal,
       discountTotal,
       taxTotal: taxAmount,

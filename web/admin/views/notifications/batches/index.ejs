@@ -9,29 +9,29 @@
     <%- include("../../partials/alerts") %>
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Notification Batches</h3>
+        <h3 class="card-title"><%= t('notifications:notificationBatches') %></h3>
         <div class="card-options">
-          <span class="badge bg-secondary"><%= total %> total</span>
+          <span class="badge bg-secondary"><%= total %> <%= t('notifications:totalRecords') %></span>
         </div>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover text-nowrap">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Channel</th>
-              <th>Status</th>
-              <th>Total</th>
-              <th>Sent</th>
-              <th>Failed</th>
-              <th>Created</th>
-              <th>Actions</th>
+              <th><%= t('common.name') %></th>
+              <th><%= t('notifications:channels') %></th>
+              <th><%= t('common.status') %></th>
+              <th><%= t('common.total') %></th>
+              <th><%= t('shared:common.sent') %></th>
+              <th><%= t('shared:common.failed') %></th>
+              <th><%= t('shared:common.dateCreated') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
             <% if (!batches || batches.length === 0) { %>
               <tr>
-                <td colspan="8" class="text-center py-4"><em>No notification batches found.</em></td>
+                <td colspan="8" class="text-center py-4"><em><%= t('notifications:noBatches') %></em></td>
               </tr>
             <% } else { %>
               <% batches.forEach(batch => { %>
@@ -48,7 +48,7 @@
                   <td><%= batch.createdAt ? new Date(batch.createdAt).toLocaleString() : '-' %></td>
                   <td>
                     <a href="/admin/notifications/batches/<%= batch.notificationBatchId %>" class="btn btn-sm btn-info">
-                      <i class="ti ti-eye"></i> View
+                      <i class="ti ti-eye"></i> <%= t('common.view') %>
                     </a>
                   </td>
                 </tr>

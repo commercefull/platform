@@ -98,6 +98,15 @@ export class SupplierReceivingRecordRepo {
     );
   }
 
+  async findAll(limit = 100): Promise<SupplierReceivingRecord[]> {
+    return (
+      (await query<SupplierReceivingRecord[]>(
+        `SELECT * FROM "supplierReceivingRecord" ORDER BY "receivedDate" DESC LIMIT $1`,
+        [limit],
+      )) || []
+    );
+  }
+
   async findWithDiscrepancies(): Promise<SupplierReceivingRecord[]> {
     return (
       (await query<SupplierReceivingRecord[]>(

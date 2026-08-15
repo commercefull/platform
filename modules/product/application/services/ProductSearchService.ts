@@ -12,8 +12,6 @@ export interface ProductSearchFilters {
   // Basic filters
   categoryId?: string;
   categoryIds?: string[];
-  brandId?: string;
-  brandIds?: string[];
   productTypeId?: string;
 
   // Price filters
@@ -65,7 +63,6 @@ export interface ProductSearchResult {
 
 export interface SearchFacets {
   categories: FacetValue[];
-  brands: FacetValue[];
   priceRanges: PriceRangeFacet[];
   attributes: AttributeFacet[];
 }
@@ -188,17 +185,6 @@ export class ProductSearchService {
       joins.push(`JOIN "${this.categoryMapTable}" pcm ON pcm."productId" = p."productId"`);
       conditions.push(`pcm."productCategoryId" = ANY($${paramIndex})`);
       params.push(filters.categoryIds);
-      paramIndex++;
-    }
-
-    // Brand filter
-    if (filters.brandId) {
-      conditions.push(`p."brandId" = $${paramIndex}`);
-      params.push(filters.brandId);
-      paramIndex++;
-    } else if (filters.brandIds && filters.brandIds.length > 0) {
-      conditions.push(`p."brandId" = ANY($${paramIndex})`);
-      params.push(filters.brandIds);
       paramIndex++;
     }
 
@@ -429,9 +415,6 @@ export class ProductSearchService {
     // Get category facets
     const categoryFacets = await this.getCategoryFacets(filters);
 
-    // Get brand facets
-    const brandFacets = await this.getBrandFacets(filters);
-
     // Get price range facets
     const priceRangeFacets = await this.getPriceRangeFacets(filters);
 
@@ -440,7 +423,6 @@ export class ProductSearchService {
 
     return {
       categories: categoryFacets,
-      brands: brandFacets,
       priceRanges: priceRangeFacets,
       attributes: attributeFacets,
     };
@@ -457,28 +439,6 @@ export class ProductSearchService {
       JOIN "${Table.ProductCategory}" pc ON pc."productCategoryId" = pcm."productCategoryId"
       WHERE p."deletedAt" IS NULL AND p."status" = 'active'
       GROUP BY pc."productCategoryId", pc."name"
-      ORDER BY count DESC
-      LIMIT 20
-    `;
-
-    const results = await query<Array<{ id: string; name: string; count: string }>>(sql);
-    return (results || []).map(r => ({
-      id: r.id,
-      name: r.name,
-      count: parseInt(r.count, 10),
-    }));
-  }
-
-  private async getBrandFacets(_filters: ProductSearchFilters): Promise<FacetValue[]> {
-    const sql = `
-      SELECT 
-        pb."productBrandId" as id,
-        pb."name",
-        COUNT(DISTINCT p."productId") as count
-      FROM "${this.productTable}" p
-      JOIN "${Table.ProductBrand}" pb ON pb."productBrandId" = p."brandId"
-      WHERE p."deletedAt" IS NULL AND p."status" = 'active' AND p."brandId" IS NOT NULL
-      GROUP BY pb."productBrandId", pb."name"
       ORDER BY count DESC
       LIMIT 20
     `;

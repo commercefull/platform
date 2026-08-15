@@ -12,6 +12,7 @@ import OrderRepo from '../../../order/infrastructure/repositories/OrderRepositor
 import PaymentRepo from '../../../payment/infrastructure/repositories/PaymentRepository';
 import { CalculateShippingRatesUseCase, CalculateShippingRatesCommand } from '../../../shipping/application/useCases/CalculateShippingRates';
 import { getLocations as getAllPickupLocations, getLocation as getPickupLocation, findNearestLocations as findNearestPickupLocations } from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import InventoryRepo from '../../../inventory/infrastructure/repositories/inventoryRepo';
 import {
   InitiateCheckoutCommand,
   InitiateCheckoutUseCase,
@@ -24,6 +25,10 @@ import {
   SetShippingMethodUseCase,
   SetPaymentMethodCommand,
   SetPaymentMethodUseCase,
+  SetFulfillmentMethodCommand,
+  SetFulfillmentMethodUseCase,
+  CheckLocalDeliveryEligibilityUseCase,
+  GetPickupSlotsUseCase,
   ApplyCouponCommand,
   ApplyCouponUseCase,
   RemoveCouponCommand,
@@ -102,6 +107,10 @@ interface PaymentMethodBody {
   paymentMethodId: string;
 }
 
+interface FulfillmentMethodBody {
+  fulfillmentType: 'shipping' | 'pickup' | 'local_delivery' | 'digital';
+}
+
 interface CouponBody {
   couponCode: string;
 }
@@ -117,7 +126,7 @@ interface CouponBody {
 export const initiateCheckout = async (req: TypedRequest<Record<string, string>, unknown, InitiateCheckoutBody>, res: Response): Promise<void> => {
   try {
     const { basketId, guestEmail } = req.body;
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || (req.user as Record<string, unknown> | undefined)?.id as string | undefined;
 
     if (!basketId) {
       respondError(req, res, 'Basket ID is required', 400, 'checkout/error');
@@ -132,7 +141,12 @@ export const initiateCheckout = async (req: TypedRequest<Record<string, string>,
   } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, (error as Error).message || 'Failed to initiate checkout', 500, 'checkout/error');
+    const message = (error as Error).message || 'Failed to initiate checkout';
+    const isNotFound = message.includes('Basket not found') || message.includes('not found');
+    const isEmpty = message.includes('empty basket');
+
+    const statusCode = isNotFound ? 404 : isEmpty ? 400 : 500;
+    respondError(req, res, message, statusCode, 'checkout/error');
   }
 };
 
@@ -182,7 +196,7 @@ export const setShippingAddress = async (req: TypedRequest<Record<string, string
       phone,
     );
 
-    const useCase = new SetShippingAddressUseCase(CheckoutRepo);
+    const useCase = new SetShippingAddressUseCase(CheckoutRepo, BasketRepo);
     const checkout = await useCase.execute(command);
 
     respond(req, res, checkout as unknown as ResponseData, 200, 'checkout/shipping');
@@ -316,8 +330,8 @@ export const setPickupLocation = async (req: TypedRequest<Record<string, string>
       return;
     }
 
+    session.setFulfillmentType('pickup');
     session.updateMetadata({
-      fulfillmentType: 'pickup',
       pickupLocationId: location.pickupLocationId,
       pickupLocationName: location.name,
       pickupStoreId: location.storeId,
@@ -325,12 +339,67 @@ export const setPickupLocation = async (req: TypedRequest<Record<string, string>
       pickupInstructions: location.instructions,
       pickupPrepareTime: location.prepareTimeMinutes,
     });
+
+    // Validate inventory at pickup location for basket items
+    const inventoryWarnings: Array<{ productId: string; available: number; requested: number }> = [];
+    try {
+      const basket = await BasketRepo.findById(session.basketId);
+      if (basket) {
+        const basketItems = await BasketRepo.getItems(session.basketId);
+        for (const item of basketItems) {
+          const availability = await InventoryRepo.checkProductAvailability(item.productId, item.productVariantId, item.quantity);
+          if (!availability.available) {
+            inventoryWarnings.push({
+              productId: item.productId,
+              available: availability.totalAvailable,
+              requested: item.quantity,
+            });
+          }
+        }
+      }
+    } catch {
+      // Inventory check is best-effort
+    }
+
+    if (inventoryWarnings.length > 0) {
+      session.updateMetadata({ pickupInventoryWarnings: inventoryWarnings });
+    }
+
     await CheckoutRepo.save(session);
 
-    respond(req, res, session as unknown as ResponseData, 200, 'checkout/view');
+    const responseData = session as unknown as ResponseData;
+    if (inventoryWarnings.length > 0) {
+      (responseData as Record<string, unknown>).inventoryWarnings = inventoryWarnings;
+    }
+    respond(req, res, responseData, 200, 'checkout/view');
   } catch (error: unknown) {
     logger.error('Error:', error);
     respondError(req, res, (error as Error).message || 'Failed to set pickup location', 500, 'checkout/error');
+  }
+};
+
+/**
+ * Set fulfillment method (shipping, pickup, local_delivery, digital)
+ * PUT /checkout/:checkoutId/fulfillment-method
+ */
+export const setFulfillmentMethod = async (req: TypedRequest<Record<string, string>, unknown, FulfillmentMethodBody>, res: Response): Promise<void> => {
+  try {
+    const { checkoutId } = req.params;
+    const { fulfillmentType } = req.body;
+
+    if (!fulfillmentType) {
+      respondError(req, res, 'fulfillmentType is required', 400, 'checkout/error');
+      return;
+    }
+
+    const command = new SetFulfillmentMethodCommand(checkoutId, fulfillmentType);
+    const useCase = new SetFulfillmentMethodUseCase(CheckoutRepo);
+    const checkout = await useCase.execute(command);
+
+    respond(req, res, checkout as unknown as ResponseData, 200, 'checkout/view');
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    respondError(req, res, (error as Error).message || 'Failed to set fulfillment method', 500, 'checkout/error');
   }
 };
 
@@ -463,7 +532,12 @@ export const completeCheckout = async (req: TypedRequest, res: Response): Promis
   } catch (error: unknown) {
     logger.error('Error:', error);
 
-    respondError(req, res, (error as Error).message || 'Failed to complete checkout', 500, 'checkout/error');
+    const message = (error as Error).message || 'Failed to complete checkout';
+    const isNotFound = message.includes('not found');
+    const isBadRequest = message.includes('payment has not been confirmed') || message.includes('shipping address') || message.includes('shipping method') || message.includes('payment method');
+
+    const statusCode = isNotFound ? 404 : isBadRequest ? 400 : 500;
+    respondError(req, res, message, statusCode, 'checkout/error');
   }
 };
 
@@ -529,7 +603,7 @@ export const setBillingAddress = async (req: TypedRequest<Record<string, string>
 export const createPaymentIntent = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || (req.user as Record<string, unknown> | undefined)?.id as string | undefined;
 
     const command = new CreatePaymentIntentCommand(checkoutId, customerId);
     const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, BasketRepo, OrderRepo, PaymentRepo);
@@ -545,5 +619,193 @@ export const createPaymentIntent = async (req: TypedRequest, res: Response): Pro
 
     const statusCode = isNotFound ? 404 : isNotReady ? 400 : isNoGateway ? 503 : 500;
     respondError(req, res, (error as Error).message || 'Failed to create payment intent', statusCode, 'checkout/error');
+  }
+};
+
+/**
+ * Get local delivery options for a checkout session
+ * GET /checkout/:checkoutId/local-delivery-options
+ */
+export const getLocalDeliveryOptions = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { checkoutId } = req.params;
+
+    const session = await CheckoutRepo.findById(checkoutId);
+    if (!session) {
+      respondError(req, res, 'Checkout session not found', 404, 'checkout/error');
+      return;
+    }
+
+    const address = session.shippingAddress
+      ? {
+          latitude: undefined as number | undefined,
+          longitude: undefined as number | undefined,
+          postalCode: session.shippingAddress.postalCode,
+          city: session.shippingAddress.city,
+          country: session.shippingAddress.country,
+        }
+      : undefined;
+
+    if (!address) {
+      respondError(req, res, 'Shipping address must be set first', 400, 'checkout/error');
+      return;
+    }
+
+    const useCase = new CheckLocalDeliveryEligibilityUseCase();
+    const result = await useCase.execute(address);
+
+    respond(req, res, result as unknown as ResponseData, 200, 'checkout/local-delivery-options');
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    respondError(req, res, (error as Error).message || 'Failed to get local delivery options', 500, 'checkout/error');
+  }
+};
+
+/**
+ * Get all available fulfillment options for a checkout session
+ * GET /checkout/:checkoutId/fulfillment-options
+ */
+export const getFulfillmentOptions = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { checkoutId } = req.params;
+
+    const session = await CheckoutRepo.findById(checkoutId);
+    if (!session) {
+      respondError(req, res, 'Checkout session not found', 404, 'checkout/error');
+      return;
+    }
+
+    // Fetch basket to determine item types
+    let hasDigitalItems = false;
+    let hasPhysicalItems = false;
+    try {
+      const basket = await BasketRepo.findById(session.basketId);
+      if (basket) {
+        const items = await BasketRepo.getItems(session.basketId);
+        hasDigitalItems = items.some(item => item.itemType === 'digital');
+        hasPhysicalItems = items.some(item => item.itemType === 'physical');
+      }
+    } catch {
+      // Best-effort
+    }
+
+    const options: Record<string, unknown> = {
+      fulfillmentTypes: [] as string[],
+      shippingMethods: [] as unknown[],
+      pickupLocations: [] as unknown[],
+      localDeliveryOptions: [] as unknown[],
+    };
+
+    // Determine available fulfillment types
+    const types: string[] = [];
+    if (hasPhysicalItems) {
+      types.push('shipping', 'pickup', 'local_delivery');
+    }
+    if (hasDigitalItems && !hasPhysicalItems) {
+      types.push('digital');
+    }
+    if (!hasDigitalItems && !hasPhysicalItems) {
+      types.push('shipping', 'pickup');
+    }
+    options.fulfillmentTypes = types;
+
+    // Get shipping methods if address is set
+    if (session.shippingAddress && (types.includes('shipping') || types.includes('local_delivery'))) {
+      try {
+        const shippingUseCase = new CalculateShippingRatesUseCase();
+        const shippingCommand = new CalculateShippingRatesCommand(
+          {
+            country: session.shippingAddress.country,
+            state: session.shippingAddress.region,
+            city: session.shippingAddress.city,
+            postalCode: session.shippingAddress.postalCode,
+          },
+          { subtotal: session.subtotal.amount, itemCount: 0, currency: session.subtotal.currency },
+        );
+        const shippingResult = await shippingUseCase.execute(shippingCommand);
+        if (shippingResult.success) {
+          options.shippingMethods = shippingResult.rates.map(rate => ({
+            id: rate.shippingMethodId,
+            name: rate.shippingMethodName,
+            price: rate.amount,
+            currency: rate.currency,
+            estimatedDeliveryDays: rate.estimatedDeliveryDays,
+            isFreeShipping: rate.isFreeShipping,
+          }));
+        }
+      } catch {
+        // Best-effort
+      }
+    }
+
+    // Get pickup locations
+    try {
+      const locations = await getAllPickupLocations();
+      options.pickupLocations = locations;
+    } catch {
+      // Best-effort
+    }
+
+    // Get local delivery options if address is set
+    if (session.shippingAddress && types.includes('local_delivery')) {
+      try {
+        const deliveryUseCase = new CheckLocalDeliveryEligibilityUseCase();
+        const deliveryResult = await deliveryUseCase.execute({
+          postalCode: session.shippingAddress.postalCode,
+          city: session.shippingAddress.city,
+          country: session.shippingAddress.country,
+        });
+        options.localDeliveryOptions = deliveryResult.options;
+      } catch {
+        // Best-effort
+      }
+    }
+
+    respond(req, res, options as unknown as ResponseData, 200, 'checkout/fulfillment-options');
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    respondError(req, res, (error as Error).message || 'Failed to get fulfillment options', 500, 'checkout/error');
+  }
+};
+
+/**
+ * Get available pickup time slots
+ * GET /checkout/:checkoutId/pickup-slots
+ */
+export const getPickupSlots = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { checkoutId } = req.params;
+    const daysAhead = req.query.days ? parseInt(String(req.query.days), 10) : 7;
+
+    const session = await CheckoutRepo.findById(checkoutId);
+    if (!session) {
+      respondError(req, res, 'Checkout session not found', 404, 'checkout/error');
+      return;
+    }
+
+    const meta = session.metadata || {};
+    const pickupLocationId = meta.pickupLocationId as string | undefined;
+    if (!pickupLocationId) {
+      respondError(req, res, 'Pickup location not set', 400, 'checkout/error');
+      return;
+    }
+
+    const location = await getPickupLocation(pickupLocationId);
+    if (!location) {
+      respondError(req, res, 'Pickup location not found', 404, 'checkout/error');
+      return;
+    }
+
+    const useCase = new GetPickupSlotsUseCase();
+    const slots = useCase.execute({
+      maxOrdersPerSlot: location.maxOrdersPerSlot || 10,
+      prepareTimeMinutes: location.prepareTimeMinutes || 60,
+      operatingHours: (location.operatingHours || {}) as Record<string, { open: string; close: string }>,
+    }, daysAhead);
+
+    respond(req, res, slots as unknown as ResponseData, 200, 'checkout/pickup-slots');
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    respondError(req, res, (error as Error).message || 'Failed to get pickup slots', 500, 'checkout/error');
   }
 };

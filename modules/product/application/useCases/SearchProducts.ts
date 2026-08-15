@@ -17,7 +17,6 @@ export class SearchProductsCommand {
     public readonly query: string,
     public readonly filters?: {
       categoryId?: string;
-      brandId?: string;
       priceMin?: number;
       priceMax?: number;
       isFeatured?: boolean;
@@ -46,7 +45,6 @@ export interface SearchProductItemResponse {
   isFeatured: boolean;
   primaryImageUrl?: string;
   categoryId?: string;
-  brandId?: string;
   shortDescription?: string;
 }
 
@@ -149,7 +147,6 @@ export class SearchProductsUseCase {
       isFeatured: product.isFeatured,
       primaryImageUrl: product.primaryImage?.url,
       categoryId: product.categoryId,
-      brandId: product.brandId,
       shortDescription: product.shortDescription,
     };
   }

@@ -79,10 +79,13 @@ export class CouponRepository {
   }
 
   async findByCode(code: string): Promise<Coupon | null> {
-    const row = await queryOne<CouponRow>('SELECT * FROM coupon WHERE code = $1', [code.toUpperCase()]);
+    const row = await queryOne<Record<string, unknown>>(
+      `SELECT * FROM "promotionCoupon" WHERE code = $1 AND "isActive" = true LIMIT 1`,
+      [code.toUpperCase()],
+    );
 
     if (!row) return null;
-    return this.mapToCoupon(row);
+    return this.mapPromotionCouponToCoupon(row);
   }
 
   async findAll(filters?: CouponFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Coupon>> {
@@ -374,6 +377,39 @@ export class CouponRepository {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
       params,
     };
+  }
+
+  private mapPromotionCouponToCoupon(row: Record<string, unknown>): Coupon {
+    const type = row.type as string;
+    const mappedType = type === 'fixedAmount' ? 'fixed_amount' : type;
+    return Coupon.reconstitute({
+      couponId: row.promotionCouponId as string,
+      code: row.code as string,
+      name: row.name as string,
+      description: (row.description as string) ?? undefined,
+      type: mappedType as 'percentage' | 'fixed_amount' | 'free_shipping',
+      value: parseFloat(String(row.discountAmount ?? 0)),
+      currency: (row.currencyCode as string) ?? undefined,
+      minOrderValue: row.minOrderAmount ? parseFloat(String(row.minOrderAmount)) : undefined,
+      maxDiscountAmount: row.maxDiscountAmount ? parseFloat(String(row.maxDiscountAmount)) : undefined,
+      usageType: row.isOneTimeUse ? 'single_use' : 'multi_use',
+      usageLimit: row.maxUsage ? parseInt(String(row.maxUsage)) : undefined,
+      usageCount: parseInt(String(row.usageCount ?? 0)),
+      customerUsageLimit: row.maxUsagePerCustomer ? parseInt(String(row.maxUsagePerCustomer)) : undefined,
+      conditions: [],
+      isActive: Boolean(row.isActive),
+      startsAt: row.startDate ? new Date(row.startDate as string) : undefined,
+      expiresAt: row.endDate ? new Date(row.endDate as string) : undefined,
+      applicableProducts: undefined,
+      applicableCategories: undefined,
+      applicableCustomerGroups: undefined,
+      excludedProducts: undefined,
+      excludedCategories: undefined,
+      createdBy: '',
+      metadata: undefined,
+      createdAt: new Date(row.createdAt as string),
+      updatedAt: new Date(row.updatedAt as string),
+    });
   }
 
   private mapToCoupon(row: CouponRow): Coupon {

@@ -1,0 +1,23 @@
+{
+  "programMembers": "Участники программы",
+  "pointsIssued": "Выданные баллы",
+  "pointsRedeemed": "Погашенные баллы",
+  "programSettings": "Настройки программы",
+  "pointsPerDollar": "Баллы за каждый потраченный доллар",
+  "pointsValue": "Стоимость баллов ($ за балл)",
+  "minimumRedemption": "Минимальное погашение",
+  "addReward": "Добавить награду",
+  "reward": "Награда",
+  "redemptions": "Погашения",
+  "noRewards": "Награды не настроены.",
+  "recentTransactions": "Недавние транзакции",
+  "noTransactions": "Транзакций пока нет.",
+  "rewardName": "Название награды",
+  "rewardType": "Тип вознаграждения",
+  "freeProduct": "Бесплатный продукт",
+  "giftCard": "Подарочная карта",
+  "rewardValue": "Значение вознаграждения",
+  "confirmDeleteReward": "Удалить эту награду?",
+  "analytics": "Аналитика программы лояльности",
+  "analyticsDescription": "Распределение баллов, скорость их использования и повышение уровня."
+}

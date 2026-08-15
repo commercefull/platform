@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Abbonamenti totali",
+  "monthlyRecurringRevenue": "Entrate ricorrenti mensili",
+  "addPlan": "Aggiungi piano",
+  "planName": "Nome del piano",
+  "subscribers": "Abbonati",
+  "noPlans": "Nessun piano di abbonamento configurato.",
+  "plan": "Piano",
+  "started": "Iniziato",
+  "nextBilling": "Fatturazione successiva",
+  "noActiveSubscriptions": "Nessun abbonamento attivo.",
+  "addSubscriptionPlan": "Aggiungi piano di abbonamento",
+  "yearly": "Annuale",
+  "trialDays": "Giorni di prova",
+  "confirmDeletePlan": "Eliminare questo piano?",
+  "billingOverview": "Panoramica sulla fatturazione",
+  "billingDescription": "Gestisci la fatturazione degli abbonamenti, i pagamenti non riusciti e l'elaborazione dei rinnovi."
+}

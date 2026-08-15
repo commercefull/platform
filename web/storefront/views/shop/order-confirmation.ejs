@@ -10,14 +10,14 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
-        <h1 class="text-4xl font-bold text-white mb-4">Thank You for Your Order!</h1>
-        <p class="text-xl text-green-100 mb-0">Your order has been placed successfully</p>
+        <h1 class="text-4xl font-bold text-white mb-4"><%= t('storefront:thankYouForOrder') %></h1>
+        <p class="text-xl text-green-100 mb-0"><%= t('storefront:orderPlacedSuccessfully') %></p>
       </div>
 
       <!-- Order Number Card -->
       <div class="px-8 py-6 bg-gray-50 border-b border-gray-200">
         <div class="text-center">
-          <h2 class="text-lg font-medium text-gray-900 mb-2">Order Number</h2>
+          <h2 class="text-lg font-medium text-gray-900 mb-2"><%= t('storefront:orderNumber') %></h2>
           <p class="text-3xl font-bold text-blue-600 font-mono"><%= order.orderNumber %></p>
         </div>
       </div>
@@ -33,13 +33,13 @@
               <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
               </svg>
-              Order Details
+              <%= t('storefront:orderDetails') %>
             </h2>
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-1">Order Date</h3>
+                <h3 class="text-sm font-medium text-gray-500 mb-1"><%= t('storefront:orderDate') %></h3>
                 <p class="text-sm text-gray-900">
                   <%= new Date(order.createdAt).toLocaleDateString('en-US', {
                     weekday: 'long',
@@ -52,7 +52,7 @@
                 </p>
               </div>
               <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-1">Order Status</h3>
+                <h3 class="text-sm font-medium text-gray-500 mb-1"><%= t('shared:common.orderStatus') %></h3>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
                 </span>
@@ -62,7 +62,7 @@
             <!-- Order Items -->
             <% if (order.items && order.items.length > 0) { %>
               <div class="border-t border-gray-200 pt-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Items Ordered</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4"><%= t('storefront:itemsOrdered') %></h3>
                 <div class="space-y-4">
                   <% order.items.forEach(item => { %>
                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -75,7 +75,7 @@
                         </div>
                         <div>
                           <h4 class="text-sm font-medium text-gray-900"><%= item.name %></h4>
-                          <p class="text-sm text-gray-600">Quantity: <%= item.quantity %></p>
+                          <p class="text-sm text-gray-600"><%= t('shared:common.quantity') %>: <%= item.quantity %></p>
                         </div>
                       </div>
                       <div class="text-sm font-semibold text-gray-900">
@@ -91,24 +91,24 @@
             <div class="border-t border-gray-200 pt-6 mt-6">
               <div class="bg-gray-50 rounded-lg p-6 space-y-3">
                 <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Subtotal</span>
+                  <span class="text-sm text-gray-600"><%= t('shared:common.subtotal') %></span>
                   <span class="text-sm text-gray-900">$<%= order.totals ? order.totals.subtotal : '0.00' %></span>
                 </div>
 
                 <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Shipping</span>
+                  <span class="text-sm text-gray-600"><%= t('shared:common.shipping') %></span>
                   <span class="text-sm text-gray-900">$<%= order.totals ? order.totals.shipping : '0.00' %></span>
                 </div>
 
                 <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Tax</span>
+                  <span class="text-sm text-gray-600"><%= t('shared:common.tax') %></span>
                   <span class="text-sm text-gray-900">$<%= order.totals ? order.totals.tax : '0.00' %></span>
                 </div>
 
                 <hr class="border-gray-300">
 
                 <div class="flex justify-between items-center">
-                  <span class="text-lg font-semibold text-gray-900">Total</span>
+                  <span class="text-lg font-semibold text-gray-900"><%= t('shared:common.total') %></span>
                   <span class="text-lg font-bold text-green-600">$<%= order.totals ? order.totals.total : '0.00' %></span>
                 </div>
               </div>
@@ -126,7 +126,7 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
               </svg>
-              What's Next?
+              <%= t('storefront:whatsNext') %>
             </h3>
           </div>
           <div class="p-6">
@@ -137,7 +137,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                 </div>
-                <p class="text-sm text-gray-700">You will receive an email confirmation shortly</p>
+                <p class="text-sm text-gray-700"><%= t('storefront:emailConfirmationShortly') %></p>
               </div>
 
               <div class="flex items-start space-x-3">
@@ -146,7 +146,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                   </svg>
                 </div>
-                <p class="text-sm text-gray-700">We'll notify you when your order ships</p>
+                <p class="text-sm text-gray-700"><%= t('storefront:notifyWhenShips') %></p>
               </div>
 
               <div class="flex items-start space-x-3">
@@ -155,7 +155,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
                   </svg>
                 </div>
-                <p class="text-sm text-gray-700">You can track your order status anytime</p>
+                <p class="text-sm text-gray-700"><%= t('storefront:trackOrderAnytime') %></p>
               </div>
             </div>
           </div>
@@ -170,7 +170,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
             </svg>
-            Track Order
+            <%= t('storefront:trackOrder') %>
           </a>
 
           <a
@@ -180,7 +180,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
-            View All Orders
+            <%= t('shared:common.viewAllOrders') %>
           </a>
 
           <a
@@ -190,7 +190,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
-            Continue Shopping
+            <%= t('storefront:continueShopping') %>
           </a>
         </div>
       </div>

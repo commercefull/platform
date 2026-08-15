@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "कुल सदस्यताएँ",
+  "monthlyRecurringRevenue": "मासिक आवर्ती राजस्व",
+  "addPlan": "योजना जोड़ें",
+  "planName": "योजना का नाम",
+  "subscribers": "ग्राहकों",
+  "noPlans": "कोई सदस्यता योजना कॉन्फ़िगर नहीं की गई.",
+  "plan": "योजना",
+  "started": "शुरू कर दिया",
+  "nextBilling": "अगली बिलिंग",
+  "noActiveSubscriptions": "कोई सक्रिय सदस्यता नहीं.",
+  "addSubscriptionPlan": "सदस्यता योजना जोड़ें",
+  "yearly": "सालाना",
+  "trialDays": "परीक्षण के दिन",
+  "confirmDeletePlan": "यह योजना हटाएं?",
+  "billingOverview": "बिलिंग अवलोकन",
+  "billingDescription": "सदस्यता बिलिंग, विफल भुगतान और नवीनीकरण प्रसंस्करण प्रबंधित करें।"
+}

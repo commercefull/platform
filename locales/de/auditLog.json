@@ -1,0 +1,11 @@
+{
+  "title": "Audit-Protokolle",
+  "user": "Benutzer",
+  "resource": "Ressource",
+  "resourceId": "Ressourcen-ID",
+  "ipAddress": "IP-Adresse",
+  "noLogs": "Keine Überwachungsprotokolle gefunden.",
+  "changes": "Änderungen",
+  "oldValue": "Alter Wert",
+  "newValue": "Neuer Wert"
+}

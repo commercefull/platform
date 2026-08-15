@@ -7,13 +7,13 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Shipping Zones</h1>
+          <h1 class="m-0"><%= t('shared:common.zones') %></h1>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/shipping">Shipping</a></li>
-            <li class="breadcrumb-item active">Zones</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/shipping"><%= t('shared:common.shipping') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.zones') %></li>
           </ol>
         </div>
       </div>
@@ -35,11 +35,11 @@
       <div class="row mb-3">
         <div class="col-12">
           <a href="/admin/shipping/zones/create" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create Zone
+            <i class="fas fa-plus"></i> <%= t('distribution:shipping.createZone') %>
           </a>
           <div class="float-right">
-            <span class="badge badge-info">Total: <%= stats.total %></span>
-            <span class="badge badge-success ml-2">Active: <%= stats.active %></span>
+            <span class="badge badge-info"><%= t('common.total') %>: <%= stats.total %></span>
+            <span class="badge badge-success ml-2"><%= t('common.active') %>: <%= stats.active %></span>
           </div>
         </div>
       </div>
@@ -47,25 +47,25 @@
       <!-- Zones Table -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Shipping Zones</h3>
+          <h3 class="card-title"><%= t('shared:common.zones') %></h3>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover text-nowrap">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Locations</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th><%= t('common.name') %></th>
+                <th><%= t('common.type') %></th>
+                <th><%= t('distribution:shipping.locations') %></th>
+                <th><%= t('shared:common.priority') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
               <% if (zones.length === 0) { %>
                 <tr>
                   <td colspan="6" class="text-center py-4">
-                    <em>No shipping zones found. <a href="/admin/shipping/zones/create">Create your first zone</a>.</em>
+                    <em><%= t('distribution:shipping.noZones') %> <a href="/admin/shipping/zones/create"><%= t('distribution:shipping.createFirstZone') %></a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -82,20 +82,20 @@
                     </td>
                     <td>
                       <% if (zone.locations && zone.locations.length > 0) { %>
-                        <%= zone.locations.length %> location<%= zone.locations.length > 1 ? 's' : '' %>
+                        <%= zone.locations.length %> <%= zone.locations.length > 1 ? t('inventory:locationsPlural') : t('inventory:locationCount') %>
                         <% if (zone.excludedLocations && zone.excludedLocations.length > 0) { %>
-                          <br><small class="text-muted"><%= zone.excludedLocations.length %> excluded</small>
+                          <br><small class="text-muted"><%= zone.excludedLocations.length %> <%= t('inventory:excluded') %></small>
                         <% } %>
                       <% } else { %>
-                        <span class="text-muted">No locations</span>
+                        <span class="text-muted"><%= t('inventory:noLocations') %></span>
                       <% } %>
                     </td>
                     <td><%= zone.priority %></td>
                     <td>
                       <% if (zone.isActive) { %>
-                        <span class="badge badge-success">Active</span>
+                        <span class="badge badge-success"><%= t('common.active') %></span>
                       <% } else { %>
-                        <span class="badge badge-secondary">Inactive</span>
+                        <span class="badge badge-secondary"><%= t('common.inactive') %></span>
                       <% } %>
                     </td>
                     <td>
@@ -134,18 +134,18 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Delete Shipping Zone</h4>
+        <h4 class="modal-title"><%= t('distribution:shipping.deleteZone') %></h4>
         <button type="button" class="close" data-dismiss="modal">
           <span>&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to delete the shipping zone "<strong id="deleteZoneName"></strong>"?</p>
-        <p class="text-danger"><small>This action will also delete all associated shipping rates and cannot be undone.</small></p>
+        <p><%= t('common.deleteZoneConfirm') %> "<strong id="deleteZoneName"></strong>"?</p>
+        <p class="text-danger"><small><%= t('common.deleteZoneWarning') %></small></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Zone</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn"><%= t('distribution:shipping.deleteZone') %></button>
       </div>
     </div>
   </div>
@@ -164,11 +164,11 @@ function activateZone(zoneId) {
     if (data.success) {
       location.reload();
     } else {
-      alert('Error: ' + data.message);
+      alert('<%= t("common.error") %>: ' + data.message);
     }
   })
   .catch(error => {
-    alert('Error activating shipping zone');
+    alert('<%= t("distribution:shipping.errorActivatingZone") %>');
     console.error('Error:', error);
   });
 }
@@ -185,11 +185,11 @@ function deactivateZone(zoneId) {
     if (data.success) {
       location.reload();
     } else {
-      alert('Error: ' + data.message);
+      alert('<%= t("common.error") %>: ' + data.message);
     }
   })
   .catch(error => {
-    alert('Error deactivating shipping zone');
+    alert('<%= t("distribution:shipping.errorDeactivatingZone") %>');
     console.error('Error:', error);
   });
 }
@@ -208,11 +208,11 @@ function deleteZone(zoneId, zoneName) {
       if (data.success) {
         location.reload();
       } else {
-        alert('Error: ' + data.message);
+        alert('<%= t("common.error") %>: ' + data.message);
       }
     })
     .catch(error => {
-      alert('Error deleting shipping zone');
+      alert('<%= t("distribution:shipping.errorDeletingZone") %>');
       console.error('Error:', error);
     });
   };

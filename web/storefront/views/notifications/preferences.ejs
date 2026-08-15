@@ -4,9 +4,9 @@
   <div class="max-w-2xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-      <a href="/notifications" class="text-blue-600 hover:text-blue-800 text-sm">&larr; Back to Notifications</a>
-      <h1 class="text-3xl font-bold text-gray-900 mt-2">Notification Preferences</h1>
-      <p class="mt-2 text-sm text-gray-600">Choose which notifications you'd like to receive</p>
+      <a href="/notifications" class="text-blue-600 hover:text-blue-800 text-sm">&larr; <%= t('storefront:backToNotifications') %></a>
+      <h1 class="text-3xl font-bold text-gray-900 mt-2"><%= t('storefront:notificationPreferences') %></h1>
+      <p class="mt-2 text-sm text-gray-600"><%= t('storefront:chooseNotifications') %></p>
     </div>
 
     <div class="bg-white shadow-lg rounded-xl overflow-hidden">
@@ -16,8 +16,8 @@
           <div class="px-6 py-5">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-semibold text-gray-900">Order Updates</h3>
-                <p class="text-sm text-gray-500 mt-1">Get notified about order status changes, shipping updates, and delivery confirmations</p>
+                <h3 class="text-sm font-semibold text-gray-900"><%= t('storefront:orderUpdates') %></h3>
+                <p class="text-sm text-gray-500 mt-1"><%= t('storefront:orderUpdatesDesc') %></p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" name="orderUpdates" class="sr-only peer" <%= preferences?.orderUpdates !== false ? 'checked' : '' %>>
@@ -30,8 +30,8 @@
           <div class="px-6 py-5">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-semibold text-gray-900">Promotions & Deals</h3>
-                <p class="text-sm text-gray-500 mt-1">Receive alerts about sales, special offers, and exclusive discounts</p>
+                <h3 class="text-sm font-semibold text-gray-900"><%= t('storefront:promotionsDeals') %></h3>
+                <p class="text-sm text-gray-500 mt-1"><%= t('storefront:promotionsDealsDesc') %></p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" name="promotions" class="sr-only peer" <%= preferences?.promotions ? 'checked' : '' %>>
@@ -44,8 +44,8 @@
           <div class="px-6 py-5">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-semibold text-gray-900">Product Updates</h3>
-                <p class="text-sm text-gray-500 mt-1">Get notified when items on your wishlist go on sale or come back in stock</p>
+                <h3 class="text-sm font-semibold text-gray-900"><%= t('storefront:productUpdates') %></h3>
+                <p class="text-sm text-gray-500 mt-1"><%= t('storefront:productUpdatesDesc') %></p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" name="productUpdates" class="sr-only peer" <%= preferences?.productUpdates ? 'checked' : '' %>>
@@ -58,8 +58,8 @@
           <div class="px-6 py-5">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-semibold text-gray-900">Review Reminders</h3>
-                <p class="text-sm text-gray-500 mt-1">Reminders to leave reviews for products you've purchased</p>
+                <h3 class="text-sm font-semibold text-gray-900"><%= t('storefront:reviewReminders') %></h3>
+                <p class="text-sm text-gray-500 mt-1"><%= t('storefront:reviewRemindersDesc') %></p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" name="reviewReminders" class="sr-only peer" <%= preferences?.reviewReminders ? 'checked' : '' %>>
@@ -72,8 +72,8 @@
           <div class="px-6 py-5">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-semibold text-gray-900">Membership & Loyalty</h3>
-                <p class="text-sm text-gray-500 mt-1">Updates about your membership status, points balance, and tier changes</p>
+                <h3 class="text-sm font-semibold text-gray-900"><%= t('storefront:membershipLoyalty') %></h3>
+                <p class="text-sm text-gray-500 mt-1"><%= t('storefront:membershipLoyaltyDesc') %></p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" name="membershipUpdates" class="sr-only peer" <%= preferences?.membershipUpdates !== false ? 'checked' : '' %>>
@@ -86,8 +86,8 @@
           <div class="px-6 py-5">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-semibold text-gray-900">Email Notifications</h3>
-                <p class="text-sm text-gray-500 mt-1">Also receive notifications via email</p>
+                <h3 class="text-sm font-semibold text-gray-900"><%= t('storefront:emailNotifications') %></h3>
+                <p class="text-sm text-gray-500 mt-1"><%= t('storefront:emailNotificationsDesc') %></p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" name="emailNotifications" class="sr-only peer" <%= preferences?.emailNotifications !== false ? 'checked' : '' %>>
@@ -99,7 +99,7 @@
 
         <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
           <button type="submit" class="inline-flex items-center px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-            Save Preferences
+            <%= t('storefront:savePreferences') %>
           </button>
         </div>
       </form>

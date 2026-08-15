@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "メンバーシップ",
+  "totalMembers": "総会員数",
+  "activeMembers": "アクティブなメンバー",
+  "membershipTiers": "会員レベル",
+  "expiringThisMonth": "今月期限切れ",
+  "addTier": "階層の追加",
+  "members": "メンバー",
+  "noTiers": "メンバーシップ層が構成されていません。",
+  "recentMembers": "最近のメンバー",
+  "tier": "階層",
+  "noMembers": "まだメンバーがいません。",
+  "addMembershipTier": "メンバーシップ層を追加",
+  "tierName": "ティア名",
+  "billingPeriod": "請求期間",
+  "lifetime": "一生",
+  "benefitsOnePerLine": "特典 (1 行に 1 つ)",
+  "setAsDefault": "デフォルト階層として設定",
+  "createTier": "階層の作成",
+  "confirmDeleteTier": "この階層を削除しますか?",
+  "analytics": "メンバーシップ分析",
+  "analyticsDescription": "アクティブなメンバー、収益、解約率、階層分布。"
+}

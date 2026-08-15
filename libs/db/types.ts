@@ -16,8 +16,6 @@ export enum Table {
   BasketHistory = "basketHistory",
   BasketItem = "basketItem",
   BasketMerge = "basketMerge",
-  Brand = "brand",
-  BrandTranslation = "brandTranslation",
   Business = "business",
   BusinessApiKey = "businessApiKey",
   CheckoutSession = "checkoutSession",
@@ -56,6 +54,7 @@ export enum Table {
   CustomerWishlistItem = "customerWishlistItem",
   DistributionWarehouse = "distributionWarehouse",
   DistributionWarehouseBin = "distributionWarehouseBin",
+  DistributionWarehouseZone = "distributionWarehouseZone",
   FraudBlacklist = "fraudBlacklist",
   FraudCheck = "fraudCheck",
   FraudRule = "fraudRule",
@@ -133,11 +132,13 @@ export enum Table {
   OrderAllocation = "orderAllocation",
   OrderDiscount = "orderDiscount",
   OrderFulfillment = "orderFulfillment",
+  OrderFulfillmentHistory = "orderFulfillmentHistory",
   OrderFulfillmentItem = "orderFulfillmentItem",
   OrderFulfillmentPackage = "orderFulfillmentPackage",
   OrderItem = "orderItem",
   OrderNote = "orderNote",
   OrderPayment = "orderPayment",
+  OrderPaymentHistory = "orderPaymentHistory",
   OrderPaymentRefund = "orderPaymentRefund",
   OrderReturn = "orderReturn",
   OrderReturnItem = "orderReturnItem",
@@ -176,11 +177,11 @@ export enum Table {
   ProductAttributeOption = "productAttributeOption",
   ProductAttributeOptionTranslation = "productAttributeOptionTranslation",
   ProductAttributeSet = "productAttributeSet",
+  ProductAttributeSetMapping = "productAttributeSetMapping",
   ProductAttributeToGroup = "productAttributeToGroup",
   ProductAttributeTranslation = "productAttributeTranslation",
   ProductAttributeValue = "productAttributeValue",
   ProductAttributeValueMap = "productAttributeValueMap",
-  ProductBrand = "productBrand",
   ProductBundle = "productBundle",
   ProductBundleItem = "productBundleItem",
   ProductCategory = "productCategory",
@@ -225,6 +226,7 @@ export enum Table {
   Role = "role",
   Session = "session",
   ShippingCarrier = "shippingCarrier",
+  ShippingLabel = "shippingLabel",
   ShippingMethod = "shippingMethod",
   ShippingPackagingType = "shippingPackagingType",
   ShippingRate = "shippingRate",
@@ -274,6 +276,8 @@ export enum Table {
   TaxVatRegistration = "taxVatRegistration",
   TaxVatValidationLog = "taxVatValidationLog",
   TaxZone = "taxZone",
+  WarehousePickPack = "warehousePickPack",
+  WarehouseReceiving = "warehouseReceiving",
   WebhookDelivery = "webhookDelivery",
   WebhookEndpoint = "webhookEndpoint",
 }
@@ -293,8 +297,6 @@ export type Tables = {
   "basketHistory": BasketHistory,
   "basketItem": BasketItem,
   "basketMerge": BasketMerge,
-  "brand": Brand,
-  "brandTranslation": BrandTranslation,
   "business": Business,
   "businessApiKey": BusinessApiKey,
   "checkoutSession": CheckoutSession,
@@ -333,6 +335,7 @@ export type Tables = {
   "customerWishlistItem": CustomerWishlistItem,
   "distributionWarehouse": DistributionWarehouse,
   "distributionWarehouseBin": DistributionWarehouseBin,
+  "distributionWarehouseZone": DistributionWarehouseZone,
   "fraudBlacklist": FraudBlacklist,
   "fraudCheck": FraudCheck,
   "fraudRule": FraudRule,
@@ -410,11 +413,13 @@ export type Tables = {
   "orderAllocation": OrderAllocation,
   "orderDiscount": OrderDiscount,
   "orderFulfillment": OrderFulfillment,
+  "orderFulfillmentHistory": OrderFulfillmentHistory,
   "orderFulfillmentItem": OrderFulfillmentItem,
   "orderFulfillmentPackage": OrderFulfillmentPackage,
   "orderItem": OrderItem,
   "orderNote": OrderNote,
   "orderPayment": OrderPayment,
+  "orderPaymentHistory": OrderPaymentHistory,
   "orderPaymentRefund": OrderPaymentRefund,
   "orderReturn": OrderReturn,
   "orderReturnItem": OrderReturnItem,
@@ -453,11 +458,11 @@ export type Tables = {
   "productAttributeOption": ProductAttributeOption,
   "productAttributeOptionTranslation": ProductAttributeOptionTranslation,
   "productAttributeSet": ProductAttributeSet,
+  "productAttributeSetMapping": ProductAttributeSetMapping,
   "productAttributeToGroup": ProductAttributeToGroup,
   "productAttributeTranslation": ProductAttributeTranslation,
   "productAttributeValue": ProductAttributeValue,
   "productAttributeValueMap": ProductAttributeValueMap,
-  "productBrand": ProductBrand,
   "productBundle": ProductBundle,
   "productBundleItem": ProductBundleItem,
   "productCategory": ProductCategory,
@@ -502,6 +507,7 @@ export type Tables = {
   "role": Role,
   "session": Session,
   "shippingCarrier": ShippingCarrier,
+  "shippingLabel": ShippingLabel,
   "shippingMethod": ShippingMethod,
   "shippingPackagingType": ShippingPackagingType,
   "shippingRate": ShippingRate,
@@ -551,6 +557,8 @@ export type Tables = {
   "taxVatRegistration": TaxVatRegistration,
   "taxVatValidationLog": TaxVatValidationLog,
   "taxZone": TaxZone,
+  "warehousePickPack": WarehousePickPack,
+  "warehouseReceiving": WarehouseReceiving,
   "webhookDelivery": WebhookDelivery,
   "webhookEndpoint": WebhookEndpoint,
 };
@@ -871,40 +879,6 @@ export type BasketMerge = {
   itemsMerged: number;
   conflictStrategy: string;
   mergedBy: string | null;
-};
-
-export type Brand = {
-  brandId: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  logoMediaId: string | null;
-  coverImageMediaId: string | null;
-  website: string | null;
-  countryOfOrigin: string | null;
-  isActive: boolean | null;
-  isFeatured: boolean | null;
-  sortOrder: number | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type BrandTranslation = {
-  brandTranslationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productBrandId: string;
-  localeId: string;
-  name: string | null;
-  slug: string | null;
-  description: string | null;
-  story: string | null;
-  metaTitle: string | null;
-  metaDescription: string | null;
-  isAutoTranslated: boolean;
-  translationSource: string | null;
-  isApproved: boolean;
 };
 
 export type Business = {
@@ -1610,6 +1584,20 @@ export type DistributionWarehouseBin = {
   isReceivable: boolean;
   isMixed: boolean;
   priority: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type DistributionWarehouseZone = {
+  distributionWarehouseZoneId: string;
+  distributionWarehouseId: string;
+  name: string;
+  code: string;
+  description: string | null;
+  zoneType: string;
+  isActive: boolean;
+  sortOrder: number | null;
+  metadata: unknown | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -3121,6 +3109,15 @@ export type OrderFulfillment = {
   fulfilledBy: string | null;
 };
 
+export type OrderFulfillmentHistory = {
+  orderFulfillmentHistoryId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  orderId: string;
+  fulfillmentStatus: string;
+  notes: string | null;
+};
+
 export type OrderFulfillmentItem = {
   orderFulfillmentItemId: string;
   createdAt: Date;
@@ -3211,6 +3208,16 @@ export type OrderPayment = {
   capturedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+};
+
+export type OrderPaymentHistory = {
+  orderPaymentHistoryId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  orderId: string;
+  paymentStatus: string;
+  transactionId: string | null;
+  notes: string | null;
 };
 
 export type OrderPaymentRefund = {
@@ -3790,7 +3797,6 @@ export type Product = {
   name: string;
   slug: string;
   description: string | null;
-  brandId: string | null;
   type: string;
   status: string;
   visibility: string;
@@ -3935,6 +3941,17 @@ export type ProductAttributeSet = {
   isGlobal: boolean;
 };
 
+export type ProductAttributeSetMapping = {
+  productAttributeSetMappingId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  attributeSetId: string;
+  attributeId: string;
+  position: number;
+  isRequired: boolean;
+  defaultValue: string | null;
+};
+
 export type ProductAttributeToGroup = {
   productAttributeToGroupId: string;
   createdAt: Date;
@@ -3985,26 +4002,6 @@ export type ProductAttributeValueMap = {
   valueDate: Date | null;
   isSystem: boolean;
   language: string | null;
-};
-
-export type ProductBrand = {
-  productBrandId: string;
-  name: string;
-  slug: string | null;
-  description: string | null;
-  logoUrl: string | null;
-  websiteUrl: string | null;
-  isActive: boolean;
-  isFeatured: boolean;
-  metaTitle: string | null;
-  metaDescription: string | null;
-  metaKeywords: string | null;
-  merchantId: string | null;
-  isGlobal: boolean;
-  sortOrder: number;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
 };
 
 export type ProductBundle = {
@@ -4654,7 +4651,6 @@ export type PromotionProductDiscountItem = {
   productId: string | null;
   productVariantId: string | null;
   productCategoryId: string;
-  productBrandId: string | null;
   itemType: string;
 };
 
@@ -4735,6 +4731,33 @@ export type ShippingCarrier = {
   hasApiIntegration: boolean;
   customFields: unknown | null;
   createdBy: string | null;
+};
+
+export type ShippingLabel = {
+  shippingLabelId: string;
+  shippingCarrierId: string;
+  carrierName: string | null;
+  carrierService: string | null;
+  trackingNumber: string;
+  labelUrl: string | null;
+  labelFormat: string | null;
+  status: string | null;
+  orderId: string | null;
+  fulfillmentId: string | null;
+  shipFromName: string | null;
+  shipToName: string | null;
+  shipToAddressLine1: string | null;
+  shipToCity: string | null;
+  shipToState: string | null;
+  shipToPostalCode: string | null;
+  shipToCountry: string | null;
+  weight: string | null;
+  dimensions: unknown | null;
+  shippingCost: string | null;
+  voidReason: string | null;
+  voidedAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type ShippingMethod = {
@@ -5865,6 +5888,45 @@ export type TaxZone = {
   postcodes: unknown | null;
   cities: unknown | null;
   isActive: boolean;
+};
+
+export type WarehousePickPack = {
+  warehousePickPackId: string;
+  distributionWarehouseId: string;
+  pickPackNumber: string;
+  orderId: string | null;
+  fulfillmentId: string | null;
+  status: string;
+  items: unknown | null;
+  assignedTo: string | null;
+  pickingStartedAt: Date | null;
+  pickingCompletedAt: Date | null;
+  packingStartedAt: Date | null;
+  packingCompletedAt: Date | null;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type WarehouseReceiving = {
+  warehouseReceivingId: string;
+  distributionWarehouseId: string;
+  receiptNumber: string;
+  sourceType: string;
+  sourceId: string | null;
+  status: string;
+  expectedDate: Date | null;
+  receivedDate: Date | null;
+  carrierName: string | null;
+  trackingNumber: string | null;
+  packageCount: number | null;
+  notes: string | null;
+  hasDiscrepancies: boolean;
+  items: unknown | null;
+  completedAt: Date | null;
+  receivedBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type WebhookDelivery = {

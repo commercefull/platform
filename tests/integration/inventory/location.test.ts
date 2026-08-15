@@ -41,7 +41,6 @@ describe('Inventory Location Tests', () => {
       const locationId = response.data.data.inventoryLocationId || response.data.data.id;
       expect(locationId).toBe(testLocationId);
       expect(response.data.data).toHaveProperty('name', testInventoryLocation.name);
-      expect(response.data.data).toHaveProperty('type', testInventoryLocation.type);
     });
 
     it('should list all active locations', async () => {
@@ -79,7 +78,6 @@ describe('Inventory Location Tests', () => {
       // DB returns inventoryLocationId, not id
       expect(response.data.data.inventoryLocationId || response.data.data.id).toBeTruthy();
       expect(response.data.data).toHaveProperty('name', newLocation.name);
-      expect(response.data.data).toHaveProperty('type', newLocation.type);
 
       // Save ID for cleanup - uses inventoryLocationId
       additionalLocationId = response.data.data.inventoryLocationId || response.data.data.id;

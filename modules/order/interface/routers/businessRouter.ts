@@ -35,6 +35,12 @@ router.get('/orders/store-summary', orderController.getStoreSalesSummary);
 router.get('/orders', orderController.listOrders);
 
 /**
+ * Get order by order number
+ * GET /business/orders/number/:orderNumber
+ */
+router.get('/orders/number/:orderNumber', orderController.getOrderByNumber);
+
+/**
  * Get order details
  * GET /business/orders/:orderId
  */
@@ -86,5 +92,27 @@ router.post('/orders/:orderId/refunds', orderController.createOrderRefund);
 router.get('/orders/:orderId/packages', orderController.listFulfillmentPackages);
 router.post('/orders/:orderId/packages', orderController.createFulfillmentPackage);
 router.post('/orders/:orderId/packages/:packageId/tracking', orderController.trackFulfillmentPackage);
+
+// ============================================================================
+// Order Items
+// ============================================================================
+router.get('/orders/:orderId/items', orderController.getOrderItems);
+router.get('/order-items/:orderItemId', orderController.getOrderItemById);
+router.post('/order-items', orderController.createOrderItem);
+router.put('/order-items/:orderItemId', orderController.updateOrderItem);
+router.delete('/order-items/:orderItemId', orderController.deleteOrderItem);
+
+// ============================================================================
+// Payment & Fulfillment Status
+// ============================================================================
+router.put('/orders/:orderId/payment-status', orderController.updatePaymentStatus);
+router.put('/orders/:orderId/fulfillment-status', orderController.updateFulfillmentStatus);
+
+// ============================================================================
+// Status History
+// ============================================================================
+router.get('/orders/:orderId/status-history', orderController.getStatusHistory);
+router.get('/orders/:orderId/payment-history', orderController.getPaymentHistory);
+router.get('/orders/:orderId/fulfillment-history', orderController.getFulfillmentHistory);
 
 export const orderBusinessRouter = router;

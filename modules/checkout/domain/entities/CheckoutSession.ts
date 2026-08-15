@@ -8,6 +8,7 @@ import { Money } from '../../../basket/domain/valueObjects/Money';
 
 export type CheckoutStatus = 'active' | 'pending_payment' | 'processing' | 'completed' | 'abandoned' | 'expired' | 'failed';
 export type PaymentStatus = 'pending' | 'authorized' | 'captured' | 'failed' | 'refunded';
+export type FulfillmentType = 'shipping' | 'pickup' | 'local_delivery' | 'digital';
 
 export interface CheckoutSessionProps {
   id: string;
@@ -30,6 +31,7 @@ export interface CheckoutSessionProps {
   discountAmount: Money;
   total: Money;
   couponCode?: string;
+  fulfillmentType: FulfillmentType;
   notes?: string;
   metadata?: Record<string, unknown>;
   createdAt: Date;
@@ -57,6 +59,7 @@ export class CheckoutSession {
       status: 'active',
       paymentStatus: 'pending',
       sameAsShipping: true,
+      fulfillmentType: 'shipping',
       subtotal: Money.zero(currency),
       taxAmount: Money.zero(currency),
       shippingAmount: Money.zero(currency),
@@ -153,6 +156,10 @@ export class CheckoutSession {
     return this.props.couponCode;
   }
 
+  get fulfillmentType(): FulfillmentType {
+    return this.props.fulfillmentType;
+  }
+
   get notes(): string | undefined {
     return this.props.notes;
   }
@@ -190,14 +197,36 @@ export class CheckoutSession {
   }
 
   get isReadyForPayment(): boolean {
-    const isPickup = this.props.metadata?.fulfillmentType === 'pickup' && !!this.props.metadata?.pickupLocationId;
-    if (isPickup) {
+    if (this.props.fulfillmentType === 'pickup') {
       return !!this.props.paymentMethodId && !this.props.total.isZero();
     }
+    if (this.props.fulfillmentType === 'digital') {
+      return !!this.props.paymentMethodId && !this.props.total.isZero();
+    }
+    if (this.props.fulfillmentType === 'local_delivery') {
+      return !!this.props.shippingAddress && !!this.props.paymentMethodId && !this.props.total.isZero();
+    }
+    // shipping
     return !!this.props.shippingAddress && !!this.props.shippingMethodId && !this.props.total.isZero();
   }
 
+  hasOnlyDigitalItems(items: Array<{ isDigital: boolean }>): boolean {
+    return items.length > 0 && items.every(item => item.isDigital);
+  }
+
   // Domain methods
+  setFulfillmentType(type: FulfillmentType): void {
+    this.ensureActive();
+    this.props.fulfillmentType = type;
+    if (type === 'pickup' || type === 'digital') {
+      this.props.shippingMethodId = undefined;
+      this.props.shippingMethodName = undefined;
+      this.props.shippingAmount = Money.zero(this.props.subtotal.currency);
+      this.recalculateTotal();
+    }
+    this.touch();
+  }
+
   setShippingAddress(address: Address): void {
     this.ensureActive();
     this.props.shippingAddress = address;
@@ -360,6 +389,7 @@ export class CheckoutSession {
       total: this.props.total.amount,
       currency: this.props.subtotal.currency,
       couponCode: this.props.couponCode,
+      fulfillmentType: this.props.fulfillmentType,
       notes: this.props.notes,
       metadata: this.props.metadata,
       isReadyForPayment: this.isReadyForPayment,

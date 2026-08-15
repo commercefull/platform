@@ -8,8 +8,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/promotions">Promotions</a></li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('dashboard.title') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/promotions"><%= t('shared:common.promotions') %></a></li>
             <li class="breadcrumb-item active"><%= promotion.code %></li>
           </ol>
         </div>
@@ -32,13 +32,13 @@
       <div class="row mb-3">
         <div class="col-12">
           <a href="<%= `/admin/promotions/${promotion.promotionId}/edit` %>" class="btn btn-primary">
-            <i class="fas fa-edit"></i> Edit Promotion
+            <i class="fas fa-edit"></i> <%= t('promotion:edit') %>
           </a>
           <button class="btn btn-danger ml-2" onclick="deletePromotion('<%= promotion.promotionId %>', '<%= promotion.name %>')">
-            <i class="fas fa-trash"></i> Delete Promotion
+            <i class="fas fa-trash"></i> <%= t('promotion:promotions.deletePromotion') %>
           </button>
           <a href="/admin/promotions" class="btn btn-secondary ml-2">
-            <i class="fas fa-arrow-left"></i> Back to Promotions
+            <i class="fas fa-arrow-left"></i> <%= t('promotion:promotions.backToPromotions') %>
           </a>
         </div>
       </div>
@@ -48,48 +48,48 @@
         <div class="col-md-8">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Promotion Details</h3>
+              <h3 class="card-title"><%= t('promotion:promotions.promotionDetails') %></h3>
             </div>
             <div class="card-body">
               <dl class="row">
-                <dt class="col-sm-3">Code:</dt>
+                <dt class="col-sm-3"><%= t('shared:common.code') %>:</dt>
                 <dd class="col-sm-9"><code><%= promotion.code %></code></dd>
 
-                <dt class="col-sm-3">Name:</dt>
+                <dt class="col-sm-3"><%= t('shared:common.name') %>:</dt>
                 <dd class="col-sm-9"><%= promotion.name %></dd>
 
                 <% if (promotion.description) { %>
-                  <dt class="col-sm-3">Description:</dt>
+                  <dt class="col-sm-3"><%= t('shared:common.description') %>:</dt>
                   <dd class="col-sm-9"><%= promotion.description %></dd>
                 <% } %>
 
-                <dt class="col-sm-3">Type:</dt>
+                <dt class="col-sm-3"><%= t('shared:common.type') %>:</dt>
                 <dd class="col-sm-9">
                   <span class="badge badge-secondary"><%= promotion.type.replace('_', ' ') %></span>
                 </dd>
 
-                <dt class="col-sm-3">Discount:</dt>
+                <dt class="col-sm-3"><%= t('shared:common.discount') %>:</dt>
                 <dd class="col-sm-9">
                   <% if (promotion.type === 'percentage') { %>
-                    <%= promotion.value %>% off
+                    <%= promotion.value %>% <%= t('promotion:promotions.off') %>
                   <% } else if (promotion.type === 'fixed_amount') { %>
                     $<%= promotion.value.toFixed(2) %>
                   <% } else { %>
-                    Free Shipping
+                    <%= t('shared:common.freeShipping') %>
                   <% } %>
                 </dd>
 
                 <% if (promotion.minOrderAmount) { %>
-                  <dt class="col-sm-3">Minimum Order:</dt>
+                  <dt class="col-sm-3"><%= t('promotion:minOrder') %>:</dt>
                   <dd class="col-sm-9">$<%= promotion.minOrderAmount.toFixed(2) %></dd>
                 <% } %>
 
                 <% if (promotion.maxDiscountAmount) { %>
-                  <dt class="col-sm-3">Max Discount:</dt>
+                  <dt class="col-sm-3"><%= t('promotion:promotions.maxDiscount') %>:</dt>
                   <dd class="col-sm-9">$<%= promotion.maxDiscountAmount.toFixed(2) %></dd>
                 <% } %>
 
-                <dt class="col-sm-3">Usage:</dt>
+                <dt class="col-sm-3"><%= t('promotion:giftCard.usage') %>:</dt>
                 <dd class="col-sm-9">
                   <%= promotion.usageCount || 0 %>
                   <% if (promotion.maxUsage) { %>
@@ -98,35 +98,35 @@
                 </dd>
 
                 <% if (promotion.maxUsagePerCustomer) { %>
-                  <dt class="col-sm-3">Per Customer:</dt>
-                  <dd class="col-sm-9"><%= promotion.maxUsagePerCustomer %> uses</dd>
+                  <dt class="col-sm-3"><%= t('promotion:promotions.perCustomer') %>:</dt>
+                  <dd class="col-sm-9"><%= promotion.maxUsagePerCustomer %> <%= t('promotion:giftCard.uses') %></dd>
                 <% } %>
 
                 <% if (promotion.startDate) { %>
-                  <dt class="col-sm-3">Starts:</dt>
+                  <dt class="col-sm-3"><%= t('promotion:promotions.starts') %>:</dt>
                   <dd class="col-sm-9"><%= new Date(promotion.startDate).toLocaleString() %></dd>
                 <% } %>
 
                 <% if (promotion.endDate) { %>
-                  <dt class="col-sm-3">Ends:</dt>
+                  <dt class="col-sm-3"><%= t('promotion:promotions.ends') %>:</dt>
                   <dd class="col-sm-9"><%= new Date(promotion.endDate).toLocaleString() %></dd>
                 <% } %>
 
-                <dt class="col-sm-3">Status:</dt>
+                <dt class="col-sm-3"><%= t('common.status') %>:</dt>
                 <dd class="col-sm-9">
                   <span class="badge badge-<%= promotion.status === 'active' ? 'success' : promotion.status === 'expired' ? 'warning' : 'secondary' %>">
                     <%= promotion.status %>
                   </span>
                   <% if (!promotion.isActive) { %>
-                    <small class="text-muted">(Inactive)</small>
+                    <small class="text-muted">(<%= t('shared:common.inactive') %>)</small>
                   <% } %>
                 </dd>
 
-                <dt class="col-sm-3">Created:</dt>
+                <dt class="col-sm-3"><%= t('shared:common.dateCreated') %>:</dt>
                 <dd class="col-sm-9"><%= new Date(promotion.createdAt).toLocaleString() %></dd>
 
                 <% if (promotion.updatedAt !== promotion.createdAt) { %>
-                  <dt class="col-sm-3">Updated:</dt>
+                  <dt class="col-sm-3"><%= t('shared:common.dateUpdated') %>:</dt>
                   <dd class="col-sm-9"><%= new Date(promotion.updatedAt).toLocaleString() %></dd>
                 <% } %>
               </dl>
@@ -138,14 +138,14 @@
         <div class="col-md-4">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Statistics</h3>
+              <h3 class="card-title"><%= t('promotion:promotions.statistics') %></h3>
             </div>
             <div class="card-body">
               <div class="row text-center">
                 <div class="col-6">
                   <div class="description-block">
                     <h5 class="description-header"><%= promotion.usageCount || 0 %></h5>
-                    <span class="description-text">TOTAL USES</span>
+                    <span class="description-text"><%= t('promotion:promotions.totalUses') %></span>
                   </div>
                 </div>
                 <div class="col-6">
@@ -157,27 +157,27 @@
                         N/A
                       <% } %>
                     </h5>
-                    <span class="description-text">USAGE RATE</span>
+                    <span class="description-text"><%= t('promotion:promotions.usageRate') %></span>
                   </div>
                 </div>
               </div>
 
               <% if (promotion.applicableProducts && promotion.applicableProducts.length > 0) { %>
                 <hr>
-                <h6>Applicable Products</h6>
-                <small class="text-muted"><%= promotion.applicableProducts.length %> products</small>
+                <h6><%= t('promotion:promotions.applicableProducts') %></h6>
+                <small class="text-muted"><%= promotion.applicableProducts.length %> <%= t('promotion:promotions.products') %></small>
               <% } %>
 
               <% if (promotion.applicableCategories && promotion.applicableCategories.length > 0) { %>
                 <hr>
-                <h6>Applicable Categories</h6>
-                <small class="text-muted"><%= promotion.applicableCategories.length %> categories</small>
+                <h6><%= t('promotion:promotions.applicableCategories') %></h6>
+                <small class="text-muted"><%= promotion.applicableCategories.length %> <%= t('promotion:promotions.categories') %></small>
               <% } %>
 
               <% if (promotion.applicableCustomerGroups && promotion.applicableCustomerGroups.length > 0) { %>
                 <hr>
-                <h6>Customer Groups</h6>
-                <small class="text-muted"><%= promotion.applicableCustomerGroups.length %> groups</small>
+                <h6><%= t('shared:common.customerGroups') %></h6>
+                <small class="text-muted"><%= promotion.applicableCustomerGroups.length %> <%= t('promotion:promotions.groups') %></small>
               <% } %>
             </div>
           </div>
@@ -192,18 +192,18 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Delete Promotion</h4>
+        <h4 class="modal-title"><%= t('promotion:promotions.deletePromotion') %></h4>
         <button type="button" class="close" data-dismiss="modal">
           <span>&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to delete the promotion "<strong id="deletePromotionName"></strong>"?</p>
-        <p class="text-danger"><small>This action cannot be undone and will affect any active orders using this promotion.</small></p>
+        <p><%= t('promotion:promotions.confirmDeleteShort') %> "<strong id="deletePromotionName"></strong>"?</p>
+        <p class="text-danger"><small><%= t('promotion:promotions.deletePromotionWarning') %></small></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Promotion</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn"><%= t('promotion:promotions.deletePromotion') %></button>
       </div>
     </div>
   </div>
@@ -222,13 +222,13 @@ function deletePromotion(promotionId, promotionName) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        window.location.href = '/admin/promotions?success=Promotion deleted successfully';
+        window.location.href = '/admin/promotions?success=' + encodeURIComponent('<%= t("promotion:promotions.deletedSuccess") %>');
       } else {
-        alert('Error: ' + data.message);
+        alert('<%= t("common.error") %>: ' + data.message);
       }
     })
     .catch(error => {
-      alert('Error deleting promotion');
+      alert('<%= t("promotion:promotions.errorDeletingPromotion") %>');
       console.error('Error:', error);
     });
   };

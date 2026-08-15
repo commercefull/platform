@@ -45,7 +45,7 @@ describe('Tax Categories API Integration Tests', () => {
     });
   });
 
-  describe('GET /api/tax/categories/:code', () => {
+  describe('GET /customer/tax/categories/:code', () => {
     it('should return a tax category by code for public API', async () => {
       // First get all categories to find a valid code
       const allCategoriesResponse = await client.get('/business/tax/categories', {
@@ -55,7 +55,7 @@ describe('Tax Categories API Integration Tests', () => {
       const categoryCode = allCategoriesResponse.data.data[0].code;
 
       // Test the public endpoint
-      const response = await client.get(`/api/tax/categories/${categoryCode}`);
+      const response = await client.get(`/customer/tax/categories/${categoryCode}`);
 
       expect(response.status).toBe(200);
       // DB returns taxCategoryId, not id
@@ -65,7 +65,7 @@ describe('Tax Categories API Integration Tests', () => {
     });
 
     it('should return 404 for non-existent tax category code', async () => {
-      const response = await client.get('/api/tax/categories/non-existent-code');
+      const response = await client.get('/customer/tax/categories/non-existent-code');
       expect(response.status).toBe(404);
     });
   });
@@ -87,10 +87,10 @@ describe('Tax Categories API Integration Tests', () => {
 
       expect(response.status).toBe(201);
       // DB returns taxCategoryId, not id
-      const createdTaxCategoryId = response.data.taxCategoryId || response.data.id;
+      const createdTaxCategoryId = response.data.data.taxCategoryId || response.data.data.id;
       expect(createdTaxCategoryId).toBeTruthy();
-      expect(response.data.name).toBe(newTaxCategory.name);
-      expect(response.data.code).toBe(newTaxCategory.code);
+      expect(response.data.data.name).toBe(newTaxCategory.name);
+      expect(response.data.data.code).toBe(newTaxCategory.code);
 
       // Clean up - delete the tax category we just created
       await client.delete(`/business/tax/categories/${createdTaxCategoryId}`, {
@@ -127,7 +127,7 @@ describe('Tax Categories API Integration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      const createdTaxCategoryId = firstResponse.data.id;
+      const createdTaxCategoryId = firstResponse.data.data.taxCategoryId || firstResponse.data.data.id;
 
       // Try to create another category with the same code
       const duplicateTaxCategory = {
@@ -171,7 +171,7 @@ describe('Tax Categories API Integration Tests', () => {
       });
 
       if (createResponse.status === 201) {
-        testCategoryId = createResponse.data.id;
+        testCategoryId = createResponse.data.data.taxCategoryId || createResponse.data.data.id;
       }
     });
 
@@ -196,9 +196,9 @@ describe('Tax Categories API Integration Tests', () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.data.name).toBe(updateData.name);
-      expect(response.data.description).toBe(updateData.description);
-      expect(response.data.sortOrder).toBe(updateData.sortOrder);
+      expect(response.data.data.name).toBe(updateData.name);
+      expect(response.data.data.description).toBe(updateData.description);
+      expect(response.data.data.sortOrder).toBe(updateData.sortOrder);
     });
 
     it('should return 404 for non-existent tax category', async () => {
@@ -233,7 +233,7 @@ describe('Tax Categories API Integration Tests', () => {
       });
 
       if (createResponse.status === 201) {
-        testCategoryId = createResponse.data.id;
+        testCategoryId = createResponse.data.data.taxCategoryId || createResponse.data.data.id;
       }
     });
 

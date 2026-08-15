@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Gesamtzahl der Abonnements",
+  "monthlyRecurringRevenue": "Monatlich wiederkehrende Einnahmen",
+  "addPlan": "Plan hinzufügen",
+  "planName": "Planname",
+  "subscribers": "Abonnenten",
+  "noPlans": "Keine Abonnementpläne konfiguriert.",
+  "plan": "Planen",
+  "started": "Begonnen",
+  "nextBilling": "Nächste Abrechnung",
+  "noActiveSubscriptions": "Keine aktiven Abonnements.",
+  "addSubscriptionPlan": "Abonnementplan hinzufügen",
+  "yearly": "Jährlich",
+  "trialDays": "Probetage",
+  "confirmDeletePlan": "Diesen Plan löschen?",
+  "billingOverview": "Abrechnungsübersicht",
+  "billingDescription": "Verwalten Sie die Abonnementabrechnung, fehlgeschlagene Zahlungen und die Verlängerungsverarbeitung."
+}

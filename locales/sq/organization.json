@@ -1,0 +1,13 @@
+{
+  "create": "Krijo Organizatë",
+  "view": "Detajet e Organizatës",
+  "single": "Beqare",
+  "multiStore": "Shumë-Dyqani",
+  "marketplace": "Tregu",
+  "settings": "Cilësimet (JSON)",
+  "settingsHint": "Objekti opsional JSON për cilësimet e nivelit të organizatës.",
+  "slugHint": "Vetëm shkronja të vogla, numra dhe viza.",
+  "noOrganizations": "Nuk u gjet asnjë organizatë.",
+  "confirmDelete": "Të fshihet kjo organizatë?",
+  "noStoresLinked": "Nuk ka dyqane të lidhura me këtë organizatë."
+}

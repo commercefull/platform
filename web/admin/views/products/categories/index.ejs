@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
-            <li class="breadcrumb-item active">Categories</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/products"><%= t('shared:common.products') %></a></li>
+            <li class="breadcrumb-item active"><%= t('nav.categories') %></li>
           </ol>
         </div>
       </div>
@@ -29,9 +29,9 @@
 
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h3 class="card-title">Product Categories</h3>
+          <h3 class="card-title"><%= t('product:category.title') %></h3>
           <a href="/admin/products/categories/create" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus me-1"></i>New Category
+            <i class="fas fa-plus me-1"></i><%= t('product:category.new') %>
           </a>
         </div>
         <div class="card-body p-0">
@@ -39,12 +39,12 @@
           <table class="table table-striped mb-0">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Slug</th>
-                <th>Parent</th>
-                <th>Position</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th><%= t('common.name') %></th>
+                <th><%= t('shared:common.slug') %></th>
+                <th><%= t('shared:common.parent') %></th>
+                <th><%= t('product:category.position') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
@@ -56,16 +56,16 @@
                 <td><%= cat.position %></td>
                 <td>
                   <% if (cat.isActive) { %>
-                    <span class="badge bg-success">Active</span>
+                    <span class="badge bg-success"><%= t('common.active') %></span>
                   <% } else { %>
-                    <span class="badge bg-secondary">Inactive</span>
+                    <span class="badge bg-secondary"><%= t('common.inactive') %></span>
                   <% } %>
                 </td>
                 <td>
-                  <a href="/admin/products/categories/<%= cat.productCategoryId %>/edit" class="btn btn-sm btn-outline-primary">Edit</a>
-                  <form method="POST" action="/admin/products/categories/<%= cat.productCategoryId %>?_method=DELETE" class="d-inline" onsubmit="return confirm('Delete this category?')">
+                  <a href="/admin/products/categories/<%= cat.productCategoryId %>/edit" class="btn btn-sm btn-outline-primary"><%= t('common.edit') %></a>
+                  <form method="POST" action="/admin/products/categories/<%= cat.productCategoryId %>?_method=DELETE" class="d-inline" onsubmit="return confirm('<%= t('product:category.confirmDelete') %>')">
                     <input type="hidden" name="_method" value="DELETE">
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><%= t('common.delete') %></button>
                   </form>
                 </td>
               </tr>
@@ -73,7 +73,7 @@
             </tbody>
           </table>
           <% } else { %>
-          <div class="p-4 text-muted text-center">No product categories found. <a href="/admin/products/categories/create">Create one</a>.</div>
+          <div class="p-4 text-muted text-center"><%= t('product:category.noCategories') %> <a href="/admin/products/categories/create"><%= t('product:category.createOne') %></a>.</div>
           <% } %>
         </div>
       </div>

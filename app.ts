@@ -92,6 +92,7 @@ app.use(
           'https://unpkg.com',
           'https://cdnjs.cloudflare.com',
           'https://cdn.jsdelivr.net',
+          ...(isProduction ? [] : ["'unsafe-inline'"]),
         ],
         'img-src': [
           "'self'",
@@ -108,6 +109,7 @@ app.use(
           'https://cdnjs.cloudflare.com',
           'https://cdn.jsdelivr.net',
           'https://code.ionicframework.com',
+          ...(isProduction ? [] : ['ws:', 'wss:']),
         ],
         'font-src': [
           "'self'",
@@ -204,8 +206,8 @@ i18next
       loadPath,
     },
     fallbackLng: 'en',
-    preload: ['en', 'de', 'es', 'fr', 'it', 'el', 'sq'],
-    ns: ['shared', 'auth', 'basket', 'checkout', 'customer', 'distribution', 'merchant', 'order', 'product', 'promotion', 'tax'],
+    preload: ['en', 'de', 'es', 'fr', 'it', 'el', 'sq', 'pt', 'zh', 'hi', 'ru', 'id', 'ja', 'tr', 'ko', 'vi'],
+    ns: ['shared', 'auth', 'basket', 'checkout', 'content', 'customer', 'distribution', 'merchant', 'order', 'product', 'promotion', 'tax', 'storefront', 'analytics', 'operations', 'platform', 'marketing', 'notifications', 'payment', 'inventory', 'users', 'settings', 'support', 'b2b', 'loyalty', 'subscription', 'membership', 'gdpr', 'reporting', 'salesSegment', 'auditLog', 'organization'],
     defaultNS: 'shared',
     detection: {
       order: ['querystring', 'cookie'],
@@ -232,7 +234,14 @@ app.locals.t = function (key: string) {
 };
 
 app.use(expressHttpLogger);
-app.use(express.json({ limit: '1mb' })); // Limit JSON body size
+// Skip JSON parsing for webhook route — needs raw Buffer for signature verification
+app.use((req, res, next) => {
+  if (req.path === '/payment/webhook') {
+    next();
+  } else {
+    express.json({ limit: '1mb' })(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 

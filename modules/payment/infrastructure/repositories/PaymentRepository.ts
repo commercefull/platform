@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { generateUUID } from '../../../../libs/uuid';
 import {
   PaymentRepository as IPaymentRepository,
   PaymentFilters,
@@ -123,17 +124,43 @@ export class PaymentRepo implements IPaymentRepository {
         ],
       );
     } else {
+      const orderPaymentId = generateUUID();
+
+      // Create orderPayment record first (FK constraint)
+      await query(
+        `INSERT INTO "orderPayment" (
+          "orderPaymentId", "orderId", "type", "provider",
+          amount, currency, status, "refundedAmount",
+          "createdAt", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [
+          orderPaymentId,
+          transaction.orderId,
+          'creditCard',
+          'stripe',
+          transaction.amount,
+          transaction.currency,
+          'pending',
+          0,
+          now,
+          now,
+        ],
+      );
+
       await query(
         `INSERT INTO "paymentTransaction" (
-          "paymentTransactionId", "orderId", "customerId", "paymentMethodId", "paymentGatewayId",
+          "paymentTransactionId", "orderPaymentId", "orderId", "type",
+          "customerId", "paymentMethodId", "paymentGatewayId",
           amount, currency, status, "refundedAmount", "customerIp", metadata,
           "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
         [
           transaction.transactionId,
+          orderPaymentId,
           transaction.orderId,
+          'sale',
           transaction.customerId,
-          transaction.paymentMethodConfigId,
+          null,
           transaction.gatewayId,
           transaction.amount,
           transaction.currency,
@@ -259,16 +286,30 @@ export class PaymentRepo implements IPaymentRepository {
     provider: string;
     isTestMode: boolean;
   } | null> {
-    const row = await queryOne<Record<string, unknown>>(
-      'SELECT * FROM "paymentGateway" WHERE "merchantId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
-      [merchantId],
-    );
+    let row: Record<string, unknown> | null = null;
+
+    if (merchantId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(merchantId)) {
+      row = await queryOne<Record<string, unknown>>(
+        'SELECT * FROM "paymentGateway" WHERE "merchantId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
+        [merchantId],
+      );
+    }
 
     if (!row) {
       const fallback = await queryOne<Record<string, unknown>>(
-        'SELECT * FROM "paymentGateway" WHERE "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
+        'SELECT * FROM "paymentGateway" WHERE "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
       );
-      if (!fallback) return null;
+      if (!fallback) {
+        const anyGateway = await queryOne<Record<string, unknown>>(
+          'SELECT * FROM "paymentGateway" WHERE "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
+        );
+        if (!anyGateway) return null;
+        return {
+          gatewayId: anyGateway.paymentGatewayId as string,
+          provider: anyGateway.provider as string,
+          isTestMode: Boolean(anyGateway.isTestMode),
+        };
+      }
       return {
         gatewayId: fallback.paymentGatewayId as string,
         provider: fallback.provider as string,

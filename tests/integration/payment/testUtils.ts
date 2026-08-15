@@ -41,6 +41,7 @@ export const setupPaymentTests = async () => {
 
   let testGatewayId = '';
   let testMethodConfigId = '';
+  let testOrderId = '';
 
   // Try to create test gateway
   try {
@@ -73,12 +74,54 @@ export const setupPaymentTests = async () => {
     } catch {}
   }
 
+  // Create a test order for transaction creation
+  if (customerToken) {
+    try {
+      const orderResponse = await client.post(
+        '/customer/order',
+        {
+          orderNumber: `PAY-TEST-${Date.now()}`,
+          currencyCode: 'USD',
+          customerEmail: 'test@example.com',
+          customerName: 'Test Customer',
+          shippingAddress: {
+            firstName: 'Test',
+            lastName: 'Customer',
+            address1: '123 Test St',
+            city: 'Test City',
+            state: 'TS',
+            postalCode: '12345',
+            country: 'US',
+            phone: '555-123-4567',
+          },
+          items: [
+            {
+              productId: '10000000-0000-0000-0000-000000000001',
+              sku: 'TEST-PROD-001',
+              name: 'Test Product',
+              quantity: 1,
+              unitPrice: 49.99,
+            },
+          ],
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
+
+      if (orderResponse.data?.success && orderResponse.data?.data?.orderId) {
+        testOrderId = orderResponse.data.data.orderId;
+      }
+    } catch {}
+  }
+
   return {
     client,
     adminToken,
     customerToken,
     testGatewayId,
     testMethodConfigId,
+    testOrderId,
     testTransactionId: '', // Will be created in tests if needed
   };
 };
@@ -87,7 +130,18 @@ export const setupPaymentTests = async () => {
  * Cleanup function for payment integration tests
  * Removes test data created during setup
  */
-export const cleanupPaymentTests = async (client: AxiosInstance, adminToken: string, testGatewayId: string, testMethodConfigId: string) => {
+export const cleanupPaymentTests = async (client: AxiosInstance, adminToken: string, testGatewayId: string, testMethodConfigId: string, testOrderId?: string) => {
+  // Delete test order
+  if (testOrderId) {
+    try {
+      await client.delete(`/business/orders/${testOrderId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+    } catch {
+      /* ignore */
+    }
+  }
+
   // Delete test method config
   if (testMethodConfigId) {
     try {

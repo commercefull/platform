@@ -1,0 +1,10 @@
+{
+  "rates": "Thuế suất",
+  "zones": "Khu thuế",
+  "addRate": "Thêm thuế suất",
+  "addZone": "Thêm khu vực thuế",
+  "addClass": "Thêm loại thuế",
+  "stateRegion": "Tiểu bang/Khu vực",
+  "classes": "Các loại thuế",
+  "zoneName": "Tên khu vực"
+}

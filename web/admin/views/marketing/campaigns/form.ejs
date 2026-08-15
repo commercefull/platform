@@ -2,7 +2,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title"><%= campaign ? 'Edit Campaign' : 'Create Campaign' %></h2>
+      <h2 class="page-title"><%= campaign ? t('marketing:editCampaign') : t('marketing:createCampaign') %></h2>
     </div>
     <div class="col-auto">
       <a href="/admin/marketing/campaigns" class="btn btn-outline-secondary">
@@ -11,7 +11,7 @@
           <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
           <polyline points="15 6 9 12 15 18"/>
         </svg>
-        Back to Campaigns
+        <%= t('marketing:backToCampaigns') %>
       </a>
     </div>
   </div>
@@ -27,38 +27,38 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title"><%= campaign ? 'Edit' : 'New' %> Email Campaign</h3>
+        <h3 class="card-title"><%= campaign ? t('common.edit') : t('shared:common.new') %> <%= t('marketing:emailCampaigns') %></h3>
       </div>
       <div class="card-body">
         <form method="POST" action="/admin/marketing/campaigns<%= campaign ? '/' + campaign.marketingEmailCampaignId : '' %>">
           <div class="mb-3">
-            <label class="form-label required">Campaign Name</label>
+            <label class="form-label required"><%= t('marketing:campaignName') %></label>
             <input type="text" name="name" class="form-control" required
               value="<%= (formData && formData.name) || (campaign && campaign.name) || '' %>"
-              placeholder="e.g. Summer Sale Newsletter">
+              placeholder="<%= t('marketing:campaignNamePlaceholder') %>">
           </div>
           <div class="mb-3">
-            <label class="form-label required">Subject Line</label>
+            <label class="form-label required"><%= t('marketing:subjectLine') %></label>
             <input type="text" name="subject" class="form-control" required
               value="<%= (formData && formData.subject) || (campaign && campaign.subject) || '' %>"
-              placeholder="e.g. Don't miss our summer deals!">
+              placeholder="<%= t('marketing:subjectLinePlaceholder') %>">
           </div>
           <div class="mb-3">
-            <label class="form-label">Template ID <span class="text-muted">(optional)</span></label>
+            <label class="form-label"><%= t('marketing:templateIdOptional') %></label>
             <input type="text" name="templateId" class="form-control"
               value="<%= (formData && formData.templateId) || (campaign && campaign.templateId) || '' %>"
-              placeholder="UUID of email template">
+              placeholder="<%= t('marketing:templateIdPlaceholder') %>">
           </div>
           <div class="mb-3">
-            <label class="form-label">Scheduled At <span class="text-muted">(optional)</span></label>
+            <label class="form-label"><%= t('marketing:scheduledAtOptional') %></label>
             <input type="datetime-local" name="scheduledAt" class="form-control"
               value="<%= (formData && formData.scheduledAt) || '' %>">
           </div>
           <div class="form-footer">
             <button type="submit" class="btn btn-primary">
-              <%= campaign ? 'Update Campaign' : 'Create Campaign' %>
+              <%= campaign ? t('marketing:updateCampaign') : t('marketing:createCampaign') %>
             </button>
-            <a href="/admin/marketing/campaigns" class="btn btn-link">Cancel</a>
+            <a href="/admin/marketing/campaigns" class="btn btn-link"><%= t('common.cancel') %></a>
           </div>
         </form>
       </div>

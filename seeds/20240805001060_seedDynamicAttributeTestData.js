@@ -406,6 +406,25 @@ exports.seed = async function (knex) {
     .onConflict('productAttributeSetId')
     .merge();
 
+  // ==================== ATTRIBUTE SET MAPPINGS ====================
+  await knex('productAttributeSetMapping')
+    .insert([
+      // Default set: brand, weight
+      { attributeSetId: ATTRIBUTE_SET_DEFAULT_ID, attributeId: ATTRIBUTE_BRAND_ID, position: 1, isRequired: false },
+      { attributeSetId: ATTRIBUTE_SET_DEFAULT_ID, attributeId: ATTRIBUTE_WEIGHT_ID, position: 2, isRequired: false },
+      // Apparel set: color (required), size, material
+      { attributeSetId: ATTRIBUTE_SET_APPAREL_ID, attributeId: ATTRIBUTE_COLOR_ID, position: 1, isRequired: true },
+      { attributeSetId: ATTRIBUTE_SET_APPAREL_ID, attributeId: ATTRIBUTE_SIZE_ID, position: 2, isRequired: false },
+      { attributeSetId: ATTRIBUTE_SET_APPAREL_ID, attributeId: ATTRIBUTE_MATERIAL_ID, position: 3, isRequired: false },
+      // Electronics set: screen-size, ram, storage, brand
+      { attributeSetId: ATTRIBUTE_SET_ELECTRONICS_ID, attributeId: ATTRIBUTE_SCREEN_SIZE_ID, position: 1, isRequired: false },
+      { attributeSetId: ATTRIBUTE_SET_ELECTRONICS_ID, attributeId: ATTRIBUTE_RAM_ID, position: 2, isRequired: false },
+      { attributeSetId: ATTRIBUTE_SET_ELECTRONICS_ID, attributeId: ATTRIBUTE_STORAGE_ID, position: 3, isRequired: false },
+      { attributeSetId: ATTRIBUTE_SET_ELECTRONICS_ID, attributeId: ATTRIBUTE_BRAND_ID, position: 4, isRequired: false },
+    ])
+    .onConflict(['attributeSetId', 'attributeId'])
+    .merge();
+
   // ==================== PRODUCT ATTRIBUTE VALUES (assign to test products) ====================
   // Note: productAttributeValueMap has: productAttributeValueMapId, productId, productVariantId,
   // attributeId, value, valueText, valueNumeric, valueBoolean, valueJson, valueDate, isSystem, language
@@ -470,6 +489,10 @@ exports.down = async function (knex) {
       ATTRIBUTE_RAM_ID,
       ATTRIBUTE_STORAGE_ID,
     ])
+    .delete();
+
+  await knex('productAttributeSetMapping')
+    .whereIn('attributeSetId', [ATTRIBUTE_SET_DEFAULT_ID, ATTRIBUTE_SET_APPAREL_ID, ATTRIBUTE_SET_ELECTRONICS_ID])
     .delete();
 
   await knex('productAttributeSet')

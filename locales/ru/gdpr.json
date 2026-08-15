@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "Ожидающие запросы",
+  "completedThisMonth": "Завершено в этом месяце",
+  "avgProcessingDays": "Среднее количество дней обработки",
+  "marketingConsentRate": "Коэффициент согласия на маркетинг",
+  "dataAccessRequests": "Запросы на доступ к данным",
+  "dataAccess": "Доступ к данным",
+  "dataDeletion": "Удаление данных",
+  "noGdprRequests": "Запросов GDPR пока нет.",
+  "consentManagement": "Управление согласием",
+  "marketingConsent": "Маркетинговое согласие",
+  "analyticsConsent": "Согласие на аналитику",
+  "manageConsentSettings": "Управление настройками согласия",
+  "createGdprRequest": "Создать запрос GDPR",
+  "dataAccessRequestSar": "Запрос доступа к данным (SAR)",
+  "dataDeletionRequest": "Запрос на удаление данных",
+  "dataRectificationRequest": "Запрос на исправление данных",
+  "customerEmail": "Электронная почта клиента",
+  "createRequest": "Создать запрос",
+  "confirmProcessRequest": "Отметить этот запрос как обрабатываемый?",
+  "consentRecords": "Записи о согласии",
+  "manageConsentRecords": "Управляйте записями согласия и предпочтениями клиентов."
+}

@@ -196,11 +196,12 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
       return;
     }
 
-    const email = customerEmail || req.user?.email;
-    if (!email) {
+    if (!customerEmail) {
       respondError(req, res, 'Customer email is required', 400, 'order/error');
       return;
     }
+
+    const email = customerEmail;
 
     let resolvedStoreId = storeId || req.user?.storeId;
     let resolvedChannelId = channelId;
@@ -273,6 +274,11 @@ export const cancelOrder = async (req: TypedRequest, res: Response): Promise<voi
 
     if ((error as Error).message.includes('cannot be cancelled')) {
       respondError(req, res, (error as Error).message, 400, 'order/error');
+      return;
+    }
+
+    if ((error as Error).message.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order not found', 404, 'order/error');
       return;
     }
 

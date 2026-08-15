@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">Payment Methods</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.paymentMethods') %></li>
           </ol>
         </div>
       </div>
@@ -21,18 +21,18 @@
     <div class="container-fluid">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-list me-2"></i>Configured Payment Methods</h3>
+          <h3 class="card-title"><i class="fas fa-list me-2"></i><%= t('shared:common.paymentMethods') %></h3>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Method</th>
-                <th>Gateway</th>
-                <th>Countries</th>
-                <th>Min/Max Amount</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th><%= t('shared:common.methodName') %></th>
+                <th><%= t('payment:gateways') %></th>
+                <th><%= t('localization.countries') %></th>
+                <th><%= t('merchant:minAmount') %> / <%= t('merchant:maxAmount') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
@@ -43,17 +43,17 @@
                   <strong><%= method.name %></strong>
                 </td>
                 <td><span class="badge bg-secondary"><%= method.gatewayName || method.gateway %></span></td>
-                <td><%= (method.countries || []).length > 0 ? method.countries.join(', ') : 'All' %></td>
+                <td><%= (method.countries || []).length > 0 ? method.countries.join(', ') : t('common.all') %></td>
                 <td>
                   <% if (method.minAmount || method.maxAmount) { %>
                   $<%= method.minAmount || 0 %> - $<%= method.maxAmount || '∞' %>
                   <% } else { %>
-                  No limits
+                  <%= t('common.none') %>
                   <% } %>
                 </td>
                 <td>
                   <span class="badge bg-<%= method.isActive ? 'success' : 'secondary' %>">
-                    <%= method.isActive ? 'Active' : 'Inactive' %>
+                    <%= method.isActive ? t('common.active') : t('common.inactive') %>
                   </span>
                 </td>
                 <td>
@@ -69,7 +69,7 @@
               <% if ((methods || []).length === 0) { %>
               <tr>
                 <td colspan="6" class="text-center text-muted py-4">
-                  No payment methods configured. Configure a gateway first.
+                  <%= t('payment:noMethods') %> <%= t('payment:createGateway') %>.
                 </td>
               </tr>
               <% } %>

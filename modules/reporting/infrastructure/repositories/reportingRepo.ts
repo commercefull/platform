@@ -214,7 +214,7 @@ function mapExecutionRow(row: ReportingReportExecution): ReportExecutionProps {
   };
 }
 
-function computeNextRunDate(frequency: ReportFrequency, from: Date): Date {
+export function computeNextRunDate(frequency: ReportFrequency, from: Date): Date {
   const next = new Date(from);
   switch (frequency) {
     case 'daily':

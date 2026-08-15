@@ -8,317 +8,45 @@ The Tax feature manages tax rates, categories, and zones for accurate tax calcul
 
 ## Use Cases
 
-### Tax Rates (Business)
-
-### UC-TAX-001: List Tax Rates (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request tax rates  
-**Then** the system returns all configured rates
-
-#### API Endpoint
-
-```
-GET /business/tax/rates
-Query: zoneId?, categoryId?, isActive?, limit, offset
-```
-
----
-
-### UC-TAX-002: Get Tax Rate (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/tax/rates/:id
-```
-
----
-
-### UC-TAX-003: Create Tax Rate (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** valid rate configuration  
-**When** they create a tax rate  
-**Then** the rate is applied to matching orders
-
-#### API Endpoint
-
-```
-POST /business/tax/rates
-Body: {
-  name,
-  rate,
-  zoneId,
-  categoryId?,
-  isCompound?,
-  priority?,
-  isActive
-}
-```
-
-#### Business Rules
-
-- Rate is a percentage (e.g., 8.25 for 8.25%)
-- Compound taxes apply on top of other taxes
-- Priority determines calculation order
-- Can be category-specific
-
----
-
-### UC-TAX-004: Update Tax Rate (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /business/tax/rates/:id
-```
-
----
-
-### UC-TAX-005: Delete Tax Rate (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-DELETE /business/tax/rates/:id
-```
-
----
-
-### Tax Categories (Business)
-
-### UC-TAX-006: List Tax Categories (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request tax categories  
-**Then** the system returns all categories
-
-#### API Endpoint
-
-```
-GET /business/tax/categories
-```
-
----
-
-### UC-TAX-007: Get Tax Category (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/tax/categories/:id
-```
-
----
-
-### UC-TAX-008: Create Tax Category (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** valid category data  
-**When** they create a tax category  
-**Then** products can be assigned to it
-
-#### API Endpoint
-
-```
-POST /business/tax/categories
-Body: {
-  name, code, description?,
-  isDefault?
-}
-```
-
-#### Business Rules
-
-- Categories group products for tax purposes
-- Examples: Standard, Reduced, Zero-rated, Exempt
-- One default category for uncategorized products
-
----
-
-### UC-TAX-009: Update Tax Category (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /business/tax/categories/:id
-```
-
----
-
-### UC-TAX-010: Delete Tax Category (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-DELETE /business/tax/categories/:id
-```
-
----
-
-### Tax Zones (Business)
-
-### UC-TAX-011: Get Tax Zone (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/tax/zones/:id
-```
-
----
-
-### UC-TAX-012: Create Tax Zone (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** valid zone configuration  
-**When** they create a tax zone  
-**Then** addresses in that zone use its rates
-
-#### API Endpoint
-
-```
-POST /business/tax/zones
-Body: {
-  name,
-  countries: [],
-  states?: [],
-  postalCodes?: [],
-  isDefault?
-}
-```
-
-#### Business Rules
-
-- Zones define geographic tax jurisdictions
-- Can be country, state, or postal code level
-- Most specific zone wins
-- One default zone for unmatched addresses
-
----
-
-### UC-TAX-013: Update Tax Zone (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /business/tax/zones/:id
-```
-
----
-
-### UC-TAX-014: Delete Tax Zone (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-DELETE /business/tax/zones/:id
-```
-
----
-
-### Tax Calculation (Customer)
-
-### UC-TAX-015: Calculate Tax (Customer)
-
-**Actor:** System/Checkout  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** a cart with items  
-**And** a shipping address  
-**When** calculating tax  
-**Then** the correct tax amount is returned
-
-#### API Endpoint
-
-```
-POST /tax/calculate
-Body: {
-  items: [{ productId, quantity, price, categoryId? }],
-  shippingAddress: { country, state?, postalCode? }
-}
-```
-
-#### Business Rules
-
-- Matches address to tax zone
-- Applies category-specific rates
-- Handles compound taxes
-- Returns itemized tax breakdown
-
----
-
-### UC-TAX-016: Get Tax Summary (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an order  
-**When** requesting tax summary  
-**Then** the system returns tax breakdown
-
-#### API Endpoint
-
-```
-GET /tax/summary/:orderId
-```
+| ID | Use Case | Actor | Purpose |
+|---|---|---|---|
+| UC-TAX-001 | List Tax Rates | Merchant/Admin | List all configured tax rates with optional zone/category/active filtering |
+| UC-TAX-002 | Get Tax Rate | Merchant/Admin | Retrieve a specific tax rate by ID |
+| UC-TAX-003 | Create Tax Rate | Merchant/Admin | Create a tax rate (percentage) for a zone, optionally category-specific, compound, with priority |
+| UC-TAX-004 | Update Tax Rate | Merchant/Admin | Update an existing tax rate's configuration |
+| UC-TAX-005 | Delete Tax Rate | Merchant/Admin | Permanently delete a tax rate |
+| UC-TAX-006 | List Tax Categories | Merchant/Admin | List all tax categories |
+| UC-TAX-007 | Get Tax Category | Merchant/Admin | Retrieve a specific tax category by ID |
+| UC-TAX-008 | Create Tax Category | Merchant/Admin | Create a tax category (e.g., Standard, Reduced, Zero-rated, Exempt) with optional default flag |
+| UC-TAX-009 | Update Tax Category | Merchant/Admin | Update an existing tax category |
+| UC-TAX-010 | Delete Tax Category | Merchant/Admin | Permanently delete a tax category |
+| UC-TAX-011 | Get Tax Zone | Merchant/Admin | Retrieve a specific tax zone by ID |
+| UC-TAX-012 | Create Tax Zone | Merchant/Admin | Create a geographic tax jurisdiction (country, state, or postal code level) with optional default flag |
+| UC-TAX-013 | Update Tax Zone | Merchant/Admin | Update an existing tax zone's geographic scope |
+| UC-TAX-014 | Delete Tax Zone | Merchant/Admin | Permanently delete a tax zone |
+| UC-TAX-015 | Calculate Tax | System/Checkout | Calculate tax for cart items based on shipping address, zone matching, and category-specific rates |
+| UC-TAX-016 | Get Tax Summary | Customer | Retrieve an itemized tax breakdown for a specific order |
+
+### API Endpoints
+
+| ID | Method | Endpoint |
+|---|---|---|
+| UC-TAX-001 | GET | `/business/tax/rates` |
+| UC-TAX-002 | GET | `/business/tax/rates/:id` |
+| UC-TAX-003 | POST | `/business/tax/rates` |
+| UC-TAX-004 | PUT | `/business/tax/rates/:id` |
+| UC-TAX-005 | DELETE | `/business/tax/rates/:id` |
+| UC-TAX-006 | GET | `/business/tax/categories` |
+| UC-TAX-007 | GET | `/business/tax/categories/:id` |
+| UC-TAX-008 | POST | `/business/tax/categories` |
+| UC-TAX-009 | PUT | `/business/tax/categories/:id` |
+| UC-TAX-010 | DELETE | `/business/tax/categories/:id` |
+| UC-TAX-011 | GET | `/business/tax/zones/:id` |
+| UC-TAX-012 | POST | `/business/tax/zones` |
+| UC-TAX-013 | PUT | `/business/tax/zones/:id` |
+| UC-TAX-014 | DELETE | `/business/tax/zones/:id` |
+| UC-TAX-015 | POST | `/tax/calculate` |
+| UC-TAX-016 | GET | `/tax/summary/:orderId` |
 
 ---
 
@@ -351,9 +79,9 @@ Total Tax = Sum of all item taxes
 
 ## Integration Test Coverage
 
-| Use Case                 | Test File                 | Status |
-| ------------------------ | ------------------------- | ------ |
-| UC-TAX-001 to UC-TAX-005 | `tax/rates.test.ts`       | 🟡     |
-| UC-TAX-006 to UC-TAX-010 | `tax/categories.test.ts`  | 🟡     |
-| UC-TAX-011 to UC-TAX-014 | `tax/zones.test.ts`       | ❌     |
-| UC-TAX-015 to UC-TAX-016 | `tax/calculation.test.ts` | 🟡     |
+| Use Case                 | Test File                       | Status |
+| ------------------------ | ------------------------------- | ------ |
+| UC-TAX-001 to UC-TAX-005 | `tax/taxRates.test.ts`          | ✅     |
+| UC-TAX-006 to UC-TAX-010 | `tax/taxCategories.test.ts`     | ✅     |
+| UC-TAX-011 to UC-TAX-014 | `tax/taxZones.test.ts`             | ✅     |
+| UC-TAX-015 to UC-TAX-016 | `tax/taxCalculation.test.ts`    | ✅     |

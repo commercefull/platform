@@ -5,7 +5,7 @@
 
 import { ProductRepository, PaginationOptions, ProductFilters } from '../../domain/repositories/ProductRepository';
 import { Product } from '../../domain/entities/Product';
-import { BusinessRepository } from '../../../business/domain/repositories/BusinessRepository';
+import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
 import { StoreRepository } from '../../../store/domain/repositories/StoreRepository';
 import { SystemConfigurationRepository } from '../../../configuration/domain/repositories/SystemConfigurationRepository';
 import { SystemConfiguration } from '../../../configuration/domain/entities/SystemConfiguration';
@@ -29,7 +29,6 @@ export class ListProductsForContextCommand {
 
       // Common filters
       categoryId?: string;
-      brandId?: string;
       isFeatured?: boolean;
       search?: string;
       priceMin?: number;
@@ -50,7 +49,6 @@ export class ListProductsForContextCommand {
 export class ListProductsForContextUseCase {
   constructor(
     private readonly productRepository: ProductRepository,
-    private readonly businessRepository: BusinessRepository,
     private readonly storeRepository: StoreRepository,
     private readonly systemConfigRepository: SystemConfigurationRepository,
   ) {}
@@ -94,27 +92,27 @@ export class ListProductsForContextUseCase {
       }
       // In marketplace, we might show products from multiple merchants
     } else if (systemConfig?.isMultiStore) {
-      // Multi-store mode: products belong to businesses
+      // Multi-store mode: products belong to organizations
       if (command.context.businessId) {
         filters.businessId = command.context.businessId;
       } else if (command.context.storeId) {
-        // If storeId is provided, find the business for that store
+        // If storeId is provided, find the organization for that store
         const store = await this.storeRepository.findById(command.context.storeId);
         if (store?.businessId) {
           filters.businessId = store.businessId;
         }
       }
     } else {
-      // Single store mode: products belong to the default business
-      const defaultBusiness = await this.businessRepository.findActive().then(businesses => businesses[0]);
-      if (defaultBusiness) {
-        filters.businessId = defaultBusiness.businessId;
+      // Single store mode: products belong to the default organization
+      const organizations = await organizationRepo.findAll();
+      const defaultOrg = organizations[0];
+      if (defaultOrg) {
+        filters.businessId = defaultOrg.organizationId;
       }
     }
 
     // Apply common filters
     if (command.context.categoryId) filters.categoryId = command.context.categoryId;
-    if (command.context.brandId) filters.brandId = command.context.brandId;
     if (command.context.isFeatured !== undefined) filters.isFeatured = command.context.isFeatured;
     if (command.context.search) filters.search = command.context.search;
     if (command.context.priceMin !== undefined) filters.priceMin = command.context.priceMin;

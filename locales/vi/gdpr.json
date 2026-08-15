@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "Yêu cầu đang chờ xử lý",
+  "completedThisMonth": "Đã hoàn thành trong tháng này",
+  "avgProcessingDays": "Số ngày xử lý trung bình",
+  "marketingConsentRate": "Tỷ lệ đồng ý tiếp thị",
+  "dataAccessRequests": "Yêu cầu truy cập dữ liệu",
+  "dataAccess": "Truy cập dữ liệu",
+  "dataDeletion": "Xóa dữ liệu",
+  "noGdprRequests": "Chưa có yêu cầu GDPR nào.",
+  "consentManagement": "Quản lý sự đồng ý",
+  "marketingConsent": "Đồng ý tiếp thị",
+  "analyticsConsent": "Đồng ý phân tích",
+  "manageConsentSettings": "Quản lý cài đặt đồng ý",
+  "createGdprRequest": "Tạo yêu cầu GDPR",
+  "dataAccessRequestSar": "Yêu cầu truy cập dữ liệu (SAR)",
+  "dataDeletionRequest": "Yêu cầu xóa dữ liệu",
+  "dataRectificationRequest": "Yêu cầu chỉnh sửa dữ liệu",
+  "customerEmail": "Email khách hàng",
+  "createRequest": "Tạo yêu cầu",
+  "confirmProcessRequest": "Đánh dấu yêu cầu này là đang xử lý?",
+  "consentRecords": "Hồ sơ đồng ý",
+  "manageConsentRecords": "Quản lý hồ sơ và sở thích chấp thuận của khách hàng."
+}

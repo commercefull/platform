@@ -1,0 +1,23 @@
+{
+  "programMembers": "Program Members",
+  "pointsIssued": "Points Issued",
+  "pointsRedeemed": "Points Redeemed",
+  "programSettings": "Program Settings",
+  "pointsPerDollar": "Points per Dollar Spent",
+  "pointsValue": "Points Value ($ per point)",
+  "minimumRedemption": "Minimum Redemption",
+  "addReward": "Add Reward",
+  "reward": "Reward",
+  "redemptions": "Redemptions",
+  "noRewards": "No rewards configured.",
+  "recentTransactions": "Recent Transactions",
+  "noTransactions": "No transactions yet.",
+  "rewardName": "Reward Name",
+  "rewardType": "Reward Type",
+  "freeProduct": "Free Product",
+  "giftCard": "Gift Card",
+  "rewardValue": "Reward Value",
+  "confirmDeleteReward": "Delete this reward?",
+  "analytics": "Loyalty Program Analytics",
+  "analyticsDescription": "Points distribution, redemption rates, and tier progression."
+}

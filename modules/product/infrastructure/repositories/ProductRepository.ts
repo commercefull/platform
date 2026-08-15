@@ -96,21 +96,20 @@ export class ProductRepo implements IProductRepository {
       await query(
         `UPDATE product SET
           name = $1, description = $2, "shortDescription" = $3, sku = $4, slug = $5,
-          "brandId" = $6, type = $7, status = $8, visibility = $9, price = $10,
-          "basePrice" = $11, "salePrice" = $12, "costPrice" = $13, "taxClass" = $14,
-          "isTaxable" = $15, currency = $16, "isInventoryManaged" = $17,
-          weight = $18, "weightUnit" = $19, length = $20, width = $21, height = $22,
-          "dimensionUnit" = $23, "metaTitle" = $24, "metaDescription" = $25, "metaKeywords" = $26,
-          "isFeatured" = $27, "isNew" = $28, "isBestseller" = $29, "hasVariants" = $30,
-          "merchantId" = $31, "businessId" = $32, "storeId" = $33, "publishedAt" = $34, "updatedAt" = $35
-        WHERE "productId" = $36`,
+          type = $6, status = $7, visibility = $8, price = $9,
+          "basePrice" = $10, "salePrice" = $11, "costPrice" = $12, "taxClass" = $13,
+          "isTaxable" = $14, currency = $15, "isInventoryManaged" = $16,
+          weight = $17, "weightUnit" = $18, length = $19, width = $20, height = $21,
+          "dimensionUnit" = $22, "metaTitle" = $23, "metaDescription" = $24, "metaKeywords" = $25,
+          "isFeatured" = $26, "isNew" = $27, "isBestseller" = $28, "hasVariants" = $29,
+          "merchantId" = $30, "businessId" = $31, "storeId" = $32, "publishedAt" = $33, "updatedAt" = $34
+        WHERE "productId" = $35`,
         [
           product.name,
           product.description,
           product.shortDescription,
           product.sku,
           product.slug,
-          product.brandId || null,
           'simple',
           product.status,
           product.visibility,
@@ -147,7 +146,7 @@ export class ProductRepo implements IProductRepository {
       await query(
         `INSERT INTO product (
           "productId", name, description, "shortDescription", sku, slug,
-          "brandId", type, status, visibility, price, "basePrice", "salePrice", "costPrice",
+          type, status, visibility, price, "basePrice", "salePrice", "costPrice",
           "taxClass", "isTaxable", currency, "isInventoryManaged",
           weight, "weightUnit", length, width, height, "dimensionUnit",
           "metaTitle", "metaDescription", "metaKeywords",
@@ -155,7 +154,7 @@ export class ProductRepo implements IProductRepository {
           "merchantId", "businessId", "storeId", "publishedAt", "createdAt", "updatedAt"
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37
+          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36
         )`,
         [
           product.productId,
@@ -164,7 +163,6 @@ export class ProductRepo implements IProductRepository {
           product.shortDescription,
           product.sku,
           product.slug,
-          product.brandId || null,
           'simple',
           product.status,
           product.visibility,
@@ -227,10 +225,6 @@ export class ProductRepo implements IProductRepository {
     return this.findAll({ categoryId }, pagination);
   }
 
-  async findByBrand(brandId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
-    return this.findAll({ brandId }, pagination);
-  }
-
   async findByMerchant(merchantId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
     return this.findAll({ merchantId }, pagination);
   }
@@ -256,15 +250,18 @@ export class ProductRepo implements IProductRepository {
     if (!product?.categoryId) return [];
 
     const rows = await query<DbProduct[]>(
-      `SELECT * FROM product 
-       WHERE "brandId" = $1 AND "productId" != $2 AND "deletedAt" IS NULL 
+      `SELECT * FROM product
+       WHERE "categoryId" = $1 AND "productId" != $2 AND "deletedAt" IS NULL
        AND status = $3 AND visibility IN ($4, $5)
-       ORDER BY "isFeatured" DESC, RANDOM() LIMIT $6`,
-      [product.brandId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, ProductVisibility.FEATURED, limit],
+       ORDER BY "isFeatured" DESC, RANDOM()
+       LIMIT $6`,
+      [product.categoryId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, ProductVisibility.FEATURED, limit],
     );
 
+    if (!rows || rows.length === 0) return [];
+
     const products: Product[] = [];
-    for (const row of rows || []) {
+    for (const row of rows) {
       const images = await this.getProductImages(row.productId);
       products.push(this.mapToProduct(row, images));
     }
@@ -448,12 +445,6 @@ export class ProductRepo implements IProductRepository {
     }
     if (filters?.categoryId) {
       // Category filtering not implemented in current schema
-      // conditions.push(`"brandId" = $${paramIndex++}`);
-      // params.push(filters.categoryId);
-    }
-    if (filters?.brandId) {
-      conditions.push(`"brandId" = $${paramIndex++}`);
-      params.push(filters.brandId);
     }
     if (filters?.merchantId) {
       conditions.push(`"merchantId" = $${paramIndex++}`);
@@ -504,8 +495,7 @@ export class ProductRepo implements IProductRepository {
       sku: row.sku,
       slug: row.slug,
       productTypeId: row.type,
-      categoryId: undefined, // Not in current schema
-      brandId: row.brandId ?? undefined,
+      categoryId: undefined,
       merchantId: row.merchantId ?? undefined,
       businessId: row.businessId ?? undefined,
       storeId: row.storeId ?? undefined,

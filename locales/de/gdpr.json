@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "Ausstehende Anfragen",
+  "completedThisMonth": "Diesen Monat abgeschlossen",
+  "avgProcessingDays": "Durchschnittliche Bearbeitungstage",
+  "marketingConsentRate": "Marketing-Einwilligungsrate",
+  "dataAccessRequests": "Datenzugriffsanfragen",
+  "dataAccess": "Datenzugriff",
+  "dataDeletion": "Datenlöschung",
+  "noGdprRequests": "Noch keine DSGVO-Anfragen.",
+  "consentManagement": "Einwilligungsmanagement",
+  "marketingConsent": "Marketing-Einwilligung",
+  "analyticsConsent": "Analytics-Einwilligung",
+  "manageConsentSettings": "Einwilligungseinstellungen verwalten",
+  "createGdprRequest": "Erstellen Sie eine DSGVO-Anfrage",
+  "dataAccessRequestSar": "Datenzugriffsanfrage (SAR)",
+  "dataDeletionRequest": "Antrag auf Datenlöschung",
+  "dataRectificationRequest": "Antrag auf Datenberichtigung",
+  "customerEmail": "Kunden-E-Mail",
+  "createRequest": "Anfrage erstellen",
+  "confirmProcessRequest": "Diese Anfrage als in Bearbeitung markieren?",
+  "consentRecords": "Einwilligungsaufzeichnungen",
+  "manageConsentRecords": "Verwalten Sie Kundeneinwilligungsdatensätze und -präferenzen."
+}

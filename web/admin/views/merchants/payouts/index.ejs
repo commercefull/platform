@@ -1,7 +1,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Merchant Payouts</h2>
+      <h2 class="page-title"><%= t('merchant:merchants.merchantPayouts') %></h2>
     </div>
   </div>
 </div>
@@ -12,21 +12,21 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Payouts</h3>
+        <h3 class="card-title"><%= t('merchant:payouts') %></h3>
         <span class="float-end text-muted"><%= (payouts || []).length %> records</span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Payout ID</th>
-              <th>Amount</th>
-              <th>Currency</th>
-              <th>Status</th>
-              <th>Scheduled</th>
-              <th>Processed</th>
-              <th>Reference</th>
-              <th>Actions</th>
+              <th><%= t('merchant:merchants.payoutId') %></th>
+              <th><%= t('common.amount') %></th>
+              <th><%= t('common.currency') %></th>
+              <th><%= t('common.status') %></th>
+              <th><%= t('shared:common.scheduled') %></th>
+              <th><%= t('shared:common.processed') %></th>
+              <th><%= t('shared:common.reference') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
@@ -44,12 +44,12 @@
               <td><%= p.processedAt ? new Date(p.processedAt).toLocaleDateString() : '-' %></td>
               <td><%= p.reference || '-' %></td>
               <td>
-                <a href="/admin/operations/merchants/<%= merchantId %>/payouts/<%= p.merchantPayoutId %>" class="btn btn-sm btn-outline-info">View</a>
+                <a href="/admin/operations/merchants/<%= merchantId %>/payouts/<%= p.merchantPayoutId %>" class="btn btn-sm btn-outline-info"><%= t('common.view') %></a>
               </td>
             </tr>
             <% }); %>
             <% if ((payouts || []).length === 0) { %>
-            <tr><td colspan="8" class="text-center text-muted py-4">No payouts found.</td></tr>
+            <tr><td colspan="8" class="text-center text-muted py-4"><%= t('merchant:merchants.noPayouts') %></td></tr>
             <% } %>
           </tbody>
         </table>

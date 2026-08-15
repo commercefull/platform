@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">Transactions</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.transactions') %></li>
           </ol>
         </div>
       </div>
@@ -25,7 +25,7 @@
           <div class="small-box bg-success">
             <div class="inner">
               <h3>$<%= ((stats.totalSuccessful || 0) / 1000).toFixed(1) %>k</h3>
-              <p>Successful</p>
+              <p><%= t('common.success') %></p>
             </div>
             <div class="icon"><i class="fas fa-check-circle"></i></div>
           </div>
@@ -34,7 +34,7 @@
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= stats.pendingCount || 0 %></h3>
-              <p>Pending</p>
+              <p><%= t('common.pending') %></p>
             </div>
             <div class="icon"><i class="fas fa-clock"></i></div>
           </div>
@@ -43,7 +43,7 @@
           <div class="small-box bg-danger">
             <div class="inner">
               <h3><%= stats.failedCount || 0 %></h3>
-              <p>Failed</p>
+              <p><%= t('common.failed') %></p>
             </div>
             <div class="icon"><i class="fas fa-times-circle"></i></div>
           </div>
@@ -52,7 +52,7 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3>$<%= ((stats.totalRefunded || 0) / 1000).toFixed(1) %>k</h3>
-              <p>Refunded</p>
+              <p><%= t('common.refunded') %></p>
             </div>
             <div class="icon"><i class="fas fa-undo"></i></div>
           </div>
@@ -64,20 +64,20 @@
         <div class="card-body">
           <form method="GET" class="row g-3">
             <div class="col-md-2">
-              <input type="text" class="form-control" name="search" value="<%= filters.search || '' %>" placeholder="Search...">
+              <input type="text" class="form-control" name="search" value="<%= filters.search || '' %>" placeholder="<%= t('common.search') %>">
             </div>
             <div class="col-md-2">
               <select class="form-select" name="status">
-                <option value="">All Status</option>
-                <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
-                <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
-                <option value="failed" <%= filters.status === 'failed' ? 'selected' : '' %>>Failed</option>
-                <option value="refunded" <%= filters.status === 'refunded' ? 'selected' : '' %>>Refunded</option>
+                <option value=""><%= t('common.allStatus') %></option>
+                <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>><%= t('common.pending') %></option>
+                <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>><%= t('common.completed') %></option>
+                <option value="failed" <%= filters.status === 'failed' ? 'selected' : '' %>><%= t('common.failed') %></option>
+                <option value="refunded" <%= filters.status === 'refunded' ? 'selected' : '' %>><%= t('common.refunded') %></option>
               </select>
             </div>
             <div class="col-md-2">
               <select class="form-select" name="gateway">
-                <option value="">All Gateways</option>
+                <option value=""><%= t('payment:gateways') %></option>
                 <% (gateways || []).forEach(function(gw) { %>
                 <option value="<%= gw.gatewayId %>" <%= filters.gateway === gw.gatewayId ? 'selected' : '' %>><%= gw.name %></option>
                 <% }); %>
@@ -91,7 +91,7 @@
             </div>
             <div class="col-md-2">
               <button type="submit" class="btn btn-primary w-100">
-                <i class="fas fa-search me-1"></i>Filter
+                <i class="fas fa-search me-1"></i><%= t('common.filter') %>
               </button>
             </div>
           </form>
@@ -101,21 +101,21 @@
       <!-- Transactions Table -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-list me-2"></i>Transactions</h3>
-          <span class="float-end text-muted">Total: <%= pagination.total %></span>
+          <h3 class="card-title"><i class="fas fa-list me-2"></i><%= t('shared:common.transactions') %></h3>
+          <span class="float-end text-muted"><%= t('common.total') %>: <%= pagination.total %></span>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Transaction ID</th>
-                <th>Order</th>
-                <th>Customer</th>
-                <th>Amount</th>
-                <th>Gateway</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th><%= t('shared:common.transactionId') %></th>
+                <th><%= t('shared:common.orders') %></th>
+                <th><%= t('shared:common.customer') %></th>
+                <th><%= t('common.amount') %></th>
+                <th><%= t('payment:gateways') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('common.date') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
@@ -151,7 +151,7 @@
               <% }); %>
               <% if ((transactions || []).length === 0) { %>
               <tr>
-                <td colspan="8" class="text-center text-muted py-4">No transactions found.</td>
+                <td colspan="8" class="text-center text-muted py-4"><%= t('shared:common.noTransactionsFound') %></td>
               </tr>
               <% } %>
             </tbody>

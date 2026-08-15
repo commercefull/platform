@@ -27,6 +27,7 @@ export interface UpdateOrderStatusResponse {
   orderId: string;
   orderNumber: string;
   previousStatus: string;
+  status: string;
   newStatus: string;
   updatedAt: string;
 }
@@ -54,7 +55,7 @@ export class UpdateOrderStatusUseCase {
     await this.orderRepository.save(order);
 
     // Record status change in history
-    await this.orderRepository.recordStatusChange(command.orderId, command.newStatus, command.reason);
+    await this.orderRepository.recordStatusChange(command.orderId, command.newStatus, command.reason, previousStatus);
 
     // Emit event
     eventBus.emit('order.status_changed', {
@@ -69,6 +70,7 @@ export class UpdateOrderStatusUseCase {
       orderId: order.orderId,
       orderNumber: order.orderNumber,
       previousStatus,
+      status: command.newStatus,
       newStatus: command.newStatus,
       updatedAt: order.updatedAt.toISOString(),
     };

@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/users">Admin Users</a></li>
-            <li class="breadcrumb-item active">Roles</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/users"><%= t('users:adminUsers') %></a></li>
+            <li class="breadcrumb-item active"><%= t('users:roles') %></li>
           </ol>
         </div>
       </div>
@@ -24,7 +24,7 @@
       <div class="row mb-3">
         <div class="col-12">
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRoleModal">
-            <i class="fas fa-plus me-2"></i>Create Role
+            <i class="fas fa-plus me-2"></i><%= t('users:createRole') %>
           </button>
         </div>
       </div>
@@ -38,16 +38,16 @@
               <h3 class="card-title">
                 <i class="fas fa-user-shield me-2"></i><%= role.name %>
                 <% if (role.isSystem) { %>
-                  <span class="badge bg-secondary ms-2">System</span>
+                  <span class="badge bg-secondary ms-2"><%= t('users:system') %></span>
                 <% } %>
               </h3>
-              <span class="float-end text-muted"><%= role.userCount || 0 %> users</span>
+              <span class="float-end text-muted"><%= role.userCount || 0 %> <%= t('users:usersCount') %></span>
             </div>
             <div class="card-body">
               <% if (role.description) { %>
                 <p class="text-muted"><%= role.description %></p>
               <% } %>
-              <h6>Permissions:</h6>
+              <h6><%= t('common.permissions') %>:</h6>
               <div class="mb-3">
                 <% const perms = typeof role.permissions === 'string' ? JSON.parse(role.permissions) : (role.permissions || []); %>
                 <% if (perms.length > 0) { %>
@@ -55,15 +55,15 @@
                     <span class="badge bg-info me-1 mb-1"><%= perm %></span>
                   <% }); %>
                 <% } else { %>
-                  <span class="text-muted">No permissions</span>
+                  <span class="text-muted"><%= t('users:noPermissions') %></span>
                 <% } %>
               </div>
               <% if (!role.isSystem) { %>
               <button class="btn btn-sm btn-outline-primary" onclick="editRole('<%= role.roleId %>', '<%= role.name %>', '<%= role.description || '' %>', '<%= JSON.stringify(perms) %>')">
-                <i class="fas fa-edit me-1"></i>Edit
+                <i class="fas fa-edit me-1"></i><%= t('common.edit') %>
               </button>
               <button class="btn btn-sm btn-outline-danger" onclick="deleteRole('<%= role.roleId %>')">
-                <i class="fas fa-trash me-1"></i>Delete
+                <i class="fas fa-trash me-1"></i><%= t('common.delete') %>
               </button>
               <% } %>
             </div>
@@ -74,7 +74,7 @@
         <div class="col-12">
           <div class="card">
             <div class="card-body text-center text-muted">
-              No roles defined. Click "Create Role" to add one.
+              <%= t('users:noRolesDefined') %>
             </div>
           </div>
         </div>
@@ -86,7 +86,7 @@
         <div class="col-12">
           <div class="card collapsed-card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-list me-2"></i>Available Permissions</h3>
+              <h3 class="card-title"><i class="fas fa-list me-2"></i><%= t('users:availablePermissions') %></h3>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fas fa-plus"></i>
@@ -124,21 +124,21 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Create Role</h5>
+        <h5 class="modal-title"><%= t('users:createRole') %></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form id="createRoleForm">
           <div class="mb-3">
-            <label class="form-label">Role Name</label>
+            <label class="form-label"><%= t('users:roleName') %></label>
             <input type="text" class="form-control" name="name" required placeholder="e.g., Editor">
           </div>
           <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea class="form-control" name="description" rows="2" placeholder="Optional description"></textarea>
+            <label class="form-label"><%= t('common.description') %></label>
+            <textarea class="form-control" name="description" rows="2" placeholder="<%= t('common.optionalDescription') %>"></textarea>
           </div>
           <div class="mb-3">
-            <label class="form-label">Permissions</label>
+            <label class="form-label"><%= t('common.permissions') %></label>
             <div class="row" style="max-height: 300px; overflow-y: auto;">
               <% Object.entries(categories).forEach(function([category, perms]) { %>
               <div class="col-md-6 mb-3">
@@ -158,8 +158,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="createRole()">Create Role</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-primary" onclick="createRole()"><%= t('users:createRole') %></button>
       </div>
     </div>
   </div>
@@ -170,22 +170,22 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Edit Role</h5>
+        <h5 class="modal-title"><%= t('users:editRole') %></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form id="editRoleForm">
           <input type="hidden" name="roleId" id="editRoleId">
           <div class="mb-3">
-            <label class="form-label">Role Name</label>
+            <label class="form-label"><%= t('users:roleName') %></label>
             <input type="text" class="form-control" name="name" id="editRoleName" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Description</label>
+            <label class="form-label"><%= t('common.description') %></label>
             <textarea class="form-control" name="description" id="editRoleDescription" rows="2"></textarea>
           </div>
           <div class="mb-3">
-            <label class="form-label">Permissions</label>
+            <label class="form-label"><%= t('common.permissions') %></label>
             <div class="row" style="max-height: 300px; overflow-y: auto;">
               <% Object.entries(categories).forEach(function([category, perms]) { %>
               <div class="col-md-6 mb-3">
@@ -205,8 +205,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="saveRole()">Save Changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-primary" onclick="saveRole()"><%= t('shared:common.saveChanges') %></button>
       </div>
     </div>
   </div>
@@ -233,10 +233,10 @@
       if (result.success) {
         location.reload();
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   }
 
@@ -279,15 +279,15 @@
       if (result.success) {
         location.reload();
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   }
 
   async function deleteRole(roleId) {
-    if (!confirm('Are you sure you want to delete this role?')) return;
+    if (!confirm('<%= t("users:confirmDeleteRole") %>')) return;
 
     try {
       const response = await fetch(`/admin/roles/${roleId}`, { method: 'DELETE' });
@@ -295,10 +295,10 @@
       if (result.success) {
         location.reload();
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   }
 </script>

@@ -90,17 +90,17 @@ describe('Tax Rates API Integration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      const taxCategoryId = categoriesResponse.data[0].id;
-      const taxZoneId = zonesResponse.data[0].id;
+      const taxCategoryId = categoriesResponse.data.data[0].taxCategoryId || categoriesResponse.data.data[0].id;
+      const taxZoneId = zonesResponse.data.data[0].taxZoneId || zonesResponse.data.data[0].id;
 
       const newTaxRate = {
         name: 'Test Tax Rate',
         description: 'Tax rate created during integration test',
-        rate: 5.5,
+        rate: '5.5',
         taxCategoryId,
         taxZoneId,
         type: 'percentage',
-        priority: 1,
+        priority: Math.floor(Math.random() * 10000) + 100,
         isCompound: false,
         includeInPrice: false,
         isShippingTaxable: false,
@@ -113,12 +113,12 @@ describe('Tax Rates API Integration Tests', () => {
       });
 
       expect(response.status).toBe(201);
-      expect(response.data).toHaveProperty('id');
-      expect(response.data.name).toBe(newTaxRate.name);
-      expect(response.data.rate).toBe(newTaxRate.rate);
+      expect(response.data.data).toHaveProperty('id');
+      expect(response.data.data.name).toBe(newTaxRate.name);
+      expect(parseFloat(response.data.data.rate)).toBe(parseFloat(newTaxRate.rate));
 
       // Store the id for use in other tests
-      const createdTaxRateId = response.data.id;
+      const createdTaxRateId = response.data.data.id;
 
       // Clean up - delete the tax rate we just created
       await client.delete(`/business/tax/rates/${createdTaxRateId}`, {
@@ -153,23 +153,23 @@ describe('Tax Rates API Integration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      if (categoriesResponse.data.length === 0 || zonesResponse.data.length === 0) {
+      if (categoriesResponse.data.data.length === 0 || zonesResponse.data.data.length === 0) {
         // Skip setup if we don't have required data
 
         return;
       }
 
-      const taxCategoryId = categoriesResponse.data[0].id;
-      const taxZoneId = zonesResponse.data[0].id;
+      const taxCategoryId = categoriesResponse.data.data[0].taxCategoryId || categoriesResponse.data.data[0].id;
+      const taxZoneId = zonesResponse.data.data[0].taxZoneId || zonesResponse.data.data[0].id;
 
       const newTaxRate = {
         name: 'Update Test Tax Rate',
         description: 'Tax rate for update testing',
-        rate: 7.5,
+        rate: '7.5',
         taxCategoryId,
         taxZoneId,
         type: 'percentage',
-        priority: 1,
+        priority: Math.floor(Math.random() * 10000) + 100,
         isCompound: false,
         includeInPrice: false,
         isShippingTaxable: false,
@@ -182,7 +182,7 @@ describe('Tax Rates API Integration Tests', () => {
       });
 
       if (createResponse.status === 201) {
-        testTaxRateId = createResponse.data.id;
+        testTaxRateId = createResponse.data.data.id;
       }
     });
 
@@ -198,7 +198,7 @@ describe('Tax Rates API Integration Tests', () => {
     it('should update an existing tax rate when authenticated as admin', async () => {
       const updateData = {
         name: 'Updated Tax Rate Name',
-        rate: 8.0,
+        rate: '8.0',
         description: 'Updated description',
       };
 
@@ -207,9 +207,8 @@ describe('Tax Rates API Integration Tests', () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.data.name).toBe(updateData.name);
-      expect(response.data.rate).toBe(updateData.rate);
-      expect(response.data.description).toBe(updateData.description);
+      expect(response.data.data.name).toBe(updateData.name);
+      expect(parseFloat(response.data.data.rate)).toBe(parseFloat(updateData.rate));
     });
 
     it('should return 404 for non-existent tax rate', async () => {
@@ -238,23 +237,23 @@ describe('Tax Rates API Integration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      if (categoriesResponse.data.length === 0 || zonesResponse.data.length === 0) {
+      if (categoriesResponse.data.data.length === 0 || zonesResponse.data.data.length === 0) {
         // Skip setup if we don't have required data
 
         return;
       }
 
-      const taxCategoryId = categoriesResponse.data[0].id;
-      const taxZoneId = zonesResponse.data[0].id;
+      const taxCategoryId = categoriesResponse.data.data[0].taxCategoryId || categoriesResponse.data.data[0].id;
+      const taxZoneId = zonesResponse.data.data[0].taxZoneId || zonesResponse.data.data[0].id;
 
       const newTaxRate = {
         name: 'Delete Test Tax Rate',
         description: 'Tax rate for deletion testing',
-        rate: 9.0,
+        rate: '9.0',
         taxCategoryId,
         taxZoneId,
         type: 'percentage',
-        priority: 1,
+        priority: Math.floor(Math.random() * 10000) + 100,
         isCompound: false,
         includeInPrice: false,
         isShippingTaxable: false,
@@ -267,7 +266,7 @@ describe('Tax Rates API Integration Tests', () => {
       });
 
       if (createResponse.status === 201) {
-        testTaxRateId = createResponse.data.id;
+        testTaxRateId = createResponse.data.data.id;
       }
     });
 

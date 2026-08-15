@@ -35,7 +35,6 @@ export interface ProductProps {
   slug: string;
   productTypeId: string;
   categoryId?: string;
-  brandId?: string;
   merchantId?: string; // For marketplace products owned by merchants
   businessId?: string; // For multi-store products owned by businesses
   storeId?: string; // For store-specific product overrides
@@ -85,7 +84,6 @@ export class Product {
     shortDescription?: string;
     sku?: string;
     categoryId?: string;
-    brandId?: string;
     merchantId?: string;
     businessId?: string;
     storeId?: string;
@@ -130,7 +128,6 @@ export class Product {
       slug,
       productTypeId: props.productTypeId,
       categoryId: props.categoryId,
-      brandId: props.brandId,
       merchantId: props.merchantId,
       businessId: props.businessId,
       storeId: props.storeId,
@@ -197,9 +194,6 @@ export class Product {
   }
   get categoryId(): string | undefined {
     return this.props.categoryId;
-  }
-  get brandId(): string | undefined {
-    return this.props.brandId;
   }
   get merchantId(): string | undefined {
     return this.props.merchantId;
@@ -413,11 +407,6 @@ export class Product {
     this.touch();
   }
 
-  assignBrand(brandId: string): void {
-    this.props.brandId = brandId;
-    this.touch();
-  }
-
   addImage(image: ProductImage): void {
     const existingIndex = this.props.images.findIndex(img => img.imageId === image.imageId);
     if (existingIndex >= 0) {
@@ -554,7 +543,6 @@ export class Product {
       slug: this.props.slug,
       productTypeId: this.props.productTypeId,
       categoryId: this.props.categoryId,
-      brandId: this.props.brandId,
       merchantId: this.props.merchantId,
       businessId: this.props.businessId,
       storeId: this.props.storeId,

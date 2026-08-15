@@ -7,13 +7,13 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Gift Card Management</h1>
+          <h1 class="m-0"><%= t('promotion:giftCard.management') %></h1>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/promotions">Promotions</a></li>
-            <li class="breadcrumb-item active">Gift Cards</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/promotions"><%= t('shared:common.promotions') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.giftCards') %></li>
           </ol>
         </div>
       </div>
@@ -37,7 +37,7 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3><%= stats.totalCards %></h3>
-              <p>Total Gift Cards</p>
+              <p><%= t('promotion:giftCard.totalCards') %></p>
             </div>
             <div class="icon">
               <i class="fas fa-gift"></i>
@@ -48,7 +48,7 @@
           <div class="small-box bg-success">
             <div class="inner">
               <h3><%= stats.activeCards %></h3>
-              <p>Active Cards</p>
+              <p><%= t('promotion:giftCard.activeCards') %></p>
             </div>
             <div class="icon">
               <i class="fas fa-check-circle"></i>
@@ -59,7 +59,7 @@
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= stats.totalValue.toFixed(2) %></h3>
-              <p>Total Value</p>
+              <p><%= t('promotion:giftCard.totalValue') %></p>
             </div>
             <div class="icon">
               <i class="fas fa-dollar-sign"></i>
@@ -70,7 +70,7 @@
           <a href="/admin/promotions/gift-cards/create" class="small-box bg-primary">
             <div class="inner">
               <h3>+</h3>
-              <p>Create Card</p>
+              <p><%= t('promotion:giftCard.createCard') %></p>
             </div>
             <div class="icon">
               <i class="fas fa-plus"></i>
@@ -86,21 +86,21 @@
             <div class="card-body">
               <form method="GET" class="form-inline">
                 <div class="form-group mr-3">
-                  <label for="status" class="mr-2">Status:</label>
+                  <label for="status" class="mr-2"><%= t('common.status') %>:</label>
                   <select name="status" id="status" class="form-control">
-                    <option value="">All Status</option>
-                    <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
-                    <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
-                    <option value="depleted" <%= filters.status === 'depleted' ? 'selected' : '' %>>Depleted</option>
-                    <option value="expired" <%= filters.status === 'expired' ? 'selected' : '' %>>Expired</option>
-                    <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    <option value=""><%= t('shared:common.allStatus') %></option>
+                    <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>><%= t('shared:common.pending') %></option>
+                    <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>><%= t('shared:common.active') %></option>
+                    <option value="depleted" <%= filters.status === 'depleted' ? 'selected' : '' %>><%= t('promotion:giftCard.depleted') %></option>
+                    <option value="expired" <%= filters.status === 'expired' ? 'selected' : '' %>><%= t('shared:common.expired') %></option>
+                    <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>><%= t('shared:common.cancelled') %></option>
                   </select>
                 </div>
                 <button type="submit" class="btn btn-secondary mr-2">
-                  <i class="fas fa-filter"></i> Filter
+                  <i class="fas fa-filter"></i> <%= t('common.filter') %>
                 </button>
                 <a href="/admin/promotions/gift-cards" class="btn btn-outline-secondary">
-                  <i class="fas fa-times"></i> Clear
+                  <i class="fas fa-times"></i> <%= t('common.clear') %>
                 </a>
               </form>
             </div>
@@ -111,27 +111,27 @@
       <!-- Gift Cards Table -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Gift Cards</h3>
+          <h3 class="card-title"><%= t('shared:common.giftCards') %></h3>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover text-nowrap">
             <thead>
               <tr>
-                <th>Code</th>
-                <th>Type</th>
-                <th>Balance</th>
-                <th>Status</th>
-                <th>Recipient</th>
-                <th>Expires</th>
-                <th>Usage</th>
-                <th>Actions</th>
+                <th><%= t('shared:common.code') %></th>
+                <th><%= t('shared:common.type') %></th>
+                <th><%= t('promotion:balance') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('shared:common.recipient') %></th>
+                <th><%= t('shared:common.expires') %></th>
+                <th><%= t('promotion:giftCard.usage') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
               <% if (giftCards.length === 0) { %>
                 <tr>
                   <td colspan="8" class="text-center py-4">
-                    <em>No gift cards found. <a href="/admin/promotions/gift-cards/create">Create your first gift card</a>.</em>
+                    <em><%= t('promotion:giftCard.noGiftCards') %> <a href="/admin/promotions/gift-cards/create"><%= t('promotion:giftCard.createFirst') %></a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -139,7 +139,7 @@
                   <tr>
                     <td>
                       <strong><code><%= card.code %></code></strong>
-                      <br><small class="text-muted">ID: <%= card.promotionGiftCardId %></small>
+                      <br><small class="text-muted"><%= t('common.id') %>: <%= card.promotionGiftCardId %></small>
                     </td>
                     <td>
                       <span class="badge badge-secondary"><%= card.type %></span>
@@ -147,7 +147,7 @@
                     <td>
                       <strong><%= card.currency %> <%= card.currentBalance.toFixed(2) %></strong>
                       <% if (card.initialBalance !== card.currentBalance) { %>
-                        <br><small class="text-muted">of <%= card.initialBalance.toFixed(2) %></small>
+                        <br><small class="text-muted"><%= t('shared:common.of') %> <%= card.initialBalance.toFixed(2) %></small>
                       <% } %>
                     </td>
                     <td>
@@ -169,13 +169,13 @@
                       <% if (card.expiresAt) { %>
                         <%= new Date(card.expiresAt).toLocaleDateString() %>
                       <% } else { %>
-                        <span class="text-muted">Never</span>
+                        <span class="text-muted"><%= t('shared:common.never') %></span>
                       <% } %>
                     </td>
                     <td>
-                      <%= card.usageCount %> uses
+                      <%= card.usageCount %> <%= t('promotion:giftCard.uses') %>
                       <% if (card.totalRedeemed > 0) { %>
-                        <br><small class="text-muted"><%= card.currency %> <%= card.totalRedeemed.toFixed(2) %> redeemed</small>
+                        <br><small class="text-muted"><%= card.currency %> <%= card.totalRedeemed.toFixed(2) %> <%= t('promotion:giftCard.redeemed') %></small>
                       <% } %>
                     </td>
                     <td>
@@ -210,18 +210,18 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Cancel Gift Card</h4>
+        <h4 class="modal-title"><%= t('promotion:giftCard.cancelGiftCard') %></h4>
         <button type="button" class="close" data-dismiss="modal">
           <span>&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to cancel this gift card?</p>
-        <p class="text-danger"><small>This action will permanently deactivate the card and cannot be undone.</small></p>
+        <p><%= t('promotion:giftCard.confirmCancel') %></p>
+        <p class="text-danger"><small><%= t('promotion:giftCard.cancelWarning') %></small></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" id="confirmCancelBtn">Cancel Card</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-danger" id="confirmCancelBtn"><%= t('promotion:giftCard.cancelCard') %></button>
       </div>
     </div>
   </div>
@@ -240,11 +240,11 @@ function activateCard(cardId) {
     if (data.success) {
       location.reload();
     } else {
-      alert('Error: ' + data.message);
+      alert('<%= t("common.error") %>: ' + data.message);
     }
   })
   .catch(error => {
-    alert('Error activating gift card');
+    alert('<%= t("promotion:giftCard.errorActivating") %>');
     console.error('Error:', error);
   });
 }
@@ -262,11 +262,11 @@ function cancelCard(cardId) {
       if (data.success) {
         location.reload();
       } else {
-        alert('Error: ' + data.message);
+        alert('<%= t("common.error") %>: ' + data.message);
       }
     })
     .catch(error => {
-      alert('Error cancelling gift card');
+      alert('<%= t("promotion:giftCard.errorCancelling") %>');
       console.error('Error:', error);
     });
   };

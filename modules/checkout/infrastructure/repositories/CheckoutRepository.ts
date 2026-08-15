@@ -7,9 +7,10 @@ import { query, queryOne } from '../../../../libs/db';
 import { CheckoutSession as DbCheckoutSession } from '../../../../libs/db/types';
 import { generateUUID } from '../../../../libs/uuid';
 import { CheckoutRepository, ShippingMethodData, PaymentMethodData } from '../../domain/repositories/CheckoutRepository';
-import { CheckoutSession, CheckoutStatus, PaymentStatus } from '../../domain/entities/CheckoutSession';
+import { CheckoutSession, CheckoutStatus, PaymentStatus, FulfillmentType } from '../../domain/entities/CheckoutSession';
 import { Address } from '../../domain/valueObjects/Address';
 import { Money } from '../../../basket/domain/valueObjects/Money';
+import { calculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
 
 export class CheckoutRepo implements CheckoutRepository {
   async findById(id: string): Promise<CheckoutSession | null> {
@@ -58,6 +59,23 @@ export class CheckoutRepo implements CheckoutRepository {
     if (session.orderId) {
       metadata.orderId = session.orderId;
     }
+    metadata.subtotal = session.subtotal.amount;
+    metadata.taxAmount = session.taxAmount.amount;
+    metadata.shippingAmount = session.shippingAmount.amount;
+    metadata.discountAmount = session.discountAmount.amount;
+    metadata.total = session.total.amount;
+    metadata.currency = session.subtotal.currency;
+    metadata.fulfillmentType = session.fulfillmentType;
+    if (session.couponCode) {
+      metadata.couponCode = session.couponCode;
+    }
+    if (session.shippingMethodId) {
+      metadata.shippingMethodId = session.shippingMethodId;
+      metadata.shippingMethodName = session.shippingMethodName;
+    }
+    if (session.paymentMethodId) {
+      metadata.paymentMethodId = session.paymentMethodId;
+    }
 
     if (existing) {
       await query(
@@ -71,7 +89,7 @@ export class CheckoutRepo implements CheckoutRepository {
         WHERE "checkoutSessionId" = $20`,
         [
           session.customerId || null,
-          session.guestEmail || null,
+          session.guestEmail || '',
           session.basketId,
           session.status,
           null,
@@ -265,19 +283,33 @@ export class CheckoutRepo implements CheckoutRepository {
 
   async calculateTax(subtotal: number, shippingAmount: number, address: unknown): Promise<number> {
     const addr = address as Record<string, unknown>;
-    const row = await queryOne<Record<string, unknown>>(
-      `SELECT tr.rate FROM "taxRate" tr
-       JOIN "taxZone" tz ON tz."taxZoneId" = tr."taxZoneId"
-       WHERE tz."countries" @> $1::jsonb AND tr."isActive" = true AND tz."isActive" = true
-       ORDER BY tz."isDefault" DESC LIMIT 1`,
-      [JSON.stringify([addr.country])],
-    );
-
-    if (row) {
-      const taxRate = Number(row.rate) / 100;
-      return Math.round((subtotal + shippingAmount) * taxRate * 100) / 100;
+    try {
+      const result = await calculateOrderTaxUseCase.execute({
+        items: [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPrice: subtotal }],
+        shippingAddress: {
+          country: String(addr.country || ''),
+          region: addr.region as string | undefined,
+          postalCode: addr.postalCode as string | undefined,
+          city: addr.city as string | undefined,
+        },
+        shippingAmount,
+      });
+      return result.success ? result.taxAmount : 0;
+    } catch {
+      // Fall back to simplified query if tax use case fails
+      const row = await queryOne<Record<string, unknown>>(
+        `SELECT tr.rate FROM "taxRate" tr
+         JOIN "taxZone" tz ON tz."taxZoneId" = tr."taxZoneId"
+         WHERE tz."countries" @> $1::jsonb AND tr."isActive" = true AND tz."isActive" = true
+         ORDER BY tz."isDefault" DESC LIMIT 1`,
+        [JSON.stringify([addr.country])],
+      );
+      if (row) {
+        const taxRate = Number(row.rate) / 100;
+        return Math.round((subtotal + shippingAmount) * taxRate * 100) / 100;
+      }
+      return 0;
     }
-    return 0;
   }
 
   private mapToCheckoutSession(row: DbCheckoutSession): CheckoutSession {
@@ -317,17 +349,18 @@ export class CheckoutRepo implements CheckoutRepository {
       shippingAddress,
       billingAddress,
       sameAsShipping: Boolean(row.sameBillingAsShipping),
-      shippingMethodId: row.selectedShippingMethodId ?? undefined,
-      shippingMethodName: undefined,
-      paymentMethodId: undefined,
+      shippingMethodId: (meta?.shippingMethodId as string) ?? row.selectedShippingMethodId ?? undefined,
+      shippingMethodName: meta?.shippingMethodName as string | undefined,
+      paymentMethodId: meta?.paymentMethodId as string | undefined,
       paymentIntentId: row.paymentIntentId ?? undefined,
       orderId,
-      subtotal: Money.create(0, currency),
-      taxAmount: Money.create(0, currency),
-      shippingAmount: Money.create(0, currency),
-      discountAmount: Money.create(0, currency),
-      total: Money.create(0, currency),
-      couponCode: undefined,
+      subtotal: Money.create(Number(meta?.subtotal ?? 0), currency),
+      taxAmount: Money.create(Number(meta?.taxAmount ?? 0), currency),
+      shippingAmount: Money.create(Number(meta?.shippingAmount ?? 0), currency),
+      discountAmount: Money.create(Number(meta?.discountAmount ?? 0), currency),
+      total: Money.create(Number(meta?.total ?? 0), currency),
+      couponCode: meta?.couponCode as string | undefined,
+      fulfillmentType: (meta?.fulfillmentType as FulfillmentType) ?? 'shipping',
       notes: row.notes ?? undefined,
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata as Record<string, unknown>) : undefined,
       createdAt: new Date(row.createdAt),

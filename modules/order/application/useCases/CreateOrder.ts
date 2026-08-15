@@ -97,6 +97,7 @@ export interface OrderResponse {
   currencyCode: string;
   customerEmail: string;
   createdAt: string;
+  items?: Array<Record<string, unknown>>;
 }
 
 // ============================================================================
@@ -194,6 +195,11 @@ export class CreateOrderUseCase {
     // Save order
     const savedOrder = await this.orderRepository.save(order);
 
+    // Record initial status history
+    await this.orderRepository.recordStatusChange(savedOrder.orderId, savedOrder.status, 'Initial status', 'pending');
+    await this.orderRepository.recordPaymentStatusChange(savedOrder.orderId, savedOrder.paymentStatus);
+    await this.orderRepository.recordFulfillmentStatusChange(savedOrder.orderId, savedOrder.fulfillmentStatus);
+
     // Emit event
     eventBus.emit('order.created', {
       orderId: savedOrder.orderId,
@@ -228,6 +234,7 @@ export class CreateOrderUseCase {
       currencyCode: order.currencyCode,
       customerEmail: order.customerEmail,
       createdAt: order.createdAt.toISOString(),
+      items: order.items.map(i => i.toJSON()),
     };
   }
 }

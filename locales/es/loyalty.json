@@ -1,0 +1,23 @@
+{
+  "programMembers": "Miembros del programa",
+  "pointsIssued": "Puntos emitidos",
+  "pointsRedeemed": "Puntos canjeados",
+  "programSettings": "Configuración del programa",
+  "pointsPerDollar": "Puntos por dólar gastado",
+  "pointsValue": "Valor de los puntos ($ por punto)",
+  "minimumRedemption": "Redención mínima",
+  "addReward": "Agregar recompensa",
+  "reward": "Premio",
+  "redemptions": "Redenciones",
+  "noRewards": "No hay recompensas configuradas.",
+  "recentTransactions": "Transacciones recientes",
+  "noTransactions": "Aún no hay transacciones.",
+  "rewardName": "Nombre de la recompensa",
+  "rewardType": "Tipo de recompensa",
+  "freeProduct": "Producto gratuito",
+  "giftCard": "Tarjeta de regalo",
+  "rewardValue": "Valor de recompensa",
+  "confirmDeleteReward": "¿Eliminar esta recompensa?",
+  "analytics": "Análisis del programa de fidelización",
+  "analyticsDescription": "Distribución de puntos, tasas de canje y progresión de niveles."
+}

@@ -2,7 +2,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Referrals</h2>
+      <h2 class="page-title"><%= t('marketing:referrals.title') %></h2>
     </div>
   </div>
 </div>
@@ -13,19 +13,19 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Referrals</h3>
-        <span class="float-end text-muted"><%= (referrals || []).length %> records</span>
+        <h3 class="card-title"><%= t('marketing:referrals.title') %></h3>
+        <span class="float-end text-muted"><%= (referrals || []).length %> <%= t('common.records') %></span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Referrer ID</th>
-              <th>Referred Email</th>
-              <th>Status</th>
-              <th>Converted At</th>
-              <th>Created</th>
+              <th><%= t('shared:common.code') %></th>
+              <th><%= t('marketing:referrals.referrerId') %></th>
+              <th><%= t('marketing:referrals.referredEmail') %></th>
+              <th><%= t('common.status') %></th>
+              <th><%= t('marketing:referrals.convertedAt') %></th>
+              <th><%= t('common.dateCreated') %></th>
             </tr>
           </thead>
           <tbody>
@@ -44,7 +44,7 @@
             </tr>
             <% }); %>
             <% if ((referrals || []).length === 0) { %>
-            <tr><td colspan="6" class="text-center text-muted py-4">No referrals found.</td></tr>
+            <tr><td colspan="6" class="text-center text-muted py-4"><%= t('marketing:referrals.noReferrals') %></td></tr>
             <% } %>
           </tbody>
         </table>

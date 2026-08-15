@@ -11,20 +11,17 @@ exports.up = function (knex) {
     t.uuid('productId').references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
     t.uuid('productCategoryId').notNullable().references('productCategoryId').inTable('productCategory').onDelete('CASCADE');
-    t.uuid('productBrandId').references('productBrandId').inTable('productBrand').onDelete('CASCADE');
-    t.enum('itemType', ['product', 'variant', 'category', 'brand']).notNullable();
+    t.enum('itemType', ['product', 'variant', 'category']).notNullable();
 
     t.index('promotionProductDiscountId');
     t.index('productId');
     t.index('productVariantId');
     t.index('productCategoryId');
-    t.index('productBrandId');
     t.index('itemType');
 
     t.unique(['promotionProductDiscountId', 'productId'], 'idx_promo_discount_product');
     t.unique(['promotionProductDiscountId', 'productVariantId'], 'idx_promo_discount_variant');
     t.unique(['promotionProductDiscountId', 'productCategoryId'], 'idx_promo_discount_category');
-    t.unique(['promotionProductDiscountId', 'productBrandId'], 'idx_promo_discount_brand');
   });
 };
 

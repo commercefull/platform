@@ -3,6 +3,8 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import SupplierRepo from '../../infrastructure/repositories/supplierRepo';
 import { SupplierFilters, SupplierStatus, SupplierCreateParams, SupplierUpdateParams } from '../../infrastructure/repositories/supplierRepo';
+import SupplierAddressRepo, { SupplierAddressType, SupplierAddressUpdateParams } from '../../infrastructure/repositories/supplierAddressRepo';
+import SupplierProductRepo, { SupplierProductUpdateParams } from '../../infrastructure/repositories/supplierProductRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 
 const supplierRepo = SupplierRepo;
@@ -284,8 +286,9 @@ export const getSupplierStatistics = async (req: TypedRequest, res: Response): P
 
 export const getSupplierAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Implement when supplier address repo is available
-    successResponse(res, []);
+    const { supplierId } = req.params;
+    const addresses = await SupplierAddressRepo.findBySupplierId(supplierId);
+    successResponse(res, addresses);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -295,8 +298,47 @@ export const getSupplierAddresses = async (req: TypedRequest, res: Response): Pr
 
 export const createSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Implement when supplier address repo is available
-    successResponse(res, {}, 201);
+    const { supplierId } = req.params;
+    const { name, addressLine1, city, state, postalCode, country, addressType, isDefault, contactName, contactEmail, contactPhone, notes } = req.body as {
+      name: string;
+      addressLine1: string;
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+      addressType?: string;
+      isDefault?: boolean;
+      contactName?: string;
+      contactEmail?: string;
+      contactPhone?: string;
+      notes?: string;
+      addressLine2?: string;
+    };
+
+    if (!name || !addressLine1 || !city || !state || !postalCode || !country) {
+      validationErrorResponse(res, ['Missing required address fields']);
+      return;
+    }
+
+    const address = await SupplierAddressRepo.create({
+      supplierId,
+      name,
+      addressLine1,
+      addressLine2: (req.body as { addressLine2?: string }).addressLine2,
+      city,
+      state,
+      postalCode,
+      country,
+      addressType: (addressType as SupplierAddressType) || 'headquarters',
+      isDefault: isDefault || false,
+      contactName,
+      contactEmail,
+      contactPhone,
+      notes,
+      isActive: true,
+    });
+
+    successResponse(res, address, 201);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -306,8 +348,15 @@ export const createSupplierAddress = async (req: TypedRequest, res: Response): P
 
 export const updateSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Implement when supplier address repo is available
-    successResponse(res, {});
+    const { supplierAddressId } = req.params;
+    const address = await SupplierAddressRepo.update(supplierAddressId, req.body as SupplierAddressUpdateParams);
+
+    if (!address) {
+      errorResponse(res, 'Supplier address not found', 404);
+      return;
+    }
+
+    successResponse(res, address);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -317,7 +366,14 @@ export const updateSupplierAddress = async (req: TypedRequest, res: Response): P
 
 export const deleteSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Implement when supplier address repo is available
+    const { supplierAddressId } = req.params;
+    const deleted = await SupplierAddressRepo.delete(supplierAddressId);
+
+    if (!deleted) {
+      errorResponse(res, 'Supplier address not found', 404);
+      return;
+    }
+
     successResponse(res, { message: 'Supplier address deleted successfully' });
   } catch (error: unknown) {
     logger.error('Error:', error);
@@ -330,8 +386,9 @@ export const deleteSupplierAddress = async (req: TypedRequest, res: Response): P
 
 export const getSupplierProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Implement when supplier product repo is available
-    successResponse(res, []);
+    const { supplierId } = req.params;
+    const products = await SupplierProductRepo.findBySupplierId(supplierId);
+    successResponse(res, products);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -341,8 +398,49 @@ export const getSupplierProducts = async (req: TypedRequest, res: Response): Pro
 
 export const addProductToSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Implement when supplier product repo is available
-    successResponse(res, {}, 201);
+    const { supplierId } = req.params;
+    const { productId, productVariantId, sku, supplierSku, supplierProductName, isPreferred, unitCost, currency, minimumOrderQuantity, leadTime, packagingInfo, dimensions, weight, notes } = req.body as {
+      productId: string;
+      productVariantId?: string;
+      sku: string;
+      supplierSku?: string;
+      supplierProductName?: string;
+      isPreferred?: boolean;
+      unitCost: number;
+      currency?: string;
+      minimumOrderQuantity?: number;
+      leadTime?: number;
+      packagingInfo?: Record<string, unknown>;
+      dimensions?: Record<string, unknown>;
+      weight?: number;
+      notes?: string;
+    };
+
+    if (!productId || !sku || unitCost === undefined) {
+      validationErrorResponse(res, ['Missing required fields: productId, sku, unitCost']);
+      return;
+    }
+
+    const supplierProduct = await SupplierProductRepo.create({
+      supplierId,
+      productId,
+      productVariantId,
+      sku,
+      supplierSku,
+      supplierProductName,
+      status: 'active',
+      isPreferred: isPreferred || false,
+      unitCost,
+      currency: currency || 'USD',
+      minimumOrderQuantity: minimumOrderQuantity || 1,
+      leadTime,
+      packagingInfo,
+      dimensions,
+      weight,
+      notes,
+    });
+
+    successResponse(res, supplierProduct, 201);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -352,8 +450,15 @@ export const addProductToSupplier = async (req: TypedRequest, res: Response): Pr
 
 export const updateSupplierProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Implement when supplier product repo is available
-    successResponse(res, {});
+    const { supplierProductId } = req.params;
+    const product = await SupplierProductRepo.update(supplierProductId, req.body as SupplierProductUpdateParams);
+
+    if (!product) {
+      errorResponse(res, 'Supplier product not found', 404);
+      return;
+    }
+
+    successResponse(res, product);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -363,7 +468,14 @@ export const updateSupplierProduct = async (req: TypedRequest, res: Response): P
 
 export const removeProductFromSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Implement when supplier product repo is available
+    const { supplierProductId } = req.params;
+    const deleted = await SupplierProductRepo.delete(supplierProductId);
+
+    if (!deleted) {
+      errorResponse(res, 'Supplier product not found', 404);
+      return;
+    }
+
     successResponse(res, { message: 'Product removed from supplier successfully' });
   } catch (error: unknown) {
     logger.error('Error:', error);

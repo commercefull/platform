@@ -1,0 +1,108 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-2xl mx-auto">
+    <!-- Back Link -->
+    <a href="/support/tickets" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <%= t('storefront:backToTickets') %>
+    </a>
+
+    <!-- Error Message -->
+    <% if (error) { %>
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <!-- Create Ticket Form -->
+    <div class="bg-white shadow rounded-lg p-8">
+      <h1 class="text-2xl font-bold text-gray-900 mb-2"><%= t('storefront:createSupportTicket') %></h1>
+      <p class="text-gray-600 mb-6"><%= t('storefront:createTicketDesc') %></p>
+
+      <form method="POST" action="/support/tickets">
+        <% if (orderId) { %>
+          <input type="hidden" name="orderId" value="<%= orderId %>">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+            <p class="text-sm text-blue-700">
+              <strong><%= t('storefront:relatedOrder') %>:</strong> <%= orderId %>
+            </p>
+          </div>
+        <% } %>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('shared:common.subject') %> *</label>
+          <input type="text" name="subject" value="<%= formData.subject || '' %>" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="<%= t('storefront:subjectPlaceholder') %>" required>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('shared:common.category') %></label>
+            <select name="category" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="general" <%= formData.category === 'general' ? 'selected' : '' %>><%= t('storefront:generalCat') %></option>
+              <option value="order" <%= formData.category === 'order' ? 'selected' : '' %>><%= t('storefront:orderIssue') %></option>
+              <option value="payment" <%= formData.category === 'payment' ? 'selected' : '' %>><%= t('shared:common.payment') %></option>
+              <option value="shipping" <%= formData.category === 'shipping' ? 'selected' : '' %>><%= t('shared:common.shipping') %></option>
+              <option value="return" <%= formData.category === 'return' ? 'selected' : '' %>><%= t('storefront:return') %></option>
+              <option value="product" <%= formData.category === 'product' ? 'selected' : '' %>><%= t('shared:common.product') %></option>
+              <option value="account" <%= formData.category === 'account' ? 'selected' : '' %>><%= t('storefront:account') %></option>
+              <option value="technical" <%= formData.category === 'technical' ? 'selected' : '' %>><%= t('storefront:technical') %></option>
+              <option value="other" <%= formData.category === 'other' ? 'selected' : '' %>><%= t('shared:common.other') %></option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('shared:common.priority') %></label>
+            <select name="priority" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="low" <%= formData.priority === 'low' ? 'selected' : '' %>><%= t('storefront:low') %></option>
+              <option value="medium" <%= (formData.priority === 'medium' || !formData.priority) ? 'selected' : '' %>><%= t('storefront:medium') %></option>
+              <option value="high" <%= formData.priority === 'high' ? 'selected' : '' %>><%= t('storefront:high') %></option>
+              <option value="urgent" <%= formData.priority === 'urgent' ? 'selected' : '' %>><%= t('storefront:urgent') %></option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('shared:common.email') %></label>
+            <input type="email" name="email" value="<%= formData.email || '' %>" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="<%= t('storefront:emailPlaceholder') %>">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('storefront:phoneOptional') %></label>
+            <input type="tel" name="phone" value="<%= formData.phone || '' %>" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="<%= t('storefront:phonePlaceholder') %>">
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('shared:common.description') %> *</label>
+          <textarea name="description" rows="6" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="<%= t('storefront:descriptionPlaceholder') %>" required><%= formData.description || '' %></textarea>
+        </div>
+
+        <div class="flex gap-3">
+          <button type="submit" class="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+            <%= t('storefront:submitTicket') %>
+          </button>
+          <a href="/support/tickets" class="inline-flex items-center px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            <%= t('shared:common.cancel') %>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Help Info -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div class="flex items-start">
+        <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div class="text-sm text-blue-700">
+          <p class="font-medium mb-1"><%= t('storefront:needQuickAnswer') %></p>
+          <p><%= t('storefront:checkFaq', { faq: '<a href="/faq" class="underline font-medium">' + t('storefront:faqPage') + '</a>', support: '<a href="/support" class="underline font-medium">' + t('shared:common.supportCenter') + '</a>' }) %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

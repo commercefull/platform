@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Total des abonnements",
+  "monthlyRecurringRevenue": "Revenu mensuel récurrent",
+  "addPlan": "Ajouter un forfait",
+  "planName": "Nom du régime",
+  "subscribers": "Abonnés",
+  "noPlans": "Aucun plan d'abonnement configuré.",
+  "plan": "Plan",
+  "started": "Commencé",
+  "nextBilling": "Facturation suivante",
+  "noActiveSubscriptions": "Aucun abonnement actif.",
+  "addSubscriptionPlan": "Ajouter un plan d'abonnement",
+  "yearly": "Annuel",
+  "trialDays": "Journées d'essai",
+  "confirmDeletePlan": "Supprimer ce forfait ?",
+  "billingOverview": "Aperçu de la facturation",
+  "billingDescription": "Gérez la facturation des abonnements, les échecs de paiement et le traitement des renouvellements."
+}

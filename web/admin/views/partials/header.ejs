@@ -27,7 +27,7 @@
           <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
             <div class="card">
               <div class="card-header d-flex">
-                <h3 class="card-title">Notifications</h3>
+                <h3 class="card-title"><%= t('admin.notifications') %></h3>
                 <div class="btn-close ms-auto" data-bs-dismiss="dropdown"></div>
               </div>
               <div class="list-group list-group-flush list-group-hoverable">
@@ -35,8 +35,8 @@
                   <div class="row align-items-center">
                     <div class="col-auto"><span class="status-dot status-dot-animated bg-red d-block"></span></div>
                     <div class="col text-truncate">
-                      <a href="#" class="text-body d-block">Example 1</a>
-                      <div class="d-block text-secondary text-truncate mt-n1">Change deprecated html tags to text decoration classes (#29604)</div>
+                      <a href="#" class="text-body d-block"><%= t('admin.notificationExample1') %></a>
+                      <div class="d-block text-secondary text-truncate mt-n1"><%= t('admin.notificationExample1Desc') %></div>
                     </div>
                     <div class="col-auto">
                       <a href="#" class="list-group-item-actions">
@@ -52,8 +52,8 @@
                   <div class="row align-items-center">
                     <div class="col-auto"><span class="status-dot d-block"></span></div>
                     <div class="col text-truncate">
-                      <a href="#" class="text-body d-block">Example 2</a>
-                      <div class="d-block text-secondary text-truncate mt-n1">justify-content:between ⇒ justify-content:space-between (#29734)</div>
+                      <a href="#" class="text-body d-block"><%= t('admin.notificationExample2') %></a>
+                      <div class="d-block text-secondary text-truncate mt-n1"><%= t('admin.notificationExample2Desc') %></div>
                     </div>
                     <div class="col-auto">
                       <a href="#" class="list-group-item-actions show">
@@ -69,8 +69,8 @@
                   <div class="row align-items-center">
                     <div class="col-auto"><span class="status-dot d-block"></span></div>
                     <div class="col text-truncate">
-                      <a href="#" class="text-body d-block">Example 3</a>
-                      <div class="d-block text-secondary text-truncate mt-n1">Update change-version.js (#29736)</div>
+                      <a href="#" class="text-body d-block"><%= t('admin.notificationExample3') %></a>
+                      <div class="d-block text-secondary text-truncate mt-n1"><%= t('admin.notificationExample3Desc') %></div>
                     </div>
                     <div class="col-auto">
                       <a href="#" class="list-group-item-actions">
@@ -103,10 +103,10 @@
               <div class="card-body">
                 <div class="row">
                   <div class="col">
-                    <a href="#" class="btn btn-2 w-100"> Archive all </a>
+                    <a href="#" class="btn btn-2 w-100"> <%= t('admin.archiveAll') %> </a>
                   </div>
                   <div class="col">
-                    <a href="#" class="btn btn-2 w-100"> Mark all as read </a>
+                    <a href="#" class="btn btn-2 w-100"> <%= t('admin.markAllAsRead') %> </a>
                   </div>
                 </div>
               </div>
@@ -118,15 +118,15 @@
         <a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="Open user menu">
           <span class="avatar avatar-sm" style="background-image: url('<%= user?.avatar %>')"></span>
           <div class="d-none d-xl-block ps-2">
-            <div><%= user?.name || 'Admin User' %></div>
-            <div class="mt-1 small text-secondary"><%= user?.role || 'Administrator' %></div>
+            <div><%= user?.name || t('admin.adminUser') %></div>
+            <div class="mt-1 small text-secondary"><%= user?.role || t('admin.administrator') %></div>
           </div>
         </a>
         <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-          <a href="/admin/profile" class="dropdown-item">Profile</a>
-          <a href="/admin/settings/store" class="dropdown-item">Settings</a>
+          <a href="/admin/profile" class="dropdown-item"><%= t('admin.profile') %></a>
+          <a href="/admin/settings/store" class="dropdown-item"><%= t('admin.settings') %></a>
           <div class="dropdown-divider"></div>
-          <a href="/admin/logout" class="dropdown-item">Logout</a>
+          <a href="/admin/logout" class="dropdown-item"><%= t('admin.logout') %></a>
         </div>
       </div>
     </div>

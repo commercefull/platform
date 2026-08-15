@@ -4,8 +4,8 @@
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Checkout</h1>
-      <p class="mt-2 text-sm text-gray-600">Complete your order by filling out the information below</p>
+      <h1 class="text-3xl font-bold text-gray-900"><%= t('shared:common.checkout') %></h1>
+      <p class="mt-2 text-sm text-gray-600"><%= t('storefront:checkoutDesc') %></p>
     </div>
 
     <!-- Flash Messages -->
@@ -47,7 +47,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
-              Billing Information
+              <%= t('storefront:billingInformation') %>
             </h2>
           </div>
           <div class="p-6">
@@ -72,38 +72,38 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label for="billingFirstName" class="block text-sm font-medium text-gray-700 mb-2">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      id="billingFirstName"
-                      name="billingFirstName"
-                      value="<%= customer ? customer.firstName : '' %>"
-                      required
-                      class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-                      placeholder="Enter your first name"
+                      <%= t('shared:common.firstName') %>
+                  </label>
+                  <input
+                    type="text"
+                    id="billingFirstName"
+                    name="billingFirstName"
+                    value="<%= customer ? customer.firstName : '' %>"
+                    required
+                    class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
+                    placeholder="<%= t('shared:common.firstName') %>"
                     >
                   </div>
 
                   <div>
                     <label for="billingLastName" class="block text-sm font-medium text-gray-700 mb-2">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      id="billingLastName"
-                      name="billingLastName"
-                      value="<%= customer ? customer.lastName : '' %>"
-                      required
-                      class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-                      placeholder="Enter your last name"
+                      <%= t('shared:common.lastName') %>
+                  </label>
+                  <input
+                    type="text"
+                    id="billingLastName"
+                    name="billingLastName"
+                    value="<%= customer ? customer.lastName : '' %>"
+                    required
+                    class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
+                    placeholder="<%= t('shared:common.lastName') %>"
                     >
                   </div>
                 </div>
 
                 <div>
                   <label for="billingEmail" class="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                    <%= t('storefront:emailAddress') %>
                   </label>
                   <input
                     type="email"
@@ -112,13 +112,13 @@
                     value="<%= customer ? customer.email : '' %>"
                     required
                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-                    placeholder="Enter your email"
+                    placeholder="<%= t('storefront:emailAddress') %>"
                   >
                 </div>
 
                 <div>
                   <label for="billingAddress" class="block text-sm font-medium text-gray-700 mb-2">
-                    Street Address
+                    <%= t('storefront:streetAddress') %>
                   </label>
                   <input
                     type="text"
@@ -126,14 +126,14 @@
                     name="billingAddress"
                     required
                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-                    placeholder="Enter your street address"
+                    placeholder="<%= t('storefront:streetAddress') %>"
                   >
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label for="billingCity" class="block text-sm font-medium text-gray-700 mb-2">
-                      City
+                      <%= t('shared:common.city') %>
                     </label>
                     <input
                       type="text"
@@ -141,13 +141,13 @@
                       name="billingCity"
                       required
                       class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-                      placeholder="City"
+                      placeholder="<%= t('shared:common.city') %>"
                     >
                   </div>
 
                   <div>
                     <label for="billingState" class="block text-sm font-medium text-gray-700 mb-2">
-                      State
+                      <%= t('shared:common.state') %>
                     </label>
                     <input
                       type="text"
@@ -155,13 +155,13 @@
                       name="billingState"
                       required
                       class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-                      placeholder="State"
+                      placeholder="<%= t('shared:common.state') %>"
                     >
                   </div>
 
                   <div>
                     <label for="billingZip" class="block text-sm font-medium text-gray-700 mb-2">
-                      ZIP Code
+                      <%= t('shared:common.zipCode') %>
                     </label>
                     <input
                       type="text"
@@ -169,7 +169,7 @@
                       name="billingZip"
                       required
                       class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-                      placeholder="ZIP"
+                      placeholder="<%= t('shared:common.zipCode') %>"
                     >
                   </div>
                 </div>
@@ -185,7 +185,7 @@
               <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
               </svg>
-              Shipping Information
+              <%= t('storefront:shippingInformation') %>
             </h2>
           </div>
           <div class="p-6">
@@ -197,7 +197,7 @@
                   checked
                   class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                 >
-                <span class="ml-3 text-sm text-gray-700">Shipping address is the same as billing address</span>
+                <span class="ml-3 text-sm text-gray-700"><%= t('storefront:shippingSameAsBilling') %></span>
               </label>
             </div>
 
@@ -205,81 +205,81 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label for="shippingFirstName" class="block text-sm font-medium text-gray-700 mb-2">
-                    First Name
+                    <%= t('shared:common.firstName') %>
                   </label>
                   <input
                     type="text"
                     id="shippingFirstName"
                     name="shippingFirstName"
                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent sm:text-sm"
-                    placeholder="First name"
+                    placeholder="<%= t('shared:common.firstName') %>"
                   >
                 </div>
 
                 <div>
                   <label for="shippingLastName" class="block text-sm font-medium text-gray-700 mb-2">
-                    Last Name
+                    <%= t('shared:common.lastName') %>
                   </label>
                   <input
                     type="text"
                     id="shippingLastName"
                     name="shippingLastName"
                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent sm:text-sm"
-                    placeholder="Last name"
+                    placeholder="<%= t('shared:common.lastName') %>"
                   >
                 </div>
               </div>
 
               <div>
                 <label for="shippingAddressInput" class="block text-sm font-medium text-gray-700 mb-2">
-                  Street Address
+                  <%= t('storefront:streetAddress') %>
                 </label>
                 <input
                   type="text"
                   id="shippingAddressInput"
                   name="shippingAddress"
                   class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent sm:text-sm"
-                  placeholder="Enter shipping address"
+                  placeholder="<%= t('storefront:streetAddress') %>"
                 >
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label for="shippingCity" class="block text-sm font-medium text-gray-700 mb-2">
-                    City
+                    <%= t('shared:common.city') %>
                   </label>
                   <input
                     type="text"
                     id="shippingCity"
                     name="shippingCity"
                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent sm:text-sm"
-                    placeholder="City"
+                    placeholder="<%= t('shared:common.city') %>"
                   >
                 </div>
 
                 <div>
                   <label for="shippingState" class="block text-sm font-medium text-gray-700 mb-2">
-                    State
+                    <%= t('shared:common.state') %>
                   </label>
                   <input
                     type="text"
                     id="shippingState"
                     name="shippingState"
                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent sm:text-sm"
-                    placeholder="State"
+                    placeholder="<%= t('shared:common.state') %>"
                   >
                 </div>
 
                 <div>
                   <label for="shippingZip" class="block text-sm font-medium text-gray-700 mb-2">
-                    ZIP Code
+                    <%= t('shared:common.zipCode') %>
                   </label>
                   <input
                     type="text"
                     id="shippingZip"
                     name="shippingZip"
                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent sm:text-sm"
-                    placeholder="ZIP"
+                    placeholder="<%= t('shared:common.zipCode') %>"
                   >
                 </div>
               </div>
@@ -294,7 +294,7 @@
               <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
               </svg>
-              Shipping Method
+              <%= t('shared:common.shipping') %>
             </h2>
           </div>
           <div class="p-6">
@@ -329,7 +329,7 @@
               <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
               </svg>
-              Payment Method
+              <%= t('shared:common.paymentMethod') %>
             </h2>
           </div>
           <div class="p-6">
@@ -349,7 +349,7 @@
                   <svg class="w-8 h-8 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                   </svg>
-                  <span class="text-sm font-medium text-gray-900">Credit Card</span>
+                  <span class="text-sm font-medium text-gray-900"><%= t('storefront:creditCard') %></span>
                 </div>
               </label>
 
@@ -366,7 +366,7 @@
                   <svg class="w-8 h-8 text-blue-600 mr-3" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.622 1.403 1.43.984 2.099 2.602 1.889 4.439-.217 1.79-.927 3.278-1.974 4.515-.903 1.055-2.245 1.907-3.606 1.907h-1.056c-.328 0-.585.215-.585.5v.5c0 .285.257.5.585.5h.962c1.093 0 2.053-.547 2.711-1.384.948-.95 1.593-2.396 1.806-4.146.161-1.321-.069-2.424-.841-3.166-.701-.678-1.893-1.176-3.404-1.176h-6.192c-.468 0-.858.26-.858.657v.823c0 .397.39.657.858.657h4.437c.687 0 1.257.18 1.666.54.411.356.671.881.671 1.482 0 .819-.429 1.512-1.063 1.904-.639.394-1.457.59-2.333.59h-1.866c-.655 0-1.118.215-1.118.5v.5c0 .285.463.5 1.118.5h.962c.917 0 1.769-.215 2.46-.59.691-.375 1.209-.944 1.563-1.649.354-.709.563-1.536.563-2.439 0-1.733-.725-3.1-2.112-3.854C12.148.825 10.438.5 8.687.5H6.211c-.328 0-.585.215-.585.5v.5c0 .285.257.5.585.5h1.866c.917 0 1.769.215 2.46.59.691.375 1.209.944 1.563 1.649.354.709.563 1.536.563 2.439 0 1.733-.725 3.1-2.112 3.854C9.271 21.087 7.561 21.412 5.81 21.412h-1.056c-.328 0-.585-.215-.585-.5v-.5c0-.285.257-.5.585-.5h.962c.328 0 .585-.215.585-.5v-.5c0-.285-.257-.5-.585-.5z"/>
                   </svg>
-                  <span class="text-sm font-medium text-gray-900">PayPal</span>
+                  <span class="text-sm font-medium text-gray-900"><%= t('storefront:paypal') %></span>
                 </div>
               </label>
             </div>
@@ -376,20 +376,20 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label for="cc-name" class="block text-sm font-medium text-gray-700 mb-2">
-                    Name on Card
+                    <%= t('storefront:cardholderName') %>
                   </label>
                   <input
                     type="text"
                     id="cc-name"
                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-sm"
-                    placeholder="John Doe"
+                    placeholder="<%= t('storefront:cardholderNamePlaceholder') %>"
                     required
                   >
                 </div>
 
                 <div>
                   <label for="cc-number" class="block text-sm font-medium text-gray-700 mb-2">
-                    Card Number
+                    <%= t('storefront:cardNumber') %>
                   </label>
                   <input
                     type="text"
@@ -404,20 +404,20 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label for="cc-expiration" class="block text-sm font-medium text-gray-700 mb-2">
-                    Expiration Date
+                    <%= t('storefront:expirationDate') %>
                   </label>
                   <input
                     type="text"
                     id="cc-expiration"
                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-sm"
-                    placeholder="MM/YY"
+                    placeholder="<%= t('storefront:cardExpiryPlaceholder') %>"
                     required
                   >
                 </div>
 
                 <div>
                   <label for="cc-cvv" class="block text-sm font-medium text-gray-700 mb-2">
-                    CVV
+                    <%= t('storefront:cvv') %>
                   </label>
                   <input
                     type="text"
@@ -436,7 +436,7 @@
                 <svg class="w-16 h-16 text-blue-600 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.622 1.403 1.43.984 2.099 2.602 1.889 4.439-.217 1.79-.927 3.278-1.974 4.515-.903 1.055-2.245 1.907-3.606 1.907h-1.056c-.328 0-.585.215-.585.5v.5c0 .285.257.5.585.5h.962c1.093 0 2.053-.547 2.711-1.384.948-.95 1.593-2.396 1.806-4.146.161-1.321-.069-2.424-.841-3.166-.701-.678-1.893-1.176-3.404-1.176h-6.192c-.468 0-.858.26-.858.657v.823c0 .397.39.657.858.657h4.437c.687 0 1.257.18 1.666.54.411.356.671.881.671 1.482 0 .819-.429 1.512-1.063 1.904-.639.394-1.457.59-2.333.59h-1.866c-.655 0-1.118.215-1.118.5v.5c0 .285.463.5 1.118.5h.962c.917 0 1.769-.215 2.46-.59.691-.375 1.209-.944 1.563-1.649.354-.709.563-1.536.563-2.439 0-1.733-.725-3.1-2.112-3.854C12.148.825 10.438.5 8.687.5H6.211c-.328 0-.585.215-.585.5v.5c0 .285.257.5.585.5h1.866c.917 0 1.769.215 2.46.59.691.375 1.209.944 1.563 1.649.354.709.563 1.536.563 2.439 0 1.733-.725 3.1-2.112 3.854C9.271 21.087 7.561 21.412 5.81 21.412h-1.056c-.328 0-.585-.215-.585-.5v-.5c0-.285.257-.5.585-.5h.962c.328 0 .585-.215.585-.5v-.5c0-.285-.257-.5-.585-.5z"/>
                 </svg>
-                <p class="text-gray-600">You will be redirected to PayPal to complete your payment securely.</p>
+                <p class="text-gray-600"><%= t('storefront:paypalRedirectMsg') %></p>
               </div>
             </div>
           </div>
@@ -449,19 +449,19 @@
               <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
               </svg>
-              Special Instructions
+              <%= t('storefront:specialInstructions') %>
             </h2>
           </div>
           <div class="p-6">
             <label for="specialInstructions" class="block text-sm font-medium text-gray-700 mb-2">
-              Delivery Instructions (Optional)
+              <%= t('storefront:deliveryInstructionsOptional') %>
             </label>
             <textarea
               id="specialInstructions"
               name="specialInstructions"
               rows="4"
               class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent sm:text-sm"
-              placeholder="Any special delivery instructions, gate codes, or preferences..."
+              placeholder="<%= t('storefront:deliveryInstructionsPlaceholder') %>"
             ></textarea>
           </div>
         </div>
@@ -476,7 +476,7 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
               </svg>
-              Order Summary
+              <%= t('shared:common.orderSummary') %>
             </h3>
           </div>
           <div class="p-6">
@@ -486,7 +486,7 @@
               <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
                 <div class="flex-1 min-w-0">
                   <h4 class="text-sm font-medium text-gray-900 truncate"><%= item.name %></h4>
-                  <p class="text-sm text-gray-600">Qty: <%= item.quantity %></p>
+                  <p class="text-sm text-gray-600"><%= t('shared:common.qty') %>: <%= item.quantity %></p>
                 </div>
                 <div class="text-sm font-semibold text-gray-900">
                   $<%= (parseFloat(item.price) * item.quantity).toFixed(2) %>
@@ -498,24 +498,24 @@
             <!-- Order Totals -->
             <div class="space-y-3 border-t border-gray-200 pt-4">
               <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">Subtotal</span>
+                <span class="text-sm text-gray-600"><%= t('shared:common.subtotal') %></span>
                 <span class="text-sm text-gray-900">$<%= totals.subtotal %></span>
               </div>
 
               <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">Tax</span>
+                <span class="text-sm text-gray-600"><%= t('shared:common.tax') %></span>
                 <span class="text-sm text-gray-900">$<%= totals.tax %></span>
               </div>
 
               <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">Shipping</span>
+                <span class="text-sm text-gray-600"><%= t('shared:common.shipping') %></span>
                 <span class="text-sm text-gray-900">$<%= totals.shipping %></span>
               </div>
 
               <hr class="border-gray-200">
 
               <div class="flex justify-between items-center">
-                <span class="text-lg font-semibold text-gray-900">Total</span>
+                <span class="text-lg font-semibold text-gray-900"><%= t('shared:common.total') %></span>
                 <span class="text-lg font-bold text-green-600">$<%= totals.total %></span>
               </div>
             </div>
@@ -533,10 +533,10 @@
               <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              Complete Order - $<%= totals.total %>
+              <%= t('storefront:completeOrder', { total: totals.total }) %>
             </button>
             <p class="text-xs text-gray-500 text-center mt-3">
-              Your payment information is secure and encrypted
+              <%= t('storefront:paymentSecureEncrypted') %>
             </p>
           </div>
         </div>
@@ -551,8 +551,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
           </svg>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
-        <p class="text-gray-600 mb-6">Add some items to your cart before proceeding to checkout.</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-2"><%= t('storefront:cartEmpty') %></h3>
+        <p class="text-gray-600 mb-6"><%= t('storefront:addItemsBeforeCheckout') %></p>
         <a
           href="/products"
           class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors"
@@ -560,7 +560,7 @@
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
           </svg>
-          Continue Shopping
+          <%= t('storefront:continueShopping') %>
         </a>
       </div>
     </div>

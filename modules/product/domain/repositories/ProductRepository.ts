@@ -13,7 +13,6 @@ export interface ProductFilters {
   status?: ProductStatus | ProductStatus[];
   visibility?: ProductVisibility | ProductVisibility[];
   categoryId?: string;
-  brandId?: string;
   merchantId?: string;
   businessId?: string;
   storeId?: string;
@@ -55,7 +54,6 @@ export interface ProductRepository {
 
   // Product queries
   findByCategory(categoryId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
-  findByBrand(brandId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findByMerchant(merchantId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findByBusiness(businessId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findByStore(storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;

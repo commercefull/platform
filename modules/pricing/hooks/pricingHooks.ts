@@ -26,13 +26,10 @@ export async function calculateBasketPrices(
     includeTax?: boolean;
   } = {},
 ): Promise<Basket> {
-  // NOTE: This function needs refactoring - Basket interface doesn't have items property
-  // TODO: Implement basket item fetching from basketItemRepo
-  return basket;
-
-  /* COMMENTED OUT UNTIL BASKET ITEMS INTERFACE IS FIXED
-  if (!basket || !basket.items || basket.items.length === 0) {
-    return basket; // No items to calculate prices for
+  // Basket items are loaded by BasketRepository.findById() which calls getItemsWithCurrency()
+  // If basket has no items, return early — nothing to calculate
+  if (!basket.items || basket.items.length === 0) {
+    return basket;
   }
 
   // Default options
@@ -42,10 +39,10 @@ export async function calculateBasketPrices(
     applyLoyaltyDiscount: false,
     loyaltyPointsToApply: 0,
     includeTax: false,
-    ...options
+    ..._options
   };
   
-  let totalDiscount = 0;
+  let _totalDiscount = 0;
   
   // Process each item in the basket through the pricing service
   for (let i = 0; i < basket.items.length; i++) {
@@ -55,34 +52,20 @@ export async function calculateBasketPrices(
     const result = await pricingService.calculatePrice(
       item.productId,
       {
-        variantId: item.variantId,
+        variantId: item.productVariantId,
         quantity: item.quantity,
         customerId: basket.customerId,
-        // Pass all the additional pricing options
         additionalData: pricingOptions
       }
     );
     
-    // Update the item with calculated price
-    basket.items[i] = {
-      ...item,
-      price: result.finalPrice / item.quantity, // Store the per-unit price
-    };
-    
     // Track discounts applied
     if (result.appliedRules && result.appliedRules.length > 0) {
-      totalDiscount += result.appliedRules.reduce((sum: number, rule: unknown) => sum + rule.impact, 0);
+      _totalDiscount += result.appliedRules.reduce((sum: number, rule: unknown) => sum + (rule as { impact: number }).impact, 0);
     }
   }
   
-  // Recalculate basket totals
-  basket.subTotal = basket.items.reduce((sum: number, item: unknown) => sum + (item.price * item.quantity), 0);
-  basket.discountAmount = totalDiscount;
-  basket.grandTotal = Math.max(0, basket.subTotal - basket.discountAmount);
-  basket.updatedAt = String(Math.floor(Date.now() / 1000));
-  
   return basket;
-  */
 }
 
 /**

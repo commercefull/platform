@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Total de assinaturas",
+  "monthlyRecurringRevenue": "Receita recorrente mensal",
+  "addPlan": "Adicionar plano",
+  "planName": "Nome do plano",
+  "subscribers": "Assinantes",
+  "noPlans": "Nenhum plano de assinatura configurado.",
+  "plan": "Plano",
+  "started": "Iniciado",
+  "nextBilling": "Próximo faturamento",
+  "noActiveSubscriptions": "Nenhuma assinatura ativa.",
+  "addSubscriptionPlan": "Adicionar plano de assinatura",
+  "yearly": "Anual",
+  "trialDays": "Dias de teste",
+  "confirmDeletePlan": "Excluir este plano?",
+  "billingOverview": "Visão geral do faturamento",
+  "billingDescription": "Gerencie o faturamento de assinaturas, pagamentos com falha e processamento de renovação."
+}

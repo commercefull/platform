@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "총 구독수",
+  "monthlyRecurringRevenue": "월간 반복 수익",
+  "addPlan": "계획 추가",
+  "planName": "계획 이름",
+  "subscribers": "구독자",
+  "noPlans": "구성된 구독 계획이 없습니다.",
+  "plan": "계획",
+  "started": "시작됨",
+  "nextBilling": "다음 청구",
+  "noActiveSubscriptions": "활성 구독이 없습니다.",
+  "addSubscriptionPlan": "구독 계획 추가",
+  "yearly": "매년",
+  "trialDays": "평가판 일수",
+  "confirmDeletePlan": "이 계획을 삭제하시겠습니까?",
+  "billingOverview": "결제 개요",
+  "billingDescription": "구독 청구, 결제 실패, 갱신 처리를 관리합니다."
+}

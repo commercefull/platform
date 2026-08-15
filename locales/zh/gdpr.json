@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "待处理的请求",
+  "completedThisMonth": "本月完成",
+  "avgProcessingDays": "平均处理天数",
+  "marketingConsentRate": "营销同意率",
+  "dataAccessRequests": "数据访问请求",
+  "dataAccess": "数据存取",
+  "dataDeletion": "数据删除",
+  "noGdprRequests": "尚无 GDPR 请求。",
+  "consentManagement": "同意管理",
+  "marketingConsent": "营销同意书",
+  "analyticsConsent": "分析同意书",
+  "manageConsentSettings": "管理同意设置",
+  "createGdprRequest": "创建 GDPR 请求",
+  "dataAccessRequestSar": "数据访问请求 (SAR)",
+  "dataDeletionRequest": "数据删除请求",
+  "dataRectificationRequest": "数据更正请求",
+  "customerEmail": "客户邮箱",
+  "createRequest": "创建请求",
+  "confirmProcessRequest": "将此请求标记为正在处理？",
+  "consentRecords": "同意记录",
+  "manageConsentRecords": "管理客户同意记录和偏好。"
+}

@@ -3,12 +3,11 @@
  * @returns { Promise<void> }
  */
 exports.up = async function (knex) {
-  // Get brand and category IDs
-  const genericBrand = await knex('productBrand').where({ slug: 'generic' }).first('productBrandId');
+  // Get category ID
   const electronicsCategory = await knex('productCategory').where({ slug: 'electronics' }).first('productCategoryId');
 
-  if (!genericBrand || !electronicsCategory) {
-    throw new Error('Required seed data (brand/category) not found');
+  if (!electronicsCategory) {
+    throw new Error('Required seed data (category) not found');
   }
 
   // Insert sample product
@@ -19,7 +18,6 @@ exports.up = async function (knex) {
       slug: 'sample-product',
       description: 'This is a detailed description of the sample product.',
       shortDescription: 'A short description of the sample product.',
-      brandId: genericBrand.productBrandId,
       type: 'simple',
       status: 'active',
       visibility: 'visible',

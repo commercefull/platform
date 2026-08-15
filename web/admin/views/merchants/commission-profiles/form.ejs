@@ -1,10 +1,10 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title"><%= profile ? 'Edit' : 'Create' %> Commission Profile</h2>
+      <h2 class="page-title"><%= profile ? t('common.edit') : t('common.create') %> <%= t('merchant:merchants.commissionProfile') %></h2>
     </div>
     <div class="col-auto ms-auto">
-      <a href="/admin/operations/merchants/commission-profiles" class="btn btn-secondary">Back</a>
+      <a href="/admin/operations/merchants/commission-profiles" class="btn btn-secondary"><%= t('common.back') %></a>
     </div>
   </div>
 </div>
@@ -17,26 +17,26 @@
       <div class="card-body">
         <form method="POST" action="<%= formAction %>">
           <div class="mb-3">
-            <label class="form-label">Name <span class="text-danger">*</span></label>
+            <label class="form-label"><%= t('common.name') %> <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="name" value="<%= (formData && formData.name) || (profile && profile.name) || '' %>" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Description</label>
+            <label class="form-label"><%= t('common.description') %></label>
             <textarea class="form-control" name="description" rows="3"><%= (formData && formData.description) || (profile && profile.description) || '' %></textarea>
           </div>
           <div class="mb-3">
-            <label class="form-label">Default Rate (%) <span class="text-danger">*</span></label>
+            <label class="form-label"><%= t('merchant:merchants.defaultRate') %> (%) <span class="text-danger">*</span></label>
             <input type="number" class="form-control" name="defaultRate" step="0.01" min="0" max="100"
               value="<%= (formData && formData.defaultRate) || (profile && profile.defaultRate) || '' %>" required>
           </div>
           <div class="mb-3 form-check">
             <input type="checkbox" class="form-check-input" name="isActive" value="true" id="isActive"
               <%= (!profile || profile.isActive) ? 'checked' : '' %>>
-            <label class="form-check-label" for="isActive">Active</label>
+            <label class="form-check-label" for="isActive"><%= t('common.active') %></label>
           </div>
           <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary"><%= profile ? 'Update' : 'Create' %> Profile</button>
-            <a href="/admin/operations/merchants/commission-profiles" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary"><%= profile ? t('common.update') : t('common.create') %> <%= t('shared:common.profile') %></button>
+            <a href="/admin/operations/merchants/commission-profiles" class="btn btn-secondary"><%= t('common.cancel') %></a>
           </div>
         </form>
       </div>

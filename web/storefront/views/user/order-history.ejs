@@ -4,8 +4,8 @@
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Order History</h1>
-      <p class="mt-2 text-sm text-gray-600">Track and manage all your orders in one place</p>
+      <h1 class="text-3xl font-bold text-gray-900"><%= t('storefront:orderHistory') %></h1>
+      <p class="mt-2 text-sm text-gray-600"><%= t('storefront:orderHistoryDesc') %></p>
     </div>
 
     <!-- Filters -->
@@ -15,26 +15,26 @@
           <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
           </svg>
-          Filter Orders
+          <%= t('storefront:filterOrders') %>
         </h2>
       </div>
       <div class="p-6">
         <form action="/orders" method="GET" class="flex flex-col sm:flex-row gap-4 items-end">
           <div class="flex-1">
             <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
-              Filter by Status
+              <%= t('storefront:filterByStatus') %>
             </label>
             <select
               id="status"
               name="status"
               class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
             >
-              <option value="all" <%= filters.status === 'all' || !filters.status ? 'selected' : '' %>>All Orders</option>
-              <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
-              <option value="processing" <%= filters.status === 'processing' ? 'selected' : '' %>>Processing</option>
-              <option value="shipped" <%= filters.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
-              <option value="delivered" <%= filters.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
-              <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+              <option value="all" <%= filters.status === 'all' || !filters.status ? 'selected' : '' %>><%= t('storefront:allOrders') %></option>
+              <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>><%= t('shared:common.pending') %></option>
+              <option value="processing" <%= filters.status === 'processing' ? 'selected' : '' %>><%= t('shared:common.processing') %></option>
+              <option value="shipped" <%= filters.status === 'shipped' ? 'selected' : '' %>><%= t('shared:common.shipped') %></option>
+              <option value="delivered" <%= filters.status === 'delivered' ? 'selected' : '' %>><%= t('shared:common.delivered') %></option>
+              <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>><%= t('shared:common.cancelled') %></option>
             </select>
           </div>
           <div>
@@ -45,7 +45,7 @@
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
               </svg>
-              Apply Filter
+              <%= t('storefront:applyFilter') %>
             </button>
           </div>
         </form>
@@ -62,10 +62,10 @@
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h3 class="text-lg font-semibold text-gray-900">
-                    Order #<%= order.orderNumber %>
+                    <%= t('shared:common.order') %> #<%= order.orderNumber %>
                   </h3>
                   <p class="text-sm text-gray-600">
-                    Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                    <%= t('storefront:placedOn') %> <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
                   </p>
                 </div>
                 <div class="flex items-center space-x-3">
@@ -94,12 +94,12 @@
                 <div class="flex items-center space-x-6">
                   <div class="text-center">
                     <div class="text-2xl font-bold text-gray-900"><%= order.itemCount || (order.items ? order.items.length : 0) %></div>
-                    <div class="text-sm text-gray-600">Items</div>
+                    <div class="text-sm text-gray-600"><%= t('shared:common.items') %></div>
                   </div>
                   <div class="hidden sm:block w-px h-12 bg-gray-200"></div>
                   <div class="text-center">
                     <div class="text-lg font-semibold text-gray-900">$<%= order.total ? order.total.toFixed(2) : '0.00' %></div>
-                    <div class="text-sm text-gray-600">Total</div>
+                    <div class="text-sm text-gray-600"><%= t('shared:common.total') %></div>
                   </div>
                 </div>
 
@@ -112,7 +112,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
-                    View Details
+                    <%= t('shared:common.viewDetails') %>
                   </a>
                   <a
                     href="/track/<%= order.orderNumber %>"
@@ -121,7 +121,7 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
                     </svg>
-                    Track Order
+                    <%= t('storefront:trackOrder') %>
                   </a>
                 </div>
               </div>
@@ -144,8 +144,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-          <p class="text-gray-600 mb-6">You haven't placed any orders yet. Start exploring our products to make your first purchase.</p>
+          <h3 class="text-lg font-medium text-gray-900 mb-2"><%= t('storefront:noOrdersFound') %></h3>
+          <p class="text-gray-600 mb-6"><%= t('storefront:noOrdersFoundDesc') %></p>
           <a
             href="/products"
             class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors"
@@ -153,7 +153,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
-            Start Shopping
+            <%= t('storefront:startShopping') %>
           </a>
         </div>
       </div>

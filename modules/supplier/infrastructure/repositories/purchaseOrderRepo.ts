@@ -195,6 +195,17 @@ export class SupplierPurchaseOrderRepo {
   }
 
   /**
+   * Find all purchase orders with pagination
+   */
+  async findAll(limit: number = 50, offset: number = 0): Promise<SupplierPurchaseOrder[]> {
+    const results = await query<SupplierPurchaseOrder[]>(
+      `SELECT * FROM "supplierPurchaseOrder" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
+      [limit, offset],
+    );
+    return results || [];
+  }
+
+  /**
    * Find overdue purchase orders
    */
   async findOverdue(): Promise<SupplierPurchaseOrder[]> {

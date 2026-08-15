@@ -4,11 +4,11 @@
     <div class="col">
       <h2 class="page-title"><%= priceList.name %></h2>
       <div class="text-muted mt-1">
-        <a href="/admin/b2b/price-lists">Price Lists</a> &rsaquo; <%= priceList.name %>
+        <a href="/admin/b2b/price-lists"><%= t('shared:common.priceLists') %></a> &rsaquo; <%= priceList.name %>
       </div>
     </div>
     <div class="col-auto">
-      <a href="/admin/b2b/price-lists/<%= priceList.b2bPriceListId %>/edit" class="btn btn-outline-secondary">Edit</a>
+      <a href="/admin/b2b/price-lists/<%= priceList.b2bPriceListId %>/edit" class="btn btn-outline-secondary"><%= t('shared:common.edit') %></a>
     </div>
   </div>
 </div>
@@ -21,25 +21,25 @@
       <div class="col-md-4">
         <div class="card mb-3">
           <div class="card-header">
-            <h3 class="card-title">Price List Details</h3>
+            <h3 class="card-title"><%= t('b2b:priceListDetails') %></h3>
           </div>
           <div class="card-body">
             <dl class="row">
               <dt class="col-sm-5">ID</dt>
               <dd class="col-sm-7"><code><%= priceList.b2bPriceListId.substring(0, 8) %>...</code></dd>
-              <dt class="col-sm-5">Currency</dt>
+              <dt class="col-sm-5"><%= t('shared:common.currency') %></dt>
               <dd class="col-sm-7"><%= priceList.currency %></dd>
-              <dt class="col-sm-5">Company</dt>
-              <dd class="col-sm-7"><%= priceList.b2bCompanyId ? priceList.b2bCompanyId.substring(0, 8) + '...' : 'Global' %></dd>
-              <dt class="col-sm-5">Status</dt>
+              <dt class="col-sm-5"><%= t('b2b:company') %></dt>
+              <dd class="col-sm-7"><%= priceList.b2bCompanyId ? priceList.b2bCompanyId.substring(0, 8) + '...' : t('shared:common.global') %></dd>
+              <dt class="col-sm-5"><%= t('shared:common.status') %></dt>
               <dd class="col-sm-7">
                 <span class="badge bg-<%= priceList.isActive ? 'success' : 'secondary' %>">
-                  <%= priceList.isActive ? 'Active' : 'Inactive' %>
+                  <%= priceList.isActive ? t('shared:common.active') : t('shared:common.inactive') %>
                 </span>
               </dd>
-              <dt class="col-sm-5">Notes</dt>
+              <dt class="col-sm-5"><%= t('shared:common.notes') %></dt>
               <dd class="col-sm-7"><%= priceList.notes || '-' %></dd>
-              <dt class="col-sm-5">Created</dt>
+              <dt class="col-sm-5"><%= t('shared:common.date') %></dt>
               <dd class="col-sm-7"><%= new Date(priceList.createdAt).toLocaleDateString() %></dd>
             </dl>
           </div>
@@ -49,18 +49,18 @@
       <div class="col-md-8">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Price List Items</h3>
-            <span class="float-end text-muted"><%= (items || []).length %> items</span>
+            <h3 class="card-title"><%= t('b2b:priceListItems') %></h3>
+            <span class="float-end text-muted"><%= (items || []).length %> <%= t('b2b:items') %></span>
           </div>
           <div class="card-body table-responsive p-0">
             <table class="table table-hover">
               <thead>
                 <tr>
-                  <th>Product ID</th>
-                  <th>Variant ID</th>
-                  <th>Price</th>
-                  <th>Currency</th>
-                  <th>Updated</th>
+                  <th><%= t('shared:common.productId') %></th>
+                  <th><%= t('shared:common.variantId') %></th>
+                  <th><%= t('shared:common.price') %></th>
+                  <th><%= t('shared:common.currency') %></th>
+                  <th><%= t('shared:common.dateUpdated') %></th>
                 </tr>
               </thead>
               <tbody>
@@ -74,7 +74,7 @@
                 </tr>
                 <% }); %>
                 <% if ((items || []).length === 0) { %>
-                <tr><td colspan="5" class="text-center text-muted py-4">No items in this price list.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted py-4"><%= t('b2b:noItemsInPriceList') %></td></tr>
                 <% } %>
               </tbody>
             </table>

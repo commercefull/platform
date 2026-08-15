@@ -7,13 +7,13 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Content Pages</h1>
+          <h1 class="m-0"><%= t('shared:common.pages') %></h1>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/content">Content</a></li>
-            <li class="breadcrumb-item active">Pages</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/content"><%= t('shared:common.content') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.pages') %></li>
           </ol>
         </div>
       </div>
@@ -35,10 +35,10 @@
       <div class="row mb-3">
         <div class="col-12">
           <a href="/admin/content/pages/create" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create Page
+            <i class="fas fa-plus"></i> <%= t('content:createPage') %>
           </a>
           <div class="float-right">
-            <span class="badge badge-info">Total: <%= pages.length %></span>
+            <span class="badge badge-info"><%= t('common.total') %>: <%= pages.length %></span>
           </div>
         </div>
       </div>
@@ -50,19 +50,19 @@
             <div class="card-body">
               <form method="GET" class="form-inline">
                 <div class="form-group mr-3">
-                  <label for="status" class="mr-2">Status:</label>
+                  <label for="status" class="mr-2"><%= t('common.status') %>:</label>
                   <select name="status" id="status" class="form-control">
-                    <option value="">All Status</option>
-                    <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>>Draft</option>
-                    <option value="published" <%= filters.status === 'published' ? 'selected' : '' %>>Published</option>
-                    <option value="scheduled" <%= filters.status === 'scheduled' ? 'selected' : '' %>>Scheduled</option>
-                    <option value="archived" <%= filters.status === 'archived' ? 'selected' : '' %>>Archived</option>
+                    <option value=""><%= t('common.allStatus') %></option>
+                    <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>><%= t('shared:common.draft') %></option>
+                    <option value="published" <%= filters.status === 'published' ? 'selected' : '' %>><%= t('shared:common.published') %></option>
+                    <option value="scheduled" <%= filters.status === 'scheduled' ? 'selected' : '' %>><%= t('shared:common.scheduled') %></option>
+                    <option value="archived" <%= filters.status === 'archived' ? 'selected' : '' %>><%= t('product:archived') %></option>
                   </select>
                 </div>
                 <div class="form-group mr-3">
-                  <label for="contentTypeId" class="mr-2">Content Type:</label>
+                  <label for="contentTypeId" class="mr-2"><%= t('content:contentType') %>:</label>
                   <select name="contentTypeId" id="contentTypeId" class="form-control">
-                    <option value="">All Types</option>
+                    <option value=""><%= t('content:allTypes') %></option>
                     <% contentTypes.forEach(type => { %>
                       <option value="<%= type.id %>" <%= filters.contentTypeId === type.id ? 'selected' : '' %>>
                         <%= type.name %>
@@ -71,10 +71,10 @@
                   </select>
                 </div>
                 <button type="submit" class="btn btn-secondary mr-2">
-                  <i class="fas fa-filter"></i> Filter
+                  <i class="fas fa-filter"></i> <%= t('common.filter') %>
                 </button>
                 <a href="/admin/content/pages" class="btn btn-outline-secondary">
-                  <i class="fas fa-times"></i> Clear
+                  <i class="fas fa-times"></i> <%= t('common.clear') %>
                 </a>
               </form>
             </div>
@@ -85,27 +85,27 @@
       <!-- Pages Table -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Content Pages</h3>
+          <h3 class="card-title"><%= t('shared:common.pages') %></h3>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover text-nowrap">
             <thead>
               <tr>
-                <th>Title</th>
-                <th>Slug</th>
-                <th>Status</th>
-                <th>Type</th>
-                <th>Visibility</th>
-                <th>Home Page</th>
-                <th>Published</th>
-                <th>Actions</th>
+                <th><%= t('content:title_') %></th>
+                <th><%= t('shared:common.slug') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('common.type') %></th>
+                <th><%= t('content:visibility') %></th>
+                <th><%= t('content:homePage') %></th>
+                <th><%= t('shared:common.published') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
               <% if (pages.length === 0) { %>
                 <tr>
                   <td colspan="8" class="text-center py-4">
-                    <em>No content pages found. <a href="/admin/content/pages/create">Create your first page</a>.</em>
+                    <em><%= t('content:noPages') %> <a href="/admin/content/pages/create"><%= t('content:createFirstPage') %></a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -127,7 +127,7 @@
                     </td>
                     <td>
                       <% const contentType = contentTypes.find(ct => ct.id === page.contentTypeId); %>
-                      <%= contentType ? contentType.name : 'Unknown' %>
+                      <%= contentType ? contentType.name : t('content:unknown') %>
                     </td>
                     <td>
                       <span class="badge badge-<%= page.visibility === 'public' ? 'success' : page.visibility === 'private' ? 'warning' : 'info' %>">
@@ -136,7 +136,7 @@
                     </td>
                     <td>
                       <% if (page.isHomePage) { %>
-                        <i class="fas fa-home text-primary"></i> Yes
+                        <i class="fas fa-home text-primary"></i> <%= t('common.yes') %>
                       <% } else { %>
                         <span class="text-muted">-</span>
                       <% } %>
@@ -180,18 +180,18 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Delete Content Page</h4>
+        <h4 class="modal-title"><%= t('content:deletePage') %></h4>
         <button type="button" class="close" data-dismiss="modal">
           <span>&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to delete the content page "<strong id="deletePageTitle"></strong>"?</p>
-        <p class="text-danger"><small>This action will also delete all associated content blocks and cannot be undone.</small></p>
+        <p><%= t('content:confirmDeletePage') %> "<strong id="deletePageTitle"></strong>"?</p>
+        <p class="text-danger"><small><%= t('content:deleteWarning') %></small></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Page</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn"><%= t('content:deletePageBtn') %></button>
       </div>
     </div>
   </div>
@@ -212,11 +212,11 @@ function deletePage(pageId, pageTitle) {
       if (data.success) {
         location.reload();
       } else {
-        alert('Error: ' + data.message);
+        alert('<%= t("common.error") %>: ' + data.message);
       }
     })
     .catch(error => {
-      alert('Error deleting content page');
+      alert('<%= t("content:errorDeletingPage") %>');
       console.error('Error:', error);
     });
   };
@@ -224,7 +224,7 @@ function deletePage(pageId, pageTitle) {
 }
 
 function publishPage(pageId, pageTitle) {
-  if (confirm(`Are you sure you want to publish "${pageTitle}"?`)) {
+  if (confirm(`<%= t('content:confirmPublish', { title: pageTitle }) %>`)) {
     fetch(`/admin/content/pages/${pageId}/publish`, {
       method: 'POST',
       headers: {
@@ -236,11 +236,11 @@ function publishPage(pageId, pageTitle) {
       if (data.success) {
         location.reload();
       } else {
-        alert('Error: ' + data.message);
+        alert('<%= t("common.error") %>: ' + data.message);
       }
     })
     .catch(error => {
-      alert('Error publishing page');
+      alert('<%= t("content:errorPublishingPage") %>');
       console.error('Error:', error);
     });
   }

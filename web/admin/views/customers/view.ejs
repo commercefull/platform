@@ -15,8 +15,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-            <li class="breadcrumb-item"><a href="/admin/customers">Customers</a></li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/customers"><%= t('shared:common.customers') %></a></li>
             <li class="breadcrumb-item active"><%= customer.firstName %> <%= customer.lastName %></li>
           </ol>
         </div>
@@ -45,43 +45,43 @@
               </h3>
 
               <p class="text-muted text-center">
-                Customer since <%= new Date(customer.createdAt).toLocaleDateString() %>
+                <%= t('customer:customerSince') %> <%= new Date(customer.createdAt).toLocaleDateString() %>
               </p>
 
               <ul class="list-group list-group-unbordered mb-3">
                 <li class="list-group-item">
-                  <b>Email</b> <a class="float-right"><%= customer.email %></a>
+                  <b><%= t('shared:common.email') %></b> <a class="float-right"><%= customer.email %></a>
                 </li>
                 <% if (customer.phone) { %>
                 <li class="list-group-item">
-                  <b>Phone</b> <a class="float-right"><%= customer.phone %></a>
+                  <b><%= t('shared:common.phone') %></b> <a class="float-right"><%= customer.phone %></a>
                 </li>
                 <% } %>
                 <li class="list-group-item">
-                  <b>Status</b> 
+                  <b><%= t('common.status') %></b>
                   <span class="badge float-right badge-<%= customer.isActive ? 'success' : 'secondary' %>">
-                    <%= customer.isActive ? 'Active' : 'Inactive' %>
+                    <%= customer.isActive ? t('common.active') : t('common.inactive') %>
                   </span>
                 </li>
                 <li class="list-group-item">
-                  <b>Verified</b>
+                  <b><%= t('customer:verified') %></b>
                   <span class="float-right">
                     <% if (customer.isVerified) { %>
-                      <i class="fas fa-check-circle text-success"></i> Yes
+                      <i class="fas fa-check-circle text-success"></i> <%= t('common.yes') %>
                     <% } else { %>
-                      <i class="fas fa-times-circle text-danger"></i> No
+                      <i class="fas fa-times-circle text-danger"></i> <%= t('common.no') %>
                     <% } %>
                   </span>
                 </li>
                 <% if (customer.lastLoginAt) { %>
                 <li class="list-group-item">
-                  <b>Last Login</b> <span class="float-right"><%= new Date(customer.lastLoginAt).toLocaleString() %></span>
+                  <b><%= t('shared:common.lastLogin') %></b> <span class="float-right"><%= new Date(customer.lastLoginAt).toLocaleString() %></span>
                 </li>
                 <% } %>
               </ul>
 
               <a href="/admin/customers/<%= customer.customerId %>/edit" class="btn btn-primary btn-block">
-                <i class="fas fa-edit"></i> Edit Profile
+                <i class="fas fa-edit"></i> <%= t('shared:common.editProfile') %>
               </a>
             </div>
           </div>
@@ -89,31 +89,31 @@
           <!-- Actions -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Actions</h3>
+              <h3 class="card-title"><%= t('common.actions') %></h3>
             </div>
             <div class="card-body">
               <% if (!customer.isVerified) { %>
                 <button onclick="verifyCustomer('<%= customer.customerId %>')" class="btn btn-success btn-block mb-2">
-                  <i class="fas fa-check"></i> Verify Customer
+                  <i class="fas fa-check"></i> <%= t('customer:verifyCustomer') %>
                 </button>
               <% } %>
               
               <% if (customer.isActive) { %>
                 <button onclick="deactivateCustomer('<%= customer.customerId %>')" class="btn btn-warning btn-block mb-2">
-                  <i class="fas fa-user-slash"></i> Deactivate
+                  <i class="fas fa-user-slash"></i> <%= t('shared:common.deactivate') %>
                 </button>
               <% } else { %>
                 <button onclick="reactivateCustomer('<%= customer.customerId %>')" class="btn btn-success btn-block mb-2">
-                  <i class="fas fa-user-check"></i> Reactivate
+                  <i class="fas fa-user-check"></i> <%= t('customer:reactivate') %>
                 </button>
               <% } %>
 
               <a href="/admin/customers/<%= customer.customerId %>/addresses" class="btn btn-info btn-block mb-2">
-                <i class="fas fa-map-marker-alt"></i> Manage Addresses
+                <i class="fas fa-map-marker-alt"></i> <%= t('customer:manageAddresses') %>
               </a>
 
               <a href="/admin/customers" class="btn btn-secondary btn-block">
-                <i class="fas fa-arrow-left"></i> Back to Customers
+                <i class="fas fa-arrow-left"></i> <%= t('customer:backToCustomers') %>
               </a>
             </div>
           </div>
@@ -124,10 +124,10 @@
           <!-- Addresses -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-map-marker-alt mr-2"></i>Addresses</h3>
+              <h3 class="card-title"><i class="fas fa-map-marker-alt mr-2"></i><%= t('customer:addresses') %></h3>
               <div class="card-tools">
                 <a href="/admin/customers/<%= customer.customerId %>/addresses" class="btn btn-sm btn-primary">
-                  <i class="fas fa-plus"></i> Add
+                  <i class="fas fa-plus"></i> <%= t('common.add') %>
                 </a>
               </div>
             </div>
@@ -141,7 +141,7 @@
                         <h5 class="card-title">
                           <%= addr.addressType.charAt(0).toUpperCase() + addr.addressType.slice(1) %>
                           <% if (addr.isDefault) { %>
-                            <span class="badge badge-primary">Default</span>
+                            <span class="badge badge-primary"><%= t('shared:common.default') %></span>
                           <% } %>
                         </h5>
                       </div>
@@ -167,7 +167,7 @@
                   <% }); %>
                 </div>
               <% } else { %>
-                <p class="text-muted">No addresses on file.</p>
+                <p class="text-muted"><%= t('customer:noAddresses') %></p>
               <% } %>
             </div>
           </div>
@@ -176,7 +176,7 @@
           <% if (customer.note) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-sticky-note mr-2"></i>Notes</h3>
+              <h3 class="card-title"><i class="fas fa-sticky-note mr-2"></i><%= t('shared:common.notes') %></h3>
             </div>
             <div class="card-body">
               <p><%= customer.note %></p>
@@ -187,15 +187,15 @@
           <!-- Recent Orders placeholder -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-shopping-cart mr-2"></i>Recent Orders</h3>
+              <h3 class="card-title"><i class="fas fa-shopping-cart mr-2"></i><%= t('shared:common.recentOrders') %></h3>
               <div class="card-tools">
                 <a href="/admin/orders?customerId=<%= customer.customerId %>" class="btn btn-sm btn-primary">
-                  View All
+                  <%= t('shared:common.viewAll') %>
                 </a>
               </div>
             </div>
             <div class="card-body">
-              <p class="text-muted">Order history will be displayed here.</p>
+              <p class="text-muted"><%= t('customer:orderHistoryPlaceholder') %></p>
             </div>
           </div>
         </div>
@@ -208,34 +208,34 @@
 
 <script>
 function verifyCustomer(customerId) {
-  if (confirm('Verify this customer?')) {
+  if (confirm('<%= t('customer:confirmVerify') %>')) {
     fetch(`/admin/customers/${customerId}/verify`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
-        else alert('Error: ' + data.message);
+        else alert('<%= t("common.error") %>: ' + data.message);
       });
   }
 }
 
 function deactivateCustomer(customerId) {
-  if (confirm('Deactivate this customer?')) {
+  if (confirm('<%= t('customer:confirmDeactivate') %>')) {
     fetch(`/admin/customers/${customerId}/deactivate`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
-        else alert('Error: ' + data.message);
+        else alert('<%= t("common.error") %>: ' + data.message);
       });
   }
 }
 
 function reactivateCustomer(customerId) {
-  if (confirm('Reactivate this customer?')) {
+  if (confirm('<%= t('customer:confirmReactivate') %>')) {
     fetch(`/admin/customers/${customerId}/reactivate`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
-        else alert('Error: ' + data.message);
+        else alert('<%= t("common.error") %>: ' + data.message);
       });
   }
 }

@@ -8,6 +8,7 @@ describe('Payment Transaction Tests', () => {
   let customerToken: string;
   let testGatewayId: string;
   let testMethodConfigId: string;
+  let testOrderId: string;
 
   beforeAll(async () => {
     const setup = await setupPaymentTests();
@@ -16,10 +17,11 @@ describe('Payment Transaction Tests', () => {
     customerToken = setup.customerToken;
     testGatewayId = setup.testGatewayId;
     testMethodConfigId = setup.testMethodConfigId;
+    testOrderId = setup.testOrderId;
   });
 
   afterAll(async () => {
-    await cleanupPaymentTests(client, adminToken, testGatewayId, testMethodConfigId);
+    await cleanupPaymentTests(client, adminToken, testGatewayId, testMethodConfigId, testOrderId);
   });
 
   describe('Transaction Operations', () => {
@@ -30,17 +32,17 @@ describe('Payment Transaction Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('data');
-      expect(Array.isArray(response.data.data.data)).toBe(true);
+      expect(response.data.data).toHaveProperty('transactions');
+      expect(Array.isArray(response.data.data.transactions)).toBe(true);
     });
 
     it('should create a new transaction', async () => {
-      if (!testMethodConfigId) {
+      if (!testMethodConfigId || !testOrderId) {
         return;
       }
 
       const newTransaction = {
-        orderId: '00000000-0000-0000-0000-000000000001',
+        orderId: testOrderId,
         amount: 49.99,
         currency: 'USD',
         paymentMethodConfigId: testMethodConfigId,

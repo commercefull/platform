@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "Üyelikler",
+  "totalMembers": "Toplam Üye",
+  "activeMembers": "Aktif Üyeler",
+  "membershipTiers": "Üyelik Seviyeleri",
+  "expiringThisMonth": "Bu Ay Sona Eriyor",
+  "addTier": "Seviye Ekle",
+  "members": "üyeler",
+  "noTiers": "Hiçbir üyelik katmanı yapılandırılmadı.",
+  "recentMembers": "Son Üyeler",
+  "tier": "Aşama",
+  "noMembers": "Henüz üye yok.",
+  "addMembershipTier": "Üyelik Katmanı Ekle",
+  "tierName": "Seviye Adı",
+  "billingPeriod": "Fatura Dönemi",
+  "lifetime": "Ömür boyu",
+  "benefitsOnePerLine": "Avantajlar (satır başına bir tane)",
+  "setAsDefault": "Varsayılan katman olarak ayarla",
+  "createTier": "Katman Oluştur",
+  "confirmDeleteTier": "Bu seviye silinsin mi?",
+  "analytics": "Üyelik Analizi",
+  "analyticsDescription": "Aktif üyeler, gelir, kayıp oranı ve kademe dağıtımı."
+}

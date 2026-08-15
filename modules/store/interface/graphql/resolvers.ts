@@ -31,7 +31,7 @@ export const storeResolvers = {
   Mutation: {
     createStore: async (_parent: unknown, args: { input: Record<string, unknown> }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new CreateStoreUseCase(StoreRepo, null as never, null as never);
+      const useCase = new CreateStoreUseCase(StoreRepo, null as never);
       const command = new CreateStoreCommand(args.input as CreateStoreCommand['storeData']);
       const result = await useCase.execute(command);
       return {

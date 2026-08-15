@@ -29,6 +29,12 @@ export * from './DispatchFromStore';
 export * from './ReceiveStoreDispatch';
 export * from './CancelStoreDispatch';
 
+// Reservation management
+export * from './ConfirmReservation';
+
+// Threshold management
+export * from './SetLowStockThreshold';
+
 // Inventory item management
 export * from './CreateInventoryItem';
 export * from './GetInventoryItem';

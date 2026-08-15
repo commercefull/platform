@@ -5,6 +5,7 @@
 
 import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
 import { CustomerSubscription } from '../../infrastructure/repositories/subscriptionRepo';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
 // Command
@@ -93,7 +94,13 @@ export class CancelSubscriptionUseCase {
       // 6. Get updated subscription
       const updatedSubscription = await subscriptionRepo.getCustomerSubscription(input.customerSubscriptionId);
 
-      // TODO: Emit SubscriptionCancelled event
+      // 6. Emit SubscriptionCancelled event
+      await eventBus.emit('subscription.cancelled', {
+        customerSubscriptionId: input.customerSubscriptionId,
+        customerId: updatedSubscription?.customerId,
+        reason: input.reason,
+        cancelImmediately: input.cancelImmediately,
+      });
 
       return {
         success: true,

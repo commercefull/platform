@@ -1,0 +1,10 @@
+{
+  "rates": "Vergi Oranları",
+  "zones": "Vergi Bölgeleri",
+  "addRate": "Vergi Oranı Ekle",
+  "addZone": "Vergi Bölgesi Ekle",
+  "addClass": "Vergi Sınıfı Ekle",
+  "stateRegion": "Eyalet/Bölge",
+  "classes": "Vergi Sınıfları",
+  "zoneName": "Bölge Adı"
+}

@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
-            <li class="breadcrumb-item active">Create</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/products"><%= t('shared:common.products') %></a></li>
+            <li class="breadcrumb-item active"><%= t('common.create') %></li>
           </ol>
         </div>
       </div>
@@ -34,34 +34,34 @@
             <!-- Basic Info -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Basic Information</h3>
+                <h3 class="card-title"><i class="fas fa-info-circle me-2"></i><%= t('shared:common.basicInformation') %></h3>
               </div>
               <div class="card-body">
                 <div class="form-group mb-3">
-                  <label class="form-label">Product Name <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" name="name" value="<%= formData.name || '' %>" required placeholder="Enter product name">
+                  <label class="form-label"><%= t('shared:common.productName') %> <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="name" value="<%= formData.name || '' %>" required placeholder="<%= t('shared:common.productName') %>">
                 </div>
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">SKU</label>
-                      <input type="text" class="form-control" name="sku" value="<%= formData.sku || '' %>" placeholder="Stock Keeping Unit">
+                      <label class="form-label"><%= t('shared:common.sku') %></label>
+                      <input type="text" class="form-control" name="sku" value="<%= formData.sku || '' %>" placeholder="<%= t('shared:common.sku') %>">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Slug</label>
+                      <label class="form-label"><%= t('shared:common.slug') %></label>
                       <input type="text" class="form-control" name="slug" value="<%= formData.slug || '' %>" placeholder="url-friendly-name">
                     </div>
                   </div>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Short Description</label>
-                  <textarea class="form-control" name="shortDescription" rows="2" placeholder="Brief product summary"><%= formData.shortDescription || '' %></textarea>
+                  <label class="form-label"><%= t('product:shortDescription') %></label>
+                  <textarea class="form-control" name="shortDescription" rows="2" placeholder="<%= t('product:shortDescription') %>"><%= formData.shortDescription || '' %></textarea>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Full Description</label>
-                  <textarea class="form-control" name="description" rows="5" placeholder="Detailed product description"><%= formData.description || '' %></textarea>
+                  <label class="form-label"><%= t('product:fullDescription') %></label>
+                  <textarea class="form-control" name="description" rows="5" placeholder="<%= t('product:fullDescription') %>"><%= formData.description || '' %></textarea>
                 </div>
               </div>
             </div>
@@ -69,13 +69,13 @@
             <!-- Pricing -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-dollar-sign me-2"></i>Pricing</h3>
+                <h3 class="card-title"><i class="fas fa-dollar-sign me-2"></i><%= t('common.pricing') %></h3>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Base Price <span class="text-danger">*</span></label>
+                      <label class="form-label"><%= t('product:basePrice') %> <span class="text-danger">*</span></label>
                       <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" class="form-control" name="basePrice" value="<%= formData.basePrice || '0.00' %>" step="0.01" min="0" required>
@@ -84,7 +84,7 @@
                   </div>
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Sale Price</label>
+                      <label class="form-label"><%= t('product:salePrice') %></label>
                       <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" class="form-control" name="salePrice" value="<%= formData.salePrice || '' %>" step="0.01" min="0">
@@ -93,7 +93,7 @@
                   </div>
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Cost</label>
+                      <label class="form-label"><%= t('shared:common.cost') %></label>
                       <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" class="form-control" name="cost" value="<%= formData.cost || '' %>" step="0.01" min="0">
@@ -104,21 +104,21 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Currency</label>
+                      <label class="form-label"><%= t('shared:common.currency') %></label>
                       <select class="form-select" name="currencyCode">
-                        <option value="USD" <%= formData.currencyCode === 'USD' ? 'selected' : '' %>>USD - US Dollar</option>
-                        <option value="EUR" <%= formData.currencyCode === 'EUR' ? 'selected' : '' %>>EUR - Euro</option>
-                        <option value="GBP" <%= formData.currencyCode === 'GBP' ? 'selected' : '' %>>GBP - British Pound</option>
+                        <option value="USD" <%= formData.currencyCode === 'USD' ? 'selected' : '' %>><%= t('product:usDollar') %></option>
+                        <option value="EUR" <%= formData.currencyCode === 'EUR' ? 'selected' : '' %>><%= t('product:euro') %></option>
+                        <option value="GBP" <%= formData.currencyCode === 'GBP' ? 'selected' : '' %>><%= t('product:britishPound') %></option>
                       </select>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Tax Class</label>
+                      <label class="form-label"><%= t('shared:common.taxClass') %></label>
                       <select class="form-select" name="taxClass">
-                        <option value="">Standard</option>
-                        <option value="reduced" <%= formData.taxClass === 'reduced' ? 'selected' : '' %>>Reduced</option>
-                        <option value="zero" <%= formData.taxClass === 'zero' ? 'selected' : '' %>>Zero Rate</option>
+                        <option value=""><%= t('product:standard') %></option>
+                        <option value="reduced" <%= formData.taxClass === 'reduced' ? 'selected' : '' %>><%= t('product:reduced') %></option>
+                        <option value="zero" <%= formData.taxClass === 'zero' ? 'selected' : '' %>><%= t('product:zeroRate') %></option>
                       </select>
                     </div>
                   </div>
@@ -129,13 +129,13 @@
             <!-- Dimensions -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-ruler-combined me-2"></i>Dimensions & Weight</h3>
+                <h3 class="card-title"><i class="fas fa-ruler-combined me-2"></i><%= t('product:dimensionsWeight') %></h3>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Weight</label>
+                      <label class="form-label"><%= t('shared:common.weight') %></label>
                       <div class="input-group">
                         <input type="number" class="form-control" name="weight" value="<%= formData.weight || '' %>" step="0.01" min="0">
                         <select class="form-select" name="weightUnit" style="max-width: 100px;">
@@ -151,19 +151,19 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Length</label>
+                      <label class="form-label"><%= t('product:length') %></label>
                       <input type="number" class="form-control" name="length" value="<%= formData.length || '' %>" step="0.01" min="0">
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Width</label>
+                      <label class="form-label"><%= t('product:width') %></label>
                       <input type="number" class="form-control" name="width" value="<%= formData.width || '' %>" step="0.01" min="0">
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group mb-3">
-                      <label class="form-label">Height</label>
+                      <label class="form-label"><%= t('product:height') %></label>
                       <div class="input-group">
                         <input type="number" class="form-control" name="height" value="<%= formData.height || '' %>" step="0.01" min="0">
                         <select class="form-select" name="dimensionUnit" style="max-width: 80px;">
@@ -181,34 +181,34 @@
             <!-- Order Limits & Policies -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i>Order Limits & Policies</h3>
+                <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i><%= t('product:orderLimits') %></h3>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Min Order Quantity</label>
+                      <label class="form-label"><%= t('product:minOrderQuantity') %></label>
                       <input type="number" class="form-control" name="minOrderQuantity" value="<%= formData.minOrderQuantity || 1 %>" min="1" step="1">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Max Order Quantity</label>
-                      <input type="number" class="form-control" name="maxOrderQuantity" value="<%= formData.maxOrderQuantity || '' %>" min="1" step="1" placeholder="No limit">
+                      <label class="form-label"><%= t('product:maxOrderQuantity') %></label>
+                      <input type="number" class="form-control" name="maxOrderQuantity" value="<%= formData.maxOrderQuantity || '' %>" min="1" step="1" placeholder="<%= t('product:noLimit') %>">
                     </div>
                   </div>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Warranty</label>
-                  <textarea class="form-control" name="warranty" rows="2" placeholder="e.g., 1 year manufacturer warranty"><%= formData.warranty || '' %></textarea>
+                  <label class="form-label"><%= t('product:warranty') %></label>
+                  <textarea class="form-control" name="warranty" rows="2" placeholder="<%= t('product:warranty') %>"><%= formData.warranty || '' %></textarea>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Return Policy</label>
-                  <textarea class="form-control" name="returnPolicy" rows="2" placeholder="e.g., 30-day money-back guarantee"><%= formData.returnPolicy || '' %></textarea>
+                  <label class="form-label"><%= t('shared:common.returnPolicy') %></label>
+                  <textarea class="form-control" name="returnPolicy" rows="2" placeholder="<%= t('shared:common.returnPolicy') %>"><%= formData.returnPolicy || '' %></textarea>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">External ID</label>
-                  <input type="text" class="form-control" name="externalId" value="<%= formData.externalId || '' %>" placeholder="ID from external system (ERP, PIM, etc.)">
+                  <label class="form-label"><%= t('shared:common.externalId') %></label>
+                  <input type="text" class="form-control" name="externalId" value="<%= formData.externalId || '' %>" placeholder="<%= t('shared:common.externalId') %>">
                 </div>
               </div>
             </div>
@@ -216,21 +216,21 @@
             <!-- SEO -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-search me-2"></i>SEO</h3>
+                <h3 class="card-title"><i class="fas fa-search me-2"></i><%= t('common.seo') %></h3>
               </div>
               <div class="card-body">
                 <div class="form-group mb-3">
-                  <label class="form-label">Meta Title</label>
+                  <label class="form-label"><%= t('shared:common.metaTitle') %></label>
                   <input type="text" class="form-control" name="metaTitle" value="<%= formData.metaTitle || '' %>" maxlength="70">
-                  <small class="text-muted">Recommended: 50-60 characters</small>
+                  <small class="text-muted"><%= t('product:seoRecommendedTitle') %></small>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Meta Description</label>
+                  <label class="form-label"><%= t('shared:common.metaDescription') %></label>
                   <textarea class="form-control" name="metaDescription" rows="2" maxlength="160"><%= formData.metaDescription || '' %></textarea>
-                  <small class="text-muted">Recommended: 150-160 characters</small>
+                  <small class="text-muted"><%= t('product:seoRecommendedDesc') %></small>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Meta Keywords</label>
+                  <label class="form-label"><%= t('product:metaKeywords') %></label>
                   <input type="text" class="form-control" name="metaKeywords" value="<%= formData.metaKeywords || '' %>" placeholder="keyword1, keyword2, keyword3">
                 </div>
               </div>
@@ -242,14 +242,14 @@
             <!-- Publish -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-paper-plane me-2"></i>Publish</h3>
+                <h3 class="card-title"><i class="fas fa-paper-plane me-2"></i><%= t('product:publish') %></h3>
               </div>
               <div class="card-body">
                 <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                  <i class="fas fa-save me-2"></i>Create Product
+                  <i class="fas fa-save me-2"></i><%= t('product:create') %>
                 </button>
                 <a href="/admin/products" class="btn btn-secondary w-100">
-                  <i class="fas fa-times me-2"></i>Cancel
+                  <i class="fas fa-times me-2"></i><%= t('common.cancel') %>
                 </a>
               </div>
             </div>
@@ -257,38 +257,29 @@
             <!-- Organization -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-folder me-2"></i>Organization</h3>
+                <h3 class="card-title"><i class="fas fa-folder me-2"></i><%= t('product:organization') %></h3>
               </div>
               <div class="card-body">
                 <div class="form-group mb-3">
-                  <label class="form-label">Product Type</label>
+                  <label class="form-label"><%= t('product:productType') %></label>
                   <select class="form-select" name="productTypeId">
-                    <option value="">Select Type</option>
+                    <option value=""><%= t('shared:common.selectType') %></option>
                     <% (productTypes || []).forEach(function(type) { %>
                     <option value="<%= type.productTypeId %>" <%= formData.productTypeId === type.productTypeId ? 'selected' : '' %>><%= type.name %></option>
                     <% }); %>
                   </select>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Category</label>
+                  <label class="form-label"><%= t('common.category') %></label>
                   <select class="form-select" name="categoryId">
-                    <option value="">Select Category</option>
+                    <option value=""><%= t('product:selectCategory') %></option>
                     <% (categories || []).forEach(function(cat) { %>
                     <option value="<%= cat.productCategoryId %>" <%= formData.categoryId === cat.productCategoryId ? 'selected' : '' %>><%= cat.name %></option>
                     <% }); %>
                   </select>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Brand</label>
-                  <select class="form-select" name="brandId">
-                    <option value="">Select Brand</option>
-                    <% (brands || []).forEach(function(brand) { %>
-                    <option value="<%= brand.brandId %>" <%= formData.brandId === brand.brandId ? 'selected' : '' %>><%= brand.name %></option>
-                    <% }); %>
-                  </select>
-                </div>
-                <div class="form-group mb-3">
-                  <label class="form-label">Tags</label>
+                  <label class="form-label"><%= t('shared:common.tags') %></label>
                   <input type="text" class="form-control" name="tags" value="<%= formData.tags || '' %>" placeholder="tag1, tag2, tag3">
                 </div>
               </div>
@@ -297,28 +288,28 @@
             <!-- Options -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-cog me-2"></i>Options</h3>
+                <h3 class="card-title"><i class="fas fa-cog me-2"></i><%= t('product:options') %></h3>
               </div>
               <div class="card-body">
                 <div class="form-check mb-2">
                   <input class="form-check-input" type="checkbox" name="isFeatured" value="true" id="isFeatured" <%= formData.isFeatured ? 'checked' : '' %>>
-                  <label class="form-check-label" for="isFeatured">Featured Product</label>
+                  <label class="form-check-label" for="isFeatured"><%= t('product:featuredProduct') %></label>
                 </div>
                 <div class="form-check mb-2">
                   <input class="form-check-input" type="checkbox" name="isTaxable" value="true" id="isTaxable" <%= formData.isTaxable !== false ? 'checked' : '' %>>
-                  <label class="form-check-label" for="isTaxable">Taxable</label>
+                  <label class="form-check-label" for="isTaxable"><%= t('product:taxable') %></label>
                 </div>
                 <div class="form-check mb-2">
                   <input class="form-check-input" type="checkbox" name="isVirtual" value="true" id="isVirtual" <%= formData.isVirtual ? 'checked' : '' %>>
-                  <label class="form-check-label" for="isVirtual">Virtual Product</label>
+                  <label class="form-check-label" for="isVirtual"><%= t('product:virtualProduct') %></label>
                 </div>
                 <div class="form-check mb-2">
                   <input class="form-check-input" type="checkbox" name="isDownloadable" value="true" id="isDownloadable" <%= formData.isDownloadable ? 'checked' : '' %>>
-                  <label class="form-check-label" for="isDownloadable">Downloadable</label>
+                  <label class="form-check-label" for="isDownloadable"><%= t('product:downloadable') %></label>
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" name="isSubscription" value="true" id="isSubscription" <%= formData.isSubscription ? 'checked' : '' %>>
-                  <label class="form-check-label" for="isSubscription">Subscription Product</label>
+                  <label class="form-check-label" for="isSubscription"><%= t('product:subscriptionProduct') %></label>
                 </div>
               </div>
             </div>

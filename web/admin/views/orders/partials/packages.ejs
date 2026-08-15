@@ -1,18 +1,18 @@
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">Fulfillment Packages</h3>
+    <h3 class="card-title"><%= t('order:fulfillmentPackages') %></h3>
   </div>
   <div class="card-body p-0">
     <% if (packages && packages.length > 0) { %>
     <table class="table table-striped mb-0">
       <thead>
         <tr>
-          <th>Package #</th>
-          <th>Tracking Number</th>
-          <th>Type</th>
-          <th>Weight</th>
-          <th>Date</th>
-          <th>Actions</th>
+          <th><%= t('order:packageNumber') %></th>
+          <th><%= t('shared:common.trackingNumber') %></th>
+          <th><%= t('common.type') %></th>
+          <th><%= t('shared:common.weight') %></th>
+          <th><%= t('common.date') %></th>
+          <th><%= t('common.actions') %></th>
         </tr>
       </thead>
       <tbody>
@@ -26,23 +26,23 @@
           <td>
             <button type="button" class="btn btn-sm btn-outline-primary"
               data-toggle="collapse" data-target="#tracking-form-<%= pkg.orderFulfillmentPackageId %>">
-              Update Tracking
+              <%= t('order:updateTracking') %>
             </button>
             <div class="collapse mt-2" id="tracking-form-<%= pkg.orderFulfillmentPackageId %>">
               <form method="POST" action="/admin/orders/<%= orderId %>/packages/<%= pkg.orderFulfillmentPackageId %>/tracking">
                 <div class="form-group">
                   <input type="text" name="trackingNumber" class="form-control form-control-sm"
-                    placeholder="Tracking number" value="<%= pkg.trackingNumber || '' %>">
+                    placeholder="<%= t('order:trackingNumberPlaceholder') %>" value="<%= pkg.trackingNumber || '' %>">
                 </div>
                 <div class="form-group">
                   <input type="text" name="shippingLabelUrl" class="form-control form-control-sm"
-                    placeholder="Shipping label URL" value="<%= pkg.shippingLabelUrl || '' %>">
+                    placeholder="<%= t('order:shippingLabelUrlPlaceholder') %>" value="<%= pkg.shippingLabelUrl || '' %>">
                 </div>
                 <div class="form-group">
                   <input type="text" name="commercialInvoiceUrl" class="form-control form-control-sm"
-                    placeholder="Commercial invoice URL" value="<%= pkg.commercialInvoiceUrl || '' %>">
+                    placeholder="<%= t('order:commercialInvoiceUrlPlaceholder') %>" value="<%= pkg.commercialInvoiceUrl || '' %>">
                 </div>
-                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                <button type="submit" class="btn btn-sm btn-primary"><%= t('common.save') %></button>
               </form>
             </div>
           </td>
@@ -51,7 +51,7 @@
       </tbody>
     </table>
     <% } else { %>
-    <div class="p-3 text-muted">No fulfillment packages found.</div>
+    <div class="p-3 text-muted"><%= t('order:noPackages') %></div>
     <% } %>
   </div>
 </div>

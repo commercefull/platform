@@ -1,0 +1,10 @@
+{
+  "rates": "세율",
+  "zones": "세금 구역",
+  "addRate": "세율 추가",
+  "addZone": "세금 구역 추가",
+  "addClass": "세금 클래스 추가",
+  "stateRegion": "주/지역",
+  "classes": "세금 분류",
+  "zoneName": "구역 이름"
+}

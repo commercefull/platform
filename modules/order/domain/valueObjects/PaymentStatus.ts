@@ -7,12 +7,12 @@ export enum PaymentStatus {
   PENDING = 'pending',
   AUTHORIZED = 'authorized',
   PAID = 'paid',
-  PARTIALLY_PAID = 'partially_paid',
-  PARTIALLY_REFUNDED = 'partially_refunded',
+  PARTIALLY_PAID = 'partiallyPaid',
+  PARTIALLY_REFUNDED = 'partiallyRefunded',
   REFUNDED = 'refunded',
   FAILED = 'failed',
   VOIDED = 'voided',
-  REQUIRES_ACTION = 'requires_action',
+  REQUIRES_ACTION = 'requiresAction',
 }
 
 /**

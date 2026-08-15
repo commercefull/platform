@@ -34,13 +34,14 @@ import * as operationsController from './controllers/operationsController';
 import * as gdprController from './controllers/gdprController';
 import * as supportController from './controllers/supportController';
 import * as assortmentController from './controllers/assortmentController';
-import * as brandController from './controllers/brandController';
 import * as pricingController from './controllers/pricingController';
 import * as localizationController from './controllers/localizationController';
 import * as merchantController from './controllers/merchantController';
 import * as mediaController from './controllers/mediaController';
 import * as checkoutController from './controllers/checkoutController';
 import * as storeController from './controllers/storeController';
+import * as organizationController from './controllers/organizationController';
+import * as reportingController from './controllers/reportingController';
 
 const router = express.Router();
 
@@ -96,19 +97,6 @@ router.get('/catalog/collections/:collectionId/edit', assortmentController.editC
 router.post('/catalog/collections/:collectionId', assortmentController.updateCollection);
 router.put('/catalog/collections/:collectionId', assortmentController.updateCollection);
 router.delete('/catalog/collections/:collectionId', assortmentController.deleteCollection);
-
-// ============================================================================
-// Catalog - Brands Routes
-// ============================================================================
-
-router.get('/catalog/brands', brandController.listBrands);
-router.get('/catalog/brands/create', brandController.createBrandForm);
-router.post('/catalog/brands', brandController.createBrand);
-router.get('/catalog/brands/:brandId', brandController.viewBrand);
-router.get('/catalog/brands/:brandId/edit', brandController.editBrandForm);
-router.post('/catalog/brands/:brandId', brandController.updateBrand);
-router.put('/catalog/brands/:brandId', brandController.updateBrand);
-router.delete('/catalog/brands/:brandId', brandController.deleteBrand);
 
 // ============================================================================
 // Catalog - Pricing Routes
@@ -214,6 +202,32 @@ router.post('/stores/:storeId', storeController.updateStore);
 router.get('/stores/:storeId/users', storeController.manageStoreUsers);
 router.post('/stores/:storeId/users', storeController.assignUserToStore);
 router.delete('/stores/:storeId/users/:userId', storeController.removeUserFromStore);
+
+// ============================================================================
+// Organization Routes
+// ============================================================================
+
+router.get('/organizations', organizationController.listOrganizations);
+router.get('/organizations/create', organizationController.createOrganizationForm);
+router.post('/organizations', organizationController.createOrganization);
+router.get('/organizations/:organizationId', organizationController.viewOrganization);
+router.get('/organizations/:organizationId/edit', organizationController.editOrganizationForm);
+router.post('/organizations/:organizationId', organizationController.updateOrganization);
+router.delete('/organizations/:organizationId', organizationController.deleteOrganization);
+
+// ============================================================================
+// Reporting Routes
+// ============================================================================
+
+router.get('/reporting', reportingController.reportingDashboard);
+router.post('/reporting/generate', reportingController.generateReport);
+router.get('/reporting/schedules', reportingController.listSchedules);
+router.get('/reporting/schedules/create', reportingController.createScheduleForm);
+router.post('/reporting/schedules', reportingController.createSchedule);
+router.get('/reporting/schedules/:scheduleId', reportingController.viewSchedule);
+router.get('/reporting/schedules/:scheduleId/edit', reportingController.editScheduleForm);
+router.post('/reporting/schedules/:scheduleId', reportingController.updateSchedule);
+router.delete('/reporting/schedules/:scheduleId', reportingController.deleteSchedule);
 
 // ============================================================================
 // Customer Routes

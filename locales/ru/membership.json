@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "Членство",
+  "totalMembers": "Всего участников",
+  "activeMembers": "Активные участники",
+  "membershipTiers": "Уровни членства",
+  "expiringThisMonth": "Срок действия истекает в этом месяце",
+  "addTier": "Добавить уровень",
+  "members": "члены",
+  "noTiers": "Уровни членства не настроены.",
+  "recentMembers": "Недавние участники",
+  "tier": "Уровень",
+  "noMembers": "Пока нет участников.",
+  "addMembershipTier": "Добавить уровень членства",
+  "tierName": "Название уровня",
+  "billingPeriod": "Расчетный период",
+  "lifetime": "Продолжительность жизни",
+  "benefitsOnePerLine": "Преимущества (по одному в строке)",
+  "setAsDefault": "Установить как уровень по умолчанию",
+  "createTier": "Создать уровень",
+  "confirmDeleteTier": "Удалить этот уровень?",
+  "analytics": "Аналитика членства",
+  "analyticsDescription": "Активные участники, доход, уровень оттока и распределение по уровням."
+}

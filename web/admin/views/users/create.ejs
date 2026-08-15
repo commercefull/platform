@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/users">Admin Users</a></li>
-            <li class="breadcrumb-item active">Create</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/users"><%= t('users:adminUsers') %></a></li>
+            <li class="breadcrumb-item active"><%= t('common.create') %></li>
           </ol>
         </div>
       </div>
@@ -24,40 +24,40 @@
         <div class="col-lg-8">
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title">New Admin User</h3>
+              <h3 class="card-title"><%= t('users:newAdminUser') %></h3>
             </div>
             <form id="createUserForm">
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">First Name</label>
+                      <label class="form-label"><%= t('shared:common.firstName') %></label>
                       <input type="text" class="form-control" name="firstName" placeholder="John">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Last Name</label>
+                      <label class="form-label"><%= t('shared:common.lastName') %></label>
                       <input type="text" class="form-control" name="lastName" placeholder="Doe">
                     </div>
                   </div>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Email <span class="text-danger">*</span></label>
+                  <label class="form-label"><%= t('shared:common.email') %> <span class="text-danger">*</span></label>
                   <input type="email" class="form-control" name="email" required placeholder="admin@example.com">
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Password <span class="text-danger">*</span></label>
-                  <input type="password" class="form-control" name="password" required minlength="8" placeholder="Minimum 8 characters">
+                  <label class="form-label"><%= t('shared:common.password') %> <span class="text-danger">*</span></label>
+                  <input type="password" class="form-control" name="password" required minlength="8" placeholder="<%= t('common.minEightChars') %>">
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                  <input type="password" class="form-control" name="confirmPassword" required placeholder="Confirm password">
+                  <label class="form-label"><%= t('shared:common.confirmPassword') %> <span class="text-danger">*</span></label>
+                  <input type="password" class="form-control" name="confirmPassword" required placeholder="<%= t('common.confirmPasswordPlaceholder') %>">
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Role</label>
+                  <label class="form-label"><%= t('shared:common.role') %></label>
                   <select class="form-control" name="roleId">
-                    <option value="">No Role</option>
+                    <option value=""><%= t('users:noRole') %></option>
                     <% (roles || []).forEach(function(role) { %>
                     <option value="<%= role.roleId %>"><%= role.name %></option>
                     <% }); %>
@@ -66,9 +66,9 @@
               </div>
               <div class="card-footer">
                 <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save me-2"></i>Create User
+                  <i class="fas fa-save me-2"></i><%= t('users:create') %>
                 </button>
-                <a href="/admin/users" class="btn btn-secondary ms-2">Cancel</a>
+                <a href="/admin/users" class="btn btn-secondary ms-2"><%= t('common.cancel') %></a>
               </div>
             </form>
           </div>
@@ -76,14 +76,14 @@
         <div class="col-lg-4">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Password Requirements</h3>
+              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i><%= t('users:passwordRequirements') %></h3>
             </div>
             <div class="card-body">
               <ul class="list-unstyled mb-0">
-                <li><i class="fas fa-check text-success me-2"></i>Minimum 8 characters</li>
-                <li><i class="fas fa-check text-success me-2"></i>At least one uppercase letter</li>
-                <li><i class="fas fa-check text-success me-2"></i>At least one lowercase letter</li>
-                <li><i class="fas fa-check text-success me-2"></i>At least one number</li>
+                <li><i class="fas fa-check text-success me-2"></i><%= t('shared:common.minEightChars') %></li>
+                <li><i class="fas fa-check text-success me-2"></i><%= t('users:oneUppercase') %></li>
+                <li><i class="fas fa-check text-success me-2"></i><%= t('users:oneLowercase') %></li>
+                <li><i class="fas fa-check text-success me-2"></i><%= t('users:oneNumber') %></li>
               </ul>
             </div>
           </div>
@@ -101,7 +101,7 @@
     const data = Object.fromEntries(formData);
 
     if (data.password !== data.confirmPassword) {
-      alert('Passwords do not match');
+      alert('<%= t("users:passwordsDoNotMatch") %>');
       return;
     }
 
@@ -117,10 +117,10 @@
       if (result.success) {
         window.location.href = '/admin/users/' + result.userId;
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   });
 </script>

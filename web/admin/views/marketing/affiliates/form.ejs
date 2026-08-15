@@ -2,7 +2,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title"><%= affiliate ? 'Edit Affiliate' : 'Create Affiliate' %></h2>
+      <h2 class="page-title"><%= affiliate ? t('marketing:affiliates.edit') : t('marketing:affiliates.create') %></h2>
     </div>
     <div class="col-auto">
       <a href="/admin/marketing/affiliates" class="btn btn-outline-secondary">
@@ -11,7 +11,7 @@
           <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
           <polyline points="15 6 9 12 15 18"/>
         </svg>
-        Back to Affiliates
+        <%= t('marketing:affiliates.backToAffiliates') %>
       </a>
     </div>
   </div>
@@ -27,19 +27,19 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title"><%= affiliate ? 'Edit' : 'New' %> Affiliate</h3>
+        <h3 class="card-title"><%= affiliate ? t('common.edit') : t('shared:common.new') %> <%= t('marketing:affiliates.title') %></h3>
       </div>
       <div class="card-body">
         <form method="POST" action="/admin/marketing/affiliates">
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label required">Name</label>
+              <label class="form-label required"><%= t('common.name') %></label>
               <input type="text" name="name" class="form-control" required
                 value="<%= (formData && formData.name) || (affiliate && affiliate.name) || '' %>"
-                placeholder="Affiliate name">
+                placeholder="<%= t('marketing:affiliates.name') %>">
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label required">Email</label>
+              <label class="form-label required"><%= t('shared:common.email') %></label>
               <input type="email" name="email" class="form-control" required
                 value="<%= (formData && formData.email) || (affiliate && affiliate.email) || '' %>"
                 placeholder="affiliate@example.com">
@@ -47,39 +47,39 @@
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label required">Affiliate Code</label>
+              <label class="form-label required"><%= t('marketing:affiliates.code') %></label>
               <input type="text" name="code" class="form-control" required
                 value="<%= (formData && formData.code) || (affiliate && affiliate.code) || '' %>"
                 placeholder="e.g. PARTNER2024">
-              <small class="text-muted">Unique code used in tracking links.</small>
+              <small class="text-muted"><%= t('marketing:affiliates.codeHint') %></small>
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label required">Commission Rate (%)</label>
+              <label class="form-label required"><%= t('marketing:affiliates.commissionRate') %> (%)</label>
               <input type="number" name="commissionRate" class="form-control" required min="0" max="100" step="0.01"
                 value="<%= (formData && formData.commissionRate) || (affiliate && affiliate.commissionRate) || '10' %>">
             </div>
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label">Tracking URL <span class="text-muted">(optional)</span></label>
+              <label class="form-label"><%= t('marketing:affiliates.trackingUrlOptional') %></label>
               <input type="url" name="trackingUrl" class="form-control"
                 value="<%= (formData && formData.trackingUrl) || '' %>"
                 placeholder="https://yourstore.com/ref/CODE">
-              <small class="text-muted">Leave blank to auto-generate.</small>
+              <small class="text-muted"><%= t('marketing:affiliates.trackingUrlHint') %></small>
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label">Tracking Slug <span class="text-muted">(optional)</span></label>
+              <label class="form-label"><%= t('marketing:affiliates.trackingSlugOptional') %></label>
               <input type="text" name="trackingSlug" class="form-control"
                 value="<%= (formData && formData.trackingSlug) || '' %>"
                 placeholder="e.g. partner2024">
-              <small class="text-muted">Leave blank to use the affiliate code.</small>
+              <small class="text-muted"><%= t('marketing:affiliates.trackingSlugHint') %></small>
             </div>
           </div>
           <div class="form-footer">
             <button type="submit" class="btn btn-primary">
-              <%= affiliate ? 'Update Affiliate' : 'Create Affiliate' %>
+              <%= affiliate ? t('marketing:affiliates.update') : t('marketing:affiliates.create') %>
             </button>
-            <a href="/admin/marketing/affiliates" class="btn btn-link">Cancel</a>
+            <a href="/admin/marketing/affiliates" class="btn btn-link"><%= t('common.cancel') %></a>
           </div>
         </form>
       </div>

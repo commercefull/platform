@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">Configuration</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.settings') %></li>
           </ol>
         </div>
       </div>
@@ -24,7 +24,7 @@
         <div class="col-12">
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-toggle-on me-2"></i>Feature Flags</h3>
+              <h3 class="card-title"><i class="fas fa-toggle-on me-2"></i><%= t('platform:featureFlags') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
@@ -62,11 +62,11 @@
               <table class="table table-hover mb-0">
                 <thead>
                   <tr>
-                    <th>Key</th>
-                    <th>Value</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Actions</th>
+                    <th><%= t('common.code') %></th>
+                    <th><%= t('common.description') %></th>
+                    <th><%= t('common.type') %></th>
+                    <th><%= t('common.description') %></th>
+                    <th><%= t('common.actions') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -108,38 +108,38 @@
         <div class="col-12">
           <div class="card card-outline card-success">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-plus me-2"></i>Add New Configuration</h3>
+              <h3 class="card-title"><i class="fas fa-plus me-2"></i><%= t('common.add') %> <%= t('shared:common.settings') %></h3>
             </div>
             <div class="card-body">
               <form id="addConfigForm">
                 <div class="row">
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label>Key</label>
+                      <label><%= t('common.code') %></label>
                       <input type="text" class="form-control" name="key" placeholder="category.setting" required>
                     </div>
                   </div>
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label>Value</label>
-                      <input type="text" class="form-control" name="value" placeholder="value" required>
+                      <label><%= t('common.description') %></label>
+                      <input type="text" class="form-control" name="value" placeholder="<%= t('platform:valuePlaceholder') %>" required>
                     </div>
                   </div>
                   <div class="col-md-2">
                     <div class="form-group">
-                      <label>Type</label>
+                      <label><%= t('common.type') %></label>
                       <select class="form-control" name="type">
-                        <option value="string">String</option>
-                        <option value="number">Number</option>
-                        <option value="boolean">Boolean</option>
-                        <option value="json">JSON</option>
+                        <option value="string"><%= t('platform:configTypeString') %></option>
+                        <option value="number"><%= t('platform:configTypeNumber') %></option>
+                        <option value="boolean"><%= t('platform:configTypeBoolean') %></option>
+                        <option value="json"><%= t('platform:configTypeJson') %></option>
                       </select>
                     </div>
                   </div>
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label>Description</label>
-                      <input type="text" class="form-control" name="description" placeholder="Description">
+                      <label><%= t('common.description') %></label>
+                      <input type="text" class="form-control" name="description" placeholder="<%= t('common.description') %>">
                     </div>
                   </div>
                   <div class="col-md-1">
@@ -165,28 +165,28 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Edit Configuration</h5>
+        <h5 class="modal-title"><%= t('common.edit') %> <%= t('shared:common.settings') %></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form id="editConfigForm">
           <div class="mb-3">
-            <label class="form-label">Key</label>
+            <label class="form-label"><%= t('common.code') %></label>
             <input type="text" class="form-control" name="key" readonly>
           </div>
           <div class="mb-3">
-            <label class="form-label">Value</label>
+            <label class="form-label"><%= t('common.description') %></label>
             <input type="text" class="form-control" name="value" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Type</label>
+            <label class="form-label"><%= t('common.type') %></label>
             <input type="text" class="form-control" name="type" readonly>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="saveConfig()">Save Changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-primary" onclick="saveConfig()"><%= t('shared:common.saveChanges') %></button>
       </div>
     </div>
   </div>
@@ -202,11 +202,11 @@
       });
       const result = await response.json();
       if (!result.success) {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
         location.reload();
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
       location.reload();
     }
   }
@@ -234,10 +234,10 @@
       if (result.success) {
         location.reload();
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   }
 
@@ -256,10 +256,10 @@
       if (result.success) {
         location.reload();
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   });
 </script>

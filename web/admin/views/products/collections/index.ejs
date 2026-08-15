@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
-            <li class="breadcrumb-item active">Collections</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/products"><%= t('shared:common.products') %></a></li>
+            <li class="breadcrumb-item active"><%= t('nav.collections') %></li>
           </ol>
         </div>
       </div>
@@ -29,9 +29,9 @@
 
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h3 class="card-title">Product Collections</h3>
+          <h3 class="card-title"><%= t('product:collection.title') %></h3>
           <a href="/admin/products/collections/create" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus me-1"></i>New Collection
+            <i class="fas fa-plus me-1"></i><%= t('product:collection.new') %>
           </a>
         </div>
         <div class="card-body p-0">
@@ -39,11 +39,11 @@
           <table class="table table-striped mb-0">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Slug</th>
-                <th>Position</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th><%= t('common.name') %></th>
+                <th><%= t('shared:common.slug') %></th>
+                <th><%= t('product:category.position') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
@@ -54,16 +54,16 @@
                 <td><%= col.position %></td>
                 <td>
                   <% if (col.isActive) { %>
-                    <span class="badge bg-success">Active</span>
+                    <span class="badge bg-success"><%= t('common.active') %></span>
                   <% } else { %>
-                    <span class="badge bg-secondary">Inactive</span>
+                    <span class="badge bg-secondary"><%= t('common.inactive') %></span>
                   <% } %>
                 </td>
                 <td>
-                  <a href="/admin/products/collections/<%= col.productCollectionId %>/edit" class="btn btn-sm btn-outline-primary">Edit</a>
-                  <form method="POST" action="/admin/products/collections/<%= col.productCollectionId %>?_method=DELETE" class="d-inline" onsubmit="return confirm('Delete this collection?')">
+                  <a href="/admin/products/collections/<%= col.productCollectionId %>/edit" class="btn btn-sm btn-outline-primary"><%= t('common.edit') %></a>
+                  <form method="POST" action="/admin/products/collections/<%= col.productCollectionId %>?_method=DELETE" class="d-inline" onsubmit="return confirm('<%= t('product:collection.confirmDelete') %>')">
                     <input type="hidden" name="_method" value="DELETE">
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><%= t('common.delete') %></button>
                   </form>
                 </td>
               </tr>
@@ -71,7 +71,7 @@
             </tbody>
           </table>
           <% } else { %>
-          <div class="p-4 text-muted text-center">No collections found. <a href="/admin/products/collections/create">Create one</a>.</div>
+          <div class="p-4 text-muted text-center"><%= t('product:collection.noCollections') %> <a href="/admin/products/collections/create"><%= t('product:category.createOne') %></a>.</div>
           <% } %>
         </div>
       </div>

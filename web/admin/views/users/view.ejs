@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/users">Admin Users</a></li>
-            <li class="breadcrumb-item active">Details</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/users"><%= t('users:adminUsers') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.details') %></li>
           </ol>
         </div>
       </div>
@@ -25,40 +25,40 @@
           <!-- User Info -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>User Information</h3>
+              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i><%= t('users:userInformation') %></h3>
             </div>
             <div class="card-body">
               <form id="updateUserForm">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">First Name</label>
+                      <label class="form-label"><%= t('shared:common.firstName') %></label>
                       <input type="text" class="form-control" name="firstName" value="<%= adminUser.firstName || '' %>">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Last Name</label>
+                      <label class="form-label"><%= t('shared:common.lastName') %></label>
                       <input type="text" class="form-control" name="lastName" value="<%= adminUser.lastName || '' %>">
                     </div>
                   </div>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Email</label>
+                  <label class="form-label"><%= t('shared:common.email') %></label>
                   <input type="email" class="form-control" value="<%= adminUser.email %>" readonly>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Status</label>
+                  <label class="form-label"><%= t('common.status') %></label>
                   <select class="form-control" name="status">
-                    <option value="active" <%= adminUser.status === 'active' ? 'selected' : '' %>>Active</option>
-                    <option value="inactive" <%= adminUser.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
-                    <option value="suspended" <%= adminUser.status === 'suspended' ? 'selected' : '' %>>Suspended</option>
+                    <option value="active" <%= adminUser.status === 'active' ? 'selected' : '' %>><%= t('common.active') %></option>
+                    <option value="inactive" <%= adminUser.status === 'inactive' ? 'selected' : '' %>><%= t('common.inactive') %></option>
+                    <option value="suspended" <%= adminUser.status === 'suspended' ? 'selected' : '' %>><%= t('shared:common.suspended') %></option>
                   </select>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="form-label">Role</label>
+                  <label class="form-label"><%= t('shared:common.role') %></label>
                   <select class="form-control" name="roleId">
-                    <option value="">No Role</option>
+                    <option value=""><%= t('users:noRole') %></option>
                     <% (roles || []).forEach(function(role) { %>
                     <option value="<%= role.roleId %>" <%= adminUser.roleId === role.roleId ? 'selected' : '' %>>
                       <%= role.name %>
@@ -67,7 +67,7 @@
                   </select>
                 </div>
                 <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save me-2"></i>Save Changes
+                  <i class="fas fa-save me-2"></i><%= t('shared:common.saveChanges') %>
                 </button>
               </form>
             </div>
@@ -77,39 +77,39 @@
           <!-- Account Stats -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-chart-bar me-2"></i>Account Statistics</h3>
+              <h3 class="card-title"><i class="fas fa-chart-bar me-2"></i><%= t('users:accountStatistics') %></h3>
             </div>
             <div class="card-body">
               <table class="table table-borderless">
                 <tr>
-                  <th>User ID</th>
+                  <th><%= t('users:userId') %></th>
                   <td><code><%= adminUser.userId %></code></td>
                 </tr>
                 <tr>
-                  <th>Created</th>
+                  <th><%= t('shared:common.dateCreated') %></th>
                   <td><%= new Date(adminUser.createdAt).toLocaleString() %></td>
                 </tr>
                 <tr>
-                  <th>Last Login</th>
-                  <td><%= adminUser.lastLoginAt ? new Date(adminUser.lastLoginAt).toLocaleString() : 'Never' %></td>
+                  <th><%= t('shared:common.lastLogin') %></th>
+                  <td><%= adminUser.lastLoginAt ? new Date(adminUser.lastLoginAt).toLocaleString() : t('shared:common.never') %></td>
                 </tr>
                 <tr>
-                  <th>Login Count</th>
+                  <th><%= t('users:loginCount') %></th>
                   <td><%= adminUser.loginCount || 0 %></td>
                 </tr>
                 <tr>
-                  <th>Email Verified</th>
+                  <th><%= t('users:emailVerified') %></th>
                   <td>
                     <span class="badge bg-<%= adminUser.emailVerified ? 'success' : 'warning' %>">
-                      <%= adminUser.emailVerified ? 'Yes' : 'No' %>
+                      <%= adminUser.emailVerified ? t('common.yes') : t('common.no') %>
                     </span>
                   </td>
                 </tr>
                 <tr>
-                  <th>MFA Enabled</th>
+                  <th><%= t('users:mfaEnabled') %></th>
                   <td>
                     <span class="badge bg-<%= adminUser.mfaEnabled ? 'success' : 'secondary' %>">
-                      <%= adminUser.mfaEnabled ? 'Yes' : 'No' %>
+                      <%= adminUser.mfaEnabled ? t('common.yes') : t('common.no') %>
                     </span>
                   </td>
                 </tr>
@@ -120,7 +120,7 @@
           <!-- Permissions -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i>Permissions</h3>
+              <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i><%= t('common.permissions') %></h3>
             </div>
             <div class="card-body">
               <% if ((permissions || []).length > 0) { %>
@@ -128,7 +128,7 @@
                   <span class="badge bg-info me-1 mb-1"><%= perm %></span>
                 <% }); %>
               <% } else { %>
-                <p class="text-muted mb-0">No permissions assigned. Assign a role to grant permissions.</p>
+                <p class="text-muted mb-0"><%= t('users:noPermissionsAssigned') %></p>
               <% } %>
             </div>
           </div>
@@ -139,10 +139,10 @@
       <div class="row">
         <div class="col-12">
           <a href="/admin/users" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Users
+            <i class="fas fa-arrow-left me-2"></i><%= t('users:backToUsers') %>
           </a>
           <button class="btn btn-danger float-end" onclick="deleteUser()">
-            <i class="fas fa-trash me-2"></i>Delete User
+            <i class="fas fa-trash me-2"></i><%= t('users:deleteUser') %>
           </button>
         </div>
       </div>
@@ -165,18 +165,18 @@
       });
       const result = await response.json();
       if (result.success) {
-        alert('User updated successfully');
+        alert('<%= t("users:userUpdatedSuccess") %>');
         location.reload();
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   });
 
   async function deleteUser() {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm('<%= t("users:confirmDelete") %>')) return;
 
     try {
       const response = await fetch('/admin/users/<%= adminUser.userId %>', { method: 'DELETE' });
@@ -184,10 +184,10 @@
       if (result.success) {
         window.location.href = '/admin/users';
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   }
 </script>

@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "保留中のリクエスト",
+  "completedThisMonth": "今月完了しました",
+  "avgProcessingDays": "平均処理日数",
+  "marketingConsentRate": "マーケティング同意率",
+  "dataAccessRequests": "データアクセスリクエスト",
+  "dataAccess": "データアクセス",
+  "dataDeletion": "データの削除",
+  "noGdprRequests": "GDPR リクエストはまだありません。",
+  "consentManagement": "同意管理",
+  "marketingConsent": "マーケティングの同意",
+  "analyticsConsent": "分析の同意",
+  "manageConsentSettings": "同意設定の管理",
+  "createGdprRequest": "GDPRリクエストの作成",
+  "dataAccessRequestSar": "データ アクセス リクエスト (SAR)",
+  "dataDeletionRequest": "データ削除リクエスト",
+  "dataRectificationRequest": "データ修正リクエスト",
+  "customerEmail": "顧客の電子メール",
+  "createRequest": "リクエストの作成",
+  "confirmProcessRequest": "このリクエストを処理中としてマークしますか?",
+  "consentRecords": "同意記録",
+  "manageConsentRecords": "顧客の同意記録と設定を管理します。"
+}

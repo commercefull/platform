@@ -17,6 +17,8 @@ import {
   GetInventoryItemUseCase,
   ListInventoryItemsUseCase,
   TransferBetweenStoresUseCase,
+  ConfirmReservationUseCase,
+  SetLowStockThresholdUseCase,
 } from '../../application/useCases';
 import {
   saveLocation as saveStoreLocation,
@@ -738,5 +740,59 @@ export const transferBetweenStores = async (req: TypedRequest<Record<string, str
     respond(res, result, 201);
   } catch (error: unknown) {
     respondError(res, error instanceof Error ? error.message : 'Failed to transfer between stores', 400);
+  }
+};
+
+// ============================================================================
+// Confirm Reservation
+// ============================================================================
+
+interface ConfirmReservationBody {
+  reservationId: string;
+  orderId?: string;
+}
+
+export const confirmReservation = async (req: TypedRequest<Record<string, string>, unknown, ConfirmReservationBody>, res: Response): Promise<void> => {
+  try {
+    const useCase = new ConfirmReservationUseCase(inventoryRepo);
+    const result = await useCase.execute({
+      reservationId: req.body.reservationId,
+      orderId: req.body.orderId,
+    });
+    if (!result.confirmed) {
+      respondError(res, result.message, 404);
+      return;
+    }
+    respond(res, result);
+  } catch (error: unknown) {
+    respondError(res, error instanceof Error ? error.message : 'Failed to confirm reservation', 400);
+  }
+};
+
+// ============================================================================
+// Set Low Stock Threshold
+// ============================================================================
+
+interface SetLowStockThresholdBody {
+  productId: string;
+  variantId?: string;
+  locationId: string;
+  reorderPoint: number;
+  reorderQuantity?: number;
+}
+
+export const setLowStockThreshold = async (req: TypedRequest<Record<string, string>, unknown, SetLowStockThresholdBody>, res: Response): Promise<void> => {
+  try {
+    const useCase = new SetLowStockThresholdUseCase(inventoryRepository);
+    const result = await useCase.execute({
+      productId: req.body.productId,
+      variantId: req.body.variantId,
+      locationId: req.body.locationId,
+      reorderPoint: req.body.reorderPoint,
+      reorderQuantity: req.body.reorderQuantity,
+    });
+    respond(res, result);
+  } catch (error: unknown) {
+    respondError(res, error instanceof Error ? error.message : 'Failed to set low stock threshold', 400);
   }
 };

@@ -1,17 +1,17 @@
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">Order Notes</h3>
+    <h3 class="card-title"><%= t('order:orderNotes') %></h3>
   </div>
   <div class="card-body p-0">
     <% if (notes && notes.length > 0) { %>
     <table class="table table-striped mb-0">
       <thead>
         <tr>
-          <th>Note</th>
-          <th>Visible to Customer</th>
-          <th>Created By</th>
-          <th>Date</th>
-          <th>Actions</th>
+          <th><%= t('shared:common.note') %></th>
+          <th><%= t('order:visibleToCustomer') %></th>
+          <th><%= t('order:createdBy') %></th>
+          <th><%= t('common.date') %></th>
+          <th><%= t('common.actions') %></th>
         </tr>
       </thead>
       <tbody>
@@ -20,16 +20,16 @@
           <td><%= note.content %></td>
           <td>
             <% if (note.isCustomerVisible) { %>
-              <span class="badge badge-success">Yes</span>
+              <span class="badge badge-success"><%= t('common.yes') %></span>
             <% } else { %>
-              <span class="badge badge-secondary">No</span>
+              <span class="badge badge-secondary"><%= t('common.no') %></span>
             <% } %>
           </td>
           <td><%= note.createdBy || '—' %></td>
           <td><%= new Date(note.createdAt).toLocaleString() %></td>
           <td>
             <form method="POST" action="/admin/orders/<%= orderId %>/notes/<%= note.orderNoteId %>/delete" style="display:inline;">
-              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this note?')">Delete</button>
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('<%= t('order:confirmDeleteNote') %>')"><%= t('common.delete') %></button>
             </form>
           </td>
         </tr>
@@ -37,20 +37,20 @@
       </tbody>
     </table>
     <% } else { %>
-    <div class="p-3 text-muted">No notes yet.</div>
+    <div class="p-3 text-muted"><%= t('order:noNotes') %></div>
     <% } %>
   </div>
   <div class="card-footer">
     <form method="POST" action="/admin/orders/<%= orderId %>/notes">
       <div class="form-group">
-        <label for="noteContent">Add Note</label>
-        <textarea id="noteContent" name="content" class="form-control" rows="3" placeholder="Enter note..." required></textarea>
+        <label for="noteContent"><%= t('order:addNote') %></label>
+        <textarea id="noteContent" name="content" class="form-control" rows="3" placeholder="<%= t('order:enterNote') %>" required></textarea>
       </div>
       <div class="form-group form-check">
         <input type="checkbox" class="form-check-input" id="isCustomerVisible" name="isCustomerVisible" value="true">
-        <label class="form-check-label" for="isCustomerVisible">Visible to customer</label>
+        <label class="form-check-label" for="isCustomerVisible"><%= t('order:visibleToCustomer') %></label>
       </div>
-      <button type="submit" class="btn btn-primary">Add Note</button>
+      <button type="submit" class="btn btn-primary"><%= t('order:addNote') %></button>
     </form>
   </div>
 </div>

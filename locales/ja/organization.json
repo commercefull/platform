@@ -1,0 +1,13 @@
+{
+  "create": "組織の作成",
+  "view": "組織の詳細",
+  "single": "シングル",
+  "multiStore": "マルチストア",
+  "marketplace": "市場",
+  "settings": "設定(JSON)",
+  "settingsHint": "組織レベルの設定用のオプションの JSON オブジェクト。",
+  "slugHint": "小文字、数字、ハイフンのみ。",
+  "noOrganizations": "組織が見つかりませんでした。",
+  "confirmDelete": "この組織を削除しますか?",
+  "noStoresLinked": "この組織にリンクされている店舗はありません。"
+}

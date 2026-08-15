@@ -1,0 +1,23 @@
+{
+  "programMembers": "Programmmitglieder",
+  "pointsIssued": "Vergebene Punkte",
+  "pointsRedeemed": "Punkte eingelöst",
+  "programSettings": "Programmeinstellungen",
+  "pointsPerDollar": "Punkte pro ausgegebenem Dollar",
+  "pointsValue": "Punktewert ($ pro Punkt)",
+  "minimumRedemption": "Mindesteinlösung",
+  "addReward": "Belohnung hinzufügen",
+  "reward": "Belohnen",
+  "redemptions": "Einlösungen",
+  "noRewards": "Keine Belohnungen konfiguriert.",
+  "recentTransactions": "Letzte Transaktionen",
+  "noTransactions": "Noch keine Transaktionen.",
+  "rewardName": "Belohnungsname",
+  "rewardType": "Belohnungstyp",
+  "freeProduct": "Kostenloses Produkt",
+  "giftCard": "Geschenkkarte",
+  "rewardValue": "Belohnungswert",
+  "confirmDeleteReward": "Diese Belohnung löschen?",
+  "analytics": "Analyse von Treueprogrammen",
+  "analyticsDescription": "Punkteverteilung, Einlösungsraten und Stufenfortschritt."
+}

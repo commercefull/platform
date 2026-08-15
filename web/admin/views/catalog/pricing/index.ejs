@@ -13,26 +13,26 @@
     <div class="col-md-6">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Price Lists</h3>
+          <h3 class="card-title"><%= t('shared:common.priceLists') %></h3>
           <div class="card-actions">
-            <a href="/admin/catalog/pricing/lists/create" class="btn btn-primary btn-sm">Create</a>
+            <a href="/admin/catalog/pricing/lists/create" class="btn btn-primary btn-sm"><%= t('common.create') %></a>
           </div>
         </div>
         <div class="card-body">
-          <p class="text-muted">Manage price lists for different customer groups.</p>
+          <p class="text-muted"><%= t('product:pricing.managePriceLists') %></p>
         </div>
       </div>
     </div>
     <div class="col-md-6">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Price Rules</h3>
+          <h3 class="card-title"><%= t('product:pricing.priceRules') %></h3>
           <div class="card-actions">
-            <a href="/admin/catalog/pricing/rules/create" class="btn btn-primary btn-sm">Create</a>
+            <a href="/admin/catalog/pricing/rules/create" class="btn btn-primary btn-sm"><%= t('common.create') %></a>
           </div>
         </div>
         <div class="card-body">
-          <p class="text-muted">Configure dynamic pricing rules.</p>
+          <p class="text-muted"><%= t('product:pricing.configureRules') %></p>
         </div>
       </div>
     </div>

@@ -39,9 +39,7 @@ export const getPurchaseOrders = async (req: TypedRequest, res: Response): Promi
         parseInt(offset as string),
       );
     } else {
-      // TODO: Implement findAll method if needed
-      successResponse(res, []);
-      return;
+      purchaseOrders = await purchaseOrderRepo.findAll(parseInt(limit as string), parseInt(offset as string));
     }
 
     successResponse(res, purchaseOrders);

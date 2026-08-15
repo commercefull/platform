@@ -7,13 +7,13 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Abandoned Carts</h1>
+          <h1 class="m-0"><%= t('shared:common.abandonedCarts') %></h1>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item">Operations</li>
-            <li class="breadcrumb-item active">Abandoned Carts</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><%= t('shared:common.operations') %></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.abandonedCarts') %></li>
           </ol>
         </div>
       </div>
@@ -37,7 +37,7 @@
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= stats.totalAbandoned %></h3>
-              <p>Abandoned Carts</p>
+              <p><%= t('shared:common.abandonedCarts') %></p>
             </div>
             <div class="icon">
               <i class="fas fa-shopping-cart"></i>
@@ -48,7 +48,7 @@
           <div class="small-box bg-danger">
             <div class="inner">
               <h3><%= stats.totalExpired %></h3>
-              <p>Expired Carts</p>
+              <p><%= t('operations:expiredCarts') %></p>
             </div>
             <div class="icon">
               <i class="fas fa-clock"></i>
@@ -59,7 +59,7 @@
           <div class="small-box bg-success">
             <div class="inner">
               <h3><%= stats.recoveryPotential.toFixed(2) %></h3>
-              <p>Recovery Value</p>
+              <p><%= t('operations:recoveryValue') %></p>
             </div>
             <div class="icon">
               <i class="fas fa-dollar-sign"></i>
@@ -70,7 +70,7 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3><%= stats.avgCartValue.toFixed(2) %></h3>
-              <p>Avg Cart Value</p>
+              <p><%= t('operations:avgCartValue') %></p>
             </div>
             <div class="icon">
               <i class="fas fa-chart-line"></i>
@@ -86,7 +86,7 @@
             <div class="card-body">
               <form method="GET" class="form-inline">
                 <div class="form-group mr-3">
-                  <label for="days" class="mr-2">Abandoned for (days):</label>
+                  <label for="days" class="mr-2"><%= t('operations:abandonedFor') %></label>
                   <select name="days" id="days" class="form-control">
                     <option value="1" <%= filters.olderThanDays === 1 ? 'selected' : '' %>>1 day</option>
                     <option value="3" <%= filters.olderThanDays === 3 ? 'selected' : '' %>>3 days</option>
@@ -96,10 +96,10 @@
                   </select>
                 </div>
                 <button type="submit" class="btn btn-secondary mr-2">
-                  <i class="fas fa-filter"></i> Filter
+                  <i class="fas fa-filter"></i> <%= t('common.filter') %>
                 </button>
                 <a href="/admin/baskets/abandoned" class="btn btn-outline-secondary">
-                  <i class="fas fa-times"></i> Clear
+                  <i class="fas fa-times"></i> <%= t('common.clear') %>
                 </a>
               </form>
             </div>
@@ -110,26 +110,26 @@
       <!-- Abandoned Carts Table -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Abandoned Shopping Carts</h3>
+          <h3 class="card-title"><%= t('operations:abandonedShoppingCarts') %></h3>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover text-nowrap">
             <thead>
               <tr>
-                <th>Cart ID</th>
-                <th>Items</th>
-                <th>Cart Value</th>
-                <th>Last Activity</th>
-                <th>Days Abandoned</th>
-                <th>Customer</th>
-                <th>Actions</th>
+                <th><%= t('operations:cartId') %></th>
+                <th><%= t('shared:common.items') %></th>
+                <th><%= t('operations:cartValue') %></th>
+                <th><%= t('operations:lastActivity') %></th>
+                <th><%= t('operations:daysAbandoned') %></th>
+                <th><%= t('shared:common.customer') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
               <% if (abandonedBaskets.length === 0) { %>
                 <tr>
                   <td colspan="7" class="text-center py-4">
-                    <em>No abandoned carts found for the selected time period.</em>
+                    <em><%= t('operations:noAbandonedCarts') %></em>
                   </td>
                 </tr>
               <% } else { %>
@@ -166,15 +166,15 @@
                       <% if (basket.customerId) { %>
                         Customer: <%= basket.customerId.substring(0, 8) %>...
                       <% } else { %>
-                        <span class="text-muted">Guest</span>
+                        <span class="text-muted"><%= t('shared:common.guest') %></span>
                       <% } %>
                     </td>
                     <td>
                       <a href="/admin/baskets/abandoned/<%= basket.basketId %>" class="btn btn-sm btn-info">
-                        <i class="fas fa-eye"></i> View
+                        <i class="fas fa-eye"></i> <%= t('shared:common.view') %>
                       </a>
                       <button class="btn btn-sm btn-primary" onclick="recoverCart('<%= basket.basketId %>')">
-                        <i class="fas fa-envelope"></i> Recover
+                        <i class="fas fa-envelope"></i> <%= t('operations:recover') %>
                       </button>
                     </td>
                   </tr>
@@ -189,22 +189,22 @@
       <% if (expiredBaskets.length > 0) { %>
         <div class="card mt-4">
           <div class="card-header">
-            <h3 class="card-title">Expired Carts (Cleanup Required)</h3>
+            <h3 class="card-title"><%= t('operations:expiredCartsCleanup') %></h3>
           </div>
           <div class="card-body">
             <p class="text-muted">
-              These carts have expired and should be cleaned up to free up storage space.
+              <%= t('operations:expiredCartsCleanupHint') %>
               <button class="btn btn-sm btn-danger ml-2" onclick="cleanupExpired()">
-                <i class="fas fa-trash"></i> Clean Up Expired Carts
+                <i class="fas fa-trash"></i> <%= t('operations:cleanUpExpiredCarts') %>
               </button>
             </p>
             <div class="table-responsive">
               <table class="table table-sm">
                 <thead>
                   <tr>
-                    <th>Cart ID</th>
-                    <th>Items</th>
-                    <th>Expired</th>
+                    <th><%= t('operations:cartId') %></th>
+                    <th><%= t('shared:common.items') %></th>
+                    <th><%= t('shared:common.expired') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -218,7 +218,7 @@
                   <% if (expiredBaskets.length > 5) { %>
                     <tr>
                       <td colspan="3" class="text-center text-muted">
-                        ... and <%= expiredBaskets.length - 5 %> more expired carts
+                        ... <%= t('operations:andMoreExpiredCarts') %> <%= expiredBaskets.length - 5 %>
                       </td>
                     </tr>
                   <% } %>
@@ -237,7 +237,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Recover Abandoned Cart</h4>
+        <h4 class="modal-title"><%= t('operations:recoverAbandonedCart') %></h4>
         <button type="button" class="close" data-dismiss="modal">
           <span>&times;</span>
         </button>
@@ -245,22 +245,22 @@
       <div class="modal-body">
         <form id="recoveryForm">
           <div class="form-group">
-            <label for="recoveryMethod">Recovery Method:</label>
+            <label for="recoveryMethod"><%= t('operations:recoveryMethod') %></label>
             <select class="form-control" id="recoveryMethod" name="recoveryMethod" required>
-              <option value="email">Send Recovery Email</option>
-              <option value="discount">Apply Discount Code</option>
-              <option value="reminder">Send Reminder SMS</option>
+              <option value="email"><%= t('operations:sendRecoveryEmail') %></option>
+              <option value="discount"><%= t('operations:applyDiscountCode') %></option>
+              <option value="reminder"><%= t('operations:sendReminderSms') %></option>
             </select>
           </div>
           <div class="form-group">
-            <label for="message">Message (optional):</label>
-            <textarea class="form-control" id="message" name="message" rows="3" placeholder="Personalized message to include..."></textarea>
+            <label for="message"><%= t('operations:messageOptional') %></label>
+            <textarea class="form-control" id="message" name="message" rows="3" placeholder="<%= t('operations:messagePlaceholder') %>"></textarea>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="confirmRecoveryBtn">Send Recovery</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-primary" id="confirmRecoveryBtn"><%= t('operations:sendRecovery') %></button>
       </div>
     </div>
   </div>
@@ -289,20 +289,20 @@ document.getElementById('confirmRecoveryBtn').onclick = function() {
   .then(data => {
     if (data.success) {
       $('#recoveryModal').modal('hide');
-      alert('Recovery action initiated successfully!');
+      alert('<%= t('operations:recoverySuccess') %>');
       location.reload();
     } else {
-      alert('Error: ' + data.message);
+      alert('<%= t("common.error") %>: ' + data.message);
     }
   })
   .catch(error => {
-    alert('Error sending recovery');
+    alert('<%= t('operations:errorSendingRecovery') %>');
     console.error('Error:', error);
   });
 };
 
 function cleanupExpired() {
-  if (confirm('This will permanently delete all expired carts. Continue?')) {
+  if (confirm('<%= t('operations:confirmCleanupExpired') %>')) {
     fetch('/admin/baskets/cleanup-expired', {
       method: 'POST',
       headers: {
@@ -312,14 +312,14 @@ function cleanupExpired() {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        alert(`Successfully cleaned up ${data.deletedCount} expired carts`);
+        alert(`${data.deletedCount} <%= t('operations:cleanupSuccess') %>`);
         location.reload();
       } else {
-        alert('Error: ' + data.message);
+        alert('<%= t("common.error") %>: ' + data.message);
       }
     })
     .catch(error => {
-      alert('Error cleaning up expired carts');
+      alert('<%= t('operations:errorCleaningUp') %>');
       console.error('Error:', error);
     });
   }

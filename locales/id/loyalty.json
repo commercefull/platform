@@ -1,0 +1,23 @@
+{
+  "programMembers": "Anggota Program",
+  "pointsIssued": "Poin yang Dikeluarkan",
+  "pointsRedeemed": "Poin Ditebus",
+  "programSettings": "Pengaturan Program",
+  "pointsPerDollar": "Poin per Dolar yang Dibelanjakan",
+  "pointsValue": "Nilai Poin ($per poin)",
+  "minimumRedemption": "Penukaran Minimum",
+  "addReward": "Tambahkan Hadiah",
+  "reward": "Hadiah",
+  "redemptions": "Penukaran",
+  "noRewards": "Tidak ada imbalan yang dikonfigurasi.",
+  "recentTransactions": "Transaksi Terkini",
+  "noTransactions": "Belum ada transaksi.",
+  "rewardName": "Nama Hadiah",
+  "rewardType": "Jenis Hadiah",
+  "freeProduct": "Produk Gratis",
+  "giftCard": "Kartu Hadiah",
+  "rewardValue": "Nilai Hadiah",
+  "confirmDeleteReward": "Hapus hadiah ini?",
+  "analytics": "Analisis Program Loyalitas",
+  "analyticsDescription": "Distribusi poin, tingkat penukaran, dan perkembangan tingkatan."
+}

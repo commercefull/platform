@@ -7,7 +7,6 @@ export type TranslatableEntityType =
   | 'product'
   | 'category'
   | 'collection'
-  | 'brand'
   | 'contentPage'
   | 'notificationTemplate'
   | 'attribute'

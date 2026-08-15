@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "Bekleyen İstekler",
+  "completedThisMonth": "Bu Ay Tamamlandı",
+  "avgProcessingDays": "Ortalama İşlem Günleri",
+  "marketingConsentRate": "Pazarlama Onay Oranı",
+  "dataAccessRequests": "Veri Erişim Talepleri",
+  "dataAccess": "Veri Erişimi",
+  "dataDeletion": "Veri Silme",
+  "noGdprRequests": "Henüz GDPR isteği yok.",
+  "consentManagement": "Onay Yönetimi",
+  "marketingConsent": "Pazarlama Onayı",
+  "analyticsConsent": "Analitik Onayı",
+  "manageConsentSettings": "İzin Ayarlarını Yönet",
+  "createGdprRequest": "GDPR Talebi Oluştur",
+  "dataAccessRequestSar": "Veri Erişim Talebi (SAR)",
+  "dataDeletionRequest": "Veri Silme Talebi",
+  "dataRectificationRequest": "Veri Düzeltme Talebi",
+  "customerEmail": "Müşteri E-postası",
+  "createRequest": "Talep Oluştur",
+  "confirmProcessRequest": "Bu istek işleniyor olarak işaretlensin mi?",
+  "consentRecords": "Onay Kayıtları",
+  "manageConsentRecords": "Müşteri onay kayıtlarını ve tercihlerini yönetin."
+}

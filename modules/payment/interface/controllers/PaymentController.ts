@@ -31,7 +31,7 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
 
 export const getMyTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -179,8 +179,8 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
   } catch (error: unknown) {
     logger.error('Error:', error);
 
-    if ((error as Error).message.includes('not found')) {
-      respondError(req, res, (error as Error).message, 404);
+    if ((error as Error).message.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Transaction not found', 404);
       return;
     }
     if ((error as Error).message.includes('cannot be refunded') || (error as Error).message.includes('exceeds')) {
@@ -194,11 +194,22 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
 export const getRefunds = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { transactionId } = req.params;
+
+    const transaction = await PaymentRepo.findTransactionById(transactionId);
+    if (!transaction) {
+      respondError(req, res, 'Transaction not found', 404);
+      return;
+    }
+
     const refunds = await PaymentRepo.findRefundsByTransactionId(transactionId);
     respond(req, res, { refunds: refunds.map(r => r.toJSON()) });
   } catch (error: unknown) {
     logger.error('Error:', error);
 
+    if ((error as Error).message?.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Transaction not found', 404);
+      return;
+    }
     respondError(req, res, (error as Error).message || 'Failed to get refunds', 500);
   }
 };
@@ -209,7 +220,7 @@ export const getRefunds = async (req: TypedRequest, res: Response): Promise<void
 
 export const listGateways = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id;
+    const merchantId = req.user?.merchantId || req.user?._id || req.user?.id;
     if (!merchantId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -249,7 +260,7 @@ export const getGateway = async (req: TypedRequest, res: Response): Promise<void
 
 export const createGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id;
+    const merchantId = req.user?.merchantId || req.user?._id || req.user?.id;
     if (!merchantId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -395,7 +406,7 @@ export const deleteGateway = async (req: TypedRequest, res: Response): Promise<v
 
 export const listMethodConfigs = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id;
+    const merchantId = req.user?.merchantId || req.user?._id || req.user?.id;
     if (!merchantId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -435,7 +446,7 @@ export const getMethodConfig = async (req: TypedRequest, res: Response): Promise
 
 export const createMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id;
+    const merchantId = req.user?.merchantId || req.user?._id || req.user?.id;
     if (!merchantId) {
       respondError(req, res, 'Authentication required', 401);
       return;

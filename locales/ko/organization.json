@@ -1,0 +1,13 @@
+{
+  "create": "조직 생성",
+  "view": "조직 세부정보",
+  "single": "하나의",
+  "multiStore": "다중 매장",
+  "marketplace": "시장",
+  "settings": "설정(JSON)",
+  "settingsHint": "조직 수준 설정을 위한 선택적 JSON 개체입니다.",
+  "slugHint": "소문자, 숫자, 하이픈만 가능합니다.",
+  "noOrganizations": "조직을 찾을 수 없습니다.",
+  "confirmDelete": "이 조직을 삭제하시겠습니까?",
+  "noStoresLinked": "이 조직에 연결된 매장이 없습니다."
+}

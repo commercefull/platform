@@ -1,0 +1,13 @@
+{
+  "create": "Buat Organisasi",
+  "view": "Detail Organisasi",
+  "single": "Lajang",
+  "multiStore": "Multi-Toko",
+  "marketplace": "Pasar",
+  "settings": "Pengaturan (JSON)",
+  "settingsHint": "Objek JSON opsional untuk pengaturan tingkat organisasi.",
+  "slugHint": "Hanya huruf kecil, angka, dan tanda hubung.",
+  "noOrganizations": "Tidak ada organisasi yang ditemukan.",
+  "confirmDelete": "Hapus organisasi ini?",
+  "noStoresLinked": "Tidak ada toko yang tertaut ke organisasi ini."
+}

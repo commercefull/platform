@@ -6,7 +6,7 @@
   </div>
   <div class="card card-md">
     <div class="card-body">
-      <h2 class="h2 text-center mb-4">Login to your account</h2>
+      <h2 class="h2 text-center mb-4"><%= t('auth:loginToAccount') %></h2>
 
       <% if (typeof error !== 'undefined' && error) { %>
       <div class="alert alert-danger" role="alert">
@@ -22,17 +22,17 @@
 
       <form action="/admin/login" method="post">
         <div class="mb-3">
-          <label class="form-label">Email address</label>
+          <label class="form-label"><%= t('auth:emailAddress') %></label>
           <input type="email" name="email" class="form-control" placeholder="your@email.com" autocomplete="off" required>
         </div>
         <div class="mb-2">
           <label class="form-label">
-            Password
+            <%= t('shared:common.password') %>
           </label>
           <div class="input-group input-group-flat">
-            <input type="password" name="password" class="form-control" placeholder="Your password" autocomplete="off" required>
+            <input type="password" name="password" class="form-control" placeholder="<%= t('auth:passwordPlaceholder') %>" autocomplete="off" required>
             <span class="input-group-text">
-              <a href="#" class="link-secondary" title="Show password" data-bs-toggle="tooltip">
+              <a href="#" class="link-secondary" title="<%= t('auth:showPassword') %>" data-bs-toggle="tooltip">
                 <svg class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
@@ -45,15 +45,15 @@
         <div class="mb-2">
           <label class="form-check">
             <input type="checkbox" name="rememberMe" value="true" class="form-check-input">
-            <span class="form-check-label">Remember me on this device</span>
+            <span class="form-check-label"><%= t('auth:rememberDevice') %></span>
           </label>
         </div>
         <div class="form-footer">
-          <button type="submit" class="btn btn-primary w-100">Sign in</button>
+          <button type="submit" class="btn btn-primary w-100"><%= t('shared:common.signIn') %></button>
         </div>
       </form>
     </div>
-    <div class="hr-text">or</div>
+    <div class="hr-text"><%= t('common.or') %></div>
     <div class="card-body">
       <div class="row">
         <div class="col">
@@ -62,7 +62,7 @@
               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
               <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"></path>
             </svg>
-            Login with GitHub
+            <%= t('auth:loginWithGitHub') %>
           </a>
         </div>
         <div class="col">
@@ -71,14 +71,14 @@
               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
               <path d="M22.56 12.25c0 1.81 -.51 3.54 -1.46 5.05l-.07 .11l-2.7 4.31l-.13 .2c-1.05 1.67 -2.53 2.9 -4.33 3.56l-.22 .08l-1.06 .25h-2.12l-1.06 -.25l-.22 -.08c-1.8 -.66 -3.28 -1.89 -4.33 -3.56l-.13 -.2l-2.7 -4.31l-.07 -.11a10.44 10.44 0 0 1 -1.46 -5.05l.01 -.23a10.27 10.27 0 0 1 1.46 -5.05l.07 -.11l2.7 -4.31l.13 -.2c1.05 -1.67 2.53 -2.9 4.33 -3.56l.22 -.08l1.06 -.25h2.12l1.06 .25l.22 .08c1.8 .66 3.28 1.89 4.33 3.56l.13 .2l2.7 4.31l.07 .11a10.44 10.44 0 0 1 1.46 5.05l-.01 .23zm-10.56 5.75a4.5 4.5 0 1 0 0 -9a4.5 4.5 0 0 0 0 9z"></path>
             </svg>
-            Login with Google
+            <%= t('auth:loginWithGoogle') %>
           </a>
         </div>
       </div>
     </div>
   </div>
   <div class="text-center text-muted mt-3">
-    Don't have account yet? <a href="#" tabindex="-1">Sign up</a>
+    <%= t('shared:common.dontHaveAnAccount') %> <a href="#" tabindex="-1"><%= t('shared:common.signUp') %></a>
   </div>
 </div>
 

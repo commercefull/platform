@@ -1,0 +1,45 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/organizations" class="btn btn-outline-secondary"><%= t('common.back') %></a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="card">
+      <div class="card-body">
+        <form method="POST" action="/admin/organizations">
+          <div class="row">
+            <div class="col-md-8 mb-3">
+              <label class="form-label"><%= t('shared:common.name') %></label>
+              <input class="form-control" name="name" value="<%= formData.name || '' %>" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label"><%= t('shared:common.slug') %></label>
+              <input class="form-control" name="slug" value="<%= formData.slug || '' %>" required>
+              <small class="form-hint"><%= t('organization:slugHint') %></small>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label"><%= t('shared:common.type') %></label>
+              <select class="form-select" name="type">
+                <option value="single" <%= formData.type === 'single' ? 'selected' : '' %>><%= t('organization:single') %></option>
+                <option value="multi_store" <%= formData.type === 'multi_store' ? 'selected' : '' %>><%= t('organization:multiStore') %></option>
+                <option value="marketplace" <%= formData.type === 'marketplace' ? 'selected' : '' %>><%= t('organization:marketplace') %></option>
+              </select>
+            </div>
+            <div class="col-12 mb-3">
+              <label class="form-label"><%= t('organization:settings') %></label>
+              <textarea class="form-control" name="settings" rows="5" placeholder='{"key": "value"}'><%= formData.settings ? (typeof formData.settings === 'string' ? formData.settings : JSON.stringify(formData.settings, null, 2)) : '' %></textarea>
+              <small class="form-hint"><%= t('organization:settingsHint') %></small>
+            </div>
+          </div>
+          <div class="d-flex">
+            <button type="submit" class="btn btn-primary"><%= t('organization:create') %></button>
+            <a href="/admin/organizations" class="btn btn-link"><%= t('common.cancel') %></a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

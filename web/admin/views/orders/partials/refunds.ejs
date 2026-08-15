@@ -1,18 +1,18 @@
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">Refunds</h3>
+    <h3 class="card-title"><%= t('order:refunds') %></h3>
   </div>
   <div class="card-body p-0">
     <% if (refunds && refunds.length > 0) { %>
     <table class="table table-striped mb-0">
       <thead>
         <tr>
-          <th>Refund ID</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Reason</th>
-          <th>Transaction ID</th>
-          <th>Date</th>
+          <th><%= t('order:refundId') %></th>
+          <th><%= t('common.amount') %></th>
+          <th><%= t('common.status') %></th>
+          <th><%= t('shared:common.reason') %></th>
+          <th><%= t('shared:common.transactionId') %></th>
+          <th><%= t('common.date') %></th>
         </tr>
       </thead>
       <tbody>
@@ -37,7 +37,7 @@
       </tbody>
     </table>
     <% } else { %>
-    <div class="p-3 text-muted">No refunds recorded.</div>
+    <div class="p-3 text-muted"><%= t('order:noRefunds') %></div>
     <% } %>
   </div>
 </div>

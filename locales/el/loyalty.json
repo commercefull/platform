@@ -1,0 +1,23 @@
+{
+  "programMembers": "Μέλη Προγράμματος",
+  "pointsIssued": "Πόντοι που εκδόθηκαν",
+  "pointsRedeemed": "Πόντοι εξαργυρώθηκαν",
+  "programSettings": "Ρυθμίσεις προγράμματος",
+  "pointsPerDollar": "Πόντοι ανά δολάριο που ξοδεύεται",
+  "pointsValue": "Αξία πόντων ($ ανά πόντο)",
+  "minimumRedemption": "Ελάχιστη Εξαγορά",
+  "addReward": "Προσθήκη ανταμοιβής",
+  "reward": "Ανταμοιβή",
+  "redemptions": "Εξαγορές",
+  "noRewards": "Δεν έχουν διαμορφωθεί ανταμοιβές.",
+  "recentTransactions": "Πρόσφατες Συναλλαγές",
+  "noTransactions": "Δεν υπάρχουν ακόμη συναλλαγές.",
+  "rewardName": "Όνομα επιβράβευσης",
+  "rewardType": "Τύπος ανταμοιβής",
+  "freeProduct": "Δωρεάν προϊόν",
+  "giftCard": "Δωροκάρτα",
+  "rewardValue": "Αξία ανταμοιβής",
+  "confirmDeleteReward": "Διαγραφή αυτής της ανταμοιβής;",
+  "analytics": "Αναλύσεις προγράμματος αφοσίωσης",
+  "analyticsDescription": "Κατανομή πόντων, ποσοστά εξαργύρωσης και εξέλιξη βαθμίδων."
+}

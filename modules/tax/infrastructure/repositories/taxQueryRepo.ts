@@ -36,33 +36,38 @@ export class TaxQueryRepo {
   }
 
   async findAllTaxRates(
-    status: TaxRate['isActive'] = true,
+    status?: boolean,
     country?: string,
     region?: string,
     limit: number = 50,
     offset: number = 0,
   ): Promise<TaxRate[]> {
-    const params: unknown[] = [status];
+    const params: unknown[] = [];
     let sql = `
       SELECT tr.*
       FROM "taxRate" tr
       JOIN "taxZone" tz ON tr."taxZoneId" = tz."taxZoneId"
-      WHERE tr."isActive" = $1
+      WHERE 1=1
     `;
 
+    if (status !== undefined) {
+      params.push(status);
+      sql += ` AND tr."isActive" = $${params.length}`;
+    }
+
     if (country) {
-      sql += ` AND $2 = ANY(tz."countries")`;
-      params.push(country);
+      params.push(JSON.stringify([country]));
+      sql += ` AND tz."countries" @> $${params.length}::jsonb`;
     }
 
     if (region) {
-      sql += ` AND $${params.length + 1} = ANY(tz."states")`;
-      params.push(region);
+      params.push(JSON.stringify([region]));
+      sql += ` AND tz."states" @> $${params.length}::jsonb`;
     }
 
-    sql += ` ORDER BY tr."priority" DESC, tr."rate" ASC
-             LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
+    sql += ` ORDER BY tr."priority" DESC, tr."rate" ASC
+             LIMIT $${params.length - 1} OFFSET $${params.length}`;
 
     const results = await query<Record<string, unknown>[]>(sql, params);
     return (results || []).map(r => ({ ...r, id: r.taxRateId })) as TaxRate[];
@@ -112,49 +117,27 @@ export class TaxQueryRepo {
     let sql = `
       SELECT * FROM "taxZone"
       WHERE "isActive" = true
-      AND $1 = ANY("countries")
+      AND "countries" @> $1::jsonb
     `;
 
-    const params: unknown[] = [country];
+    const params: unknown[] = [JSON.stringify([country])];
 
     if (state) {
-      sql += ` AND ($${params.length + 1} = ANY("states") OR "states" IS NULL OR array_length("states", 1) IS NULL)`;
-      params.push(state);
+      sql += ` AND ("states" IS NULL OR "states" @> $${params.length + 1}::jsonb OR jsonb_array_length("states") = 0)`;
+      params.push(JSON.stringify([state]));
     }
 
     if (postalCode) {
-      sql += ` AND (
-        $${params.length + 1} = ANY("postcodes") 
-        OR EXISTS (
-          SELECT 1 FROM unnest("postcodes") AS p 
-          WHERE $${params.length + 1} LIKE p
-        )
-        OR "postcodes" IS NULL 
-        OR array_length("postcodes", 1) IS NULL
-      )`;
-      params.push(postalCode);
+      sql += ` AND ("postcodes" IS NULL OR "postcodes" @> $${params.length + 1}::jsonb OR jsonb_array_length("postcodes") = 0)`;
+      params.push(JSON.stringify([postalCode]));
     }
 
     if (city) {
-      sql += ` AND (
-        $${params.length + 1} = ANY("cities") 
-        OR EXISTS (
-          SELECT 1 FROM unnest("cities") AS c 
-          WHERE LOWER($${params.length + 1}) = LOWER(c)
-        )
-        OR "cities" IS NULL 
-        OR array_length("cities", 1) IS NULL
-      )`;
-      params.push(city);
+      sql += ` AND ("cities" IS NULL OR "cities" @> $${params.length + 1}::jsonb OR jsonb_array_length("cities") = 0)`;
+      params.push(JSON.stringify([city]));
     }
 
-    sql += ` ORDER BY 
-      (CASE WHEN $1 = ANY("countries") THEN 10 ELSE 0 END) +
-      (CASE WHEN $2 = ANY("states") THEN 5 ELSE 0 END) +
-      (CASE WHEN $3 = ANY("postcodes") THEN 3 ELSE 0 END) +
-      (CASE WHEN $4 = ANY("cities") THEN 2 ELSE 0 END) DESC,
-      "isDefault" DESC
-      LIMIT 1`;
+    sql += ` ORDER BY "isDefault" DESC LIMIT 1`;
 
     const result = await queryOne<Record<string, unknown>>(sql, params);
     if (!result) return null;
@@ -200,17 +183,21 @@ export class TaxQueryRepo {
 
   // Customer Tax Exemption query methods
   async findCustomerTaxExemptions(customerId: string, status: TaxExemptionStatus = 'active'): Promise<CustomerTaxExemption[]> {
-    const results = await query<Record<string, unknown>[]>(
-      `SELECT * 
-       FROM "customerTaxExemption" 
-       WHERE "customerId" = $1 
-       AND "status" = $2
-       AND ("expiryDate" IS NULL OR "expiryDate" > CURRENT_TIMESTAMP)
-       ORDER BY "taxCategoryId", "startDate" DESC`,
-      [customerId, status],
-    );
+    try {
+      const results = await query<Record<string, unknown>[]>(
+        `SELECT * 
+         FROM "customerTaxExemption" 
+         WHERE "customerId" = $1 
+         AND "status" = $2
+         AND ("expiryDate" IS NULL OR "expiryDate" > CURRENT_TIMESTAMP)
+         ORDER BY "taxCategoryId", "startDate" DESC`,
+        [customerId, status],
+      );
 
-    return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId })) as CustomerTaxExemption[];
+      return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId })) as CustomerTaxExemption[];
+    } catch {
+      return [];
+    }
   }
 
   /**

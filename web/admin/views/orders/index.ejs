@@ -26,7 +26,7 @@
                 <path d="M4 12h16"/>
                 <path d="M4 18h12"/>
               </svg>
-              Filters
+              <%= t('common.filter') %>
             </h3>
           </div>
           <div class="col-auto">
@@ -35,7 +35,7 @@
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/>
               </svg>
-              Show Filters
+              <%= t('shared:common.showFilters') %>
             </button>
           </div>
         </div>
@@ -49,10 +49,10 @@
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <path d="M9 12l2 2l4 -4"/>
               </svg>
-              Order Status
+              <%= t('shared:common.orderStatus') %>
             </label>
             <select class="form-select" id="status" name="status">
-              <option value="">All Status</option>
+              <option value=""><%= t('shared:common.allStatus') %></option>
               <% orderStatuses.forEach(s => { %>
                 <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option>
               <% }); %>
@@ -67,10 +67,10 @@
                 <path d="M17 8v-3a1 1 0 0 0 -1 -1h-10a2 2 0 0 0 0 4h12a1 1 0 0 1 1 1v3m0 4v3a1 1 0 0 1 -1 1h-12a2 2 0 0 1 -2 -2v-12"/>
                 <path d="M20 12v4h-4a2 2 0 0 1 0 -4h4"/>
               </svg>
-              Payment Status
+              <%= t('order:paymentStatus') %>
             </label>
             <select class="form-select" id="paymentStatus" name="paymentStatus">
-              <option value="">All</option>
+              <option value=""><%= t('common.all') %></option>
               <% paymentStatuses.forEach(s => { %>
                 <option value="<%= s %>" <%= filters.paymentStatus === s ? 'selected' : '' %>><%= s %></option>
               <% }); %>
@@ -89,7 +89,7 @@
                 <path d="M11 15h1"/>
                 <path d="M12 15v3"/>
               </svg>
-              From Date
+              <%= t('order:fromDate') %>
             </label>
             <input type="date" class="form-control" id="startDate" name="startDate" value="<%= filters.startDate %>">
           </div>
@@ -105,7 +105,7 @@
                 <path d="M11 15h1"/>
                 <path d="M12 15v3"/>
               </svg>
-              To Date
+              <%= t('order:toDate') %>
             </label>
             <input type="date" class="form-control" id="endDate" name="endDate" value="<%= filters.endDate %>">
           </div>
@@ -118,9 +118,9 @@
                 <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
                 <path d="M21 21l-6 -6"/>
               </svg>
-              Search
+              <%= t('common.search') %>
             </label>
-            <input type="text" class="form-control" id="search" name="search" value="<%= filters.search %>" placeholder="Order #, Email...">
+            <input type="text" class="form-control" id="search" name="search" value="<%= filters.search %>" placeholder="<%= t('order:searchPlaceholder') %>">
           </div>
 
           <!-- Actions -->
@@ -132,7 +132,7 @@
                   <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
                   <path d="M21 21l-6 -6"/>
                 </svg>
-                Apply Filters
+                <%= t('shared:common.applyFilters') %>
               </button>
               <a href="/admin/orders" class="btn btn-outline-secondary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
@@ -140,12 +140,12 @@
                   <path d="M19 19h-11l-4 -4a2 2 0 0 1 0 -2.828l4 -4h11a2 2 0 0 0 2 -2v-3a2 2 0 0 0 -2 -2h-3l-3 -3"/>
                   <path d="M3 3l18 18"/>
                 </svg>
-                Clear All
+                <%= t('shared:common.clearAll') %>
               </a>
               <% if (filters.search || filters.status || filters.paymentStatus || filters.startDate || filters.endDate) { %>
                 <div class="ms-auto">
                   <span class="badge bg-info">
-                    <%= [filters.search && 'Search', filters.status && 'Status', filters.paymentStatus && 'Payment', (filters.startDate || filters.endDate) && 'Date'].filter(Boolean).join(' + ') %> filters active
+                    <%= [filters.search && t('common.search'), filters.status && t('common.status'), filters.paymentStatus && t('shared:common.payment'), (filters.startDate || filters.endDate) && t('common.date')].filter(Boolean).join(' + ') %> <%= t('shared:common.filtersActive') %>
                   </span>
                 </div>
               <% } %>
@@ -158,21 +158,21 @@
     <!-- Orders Table -->
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Orders (<%= pagination.total %>)</h3>
+        <h3 class="card-title"><%= t('shared:common.orders') %> (<%= pagination.total %>)</h3>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover text-nowrap">
           <thead>
             <tr>
-              <th>Order #</th>
-              <th>Customer</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Payment</th>
-              <th>Fulfillment</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Actions</th>
+              <th><%= t('shared:common.order2') %></th>
+              <th><%= t('shared:common.customer') %></th>
+              <th><%= t('shared:common.date') %></th>
+              <th><%= t('common.status') %></th>
+              <th><%= t('shared:common.payment') %></th>
+              <th><%= t('shared:common.fulfillment') %></th>
+              <th><%= t('shared:common.items') %></th>
+              <th><%= t('common.total') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
@@ -184,7 +184,7 @@
                 </a>
               </td>
               <td>
-                <%= order.customerName || 'Guest' %><br>
+                <%= order.customerName || t('shared:common.guest') %><br>
                 <small class="text-muted"><%= order.customerEmail %></small>
               </td>
               <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
@@ -217,11 +217,11 @@
               <td><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
               <td>
                 <div class="btn-group">
-                  <a href="/admin/orders/<%= order.orderId %>" class="btn btn-sm btn-info" title="View">
+                  <a href="/admin/orders/<%= order.orderId %>" class="btn btn-sm btn-info" title="<%= t('common.view') %>">
                     <i class="fas fa-eye"></i>
                   </a>
                   <% if (order.paymentStatus === 'paid' && order.status !== 'refunded') { %>
-                  <a href="/admin/orders/<%= order.orderId %>/refund" class="btn btn-sm btn-warning" title="Refund">
+                  <a href="/admin/orders/<%= order.orderId %>/refund" class="btn btn-sm btn-warning" title="<%= t('shared:common.refund') %>">
                     <i class="fas fa-undo"></i>
                   </a>
                   <% } %>

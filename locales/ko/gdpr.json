@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "보류 중인 요청",
+  "completedThisMonth": "이번 달에 완료됨",
+  "avgProcessingDays": "평균 처리 일수",
+  "marketingConsentRate": "마케팅 동의율",
+  "dataAccessRequests": "데이터 액세스 요청",
+  "dataAccess": "데이터 액세스",
+  "dataDeletion": "데이터 삭제",
+  "noGdprRequests": "아직 GDPR 요청이 없습니다.",
+  "consentManagement": "동의 관리",
+  "marketingConsent": "마케팅 동의",
+  "analyticsConsent": "분석 동의",
+  "manageConsentSettings": "동의 설정 관리",
+  "createGdprRequest": "GDPR 요청 생성",
+  "dataAccessRequestSar": "데이터 액세스 요청(SAR)",
+  "dataDeletionRequest": "데이터 삭제 요청",
+  "dataRectificationRequest": "데이터 정정 요청",
+  "customerEmail": "고객 이메일",
+  "createRequest": "요청 생성",
+  "confirmProcessRequest": "이 요청을 처리 중으로 표시하시겠습니까?",
+  "consentRecords": "동의기록",
+  "manageConsentRecords": "고객 동의 기록 및 기본 설정을 관리합니다."
+}

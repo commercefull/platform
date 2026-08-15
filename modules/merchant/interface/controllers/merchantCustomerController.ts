@@ -3,6 +3,7 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { MerchantRepo } from '../../infrastructure/repositories/merchantRepo';
 import { storefrontRespond } from '../../../../web/respond';
+import ProductRepo from '../../../product/infrastructure/repositories/productRepo';
 
 // Define interfaces for public-facing data
 interface Product {
@@ -180,11 +181,15 @@ export const getMerchantProducts = async (req: TypedRequest, res: Response): Pro
 
     // Use the Product interface defined at the top level
 
-    // Since merchantRepo doesn't have a method to get products, we'll simulate an empty response
-    // In a real implementation, you would use a product repository or add this method to merchantRepo
-    const products: Product[] = [];
-    // TODO: Implement proper product fetching once the method is available
-    // const products = await productRepo.findByMerchantId(id, limit, offset);
+    // Fetch products for this merchant
+    const merchantProducts = await ProductRepo.findByMerchant(id, { limit, offset });
+    const products: Product[] = merchantProducts.map((p: { productId: string; name: string; price: number; description?: string; images?: unknown }) => ({
+      id: p.productId,
+      name: p.name,
+      price: p.price,
+      description: p.description,
+      imageUrl: Array.isArray(p.images) && p.images.length > 0 ? (p.images[0] as { url?: string }).url : undefined,
+    }));
 
     // For storefront API response
     if (req.headers.accept?.includes('application/json')) {

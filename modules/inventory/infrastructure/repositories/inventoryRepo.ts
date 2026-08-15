@@ -486,6 +486,62 @@ export class InventoryRepo {
     `;
     return await queryOne<InventoryLevel>(sql, [productId, distributionWarehouseId]);
   }
+
+  // ==========================================================================
+  // Reservation Methods
+  // ==========================================================================
+
+  async findReservationById(reservationId: string): Promise<{ reservationId: string; orderId: string; status: string; productId: string; quantity: number } | null> {
+    const sql = `SELECT * FROM "inventoryReservation" WHERE "inventoryReservationId" = $1`;
+    const row = await queryOne<{ inventoryReservationId: string; orderId: string; status: string; productId: string; quantity: number }>(sql, [reservationId]);
+    if (!row) return null;
+    return {
+      reservationId: row.inventoryReservationId,
+      orderId: row.orderId,
+      status: row.status,
+      productId: row.productId,
+      quantity: row.quantity,
+    };
+  }
+
+  async findReservationsByOrderId(orderId: string): Promise<Array<{ reservationId: string; orderId: string; status: string; productId: string; quantity: number }>> {
+    const sql = `SELECT * FROM "inventoryReservation" WHERE "orderId" = $1`;
+    const rows = await query<Array<{ inventoryReservationId: string; orderId: string; status: string; productId: string; quantity: number }>>(sql, [orderId]);
+    return (rows || []).map(row => ({
+      reservationId: row.inventoryReservationId,
+      orderId: row.orderId,
+      status: row.status,
+      productId: row.productId,
+      quantity: row.quantity,
+    }));
+  }
+
+  async updateReservationStatus(reservationId: string, status: string, reason?: string): Promise<void> {
+    const now = new Date();
+    if (status === 'released' || status === 'expired') {
+      await query(
+        `UPDATE "inventoryReservation" SET "status" = $1, "releasedReason" = $2, "releasedAt" = $3, "updatedAt" = $4 WHERE "inventoryReservationId" = $5`,
+        [status, reason || null, now, now, reservationId],
+      );
+    } else {
+      await query(
+        `UPDATE "inventoryReservation" SET "status" = $1, "updatedAt" = $2 WHERE "inventoryReservationId" = $3`,
+        [status, now, reservationId],
+      );
+    }
+  }
+
+  // ==========================================================================
+  // Reorder Point / Threshold Methods
+  // ==========================================================================
+
+  async updateReorderPoint(inventoryItemId: string, reorderPoint: number, _reorderQuantity?: number): Promise<void> {
+    const now = new Date();
+    await query(
+      `UPDATE "inventoryLocation" SET "minimumStockLevel" = $1, "updatedAt" = $2 WHERE "inventoryLocationId" = $3`,
+      [reorderPoint, now, inventoryItemId],
+    );
+  }
 }
 
 export default new InventoryRepo();

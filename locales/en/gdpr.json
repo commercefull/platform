@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "Pending Requests",
+  "completedThisMonth": "Completed This Month",
+  "avgProcessingDays": "Avg Processing Days",
+  "marketingConsentRate": "Marketing Consent Rate",
+  "dataAccessRequests": "Data Access Requests",
+  "dataAccess": "Data Access",
+  "dataDeletion": "Data Deletion",
+  "noGdprRequests": "No GDPR requests yet.",
+  "consentManagement": "Consent Management",
+  "marketingConsent": "Marketing Consent",
+  "analyticsConsent": "Analytics Consent",
+  "manageConsentSettings": "Manage Consent Settings",
+  "createGdprRequest": "Create GDPR Request",
+  "dataAccessRequestSar": "Data Access Request (SAR)",
+  "dataDeletionRequest": "Data Deletion Request",
+  "dataRectificationRequest": "Data Rectification Request",
+  "customerEmail": "Customer Email",
+  "createRequest": "Create Request",
+  "confirmProcessRequest": "Mark this request as processing?",
+  "consentRecords": "Consent Records",
+  "manageConsentRecords": "Manage customer consent records and preferences."
+}

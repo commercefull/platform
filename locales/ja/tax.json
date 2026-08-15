@@ -1,0 +1,10 @@
+{
+  "rates": "税率",
+  "zones": "課税ゾーン",
+  "addRate": "税率を追加",
+  "addZone": "課税ゾーンを追加する",
+  "addClass": "税クラスの追加",
+  "stateRegion": "州/地域",
+  "classes": "税金の種類",
+  "zoneName": "ゾーン名"
+}

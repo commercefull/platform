@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Всего подписок",
+  "monthlyRecurringRevenue": "Ежемесячный регулярный доход",
+  "addPlan": "Добавить план",
+  "planName": "Название плана",
+  "subscribers": "Подписчики",
+  "noPlans": "Планы подписки не настроены.",
+  "plan": "План",
+  "started": "Началось",
+  "nextBilling": "Следующий платеж",
+  "noActiveSubscriptions": "Нет активных подписок.",
+  "addSubscriptionPlan": "Добавить план подписки",
+  "yearly": "Ежегодно",
+  "trialDays": "Пробные дни",
+  "confirmDeletePlan": "Удалить этот план?",
+  "billingOverview": "Обзор платежных данных",
+  "billingDescription": "Управляйте выставлением счетов за подписку, неудачными платежами и обработкой продления."
+}

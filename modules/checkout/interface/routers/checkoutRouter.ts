@@ -5,8 +5,11 @@
 
 import express from 'express';
 import * as checkoutController from '../controllers/CheckoutController';
+import { optionalCustomerAuth } from '../../../../libs/auth';
 
 const router = express.Router();
+
+router.use(optionalCustomerAuth);
 
 // ============================================================================
 // Customer Checkout Routes
@@ -31,6 +34,12 @@ router.get('/checkout/pickup-locations', checkoutController.getPickupLocations);
 router.put('/checkout/:checkoutId/pickup-location', checkoutController.setPickupLocation);
 
 /**
+ * Get available pickup time slots
+ * GET /checkout/:checkoutId/pickup-slots
+ */
+router.get('/checkout/:checkoutId/pickup-slots', checkoutController.getPickupSlots);
+
+/**
  * Initiate checkout session
  * POST /checkout
  */
@@ -41,6 +50,12 @@ router.post('/checkout', checkoutController.initiateCheckout);
  * GET /checkout/:checkoutId
  */
 router.get('/checkout/:checkoutId', checkoutController.getCheckout);
+
+/**
+ * Set fulfillment method (shipping, pickup, local_delivery, digital)
+ * PUT /checkout/:checkoutId/fulfillment-method
+ */
+router.put('/checkout/:checkoutId/fulfillment-method', checkoutController.setFulfillmentMethod);
 
 /**
  * Set shipping address
@@ -59,6 +74,18 @@ router.put('/checkout/:checkoutId/billing-address', checkoutController.setBillin
  * GET /checkout/:checkoutId/shipping-methods
  */
 router.get('/checkout/:checkoutId/shipping-methods', checkoutController.getShippingMethods);
+
+/**
+ * Get local delivery options
+ * GET /checkout/:checkoutId/local-delivery-options
+ */
+router.get('/checkout/:checkoutId/local-delivery-options', checkoutController.getLocalDeliveryOptions);
+
+/**
+ * Get all fulfillment options (unified)
+ * GET /checkout/:checkoutId/fulfillment-options
+ */
+router.get('/checkout/:checkoutId/fulfillment-options', checkoutController.getFulfillmentOptions);
 
 /**
  * Set shipping method

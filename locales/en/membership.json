@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "Memberships",
+  "totalMembers": "Total Members",
+  "activeMembers": "Active Members",
+  "membershipTiers": "Membership Tiers",
+  "expiringThisMonth": "Expiring This Month",
+  "addTier": "Add Tier",
+  "members": "members",
+  "noTiers": "No membership tiers configured.",
+  "recentMembers": "Recent Members",
+  "tier": "Tier",
+  "noMembers": "No members yet.",
+  "addMembershipTier": "Add Membership Tier",
+  "tierName": "Tier Name",
+  "billingPeriod": "Billing Period",
+  "lifetime": "Lifetime",
+  "benefitsOnePerLine": "Benefits (one per line)",
+  "setAsDefault": "Set as default tier",
+  "createTier": "Create Tier",
+  "confirmDeleteTier": "Delete this tier?",
+  "analytics": "Membership Analytics",
+  "analyticsDescription": "Active members, revenue, churn rate, and tier distribution."
+}

@@ -19,6 +19,7 @@ router.get('/locations/nearest', isMerchantLoggedIn, locationController.findNear
 router.get('/locations/:locationId', isMerchantLoggedIn, locationController.getLocation);
 router.post('/locations', isMerchantLoggedIn, locationController.createLocation);
 router.put('/locations/:locationId', isMerchantLoggedIn, locationController.updateLocation);
+router.delete('/locations/:locationId', isMerchantLoggedIn, locationController.deleteLocation);
 router.post('/locations/:locationId/activate', isMerchantLoggedIn, locationController.activateLocation);
 router.post('/locations/:locationId/deactivate', isMerchantLoggedIn, locationController.deactivateLocation);
 
@@ -29,6 +30,8 @@ router.post('/locations/:locationId/deactivate', isMerchantLoggedIn, locationCon
 router.get('/partners', isMerchantLoggedIn, locationController.listPartners);
 router.get('/partners/:partnerId', isMerchantLoggedIn, locationController.getPartner);
 router.post('/partners', isMerchantLoggedIn, locationController.createPartner);
+router.put('/partners/:partnerId', isMerchantLoggedIn, locationController.updatePartner);
+router.delete('/partners/:partnerId', isMerchantLoggedIn, locationController.deletePartner);
 
 export const fulfillmentLocationRouter = router;
 export default router;

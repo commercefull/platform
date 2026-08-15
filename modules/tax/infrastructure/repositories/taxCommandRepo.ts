@@ -66,7 +66,7 @@ export class TaxCommandRepo {
         taxRate.minimumAmount || null,
         taxRate.maximumAmount || null,
         taxRate.threshold || null,
-        taxRate.startDate,
+        taxRate.startDate ? new Date(taxRate.startDate * 1000).toISOString() : now,
         taxRate.endDate || null,
         taxRate.isActive,
         now,

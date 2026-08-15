@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
             <li class="breadcrumb-item active">B2B</li>
           </ol>
         </div>
@@ -25,7 +25,7 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3><%= stats.totalCompanies || 0 %></h3>
-              <p>Companies</p>
+              <p><%= t('shared:common.companies') %></p>
             </div>
             <div class="icon"><i class="fas fa-building"></i></div>
           </div>
@@ -34,7 +34,7 @@
           <div class="small-box bg-success">
             <div class="inner">
               <h3><%= stats.activeCompanies || 0 %></h3>
-              <p>Active</p>
+              <p><%= t('common.active') %></p>
             </div>
             <div class="icon"><i class="fas fa-check-circle"></i></div>
           </div>
@@ -43,7 +43,7 @@
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= stats.pendingQuotes || 0 %></h3>
-              <p>Pending Quotes</p>
+              <p><%= t('b2b:b2bProgram.pendingQuotes') %></p>
             </div>
             <div class="icon"><i class="fas fa-file-invoice"></i></div>
           </div>
@@ -52,7 +52,7 @@
           <div class="small-box bg-danger">
             <div class="inner">
               <h3>$<%= ((stats.totalB2BRevenue || 0) / 1000).toFixed(0) %>k</h3>
-              <p>B2B Revenue</p>
+              <p><%= t('b2b:b2bProgram.b2bRevenue') %></p>
             </div>
             <div class="icon"><i class="fas fa-dollar-sign"></i></div>
           </div>
@@ -62,21 +62,21 @@
       <!-- Companies -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-building me-2"></i>Companies</h3>
+          <h3 class="card-title"><i class="fas fa-building me-2"></i><%= t('shared:common.companies') %></h3>
           <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addCompanyModal">
-            <i class="fas fa-plus me-1"></i>Add Company
+            <i class="fas fa-plus me-1"></i><%= t('b2b:b2bProgram.addCompany') %>
           </button>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Company</th>
-                <th>Contact</th>
-                <th>Credit Limit</th>
-                <th>Orders</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th><%= t('b2b:company') %></th>
+                <th><%= t('shared:common.contact') %></th>
+                <th><%= t('b2b:creditLimit') %></th>
+                <th><%= t('shared:common.orders') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
@@ -114,7 +114,7 @@
               <% }); %>
               <% if ((companies || []).length === 0) { %>
               <tr>
-                <td colspan="6" class="text-center text-muted py-4">No companies registered.</td>
+                <td colspan="6" class="text-center text-muted py-4"><%= t('b2b:b2bProgram.noCompanies') %></td>
               </tr>
               <% } %>
             </tbody>
@@ -125,20 +125,20 @@
       <!-- Quotes -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-file-invoice me-2"></i>Recent Quotes</h3>
-          <a href="/admin/programs/b2b/quotes" class="btn btn-sm btn-primary float-end">View All</a>
+          <h3 class="card-title"><i class="fas fa-file-invoice me-2"></i><%= t('b2b:b2bProgram.recentQuotes') %></h3>
+          <a href="/admin/programs/b2b/quotes" class="btn btn-sm btn-primary float-end"><%= t('shared:common.viewAll') %></a>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Quote #</th>
-                <th>Company</th>
-                <th>Items</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Expires</th>
-                <th>Actions</th>
+                <th><%= t('b2b:quoteNumber') %></th>
+                <th><%= t('b2b:company') %></th>
+                <th><%= t('shared:common.items') %></th>
+                <th><%= t('common.total') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('shared:common.expires') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
@@ -163,7 +163,7 @@
               <% }); %>
               <% if ((quotes || []).length === 0) { %>
               <tr>
-                <td colspan="7" class="text-center text-muted py-4">No quotes yet.</td>
+                <td colspan="7" class="text-center text-muted py-4"><%= t('b2b:b2bProgram.noQuotes') %></td>
               </tr>
               <% } %>
             </tbody>
@@ -179,7 +179,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add B2B Company</h5>
+        <h5 class="modal-title"><%= t('b2b:b2bProgram.addB2bCompany') %></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form method="POST" action="/admin/programs/b2b/companies">
@@ -187,13 +187,13 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Company Name <span class="text-danger">*</span></label>
+                <label class="form-label"><%= t('shared:common.companyName') %> <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" name="name" required>
               </div>
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Tax ID / VAT</label>
+                <label class="form-label"><%= t('b2b:b2bProgram.taxIdVat') %></label>
                 <input type="text" class="form-control" name="taxId">
               </div>
             </div>
@@ -201,13 +201,13 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Contact Name</label>
+                <label class="form-label"><%= t('shared:common.contactName') %></label>
                 <input type="text" class="form-control" name="contactName">
               </div>
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Email <span class="text-danger">*</span></label>
+                <label class="form-label"><%= t('common.name') %> <span class="text-danger">*</span></label>
                 <input type="email" class="form-control" name="email" required>
               </div>
             </div>
@@ -215,13 +215,13 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Phone</label>
+                <label class="form-label"><%= t('shared:common.phone') %></label>
                 <input type="tel" class="form-control" name="phone">
               </div>
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Credit Limit</label>
+                <label class="form-label"><%= t('b2b:creditLimit') %></label>
                 <div class="input-group">
                   <span class="input-group-text">$</span>
                   <input type="number" class="form-control" name="creditLimit" min="0" value="0">
@@ -230,17 +230,17 @@
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Address</label>
+            <label class="form-label"><%= t('shared:common.address') %></label>
             <textarea class="form-control" name="address" rows="2"></textarea>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" name="autoApprove" value="true" id="autoApprove">
-            <label class="form-check-label" for="autoApprove">Auto-approve this company</label>
+            <label class="form-check-label" for="autoApprove"><%= t('b2b:b2bProgram.autoApprove') %></label>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create Company</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+          <button type="submit" class="btn btn-primary"><%= t('b2b:b2bProgram.createCompany') %></button>
         </div>
       </form>
     </div>
@@ -250,7 +250,7 @@
 <script>
   function editCompany(id) { window.location.href = `/admin/programs/b2b/companies/${id}/edit`; }
   async function approveCompany(id) {
-    if (!confirm('Approve this company?')) return;
+    if (!confirm('<%= t('b2b:b2bProgram.confirmApproveCompany') %>')) return;
     const res = await fetch(`/admin/programs/b2b/companies/${id}/approve`, { method: 'POST' });
     if ((await res.json()).success) location.reload();
   }

@@ -1,0 +1,13 @@
+{
+  "create": "Créer une organisation",
+  "view": "Détails de l'organisation",
+  "single": "Célibataire",
+  "multiStore": "Multi-magasin",
+  "marketplace": "Marché",
+  "settings": "Paramètres (JSON)",
+  "settingsHint": "Objet JSON facultatif pour les paramètres au niveau de l’organisation.",
+  "slugHint": "Lettres minuscules, chiffres et traits d'union uniquement.",
+  "noOrganizations": "Aucune organisation trouvée.",
+  "confirmDelete": "Supprimer cette organisation ?",
+  "noStoresLinked": "Aucun magasin lié à cette organisation."
+}

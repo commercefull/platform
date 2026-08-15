@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">Products</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.products') %></li>
           </ol>
         </div>
       </div>
@@ -31,46 +31,46 @@
         <div class="card-body">
           <form method="GET" action="/admin/products" class="row g-3">
             <div class="col-md-3">
-              <label class="form-label">Search</label>
-              <input type="text" class="form-control" name="search" value="<%= filters.search %>" placeholder="Search by name, SKU, barcode...">
+              <label class="form-label"><%= t('common.search') %></label>
+              <input type="text" class="form-control" name="search" value="<%= filters.search %>" placeholder="<%= t('product:searchPlaceholder') %>">
             </div>
             <div class="col-md-2">
-              <label class="form-label">Status</label>
+              <label class="form-label"><%= t('common.status') %></label>
               <select class="form-select" name="status">
-                <option value="">All Statuses</option>
-                <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>>Draft</option>
-                <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
-                <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
-                <option value="archived" <%= filters.status === 'archived' ? 'selected' : '' %>>Archived</option>
+                <option value=""><%= t('product:allStatuses') %></option>
+                <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>><%= t('shared:common.draft') %></option>
+                <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>><%= t('common.active') %></option>
+                <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>><%= t('common.inactive') %></option>
+                <option value="archived" <%= filters.status === 'archived' ? 'selected' : '' %>><%= t('product:archived') %></option>
               </select>
             </div>
             <div class="col-md-2">
-              <label class="form-label">Visibility</label>
+              <label class="form-label"><%= t('product:visibility') %></label>
               <select class="form-select" name="visibility">
-                <option value="">All</option>
-                <option value="visible" <%= filters.visibility === 'visible' ? 'selected' : '' %>>Visible</option>
-                <option value="hidden" <%= filters.visibility === 'hidden' ? 'selected' : '' %>>Hidden</option>
-                <option value="catalog" <%= filters.visibility === 'catalog' ? 'selected' : '' %>>Catalog Only</option>
-                <option value="search" <%= filters.visibility === 'search' ? 'selected' : '' %>>Search Only</option>
+                <option value=""><%= t('common.all') %></option>
+                <option value="visible" <%= filters.visibility === 'visible' ? 'selected' : '' %>><%= t('product:visible') %></option>
+                <option value="hidden" <%= filters.visibility === 'hidden' ? 'selected' : '' %>><%= t('product:hidden') %></option>
+                <option value="catalog" <%= filters.visibility === 'catalog' ? 'selected' : '' %>><%= t('product:catalogOnly') %></option>
+                <option value="search" <%= filters.visibility === 'search' ? 'selected' : '' %>><%= t('product:searchOnly') %></option>
               </select>
             </div>
             <div class="col-md-2">
-              <label class="form-label">Sort By</label>
+              <label class="form-label"><%= t('shared:common.sortBy') %></label>
               <select class="form-select" name="orderBy">
-                <option value="createdAt" <%= filters.orderBy === 'createdAt' ? 'selected' : '' %>>Created Date</option>
-                <option value="name" <%= filters.orderBy === 'name' ? 'selected' : '' %>>Name</option>
-                <option value="basePrice" <%= filters.orderBy === 'basePrice' ? 'selected' : '' %>>Price</option>
+                <option value="createdAt" <%= filters.orderBy === 'createdAt' ? 'selected' : '' %>><%= t('product:createdDate') %></option>
+                <option value="name" <%= filters.orderBy === 'name' ? 'selected' : '' %>><%= t('common.name') %></option>
+                <option value="basePrice" <%= filters.orderBy === 'basePrice' ? 'selected' : '' %>><%= t('common.price') %></option>
               </select>
             </div>
             <div class="col-md-3 d-flex align-items-end">
               <button type="submit" class="btn btn-primary me-2">
-                <i class="fas fa-search me-1"></i>Filter
+                <i class="fas fa-search me-1"></i><%= t('common.filter') %>
               </button>
               <a href="/admin/products" class="btn btn-secondary me-2">
-                <i class="fas fa-times me-1"></i>Clear
+                <i class="fas fa-times me-1"></i><%= t('shared:common.clear') %>
               </a>
               <a href="/admin/products/create" class="btn btn-success">
-                <i class="fas fa-plus me-1"></i>Add Product
+                <i class="fas fa-plus me-1"></i><%= t('product:addProduct') %>
               </a>
             </div>
           </form>
@@ -80,21 +80,21 @@
       <!-- Products Table -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-list me-2"></i>Products</h3>
-          <span class="float-end text-muted">Total: <%= pagination.total %></span>
+          <h3 class="card-title"><i class="fas fa-list me-2"></i><%= t('shared:common.products') %></h3>
+          <span class="float-end text-muted"><%= t('common.total') %>: <%= pagination.total %></span>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover text-nowrap">
             <thead>
               <tr>
-                <th style="width: 60px">Image</th>
-                <th>Name</th>
-                <th>SKU</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Visibility</th>
-                <th>Created</th>
-                <th style="width: 150px">Actions</th>
+                <th style="width: 60px"><%= t('shared:common.image') %></th>
+                <th><%= t('common.name') %></th>
+                <th><%= t('shared:common.sku') %></th>
+                <th><%= t('common.price') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('product:visibility') %></th>
+                <th><%= t('shared:common.dateCreated') %></th>
+                <th style="width: 150px"><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
@@ -117,13 +117,13 @@
                     <span class="badge bg-warning ms-1"><i class="fas fa-star"></i></span>
                   <% } %>
                   <% if (product.hasVariants) { %>
-                    <span class="badge bg-light text-dark ms-1">Variants</span>
+                    <span class="badge bg-light text-dark ms-1"><%= t('product:variants') %></span>
                   <% } %>
                   <% if (product.isVirtual) { %>
-                    <span class="badge bg-info ms-1">Virtual</span>
+                    <span class="badge bg-info ms-1"><%= t('shared:common.virtual') %></span>
                   <% } %>
                   <% if (product.isSubscription) { %>
-                    <span class="badge bg-info ms-1">Subscription</span>
+                    <span class="badge bg-info ms-1"><%= t('product:subscription') %></span>
                   <% } %>
                 </td>
                 <td><code><%= product.sku || '-' %></code></td>
@@ -147,13 +147,13 @@
                 </td>
                 <td><%= new Date(product.createdAt).toLocaleDateString() %></td>
                 <td>
-                  <a href="/admin/products/<%= product.productId %>" class="btn btn-sm btn-outline-info" title="View">
+                  <a href="/admin/products/<%= product.productId %>" class="btn btn-sm btn-outline-info" title="<%= t('common.view') %>">
                     <i class="fas fa-eye"></i>
                   </a>
-                  <a href="/admin/products/<%= product.productId %>/edit" class="btn btn-sm btn-outline-primary" title="Edit">
+                  <a href="/admin/products/<%= product.productId %>/edit" class="btn btn-sm btn-outline-primary" title="<%= t('common.edit') %>">
                     <i class="fas fa-edit"></i>
                   </a>
-                  <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('<%= product.productId %>', '<%= product.name %>')" title="Delete">
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('<%= product.productId %>', '<%= product.name %>')" title="<%= t('common.delete') %>">
                     <i class="fas fa-trash"></i>
                   </button>
                 </td>
@@ -163,7 +163,7 @@
               <tr>
                 <td colspan="8" class="text-center text-muted py-4">
                   <i class="fas fa-box-open fa-3x mb-3 d-block"></i>
-                  No products found. <a href="/admin/products/create">Create your first product</a>
+                  <%= t('product:noProducts') %> <a href="/admin/products/create"><%= t('product:createFirst') %></a>
                 </td>
               </tr>
               <% } %>
@@ -214,10 +214,10 @@
       if (result.success) {
         location.reload();
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   }
 </script>

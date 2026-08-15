@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Total Subscriptions",
+  "monthlyRecurringRevenue": "Monthly Recurring Revenue",
+  "addPlan": "Add Plan",
+  "planName": "Plan Name",
+  "subscribers": "Subscribers",
+  "noPlans": "No subscription plans configured.",
+  "plan": "Plan",
+  "started": "Started",
+  "nextBilling": "Next Billing",
+  "noActiveSubscriptions": "No active subscriptions.",
+  "addSubscriptionPlan": "Add Subscription Plan",
+  "yearly": "Yearly",
+  "trialDays": "Trial Days",
+  "confirmDeletePlan": "Delete this plan?",
+  "billingOverview": "Billing Overview",
+  "billingDescription": "Manage subscription billing, failed payments, and renewal processing."
+}

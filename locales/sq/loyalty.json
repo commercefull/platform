@@ -1,0 +1,23 @@
+{
+  "programMembers": "Anëtarët e Programit",
+  "pointsIssued": "Pikët e lëshuara",
+  "pointsRedeemed": "Pikët e përdorura",
+  "programSettings": "Cilësimet e programit",
+  "pointsPerDollar": "Pikët për dollar të shpenzuar",
+  "pointsValue": "Vlera e pikëve ($ për pikë)",
+  "minimumRedemption": "Shlyerja minimale",
+  "addReward": "Shto shpërblim",
+  "reward": "Shpërblimi",
+  "redemptions": "Shlyerjet",
+  "noRewards": "Asnjë shpërblim nuk është konfiguruar.",
+  "recentTransactions": "Transaksionet e fundit",
+  "noTransactions": "Nuk ka ende transaksione.",
+  "rewardName": "Emri i shpërblimit",
+  "rewardType": "Lloji i shpërblimit",
+  "freeProduct": "Produkt falas",
+  "giftCard": "Kartë Dhuratë",
+  "rewardValue": "Vlera e shpërblimit",
+  "confirmDeleteReward": "Të fshihet ky shpërblim?",
+  "analytics": "Analiza e programit të besnikërisë",
+  "analyticsDescription": "Shpërndarja e pikëve, normat e riblerjes dhe përparimi i nivelit."
+}

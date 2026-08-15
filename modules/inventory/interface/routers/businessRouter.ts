@@ -67,6 +67,18 @@ router.get('/inventory/items/lookup', inventoryController.getInventoryItem);
 router.post('/inventory/transfer-between-stores', inventoryController.transferBetweenStores);
 
 // ============================================================================
+// Reservation Management
+// ============================================================================
+
+router.post('/inventory/reservations/:reservationId/confirm', inventoryController.confirmReservation);
+
+// ============================================================================
+// Low Stock Threshold
+// ============================================================================
+
+router.put('/inventory/products/:productId/threshold', inventoryController.setLowStockThreshold);
+
+// ============================================================================
 // Legacy Routes (for backward compatibility)
 // ============================================================================
 

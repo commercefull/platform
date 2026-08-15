@@ -1,7 +1,7 @@
 
 // Tax Types
 export type TaxCalculationMethod = 'unit_based' | 'row_based' | 'total_based';
-export type TaxRateType = 'percentage' | 'fixed_amount' | 'compound' | 'combined';
+export type TaxRateType = 'percentage' | 'fixed';
 export type TaxExemptionStatus = 'pending' | 'active' | 'expired' | 'revoked' | 'rejected';
 export type TaxExemptionType = 'business' | 'government' | 'nonprofit' | 'educational' | 'reseller' | 'diplomatic' | 'other';
 

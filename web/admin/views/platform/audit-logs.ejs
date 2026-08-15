@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">Audit Logs</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item active"><%= t('auditLog:title') %></li>
           </ol>
         </div>
       </div>
@@ -25,7 +25,7 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3><%= summary.totalActions %></h3>
-              <p>Total Actions (30 days)</p>
+              <p><%= t('common.total') %> (30 <%= t('analytics:daily') %>)</p>
             </div>
             <div class="icon"><i class="fas fa-list"></i></div>
           </div>
@@ -34,7 +34,7 @@
           <div class="small-box bg-success">
             <div class="inner">
               <h3><%= Object.keys(summary.byEntityType || {}).length %></h3>
-              <p>Entity Types</p>
+              <p><%= t('auditLog:resource') %> <%= t('common.type') %></p>
             </div>
             <div class="icon"><i class="fas fa-database"></i></div>
           </div>
@@ -43,7 +43,7 @@
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= Object.keys(summary.byAction || {}).length %></h3>
-              <p>Action Types</p>
+              <p><%= t('shared:common.action') %> <%= t('common.type') %></p>
             </div>
             <div class="icon"><i class="fas fa-bolt"></i></div>
           </div>
@@ -52,7 +52,7 @@
           <div class="small-box bg-danger">
             <div class="inner">
               <h3><%= summary.failureRate.toFixed(2) %>%</h3>
-              <p>Failure Rate</p>
+              <p><%= t('common.failed') %> <%= t('common.status') %></p>
             </div>
             <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
           </div>
@@ -64,7 +64,7 @@
         <div class="col-12">
           <div class="card collapsed-card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-filter me-2"></i>Filters</h3>
+              <h3 class="card-title"><i class="fas fa-filter me-2"></i><%= t('common.filter') %></h3>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fas fa-plus"></i>
@@ -76,45 +76,45 @@
                 <div class="row">
                   <div class="col-md-2">
                     <div class="form-group">
-                      <label>Entity Type</label>
+                      <label><%= t('auditLog:resource') %> <%= t('common.type') %></label>
                       <input type="text" class="form-control" name="entityType" value="<%= filters.entityType || '' %>" placeholder="e.g., order">
                     </div>
                   </div>
                   <div class="col-md-2">
                     <div class="form-group">
-                      <label>Action</label>
+                      <label><%= t('shared:common.action') %></label>
                       <select class="form-control" name="action">
-                        <option value="">All</option>
-                        <option value="create" <%= filters.action === 'create' ? 'selected' : '' %>>Create</option>
-                        <option value="update" <%= filters.action === 'update' ? 'selected' : '' %>>Update</option>
-                        <option value="delete" <%= filters.action === 'delete' ? 'selected' : '' %>>Delete</option>
-                        <option value="read" <%= filters.action === 'read' ? 'selected' : '' %>>Read</option>
-                        <option value="login" <%= filters.action === 'login' ? 'selected' : '' %>>Login</option>
-                        <option value="logout" <%= filters.action === 'logout' ? 'selected' : '' %>>Logout</option>
+                        <option value=""><%= t('common.all') %></option>
+                        <option value="create" <%= filters.action === 'create' ? 'selected' : '' %>><%= t('common.create') %></option>
+                        <option value="update" <%= filters.action === 'update' ? 'selected' : '' %>><%= t('common.update') %></option>
+                        <option value="delete" <%= filters.action === 'delete' ? 'selected' : '' %>><%= t('common.delete') %></option>
+                        <option value="read" <%= filters.action === 'read' ? 'selected' : '' %>><%= t('common.read') %></option>
+                        <option value="login" <%= filters.action === 'login' ? 'selected' : '' %>><%= t('common.login') %></option>
+                        <option value="logout" <%= filters.action === 'logout' ? 'selected' : '' %>><%= t('common.logout') %></option>
                       </select>
                     </div>
                   </div>
                   <div class="col-md-2">
                     <div class="form-group">
-                      <label>Actor Type</label>
+                      <label><%= t('auditLog:user') %> <%= t('common.type') %></label>
                       <select class="form-control" name="actorType">
-                        <option value="">All</option>
-                        <option value="user" <%= filters.actorType === 'user' ? 'selected' : '' %>>User</option>
-                        <option value="admin" <%= filters.actorType === 'admin' ? 'selected' : '' %>>Admin</option>
-                        <option value="system" <%= filters.actorType === 'system' ? 'selected' : '' %>>System</option>
-                        <option value="api" <%= filters.actorType === 'api' ? 'selected' : '' %>>API</option>
+                        <option value=""><%= t('common.all') %></option>
+                        <option value="user" <%= filters.actorType === 'user' ? 'selected' : '' %>><%= t('common.user') %></option>
+                        <option value="admin" <%= filters.actorType === 'admin' ? 'selected' : '' %>><%= t('common.admin') %></option>
+                        <option value="system" <%= filters.actorType === 'system' ? 'selected' : '' %>><%= t('common.system') %></option>
+                        <option value="api" <%= filters.actorType === 'api' ? 'selected' : '' %>><%= t('common.api') %></option>
                       </select>
                     </div>
                   </div>
                   <div class="col-md-2">
                     <div class="form-group">
-                      <label>Start Date</label>
+                      <label><%= t('shared:common.from') %></label>
                       <input type="date" class="form-control" name="startDate" value="<%= filters.startDate || '' %>">
                     </div>
                   </div>
                   <div class="col-md-2">
                     <div class="form-group">
-                      <label>End Date</label>
+                      <label><%= t('shared:common.to') %></label>
                       <input type="date" class="form-control" name="endDate" value="<%= filters.endDate || '' %>">
                     </div>
                   </div>
@@ -122,7 +122,7 @@
                     <div class="form-group">
                       <label>&nbsp;</label>
                       <button type="submit" class="btn btn-primary btn-block w-100">
-                        <i class="fas fa-search me-1"></i>Filter
+                        <i class="fas fa-search me-1"></i><%= t('common.filter') %>
                       </button>
                     </div>
                   </div>
@@ -138,20 +138,20 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-list me-2"></i>Audit Log Entries</h3>
-              <span class="float-end text-muted">Total: <%= total %></span>
+              <h3 class="card-title"><i class="fas fa-list me-2"></i><%= t('auditLog:title') %></h3>
+              <span class="float-end text-muted"><%= t('common.total') %>: <%= total %></span>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Timestamp</th>
-                    <th>Entity</th>
-                    <th>Action</th>
-                    <th>Actor</th>
-                    <th>Status</th>
-                    <th>Changes</th>
-                    <th>Actions</th>
+                    <th><%= t('common.date') %></th>
+                    <th><%= t('auditLog:resource') %></th>
+                    <th><%= t('shared:common.action') %></th>
+                    <th><%= t('auditLog:user') %></th>
+                    <th><%= t('common.status') %></th>
+                    <th><%= t('auditLog:changes') %></th>
+                    <th><%= t('common.actions') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -199,7 +199,7 @@
                   <% }); %>
                   <% if ((auditLogs || []).length === 0) { %>
                   <tr>
-                    <td colspan="7" class="text-center text-muted">No audit logs found</td>
+                    <td colspan="7" class="text-center text-muted"><%= t('auditLog:noLogs') %></td>
                   </tr>
                   <% } %>
                 </tbody>

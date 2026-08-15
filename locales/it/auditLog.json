@@ -1,0 +1,11 @@
+{
+  "title": "Registri di controllo",
+  "user": "Utente",
+  "resource": "Risorsa",
+  "resourceId": "ID risorsa",
+  "ipAddress": "Indirizzo IP",
+  "noLogs": "Nessun registro di controllo trovato.",
+  "changes": "Cambiamenti",
+  "oldValue": "Vecchio valore",
+  "newValue": "Nuovo valore"
+}

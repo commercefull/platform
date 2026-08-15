@@ -9,10 +9,10 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/orders">Orders</a></li>
-            <li class="breadcrumb-item"><a href="/admin/orders/<%= order.orderId %>">Order #<%= order.orderNumber %></a></li>
-            <li class="breadcrumb-item active">Refund</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/orders"><%= t('shared:common.orders') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/orders/<%= order.orderId %>"><%= t('shared:common.orders').replace('s', '') %> #<%= order.orderNumber %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.refund') %></li>
           </ol>
         </div>
       </div>
@@ -33,23 +33,23 @@
         <div class="col-lg-8">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-money-bill-wave me-2"></i>Process Refund</h3>
+              <h3 class="card-title"><i class="fas fa-money-bill-wave me-2"></i><%= t('order:processRefund') %></h3>
             </div>
             <form method="POST" action="/admin/orders/<%= order.orderId %>/refund">
               <div class="card-body">
                 <!-- Order Items -->
-                <h5 class="mb-3">Order Items</h5>
+                <h5 class="mb-3"><%= t('shared:common.orderItems') %></h5>
                 <table class="table table-bordered mb-4">
                   <thead class="table-light">
                     <tr>
                       <th>
                         <input type="checkbox" id="selectAll" onchange="toggleAllItems()">
                       </th>
-                      <th>Product</th>
-                      <th>Quantity</th>
-                      <th>Unit Price</th>
-                      <th>Total</th>
-                      <th>Refund Qty</th>
+                      <th><%= t('shared:common.product') %></th>
+                      <th><%= t('common.quantity') %></th>
+                      <th><%= t('order:unitPrice') %></th>
+                      <th><%= t('common.total') %></th>
+                      <th><%= t('shared:common.refund') %> <%= t('shared:common.qty') %></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -82,23 +82,23 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Refund Amount <span class="text-danger">*</span></label>
+                      <label class="form-label"><%= t('shared:common.refund') %> <%= t('common.amount') %> <span class="text-danger">*</span></label>
                       <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" class="form-control" name="amount" id="refundAmount" 
                                step="0.01" min="0" max="<%= order.totalAmount %>" 
                                value="<%= (typeof formData !== 'undefined' && formData.amount) || order.totalAmount %>" required>
                       </div>
-                      <small class="text-muted">Maximum refundable: $<%= order.totalAmount.toFixed(2) %></small>
+                      <small class="text-muted"><%= t('order:maxRefundable') %>: $<%= order.totalAmount.toFixed(2) %></small>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Refund Type</label>
+                      <label class="form-label"><%= t('order:refundType') %></label>
                       <select class="form-select" name="refundType">
-                        <option value="full">Full Refund</option>
-                        <option value="partial">Partial Refund</option>
-                        <option value="items">Selected Items Only</option>
+                        <option value="full"><%= t('order:fullRefund') %></option>
+                        <option value="partial"><%= t('order:partialRefund') %></option>
+                        <option value="items"><%= t('order:selectedItemsOnly') %></option>
                       </select>
                     </div>
                   </div>
@@ -106,20 +106,20 @@
 
                 <!-- Reason -->
                 <div class="form-group mb-3">
-                  <label class="form-label">Reason for Refund <span class="text-danger">*</span></label>
+                  <label class="form-label"><%= t('order:refundReason') %> <span class="text-danger">*</span></label>
                   <select class="form-select mb-2" name="reasonType" onchange="updateReasonText(this)">
-                    <option value="">Select a reason...</option>
-                    <option value="customer_request">Customer Request</option>
-                    <option value="defective_product">Defective Product</option>
-                    <option value="wrong_item">Wrong Item Shipped</option>
-                    <option value="not_as_described">Not as Described</option>
-                    <option value="damaged_in_shipping">Damaged in Shipping</option>
-                    <option value="late_delivery">Late Delivery</option>
-                    <option value="duplicate_order">Duplicate Order</option>
-                    <option value="other">Other</option>
+                    <option value=""><%= t('order:selectReason') %></option>
+                    <option value="customer_request"><%= t('order:reasonCustomerRequest') %></option>
+                    <option value="defective_product"><%= t('order:reasonDefective') %></option>
+                    <option value="wrong_item"><%= t('order:reasonWrongItem') %></option>
+                    <option value="not_as_described"><%= t('shared:common.notAsDescribed') %></option>
+                    <option value="damaged_in_shipping"><%= t('order:reasonDamaged') %></option>
+                    <option value="late_delivery"><%= t('order:reasonLateDelivery') %></option>
+                    <option value="duplicate_order"><%= t('order:reasonDuplicate') %></option>
+                    <option value="other"><%= t('shared:common.other') %></option>
                   </select>
                   <textarea class="form-control" name="reason" id="refundReason" rows="3" 
-                            placeholder="Provide additional details about the refund..." required><%= (typeof formData !== 'undefined' && formData.reason) || '' %></textarea>
+                            placeholder="<%= t('order:refundReasonPlaceholder') %>" required><%= (typeof formData !== 'undefined' && formData.reason) || '' %></textarea>
                 </div>
 
                 <!-- Options -->
@@ -127,23 +127,23 @@
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="restockItems" value="true" id="restockItems" checked>
                     <label class="form-check-label" for="restockItems">
-                      Restock refunded items
+                      <%= t('order:restockItems') %>
                     </label>
                   </div>
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="notifyCustomer" value="true" id="notifyCustomer" checked>
                     <label class="form-check-label" for="notifyCustomer">
-                      Send refund notification to customer
+                      <%= t('order:notifyCustomer') %>
                     </label>
                   </div>
                 </div>
               </div>
               <div class="card-footer">
                 <button type="submit" class="btn btn-danger">
-                  <i class="fas fa-undo me-2"></i>Process Refund
+                  <i class="fas fa-undo me-2"></i><%= t('order:processRefund') %>
                 </button>
                 <a href="/admin/orders/<%= order.orderId %>" class="btn btn-secondary">
-                  <i class="fas fa-times me-2"></i>Cancel
+                  <i class="fas fa-times me-2"></i><%= t('common.cancel') %>
                 </a>
               </div>
             </form>
@@ -154,20 +154,20 @@
         <div class="col-lg-4">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-receipt me-2"></i>Order Summary</h3>
+              <h3 class="card-title"><i class="fas fa-receipt me-2"></i><%= t('shared:common.orderSummary') %></h3>
             </div>
             <div class="card-body">
               <table class="table table-sm">
                 <tr>
-                  <td>Order Number:</td>
+                  <td><%= t('shared:common.order2') %>:</td>
                   <td class="text-end"><strong>#<%= order.orderNumber %></strong></td>
                 </tr>
                 <tr>
-                  <td>Order Date:</td>
+                  <td><%= t('shared:common.date') %>:</td>
                   <td class="text-end"><%= new Date(order.createdAt).toLocaleDateString() %></td>
                 </tr>
                 <tr>
-                  <td>Status:</td>
+                  <td><%= t('common.status') %>:</td>
                   <td class="text-end">
                     <span class="badge bg-<%= order.status === 'completed' ? 'success' : order.status === 'cancelled' ? 'danger' : 'warning' %>">
                       <%= order.status %>
@@ -175,7 +175,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td>Payment Status:</td>
+                  <td><%= t('order:paymentStatus') %>:</td>
                   <td class="text-end">
                     <span class="badge bg-<%= order.paymentStatus === 'paid' ? 'success' : 'warning' %>">
                       <%= order.paymentStatus %>
@@ -183,38 +183,38 @@
                   </td>
                 </tr>
                 <tr class="table-light">
-                  <td><strong>Subtotal:</strong></td>
+                  <td><strong><%= t('order:subtotal') %></strong></td>
                   <td class="text-end">$<%= (order.subtotal || 0).toFixed(2) %></td>
                 </tr>
                 <% if (order.discountAmount > 0) { %>
                 <tr>
-                  <td>Discount:</td>
+                  <td><%= t('shared:common.discount') %>:</td>
                   <td class="text-end text-danger">-$<%= order.discountAmount.toFixed(2) %></td>
                 </tr>
                 <% } %>
                 <% if (order.taxAmount > 0) { %>
                 <tr>
-                  <td>Tax:</td>
+                  <td><%= t('shared:common.tax') %>:</td>
                   <td class="text-end">$<%= order.taxAmount.toFixed(2) %></td>
                 </tr>
                 <% } %>
                 <% if (order.shippingAmount > 0) { %>
                 <tr>
-                  <td>Shipping:</td>
+                  <td><%= t('order:shipping') %></td>
                   <td class="text-end">$<%= order.shippingAmount.toFixed(2) %></td>
                 </tr>
                 <% } %>
                 <tr class="table-primary">
-                  <td><strong>Total:</strong></td>
+                  <td><strong><%= t('common.total') %>:</strong></td>
                   <td class="text-end"><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
                 </tr>
                 <% if (order.refundedAmount > 0) { %>
                 <tr class="table-warning">
-                  <td>Already Refunded:</td>
+                  <td><%= t('order:alreadyRefunded') %>:</td>
                   <td class="text-end text-danger">-$<%= order.refundedAmount.toFixed(2) %></td>
                 </tr>
                 <tr class="table-info">
-                  <td><strong>Refundable:</strong></td>
+                  <td><strong><%= t('order:refundable') %>:</strong></td>
                   <td class="text-end"><strong>$<%= (order.totalAmount - (order.refundedAmount || 0)).toFixed(2) %></strong></td>
                 </tr>
                 <% } %>
@@ -225,7 +225,7 @@
           <!-- Customer Info -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-user me-2"></i>Customer</h3>
+              <h3 class="card-title"><i class="fas fa-user me-2"></i><%= t('shared:common.customer') %></h3>
             </div>
             <div class="card-body">
               <% if (order.customer) { %>
@@ -235,7 +235,7 @@
               <p class="mb-0 text-muted"><%= order.customer.phone %></p>
               <% } %>
               <% } else { %>
-              <p class="text-muted mb-0">Guest checkout</p>
+              <p class="text-muted mb-0"><%= t('order:guestCheckout') %></p>
               <% } %>
             </div>
           </div>

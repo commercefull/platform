@@ -72,6 +72,7 @@ export type EventType =
   | 'inventory.out_of_stock'
   | 'inventory.reserved'
   | 'inventory.released'
+  | 'inventory.reservation.confirmed'
   | 'inventory.reservation_failed'
   | 'inventory.dispatch.created'
   | 'inventory.dispatch.approved'
@@ -151,6 +152,7 @@ export type EventType =
   | 'receiving.completed'
   // Notification events
   | 'notification.sent'
+  | 'notification.digest'
   // GDPR events
   | 'gdpr.request.created'
   | 'gdpr.request.completed'
@@ -299,6 +301,17 @@ export type EventType =
   | 'warehouse.deleted'
   | 'warehouse.assigned_to_store'
   | 'warehouse.capacity_updated'
+  | 'warehouse.zone.created'
+  | 'warehouse.zone.updated'
+  | 'warehouse.zone.deleted'
+  | 'warehouse.bin.created'
+  | 'warehouse.bin.updated'
+  | 'warehouse.bin.deleted'
+  | 'warehouse.receiving.created'
+  | 'warehouse.receiving.completed'
+  | 'warehouse.pick.created'
+  | 'warehouse.pick.completed'
+  | 'warehouse.pack.completed'
   // Merchant events
   | 'merchant.created'
   | 'merchant.updated'
@@ -337,6 +350,9 @@ export type EventType =
   | 'shipping.zone_created'
   | 'shipping.rate_calculated'
   | 'shipping.label_created'
+  | 'shipping.label.voided'
+  | 'shipping.tracking.updated'
+  | 'shipping.delivered'
   // Fulfillment events
   | 'fulfillment.created'
   | 'fulfillment.assigned'
@@ -379,11 +395,13 @@ export type EventType =
   | 'purchase_order.created'
   | 'purchase_order.submitted'
   | 'purchase_order.received'
+  | 'purchase_order.cancelled'
   | 'receiving.completed'
   // Notification events
   | 'notification.sent'
   | 'notification.failed'
-  | 'notification.read';
+  | 'notification.read'
+  | 'notification.digest';
 
 export interface EventPayload {
   type: EventType;

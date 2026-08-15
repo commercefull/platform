@@ -14,14 +14,14 @@
                 <i class="fas fa-calendar me-1"></i> <%= filters.period %>
               </button>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="?period=7d">Last 7 Days</a></li>
-                <li><a class="dropdown-item" href="?period=30d">Last 30 Days</a></li>
-                <li><a class="dropdown-item" href="?period=90d">Last 90 Days</a></li>
-                <li><a class="dropdown-item" href="?period=1y">Last Year</a></li>
+                <li><a class="dropdown-item" href="?period=7d"><%= t('analytics:last7Days') %></a></li>
+                <li><a class="dropdown-item" href="?period=30d"><%= t('analytics:last30Days') %></a></li>
+                <li><a class="dropdown-item" href="?period=90d"><%= t('analytics:last90Days') %></a></li>
+                <li><a class="dropdown-item" href="?period=1y"><%= t('analytics:lastYear') %></a></li>
               </ul>
             </div>
             <button class="btn btn-primary" onclick="window.location.reload()">
-              <i class="fas fa-sync-alt me-1"></i> Refresh
+              <i class="fas fa-sync-alt me-1"></i> <%= t('analytics:refresh') %>
             </button>
           </div>
         </div>
@@ -37,7 +37,7 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3>$<%= (dashboardData.revenue.total || 0).toLocaleString() %></h3>
-              <p>Total Revenue</p>
+              <p><%= t('shared:common.totalRevenue') %></p>
             </div>
             <div class="icon"><i class="fas fa-dollar-sign"></i></div>
           </div>
@@ -46,7 +46,7 @@
           <div class="small-box bg-success">
             <div class="inner">
               <h3><%= dashboardData.customers.total || 0 %></h3>
-              <p>Total Customers</p>
+              <p><%= t('shared:common.totalCustomers') %></p>
             </div>
             <div class="icon"><i class="fas fa-users"></i></div>
           </div>
@@ -55,7 +55,7 @@
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= dashboardData.customers.new || 0 %></h3>
-              <p>New Customers</p>
+              <p><%= t('shared:common.newCustomers') %></p>
             </div>
             <div class="icon"><i class="fas fa-user-plus"></i></div>
           </div>
@@ -64,7 +64,7 @@
           <div class="small-box bg-danger">
             <div class="inner">
               <h3><%= (dashboardData.customers.churnRate * 100 || 0).toFixed(1) %>%</h3>
-              <p>Churn Rate</p>
+              <p><%= t('shared:common.churnRate') %></p>
             </div>
             <div class="icon"><i class="fas fa-user-minus"></i></div>
           </div>
@@ -76,7 +76,7 @@
         <div class="col-lg-8">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-chart-area me-2"></i>Revenue Trend</h3>
+              <h3 class="card-title"><i class="fas fa-chart-area me-2"></i><%= t('analytics:revenueTrend') %></h3>
             </div>
             <div class="card-body">
               <canvas id="revenueChart" height="300"></canvas>
@@ -86,7 +86,7 @@
         <div class="col-lg-4">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-chart-pie me-2"></i>Customer Segments</h3>
+              <h3 class="card-title"><i class="fas fa-chart-pie me-2"></i><%= t('shared:common.customerSegments') %></h3>
             </div>
             <div class="card-body">
               <canvas id="segmentChart" height="300"></canvas>
@@ -100,15 +100,15 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-trophy me-2"></i>Top Selling Products</h3>
+              <h3 class="card-title"><i class="fas fa-trophy me-2"></i><%= t('shared:common.topSellingProducts') %></h3>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th>Sales</th>
-                    <th>Revenue</th>
+                    <th><%= t('shared:common.product') %></th>
+                    <th><%= t('shared:common.sales') %></th>
+                    <th><%= t('shared:common.revenue') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -127,15 +127,15 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-eye me-2"></i>Product Performance</h3>
+              <h3 class="card-title"><i class="fas fa-eye me-2"></i><%= t('analytics:productPerformance') %></h3>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th>Views</th>
-                    <th>Conversions</th>
+                    <th><%= t('shared:common.product') %></th>
+                    <th><%= t('shared:common.views') %></th>
+                    <th><%= t('shared:common.conversions') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -158,28 +158,28 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-link me-2"></i>Analytics Modules</h3>
+              <h3 class="card-title"><i class="fas fa-link me-2"></i><%= t('analytics:analyticsModules') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
                 <div class="col-md-3">
                   <a href="/admin/analytics/predictive" class="btn btn-outline-primary btn-block mb-2 w-100">
-                    <i class="fas fa-brain me-2"></i>Predictive Analytics
+                    <i class="fas fa-brain me-2"></i><%= t('analytics:predictive') %>
                   </a>
                 </div>
                 <div class="col-md-3">
                   <a href="/admin/analytics/customers" class="btn btn-outline-success btn-block mb-2 w-100">
-                    <i class="fas fa-users me-2"></i>Customer Analytics
+                    <i class="fas fa-users me-2"></i><%= t('analytics:customers') %>
                   </a>
                 </div>
                 <div class="col-md-3">
                   <a href="/admin/analytics/ai-recommendations" class="btn btn-outline-warning btn-block mb-2 w-100">
-                    <i class="fas fa-robot me-2"></i>AI Recommendations
+                    <i class="fas fa-robot me-2"></i><%= t('analytics:aiRecommendations') %>
                   </a>
                 </div>
                 <div class="col-md-3">
                   <a href="/admin/analytics/executive" class="btn btn-outline-danger btn-block mb-2 w-100">
-                    <i class="fas fa-briefcase me-2"></i>Executive Dashboard
+                    <i class="fas fa-briefcase me-2"></i><%= t('analytics:executiveDashboard') %>
                   </a>
                 </div>
               </div>
@@ -200,7 +200,7 @@
     data: {
       labels: <%= JSON.stringify((dashboardData.revenue.byPeriod || []).map(d => d.date)) %>,
       datasets: [{
-        label: 'Revenue',
+        label: '<%= t("shared:common.revenue") %>',
         data: <%= JSON.stringify((dashboardData.revenue.byPeriod || []).map(d => d.revenue)) %>,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
@@ -219,7 +219,7 @@
   new Chart(segmentCtx, {
     type: 'doughnut',
     data: {
-      labels: ['New', 'Returning', 'Churned'],
+      labels: ['<%= t("shared:common.newCustomers") %>', '<%= t("analytics:retention") %>', '<%= t("shared:common.churnRate") %>'],
       datasets: [{
         data: [
           <%= dashboardData.customers.new || 0 %>,

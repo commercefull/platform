@@ -8,312 +8,47 @@ The Localization feature manages multi-language support and regional settings. I
 
 ## Use Cases
 
-### Language Management (Business)
-
-### UC-LOC-001: List Languages (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request languages  
-**Then** the system returns configured languages
-
-#### API Endpoint
-
-```
-GET /business/localization/languages
-```
-
----
-
-### UC-LOC-002: Create Language (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** valid language configuration  
-**When** they add a language  
-**Then** content can be translated to that language
-
-#### API Endpoint
-
-```
-POST /business/localization/languages
-Body: {
-  code: 'en'|'es'|'fr'|'de'|...,
-  name,
-  nativeName,
-  isDefault?,
-  isActive
-}
-```
-
-#### Business Rules
-
-- ISO 639-1 language codes
-- One default language required
-- Fallback to default if translation missing
-
----
-
-### UC-LOC-003: Update Language (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /business/localization/languages/:code
-```
-
----
-
-### UC-LOC-004: Delete Language (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-DELETE /business/localization/languages/:code
-```
-
----
-
-### Translation Management (Business)
-
-### UC-LOC-005: List Translations (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request translations  
-**Then** the system returns translation keys and values
-
-#### API Endpoint
-
-```
-GET /business/localization/translations
-Query: languageCode, namespace?, search?, limit, offset
-```
-
----
-
-### UC-LOC-006: Get Translation (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/localization/translations/:key
-Query: languageCode
-```
-
----
-
-### UC-LOC-007: Create/Update Translation (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a translation key and value  
-**When** they save the translation  
-**Then** the translation is stored
-
-#### API Endpoint
-
-```
-PUT /business/localization/translations/:key
-Body: { languageCode, value, namespace? }
-```
-
----
-
-### UC-LOC-008: Delete Translation (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-DELETE /business/localization/translations/:key
-Query: languageCode
-```
-
----
-
-### UC-LOC-009: Import Translations (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** a translation file (JSON/CSV)  
-**When** importing translations  
-**Then** all translations are bulk created/updated
-
-#### API Endpoint
-
-```
-POST /business/localization/translations/import
-Body: { languageCode, translations: {} }
-```
-
----
-
-### UC-LOC-010: Export Translations (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/localization/translations/export
-Query: languageCode, format: 'json'|'csv'
-```
-
----
-
-### Locale Settings (Business)
-
-### UC-LOC-011: List Locales (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/localization/locales
-```
-
----
-
-### UC-LOC-012: Create Locale (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** locale configuration  
-**When** they create a locale  
-**Then** regional formatting is available
-
-#### API Endpoint
-
-```
-POST /business/localization/locales
-Body: {
-  code: 'en-US'|'en-GB'|'es-ES'|...,
-  languageCode,
-  currencyCode,
-  dateFormat,
-  timeFormat,
-  numberFormat: { decimal, thousands },
-  isActive
-}
-```
-
----
-
-### UC-LOC-013: Update Locale (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-PUT /business/localization/locales/:code
-```
-
----
-
-### UC-LOC-014: Delete Locale (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-DELETE /business/localization/locales/:code
-```
-
----
-
-### Customer-Facing Use Cases
-
-### UC-LOC-015: Get Available Languages (Customer)
-
-**Actor:** Customer/Guest  
-**Priority:** High
-
-#### API Endpoint
-
-```
-GET /localization/languages
-```
-
----
-
-### UC-LOC-016: Get Translations (Customer)
-
-**Actor:** Customer/Guest  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** a language code  
-**When** requesting translations  
-**Then** the system returns all translations for that language
-
-#### API Endpoint
-
-```
-GET /localization/translations/:languageCode
-Query: namespace?
-```
-
----
-
-### UC-LOC-017: Detect Locale (Customer)
-
-**Actor:** Customer/Guest  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** browser headers or IP  
-**When** detecting locale  
-**Then** the system suggests appropriate locale
-
-#### API Endpoint
-
-```
-GET /localization/detect
-```
+| ID | Use Case | Actor | Purpose |
+|---|---|---|---|
+| UC-LOC-001 | List Languages | Merchant/Admin | List all configured languages with their codes and status |
+| UC-LOC-002 | Create Language | Merchant/Admin | Add a new language (ISO 639-1 code) to enable content translation |
+| UC-LOC-003 | Update Language | Merchant/Admin | Update an existing language's name, native name, or default/active status |
+| UC-LOC-004 | Delete Language | Merchant/Admin | Permanently remove a language and its translations |
+| UC-LOC-005 | List Translations | Merchant/Admin | List translation keys and values with optional language/namespace/search filtering |
+| UC-LOC-006 | Get Translation | Merchant/Admin | Retrieve a specific translation key's value for a given language |
+| UC-LOC-007 | Create/Update Translation | Merchant/Admin | Create or update a translation value for a specific key and language |
+| UC-LOC-008 | Delete Translation | Merchant/Admin | Remove a translation key's value for a given language |
+| UC-LOC-009 | Import Translations | Merchant/Admin | Bulk import translations from JSON or CSV data for a language |
+| UC-LOC-010 | Export Translations | Merchant/Admin | Export all translations for a language in JSON or CSV format |
+| UC-LOC-011 | List Locales | Merchant/Admin | List all configured locale settings (date/time/number formats) |
+| UC-LOC-012 | Create Locale | Merchant/Admin | Create a locale with regional formatting (currency, date, time, number formats) |
+| UC-LOC-013 | Update Locale | Merchant/Admin | Update an existing locale's formatting or active status |
+| UC-LOC-014 | Delete Locale | Merchant/Admin | Permanently remove a locale configuration |
+| UC-LOC-015 | Get Available Languages | Customer/Guest | Retrieve the list of active storefront languages |
+| UC-LOC-016 | Get Translations | Customer/Guest | Retrieve all translations for a specific language with optional namespace filter |
+| UC-LOC-017 | Detect Locale | Customer/Guest | Auto-detect the appropriate locale from browser headers or IP address |
+
+### API Endpoints
+
+| ID | Method | Endpoint |
+|---|---|---|
+| UC-LOC-001 | GET | `/business/localization/languages` |
+| UC-LOC-002 | POST | `/business/localization/languages` |
+| UC-LOC-003 | PUT | `/business/localization/languages/:code` |
+| UC-LOC-004 | DELETE | `/business/localization/languages/:code` |
+| UC-LOC-005 | GET | `/business/localization/translations` |
+| UC-LOC-006 | GET | `/business/localization/translations/:key` |
+| UC-LOC-007 | PUT | `/business/localization/translations/:key` |
+| UC-LOC-008 | DELETE | `/business/localization/translations/:key` |
+| UC-LOC-009 | POST | `/business/localization/translations/import` |
+| UC-LOC-010 | GET | `/business/localization/translations/export` |
+| UC-LOC-011 | GET | `/business/localization/locales` |
+| UC-LOC-012 | POST | `/business/localization/locales` |
+| UC-LOC-013 | PUT | `/business/localization/locales/:code` |
+| UC-LOC-014 | DELETE | `/business/localization/locales/:code` |
+| UC-LOC-015 | GET | `/localization/languages` |
+| UC-LOC-016 | GET | `/localization/translations/:languageCode` |
+| UC-LOC-017 | GET | `/localization/detect` |
 
 ---
 
@@ -329,9 +64,9 @@ GET /localization/detect
 
 ## Integration Test Coverage
 
-| Use Case                 | Test File                           | Status |
-| ------------------------ | ----------------------------------- | ------ |
-| UC-LOC-001 to UC-LOC-004 | `localization/languages.test.ts`    | ❌     |
-| UC-LOC-005 to UC-LOC-010 | `localization/translations.test.ts` | ❌     |
-| UC-LOC-011 to UC-LOC-014 | `localization/locales.test.ts`      | ❌     |
-| UC-LOC-015 to UC-LOC-017 | `localization/customer.test.ts`     | ❌     |
+| Use Case                 | Test File                       | Status |
+| ------------------------ | ------------------------------- | ------ |
+| UC-LOC-001 to UC-LOC-004 | `localization/localization.test.ts` | ✅ |
+| UC-LOC-005 to UC-LOC-010 | `localization/localization.test.ts` | ✅ |
+| UC-LOC-011 to UC-LOC-014 | `localization/localization.test.ts` | ✅ |
+| UC-LOC-015 to UC-LOC-017 | `localization/localization.test.ts` | ✅ |

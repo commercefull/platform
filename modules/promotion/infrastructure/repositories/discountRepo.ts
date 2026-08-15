@@ -61,8 +61,7 @@ export interface CreateDiscountItemInput {
   productId?: string;
   productVariantId?: string;
   productCategoryId?: string;
-  productBrandId?: string;
-  itemType: 'product' | 'variant' | 'category' | 'brand';
+  itemType: 'product' | 'variant' | 'category';
 }
 
 /**
@@ -317,14 +316,13 @@ export class DiscountRepo {
     const item = await queryOne<PromotionProductDiscountItem>(
       `INSERT INTO "${DISCOUNT_ITEM_TABLE}" (
         "promotionProductDiscountId", "productId", "productVariantId",
-        "productCategoryId", "productBrandId", "itemType", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+        "productCategoryId", "itemType", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [
         input.promotionProductDiscountId,
         input.productId || null,
         input.productVariantId || null,
         input.productCategoryId || null,
-        input.productBrandId || null,
         input.itemType,
         now,
         now,

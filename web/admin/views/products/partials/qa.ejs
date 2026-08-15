@@ -1,17 +1,17 @@
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">Product Q&amp;A</h3>
+    <h3 class="card-title"><%= t('product:productQa') %></h3>
   </div>
   <div class="card-body p-0">
     <% if (qaList && qaList.length > 0) { %>
     <table class="table table-striped mb-0">
       <thead>
         <tr>
-          <th>Question</th>
-          <th>Asker</th>
-          <th>Status</th>
-          <th>Date</th>
-          <th>Actions</th>
+          <th><%= t('shared:common.question') %></th>
+          <th><%= t('product:asker') %></th>
+          <th><%= t('common.status') %></th>
+          <th><%= t('common.date') %></th>
+          <th><%= t('common.actions') %></th>
         </tr>
       </thead>
       <tbody>
@@ -21,11 +21,11 @@
           <td><%= qa.askerName || qa.askerEmail || '—' %></td>
           <td>
             <% if (qa.status === 'approved') { %>
-              <span class="badge bg-success">Approved</span>
+              <span class="badge bg-success"><%= t('shared:common.approved') %></span>
             <% } else if (qa.status === 'rejected') { %>
-              <span class="badge bg-danger">Rejected</span>
+              <span class="badge bg-danger"><%= t('shared:common.rejected') %></span>
             <% } else { %>
-              <span class="badge bg-warning text-dark">Pending</span>
+              <span class="badge bg-warning text-dark"><%= t('shared:common.pending') %></span>
             <% } %>
           </td>
           <td><%= new Date(qa.createdAt).toLocaleDateString() %></td>
@@ -33,13 +33,13 @@
             <% if (qa.status !== 'approved') { %>
             <form method="POST" action="/admin/products/<%= productId %>/qa/<%= qa.productQaId %>/status" class="d-inline">
               <input type="hidden" name="status" value="approved">
-              <button type="submit" class="btn btn-sm btn-outline-success">Approve</button>
+              <button type="submit" class="btn btn-sm btn-outline-success"><%= t('shared:common.approve') %></button>
             </form>
             <% } %>
             <% if (qa.status !== 'rejected') { %>
             <form method="POST" action="/admin/products/<%= productId %>/qa/<%= qa.productQaId %>/status" class="d-inline">
               <input type="hidden" name="status" value="rejected">
-              <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+              <button type="submit" class="btn btn-sm btn-outline-danger"><%= t('product:reject') %></button>
             </form>
             <% } %>
           </td>
@@ -48,7 +48,7 @@
       </tbody>
     </table>
     <% } else { %>
-    <div class="p-3 text-muted">No Q&amp;A entries for this product.</div>
+    <div class="p-3 text-muted"><%= t('product:noQaEntries') %></div>
     <% } %>
   </div>
 </div>

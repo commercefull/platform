@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "Kërkesat në pritje",
+  "completedThisMonth": "Përfunduar këtë muaj",
+  "avgProcessingDays": "Ditët mesatare të përpunimit",
+  "marketingConsentRate": "Shkalla e pëlqimit të marketingut",
+  "dataAccessRequests": "Kërkesat për qasje në të dhëna",
+  "dataAccess": "Qasja e të dhënave",
+  "dataDeletion": "Fshirja e të dhënave",
+  "noGdprRequests": "Nuk ka ende kërkesa GDPR.",
+  "consentManagement": "Menaxhimi i pëlqimit",
+  "marketingConsent": "Pëlqimi për marketing",
+  "analyticsConsent": "Pëlqimi i analitikës",
+  "manageConsentSettings": "Menaxho cilësimet e pëlqimit",
+  "createGdprRequest": "Krijo kërkesë GDPR",
+  "dataAccessRequestSar": "Kërkesë për qasje në të dhëna (SAR)",
+  "dataDeletionRequest": "Kërkesë për fshirje të të dhënave",
+  "dataRectificationRequest": "Kërkesë për korrigjimin e të dhënave",
+  "customerEmail": "Email-i i klientit",
+  "createRequest": "Krijo kërkesë",
+  "confirmProcessRequest": "Të shënohet kjo kërkesë si në përpunim?",
+  "consentRecords": "Regjistrimet e Pëlqimit",
+  "manageConsentRecords": "Menaxhoni të dhënat dhe preferencat e pëlqimit të klientit."
+}

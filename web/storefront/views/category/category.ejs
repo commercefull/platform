@@ -14,7 +14,7 @@
         <nav class="flex justify-center mb-8" aria-label="Breadcrumb">
           <ol class="flex items-center space-x-2">
             <li>
-              <a href="/" class="text-blue-200 hover:text-white transition-colors">Home</a>
+              <a href="/" class="text-blue-200 hover:text-white transition-colors"><%= t('storefront:home') %></a>
             </li>
             <li class="flex items-center">
               <svg class="w-4 h-4 text-blue-300 mx-2" fill="currentColor" viewBox="0 0 20 20">
@@ -32,7 +32,7 @@
     <!-- Subcategories Section -->
     <% if (subcategories && subcategories.length > 0) { %>
     <section class="mb-16">
-      <h2 class="text-3xl font-bold text-gray-900 mb-8">Shop by Category</h2>
+      <h2 class="text-3xl font-bold text-gray-900 mb-8"><%= t('storefront:shopByCategory') %></h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <% subcategories.forEach(subcategory => { %>
         <a href="/products/category/<%= subcategory.slug %>"
@@ -54,7 +54,7 @@
             <p class="text-gray-600 text-sm line-clamp-2"><%= subcategory.description %></p>
             <% } %>
             <div class="mt-4 flex items-center text-blue-600 group-hover:text-blue-700 font-medium">
-              <span>Shop Now</span>
+              <span><%= t('storefront:shopNow') %></span>
               <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
@@ -70,10 +70,10 @@
     <% if (featuredProducts && featuredProducts.length > 0) { %>
     <section class="mb-16">
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-3xl font-bold text-gray-900">Featured Products</h2>
+        <h2 class="text-3xl font-bold text-gray-900"><%= t('storefront:featuredProducts') %></h2>
         <a href="/products/category/<%= category.slug %>"
            class="text-blue-600 hover:text-blue-700 font-medium flex items-center">
-          View All
+          <%= t('shared:common.viewAll') %>
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
           </svg>
@@ -116,7 +116,7 @@
     <section class="bg-white rounded-xl shadow-sm p-8">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">About <%= category.name %></h3>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4"><%= t('storefront:aboutCategory', { name: category.name }) %></h3>
           <% if (category.description) { %>
           <p class="text-gray-600 mb-6"><%= category.description %></p>
           <% } %>
@@ -126,38 +126,37 @@
               <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              <span class="text-gray-700">High-quality products</span>
+              <span class="text-gray-700"><%= t('storefront:highQualityProducts') %></span>
             </div>
             <div class="flex items-center">
               <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              <span class="text-gray-700">Fast shipping</span>
+              <span class="text-gray-700"><%= t('storefront:fastShipping') %></span>
             </div>
             <div class="flex items-center">
               <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              <span class="text-gray-700">30-day returns</span>
+              <span class="text-gray-700"><%= t('storefront:thirtyDayReturns') %></span>
             </div>
           </div>
         </div>
 
         <div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">Shop <%= category.name %></h3>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4"><%= t('storefront:shopCategory', { name: category.name }) %></h3>
           <p class="text-gray-600 mb-6">
-            Discover our curated selection of <%= category.name.toLowerCase() %> products.
-            From the latest trends to timeless classics, find exactly what you're looking for.
+            <%= t('storefront:discoverCuratedSelection', { name: category.name.toLowerCase() }) %>
           </p>
 
           <div class="space-y-3">
             <a href="/products/category/<%= category.slug %>"
                class="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-              Browse All Products
+              <%= t('storefront:browseAllProducts') %>
             </a>
             <a href="/search?q=<%= encodeURIComponent(category.name) %>"
                class="block w-full bg-white text-blue-600 text-center px-6 py-3 rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors font-medium">
-              Search in <%= category.name %>
+              <%= t('storefront:searchInCategory', { name: category.name }) %>
             </a>
           </div>
         </div>

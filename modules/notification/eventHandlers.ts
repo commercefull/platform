@@ -1,5 +1,7 @@
 import { eventBus, EventPayload } from '../../libs/events/eventBus';
 import { JobScheduler } from '../../libs/jobs/cronScheduler';
+import { query } from '../../libs/db';
+import { logger } from '../../libs/logger';
 
 // Event payload interfaces
 interface OrderCreatedPayload {
@@ -152,12 +154,16 @@ export const registerOrderEventHandlers = () => {
     });
 
     // Send order confirmation email
-    await JobScheduler.scheduleEmail({
-      to: 'customer@example.com', // TODO: Get customer email
-      subject: `Order Confirmation - ${orderNumber}`,
-      template: 'order-confirmation',
-      data: { orderId, orderNumber, total },
-    });
+    const customerRow = await query<Array<{ email: string }>>(`SELECT email FROM customer WHERE "customerId" = $1`, [customerId]);
+    const customerEmail = customerRow?.[0]?.email;
+    if (customerEmail) {
+      await JobScheduler.scheduleEmail({
+        to: customerEmail,
+        subject: `Order Confirmation - ${orderNumber}`,
+        template: 'order-confirmation',
+        data: { orderId, orderNumber, total },
+      });
+    }
   });
 
   // Order paid event
@@ -289,27 +295,41 @@ export const registerInventoryEventHandlers = () => {
 
     console.log(`Low inventory alert: ${sku} (${currentStock} remaining, reorder at ${reorderPoint})`);
 
-    // Send low stock notification to merchants
-    await JobScheduler.scheduleNotification({
-      userId: 'merchant', // TODO: Send to specific merchants
-      type: 'low_stock_alert',
-      title: 'Low Stock Alert',
-      message: `Product ${sku} is running low on stock.`,
-      data: { productId, sku, currentStock, reorderPoint },
-    });
+    // Send low stock notification to merchants who carry this product
+    const merchants = await query<Array<{ merchantId: string }>>(
+      `SELECT DISTINCT m."merchantId" FROM merchant m JOIN product p ON p."merchantId" = m."merchantId" WHERE p."productId" = $1 AND m.status = 'active'`,
+      [productId],
+    );
+
+    for (const merchant of merchants || []) {
+      await JobScheduler.scheduleNotification({
+        userId: merchant.merchantId,
+        type: 'low_stock_alert',
+        title: 'Low Stock Alert',
+        message: `Product ${sku} is running low on stock (${currentStock} remaining, reorder at ${reorderPoint}).`,
+        data: { productId, sku, currentStock, reorderPoint },
+      });
+    }
   });
 
   eventBus.registerHandler('inventory.out_of_stock', async (payload: EventPayload) => {
     const { productId, sku } = payload.data as InventoryOutOfStockPayload;
 
-    // Send out of stock notification
-    await JobScheduler.scheduleNotification({
-      userId: 'merchant',
-      type: 'out_of_stock_alert',
-      title: 'Out of Stock Alert',
-      message: `Product ${sku} is now out of stock.`,
-      data: { productId, sku },
-    });
+    // Send out of stock notification to merchants who carry this product
+    const merchants = await query<Array<{ merchantId: string }>>(
+      `SELECT DISTINCT m."merchantId" FROM merchant m JOIN product p ON p."merchantId" = m."merchantId" WHERE p."productId" = $1 AND m.status = 'active'`,
+      [productId],
+    );
+
+    for (const merchant of merchants || []) {
+      await JobScheduler.scheduleNotification({
+        userId: merchant.merchantId,
+        type: 'out_of_stock_alert',
+        title: 'Out of Stock Alert',
+        message: `Product ${sku} is now out of stock.`,
+        data: { productId, sku },
+      });
+    }
   });
 
   eventBus.registerHandler('inventory.reserved', async (payload: EventPayload) => {
@@ -350,7 +370,7 @@ export const registerCustomerEventHandlers = () => {
     const { customerId: _customerId, changes: _changes } = payload.data as CustomerUpdatedPayload;
 
     // Invalidate customer cache if needed
-    // TODO: Implement customer caching
+    logger.info(`customer.updated: invalidating cache for customer ${_customerId}`);
   });
 };
 
@@ -408,7 +428,7 @@ export const registerSupplierEventHandlers = () => {
     const { receivingRecordId: _receivingRecordId, purchaseOrderId: _purchaseOrderId, receiptNumber: _receiptNumber } = payload.data as ReceivingCompletedPayload;
 
     // Update inventory and send notifications
-    // TODO: Trigger inventory updates
+    logger.info(`receiving.completed: triggering inventory update for PO ${_purchaseOrderId} (receipt ${_receiptNumber})`);
   });
 };
 

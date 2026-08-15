@@ -5,6 +5,7 @@
 
 import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
 import { CustomerSubscription, SubscriptionPlan, SubscriptionProduct } from '../../infrastructure/repositories/subscriptionRepo';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
 // Command
@@ -136,7 +137,13 @@ export class CreateSubscriptionUseCase {
         customizations: input.customizations,
       });
 
-      // TODO: Emit SubscriptionCreated event
+      // Emit SubscriptionCreated event
+      await eventBus.emit('subscription.created', {
+        customerSubscriptionId: subscription.customerSubscriptionId,
+        customerId: input.customerId,
+        subscriptionPlanId: input.subscriptionPlanId,
+        status,
+      });
 
       return {
         success: true,

@@ -1,0 +1,23 @@
+{
+  "programMembers": "Membri del programma",
+  "pointsIssued": "Punti emessi",
+  "pointsRedeemed": "Punti riscattati",
+  "programSettings": "Impostazioni del programma",
+  "pointsPerDollar": "Punti per dollaro speso",
+  "pointsValue": "Valore punti ($ per punto)",
+  "minimumRedemption": "Rimborso minimo",
+  "addReward": "Aggiungi ricompensa",
+  "reward": "Ricompensa",
+  "redemptions": "Riscatti",
+  "noRewards": "Nessun premio configurato.",
+  "recentTransactions": "Transazioni recenti",
+  "noTransactions": "Nessuna transazione ancora.",
+  "rewardName": "Nome del premio",
+  "rewardType": "Tipo di ricompensa",
+  "freeProduct": "Prodotto gratuito",
+  "giftCard": "Carta regalo",
+  "rewardValue": "Valore della ricompensa",
+  "confirmDeleteReward": "Eliminare questo premio?",
+  "analytics": "Analisi del programma fedeltà",
+  "analyticsDescription": "Distribuzione dei punti, tassi di riscatto e progressione di livello."
+}

@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin/analytics">Analytics</a></li>
-            <li class="breadcrumb-item active">Reports</li>
+            <li class="breadcrumb-item"><a href="/admin/analytics"><%= t('shared:common.analytics') %></a></li>
+            <li class="breadcrumb-item active"><%= t('analytics:reports') %></li>
           </ol>
         </div>
       </div>
@@ -24,39 +24,39 @@
         <div class="col-12">
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-play me-2"></i>Generate Report Now</h3>
+              <h3 class="card-title"><i class="fas fa-play me-2"></i><%= t('analytics:generateReportNow') %></h3>
             </div>
             <div class="card-body">
               <form id="generateReportForm">
                 <div class="row">
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label>Report Type</label>
+                      <label><%= t('shared:common.reportType') %></label>
                       <select class="form-control" name="reportType" required>
-                        <option value="sales">Sales Report</option>
-                        <option value="customers">Customer Report</option>
-                        <option value="products">Product Report</option>
-                        <option value="inventory">Inventory Report</option>
-                        <option value="executive">Executive Summary</option>
+                        <option value="sales"><%= t('analytics:salesReport') %></option>
+                        <option value="customers"><%= t('analytics:customerReport') %></option>
+                        <option value="products"><%= t('analytics:productReport') %></option>
+                        <option value="inventory"><%= t('shared:common.inventory') %></option>
+                        <option value="executive"><%= t('analytics:executive') %></option>
                       </select>
                     </div>
                   </div>
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label>Period</label>
+                      <label><%= t('shared:common.period') %></label>
                       <select class="form-control" name="period">
-                        <option value="7d">Last 7 Days</option>
-                        <option value="30d" selected>Last 30 Days</option>
-                        <option value="90d">Last 90 Days</option>
-                        <option value="1y">Last Year</option>
+                        <option value="7d"><%= t('analytics:last7Days') %></option>
+                        <option value="30d" selected><%= t('analytics:last30Days') %></option>
+                        <option value="90d"><%= t('analytics:last90Days') %></option>
+                        <option value="1y"><%= t('analytics:lastYear') %></option>
                       </select>
                     </div>
                   </div>
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label>Format</label>
+                      <label><%= t('shared:common.format') %></label>
                       <select class="form-control" name="format">
-                        <option value="html">HTML (View)</option>
+                        <option value="html">HTML</option>
                         <option value="pdf">PDF</option>
                         <option value="excel">Excel</option>
                         <option value="csv">CSV</option>
@@ -67,7 +67,7 @@
                     <div class="form-group">
                       <label>&nbsp;</label>
                       <button type="submit" class="btn btn-primary btn-block w-100">
-                        <i class="fas fa-file-download me-2"></i>Generate
+                        <i class="fas fa-file-download me-2"></i><%= t('analytics:generate') %>
                       </button>
                     </div>
                   </div>
@@ -83,7 +83,7 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-clock me-2"></i>Scheduled Reports</h3>
+              <h3 class="card-title"><i class="fas fa-clock me-2"></i><%= t('shared:common.scheduledReports') %></h3>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-bs-toggle="modal" data-bs-target="#newScheduleModal">
                   <i class="fas fa-plus"></i>
@@ -94,11 +94,11 @@
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Frequency</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th><%= t('analytics:reportName') %></th>
+                    <th><%= t('shared:common.reportType') %></th>
+                    <th><%= t('shared:common.frequency') %></th>
+                    <th><%= t('common.status') %></th>
+                    <th><%= t('common.actions') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -109,7 +109,7 @@
                     <td><%= report.type %></td>
                     <td>
                       <span class="badge bg-<%= report.isActive ? 'success' : 'secondary' %>">
-                        <%= report.isActive ? 'Active' : 'Paused' %>
+                        <%= report.isActive ? t('common.active') : t('shared:common.paused') %>
                       </span>
                     </td>
                     <td>
@@ -122,7 +122,7 @@
                   <% if ((reports || []).length === 0) { %>
                   <tr>
                     <td colspan="5" class="text-center text-muted">
-                      No scheduled reports. Click + to create one.
+                      <%= t('analytics:noScheduledReports') %>
                     </td>
                   </tr>
                   <% } %>
@@ -134,16 +134,16 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-history me-2"></i>Report History</h3>
+              <h3 class="card-title"><i class="fas fa-history me-2"></i><%= t('analytics:reportHistory') %></h3>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Report</th>
-                    <th>Generated</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th><%= t('analytics:report') %></th>
+                    <th><%= t('analytics:generated') %></th>
+                    <th><%= t('common.status') %></th>
+                    <th><%= t('common.actions') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -168,7 +168,7 @@
                   <% if ((reportHistory || []).length === 0) { %>
                   <tr>
                     <td colspan="4" class="text-center text-muted">
-                      No report history available.
+                      <%= t('analytics:noReportHistory') %>
                     </td>
                   </tr>
                   <% } %>
@@ -184,7 +184,7 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-file-invoice me-2"></i>Report Templates</h3>
+              <h3 class="card-title"><i class="fas fa-file-invoice me-2"></i><%= t('analytics:reportTemplates') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
@@ -192,9 +192,9 @@
                   <div class="card card-outline card-primary">
                     <div class="card-body text-center">
                       <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
-                      <h5>Sales Report</h5>
-                      <p class="text-muted small">Revenue, orders, and sales trends</p>
-                      <button class="btn btn-primary btn-sm" onclick="generateReport('sales')">Generate</button>
+                      <h5><%= t('analytics:salesReport') %></h5>
+                      <p class="text-muted small"><%= t('analytics:salesReportDesc') %></p>
+                      <button class="btn btn-primary btn-sm" onclick="generateReport('sales')"><%= t('analytics:generate') %></button>
                     </div>
                   </div>
                 </div>
@@ -202,9 +202,9 @@
                   <div class="card card-outline card-success">
                     <div class="card-body text-center">
                       <i class="fas fa-users fa-3x text-success mb-3"></i>
-                      <h5>Customer Report</h5>
-                      <p class="text-muted small">Acquisition, retention, and segments</p>
-                      <button class="btn btn-success btn-sm" onclick="generateReport('customers')">Generate</button>
+                      <h5><%= t('analytics:customerReport') %></h5>
+                      <p class="text-muted small"><%= t('analytics:customerReportDesc') %></p>
+                      <button class="btn btn-success btn-sm" onclick="generateReport('customers')"><%= t('analytics:generate') %></button>
                     </div>
                   </div>
                 </div>
@@ -212,9 +212,9 @@
                   <div class="card card-outline card-warning">
                     <div class="card-body text-center">
                       <i class="fas fa-box fa-3x text-warning mb-3"></i>
-                      <h5>Product Report</h5>
-                      <p class="text-muted small">Performance, inventory, and trends</p>
-                      <button class="btn btn-warning btn-sm" onclick="generateReport('products')">Generate</button>
+                      <h5><%= t('analytics:productReport') %></h5>
+                      <p class="text-muted small"><%= t('analytics:productReportDesc') %></p>
+                      <button class="btn btn-warning btn-sm" onclick="generateReport('products')"><%= t('analytics:generate') %></button>
                     </div>
                   </div>
                 </div>
@@ -222,9 +222,9 @@
                   <div class="card card-outline card-danger">
                     <div class="card-body text-center">
                       <i class="fas fa-briefcase fa-3x text-danger mb-3"></i>
-                      <h5>Executive Summary</h5>
-                      <p class="text-muted small">High-level KPIs and insights</p>
-                      <button class="btn btn-danger btn-sm" onclick="generateReport('executive')">Generate</button>
+                      <h5><%= t('analytics:executive') %></h5>
+                      <p class="text-muted small"><%= t('analytics:executiveSummaryDesc') %></p>
+                      <button class="btn btn-danger btn-sm" onclick="generateReport('executive')"><%= t('analytics:generate') %></button>
                     </div>
                   </div>
                 </div>
@@ -242,40 +242,40 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Create Scheduled Report</h5>
+        <h5 class="modal-title"><%= t('analytics:createScheduledReport') %></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form id="scheduleForm">
           <div class="mb-3">
-            <label class="form-label">Report Name</label>
+            <label class="form-label"><%= t('analytics:reportName') %></label>
             <input type="text" class="form-control" name="name" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Report Type</label>
+            <label class="form-label"><%= t('shared:common.reportType') %></label>
             <select class="form-control" name="reportType" required>
-              <option value="sales">Sales Report</option>
-              <option value="customers">Customer Report</option>
-              <option value="products">Product Report</option>
-              <option value="inventory">Inventory Report</option>
-              <option value="executive">Executive Summary</option>
+              <option value="sales"><%= t('analytics:salesReport') %></option>
+              <option value="customers"><%= t('analytics:customerReport') %></option>
+              <option value="products"><%= t('analytics:productReport') %></option>
+              <option value="inventory"><%= t('shared:common.inventory') %></option>
+              <option value="executive"><%= t('analytics:executive') %></option>
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Frequency</label>
+            <label class="form-label"><%= t('shared:common.frequency') %></label>
             <select class="form-control" name="type" required>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="quarterly">Quarterly</option>
+              <option value="daily"><%= t('analytics:daily') %></option>
+              <option value="weekly"><%= t('shared:common.weekly') %></option>
+              <option value="monthly"><%= t('shared:common.monthly') %></option>
+              <option value="quarterly"><%= t('shared:common.quarterly') %></option>
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Recipients (comma-separated emails)</label>
+            <label class="form-label"><%= t('analytics:recipients') %></label>
             <input type="text" class="form-control" name="recipients" placeholder="email@example.com">
           </div>
           <div class="mb-3">
-            <label class="form-label">Format</label>
+            <label class="form-label"><%= t('shared:common.format') %></label>
             <select class="form-control" name="format">
               <option value="pdf">PDF</option>
               <option value="excel">Excel</option>
@@ -286,8 +286,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="createSchedule()">Create Schedule</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-primary" onclick="createSchedule()"><%= t('shared:common.createSchedule') %></button>
       </div>
     </div>
   </div>
@@ -313,13 +313,13 @@
       });
       const result = await response.json();
       if (result.success) {
-        alert('Report generated successfully!');
+        alert('<%= t("analytics:reportGeneratedSuccess") %>');
         console.log(result.report);
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error generating report: ' + error.message);
+      alert('<%= t("analytics:errorGeneratingReport") %>: ' + error.message);
     }
   });
 
@@ -337,13 +337,13 @@
       });
       const result = await response.json();
       if (result.success) {
-        alert('Schedule created successfully!');
+        alert('<%= t("analytics:scheduleCreatedSuccess") %>');
         location.reload();
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error creating schedule: ' + error.message);
+      alert('<%= t("analytics:errorCreatingSchedule") %>: ' + error.message);
     }
   }
 </script>

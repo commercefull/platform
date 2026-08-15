@@ -1,0 +1,13 @@
+{
+  "create": "Organizasyon Oluştur",
+  "view": "Organizasyon Detayları",
+  "single": "Bekar",
+  "multiStore": "Çoklu Mağaza",
+  "marketplace": "Pazar yeri",
+  "settings": "Ayarlar (JSON)",
+  "settingsHint": "Kuruluş düzeyindeki ayarlar için isteğe bağlı JSON nesnesi.",
+  "slugHint": "Yalnızca küçük harfler, sayılar ve kısa çizgiler.",
+  "noOrganizations": "Hiçbir kuruluş bulunamadı.",
+  "confirmDelete": "Bu kuruluş silinsin mi?",
+  "noStoresLinked": "Bu kuruluşa bağlı mağaza yok."
+}

@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "Permintaan yang Tertunda",
+  "completedThisMonth": "Selesai Bulan Ini",
+  "avgProcessingDays": "Rata-rata Hari Pemrosesan",
+  "marketingConsentRate": "Tingkat Persetujuan Pemasaran",
+  "dataAccessRequests": "Permintaan Akses Data",
+  "dataAccess": "Akses Data",
+  "dataDeletion": "Penghapusan Data",
+  "noGdprRequests": "Belum ada permintaan GDPR.",
+  "consentManagement": "Manajemen Persetujuan",
+  "marketingConsent": "Persetujuan Pemasaran",
+  "analyticsConsent": "Persetujuan Analisis",
+  "manageConsentSettings": "Kelola Pengaturan Persetujuan",
+  "createGdprRequest": "Buat Permintaan GDPR",
+  "dataAccessRequestSar": "Permintaan Akses Data (SAR)",
+  "dataDeletionRequest": "Permintaan Penghapusan Data",
+  "dataRectificationRequest": "Permintaan Perbaikan Data",
+  "customerEmail": "Email Pelanggan",
+  "createRequest": "Buat Permintaan",
+  "confirmProcessRequest": "Tandai permintaan ini sebagai sedang diproses?",
+  "consentRecords": "Catatan Persetujuan",
+  "manageConsentRecords": "Kelola catatan dan preferensi persetujuan pelanggan."
+}

@@ -85,8 +85,6 @@ interface ExtendExpirationBody {
 
 interface ApplyCouponBody {
   couponCode: string;
-  discountType: 'percentage' | 'fixed';
-  discountValue: number;
 }
 
 interface DomainErrorWithStatusCode extends Error {
@@ -535,14 +533,14 @@ export const applyCoupon = async (req: TypedRequest, res: Response): Promise<voi
   try {
     const { basketId } = req.params;
     const body = req.body as ApplyCouponBody;
-    const { couponCode, discountType, discountValue } = body;
+    const { couponCode } = body;
 
-    if (!couponCode || !discountType || discountValue === undefined) {
-      respondError(req, res, 'couponCode, discountType, and discountValue are required', 400, 'basket/error');
+    if (!couponCode) {
+      respondError(req, res, 'couponCode is required', 400, 'basket/error');
       return;
     }
 
-    const command = new ApplyCouponCommand(basketId, couponCode, discountType, discountValue);
+    const command = new ApplyCouponCommand(basketId, couponCode);
     const useCase = new ApplyCouponUseCase(BasketRepo);
     const basket = await useCase.execute(command);
 

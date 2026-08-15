@@ -1,0 +1,147 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50">
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4"><%= t('storefront:promotionsCoupons') %></h1>
+        <p class="text-xl text-purple-100 max-w-3xl mx-auto mb-8">
+          <%= t('storefront:promotionsDesc') %>
+        </p>
+        <nav class="flex justify-center" aria-label="Breadcrumb">
+          <ol class="flex items-center space-x-2">
+            <li>
+              <a href="/" class="text-purple-200 hover:text-white transition-colors"><%= t('storefront:home') %></a>
+            </li>
+            <li class="flex items-center">
+              <svg class="w-4 h-4 text-purple-300 mx-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-purple-200"><%= t('shared:common.promotions') %></span>
+            </li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Active Promotions -->
+    <% if (promotions && promotions.length > 0) { %>
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold text-gray-900 mb-8"><%= t('storefront:activePromotions') %></h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% promotions.forEach(promo => { %>
+        <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden">
+          <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-xl font-semibold text-gray-900"><%= promo.name %></h3>
+              <% if (promo.discountType === 'percentage') { %>
+              <span class="text-3xl font-bold text-purple-600"><%= promo.discountValue %><%= t('storefront:percentOff') %></span>
+              <% } else if (promo.discountType === 'fixed') { %>
+              <span class="text-3xl font-bold text-purple-600">$<%= promo.discountValue %><%= t('storefront:dollarOff') %></span>
+              <% } else { %>
+              <span class="text-lg font-bold text-purple-600"><%= promo.discountType %></span>
+              <% } %>
+            </div>
+            <% if (promo.description) { %>
+            <p class="text-sm text-gray-600"><%= promo.description %></p>
+            <% } %>
+          </div>
+          <div class="p-6">
+            <div class="space-y-2 text-sm text-gray-600 mb-4">
+              <% if (promo.minOrderAmount) { %>
+              <p><%= t('storefront:minimumOrder', { amount: promo.minOrderAmount }) %></p>
+              <% } %>
+              <% if (promo.maxDiscountAmount) { %>
+              <p><%= t('storefront:maximumDiscount', { amount: promo.maxDiscountAmount }) %></p>
+              <% } %>
+              <% if (promo.endDate) { %>
+              <p><%= t('storefront:validUntil', { date: new Date(promo.endDate).toLocaleDateString() }) %></p>
+              <% } %>
+            </div>
+            <a href="/products" class="inline-flex items-center text-sm font-medium text-purple-600 hover:text-purple-800">
+              <%= t('storefront:shopNow') %>
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- Available Coupons -->
+    <% if (coupons && coupons.length > 0) { %>
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold text-gray-900 mb-8"><%= t('storefront:availableCoupons') %></h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% coupons.forEach(coupon => { %>
+        <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border-2 border-dashed border-purple-200 overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900"><%= coupon.name || coupon.code %></h3>
+                <code class="text-sm font-mono bg-purple-50 text-purple-700 px-2 py-1 rounded mt-1 inline-block">
+                  <%= coupon.code %>
+                </code>
+              </div>
+              <div class="text-right">
+                <% if (coupon.type === 'percentage') { %>
+                <span class="text-2xl font-bold text-purple-600"><%= coupon.discountAmount %>%</span>
+                <% } else { %>
+                <span class="text-2xl font-bold text-purple-600">$<%= coupon.discountAmount %></span>
+                <% } %>
+                <p class="text-xs text-gray-500"><%= t('storefront:off') %></p>
+              </div>
+            </div>
+
+            <% if (coupon.description) { %>
+            <p class="text-sm text-gray-600 mb-3"><%= coupon.description %></p>
+            <% } %>
+
+            <div class="space-y-1 text-xs text-gray-500 mb-4">
+              <% if (coupon.minOrderAmount) { %>
+              <p><%= t('storefront:minOrder', { amount: coupon.minOrderAmount }) %></p>
+              <% } %>
+              <% if (coupon.maxDiscountAmount) { %>
+              <p><%= t('storefront:maxDiscount', { amount: coupon.maxDiscountAmount }) %></p>
+              <% } %>
+              <% if (coupon.endDate) { %>
+              <p><%= t('storefront:expires', { date: new Date(coupon.endDate).toLocaleDateString() }) %></p>
+              <% } %>
+              <% if (coupon.maxUsagePerCustomer) { %>
+              <p><%= t('storefront:limitPerCustomer', { count: coupon.maxUsagePerCustomer }) %></p>
+              <% } %>
+            </div>
+
+            <button onclick="navigator.clipboard.writeText('<%= coupon.code %>').then(() => { this.textContent = '<%= t('storefront:copied') %>'; setTimeout(() => { this.textContent = '<%= t('storefront:copyCodeBtn') %>'; }, 2000); })"
+                    class="w-full px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors">
+              <%= t('storefront:copyCode') %>
+            </button>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+
+    <% if ((!promotions || promotions.length === 0) && (!coupons || coupons.length === 0)) { %>
+    <div class="text-center py-16">
+      <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+      </svg>
+      <h3 class="text-lg font-medium text-gray-900 mb-2"><%= t('storefront:noActivePromotions') %></h3>
+      <p class="text-gray-500 mb-6"><%= t('storefront:noActivePromotionsDesc') %></p>
+      <a href="/products" class="inline-flex items-center px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors">
+        <%= t('storefront:continueShopping') %>
+      </a>
+    </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

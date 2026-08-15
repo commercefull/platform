@@ -1,0 +1,23 @@
+{
+  "pendingRequests": "Richieste in sospeso",
+  "completedThisMonth": "Completato questo mese",
+  "avgProcessingDays": "Giorni di elaborazione medi",
+  "marketingConsentRate": "Tasso di consenso al marketing",
+  "dataAccessRequests": "Richieste di accesso ai dati",
+  "dataAccess": "Accesso ai dati",
+  "dataDeletion": "Cancellazione dei dati",
+  "noGdprRequests": "Nessuna richiesta GDPR ancora.",
+  "consentManagement": "Gestione del consenso",
+  "marketingConsent": "Consenso al marketing",
+  "analyticsConsent": "Consenso analitico",
+  "manageConsentSettings": "Gestisci le impostazioni di consenso",
+  "createGdprRequest": "Crea richiesta GDPR",
+  "dataAccessRequestSar": "Richiesta di accesso ai dati (SAR)",
+  "dataDeletionRequest": "Richiesta di cancellazione dei dati",
+  "dataRectificationRequest": "Richiesta di rettifica dati",
+  "customerEmail": "E-mail del cliente",
+  "createRequest": "Crea richiesta",
+  "confirmProcessRequest": "Contrassegnare questa richiesta come in elaborazione?",
+  "consentRecords": "Record di consenso",
+  "manageConsentRecords": "Gestire i record e le preferenze del consenso del cliente."
+}

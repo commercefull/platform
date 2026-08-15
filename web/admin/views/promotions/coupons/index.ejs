@@ -7,13 +7,13 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Coupon Management</h1>
+          <h1 class="m-0"><%= t('promotion:promotions.couponManagement') %></h1>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/promotions">Promotions</a></li>
-            <li class="breadcrumb-item active">Coupons</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('dashboard.title') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/promotions"><%= t('shared:common.promotions') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.coupons') %></li>
           </ol>
         </div>
       </div>
@@ -35,11 +35,11 @@
       <div class="row mb-3">
         <div class="col-12">
           <a href="/admin/promotions/coupons/create" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create Coupon
+            <i class="fas fa-plus"></i> <%= t('promotion:coupon.create') %>
           </a>
           <div class="float-right">
-            <span class="badge badge-info">Total: <%= coupons.length %></span>
-            <span class="badge badge-success ml-2">Active: <%= activeCoupons %></span>
+            <span class="badge badge-info"><%= t('shared:common.total') %>: <%= coupons.length %></span>
+            <span class="badge badge-success ml-2"><%= t('shared:common.active') %>: <%= activeCoupons %></span>
           </div>
         </div>
       </div>
@@ -51,18 +51,18 @@
             <div class="card-body">
               <form method="GET" class="form-inline">
                 <div class="form-group mr-3">
-                  <label for="isActive" class="mr-2">Status:</label>
+                  <label for="isActive" class="mr-2"><%= t('common.status') %>:</label>
                   <select name="isActive" id="isActive" class="form-control">
-                    <option value="">All Coupons</option>
-                    <option value="true" <%= filters.isActive === true ? 'selected' : '' %>>Active</option>
-                    <option value="false" <%= filters.isActive === false ? 'selected' : '' %>>Inactive</option>
+                    <option value=""><%= t('promotion:promotions.allCoupons') %></option>
+                    <option value="true" <%= filters.isActive === true ? 'selected' : '' %>><%= t('shared:common.active') %></option>
+                    <option value="false" <%= filters.isActive === false ? 'selected' : '' %>><%= t('shared:common.inactive') %></option>
                   </select>
                 </div>
                 <button type="submit" class="btn btn-secondary mr-2">
-                  <i class="fas fa-filter"></i> Filter
+                  <i class="fas fa-filter"></i> <%= t('common.filter') %>
                 </button>
                 <a href="/admin/promotions/coupons" class="btn btn-outline-secondary">
-                  <i class="fas fa-times"></i> Clear
+                  <i class="fas fa-times"></i> <%= t('common.clear') %>
                 </a>
               </form>
             </div>
@@ -73,27 +73,27 @@
       <!-- Coupons Table -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Coupons</h3>
+          <h3 class="card-title"><%= t('shared:common.coupons') %></h3>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover text-nowrap">
             <thead>
               <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Discount</th>
-                <th>Usage</th>
-                <th>Status</th>
-                <th>Expires</th>
-                <th>Actions</th>
+                <th><%= t('shared:common.code') %></th>
+                <th><%= t('shared:common.name') %></th>
+                <th><%= t('shared:common.type') %></th>
+                <th><%= t('shared:common.discount') %></th>
+                <th><%= t('promotion:giftCard.usage') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('shared:common.expires') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
               <% if (coupons.length === 0) { %>
                 <tr>
                   <td colspan="8" class="text-center py-4">
-                    <em>No coupons found. <a href="/admin/promotions/coupons/create">Create your first coupon</a>.</em>
+                    <em><%= t('promotion:coupon.noCoupons') %> <a href="/admin/promotions/coupons/create"><%= t('promotion:promotions.createFirstCoupon') %></a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -130,16 +130,16 @@
                     </td>
                     <td>
                       <% if (coupon.isActive) { %>
-                        <span class="badge badge-success">Active</span>
+                        <span class="badge badge-success"><%= t('shared:common.active') %></span>
                       <% } else { %>
-                        <span class="badge badge-secondary">Inactive</span>
+                        <span class="badge badge-secondary"><%= t('shared:common.inactive') %></span>
                       <% } %>
                     </td>
                     <td>
                       <% if (coupon.endDate) { %>
                         <%= new Date(coupon.endDate).toLocaleDateString() %>
                       <% } else { %>
-                        <span class="text-muted">No expiry</span>
+                        <span class="text-muted"><%= t('promotion:promotions.noExpiry') %></span>
                       <% } %>
                     </td>
                     <td>
@@ -169,18 +169,18 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Delete Coupon</h4>
+        <h4 class="modal-title"><%= t('promotion:promotions.deleteCoupon') %></h4>
         <button type="button" class="close" data-dismiss="modal">
           <span>&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to delete the coupon "<strong id="deleteCouponName"></strong>"?</p>
-        <p class="text-danger"><small>This action will permanently delete the coupon and cannot be undone.</small></p>
+        <p><%= t('promotion:promotions.confirmDeleteCoupon') %> "<strong id="deleteCouponName"></strong>"?</p>
+        <p class="text-danger"><small><%= t('promotion:promotions.deleteWarning') %></small></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Coupon</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn"><%= t('promotion:promotions.deleteCoupon') %></button>
       </div>
     </div>
   </div>
@@ -201,11 +201,11 @@ function deleteCoupon(couponId, couponName) {
       if (data.success) {
         location.reload();
       } else {
-        alert('Error: ' + data.message);
+        alert('<%= t("common.error") %>: ' + data.message);
       }
     })
     .catch(error => {
-      alert('Error deleting coupon');
+      alert('<%= t("promotion:coupon.errorDeletingCoupon") %>');
       console.error('Error:', error);
     });
   };

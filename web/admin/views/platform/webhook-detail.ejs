@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/platform/webhooks">Webhooks</a></li>
-            <li class="breadcrumb-item active">Detail</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/platform/webhooks"><%= t('platform:webhooks') %></a></li>
+            <li class="breadcrumb-item active"><%= t('common.details') %></li>
           </ol>
         </div>
       </div>
@@ -25,17 +25,17 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Webhook Configuration</h3>
+              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i><%= t('platform:webhookDetails') %></h3>
               <div class="card-tools">
                 <span class="badge bg-<%= webhook.isActive ? 'success' : 'secondary' %>">
-                  <%= webhook.isActive ? 'Active' : 'Inactive' %>
+                  <%= webhook.isActive ? t('common.active') : t('common.inactive') %>
                 </span>
               </div>
             </div>
             <div class="card-body">
               <table class="table table-borderless">
                 <tr>
-                  <th style="width: 30%">Name</th>
+                  <th style="width: 30%"><%= t('common.name') %></th>
                   <td><%= webhook.name %></td>
                 </tr>
                 <tr>
@@ -43,7 +43,7 @@
                   <td><code style="word-break: break-all;"><%= webhook.url %></code></td>
                 </tr>
                 <tr>
-                  <th>Secret</th>
+                  <th><%= t('shared:common.secret') %></th>
                   <td>
                     <code id="webhookSecret" style="display: none;"><%= webhook.secret %></code>
                     <span id="secretMask">••••••••••••••••</span>
@@ -56,11 +56,11 @@
                   </td>
                 </tr>
                 <tr>
-                  <th>Created</th>
+                  <th><%= t('common.dateCreated') %></th>
                   <td><%= new Date(webhook.createdAt).toLocaleString() %></td>
                 </tr>
                 <tr>
-                  <th>Updated</th>
+                  <th><%= t('common.dateUpdated') %></th>
                   <td><%= new Date(webhook.updatedAt).toLocaleString() %></td>
                 </tr>
               </table>
@@ -70,7 +70,7 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-bell me-2"></i>Subscribed Events</h3>
+              <h3 class="card-title"><i class="fas fa-bell me-2"></i><%= t('platform:subscribedEvents') %></h3>
             </div>
             <div class="card-body">
               <% (webhook.events || []).forEach(function(event) { %>
@@ -81,20 +81,20 @@
 
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-redo me-2"></i>Retry Policy</h3>
+              <h3 class="card-title"><i class="fas fa-redo me-2"></i><%= t('platform:retryPolicy') %></h3>
             </div>
             <div class="card-body">
               <table class="table table-borderless table-sm">
                 <tr>
-                  <th>Max Retries</th>
+                  <th><%= t('platform:maxRetries') %></th>
                   <td><%= webhook.retryPolicy.maxRetries %></td>
                 </tr>
                 <tr>
-                  <th>Initial Delay</th>
+                  <th><%= t('platform:initialDelay') %></th>
                   <td><%= webhook.retryPolicy.retryDelayMs %>ms</td>
                 </tr>
                 <tr>
-                  <th>Backoff Multiplier</th>
+                  <th><%= t('platform:backoffMultiplier') %></th>
                   <td><%= webhook.retryPolicy.backoffMultiplier %>x</td>
                 </tr>
               </table>
@@ -108,13 +108,13 @@
         <div class="col-12">
           <button class="btn btn-<%= webhook.isActive ? 'warning' : 'success' %>" onclick="toggleActive()">
             <i class="fas fa-<%= webhook.isActive ? 'pause' : 'play' %> me-2"></i>
-            <%= webhook.isActive ? 'Deactivate' : 'Activate' %>
+            <%= webhook.isActive ? t('shared:common.deactivate') : t('shared:common.activate') %>
           </button>
           <button class="btn btn-outline-primary" onclick="regenerateSecret()">
-            <i class="fas fa-key me-2"></i>Regenerate Secret
+            <i class="fas fa-key me-2"></i><%= t('platform:regenerateSecret') %>
           </button>
           <button class="btn btn-outline-danger" onclick="deleteWebhook()">
-            <i class="fas fa-trash me-2"></i>Delete Webhook
+            <i class="fas fa-trash me-2"></i><%= t('common.delete') %>
           </button>
         </div>
       </div>
@@ -124,18 +124,18 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-paper-plane me-2"></i>Recent Deliveries</h3>
+              <h3 class="card-title"><i class="fas fa-paper-plane me-2"></i><%= t('platform:recentDeliveries') %></h3>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Event</th>
-                    <th>Status</th>
-                    <th>Attempts</th>
-                    <th>Response</th>
-                    <th>Duration</th>
-                    <th>Created</th>
+                    <th><%= t('platform:event') %></th>
+                    <th><%= t('common.status') %></th>
+                    <th><%= t('platform:attempts') %></th>
+                    <th><%= t('shared:common.response') %></th>
+                    <th><%= t('common.duration') %></th>
+                    <th><%= t('common.dateCreated') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -155,7 +155,7 @@
                         </span>
                       <% } else if (delivery.errorMessage) { %>
                         <span class="text-danger" title="<%= delivery.errorMessage %>">
-                          <i class="fas fa-exclamation-circle"></i> Error
+                          <i class="fas fa-exclamation-circle"></i> <%= t('common.error') %>
                         </span>
                       <% } else { %>
                         <span class="text-muted">-</span>
@@ -167,7 +167,7 @@
                   <% }); %>
                   <% if ((deliveries || []).length === 0) { %>
                   <tr>
-                    <td colspan="6" class="text-center text-muted">No deliveries yet</td>
+                    <td colspan="6" class="text-center text-muted"><%= t('platform:noDeliveries') %></td>
                   </tr>
                   <% } %>
                 </tbody>
@@ -181,7 +181,7 @@
       <div class="row">
         <div class="col-12">
           <a href="/admin/platform/webhooks" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Webhooks
+            <i class="fas fa-arrow-left me-2"></i><%= t('common.back') %>
           </a>
         </div>
       </div>
@@ -205,7 +205,7 @@
   function copySecret() {
     const secret = '<%= webhook.secret %>';
     navigator.clipboard.writeText(secret).then(() => {
-      alert('Secret copied to clipboard');
+      alert('<%= t("platform:secretCopied") %>');
     });
   }
 
@@ -220,16 +220,16 @@
       if (result.success) {
         location.reload();
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   }
 
   async function regenerateSecret() {
-    if (!confirm('Are you sure you want to regenerate the secret? You will need to update your endpoint.')) return;
-    alert('Secret regeneration not yet implemented');
+    if (!confirm('<%= t("platform:confirmRegenSecret") %>')) return;
+    alert('<%= t("platform:secretRegenNotImplemented") %>');
   }
 
   async function deleteWebhook() {
@@ -241,10 +241,10 @@
       if (result.success) {
         window.location.href = '/admin/platform/webhooks';
       } else {
-        alert('Error: ' + result.message);
+        alert('<%= t("common.error") %>: ' + result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert('<%= t("common.error") %>: ' + error.message);
     }
   }
 </script>

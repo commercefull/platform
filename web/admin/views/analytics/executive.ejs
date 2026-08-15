@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin/analytics">Analytics</a></li>
-            <li class="breadcrumb-item active">Executive</li>
+            <li class="breadcrumb-item"><a href="/admin/analytics"><%= t('shared:common.analytics') %></a></li>
+            <li class="breadcrumb-item active"><%= t('analytics:executive') %></li>
           </ol>
         </div>
       </div>
@@ -25,7 +25,7 @@
           <div class="info-box">
             <span class="info-box-icon bg-info"><i class="fas fa-dollar-sign"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Revenue</span>
+              <span class="info-box-text"><%= t('shared:common.revenue') %></span>
               <span class="info-box-number">$<%= (kpis.revenue.current || 0).toLocaleString() %></span>
               <div class="progress">
                 <div class="progress-bar bg-info" style="width: <%= Math.min(100, (kpis.revenue.current / kpis.revenue.target * 100) || 0) %>%"></div>
@@ -36,7 +36,7 @@
                 <% } else { %>
                   <span class="text-danger"><i class="fas fa-arrow-down"></i> <%= Math.abs(kpis.revenue.growth).toFixed(1) %>%</span>
                 <% } %>
-                vs last period
+                <%= t('analytics:vsLastPeriod') %>
               </span>
             </div>
           </div>
@@ -45,13 +45,13 @@
           <div class="info-box">
             <span class="info-box-icon bg-success"><i class="fas fa-chart-pie"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Profit Margin</span>
+              <span class="info-box-text"><%= t('analytics:profitMargin') %></span>
               <span class="info-box-number"><%= (kpis.profit.margin || 0).toFixed(1) %>%</span>
               <div class="progress">
                 <div class="progress-bar bg-success" style="width: <%= Math.min(100, kpis.profit.margin || 0) %>%"></div>
               </div>
               <span class="progress-description">
-                Profit: $<%= (kpis.profit.current || 0).toLocaleString() %>
+                <%= t('analytics:profit') %>: $<%= (kpis.profit.current || 0).toLocaleString() %>
               </span>
             </div>
           </div>
@@ -60,13 +60,13 @@
           <div class="info-box">
             <span class="info-box-icon bg-warning"><i class="fas fa-users"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Customers</span>
+              <span class="info-box-text"><%= t('shared:common.totalCustomers') %></span>
               <span class="info-box-number"><%= kpis.customers.total || 0 %></span>
               <div class="progress">
                 <div class="progress-bar bg-warning" style="width: <%= Math.min(100, (kpis.customers.active / kpis.customers.total * 100) || 0) %>%"></div>
               </div>
               <span class="progress-description">
-                Active: <%= kpis.customers.active || 0 %> | 
+                <%= t('common.active') %>: <%= kpis.customers.active || 0 %> | 
                 <% if (kpis.customers.growth > 0) { %>
                   <span class="text-success"><i class="fas fa-arrow-up"></i> <%= kpis.customers.growth.toFixed(1) %>%</span>
                 <% } else { %>
@@ -83,10 +83,10 @@
           <div class="info-box">
             <span class="info-box-icon bg-primary"><i class="fas fa-shopping-cart"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Orders</span>
+              <span class="info-box-text"><%= t('shared:common.orders') %></span>
               <span class="info-box-number"><%= kpis.orders.total || 0 %></span>
               <span class="progress-description">
-                AOV: $<%= (kpis.orders.average || 0).toFixed(2) %> | Conv: <%= ((kpis.orders.conversion || 0) * 100).toFixed(1) %>%
+                <%= t('analytics:aov') %>: $<%= (kpis.orders.average || 0).toFixed(2) %> | <%= t('analytics:conversion') %>: <%= ((kpis.orders.conversion || 0) * 100).toFixed(1) %>%
               </span>
             </div>
           </div>
@@ -95,10 +95,10 @@
           <div class="info-box">
             <span class="info-box-icon bg-danger"><i class="fas fa-boxes"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Inventory</span>
+              <span class="info-box-text"><%= t('shared:common.inventory') %></span>
               <span class="info-box-number">$<%= (kpis.inventory.value || 0).toLocaleString() %></span>
               <span class="progress-description">
-                Turnover: <%= (kpis.inventory.turnover || 0).toFixed(2) %> | Stockouts: <%= kpis.inventory.stockouts || 0 %>
+                <%= t('analytics:turnover') %>: <%= (kpis.inventory.turnover || 0).toFixed(2) %> | <%= t('analytics:stockouts') %>: <%= kpis.inventory.stockouts || 0 %>
               </span>
             </div>
           </div>
@@ -107,10 +107,10 @@
           <div class="info-box">
             <span class="info-box-icon bg-secondary"><i class="fas fa-bullhorn"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Marketing</span>
-              <span class="info-box-number">ROI: <%= (kpis.marketing.roi || 0).toFixed(1) %>x</span>
+              <span class="info-box-text"><%= t('shared:common.marketing') %></span>
+              <span class="info-box-number"><%= t('common.roi') %>: <%= (kpis.marketing.roi || 0).toFixed(1) %>x</span>
               <span class="progress-description">
-                CAC: $<%= (kpis.marketing.cac || 0).toFixed(2) %> | LTV: $<%= (kpis.marketing.ltv || 0).toFixed(2) %>
+                <%= t('common.cac') %>: $<%= (kpis.marketing.cac || 0).toFixed(2) %> | <%= t('common.ltv') %>: $<%= (kpis.marketing.ltv || 0).toFixed(2) %>
               </span>
             </div>
           </div>
@@ -122,36 +122,36 @@
         <div class="col-lg-6">
           <div class="card card-danger">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-exclamation-triangle me-2"></i>Business Alerts</h3>
+              <h3 class="card-title"><i class="fas fa-exclamation-triangle me-2"></i><%= t('analytics:businessAlerts') %></h3>
             </div>
             <div class="card-body">
               <% if ((alerts.critical || []).length > 0) { %>
                 <% alerts.critical.forEach(function(alert) { %>
                 <div class="alert alert-danger" role="alert">
-                  <strong><i class="fas fa-times-circle me-2"></i>Critical:</strong> <%= alert.message %>
-                  <br><small class="text-muted">Action: <%= alert.action %></small>
+                  <strong><i class="fas fa-times-circle me-2"></i><%= t('analytics:critical') %>:</strong> <%= alert.message %>
+                  <br><small class="text-muted"><%= t('shared:common.action') %>: <%= alert.action %></small>
                 </div>
                 <% }); %>
               <% } %>
               <% if ((alerts.warnings || []).length > 0) { %>
                 <% alerts.warnings.forEach(function(alert) { %>
                 <div class="alert alert-warning" role="alert">
-                  <strong><i class="fas fa-exclamation-circle me-2"></i>Warning:</strong> <%= alert.message %>
-                  <br><small class="text-muted">Action: <%= alert.action %></small>
+                  <strong><i class="fas fa-exclamation-circle me-2"></i><%= t('shared:common.warning') %>:</strong> <%= alert.message %>
+                  <br><small class="text-muted"><%= t('shared:common.action') %>: <%= alert.action %></small>
                 </div>
                 <% }); %>
               <% } %>
               <% if ((alerts.opportunities || []).length > 0) { %>
                 <% alerts.opportunities.forEach(function(alert) { %>
                 <div class="alert alert-info" role="alert">
-                  <strong><i class="fas fa-lightbulb me-2"></i>Opportunity:</strong> <%= alert.message %>
-                  <br><small class="text-muted">Action: <%= alert.action %></small>
+                  <strong><i class="fas fa-lightbulb me-2"></i><%= t('analytics:opportunity') %>:</strong> <%= alert.message %>
+                  <br><small class="text-muted"><%= t('shared:common.action') %>: <%= alert.action %></small>
                 </div>
                 <% }); %>
               <% } %>
               <% if ((alerts.critical || []).length === 0 && (alerts.warnings || []).length === 0 && (alerts.opportunities || []).length === 0) { %>
               <div class="alert alert-success" role="alert">
-                <i class="fas fa-check-circle me-2"></i>All systems operating normally. No alerts at this time.
+                <i class="fas fa-check-circle me-2"></i><%= t('analytics:allSystemsNormal') %>
               </div>
               <% } %>
             </div>
@@ -160,7 +160,7 @@
         <div class="col-lg-6">
           <div class="card card-info">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-chart-line me-2"></i>Business Trends</h3>
+              <h3 class="card-title"><i class="fas fa-chart-line me-2"></i><%= t('analytics:businessTrends') %></h3>
             </div>
             <div class="card-body">
               <% (trends || []).forEach(function(trend) { %>
@@ -173,8 +173,8 @@
               <% }); %>
               <% if ((trends || []).length === 0) { %>
               <div class="callout callout-info">
-                <h5><i class="fas fa-info-circle me-2"></i>No Significant Trends</h5>
-                <p class="mb-0">Business metrics are stable with no significant changes detected.</p>
+                <h5><i class="fas fa-info-circle me-2"></i><%= t('analytics:noSignificantTrends') %></h5>
+                <p class="mb-0"><%= t('analytics:businessMetricsStable') %></p>
               </div>
               <% } %>
             </div>
@@ -187,28 +187,28 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+              <h3 class="card-title"><i class="fas fa-bolt me-2"></i><%= t('shared:common.quickActions') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
                 <div class="col-md-3">
                   <a href="/admin/analytics/reports" class="btn btn-outline-primary btn-block w-100 mb-2">
-                    <i class="fas fa-file-alt me-2"></i>Generate Report
+                    <i class="fas fa-file-alt me-2"></i><%= t('analytics:generateReportBtn') %>
                   </a>
                 </div>
                 <div class="col-md-3">
                   <a href="/admin/analytics/predictive" class="btn btn-outline-success btn-block w-100 mb-2">
-                    <i class="fas fa-brain me-2"></i>View Predictions
+                    <i class="fas fa-brain me-2"></i><%= t('analytics:viewPredictions') %>
                   </a>
                 </div>
                 <div class="col-md-3">
                   <a href="/admin/analytics/customers" class="btn btn-outline-warning btn-block w-100 mb-2">
-                    <i class="fas fa-users me-2"></i>Customer Insights
+                    <i class="fas fa-users me-2"></i><%= t('analytics:customerInsights') %>
                   </a>
                 </div>
                 <div class="col-md-3">
                   <a href="/admin/analytics/ai-recommendations" class="btn btn-outline-info btn-block w-100 mb-2">
-                    <i class="fas fa-robot me-2"></i>AI Recommendations
+                    <i class="fas fa-robot me-2"></i><%= t('analytics:aiRecommendations') %>
                   </a>
                 </div>
               </div>

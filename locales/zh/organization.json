@@ -1,0 +1,13 @@
+{
+  "create": "创建组织",
+  "view": "组织详情",
+  "single": "单身的",
+  "multiStore": "多店",
+  "marketplace": "市场",
+  "settings": "设置（JSON）",
+  "settingsHint": "用于组织级别设置的可选 JSON 对象。",
+  "slugHint": "仅限小写字母、数字和连字符。",
+  "noOrganizations": "没有找到组织。",
+  "confirmDelete": "删除这个组织？",
+  "noStoresLinked": "没有与该组织关联的商店。"
+}

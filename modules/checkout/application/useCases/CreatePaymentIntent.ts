@@ -91,7 +91,7 @@ export class CreatePaymentIntentUseCase {
 
     // Build shipping address for order
     // For pickup orders, use the pickup location address from metadata
-    const isPickup = session.metadata?.fulfillmentType === 'pickup';
+    const isPickup = session.fulfillmentType === 'pickup';
     const sa = session.shippingAddress;
 
     if (!sa && !isPickup) {

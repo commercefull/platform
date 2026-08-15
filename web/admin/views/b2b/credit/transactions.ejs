@@ -2,11 +2,11 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Credit Transactions</h2>
+      <h2 class="page-title"><%= t('b2b:creditTransactions') %></h2>
       <div class="text-muted mt-1">
-        <a href="/admin/b2b/companies">Companies</a> &rsaquo;
+        <a href="/admin/b2b/companies"><%= t('shared:common.companies') %></a> &rsaquo;
         <a href="/admin/b2b/companies/<%= company.b2bCompanyId %>"><%= company.name %></a> &rsaquo;
-        <a href="/admin/b2b/companies/<%= company.b2bCompanyId %>/credit">Credit</a> &rsaquo; Transactions
+        <a href="/admin/b2b/companies/<%= company.b2bCompanyId %>/credit"><%= t('b2b:credit') %></a> &rsaquo; <%= t('shared:common.transactions') %>
       </div>
     </div>
   </div>
@@ -21,7 +21,7 @@
       <div class="card-body">
         <div class="row">
           <div class="col-auto">
-            <span class="text-muted">Current Balance Used:</span>
+            <span class="text-muted"><%= t('b2b:currentBalanceUsedLabel') %></span>
             <strong class="ms-2"><%= (balance || 0).toFixed(2) %></strong>
           </div>
         </div>
@@ -31,19 +31,19 @@
     <!-- Transactions Table -->
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Transaction History</h3>
-        <span class="float-end text-muted"><%= (transactions || []).length %> records</span>
+        <h3 class="card-title"><%= t('b2b:transactionHistory') %></h3>
+        <span class="float-end text-muted"><%= (transactions || []).length %> <%= t('shared:common.records') %></span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Type</th>
-              <th>Amount</th>
-              <th>Reference</th>
-              <th>Notes</th>
-              <th>Date</th>
+              <th><%= t('shared:common.type') %></th>
+              <th><%= t('shared:common.amount') %></th>
+              <th><%= t('shared:common.reference') %></th>
+              <th><%= t('shared:common.notes') %></th>
+              <th><%= t('shared:common.date') %></th>
             </tr>
           </thead>
           <tbody>
@@ -62,7 +62,7 @@
             </tr>
             <% }); %>
             <% if ((transactions || []).length === 0) { %>
-            <tr><td colspan="6" class="text-center text-muted py-4">No transactions found.</td></tr>
+            <tr><td colspan="6" class="text-center text-muted py-4"><%= t('shared:common.noTransactionsFound') %></td></tr>
             <% } %>
           </tbody>
         </table>

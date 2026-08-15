@@ -56,7 +56,6 @@ export const productTypeDefs = `#graphql
     slug: String!
     productTypeId: String!
     categoryId: String
-    brandId: String
     merchantId: String
     status: String!
     visibility: String!
@@ -140,7 +139,6 @@ export const productTypeDefs = `#graphql
     isFeatured: Boolean!
     primaryImageUrl: String
     categoryId: String
-    brandId: String
     shortDescription: String
   }
 
@@ -155,7 +153,6 @@ export const productTypeDefs = `#graphql
 
   input ProductFilterInput {
     categoryId: String
-    brandId: String
     merchantId: String
     businessId: String
     storeId: String
@@ -170,7 +167,6 @@ export const productTypeDefs = `#graphql
 
   input SearchFilterInput {
     categoryId: String
-    brandId: String
     priceMin: Float
     priceMax: Float
     isFeatured: Boolean

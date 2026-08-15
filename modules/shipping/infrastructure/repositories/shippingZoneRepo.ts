@@ -36,14 +36,24 @@ export async function findByLocationType(locationType: ShippingZone['locationTyp
 }
 
 export async function findByLocation(country: string, state?: string): Promise<ShippingZone[]> {
+  if (state) {
+    const sql = `
+      SELECT * FROM "${TABLE}" 
+      WHERE "isActive" = true 
+      AND ("locations" @> $1::jsonb OR "locations" @> $2::jsonb)
+      AND NOT (COALESCE("excludedLocations", '[]'::jsonb) @> $1::jsonb OR COALESCE("excludedLocations", '[]'::jsonb) @> $2::jsonb)
+      ORDER BY "priority" ASC
+    `;
+    return (await query<ShippingZone[]>(sql, [JSON.stringify([country]), JSON.stringify([state])])) || [];
+  }
   const sql = `
     SELECT * FROM "${TABLE}" 
     WHERE "isActive" = true 
-    AND ("locations" @> $1::jsonb OR "locations" @> $2::jsonb)
-    AND NOT (COALESCE("excludedLocations", '[]'::jsonb) @> $1::jsonb OR COALESCE("excludedLocations", '[]'::jsonb) @> $2::jsonb)
+    AND "locations" @> $1::jsonb
+    AND NOT (COALESCE("excludedLocations", '[]'::jsonb) @> $1::jsonb)
     ORDER BY "priority" ASC
   `;
-  return (await query<ShippingZone[]>(sql, [JSON.stringify([country]), state ? JSON.stringify([state]) : JSON.stringify([])])) || [];
+  return (await query<ShippingZone[]>(sql, [JSON.stringify([country])])) || [];
 }
 
 export async function create(input: CreateShippingZoneInput): Promise<ShippingZone> {

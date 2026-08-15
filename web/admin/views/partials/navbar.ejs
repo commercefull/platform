@@ -17,7 +17,7 @@
                       <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/>
                     </svg>
                   </span>
-                  <span class="nav-link-title">Dashboard</span>
+                  <span class="nav-link-title"><%= t('admin.dashboard') %></span>
                 </a>
               </li>
 
@@ -33,7 +33,7 @@
                       <path d="M12 12l-8 -4.5"/>
                     </svg>
                   </span>
-                  <span class="nav-link-title">Catalog</span>
+                  <span class="nav-link-title"><%= t('nav.catalog') %></span>
                 </a>
                 <div class="dropdown-menu">
                   <a class="dropdown-item" href="/admin/products">
@@ -41,14 +41,14 @@
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                       <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"/>
                     </svg>
-                    Products
+                    <%= t('nav.products') %>
                   </a>
                   <a class="dropdown-item" href="/admin/catalog/categories">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                       <path d="M4 4h6v6h-6z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6h-6z"/><path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
                     </svg>
-                    Categories
+                    <%= t('nav.categories') %>
                   </a>
                   <a class="dropdown-item" href="/admin/catalog/collections">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -56,15 +56,7 @@
                       <path d="M3 4m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"/>
                       <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10"/>
                     </svg>
-                    Collections
-                  </a>
-                  <a class="dropdown-item" href="/admin/catalog/brands">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                      <path d="M7.5 7.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-                      <path d="M3 6v5.172a2 2 0 0 0 .586 1.414l7.71 7.71a2.41 2.41 0 0 0 3.408 0l5.592 -5.592a2.41 2.41 0 0 0 0 -3.408l-7.71 -7.71a2 2 0 0 0 -1.414 -.586h-5.172a3 3 0 0 0 -3 3z"/>
-                    </svg>
-                    Brands
+                    <%= t('nav.collections') %>
                   </a>
                   <div class="dropdown-divider"></div>
                   <a class="dropdown-item" href="/admin/inventory">
@@ -72,7 +64,7 @@
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                       <path d="M4 7h3a1 1 0 0 0 1 -1v-1a2 2 0 0 1 4 0v1a1 1 0 0 0 1 1h3a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-1a2 2 0 0 0 0 4h1a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-1a2 2 0 0 0 -4 0v1a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 0 -1 -1h-1a2 2 0 0 1 0 -4h1a1 1 0 0 0 1 -1v-3a1 1 0 0 1 1 -1"/>
                     </svg>
-                    Inventory
+                    <%= t('nav.inventory') %>
                   </a>
                   <a class="dropdown-item" href="/admin/dispatches">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -81,14 +73,14 @@
                       <path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
                       <path d="M5 17h-2v-4m-1 -8h11v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5"/>
                     </svg>
-                    Dispatches
+                    <%= t('nav.dispatches') %>
                   </a>
                   <a class="dropdown-item" href="/admin/stores">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                       <path d="M3 3h6l2.5 2.5L15 6v14l-9 -5z"/>
                     </svg>
-                    Stores
+                    <%= t('nav.stores') %>
                   </a>
                   <a class="dropdown-item" href="/admin/analytics/store-sales">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -96,7 +88,7 @@
                       <path d="M16.7 8a3 3 0 0 0 -2.7 -2h-4a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-4a3 3 0 0 1 -2.7 -2"/>
                       <path d="M12 3v3m0 12v3"/>
                     </svg>
-                    Store Sales
+                    <%= t('nav.storeSales') %>
                   </a>
                   <a class="dropdown-item" href="/admin/catalog/pricing">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -104,7 +96,7 @@
                       <path d="M16.7 8a3 3 0 0 0 -2.7 -2h-4a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-4a3 3 0 0 1 -2.7 -2"/>
                       <path d="M12 3v3m0 12v3"/>
                     </svg>
-                    Pricing
+                    <%= t('nav.pricing') %>
                   </a>
                 </div>
               </li>
@@ -122,7 +114,7 @@
                       <path d="M9 17l6 0"/>
                     </svg>
                   </span>
-                  <span class="nav-link-title">Content</span>
+                  <span class="nav-link-title"><%= t('nav.content') %></span>
                 </a>
                 <div class="dropdown-menu">
                   <a class="dropdown-item" href="/admin/content/pages">
@@ -131,7 +123,7 @@
                       <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
                       <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h6l6 6v10a2 2 0 0 1 -2 2z"/>
                     </svg>
-                    Pages
+                    <%= t('nav.pages') %>
                   </a>
                   <a class="dropdown-item" href="/admin/content/blocks">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -140,7 +132,7 @@
                       <path d="M9 9l6 0"/>
                       <path d="M9 13l6 0"/>
                     </svg>
-                    Blocks
+                    <%= t('nav.blocks') %>
                   </a>
                   <a class="dropdown-item" href="/admin/content/media">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -150,7 +142,7 @@
                       <path d="M4 16l4 -4a3 5 0 0 1 3 0l5 5"/>
                       <path d="M14 14l1 -1a3 5 0 0 1 3 0l2 2"/>
                     </svg>
-                    Media
+                    <%= t('nav.media') %>
                   </a>
                   <div class="dropdown-divider"></div>
                   <a class="dropdown-item" href="/admin/marketing/seo">
@@ -160,7 +152,7 @@
                       <path d="M17 8l4 4l-4 4"/>
                       <path d="M14 4l-4 16"/>
                     </svg>
-                    SEO
+                    <%= t('nav.seo') %>
                   </a>
                 </div>
               </li>
@@ -177,7 +169,7 @@
                       <path d="M6 5l14 1l-1 7h-13"/>
                     </svg>
                   </span>
-                  <span class="nav-link-title">Sales</span>
+                  <span class="nav-link-title"><%= t('nav.sales') %></span>
                 </a>
                 <div class="dropdown-menu">
                   <a class="dropdown-item" href="/admin/orders">
@@ -186,7 +178,7 @@
                       <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2"/>
                       <path d="M14 8h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5m2 0v1.5m0 -9v1.5"/>
                     </svg>
-                    Orders
+                    <%= t('nav.orders') %>
                   </a>
                   <a class="dropdown-item" href="/admin/customers">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -196,7 +188,7 @@
                       <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                       <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>
                     </svg>
-                    Customers
+                    <%= t('nav.customers') %>
                   </a>
                   <a class="dropdown-item" href="/admin/baskets/abandoned">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -208,7 +200,7 @@
                       <path d="M22 22l-5 -5"/>
                       <path d="M17 22l5 -5"/>
                     </svg>
-                    Abandoned Carts
+                    <%= t('nav.abandonedCarts') %>
                   </a>
                   <a class="dropdown-item" href="/admin/sales/segments">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -220,10 +212,10 @@
                       <path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/>
                       <path d="M3 13v-1a2 2 0 0 1 2 -2h2"/>
                     </svg>
-                    Customer Segments
+                    <%= t('nav.customerSegments') %>
                   </a>
                   <div class="dropdown-divider"></div>
-                  <span class="dropdown-header">B2B Sales</span>
+                  <span class="dropdown-header"><%= t('nav.b2bSales') %></span>
                   <a class="dropdown-item" href="/admin/b2b/companies">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -232,7 +224,7 @@
                       <path d="M9 5a3 3 0 0 1 6 0"/>
                       <path d="M21 10.5a2.5 2.5 0 0 0 -4.5 -1.5a2.5 2.5 0 0 0 -4.5 1.5v.5a2.5 2.5 0 0 0 5 0v-.5"/>
                     </svg>
-                    Companies
+                    <%= t('nav.companies') %>
                   </a>
                   <a class="dropdown-item" href="/admin/b2b/quotes">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -243,7 +235,7 @@
                       <path d="M8 8h-2a2 2 0 0 0 -2 2v6a2 2 0 0 0 2 2h2l2 -3l-2 -3z"/>
                       <path d="M14 8h2a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-2l-2 -3l2 -3z"/>
                     </svg>
-                    Quotes
+                    <%= t('nav.quotes') %>
                   </a>
                 </div>
               </li>
@@ -259,11 +251,11 @@
                       <path d="M12 8h0l4.524 -3.77a.9 .9 0 0 1 1.476 .692v12.156a.9 .9 0 0 1 -1.476 .692l-4.524 -3.77h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h8"/>
                     </svg>
                   </span>
-                  <span class="nav-link-title">Marketing</span>
+                  <span class="nav-link-title"><%= t('nav.marketing') %></span>
                 </a>
                 <div class="dropdown-menu">
                   <div class="dropdown-menu-column">
-                    <span class="dropdown-header">Promotions</span>
+                    <span class="dropdown-header"><%= t('nav.promotions') %></span>
                     <a class="dropdown-item" href="/admin/promotions">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -273,7 +265,7 @@
                         <path d="M15 9l3 -3"/>
                         <path d="M10 20l2 -2l2 2l2 -2l2 2"/>
                       </svg>
-                      Discounts
+                      <%= t('nav.discounts') %>
                     </a>
                     <a class="dropdown-item" href="/admin/promotions/coupons">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -283,7 +275,7 @@
                         <path d="M12 13v9"/>
                         <path d="M7.5 4h9l-.5 3h-8z"/>
                       </svg>
-                      Coupons
+                      <%= t('nav.coupons') %>
                     </a>
                     <a class="dropdown-item" href="/admin/promotions/gift-cards">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -291,10 +283,10 @@
                         <path d="M3 5m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z"/>
                         <path d="M7 9l2 2l4 -4"/>
                       </svg>
-                      Gift Cards
+                      <%= t('nav.giftCards') %>
                     </a>
                     <div class="dropdown-divider"></div>
-                    <span class="dropdown-header">Loyalty</span>
+                    <span class="dropdown-header"><%= t('nav.loyalty') %></span>
                     <a class="dropdown-item" href="/admin/loyalty/tiers">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -303,14 +295,14 @@
                         <path d="M10 7l1 1"/>
                         <path d="M14 10v6a2 2 0 0 1 -2 2h-4a2 2 0 0 1 -2 -2v-6a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1z"/>
                       </svg>
-                      Tiers
+                      <%= t('nav.tiers') %>
                     </a>
                     <a class="dropdown-item" href="/admin/loyalty/rewards">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                         <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/>
                       </svg>
-                      Rewards
+                      <%= t('nav.rewards') %>
                     </a>
                     <a class="dropdown-item" href="/admin/loyalty/customers">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -320,18 +312,18 @@
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                         <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>
                       </svg>
-                      Customer Points
+                      <%= t('nav.customerPoints') %>
                     </a>
                   </div>
                   <div class="dropdown-menu-column">
-                    <span class="dropdown-header">Programs</span>
+                    <span class="dropdown-header"><%= t('nav.programs') %></span>
                     <a class="dropdown-item" href="/admin/membership/plans">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                         <path d="M3 5m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"/>
                         <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10"/>
                       </svg>
-                      Membership
+                      <%= t('nav.membership') %>
                     </a>
                     <a class="dropdown-item" href="/admin/subscription/plans">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -344,7 +336,7 @@
                         <path d="M19 12l0 -8"/>
                         <path d="M12 12l0 -8"/>
                       </svg>
-                      Subscriptions
+                      <%= t('nav.subscriptions') %>
                     </a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="/admin/notifications/templates">
@@ -353,7 +345,7 @@
                         <path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/>
                         <path d="M9 17v1a3 3 0 0 0 6 0v-1"/>
                       </svg>
-                      Notifications
+                      <%= t('nav.notifications') %>
                     </a>
                   </div>
                 </div>
@@ -371,11 +363,11 @@
                       <path d="M3 9l4 0"/>
                     </svg>
                   </span>
-                  <span class="nav-link-title">Operations</span>
+                  <span class="nav-link-title"><%= t('nav.operations') %></span>
                 </a>
                 <div class="dropdown-menu">
                   <div class="dropdown-menu-column">
-                    <span class="dropdown-header">Fulfillment</span>
+                    <span class="dropdown-header"><%= t('nav.fulfillment') %></span>
                     <a class="dropdown-item" href="/admin/warehouses">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -383,7 +375,7 @@
                         <path d="M13 13h4v8h-10v-6h6"/>
                         <path d="M13 21v-9a1 1 0 0 0 -1 -1h-2a1 1 0 0 0 -1 1v3"/>
                       </svg>
-                      Warehouses
+                      <%= t('nav.warehouses') %>
                     </a>
                     <a class="dropdown-item" href="/admin/suppliers">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -392,7 +384,7 @@
                         <path d="M9 15l6 -6"/>
                         <path d="M15 9l-6 6"/>
                       </svg>
-                      Suppliers
+                      <%= t('nav.suppliers') %>
                     </a>
                     <a class="dropdown-item" href="/admin/stores">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -406,10 +398,10 @@
                         <path d="M13 12l0 .01"/>
                         <path d="M13 15l0 .01"/>
                       </svg>
-                      Stores
+                      <%= t('nav.stores') %>
                     </a>
                     <div class="dropdown-divider"></div>
-                    <span class="dropdown-header">Shipping</span>
+                    <span class="dropdown-header"><%= t('nav.shipping') %></span>
                     <a class="dropdown-item" href="/admin/shipping">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -418,7 +410,7 @@
                         <path d="M5 17h-2v-4m-1 -8h11v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5"/>
                         <path d="M3 9l4 0"/>
                       </svg>
-                      Methods
+                      <%= t('nav.methods') %>
                     </a>
                     <a class="dropdown-item" href="/admin/shipping/zones">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -427,7 +419,7 @@
                         <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
                         <path d="M12 12l6 6"/>
                       </svg>
-                      Zones
+                      <%= t('nav.zones') %>
                     </a>
                     <a class="dropdown-item" href="/admin/shipping/rates">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -435,11 +427,11 @@
                         <path d="M16.7 8a3 3 0 0 0 -2.7 -2h-4a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-4a3 3 0 0 1 -2.7 -2"/>
                         <path d="M12 3v3m0 12v3"/>
                       </svg>
-                      Rates
+                      <%= t('nav.rates') %>
                     </a>
                   </div>
                   <div class="dropdown-menu-column">
-                    <span class="dropdown-header">Payments</span>
+                    <span class="dropdown-header"><%= t('nav.payments') %></span>
                     <a class="dropdown-item" href="/admin/payments">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -448,7 +440,7 @@
                         <path d="M7 15h.01"/>
                         <path d="M11 15h2"/>
                       </svg>
-                      Gateways
+                      <%= t('nav.gateways') %>
                     </a>
                     <a class="dropdown-item" href="/admin/payments/methods">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -458,7 +450,7 @@
                         <path d="M7 15h.01"/>
                         <path d="M11 15h2"/>
                       </svg>
-                      Methods
+                      <%= t('nav.methods') %>
                     </a>
                     <a class="dropdown-item" href="/admin/payments/transactions">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -466,17 +458,17 @@
                         <path d="M10 14l11 -11"/>
                         <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5"/>
                       </svg>
-                      Transactions
+                      <%= t('nav.transactions') %>
                     </a>
                     <div class="dropdown-divider"></div>
-                    <span class="dropdown-header">Finance</span>
+                    <span class="dropdown-header"><%= t('nav.finance') %></span>
                     <a class="dropdown-item" href="/admin/tax">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                         <path d="M16.7 8a3 3 0 0 0 -2.7 -2h-4a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-4a3 3 0 0 1 -2.7 -2"/>
                         <path d="M12 3v3m0 12v3"/>
                       </svg>
-                      Tax Settings
+                      <%= t('nav.taxSettings') %>
                     </a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="/admin/operations">
@@ -487,7 +479,7 @@
                         <path d="M15 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>
                         <path d="M4 20l14 0"/>
                       </svg>
-                      Dashboard
+                      <%= t('admin.dashboard') %>
                     </a>
                   </div>
                 </div>
@@ -503,10 +495,10 @@
                       <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
                     </svg>
                   </span>
-                  <span class="nav-link-title">Settings</span>
+                  <span class="nav-link-title"><%= t('nav.settings') %></span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end">
-                  <span class="dropdown-header">Store Configuration</span>
+                  <span class="dropdown-header"><%= t('nav.storeConfiguration') %></span>
                   <a class="dropdown-item" href="/admin/settings/store">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -516,7 +508,7 @@
                       <path d="M12 16l.01 0"/>
                       <path d="M8 16l.01 0"/>
                     </svg>
-                    Store Settings
+                    <%= t('nav.storeSettings') %>
                   </a>
                   <a class="dropdown-item" href="/admin/settings/business">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -526,7 +518,7 @@
                       <path d="M9 5a3 3 0 0 1 6 0"/>
                       <path d="M21 10.5a2.5 2.5 0 0 0 -4.5 -1.5a2.5 2.5 0 0 0 -4.5 1.5v.5a2.5 2.5 0 0 0 5 0v-.5"/>
                     </svg>
-                    Business Info
+                    <%= t('nav.businessInfo') %>
                   </a>
                   <a class="dropdown-item" href="/admin/settings/localization">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -537,7 +529,7 @@
                       <path d="M11.5 3a17 17 0 0 0 0 18"/>
                       <path d="M12.5 3a17 17 0 0 1 0 18"/>
                     </svg>
-                    Localization
+                    <%= t('nav.localization') %>
                   </a>
                   <a class="dropdown-item" href="/admin/settings/channels">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -547,7 +539,7 @@
                       <path d="M5 17h-2v-4m-1 -8h11v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5"/>
                       <path d="M3 9l4 0"/>
                     </svg>
-                    Sales Channels
+                    <%= t('nav.salesChannels') %>
                   </a>
                   <a class="dropdown-item" href="/admin/settings/checkout">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -559,10 +551,10 @@
                       <path d="M22 22l-5 -5"/>
                       <path d="M17 22l5 -5"/>
                     </svg>
-                    Checkout
+                    <%= t('nav.checkout') %>
                   </a>
                   <div class="dropdown-divider"></div>
-                  <span class="dropdown-header">Operations</span>
+                  <span class="dropdown-header"><%= t('nav.operations') %></span>
                   <a class="dropdown-item" href="/admin/operations/merchants">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -571,10 +563,32 @@
                       <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                       <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>
                     </svg>
-                    Merchants
+                    <%= t('nav.merchants') %>
                   </a>
                   <div class="dropdown-divider"></div>
-                  <span class="dropdown-header">Administration</span>
+                  <span class="dropdown-header"><%= t('nav.administration') %></span>
+                  <a class="dropdown-item" href="/admin/organizations">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M3 21h18"/>
+                      <path d="M5 21V7l8 -4v18"/>
+                      <path d="M19 21V11l-6 -4"/>
+                      <path d="M9 9v.01"/>
+                      <path d="M9 12v.01"/>
+                      <path d="M9 15v.01"/>
+                      <path d="M9 18v.01"/>
+                    </svg>
+                    <%= t('nav.organizations') %>
+                  </a>
+                  <a class="dropdown-item" href="/admin/reporting">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M4 19h16"/>
+                      <path d="M4 15l4 -4l4 4l8 -8"/>
+                      <path d="M12 7l4 0l0 4"/>
+                    </svg>
+                    <%= t('nav.reporting') %>
+                  </a>
                   <a class="dropdown-item" href="/admin/users">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -583,7 +597,7 @@
                       <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                       <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>
                     </svg>
-                    Users & Roles
+                    <%= t('nav.usersRoles') %>
                   </a>
                   <a class="dropdown-item" href="/admin/gdpr">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -593,7 +607,7 @@
                       <path d="M3 12c1 0 3 -1 3 -3s-2 -3 -3 -3s-3 1 -3 3s2 3 3 3"/>
                       <path d="M12 3c-2 0 -4 1 -4 3l4 10c0 2 2 3 4 3s4 -1 4 -3l-4 -10c0 -2 -2 -3 -4 -3"/>
                     </svg>
-                    GDPR Compliance
+                    <%= t('nav.gdprCompliance') %>
                   </a>
                   <a class="dropdown-item" href="/admin/support">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -601,7 +615,7 @@
                       <path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/>
                       <path d="M9 17v1a3 3 0 0 0 6 0v-1"/>
                     </svg>
-                    Support Center
+                    <%= t('nav.supportCenter') %>
                   </a>
                   <div class="dropdown-divider"></div>
                   <a class="dropdown-item" href="/admin/analytics">
@@ -611,7 +625,7 @@
                       <path d="M20 18v3"/>
                       <path d="M7 14l3 -3l4 4l3 -3"/>
                     </svg>
-                    Analytics
+                    <%= t('nav.analytics') %>
                   </a>
                   <a class="dropdown-item" href="/admin/analytics/store-sales">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-inline me-1">
@@ -620,7 +634,7 @@
                       <path d="M9 8m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>
                       <path d="M15 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>
                     </svg>
-                    Store Sales
+                    <%= t('nav.storeSales') %>
                   </a>
                 </div>
               </li>

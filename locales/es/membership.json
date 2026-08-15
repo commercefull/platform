@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "Membresías",
+  "totalMembers": "Total de miembros",
+  "activeMembers": "Miembros activos",
+  "membershipTiers": "Niveles de membresía",
+  "expiringThisMonth": "Vence este mes",
+  "addTier": "Agregar nivel",
+  "members": "miembros",
+  "noTiers": "No hay niveles de membresía configurados.",
+  "recentMembers": "Miembros recientes",
+  "tier": "Nivel",
+  "noMembers": "Aún no hay miembros.",
+  "addMembershipTier": "Agregar nivel de membresía",
+  "tierName": "Nombre del nivel",
+  "billingPeriod": "Período de facturación",
+  "lifetime": "Vida",
+  "benefitsOnePerLine": "Beneficios (uno por línea)",
+  "setAsDefault": "Establecer como nivel predeterminado",
+  "createTier": "Crear nivel",
+  "confirmDeleteTier": "¿Eliminar este nivel?",
+  "analytics": "Análisis de membresía",
+  "analyticsDescription": "Miembros activos, ingresos, tasa de abandono y distribución de niveles."
+}

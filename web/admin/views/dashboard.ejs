@@ -15,14 +15,14 @@
     <div class="card">
       <div class="card-body">
         <div class="d-flex align-items-center">
-          <div class="subheader">Total Orders</div>
+          <div class="subheader"><%= t('dashboard.totalOrders') %></div>
           <div class="ms-auto lh-1">
-            <div class="text-muted small">This month</div>
+            <div class="text-muted small"><%= t('dashboard.thisMonth') %></div>
           </div>
         </div>
         <div class="h1 mb-3"><%= stats.totalOrders %></div>
         <div class="d-flex">
-          <a href="/admin/orders" class="btn btn-primary btn-sm">View Orders</a>
+          <a href="/admin/orders" class="btn btn-primary btn-sm"><%= t('dashboard.viewOrders') %></a>
         </div>
       </div>
     </div>
@@ -31,14 +31,14 @@
     <div class="card">
       <div class="card-body">
         <div class="d-flex align-items-center">
-          <div class="subheader">Total Revenue</div>
+          <div class="subheader"><%= t('dashboard.totalRevenue') %></div>
           <div class="ms-auto lh-1">
-            <div class="text-muted small">This month</div>
+            <div class="text-muted small"><%= t('dashboard.thisMonth') %></div>
           </div>
         </div>
         <div class="h1 mb-3">$<%= (stats.totalRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
         <div class="d-flex">
-          <a href="/admin/analytics" class="btn btn-success btn-sm">View Analytics</a>
+          <a href="/admin/analytics" class="btn btn-success btn-sm"><%= t('dashboard.viewAnalytics') %></a>
         </div>
       </div>
     </div>
@@ -47,14 +47,14 @@
     <div class="card">
       <div class="card-body">
         <div class="d-flex align-items-center">
-          <div class="subheader">Total Customers</div>
+          <div class="subheader"><%= t('dashboard.totalCustomers') %></div>
           <div class="ms-auto lh-1">
-            <div class="text-muted small">Registered</div>
+            <div class="text-muted small"><%= t('dashboard.registered') %></div>
           </div>
         </div>
         <div class="h1 mb-3"><%= stats.totalCustomers %></div>
         <div class="d-flex">
-          <a href="/admin/customers" class="btn btn-warning btn-sm">View Customers</a>
+          <a href="/admin/customers" class="btn btn-warning btn-sm"><%= t('dashboard.viewCustomers') %></a>
         </div>
       </div>
     </div>
@@ -63,14 +63,14 @@
     <div class="card">
       <div class="card-body">
         <div class="d-flex align-items-center">
-          <div class="subheader">Total Products</div>
+          <div class="subheader"><%= t('dashboard.totalProducts') %></div>
           <div class="ms-auto lh-1">
-            <div class="text-muted small">Active</div>
+            <div class="text-muted small"><%= t('common.active') %></div>
           </div>
         </div>
         <div class="h1 mb-3"><%= stats.totalProducts %></div>
         <div class="d-flex">
-          <a href="/admin/products" class="btn btn-danger btn-sm">View Products</a>
+          <a href="/admin/products" class="btn btn-danger btn-sm"><%= t('dashboard.viewProducts') %></a>
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@
               </div>
               <div class="col">
                 <div class="font-weight-medium"><%= stats.pendingOrders %></div>
-                <div class="text-muted">Pending Orders</div>
+                <div class="text-muted"><%= t('dashboard.pendingOrders') %></div>
               </div>
             </div>
           </div>
@@ -115,7 +115,7 @@
               </div>
               <div class="col">
                 <div class="font-weight-medium"><%= stats.lowStockProducts %></div>
-                <div class="text-muted">Low Stock Items</div>
+                <div class="text-muted"><%= t('dashboard.lowStockItems') %></div>
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@
               </div>
               <div class="col">
                 <div class="font-weight-medium"><%= stats.todayOrders %></div>
-                <div class="text-muted">Today's Orders</div>
+                <div class="text-muted"><%= t('dashboard.todaysOrders') %></div>
               </div>
             </div>
           </div>
@@ -160,7 +160,7 @@
               </div>
               <div class="col">
                 <div class="font-weight-medium">$<%= (stats.todayRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
-                <div class="text-muted">Today's Revenue</div>
+                <div class="text-muted"><%= t('dashboard.todaysRevenue') %></div>
               </div>
             </div>
           </div>
@@ -175,7 +175,7 @@
         <!-- Revenue Chart -->
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Revenue Overview</h3>
+            <h3 class="card-title"><%= t('dashboard.revenueOverview') %></h3>
           </div>
           <div class="card-body">
             <canvas id="revenueChart" height="200"></canvas>
@@ -187,7 +187,7 @@
       <div class="col-lg-4">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Top Products</h3>
+            <h3 class="card-title"><%= t('dashboard.topProducts') %></h3>
           </div>
           <div class="card-body">
             <% (topProducts || []).forEach(function(product) { %>
@@ -207,12 +207,12 @@
                 <div class="font-weight-medium">
                   <a href="/admin/products/<%= product.productId %>"><%= product.name %></a>
                 </div>
-                <div class="text-muted"><%= product.totalSold %> sold • $<%= (product.revenue || 0).toFixed(2) %></div>
+                <div class="text-muted"><%= product.totalSold %> <%= t('common.sold') %> • $<%= (product.revenue || 0).toFixed(2) %></div>
               </div>
             </div>
             <% }); %>
             <% if ((topProducts || []).length === 0) { %>
-            <div class="text-center text-muted">No product sales yet</div>
+            <div class="text-center text-muted"><%= t('dashboard.noProductSales') %></div>
             <% } %>
           </div>
         </div>
@@ -225,18 +225,18 @@
         <!-- Recent Orders -->
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Recent Orders</h3>
+            <h3 class="card-title"><%= t('dashboard.recentOrders') %></h3>
           </div>
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-vcenter">
                 <thead>
                   <tr>
-                    <th>Order #</th>
-                    <th>Customer</th>
-                    <th>Status</th>
-                    <th>Amount</th>
-                    <th>Date</th>
+                    <th><%= t('shared:common.order2') %></th>
+                    <th><%= t('shared:common.customer') %></th>
+                    <th><%= t('common.status') %></th>
+                    <th><%= t('common.total') %></th>
+                    <th><%= t('common.date') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -255,7 +255,7 @@
                   <% }); %>
                   <% if ((recentOrders || []).length === 0) { %>
                   <tr>
-                    <td colspan="5" class="text-center text-muted">No orders yet</td>
+                    <td colspan="5" class="text-center text-muted"><%= t('dashboard.noOrders') %></td>
                   </tr>
                   <% } %>
                 </tbody>
@@ -263,7 +263,7 @@
             </div>
           </div>
           <div class="card-footer">
-            <a href="/admin/orders" class="btn btn-primary">View All Orders</a>
+            <a href="/admin/orders" class="btn btn-primary"><%= t('dashboard.viewAllOrders') %></a>
           </div>
         </div>
       </div>

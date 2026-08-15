@@ -23,6 +23,10 @@ import orderFulfillmentPackageRepo from '../../infrastructure/repositories/order
 import { AddOrderNoteCommand, AddOrderNoteUseCase } from '../../application/useCases/AddOrderNote';
 import { CreateOrderRefundCommand, CreateOrderRefundUseCase } from '../../application/useCases/CreateOrderRefund';
 import { TrackFulfillmentPackageCommand, TrackFulfillmentPackageUseCase } from '../../application/useCases/TrackFulfillmentPackage';
+import { OrderItem } from '../../domain/entities/OrderItem';
+import { Money } from '../../domain/valueObjects/Money';
+import { generateUUID } from '../../../../libs/uuid';
+import { query, queryOne } from '../../../../libs/db';
 
 // ============================================================================
 // Content Negotiation Helpers
@@ -169,8 +173,8 @@ export const updateOrderStatus = async (req: TypedRequest, res: Response): Promi
       return;
     }
 
-    if ((error as Error).message.includes('not found')) {
-      respondError(req, res, (error as Error).message, 404, 'admin/order/error');
+    if ((error as Error).message.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order not found', 404, 'admin/order/error');
       return;
     }
 
@@ -550,5 +554,334 @@ export const trackFulfillmentPackage = async (req: TypedRequest, res: Response):
       return;
     }
     respondError(req, res, (error as Error).message || 'Failed to update package tracking', 500);
+  }
+};
+
+// ============================================================================
+// Order Lookup by Number
+// ============================================================================
+
+export const getOrderByNumber = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderNumber } = req.params;
+
+    const command = new GetOrderCommand(undefined, orderNumber);
+    const useCase = new GetOrderUseCase(OrderRepo);
+    const order = await useCase.execute(command);
+
+    if (!order) {
+      respondError(req, res, 'Order not found', 404, 'admin/order/error');
+      return;
+    }
+
+    respond(req, res, order, 200, 'admin/order/detail');
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+
+    if ((error as Error).message.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order not found', 404, 'admin/order/error');
+      return;
+    }
+
+    respondError(req, res, (error as Error).message || 'Failed to get order', 500, 'admin/order/error');
+  }
+};
+
+// ============================================================================
+// Order Items
+// ============================================================================
+
+export const getOrderItems = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const items = await OrderRepo.getOrderItems(orderId);
+    respond(req, res, items.map(i => i.toJSON()));
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    if ((error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order not found', 404);
+      return;
+    }
+    respondError(req, res, (error as Error).message || 'Failed to get order items', 500);
+  }
+};
+
+export const getOrderItemById = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderItemId } = req.params;
+    const row = await queryOne<Record<string, unknown>>(
+      'SELECT * FROM "orderItem" WHERE "orderItemId" = $1',
+      [orderItemId],
+    );
+    if (!row) {
+      respondError(req, res, 'Order item not found', 404);
+      return;
+    }
+    const orderId = row.orderId as string;
+    const items = await OrderRepo.getOrderItems(orderId);
+    const item = items.find(i => i.orderItemId === orderItemId);
+    if (!item) {
+      respondError(req, res, 'Order item not found', 404);
+      return;
+    }
+    respond(req, res, item.toJSON());
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    if ((error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order item not found', 404);
+      return;
+    }
+    respondError(req, res, (error as Error).message || 'Failed to get order item', 500);
+  }
+};
+
+export const createOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const body = req.body as { orderId: string; productId: string; sku?: string; name: string; quantity: number; unitPrice: number; discountedUnitPrice?: number; lineTotal?: number; discountTotal?: number; taxTotal?: number; taxRate?: number; taxExempt?: boolean; fulfillmentStatus?: string; giftWrapped?: boolean; isDigital?: boolean; description?: string; variantId?: string };
+    const { orderId, productId, name, quantity, unitPrice } = body;
+
+    if (!orderId || !productId || !name || !quantity || !unitPrice) {
+      respondError(req, res, 'Missing required fields', 400);
+      return;
+    }
+
+    const orderItemId = generateUUID();
+    const currency = 'USD';
+    const item = OrderItem.reconstitute({
+      orderItemId,
+      orderId,
+      productId: body.productId,
+      productVariantId: body.variantId,
+      name: body.name,
+      sku: body.sku || '',
+      quantity: body.quantity,
+      unitPrice: Money.create(body.unitPrice, currency),
+      discountedUnitPrice: Money.create(body.discountedUnitPrice ?? body.unitPrice, currency),
+      lineTotal: Money.create(body.lineTotal ?? body.unitPrice * body.quantity, currency),
+      discountTotal: Money.create(body.discountTotal ?? 0, currency),
+      taxTotal: Money.create(body.taxTotal ?? 0, currency),
+      taxRate: body.taxRate ?? 0,
+      taxExempt: body.taxExempt ?? false,
+      fulfillmentStatus: (body.fulfillmentStatus as FulfillmentStatus) ?? FulfillmentStatus.UNFULFILLED,
+      giftWrapped: body.giftWrapped ?? false,
+      isDigital: body.isDigital ?? false,
+      description: body.description,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await OrderRepo.addOrderItem(orderId, item);
+    respond(req, res, item.toJSON(), 201);
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    respondError(req, res, (error as Error).message || 'Failed to create order item', 500);
+  }
+};
+
+export const updateOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderItemId } = req.params;
+    const body = req.body as { quantity?: number; unitPrice?: number };
+
+    // Find the item across all orders (we need orderId to look it up)
+    // Since we don't have orderId in the route, we search by orderItemId
+    const row = await query<Array<{ orderId: string }>>('SELECT "orderId" FROM "orderItem" WHERE "orderItemId" = $1', [orderItemId]);
+    if (!row || row.length === 0) {
+      respondError(req, res, 'Order item not found', 404);
+      return;
+    }
+
+    const orderId = row[0].orderId;
+    const items = await OrderRepo.getOrderItems(orderId);
+    const item = items.find(i => i.orderItemId === orderItemId);
+    if (!item) {
+      respondError(req, res, 'Order item not found', 404);
+      return;
+    }
+
+    if (body.quantity !== undefined) {
+      item.updateQuantity(body.quantity);
+    }
+
+    await OrderRepo.updateOrderItem(item);
+    respond(req, res, item.toJSON());
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    if ((error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order item not found', 404);
+      return;
+    }
+    respondError(req, res, (error as Error).message || 'Failed to update order item', 500);
+  }
+};
+
+export const deleteOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderItemId } = req.params;
+    await OrderRepo.removeOrderItem(orderItemId);
+    respond(req, res, { deleted: true });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    if ((error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order item not found', 404);
+      return;
+    }
+    respondError(req, res, (error as Error).message || 'Failed to delete order item', 500);
+  }
+};
+
+// ============================================================================
+// Payment & Fulfillment Status
+// ============================================================================
+
+export const updatePaymentStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const body = req.body as { paymentStatus: string };
+    const { paymentStatus } = body;
+
+    const validStatuses = Object.values(PaymentStatus) as string[];
+    if (!validStatuses.includes(paymentStatus)) {
+      respondError(req, res, `Invalid payment status. Must be one of: ${validStatuses.join(', ')}`, 400);
+      return;
+    }
+
+    const order = await OrderRepo.findById(orderId);
+    if (!order) {
+      respondError(req, res, 'Order not found', 404);
+      return;
+    }
+
+    const previousStatus = order.paymentStatus;
+    order.updatePaymentStatus(paymentStatus as PaymentStatus);
+    await OrderRepo.save(order);
+    await OrderRepo.recordPaymentStatusChange(orderId, paymentStatus as PaymentStatus);
+
+    respond(req, res, {
+      orderId: order.orderId,
+      previousStatus,
+      paymentStatus: order.paymentStatus,
+      updatedAt: order.updatedAt.toISOString(),
+    });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    if ((error as Error).message.includes('Cannot transition')) {
+      respondError(req, res, (error as Error).message, 400);
+      return;
+    }
+    if ((error as Error).message.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order not found', 404);
+      return;
+    }
+    respondError(req, res, (error as Error).message || 'Failed to update payment status', 500);
+  }
+};
+
+export const updateFulfillmentStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const body = req.body as { fulfillmentStatus: string };
+    const { fulfillmentStatus } = body;
+
+    const validStatuses = Object.values(FulfillmentStatus) as string[];
+    if (!validStatuses.includes(fulfillmentStatus)) {
+      respondError(req, res, `Invalid fulfillment status. Must be one of: ${validStatuses.join(', ')}`, 400);
+      return;
+    }
+
+    const order = await OrderRepo.findById(orderId);
+    if (!order) {
+      respondError(req, res, 'Order not found', 404);
+      return;
+    }
+
+    const previousStatus = order.fulfillmentStatus;
+    order.updateFulfillmentStatus(fulfillmentStatus as FulfillmentStatus);
+    await OrderRepo.save(order);
+    await OrderRepo.recordFulfillmentStatusChange(orderId, fulfillmentStatus as FulfillmentStatus);
+
+    respond(req, res, {
+      orderId: order.orderId,
+      previousStatus,
+      fulfillmentStatus: order.fulfillmentStatus,
+      updatedAt: order.updatedAt.toISOString(),
+    });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    if ((error as Error).message.includes('Cannot transition')) {
+      respondError(req, res, (error as Error).message, 400);
+      return;
+    }
+    if ((error as Error).message.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order not found', 404);
+      return;
+    }
+    respondError(req, res, (error as Error).message || 'Failed to update fulfillment status', 500);
+  }
+};
+
+// ============================================================================
+// Status History Endpoints
+// ============================================================================
+
+export const getStatusHistory = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const history = await OrderRepo.getStatusHistory(orderId);
+    const result = history.map(h => ({
+      orderId,
+      status: h.status,
+      reason: h.reason,
+      createdAt: h.createdAt.toISOString(),
+    }));
+    respond(req, res, result);
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    if ((error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order not found', 404);
+      return;
+    }
+    respondError(req, res, (error as Error).message || 'Failed to get status history', 500);
+  }
+};
+
+export const getPaymentHistory = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const history = await OrderRepo.getPaymentStatusHistory(orderId);
+    const result = history.map(h => ({
+      orderId: h.orderId,
+      paymentStatus: h.paymentStatus,
+      transactionId: h.transactionId,
+      createdAt: h.createdAt.toISOString(),
+    }));
+    respond(req, res, result);
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    if ((error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order not found', 404);
+      return;
+    }
+    respondError(req, res, (error as Error).message || 'Failed to get payment history', 500);
+  }
+};
+
+export const getFulfillmentHistory = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const history = await OrderRepo.getFulfillmentStatusHistory(orderId);
+    const result = history.map(h => ({
+      orderId: h.orderId,
+      fulfillmentStatus: h.fulfillmentStatus,
+      createdAt: h.createdAt.toISOString(),
+    }));
+    respond(req, res, result);
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    if ((error as Error).message?.includes('invalid input syntax for type uuid')) {
+      respondError(req, res, 'Order not found', 404);
+      return;
+    }
+    respondError(req, res, (error as Error).message || 'Failed to get fulfillment history', 500);
   }
 };

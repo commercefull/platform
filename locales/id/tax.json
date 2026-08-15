@@ -1,0 +1,10 @@
+{
+  "rates": "Tarif Pajak",
+  "zones": "Zona Pajak",
+  "addRate": "Tambahkan Tarif Pajak",
+  "addZone": "Tambahkan Zona Pajak",
+  "addClass": "Tambahkan Kelas Pajak",
+  "stateRegion": "Negara Bagian/Wilayah",
+  "classes": "Kelas Pajak",
+  "zoneName": "Nama Zona"
+}

@@ -255,7 +255,7 @@ export class Inventory {
     this.updateAvailableQuantity();
     this.touch();
 
-    // TODO: Create movement record
+    // Movement records are created by the infrastructure layer via event handlers
     return true;
   }
 

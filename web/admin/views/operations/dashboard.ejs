@@ -8,7 +8,7 @@
   <div class="container-fluid">
     <%- include("../partials/alerts") %>
     <div class="row">
-      <div class="col-md-4"><div class="card"><div class="card-body"><h3 class="card-title">Warehouses</h3><a href="/admin/warehouses" class="btn btn-outline-primary btn-sm">Manage</a></div></div></div><div class="col-md-4"><div class="card"><div class="card-body"><h3 class="card-title">Fulfillments</h3><a href="/admin/fulfillments" class="btn btn-outline-primary btn-sm">Manage</a></div></div></div><div class="col-md-4"><div class="card"><div class="card-body"><h3 class="card-title">Suppliers</h3><a href="/admin/suppliers" class="btn btn-outline-primary btn-sm">Manage</a></div></div></div>
+      <div class="col-md-4"><div class="card"><div class="card-body"><h3 class="card-title"><%= t('shared:common.warehouses') %></h3><a href="/admin/warehouses" class="btn btn-outline-primary btn-sm"><%= t('shared:common.manage') %></a></div></div></div><div class="col-md-4"><div class="card"><div class="card-body"><h3 class="card-title"><%= t('operations:fulfillments') %></h3><a href="/admin/fulfillments" class="btn btn-outline-primary btn-sm"><%= t('shared:common.manage') %></a></div></div></div><div class="col-md-4"><div class="card"><div class="card-body"><h3 class="card-title"><%= t('shared:common.suppliers') %></h3><a href="/admin/suppliers" class="btn btn-outline-primary btn-sm"><%= t('shared:common.manage') %></a></div></div></div>
     </div>
   </div>
 </section>

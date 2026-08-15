@@ -11,6 +11,7 @@ import * as faqRepo from '../../infrastructure/repositories/faqRepo';
 import * as alertRepo from '../../infrastructure/repositories/alertRepo';
 import type { AlertStatus } from '../../infrastructure/repositories/alertRepo';
 import type { TicketStatus, TicketPriority, TicketCategory } from '../../infrastructure/repositories/supportRepo';
+import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 
 type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
 
@@ -419,7 +420,14 @@ export const notifyStockAlerts: AsyncHandler = async (req, res, _next) => {
 
     for (const alert of alerts) {
       await alertRepo.notifyStockAlert(alert.stockAlertId);
-      // TODO: Send actual notification (email/SMS/push)
+      await JobScheduler.scheduleNotification({
+        userId: alert.customerId || '',
+        type: 'stock_alert',
+        title: 'Back in Stock',
+        message: `Your saved item is back in stock!`,
+        data: { productId, productVariantId, alertId: alert.stockAlertId },
+        channels: ['email', 'in_app'],
+      });
     }
 
     res.json({ success: true, message: `Notified ${alerts.length} alerts` });
@@ -437,7 +445,14 @@ export const notifyPriceAlerts: AsyncHandler = async (req, res, _next) => {
 
     for (const alert of alerts) {
       await alertRepo.notifyPriceAlert(alert.priceAlertId, newPrice);
-      // TODO: Send actual notification (email/SMS/push)
+      await JobScheduler.scheduleNotification({
+        userId: alert.customerId || '',
+        type: 'price_alert',
+        title: 'Price Drop Alert',
+        message: `The price has dropped to $${newPrice}!`,
+        data: { productId, newPrice, alertId: alert.priceAlertId },
+        channels: ['email', 'in_app'],
+      });
     }
 
     // Update current price for all alerts

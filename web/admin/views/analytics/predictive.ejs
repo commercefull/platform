@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin/analytics">Analytics</a></li>
-            <li class="breadcrumb-item active">Predictive</li>
+            <li class="breadcrumb-item"><a href="/admin/analytics"><%= t('shared:common.analytics') %></a></li>
+            <li class="breadcrumb-item active"><%= t('analytics:predictive') %></li>
           </ol>
         </div>
       </div>
@@ -24,7 +24,7 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-chart-line me-2"></i>Sales Forecasting</h3>
+              <h3 class="card-title"><i class="fas fa-chart-line me-2"></i><%= t('analytics:salesForecasting') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
@@ -35,21 +35,21 @@
                   <div class="info-box bg-info">
                     <span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
                     <div class="info-box-content">
-                      <span class="info-box-text">Predicted Revenue (30 days)</span>
+                      <span class="info-box-text"><%= t('analytics:predictedRevenue30') %></span>
                       <span class="info-box-number">$<%= (forecasts.predictions || []).reduce((sum, p) => sum + p.revenue, 0).toLocaleString() %></span>
                     </div>
                   </div>
                   <div class="info-box bg-success">
                     <span class="info-box-icon"><i class="fas fa-percentage"></i></span>
                     <div class="info-box-content">
-                      <span class="info-box-text">Confidence Level</span>
+                      <span class="info-box-text"><%= t('analytics:confidenceLevel') %></span>
                       <span class="info-box-number"><%= ((forecasts.confidence || 0) * 100).toFixed(1) %>%</span>
                     </div>
                   </div>
                   <div class="info-box bg-warning">
                     <span class="info-box-icon"><i class="fas fa-chart-bar"></i></span>
                     <div class="info-box-content">
-                      <span class="info-box-text">Trend</span>
+                      <span class="info-box-text"><%= t('analytics:trend') %></span>
                       <span class="info-box-number"><%= forecasts.trend || 'Stable' %></span>
                     </div>
                   </div>
@@ -65,16 +65,16 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-boxes me-2"></i>Inventory Recommendations</h3>
+              <h3 class="card-title"><i class="fas fa-boxes me-2"></i><%= t('analytics:inventoryRecommendations') %></h3>
             </div>
             <div class="card-body table-responsive p-0" style="max-height: 400px;">
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th>Current</th>
-                    <th>Recommended</th>
-                    <th>Action</th>
+                    <th><%= t('shared:common.product') %></th>
+                    <th><%= t('analytics:current') %></th>
+                    <th><%= t('analytics:recommended') %></th>
+                    <th><%= t('shared:common.action') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -85,11 +85,11 @@
                     <td><%= rec.recommendedStock %></td>
                     <td>
                       <% if (rec.currentStock < rec.recommendedStock) { %>
-                        <span class="badge bg-warning">Reorder</span>
+                        <span class="badge bg-warning"><%= t('analytics:reorder') %></span>
                       <% } else if (rec.currentStock > rec.recommendedStock * 1.5) { %>
-                        <span class="badge bg-info">Overstock</span>
+                        <span class="badge bg-info"><%= t('analytics:overstock') %></span>
                       <% } else { %>
-                        <span class="badge bg-success">Optimal</span>
+                        <span class="badge bg-success"><%= t('analytics:optimal') %></span>
                       <% } %>
                     </td>
                   </tr>
@@ -102,7 +102,7 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-exclamation-triangle me-2"></i>Inventory Alerts</h3>
+              <h3 class="card-title"><i class="fas fa-exclamation-triangle me-2"></i><%= t('analytics:inventoryAlerts') %></h3>
             </div>
             <div class="card-body">
               <% (inventoryPredictions.alerts || []).slice(0, 5).forEach(function(alert) { %>
@@ -113,7 +113,7 @@
               <% }); %>
               <% if ((inventoryPredictions.alerts || []).length === 0) { %>
               <div class="alert alert-success" role="alert">
-                <i class="fas fa-check-circle me-2"></i>No inventory alerts at this time.
+                <i class="fas fa-check-circle me-2"></i><%= t('analytics:noInventoryAlerts') %>
               </div>
               <% } %>
             </div>
@@ -126,17 +126,17 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-user-minus me-2"></i>Customer Churn Risk Analysis</h3>
+              <h3 class="card-title"><i class="fas fa-user-minus me-2"></i><%= t('analytics:customerChurnRisk') %></h3>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Customer ID</th>
-                    <th>Churn Probability</th>
-                    <th>Risk Level</th>
-                    <th>Key Factors</th>
-                    <th>Recommendations</th>
+                    <th><%= t('analytics:customerId') %></th>
+                    <th><%= t('analytics:churnProbability') %></th>
+                    <th><%= t('analytics:riskLevel') %></th>
+                    <th><%= t('analytics:keyFactors') %></th>
+                    <th><%= t('analytics:recommendations') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -178,7 +178,7 @@
     data: {
       labels: <%- JSON.stringify((forecasts.predictions || []).map(p => p.date)) %>,
       datasets: [{
-        label: 'Predicted Revenue',
+        label: '<%= t("analytics:predictedRevenue30") %>',
         data: <%- JSON.stringify((forecasts.predictions || []).map(p => p.revenue)) %>,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,

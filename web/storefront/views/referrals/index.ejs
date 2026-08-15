@@ -3,25 +3,25 @@
 <main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
   <div class="max-w-3xl mx-auto">
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">My Referrals</h1>
-      <p class="mt-2 text-sm text-gray-600">Share your referral link and earn rewards when friends sign up</p>
+      <h1 class="text-3xl font-bold text-gray-900"><%= t('storefront:myReferrals') %></h1>
+      <p class="mt-2 text-sm text-gray-600"><%= t('storefront:referralsDesc') %></p>
     </div>
 
     <!-- Referral Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
       <div class="bg-white shadow-lg rounded-xl p-6 text-center">
         <div class="text-3xl font-extrabold text-blue-600"><%= referralCount %></div>
-        <div class="text-sm text-gray-500 mt-1">Total Referrals</div>
+        <div class="text-sm text-gray-500 mt-1"><%= t('shared:common.totalReferrals') %></div>
       </div>
       <div class="bg-white shadow-lg rounded-xl p-6 text-center">
         <div class="text-3xl font-extrabold text-green-600"><%= convertedCount %></div>
-        <div class="text-sm text-gray-500 mt-1">Successful Conversions</div>
+        <div class="text-sm text-gray-500 mt-1"><%= t('storefront:successfulConversions') %></div>
       </div>
     </div>
 
     <!-- Referral Link -->
     <div class="bg-white shadow-lg rounded-xl p-6 mb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-3">Your Referral Link</h2>
+      <h2 class="text-lg font-semibold text-gray-900 mb-3"><%= t('storefront:yourReferralLink') %></h2>
       <% if (referralLink) { %>
         <div class="flex items-center gap-3">
           <input
@@ -32,30 +32,30 @@
             class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 bg-gray-50 focus:outline-none"
           />
           <button
-            onclick="navigator.clipboard.writeText(document.getElementById('referral-link').value).then(() => this.textContent = 'Copied!')"
+            onclick="navigator.clipboard.writeText(document.getElementById('referral-link').value).then(() => this.textContent = '<%= t('storefront:copied') %>')"
             class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
           >
-            Copy Link
+            <%= t('storefront:copyLink') %>
           </button>
         </div>
-        <p class="mt-2 text-xs text-gray-500">Share this link with friends. You'll earn a reward when they sign up and make their first purchase.</p>
+        <p class="mt-2 text-xs text-gray-500"><%= t('storefront:referralLinkDesc') %></p>
       <% } else { %>
-        <p class="text-sm text-gray-500">You don't have a referral code yet. Make a referral to get started.</p>
+        <p class="text-sm text-gray-500"><%= t('storefront:noReferralCode') %></p>
       <% } %>
     </div>
 
     <!-- Referral History -->
     <div class="bg-white shadow-lg rounded-xl p-6">
-      <h2 class="text-lg font-semibold text-gray-900 mb-4">Referral History</h2>
+      <h2 class="text-lg font-semibold text-gray-900 mb-4"><%= t('storefront:referralHistory') %></h2>
       <% if (referrals && referrals.length > 0) { %>
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead>
               <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <th class="pb-3 pr-4">Email</th>
-                <th class="pb-3 pr-4">Code</th>
-                <th class="pb-3 pr-4">Status</th>
-                <th class="pb-3">Date</th>
+                <th class="pb-3 pr-4"><%= t('shared:common.email') %></th>
+                <th class="pb-3 pr-4"><%= t('shared:common.code') %></th>
+                <th class="pb-3 pr-4"><%= t('shared:common.status') %></th>
+                <th class="pb-3"><%= t('shared:common.date') %></th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -65,9 +65,9 @@
                   <td class="py-3 pr-4 font-mono text-gray-600"><%= referral.code %></td>
                   <td class="py-3 pr-4">
                     <% if (referral.status === 'converted') { %>
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Converted</span>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><%= t('storefront:converted') %></span>
                     <% } else if (referral.status === 'pending') { %>
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"><%= t('shared:common.pending') %></span>
                     <% } else { %>
                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600"><%= referral.status %></span>
                     <% } %>
@@ -79,7 +79,7 @@
           </table>
         </div>
       <% } else { %>
-        <p class="text-sm text-gray-500">No referrals yet. Share your link to get started!</p>
+        <p class="text-sm text-gray-500"><%= t('storefront:noReferralsYet') %></p>
       <% } %>
     </div>
   </div>

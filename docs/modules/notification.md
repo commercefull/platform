@@ -8,124 +8,25 @@ The Notification feature manages in-app notifications for merchants and administ
 
 ## Use Cases
 
-### Notification Management (Business)
+| ID | Use Case | Actor | Purpose |
+|---|---|---|---|
+| UC-NOT-001 | Get Unread Notifications | Merchant/Admin | Retrieve the merchant's unread notifications with pagination |
+| UC-NOT-002 | Get Recent Notifications | Merchant/Admin | Retrieve recent notifications (both read and unread) with pagination |
+| UC-NOT-003 | Get Unread Count | Merchant/Admin | Retrieve the count of unread notifications for badge display |
+| UC-NOT-004 | Mark Notification as Read | Merchant/Admin | Mark a specific notification as read |
+| UC-NOT-005 | Mark All as Read | Merchant/Admin | Mark all unread notifications as read |
+| UC-NOT-006 | Delete Notification | Merchant/Admin | Permanently delete a notification |
 
-### UC-NOT-001: Get Unread Notifications (Business)
+### API Endpoints
 
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request unread notifications  
-**Then** the system returns their unread notifications
-
-#### API Endpoint
-
-```
-GET /business/notifications/unread
-Query: limit, offset
-```
-
----
-
-### UC-NOT-002: Get Recent Notifications (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request recent notifications  
-**Then** the system returns recent notifications (read and unread)
-
-#### API Endpoint
-
-```
-GET /business/notifications/recent
-Query: limit, offset
-```
-
----
-
-### UC-NOT-003: Get Unread Count (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request unread count  
-**Then** the system returns the number of unread notifications
-
-#### API Endpoint
-
-```
-GET /business/notifications/count
-```
-
----
-
-### UC-NOT-004: Mark Notification as Read (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** an unread notification  
-**When** they mark it as read  
-**Then** the notification is marked as read
-
-#### API Endpoint
-
-```
-PUT /business/notifications/:id/read
-```
-
----
-
-### UC-NOT-005: Mark All as Read (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** multiple unread notifications  
-**When** they mark all as read  
-**Then** all notifications are marked as read
-
-#### API Endpoint
-
-```
-PUT /business/notifications/read-all
-```
-
----
-
-### UC-NOT-006: Delete Notification (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a notification  
-**When** they delete it  
-**Then** the notification is removed
-
-#### API Endpoint
-
-```
-DELETE /business/notifications/:id
-```
+| ID | Method | Endpoint |
+|---|---|---|
+| UC-NOT-001 | GET | `/business/notifications/unread` |
+| UC-NOT-002 | GET | `/business/notifications/recent` |
+| UC-NOT-003 | GET | `/business/notifications/count` |
+| UC-NOT-004 | PUT | `/business/notifications/:id/read` |
+| UC-NOT-005 | PUT | `/business/notifications/read-all` |
+| UC-NOT-006 | DELETE | `/business/notifications/:id` |
 
 ---
 
@@ -161,6 +62,6 @@ DELETE /business/notifications/:id
 
 ## Integration Test Coverage
 
-| Use Case                 | Test File                           | Status |
-| ------------------------ | ----------------------------------- | ------ |
-| UC-NOT-001 to UC-NOT-006 | `notification/notification.test.ts` | 🟡     |
+| Use Case                 | Test File                                  | Status |
+| ------------------------ | ------------------------------------------ | ------ |
+| UC-NOT-001 to UC-NOT-006 | `notification/notificationExpanded.test.ts` | ✅    |

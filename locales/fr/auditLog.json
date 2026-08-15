@@ -1,0 +1,11 @@
+{
+  "title": "Journaux d'audit",
+  "user": "Utilisateur",
+  "resource": "Ressource",
+  "resourceId": "ID de ressource",
+  "ipAddress": "Adresse IP",
+  "noLogs": "Aucun journal d'audit trouvé.",
+  "changes": "Changements",
+  "oldValue": "Ancienne valeur",
+  "newValue": "Nouvelle valeur"
+}

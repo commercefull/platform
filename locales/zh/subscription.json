@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "订阅总数",
+  "monthlyRecurringRevenue": "每月经常性收入",
+  "addPlan": "添加计划",
+  "planName": "计划名称",
+  "subscribers": "订阅者",
+  "noPlans": "未配置订阅计划。",
+  "plan": "计划",
+  "started": "开始",
+  "nextBilling": "下一个账单",
+  "noActiveSubscriptions": "没有活跃的订阅。",
+  "addSubscriptionPlan": "添加订阅计划",
+  "yearly": "每年",
+  "trialDays": "试用日",
+  "confirmDeletePlan": "删除这个计划？",
+  "billingOverview": "计费概览",
+  "billingDescription": "管理订阅计费、失败付款和续订处理。"
+}

@@ -154,7 +154,7 @@ export interface OrderRepository {
   /**
    * Record status change in history
    */
-  recordStatusChange(orderId: string, status: OrderStatus, reason?: string): Promise<void>;
+  recordStatusChange(orderId: string, status: OrderStatus, reason?: string, previousStatus?: string): Promise<void>;
 
   /**
    * Record payment status change in history
@@ -170,6 +170,16 @@ export interface OrderRepository {
    * Get order status history
    */
   getStatusHistory(orderId: string): Promise<Array<{ status: OrderStatus; reason?: string; createdAt: Date }>>;
+
+  /**
+   * Get payment status history
+   */
+  getPaymentStatusHistory(orderId: string): Promise<Array<{ orderId: string; paymentStatus: string; transactionId?: string; createdAt: Date }>>;
+
+  /**
+   * Get fulfillment status history
+   */
+  getFulfillmentStatusHistory(orderId: string): Promise<Array<{ orderId: string; fulfillmentStatus: string; createdAt: Date }>>;
 
   // Analytics
   /**

@@ -1,0 +1,13 @@
+{
+  "create": "Tạo tổ chức",
+  "view": "Chi tiết tổ chức",
+  "single": "Đơn",
+  "multiStore": "Nhiều cửa hàng",
+  "marketplace": "Thị trường",
+  "settings": "Cài đặt (JSON)",
+  "settingsHint": "Đối tượng JSON tùy chọn cho cài đặt cấp tổ chức.",
+  "slugHint": "Chỉ chữ cái viết thường, số và dấu gạch nối.",
+  "noOrganizations": "Không tìm thấy tổ chức nào.",
+  "confirmDelete": "Xóa tổ chức này?",
+  "noStoresLinked": "Không có cửa hàng nào được liên kết với tổ chức này."
+}

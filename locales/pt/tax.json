@@ -1,0 +1,10 @@
+{
+  "rates": "Taxas de imposto",
+  "zones": "Zonas fiscais",
+  "addRate": "Adicionar taxa de imposto",
+  "addZone": "Adicionar zona fiscal",
+  "addClass": "Adicionar classe fiscal",
+  "stateRegion": "Estado/Região",
+  "classes": "Aulas fiscais",
+  "zoneName": "Nome da zona"
+}

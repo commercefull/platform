@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "Associações",
+  "totalMembers": "Total de membros",
+  "activeMembers": "Membros Ativos",
+  "membershipTiers": "Níveis de associação",
+  "expiringThisMonth": "Expira este mês",
+  "addTier": "Adicionar nível",
+  "members": "membros",
+  "noTiers": "Nenhum nível de associação configurado.",
+  "recentMembers": "Membros recentes",
+  "tier": "Nível",
+  "noMembers": "Nenhum membro ainda.",
+  "addMembershipTier": "Adicionar nível de associação",
+  "tierName": "Nome da camada",
+  "billingPeriod": "Período de cobrança",
+  "lifetime": "Vida",
+  "benefitsOnePerLine": "Benefícios (um por linha)",
+  "setAsDefault": "Definir como nível padrão",
+  "createTier": "Criar nível",
+  "confirmDeleteTier": "Excluir esta modalidade?",
+  "analytics": "Análise de sócios",
+  "analyticsDescription": "Membros ativos, receita, taxa de rotatividade e distribuição por níveis."
+}

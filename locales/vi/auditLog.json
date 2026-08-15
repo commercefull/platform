@@ -1,0 +1,11 @@
+{
+  "title": "Nhật ký kiểm tra",
+  "user": "người dùng",
+  "resource": "Tài nguyên",
+  "resourceId": "ID tài nguyên",
+  "ipAddress": "Địa chỉ IP",
+  "noLogs": "Không tìm thấy nhật ký kiểm tra.",
+  "changes": "Thay đổi",
+  "oldValue": "Giá trị cũ",
+  "newValue": "Giá trị mới"
+}

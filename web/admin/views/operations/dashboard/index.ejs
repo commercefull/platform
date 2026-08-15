@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">Operations</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.operations') %></li>
           </ol>
         </div>
       </div>
@@ -25,40 +25,40 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3><%= stats.pendingFulfillments || 0 %></h3>
-              <p>Pending Fulfillments</p>
+              <p><%= t('operations:pendingFulfillments') %></p>
             </div>
             <div class="icon"><i class="fas fa-box-open"></i></div>
-            <a href="/admin/operations/fulfillments" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/operations/fulfillments" class="small-box-footer"><%= t('shared:common.view') %> <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <div class="col-lg-3 col-6">
           <div class="small-box bg-success">
             <div class="inner">
               <h3><%= stats.activeWarehouses || 0 %></h3>
-              <p>Active Warehouses</p>
+              <p><%= t('operations:activeWarehouses') %></p>
             </div>
             <div class="icon"><i class="fas fa-warehouse"></i></div>
-            <a href="/admin/operations/warehouses" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/operations/warehouses" class="small-box-footer"><%= t('shared:common.view') %> <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <div class="col-lg-3 col-6">
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= stats.abandonedCarts || 0 %></h3>
-              <p>Abandoned Carts</p>
+              <p><%= t('shared:common.abandonedCarts') %></p>
             </div>
             <div class="icon"><i class="fas fa-shopping-cart"></i></div>
-            <a href="/admin/operations/baskets/abandoned" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/operations/baskets/abandoned" class="small-box-footer"><%= t('shared:common.view') %> <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <div class="col-lg-3 col-6">
           <div class="small-box bg-danger">
             <div class="inner">
               <h3><%= stats.lowStockItems || 0 %></h3>
-              <p>Low Stock Items</p>
+              <p><%= t('shared:common.lowStockItems') %></p>
             </div>
             <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <a href="/admin/inventory/low-stock" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/inventory/low-stock" class="small-box-footer"><%= t('shared:common.view') %> <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
       </div>
@@ -68,17 +68,17 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-truck me-2"></i>Recent Fulfillments</h3>
-              <a href="/admin/operations/fulfillments" class="btn btn-sm btn-primary float-end">View All</a>
+              <h3 class="card-title"><i class="fas fa-truck me-2"></i><%= t('operations:recentFulfillments') %></h3>
+              <a href="/admin/operations/fulfillments" class="btn btn-sm btn-primary float-end"><%= t('shared:common.viewAll') %></a>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-sm">
                 <thead>
                   <tr>
-                    <th>Order</th>
-                    <th>Status</th>
-                    <th>Carrier</th>
-                    <th>Date</th>
+                    <th><%= t('shared:common.order') %></th>
+                    <th><%= t('common.status') %></th>
+                    <th><%= t('shared:common.carrier') %></th>
+                    <th><%= t('common.date') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -95,7 +95,7 @@
                   </tr>
                   <% }); %>
                   <% if ((recentFulfillments || []).length === 0) { %>
-                  <tr><td colspan="4" class="text-center text-muted">No recent fulfillments</td></tr>
+                  <tr><td colspan="4" class="text-center text-muted"><%= t('operations:noRecentFulfillments') %></td></tr>
                   <% } %>
                 </tbody>
               </table>
@@ -107,17 +107,17 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-warehouse me-2"></i>Warehouse Status</h3>
-              <a href="/admin/operations/warehouses" class="btn btn-sm btn-primary float-end">Manage</a>
+              <h3 class="card-title"><i class="fas fa-warehouse me-2"></i><%= t('operations:warehouseStatus') %></h3>
+              <a href="/admin/operations/warehouses" class="btn btn-sm btn-primary float-end"><%= t('shared:common.manage') %></a>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-sm">
                 <thead>
                   <tr>
-                    <th>Warehouse</th>
-                    <th>Products</th>
-                    <th>Capacity</th>
-                    <th>Status</th>
+                    <th><%= t('operations:warehouse') %></th>
+                    <th><%= t('shared:common.products') %></th>
+                    <th><%= t('operations:capacity') %></th>
+                    <th><%= t('common.status') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -133,13 +133,13 @@
                     </td>
                     <td>
                       <span class="badge bg-<%= w.isActive ? 'success' : 'secondary' %>">
-                        <%= w.isActive ? 'Active' : 'Inactive' %>
+                        <%= w.isActive ? t('shared:common.active') : t('shared:common.inactive') %>
                       </span>
                     </td>
                   </tr>
                   <% }); %>
                   <% if ((warehouses || []).length === 0) { %>
-                  <tr><td colspan="4" class="text-center text-muted">No warehouses configured</td></tr>
+                  <tr><td colspan="4" class="text-center text-muted"><%= t('operations:noWarehousesConfigured') %></td></tr>
                   <% } %>
                 </tbody>
               </table>
@@ -153,22 +153,22 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-truck-loading me-2"></i>Suppliers</h3>
-              <a href="/admin/operations/suppliers" class="btn btn-sm btn-primary float-end">Manage</a>
+              <h3 class="card-title"><i class="fas fa-truck-loading me-2"></i><%= t('shared:common.suppliers') %></h3>
+              <a href="/admin/operations/suppliers" class="btn btn-sm btn-primary float-end"><%= t('shared:common.manage') %></a>
             </div>
             <div class="card-body">
               <div class="row text-center">
                 <div class="col-4">
                   <h4><%= stats.totalSuppliers || 0 %></h4>
-                  <small class="text-muted">Total</small>
+                  <small class="text-muted"><%= t('shared:common.total') %></small>
                 </div>
                 <div class="col-4">
                   <h4><%= stats.activeSuppliers || 0 %></h4>
-                  <small class="text-muted">Active</small>
+                  <small class="text-muted"><%= t('shared:common.active') %></small>
                 </div>
                 <div class="col-4">
                   <h4><%= stats.pendingOrders || 0 %></h4>
-                  <small class="text-muted">Pending POs</small>
+                  <small class="text-muted"><%= t('operations:pendingPOs') %></small>
                 </div>
               </div>
             </div>
@@ -179,28 +179,28 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+              <h3 class="card-title"><i class="fas fa-bolt me-2"></i><%= t('shared:common.quickActions') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
                 <div class="col-6 mb-2">
                   <a href="/admin/operations/fulfillments?status=pending" class="btn btn-outline-primary w-100">
-                    <i class="fas fa-box me-1"></i>Process Orders
+                    <i class="fas fa-box me-1"></i><%= t('operations:processOrders') %>
                   </a>
                 </div>
                 <div class="col-6 mb-2">
                   <a href="/admin/inventory" class="btn btn-outline-info w-100">
-                    <i class="fas fa-boxes me-1"></i>Check Inventory
+                    <i class="fas fa-boxes me-1"></i><%= t('operations:checkInventory') %>
                   </a>
                 </div>
                 <div class="col-6 mb-2">
                   <a href="/admin/operations/baskets/abandoned" class="btn btn-outline-warning w-100">
-                    <i class="fas fa-cart-arrow-down me-1"></i>Abandoned Carts
+                    <i class="fas fa-cart-arrow-down me-1"></i><%= t('shared:common.abandonedCarts') %>
                   </a>
                 </div>
                 <div class="col-6 mb-2">
                   <a href="/admin/operations/suppliers" class="btn btn-outline-success w-100">
-                    <i class="fas fa-plus me-1"></i>New PO
+                    <i class="fas fa-plus me-1"></i><%= t('operations:newPO') %>
                   </a>
                 </div>
               </div>

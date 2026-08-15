@@ -1,8 +1,6 @@
 import promotionRepo from '../../infrastructure/repositories/promotionRepo';
 import { requireBusinessAuth, requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { ListPromotionsUseCase, ListPromotionsCommand } from '../../application/useCases/ListPromotions';
-import { ValidateCouponUseCase, ValidateCouponCommand } from '../../application/useCases/ValidateCoupon';
-import { RedeemCouponUseCase, RedeemCouponCommand } from '../../application/useCases/RedeemCoupon';
 import { CheckGiftCardBalanceUseCase, CheckGiftCardBalanceQuery } from '../../application/useCases/CheckGiftCardBalance';
 import { RedeemGiftCardUseCase, RedeemGiftCardCommand } from '../../application/useCases/RedeemGiftCard';
 
@@ -18,19 +16,6 @@ export const promotionResolvers = {
       return useCase.execute(command);
     },
 
-    validateCoupon: async (_parent: unknown, args: {
-      code: string;
-      orderTotal: number;
-      customerId?: string;
-      merchantId?: string;
-    }) => {
-      const useCase = new ValidateCouponUseCase();
-      const command = new ValidateCouponCommand(
-        args.code, args.orderTotal, args.customerId, args.merchantId,
-      );
-      return useCase.execute(command);
-    },
-
     giftCardBalance: async (_parent: unknown, args: { code: string }) => {
       const useCase = new CheckGiftCardBalanceUseCase();
       const query = new CheckGiftCardBalanceQuery(args.code);
@@ -39,23 +24,6 @@ export const promotionResolvers = {
   },
 
   Mutation: {
-    redeemCoupon: async (_parent: unknown, args: {
-      code: string;
-      orderId: string;
-      orderTotal: number;
-      discountAmount: number;
-      customerId?: string;
-      merchantId?: string;
-    }, context: GraphQLAuthContext) => {
-      requireCustomerAuth(context);
-      const useCase = new RedeemCouponUseCase();
-      const command = new RedeemCouponCommand(
-        args.code, args.orderId, args.orderTotal,
-        args.discountAmount, args.customerId, args.merchantId,
-      );
-      return useCase.execute(command);
-    },
-
     redeemGiftCard: async (_parent: unknown, args: {
       code: string;
       amount: number;

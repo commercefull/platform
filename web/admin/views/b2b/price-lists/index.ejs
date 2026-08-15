@@ -2,7 +2,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">B2B Price Lists</h2>
+      <h2 class="page-title"><%= t('b2b:b2bPriceLists') %></h2>
     </div>
     <div class="col-auto">
       <a href="/admin/b2b/price-lists/create" class="btn btn-primary">
@@ -12,7 +12,7 @@
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        New Price List
+        <%= t('b2b:newPriceList') %>
       </a>
     </div>
   </div>
@@ -24,19 +24,19 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Price Lists</h3>
-        <span class="float-end text-muted"><%= (priceLists || []).length %> records</span>
+        <h3 class="card-title"><%= t('shared:common.priceLists') %></h3>
+        <span class="float-end text-muted"><%= (priceLists || []).length %> <%= t('shared:common.records') %></span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Currency</th>
-              <th>Company</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Actions</th>
+              <th><%= t('shared:common.name') %></th>
+              <th><%= t('shared:common.currency') %></th>
+              <th><%= t('b2b:company') %></th>
+              <th><%= t('shared:common.status') %></th>
+              <th><%= t('shared:common.date') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
@@ -44,21 +44,21 @@
             <tr>
               <td><strong><%= pl.name %></strong></td>
               <td><%= pl.currency %></td>
-              <td><%= pl.b2bCompanyId ? pl.b2bCompanyId.substring(0, 8) + '...' : 'Global' %></td>
+              <td><%= pl.b2bCompanyId ? pl.b2bCompanyId.substring(0, 8) + '...' : t('shared:common.global') %></td>
               <td>
                 <span class="badge bg-<%= pl.isActive ? 'success' : 'secondary' %>">
-                  <%= pl.isActive ? 'Active' : 'Inactive' %>
+                  <%= pl.isActive ? t('shared:common.active') : t('shared:common.inactive') %>
                 </span>
               </td>
               <td><%= new Date(pl.createdAt).toLocaleDateString() %></td>
               <td>
-                <a href="/admin/b2b/price-lists/<%= pl.b2bPriceListId %>" class="btn btn-sm btn-outline-info">View</a>
-                <a href="/admin/b2b/price-lists/<%= pl.b2bPriceListId %>/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <a href="/admin/b2b/price-lists/<%= pl.b2bPriceListId %>" class="btn btn-sm btn-outline-info"><%= t('common.view') %></a>
+                <a href="/admin/b2b/price-lists/<%= pl.b2bPriceListId %>/edit" class="btn btn-sm btn-outline-secondary"><%= t('shared:common.edit') %></a>
               </td>
             </tr>
             <% }); %>
             <% if ((priceLists || []).length === 0) { %>
-            <tr><td colspan="6" class="text-center text-muted py-4">No price lists found.</td></tr>
+            <tr><td colspan="6" class="text-center text-muted py-4"><%= t('b2b:noPriceLists') %></td></tr>
             <% } %>
           </tbody>
         </table>

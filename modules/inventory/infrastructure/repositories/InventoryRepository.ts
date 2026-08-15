@@ -703,6 +703,14 @@ export class InventoryRepository {
       createdAt: now,
     };
   }
+
+  async updateReorderPoint(inventoryItemId: string, reorderPoint: number, _reorderQuantity?: number): Promise<void> {
+    const now = new Date().toISOString();
+    await query(
+      `UPDATE "inventoryLocation" SET "minimumStockLevel" = $1, "updatedAt" = $2 WHERE "inventoryLocationId" = $3`,
+      [reorderPoint, now, inventoryItemId],
+    );
+  }
 }
 
 export default new InventoryRepository();

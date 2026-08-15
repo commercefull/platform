@@ -1,0 +1,11 @@
+{
+  "title": "Registros de auditoría",
+  "user": "Usuario",
+  "resource": "Recurso",
+  "resourceId": "ID de recurso",
+  "ipAddress": "Dirección IP",
+  "noLogs": "No se encontraron registros de auditoría.",
+  "changes": "Cambios",
+  "oldValue": "Valor antiguo",
+  "newValue": "Nuevo valor"
+}

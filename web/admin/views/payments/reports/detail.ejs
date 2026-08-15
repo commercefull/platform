@@ -2,9 +2,9 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Report Detail</h2>
+      <h2 class="page-title"><%= t('payment:reports') %></h2>
       <div class="text-muted mt-1">
-        <a href="/admin/payments/reports">Reports</a> &rsaquo; <%= report.type %>
+        <a href="/admin/payments/reports"><%= t('payment:reports') %></a> &rsaquo; <%= report.type %>
       </div>
     </div>
   </div>
@@ -18,35 +18,35 @@
       <div class="col-md-8">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Report Information</h3>
+            <h3 class="card-title"><%= t('payment:reports') %></h3>
           </div>
           <div class="card-body">
             <dl class="row">
-              <dt class="col-sm-4">Report ID</dt>
+              <dt class="col-sm-4"><%= t('payment:reports') %> <%= t('common.id') %></dt>
               <dd class="col-sm-8"><code><%= report.paymentReportId %></code></dd>
 
-              <dt class="col-sm-4">Merchant ID</dt>
+              <dt class="col-sm-4"><%= t('shared:common.merchants') %> <%= t('common.id') %></dt>
               <dd class="col-sm-8"><code><%= report.merchantId %></code></dd>
 
-              <dt class="col-sm-4">Type</dt>
+              <dt class="col-sm-4"><%= t('common.type') %></dt>
               <dd class="col-sm-8"><span class="badge bg-info"><%= report.type %></span></dd>
 
-              <dt class="col-sm-4">Currency</dt>
+              <dt class="col-sm-4"><%= t('shared:common.currency') %></dt>
               <dd class="col-sm-8"><%= report.currency %></dd>
 
-              <dt class="col-sm-4">Total Amount</dt>
+              <dt class="col-sm-4"><%= t('common.amount') %></dt>
               <dd class="col-sm-8"><strong><%= report.currency %> <%= (report.totalAmount || 0).toFixed(2) %></strong></dd>
 
-              <dt class="col-sm-4">Transactions</dt>
+              <dt class="col-sm-4"><%= t('shared:common.transactions') %></dt>
               <dd class="col-sm-8"><%= report.transactionCount || 0 %></dd>
 
-              <dt class="col-sm-4">Period Start</dt>
+              <dt class="col-sm-4"><%= t('shared:common.from') %></dt>
               <dd class="col-sm-8"><%= new Date(report.periodStart).toLocaleString() %></dd>
 
-              <dt class="col-sm-4">Period End</dt>
+              <dt class="col-sm-4"><%= t('shared:common.to') %></dt>
               <dd class="col-sm-8"><%= new Date(report.periodEnd).toLocaleString() %></dd>
 
-              <dt class="col-sm-4">Created</dt>
+              <dt class="col-sm-4"><%= t('common.dateCreated') %></dt>
               <dd class="col-sm-8"><%= new Date(report.createdAt).toLocaleString() %></dd>
             </dl>
           </div>
@@ -55,7 +55,7 @@
         <% if (report.data && Object.keys(report.data).length > 0) { %>
         <div class="card mt-3">
           <div class="card-header">
-            <h3 class="card-title">Report Data</h3>
+            <h3 class="card-title"><%= t('payment:reports') %></h3>
           </div>
           <div class="card-body">
             <pre class="bg-light p-3 rounded"><%= JSON.stringify(report.data, null, 2) %></pre>
@@ -65,7 +65,7 @@
       </div>
 
       <div class="col-md-4">
-        <a href="/admin/payments/reports" class="btn btn-outline-secondary w-100">Back to Reports</a>
+        <a href="/admin/payments/reports" class="btn btn-outline-secondary w-100"><%= t('common.back') %></a>
       </div>
     </div>
   </div>

@@ -44,23 +44,17 @@ describe('Order Item Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      // May return 200 or 500 depending on endpoint implementation
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(Array.isArray(response.data.data)).toBe(true);
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(Array.isArray(response.data.data)).toBe(true);
+      expect(response.data.data.length).toBeGreaterThan(0);
 
-        if (response.data.data.length > 0) {
-          // Verify camelCase property names in response (TypeScript interface)
-          const items = response.data.data as OrderItem[];
-          expect(items[0]).toHaveProperty('unitPrice');
+      // Verify camelCase property names in response (TypeScript interface)
+      const items = response.data.data as OrderItem[];
+      expect(items[0]).toHaveProperty('unitPrice');
 
-          // Verify no snake_case properties are exposed in the API
-          expect(items[0]).not.toHaveProperty('unit_price');
-        }
-      } else {
-        // Endpoint may not be implemented
-        expect(response.status).toBe(404);
-      }
+      // Verify no snake_case properties are exposed in the API
+      expect(items[0]).not.toHaveProperty('unit_price');
     });
 
     it('should get an order item by ID (admin)', async () => {
@@ -68,19 +62,13 @@ describe('Order Item Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      // May return 200 or 500 depending on endpoint implementation
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('orderItemId');
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('orderItemId');
 
-        // Check order item properties
-        const item = response.data.data as OrderItem;
-        expect(item).toHaveProperty('name');
-        expect(item).toHaveProperty('sku');
-      } else {
-        // Endpoint may not be implemented
-        expect(response.status).toBe(404);
-      }
+      // Check order item properties
+      const item = response.data.data as OrderItem;
+      expect(item).toHaveProperty('name');
+      expect(item).toHaveProperty('sku');
     });
 
     it('should create a new order item (admin)', async () => {
@@ -99,20 +87,15 @@ describe('Order Item Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      // May return 201 or 500 depending on endpoint implementation
-      if (response.status === 201) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('orderItemId');
+      expect(response.status).toBe(201);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('orderItemId');
 
-        // Clean up the new test item
-        const newItemId = response.data.data.orderItemId;
-        await client.delete(`/business/order-items/${newItemId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-      } else {
-        // Endpoint may not be implemented
-        expect(response.status).toBe(404);
-      }
+      // Clean up the new test item
+      const newItemId = response.data.data.orderItemId;
+      await client.delete(`/business/order-items/${newItemId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
     });
 
     it('should update an order item (admin)', async () => {
@@ -125,14 +108,9 @@ describe('Order Item Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      // May return 200 or 500 depending on endpoint implementation
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('orderItemId');
-      } else {
-        // Endpoint may not be implemented
-        expect(response.status).toBe(404);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('orderItemId');
     });
 
     it('should recalculate order totals when items change', async () => {
@@ -141,10 +119,7 @@ describe('Order Item Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      if (beforeResponse.status !== 200) {
-        // Skip test if order not found
-        return;
-      }
+      expect(beforeResponse.status).toBe(200);
 
       const _beforeTotals = beforeResponse.data.data;
 
@@ -157,11 +132,7 @@ describe('Order Item Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      // Skip if update endpoint not implemented
-      if (updateResponse.status !== 200) {
-        expect(updateResponse.status).toBe(404);
-        return;
-      }
+      expect(updateResponse.status).toBe(200);
 
       // Get updated order totals
       const afterResponse = await client.get(`/business/orders/${testOrderId}`, {
@@ -169,7 +140,7 @@ describe('Order Item Tests', () => {
       });
       const afterTotals = afterResponse.data.data;
 
-      // Verify totals exist (may or may not have changed depending on implementation)
+      // Verify totals exist
       expect(afterTotals).toHaveProperty('subtotal');
       expect(afterTotals).toHaveProperty('totalAmount');
     });
@@ -181,18 +152,15 @@ describe('Order Item Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
-      // May return 200 or 500 depending on order state
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('items');
-        expect(Array.isArray(response.data.data.items)).toBe(true);
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('items');
+      expect(Array.isArray(response.data.data.items)).toBe(true);
+      expect(response.data.data.items.length).toBeGreaterThan(0);
 
-        // Verify items exist
-        const items = response.data.data.items as OrderItem[];
-        if (items.length > 0) {
-          expect(items[0]).toHaveProperty('sku');
-        }
-      }
+      // Verify items exist
+      const items = response.data.data.items as OrderItem[];
+      expect(items[0]).toHaveProperty('sku');
     });
 
     it('should not expose sensitive order item fields to customers', async () => {
@@ -200,15 +168,16 @@ describe('Order Item Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
-      if (response.status === 200 && response.data.data?.items?.length > 0) {
-        // Find our test item
-        const items = response.data.data.items as OrderItem[];
-        const testItem = items[0];
+      expect(response.status).toBe(200);
+      expect(response.data.data?.items?.length).toBeGreaterThan(0);
 
-        // Verify sensitive fields are not exposed to customers
-        expect(testItem).not.toHaveProperty('costPrice');
-        expect(testItem).not.toHaveProperty('profit');
-      }
+      // Find our test item
+      const items = response.data.data.items as OrderItem[];
+      const testItem = items[0];
+
+      // Verify sensitive fields are not exposed to customers
+      expect(testItem).not.toHaveProperty('costPrice');
+      expect(testItem).not.toHaveProperty('profit');
     });
   });
 });

@@ -7,7 +7,7 @@
       <div class="col-auto ms-auto">
         <a href="/admin/catalog/categories/create" class="btn btn-primary">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-          Create Category
+          <%= t('product:category.create') %>
         </a>
       </div>
     </div>
@@ -24,17 +24,17 @@
 
   <div class="card">
     <div class="card-header">
-      <h3 class="card-title">All Categories</h3>
+      <h3 class="card-title"><%= t('shared:common.allCategories') %></h3>
     </div>
     <div class="table-responsive">
       <table class="table table-vcenter card-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Slug</th>
-            <th>Parent</th>
-            <th>Status</th>
-            <th>Products</th>
+            <th><%= t('common.name') %></th>
+            <th><%= t('shared:common.slug') %></th>
+            <th><%= t('shared:common.parent') %></th>
+            <th><%= t('common.status') %></th>
+            <th><%= t('shared:common.products') %></th>
             <th class="w-1"></th>
           </tr>
         </thead>
@@ -47,20 +47,20 @@
               <td><%= category.parentId || '-' %></td>
               <td>
                 <% if (category.isActive) { %>
-                <span class="badge bg-success">Active</span>
+                <span class="badge bg-success"><%= t('common.active') %></span>
                 <% } else { %>
-                <span class="badge bg-secondary">Inactive</span>
+                <span class="badge bg-secondary"><%= t('common.inactive') %></span>
                 <% } %>
               </td>
               <td><%= category.productCount || 0 %></td>
               <td>
-                <a href="/admin/catalog/categories/<%= category.productCategoryId %>" class="btn btn-sm">View</a>
+                <a href="/admin/catalog/categories/<%= category.productCategoryId %>" class="btn btn-sm"><%= t('common.view') %></a>
               </td>
             </tr>
             <% }); %>
           <% } else { %>
             <tr>
-              <td colspan="6" class="text-center text-muted">No categories found</td>
+              <td colspan="6" class="text-center text-muted"><%= t('product:category.notFound') %></td>
             </tr>
           <% } %>
         </tbody>

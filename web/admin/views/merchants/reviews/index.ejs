@@ -1,7 +1,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Merchant Reviews</h2>
+      <h2 class="page-title"><%= t('merchant:merchants.merchantReviews') %></h2>
     </div>
   </div>
 </div>
@@ -12,19 +12,19 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Reviews</h3>
-        <span class="float-end text-muted"><%= (reviews || []).length %> records</span>
+        <h3 class="card-title"><%= t('shared:common.reviews') %></h3>
+        <span class="float-end text-muted"><%= (reviews || []).length %> <%= t('common.records') %></span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Customer</th>
-              <th>Rating</th>
-              <th>Title</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Actions</th>
+              <th><%= t('shared:common.customer') %></th>
+              <th><%= t('shared:common.rating') %></th>
+              <th><%= t('shared:common.title') %></th>
+              <th><%= t('common.status') %></th>
+              <th><%= t('common.date') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
@@ -46,17 +46,17 @@
               <td>
                 <form method="POST" action="/admin/operations/merchants/<%= merchantId %>/reviews/<%= r.merchantReviewId %>/status" class="d-inline">
                   <select name="status" class="form-select form-select-sm d-inline w-auto">
-                    <option value="pending" <%= r.status === 'pending' ? 'selected' : '' %>>Pending</option>
-                    <option value="approved" <%= r.status === 'approved' ? 'selected' : '' %>>Approved</option>
-                    <option value="rejected" <%= r.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                    <option value="pending" <%= r.status === 'pending' ? 'selected' : '' %>><%= t('shared:common.pending') %></option>
+                    <option value="approved" <%= r.status === 'approved' ? 'selected' : '' %>><%= t('shared:common.approved') %></option>
+                    <option value="rejected" <%= r.status === 'rejected' ? 'selected' : '' %>><%= t('shared:common.rejected') %></option>
                   </select>
-                  <button type="submit" class="btn btn-sm btn-outline-primary ms-1">Update</button>
+                  <button type="submit" class="btn btn-sm btn-outline-primary ms-1"><%= t('common.update') %></button>
                 </form>
               </td>
             </tr>
             <% }); %>
             <% if ((reviews || []).length === 0) { %>
-            <tr><td colspan="6" class="text-center text-muted py-4">No reviews found.</td></tr>
+            <tr><td colspan="6" class="text-center text-muted py-4"><%= t('merchant:merchants.noReviews') %></td></tr>
             <% } %>
           </tbody>
         </table>

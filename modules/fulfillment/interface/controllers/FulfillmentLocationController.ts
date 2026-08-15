@@ -148,3 +148,40 @@ export const createPartner = async (req: TypedRequest, res: Response): Promise<v
     res.status(400).json({ success: false, error: (error as Error).message });
   }
 };
+
+export const updatePartner = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { partnerId } = req.params;
+    const result = await fulfillmentPartnerRepo.update(partnerId, req.body as Record<string, unknown>);
+    if (!result) {
+      res.status(404).json({ success: false, error: 'Partner not found' });
+      return;
+    }
+    res.status(200).json({ success: true, data: result });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    res.status(400).json({ success: false, error: (error as Error).message });
+  }
+};
+
+export const deletePartner = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { partnerId } = req.params;
+    await fulfillmentPartnerRepo.remove(partnerId);
+    res.status(200).json({ success: true, message: 'Partner deleted successfully' });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    res.status(400).json({ success: false, error: (error as Error).message });
+  }
+};
+
+export const deleteLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { locationId } = req.params;
+    await fulfillmentLocationRepo.deleteLocation(locationId);
+    res.status(200).json({ success: true, message: 'Location deleted successfully' });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    res.status(400).json({ success: false, error: (error as Error).message });
+  }
+};

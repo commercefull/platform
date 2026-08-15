@@ -1,0 +1,23 @@
+{
+  "programMembers": "कार्यक्रम के सदस्य",
+  "pointsIssued": "जारी किए गए अंक",
+  "pointsRedeemed": "अंक भुनाए गए",
+  "programSettings": "प्रोग्राम सेटिंग्स",
+  "pointsPerDollar": "खर्च किए गए प्रति डॉलर अंक",
+  "pointsValue": "अंक मूल्य ($ प्रति अंक)",
+  "minimumRedemption": "न्यूनतम मोचन",
+  "addReward": "इनाम जोड़ें",
+  "reward": "इनाम",
+  "redemptions": "मोचन",
+  "noRewards": "कोई पुरस्कार कॉन्फ़िगर नहीं किया गया.",
+  "recentTransactions": "हाल के लेनदेन",
+  "noTransactions": "अभी तक कोई लेन-देन नहीं.",
+  "rewardName": "इनाम का नाम",
+  "rewardType": "इनाम का प्रकार",
+  "freeProduct": "निःशुल्क उत्पाद",
+  "giftCard": "उपहार कार्ड",
+  "rewardValue": "इनाम मूल्य",
+  "confirmDeleteReward": "यह इनाम हटाएं?",
+  "analytics": "लॉयल्टी प्रोग्राम एनालिटिक्स",
+  "analyticsDescription": "अंक वितरण, मोचन दरें, और स्तरीय प्रगति।"
+}

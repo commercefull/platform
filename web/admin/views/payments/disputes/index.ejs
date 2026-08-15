@@ -2,7 +2,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Payment Disputes</h2>
+      <h2 class="page-title"><%= t('payment:disputes') %></h2>
     </div>
   </div>
 </div>
@@ -17,16 +17,16 @@
         <form method="GET" class="row g-3">
           <div class="col-md-3">
             <select class="form-select" name="status">
-              <option value="">All Statuses</option>
-              <option value="open" <%= filters.status === 'open' ? 'selected' : '' %>>Open</option>
-              <option value="under_review" <%= filters.status === 'under_review' ? 'selected' : '' %>>Under Review</option>
-              <option value="resolved" <%= filters.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
-              <option value="lost" <%= filters.status === 'lost' ? 'selected' : '' %>>Lost</option>
-              <option value="won" <%= filters.status === 'won' ? 'selected' : '' %>>Won</option>
+              <option value=""><%= t('common.allStatus') %></option>
+              <option value="open" <%= filters.status === 'open' ? 'selected' : '' %>><%= t('shared:common.open') %></option>
+              <option value="under_review" <%= filters.status === 'under_review' ? 'selected' : '' %>><%= t('payment:disputeStatus') %></option>
+              <option value="resolved" <%= filters.status === 'resolved' ? 'selected' : '' %>><%= t('shared:common.resolved') %></option>
+              <option value="lost" <%= filters.status === 'lost' ? 'selected' : '' %>><%= t('payment:lost') %></option>
+              <option value="won" <%= filters.status === 'won' ? 'selected' : '' %>><%= t('payment:won') %></option>
             </select>
           </div>
           <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Filter</button>
+            <button type="submit" class="btn btn-primary w-100"><%= t('common.filter') %></button>
           </div>
         </form>
       </div>
@@ -35,22 +35,22 @@
     <!-- Disputes Table -->
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Disputes</h3>
-        <span class="float-end text-muted"><%= (disputes || []).length %> records</span>
+        <h3 class="card-title"><%= t('payment:disputes') %></h3>
+        <span class="float-end text-muted"><%= (disputes || []).length %> <%= t('common.records') %></span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Dispute ID</th>
-              <th>Payment ID</th>
-              <th>Merchant</th>
-              <th>Amount</th>
-              <th>Reason</th>
-              <th>Status</th>
-              <th>Due By</th>
-              <th>Created</th>
-              <th>Actions</th>
+              <th><%= t('payment:disputeId') %></th>
+              <th><%= t('shared:common.transactionId') %></th>
+              <th><%= t('shared:common.merchants') %></th>
+              <th><%= t('common.amount') %></th>
+              <th><%= t('shared:common.reason') %></th>
+              <th><%= t('common.status') %></th>
+              <th><%= t('common.dueDate') %></th>
+              <th><%= t('common.dateCreated') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
@@ -69,12 +69,12 @@
               <td><%= d.dueBy ? new Date(d.dueBy).toLocaleDateString() : '-' %></td>
               <td><%= new Date(d.createdAt).toLocaleDateString() %></td>
               <td>
-                <a href="/admin/payments/disputes/<%= d.paymentDisputeId %>" class="btn btn-sm btn-outline-info">View</a>
+                <a href="/admin/payments/disputes/<%= d.paymentDisputeId %>" class="btn btn-sm btn-outline-info"><%= t('common.view') %></a>
               </td>
             </tr>
             <% }); %>
             <% if ((disputes || []).length === 0) { %>
-            <tr><td colspan="9" class="text-center text-muted py-4">No disputes found.</td></tr>
+            <tr><td colspan="9" class="text-center text-muted py-4"><%= t('payment:noDisputes') %></td></tr>
             <% } %>
           </tbody>
         </table>

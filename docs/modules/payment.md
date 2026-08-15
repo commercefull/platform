@@ -8,474 +8,53 @@ The Payment feature handles all payment processing including transactions, refun
 
 ## Use Cases
 
-### UC-PAY-001: Get Payment Methods (Public)
-
-**Actor:** Customer/Guest  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** any user browsing the store  
-**When** they request available payment methods  
-**Then** the system returns all active payment methods
-
-#### API Endpoint
-
-```
-GET /payment/methods
-```
-
-#### Business Rules
-
-- Returns all enabled payment methods
-- Includes method type, name, and configuration
-- No authentication required
-- Used for checkout display
-
----
-
-### UC-PAY-002: Get My Transactions (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated customer  
-**When** they request their payment transactions  
-**Then** the system returns their transaction history
-
-#### API Endpoint
-
-```
-GET /payment/transactions
-```
-
-#### Business Rules
-
-- Only returns customer's own transactions
-- Sorted by date (newest first)
-- Includes transaction status and amount
-
----
-
-### UC-PAY-003: Get Transaction by Order (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated customer  
-**And** an order that belongs to them  
-**When** they request payment details for the order  
-**Then** the system returns the transaction(s) for that order
-
-#### API Endpoint
-
-```
-GET /payment/orders/:orderId
-```
-
-#### Business Rules
-
-- Customer can only view their own orders
-- Returns all transactions linked to the order
-- Includes payment, refund transactions
-
----
-
-### UC-PAY-004: List Transactions (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request all transactions  
-**Then** the system returns a paginated list of transactions
-
-#### API Endpoint
-
-```
-GET /business/payments/transactions
-Query: status, customerId, dateFrom, dateTo, limit, offset
-```
-
-#### Business Rules
-
-- Returns all transactions for the merchant
-- Supports filtering by status, customer, date
-- Includes detailed transaction information
-
----
-
-### UC-PAY-005: Get Transaction Details (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a valid transaction ID  
-**When** they request transaction details  
-**Then** the system returns complete transaction information
-
-#### API Endpoint
-
-```
-GET /business/payments/transactions/:transactionId
-```
-
-#### Business Rules
-
-- Returns full transaction details
-- Includes payment provider response
-- Includes related order information
-
----
-
-### UC-PAY-006: Initiate Payment (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** valid payment details  
-**When** they initiate a payment  
-**Then** the system processes the payment through the provider
-
-#### API Endpoint
-
-```
-POST /business/payments/transactions
-Body: { orderId, amount, currency, paymentMethodId, ... }
-```
-
-#### Business Rules
-
-- Validates payment amount
-- Routes to appropriate payment provider
-- Creates transaction record
-- Returns provider response
-
----
-
-### UC-PAY-007: Get Refunds for Transaction (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a valid transaction ID  
-**When** they request refunds for the transaction  
-**Then** the system returns all refunds processed
-
-#### API Endpoint
-
-```
-GET /business/payments/transactions/:transactionId/refunds
-```
-
-#### Business Rules
-
-- Returns all refunds for the transaction
-- Shows partial and full refunds
-- Includes refund status and amounts
-
----
-
-### UC-PAY-008: Process Refund (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a transaction that can be refunded  
-**When** they process a refund  
-**Then** the system refunds via the payment provider  
-**And** creates a refund record
-
-#### API Endpoint
-
-```
-POST /business/payments/transactions/:transactionId/refund
-Body: { amount, reason }
-```
-
-#### Business Rules
-
-- Refund amount cannot exceed captured amount
-- Can do partial refunds
-- Multiple refunds allowed up to total
-- Reason is required for auditing
-
----
-
-## Fraud Prevention Use Cases
-
-### UC-PAY-009: Get Fraud Rules (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request fraud rules  
-**Then** the system returns all configured rules
-
-#### API Endpoint
-
-```
-GET /business/payments/fraud/rules
-Query: activeOnly
-```
-
-#### Business Rules
-
-- Returns all fraud prevention rules
-- Can filter by active status
-
----
-
-### UC-PAY-010: Get Fraud Rule (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a valid rule ID  
-**When** they request the rule  
-**Then** the system returns the rule configuration
-
-#### API Endpoint
-
-```
-GET /business/payments/fraud/rules/:id
-```
-
----
-
-### UC-PAY-011: Create Fraud Rule (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they create a new fraud rule  
-**Then** the system creates and activates the rule
-
-#### API Endpoint
-
-```
-POST /business/payments/fraud/rules
-Body: { name, ruleType, conditions, action, riskScore, ... }
-```
-
-#### Business Rules
-
-- Rule types: velocity, geolocation, amount, pattern, blacklist, custom
-- Actions: allow, flag, review, block
-- Conditions are rule-specific JSON
-
----
-
-### UC-PAY-012: Update Fraud Rule (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** an existing rule  
-**When** they update the rule  
-**Then** the system saves the changes
-
-#### API Endpoint
-
-```
-PUT /business/payments/fraud/rules/:id
-Body: { name?, conditions?, action?, isActive?, ... }
-```
-
----
-
-### UC-PAY-013: Delete Fraud Rule (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** an existing rule  
-**When** they delete the rule  
-**Then** the system deactivates the rule
-
-#### API Endpoint
-
-```
-DELETE /business/payments/fraud/rules/:id
-```
-
----
-
-### UC-PAY-014: Get Fraud Checks (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request fraud checks  
-**Then** the system returns fraud check results
-
-#### API Endpoint
-
-```
-GET /business/payments/fraud/checks
-Query: status, riskLevel, customerId, limit, offset
-```
-
----
-
-### UC-PAY-015: Get Fraud Check (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a valid check ID  
-**When** they request the check  
-**Then** the system returns the full fraud check details
-
-#### API Endpoint
-
-```
-GET /business/payments/fraud/checks/:id
-```
-
----
-
-### UC-PAY-016: Get Pending Reviews (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request pending fraud reviews  
-**Then** the system returns checks needing manual review
-
-#### API Endpoint
-
-```
-GET /business/payments/fraud/reviews
-```
-
----
-
-### UC-PAY-017: Review Fraud Check (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a fraud check pending review  
-**When** they submit a review decision  
-**Then** the system updates the check status
-
-#### API Endpoint
-
-```
-POST /business/payments/fraud/checks/:id/review
-Body: { decision: 'approve'|'reject', notes?: string }
-```
-
----
-
-### UC-PAY-018: Get Blacklist (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request the fraud blacklist  
-**Then** the system returns blacklisted entities
-
-#### API Endpoint
-
-```
-GET /business/payments/fraud/blacklist
-Query: type, isActive, limit, offset
-```
-
----
-
-### UC-PAY-019: Add to Blacklist (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they add an entity to the blacklist  
-**Then** the entity is blocked from transactions
-
-#### API Endpoint
-
-```
-POST /business/payments/fraud/blacklist
-Body: { type, value, reason }
-```
-
-#### Business Rules
-
-- Types: email, ip, card, phone, device
-- Reason is required
-
----
-
-### UC-PAY-020: Remove from Blacklist (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a blacklist entry  
-**When** they remove it  
-**Then** the entry is deactivated
-
-#### API Endpoint
-
-```
-DELETE /business/payments/fraud/blacklist/:id
-```
+| ID | Use Case | Actor | Purpose |
+|---|---|---|---|
+| UC-PAY-001 | Get Payment Methods | Customer/Guest | Retrieve all active payment methods for checkout display (no auth required) |
+| UC-PAY-002 | Get My Transactions | Customer | Retrieve the authenticated customer's own payment transaction history |
+| UC-PAY-003 | Get Transaction by Order | Customer | Retrieve all payment and refund transactions for a specific order |
+| UC-PAY-004 | List Transactions | Merchant/Admin | List all transactions with optional status/customer/date filtering |
+| UC-PAY-005 | Get Transaction Details | Merchant/Admin | Retrieve full transaction details including provider response and order info |
+| UC-PAY-006 | Initiate Payment | Merchant/Admin | Process a payment through the appropriate provider and create a transaction record |
+| UC-PAY-007 | Get Refunds for Transaction | Merchant/Admin | Retrieve all refunds (partial and full) processed for a specific transaction |
+| UC-PAY-008 | Process Refund | Merchant/Admin | Process a full or partial refund via the payment provider with a required reason |
+| UC-PAY-009 | Get Fraud Rules | Merchant/Admin | List all configured fraud prevention rules with optional active-only filter |
+| UC-PAY-010 | Get Fraud Rule | Merchant/Admin | Retrieve a specific fraud rule configuration by ID |
+| UC-PAY-011 | Create Fraud Rule | Merchant/Admin | Create a fraud rule (velocity, geolocation, amount, pattern, blacklist, custom) with an action (allow, flag, review, block) |
+| UC-PAY-012 | Update Fraud Rule | Merchant/Admin | Update an existing fraud rule's conditions, action, or active status |
+| UC-PAY-013 | Delete Fraud Rule | Merchant/Admin | Deactivate a fraud rule |
+| UC-PAY-014 | Get Fraud Checks | Merchant/Admin | List fraud check results with optional status/risk level/customer filtering |
+| UC-PAY-015 | Get Fraud Check | Merchant/Admin | Retrieve full details of a specific fraud check by ID |
+| UC-PAY-016 | Get Pending Reviews | Merchant/Admin | Retrieve fraud checks that require manual review |
+| UC-PAY-017 | Review Fraud Check | Merchant/Admin | Submit a manual review decision (approve or reject) for a flagged fraud check |
+| UC-PAY-018 | Get Blacklist | Merchant/Admin | List blacklisted entities (email, IP, card, phone, device) with optional type/active filtering |
+| UC-PAY-019 | Add to Blacklist | Merchant/Admin | Add an entity to the fraud blacklist with a required reason |
+| UC-PAY-020 | Remove from Blacklist | Merchant/Admin | Deactivate a blacklist entry |
+
+### API Endpoints
+
+| ID | Method | Endpoint |
+|---|---|---|
+| UC-PAY-001 | GET | `/payment/methods` |
+| UC-PAY-002 | GET | `/payment/transactions` |
+| UC-PAY-003 | GET | `/payment/orders/:orderId` |
+| UC-PAY-004 | GET | `/business/payments/transactions` |
+| UC-PAY-005 | GET | `/business/payments/transactions/:transactionId` |
+| UC-PAY-006 | POST | `/business/payments/transactions` |
+| UC-PAY-007 | GET | `/business/payments/transactions/:transactionId/refunds` |
+| UC-PAY-008 | POST | `/business/payments/transactions/:transactionId/refund` |
+| UC-PAY-009 | GET | `/business/payments/fraud/rules` |
+| UC-PAY-010 | GET | `/business/payments/fraud/rules/:id` |
+| UC-PAY-011 | POST | `/business/payments/fraud/rules` |
+| UC-PAY-012 | PUT | `/business/payments/fraud/rules/:id` |
+| UC-PAY-013 | DELETE | `/business/payments/fraud/rules/:id` |
+| UC-PAY-014 | GET | `/business/payments/fraud/checks` |
+| UC-PAY-015 | GET | `/business/payments/fraud/checks/:id` |
+| UC-PAY-016 | GET | `/business/payments/fraud/reviews` |
+| UC-PAY-017 | POST | `/business/payments/fraud/checks/:id/review` |
+| UC-PAY-018 | GET | `/business/payments/fraud/blacklist` |
+| UC-PAY-019 | POST | `/business/payments/fraud/blacklist` |
+| UC-PAY-020 | DELETE | `/business/payments/fraud/blacklist/:id` |
 
 ---
 
@@ -497,25 +76,25 @@ DELETE /business/payments/fraud/blacklist/:id
 
 ## Integration Test Coverage
 
-| Use Case   | Test File                 | Status |
-| ---------- | ------------------------- | ------ |
-| UC-PAY-001 | `payment/payment.test.ts` | ✅     |
-| UC-PAY-002 | `payment/payment.test.ts` | 🟡     |
-| UC-PAY-003 | `payment/payment.test.ts` | 🟡     |
-| UC-PAY-004 | `payment/payment.test.ts` | ✅     |
-| UC-PAY-005 | `payment/payment.test.ts` | ✅     |
-| UC-PAY-006 | `payment/payment.test.ts` | ✅     |
-| UC-PAY-007 | `payment/payment.test.ts` | 🟡     |
-| UC-PAY-008 | `payment/payment.test.ts` | ✅     |
-| UC-PAY-009 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-010 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-011 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-012 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-013 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-014 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-015 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-016 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-017 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-018 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-019 | `payment/fraud.test.ts`   | ❌     |
-| UC-PAY-020 | `payment/fraud.test.ts`   | ❌     |
+| Use Case   | Test File                       | Status |
+| ---------- | ------------------------------- | ------ |
+| UC-PAY-001 | `payment/payment.test.ts`       | ✅     |
+| UC-PAY-002 | `payment/payment.test.ts`       | ✅     |
+| UC-PAY-003 | `payment/payment.test.ts`       | ✅     |
+| UC-PAY-004 | `payment/gateway.test.ts`       | ✅     |
+| UC-PAY-005 | `payment/gateway.test.ts`       | ✅     |
+| UC-PAY-006 | `payment/methodConfig.test.ts`  | ✅     |
+| UC-PAY-007 | `payment/methodConfig.test.ts`  | ✅     |
+| UC-PAY-008 | `payment/transaction.test.ts`   | ✅     |
+| UC-PAY-009 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-010 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-011 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-012 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-013 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-014 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-015 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-016 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-017 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-018 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-019 | `payment/fraud.test.ts`         | ✅     |
+| UC-PAY-020 | `payment/fraud.test.ts`         | ✅     |

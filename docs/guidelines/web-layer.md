@@ -18,8 +18,6 @@ web/
 │       ├── products/
 │       ├── orders/
 │       └── ...
-├── merchant/                  # Merchant dashboard (Tabler)
-├── b2b/                       # B2B portal (Tabler)
 ├── storefront/                # Customer store (Tailwind)
 └── respond.ts                 # Response helpers for all portals
 ```
@@ -55,8 +53,6 @@ export const listProducts = async (req: Request, res: Response) => {
 | Helper              | Portal     | Layout                  |
 | ------------------- | ---------- | ----------------------- |
 | `adminRespond`      | Admin      | `admin/views/layout`    |
-| `merchantRespond`   | Merchant   | `merchant/views/layout` |
-| `b2bRespond`        | B2B        | `b2b/views/layout`      |
 | `storefrontRespond` | Storefront | Direct render           |
 
 ## EJS Template Conventions
@@ -67,7 +63,7 @@ export const listProducts = async (req: Request, res: Response) => {
 - Current user/session available as `user` and `session`.
 - i18n available via `t('key')`.
 
-### Admin / Merchant / B2B (Tabler)
+### Admin
 
 ```html
 <div class="page-header d-print-none">
@@ -101,3 +97,4 @@ export const listProducts = async (req: Request, res: Response) => {
 - Web controllers must not import from `infrastructure/` except to inject repositories into use cases.
 - No direct SQL calls from `web/` — go through module use cases or legacy repos.
 - Auth middleware is applied in each portal's router file (see [authentication.md](./authentication.md)).
+- **Never hardcode user-facing text** — all visible strings (labels, buttons, headings, placeholders, alt text, alert/confirm messages, option labels, fallback values) must use `t('namespace:key')` or `t('key')` for the default `shared` namespace. Add missing keys to the appropriate locale JSON file before referencing them in templates. This applies to both admin and storefront EJS templates.

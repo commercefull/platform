@@ -2,15 +2,15 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Credit Limit</h2>
+      <h2 class="page-title"><%= t('b2b:creditLimit') %></h2>
       <div class="text-muted mt-1">
-        <a href="/admin/b2b/companies">Companies</a> &rsaquo;
-        <a href="/admin/b2b/companies/<%= company.b2bCompanyId %>"><%= company.name %></a> &rsaquo; Credit
+        <a href="/admin/b2b/companies"><%= t('shared:common.companies') %></a> &rsaquo;
+        <a href="/admin/b2b/companies/<%= company.b2bCompanyId %>"><%= company.name %></a> &rsaquo; <%= t('b2b:credit') %>
       </div>
     </div>
     <div class="col-auto">
       <a href="/admin/b2b/companies/<%= company.b2bCompanyId %>/credit/transactions" class="btn btn-outline-secondary">
-        View Transactions
+        <%= t('b2b:viewTransactions') %>
       </a>
     </div>
   </div>
@@ -25,18 +25,18 @@
         <!-- Current Credit Status -->
         <div class="card mb-3">
           <div class="card-header">
-            <h3 class="card-title">Current Credit Status</h3>
+            <h3 class="card-title"><%= t('b2b:currentCreditStatus') %></h3>
           </div>
           <div class="card-body">
             <% if (creditStatus) { %>
             <dl class="row">
-              <dt class="col-sm-5">Credit Limit</dt>
+              <dt class="col-sm-5"><%= t('b2b:creditLimit') %></dt>
               <dd class="col-sm-7">
                 <strong><%= creditStatus.currency %> <%= (creditStatus.creditLimit || 0).toFixed(2) %></strong>
               </dd>
-              <dt class="col-sm-5">Current Balance Used</dt>
+              <dt class="col-sm-5"><%= t('b2b:currentBalanceUsed') %></dt>
               <dd class="col-sm-7"><%= creditStatus.currency %> <%= (creditStatus.currentBalance || 0).toFixed(2) %></dd>
-              <dt class="col-sm-5">Available Credit</dt>
+              <dt class="col-sm-5"><%= t('b2b:availableCredit') %></dt>
               <dd class="col-sm-7">
                 <span class="text-<%= (creditStatus.availableCredit || 0) > 0 ? 'success' : 'danger' %>">
                   <%= creditStatus.currency %> <%= (creditStatus.availableCredit || 0).toFixed(2) %>
@@ -44,7 +44,7 @@
               </dd>
             </dl>
             <% } else { %>
-            <p class="text-muted">No credit limit set for this company.</p>
+            <p class="text-muted"><%= t('b2b:noCreditLimitSet') %></p>
             <% } %>
           </div>
         </div>
@@ -52,25 +52,25 @@
         <!-- Update Credit Limit Form -->
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title"><%= creditStatus ? 'Update' : 'Set' %> Credit Limit</h3>
+            <h3 class="card-title"><%= creditStatus ? t('b2b:updateCreditLimit') : t('b2b:setCreditLimit') %></h3>
           </div>
           <div class="card-body">
             <form method="POST" action="/admin/b2b/companies/<%= company.b2bCompanyId %>/credit">
               <div class="mb-3">
-                <label class="form-label">Credit Limit <span class="text-danger">*</span></label>
+                <label class="form-label"><%= t('b2b:creditLimit') %> <span class="text-danger">*</span></label>
                 <input type="number" step="0.01" min="0" class="form-control" name="creditLimit"
                   value="<%= creditStatus ? creditStatus.creditLimit : '' %>" required>
               </div>
               <div class="mb-3">
-                <label class="form-label">Currency</label>
+                <label class="form-label"><%= t('shared:common.currency') %></label>
                 <input type="text" class="form-control" name="currency" maxlength="3"
                   value="<%= creditStatus ? creditStatus.currency : 'USD' %>">
               </div>
               <div class="mb-3">
-                <label class="form-label">Notes</label>
+                <label class="form-label"><%= t('shared:common.notes') %></label>
                 <textarea class="form-control" name="notes" rows="2"></textarea>
               </div>
-              <button type="submit" class="btn btn-primary">Save Credit Limit</button>
+              <button type="submit" class="btn btn-primary"><%= t('b2b:saveCreditLimit') %></button>
             </form>
           </div>
         </div>

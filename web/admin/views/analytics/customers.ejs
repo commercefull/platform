@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin/analytics">Analytics</a></li>
-            <li class="breadcrumb-item active">Customers</li>
+            <li class="breadcrumb-item"><a href="/admin/analytics"><%= t('shared:common.analytics') %></a></li>
+            <li class="breadcrumb-item active"><%= t('analytics:customers') %></li>
           </ol>
         </div>
       </div>
@@ -25,7 +25,7 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3>$<%= (lifetimeValue.averageCLV || 0).toFixed(2) %></h3>
-              <p>Average CLV</p>
+              <p><%= t('analytics:averageCLV') %></p>
             </div>
             <div class="icon"><i class="fas fa-dollar-sign"></i></div>
           </div>
@@ -34,7 +34,7 @@
           <div class="small-box bg-success">
             <div class="inner">
               <h3><%= (segmentationAnalysis.segments || []).length %></h3>
-              <p>Customer Segments</p>
+              <p><%= t('shared:common.customerSegments') %></p>
             </div>
             <div class="icon"><i class="fas fa-layer-group"></i></div>
           </div>
@@ -43,7 +43,7 @@
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= (segmentationAnalysis.segments || []).reduce((sum, s) => sum + s.size, 0) %></h3>
-              <p>Total Customers</p>
+              <p><%= t('shared:common.totalCustomers') %></p>
             </div>
             <div class="icon"><i class="fas fa-users"></i></div>
           </div>
@@ -52,7 +52,7 @@
           <div class="small-box bg-danger">
             <div class="inner">
               <h3><%= ((segmentationAnalysis.segments || []).find(s => s.id === 'at_risk')?.size || 0) %></h3>
-              <p>At Risk Customers</p>
+              <p><%= t('analytics:atRiskCustomers') %></p>
             </div>
             <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
           </div>
@@ -64,7 +64,7 @@
         <div class="col-lg-8">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-chart-pie me-2"></i>Customer Segments</h3>
+              <h3 class="card-title"><i class="fas fa-chart-pie me-2"></i><%= t('shared:common.customerSegments') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
@@ -83,7 +83,7 @@
                            style="width: <%= ((segment.size / ((segmentationAnalysis.segments || []).reduce((sum, s) => sum + s.size, 0) || 1)) * 100).toFixed(0) %>%">
                       </div>
                     </div>
-                    <small class="text-muted">Avg CLV: $<%= (segment.avgLifetimeValue || 0).toFixed(2) %> | Churn: <%= ((segment.churnRate || 0) * 100).toFixed(1) %>%</small>
+                    <small class="text-muted"><%= t('analytics:avgCLV') %>: $<%= (segment.avgLifetimeValue || 0).toFixed(2) %> | <%= t('analytics:churn') %>: <%= ((segment.churnRate || 0) * 100).toFixed(1) %>%</small>
                   </div>
                   <% }); %>
                 </div>
@@ -94,7 +94,7 @@
         <div class="col-lg-4">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Segment Insights</h3>
+              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i><%= t('analytics:segmentInsights') %></h3>
             </div>
             <div class="card-body">
               <% (segmentationAnalysis.segments || []).forEach(function(segment) { %>
@@ -119,7 +119,7 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-chart-bar me-2"></i>Customer Lifetime Value by Segment</h3>
+              <h3 class="card-title"><i class="fas fa-chart-bar me-2"></i><%= t('analytics:clvBySegment') %></h3>
             </div>
             <div class="card-body">
               <canvas id="clvChart" height="200"></canvas>
@@ -133,17 +133,17 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-table me-2"></i>Segment Analysis Details</h3>
+              <h3 class="card-title"><i class="fas fa-table me-2"></i><%= t('analytics:segmentAnalysisDetails') %></h3>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Segment</th>
-                    <th>Size</th>
-                    <th>Avg CLV</th>
-                    <th>Churn Rate</th>
-                    <th>Characteristics</th>
+                    <th><%= t('analytics:segment') %></th>
+                    <th><%= t('analytics:size') %></th>
+                    <th><%= t('analytics:avgCLV') %></th>
+                    <th><%= t('shared:common.churnRate') %></th>
+                    <th><%= t('analytics:characteristics') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -200,7 +200,7 @@
     data: {
       labels: <%- JSON.stringify((lifetimeValue.clvBySegment || []).map(s => s.segment)) %>,
       datasets: [{
-        label: 'Average CLV',
+        label: '<%= t("analytics:averageCLV") %>',
         data: <%- JSON.stringify((lifetimeValue.clvBySegment || []).map(s => s.clv)) %>,
         backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#dc3545']
       }]

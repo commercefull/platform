@@ -2,8 +2,10 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import LocaleRepo from '../../infrastructure/repositories/localeRepo';
+import CountryRepo from '../../infrastructure/repositories/countryRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 import { Locale } from '../../../../libs/db/types';
+import { CountryCreateParams, CountryUpdateParams } from '../../infrastructure/repositories/countryRepo';
 
 interface CreateLocaleBody {
   code: string;
@@ -280,8 +282,16 @@ export const deactivateLocale = async (req: TypedRequest, res: Response): Promis
 
 export const getCountries = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Implement when country repo is available
-    successResponse(res, []);
+    const { activeOnly = 'true', region } = req.query;
+
+    let countries;
+    if (region) {
+      countries = await CountryRepo.findByRegion(region as string);
+    } else {
+      countries = await CountryRepo.findAll(activeOnly === 'true');
+    }
+
+    successResponse(res, countries);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -291,9 +301,15 @@ export const getCountries = async (req: TypedRequest, res: Response): Promise<vo
 
 export const getCountryById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    
-    // TODO: Implement when country repo is available
-    successResponse(res, {});
+    const { id } = req.params;
+    const country = await CountryRepo.findById(id);
+
+    if (!country) {
+      errorResponse(res, `Country with ID ${id} not found`, 404);
+      return;
+    }
+
+    successResponse(res, country);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -303,9 +319,15 @@ export const getCountryById = async (req: TypedRequest, res: Response): Promise<
 
 export const getCountryByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    
-    // TODO: Implement when country repo is available
-    successResponse(res, {});
+    const { code } = req.params;
+    const country = await CountryRepo.findByCode(code);
+
+    if (!country) {
+      errorResponse(res, `Country with code ${code} not found`, 404);
+      return;
+    }
+
+    successResponse(res, country);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -315,9 +337,9 @@ export const getCountryByCode = async (req: TypedRequest, res: Response): Promis
 
 export const getCountriesByRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    
-    // TODO: Implement when country repo is available
-    successResponse(res, []);
+    const { region } = req.params;
+    const countries = await CountryRepo.findByRegion(region);
+    successResponse(res, countries);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -327,20 +349,51 @@ export const getCountriesByRegion = async (req: TypedRequest, res: Response): Pr
 
 export const createCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Implement when country repo is available
-    successResponse(res, {}, 201);
+    const { code, name, numericCode, alpha3Code, defaultCurrencyId, isActive, flagIcon, region } = req.body as CountryCreateParams;
+
+    const errors: string[] = [];
+    if (!code) errors.push('code is required');
+    if (!name) errors.push('name is required');
+
+    if (errors.length > 0) {
+      validationErrorResponse(res, errors);
+      return;
+    }
+
+    const country = await CountryRepo.create({
+      code,
+      name,
+      numericCode,
+      alpha3Code,
+      defaultCurrencyId,
+      isActive: isActive ?? true,
+      flagIcon,
+      region,
+    });
+
+    successResponse(res, country, 201);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
-    errorResponse(res, 'Failed to create country');
+    if ((error as Error).message.includes('already exists')) {
+      errorResponse(res, (error as Error).message, 409);
+    } else {
+      errorResponse(res, 'Failed to create country');
+    }
   }
 };
 
 export const updateCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    
-    // TODO: Implement when country repo is available
-    successResponse(res, {});
+    const { id } = req.params;
+    const country = await CountryRepo.update(id, req.body as CountryUpdateParams);
+
+    if (!country) {
+      errorResponse(res, `Country with ID ${id} not found`, 404);
+      return;
+    }
+
+    successResponse(res, country);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -350,8 +403,14 @@ export const updateCountry = async (req: TypedRequest, res: Response): Promise<v
 
 export const deleteCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    
-    // TODO: Implement when country repo is available
+    const { id } = req.params;
+    const deleted = await CountryRepo.delete(id);
+
+    if (!deleted) {
+      errorResponse(res, `Country with ID ${id} not found`, 404);
+      return;
+    }
+
     successResponse(res, { message: 'Country deleted successfully' });
   } catch (error: unknown) {
     logger.error('Error:', error);
@@ -362,9 +421,15 @@ export const deleteCountry = async (req: TypedRequest, res: Response): Promise<v
 
 export const activateCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    
-    // TODO: Implement when country repo is available
-    successResponse(res, {});
+    const { id } = req.params;
+    const country = await CountryRepo.activate(id);
+
+    if (!country) {
+      errorResponse(res, `Country with ID ${id} not found`, 404);
+      return;
+    }
+
+    successResponse(res, country);
   } catch (error: unknown) {
     logger.error('Error:', error);
 
@@ -374,9 +439,15 @@ export const activateCountry = async (req: TypedRequest, res: Response): Promise
 
 export const deactivateCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    
-    // TODO: Implement when country repo is available
-    successResponse(res, {});
+    const { id } = req.params;
+    const country = await CountryRepo.deactivate(id);
+
+    if (!country) {
+      errorResponse(res, `Country with ID ${id} not found`, 404);
+      return;
+    }
+
+    successResponse(res, country);
   } catch (error: unknown) {
     logger.error('Error:', error);
 

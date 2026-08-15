@@ -35,9 +35,9 @@
         <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= pageName %></h1>
         <p class="text-gray-600">
           <% if (products && products.length > 0) { %>
-            <%= products.length %> product<%= products.length !== 1 ? 's' : '' %> found
+            <%= products.length !== 1 ? t('storefront:productsFound', { count: products.length }) : t('storefront:productFound', { count: products.length }) %>
           <% } else { %>
-            No products found
+            <%= t('storefront:noProductsFound') %>
           <% } %>
         </p>
       </div>
@@ -49,15 +49,15 @@
       <!-- Filters Sidebar -->
       <aside class="lg:w-64 flex-shrink-0">
         <div class="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-4"><%= t('shared:common.filters') %></h3>
 
           <!-- Categories -->
           <% if (categories && categories.length > 0) { %>
           <div class="mb-6">
-            <h4 class="font-medium text-gray-900 mb-3">Categories</h4>
+            <h4 class="font-medium text-gray-900 mb-3"><%= t('shared:common.categories') %></h4>
             <div class="space-y-2">
               <a href="/products" class="block text-sm <%= !categorySlug ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-blue-600' %> transition-colors">
-                All Products
+                <%= t('storefront:allProducts') %>
               </a>
               <% categories.forEach(category => { %>
               <a href="/products/category/<%= category.slug %>"
@@ -71,45 +71,45 @@
 
           <!-- Price Range -->
           <div class="mb-6">
-            <h4 class="font-medium text-gray-900 mb-3">Price Range</h4>
+            <h4 class="font-medium text-gray-900 mb-3"><%= t('storefront:priceRange') %></h4>
             <div class="space-y-2">
               <label class="flex items-center">
                 <input type="radio" name="price" value="0-50" class="text-blue-600 focus:ring-blue-500">
-                <span class="ml-2 text-sm text-gray-700">Under $50</span>
+                <span class="ml-2 text-sm text-gray-700"><%= t('storefront:underFifty') %></span>
               </label>
               <label class="flex items-center">
                 <input type="radio" name="price" value="50-100" class="text-blue-600 focus:ring-blue-500">
-                <span class="ml-2 text-sm text-gray-700">$50 - $100</span>
+                <span class="ml-2 text-sm text-gray-700"><%= t('storefront:fiftyToHundred') %></span>
               </label>
               <label class="flex items-center">
                 <input type="radio" name="price" value="100-200" class="text-blue-600 focus:ring-blue-500">
-                <span class="ml-2 text-sm text-gray-700">$100 - $200</span>
+                <span class="ml-2 text-sm text-gray-700"><%= t('storefront:hundredToTwoHundred') %></span>
               </label>
               <label class="flex items-center">
                 <input type="radio" name="price" value="200+" class="text-blue-600 focus:ring-blue-500">
-                <span class="ml-2 text-sm text-gray-700">$200+</span>
+                <span class="ml-2 text-sm text-gray-700"><%= t('storefront:twoHundredPlus') %></span>
               </label>
             </div>
           </div>
 
           <!-- Availability -->
           <div class="mb-6">
-            <h4 class="font-medium text-gray-900 mb-3">Availability</h4>
+            <h4 class="font-medium text-gray-900 mb-3"><%= t('storefront:availability') %></h4>
             <div class="space-y-2">
               <label class="flex items-center">
                 <input type="checkbox" class="text-blue-600 focus:ring-blue-500">
-                <span class="ml-2 text-sm text-gray-700">In Stock</span>
+                <span class="ml-2 text-sm text-gray-700"><%= t('shared:common.inStock') %></span>
               </label>
               <label class="flex items-center">
                 <input type="checkbox" class="text-blue-600 focus:ring-blue-500">
-                <span class="ml-2 text-sm text-gray-700">Pre-order</span>
+                <span class="ml-2 text-sm text-gray-700"><%= t('storefront:preOrder') %></span>
               </label>
             </div>
           </div>
 
           <!-- Clear Filters -->
           <button class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
-            Clear All Filters
+            <%= t('storefront:clearAllFilters') %>
           </button>
         </div>
       </aside>
@@ -121,24 +121,24 @@
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <!-- Sort Options -->
             <div class="flex items-center space-x-4">
-              <span class="text-sm text-gray-600">Sort by:</span>
+              <span class="text-sm text-gray-600"><%= t('storefront:sortBy') %></span>
               <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="newest">Newest First</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="name">Name A-Z</option>
-                <option value="popular">Most Popular</option>
+                <option value="newest"><%= t('storefront:newestFirst') %></option>
+                <option value="price-low"><%= t('storefront:priceLowToHigh') %></option>
+                <option value="price-high"><%= t('storefront:priceHighToLow') %></option>
+                <option value="name"><%= t('storefront:nameAZ') %></option>
+                <option value="popular"><%= t('storefront:mostPopular') %></option>
               </select>
             </div>
 
             <!-- View Options -->
             <div class="flex items-center space-x-2">
-              <button class="p-2 text-gray-600 hover:text-blue-600 transition-colors" title="Grid View">
+              <button class="p-2 text-gray-600 hover:text-blue-600 transition-colors" title="<%= t('storefront:gridView') %>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                 </svg>
               </button>
-              <button class="p-2 text-gray-600 hover:text-blue-600 transition-colors" title="List View">
+              <button class="p-2 text-gray-600 hover:text-blue-600 transition-colors" title="<%= t('storefront:listView') %>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
                 </svg>
@@ -166,13 +166,13 @@
               <% if (!product.isActive || product.stock <= 0) { %>
               <div class="absolute top-3 left-3">
                 <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                  <%= product.stock > 0 ? 'Coming Soon' : 'Sold Out' %>
+                  <%= product.stock > 0 ? t('storefront:comingSoon') : t('storefront:soldOut') %>
                 </span>
               </div>
               <% } else { %>
               <div class="absolute top-3 left-3">
                 <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                  In Stock
+                  <%= t('shared:common.inStock') %>
                 </span>
               </div>
               <% } %>
@@ -222,14 +222,14 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
                 </svg>
-                Add to Cart
+                <%= t('shared:common.addToCart') %>
               </a>
               <% } else { %>
               <button
                 disabled
                 class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-medium cursor-not-allowed inline-flex items-center justify-center"
               >
-                <%= product.stock > 0 ? 'Coming Soon' : 'Sold Out' %>
+                <%= product.stock > 0 ? t('storefront:comingSoon') : t('storefront:soldOut') %>
               </button>
               <% } %>
             </div>
@@ -242,10 +242,10 @@
           <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
           </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-          <p class="text-gray-600 mb-6">Try adjusting your filters or browse our full collection.</p>
+          <h3 class="text-lg font-medium text-gray-900 mb-2"><%= t('storefront:noProductsFound') %></h3>
+          <p class="text-gray-600 mb-6"><%= t('storefront:tryAdjustingFilters') %></p>
           <a href="/products" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            View All Products
+            <%= t('storefront:viewAllProducts') %>
           </a>
         </div>
         <% } %>

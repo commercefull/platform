@@ -1,0 +1,11 @@
+{
+  "title": "审核日志",
+  "user": "用户",
+  "resource": "资源",
+  "resourceId": "资源ID",
+  "ipAddress": "IP地址",
+  "noLogs": "未找到审核日志。",
+  "changes": "变化",
+  "oldValue": "旧值",
+  "newValue": "新价值"
+}

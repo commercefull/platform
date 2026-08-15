@@ -1,0 +1,52 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/reporting/schedules/create" class="btn btn-primary"><%= t('shared:common.createSchedule') %></a>
+      <a href="/admin/reporting" class="btn btn-outline-secondary ms-2"><%= t('reporting:dashboard') %></a>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="card">
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th><%= t('common.name') %></th>
+              <th><%= t('shared:common.reportType') %></th>
+              <th><%= t('shared:common.frequency') %></th>
+              <th><%= t('shared:common.format') %></th>
+              <th><%= t('common.active') %></th>
+              <th><%= t('reporting:lastRun') %></th>
+              <th><%= t('reporting:nextRun') %></th>
+              <th><%= t('common.actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (schedules || []).forEach(function(sched) { %>
+              <tr>
+                <td><strong><%= sched.name %></strong></td>
+                <td><span class="badge bg-secondary"><%= sched.reportType %></span></td>
+                <td><%= sched.frequency %></td>
+                <td><%= sched.format %></td>
+                <td><span class="badge bg-<%= sched.isActive ? 'success' : 'secondary' %>"><%= sched.isActive ? t('common.active') : t('common.inactive') %></span></td>
+                <td><%= sched.lastRunAt ? new Date(sched.lastRunAt).toLocaleDateString() : '—' %></td>
+                <td><%= sched.nextRunAt ? new Date(sched.nextRunAt).toLocaleDateString() : '—' %></td>
+                <td>
+                  <a class="btn btn-sm btn-outline-primary" href="/admin/reporting/schedules/<%= sched.reportScheduleId %>"><%= t('common.view') %></a>
+                  <a class="btn btn-sm btn-outline-secondary" href="/admin/reporting/schedules/<%= sched.reportScheduleId %>/edit"><%= t('common.edit') %></a>
+                </td>
+              </tr>
+            <% }) %>
+            <% if (!schedules || schedules.length === 0) { %>
+              <tr><td colspan="8" class="text-center text-muted py-4"><%= t('analytics:noScheduledReports') %></td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "総購読数",
+  "monthlyRecurringRevenue": "毎月の経常収益",
+  "addPlan": "プランの追加",
+  "planName": "プラン名",
+  "subscribers": "購読者",
+  "noPlans": "サブスクリプション プランが設定されていません。",
+  "plan": "プラン",
+  "started": "開始しました",
+  "nextBilling": "次回の請求",
+  "noActiveSubscriptions": "アクティブなサブスクリプションはありません。",
+  "addSubscriptionPlan": "サブスクリプションプランの追加",
+  "yearly": "毎年",
+  "trialDays": "トライアルデー",
+  "confirmDeletePlan": "このプランを削除しますか?",
+  "billingOverview": "請求の概要",
+  "billingDescription": "サブスクリプションの請求、失敗した支払い、更新処理を管理します。"
+}

@@ -1,0 +1,13 @@
+{
+  "create": "Crear organización",
+  "view": "Detalles de la organización",
+  "single": "Soltero",
+  "multiStore": "Multitienda",
+  "marketplace": "Mercado",
+  "settings": "Configuración (JSON)",
+  "settingsHint": "Objeto JSON opcional para configuraciones a nivel de organización.",
+  "slugHint": "Sólo letras minúsculas, números y guiones.",
+  "noOrganizations": "No se encontraron organizaciones.",
+  "confirmDelete": "¿Eliminar esta organización?",
+  "noStoresLinked": "No hay tiendas vinculadas a esta organización."
+}

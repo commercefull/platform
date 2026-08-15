@@ -1,0 +1,18 @@
+{
+  "totalSubscriptions": "Tổng số đăng ký",
+  "monthlyRecurringRevenue": "Doanh thu định kỳ hàng tháng",
+  "addPlan": "Thêm kế hoạch",
+  "planName": "Tên kế hoạch",
+  "subscribers": "Người đăng ký",
+  "noPlans": "Không có gói đăng ký nào được định cấu hình.",
+  "plan": "Kế hoạch",
+  "started": "Đã bắt đầu",
+  "nextBilling": "Thanh toán tiếp theo",
+  "noActiveSubscriptions": "Không có đăng ký hoạt động.",
+  "addSubscriptionPlan": "Thêm gói đăng ký",
+  "yearly": "Hàng năm",
+  "trialDays": "Ngày dùng thử",
+  "confirmDeletePlan": "Xóa kế hoạch này?",
+  "billingOverview": "Tổng quan về thanh toán",
+  "billingDescription": "Quản lý thanh toán đăng ký, thanh toán không thành công và xử lý gia hạn."
+}

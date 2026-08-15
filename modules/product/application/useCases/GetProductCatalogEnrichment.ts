@@ -1,10 +1,9 @@
 /**
  * Get Product Catalog Enrichment Use Case
- * Returns a product with its brand, categories, tags, and Q&A
+ * Returns a product with its categories, tags, and Q&A
  */
 
 import productRepo from '../../infrastructure/repositories/productRepo';
-import productBrandRepo from '../../infrastructure/repositories/productBrandRepo';
 import productToCategoryRepo from '../../infrastructure/repositories/productToCategoryRepo';
 import productCategoryRepo from '../../infrastructure/repositories/productCategoryRepo';
 import productTagRepo from '../../infrastructure/repositories/productTagRepo';
@@ -12,7 +11,6 @@ import productQaRepo from '../../infrastructure/repositories/productQaRepo';
 import type { ProductQaStatus } from '../../infrastructure/repositories/productQaRepo';
 import productQaAnswerRepo from '../../infrastructure/repositories/productQaAnswerRepo';
 import type { Product } from '../../infrastructure/repositories/productRepo';
-import type { ProductBrand } from '../../infrastructure/repositories/productBrandRepo';
 import type { ProductCategory } from '../../infrastructure/repositories/productCategoryRepo';
 import type { ProductTag } from '../../infrastructure/repositories/productTagRepo';
 import type { ProductQa } from '../../infrastructure/repositories/productQaRepo';
@@ -40,7 +38,6 @@ export interface QaWithAnswers extends ProductQa {
 
 export interface ProductCatalogEnrichmentResponse {
   product: Product;
-  brands: ProductBrand[];
   categories: ProductCategory[];
   tags: ProductTag[];
   qa: QaWithAnswers[];
@@ -60,9 +57,6 @@ export class GetProductCatalogEnrichmentUseCase {
     if (!product) {
       throw new Error(`Product not found: ${command.productId}`);
     }
-
-    // Fetch brands linked to this product
-    const brands = await productBrandRepo.findByProduct(command.productId);
 
     // Fetch category mappings and resolve full category objects
     const categoryMappings = await productToCategoryRepo.findByProduct(command.productId);
@@ -88,6 +82,6 @@ export class GetProductCatalogEnrichmentUseCase {
       qa.push({ ...question, answers });
     }
 
-    return { product, brands, categories, tags, qa };
+    return { product, categories, tags, qa };
   }
 }

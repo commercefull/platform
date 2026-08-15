@@ -56,10 +56,10 @@ export const createTaxRate = async (req: TypedRequest, res: Response) => {
     const body = req.body as {
       name?: string;
       description?: string;
-      rate?: string;
+      rate?: string | number;
       taxCategoryId?: string;
       taxZoneId?: string;
-      priority?: string;
+      priority?: string | number;
       isActive?: boolean;
       type?: string;
       isCompound?: boolean;
@@ -80,10 +80,10 @@ export const createTaxRate = async (req: TypedRequest, res: Response) => {
     const newTaxRate: Omit<TaxRate, 'id' | 'createdAt' | 'updatedAt'> = {
       name,
       description,
-      rate: parseFloat(rate),
+      rate: parseFloat(String(rate)),
       taxCategoryId,
       taxZoneId,
-      priority: priority ? parseInt(priority) : 1,
+      priority: priority ? parseInt(String(priority)) : 1,
       isActive: isActive !== undefined ? isActive : true,
       type: (type || 'percentage') as TaxRateType,
       isCompound: isCompound !== undefined ? isCompound : false,
@@ -108,10 +108,10 @@ export const updateTaxRate = async (req: TypedRequest, res: Response) => {
     const body = req.body as {
       name?: string;
       description?: string;
-      rate?: string;
+      rate?: string | number;
       taxCategoryId?: string;
       taxZoneId?: string;
-      priority?: string;
+      priority?: string | number;
       isActive?: boolean;
     };
     const { name, description, rate, taxCategoryId, taxZoneId, priority, isActive } = body;
@@ -126,10 +126,10 @@ export const updateTaxRate = async (req: TypedRequest, res: Response) => {
 
     if (name !== undefined) updatedTaxRate.name = name;
     if (description !== undefined) updatedTaxRate.description = description;
-    if (rate !== undefined) updatedTaxRate.rate = parseFloat(rate);
+    if (rate !== undefined) updatedTaxRate.rate = parseFloat(String(rate));
     if (taxCategoryId !== undefined) updatedTaxRate.taxCategoryId = taxCategoryId;
     if (taxZoneId !== undefined) updatedTaxRate.taxZoneId = taxZoneId;
-    if (priority !== undefined) updatedTaxRate.priority = parseInt(priority);
+    if (priority !== undefined) updatedTaxRate.priority = parseInt(String(priority));
     if (isActive !== undefined) updatedTaxRate.isActive = isActive;
 
     const result = await new TaxCommandRepo().updateTaxRate(id, updatedTaxRate);
@@ -137,6 +137,10 @@ export const updateTaxRate = async (req: TypedRequest, res: Response) => {
     res.json({ success: true, data: result });
   } catch (error: unknown) {
     logger.error('Error:', error);
+
+    if ((error as Error).message?.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      return res.status(404).json({ success: false, error: 'Tax rate not found' });
+    }
 
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
@@ -157,6 +161,10 @@ export const deleteTaxRate = async (req: TypedRequest, res: Response) => {
     res.json({ success: true, message: 'Tax rate deleted successfully' });
   } catch (error: unknown) {
     logger.error('Error:', error);
+
+    if ((error as Error).message?.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      return res.status(404).json({ success: false, error: 'Tax rate not found' });
+    }
 
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
@@ -233,6 +241,10 @@ export const createTaxCategory = async (req: TypedRequest, res: Response) => {
   } catch (error: unknown) {
     logger.error('Error:', error);
 
+    if ((error as Error).message?.includes('unique') || (error as Error).message?.includes('duplicate') || (error as Error).message?.includes('violates unique constraint')) {
+      return res.status(400).json({ success: false, error: 'A tax category with this code already exists' });
+    }
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 };
@@ -271,6 +283,10 @@ export const updateTaxCategory = async (req: TypedRequest, res: Response) => {
   } catch (error: unknown) {
     logger.error('Error:', error);
 
+    if ((error as Error).message?.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      return res.status(404).json({ success: false, error: 'Tax category not found' });
+    }
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 };
@@ -290,6 +306,10 @@ export const deleteTaxCategory = async (req: TypedRequest, res: Response) => {
     res.json({ success: true, message: 'Tax category deleted successfully' });
   } catch (error: unknown) {
     logger.error('Error:', error);
+
+    if ((error as Error).message?.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
+      return res.status(404).json({ success: false, error: 'Tax category not found' });
+    }
 
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }

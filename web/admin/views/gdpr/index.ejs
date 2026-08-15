@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">GDPR Compliance</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('dashboard.title') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.gdprCompliance') %></li>
           </ol>
         </div>
       </div>
@@ -25,17 +25,17 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3><%= stats.pendingRequests || 0 %></h3>
-              <p>Pending Requests</p>
+              <p><%= t('gdpr:pendingRequests') %></p>
             </div>
             <div class="icon"><i class="fas fa-clock"></i></div>
-            <a href="#requests" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="#requests" class="small-box-footer"><%= t('common.view') %> <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <div class="col-lg-3 col-6">
           <div class="small-box bg-success">
             <div class="inner">
               <h3><%= stats.completedRequests || 0 %></h3>
-              <p>Completed This Month</p>
+              <p><%= t('gdpr:completedThisMonth') %></p>
             </div>
             <div class="icon"><i class="fas fa-check-circle"></i></div>
           </div>
@@ -44,7 +44,7 @@
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= stats.avgProcessingDays || 0 %></h3>
-              <p>Avg Processing Days</p>
+              <p><%= t('gdpr:avgProcessingDays') %></p>
             </div>
             <div class="icon"><i class="fas fa-calendar-alt"></i></div>
           </div>
@@ -53,7 +53,7 @@
           <div class="small-box bg-danger">
             <div class="inner">
               <h3><%= stats.consentRate || 0 %>%</h3>
-              <p>Marketing Consent Rate</p>
+              <p><%= t('gdpr:marketingConsentRate') %></p>
             </div>
             <div class="icon"><i class="fas fa-percentage"></i></div>
           </div>
@@ -63,23 +63,23 @@
       <!-- Data Access Requests -->
       <div id="requests" class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-user-shield me-2"></i>Data Access Requests</h3>
+          <h3 class="card-title"><i class="fas fa-user-shield me-2"></i><%= t('gdpr:dataAccessRequests') %></h3>
           <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#newRequestModal">
-            <i class="fas fa-plus me-1"></i>New Request
+            <i class="fas fa-plus me-1"></i><%= t('shared:common.newRequest') %>
           </button>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Request ID</th>
-                <th>Type</th>
-                <th>Customer</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Requested</th>
-                <th>Due Date</th>
-                <th>Actions</th>
+                <th><%= t('shared:common.requestId') %></th>
+                <th><%= t('shared:common.requestType') %></th>
+                <th><%= t('shared:common.customer') %></th>
+                <th><%= t('shared:common.email') %></th>
+                <th><%= t('shared:common.status') %></th>
+                <th><%= t('shared:common.requested') %></th>
+                <th><%= t('shared:common.dueDate') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
@@ -88,7 +88,7 @@
                 <td><code><%= request.requestId.substring(0, 8) %>...</code></td>
                 <td>
                   <span class="badge bg-<%= request.requestType === 'access' ? 'info' : request.requestType === 'delete' ? 'danger' : 'warning' %>">
-                    <%= request.requestType === 'access' ? 'Data Access' : request.requestType === 'delete' ? 'Data Deletion' : 'Rectification' %>
+                    <%= request.requestType === 'access' ? t('gdpr:dataAccess') : request.requestType === 'delete' ? t('gdpr:dataDeletion') : t('shared:common.rectification') %>
                   </span>
                 </td>
                 <td><%= request.customerName || '-' %></td>
@@ -114,7 +114,7 @@
               <% }); %>
               <% if ((requests || []).length === 0) { %>
               <tr>
-                <td colspan="8" class="text-center text-muted py-4">No GDPR requests yet.</td>
+                <td colspan="8" class="text-center text-muted py-4"><%= t('gdpr:noGdprRequests') %></td>
               </tr>
               <% } %>
             </tbody>
@@ -125,7 +125,7 @@
       <!-- Consent Management -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-check-circle me-2"></i>Consent Management</h3>
+          <h3 class="card-title"><i class="fas fa-check-circle me-2"></i><%= t('gdpr:consentManagement') %></h3>
         </div>
         <div class="card-body">
           <div class="row">
@@ -133,7 +133,7 @@
               <div class="info-box">
                 <span class="info-box-icon bg-success"><i class="fas fa-thumbs-up"></i></span>
                 <div class="info-box-content">
-                  <span class="info-box-text">Marketing Consent</span>
+                  <span class="info-box-text"><%= t('gdpr:marketingConsent') %></span>
                   <span class="info-box-number"><%= stats.marketingConsent || 0 %></span>
                   <div class="progress">
                     <div class="progress-bar bg-success" style="width: <%= stats.marketingConsentRate || 0 %>%"></div>
@@ -145,7 +145,7 @@
               <div class="info-box">
                 <span class="info-box-icon bg-info"><i class="fas fa-cookie-bite"></i></span>
                 <div class="info-box-content">
-                  <span class="info-box-text">Analytics Consent</span>
+                  <span class="info-box-text"><%= t('gdpr:analyticsConsent') %></span>
                   <span class="info-box-number"><%= stats.analyticsConsent || 0 %></span>
                   <div class="progress">
                     <div class="progress-bar bg-info" style="width: <%= stats.analyticsConsentRate || 0 %>%"></div>
@@ -156,7 +156,7 @@
           </div>
           <div class="mt-3">
             <a href="/admin/gdpr/consent" class="btn btn-outline-primary">
-              <i class="fas fa-cog me-1"></i>Manage Consent Settings
+              <i class="fas fa-cog me-1"></i><%= t('gdpr:manageConsentSettings') %>
             </a>
           </div>
         </div>
@@ -170,35 +170,35 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Create GDPR Request</h5>
+        <h5 class="modal-title"><%= t('gdpr:createGdprRequest') %></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form method="POST" action="/admin/gdpr/requests">
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Request Type <span class="text-danger">*</span></label>
+            <label class="form-label"><%= t('shared:common.requestType') %> <span class="text-danger">*</span></label>
             <select class="form-select" name="requestType" required>
-              <option value="access">Data Access Request (SAR)</option>
-              <option value="delete">Data Deletion Request</option>
-              <option value="rectify">Data Rectification Request</option>
+              <option value="access"><%= t('gdpr:dataAccessRequestSar') %></option>
+              <option value="delete"><%= t('gdpr:dataDeletionRequest') %></option>
+              <option value="rectify"><%= t('gdpr:dataRectificationRequest') %></option>
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Customer Email <span class="text-danger">*</span></label>
+            <label class="form-label"><%= t('gdpr:customerEmail') %> <span class="text-danger">*</span></label>
             <input type="email" class="form-control" name="customerEmail" required placeholder="customer@example.com">
           </div>
           <div class="mb-3">
-            <label class="form-label">Customer Name</label>
-            <input type="text" class="form-control" name="customerName" placeholder="Optional">
+            <label class="form-label"><%= t('shared:common.customerName') %></label>
+            <input type="text" class="form-control" name="customerName" placeholder="<%= t('common.optional') %>">
           </div>
           <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea class="form-control" name="description" rows="3" placeholder="Additional details about the request"></textarea>
+            <label class="form-label"><%= t('shared:common.description') %></label>
+            <textarea class="form-control" name="description" rows="3" placeholder="<%= t('shared:common.description') %>"></textarea>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create Request</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+          <button type="submit" class="btn btn-primary"><%= t('gdpr:createRequest') %></button>
         </div>
       </form>
     </div>
@@ -207,7 +207,7 @@
 
 <script>
   async function processRequest(requestId) {
-    if (!confirm('Mark this request as processing?')) return;
+    if (!confirm('<%= t("gdpr:confirmProcessRequest") %>')) return;
     const res = await fetch(`/admin/gdpr/requests/${requestId}/process`, { method: 'POST' });
     if ((await res.json()).success) location.reload();
   }

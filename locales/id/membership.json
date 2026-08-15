@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "Keanggotaan",
+  "totalMembers": "Jumlah Anggota",
+  "activeMembers": "Anggota Aktif",
+  "membershipTiers": "Tingkatan Keanggotaan",
+  "expiringThisMonth": "Berakhir Bulan Ini",
+  "addTier": "Tambahkan Tingkat",
+  "members": "anggota",
+  "noTiers": "Tidak ada tingkat keanggotaan yang dikonfigurasi.",
+  "recentMembers": "Anggota Terbaru",
+  "tier": "Tingkat",
+  "noMembers": "Belum ada anggota.",
+  "addMembershipTier": "Tambahkan Tingkat Keanggotaan",
+  "tierName": "Nama Tingkat",
+  "billingPeriod": "Periode Penagihan",
+  "lifetime": "Seumur hidup",
+  "benefitsOnePerLine": "Manfaat (satu per baris)",
+  "setAsDefault": "Tetapkan sebagai tingkat default",
+  "createTier": "Buat Tingkat",
+  "confirmDeleteTier": "Hapus tingkat ini?",
+  "analytics": "Analisis Keanggotaan",
+  "analyticsDescription": "Anggota aktif, pendapatan, tingkat churn, dan distribusi tingkatan."
+}

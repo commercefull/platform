@@ -7,13 +7,13 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Cart Analytics</h1>
+          <h1 class="m-0"><%= t('operations:cartAnalytics') %></h1>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item">Operations</li>
-            <li class="breadcrumb-item active">Cart Analytics</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><%= t('shared:common.operations') %></li>
+            <li class="breadcrumb-item active"><%= t('operations:cartAnalytics') %></li>
           </ol>
         </div>
       </div>
@@ -29,13 +29,13 @@
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= stats.totalAbandoned %></h3>
-              <p>Abandoned Carts</p>
+              <p><%= t('shared:common.abandonedCarts') %></p>
             </div>
             <div class="icon">
               <i class="fas fa-shopping-cart"></i>
             </div>
             <div class="small-box-footer">
-              Last 30 days
+              <%= t('operations:last30Days') %>
             </div>
           </div>
         </div>
@@ -43,13 +43,13 @@
           <div class="small-box bg-danger">
             <div class="inner">
               <h3><%= stats.totalExpired %></h3>
-              <p>Expired Carts</p>
+              <p><%= t('operations:expiredCarts') %></p>
             </div>
             <div class="icon">
               <i class="fas fa-clock"></i>
             </div>
             <div class="small-box-footer">
-              Need cleanup
+              <%= t('operations:needCleanup') %>
             </div>
           </div>
         </div>
@@ -57,13 +57,13 @@
           <div class="small-box bg-success">
             <div class="inner">
               <h3><%= stats.totalValue.toFixed(0) %></h3>
-              <p>Recovery Value ($)</p>
+              <p><%= t('operations:recoveryValue') %> ($)</p>
             </div>
             <div class="icon">
               <i class="fas fa-dollar-sign"></i>
             </div>
             <div class="small-box-footer">
-              Potential revenue
+              <%= t('operations:potentialRevenue') %>
             </div>
           </div>
         </div>
@@ -71,13 +71,13 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3><%= stats.avgCartValue.toFixed(0) %></h3>
-              <p>Avg Cart Value ($)</p>
+              <p><%= t('operations:avgCartValue') %> ($)</p>
             </div>
             <div class="icon">
               <i class="fas fa-chart-line"></i>
             </div>
             <div class="small-box-footer">
-              Per abandoned cart
+              <%= t('operations:perAbandonedCart') %>
             </div>
           </div>
         </div>
@@ -88,7 +88,7 @@
         <div class="col-md-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Recovery Potential by Cart Age</h3>
+              <h3 class="card-title"><%= t('operations:recoveryPotentialByAge') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
@@ -96,13 +96,13 @@
                   <div class="info-box">
                     <span class="info-box-icon bg-success"><i class="fas fa-clock"></i></span>
                     <div class="info-box-content">
-                      <span class="info-box-text">Recent Carts (≤7 days)</span>
-                      <span class="info-box-number"><%= stats.recentAbandoned %> carts</span>
+                      <span class="info-box-text"><%= t('operations:recentCarts') %></span>
+                      <span class="info-box-number"><%= stats.recentAbandoned %> <%= t('operations:carts') %></span>
                       <div class="progress">
                         <div class="progress-bar bg-success" style="width: <%= Math.round((stats.recentAbandoned / Math.max(stats.recentAbandoned + stats.olderAbandoned, 1)) * 100) %>%"></div>
                       </div>
                       <span class="progress-description">
-                        $<%= stats.recentValue.toFixed(0) %> potential recovery
+                        $<%= stats.recentValue.toFixed(0) %> <%= t('operations:potentialRecovery') %>
                       </span>
                     </div>
                   </div>
@@ -111,13 +111,13 @@
                   <div class="info-box">
                     <span class="info-box-icon bg-warning"><i class="fas fa-calendar-alt"></i></span>
                     <div class="info-box-content">
-                      <span class="info-box-text">Older Carts (>7 days)</span>
-                      <span class="info-box-number"><%= stats.olderAbandoned %> carts</span>
+                      <span class="info-box-text"><%= t('operations:olderCarts') %></span>
+                      <span class="info-box-number"><%= stats.olderAbandoned %> <%= t('operations:carts') %></span>
                       <div class="progress">
                         <div class="progress-bar bg-warning" style="width: <%= Math.round((stats.olderAbandoned / Math.max(stats.recentAbandoned + stats.olderAbandoned, 1)) * 100) %>%"></div>
                       </div>
                       <span class="progress-description">
-                        $<%= stats.olderValue.toFixed(0) %> potential recovery
+                        $<%= stats.olderValue.toFixed(0) %> <%= t('operations:potentialRecovery') %>
                       </span>
                     </div>
                   </div>
@@ -133,19 +133,19 @@
         <div class="col-md-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Recovery Strategies</h3>
+              <h3 class="card-title"><%= t('operations:recoveryStrategies') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
                 <div class="col-md-4">
                   <div class="card card-outline card-primary">
                     <div class="card-header">
-                      <h5 class="card-title">Email Recovery</h5>
+                      <h5 class="card-title"><%= t('operations:emailRecovery') %></h5>
                     </div>
                     <div class="card-body">
-                      <p>Send personalized emails with cart contents and discount offers.</p>
+                      <p><%= t('operations:emailRecoveryDesc') %></p>
                       <button class="btn btn-primary btn-sm" onclick="runEmailCampaign()">
-                        <i class="fas fa-envelope"></i> Run Email Campaign
+                        <i class="fas fa-envelope"></i> <%= t('operations:runEmailCampaign') %>
                       </button>
                     </div>
                   </div>
@@ -153,12 +153,12 @@
                 <div class="col-md-4">
                   <div class="card card-outline card-success">
                     <div class="card-header">
-                      <h5 class="card-title">SMS Recovery</h5>
+                      <h5 class="card-title"><%= t('operations:smsRecovery') %></h5>
                     </div>
                     <div class="card-body">
-                      <p>Send text reminders with direct links to complete purchase.</p>
+                      <p><%= t('operations:smsRecoveryDesc') %></p>
                       <button class="btn btn-success btn-sm" onclick="runSMSCampaign()">
-                        <i class="fas fa-sms"></i> Run SMS Campaign
+                        <i class="fas fa-sms"></i> <%= t('operations:runSmsCampaign') %>
                       </button>
                     </div>
                   </div>
@@ -166,12 +166,12 @@
                 <div class="col-md-4">
                   <div class="card card-outline card-warning">
                     <div class="card-header">
-                      <h5 class="card-title">Discount Offers</h5>
+                      <h5 class="card-title"><%= t('operations:discountOffers') %></h5>
                     </div>
                     <div class="card-body">
-                      <p>Automatically apply discount codes to abandoned carts.</p>
+                      <p><%= t('operations:discountOffersDesc') %></p>
                       <button class="btn btn-warning btn-sm" onclick="applyDiscounts()">
-                        <i class="fas fa-percent"></i> Apply Discounts
+                        <i class="fas fa-percent"></i> <%= t('operations:applyDiscounts') %>
                       </button>
                     </div>
                   </div>
@@ -187,32 +187,32 @@
         <div class="col-md-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Performance Metrics</h3>
+              <h3 class="card-title"><%= t('operations:performanceMetrics') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
                 <div class="col-md-3">
                   <div class="text-center">
                     <div class="h4 text-info"><%= stats.recoveryRate %>%</div>
-                    <div class="text-muted">Recovery Rate</div>
+                    <div class="text-muted"><%= t('operations:recoveryRate') %></div>
                   </div>
                 </div>
                 <div class="col-md-3">
                   <div class="text-center">
                     <div class="h4 text-success">$<%= (stats.totalValue * stats.recoveryRate / 100).toFixed(0) %></div>
-                    <div class="text-muted">Recovered Revenue</div>
+                    <div class="text-muted"><%= t('operations:recoveredRevenue') %></div>
                   </div>
                 </div>
                 <div class="col-md-3">
                   <div class="text-center">
                     <div class="h4 text-warning"><%= Math.round((stats.recentAbandoned / (stats.recentAbandoned + stats.olderAbandoned)) * 100) %>%</div>
-                    <div class="text-muted">Recent Cart %</div>
+                    <div class="text-muted"><%= t('operations:recentCartPercent') %></div>
                   </div>
                 </div>
                 <div class="col-md-3">
                   <div class="text-center">
                     <div class="h4 text-danger"><%= stats.totalExpired %></div>
-                    <div class="text-muted">Expired Carts</div>
+                    <div class="text-muted"><%= t('operations:expiredCarts') %></div>
                   </div>
                 </div>
               </div>
@@ -226,16 +226,16 @@
         <div class="col-md-12">
           <div class="card">
             <div class="card-body">
-              <h5>Quick Actions</h5>
+              <h5><%= t('shared:common.quickActions') %></h5>
               <div class="btn-group">
                 <button class="btn btn-primary" onclick="exportAbandonedCarts()">
-                  <i class="fas fa-download"></i> Export Abandoned Carts
+                  <i class="fas fa-download"></i> <%= t('operations:exportAbandonedCarts') %>
                 </button>
                 <button class="btn btn-secondary" onclick="scheduleReport()">
-                  <i class="fas fa-calendar"></i> Schedule Report
+                  <i class="fas fa-calendar"></i> <%= t('operations:scheduleReport') %>
                 </button>
                 <button class="btn btn-info" onclick="viewDetailedAnalytics()">
-                  <i class="fas fa-chart-bar"></i> Detailed Analytics
+                  <i class="fas fa-chart-bar"></i> <%= t('operations:detailedAnalytics') %>
                 </button>
               </div>
             </div>
@@ -248,32 +248,32 @@
 
 <script>
 function runEmailCampaign() {
-  alert('Email recovery campaign feature coming soon!');
+  alert('<%= t("operations:emailCampaignComingSoon") %>');
   // TODO: Implement email campaign functionality
 }
 
 function runSMSCampaign() {
-  alert('SMS recovery campaign feature coming soon!');
+  alert('<%= t("operations:smsCampaignComingSoon") %>');
   // TODO: Implement SMS campaign functionality
 }
 
 function applyDiscounts() {
-  alert('Automatic discount application feature coming soon!');
+  alert('<%= t("operations:discountComingSoon") %>');
   // TODO: Implement discount application functionality
 }
 
 function exportAbandonedCarts() {
-  alert('Cart export feature coming soon!');
+  alert('<%= t("operations:cartExportComingSoon") %>');
   // TODO: Implement cart export functionality
 }
 
 function scheduleReport() {
-  alert('Report scheduling feature coming soon!');
+  alert('<%= t("operations:reportSchedulingComingSoon") %>');
   // TODO: Implement report scheduling functionality
 }
 
 function viewDetailedAnalytics() {
-  alert('Detailed analytics feature coming soon!');
+  alert('<%= t("operations:detailedAnalyticsComingSoon") %>');
   // TODO: Implement detailed analytics functionality
 }
 </script>

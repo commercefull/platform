@@ -5,6 +5,7 @@ import { MerchantRepo } from '../../../merchant/infrastructure/repositories/merc
 import { AuthRefreshTokenRepo } from '../../infrastructure/repositories/identityRefreshTokenRepo';
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
 import { emitMerchantLogin, emitMerchantRegistered, emitMerchantTokenRefreshed } from '../../domain/events/emitIdentityEvent';
+import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 
 // Environment configuration with secure defaults
 const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
@@ -409,8 +410,13 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
     // Generate secure reset token
     const resetToken = await merchantRepo.createPasswordResetToken(merchant.merchantId);
 
-    // TODO: Send reset token via email
-    // await emailService.sendPasswordResetEmail(email, resetToken);
+    // Send password reset email
+    await JobScheduler.scheduleEmail({
+      to: email,
+      subject: 'Password Reset Request',
+      template: 'password-reset',
+      data: { resetToken, email },
+    });
 
     res.json({
       success: true,

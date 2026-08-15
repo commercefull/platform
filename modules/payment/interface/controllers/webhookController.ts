@@ -41,7 +41,8 @@ function detectProvider(req: Request): string {
 // ============================================================================
 
 export async function handleGatewayWebhook(req: Request, res: Response): Promise<void> {
-  const rawBody: Buffer = req.body as Buffer;
+  try {
+    const rawBody: Buffer = req.body as Buffer;
 
   // 1. Detect provider and resolve adapter
   const provider = detectProvider(req);
@@ -198,4 +199,8 @@ export async function handleGatewayWebhook(req: Request, res: Response): Promise
 
   // Other normalized types (refund_completed, etc.) — acknowledge, handle later
   res.status(200).json({ received: true });
+  } catch (error: unknown) {
+    logger.error('[webhook] Unhandled error:', error);
+    res.status(200).json({ received: true });
+  }
 }

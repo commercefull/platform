@@ -15,6 +15,7 @@ import {
   initiateReturn,
   listFulfillmentsByOrder,
   listFulfillments,
+  assignFulfillment,
 } from '../controllers/FulfillmentController';
 
 const router = Router();
@@ -51,6 +52,9 @@ router.put('/:fulfillmentId/tracking', updateTracking);
 
 // Initiate return
 router.post('/:fulfillmentId/return', initiateReturn);
+
+// Assign fulfillment
+router.post('/:fulfillmentId/assign', assignFulfillment);
 
 export const fulfillmentBusinessRouter = router;
 export default router;

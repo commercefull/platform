@@ -1,0 +1,11 @@
+{
+  "title": "Denetim Günlükleri",
+  "user": "Kullanıcı",
+  "resource": "Kaynak",
+  "resourceId": "Kaynak Kimliği",
+  "ipAddress": "IP Adresi",
+  "noLogs": "Denetim günlüğü bulunamadı.",
+  "changes": "Değişiklikler",
+  "oldValue": "Eski Değer",
+  "newValue": "Yeni Değer"
+}

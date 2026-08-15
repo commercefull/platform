@@ -6,15 +6,15 @@
 export enum OrderStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
-  ON_HOLD = 'on_hold',
+  ON_HOLD = 'onHold',
   COMPLETED = 'completed',
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
   CANCELLED = 'cancelled',
   REFUNDED = 'refunded',
   FAILED = 'failed',
-  PAYMENT_PENDING = 'payment_pending',
-  PAYMENT_FAILED = 'payment_failed',
+  PAYMENT_PENDING = 'paymentPending',
+  PAYMENT_FAILED = 'paymentFailed',
   BACKORDERED = 'backordered',
 }
 

@@ -39,6 +39,10 @@ import * as loyaltyController from './controllers/loyaltyController';
 import * as subscriptionController from './controllers/subscriptionController';
 import * as membershipController from './controllers/membershipController';
 import * as notificationController from './controllers/notificationController';
+import * as supportController from './controllers/supportController';
+import * as gdprController from './controllers/gdprController';
+import * as storeLocatorController from './controllers/storeLocatorController';
+import * as promotionsController from './controllers/promotionsController';
 import { isCustomerLoggedIn } from '../../libs/auth';
 
 const router = express.Router();
@@ -80,6 +84,12 @@ router.get('/returns', getReturnsPage);
 
 // GET: display support page
 router.get('/support', getSupportPage);
+
+// GET: store locator page
+router.get('/stores', storeLocatorController.getStoreLocator);
+
+// GET: promotions and coupons landing page
+router.get('/promotions', promotionsController.getPromotionsPage);
 
 // POST: handle contact us form
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -330,6 +340,47 @@ router.post('/notifications/devices', isCustomerLoggedIn, notificationController
 
 // POST: delete a push notification device
 router.post('/notifications/devices/:deviceToken/delete', isCustomerLoggedIn, notificationController.deleteDevice);
+
+// ============================================================================
+// Support Ticket Routes (Auth required)
+// ============================================================================
+
+// GET: list customer's support tickets
+router.get('/support/tickets', supportController.listTickets);
+
+// GET: create ticket form
+router.get('/support/tickets/new', supportController.createTicketForm);
+
+// POST: submit new ticket
+router.post('/support/tickets', supportController.createTicketSubmit);
+
+// GET: view single ticket
+router.get('/support/tickets/:ticketId', supportController.viewTicket);
+
+// POST: add message to ticket
+router.post('/support/tickets/:ticketId/messages', supportController.addTicketMessage);
+
+// POST: submit ticket feedback
+router.post('/support/tickets/:ticketId/feedback', supportController.submitTicketFeedback);
+
+// ============================================================================
+// GDPR Data Request Routes (Auth required)
+// ============================================================================
+
+// GET: list customer's GDPR data requests
+router.get('/gdpr/requests', gdprController.listRequests);
+
+// GET: create data request form
+router.get('/gdpr/requests/new', gdprController.createRequestForm);
+
+// POST: submit new data request
+router.post('/gdpr/requests', gdprController.createRequestSubmit);
+
+// GET: view single data request
+router.get('/gdpr/requests/:gdprDataRequestId', gdprController.viewRequest);
+
+// POST: cancel a data request
+router.post('/gdpr/requests/:gdprDataRequestId/cancel', gdprController.cancelRequest);
 
 // ============================================================================
 // Content Routes

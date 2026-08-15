@@ -7,6 +7,7 @@ import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository
 import { Money } from '../../../basket/domain/valueObjects/Money';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { CouponRepository } from '../../../coupon/infrastructure/repositories/CouponRepository';
 
 // ============================================================================
 // Command
@@ -32,9 +33,15 @@ export class ApplyCouponUseCase {
       throw new Error('Checkout session not found');
     }
 
-    // TODO: Validate coupon code against coupon service
-    // For now, apply a 10% discount as placeholder
-    const discountAmount = Money.create(session.subtotal.amount * 0.1, session.subtotal.currency);
+    // Validate coupon code against coupon repository
+    const couponRepo = new CouponRepository();
+    const validation = await couponRepo.validateCouponCode(command.couponCode, session.subtotal.amount);
+
+    if (!validation.valid || !validation.coupon) {
+      throw new Error(validation.error || `Invalid coupon code: ${command.couponCode}`);
+    }
+
+    const discountAmount = Money.create(validation.discountAmount || 0, session.subtotal.currency);
 
     session.applyCoupon(command.couponCode, discountAmount);
     await this.checkoutRepository.save(session);

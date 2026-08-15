@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "会员资格",
+  "totalMembers": "会员总数",
+  "activeMembers": "活跃会员",
+  "membershipTiers": "会员等级",
+  "expiringThisMonth": "本月到期",
+  "addTier": "添加等级",
+  "members": "会员",
+  "noTiers": "未配置会员级别。",
+  "recentMembers": "最近的会员",
+  "tier": "等级",
+  "noMembers": "还没有会员。",
+  "addMembershipTier": "添加会员等级",
+  "tierName": "等级名称",
+  "billingPeriod": "计费周期",
+  "lifetime": "寿命",
+  "benefitsOnePerLine": "优点（每行一项）",
+  "setAsDefault": "设置为默认层",
+  "createTier": "创建层",
+  "confirmDeleteTier": "删除该层？",
+  "analytics": "会员分析",
+  "analyticsDescription": "活跃会员、收入、流失率和等级分布。"
+}

@@ -1,0 +1,54 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/organizations/create" class="btn btn-primary"><%= t('organization:create') %></a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="card">
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th><%= t('shared:common.name') %></th>
+              <th><%= t('shared:common.slug') %></th>
+              <th><%= t('shared:common.type') %></th>
+              <th><%= t('shared:common.dateCreated') %></th>
+              <th><%= t('common.actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (organizations || []).forEach(function(org) { %>
+              <tr>
+                <td><strong><%= org.name %></strong></td>
+                <td><small class="text-muted"><%= org.slug %></small></td>
+                <td><span class="badge bg-secondary"><%= org.type %></span></td>
+                <td><%= new Date(org.createdAt).toLocaleDateString() %></td>
+                <td>
+                  <a class="btn btn-sm btn-outline-primary" href="/admin/organizations/<%= org.organizationId %>"><%= t('common.view') %></a>
+                  <a class="btn btn-sm btn-outline-secondary" href="/admin/organizations/<%= org.organizationId %>/edit"><%= t('common.edit') %></a>
+                </td>
+              </tr>
+            <% }) %>
+            <% if (!organizations || organizations.length === 0) { %>
+              <tr><td colspan="5" class="text-center text-muted py-4"><%= t('organization:noOrganizations') %></td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+      <% if (pagination.pages > 1) { %>
+        <div class="card-footer d-flex align-items-center">
+          <ul class="pagination m-0 ms-auto">
+            <% for (let i = 1; i <= pagination.pages; i++) { %>
+              <li class="page-item <%= i === pagination.page ? 'active' : '' %>">
+                <a class="page-link" href="/admin/organizations?page=<%= i %>"><%= i %></a>
+              </li>
+            <% } %>
+          </ul>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>

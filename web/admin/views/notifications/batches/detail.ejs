@@ -3,7 +3,7 @@
   <div class="row g-2 align-items-center">
     <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
     <div class="col-auto ms-auto">
-      <a href="/admin/notifications/batches" class="btn btn-secondary"><i class="ti ti-arrow-left"></i> Back</a>
+      <a href="/admin/notifications/batches" class="btn btn-secondary"><i class="ti ti-arrow-left"></i> <%= t('common.back') %></a>
     </div>
   </div>
 </div>
@@ -13,49 +13,49 @@
     <div class="row">
       <div class="col-md-8">
         <div class="card">
-          <div class="card-header"><h3 class="card-title">Batch Details</h3></div>
+          <div class="card-header"><h3 class="card-title"><%= t('notifications:batchDetails') %></h3></div>
           <div class="card-body">
             <dl class="row">
-              <dt class="col-sm-4">Batch ID</dt>
+              <dt class="col-sm-4"><%= t('notifications:batchId') %></dt>
               <dd class="col-sm-8"><code><%= batch.notificationBatchId %></code></dd>
-              <dt class="col-sm-4">Name</dt>
+              <dt class="col-sm-4"><%= t('common.name') %></dt>
               <dd class="col-sm-8"><%= batch.name || '-' %></dd>
-              <dt class="col-sm-4">Channel</dt>
+              <dt class="col-sm-4"><%= t('notifications:channels') %></dt>
               <dd class="col-sm-8"><span class="badge bg-blue-lt"><%= batch.channel || '-' %></span></dd>
-              <dt class="col-sm-4">Status</dt>
+              <dt class="col-sm-4"><%= t('common.status') %></dt>
               <dd class="col-sm-8">
                 <% const statusColor = batch.status === 'completed' ? 'success' : batch.status === 'failed' ? 'danger' : batch.status === 'processing' ? 'warning' : 'secondary'; %>
                 <span class="badge bg-<%= statusColor %>"><%= batch.status || '-' %></span>
               </dd>
-              <dt class="col-sm-4">Total</dt>
+              <dt class="col-sm-4"><%= t('common.total') %></dt>
               <dd class="col-sm-8"><%= batch.totalCount || 0 %></dd>
-              <dt class="col-sm-4">Sent</dt>
+              <dt class="col-sm-4"><%= t('shared:common.sent') %></dt>
               <dd class="col-sm-8"><%= batch.sentCount || 0 %></dd>
-              <dt class="col-sm-4">Failed</dt>
+              <dt class="col-sm-4"><%= t('shared:common.failed') %></dt>
               <dd class="col-sm-8"><%= batch.failedCount || 0 %></dd>
-              <dt class="col-sm-4">Created</dt>
+              <dt class="col-sm-4"><%= t('shared:common.dateCreated') %></dt>
               <dd class="col-sm-8"><%= batch.createdAt ? new Date(batch.createdAt).toLocaleString() : '-' %></dd>
             </dl>
           </div>
         </div>
 
         <div class="card mt-3">
-          <div class="card-header"><h3 class="card-title">Delivery Log</h3></div>
+          <div class="card-header"><h3 class="card-title"><%= t('notifications:deliveryLog') %></h3></div>
           <div class="card-body table-responsive p-0">
             <table class="table table-hover text-nowrap">
               <thead>
                 <tr>
-                  <th>Notification ID</th>
-                  <th>Channel</th>
-                  <th>Status</th>
-                  <th>Recipient</th>
-                  <th>Sent At</th>
+                  <th><%= t('notifications:notificationId') %></th>
+                  <th><%= t('notifications:channels') %></th>
+                  <th><%= t('common.status') %></th>
+                  <th><%= t('shared:common.recipient') %></th>
+                  <th><%= t('shared:common.sentAt') %></th>
                 </tr>
               </thead>
               <tbody>
                 <% if (!deliveryLogs || deliveryLogs.length === 0) { %>
                   <tr>
-                    <td colspan="5" class="text-center py-4"><em>No delivery logs found.</em></td>
+                    <td colspan="5" class="text-center py-4"><em><%= t('notifications:noDeliveryLogs') %></em></td>
                   </tr>
                 <% } else { %>
                   <% deliveryLogs.forEach(log => { %>
@@ -79,9 +79,9 @@
 
       <div class="col-md-4">
         <div class="card">
-          <div class="card-header"><h3 class="card-title">Actions</h3></div>
+          <div class="card-header"><h3 class="card-title"><%= t('common.actions') %></h3></div>
           <div class="card-body">
-            <a href="/admin/notifications/batches" class="btn btn-outline-secondary w-100">Back to Batches</a>
+            <a href="/admin/notifications/batches" class="btn btn-outline-secondary w-100"><%= t('notifications:backToBatches') %></a>
           </div>
         </div>
       </div>

@@ -1,0 +1,23 @@
+{
+  "programMembers": "프로그램 회원",
+  "pointsIssued": "발급된 포인트",
+  "pointsRedeemed": "사용된 포인트",
+  "programSettings": "프로그램 설정",
+  "pointsPerDollar": "지출된 달러당 포인트",
+  "pointsValue": "포인트 가치(포인트당 $)",
+  "minimumRedemption": "최소 상환",
+  "addReward": "보상 추가",
+  "reward": "보상",
+  "redemptions": "상환",
+  "noRewards": "구성된 보상이 없습니다.",
+  "recentTransactions": "최근 거래",
+  "noTransactions": "아직 거래가 없습니다.",
+  "rewardName": "보상 이름",
+  "rewardType": "보상 유형",
+  "freeProduct": "무료 제품",
+  "giftCard": "기프트 카드",
+  "rewardValue": "보상 가치",
+  "confirmDeleteReward": "이 보상을 삭제하시겠습니까?",
+  "analytics": "로열티 프로그램 분석",
+  "analyticsDescription": "포인트 분배, 상환율 및 등급 승급."
+}

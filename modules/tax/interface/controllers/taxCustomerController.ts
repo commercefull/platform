@@ -77,7 +77,22 @@ export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) 
         customerId,
       );
 
-      res.json(taxResult);
+      const subtotal = taxResult.taxableAmount;
+      res.json({
+        subtotal,
+        taxAmount: taxResult.taxAmount,
+        total: taxResult.total,
+        rate: taxResult.rate,
+        taxBreakdown: taxResult.taxAmount > 0
+          ? [{
+              rateId: 'default',
+              rateName: 'Tax',
+              rateValue: taxResult.rate,
+              taxableAmount: subtotal,
+              taxAmount: taxResult.taxAmount,
+            }]
+          : [],
+      });
       return;
     }
 
@@ -181,9 +196,12 @@ export const calculateTaxForBasket = async (req: TypedRequest, res: Response) =>
         return;
       }
 
-      // Format the items for tax calculation (in application camelCase format)
-      // TODO: Basket interface doesn't have items property - needs basketItemRepo
-      const items: TaxableItem[] = [];
+      // Format the items for tax calculation from basket items
+      const items: TaxableItem[] = (basket.items || []).map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.unitPrice.amount,
+      }));
 
       // Transform addresses to the expected format (camelCase for application layer)
       const shippingAddrInput: AddressInput = {
@@ -332,37 +350,15 @@ export const findTaxZoneForAddress = async (req: TypedRequest, res: Response) =>
       return;
     }
 
-    // Format the address input in camelCase for application layer
-    const address: AddressInput = {
-      country,
-      region,
-      postalCode,
-      city,
-    };
+    // Find the actual tax zone for this address
+    const taxZone = await taxQueryRepo.findTaxZoneForAddress(country, region, postalCode, city);
 
-    //  just the country-based tax zone for now
-    // The enhanced method will be implemented in taxRepo
-    try {
-      // Fallback to look up by country only
-      const taxRates = await taxQueryRepo.findAllTaxRates(true, address.country);
-
-      if (taxRates.length === 0) {
-        res.status(404).json({ error: 'No matching tax zone found' });
-        return;
-      }
-
-      //  the first matching tax rate's zone information
-      // Note: This is constructed in camelCase as it's going to the API response
-      res.json({
-        id: `default-${country}`,
-        name: `${country} Tax Zone`,
-        description: `Default tax zone for ${country}`,
-        countries: [country],
-        isDefault: true,
-      });
-    } catch (_err: unknown) {
+    if (!taxZone) {
       res.status(404).json({ error: 'No matching tax zone found' });
+      return;
     }
+
+    res.json(taxZone);
   } catch (error: unknown) {
     logger.error('Error:', error);
 

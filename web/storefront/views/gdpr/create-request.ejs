@@ -1,0 +1,113 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-2xl mx-auto">
+    <!-- Back Link -->
+    <a href="/gdpr/requests" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <%= t('storefront:backToRequests') %>
+    </a>
+
+    <!-- Error Message -->
+    <% if (error) { %>
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <!-- Create Request Form -->
+    <div class="bg-white shadow rounded-lg p-8">
+      <h1 class="text-2xl font-bold text-gray-900 mb-2"><%= t('storefront:submitDataRequest') %></h1>
+      <p class="text-gray-600 mb-6"><%= t('storefront:submitDataRequestDesc') %></p>
+
+      <form method="POST" action="/gdpr/requests">
+        <!-- Request Type Selection -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-3"><%= t('storefront:requestTypeRequired') %></label>
+          <div class="space-y-2">
+            <% const types = ['access', 'export', 'deletion', 'rectification', 'objection', 'restriction']; %>
+            <% types.forEach(function(type) { %>
+              <label class="flex items-start p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors <%= requestType === type ? 'border-blue-500 bg-blue-50' : '' %>">
+                <input type="radio" name="requestType" value="<%= type %>" class="mt-1 mr-3" <%= requestType === type ? 'checked' : '' %> required>
+                <div>
+                  <span class="text-sm font-medium text-gray-900"><%= requestTypeLabels[type] %></span>
+                  <p class="text-xs text-gray-500 mt-0.5"><%= requestTypeDescriptions[type] %></p>
+                </div>
+              </label>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- Reason -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('storefront:reasonDetails') %></label>
+          <textarea name="reason" rows="4" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="<%= t('storefront:reasonPlaceholder') %>"><%= formData.reason || '' %></textarea>
+          <p class="text-xs text-gray-500 mt-1"><%= t('storefront:reasonHelp') %></p>
+        </div>
+
+        <!-- Data Categories (for access/export) -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('storefront:dataCategories') %></label>
+          <p class="text-xs text-gray-500 mb-3"><%= t('storefront:dataCategoriesHelp') %></p>
+          <div class="grid grid-cols-2 gap-2">
+            <% const categories = [
+              { value: 'Profile', key: 'storefront:dataCategoryProfile' },
+              { value: 'Orders', key: 'storefront:dataCategoryOrders' },
+              { value: 'Addresses', key: 'storefront:dataCategoryAddresses' },
+              { value: 'Payment Methods', key: 'storefront:dataCategoryPaymentMethods' },
+              { value: 'Reviews', key: 'storefront:dataCategoryReviews' },
+              { value: 'Wishlist', key: 'storefront:dataCategoryWishlist' },
+              { value: 'Support Tickets', key: 'storefront:dataCategorySupportTickets' },
+              { value: 'Login History', key: 'storefront:dataCategoryLoginHistory' }
+            ]; %>
+            <% categories.forEach(function(cat) { %>
+              <label class="flex items-center text-sm text-gray-700">
+                <input type="checkbox" name="requestedData" value="<%= cat.value %>" class="mr-2 rounded">
+                <%= t(cat.key) %>
+              </label>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- Warning for deletion -->
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex items-start">
+            <svg class="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div class="text-sm text-red-700">
+              <p class="font-medium"><%= t('storefront:importantNotice') %></p>
+              <p class="mt-1"><%= t('storefront:deletionWarning') %></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button type="submit" class="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+            <%= t('storefront:submitRequest') %>
+          </button>
+          <a href="/gdpr/requests" class="inline-flex items-center px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            <%= t('shared:common.cancel') %>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Help Info -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div class="flex items-start">
+        <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div class="text-sm text-blue-700">
+          <p class="font-medium mb-1"><%= t('storefront:privacyQuestions') %></p>
+          <p><%= t('storefront:privacyQuestionsDesc', { support: '<a href="/support" class="underline font-medium">' + t('shared:common.supportCenter') + '</a>', faq: '<a href="/faq" class="underline font-medium">' + t('storefront:faq') + '</a>' }) %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

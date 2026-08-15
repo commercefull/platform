@@ -1,0 +1,90 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= schedule?.name || pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/reporting/schedules/<%= schedule.reportScheduleId %>/edit" class="btn btn-primary me-2"><%= t('common.edit') %></a>
+      <form method="POST" action="/admin/reporting/schedules/<%= schedule.reportScheduleId %>?_method=DELETE" class="d-inline" onsubmit="return confirm('<%= t('common.delete') %>?')">
+        <button type="submit" class="btn btn-outline-danger"><%= t('common.delete') %></button>
+      </form>
+      <a href="/admin/reporting/schedules" class="btn btn-outline-secondary ms-2"><%= t('common.back') %></a>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="row">
+      <div class="col-md-5">
+        <div class="card mb-3">
+          <div class="card-header"><h3 class="card-title"><%= t('reporting:scheduleDetail') %></h3></div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-5"><%= t('common.name') %></dt>
+              <dd class="col-sm-7"><%= schedule.name %></dd>
+              <dt class="col-sm-5"><%= t('shared:common.reportType') %></dt>
+              <dd class="col-sm-7"><span class="badge bg-secondary"><%= schedule.reportType %></span></dd>
+              <dt class="col-sm-5"><%= t('shared:common.frequency') %></dt>
+              <dd class="col-sm-7"><%= schedule.frequency %></dd>
+              <dt class="col-sm-5"><%= t('shared:common.format') %></dt>
+              <dd class="col-sm-7"><%= schedule.format %></dd>
+              <dt class="col-sm-5"><%= t('common.active') %></dt>
+              <dd class="col-sm-7"><span class="badge bg-<%= schedule.isActive ? 'success' : 'secondary' %>"><%= schedule.isActive ? t('common.yes') : t('common.no') %></span></dd>
+              <dt class="col-sm-5"><%= t('reporting:lastRun') %></dt>
+              <dd class="col-sm-7"><%= schedule.lastRunAt ? new Date(schedule.lastRunAt).toLocaleString() : 'Never' %></dd>
+              <dt class="col-sm-5"><%= t('reporting:nextRun') %></dt>
+              <dd class="col-sm-7"><%= schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleString() : '—' %></dd>
+              <dt class="col-sm-5"><%= t('common.dateCreated') %></dt>
+              <dd class="col-sm-7"><%= new Date(schedule.createdAt).toLocaleDateString() %></dd>
+            </dl>
+            <% if (schedule.recipients && schedule.recipients.length > 0) { %>
+              <hr>
+              <h4><%= t('analytics:recipients') %></h4>
+              <ul class="list-unstyled">
+                <% schedule.recipients.forEach(function(email) { %>
+                  <li><small><%= email %></small></li>
+                <% }) %>
+              </ul>
+            <% } %>
+            <% if (schedule.parameters && Object.keys(schedule.parameters).length > 0) { %>
+              <hr>
+              <h4><%= t('organization:settings') %></h4>
+              <pre class="bg-light p-3 rounded"><code><%= JSON.stringify(schedule.parameters, null, 2) %></code></pre>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><%= t('analytics:reportHistory') %></h3></div>
+          <div class="card-body table-responsive p-0">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th><%= t('common.status') %></th>
+                  <th><%= t('analytics:generated') %></th>
+                  <th><%= t('common.date') %></th>
+                  <th><%= t('common.name') %></th>
+                  <th><%= t('common.error') %></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% (executions || []).forEach(function(exec) { %>
+                  <tr>
+                    <td><span class="badge bg-<%= exec.status === 'completed' ? 'success' : exec.status === 'failed' ? 'danger' : exec.status === 'running' ? 'primary' : 'secondary' %>"><%= exec.status %></span></td>
+                    <td><%= new Date(exec.startedAt).toLocaleString() %></td>
+                    <td><%= exec.completedAt ? new Date(exec.completedAt).toLocaleString() : '—' %></td>
+                    <td><%= exec.fileUrl ? '<a href="' + exec.fileUrl + '">' + t('common.export') + '</a>' : '—' %></td>
+                    <td><%= exec.errorMessage ? '<small class="text-danger">' + exec.errorMessage + '</small>' : '—' %></td>
+                  </tr>
+                <% }) %>
+                <% if (!executions || executions.length === 0) { %>
+                  <tr><td colspan="5" class="text-center text-muted py-4"><%= t('analytics:noReportHistory') %></td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

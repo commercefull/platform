@@ -2,7 +2,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Payment Fees</h2>
+      <h2 class="page-title"><%= t('payment:fees') %></h2>
     </div>
   </div>
 </div>
@@ -13,20 +13,20 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Fees</h3>
-        <span class="float-end text-muted"><%= (fees || []).length %> records</span>
+        <h3 class="card-title"><%= t('payment:fees') %></h3>
+        <span class="float-end text-muted"><%= (fees || []).length %> <%= t('common.records') %></span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Fee ID</th>
-              <th>Transaction ID</th>
-              <th>Merchant</th>
-              <th>Type</th>
-              <th>Amount</th>
-              <th>Description</th>
-              <th>Created</th>
+              <th><%= t('payment:feeType') %> <%= t('common.id') %></th>
+              <th><%= t('shared:common.transactionId') %></th>
+              <th><%= t('shared:common.merchants') %></th>
+              <th><%= t('common.type') %></th>
+              <th><%= t('common.amount') %></th>
+              <th><%= t('common.description') %></th>
+              <th><%= t('common.dateCreated') %></th>
             </tr>
           </thead>
           <tbody>
@@ -42,7 +42,7 @@
             </tr>
             <% }); %>
             <% if ((fees || []).length === 0) { %>
-            <tr><td colspan="7" class="text-center text-muted py-4">No fees found.</td></tr>
+            <tr><td colspan="7" class="text-center text-muted py-4"><%= t('payment:noFees') %></td></tr>
             <% } %>
           </tbody>
         </table>

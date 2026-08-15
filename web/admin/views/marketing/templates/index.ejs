@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/marketing/campaigns">Marketing</a></li>
-            <li class="breadcrumb-item active">Email Templates</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/marketing/campaigns"><%= t('shared:common.marketing') %></a></li>
+            <li class="breadcrumb-item active"><%= t('marketing:templates.title') %></li>
           </ol>
         </div>
       </div>
@@ -22,9 +22,9 @@
     <div class="container-fluid">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-list me-2"></i>Email Templates</h3>
+          <h3 class="card-title"><i class="fas fa-list me-2"></i><%= t('marketing:templates.title') %></h3>
           <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addTemplateModal">
-            <i class="fas fa-plus me-1"></i>Create Template
+            <i class="fas fa-plus me-1"></i><%= t('shared:common.createTemplate') %>
           </button>
         </div>
         <div class="card-body">
@@ -35,22 +35,22 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                   <span><%= template.name %></span>
                   <span class="badge bg-<%= template.isActive ? 'success' : 'secondary' %>">
-                    <%= template.isActive ? 'Active' : 'Draft' %>
+                    <%= template.isActive ? t('shared:common.active') : t('shared:common.draft') %>
                   </span>
                 </div>
                 <div class="card-body">
-                  <p class="text-muted small"><%= template.description || 'No description' %></p>
+                  <p class="text-muted small"><%= template.description || t('marketing:templates.noDescription') %></p>
                   <div class="mb-2">
                     <span class="badge bg-info"><%= template.templateType || 'custom' %></span>
                   </div>
-                  <small class="text-muted">Subject: <%= template.subject || '-' %></small>
+                  <small class="text-muted"><%= t('marketing:templates.subjectLabel') %> <%= template.subject || '-' %></small>
                 </div>
                 <div class="card-footer">
                   <a href="/admin/marketing/templates/<%= template.emailTemplateId %>/edit" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-edit"></i> Edit
+                    <i class="fas fa-edit"></i> <%= t('common.edit') %>
                   </a>
                   <button class="btn btn-sm btn-outline-info" onclick="previewTemplate('<%= template.emailTemplateId %>')">
-                    <i class="fas fa-eye"></i> Preview
+                    <i class="fas fa-eye"></i> <%= t('marketing:templates.preview') %>
                   </button>
                   <button class="btn btn-sm btn-outline-secondary" onclick="duplicateTemplate('<%= template.emailTemplateId %>')">
                     <i class="fas fa-copy"></i>
@@ -62,7 +62,7 @@
             <% if ((templates || []).length === 0) { %>
             <div class="col-12 text-center text-muted py-4">
               <i class="fas fa-envelope-open-text fa-3x mb-3 d-block"></i>
-              No email templates yet.
+              <%= t('marketing:templates.noTemplatesYet') %>
             </div>
             <% } %>
           </div>
@@ -72,25 +72,25 @@
       <!-- System Templates -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-cog me-2"></i>System Templates</h3>
+          <h3 class="card-title"><i class="fas fa-cog me-2"></i><%= t('marketing:templates.systemTemplates') %></h3>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Template</th>
-                <th>Trigger</th>
-                <th>Last Modified</th>
-                <th>Actions</th>
+                <th><%= t('shared:common.template') %></th>
+                <th><%= t('marketing:templates.trigger') %></th>
+                <th><%= t('marketing:templates.lastModified') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
               <% const systemTemplates = [
-                { id: 'order-confirmation', name: 'Order Confirmation', trigger: 'Order placed' },
-                { id: 'shipping-notification', name: 'Shipping Notification', trigger: 'Order shipped' },
-                { id: 'password-reset', name: 'Password Reset', trigger: 'Password reset requested' },
-                { id: 'welcome-email', name: 'Welcome Email', trigger: 'Account created' },
-                { id: 'abandoned-cart', name: 'Abandoned Cart', trigger: 'Cart abandoned (24h)' }
+                { id: 'order-confirmation', name: '<%= t("marketing:templates.orderConfirmation") %>', trigger: '<%= t("marketing:templates.orderPlaced") %>' },
+                { id: 'shipping-notification', name: '<%= t("marketing:templates.shippingNotification") %>', trigger: '<%= t("marketing:templates.orderShipped") %>' },
+                { id: 'password-reset', name: '<%= t("marketing:templates.passwordReset") %>', trigger: '<%= t("marketing:templates.passwordResetRequested") %>' },
+                { id: 'welcome-email', name: '<%= t("marketing:templates.welcomeEmail") %>', trigger: '<%= t("marketing:templates.accountCreated") %>' },
+                { id: 'abandoned-cart', name: '<%= t("marketing:templates.abandonedCart") %>', trigger: '<%= t("marketing:templates.cartAbandoned") %>' }
               ]; %>
               <% systemTemplates.forEach(function(st) { %>
               <tr>
@@ -99,7 +99,7 @@
                 <td>-</td>
                 <td>
                   <a href="/admin/marketing/templates/system/<%= st.id %>/edit" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-edit"></i> Customize
+                    <i class="fas fa-edit"></i> <%= t('shared:common.customize') %>
                   </a>
                 </td>
               </tr>
@@ -117,7 +117,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Create Email Template</h5>
+        <h5 class="modal-title"><%= t('marketing:templates.createEmailTemplate') %></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form method="POST" action="/admin/marketing/templates">
@@ -125,38 +125,38 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Template Name <span class="text-danger">*</span></label>
+                <label class="form-label"><%= t('marketing:templates.name') %> <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" name="name" required>
               </div>
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Template Type</label>
+                <label class="form-label"><%= t('marketing:templates.templateType') %></label>
                 <select class="form-select" name="templateType">
-                  <option value="promotional">Promotional</option>
-                  <option value="transactional">Transactional</option>
-                  <option value="newsletter">Newsletter</option>
-                  <option value="custom">Custom</option>
+                  <option value="promotional"><%= t('marketing:templates.promotional') %></option>
+                  <option value="transactional"><%= t('marketing:templates.transactional') %></option>
+                  <option value="newsletter"><%= t('marketing:templates.newsletter') %></option>
+                  <option value="custom"><%= t('marketing:templates.custom') %></option>
                 </select>
               </div>
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Subject Line <span class="text-danger">*</span></label>
+            <label class="form-label"><%= t('marketing:subjectLine') %> <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="subject" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Description</label>
+            <label class="form-label"><%= t('shared:common.description') %></label>
             <textarea class="form-control" name="description" rows="2"></textarea>
           </div>
           <div class="mb-3">
-            <label class="form-label">Email Content (HTML)</label>
+            <label class="form-label"><%= t('marketing:templates.emailContent') %></label>
             <textarea class="form-control font-monospace" name="content" rows="10"></textarea>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create Template</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+          <button type="submit" class="btn btn-primary"><%= t('shared:common.createTemplate') %></button>
         </div>
       </form>
     </div>

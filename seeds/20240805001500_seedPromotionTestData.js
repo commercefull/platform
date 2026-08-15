@@ -9,6 +9,8 @@ const SEEDED_PROMOTION_CART_ID = '01935f00-0000-7000-8000-000000000002';
 const SEEDED_COUPON_ID = '01935f00-0000-7000-8000-000000000010';
 const SEEDED_COUPON_PERCENTAGE_ID = '01935f00-0000-7000-8000-000000000011';
 const SEEDED_COUPON_EXPIRED_ID = '01935f00-0000-7000-8000-000000000012';
+const SEEDED_COUPON_TEST10_ID = '01935f00-0000-7000-8000-000000000013';
+const SEEDED_COUPON_SAVE10_ID = '01935f00-0000-7000-8000-000000000014';
 const SEEDED_PRODUCT_DISCOUNT_ID = '01935f00-0000-7000-8000-000000000020';
 const SEEDED_GIFT_CARD_ID = '01935f00-0000-7000-8000-000000000030';
 const SEEDED_GIFT_CARD_DEPLETED_ID = '01935f00-0000-7000-8000-000000000031';
@@ -217,6 +219,58 @@ exports.seed = async function (knex) {
       merchantId: null,
       createdAt: pastDate,
       updatedAt: pastDate,
+    },
+    {
+      promotionCouponId: SEEDED_COUPON_TEST10_ID,
+      code: 'TEST10',
+      promotionId: SEEDED_PROMOTION_ID,
+      name: 'Test 10% Coupon',
+      description: '10% off your order',
+      type: 'percentage',
+      discountAmount: 10.0,
+      currencyCode: 'USD',
+      minOrderAmount: null,
+      maxDiscountAmount: null,
+      startDate: now,
+      endDate: futureDate,
+      isActive: true,
+      isOneTimeUse: false,
+      maxUsage: 1000,
+      usageCount: 0,
+      maxUsagePerCustomer: 10,
+      generationMethod: 'manual',
+      isReferral: false,
+      referrerId: null,
+      isPublic: true,
+      merchantId: null,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      promotionCouponId: SEEDED_COUPON_SAVE10_ID,
+      code: 'SAVE10',
+      promotionId: null,
+      name: 'Save 10% Coupon',
+      description: '10% off your order',
+      type: 'percentage',
+      discountAmount: 10.0,
+      currencyCode: 'USD',
+      minOrderAmount: null,
+      maxDiscountAmount: null,
+      startDate: now,
+      endDate: futureDate,
+      isActive: true,
+      isOneTimeUse: false,
+      maxUsage: 1000,
+      usageCount: 0,
+      maxUsagePerCustomer: 10,
+      generationMethod: 'manual',
+      isReferral: false,
+      referrerId: null,
+      isPublic: true,
+      merchantId: null,
+      createdAt: now,
+      updatedAt: now,
     },
   ]);
 

@@ -268,13 +268,22 @@ exports.seed = async function (knex) {
         taxesCalculated: false,
         agreeToTerms: false,
         agreeToMarketing: false,
-        expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         createdAt: new Date(),
         updatedAt: new Date(),
         lastActivityAt: new Date(),
       })
       .onConflict('checkoutSessionId')
       .ignore();
+  } else {
+    await knex('checkoutSession')
+      .where('checkoutSessionId', TEST_CHECKOUT_ID)
+      .update({
+        status: 'active',
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        updatedAt: new Date(),
+        lastActivityAt: new Date(),
+      });
   }
 
   // =========================================================================

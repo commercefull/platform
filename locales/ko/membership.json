@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "멤버십",
+  "totalMembers": "총 회원 수",
+  "activeMembers": "활동 회원",
+  "membershipTiers": "멤버십 등급",
+  "expiringThisMonth": "이번 달 만료",
+  "addTier": "등급 추가",
+  "members": "회원",
+  "noTiers": "구성된 멤버십 등급이 없습니다.",
+  "recentMembers": "최근 회원",
+  "tier": "층",
+  "noMembers": "아직 회원이 없습니다.",
+  "addMembershipTier": "멤버십 등급 추가",
+  "tierName": "계층 이름",
+  "billingPeriod": "청구기간",
+  "lifetime": "일생",
+  "benefitsOnePerLine": "혜택(한 줄에 하나씩)",
+  "setAsDefault": "기본 계층으로 설정",
+  "createTier": "등급 생성",
+  "confirmDeleteTier": "이 등급을 삭제하시겠습니까?",
+  "analytics": "멤버십 분석",
+  "analyticsDescription": "활성 회원, 수익, 이탈률 및 등급 분포."
+}

@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "subscription": {}
+  },
+  "memberships": "Συνδρομές",
+  "totalMembers": "Σύνολο μελών",
+  "activeMembers": "Ενεργά Μέλη",
+  "membershipTiers": "Βαθμίδες μελών",
+  "expiringThisMonth": "Λήγει Αυτόν τον Μήνα",
+  "addTier": "Προσθήκη επιπέδου",
+  "members": "μέλη",
+  "noTiers": "Δεν έχουν διαμορφωθεί επίπεδα ιδιότητας μέλους.",
+  "recentMembers": "Πρόσφατα Μέλη",
+  "tier": "Κερκίδα",
+  "noMembers": "Δεν υπάρχουν ακόμη μέλη.",
+  "addMembershipTier": "Προσθήκη επιπέδου μελών",
+  "tierName": "Όνομα Βαθμίδας",
+  "billingPeriod": "Περίοδος χρέωσης",
+  "lifetime": "Διάρκεια ζωής",
+  "benefitsOnePerLine": "Οφέλη (ένα ανά γραμμή)",
+  "setAsDefault": "Ορισμός ως προεπιλεγμένης βαθμίδας",
+  "createTier": "Δημιουργία επιπέδου",
+  "confirmDeleteTier": "Διαγραφή αυτού του επιπέδου;",
+  "analytics": "Αναλυτικά στοιχεία μελών",
+  "analyticsDescription": "Ενεργά μέλη, έσοδα, ποσοστό εκτροπής και διανομή βαθμίδων."
+}

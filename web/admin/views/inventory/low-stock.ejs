@@ -8,7 +8,7 @@
   <div class="container-fluid">
     <%- include("../partials/alerts") %>
     <div class="row">
-      <div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title">Items Below Reorder Point</h3></div><div class="card-body p-0"><table class="table table-striped"><thead><tr><th>SKU</th><th>Product</th><th>Current Stock</th><th>Reorder Point</th></tr></thead><tbody><% if (items && items.length > 0) { %><% items.forEach(i => { %><tr><td><code><%= i.sku %></code></td><td><%= i.productName || i.sku %></td><td class="text-danger fw-bold"><%= i.quantity || 0 %></td><td><%= i.reorderPoint || 0 %></td></tr><% }) %><% } else { %><tr><td colspan="4" class="text-center text-muted py-4">All items well stocked</td></tr><% } %></tbody></table></div></div></div>
+      <div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title"><%= t('inventory:itemsBelowReorderPoint') %></h3></div><div class="card-body p-0"><table class="table table-striped"><thead><tr><th><%= t('shared:common.sku') %></th><th><%= t('shared:common.product') %></th><th><%= t('inventory:currentStock') %></th><th><%= t('inventory:reorderPoint') %></th></tr></thead><tbody><% if (items && items.length > 0) { %><% items.forEach(i => { %><tr><td><code><%= i.sku %></code></td><td><%= i.productName || i.sku %></td><td class="text-danger fw-bold"><%= i.quantity || 0 %></td><td><%= i.reorderPoint || 0 %></td></tr><% }) %><% } else { %><tr><td colspan="4" class="text-center text-muted py-4"><%= t('inventory:allItemsWellStocked') %></td></tr><% } %></tbody></table></div></div></div>
     </div>
   </div>
 </section>

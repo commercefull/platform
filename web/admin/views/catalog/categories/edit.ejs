@@ -4,7 +4,7 @@
       <div class="col-auto">
         <a href="/admin/catalog/categories" class="btn btn-outline-secondary btn-sm mb-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="15 6 9 12 15 18" /></svg>
-          Back to Categories
+          <%= t('product:category.back') %>
         </a>
         <h2 class="page-title"><%= pageName %></h2>
       </div>
@@ -25,33 +25,33 @@
     <input type="hidden" name="_method" value="PUT">
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Edit Category</h3>
+        <h3 class="card-title"><%= t('product:category.edit') %></h3>
       </div>
       <div class="card-body">
         <div class="row">
           <div class="col-md-6">
             <div class="mb-3">
-              <label class="form-label required">Name</label>
+              <label class="form-label required"><%= t('common.name') %></label>
               <input type="text" class="form-control" name="name" required value="<%= category.name %>">
             </div>
           </div>
           <div class="col-md-6">
             <div class="mb-3">
-              <label class="form-label">Slug</label>
+              <label class="form-label"><%= t('shared:common.slug') %></label>
               <input type="text" class="form-control" name="slug" value="<%= category.slug %>">
             </div>
           </div>
         </div>
         <div class="mb-3">
-          <label class="form-label">Description</label>
+          <label class="form-label"><%= t('shared:common.description') %></label>
           <textarea class="form-control" name="description" rows="3"><%= category.description || '' %></textarea>
         </div>
         <div class="row">
           <div class="col-md-6">
             <div class="mb-3">
-              <label class="form-label">Parent Category</label>
+              <label class="form-label"><%= t('product:category.parentCategory') %></label>
               <select class="form-select" name="parentId">
-                <option value="">None (Root Category)</option>
+                <option value=""><%= t('product:category.noneRoot') %></option>
                 <% if (typeof parentCategories !== 'undefined' && parentCategories) { %>
                   <% parentCategories.forEach(function(cat) { %>
                   <option value="<%= cat.productCategoryId %>" <%= category.parentId === cat.productCategoryId ? 'selected' : '' %>><%= cat.name %></option>
@@ -62,7 +62,7 @@
           </div>
           <div class="col-md-6">
             <div class="mb-3">
-              <label class="form-label">Position</label>
+              <label class="form-label"><%= t('product:category.position') %></label>
               <input type="number" class="form-control" name="position" value="<%= category.position || 0 %>">
             </div>
           </div>
@@ -70,17 +70,17 @@
         <div class="mb-3">
           <label class="form-check">
             <input type="checkbox" class="form-check-input" name="isActive" value="true" <%= category.isActive ? 'checked' : '' %>>
-            <span class="form-check-label">Active</span>
+            <span class="form-check-label"><%= t('common.active') %></span>
           </label>
         </div>
       </div>
       <div class="card-footer text-end">
-        <a href="/admin/catalog/categories/<%= category.productCategoryId %>" class="btn btn-link">Cancel</a>
-        <button type="submit" class="btn btn-primary">Update Category</button>
+        <a href="/admin/catalog/categories/<%= category.productCategoryId %>" class="btn btn-link"><%= t('common.cancel') %></a>
+        <button type="submit" class="btn btn-primary"><%= t('product:category.update') %></button>
       </div>
     </div>
   </form>
   <% } else { %>
-  <div class="alert alert-warning">Category not found</div>
+  <div class="alert alert-warning"><%= t('product:category.notFound') %></div>
   <% } %>
 </div>

@@ -7,12 +7,12 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Notification Templates</h1>
+          <h1 class="m-0"><%= t('notifications:notificationTemplates') %></h1>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">Notifications</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.notifications') %></li>
           </ol>
         </div>
       </div>
@@ -34,11 +34,11 @@
       <div class="row mb-3">
         <div class="col-12">
           <a href="/admin/notifications/templates/create" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create Template
+            <i class="fas fa-plus"></i> <%= t('shared:common.createTemplate') %>
           </a>
           <div class="float-right">
-            <span class="badge badge-info">Total: <%= templates.length %></span>
-            <span class="badge badge-success ml-2">Active: <%= stats.active %></span>
+            <span class="badge badge-info"><%= t('shared:common.total2') %> <%= templates.length %></span>
+            <span class="badge badge-success ml-2"><%= t('notifications:activeLabel') %> <%= stats.active %></span>
           </div>
         </div>
       </div>
@@ -50,9 +50,9 @@
             <div class="card-body">
               <form method="GET" class="form-inline">
                 <div class="form-group mr-3">
-                  <label for="category" class="mr-2">Category:</label>
+                  <label for="category" class="mr-2"><%= t('notifications:categoryLabel') %></label>
                   <select name="category" id="category" class="form-control">
-                    <option value="">All Categories</option>
+                    <option value=""><%= t('shared:common.allCategories') %></option>
                     <% categories.forEach(category => { %>
                       <option value="<%= category %>" <%= filters.category === category ? 'selected' : '' %>>
                         <%= category %>
@@ -61,17 +61,17 @@
                   </select>
                 </div>
                 <div class="form-group mr-3">
-                  <label for="activeOnly" class="mr-2">Status:</label>
+                  <label for="activeOnly" class="mr-2"><%= t('notifications:statusLabel') %></label>
                   <select name="activeOnly" id="activeOnly" class="form-control">
-                    <option value="false" <%= filters.activeOnly === false ? 'selected' : '' %>>All Templates</option>
-                    <option value="true" <%= filters.activeOnly !== false ? 'selected' : '' %>>Active Only</option>
+                    <option value="false" <%= filters.activeOnly === false ? 'selected' : '' %>><%= t('notifications:allTemplates') %></option>
+                    <option value="true" <%= filters.activeOnly !== false ? 'selected' : '' %>><%= t('notifications:activeOnly') %></option>
                   </select>
                 </div>
                 <button type="submit" class="btn btn-secondary mr-2">
-                  <i class="fas fa-filter"></i> Filter
+                  <i class="fas fa-filter"></i> <%= t('common.filter') %>
                 </button>
                 <a href="/admin/notifications/templates" class="btn btn-outline-secondary">
-                  <i class="fas fa-times"></i> Clear
+                  <i class="fas fa-times"></i> <%= t('common.clear') %>
                 </a>
               </form>
             </div>
@@ -82,25 +82,25 @@
       <!-- Templates Table -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Notification Templates</h3>
+          <h3 class="card-title"><%= t('notifications:notificationTemplates') %></h3>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover text-nowrap">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Channels</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th><%= t('common.name') %></th>
+                <th><%= t('common.type') %></th>
+                <th><%= t('notifications:channels') %></th>
+                <th><%= t('shared:common.category') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
               <% if (templates.length === 0) { %>
                 <tr>
                   <td colspan="6" class="text-center py-4">
-                    <em>No notification templates found. <a href="/admin/notifications/templates/create">Create your first template</a>.</em>
+                    <em><%= t('notifications:noTemplates') %> <a href="/admin/notifications/templates/create"><%= t('notifications:createFirstTemplate') %></a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -118,7 +118,7 @@
                     <td>
                       <small><%= template.supportedChannels %></small>
                       <% if (template.defaultChannel !== template.supportedChannels) { %>
-                        <br><small class="text-muted">Default: <%= template.defaultChannel %></small>
+                        <br><small class="text-muted"><%= t('notifications:defaultLabel') %> <%= template.defaultChannel %></small>
                       <% } %>
                     </td>
                     <td>
@@ -130,9 +130,9 @@
                     </td>
                     <td>
                       <% if (template.isActive) { %>
-                        <span class="badge badge-success">Active</span>
+                        <span class="badge badge-success"><%= t('common.active') %></span>
                       <% } else { %>
-                        <span class="badge badge-secondary">Inactive</span>
+                        <span class="badge badge-secondary"><%= t('common.inactive') %></span>
                       <% } %>
                     </td>
                     <td>
@@ -171,18 +171,18 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Delete Notification Template</h4>
+        <h4 class="modal-title"><%= t('notifications:deleteTemplateTitle') %></h4>
         <button type="button" class="close" data-dismiss="modal">
           <span>&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to delete the notification template "<strong id="deleteTemplateName"></strong>"?</p>
-        <p class="text-danger"><small>This action cannot be undone.</small></p>
+        <p><%= t('notifications:confirmDeleteTemplate') %> "<strong id="deleteTemplateName"></strong>"?</p>
+        <p class="text-danger"><small><%= t('shared:common.thisActionCannotBeUndone') %></small></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Template</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn"><%= t('notifications:deleteTemplateBtn') %></button>
       </div>
     </div>
   </div>
@@ -201,11 +201,11 @@ function activateTemplate(templateId) {
     if (data.success) {
       location.reload();
     } else {
-      alert('Error: ' + data.message);
+      alert('<%= t("common.error") %>: ' + data.message);
     }
   })
   .catch(error => {
-    alert('Error activating template');
+    alert('<%= t('notifications:errorActivating') %>');
     console.error('Error:', error);
   });
 }
@@ -222,11 +222,11 @@ function deactivateTemplate(templateId) {
     if (data.success) {
       location.reload();
     } else {
-      alert('Error: ' + data.message);
+      alert('<%= t("common.error") %>: ' + data.message);
     }
   })
   .catch(error => {
-    alert('Error deactivating template');
+    alert('<%= t('notifications:errorDeactivating') %>');
     console.error('Error:', error);
   });
 }
@@ -245,11 +245,11 @@ function deleteTemplate(templateId, templateName) {
       if (data.success) {
         location.reload();
       } else {
-        alert('Error: ' + data.message);
+        alert('<%= t("common.error") %>: ' + data.message);
       }
     })
     .catch(error => {
-      alert('Error deleting template');
+      alert('<%= t('notifications:errorDeleting') %>');
       console.error('Error:', error);
     });
   };

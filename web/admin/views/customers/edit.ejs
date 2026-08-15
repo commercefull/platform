@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/customers">Customers</a></li>
-            <li class="breadcrumb-item active">Edit</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/customers"><%= t('shared:common.customers') %></a></li>
+            <li class="breadcrumb-item active"><%= t('common.edit') %></li>
           </ol>
         </div>
       </div>
@@ -34,19 +34,19 @@
             <!-- Personal Info -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-user me-2"></i>Personal Information</h3>
+                <h3 class="card-title"><i class="fas fa-user me-2"></i><%= t('customer:personalInfo') %></h3>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">First Name <span class="text-danger">*</span></label>
+                      <label class="form-label"><%= t('shared:common.firstName') %> <span class="text-danger">*</span></label>
                       <input type="text" class="form-control" name="firstName" value="<%= customer.firstName || '' %>" required>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                      <label class="form-label"><%= t('shared:common.lastName') %> <span class="text-danger">*</span></label>
                       <input type="text" class="form-control" name="lastName" value="<%= customer.lastName || '' %>" required>
                     </div>
                   </div>
@@ -54,13 +54,13 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Email <span class="text-danger">*</span></label>
+                      <label class="form-label"><%= t('shared:common.email') %> <span class="text-danger">*</span></label>
                       <input type="email" class="form-control" name="email" value="<%= customer.email || '' %>" required>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Phone</label>
+                      <label class="form-label"><%= t('shared:common.phone') %></label>
                       <input type="tel" class="form-control" name="phone" value="<%= customer.phone || '' %>">
                     </div>
                   </div>
@@ -68,18 +68,18 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Date of Birth</label>
+                      <label class="form-label"><%= t('customer:dateOfBirth') %></label>
                       <input type="date" class="form-control" name="dateOfBirth" value="<%= customer.dateOfBirth ? new Date(customer.dateOfBirth).toISOString().split('T')[0] : '' %>">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Gender</label>
+                      <label class="form-label"><%= t('customer:gender') %></label>
                       <select class="form-select" name="gender">
-                        <option value="">Not specified</option>
-                        <option value="male" <%= customer.gender === 'male' ? 'selected' : '' %>>Male</option>
-                        <option value="female" <%= customer.gender === 'female' ? 'selected' : '' %>>Female</option>
-                        <option value="other" <%= customer.gender === 'other' ? 'selected' : '' %>>Other</option>
+                        <option value=""><%= t('customer:notSpecified') %></option>
+                        <option value="male" <%= customer.gender === 'male' ? 'selected' : '' %>><%= t('customer:male') %></option>
+                        <option value="female" <%= customer.gender === 'female' ? 'selected' : '' %>><%= t('customer:female') %></option>
+                        <option value="other" <%= customer.gender === 'other' ? 'selected' : '' %>><%= t('shared:common.other') %></option>
                       </select>
                     </div>
                   </div>
@@ -90,19 +90,19 @@
             <!-- Company Info -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-building me-2"></i>Company Information</h3>
+                <h3 class="card-title"><i class="fas fa-building me-2"></i><%= t('customer:companyInfo') %></h3>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Company Name</label>
+                      <label class="form-label"><%= t('shared:common.companyName') %></label>
                       <input type="text" class="form-control" name="companyName" value="<%= customer.companyName || '' %>">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group mb-3">
-                      <label class="form-label">Tax ID / VAT Number</label>
+                      <label class="form-label"><%= t('shared:common.taxIdVatNumber') %></label>
                       <input type="text" class="form-control" name="taxId" value="<%= customer.taxId || '' %>">
                     </div>
                   </div>
@@ -113,19 +113,19 @@
             <!-- Marketing Preferences -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-envelope me-2"></i>Marketing Preferences</h3>
+                <h3 class="card-title"><i class="fas fa-envelope me-2"></i><%= t('customer:marketingPrefs') %></h3>
               </div>
               <div class="card-body">
                 <div class="form-check mb-2">
                   <input class="form-check-input" type="checkbox" name="acceptsMarketing" value="true" id="acceptsMarketing" <%= customer.acceptsMarketing ? 'checked' : '' %>>
                   <label class="form-check-label" for="acceptsMarketing">
-                    Accepts marketing emails
+                    <%= t('customer:acceptsMarketing') %>
                   </label>
                 </div>
                 <div class="form-check mb-2">
                   <input class="form-check-input" type="checkbox" name="acceptsSms" value="true" id="acceptsSms" <%= customer.acceptsSms ? 'checked' : '' %>>
                   <label class="form-check-label" for="acceptsSms">
-                    Accepts SMS marketing
+                    <%= t('customer:acceptsSms') %>
                   </label>
                 </div>
               </div>
@@ -134,10 +134,10 @@
             <!-- Notes -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-sticky-note me-2"></i>Notes</h3>
+                <h3 class="card-title"><i class="fas fa-sticky-note me-2"></i><%= t('shared:common.notes') %></h3>
               </div>
               <div class="card-body">
-                <textarea class="form-control" name="notes" rows="4" placeholder="Internal notes about this customer..."><%= customer.notes || '' %></textarea>
+                <textarea class="form-control" name="notes" rows="4" placeholder="<%= t('customer:notesPlaceholder') %>"><%= customer.notes || '' %></textarea>
               </div>
             </div>
           </div>
@@ -147,14 +147,14 @@
             <!-- Actions -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-save me-2"></i>Actions</h3>
+                <h3 class="card-title"><i class="fas fa-save me-2"></i><%= t('common.actions') %></h3>
               </div>
               <div class="card-body">
                 <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
-                  <i class="fas fa-save me-2"></i>Save Changes
+                  <i class="fas fa-save me-2"></i><%= t('shared:common.saveChanges') %>
                 </button>
                 <a href="/admin/customers/<%= customer.customerId %>" class="btn btn-secondary w-100">
-                  <i class="fas fa-times me-2"></i>Cancel
+                  <i class="fas fa-times me-2"></i><%= t('common.cancel') %>
                 </a>
               </div>
             </div>
@@ -162,25 +162,25 @@
             <!-- Status -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-toggle-on me-2"></i>Status</h3>
+                <h3 class="card-title"><i class="fas fa-toggle-on me-2"></i><%= t('common.status') %></h3>
               </div>
               <div class="card-body">
                 <div class="d-flex justify-content-between mb-3">
-                  <span>Account Status:</span>
+                  <span><%= t('customer:accountStatus') %></span>
                   <span class="badge bg-<%= customer.status === 'active' ? 'success' : customer.status === 'inactive' ? 'secondary' : 'danger' %>">
                     <%= customer.status %>
                   </span>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
-                  <span>Email Verified:</span>
+                  <span><%= t('customer:emailVerified') %></span>
                   <span class="badge bg-<%= customer.emailVerified ? 'success' : 'warning' %>">
-                    <%= customer.emailVerified ? 'Yes' : 'No' %>
+                    <%= customer.emailVerified ? t('common.yes') : t('common.no') %>
                   </span>
                 </div>
                 <div class="d-flex justify-content-between">
-                  <span>Phone Verified:</span>
+                  <span><%= t('customer:phoneVerified') %></span>
                   <span class="badge bg-<%= customer.phoneVerified ? 'success' : 'warning' %>">
-                    <%= customer.phoneVerified ? 'Yes' : 'No' %>
+                    <%= customer.phoneVerified ? t('common.yes') : t('common.no') %>
                   </span>
                 </div>
               </div>
@@ -189,25 +189,25 @@
             <!-- Customer Groups -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-users me-2"></i>Customer Groups</h3>
+                <h3 class="card-title"><i class="fas fa-users me-2"></i><%= t('shared:common.customerGroups') %></h3>
               </div>
               <div class="card-body">
                 <select class="form-select" name="customerGroupId">
-                  <option value="">No Group</option>
+                  <option value=""><%= t('customer:noGroup') %></option>
                   <!-- Customer groups would be populated here -->
                 </select>
-                <small class="text-muted">Assign customer to a group for special pricing or promotions</small>
+                <small class="text-muted"><%= t('customer:assignGroupHint') %></small>
               </div>
             </div>
 
             <!-- Tags -->
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-tags me-2"></i>Tags</h3>
+                <h3 class="card-title"><i class="fas fa-tags me-2"></i><%= t('shared:common.tags') %></h3>
               </div>
               <div class="card-body">
                 <input type="text" class="form-control" name="tags" value="<%= (customer.tags || []).join(', ') %>" placeholder="vip, wholesale, etc.">
-                <small class="text-muted">Separate tags with commas</small>
+                <small class="text-muted"><%= t('customer:tagsHint') %></small>
               </div>
             </div>
           </div>

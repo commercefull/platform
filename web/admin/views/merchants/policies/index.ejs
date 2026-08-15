@@ -1,7 +1,7 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Seller Policies</h2>
+      <h2 class="page-title"><%= t('merchant:merchants.sellerPolicies') %></h2>
     </div>
   </div>
 </div>
@@ -11,49 +11,49 @@
     <%- include('../../../partials/alerts') %>
 
     <div class="card mb-4">
-      <div class="card-header"><h3 class="card-title">Add / Update Policy</h3></div>
+      <div class="card-header"><h3 class="card-title"><%= t('merchant:merchants.addUpdatePolicy') %></h3></div>
       <div class="card-body">
         <form method="POST" action="/admin/operations/merchants/<%= merchantId %>/policies">
           <div class="mb-3">
-            <label class="form-label">Policy Type <span class="text-danger">*</span></label>
+            <label class="form-label"><%= t('merchant:policyType') %> <span class="text-danger">*</span></label>
             <select class="form-select" name="policyType" required>
-              <option value="return">Return Policy</option>
-              <option value="shipping">Shipping Policy</option>
-              <option value="privacy">Privacy Policy</option>
-              <option value="terms">Terms & Conditions</option>
-              <option value="other">Other</option>
+              <option value="return"><%= t('shared:common.returnPolicy') %></option>
+              <option value="shipping"><%= t('shared:common.shippingPolicy') %></option>
+              <option value="privacy"><%= t('merchant:merchants.privacyPolicy') %></option>
+              <option value="terms"><%= t('merchant:merchants.termsConditions') %></option>
+              <option value="other"><%= t('common.other') %></option>
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Title <span class="text-danger">*</span></label>
+            <label class="form-label"><%= t('shared:common.title') %> <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="title" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Content <span class="text-danger">*</span></label>
+            <label class="form-label"><%= t('shared:common.content') %> <span class="text-danger">*</span></label>
             <textarea class="form-control" name="content" rows="6" required></textarea>
           </div>
           <div class="mb-3 form-check">
             <input type="checkbox" class="form-check-input" name="isActive" value="true" id="isActive" checked>
-            <label class="form-check-label" for="isActive">Active</label>
+            <label class="form-check-label" for="isActive"><%= t('common.active') %></label>
           </div>
-          <button type="submit" class="btn btn-primary">Save Policy</button>
+          <button type="submit" class="btn btn-primary"><%= t('merchant:merchants.savePolicy') %></button>
         </form>
       </div>
     </div>
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Existing Policies</h3>
+        <h3 class="card-title"><%= t('merchant:merchants.existingPolicies') %></h3>
         <span class="float-end text-muted"><%= (policies || []).length %> records</span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Type</th>
-              <th>Title</th>
-              <th>Active</th>
-              <th>Updated</th>
+              <th><%= t('common.type') %></th>
+              <th><%= t('shared:common.title') %></th>
+              <th><%= t('common.active') %></th>
+              <th><%= t('common.dateUpdated') %></th>
             </tr>
           </thead>
           <tbody>
@@ -63,14 +63,14 @@
               <td><%= pol.title %></td>
               <td>
                 <span class="badge bg-<%= pol.isActive ? 'success' : 'secondary' %>">
-                  <%= pol.isActive ? 'Active' : 'Inactive' %>
+                  <%= pol.isActive ? t('common.active') : t('common.inactive') %>
                 </span>
               </td>
               <td><%= new Date(pol.updatedAt).toLocaleDateString() %></td>
             </tr>
             <% }); %>
             <% if ((policies || []).length === 0) { %>
-            <tr><td colspan="4" class="text-center text-muted py-4">No policies found.</td></tr>
+            <tr><td colspan="4" class="text-center text-muted py-4"><%= t('merchant:noPolicies') %></td></tr>
             <% } %>
           </tbody>
         </table>

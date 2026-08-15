@@ -1,0 +1,23 @@
+{
+  "programMembers": "Thành viên chương trình",
+  "pointsIssued": "Điểm đã cấp",
+  "pointsRedeemed": "Điểm đã đổi",
+  "programSettings": "Cài đặt chương trình",
+  "pointsPerDollar": "Điểm trên mỗi đô la chi tiêu",
+  "pointsValue": "Giá trị điểm ($ mỗi điểm)",
+  "minimumRedemption": "Đổi thưởng tối thiểu",
+  "addReward": "Thêm phần thưởng",
+  "reward": "Phần thưởng",
+  "redemptions": "Quy đổi",
+  "noRewards": "Không có phần thưởng được cấu hình.",
+  "recentTransactions": "Giao dịch gần đây",
+  "noTransactions": "Chưa có giao dịch nào.",
+  "rewardName": "Tên phần thưởng",
+  "rewardType": "Loại phần thưởng",
+  "freeProduct": "Sản phẩm miễn phí",
+  "giftCard": "Thẻ quà tặng",
+  "rewardValue": "Giá trị phần thưởng",
+  "confirmDeleteReward": "Xóa phần thưởng này?",
+  "analytics": "Phân tích chương trình khách hàng thân thiết",
+  "analyticsDescription": "Phân bổ điểm, tỷ lệ quy đổi và tiến triển cấp bậc."
+}

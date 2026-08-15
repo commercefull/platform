@@ -8,576 +8,83 @@ The Subscription feature manages recurring billing products, subscription plans,
 
 ## Use Cases
 
-### Subscription Products (Business)
-
-### UC-SUB-001: List Subscription Products (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request subscription products  
-**Then** the system returns all subscription-enabled products
-
-#### API Endpoint
-
-```
-GET /business/subscriptions/products
-```
-
----
-
-### UC-SUB-002: Get Subscription Product (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/subscriptions/products/:id
-```
-
----
-
-### UC-SUB-003: Create Subscription Product (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** valid product configuration  
-**When** they create a subscription product  
-**Then** the product is available for subscriptions
-
-#### API Endpoint
-
-```
-POST /business/subscriptions/products
-Body: {
-  name, description, productId?,
-  billingInterval: 'daily'|'weekly'|'monthly'|'yearly',
-  isActive
-}
-```
-
----
-
-### UC-SUB-004: Update Subscription Product (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /business/subscriptions/products/:id
-```
-
----
-
-### UC-SUB-005: Delete Subscription Product (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-DELETE /business/subscriptions/products/:id
-```
-
----
-
-### Subscription Plans (Business)
-
-### UC-SUB-006: List Subscription Plans (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### API Endpoint
-
-```
-GET /business/subscriptions/products/:productId/plans
-```
-
----
-
-### UC-SUB-007: Create Subscription Plan (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a subscription product  
-**When** they create a plan  
-**Then** customers can subscribe to that plan
-
-#### API Endpoint
-
-```
-POST /business/subscriptions/products/:productId/plans
-Body: {
-  name, price, billingPeriod, billingInterval,
-  trialDays?, features: [], isActive
-}
-```
-
-#### Business Rules
-
-- Multiple plans per product
-- Different pricing tiers
-- Optional trial period
-
----
-
-### UC-SUB-008: Update Subscription Plan (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /business/subscriptions/products/:productId/plans/:planId
-```
-
----
-
-### UC-SUB-009: Delete Subscription Plan (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-DELETE /business/subscriptions/products/:productId/plans/:planId
-```
-
----
-
-### Customer Subscriptions Management (Business)
-
-### UC-SUB-010: List Customer Subscriptions (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request subscriptions  
-**Then** the system returns all customer subscriptions
-
-#### API Endpoint
-
-```
-GET /business/subscriptions/subscriptions
-Query: customerId?, status?, planId?, limit, offset
-```
-
----
-
-### UC-SUB-011: Get Customer Subscription (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### API Endpoint
-
-```
-GET /business/subscriptions/subscriptions/:id
-```
-
----
-
-### UC-SUB-012: Cancel Subscription (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** an active subscription  
-**When** they cancel the subscription  
-**Then** the subscription is marked for cancellation
-
-#### API Endpoint
-
-```
-POST /business/subscriptions/subscriptions/:id/cancel
-Body: { reason?, cancelAt?: 'immediate'|'period_end' }
-```
-
-#### Business Rules
-
-- Can cancel immediately or at period end
-- Reason is recorded for analytics
-- Customer is notified
-
----
-
-### UC-SUB-013: Pause Subscription (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-POST /business/subscriptions/subscriptions/:id/pause
-Body: { resumeDate? }
-```
-
----
-
-### UC-SUB-014: Resume Subscription (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-POST /business/subscriptions/subscriptions/:id/resume
-```
-
----
-
-### UC-SUB-015: Update Subscription Status (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /business/subscriptions/subscriptions/:id/status
-Body: { status }
-```
-
----
-
-### Subscription Orders (Business)
-
-### UC-SUB-016: Get Subscription Orders (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/subscriptions/subscriptions/:subscriptionId/orders
-```
-
----
-
-### UC-SUB-017: Retry Failed Order (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-POST /business/subscriptions/orders/:orderId/retry
-```
-
----
-
-### UC-SUB-018: Skip Order (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-POST /business/subscriptions/orders/:orderId/skip
-```
-
----
-
-### Dunning (Business)
-
-### UC-SUB-019: Get Dunning Attempts (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a subscription with payment failures  
-**When** they request dunning attempts  
-**Then** the system returns retry history
-
-#### API Endpoint
-
-```
-GET /business/subscriptions/subscriptions/:subscriptionId/dunning
-```
-
----
-
-### UC-SUB-020: Get Pending Dunning (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/subscriptions/dunning/pending
-```
-
----
-
-### Billing Operations (Business)
-
-### UC-SUB-021: Get Due Billing (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request subscriptions due for billing  
-**Then** the system returns subscriptions to be charged
-
-#### API Endpoint
-
-```
-GET /business/subscriptions/billing/due
-```
-
----
-
-### UC-SUB-022: Process Billing Cycle (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### API Endpoint
-
-```
-POST /business/subscriptions/subscriptions/:id/bill
-```
-
----
-
-### Customer-Facing Use Cases
-
-### UC-SUB-023: Browse Subscription Products (Customer)
-
-**Actor:** Customer/Guest  
-**Priority:** High
-
-#### API Endpoint
-
-```
-GET /subscriptions/products
-```
-
----
-
-### UC-SUB-024: Get Product Details (Customer)
-
-**Actor:** Customer/Guest  
-**Priority:** High
-
-#### API Endpoint
-
-```
-GET /subscriptions/products/:productId
-```
-
----
-
-### UC-SUB-025: Get Plan Details (Customer)
-
-**Actor:** Customer/Guest  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /subscriptions/plans/:planId
-```
-
----
-
-### UC-SUB-026: Get My Subscriptions (Customer)
-
-**Actor:** Customer  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated customer  
-**When** they request their subscriptions  
-**Then** the system returns their active subscriptions
-
-#### API Endpoint
-
-```
-GET /subscriptions/mine
-```
-
----
-
-### UC-SUB-027: Create Subscription (Customer)
-
-**Actor:** Customer  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated customer  
-**And** a valid plan ID  
-**When** they subscribe  
-**Then** the subscription is created  
-**And** first charge is processed  
-**And** emits subscription.created event
-
-#### API Endpoint
-
-```
-POST /subscriptions/subscribe
-Body: { planId, paymentMethodId?, shippingAddressId? }
-```
-
-#### Business Rules
-
-- Payment method required or on file
-- Trial period starts if configured
-- First billing occurs after trial
-
----
-
-### UC-SUB-028: Update My Subscription (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /subscriptions/mine/:id
-Body: { shippingAddressId?, quantity? }
-```
-
----
-
-### UC-SUB-029: Change Plan (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated customer  
-**And** an active subscription  
-**When** they change to a different plan  
-**Then** the subscription is updated  
-**And** prorated charges/credits are applied
-
-#### API Endpoint
-
-```
-POST /subscriptions/mine/:id/change-plan
-Body: { newPlanId }
-```
-
----
-
-### UC-SUB-030: Pause My Subscription (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-POST /subscriptions/mine/:id/pause
-```
-
----
-
-### UC-SUB-031: Resume My Subscription (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-POST /subscriptions/mine/:id/resume
-```
-
----
-
-### UC-SUB-032: Cancel My Subscription (Customer)
-
-**Actor:** Customer  
-**Priority:** High
-
-#### API Endpoint
-
-```
-POST /subscriptions/mine/:id/cancel
-Body: { reason? }
-```
-
----
-
-### UC-SUB-033: Reactivate Subscription (Customer)
-
-**Actor:** Customer  
-**Priority:** Low
-
-#### API Endpoint
-
-```
-POST /subscriptions/mine/:id/reactivate
-```
-
----
-
-### UC-SUB-034: Skip Next Delivery (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-POST /subscriptions/mine/:id/skip
-```
-
----
-
-### UC-SUB-035: Get Billing History (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /subscriptions/mine/:id/orders
-```
+| ID | Use Case | Actor | Purpose |
+|---|---|---|---|
+| UC-SUB-001 | List Subscription Products | Merchant/Admin | List all subscription-enabled products |
+| UC-SUB-002 | Get Subscription Product | Merchant/Admin | Retrieve a specific subscription product by ID |
+| UC-SUB-003 | Create Subscription Product | Merchant/Admin | Create a subscription product with billing interval (daily, weekly, monthly, yearly) |
+| UC-SUB-004 | Update Subscription Product | Merchant/Admin | Update an existing subscription product's configuration |
+| UC-SUB-005 | Delete Subscription Product | Merchant/Admin | Permanently delete a subscription product |
+| UC-SUB-006 | List Subscription Plans | Merchant/Admin | List all plans for a specific subscription product |
+| UC-SUB-007 | Create Subscription Plan | Merchant/Admin | Create a pricing plan with billing period, interval, optional trial, and features |
+| UC-SUB-008 | Update Subscription Plan | Merchant/Admin | Update an existing subscription plan's pricing or features |
+| UC-SUB-009 | Delete Subscription Plan | Merchant/Admin | Permanently delete a subscription plan |
+| UC-SUB-010 | List Customer Subscriptions | Merchant/Admin | List all customer subscriptions with optional status/plan/customer filtering |
+| UC-SUB-011 | Get Customer Subscription | Merchant/Admin | Retrieve a specific customer subscription by ID |
+| UC-SUB-012 | Cancel Subscription | Merchant/Admin | Cancel a subscription immediately or at period end with a reason |
+| UC-SUB-013 | Pause Subscription | Merchant/Admin | Pause a subscription with an optional resume date |
+| UC-SUB-014 | Resume Subscription | Merchant/Admin | Resume a paused subscription |
+| UC-SUB-015 | Update Subscription Status | Merchant/Admin | Update a subscription's status directly |
+| UC-SUB-016 | Get Subscription Orders | Merchant/Admin | Retrieve all orders generated by a specific subscription |
+| UC-SUB-017 | Retry Failed Order | Merchant/Admin | Retry a failed subscription billing order |
+| UC-SUB-018 | Skip Order | Merchant/Admin | Skip a subscription billing order |
+| UC-SUB-019 | Get Dunning Attempts | Merchant/Admin | Retrieve the retry/dunning history for a subscription with payment failures |
+| UC-SUB-020 | Get Pending Dunning | Merchant/Admin | Retrieve all subscriptions with pending dunning attempts |
+| UC-SUB-021 | Get Due Billing | Merchant/Admin | Retrieve all subscriptions due for billing |
+| UC-SUB-022 | Process Billing Cycle | Merchant/Admin | Process a billing cycle for a specific subscription |
+| UC-SUB-023 | Browse Subscription Products | Customer/Guest | Browse available subscription products |
+| UC-SUB-024 | Get Product Details | Customer/Guest | Retrieve details of a specific subscription product |
+| UC-SUB-025 | Get Plan Details | Customer/Guest | Retrieve details of a specific subscription plan |
+| UC-SUB-026 | Get My Subscriptions | Customer | Retrieve the authenticated customer's active subscriptions |
+| UC-SUB-027 | Create Subscription | Customer | Subscribe to a plan, processing the first charge or starting a trial |
+| UC-SUB-028 | Update My Subscription | Customer | Update the customer's subscription shipping address or quantity |
+| UC-SUB-029 | Change Plan | Customer | Change to a different plan with prorated charges/credits |
+| UC-SUB-030 | Pause My Subscription | Customer | Pause the customer's own subscription |
+| UC-SUB-031 | Resume My Subscription | Customer | Resume the customer's own paused subscription |
+| UC-SUB-032 | Cancel My Subscription | Customer | Cancel the customer's own subscription with an optional reason |
+| UC-SUB-033 | Reactivate Subscription | Customer | Reactivate a previously cancelled subscription |
+| UC-SUB-034 | Skip Next Delivery | Customer | Skip the next scheduled delivery for the customer's subscription |
+| UC-SUB-035 | Get Billing History | Customer | Retrieve the billing/order history for the customer's subscription |
+
+### API Endpoints
+
+| ID | Method | Endpoint |
+|---|---|---|
+| UC-SUB-001 | GET | `/business/subscriptions/products` |
+| UC-SUB-002 | GET | `/business/subscriptions/products/:id` |
+| UC-SUB-003 | POST | `/business/subscriptions/products` |
+| UC-SUB-004 | PUT | `/business/subscriptions/products/:id` |
+| UC-SUB-005 | DELETE | `/business/subscriptions/products/:id` |
+| UC-SUB-006 | GET | `/business/subscriptions/products/:productId/plans` |
+| UC-SUB-007 | POST | `/business/subscriptions/products/:productId/plans` |
+| UC-SUB-008 | PUT | `/business/subscriptions/products/:productId/plans/:planId` |
+| UC-SUB-009 | DELETE | `/business/subscriptions/products/:productId/plans/:planId` |
+| UC-SUB-010 | GET | `/business/subscriptions/subscriptions` |
+| UC-SUB-011 | GET | `/business/subscriptions/subscriptions/:id` |
+| UC-SUB-012 | POST | `/business/subscriptions/subscriptions/:id/cancel` |
+| UC-SUB-013 | POST | `/business/subscriptions/subscriptions/:id/pause` |
+| UC-SUB-014 | POST | `/business/subscriptions/subscriptions/:id/resume` |
+| UC-SUB-015 | PUT | `/business/subscriptions/subscriptions/:id/status` |
+| UC-SUB-016 | GET | `/business/subscriptions/subscriptions/:subscriptionId/orders` |
+| UC-SUB-017 | POST | `/business/subscriptions/orders/:orderId/retry` |
+| UC-SUB-018 | POST | `/business/subscriptions/orders/:orderId/skip` |
+| UC-SUB-019 | GET | `/business/subscriptions/subscriptions/:subscriptionId/dunning` |
+| UC-SUB-020 | GET | `/business/subscriptions/dunning/pending` |
+| UC-SUB-021 | GET | `/business/subscriptions/billing/due` |
+| UC-SUB-022 | POST | `/business/subscriptions/subscriptions/:id/bill` |
+| UC-SUB-023 | GET | `/subscriptions/products` |
+| UC-SUB-024 | GET | `/subscriptions/products/:productId` |
+| UC-SUB-025 | GET | `/subscriptions/plans/:planId` |
+| UC-SUB-026 | GET | `/subscriptions/mine` |
+| UC-SUB-027 | POST | `/subscriptions/subscribe` |
+| UC-SUB-028 | PUT | `/subscriptions/mine/:id` |
+| UC-SUB-029 | POST | `/subscriptions/mine/:id/change-plan` |
+| UC-SUB-030 | POST | `/subscriptions/mine/:id/pause` |
+| UC-SUB-031 | POST | `/subscriptions/mine/:id/resume` |
+| UC-SUB-032 | POST | `/subscriptions/mine/:id/cancel` |
+| UC-SUB-033 | POST | `/subscriptions/mine/:id/reactivate` |
+| UC-SUB-034 | POST | `/subscriptions/mine/:id/skip` |
+| UC-SUB-035 | GET | `/subscriptions/mine/:id/orders` |
 
 ---
 
@@ -598,10 +105,10 @@ GET /subscriptions/mine/:id/orders
 
 ## Integration Test Coverage
 
-| Use Case                 | Test File                         | Status |
-| ------------------------ | --------------------------------- | ------ |
-| UC-SUB-001 to UC-SUB-005 | `subscription/products.test.ts`   | ❌     |
-| UC-SUB-006 to UC-SUB-009 | `subscription/plans.test.ts`      | ❌     |
-| UC-SUB-010 to UC-SUB-015 | `subscription/management.test.ts` | ❌     |
-| UC-SUB-016 to UC-SUB-022 | `subscription/billing.test.ts`    | ❌     |
-| UC-SUB-023 to UC-SUB-035 | `subscription/customer.test.ts`   | ❌     |
+| Use Case                 | Test File                           | Status |
+| ------------------------ | ----------------------------------- | ------ |
+| UC-SUB-001 to UC-SUB-005 | `subscription/subscription.test.ts` | ✅     |
+| UC-SUB-006 to UC-SUB-009 | `subscription/subscription.test.ts` | ✅     |
+| UC-SUB-010 to UC-SUB-015 | `subscription/subscription.test.ts` | ✅     |
+| UC-SUB-016 to UC-SUB-022 | `subscription/subscription.test.ts` | ✅     |
+| UC-SUB-023 to UC-SUB-035 | `subscription/subscription.test.ts` | ✅     |

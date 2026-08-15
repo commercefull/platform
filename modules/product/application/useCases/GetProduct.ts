@@ -82,7 +82,6 @@ export interface ProductDetailResponse {
   slug: string;
   productTypeId: string;
   categoryId?: string;
-  brandId?: string;
   merchantId?: string;
   status: string;
   visibility: string;
@@ -184,7 +183,6 @@ export class GetProductUseCase {
       slug: product.slug,
       productTypeId: product.productTypeId,
       categoryId: product.categoryId,
-      brandId: product.brandId,
       merchantId: product.merchantId,
       status: product.status,
       visibility: product.visibility,

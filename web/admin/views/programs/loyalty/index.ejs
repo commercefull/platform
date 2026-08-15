@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">Loyalty Program</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item active"><%= t('shared:common.loyaltyProgram') %></li>
           </ol>
         </div>
       </div>
@@ -25,7 +25,7 @@
           <div class="small-box bg-info">
             <div class="inner">
               <h3><%= stats.totalMembers || 0 %></h3>
-              <p>Program Members</p>
+              <p><%= t('loyalty:programMembers') %></p>
             </div>
             <div class="icon"><i class="fas fa-users"></i></div>
           </div>
@@ -34,7 +34,7 @@
           <div class="small-box bg-success">
             <div class="inner">
               <h3><%= (stats.totalPointsIssued || 0).toLocaleString() %></h3>
-              <p>Points Issued</p>
+              <p><%= t('loyalty:pointsIssued') %></p>
             </div>
             <div class="icon"><i class="fas fa-coins"></i></div>
           </div>
@@ -43,7 +43,7 @@
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= (stats.totalPointsRedeemed || 0).toLocaleString() %></h3>
-              <p>Points Redeemed</p>
+              <p><%= t('loyalty:pointsRedeemed') %></p>
             </div>
             <div class="icon"><i class="fas fa-gift"></i></div>
           </div>
@@ -52,7 +52,7 @@
           <div class="small-box bg-danger">
             <div class="inner">
               <h3><%= (rewards || []).length %></h3>
-              <p>Available Rewards</p>
+              <p><%= t('shared:common.availableRewards') %></p>
             </div>
             <div class="icon"><i class="fas fa-trophy"></i></div>
           </div>
@@ -62,31 +62,31 @@
       <!-- Program Settings -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-cog me-2"></i>Program Settings</h3>
+          <h3 class="card-title"><i class="fas fa-cog me-2"></i><%= t('loyalty:programSettings') %></h3>
         </div>
         <div class="card-body">
           <form method="POST" action="/admin/programs/loyalty/settings">
             <div class="row">
               <div class="col-md-4">
                 <div class="mb-3">
-                  <label class="form-label">Points per Dollar Spent</label>
+                  <label class="form-label"><%= t('loyalty:pointsPerDollar') %></label>
                   <input type="number" class="form-control" name="pointsPerDollar" value="<%= settings.pointsPerDollar || 1 %>" min="0" step="0.1">
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="mb-3">
-                  <label class="form-label">Points Value ($ per point)</label>
+                  <label class="form-label"><%= t('loyalty:pointsValue') %></label>
                   <input type="number" class="form-control" name="pointValue" value="<%= settings.pointValue || 0.01 %>" min="0" step="0.001">
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="mb-3">
-                  <label class="form-label">Minimum Redemption</label>
+                  <label class="form-label"><%= t('loyalty:minimumRedemption') %></label>
                   <input type="number" class="form-control" name="minRedemption" value="<%= settings.minRedemption || 100 %>" min="0">
                 </div>
               </div>
             </div>
-            <button type="submit" class="btn btn-primary">Save Settings</button>
+            <button type="submit" class="btn btn-primary"><%= t('shared:common.saveSettings') %></button>
           </form>
         </div>
       </div>
@@ -94,21 +94,21 @@
       <!-- Rewards -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-gift me-2"></i>Rewards</h3>
+          <h3 class="card-title"><i class="fas fa-gift me-2"></i><%= t('shared:common.rewards') %></h3>
           <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addRewardModal">
-            <i class="fas fa-plus me-1"></i>Add Reward
+            <i class="fas fa-plus me-1"></i><%= t('loyalty:addReward') %>
           </button>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Reward</th>
-                <th>Points Required</th>
-                <th>Type</th>
-                <th>Redemptions</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th><%= t('loyalty:reward') %></th>
+                <th><%= t('shared:common.pointsRequired') %></th>
+                <th><%= t('common.type') %></th>
+                <th><%= t('loyalty:redemptions') %></th>
+                <th><%= t('common.status') %></th>
+                <th><%= t('common.actions') %></th>
               </tr>
             </thead>
             <tbody>
@@ -123,7 +123,7 @@
                 <td><%= reward.redemptionCount || 0 %></td>
                 <td>
                   <span class="badge bg-<%= reward.isActive ? 'success' : 'secondary' %>">
-                    <%= reward.isActive ? 'Active' : 'Inactive' %>
+                    <%= reward.isActive ? t('common.active') : t('common.inactive') %>
                   </span>
                 </td>
                 <td>
@@ -138,7 +138,7 @@
               <% }); %>
               <% if ((rewards || []).length === 0) { %>
               <tr>
-                <td colspan="6" class="text-center text-muted py-4">No rewards configured.</td>
+                <td colspan="6" class="text-center text-muted py-4"><%= t('loyalty:noRewards') %></td>
               </tr>
               <% } %>
             </tbody>
@@ -149,18 +149,18 @@
       <!-- Recent Transactions -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="fas fa-history me-2"></i>Recent Transactions</h3>
-          <a href="/admin/programs/loyalty/transactions" class="btn btn-sm btn-primary float-end">View All</a>
+          <h3 class="card-title"><i class="fas fa-history me-2"></i><%= t('loyalty:recentTransactions') %></h3>
+          <a href="/admin/programs/loyalty/transactions" class="btn btn-sm btn-primary float-end"><%= t('shared:common.viewAll') %></a>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Customer</th>
-                <th>Type</th>
-                <th>Points</th>
-                <th>Description</th>
-                <th>Date</th>
+                <th><%= t('shared:common.customer') %></th>
+                <th><%= t('common.type') %></th>
+                <th><%= t('shared:common.points') %></th>
+                <th><%= t('common.description') %></th>
+                <th><%= t('common.date') %></th>
               </tr>
             </thead>
             <tbody>
@@ -181,7 +181,7 @@
               <% }); %>
               <% if ((transactions || []).length === 0) { %>
               <tr>
-                <td colspan="5" class="text-center text-muted py-4">No transactions yet.</td>
+                <td colspan="5" class="text-center text-muted py-4"><%= t('loyalty:noTransactions') %></td>
               </tr>
               <% } %>
             </tbody>
@@ -197,53 +197,53 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add Reward</h5>
+        <h5 class="modal-title"><%= t('loyalty:addReward') %></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form method="POST" action="/admin/programs/loyalty/rewards">
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Reward Name <span class="text-danger">*</span></label>
+            <label class="form-label"><%= t('loyalty:rewardName') %> <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="name" required>
           </div>
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Points Required <span class="text-danger">*</span></label>
+                <label class="form-label"><%= t('shared:common.pointsRequired') %> <span class="text-danger">*</span></label>
                 <input type="number" class="form-control" name="pointsCost" min="1" required>
               </div>
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Reward Type</label>
+                <label class="form-label"><%= t('loyalty:rewardType') %></label>
                 <select class="form-select" name="rewardType">
-                  <option value="discount">Discount</option>
-                  <option value="free_shipping">Free Shipping</option>
-                  <option value="free_product">Free Product</option>
-                  <option value="gift_card">Gift Card</option>
+                  <option value="discount"><%= t('shared:common.discount') %></option>
+                  <option value="free_shipping"><%= t('shared:common.freeShipping') %></option>
+                  <option value="free_product"><%= t('loyalty:freeProduct') %></option>
+                  <option value="gift_card"><%= t('loyalty:giftCard') %></option>
                 </select>
               </div>
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Reward Value</label>
+            <label class="form-label"><%= t('loyalty:rewardValue') %></label>
             <div class="input-group">
               <span class="input-group-text">$</span>
               <input type="number" class="form-control" name="value" step="0.01" min="0">
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Description</label>
+            <label class="form-label"><%= t('common.description') %></label>
             <textarea class="form-control" name="description" rows="2"></textarea>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" name="isActive" value="true" id="rewardIsActive" checked>
-            <label class="form-check-label" for="rewardIsActive">Active</label>
+            <label class="form-check-label" for="rewardIsActive"><%= t('common.active') %></label>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create Reward</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+          <button type="submit" class="btn btn-primary"><%= t('shared:common.createReward') %></button>
         </div>
       </form>
     </div>
@@ -253,7 +253,7 @@
 <script>
   function editReward(id) { window.location.href = `/admin/programs/loyalty/rewards/${id}/edit`; }
   async function deleteReward(id) {
-    if (!confirm('Delete this reward?')) return;
+    if (!confirm('<%= t('loyalty:confirmDeleteReward') %>')) return;
     const res = await fetch(`/admin/programs/loyalty/rewards/${id}`, { method: 'DELETE' });
     if ((await res.json()).success) location.reload();
   }

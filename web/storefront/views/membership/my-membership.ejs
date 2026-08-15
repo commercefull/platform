@@ -5,11 +5,11 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900">My Membership</h1>
-        <p class="mt-2 text-sm text-gray-600">View and manage your membership</p>
+        <h1 class="text-3xl font-bold text-gray-900"><%= t('storefront:myMembership') %></h1>
+        <p class="mt-2 text-sm text-gray-600"><%= t('storefront:viewManageMembership') %></p>
       </div>
       <a href="/membership" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">
-        View All Plans
+        <%= t('storefront:viewAllPlans') %>
       </a>
     </div>
 
@@ -21,8 +21,8 @@
             <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <h2 class="text-xl font-bold text-white"><%= membership.tierName || membership.planName || 'Membership' %></h2>
-                  <p class="text-indigo-200 mt-1">Member since <%= membership.startDate ? new Date(membership.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : '-' %></p>
+                  <h2 class="text-xl font-bold text-white"><%= membership.tierName || membership.planName || t('storefront:membershipFallback') %></h2>
+                  <p class="text-indigo-200 mt-1"><%= t('storefront:memberSince', { date: membership.startDate ? new Date(membership.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : '-' }) %></p>
                 </div>
                 <%
                   let statusColor = 'gray';
@@ -38,7 +38,7 @@
             <div class="px-6 py-6">
               <div class="grid grid-cols-2 gap-6">
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Current Period</dt>
+                  <dt class="text-sm font-medium text-gray-500"><%= t('storefront:currentPeriod') %></dt>
                   <dd class="mt-1 text-sm text-gray-900">
                     <%= membership.currentPeriodStart ? new Date(membership.currentPeriodStart).toLocaleDateString() : '-' %>
                     &mdash;
@@ -46,18 +46,18 @@
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Renewal Date</dt>
-                  <dd class="mt-1 text-sm text-gray-900"><%= membership.renewalDate ? new Date(membership.renewalDate).toLocaleDateString() : 'N/A' %></dd>
+                  <dt class="text-sm font-medium text-gray-500"><%= t('storefront:renewalDate') %></dt>
+                  <dd class="mt-1 text-sm text-gray-900"><%= membership.renewalDate ? new Date(membership.renewalDate).toLocaleDateString() : t('storefront:notAvailable') %></dd>
                 </div>
                 <% if (membership.pointsBalance !== undefined) { %>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Points Balance</dt>
-                  <dd class="mt-1 text-lg font-semibold text-indigo-600"><%= membership.pointsBalance || 0 %> pts</dd>
+                  <dt class="text-sm font-medium text-gray-500"><%= t('storefront:pointsBalance') %></dt>
+                  <dd class="mt-1 text-lg font-semibold text-indigo-600"><%= membership.pointsBalance || 0 %> <%= t('storefront:pts') %></dd>
                 </div>
                 <% } %>
                 <% if (membership.totalSavings !== undefined) { %>
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Total Savings</dt>
+                  <dt class="text-sm font-medium text-gray-500"><%= t('storefront:totalSavings') %></dt>
                   <dd class="mt-1 text-lg font-semibold text-green-600">$<%= ((membership.totalSavings || 0) / 100).toFixed(2) %></dd>
                 </div>
                 <% } %>
@@ -69,7 +69,7 @@
           <% if (benefits && benefits.length > 0) { %>
           <div class="bg-white shadow-lg rounded-xl overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200">
-              <h3 class="text-lg font-semibold text-gray-900">Your Benefits</h3>
+              <h3 class="text-lg font-semibold text-gray-900"><%= t('storefront:yourBenefits') %></h3>
             </div>
             <div class="px-6 py-4">
               <div class="space-y-4">
@@ -96,14 +96,14 @@
         <div class="space-y-6">
           <% if (membership.status === 'active') { %>
           <div class="bg-white shadow-lg rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Manage</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4"><%= t('shared:common.manage') %></h3>
             <div class="space-y-3">
               <a href="/membership" class="block w-full text-center px-4 py-2 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors text-sm font-medium">
-                Upgrade Plan
+                <%= t('storefront:upgradePlan') %>
               </a>
-              <form method="POST" action="/membership/cancel" onsubmit="return confirm('Are you sure you want to cancel your membership?')">
+              <form method="POST" action="/membership/cancel" onsubmit="return confirm('<%= t('storefront:cancelMembershipConfirm') %>')">
                 <button type="submit" class="w-full px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium">
-                  Cancel Membership
+                  <%= t('storefront:cancelMembership') %>
                 </button>
               </form>
             </div>
@@ -111,10 +111,10 @@
           <% } %>
           <% if (membership.status === 'expired') { %>
           <div class="bg-white shadow-lg rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Renew</h3>
-            <p class="text-sm text-gray-600 mb-4">Your membership has expired. Renew to continue enjoying benefits.</p>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4"><%= t('storefront:renew') %></h3>
+            <p class="text-sm text-gray-600 mb-4"><%= t('storefront:membershipExpiredRenew') %></p>
             <a href="/membership" class="block w-full text-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
-              Renew Membership
+              <%= t('storefront:renewMembership') %>
             </a>
           </div>
           <% } %>
@@ -128,10 +128,10 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
           </svg>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">You're not a member yet</h3>
-        <p class="text-gray-600 mb-6">Join a membership plan to unlock exclusive benefits, rewards, and discounts.</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-2"><%= t('storefront:notAMemberYet') %></h3>
+        <p class="text-gray-600 mb-6"><%= t('storefront:joinMembershipDesc') %></p>
         <a href="/membership" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">
-          Browse Membership Plans
+          <%= t('storefront:browseMembershipPlans') %>
         </a>
       </div>
     <% } %>

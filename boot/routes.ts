@@ -49,19 +49,16 @@ import { membershipBusinessRouter } from '../modules/membership/interface/router
 import { shippingBusinessRouter } from '../modules/shipping/interface/routers/shippingBusinessRouter';
 import { inventoryBusinessRouter } from '../modules/inventory/interface/routers/businessRouter';
 import { paymentBusinessRouter } from '../modules/payment/interface/routers/paymentBusinessRouter';
-import { businessRouter } from '../modules/business/interface/http/BusinessRouter';
 import { storeRouter } from '../modules/store/interface/http/StoreRouter';
 import { systemConfigurationRouter } from '../modules/configuration/interface/http/SystemConfigurationRouter';
 import { mediaRouter } from '../modules/media/interface/http/MediaRouter';
 import { adminRouter } from '../web/admin/adminRouters';
 // New module routers
-import { brandBusinessRouter } from '../modules/brand/interface/routers/brandRouter';
 import { couponBusinessRouter } from '../modules/coupon/interface/routers/couponRouter';
 import { fulfillmentBusinessRouter } from '../modules/fulfillment/interface/routers/fulfillmentBusinessRouter';
 import fulfillmentCustomerRouter from '../modules/fulfillment/interface/routers/fulfillmentCustomerRouter';
 import { fulfillmentLocationRouter } from '../modules/fulfillment/interface/routers/fulfillmentLocationRouter';
 import { organizationBusinessRouter } from '../modules/organization/interface/routers/organizationRouter';
-import { brandCustomerRouter } from '../modules/brand/interface/routers/brandCustomerRouter';
 import { couponCustomerRouter } from '../modules/coupon/interface/routers/couponCustomerRouter';
 import { promotionCustomerRouter } from '../modules/promotion/interface/routers/customerRouter';
 import { storeCustomerRouter } from '../modules/store/interface/routers/storeCustomerRouter';
@@ -109,7 +106,6 @@ export function configureRoutes(app: Express): void {
     localizationCustomerRouter,
     shippingCustomerRouter,
     notificationCustomerRouter,
-    brandCustomerRouter,
     couponCustomerRouter,
     promotionCustomerRouter,
     categoryCustomerRouter,
@@ -145,10 +141,8 @@ export function configureRoutes(app: Express): void {
     inventoryBusinessRouter,
     paymentBusinessRouter,
     mediaRouter,
-    businessRouter,
     storeRouter,
     systemConfigurationRouter,
-    brandBusinessRouter,
     couponBusinessRouter,
     fulfillmentBusinessRouter,
     organizationBusinessRouter,

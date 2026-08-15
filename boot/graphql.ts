@@ -45,10 +45,6 @@ import { pricingTypeDefs } from '../modules/pricing/interface/graphql/typeDefs';
 import { pricingResolvers } from '../modules/pricing/interface/graphql/resolvers';
 import { merchantTypeDefs } from '../modules/merchant/interface/graphql/typeDefs';
 import { merchantResolvers } from '../modules/merchant/interface/graphql/resolvers';
-import { businessTypeDefs } from '../modules/business/interface/graphql/typeDefs';
-import { businessResolvers } from '../modules/business/interface/graphql/resolvers';
-import { brandTypeDefs } from '../modules/brand/interface/graphql/typeDefs';
-import { brandResolvers } from '../modules/brand/interface/graphql/resolvers';
 import { analyticsTypeDefs } from '../modules/analytics/interface/graphql/typeDefs';
 import { analyticsResolvers } from '../modules/analytics/interface/graphql/resolvers';
 import { contentTypeDefs } from '../modules/content/interface/graphql/typeDefs';
@@ -154,8 +150,6 @@ export function configureGraphQL(app: Express): void {
     taxTypeDefs,
     pricingTypeDefs,
     merchantTypeDefs,
-    businessTypeDefs,
-    brandTypeDefs,
     analyticsTypeDefs,
     contentTypeDefs,
     mediaTypeDefs,
@@ -191,8 +185,6 @@ export function configureGraphQL(app: Express): void {
     taxResolvers,
     pricingResolvers,
     merchantResolvers,
-    businessResolvers,
-    brandResolvers,
     analyticsResolvers,
     contentResolvers,
     mediaResolvers,
@@ -215,15 +207,74 @@ export function configureGraphQL(app: Express): void {
     introspection: process.env.NODE_ENV !== 'production',
   });
 
-  apolloServer.start().then(() => {
-    app.use(
-      '/graphql',
-      expressMiddleware<GraphQLContext>(apolloServer, {
+  // Register /graphql synchronously before storefront routes catch it.
+  // The actual Apollo middleware is swapped in once the server has started.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let graphqlHandler: any = null;
+
+  app.use(
+    '/graphql',
+    (req, res, next) => {
+      // Serve GraphiQL UI for browser GET requests in non-production
+      if (req.method === 'GET' && process.env.NODE_ENV !== 'production') {
+        const accept = req.headers.accept || '';
+        if (accept.includes('text/html')) {
+          res.setHeader('Content-Type', 'text/html');
+          res.send(`<!DOCTYPE html>
+<html>
+  <head>
+    <title>CommerceFull GraphiQL</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>body { margin: 0; height: 100vh; } #graphiql { height: 100vh; }</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/graphiql@3.3.2/graphiql.min.css" />
+  </head>
+  <body>
+    <div id="graphiql">Loading GraphiQL…</div>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/graphiql@3.3.2/graphiql.min.js"></script>
+    <script>
+      window.addEventListener('load', function () {
+        var fetcher = function (graphQLParams, opts) {
+          return fetch(window.location.origin + '/graphql', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: JSON.stringify(graphQLParams),
+            credentials: opts && opts.headers ? undefined : 'include',
+          }).then(function (r) { return r.json(); });
+        };
+        ReactDOM.render(
+          React.createElement(GraphiQL, { fetcher: fetcher, defaultEditorToolsVisibility: true }),
+          document.getElementById('graphiql')
+        );
+      });
+    </script>
+  </body>
+</html>`);
+          return;
+        }
+      }
+      if (graphqlHandler) {
+        graphqlHandler(req, res, next);
+      } else {
+        res.status(503).json({ error: 'GraphQL server is starting, please retry shortly.' });
+      }
+    },
+  );
+
+  apolloServer
+    .start()
+    .then(() => {
+      graphqlHandler = expressMiddleware<GraphQLContext>(apolloServer, {
         context: async (args) => buildContext(args),
-      }),
-    );
-    logger.info('GraphQL endpoint mounted at /graphql');
-  }).catch((error) => {
-    logger.error('Failed to start Apollo Server:', error);
-  });
+      });
+      logger.info('GraphQL endpoint mounted at /graphql');
+    })
+    .catch((error) => {
+      logger.error('Failed to start Apollo Server:', error);
+    });
 }

@@ -7,8 +7,6 @@ export interface SearchProductsQuery {
   // Basic filters
   categoryId?: string;
   categoryIds?: string[];
-  brandId?: string;
-  brandIds?: string[];
   productTypeId?: string;
 
   // Price filters
@@ -54,8 +52,6 @@ export class SearchProductsUseCase {
         query: query.query,
         categoryId: query.categoryId,
         categoryIds: query.categoryIds,
-        brandId: query.brandId,
-        brandIds: query.brandIds,
         productTypeId: query.productTypeId,
         minPrice: query.minPrice,
         maxPrice: query.maxPrice,

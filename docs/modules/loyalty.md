@@ -8,382 +8,53 @@ The Loyalty feature manages customer loyalty programs including points earning, 
 
 ## Use Cases
 
-### Tier Management (Business)
-
-### UC-LOY-001: List Tiers (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request loyalty tiers  
-**Then** the system returns all tier configurations
-
-#### API Endpoint
-
-```
-GET /business/loyalty/tiers
-```
-
----
-
-### UC-LOY-002: Get Tier (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/loyalty/tiers/:id
-```
-
----
-
-### UC-LOY-003: Create Tier (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** valid tier configuration  
-**When** they create a tier  
-**Then** customers can progress to that tier
-
-#### API Endpoint
-
-```
-POST /business/loyalty/tiers
-Body: {
-  name, slug,
-  minPoints, maxPoints?,
-  pointsMultiplier,
-  benefits: [],
-  isActive
-}
-```
-
-#### Business Rules
-
-- Tiers are ordered by minPoints
-- Higher tiers have better multipliers
-- Benefits can include discounts, free shipping, etc.
-
----
-
-### UC-LOY-004: Update Tier (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /business/loyalty/tiers/:id
-```
-
----
-
-### Reward Management (Business)
-
-### UC-LOY-005: List Rewards (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**When** they request rewards  
-**Then** the system returns all available rewards
-
-#### API Endpoint
-
-```
-GET /business/loyalty/rewards
-```
-
----
-
-### UC-LOY-006: Get Reward (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/loyalty/rewards/:id
-```
-
----
-
-### UC-LOY-007: Create Reward (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** valid reward configuration  
-**When** they create a reward  
-**Then** customers can redeem points for it
-
-#### API Endpoint
-
-```
-POST /business/loyalty/rewards
-Body: {
-  name, description,
-  pointsCost,
-  rewardType: 'discount'|'product'|'shipping'|'experience',
-  rewardValue,
-  minTierId?,
-  stock?,
-  isActive
-}
-```
-
-#### Business Rules
-
-- Rewards can be tier-restricted
-- Can have limited stock
-- Different reward types available
-
----
-
-### UC-LOY-008: Update Reward (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /business/loyalty/rewards/:id
-```
-
----
-
-### Customer Points Management (Business)
-
-### UC-LOY-009: Get Customer Points (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a customer ID  
-**When** they request points balance  
-**Then** the system returns the customer's points
-
-#### API Endpoint
-
-```
-GET /business/loyalty/customers/:customerId/points
-```
-
----
-
-### UC-LOY-010: Get Customer Transactions (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/loyalty/customers/:customerId/transactions
-Query: type?, dateFrom?, dateTo?, limit, offset
-```
-
----
-
-### UC-LOY-011: Adjust Customer Points (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### Given-When-Then
-
-**Given** an authenticated merchant  
-**And** a customer  
-**When** adjusting their points  
-**Then** the balance is updated with audit trail
-
-#### API Endpoint
-
-```
-POST /business/loyalty/customers/:customerId/points/adjust
-Body: { amount, reason, type: 'credit'|'debit' }
-```
-
----
-
-### UC-LOY-012: Get Customer Redemptions (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /business/loyalty/customers/:customerId/redemptions
-```
-
----
-
-### UC-LOY-013: Update Redemption Status (Business)
-
-**Actor:** Merchant/Admin  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-PUT /business/loyalty/redemptions/:id/status
-Body: { status: 'pending'|'fulfilled'|'cancelled' }
-```
-
----
-
-### UC-LOY-014: Process Order Points (Business)
-
-**Actor:** System/Merchant  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** a completed order  
-**When** processing loyalty points  
-**Then** points are awarded based on order value
-
-#### API Endpoint
-
-```
-POST /business/loyalty/orders/:orderId/points
-```
-
-#### Business Rules
-
-- Points calculated based on order total
-- Tier multiplier applied
-- Bonus points for promotions
-
----
-
-### Customer-Facing Use Cases
-
-### UC-LOY-015: Get Public Tiers (Customer)
-
-**Actor:** Customer/Guest  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** any user  
-**When** they request loyalty tiers  
-**Then** the system returns public tier information
-
-#### API Endpoint
-
-```
-GET /loyalty/tiers
-```
-
----
-
-### UC-LOY-016: Get Public Rewards (Customer)
-
-**Actor:** Customer/Guest  
-**Priority:** High
-
-#### API Endpoint
-
-```
-GET /loyalty/rewards
-```
-
----
-
-### UC-LOY-017: Get My Loyalty Status (Customer)
-
-**Actor:** Customer  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated customer  
-**When** they request their loyalty status  
-**Then** the system returns their tier and points
-
-#### API Endpoint
-
-```
-GET /loyalty/my-status
-```
-
----
-
-### UC-LOY-018: Get My Transactions (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /loyalty/my-transactions
-Query: limit, offset
-```
-
----
-
-### UC-LOY-019: Get My Redemptions (Customer)
-
-**Actor:** Customer  
-**Priority:** Medium
-
-#### API Endpoint
-
-```
-GET /loyalty/my-redemptions
-```
-
----
-
-### UC-LOY-020: Redeem Reward (Customer)
-
-**Actor:** Customer  
-**Priority:** High
-
-#### Given-When-Then
-
-**Given** an authenticated customer  
-**And** sufficient points  
-**When** they redeem a reward  
-**Then** points are deducted and reward is issued
-
-#### API Endpoint
-
-```
-POST /loyalty/redeem
-Body: { rewardId }
-```
-
-#### Business Rules
-
-- Customer must have enough points
-- Reward must be in stock
-- Customer must meet tier requirement
-- Creates redemption record
+| ID | Use Case | Actor | Purpose |
+|---|---|---|---|
+| UC-LOY-001 | List Tiers | Merchant/Admin | List all loyalty tier configurations with points thresholds and benefits |
+| UC-LOY-002 | Get Tier | Merchant/Admin | Retrieve a specific loyalty tier by ID |
+| UC-LOY-003 | Create Tier | Merchant/Admin | Create a loyalty tier with min/max points, multiplier, and benefits |
+| UC-LOY-004 | Update Tier | Merchant/Admin | Update an existing loyalty tier's configuration |
+| UC-LOY-005 | List Rewards | Merchant/Admin | List all available loyalty rewards |
+| UC-LOY-006 | Get Reward | Merchant/Admin | Retrieve a specific loyalty reward by ID |
+| UC-LOY-007 | Create Reward | Merchant/Admin | Create a redeemable reward (discount, product, shipping, experience) with optional tier restriction and stock |
+| UC-LOY-008 | Update Reward | Merchant/Admin | Update an existing reward's configuration |
+| UC-LOY-009 | Get Customer Points | Merchant/Admin | Retrieve a customer's loyalty points balance |
+| UC-LOY-010 | Get Customer Transactions | Merchant/Admin | Retrieve a customer's loyalty transaction history with optional filtering |
+| UC-LOY-011 | Adjust Customer Points | Merchant/Admin | Manually credit or debit a customer's points with a reason and audit trail |
+| UC-LOY-012 | Get Customer Redemptions | Merchant/Admin | Retrieve a customer's reward redemption history |
+| UC-LOY-013 | Update Redemption Status | Merchant/Admin | Update a redemption's status (pending, fulfilled, cancelled) |
+| UC-LOY-014 | Process Order Points | System/Merchant | Award loyalty points for a completed order based on order value and tier multiplier |
+| UC-LOY-015 | Get Public Tiers | Customer/Guest | Retrieve public loyalty tier information for display |
+| UC-LOY-016 | Get Public Rewards | Customer/Guest | Retrieve available rewards for display |
+| UC-LOY-017 | Get My Loyalty Status | Customer | Retrieve the authenticated customer's current tier and points balance |
+| UC-LOY-018 | Get My Transactions | Customer | Retrieve the customer's own loyalty transaction history |
+| UC-LOY-019 | Get My Redemptions | Customer | Retrieve the customer's own reward redemption history |
+| UC-LOY-020 | Redeem Reward | Customer | Redeem a reward by spending loyalty points, creating a redemption record |
+
+### API Endpoints
+
+| ID | Method | Endpoint |
+|---|---|---|
+| UC-LOY-001 | GET | `/business/loyalty/tiers` |
+| UC-LOY-002 | GET | `/business/loyalty/tiers/:id` |
+| UC-LOY-003 | POST | `/business/loyalty/tiers` |
+| UC-LOY-004 | PUT | `/business/loyalty/tiers/:id` |
+| UC-LOY-005 | GET | `/business/loyalty/rewards` |
+| UC-LOY-006 | GET | `/business/loyalty/rewards/:id` |
+| UC-LOY-007 | POST | `/business/loyalty/rewards` |
+| UC-LOY-008 | PUT | `/business/loyalty/rewards/:id` |
+| UC-LOY-009 | GET | `/business/loyalty/customers/:customerId/points` |
+| UC-LOY-010 | GET | `/business/loyalty/customers/:customerId/transactions` |
+| UC-LOY-011 | POST | `/business/loyalty/customers/:customerId/points/adjust` |
+| UC-LOY-012 | GET | `/business/loyalty/customers/:customerId/redemptions` |
+| UC-LOY-013 | PUT | `/business/loyalty/redemptions/:id/status` |
+| UC-LOY-014 | POST | `/business/loyalty/orders/:orderId/points` |
+| UC-LOY-015 | GET | `/loyalty/tiers` |
+| UC-LOY-016 | GET | `/loyalty/rewards` |
+| UC-LOY-017 | GET | `/loyalty/my-status` |
+| UC-LOY-018 | GET | `/loyalty/my-transactions` |
+| UC-LOY-019 | GET | `/loyalty/my-redemptions` |
+| UC-LOY-020 | POST | `/loyalty/redeem` |
 
 ---
 
@@ -404,7 +75,7 @@ Body: { rewardId }
 
 | Use Case                 | Test File                  | Status |
 | ------------------------ | -------------------------- | ------ |
-| UC-LOY-001 to UC-LOY-004 | `loyalty/tiers.test.ts`    | 🟡     |
-| UC-LOY-005 to UC-LOY-008 | `loyalty/rewards.test.ts`  | 🟡     |
-| UC-LOY-009 to UC-LOY-014 | `loyalty/admin.test.ts`    | ❌     |
-| UC-LOY-015 to UC-LOY-020 | `loyalty/customer.test.ts` | 🟡     |
+| UC-LOY-001 to UC-LOY-004 | `loyalty/loyalty.test.ts`  | ✅     |
+| UC-LOY-005 to UC-LOY-008 | `loyalty/loyalty.test.ts`  | ✅     |
+| UC-LOY-009 to UC-LOY-014 | `loyalty/loyalty.test.ts`  | ✅     |
+| UC-LOY-015 to UC-LOY-020 | `loyalty/loyalty.test.ts`  | ✅     |

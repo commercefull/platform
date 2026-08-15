@@ -8,6 +8,7 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import warehouseRepo from '../../infrastructure/repositories/warehouseRepo';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
+import { query } from '../../../../libs/db';
 
 /**
  * Find nearest stores based on customer location
@@ -237,20 +238,19 @@ export const checkStoreAvailability = async (req: TypedRequest, res: Response): 
       return;
     }
 
-    // TODO: Integrate with inventory service to check actual availability
-    // const availability = await inventoryService.checkAvailabilityAtLocation(
-    //   productId,
-    //   variantId as string,
-    //   id
-    // );
+    // Check inventory availability at this location
+    const inventoryRows = await query<Array<{ availableQuantity: number }>>(
+      `SELECT "availableQuantity" FROM "inventoryLocation" WHERE "distributionWarehouseId" = $1 AND "productId" = $2${variantId ? ' AND "productVariantId" = $3' : ''} LIMIT 1`,
+      variantId ? [id, productId, variantId as string] : [id, productId],
+    );
+    const availableQuantity = inventoryRows?.[0]?.availableQuantity ?? 0;
 
-    // For now, return mock availability
     const availability = {
       storeId: id,
       productId,
       variantId: variantId || null,
-      available: true,
-      quantity: 10,
+      available: availableQuantity > 0,
+      quantity: availableQuantity,
       pickupAvailable: store.isFulfillmentCenter,
       estimatedPickupTime: '2 hours',
     };

@@ -7,14 +7,14 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Create Shipping Method</h1>
+          <h1 class="m-0"><%= t('distribution:shipping.createMethod') %></h1>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/admin/shipping">Shipping</a></li>
-            <li class="breadcrumb-item"><a href="/admin/shipping/methods">Methods</a></li>
-            <li class="breadcrumb-item active">Create</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/shipping"><%= t('shared:common.shipping') %></a></li>
+            <li class="breadcrumb-item"><a href="/admin/shipping/methods"><%= t('shared:common.methods') %></a></li>
+            <li class="breadcrumb-item active"><%= t('common.create') %></li>
           </ol>
         </div>
       </div>
@@ -36,7 +36,7 @@
         <div class="col-md-12">
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title">Shipping Method Details</h3>
+              <h3 class="card-title"><%= t('distribution:shipping.methodDetails') %></h3>
             </div>
 
             <form action="/admin/shipping/methods" method="POST">
@@ -45,54 +45,54 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="name">Method Name *</label>
+                      <label for="name"><%= t('shared:common.methodName') %> *</label>
                       <input type="text" class="form-control" id="name" name="name"
                              value="<%= formData?.name || '' %>" required>
-                      <small class="form-text text-muted">Display name for this shipping method</small>
+                      <small class="form-text text-muted"><%= t('support:displayNameHint') %></small>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="code">Method Code *</label>
+                      <label for="code"><%= t('distribution:shipping.methodCode') %> *</label>
                       <input type="text" class="form-control" id="code" name="code"
                              value="<%= formData?.code || '' %>" required>
-                      <small class="form-text text-muted">Unique code for this method</small>
+                      <small class="form-text text-muted"><%= t('support:uniqueCodeHint') %></small>
                     </div>
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="description">Description</label>
+                  <label for="description"><%= t('common.description') %></label>
                   <textarea class="form-control" id="description" name="description" rows="3"><%= formData?.description || '' %></textarea>
-                  <small class="form-text text-muted">Optional description of the shipping method</small>
+                  <small class="form-text text-muted"><%= t('support:shippingDescHint') %></small>
                 </div>
 
                 <!-- Configuration -->
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="domesticInternational">Type</label>
+                      <label for="domesticInternational"><%= t('common.type') %></label>
                       <select class="form-control" id="domesticInternational" name="domesticInternational">
-                        <option value="domestic" <%= (formData?.domesticInternational || 'both') === 'domestic' ? 'selected' : '' %>>Domestic</option>
-                        <option value="international" <%= (formData?.domesticInternational || 'both') === 'international' ? 'selected' : '' %>>International</option>
-                        <option value="both" <%= (formData?.domesticInternational || 'both') === 'both' ? 'selected' : '' %>>Both</option>
+                        <option value="domestic" <%= (formData?.domesticInternational || 'both') === 'domestic' ? 'selected' : '' %>><%= t('distribution:shipping.domestic') %></option>
+                        <option value="international" <%= (formData?.domesticInternational || 'both') === 'international' ? 'selected' : '' %>><%= t('distribution:shipping.international') %></option>
+                        <option value="both" <%= (formData?.domesticInternational || 'both') === 'both' ? 'selected' : '' %>><%= t('distribution:shipping.both') %></option>
                       </select>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="priority">Priority</label>
+                      <label for="priority"><%= t('shared:common.priority') %></label>
                       <input type="number" class="form-control" id="priority" name="priority"
                              value="<%= formData?.priority || 0 %>" min="0">
-                      <small class="form-text text-muted">Higher priority methods appear first</small>
+                      <small class="form-text text-muted"><%= t('support:priorityHint') %></small>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="handlingDays">Handling Days</label>
+                      <label for="handlingDays"><%= t('distribution:shipping.handlingDays') %></label>
                       <input type="number" class="form-control" id="handlingDays" name="handlingDays"
                              value="<%= formData?.handlingDays || 1 %>" min="0">
-                      <small class="form-text text-muted">Days needed to prepare shipment</small>
+                      <small class="form-text text-muted"><%= t('support:handlingDaysHint') %></small>
                     </div>
                   </div>
                 </div>
@@ -101,63 +101,63 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="isActive">Status</label>
+                      <label for="isActive"><%= t('common.status') %></label>
                       <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="isActive" name="isActive" value="true"
                                <%= (formData?.isActive !== false) ? 'checked' : '' %>>
-                        <label class="custom-control-label" for="isActive">Active</label>
+                        <label class="custom-control-label" for="isActive"><%= t('common.active') %></label>
                       </div>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="isDefault">Default Method</label>
+                      <label for="isDefault"><%= t('distribution:shipping.defaultMethod') %></label>
                       <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="isDefault" name="isDefault" value="true"
                                <%= (formData?.isDefault === true) ? 'checked' : '' %>>
-                        <label class="custom-control-label" for="isDefault">Set as Default</label>
+                        <label class="custom-control-label" for="isDefault"><%= t('shared:common.setAsDefault') %></label>
                       </div>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="displayOnFrontend">Display on Frontend</label>
+                      <label for="displayOnFrontend"><%= t('distribution:shipping.displayOnFrontend') %></label>
                       <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="displayOnFrontend" name="displayOnFrontend" value="true"
                                <%= (formData?.displayOnFrontend !== false) ? 'checked' : '' %>>
-                        <label class="custom-control-label" for="displayOnFrontend">Show to Customers</label>
+                        <label class="custom-control-label" for="displayOnFrontend"><%= t('distribution:shipping.showToCustomers') %></label>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Order Value and Weight Restrictions -->
-                <h5 class="mt-4 mb-3">Restrictions</h5>
+                <h5 class="mt-4 mb-3"><%= t('distribution:shipping.restrictions') %></h5>
                 <div class="row">
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label for="minOrderValue">Min Order Value</label>
+                      <label for="minOrderValue"><%= t('distribution:shipping.minOrderValue') %></label>
                       <input type="number" class="form-control" id="minOrderValue" name="minOrderValue"
                              value="<%= formData?.minOrderValue || '' %>" step="0.01" min="0">
                     </div>
                   </div>
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label for="maxOrderValue">Max Order Value</label>
+                      <label for="maxOrderValue"><%= t('distribution:shipping.maxOrderValue') %></label>
                       <input type="number" class="form-control" id="maxOrderValue" name="maxOrderValue"
                              value="<%= formData?.maxOrderValue || '' %>" step="0.01" min="0">
                     </div>
                   </div>
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label for="minWeight">Min Weight (kg)</label>
+                      <label for="minWeight"><%= t('distribution:shipping.minWeight') %> (kg)</label>
                       <input type="number" class="form-control" id="minWeight" name="minWeight"
                              value="<%= formData?.minWeight || '' %>" step="0.01" min="0">
                     </div>
                   </div>
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label for="maxWeight">Max Weight (kg)</label>
+                      <label for="maxWeight"><%= t('distribution:shipping.maxWeight') %> (kg)</label>
                       <input type="number" class="form-control" id="maxWeight" name="maxWeight"
                              value="<%= formData?.maxWeight || '' %>" step="0.01" min="0">
                     </div>
@@ -166,16 +166,16 @@
 
                 <div class="alert alert-info">
                   <i class="icon fas fa-info"></i>
-                  <strong>Note:</strong> Delivery time estimates and carrier integration will be available in future updates.
+                  <strong><%= t('common.note') %>:</strong> <%= t('common.deliveryTimeNote') %>
                 </div>
               </div>
 
               <div class="card-footer">
                 <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save"></i> Create Shipping Method
+                  <i class="fas fa-save"></i> <%= t('distribution:shipping.createMethod') %>
                 </button>
                 <a href="/admin/shipping/methods" class="btn btn-secondary">
-                  <i class="fas fa-times"></i> Cancel
+                  <i class="fas fa-times"></i> <%= t('common.cancel') %>
                 </a>
               </div>
             </form>

@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <% if (pageName) { %>
-    <title>Commercefull | <%= pageName %></title>
+    <title><%= t('storefront:brandName') %> | <%= pageName %></title>
     <%} else {%>
-    <title>Commercefull - Premium Shopping Experience</title>
+    <title><%= t('storefront:brandName') %> - <%= t('storefront:premiumShoppingExperience') %></title>
     <% } %>
 
     <!-- Tailwind CSS -->
@@ -36,7 +36,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                   </svg>
                 </div>
-                <span class="text-xl font-bold text-gray-900">Commercefull</span>
+                <span class="text-xl font-bold text-gray-900"><%= t('storefront:brandName') %></span>
               </a>
             </div>
 
@@ -48,7 +48,7 @@
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                   </svg>
-                  <span>Shop</span>
+                  <span><%= t('storefront:shop') %></span>
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
@@ -60,21 +60,21 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                       <!-- All Products -->
                       <div>
-                        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3">Browse</h3>
+                        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3"><%= t('storefront:browse') %></h3>
                         <ul class="space-y-2">
                           <li>
                             <a href="/products" class="text-gray-600 hover:text-blue-600 transition-colors">
-                              All Products
+                              <%= t('storefront:allProducts') %>
                             </a>
                           </li>
                           <li>
                             <a href="/search?q=new" class="text-gray-600 hover:text-blue-600 transition-colors">
-                              New Arrivals
+                              <%= t('storefront:newArrivals') %>
                             </a>
                           </li>
                           <li>
                             <a href="/search?q=sale" class="text-gray-600 hover:text-blue-600 transition-colors">
-                              On Sale
+                              <%= t('shared:common.onSale') %>
                             </a>
                           </li>
                         </ul>
@@ -91,7 +91,7 @@
                             <li>
                               <a href="/products/category/<%= category.slug || category.name.toLowerCase().replace(/\s+/g, '-') %>"
                                  class="text-gray-600 hover:text-blue-600 transition-colors">
-                                View All <%= category.title || category.name %>
+                                <%= t('storefront:viewAllCategory', { name: category.title || category.name }) %>
                               </a>
                             </li>
                             <% if (category.subcategories && category.subcategories.length > 0) { %>
@@ -110,11 +110,11 @@
                       <% } else { %>
                         <!-- Fallback categories -->
                         <div>
-                          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3">Categories</h3>
+                          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3"><%= t('shared:common.categories') %></h3>
                           <ul class="space-y-2">
-                            <li><a href="/products" class="text-gray-600 hover:text-blue-600 transition-colors">All Products</a></li>
-                            <li><a href="/search?q=electronics" class="text-gray-600 hover:text-blue-600 transition-colors">Electronics</a></li>
-                            <li><a href="/search?q=clothing" class="text-gray-600 hover:text-blue-600 transition-colors">Clothing</a></li>
+                            <li><a href="/products" class="text-gray-600 hover:text-blue-600 transition-colors"><%= t('storefront:allProducts') %></a></li>
+                            <li><a href="/search?q=electronics" class="text-gray-600 hover:text-blue-600 transition-colors"><%= t('storefront:categoryElectronics') %></a></li>
+                            <li><a href="/search?q=clothing" class="text-gray-600 hover:text-blue-600 transition-colors"><%= t('storefront:categoryClothing') %></a></li>
                           </ul>
                         </div>
                       <% } %>
@@ -124,12 +124,12 @@
                     <div class="border-t border-gray-200 mt-6 pt-6">
                       <div class="flex items-center justify-between">
                         <div>
-                          <h3 class="text-lg font-semibold text-gray-900">Featured Collections</h3>
-                          <p class="text-gray-600 text-sm mt-1">Discover our curated product collections</p>
+                          <h3 class="text-lg font-semibold text-gray-900"><%= t('storefront:featuredCollections') %></h3>
+                          <p class="text-gray-600 text-sm mt-1"><%= t('storefront:discoverCuratedCollections') %></p>
                         </div>
                         <a href="/products"
                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                          Shop All
+                          <%= t('storefront:shopAll') %>
                         </a>
                       </div>
                     </div>
@@ -139,13 +139,13 @@
 
               <!-- Other Nav Items -->
               <a href="/" class="<%= pageName === 'Home' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600' %> transition-colors font-medium">
-                Home
+                <%= t('storefront:home') %>
               </a>
               <a href="/pages/about-us" class="<%= pageName === 'About Us' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600' %> transition-colors font-medium">
-                About
+                <%= t('storefront:about') %>
               </a>
               <a href="/pages/contact-us" class="<%= pageName === 'Contact Us' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600' %> transition-colors font-medium">
-                Contact
+                <%= t('shared:common.contact') %>
               </a>
             </div>
           </div>
@@ -159,7 +159,7 @@
                   <input
                     type="search"
                     name="q"
-                    placeholder="Search products..."
+                    placeholder="<%= t('storefront:searchProducts') %>"
                     class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -190,7 +190,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
-                <span class="hidden md:block text-sm font-medium"><%= user.username || user.email || 'Account' %></span>
+                <span class="hidden md:block text-sm font-medium"><%= user.username || user.email || t('storefront:account') %></span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
@@ -201,30 +201,30 @@
                   <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                   </svg>
-                  My Account
+                  <%= t('storefront:myAccount') %>
                 </a>
                 <a href="/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                   <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                   </svg>
-                  My Orders
+                  <%= t('storefront:myOrders') %>
                 </a>
                 <div class="border-t border-gray-100"></div>
                 <a href="/signout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                   <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                   </svg>
-                  Sign Out
+                  <%= t('storefront:signOut') %>
                 </a>
               </div>
             </div>
             <% } else { %>
             <div class="flex items-center space-x-4">
               <a href="/signin" class="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
-                Sign In
+                <%= t('shared:common.signIn') %>
               </a>
               <a href="/signup" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-                Sign Up
+                <%= t('shared:common.signUp') %>
               </a>
             </div>
             <% } %>
@@ -245,7 +245,7 @@
               <input
                 type="search"
                 name="q"
-                placeholder="Search products..."
+                placeholder="<%= t('storefront:searchProducts') %>"
                 class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

@@ -3,20 +3,20 @@
 <main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
   <div class="max-w-2xl mx-auto">
     <div class="mb-8">
-      <a href="/returns" class="text-blue-600 hover:text-blue-800 text-sm">&larr; Back to Returns</a>
-      <h1 class="text-3xl font-bold text-gray-900 mt-2">Request a Return</h1>
+      <a href="/returns" class="text-blue-600 hover:text-blue-800 text-sm">&larr; <%= t('storefront:backToReturns') %></a>
+      <h1 class="text-3xl font-bold text-gray-900 mt-2"><%= t('storefront:requestReturn') %></h1>
     </div>
 
     <div class="bg-white shadow-lg rounded-xl p-6">
       <form method="POST" action="/returns">
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Order Number</label>
-          <input type="text" name="orderNumber" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your order number" value="<%= orderNumber || '' %>" required>
+          <label class="block text-sm font-medium text-gray-700 mb-1"><%= t('storefront:orderNumber') %></label>
+          <input type="text" name="orderNumber" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="<%= t('storefront:orderNumberPlaceholder') %>" value="<%= orderNumber || '' %>" required>
         </div>
 
         <% if (orderItems && orderItems.length > 0) { %>
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Select Items to Return</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2"><%= t('storefront:selectItemsToReturn') %></label>
           <div class="space-y-3">
             <% orderItems.forEach((item, index) => { %>
               <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -36,35 +36,35 @@
         <% } %>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Reason for Return</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1"><%= t('storefront:reasonForReturn') %></label>
           <select name="reason" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-            <option value="">Select a reason</option>
-            <option value="defective">Defective / Damaged</option>
-            <option value="wrong_item">Wrong Item Received</option>
-            <option value="not_as_described">Not as Described</option>
-            <option value="no_longer_needed">No Longer Needed</option>
-            <option value="size_fit">Size / Fit Issue</option>
-            <option value="other">Other</option>
+            <option value=""><%= t('storefront:selectReason') %></option>
+            <option value="defective"><%= t('storefront:defectiveDamaged') %></option>
+            <option value="wrong_item"><%= t('storefront:wrongItemReceived') %></option>
+            <option value="not_as_described"><%= t('shared:common.notAsDescribed') %></option>
+            <option value="no_longer_needed"><%= t('storefront:noLongerNeeded') %></option>
+            <option value="size_fit"><%= t('storefront:sizeFitIssue') %></option>
+            <option value="other"><%= t('shared:common.other') %></option>
           </select>
         </div>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Additional Details (optional)</label>
-          <textarea name="details" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="Please provide any additional details about your return..."></textarea>
+          <label class="block text-sm font-medium text-gray-700 mb-1"><%= t('storefront:additionalDetails') %></label>
+          <textarea name="details" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="<%= t('storefront:additionalDetailsPlaceholder') %>"></textarea>
         </div>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Resolution</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1"><%= t('storefront:preferredResolution') %></label>
           <select name="resolution" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <option value="refund">Refund to Original Payment</option>
-            <option value="exchange">Exchange for Another Item</option>
-            <option value="store_credit">Store Credit</option>
+            <option value="refund"><%= t('storefront:refundOriginalPayment') %></option>
+            <option value="exchange"><%= t('storefront:exchangeAnotherItem') %></option>
+            <option value="store_credit"><%= t('storefront:storeCreditOption') %></option>
           </select>
         </div>
 
         <div class="mt-6 flex gap-3">
-          <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">Submit Return Request</button>
-          <a href="/returns" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">Cancel</a>
+          <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"><%= t('storefront:submitReturnRequest') %></button>
+          <a href="/returns" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"><%= t('shared:common.cancel') %></a>
         </div>
       </form>
     </div>

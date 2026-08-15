@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-            <li class="breadcrumb-item active">API Keys</li>
+            <li class="breadcrumb-item"><a href="/admin"><%= t('dashboard.title') %></a></li>
+            <li class="breadcrumb-item active"><%= t('platform:apiKeys') %></li>
           </ol>
         </div>
       </div>
@@ -23,7 +23,7 @@
       <div class="row mb-3">
         <div class="col-12">
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createApiKeyModal">
-            <i class="fas fa-plus me-2"></i>Create API Key
+            <i class="fas fa-plus me-2"></i><%= t('platform:createApiKey') %>
           </button>
         </div>
       </div>
@@ -33,19 +33,19 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-list me-2"></i>API Keys</h3>
+              <h3 class="card-title"><i class="fas fa-list me-2"></i><%= t('platform:apiKeys') %></h3>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Key Prefix</th>
-                    <th>Permissions</th>
-                    <th>Rate Limit</th>
-                    <th>Last Used</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th><%= t('shared:common.name') %></th>
+                    <th><%= t('platform:keyPrefix') %></th>
+                    <th><%= t('shared:common.permissions') %></th>
+                    <th><%= t('platform:rateLimit') %></th>
+                    <th><%= t('platform:lastUsed') %></th>
+                    <th><%= t('common.status') %></th>
+                    <th><%= t('common.actions') %></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -62,17 +62,17 @@
                       <% } %>
                     </td>
                     <td><%= key.rateLimit %>/min</td>
-                    <td><%= key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : 'Never' %></td>
+                    <td><%= key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : t('shared:common.never') %></td>
                     <td>
                       <span class="badge bg-<%= key.isActive ? 'success' : 'secondary' %>">
-                        <%= key.isActive ? 'Active' : 'Inactive' %>
+                        <%= key.isActive ? t('common.active') : t('common.inactive') %>
                       </span>
                     </td>
                     <td>
-                      <button class="btn btn-sm btn-outline-warning" title="Revoke">
+                      <button class="btn btn-sm btn-outline-warning" title="<%= t('platform:revoke') %>">
                         <i class="fas fa-ban"></i>
                       </button>
-                      <button class="btn btn-sm btn-outline-danger" title="Delete">
+                      <button class="btn btn-sm btn-outline-danger" title="<%= t('common.delete') %>">
                         <i class="fas fa-trash"></i>
                       </button>
                     </td>
@@ -81,7 +81,7 @@
                   <% if ((apiKeys || []).length === 0) { %>
                   <tr>
                     <td colspan="7" class="text-center text-muted">
-                      No API keys created yet. Click "Create API Key" to get started.
+                      <%= t('platform:noApiKeys') %>
                     </td>
                   </tr>
                   <% } %>
@@ -97,21 +97,21 @@
         <div class="col-12">
           <div class="card card-outline card-info">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i>API Key Best Practices</h3>
+              <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i><%= t('platform:bestPractices') %></h3>
             </div>
             <div class="card-body">
               <div class="row">
                 <div class="col-md-4">
-                  <h5><i class="fas fa-lock text-success me-2"></i>Keep Keys Secure</h5>
-                  <p class="text-muted">Never expose API keys in client-side code or public repositories.</p>
+                  <h5><i class="fas fa-lock text-success me-2"></i><%= t('platform:keepKeysSecure') %></h5>
+                  <p class="text-muted"><%= t('platform:keepKeysSecureDesc') %></p>
                 </div>
                 <div class="col-md-4">
-                  <h5><i class="fas fa-sync text-warning me-2"></i>Rotate Regularly</h5>
-                  <p class="text-muted">Rotate API keys periodically and immediately if compromised.</p>
+                  <h5><i class="fas fa-sync text-warning me-2"></i><%= t('platform:rotateRegularly') %></h5>
+                  <p class="text-muted"><%= t('platform:rotateRegularlyDesc') %></p>
                 </div>
                 <div class="col-md-4">
-                  <h5><i class="fas fa-user-shield text-info me-2"></i>Least Privilege</h5>
-                  <p class="text-muted">Grant only the minimum permissions required for each integration.</p>
+                  <h5><i class="fas fa-user-shield text-info me-2"></i><%= t('platform:leastPrivilege') %></h5>
+                  <p class="text-muted"><%= t('platform:leastPrivilegeDesc') %></p>
                 </div>
               </div>
             </div>
@@ -127,55 +127,55 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Create API Key</h5>
+        <h5 class="modal-title"><%= t('platform:createApiKey') %></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form id="createApiKeyForm">
           <div class="mb-3">
-            <label class="form-label">Name</label>
+            <label class="form-label"><%= t('shared:common.name') %></label>
             <input type="text" class="form-control" name="name" required placeholder="My Integration">
           </div>
           <div class="mb-3">
-            <label class="form-label">Permissions</label>
+            <label class="form-label"><%= t('shared:common.permissions') %></label>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="permissions" value="read:products" id="perm_read_products">
-              <label class="form-check-label" for="perm_read_products">Read Products</label>
+              <label class="form-check-label" for="perm_read_products"><%= t('platform:readProducts') %></label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="permissions" value="write:products" id="perm_write_products">
-              <label class="form-check-label" for="perm_write_products">Write Products</label>
+              <label class="form-check-label" for="perm_write_products"><%= t('platform:writeProducts') %></label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="permissions" value="read:orders" id="perm_read_orders">
-              <label class="form-check-label" for="perm_read_orders">Read Orders</label>
+              <label class="form-check-label" for="perm_read_orders"><%= t('platform:readOrders') %></label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="permissions" value="write:orders" id="perm_write_orders">
-              <label class="form-check-label" for="perm_write_orders">Write Orders</label>
+              <label class="form-check-label" for="perm_write_orders"><%= t('platform:writeOrders') %></label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="permissions" value="read:customers" id="perm_read_customers">
-              <label class="form-check-label" for="perm_read_customers">Read Customers</label>
+              <label class="form-check-label" for="perm_read_customers"><%= t('platform:readCustomers') %></label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="permissions" value="write:customers" id="perm_write_customers">
-              <label class="form-check-label" for="perm_write_customers">Write Customers</label>
+              <label class="form-check-label" for="perm_write_customers"><%= t('platform:writeCustomers') %></label>
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Rate Limit (requests/minute)</label>
+            <label class="form-label"><%= t('platform:rateLimitLabel') %></label>
             <input type="number" class="form-control" name="rateLimit" value="1000" min="1" max="10000">
           </div>
           <div class="mb-3">
-            <label class="form-label">Expiration (optional)</label>
+            <label class="form-label"><%= t('platform:expiration') %></label>
             <input type="date" class="form-control" name="expiresAt">
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="createApiKey()">Create API Key</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+        <button type="button" class="btn btn-primary" onclick="createApiKey()"><%= t('platform:createApiKey') %></button>
       </div>
     </div>
   </div>
@@ -183,7 +183,7 @@
 
 <script>
   async function createApiKey() {
-    alert('API Key creation not yet implemented. This is a placeholder for Phase 8.');
+    alert('<%= t("platform:apiKeyNotImplemented") %>');
   }
 </script>
 

@@ -1,0 +1,23 @@
+{
+  "programMembers": "Program Üyeleri",
+  "pointsIssued": "Verilen Puanlar",
+  "pointsRedeemed": "Kullanılan Puanlar",
+  "programSettings": "Program Ayarları",
+  "pointsPerDollar": "Harcanan Dolar Başına Puan",
+  "pointsValue": "Puan Değeri (puan başına $)",
+  "minimumRedemption": "Minimum Kullanım",
+  "addReward": "Ödül Ekle",
+  "reward": "Ödül",
+  "redemptions": "Ödemeler",
+  "noRewards": "Hiçbir ödül yapılandırılmadı.",
+  "recentTransactions": "Son İşlemler",
+  "noTransactions": "Henüz işlem yok.",
+  "rewardName": "Ödül Adı",
+  "rewardType": "Ödül Türü",
+  "freeProduct": "Ücretsiz Ürün",
+  "giftCard": "Hediye Kartı",
+  "rewardValue": "Ödül Değeri",
+  "confirmDeleteReward": "Bu ödül silinsin mi?",
+  "analytics": "Sadakat Programı Analizi",
+  "analyticsDescription": "Puan dağıtımı, puan kullanım oranları ve kademe ilerlemesi."
+}

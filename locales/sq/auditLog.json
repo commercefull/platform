@@ -1,0 +1,11 @@
+{
+  "title": "Regjistrat e auditimit",
+  "user": "Përdoruesi",
+  "resource": "Burim",
+  "resourceId": "ID e burimit",
+  "ipAddress": "Adresa IP",
+  "noLogs": "Nuk u gjetën regjistra auditimi.",
+  "changes": "Ndryshimet",
+  "oldValue": "Vlera e Vjetër",
+  "newValue": "Vlera e re"
+}

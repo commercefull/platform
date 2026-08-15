@@ -1,10 +1,10 @@
 <div class="page-header d-print-none">
   <div class="row g-2 align-items-center">
     <div class="col">
-      <h2 class="page-title">Commission Profiles</h2>
+      <h2 class="page-title"><%= t('merchant:commissionProfiles') %></h2>
     </div>
     <div class="col-auto ms-auto">
-      <a href="/admin/operations/merchants/commission-profiles/create" class="btn btn-primary">New Profile</a>
+      <a href="/admin/operations/merchants/commission-profiles/create" class="btn btn-primary"><%= t('merchant:merchants.newProfile') %></a>
     </div>
   </div>
 </div>
@@ -15,19 +15,19 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Profiles</h3>
+        <h3 class="card-title"><%= t('merchant:merchants.profiles') %></h3>
         <span class="float-end text-muted"><%= (profiles || []).length %> records</span>
       </div>
       <div class="card-body table-responsive p-0">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Default Rate</th>
-              <th>Active</th>
-              <th>Created</th>
-              <th>Actions</th>
+              <th><%= t('common.name') %></th>
+              <th><%= t('common.description') %></th>
+              <th><%= t('merchant:merchants.defaultRate') %></th>
+              <th><%= t('common.active') %></th>
+              <th><%= t('common.dateCreated') %></th>
+              <th><%= t('common.actions') %></th>
             </tr>
           </thead>
           <tbody>
@@ -38,17 +38,17 @@
               <td><%= (p.defaultRate || 0).toFixed(2) %>%</td>
               <td>
                 <span class="badge bg-<%= p.isActive ? 'success' : 'secondary' %>">
-                  <%= p.isActive ? 'Active' : 'Inactive' %>
+                  <%= p.isActive ? t('common.active') : t('common.inactive') %>
                 </span>
               </td>
               <td><%= new Date(p.createdAt).toLocaleDateString() %></td>
               <td>
-                <a href="/admin/operations/merchants/commission-profiles/<%= p.commissionProfileId %>/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <a href="/admin/operations/merchants/commission-profiles/<%= p.commissionProfileId %>/edit" class="btn btn-sm btn-outline-secondary"><%= t('common.edit') %></a>
               </td>
             </tr>
             <% }); %>
             <% if ((profiles || []).length === 0) { %>
-            <tr><td colspan="6" class="text-center text-muted py-4">No commission profiles found.</td></tr>
+            <tr><td colspan="6" class="text-center text-muted py-4"><%= t('merchant:merchants.noProfiles') %></td></tr>
             <% } %>
           </tbody>
         </table>

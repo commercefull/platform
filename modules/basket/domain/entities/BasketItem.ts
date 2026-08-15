@@ -14,6 +14,7 @@ export interface BasketItemProps {
   name: string;
   quantity: number;
   unitPrice: Money;
+  discountAmount?: number;
   imageUrl?: string;
   attributes?: Record<string, unknown>;
   itemType: 'physical' | 'digital' | 'subscription' | 'service';
@@ -91,6 +92,14 @@ export class BasketItem {
     return this.props.isGift;
   }
 
+  get discountAmount(): number {
+    return this.props.discountAmount || 0;
+  }
+
+  get isDigital(): boolean {
+    return this.props.itemType === 'digital';
+  }
+
   get giftMessage(): string | undefined {
     return this.props.giftMessage;
   }
@@ -105,7 +114,12 @@ export class BasketItem {
 
   // Calculated properties
   get lineTotal(): Money {
-    return this.props.unitPrice.multiply(this.props.quantity);
+    const gross = this.props.unitPrice.multiply(this.props.quantity);
+    if (this.props.discountAmount && this.props.discountAmount > 0) {
+      const net = Math.max(0, gross.amount - this.props.discountAmount);
+      return Money.create(net, gross.currency);
+    }
+    return gross;
   }
 
   // Domain methods
@@ -140,6 +154,12 @@ export class BasketItem {
     this.props.updatedAt = new Date();
   }
 
+  setDiscountAmount(amount: number): void {
+    if (amount < 0) throw new Error('Discount amount cannot be negative');
+    this.props.discountAmount = amount;
+    this.props.updatedAt = new Date();
+  }
+
   updateAttributes(attributes: Record<string, unknown>): void {
     this.props.attributes = { ...this.props.attributes, ...attributes };
     this.props.updatedAt = new Date();
@@ -166,6 +186,7 @@ export class BasketItem {
       unitPrice: this.props.unitPrice.amount,
       currency: this.props.unitPrice.currency,
       lineTotal: this.lineTotal.amount,
+      discountAmount: this.discountAmount,
       imageUrl: this.props.imageUrl,
       attributes: this.props.attributes,
       itemType: this.props.itemType,
