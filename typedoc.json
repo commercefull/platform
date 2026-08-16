@@ -1,0 +1,30 @@
+{
+  "entryPoints": [
+    "modules/*/domain",
+    "modules/*/application",
+    "libs"
+  ],
+  "exclude": [
+    "modules/*/infrastructure",
+    "modules/*/interface",
+    "**/node_modules/**"
+  ],
+  "out": "docs/generated/code-reference",
+  "plugin": ["typedoc-plugin-markdown"],
+  "theme": "markdown",
+  "readme": "none",
+  "name": "CommerceFull Code Reference",
+  "includeVersion": true,
+  "disableSources": false,
+  "categorizeByGroup": true,
+  "sort": ["source-order"],
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": false,
+    "external": false
+  },
+  "textContentMappings": {
+    "title": "CommerceFull Code Reference"
+  }
+}

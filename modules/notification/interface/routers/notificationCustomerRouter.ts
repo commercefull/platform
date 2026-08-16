@@ -6,7 +6,7 @@
 
 import express from 'express';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
-import { GetNotificationsUseCase, MarkAsReadUseCase } from '../../application/useCases';
+import { MarkAsReadUseCase } from '../../application/useCases';
 import notificationRepo from '../../infrastructure/repositories/notificationRepo';
 import * as notificationCustomerController from '../controllers/notificationCustomerController';
 
@@ -20,22 +20,22 @@ router.use('/notifications', isCustomerLoggedIn);
 
 router.get('/notifications', async (req, res) => {
   try {
-    const useCase = new GetNotificationsUseCase(notificationRepo);
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
 
     if (!customerId) {
       return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
 
-    const result = await useCase.execute({
-      recipientId: customerId,
-      recipientType: 'customer',
-      limit: parseInt(req.query.limit as string) || 20,
-      page: parseInt(req.query.page as string) || 1,
-      unreadOnly: req.query.unreadOnly === 'true',
-    });
+    const limit = parseInt(req.query.limit as string) || 20;
+    const unreadOnly = req.query.unreadOnly === 'true';
 
-    res.json({ success: true, data: result });
+    const notifications = unreadOnly
+      ? await notificationRepo.findUnreadByUser(customerId)
+      : await notificationRepo.findByUser(customerId, limit);
+
+    const unreadCount = await notificationRepo.countUnread(customerId);
+
+    res.json({ success: true, data: { notifications, unreadCount, total: notifications.length } });
   } catch (error: unknown) {
     res.status(400).json({ success: false, error: (error as Error).message });
   }
@@ -43,22 +43,14 @@ router.get('/notifications', async (req, res) => {
 
 router.get('/notifications/count', async (req, res) => {
   try {
-    const useCase = new GetNotificationsUseCase(notificationRepo);
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
 
     if (!customerId) {
       return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
 
-    const result = await useCase.execute({
-      recipientId: customerId,
-      recipientType: 'customer',
-      unreadOnly: true,
-      limit: 1,
-      page: 1,
-    });
-
-    res.json({ success: true, data: { unreadCount: result.unreadCount || 0 } });
+    const unreadCount = await notificationRepo.countUnread(customerId);
+    res.json({ success: true, data: { unreadCount } });
   } catch (error: unknown) {
     res.status(400).json({ success: false, error: (error as Error).message });
   }
@@ -67,7 +59,7 @@ router.get('/notifications/count', async (req, res) => {
 router.put('/notifications/:notificationId/read', async (req, res) => {
   try {
     const useCase = new MarkAsReadUseCase(notificationRepo);
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
 
     if (!customerId) {
       return res.status(401).json({ success: false, error: 'Not authenticated' });
@@ -86,20 +78,22 @@ router.put('/notifications/:notificationId/read', async (req, res) => {
 
 router.put('/notifications/read', async (req, res) => {
   try {
-    const useCase = new MarkAsReadUseCase(notificationRepo);
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
 
     if (!customerId) {
       return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
 
     const notificationIds = req.body.notificationIds;
-    if (!notificationIds || !Array.isArray(notificationIds)) {
-      return res.status(400).json({ success: false, error: 'notificationIds array is required' });
+    if (notificationIds && Array.isArray(notificationIds)) {
+      const useCase = new MarkAsReadUseCase(notificationRepo);
+      const result = await useCase.execute({ notificationIds, recipientId: customerId });
+      res.json({ success: true, data: result });
+    } else {
+      // Mark all as read
+      const count = await notificationRepo.markAllAsRead(customerId);
+      res.json({ success: true, data: { markedCount: count } });
     }
-
-    const result = await useCase.execute({ notificationIds, recipientId: customerId });
-    res.json({ success: true, data: result });
   } catch (error: unknown) {
     res.status(400).json({ success: false, error: (error as Error).message });
   }

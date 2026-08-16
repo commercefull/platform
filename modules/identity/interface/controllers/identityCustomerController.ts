@@ -120,6 +120,15 @@ export const registerCustomer = async (req: TypedRequest<Record<string, string>,
       return;
     }
 
+    // Validate password strength
+    if (password.length < 8) {
+      res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long',
+      });
+      return;
+    }
+
     // Check for existing customer
     const existingCustomer = await customerRepo.findCustomerByEmail(email);
     if (existingCustomer) {

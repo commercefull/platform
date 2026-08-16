@@ -13,21 +13,9 @@ import { generateUUID } from '../../../../libs/uuid';
 import {
   InventoryLocation as DbInventoryLocation,
   InventoryTransaction as DbInventoryTransaction,
+  DistributionWarehouse as DbDistributionWarehouse,
 } from '../../../../libs/db/types';
-
-interface DbWarehouseRow {
-  distributionWarehouseId: string;
-  name: string;
-  isFulfillmentCenter: boolean;
-  isDefault: boolean;
-  isActive: boolean;
-  storeId: string | null;
-  addressLine1: string | null;
-  city: string | null;
-  state: string | null;
-  postalCode: string | null;
-  country: string | null;
-}
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 
 export interface InventoryFilters {
   productId?: string;
@@ -38,22 +26,6 @@ export interface InventoryFilters {
   inStock?: boolean;
   lowStock?: boolean;
   needsReorder?: boolean;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
-  length: number;
 }
 
 export class InventoryRepository {
@@ -249,15 +221,15 @@ export class InventoryRepository {
 
   // Inventory Locations (mapped to distributionWarehouse table)
   async getLocations(): Promise<InventoryLocation[]> {
-    const rows = await query<DbWarehouseRow[]>(
+    const rows = await query<DbDistributionWarehouse[]>(
       'SELECT * FROM "distributionWarehouse" WHERE "isActive" = true ORDER BY "isDefault" DESC, name ASC',
     );
 
-    return (rows || []).map((row: DbWarehouseRow) => this.mapToLocation(row));
+    return (rows || []).map((row: DbDistributionWarehouse) => this.mapToLocation(row));
   }
 
   async getLocationById(locationId: string): Promise<InventoryLocation | null> {
-    const row = await queryOne<DbWarehouseRow>(
+    const row = await queryOne<DbDistributionWarehouse>(
       'SELECT * FROM "distributionWarehouse" WHERE "distributionWarehouseId" = $1',
       [locationId],
     );
@@ -271,7 +243,7 @@ export class InventoryRepository {
   }
 
   async getLocationByStoreId(storeId: string): Promise<InventoryLocation | null> {
-    const row = await queryOne<DbWarehouseRow>(
+    const row = await queryOne<DbDistributionWarehouse>(
       'SELECT * FROM "distributionWarehouse" WHERE "storeId" = $1 AND "isActive" = true ORDER BY "isDefault" DESC LIMIT 1',
       [storeId],
     );
@@ -490,7 +462,7 @@ export class InventoryRepository {
     });
   }
 
-  private mapToLocation(row: DbWarehouseRow): InventoryLocation {
+  private mapToLocation(row: DbDistributionWarehouse): InventoryLocation {
     const type: 'warehouse' | 'store' | 'supplier' = row.isFulfillmentCenter ? 'warehouse' : 'store';
     return {
       locationId: row.distributionWarehouseId,

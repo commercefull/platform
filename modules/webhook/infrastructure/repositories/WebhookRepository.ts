@@ -12,8 +12,8 @@ import {
   WebhookRepositoryInterface,
   WebhookEndpointFilters,
   WebhookDeliveryFilters,
-  PaginationOptions,
 } from '../../domain/repositories/WebhookRepository';
+import { PaginationOptions } from 'libs/types/shared';
 
 class WebhookRepository implements WebhookRepositoryInterface {
   // =========================================================================

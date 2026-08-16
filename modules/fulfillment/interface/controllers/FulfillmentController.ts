@@ -103,7 +103,7 @@ export const createFulfillment = async (req: TypedRequest, res: Response): Promi
     res.status(201).json({ success: true, data: result });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -121,7 +121,7 @@ export const getFulfillment = async (req: TypedRequest, res: Response): Promise<
     res.json({ success: true, data: result });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -137,7 +137,7 @@ export const processPicking = async (req: TypedRequest, res: Response): Promise<
     res.json({ success: true, data: result });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -156,7 +156,7 @@ export const shipOrder = async (req: TypedRequest, res: Response): Promise<void>
     res.json({ success: true, data: result.fulfillment });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -169,7 +169,7 @@ export const markDelivered = async (req: TypedRequest, res: Response): Promise<v
     res.json({ success: true, data: result.fulfillment });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -179,7 +179,7 @@ export const listFulfillmentsByOrder = async (req: TypedRequest, res: Response):
     res.json({ success: true, data: fulfillments });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -194,14 +194,14 @@ export const listFulfillments = async (req: TypedRequest, res: Response): Promis
         storeId: req.query.storeId as string | undefined,
       },
       {
-        page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
         limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 20,
+        offset: req.query.page ? (parseInt(req.query.page as string, 10) - 1) * (req.query.limit ? parseInt(req.query.limit as string, 10) : 20) : 0,
       },
     );
     res.json({ success: true, data: result });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -218,7 +218,7 @@ export const processPacking = async (req: TypedRequest, res: Response): Promise<
     res.json({ success: true, data: result.fulfillment });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -233,7 +233,7 @@ export const cancelFulfillment = async (req: TypedRequest, res: Response): Promi
     res.json({ success: true, data: result.fulfillment });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -249,7 +249,7 @@ export const updateTracking = async (req: TypedRequest, res: Response): Promise<
     res.json({ success: true, data: result.fulfillment });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -264,7 +264,7 @@ export const initiateReturn = async (req: TypedRequest, res: Response): Promise<
     res.json({ success: true, data: result });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -289,7 +289,7 @@ export const getTrackingInfo = async (req: TypedRequest, res: Response): Promise
     });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 
@@ -318,7 +318,7 @@ export const assignFulfillment = async (req: TypedRequest, res: Response): Promi
     res.json({ success: true, data: saved });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    res.status(400).json({ success: false, error: (error as Error).message });
+    const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
   }
 };
 

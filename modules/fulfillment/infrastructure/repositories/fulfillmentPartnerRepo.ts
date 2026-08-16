@@ -1,18 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
+import { FulfillmentPartner } from '../../../../libs/db/types';
 
-export interface FulfillmentPartner {
-  fulfillmentPartnerId: string;
-  name: string;
-  code: string;
-  type: string;
-  isActive: boolean;
-  apiConfig?: Record<string, unknown>;
-  address?: Record<string, unknown>;
-  contactEmail?: string;
-  contactPhone?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type { FulfillmentPartner };
 
 export async function findAll(activeOnly = true): Promise<FulfillmentPartner[]> {
   const sql = activeOnly

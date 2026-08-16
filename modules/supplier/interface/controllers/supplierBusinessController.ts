@@ -213,14 +213,14 @@ export const updateSupplierStatus = async (req: TypedRequest, res: Response): Pr
 export const updateSupplierVisibility = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { isActive } = req.body as { isActive?: boolean };
+    const { isVisible } = req.body as { isVisible?: boolean };
 
-    if (isActive === undefined) {
-      validationErrorResponse(res, ['isActive is required']);
+    if (isVisible === undefined) {
+      validationErrorResponse(res, ['isVisible is required']);
       return;
     }
 
-    const supplier = await supplierRepo.update(id, { isActive });
+    const supplier = await supplierRepo.update(id, { isActive: isVisible });
 
     if (!supplier) {
       errorResponse(res, `Supplier with ID ${id} not found`, 404);
@@ -286,7 +286,7 @@ export const getSupplierStatistics = async (req: TypedRequest, res: Response): P
 
 export const getSupplierAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { supplierId } = req.params;
+    const { id: supplierId } = req.params;
     const addresses = await SupplierAddressRepo.findBySupplierId(supplierId);
     successResponse(res, addresses);
   } catch (error: unknown) {
@@ -298,7 +298,7 @@ export const getSupplierAddresses = async (req: TypedRequest, res: Response): Pr
 
 export const createSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { supplierId } = req.params;
+    const { id: supplierId } = req.params;
     const { name, addressLine1, city, state, postalCode, country, addressType, isDefault, contactName, contactEmail, contactPhone, notes } = req.body as {
       name: string;
       addressLine1: string;
@@ -348,7 +348,7 @@ export const createSupplierAddress = async (req: TypedRequest, res: Response): P
 
 export const updateSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { supplierAddressId } = req.params;
+    const { id: supplierAddressId } = req.params;
     const address = await SupplierAddressRepo.update(supplierAddressId, req.body as SupplierAddressUpdateParams);
 
     if (!address) {
@@ -366,7 +366,7 @@ export const updateSupplierAddress = async (req: TypedRequest, res: Response): P
 
 export const deleteSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { supplierAddressId } = req.params;
+    const { id: supplierAddressId } = req.params;
     const deleted = await SupplierAddressRepo.delete(supplierAddressId);
 
     if (!deleted) {
@@ -386,7 +386,7 @@ export const deleteSupplierAddress = async (req: TypedRequest, res: Response): P
 
 export const getSupplierProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { supplierId } = req.params;
+    const { id: supplierId } = req.params;
     const products = await SupplierProductRepo.findBySupplierId(supplierId);
     successResponse(res, products);
   } catch (error: unknown) {
@@ -398,7 +398,7 @@ export const getSupplierProducts = async (req: TypedRequest, res: Response): Pro
 
 export const addProductToSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { supplierId } = req.params;
+    const { id: supplierId } = req.params;
     const { productId, productVariantId, sku, supplierSku, supplierProductName, isPreferred, unitCost, currency, minimumOrderQuantity, leadTime, packagingInfo, dimensions, weight, notes } = req.body as {
       productId: string;
       productVariantId?: string;
@@ -450,7 +450,7 @@ export const addProductToSupplier = async (req: TypedRequest, res: Response): Pr
 
 export const updateSupplierProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { supplierProductId } = req.params;
+    const { id: supplierProductId } = req.params;
     const product = await SupplierProductRepo.update(supplierProductId, req.body as SupplierProductUpdateParams);
 
     if (!product) {
@@ -468,7 +468,7 @@ export const updateSupplierProduct = async (req: TypedRequest, res: Response): P
 
 export const removeProductFromSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { supplierProductId } = req.params;
+    const { id: supplierProductId } = req.params;
     const deleted = await SupplierProductRepo.delete(supplierProductId);
 
     if (!deleted) {

@@ -3,9 +3,8 @@ import { StoreDispatch, StoreDispatchItemProps } from '../../domain/entities/Sto
 import {
   StoreDispatchRepository as IStoreDispatchRepository,
   DispatchFilters,
-  PaginationOptions,
-  PaginatedResult,
 } from '../../domain/repositories/StoreDispatchRepository';
+import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 import {
   StoreDispatch as DbStoreDispatch,
   StoreDispatchItem as DbStoreDispatchItem,
@@ -56,6 +55,7 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
       limit,
       offset,
       hasMore: offset + dispatches.length < total,
+      length: dispatches.length,
     };
   }
 
@@ -98,7 +98,7 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
           dispatch.dispatchedAt?.toISOString() || null,
           dispatch.receivedAt?.toISOString() || null,
           dispatch.notes || null,
-          dispatch.metadata ? JSON.stringify(dispatch.metadata) : null,
+          JSON.stringify(dispatch.metadata || {}),
           now,
           dispatch.dispatchId,
         ],
@@ -131,7 +131,7 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
           dispatch.dispatchedAt?.toISOString() || null,
           dispatch.receivedAt?.toISOString() || null,
           dispatch.notes || null,
-          dispatch.metadata ? JSON.stringify(dispatch.metadata) : null,
+          JSON.stringify(dispatch.metadata || {}),
           dispatch.createdAt.toISOString(),
           now,
         ],

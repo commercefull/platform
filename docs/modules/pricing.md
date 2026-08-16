@@ -106,3 +106,43 @@ Final Price =
 | UC-PRC-017 to UC-PRC-021 | `pricing/currencies.test.ts`    | ❌     |
 | UC-PRC-022 to UC-PRC-025 | `pricing/regions.test.ts`       | ❌     |
 | UC-PRC-026 to UC-PRC-029 | `pricing/currencyrules.test.ts` | ❌     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/business/pricing/currencies` | `getAllCurrencies` | Currency Management Routes |
+| POST | `/business/pricing/currencies` | `saveCurrency` | — |
+| GET | `/business/pricing/currencies/:code` | `getCurrencyByCode` | — |
+| DELETE | `/business/pricing/currencies/:code` | `deleteCurrency` | — |
+| GET | `/business/pricing/currencies/default` | `getDefaultCurrency` | — |
+| POST | `/business/pricing/currencies/update-exchange-rates` | `updateExchangeRates` | — |
+| GET | `/business/pricing/currency-price-rules` | `getAllPriceRules` | Currency Price Rule Routes |
+| POST | `/business/pricing/currency-price-rules` | `createPriceRule` | — |
+| GET | `/business/pricing/currency-price-rules/:id` | `getPriceRuleById` | — |
+| PUT | `/business/pricing/currency-price-rules/:id` | `updatePriceRule` | — |
+| DELETE | `/business/pricing/currency-price-rules/:id` | `deletePriceRule` | — |
+| GET | `/business/pricing/currency-regions` | `getAllCurrencyRegions` | Currency Region Routes |
+| POST | `/business/pricing/currency-regions` | `createCurrencyRegion` | — |
+| GET | `/business/pricing/currency-regions/:id` | `getCurrencyRegionById` | — |
+| PUT | `/business/pricing/currency-regions/:id` | `updateCurrencyRegion` | — |
+| DELETE | `/business/pricing/currency-regions/:id` | `deleteCurrencyRegion` | — |
+| GET | `/business/pricing/price-lists` | `getPriceLists` | Customer Price List Routes |
+| POST | `/business/pricing/price-lists` | `createPriceList` | — |
+| GET | `/business/pricing/price-lists/:id` | `getPriceList` | — |
+| PUT | `/business/pricing/price-lists/:id` | `updatePriceList` | — |
+| DELETE | `/business/pricing/price-lists/:id` | `deletePriceList` | — |
+| POST | `/business/pricing/price-lists/:priceListId/prices` | `addPriceToList` | Customer Prices Routes |
+| GET | `/business/pricing/rules` | `getPricingRules` | Pricing Rules Routes |
+| POST | `/business/pricing/rules` | `createPricingRule` | — |
+| GET | `/business/pricing/rules/:id` | `getPricingRule` | — |
+| PUT | `/business/pricing/rules/:id` | `updatePricingRule` | — |
+| DELETE | `/business/pricing/rules/:id` | `deletePricingRule` | — |
+| GET | `/business/pricing/tier-prices` | `getTierPrices` | Tier Pricing Routes |
+| POST | `/business/pricing/tier-prices` | `createTierPrice` | — |
+| GET | `/business/pricing/tier-prices/:id` | `getTierPrice` | — |
+| PUT | `/business/pricing/tier-prices/:id` | `updateTierPrice` | — |
+| DELETE | `/business/pricing/tier-prices/:id` | `deleteTierPrice` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

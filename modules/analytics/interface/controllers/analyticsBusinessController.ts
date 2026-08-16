@@ -293,7 +293,7 @@ export const getRealTimeMetrics: AsyncHandler = async (req, res, _next) => {
 
 export const getDashboards: AsyncHandler = async (req, res, _next) => {
   try {
-    const merchantId = req.user?.merchantId;
+    const merchantId = req.user?.merchantId || req.user?.id;
     const dashboards = await reportingRepo.getDashboards(merchantId);
     res.json({ success: true, data: dashboards });
   } catch (error: unknown) {
@@ -320,7 +320,7 @@ export const getDashboard: AsyncHandler = async (req, res, _next) => {
 
 export const createDashboard: AsyncHandler = async (req, res, _next) => {
   try {
-    const merchantId = req.user?.merchantId;
+    const merchantId = req.user?.merchantId || req.user?.id;
     const createdBy = req.user?.userId;
 
     const body = req.body as Record<string, unknown>;

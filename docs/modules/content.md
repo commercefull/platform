@@ -81,3 +81,94 @@ The Content feature provides a headless CMS for managing dynamic pages, content 
 | UC-CNT-006 to UC-CNT-011 | `content/content.test.ts`          | ✅     |
 | UC-CNT-012 to UC-CNT-017 | `content/blocks.test.ts`           | ✅     |
 | UC-CNT-018 to UC-CNT-022 | `content/content.test.ts`          | ✅     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/business/content/blocks` | `createBlock` | — |
+| GET | `/business/content/blocks/:id` | `getBlockById` | — |
+| PUT | `/business/content/blocks/:id` | `updateBlock` | — |
+| DELETE | `/business/content/blocks/:id` | `deleteBlock` | — |
+| GET | `/business/content/categories` | `getCategories` | Content Category routes |
+| POST | `/business/content/categories` | `createCategory` | — |
+| GET | `/business/content/categories/:categoryId/pages` | `getPagesByCategory` | — |
+| GET | `/business/content/categories/:id` | `getCategoryById` | — |
+| PUT | `/business/content/categories/:id` | `updateCategory` | — |
+| DELETE | `/business/content/categories/:id` | `deleteCategory` | — |
+| POST | `/business/content/categories/:id/move` | `moveCategory` | — |
+| GET | `/business/content/categories/tree` | `getCategoryTree` | — |
+| GET | `/business/content/media` | `getMedia` | Content Media routes |
+| POST | `/business/content/media` | `uploadMedia` | — |
+| GET | `/business/content/media-folders` | `getMediaFolders` | Media Folder routes |
+| POST | `/business/content/media-folders` | `createMediaFolder` | — |
+| PUT | `/business/content/media-folders/:id` | `updateMediaFolder` | — |
+| DELETE | `/business/content/media-folders/:id` | `deleteMediaFolder` | — |
+| GET | `/business/content/media-folders/tree` | `getMediaFolderTree` | — |
+| GET | `/business/content/media/:id` | `getMediaById` | — |
+| PUT | `/business/content/media/:id` | `updateMedia` | — |
+| DELETE | `/business/content/media/:id` | `deleteMedia` | — |
+| GET | `/business/content/media/:mediaId/usage` | `getMediaUsage` | Media Usage routes |
+| GET | `/business/content/media/:mediaId/usage/count` | `getMediaUsageCount` | — |
+| POST | `/business/content/media/move` | `moveMediaToFolder` | — |
+| POST | `/business/content/media/usage` | `trackMediaUsage` | — |
+| GET | `/business/content/media/usage/:entityType/:entityId` | `getMediaUsageByEntity` | — |
+| DELETE | `/business/content/media/usage/:usageId` | `untrackMediaUsage` | — |
+| PUT | `/business/content/navigation-items/:id` | `updateNavigationItem` | — |
+| DELETE | `/business/content/navigation-items/:id` | `deleteNavigationItem` | — |
+| GET | `/business/content/navigations` | `getNavigations` | Content Navigation routes |
+| POST | `/business/content/navigations` | `createNavigation` | — |
+| GET | `/business/content/navigations/:id` | `getNavigationById` | — |
+| PUT | `/business/content/navigations/:id` | `updateNavigation` | — |
+| DELETE | `/business/content/navigations/:id` | `deleteNavigation` | — |
+| GET | `/business/content/navigations/:id/items` | `getNavigationWithItems` | — |
+| POST | `/business/content/navigations/:navigationId/items` | `addNavigationItem` | Navigation Item routes |
+| POST | `/business/content/navigations/:navigationId/items/reorder` | `reorderNavigationItems` | — |
+| GET | `/business/content/pages` | `getPages` | Content Page routes |
+| POST | `/business/content/pages` | `createPage` | — |
+| GET | `/business/content/pages/:id` | `getPageById` | — |
+| PUT | `/business/content/pages/:id` | `updatePage` | — |
+| DELETE | `/business/content/pages/:id` | `deletePage` | — |
+| POST | `/business/content/pages/:id/duplicate` | `duplicatePage` | — |
+| GET | `/business/content/pages/:id/full` | `getFullPageById` | — |
+| POST | `/business/content/pages/:id/publish` | `publishPage` | Page Actions routes |
+| POST | `/business/content/pages/:id/schedule` | `schedulePage` | — |
+| POST | `/business/content/pages/:id/unpublish` | `unpublishPage` | — |
+| GET | `/business/content/pages/:pageId/blocks` | `getPageBlocks` | Content Block routes |
+| POST | `/business/content/pages/:pageId/blocks/reorder` | `reorderBlocks` | — |
+| GET | `/business/content/pages/:pageId/categories` | `getPageCategories` | Categorization routes |
+| POST | `/business/content/pages/:pageId/categories` | `assignPageToCategory` | — |
+| DELETE | `/business/content/pages/:pageId/categories/:categoryId` | `removePageFromCategory` | — |
+| POST | `/business/content/pages/:pageId/categories/primary` | `setPrimaryCategory` | — |
+| GET | `/business/content/pages/:pageId/translations` | `getPageTranslations` | Page Translation routes |
+| POST | `/business/content/pages/:pageId/translations` | `createPageTranslation` | — |
+| GET | `/business/content/pages/:pageId/translations/:localeId` | `getPageTranslationByLocale` | — |
+| GET | `/business/content/pages/:pageId/versions` | `getPageVersions` | Page Version routes |
+| POST | `/business/content/pages/:pageId/versions` | `createPageVersion` | — |
+| POST | `/business/content/pages/:pageId/versions/:versionId/restore` | `restorePageVersion` | — |
+| GET | `/business/content/redirects` | `getRedirects` | Content Redirect routes |
+| POST | `/business/content/redirects` | `createRedirect` | — |
+| GET | `/business/content/redirects/:id` | `getRedirectById` | — |
+| PUT | `/business/content/redirects/:id` | `updateRedirect` | — |
+| DELETE | `/business/content/redirects/:id` | `deleteRedirect` | — |
+| GET | `/business/content/templates` | `getTemplates` | Content Template routes |
+| POST | `/business/content/templates` | `createTemplate` | — |
+| GET | `/business/content/templates/:id` | `getTemplateById` | — |
+| PUT | `/business/content/templates/:id` | `updateTemplate` | — |
+| DELETE | `/business/content/templates/:id` | `deleteTemplate` | — |
+| POST | `/business/content/templates/:id/duplicate` | `duplicateTemplate` | — |
+| PUT | `/business/content/translations/:translationId` | `updatePageTranslation` | — |
+| DELETE | `/business/content/translations/:translationId` | `deletePageTranslation` | — |
+| GET | `/business/content/types` | `getContentTypes` | Content Type routes |
+| POST | `/business/content/types` | `createContentType` | — |
+| GET | `/business/content/types/:id` | `getContentTypeById` | — |
+| PUT | `/business/content/types/:id` | `updateContentType` | — |
+| DELETE | `/business/content/types/:id` | `deleteContentType` | — |
+| GET | `/business/content/types/slug/:slug` | `getContentTypeBySlug` | — |
+| DELETE | `/business/content/versions/:versionId` | `deletePageVersion` | — |
+| GET | `/customer/content/pages` | `getPublishedPages` | Public content routes (no auth required, only published/active content) |
+| GET | `/customer/content/pages/:slug` | `getPublishedPageBySlug` | — |
+| GET | `/customer/content/types` | `getActiveContentTypes` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

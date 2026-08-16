@@ -8,9 +8,8 @@ import { generateUUID } from '../../../../libs/uuid';
 import {
   PaymentRepository as IPaymentRepository,
   PaymentFilters,
-  PaginationOptions,
-  PaginatedResult,
 } from '../../domain/repositories/PaymentRepository';
+import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { PaymentRefund } from '../../domain/entities/PaymentRefund';
 import { TransactionStatus, RefundStatus } from '../../domain/valueObjects/PaymentStatus';
@@ -62,6 +61,7 @@ export class PaymentRepo implements IPaymentRepository {
       limit,
       offset,
       hasMore: offset + (rows?.length || 0) < total,
+      length: rows?.length || 0,
     };
   }
 
@@ -89,6 +89,7 @@ export class PaymentRepo implements IPaymentRepository {
       limit,
       offset,
       hasMore: offset + (rows?.length || 0) < total,
+      length: rows?.length || 0,
     };
   }
 

@@ -65,3 +65,47 @@ The Notification feature manages in-app notifications for merchants and administ
 | Use Case                 | Test File                                  | Status |
 | ------------------------ | ------------------------------------------ | ------ |
 | UC-NOT-001 to UC-NOT-006 | `notification/notificationExpanded.test.ts` | ✅    |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/business/notifications` | `getAllNotifications` | ============================================================================ Admin CRUD routes for notifications ============================================================================ |
+| POST | `/business/notifications` | `createNotification` | — |
+| GET | `/business/notifications/:id` | `getNotificationById` | — |
+| PUT | `/business/notifications/:id` | `updateNotification` | — |
+| DELETE | `/business/notifications/:id` | `deleteNotification` | — |
+| PUT | `/business/notifications/:id/read` | `markNotificationAsRead` | — |
+| POST | `/business/notifications/:id/send` | `markNotificationAsSent` | — |
+| GET | `/business/notifications/batches` | `listBatches` | ============================================================================ Batch routes ============================================================================ |
+| POST | `/business/notifications/batches` | `sendBatch` | — |
+| GET | `/business/notifications/batches/:batchId` | `getBatch` | — |
+| GET | `/business/notifications/count` | `getUnreadCount` | — |
+| PUT | `/business/notifications/read-all` | `markAllNotificationsAsRead` | — |
+| GET | `/business/notifications/recent` | `getRecentNotifications` | — |
+| GET | `/business/notifications/templates/:templateId/translations` | `listTranslations` | ============================================================================ Template translation routes ============================================================================ |
+| POST | `/business/notifications/templates/:templateId/translations` | `upsertTranslation` | — |
+| GET | `/business/notifications/unread` | `getUnreadNotifications` | ============================================================================ User-specific routes (for logged-in merchant viewing their own notifications) ============================================================================ |
+| GET | `/business/notifications/webhooks` | `listWebhooks` | ============================================================================ Webhook routes ============================================================================ |
+| POST | `/business/notifications/webhooks` | `createWebhook` | — |
+| DELETE | `/business/notifications/webhooks/:webhookId` | `deactivateWebhook` | — |
+| GET | `/customer/notifications` | `async (req, res) => {
+  try {
+    const useCase = new GetNot` | — |
+| PUT | `/customer/notifications/:notificationId/read` | `async (req, res) => {
+  try {
+    const useCase = new MarkAs` | — |
+| GET | `/customer/notifications/count` | `async (req, res) => {
+  try {
+    const useCase = new GetNot` | — |
+| GET | `/customer/notifications/devices` | `listDevices` | — |
+| POST | `/customer/notifications/devices` | `registerDevice` | — |
+| DELETE | `/customer/notifications/devices/:deviceToken` | `deleteDevice` | — |
+| GET | `/customer/notifications/preferences` | `getPreferences` | — |
+| POST | `/customer/notifications/preferences` | `updatePreference` | — |
+| PUT | `/customer/notifications/read` | `async (req, res) => {
+  try {
+    const useCase = new MarkAs` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

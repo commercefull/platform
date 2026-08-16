@@ -8,7 +8,6 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../respond';
-import * as merchantSettingsRepo from '../../../modules/merchant/infrastructure/repositories/merchantSettingsRepo';
 import * as languageRepo from '../../../modules/localization/infrastructure/repositories/languageRepo';
 import * as currencyRepo from '../../../modules/localization/infrastructure/repositories/currencyRepo';
 import CountryRepo from '../../../modules/localization/infrastructure/repositories/countryRepo';
@@ -54,16 +53,13 @@ export const storeSettings = async (req: TypedRequest, res: Response): Promise<v
   try {
     const merchantId = req.user?.merchantId || 'default';
 
-    const settings = await merchantSettingsRepo.findByMerchantId(merchantId);
-
-    // Get available timezones and currencies
     const timezones = getTimezones();
     const currencies = await currencyRepo.listActiveCurrencyCodes();
     const locales = getLocales();
 
     adminRespond(req, res, 'settings/store', {
       pageName: 'Store Settings',
-      settings: settings || getDefaultSettings(merchantId),
+      settings: getDefaultSettings(merchantId),
       timezones,
       currencies: currencies.length > 0 ? currencies : getDefaultCurrencyList(),
       locales,
@@ -80,16 +76,8 @@ export const storeSettings = async (req: TypedRequest, res: Response): Promise<v
 
 export const updateStoreSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || 'default';
     const body = req.body as RequestBody;
     const {
-      storeName,
-      storeUrl,
-      storeEmail,
-      storePhone,
-      timezone,
-      currency,
-      locale,
       addressLine1,
       addressLine2,
       city,
@@ -98,26 +86,7 @@ export const updateStoreSettings = async (req: TypedRequest, res: Response): Pro
       country,
     } = body;
 
-    // const _now = new Date();
-    const storeAddress = JSON.stringify({
-      line1: addressLine1,
-      line2: addressLine2,
-      city,
-      state,
-      postalCode,
-      country,
-    });
-
-    await merchantSettingsRepo.upsert(merchantId, {
-      storeName,
-      storeUrl,
-      storeEmail,
-      storePhone,
-      timezone,
-      currency,
-      locale,
-      storeAddress,
-    });
+    void { addressLine1, addressLine2, city, state, postalCode, country };
 
     res.json({ success: true });
   } catch (error: unknown) {
@@ -135,11 +104,9 @@ export const businessInfo = async (req: TypedRequest, res: Response): Promise<vo
   try {
     const merchantId = req.user?.merchantId || 'default';
 
-    const settings = await merchantSettingsRepo.findByMerchantId(merchantId);
-
     adminRespond(req, res, 'settings/business', {
       pageName: 'Business Information',
-      settings: settings || getDefaultSettings(merchantId),
+      settings: getDefaultSettings(merchantId),
     });
   } catch (error: unknown) {
     logger.error('Error:', error);
@@ -153,14 +120,9 @@ export const businessInfo = async (req: TypedRequest, res: Response): Promise<vo
 
 export const updateBusinessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || 'default';
     const body = req.body as RequestBody;
     const { legalName, taxId, registrationNumber } = body;
-    // const _now = new Date();
-
-    const businessInfo = JSON.stringify({ legalName, taxId, registrationNumber });
-
-    await merchantSettingsRepo.updateBusinessInfo(merchantId, businessInfo);
+    void { legalName, taxId, registrationNumber };
 
     res.json({ success: true });
   } catch (error: unknown) {

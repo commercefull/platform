@@ -4,6 +4,7 @@
  * Defines the contract for Fulfillment persistence operations.
  */
 
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 import { Fulfillment, FulfillmentStatus, SourceType } from '../entities/Fulfillment';
 import { FulfillmentItem } from '../entities/FulfillmentItem';
 
@@ -18,19 +19,6 @@ export interface FulfillmentFilters {
   channelId?: string;
   fromDate?: Date;
   toDate?: Date;
-}
-
-export interface PaginationOptions {
-  page: number;
-  limit: number;
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
 export interface IFulfillmentRepository {

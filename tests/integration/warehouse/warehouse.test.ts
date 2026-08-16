@@ -5,6 +5,7 @@ import {
   createTestWarehouse,
   SEEDED_WAREHOUSE_IDS,
 } from './testUtils';
+import { expectStatus } from '../testUtils';
 
 describe('Warehouse Feature Tests', () => {
   let client: AxiosInstance;
@@ -39,13 +40,11 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400]).toContain(response.status);
-      if (response.status === 201 || response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('distributionWarehouseId');
-        testWarehouseId = response.data.data.distributionWarehouseId;
-        createdResources.warehouseIds.push(testWarehouseId);
-      }
+      expectStatus(response, 201);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('distributionWarehouseId');
+      testWarehouseId = response.data.data.distributionWarehouseId;
+      createdResources.warehouseIds.push(testWarehouseId);
     });
 
     it('should list warehouses', async () => {
@@ -63,11 +62,9 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('distributionWarehouseId');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('distributionWarehouseId');
     });
 
     it('should return 404 for non-existent warehouse', async () => {
@@ -75,7 +72,7 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([404, 400]).toContain(response.status);
+      expectStatus(response, 404);
     });
 
     it('should update a warehouse', async () => {
@@ -87,10 +84,8 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should delete a warehouse', async () => {
@@ -100,7 +95,7 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 204, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 
@@ -114,10 +109,8 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should get fulfillment centers', async () => {
@@ -125,10 +118,8 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should get return centers', async () => {
@@ -136,10 +127,8 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should get warehouse statistics', async () => {
@@ -147,10 +136,8 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should find nearest warehouses', async () => {
@@ -158,10 +145,8 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should get warehouses by country', async () => {
@@ -169,18 +154,16 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should get warehouse by code', async () => {
-      const response = await client.get('/business/warehouses/code/TEST_MAIN', {
+      const response = await client.get('/business/warehouses/code/TEST-MAIN', {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 
@@ -209,10 +192,8 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should deactivate a warehouse', async () => {
@@ -222,10 +203,8 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should set default warehouse', async () => {
@@ -235,7 +214,7 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 
@@ -251,7 +230,7 @@ describe('Warehouse Feature Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 201, 400, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should remove shipping method from warehouse', async () => {
@@ -260,7 +239,7 @@ describe('Warehouse Feature Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 204, 400, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 
@@ -274,10 +253,8 @@ describe('Warehouse Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
   });
 
@@ -291,7 +268,7 @@ describe('Warehouse Feature Tests', () => {
         headers: { 'X-Test-Request': 'true' },
       });
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should get stores by city', async () => {
@@ -299,7 +276,7 @@ describe('Warehouse Feature Tests', () => {
         headers: { 'X-Test-Request': 'true' },
       });
 
-      expect([200, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should get stores by country', async () => {
@@ -307,7 +284,7 @@ describe('Warehouse Feature Tests', () => {
         headers: { 'X-Test-Request': 'true' },
       });
 
-      expect([200, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should check store availability for a product', async () => {
@@ -316,7 +293,7 @@ describe('Warehouse Feature Tests', () => {
         { headers: { 'X-Test-Request': 'true' } },
       );
 
-      expect([200, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should get a store by ID', async () => {
@@ -324,7 +301,7 @@ describe('Warehouse Feature Tests', () => {
         headers: { 'X-Test-Request': 'true' },
       });
 
-      expect([200, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 

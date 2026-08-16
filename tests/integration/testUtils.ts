@@ -111,6 +111,24 @@ export const clearTokenCache = (): void => {
 };
 
 /**
+ * Assert response status with detailed error logging for traceability.
+ * Logs response status, body, and error details when the assertion fails.
+ */
+export const expectStatus = (
+  response: { status: number; data?: unknown; config?: { url?: string; method?: string } },
+  expected: number,
+): void => {
+  if (response.status !== expected) {
+    const url = (response.config?.method || 'GET').toUpperCase() + ' ' + (response.config?.url || 'unknown');
+    console.error(`\n❌ STATUS ASSERTION FAILED: ${url}`);
+    console.error(`   Expected: ${expected}`);
+    console.error(`   Actual:   ${response.status}`);
+    console.error(`   Response body: ${JSON.stringify(response.data, null, 2)}`);
+  }
+  expect(response.status).toBe(expected);
+};
+
+/**
  * Debug helper to check current token status
  */
 export const debugTokens = (): void => {

@@ -5,8 +5,8 @@
 
 import { Router } from 'express';
 import {
-  loginMerchant,
-  registerMerchant,
+  loginorganization,
+  registerorganization,
   issueTokenPair,
   renewAccessToken,
   checkTokenValidity,
@@ -20,10 +20,10 @@ const router = Router();
 // -------------------- Public Auth Routes --------------------
 
 // Simple login (returns access token only)
-router.post('/auth/login', loginMerchant);
+router.post('/auth/login', loginorganization);
 
 // Register new merchant account
-router.post('/auth/register', registerMerchant);
+router.post('/auth/register', registerorganization);
 
 // Token-based auth (returns access + refresh tokens)
 router.post('/auth/token', issueTokenPair);

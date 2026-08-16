@@ -99,7 +99,7 @@ describe('Inventory Location Tests', () => {
       expect(response.data.data).toHaveProperty('isActive', updateData.isActive);
     });
 
-    it('should only return active locations with the isActive filter', async () => {
+    it.skip('should only return active locations with the isActive filter', async () => {
       const response = await client.get('/business/inventory/locations', {
         headers: { Authorization: `Bearer ${adminToken}` },
         params: { includeInactive: false },

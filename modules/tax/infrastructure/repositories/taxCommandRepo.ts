@@ -308,10 +308,10 @@ export class TaxCommandRepo {
         taxZone.code,
         taxZone.description || null,
         taxZone.isDefault,
-        taxZone.countries,
-        taxZone.states || null,
-        taxZone.postcodes || null,
-        taxZone.cities || null,
+        JSON.stringify(taxZone.countries),
+        taxZone.states ? JSON.stringify(taxZone.states) : null,
+        taxZone.postcodes ? JSON.stringify(taxZone.postcodes) : null,
+        taxZone.cities ? JSON.stringify(taxZone.cities) : null,
         taxZone.isActive,
         now,
         now,
@@ -357,22 +357,22 @@ export class TaxCommandRepo {
 
     if (taxZone.countries !== undefined) {
       sets.push(`"countries" = $${paramIndex++}`);
-      params.push(taxZone.countries);
+      params.push(JSON.stringify(taxZone.countries));
     }
 
     if (taxZone.states !== undefined) {
       sets.push(`"states" = $${paramIndex++}`);
-      params.push(taxZone.states);
+      params.push(JSON.stringify(taxZone.states));
     }
 
     if (taxZone.postcodes !== undefined) {
       sets.push(`"postcodes" = $${paramIndex++}`);
-      params.push(taxZone.postcodes);
+      params.push(JSON.stringify(taxZone.postcodes));
     }
 
     if (taxZone.cities !== undefined) {
       sets.push(`"cities" = $${paramIndex++}`);
-      params.push(taxZone.cities);
+      params.push(JSON.stringify(taxZone.cities));
     }
 
     if (taxZone.isActive !== undefined) {

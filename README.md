@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue.svg)](https://www.postgresql.org)
 
-CommerceFull is an open-source, multi-tenant e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It supports **admin**, **merchant**, **B2B**, and **storefront** portals with 36 business modules covering the full commerce lifecycle.
+CommerceFull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs, and 36 business modules covering the full commerce lifecycle.
 
 ---
 
@@ -55,10 +55,9 @@ CommerceFull is an open-source, multi-tenant e-commerce platform built with Node
 - **Membership Plans** — Tiered memberships with benefits and billing
 - **Subscriptions** — Recurring billing with plan management and renewals
 
-### Multi-Tenant & B2B
+### Commerce
 
-- **Merchant Dashboard** — Merchant onboarding, orders, inventory, analytics, settings
-- **B2B Portal** — Company accounts, bulk ordering, quotes, credit terms, invoices
+- **Business API** — Merchant/business management via REST API (products, orders, inventory, analytics)
 - **Multi-Channel** — Sales channel management with channel-specific configuration
 
 ### Platform
@@ -130,8 +129,6 @@ docker-compose exec app yarn db:seed  # optional
 | ---------------------- | ------------------------------ | --------------------------- |
 | **Storefront**         | http://localhost:3000          | Customer-facing shop        |
 | **Admin Panel**        | http://localhost:3000/admin    | Platform administration     |
-| **Merchant Dashboard** | http://localhost:3000/merchant | Merchant management         |
-| **B2B Portal**         | http://localhost:3000/b2b      | Business-to-business portal |
 | **Health Check**       | http://localhost:3000/health   | Application health endpoint |
 
 ---
@@ -158,15 +155,13 @@ platform/
 │   └── ...                    #   (see Modules section below)
 ├── web/                       # Web layer (EJS views + controllers)
 │   ├── admin/                 #   Admin panel (Tabler UI)
-│   ├── merchant/              #   Merchant dashboard (Tabler UI)
-│   ├── b2b/                   #   B2B portal (Tabler UI)
 │   ├── storefront/            #   Customer storefront (Tailwind CSS)
 │   └── respond.ts             #   View rendering helpers
 ├── migrations/                # Knex database migrations
 ├── seeds/                     # Database seed files
 ├── tests/                     # Test suites
 │   ├── integration/           #   Integration tests (Jest + Axios)
-│   └── e2e/                   #   End-to-end tests (Cypress)
+│   └── performance/           #   Performance tests (k6)
 ├── scripts/                   # Utility scripts
 ├── infra/                     # Infrastructure (Docker, Ansible, Terraform)
 ├── locales/                   # i18n translation files
@@ -186,14 +181,14 @@ platform/
 | **Runtime**               | Node.js 20+, TypeScript 5.x                               |
 | **Framework**             | Express 5                                                 |
 | **Database**              | PostgreSQL 18, Knex (migrations), raw SQL via `pg` driver |
-| **Admin/Merchant/B2B UI** | EJS templates, Tabler (Bootstrap-based)                   |
+| **Admin UI**            | EJS templates, Tabler (Bootstrap-based)                   |
 | **Storefront UI**         | EJS templates, Tailwind CSS                               |
 | **Payments**              | Stripe                                                    |
 | **Email**                 | Mailjet / Nodemailer                                      |
 | **Cache**                 | Redis (optional, falls back to PostgreSQL sessions)       |
 | **Logging**               | Winston with daily rotation                               |
 | **i18n**                  | i18next with filesystem backend                           |
-| **Testing**               | Jest (unit/integration), Cypress (E2E)                    |
+| **Testing**               | Jest (unit/integration), k6 (performance)                 |
 | **Build**                 | esbuild                                                   |
 | **Deployment**            | Docker, Docker Compose, Ansible, Terraform                |
 
@@ -228,7 +223,7 @@ yarn db:types               # Generate TypeScript types from DB schema
 yarn test                   # Full Jest suite with coverage
 yarn test:unit              # Unit tests (modules/ directory)
 yarn test:int               # Integration tests (tests/integration/)
-yarn test:e2e               # Cypress E2E suite
+yarn perf:smoke             # k6 smoke test
 ```
 
 ### Code Quality
@@ -254,7 +249,7 @@ yarn css:watch              # Watch mode for Tailwind CSS
 
 ```bash
 yarn job:new:admin          # Create a new admin user
-yarn job:new:merchant       # Create a new merchant
+yarn job:new:organization   # Create a new organization
 yarn job:new:business       # Create a new B2B business
 ```
 
@@ -385,19 +380,7 @@ CommerceFull includes 36 business modules:
 
 Full platform management with 41 controllers covering all modules. Built with Tabler (Bootstrap-based) UI framework.
 
-**Key sections:** Dashboard, Products, Orders, Customers, Inventory, Promotions, Payments, Shipping, Content, Analytics, Programs (Membership, Subscription, Loyalty, B2B), Operations (Warehouses, Fulfillment, Suppliers), Settings, Users & Roles, GDPR, Support.
-
-### Merchant Dashboard (`/merchant`)
-
-Self-service portal for merchants to manage their business.
-
-**Key sections:** Dashboard, Products, Orders, Inventory, Fulfillment, Analytics (Sales, Products, Customers), Settings (Profile, Store, Notifications).
-
-### B2B Portal (`/b2b`)
-
-Business-to-business portal for company accounts.
-
-**Key sections:** Dashboard, Catalog, Orders, Quotes, Company Management (Profile, Users, Addresses), Invoices, Approvals.
+**Key sections:** Dashboard, Products, Orders, Customers, Inventory, Promotions, Payments, Shipping, Content, Analytics, Programs (Membership, Subscription, Loyalty), Operations (Warehouses, Fulfillment, Suppliers), Settings, Users & Roles, GDPR, Support.
 
 ### Storefront (`/`)
 
@@ -425,13 +408,15 @@ yarn test:int
 
 Located in `tests/integration/`. Tests API endpoints with a running server.
 
-### E2E Tests
+### Performance Tests
 
 ```bash
-yarn test:e2e
+yarn perf:smoke             # Quick smoke test
+yarn perf:load              # All load tests
+yarn perf:stress            # Stress test
 ```
 
-Cypress-based end-to-end tests for critical user flows.
+k6-based performance tests covering smoke, load, stress, and spike scenarios. See `tests/performance/README.md` for details.
 
 ### Coverage
 

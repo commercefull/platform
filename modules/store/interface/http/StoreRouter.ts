@@ -12,17 +12,17 @@ const storeController = new StoreController();
 // Create store
 router.post('/stores', storeController.createStore.bind(storeController));
 
-// Get store by ID
-router.get('/stores/:storeId', storeController.getStore.bind(storeController));
+// Get active stores (must be before :storeId to avoid collision)
+router.get('/stores/active', storeController.getActiveStores.bind(storeController));
 
 // Get store by slug
 router.get('/stores/slug/:slug', storeController.getStoreBySlug.bind(storeController));
 
+// Get store by ID
+router.get('/stores/:storeId', storeController.getStore.bind(storeController));
+
 // Get stores by business
 router.get('/stores/business/:businessId', storeController.getStoresByBusiness.bind(storeController));
-
-// Get active stores
-router.get('/stores/active', storeController.getActiveStores.bind(storeController));
 
 // Update store
 router.put('/stores/:storeId', storeController.updateStore.bind(storeController));

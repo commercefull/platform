@@ -5,6 +5,7 @@
 
 import { AxiosInstance } from 'axios';
 import { setupPromotionTests, cleanupPromotionTests, testCoupon } from './testUtils';
+import { expectStatus } from '../testUtils';
 
 describe('Coupon API Tests', () => {
   let client: AxiosInstance;
@@ -113,10 +114,8 @@ describe('Coupon API Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
   });
 
@@ -181,7 +180,7 @@ describe('Coupon API Tests', () => {
         },
       );
 
-      expect([400, 404]).toContain(response.status);
+      expectStatus(response, 400);
     });
 
     it('should reject validation with non-existent code', async () => {
@@ -198,7 +197,7 @@ describe('Coupon API Tests', () => {
         },
       );
 
-      expect([400, 404]).toContain(response.status);
+      expectStatus(response, 400);
     });
   });
 
@@ -275,10 +274,8 @@ describe('Coupon API Tests', () => {
         },
       );
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should validate seeded percentage coupon code', async () => {
@@ -295,10 +292,8 @@ describe('Coupon API Tests', () => {
         },
       );
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should reject expired seeded coupon', async () => {
@@ -315,8 +310,8 @@ describe('Coupon API Tests', () => {
         },
       );
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200 && response.data.data) {
+      expectStatus(response, 400);
+      if (response.data.data) {
         expect(response.data.data.valid).toBe(false);
       }
     });

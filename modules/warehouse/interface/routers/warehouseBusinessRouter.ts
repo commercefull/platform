@@ -15,9 +15,9 @@ router.get('/warehouses/fulfillment-centers', warehouseController.getFulfillment
 router.get('/warehouses/return-centers', warehouseController.getReturnCenters);
 router.get('/warehouses/statistics', warehouseController.getWarehouseStatistics);
 router.get('/warehouses/nearest', warehouseController.findNearestWarehouses);
+router.get('/warehouses/code/:code', warehouseController.getWarehouseByCode);
 router.get('/warehouses/country/:country', warehouseController.getWarehousesByCountry);
 router.get('/warehouses/:id', warehouseController.getWarehouseById);
-router.get('/warehouses/code/:code', warehouseController.getWarehouseByCode);
 
 // Warehouse CRUD operations
 router.post('/warehouses', warehouseController.createWarehouse);

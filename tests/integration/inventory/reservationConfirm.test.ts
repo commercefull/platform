@@ -6,6 +6,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { randomUUID } from 'node:crypto';
+import { expectStatus } from '../testUtils';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
@@ -58,7 +59,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 404]).toContain(response.status);
+      expectStatus(response, 404);
       expect(response.data.success).toBe(false);
     });
 
@@ -71,7 +72,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 404]).toContain(response.status);
+      expectStatus(response, 404);
     });
 
     it('should require authentication for confirm', async () => {
@@ -150,7 +151,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
         expect(response.data.success).toBe(true);
         expect(response.data.data).toHaveProperty('reorderPoint', 15);
       } else {
-        expect([400, 404, 500]).toContain(response.status);
+        expectStatus(response, 404);
       }
     });
 
@@ -167,7 +168,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
 
     it('should reject without required productId', async () => {
@@ -182,7 +183,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
 
     it('should reject without required locationId', async () => {
@@ -197,7 +198,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
 
     it('should require authentication', async () => {
@@ -226,7 +227,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 404, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 });

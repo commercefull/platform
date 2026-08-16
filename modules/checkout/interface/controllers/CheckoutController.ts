@@ -202,8 +202,12 @@ export const setShippingAddress = async (req: TypedRequest<Record<string, string
     respond(req, res, checkout as unknown as ResponseData, 200, 'checkout/shipping');
   } catch (error: unknown) {
     logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to set shipping address', 500, 'checkout/error');
+    const message = (error as Error).message || 'Failed to set shipping address';
+    const msgLower = message.toLowerCase();
+    const statusCode = msgLower.includes('not found') ? 404 
+      : (msgLower.includes('completed') || msgLower.includes('invalid state') || msgLower.includes('cannot modify')) ? 400 
+      : 500;
+    respondError(req, res, message, statusCode, 'checkout/error');
   }
 };
 

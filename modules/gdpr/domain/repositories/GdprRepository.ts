@@ -5,6 +5,7 @@
 
 import { GdprDataRequest, GdprRequestType, GdprRequestStatus } from '../entities/GdprDataRequest';
 import { GdprCookieConsent } from '../entities/GdprCookieConsent';
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 
 // ============================================================================
 // Filters and Pagination
@@ -18,21 +19,6 @@ export interface GdprRequestFilters {
   createdAfter?: Date;
   createdBefore?: Date;
   processedBy?: string;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
 }
 
 // ============================================================================

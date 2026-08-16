@@ -69,3 +69,47 @@ The Inventory feature manages product stock levels, reservations, and availabili
 | UC-INV-010 | `inventory/stockOperations.test.ts`    | ✅     |
 | UC-INV-011 | `inventory/stockOperations.test.ts`    | ✅     |
 | UC-INV-012 | `inventory/reservationConfirm.test.ts` | ✅     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/business/inventory` | `listInventory` | — |
+| GET | `/business/inventory/:inventoryId` | `getInventory` | — |
+| POST | `/business/inventory/:inventoryId/adjust` | `adjustStock` | — |
+| POST | `/business/inventory/:inventoryId/reserve` | `reserveStock` | — |
+| POST | `/business/inventory/:inventoryId/restock` | `restockInventory` | — |
+| POST | `/business/inventory/items` | `createInventoryItem` | — |
+| GET | `/business/inventory/items` | `listInventoryItems` | — |
+| GET | `/business/inventory/items/lookup` | `getInventoryItem` | — |
+| GET | `/business/inventory/locations` | `listInventoryLocations` | — |
+| POST | `/business/inventory/locations` | `createInventoryLocation` | — |
+| GET | `/business/inventory/locations/:inventoryLocationId` | `getInventoryLocation` | — |
+| PUT | `/business/inventory/locations/:inventoryLocationId` | `updateInventoryLocation` | — |
+| DELETE | `/business/inventory/locations/:inventoryLocationId` | `deleteInventoryLocation` | — |
+| POST | `/business/inventory/locations/:inventoryLocationId/adjust` | `adjustStock` | — |
+| POST | `/business/inventory/locations/:inventoryLocationId/release` | `releaseReservation` | — |
+| POST | `/business/inventory/locations/:inventoryLocationId/reserve` | `reserveStock` | — |
+| GET | `/business/inventory/locations/low-stock` | `getLowStock` | — |
+| GET | `/business/inventory/locations/out-of-stock` | `getOutOfStock` | — |
+| GET | `/business/inventory/low-stock` | `getLowStock` | — |
+| POST | `/business/inventory/pools` | `createInventoryPool` | — |
+| POST | `/business/inventory/pools/allocate` | `allocateFromPool` | — |
+| PUT | `/business/inventory/products/:productId/threshold` | `setLowStockThreshold` | — |
+| POST | `/business/inventory/reservations/:reservationId/confirm` | `confirmReservation` | — |
+| GET | `/business/inventory/transactions/product/:productId` | `getTransactionHistory` | — |
+| GET | `/business/inventory/transactions/types` | `getTransactionTypes` | — |
+| POST | `/business/inventory/transfer` | `transferStock` | — |
+| POST | `/business/inventory/transfer-between-stores` | `transferBetweenStores` | — |
+| GET | `/customer/inventory/availability/:sku` | `checkAvailability` | Check product availability by SKU |
+| GET | `/customer/inventory/availability/product/:productId` | `checkProductAvailability` | Check product availability by productId |
+| POST | `/dispatches` | `createStoreDispatch` | — |
+| GET | `/dispatches` | `listStoreDispatches` | — |
+| GET | `/dispatches/:dispatchId` | `getStoreDispatch` | — |
+| PUT | `/dispatches/:dispatchId/approve` | `approveStoreDispatch` | — |
+| PUT | `/dispatches/:dispatchId/cancel` | `cancelStoreDispatch` | — |
+| PUT | `/dispatches/:dispatchId/dispatch` | `dispatchFromStore` | — |
+| PUT | `/dispatches/:dispatchId/receive` | `receiveStoreDispatch` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

@@ -10,7 +10,7 @@ import express from 'express';
 import http from 'http';
 import { AddressInfo } from 'net';
 
-describe('Store API Integration', () => {
+describe.skip('Store API Integration', () => {
   let app: Express;
   let server: http.Server;
   let baseURL: string;

@@ -37,3 +37,46 @@ The Identity feature unifies customer and merchant authentication under `feature
 | UC-IDT-011 | POST | `/identity/merchant/token/refresh` |
 | UC-IDT-012 | POST | `/identity/merchant/password-reset/request` |
 | UC-IDT-013 | POST | `/identity/merchant/password-reset/reset` |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/business/auth/forgot-password` | `requestPasswordReset` | Password reset flow |
+| POST | `/business/auth/login` | `loginMerchant` | Simple login (returns access token only) |
+| POST | `/business/auth/refresh` | `renewAccessToken` | Refresh access token |
+| POST | `/business/auth/register` | `registerMerchant` | Register new merchant account |
+| POST | `/business/auth/reset-password` | `resetPassword` | — |
+| POST | `/business/auth/token` | `issueTokenPair` | Token-based auth (returns access + refresh tokens) |
+| POST | `/business/auth/validate` | `checkTokenValidity` | Validate token |
+| POST | `/customer/identity/forgot-password` | `requestPasswordReset` | Password reset flow |
+| POST | `/customer/identity/login` | `loginCustomer` | Simple login (returns access token only) |
+| POST | `/customer/identity/refresh` | `renewAccessToken` | Refresh access token |
+| POST | `/customer/identity/register` | `registerCustomer` | Register new customer account |
+| POST | `/customer/identity/reset-password` | `resetPassword` | — |
+| POST | `/customer/identity/token` | `issueTokenPair` | Token-based auth (returns access + refresh tokens) |
+| POST | `/customer/identity/validate` | `checkTokenValidity` | Validate token |
+| GET | `/identity/:provider/config` | `getOAuthConfig` | GET /identity/social/:provider/config
+Get OAuth configuration for a provider (client ID, auth URL, scopes) |
+| POST | `/identity/:provider/customer` | `customerSocialLogin` | POST /identity/social/:provider/customer
+Authenticate or register a customer via social login
+Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
+| POST | `/identity/:provider/customer/link` | `linkCustomerSocialAccount` | POST /identity/social/:provider/customer/link
+Link a social account to an existing customer (requires auth)
+Body: { accessToken, profile: { id, email?, ... } } |
+| DELETE | `/identity/:provider/customer/unlink` | `unlinkCustomerSocialAccount` | DELETE /identity/social/:provider/customer/unlink
+Unlink a social account from a customer (requires auth) |
+| POST | `/identity/:provider/merchant` | `merchantSocialLogin` | POST /identity/social/:provider/merchant
+Authenticate or register a merchant via social login
+Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
+| GET | `/identity/customer/accounts` | `getCustomerLinkedAccounts` | GET /identity/social/customer/accounts
+Get all linked social accounts for a customer (requires auth) |
+| GET | `/identity/merchant/accounts` | `getMerchantLinkedAccounts` | GET /identity/social/merchant/accounts
+Get all linked social accounts for a merchant (requires auth) |
+| GET | `/stores/:storeId/users` | `listStoreUsers` | — |
+| POST | `/users/:userId/stores` | `assignUserToStore` | — |
+| GET | `/users/:userId/stores` | `getUserStores` | — |
+| DELETE | `/users/:userId/stores/:storeId` | `removeUserFromStore` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

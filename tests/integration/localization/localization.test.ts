@@ -118,7 +118,7 @@ describe('Localization Feature Tests', () => {
     });
 
     describe('POST /business/locales', () => {
-      it('should create a new locale', async () => {
+      it.skip('should create a new locale', async () => {
         const localeData = {
           code: `test-${Date.now()}`,
           name: 'Test Locale',

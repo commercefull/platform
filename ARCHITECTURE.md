@@ -4,7 +4,7 @@ High-level architecture of the CommerceFull platform. Detailed standards and pat
 
 ## System Context
 
-CommerceFull is a multi-tenant e-commerce platform. A single Express application serves four portals (Admin, Merchant, B2B, Storefront) and two API surfaces (`/customer`, `/business`), backed by PostgreSQL.
+CommerceFull is an e-commerce platform. A single Express application serves two portals (Admin, Storefront) and two API surfaces (`/customer`, `/business`), backed by PostgreSQL.
 
 ```
                     ┌─────────────────────────┐
@@ -12,13 +12,13 @@ CommerceFull is a multi-tenant e-commerce platform. A single Express application
                     │    (boot/routes.ts)       │
                     └────────┬────────────────┘
                              │
-         ┌───────────┬───────┼───────┬──────────┐
-         │           │       │       │          │
-    ┌────▼───┐ ┌─────▼──┐ ┌─▼──┐ ┌──▼────┐ ┌───▼────┐
-    │ Admin  │ │Merchant│ │B2B │ │Store- │ │  API   │
-    │/admin  │ │/merchant│ │/b2b│ │front /│ │/customer│
-    └────────┘ └────────┘ └────┘ └───────┘ │/business│
-                                            └────────┘
+         ┌───────────┬───────┼──────────┐
+         │           │       │          │
+    ┌────▼───┐ ┌─────▼──┐ ┌──▼────┐ ┌───▼────┐
+    │ Admin  │ │Store-  │ │  API   │        │
+    │/admin  │ │front / │ │/customer│        │
+    └────────┘ └───────┘ │/business│        │
+                         └────────┘
 ```
 
 ## Top-Level Layout
@@ -26,7 +26,7 @@ CommerceFull is a multi-tenant e-commerce platform. A single Express application
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                     web/ (UI Layer)                       │
-│   admin · merchant · b2b (Tabler)  ·  storefront (Tailwind)│
+│   admin (Tabler)  ·  storefront (Tailwind)                │
 ├──────────────────────────────────────────────────────────┤
 │                  modules/ (Business Logic)                │
 │   36 bounded contexts organized as DDD:                   │
@@ -71,10 +71,8 @@ Routes are configured in `boot/routes.ts`:
 | ----------- | ------------------------ | ------------------------------------- |
 | `/`         | Storefront (public)      | None / `isCustomerLoggedIn` if needed |
 | `/admin`    | Admin panel (EJS)        | `isAdminLoggedIn`                     |
-| `/merchant` | Merchant dashboard (EJS) | `isMerchantLoggedIn`                  |
-| `/b2b`      | B2B portal (EJS)         | `isB2BLoggedIn`                       |
 | `/customer` | Customer-facing API      | `isCustomerLoggedIn` where needed     |
-| `/business` | Merchant / business API  | `isMerchantLoggedIn`                  |
+| `/business` | Business / merchant API  | `isMerchantLoggedIn`                  |
 | `/health`   | Health check             | None                                  |
 
 ## Modules (36 bounded contexts)
@@ -87,16 +85,16 @@ Routes are configured in `boot/routes.ts`:
 | Marketing   | `promotion`, `coupon`, `segment`                                                                                                   |
 | Customer    | `customer`, `loyalty`, `membership`, `subscription`                                                                                |
 | Content     | `content`, `media`, `notification`                                                                                                 |
-| B2B         | `b2b`, `merchant`, `supplier`                                                                                                      |
-| Platform    | `identity`, `configuration`, `localization`, `channel`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`, `business` |
+| Commerce   | `merchant`, `supplier`, `business`                                                                                                 |
+| Platform    | `identity`, `configuration`, `localization`, `channel`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`             |
 
 ## Technology Stack (at a glance)
 
 - Node.js + Express 5 + TypeScript
 - PostgreSQL 18, Knex migrations, raw SQL via `pg`
-- EJS + Tabler (internal portals) · EJS + Tailwind (storefront)
+- EJS + Tabler (admin) · EJS + Tailwind (storefront)
 - Redis (optional) / PostgreSQL session store
-- Jest (unit/integration) · Cypress (E2E)
+- Jest (unit/integration) · k6 (performance)
 - Stripe · Mailjet/Nodemailer · Winston · i18next
 
 ## Where to Go Next
@@ -105,3 +103,4 @@ Routes are configured in `boot/routes.ts`:
 - **Standards (database, migrations, DDD, web, security, …)** → [`docs/standards/`](./docs/standards/README.md)
 - **Module specifications** → [`docs/modules/`](./docs/modules/)
 - **Platform migration guides (Shopify, WooCommerce, …)** → [`docs/migrations/`](./docs/migrations/)
+- **Documentation website & autogeneration strategy** → [`docs/DOCUMENTATION-STRATEGY.md`](./docs/DOCUMENTATION-STRATEGY.md)

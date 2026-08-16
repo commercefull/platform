@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { loginTestUser } from '../testUtils';
+import { loginTestUser, expectStatus } from '../testUtils';
 import { TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID } from '../testConstants';
 
 const createClient = () =>
@@ -73,10 +73,8 @@ describe('Basket Expanded Tests', () => {
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([200, 201, 400, 404]).toContain(response.status);
-      if (response.status === 200 || response.status === 201) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
 
       await cleanup(sourceId);
       await cleanup(targetId);
@@ -92,7 +90,7 @@ describe('Basket Expanded Tests', () => {
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([400, 404]).toContain(response.status);
+      expectStatus(response, 404);
       await cleanup(targetId);
     });
   });
@@ -112,16 +110,14 @@ describe('Basket Expanded Tests', () => {
       const itemId = items?.[0]?.basketItemId as string | undefined;
       if (!itemId) return;
 
-      const response = await client.patch(
+      const response = await client.post(
         `/customer/basket/${basketId}/items/${itemId}/gift`,
         { isGift: true, giftMessage: 'Happy Birthday!' },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
 
       await cleanup(basketId);
     });
@@ -136,19 +132,19 @@ describe('Basket Expanded Tests', () => {
       const itemId = items?.[0]?.basketItemId as string | undefined;
       if (!itemId) return;
 
-      await client.patch(
+      await client.post(
         `/customer/basket/${basketId}/items/${itemId}/gift`,
         { isGift: true, giftMessage: 'Happy Birthday!' },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      const response = await client.patch(
+      const response = await client.post(
         `/customer/basket/${basketId}/items/${itemId}/gift`,
         { isGift: false },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([200, 400, 404]).toContain(response.status);
+      expectStatus(response, 200);
       await cleanup(basketId);
     });
   });
@@ -162,16 +158,14 @@ describe('Basket Expanded Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      const response = await client.post(
-        `/customer/basket/${basketId}/extend-expiration`,
+      const response = await client.put(
+        `/customer/basket/${basketId}/expiration`,
         { days: 7 },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
 
       await cleanup(basketId);
     });
@@ -180,13 +174,13 @@ describe('Basket Expanded Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      const response = await client.post(
-        `/customer/basket/${basketId}/extend-expiration`,
+      const response = await client.put(
+        `/customer/basket/${basketId}/expiration`,
         { days: -1 },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([400, 404]).toContain(response.status);
+      expectStatus(response, 400);
       await cleanup(basketId);
     });
   });
@@ -256,7 +250,7 @@ describe('Basket Expanded Tests', () => {
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([404, 400]).toContain(response.status);
+      expectStatus(response, 404);
       await cleanup(basketId);
     });
   });

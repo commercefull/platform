@@ -3,7 +3,8 @@
  * Lists orders with filters and pagination (for admin/business use)
  */
 
-import { OrderRepository, OrderFilters, PaginationOptions } from '../../domain/repositories/OrderRepository';
+import { OrderRepository, OrderFilters } from '../../domain/repositories/OrderRepository';
+import { PaginationOptions } from 'libs/types/shared';
 import { Order } from '../../domain/entities/Order';
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';

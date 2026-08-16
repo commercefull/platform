@@ -8,10 +8,12 @@ import PurchaseOrderRepo, {
   SupplierPurchaseOrderItemCreateParams,
   SupplierPurchaseOrderItemUpdateParams,
 } from '../../infrastructure/repositories/purchaseOrderRepo';
+import supplierRepoInstance from '../../infrastructure/repositories/supplierRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 
 // Use the singleton instance directly
 const purchaseOrderRepo = PurchaseOrderRepo;
+const supplierRepo = supplierRepoInstance;
 
 // ---------- Purchase Order CRUD Methods ----------
 export const getPurchaseOrders = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -87,7 +89,7 @@ export const createPurchaseOrder = async (req: TypedRequest, res: Response): Pro
   try {
     const {
       supplierId,
-      warehouseId,
+      distributionWarehouseId,
       status,
       orderType,
       priority,
@@ -113,7 +115,7 @@ export const createPurchaseOrder = async (req: TypedRequest, res: Response): Pro
     // Validate required fields
     const errors: string[] = [];
     if (!supplierId) errors.push('supplierId is required');
-    if (!warehouseId) errors.push('warehouseId is required');
+    if (!distributionWarehouseId) errors.push('distributionWarehouseId is required');
     if (!items || !Array.isArray(items) || items.length === 0) errors.push('items array is required and must not be empty');
 
     if (errors.length > 0) {
@@ -121,10 +123,17 @@ export const createPurchaseOrder = async (req: TypedRequest, res: Response): Pro
       return;
     }
 
+    // Validate supplier exists
+    const supplier = await supplierRepo.findById(supplierId);
+    if (!supplier) {
+      validationErrorResponse(res, ['Supplier not found']);
+      return;
+    }
+
     // Create purchase order
     const poParams = {
       supplierId,
-      warehouseId,
+      distributionWarehouseId,
       status,
       orderType,
       priority,
@@ -153,6 +162,7 @@ export const createPurchaseOrder = async (req: TypedRequest, res: Response): Pro
     for (const item of items) {
       const itemParams: SupplierPurchaseOrderItemCreateParams = {
         ...item,
+        total: item.total ?? (item.quantity * item.unitCost),
         supplierPurchaseOrderId: purchaseOrder.supplierPurchaseOrderId,
       };
       const createdItem = await purchaseOrderRepo.createItem(itemParams);
@@ -287,6 +297,7 @@ export const addPurchaseOrderItem = async (req: TypedRequest, res: Response): Pr
     const itemParams: SupplierPurchaseOrderItemCreateParams = {
       supplierPurchaseOrderId: id,
       ...body,
+      total: body.total ?? (body.quantity * body.unitCost),
     };
 
     // Validate required fields

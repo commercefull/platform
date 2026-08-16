@@ -4,45 +4,9 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Coupon, CouponUsage, DiscountType, CouponType } from '../../domain/entities/Coupon';
-
-interface CouponRow {
-  couponId: string;
-  code: string;
-  name: string;
-  description: string | null;
-  type: DiscountType;
-  value: string;
-  currency: string | null;
-  minOrderValue: string | null;
-  maxDiscountAmount: string | null;
-  usageType: CouponType;
-  usageLimit: string | null;
-  usageCount: string;
-  customerUsageLimit: string | null;
-  conditions: string | null;
-  isActive: boolean;
-  startsAt: string | null;
-  expiresAt: string | null;
-  applicableProducts: string | null;
-  applicableCategories: string | null;
-  applicableCustomerGroups: string | null;
-  excludedProducts: string | null;
-  excludedCategories: string | null;
-  createdBy: string;
-  metadata: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface CouponUsageRow {
-  usageId: string;
-  couponId: string;
-  orderId: string;
-  customerId: string;
-  discountAmount: string;
-  usedAt: string;
-}
+import { Coupon, CouponUsage, DiscountType } from '../../domain/entities/Coupon';
+import { PromotionCoupon, PromotionCouponUsage } from '../../../../libs/db/types';
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 
 export interface CouponFilters {
   code?: string;
@@ -54,38 +18,23 @@ export interface CouponFilters {
   expiresBefore?: Date;
 }
 
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
-  length: number;
-}
-
 export class CouponRepository {
   async findById(couponId: string): Promise<Coupon | null> {
-    const row = await queryOne<CouponRow>('SELECT * FROM coupon WHERE "couponId" = $1', [couponId]);
+    const row = await queryOne<PromotionCoupon>('SELECT * FROM "promotionCoupon" WHERE "promotionCouponId" = $1', [couponId]);
 
     if (!row) return null;
     return this.mapToCoupon(row);
   }
 
   async findByCode(code: string): Promise<Coupon | null> {
-    const row = await queryOne<Record<string, unknown>>(
+    if (!code) return null;
+    const row = await queryOne<PromotionCoupon>(
       `SELECT * FROM "promotionCoupon" WHERE code = $1 AND "isActive" = true LIMIT 1`,
       [code.toUpperCase()],
     );
 
     if (!row) return null;
-    return this.mapPromotionCouponToCoupon(row);
+    return this.mapToCoupon(row);
   }
 
   async findAll(filters?: CouponFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Coupon>> {
@@ -96,11 +45,11 @@ export class CouponRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM coupon ${whereClause}`, params);
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "promotionCoupon" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<CouponRow[]>(
-      `SELECT * FROM coupon ${whereClause}
+    const rows = await query<PromotionCoupon[]>(
+      `SELECT * FROM "promotionCoupon" ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset],
@@ -121,84 +70,67 @@ export class CouponRepository {
   async save(coupon: Coupon): Promise<Coupon> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<{ couponId: string }>('SELECT "couponId" FROM coupon WHERE "couponId" = $1', [coupon.couponId]);
+    const existing = await queryOne<{ promotionCouponId: string }>('SELECT "promotionCouponId" FROM "promotionCoupon" WHERE "promotionCouponId" = $1', [coupon.couponId]);
 
     if (existing) {
-      // Update existing coupon
       await query(
-        `UPDATE coupon SET
-          code = $1, name = $2, description = $3, type = $4, value = $5,
-          currency = $6, "minOrderValue" = $7, "maxDiscountAmount" = $8,
-          "usageType" = $9, "usageLimit" = $10, "usageCount" = $11,
-          "customerUsageLimit" = $12, conditions = $13, "isActive" = $14,
-          "startsAt" = $15, "expiresAt" = $16, "applicableProducts" = $17,
-          "applicableCategories" = $18, "applicableCustomerGroups" = $19,
-          "excludedProducts" = $20, "excludedCategories" = $21,
-          metadata = $22, "updatedAt" = $23
-        WHERE "couponId" = $24`,
+        `UPDATE "promotionCoupon" SET
+          code = $1, name = $2, description = $3, type = $4, "discountAmount" = $5,
+          "currencyCode" = $6, "minOrderAmount" = $7, "maxDiscountAmount" = $8,
+          "isOneTimeUse" = $9, "maxUsage" = $10, "usageCount" = $11,
+          "maxUsagePerCustomer" = $12, "isActive" = $13,
+          "startDate" = $14, "endDate" = $15,
+          "updatedAt" = $16
+        WHERE "promotionCouponId" = $17`,
         [
           coupon.code,
           coupon.name,
-          coupon.description,
-          coupon.type,
-          coupon.value,
-          coupon.currency,
-          coupon.minOrderValue,
-          coupon.maxDiscountAmount,
-          coupon.usageType,
-          coupon.usageLimit,
+          coupon.description ?? null,
+          coupon.type === 'fixed_amount' ? 'fixedAmount' : coupon.type,
+          String(coupon.value),
+          coupon.currency ?? 'USD',
+          coupon.minOrderValue ? String(coupon.minOrderValue) : null,
+          coupon.maxDiscountAmount ? String(coupon.maxDiscountAmount) : null,
+          coupon.usageType === 'single_use',
+          coupon.usageLimit ?? null,
           coupon.usageCount,
-          coupon.customerUsageLimit,
-          coupon.conditions.length > 0 ? JSON.stringify(coupon.conditions) : null,
+          coupon.customerUsageLimit ?? null,
           coupon.isActive,
-          coupon.startsAt?.toISOString(),
-          coupon.expiresAt?.toISOString(),
-          coupon.applicableProducts ? JSON.stringify(coupon.applicableProducts) : null,
-          coupon.applicableCategories ? JSON.stringify(coupon.applicableCategories) : null,
-          coupon.applicableCustomerGroups ? JSON.stringify(coupon.applicableCustomerGroups) : null,
-          coupon.excludedProducts ? JSON.stringify(coupon.excludedProducts) : null,
-          coupon.excludedCategories ? JSON.stringify(coupon.excludedCategories) : null,
-          coupon.metadata ? JSON.stringify(coupon.metadata) : null,
+          coupon.startsAt?.toISOString() ?? now,
+          coupon.expiresAt?.toISOString() ?? null,
           now,
           coupon.couponId,
         ],
       );
     } else {
-      // Create new coupon
       await query(
-        `INSERT INTO coupon (
-          "couponId", code, name, description, type, value, currency,
-          "minOrderValue", "maxDiscountAmount", "usageType", "usageLimit",
-          "usageCount", "customerUsageLimit", conditions, "isActive",
-          "startsAt", "expiresAt", "applicableProducts", "applicableCategories",
-          "applicableCustomerGroups", "excludedProducts", "excludedCategories",
-          "createdBy", metadata, "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
+        `INSERT INTO "promotionCoupon" (
+          "promotionCouponId", code, name, description, type, "discountAmount",
+          "currencyCode", "minOrderAmount", "maxDiscountAmount",
+          "isOneTimeUse", "maxUsage", "usageCount", "maxUsagePerCustomer",
+          "isActive", "startDate", "endDate", "generationMethod", "isReferral", "isPublic",
+          "createdAt", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
         [
           coupon.couponId,
           coupon.code,
           coupon.name,
-          coupon.description,
-          coupon.type,
-          coupon.value,
-          coupon.currency,
-          coupon.minOrderValue,
-          coupon.maxDiscountAmount,
-          coupon.usageType,
-          coupon.usageLimit,
+          coupon.description ?? null,
+          coupon.type === 'fixed_amount' ? 'fixedAmount' : coupon.type,
+          String(coupon.value),
+          coupon.currency ?? 'USD',
+          coupon.minOrderValue ? String(coupon.minOrderValue) : null,
+          coupon.maxDiscountAmount ? String(coupon.maxDiscountAmount) : null,
+          coupon.usageType === 'single_use',
+          coupon.usageLimit ?? null,
           coupon.usageCount,
-          coupon.customerUsageLimit,
-          coupon.conditions.length > 0 ? JSON.stringify(coupon.conditions) : null,
+          coupon.customerUsageLimit ?? null,
           coupon.isActive,
-          coupon.startsAt?.toISOString(),
-          coupon.expiresAt?.toISOString(),
-          coupon.applicableProducts ? JSON.stringify(coupon.applicableProducts) : null,
-          coupon.applicableCategories ? JSON.stringify(coupon.applicableCategories) : null,
-          coupon.applicableCustomerGroups ? JSON.stringify(coupon.applicableCustomerGroups) : null,
-          coupon.excludedProducts ? JSON.stringify(coupon.excludedProducts) : null,
-          coupon.excludedCategories ? JSON.stringify(coupon.excludedCategories) : null,
-          coupon.createdBy,
-          coupon.metadata ? JSON.stringify(coupon.metadata) : null,
+          coupon.startsAt?.toISOString() ?? now,
+          coupon.expiresAt?.toISOString() ?? null,
+          'manual',
+          false,
+          false,
           now,
           now,
         ],
@@ -209,7 +141,7 @@ export class CouponRepository {
   }
 
   async delete(couponId: string): Promise<void> {
-    await query('DELETE FROM coupon WHERE "couponId" = $1', [couponId]);
+    await query('DELETE FROM "promotionCoupon" WHERE "promotionCouponId" = $1', [couponId]);
   }
 
   // Coupon Usage tracking
@@ -225,14 +157,14 @@ export class CouponRepository {
     };
 
     await query(
-      `INSERT INTO "couponUsage" (
-        "usageId", "couponId", "orderId", "customerId", "discountAmount", "usedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [fullUsage.usageId, fullUsage.couponId, fullUsage.orderId, fullUsage.customerId, fullUsage.discountAmount, now],
+      `INSERT INTO "promotionCouponUsage" (
+        "promotionCouponUsageId", "promotionCouponId", "orderId", "customerId", "discountAmount", "currencyCode", "usedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [fullUsage.usageId, fullUsage.couponId, fullUsage.orderId || null, fullUsage.customerId || null, String(fullUsage.discountAmount), 'USD', now],
     );
 
     // Update coupon usage count
-    await query('UPDATE coupon SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "couponId" = $2', [now, fullUsage.couponId]);
+    await query('UPDATE "promotionCoupon" SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "promotionCouponId" = $2', [now, fullUsage.couponId]);
 
     return fullUsage;
   }
@@ -246,29 +178,29 @@ export class CouponRepository {
     redeemedAt: Date;
   }): Promise<void> {
     await query(
-      `INSERT INTO "couponUsage" (
-        "usageId", "couponId", "orderId", "customerId", "discountAmount", "usedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [redemption.redemptionId, redemption.couponId, redemption.orderId, redemption.customerId || '', redemption.discountAmount, redemption.redeemedAt.toISOString()],
+      `INSERT INTO "promotionCouponUsage" (
+        "promotionCouponUsageId", "promotionCouponId", "orderId", "customerId", "discountAmount", "currencyCode", "usedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [redemption.redemptionId, redemption.couponId, redemption.orderId, redemption.customerId || null, String(redemption.discountAmount), 'USD', redemption.redeemedAt.toISOString()],
     );
   }
 
   async incrementUsageCount(couponId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query('UPDATE coupon SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "couponId" = $2', [now, couponId]);
+    await query('UPDATE "promotionCoupon" SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "promotionCouponId" = $2', [now, couponId]);
   }
 
   async getUsageHistory(couponId: string, limit: number = 50): Promise<CouponUsage[]> {
-    const rows = await query<CouponUsageRow[]>(`SELECT * FROM "couponUsage" WHERE "couponId" = $1 ORDER BY "usedAt" DESC LIMIT $2`, [
+    const rows = await query<PromotionCouponUsage[]>(`SELECT * FROM "promotionCouponUsage" WHERE "promotionCouponId" = $1 ORDER BY "usedAt" DESC LIMIT $2`, [
       couponId,
       limit,
     ]);
 
     return (rows || []).map(row => ({
-      usageId: row.usageId,
-      couponId: row.couponId,
-      orderId: row.orderId,
-      customerId: row.customerId,
+      usageId: row.promotionCouponUsageId,
+      couponId: row.promotionCouponId,
+      orderId: row.orderId ?? '',
+      customerId: row.customerId ?? '',
       discountAmount: parseFloat(row.discountAmount),
       usedAt: new Date(row.usedAt),
     }));
@@ -276,7 +208,7 @@ export class CouponRepository {
 
   async getCustomerUsageCount(couponId: string, customerId: string): Promise<number> {
     const row = await queryOne<{ count: string }>(
-      'SELECT COUNT(*) as count FROM "couponUsage" WHERE "couponId" = $1 AND "customerId" = $2',
+      'SELECT COUNT(*) as count FROM "promotionCouponUsage" WHERE "promotionCouponId" = $1 AND "customerId" = $2',
       [couponId, customerId],
     );
 
@@ -284,11 +216,11 @@ export class CouponRepository {
   }
 
   async getActiveCoupons(limit: number = 100): Promise<Coupon[]> {
-    const rows = await query<CouponRow[]>(
-      `SELECT * FROM coupon
+    const rows = await query<PromotionCoupon[]>(
+      `SELECT * FROM "promotionCoupon"
       WHERE "isActive" = true
-      AND ("startsAt" IS NULL OR "startsAt" <= NOW())
-      AND ("expiresAt" IS NULL OR "expiresAt" > NOW())
+      AND ("startDate" IS NULL OR "startDate" <= NOW())
+      AND ("endDate" IS NULL OR "endDate" > NOW())
       ORDER BY "createdAt" DESC
       LIMIT $1`,
       [limit],
@@ -359,17 +291,17 @@ export class CouponRepository {
     }
 
     if (filters?.usageType) {
-      conditions.push('"usageType" = $' + (params.length + 1));
-      params.push(filters.usageType);
+      conditions.push('"isOneTimeUse" = $' + (params.length + 1));
+      params.push(filters.usageType === 'single_use');
     }
 
     if (filters?.expiresAfter) {
-      conditions.push('"expiresAt" > $' + (params.length + 1));
+      conditions.push('"endDate" > $' + (params.length + 1));
       params.push(filters.expiresAfter.toISOString());
     }
 
     if (filters?.expiresBefore) {
-      conditions.push('"expiresAt" < $' + (params.length + 1));
+      conditions.push('"endDate" < $' + (params.length + 1));
       params.push(filters.expiresBefore.toISOString());
     }
 
@@ -379,27 +311,27 @@ export class CouponRepository {
     };
   }
 
-  private mapPromotionCouponToCoupon(row: Record<string, unknown>): Coupon {
-    const type = row.type as string;
-    const mappedType = type === 'fixedAmount' ? 'fixed_amount' : type;
+  private mapToCoupon(row: PromotionCoupon): Coupon {
+    const type = row.type;
+    const mappedType: DiscountType = type === 'fixedAmount' ? 'fixed_amount' : (type as DiscountType);
     return Coupon.reconstitute({
-      couponId: row.promotionCouponId as string,
-      code: row.code as string,
-      name: row.name as string,
-      description: (row.description as string) ?? undefined,
-      type: mappedType as 'percentage' | 'fixed_amount' | 'free_shipping',
+      couponId: row.promotionCouponId,
+      code: row.code,
+      name: row.name,
+      description: row.description ?? undefined,
+      type: mappedType,
       value: parseFloat(String(row.discountAmount ?? 0)),
-      currency: (row.currencyCode as string) ?? undefined,
+      currency: row.currencyCode ?? undefined,
       minOrderValue: row.minOrderAmount ? parseFloat(String(row.minOrderAmount)) : undefined,
       maxDiscountAmount: row.maxDiscountAmount ? parseFloat(String(row.maxDiscountAmount)) : undefined,
       usageType: row.isOneTimeUse ? 'single_use' : 'multi_use',
-      usageLimit: row.maxUsage ? parseInt(String(row.maxUsage)) : undefined,
-      usageCount: parseInt(String(row.usageCount ?? 0)),
-      customerUsageLimit: row.maxUsagePerCustomer ? parseInt(String(row.maxUsagePerCustomer)) : undefined,
+      usageLimit: row.maxUsage ?? undefined,
+      usageCount: row.usageCount,
+      customerUsageLimit: row.maxUsagePerCustomer ?? undefined,
       conditions: [],
       isActive: Boolean(row.isActive),
-      startsAt: row.startDate ? new Date(row.startDate as string) : undefined,
-      expiresAt: row.endDate ? new Date(row.endDate as string) : undefined,
+      startsAt: row.startDate ? new Date(row.startDate) : undefined,
+      expiresAt: row.endDate ? new Date(row.endDate) : undefined,
       applicableProducts: undefined,
       applicableCategories: undefined,
       applicableCustomerGroups: undefined,
@@ -407,57 +339,6 @@ export class CouponRepository {
       excludedCategories: undefined,
       createdBy: '',
       metadata: undefined,
-      createdAt: new Date(row.createdAt as string),
-      updatedAt: new Date(row.updatedAt as string),
-    });
-  }
-
-  private mapToCoupon(row: CouponRow): Coupon {
-    return Coupon.reconstitute({
-      couponId: row.couponId,
-      code: row.code,
-      name: row.name,
-      description: row.description ?? undefined,
-      type: row.type,
-      value: parseFloat(row.value),
-      currency: row.currency ?? undefined,
-      minOrderValue: row.minOrderValue ? parseFloat(row.minOrderValue) : undefined,
-      maxDiscountAmount: row.maxDiscountAmount ? parseFloat(row.maxDiscountAmount) : undefined,
-      usageType: row.usageType,
-      usageLimit: row.usageLimit ? parseInt(row.usageLimit) : undefined,
-      usageCount: parseInt(row.usageCount || '0'),
-      customerUsageLimit: row.customerUsageLimit ? parseInt(row.customerUsageLimit) : undefined,
-      conditions: row.conditions ? (typeof row.conditions === 'string' ? JSON.parse(row.conditions) : row.conditions) : [],
-      isActive: Boolean(row.isActive),
-      startsAt: row.startsAt ? new Date(row.startsAt) : undefined,
-      expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
-      applicableProducts: row.applicableProducts
-        ? typeof row.applicableProducts === 'string'
-          ? JSON.parse(row.applicableProducts)
-          : row.applicableProducts
-        : undefined,
-      applicableCategories: row.applicableCategories
-        ? typeof row.applicableCategories === 'string'
-          ? JSON.parse(row.applicableCategories)
-          : row.applicableCategories
-        : undefined,
-      applicableCustomerGroups: row.applicableCustomerGroups
-        ? typeof row.applicableCustomerGroups === 'string'
-          ? JSON.parse(row.applicableCustomerGroups)
-          : row.applicableCustomerGroups
-        : undefined,
-      excludedProducts: row.excludedProducts
-        ? typeof row.excludedProducts === 'string'
-          ? JSON.parse(row.excludedProducts)
-          : row.excludedProducts
-        : undefined,
-      excludedCategories: row.excludedCategories
-        ? typeof row.excludedCategories === 'string'
-          ? JSON.parse(row.excludedCategories)
-          : row.excludedCategories
-        : undefined,
-      createdBy: row.createdBy,
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

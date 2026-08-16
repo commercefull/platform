@@ -100,11 +100,6 @@ public
 tmp/
 temp/
 
-# Cypress
-cypress
-cypress/videos
-cypress/screenshots
-
 # Ansible inventory
 inventory.ini
 

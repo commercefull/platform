@@ -7,6 +7,7 @@ import express from 'express';
 import * as productController from '../controllers/ProductCustomerController';
 import * as bundleController from '../controllers/BundleController';
 import productSearchController from '../controllers/ProductSearchController';
+import { isCustomerLoggedIn, optionalCustomerAuth } from '../../../../libs/auth';
 
 const router = express.Router();
 
@@ -79,9 +80,9 @@ router.get('/products/:productId/related', productController.getRelatedProducts)
 // ============================================================================
 
 router.get('/products/:productId/reviews', productController.getProductReviews);
-router.post('/products/:productId/reviews', productController.createReview);
-router.post('/reviews/:reviewId/helpful', productController.markReviewHelpful);
-router.post('/reviews/:reviewId/report', productController.reportReview);
+router.post('/products/:productId/reviews', optionalCustomerAuth, productController.createReview);
+router.post('/reviews/:reviewId/helpful', optionalCustomerAuth, productController.markReviewHelpful);
+router.post('/reviews/:reviewId/report', optionalCustomerAuth, productController.reportReview);
 
 // ============================================================================
 // Q&A Routes (Customer)
@@ -94,7 +95,7 @@ router.post('/products/:productId/qa', productController.submitProductQa);
 // Review Vote Routes (Customer)
 // ============================================================================
 
-router.post('/products/:productId/reviews/:reviewId/vote', productController.voteOnReview);
+router.post('/products/:productId/reviews/:reviewId/vote', isCustomerLoggedIn, productController.voteOnReview);
 
 // ============================================================================
 // Bundle Routes

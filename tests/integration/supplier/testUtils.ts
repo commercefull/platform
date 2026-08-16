@@ -82,7 +82,7 @@ export function createTestSupplier(overrides: Partial<unknown> = {}) {
 export function createTestPurchaseOrder(supplierId: string, warehouseId: string, overrides: Partial<unknown> = {}) {
   return {
     supplierId,
-    warehouseId,
+    distributionWarehouseId: warehouseId,
     orderType: 'standard',
     priority: 'normal',
     currency: 'USD',

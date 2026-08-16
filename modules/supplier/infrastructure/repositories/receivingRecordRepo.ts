@@ -23,7 +23,7 @@ export interface SupplierReceivingRecord {
   updatedAt: string;
   receiptNumber: string;
   supplierPurchaseOrderId?: string;
-  warehouseId: string;
+  distributionWarehouseId: string;
   supplierId: string;
   status: SupplierReceivingStatus;
   receivedDate: string;
@@ -74,7 +74,7 @@ export class SupplierReceivingRecordRepo {
   async findByWarehouseId(warehouseId: string, limit = 50): Promise<SupplierReceivingRecord[]> {
     return (
       (await query<SupplierReceivingRecord[]>(
-        `SELECT * FROM "supplierReceivingRecord" WHERE "warehouseId" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
+        `SELECT * FROM "supplierReceivingRecord" WHERE "distributionWarehouseId" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
         [warehouseId, limit],
       )) || []
     );
@@ -121,14 +121,14 @@ export class SupplierReceivingRecordRepo {
 
     const result = await queryOne<SupplierReceivingRecord>(
       `INSERT INTO "supplierReceivingRecord" (
-        "receiptNumber", "supplierPurchaseOrderId", "warehouseId", "supplierId", "status", "receivedDate",
+        "receiptNumber", "supplierPurchaseOrderId", "distributionWarehouseId", "supplierId", "status", "receivedDate",
         "carrierName", "trackingNumber", "packageCount", "notes", "discrepancies", "attachments",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
       [
         receiptNumber,
         params.supplierPurchaseOrderId || null,
-        params.warehouseId,
+        params.distributionWarehouseId,
         params.supplierId,
         params.status || 'pending',
         params.receivedDate || now,

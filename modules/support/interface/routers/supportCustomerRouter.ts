@@ -4,6 +4,7 @@
  */
 
 import { Router } from 'express';
+import { isCustomerLoggedIn } from '../../../../libs/auth';
 import {
   // Tickets
   createTicket,
@@ -47,26 +48,26 @@ router.post('/support/faq/articles/:id/feedback', submitFaqFeedback);
 // Ticket Routes (Authenticated)
 // ============================================================================
 
-router.post('/support/tickets', createTicket);
-router.get('/support/tickets/mine', getMyTickets);
-router.get('/support/tickets/mine/:id', getMyTicket);
-router.post('/support/tickets/mine/:id/messages', addCustomerMessage);
-router.post('/support/tickets/mine/:id/feedback', submitTicketFeedback);
+router.post('/support/tickets', isCustomerLoggedIn, createTicket);
+router.get('/support/tickets/mine', isCustomerLoggedIn, getMyTickets);
+router.get('/support/tickets/mine/:id', isCustomerLoggedIn, getMyTicket);
+router.post('/support/tickets/mine/:id/messages', isCustomerLoggedIn, addCustomerMessage);
+router.post('/support/tickets/mine/:id/feedback', isCustomerLoggedIn, submitTicketFeedback);
 
 // ============================================================================
 // Stock Alert Routes
 // ============================================================================
 
-router.post('/support/alerts/stock', createStockAlert);
-router.get('/support/alerts/stock/mine', getMyStockAlerts);
-router.delete('/support/alerts/stock/mine/:id', cancelMyStockAlert);
+router.post('/support/alerts/stock', isCustomerLoggedIn, createStockAlert);
+router.get('/support/alerts/stock/mine', isCustomerLoggedIn, getMyStockAlerts);
+router.delete('/support/alerts/stock/mine/:id', isCustomerLoggedIn, cancelMyStockAlert);
 
 // ============================================================================
 // Price Alert Routes
 // ============================================================================
 
-router.post('/support/alerts/price', createPriceAlert);
-router.get('/support/alerts/price/mine', getMyPriceAlerts);
-router.delete('/support/alerts/price/mine/:id', cancelMyPriceAlert);
+router.post('/support/alerts/price', isCustomerLoggedIn, createPriceAlert);
+router.get('/support/alerts/price/mine', isCustomerLoggedIn, getMyPriceAlerts);
+router.delete('/support/alerts/price/mine/:id', isCustomerLoggedIn, cancelMyPriceAlert);
 
 export const supportCustomerRouter = router;

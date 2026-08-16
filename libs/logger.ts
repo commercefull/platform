@@ -52,7 +52,7 @@ type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'http';
 
 const { combine, timestamp, printf, errors } = format;
 
-const logDir = './../logs';
+const logDir = './logs';
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Define log levels similar to Monolog

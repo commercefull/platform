@@ -5,6 +5,7 @@
 
 import { AxiosInstance } from 'axios';
 import { setupOrderTests } from './testUtils';
+import { expectStatus } from '../testUtils';
 
 describe('Order Expanded Tests', () => {
   let client: AxiosInstance;
@@ -49,10 +50,8 @@ describe('Order Expanded Tests', () => {
           headers: authHeaders(),
         });
 
-        expect([200, 404]).toContain(historyResp.status);
-        if (historyResp.status === 200) {
-          expect(historyResp.data.success).toBe(true);
-        }
+        expectStatus(historyResp, 200);
+        expect(historyResp.data.success).toBe(true);
       }
     });
 
@@ -70,7 +69,7 @@ describe('Order Expanded Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([200, 400, 404]).toContain(updateResp.status);
+        expectStatus(updateResp, 200);
       }
     });
   });
@@ -94,7 +93,7 @@ describe('Order Expanded Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([200, 400, 404]).toContain(cancelResp.status);
+        expectStatus(cancelResp, 200);
       }
     });
 
@@ -112,7 +111,7 @@ describe('Order Expanded Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([400, 404]).toContain(cancelResp.status);
+        expectStatus(cancelResp, 400);
       }
     });
   });
@@ -133,7 +132,7 @@ describe('Order Expanded Tests', () => {
           headers: authHeaders(),
         });
 
-        expect([200, 404]).toContain(refundResp.status);
+        expectStatus(refundResp, 200);
       }
     });
 
@@ -151,7 +150,7 @@ describe('Order Expanded Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([201, 200, 400, 404]).toContain(refundResp.status);
+        expectStatus(refundResp, 201);
       }
     });
   });
@@ -172,7 +171,7 @@ describe('Order Expanded Tests', () => {
           headers: authHeaders(),
         });
 
-        expect([200, 404]).toContain(returnsResp.status);
+        expectStatus(returnsResp, 200);
       }
     });
 
@@ -190,7 +189,7 @@ describe('Order Expanded Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([201, 200, 400, 404]).toContain(returnResp.status);
+        expectStatus(returnResp, 201);
       }
     });
   });
@@ -203,7 +202,7 @@ describe('Order Expanded Tests', () => {
     it('should list customer orders', async () => {
       if (!customerToken) return;
 
-      const resp = await client.get('/customer/orders', {
+      const resp = await client.get('/customer/order', {
         headers: customerAuthHeaders(),
       });
 
@@ -214,7 +213,7 @@ describe('Order Expanded Tests', () => {
     it('should get order details as customer', async () => {
       if (!customerToken) return;
 
-      const listResp = await client.get('/customer/orders', {
+      const listResp = await client.get('/customer/order', {
         headers: customerAuthHeaders(),
       });
 

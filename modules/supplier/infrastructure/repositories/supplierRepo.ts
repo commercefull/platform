@@ -390,6 +390,13 @@ export class SupplierRepo {
    * Delete supplier
    */
   async delete(supplierId: string): Promise<boolean> {
+    // Clean up purchase order items first, then purchase orders, to avoid FK constraint violations
+    await query(
+      `DELETE FROM "supplierPurchaseOrderItem" WHERE "supplierPurchaseOrderId" IN (SELECT "supplierPurchaseOrderId" FROM "supplierPurchaseOrder" WHERE "supplierId" = $1)`,
+      [supplierId],
+    );
+    await query(`DELETE FROM "supplierPurchaseOrder" WHERE "supplierId" = $1`, [supplierId]);
+
     const result = await queryOne<{ supplierId: string }>(`DELETE FROM "supplier" WHERE "supplierId" = $1 RETURNING "supplierId"`, [
       supplierId,
     ]);

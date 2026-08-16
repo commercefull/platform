@@ -9,7 +9,7 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../../testUtils';
+import { createTestClient, loginTestAdmin, expectStatus } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID, SEEDED_PRODUCT_3_ID } from '../testUtils';
 
 describe('Product Relationships', () => {
@@ -233,7 +233,7 @@ describe('Product Relationships', () => {
         relatedProductId: SEEDED_PRODUCT_2_ID,
         type: 'related',
       });
-      expect([401, 403]).toContain(res.status);
+      expectStatus(res, 401);
     });
   });
 });

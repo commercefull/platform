@@ -8,6 +8,7 @@ import { ProductVariant } from '../entities/ProductVariant';
 import { ProductCategory } from '../entities/ProductCategory';
 import { ProductStatus } from '../valueObjects/ProductStatus';
 import { ProductVisibility } from '../valueObjects/ProductVisibility';
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 
 export interface ProductFilters {
   status?: ProductStatus | ProductStatus[];
@@ -23,21 +24,6 @@ export interface ProductFilters {
   priceMax?: number;
   tags?: string[];
   search?: string;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
 }
 
 export interface ProductRepository {

@@ -83,3 +83,33 @@ The Membership feature manages paid membership tiers with exclusive benefits. Un
 | UC-MEM-006 to UC-MEM-010 | `membership/membership.test.ts` | ✅   |
 | UC-MEM-011 to UC-MEM-017 | `membership/membership.test.ts` | ✅   |
 | UC-MEM-018 to UC-MEM-022 | `membership/membership.test.ts` | ✅   |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/business/membership/benefits` | `getMembershipBenefits` | Admin routes for membership benefit management |
+| POST | `/business/membership/benefits` | `createMembershipBenefit` | — |
+| GET | `/business/membership/benefits/:id` | `getMembershipBenefitById` | — |
+| PUT | `/business/membership/benefits/:id` | `updateMembershipBenefit` | — |
+| DELETE | `/business/membership/benefits/:id` | `deleteMembershipBenefit` | — |
+| GET | `/business/membership/tiers` | `getMembershipTiers` | Admin routes for membership tier management |
+| POST | `/business/membership/tiers` | `createMembershipTier` | — |
+| GET | `/business/membership/tiers/:id` | `getMembershipTierById` | — |
+| PUT | `/business/membership/tiers/:id` | `updateMembershipTier` | — |
+| DELETE | `/business/membership/tiers/:id` | `deleteMembershipTier` | — |
+| GET | `/business/membership/user-memberships` | `getUserMemberships` | Admin routes for user membership management |
+| POST | `/business/membership/user-memberships` | `createUserMembership` | — |
+| GET | `/business/membership/user-memberships/:id` | `getUserMembershipById` | — |
+| PUT | `/business/membership/user-memberships/:id` | `updateUserMembership` | — |
+| POST | `/business/membership/user-memberships/:id/cancel` | `cancelUserMembership` | — |
+| GET | `/business/membership/users/:userId/benefits` | `getUserMembershipBenefits` | — |
+| GET | `/business/membership/users/:userId/membership` | `getUserMembershipByUserId` | Admin routes for fetching user-specific membership data |
+| GET | `/customer/membership/tiers` | `getMembershipTiers` | Get all active membership tiers |
+| GET | `/customer/membership/tiers/:id` | `getMembershipTierById` | Get specific membership tier details |
+| GET | `/customer/membership/tiers/:tierId/benefits` | `getTierBenefits` | Get benefits for a specific tier |
+| GET | `/customer/membership/user/:userId` | `getUserMembershipByUserId` | Get current user's membership |
+| GET | `/customer/membership/user/:userId/benefits` | `getUserMembershipBenefits` | Get current user's membership benefits |
+
+<!-- GENERATED:ENDPOINTS:END -->

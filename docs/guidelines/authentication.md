@@ -18,8 +18,7 @@ export const isAdminLoggedIn = async (req, res, next) => {
 | Middleware           | User Type | JWT Secret            | Login Redirect    |
 | -------------------- | --------- | --------------------- | ----------------- |
 | `isAdminLoggedIn`    | Admin     | `ADMIN_JWT_SECRET`    | `/admin/login`    |
-| `isMerchantLoggedIn` | Merchant  | `MERCHANT_JWT_SECRET` | `/merchant/login` |
-| `isB2BLoggedIn`      | B2B user  | `B2B_JWT_SECRET`      | `/b2b/login`      |
+| `isMerchantLoggedIn` | Merchant  | `MERCHANT_JWT_SECRET` | `/admin/login`    |
 | `isCustomerLoggedIn` | Customer  | `CUSTOMER_JWT_SECRET` | `/login`          |
 
 Apply at router level:

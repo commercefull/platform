@@ -112,3 +112,48 @@ The Subscription feature manages recurring billing products, subscription plans,
 | UC-SUB-010 to UC-SUB-015 | `subscription/subscription.test.ts` | ✅     |
 | UC-SUB-016 to UC-SUB-022 | `subscription/subscription.test.ts` | ✅     |
 | UC-SUB-023 to UC-SUB-035 | `subscription/subscription.test.ts` | ✅     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/business/subscriptions` | `getCustomerSubscriptions` | — |
+| GET | `/business/subscriptions/:id` | `getCustomerSubscription` | — |
+| POST | `/business/subscriptions/:id/bill` | `processBillingCycle` | — |
+| POST | `/business/subscriptions/:id/cancel` | `cancelSubscriptionAdmin` | — |
+| POST | `/business/subscriptions/:id/pause` | `pauseSubscriptionAdmin` | — |
+| POST | `/business/subscriptions/:id/resume` | `resumeSubscriptionAdmin` | — |
+| PUT | `/business/subscriptions/:id/status` | `updateSubscriptionStatus` | — |
+| GET | `/business/subscriptions/:subscriptionId/dunning` | `getDunningAttempts` | — |
+| GET | `/business/subscriptions/:subscriptionId/orders` | `getSubscriptionOrders` | Subscription Orders |
+| GET | `/business/subscriptions/billing/due` | `getSubscriptionsDueBilling` | — |
+| GET | `/business/subscriptions/dunning/pending` | `getPendingDunning` | — |
+| POST | `/business/subscriptions/orders/:orderId/retry` | `retrySubscriptionOrder` | — |
+| POST | `/business/subscriptions/orders/:orderId/skip` | `skipSubscriptionOrder` | — |
+| GET | `/business/subscriptions/products` | `getSubscriptionProducts` | — |
+| POST | `/business/subscriptions/products` | `createSubscriptionProduct` | — |
+| GET | `/business/subscriptions/products/:id` | `getSubscriptionProduct` | — |
+| PUT | `/business/subscriptions/products/:id` | `updateSubscriptionProduct` | — |
+| DELETE | `/business/subscriptions/products/:id` | `deleteSubscriptionProduct` | — |
+| GET | `/business/subscriptions/products/:productId/plans` | `getSubscriptionPlans` | — |
+| POST | `/business/subscriptions/products/:productId/plans` | `createSubscriptionPlan` | — |
+| GET | `/business/subscriptions/products/:productId/plans/:planId` | `getSubscriptionPlan` | — |
+| PUT | `/business/subscriptions/products/:productId/plans/:planId` | `updateSubscriptionPlan` | — |
+| DELETE | `/business/subscriptions/products/:productId/plans/:planId` | `deleteSubscriptionPlan` | — |
+| GET | `/customer/subscriptions/mine` | `getMySubscriptions` | List and view subscriptions |
+| GET | `/customer/subscriptions/mine/:id` | `getMySubscription` | — |
+| PUT | `/customer/subscriptions/mine/:id` | `updateMySubscription` | Manage subscription |
+| POST | `/customer/subscriptions/mine/:id/cancel` | `cancelMySubscription` | — |
+| POST | `/customer/subscriptions/mine/:id/change-plan` | `changePlan` | — |
+| GET | `/customer/subscriptions/mine/:id/orders` | `getMySubscriptionOrders` | Billing history |
+| POST | `/customer/subscriptions/mine/:id/pause` | `pauseMySubscription` | — |
+| POST | `/customer/subscriptions/mine/:id/reactivate` | `reactivateMySubscription` | — |
+| POST | `/customer/subscriptions/mine/:id/resume` | `resumeMySubscription` | — |
+| POST | `/customer/subscriptions/mine/:id/skip` | `skipNextDelivery` | Skip delivery |
+| GET | `/customer/subscriptions/plans/:planId` | `getSubscriptionPlanDetails` | — |
+| GET | `/customer/subscriptions/products` | `getAvailableSubscriptionProducts` | — |
+| GET | `/customer/subscriptions/products/:productId` | `getSubscriptionProductDetails` | — |
+| POST | `/customer/subscriptions/subscribe` | `createSubscription` | Create subscription |
+
+<!-- GENERATED:ENDPOINTS:END -->

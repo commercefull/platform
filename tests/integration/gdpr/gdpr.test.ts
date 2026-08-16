@@ -13,6 +13,22 @@ describe('GDPR Feature Tests', () => {
     client = setup.client;
     adminToken = setup.adminToken;
     customerToken = setup.customerToken;
+
+    // Clean up any existing pending requests from previous test runs
+    if (customerToken) {
+      const existing = await client.get('/customer/gdpr/requests', {
+        headers: { Authorization: `Bearer ${customerToken}` },
+      });
+      if (existing.data?.data) {
+        for (const req of existing.data.data) {
+          if (req.status === 'pending' && req.gdprDataRequestId) {
+            await client.post(`/customer/gdpr/requests/${req.gdprDataRequestId}/cancel`, {}, {
+              headers: { Authorization: `Bearer ${customerToken}` },
+            });
+          }
+        }
+      }
+    }
   });
 
   afterAll(async () => {

@@ -2,7 +2,8 @@
  * Get Transactions Use Case
  */
 
-import { PaymentRepository, PaymentFilters, PaginationOptions } from '../../domain/repositories/PaymentRepository';
+import { PaymentRepository, PaymentFilters } from '../../domain/repositories/PaymentRepository';
+import { PaginationOptions } from 'libs/types/shared';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 

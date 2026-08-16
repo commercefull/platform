@@ -15,7 +15,7 @@ import { SaveStoredPaymentMethodCommand, SaveStoredPaymentMethodUseCase } from '
 
 export const listStoredMethods = async (req: Request, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     if (!customerId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -30,7 +30,7 @@ export const listStoredMethods = async (req: Request, res: Response): Promise<vo
 
 export const saveStoredMethod = async (req: Request, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     if (!customerId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -64,7 +64,7 @@ export const saveStoredMethod = async (req: Request, res: Response): Promise<voi
 
 export const setDefaultMethod = async (req: Request, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     if (!customerId) {
       errorResponse(res, 'Authentication required', 401);
       return;

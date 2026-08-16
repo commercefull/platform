@@ -43,8 +43,8 @@ import { taxTypeDefs } from '../modules/tax/interface/graphql/typeDefs';
 import { taxResolvers } from '../modules/tax/interface/graphql/resolvers';
 import { pricingTypeDefs } from '../modules/pricing/interface/graphql/typeDefs';
 import { pricingResolvers } from '../modules/pricing/interface/graphql/resolvers';
-import { merchantTypeDefs } from '../modules/merchant/interface/graphql/typeDefs';
-import { merchantResolvers } from '../modules/merchant/interface/graphql/resolvers';
+import { organizationTypeDefs } from '../modules/organization/interface/graphql/typeDefs';
+import { organizationResolvers } from '../modules/organization/interface/graphql/resolvers';
 import { analyticsTypeDefs } from '../modules/analytics/interface/graphql/typeDefs';
 import { analyticsResolvers } from '../modules/analytics/interface/graphql/resolvers';
 import { contentTypeDefs } from '../modules/content/interface/graphql/typeDefs';
@@ -55,8 +55,6 @@ import { localizationTypeDefs } from '../modules/localization/interface/graphql/
 import { localizationResolvers } from '../modules/localization/interface/graphql/resolvers';
 import { configurationTypeDefs } from '../modules/configuration/interface/graphql/typeDefs';
 import { configurationResolvers } from '../modules/configuration/interface/graphql/resolvers';
-import { organizationTypeDefs } from '../modules/organization/interface/graphql/typeDefs';
-import { organizationResolvers } from '../modules/organization/interface/graphql/resolvers';
 import { supplierTypeDefs } from '../modules/supplier/interface/graphql/typeDefs';
 import { supplierResolvers } from '../modules/supplier/interface/graphql/resolvers';
 import { gdprTypeDefs } from '../modules/gdpr/interface/graphql/typeDefs';
@@ -149,7 +147,6 @@ export function configureGraphQL(app: Express): void {
     storeTypeDefs,
     taxTypeDefs,
     pricingTypeDefs,
-    merchantTypeDefs,
     analyticsTypeDefs,
     contentTypeDefs,
     mediaTypeDefs,
@@ -184,7 +181,6 @@ export function configureGraphQL(app: Express): void {
     storeResolvers,
     taxResolvers,
     pricingResolvers,
-    merchantResolvers,
     analyticsResolvers,
     contentResolvers,
     mediaResolvers,

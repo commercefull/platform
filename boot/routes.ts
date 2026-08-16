@@ -1,5 +1,8 @@
 import { Express } from 'express';
 import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import swaggerUi from 'swagger-ui-express';
 
 // Storefront routes
 import { storefrontCustomerRouter } from '../web/storefront/storefrontRouter';
@@ -27,7 +30,7 @@ import { notificationCustomerRouter } from '../modules/notification/interface/ro
 
 // Feature routes - Business/Merchant facing
 import { identityBusinessRouter } from '../modules/identity/interface/routers/identityBusinessRouter';
-import { merchantMerchantRouter } from '../modules/merchant/interface/http/merchantBusinessRouter';
+import { organizationBusinessRouter } from '../modules/organization/interface/http/organizationBusinessRouter';
 import { promotionBusinessRouter } from '../modules/promotion/interface/routers/businessRouter';
 import { productBusinessRouter } from '../modules/product/interface/routers/productBusinessRouter';
 import { orderBusinessRouter } from '../modules/order/interface/routers/businessRouter';
@@ -58,12 +61,10 @@ import { couponBusinessRouter } from '../modules/coupon/interface/routers/coupon
 import { fulfillmentBusinessRouter } from '../modules/fulfillment/interface/routers/fulfillmentBusinessRouter';
 import fulfillmentCustomerRouter from '../modules/fulfillment/interface/routers/fulfillmentCustomerRouter';
 import { fulfillmentLocationRouter } from '../modules/fulfillment/interface/routers/fulfillmentLocationRouter';
-import { organizationBusinessRouter } from '../modules/organization/interface/routers/organizationRouter';
 import { couponCustomerRouter } from '../modules/coupon/interface/routers/couponCustomerRouter';
 import { promotionCustomerRouter } from '../modules/promotion/interface/routers/customerRouter';
 import { storeCustomerRouter } from '../modules/store/interface/routers/storeCustomerRouter';
 import { basketBusinessRouter } from '../modules/basket/interface/routers/basketBusinessRouter';
-import { merchantCustomerRouter } from '../modules/merchant/interface/http/merchantCustomerRouter';
 import { attributeBusinessRouter } from '../modules/product/interface/routers/attributeRouter';
 import { categoryCustomerRouter } from '../modules/product/interface/routers/categoryCustomerRouter';
 import { webhookBusinessRouter } from '../modules/webhook/interface/routers/webhookBusinessRouter';
@@ -111,7 +112,6 @@ export function configureRoutes(app: Express): void {
     categoryCustomerRouter,
     storeCustomerRouter,
     fulfillmentCustomerRouter,
-    merchantCustomerRouter,
     contentCustomerRouter,
   ]);
 
@@ -119,7 +119,7 @@ export function configureRoutes(app: Express): void {
   app.use('/business', [
     fulfillmentLocationRouter,
     identityBusinessRouter,
-    merchantMerchantRouter,
+    organizationBusinessRouter,
     promotionBusinessRouter,
     productBusinessRouter,
     orderBusinessRouter,
@@ -145,12 +145,31 @@ export function configureRoutes(app: Express): void {
     systemConfigurationRouter,
     couponBusinessRouter,
     fulfillmentBusinessRouter,
-    organizationBusinessRouter,
     basketBusinessRouter,
     attributeBusinessRouter,
     webhookBusinessRouter,
     reportingBusinessRouter,
   ]);
+
+  // ─── Documentation site (Docsify) ────────────────────────────────────────
+  // Docsify shell (index.html, _sidebar.md, _coverpage.md) and all markdown
+  // content live together in docs/.
+  const docsDir = path.resolve(__dirname, '../docs');
+  if (fs.existsSync(docsDir)) {
+    app.use('/docs', express.static(docsDir));
+    // Redirect /docs to /docs/ so Docsify loads properly
+    app.get('/docs', (_req, res) => res.redirect('/docs/'));
+  }
+
+  // ─── Swagger UI (OpenAPI) ────────────────────────────────────────────────
+  const openApiPath = path.resolve(__dirname, '../docs/generated/openapi.json');
+  if (fs.existsSync(openApiPath)) {
+    const openApiSpec = JSON.parse(fs.readFileSync(openApiPath, 'utf-8'));
+    app.use('/docs/api', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
+      customCssUrl: undefined,
+      customSiteTitle: 'CommerceFull API',
+    } as swaggerUi.SwaggerUiOptions));
+  }
 
   // Health check endpoint (before other routes for load balancers)
   app.get('/health', (_req, res) => {

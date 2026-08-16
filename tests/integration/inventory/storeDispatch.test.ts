@@ -7,6 +7,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { randomUUID } from 'node:crypto';
+import { expectStatus } from '../testUtils';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
@@ -70,7 +71,7 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
       expect(response.data.success).toBe(false);
     });
 
@@ -85,7 +86,7 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
       expect(response.data.success).toBe(false);
     });
 
@@ -141,18 +142,16 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([201, 400, 500]).toContain(response.status);
-      if (response.status === 201) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toBeDefined();
-        expect(response.data.data).toHaveProperty('dispatchId');
-        expect(response.data.data).toHaveProperty('dispatchNumber');
-        expect(response.data.data.status).toBe('draft');
-        expect(response.data.data.fromStoreId).toBe(TEST_STORE_IDS.ACTIVE);
-        expect(response.data.data.toStoreId).toBe(TEST_STORE_IDS.FEATURED);
-        expect(response.data.data.items).toHaveLength(1);
-        createdDispatchId = response.data.data.dispatchId;
-      }
+      expectStatus(response, 201);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toBeDefined();
+      expect(response.data.data).toHaveProperty('dispatchId');
+      expect(response.data.data).toHaveProperty('dispatchNumber');
+      expect(response.data.data.status).toBe('draft');
+      expect(response.data.data.fromStoreId).toBe(TEST_STORE_IDS.ACTIVE);
+      expect(response.data.data.toStoreId).toBe(TEST_STORE_IDS.FEATURED);
+      expect(response.data.data.items).toHaveLength(1);
+      createdDispatchId = response.data.data.dispatchId;
     });
   });
 
@@ -241,7 +240,7 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([404, 400]).toContain(response.status);
+      expectStatus(response, 404);
       expect(response.data.success).toBe(false);
     });
 
@@ -254,12 +253,10 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data.status).toBe('approved');
-        expect(response.data.data.approvedBy).toBe('test-admin');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data.status).toBe('approved');
+      expect(response.data.data.approvedBy).toBe('test-admin');
     });
   });
 
@@ -275,7 +272,7 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([404, 400]).toContain(response.status);
+      expectStatus(response, 404);
       expect(response.data.success).toBe(false);
     });
 
@@ -288,11 +285,9 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data.status).toBe('dispatched');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data.status).toBe('dispatched');
     });
   });
 
@@ -308,7 +303,7 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([404, 400]).toContain(response.status);
+      expectStatus(response, 404);
       expect(response.data.success).toBe(false);
     });
 
@@ -325,11 +320,9 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data.status).toBe('received');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data.status).toBe('received');
     });
   });
 
@@ -345,7 +338,7 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([404, 400]).toContain(response.status);
+      expectStatus(response, 404);
       expect(response.data.success).toBe(false);
     });
 
@@ -379,11 +372,9 @@ describe('Store Dispatch Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data.status).toBe('cancelled');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data.status).toBe('cancelled');
     });
   });
 });

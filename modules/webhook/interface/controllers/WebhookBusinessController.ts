@@ -115,7 +115,9 @@ export const getWebhook = async (req: TypedRequest, res: Response): Promise<void
       return;
     }
 
-    res.json({ success: true, data: endpoint });
+    // Strip secret from response for security
+    const { secret: _secret, ...safeEndpoint } = endpoint as unknown as Record<string, unknown>;
+    res.json({ success: true, data: safeEndpoint });
   } catch (error: unknown) {
     logger.error('Error getting webhook:', error);
     res.status(500).json({ success: false, error: (error as Error).message });

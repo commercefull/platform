@@ -12,9 +12,8 @@ import {
 import {
   ProductRepository as IProductRepository,
   ProductFilters,
-  PaginationOptions,
-  PaginatedResult,
 } from '../../domain/repositories/ProductRepository';
+import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 import { Product, ProductImage } from '../../domain/entities/Product';
 import { ProductVariant } from '../../domain/entities/ProductVariant';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
@@ -84,7 +83,7 @@ export class ProductRepo implements IProductRepository {
       products.push(this.mapToProduct(row, images));
     }
 
-    return { data: products, total, limit, offset, hasMore: offset + products.length < total };
+    return { data: products, total, limit, offset, hasMore: offset + products.length < total, length: products.length };
   }
 
   async save(product: Product): Promise<Product> {

@@ -4,7 +4,7 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../../testUtils';
+import { createTestClient, loginTestAdmin, expectStatus } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID } from '../testUtils';
 
 ;
@@ -56,8 +56,8 @@ describe('Customer: Product Browsing', () => {
     });
 
     it('should get a product by slug', async () => {
-      const res = await client.get('/customer/products/test-product-one');
-      expect([200, 404]).toContain(res.status); // slug may have changed
+      const res = await client.get('/customer/products/sample-product');
+      expectStatus(res, 200); // slug may have changed
     });
 
     it('should return 404 for non-existent product', async () => {

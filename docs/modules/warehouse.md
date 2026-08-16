@@ -99,3 +99,56 @@ The Warehouse feature manages warehouse operations including receiving, put-away
 | UC-WHS-011 to UC-WHS-015  | `warehouse/warehouseExpanded.test.ts`| ✅     |
 | UC-WHS-016 to UC-WHS-019  | `warehouse/warehouseExpanded.test.ts`| 🟡     |
 | UC-WHS-020 to UC-WHS-027  | `warehouse/warehouseExpanded.test.ts`| 🟡     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/business/merchants/:merchantId/warehouses` | `getWarehousesByMerchant` | Merchant warehouses |
+| GET | `/business/warehouses` | `getWarehouses` | Warehouse listing with various filters |
+| POST | `/business/warehouses` | `createWarehouse` | Warehouse CRUD operations |
+| GET | `/business/warehouses/:id` | `getWarehouseById` | — |
+| PUT | `/business/warehouses/:id` | `updateWarehouse` | — |
+| DELETE | `/business/warehouses/:id` | `deleteWarehouse` | — |
+| POST | `/business/warehouses/:id/activate` | `activateWarehouse` | — |
+| POST | `/business/warehouses/:id/bins` | `createBin` | — |
+| GET | `/business/warehouses/:id/bins` | `getBins` | — |
+| GET | `/business/warehouses/:id/bins/:binId` | `getBinById` | — |
+| PUT | `/business/warehouses/:id/bins/:binId` | `updateBin` | — |
+| DELETE | `/business/warehouses/:id/bins/:binId` | `deleteBin` | — |
+| POST | `/business/warehouses/:id/deactivate` | `deactivateWarehouse` | — |
+| POST | `/business/warehouses/:id/default` | `setDefaultWarehouse` | Warehouse status management |
+| POST | `/business/warehouses/:id/pick-pack` | `createPickPack` | — |
+| GET | `/business/warehouses/:id/pick-pack` | `getPickPacks` | — |
+| GET | `/business/warehouses/:id/pick-pack/:pickPackId` | `getPickPackById` | — |
+| POST | `/business/warehouses/:id/pick-pack/:pickPackId/assign` | `assignPickPack` | — |
+| POST | `/business/warehouses/:id/pick-pack/:pickPackId/complete-packing` | `completePacking` | — |
+| POST | `/business/warehouses/:id/pick-pack/:pickPackId/complete-picking` | `completePicking` | — |
+| POST | `/business/warehouses/:id/pick-pack/:pickPackId/start-packing` | `startPacking` | — |
+| POST | `/business/warehouses/:id/pick-pack/:pickPackId/start-picking` | `startPicking` | — |
+| POST | `/business/warehouses/:id/receiving` | `createReceiving` | — |
+| GET | `/business/warehouses/:id/receiving` | `getReceiving` | — |
+| GET | `/business/warehouses/:id/receiving/:receivingId` | `getReceivingById` | — |
+| POST | `/business/warehouses/:id/receiving/:receivingId/complete` | `completeReceiving` | — |
+| POST | `/business/warehouses/:id/shipping-methods` | `addShippingMethod` | Shipping method management |
+| DELETE | `/business/warehouses/:id/shipping-methods/:method` | `removeShippingMethod` | — |
+| POST | `/business/warehouses/:id/zones` | `createZone` | — |
+| GET | `/business/warehouses/:id/zones` | `getZones` | — |
+| GET | `/business/warehouses/:id/zones/:zoneId` | `getZoneById` | — |
+| PUT | `/business/warehouses/:id/zones/:zoneId` | `updateZone` | — |
+| DELETE | `/business/warehouses/:id/zones/:zoneId` | `deleteZone` | — |
+| GET | `/business/warehouses/code/:code` | `getWarehouseByCode` | — |
+| GET | `/business/warehouses/country/:country` | `getWarehousesByCountry` | — |
+| GET | `/business/warehouses/default` | `getDefaultWarehouse` | — |
+| GET | `/business/warehouses/fulfillment-centers` | `getFulfillmentCenters` | — |
+| GET | `/business/warehouses/nearest` | `findNearestWarehouses` | — |
+| GET | `/business/warehouses/return-centers` | `getReturnCenters` | — |
+| GET | `/business/warehouses/statistics` | `getWarehouseStatistics` | — |
+| GET | `/customer/warehouse/:id` | `getStoreById` | — |
+| GET | `/customer/warehouse/:id/availability/:productId` | `checkStoreAvailability` | — |
+| GET | `/customer/warehouse/city/:city` | `getStoresByCity` | — |
+| GET | `/customer/warehouse/country/:country` | `getStoresByCountry` | — |
+| GET | `/customer/warehouse/nearest` | `findNearestStores` | Store Locator Routes (Public) |
+
+<!-- GENERATED:ENDPOINTS:END -->

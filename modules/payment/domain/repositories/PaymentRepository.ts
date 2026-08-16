@@ -5,6 +5,7 @@
 import { PaymentTransaction } from '../entities/PaymentTransaction';
 import { PaymentRefund } from '../entities/PaymentRefund';
 import { TransactionStatus } from '../valueObjects/PaymentStatus';
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 
 export interface PaymentFilters {
   orderId?: string;
@@ -13,21 +14,6 @@ export interface PaymentFilters {
   gatewayId?: string;
   startDate?: Date;
   endDate?: Date;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
 }
 
 export interface PaymentRepository {

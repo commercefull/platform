@@ -1,18 +1,18 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { MerchantRepo } from '../../../merchant/infrastructure/repositories/merchantRepo';
 import { AuthRefreshTokenRepo } from '../../infrastructure/repositories/identityRefreshTokenRepo';
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
-import { emitMerchantLogin, emitMerchantRegistered, emitMerchantTokenRefreshed } from '../../domain/events/emitIdentityEvent';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
+import { OrganizationRepo } from '../../../organization/infrastructure/repositories/organizationRepo';
+import { emitMerchantLogin, emitMerchantRegistered, emitMerchantTokenRefreshed } from '../../domain/events/emitIdentityEvent';
 
 // Environment configuration with secure defaults
 const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
-const merchantRepo = new MerchantRepo();
+const organizationRepo = new OrganizationRepo();
 const refreshTokenRepo = new AuthRefreshTokenRepo();
 
 interface LoginBody {
@@ -47,10 +47,10 @@ interface ResetPasswordBody {
 }
 
 /**
- * Authenticates a merchant and returns a basic JWT token
+ * Authenticates a organization and returns a basic JWT token
  * Use this for simple session-based auth
  */
-export const loginMerchant = async (req: TypedRequest<Record<string, string>, unknown, LoginBody>, res: Response): Promise<void> => {
+export const loginorganization = async (req: TypedRequest<Record<string, string>, unknown, LoginBody>, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -63,9 +63,9 @@ export const loginMerchant = async (req: TypedRequest<Record<string, string>, un
       return;
     }
 
-    // Authenticate merchant
-    const merchant = await merchantRepo.authenticateMerchant({ email, password });
-    if (!merchant) {
+    // Authenticate organization
+    const organization = await organizationRepo.authenticate({ email, password });
+    if (!organization) {
       res.status(401).json({
         success: false,
         message: 'Invalid email or password',
@@ -73,35 +73,35 @@ export const loginMerchant = async (req: TypedRequest<Record<string, string>, un
       return;
     }
 
-    // Check merchant account status
-    if (merchant.status !== 'active') {
+    // Check organization account status
+    if (organization.status !== 'active') {
       res.status(403).json({
         success: false,
-        message: `Your account is ${merchant.status}. Please contact support for assistance.`,
+        message: `Your account is ${organization.status}. Please contact support for assistance.`,
       });
       return;
     }
 
     // Emit login event
     emitMerchantLogin({
-      merchantId: merchant.merchantId,
-      email: merchant.email,
-      name: merchant.name || '',
+      merchantId: organization.merchantId,
+      email: organization.email,
+      name: organization.name || '',
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
     });
 
     // Generate access token
-    const accessToken = generateAccessToken(merchant.merchantId, merchant.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
+    const accessToken = generateAccessToken(organization.merchantId, organization.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     res.json({
       success: true,
       accessToken,
-      merchant: {
-        id: merchant.merchantId,
-        email: merchant.email,
-        name: merchant.name,
-        status: merchant.status,
+      organization: {
+        id: organization.merchantId,
+        email: organization.email,
+        name: organization.name,
+        status: organization.status,
       },
     });
   } catch (error) {
@@ -115,10 +115,10 @@ export const loginMerchant = async (req: TypedRequest<Record<string, string>, un
 };
 
 /**
- * Registers a new merchant account
+ * Registers a new organization account
  * New accounts start with 'pending' status and require admin approval
  */
-export const registerMerchant = async (req: TypedRequest<Record<string, string>, unknown, RegisterBody>, res: Response): Promise<void> => {
+export const registerorganization = async (req: TypedRequest<Record<string, string>, unknown, RegisterBody>, res: Response): Promise<void> => {
   try {
     const { email, password, name, phone, website, description } = req.body;
 
@@ -131,18 +131,18 @@ export const registerMerchant = async (req: TypedRequest<Record<string, string>,
       return;
     }
 
-    // Check for existing merchant
-    const existingMerchant = await merchantRepo.findByEmail(email);
-    if (existingMerchant) {
+    // Check for existing organization
+    const existingOrganization = await organizationRepo.findByEmail(email);
+    if (existingOrganization) {
       res.status(409).json({
         success: false,
-        message: 'A merchant account with this email already exists',
+        message: 'A organization account with this email already exists',
       });
       return;
     }
 
-    // Create new merchant with pending status
-    const newMerchant = await merchantRepo.createMerchantWithPassword({
+    // Create new organization with pending status
+    const newOrganization = await organizationRepo.createWithPassword({
       name,
       email,
       phone,
@@ -155,20 +155,20 @@ export const registerMerchant = async (req: TypedRequest<Record<string, string>,
 
     // Emit registration event
     emitMerchantRegistered({
-      merchantId: newMerchant.merchantId,
-      email: newMerchant.email,
-      name: newMerchant.name || '',
-      status: newMerchant.status || 'pending',
+      merchantId: newOrganization.merchantId,
+      email: newOrganization.email,
+      name: newOrganization.name || '',
+      status: newOrganization.status || 'pending',
     });
 
     res.status(201).json({
       success: true,
-      message: 'Merchant account created successfully. Your account is pending approval.',
-      merchant: {
-        id: newMerchant.merchantId,
-        email: newMerchant.email,
-        name: newMerchant.name,
-        status: newMerchant.status,
+      message: 'organization account created successfully. Your account is pending approval.',
+      organization: {
+        id: newOrganization.merchantId,
+        email: newOrganization.email,
+        name: newOrganization.name,
+        status: newOrganization.status,
       },
     });
   } catch (error) {
@@ -198,8 +198,8 @@ export const issueTokenPair = async (req: TypedRequest<Record<string, string>, u
       return;
     }
 
-    const merchant = await merchantRepo.authenticateMerchant({ email, password });
-    if (!merchant) {
+    const organization = await organizationRepo.authenticate({ email, password });
+    if (!organization) {
       res.status(401).json({
         success: false,
         message: 'Invalid email or password',
@@ -207,26 +207,26 @@ export const issueTokenPair = async (req: TypedRequest<Record<string, string>, u
       return;
     }
 
-    // Check merchant account status
-    if (merchant.status !== 'active') {
+    // Check organization account status
+    if (organization.status !== 'active') {
       res.status(403).json({
         success: false,
-        message: `Your account is ${merchant.status}. Please contact support for assistance.`,
+        message: `Your account is ${organization.status}. Please contact support for assistance.`,
       });
       return;
     }
 
     // Generate access token (short-lived)
-    const accessToken = generateAccessToken(merchant.merchantId, merchant.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
+    const accessToken = generateAccessToken(organization.merchantId, organization.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     // Generate refresh token (long-lived)
-    const refreshToken = generateAccessToken(merchant.merchantId, merchant.email, 'merchant', MERCHANT_JWT_SECRET, REFRESH_TOKEN_DURATION);
+    const refreshToken = generateAccessToken(organization.merchantId, organization.email, 'merchant', MERCHANT_JWT_SECRET, REFRESH_TOKEN_DURATION);
 
     // Store refresh token in database for tracking/revocation
     await refreshTokenRepo.create({
       token: refreshToken,
       userType: 'merchant',
-      userId: merchant.merchantId,
+      userId: organization.merchantId,
       expiresAt: parseExpirationDate(REFRESH_TOKEN_DURATION),
       userAgent: req.headers['user-agent'] || null,
       ipAddress: req.ip || null,
@@ -238,10 +238,10 @@ export const issueTokenPair = async (req: TypedRequest<Record<string, string>, u
       refreshToken,
       tokenType: 'Bearer',
       expiresIn: ACCESS_TOKEN_DURATION,
-      merchant: {
-        id: merchant.merchantId,
-        email: merchant.email,
-        name: merchant.name,
+      organization: {
+        id: organization.merchantId,
+        email: organization.email,
+        name: organization.name,
       },
     });
   } catch (error) {
@@ -289,33 +289,33 @@ export const renewAccessToken = async (req: TypedRequest<Record<string, string>,
       return;
     }
 
-    // Verify merchant still exists and is active
-    const merchant = await merchantRepo.findById(tokenPayload.id);
-    if (!merchant) {
+    // Verify organization still exists and is active
+    const organization = await organizationRepo.findById(tokenPayload.id);
+    if (!organization) {
       res.status(401).json({
         success: false,
-        message: 'Merchant account not found',
+        message: 'organization account not found',
       });
       return;
     }
 
-    if (merchant.status !== 'active') {
+    if (organization.status !== 'active') {
       res.status(403).json({
         success: false,
-        message: `Your account is ${merchant.status}. Please contact support.`,
+        message: `Your account is ${organization.status}. Please contact support.`,
       });
       return;
     }
 
     // Generate new access token
-    const newAccessToken = generateAccessToken(merchant.merchantId, merchant.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
+    const newAccessToken = generateAccessToken(organization.merchantId, organization.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     // Mark refresh token as used (optional - for tracking)
     await refreshTokenRepo.markUsed(refreshToken);
 
     // Emit token refreshed event
     emitMerchantTokenRefreshed({
-      userId: merchant.merchantId,
+      userId: organization.merchantId,
       ipAddress: req.ip,
     });
 
@@ -336,7 +336,7 @@ export const renewAccessToken = async (req: TypedRequest<Record<string, string>,
 };
 
 /**
- * Validates a merchant access token
+ * Validates a organization access token
  */
 export const checkTokenValidity = async (req: TypedRequest<Record<string, string>, unknown, TokenBody>, res: Response): Promise<void> => {
   try {
@@ -365,7 +365,7 @@ export const checkTokenValidity = async (req: TypedRequest<Record<string, string
     res.json({
       success: true,
       valid: true,
-      merchant: {
+      organization: {
         id: decodedPayload.id,
         email: decodedPayload.email,
         role: decodedPayload.role,
@@ -396,10 +396,10 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
       return;
     }
 
-    const merchant = await merchantRepo.findByEmail(email);
+    const organization = await organizationRepo.findByEmail(email);
 
     // Always return success to prevent email enumeration attacks
-    if (!merchant?.merchantId) {
+    if (!organization?.merchantId) {
       res.json({
         success: true,
         message: 'If an account exists with that email, a password reset link has been sent',
@@ -408,7 +408,7 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
     }
 
     // Generate secure reset token
-    const resetToken = await merchantRepo.createPasswordResetToken(merchant.merchantId);
+    const resetToken = await organizationRepo.createPasswordResetToken(organization.merchantId);
 
     // Send password reset email
     await JobScheduler.scheduleEmail({
@@ -449,9 +449,9 @@ export const resetPassword = async (req: TypedRequest<Record<string, string>, un
       return;
     }
 
-    // Verify reset token and get merchant ID
-    const merchantId = await merchantRepo.verifyPasswordResetToken(token);
-    if (!merchantId) {
+    // Verify reset token and get organization ID
+    const organizationId = await organizationRepo.verifyPasswordResetToken(token);
+    if (!organizationId) {
       res.status(400).json({
         success: false,
         message: 'Password reset token is invalid or has expired',
@@ -459,8 +459,8 @@ export const resetPassword = async (req: TypedRequest<Record<string, string>, un
       return;
     }
 
-    // Update merchant password
-    await merchantRepo.changePassword(merchantId, newPassword);
+    // Update organization password
+    await organizationRepo.changePassword(organizationId, newPassword);
 
     res.json({
       success: true,

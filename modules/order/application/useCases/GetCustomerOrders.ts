@@ -3,7 +3,8 @@
  * Retrieves orders for a specific customer with pagination
  */
 
-import { OrderRepository, PaginationOptions } from '../../domain/repositories/OrderRepository';
+import { OrderRepository } from '../../domain/repositories/OrderRepository';
+import { PaginationOptions } from 'libs/types/shared';
 import { Order } from '../../domain/entities/Order';
 
 // ============================================================================

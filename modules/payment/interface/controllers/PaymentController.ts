@@ -31,7 +31,7 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
 
 export const getMyTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;

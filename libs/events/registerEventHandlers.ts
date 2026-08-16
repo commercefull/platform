@@ -133,7 +133,9 @@ function registerOrderEventHandlers(): void {
 
             const reservation = await inventoryReservationRepo.createAtomic({
               orderId,
-              productVariantId: item.productVariantId || item.productId,
+              productId: item.productId,
+              variantId: item.productVariantId || undefined,
+              inventoryItemId: (loc.inventoryItemId as string) || (loc.inventoryLevelId as string) || locationId,
               locationId,
               quantity: item.quantity,
               expiresAt: new Date(Date.now() + 30 * 60 * 1000),

@@ -1,3 +1,4 @@
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 import { StoreDispatch, DispatchStatus } from '../entities/StoreDispatch';
 
 export interface DispatchFilters {
@@ -6,21 +7,6 @@ export interface DispatchFilters {
   status?: DispatchStatus;
   dateFrom?: Date;
   dateTo?: Date;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
 }
 
 export interface StoreDispatchRepository {

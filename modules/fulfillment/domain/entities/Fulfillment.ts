@@ -421,5 +421,6 @@ export class Fulfillment {
 }
 
 function generateFulfillmentId(): string {
-  return `ful_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+  // Use crypto.randomUUID for proper UUID format
+  return crypto.randomUUID();
 }

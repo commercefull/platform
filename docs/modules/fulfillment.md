@@ -91,3 +91,39 @@ The Fulfillment feature manages order fulfillment operations including picking, 
 | UC-FLF-012 to UC-FLF-017 | `fulfillment/fulfillmentLocation.test.ts`   | ✅   |
 | UC-FLF-018 to UC-FLF-020 | `fulfillment/fulfillmentLocation.test.ts`   | ✅   |
 | UC-FLF-021 to UC-FLF-023 | `fulfillment/fulfillmentLifecycle.test.ts` | ✅   |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/:fulfillmentId` | `getFulfillment` | Get fulfillment by ID (customer view) |
+| GET | `/:fulfillmentId/track` | `getTrackingInfo` | Track fulfillment |
+| GET | `/business/` | `listFulfillments` | List all fulfillments (with filters/pagination) |
+| POST | `/business/` | `createFulfillment` | Create fulfillment |
+| GET | `/business/:fulfillmentId` | `getFulfillment` | Get fulfillment by ID |
+| POST | `/business/:fulfillmentId/assign` | `assignFulfillment` | Assign fulfillment |
+| POST | `/business/:fulfillmentId/cancel` | `cancelFulfillment` | Cancel fulfillment |
+| POST | `/business/:fulfillmentId/deliver` | `markDelivered` | Mark delivered |
+| POST | `/business/:fulfillmentId/pack` | `processPacking` | Process packing |
+| POST | `/business/:fulfillmentId/pick` | `processPicking` | Process picking |
+| POST | `/business/:fulfillmentId/return` | `initiateReturn` | Initiate return |
+| POST | `/business/:fulfillmentId/ship` | `shipOrder` | Ship order |
+| PUT | `/business/:fulfillmentId/tracking` | `updateTracking` | Update tracking info |
+| GET | `/business/locations` | `isMerchantLoggedIn` | — |
+| POST | `/business/locations` | `isMerchantLoggedIn` | — |
+| GET | `/business/locations/:locationId` | `isMerchantLoggedIn` | — |
+| PUT | `/business/locations/:locationId` | `isMerchantLoggedIn` | — |
+| DELETE | `/business/locations/:locationId` | `isMerchantLoggedIn` | — |
+| POST | `/business/locations/:locationId/activate` | `isMerchantLoggedIn` | — |
+| POST | `/business/locations/:locationId/deactivate` | `isMerchantLoggedIn` | — |
+| GET | `/business/locations/nearest` | `isMerchantLoggedIn` | — |
+| GET | `/business/order/:orderId` | `listFulfillmentsByOrder` | List by order |
+| GET | `/business/partners` | `isMerchantLoggedIn` | — |
+| POST | `/business/partners` | `isMerchantLoggedIn` | — |
+| GET | `/business/partners/:partnerId` | `isMerchantLoggedIn` | — |
+| PUT | `/business/partners/:partnerId` | `isMerchantLoggedIn` | — |
+| DELETE | `/business/partners/:partnerId` | `isMerchantLoggedIn` | — |
+| GET | `/order/:orderId` | `listFulfillmentsByOrder` | List fulfillments by order (customer view) |
+
+<!-- GENERATED:ENDPOINTS:END -->

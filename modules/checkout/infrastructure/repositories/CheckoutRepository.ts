@@ -4,7 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { CheckoutSession as DbCheckoutSession } from '../../../../libs/db/types';
+import { CheckoutSession as DbCheckoutSession, ShippingMethod as DbShippingMethod, PaymentMethod as DbPaymentMethod } from '../../../../libs/db/types';
 import { generateUUID } from '../../../../libs/uuid';
 import { CheckoutRepository, ShippingMethodData, PaymentMethodData } from '../../domain/repositories/CheckoutRepository';
 import { CheckoutSession, CheckoutStatus, PaymentStatus, FulfillmentType } from '../../domain/entities/CheckoutSession';
@@ -175,19 +175,7 @@ export class CheckoutRepo implements CheckoutRepository {
   }
 
   async getAvailableShippingMethods(_country: string, _postalCode: string): Promise<ShippingMethodData[]> {
-    interface ShippingMethodRow {
-      shippingMethodId: string;
-      name: string;
-      description: string | null;
-      estimatedDeliveryDays: number | null;
-      handlingDays: number | null;
-      shippingCarrierId: string | null;
-      isActive: boolean;
-      priority: number | null;
-      isDefault: boolean | null;
-    }
-
-    const rows = await query<ShippingMethodRow[]>(
+    const rows = await query<DbShippingMethod[]>(
       `SELECT sm.* FROM "shippingMethod" sm
        WHERE sm."isActive" = true
        ORDER BY sm."priority" ASC NULLS LAST, sm."isDefault" DESC`,
@@ -231,22 +219,15 @@ export class CheckoutRepo implements CheckoutRepository {
       description: row.description ?? undefined,
       price: 0,
       currency: 'USD',
-      estimatedDeliveryDays: row.estimatedDeliveryDays ?? row.handlingDays ?? undefined,
+      estimatedDeliveryDays: (row.estimatedDeliveryDays as number | null) ?? row.handlingDays ?? undefined,
       carrier: row.shippingCarrierId ?? undefined,
     }));
   }
 
   async getAvailablePaymentMethods(): Promise<PaymentMethodData[]> {
-    interface PaymentMethodRow {
-      paymentMethodId: string;
-      provider: string | null;
-      type: string;
-      isDefault: boolean;
-    }
-
-    let rows: PaymentMethodRow[] | null = null;
+    let rows: Pick<DbPaymentMethod, 'paymentMethodId' | 'provider' | 'type' | 'isDefault'>[] | null = null;
     try {
-      rows = await query<PaymentMethodRow[]>(
+      rows = await query<Pick<DbPaymentMethod, 'paymentMethodId' | 'provider' | 'type' | 'isDefault'>[]>(
         'SELECT * FROM "paymentMethod" WHERE "isDefault" = true LIMIT 5',
       );
     } catch {

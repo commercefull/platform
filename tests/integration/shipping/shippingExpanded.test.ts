@@ -14,6 +14,7 @@ import {
   SEEDED_ZONE_IDS,
   SEEDED_PACKAGING_IDS,
 } from './testUtils';
+import { expectStatus } from '../testUtils';
 
 describe('Shipping Expanded Tests', () => {
   let client: AxiosInstance;
@@ -44,7 +45,7 @@ describe('Shipping Expanded Tests', () => {
 
   describe('Rate Calculation', () => {
     it('should list all shipping rates', async () => {
-      const resp = await client.get('/business/shipping-rates', {
+      const resp = await client.get('/business/rates', {
         headers: authHeaders(),
       });
 
@@ -54,7 +55,7 @@ describe('Shipping Expanded Tests', () => {
     });
 
     it('should get rates for a specific zone', async () => {
-      const resp = await client.get('/business/shipping-rates', {
+      const resp = await client.get('/business/rates', {
         params: { zoneId: SEEDED_ZONE_IDS.US_DOMESTIC },
         headers: authHeaders(),
       });
@@ -64,7 +65,7 @@ describe('Shipping Expanded Tests', () => {
     });
 
     it('should get rates for a specific method', async () => {
-      const resp = await client.get('/business/shipping-rates', {
+      const resp = await client.get('/business/rates', {
         params: { methodId: SEEDED_METHOD_IDS.UPS_GROUND },
         headers: authHeaders(),
       });
@@ -80,7 +81,7 @@ describe('Shipping Expanded Tests', () => {
 
   describe('Zone-Based Shipping', () => {
     it('should list all shipping zones', async () => {
-      const resp = await client.get('/business/shipping-zones', {
+      const resp = await client.get('/business/zones', {
         headers: authHeaders(),
       });
 
@@ -90,7 +91,7 @@ describe('Shipping Expanded Tests', () => {
     });
 
     it('should get a specific zone by ID', async () => {
-      const resp = await client.get(`/business/shipping-zones/${SEEDED_ZONE_IDS.US_DOMESTIC}`, {
+      const resp = await client.get(`/business/zones/${SEEDED_ZONE_IDS.US_DOMESTIC}`, {
         headers: authHeaders(),
       });
 
@@ -100,11 +101,11 @@ describe('Shipping Expanded Tests', () => {
 
     it('should create a new shipping zone', async () => {
       const zoneData = createTestZone();
-      const resp = await client.post('/business/shipping-zones', zoneData, {
+      const resp = await client.post('/business/zones', zoneData, {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400]).toContain(resp.status);
+      expectStatus(resp, 201);
       if (resp.status === 201 || resp.status === 200) {
         expect(resp.data.success).toBe(true);
         expect(resp.data.data).toHaveProperty('shippingZoneId');
@@ -113,11 +114,11 @@ describe('Shipping Expanded Tests', () => {
     });
 
     it('should return 404 for non-existent zone', async () => {
-      const resp = await client.get('/business/shipping-zones/00000000-0000-0000-0000-000000000000', {
+      const resp = await client.get('/business/zones/00000000-0000-0000-0000-000000000000', {
         headers: authHeaders(),
       });
 
-      expect([404, 400]).toContain(resp.status);
+      expectStatus(resp, 404);
     });
   });
 
@@ -127,7 +128,7 @@ describe('Shipping Expanded Tests', () => {
 
   describe('Packaging', () => {
     it('should list all packaging types', async () => {
-      const resp = await client.get('/business/packaging', {
+      const resp = await client.get('/business/packaging-types', {
         headers: authHeaders(),
       });
 
@@ -137,7 +138,7 @@ describe('Shipping Expanded Tests', () => {
     });
 
     it('should get a specific packaging by ID', async () => {
-      const resp = await client.get(`/business/packaging/${SEEDED_PACKAGING_IDS.SMALL_BOX}`, {
+      const resp = await client.get(`/business/packaging-types/${SEEDED_PACKAGING_IDS.SMALL_BOX}`, {
         headers: authHeaders(),
       });
 
@@ -152,7 +153,7 @@ describe('Shipping Expanded Tests', () => {
 
   describe('Method Filtering', () => {
     it('should list all shipping methods', async () => {
-      const resp = await client.get('/business/shipping-methods', {
+      const resp = await client.get('/business/methods', {
         headers: authHeaders(),
       });
 
@@ -162,7 +163,7 @@ describe('Shipping Expanded Tests', () => {
     });
 
     it('should filter methods by carrier', async () => {
-      const resp = await client.get('/business/shipping-methods', {
+      const resp = await client.get('/business/methods', {
         params: { carrierId: SEEDED_CARRIER_IDS.UPS },
         headers: authHeaders(),
       });
@@ -172,7 +173,7 @@ describe('Shipping Expanded Tests', () => {
     });
 
     it('should get a specific method by ID', async () => {
-      const resp = await client.get(`/business/shipping-methods/${SEEDED_METHOD_IDS.UPS_GROUND}`, {
+      const resp = await client.get(`/business/methods/${SEEDED_METHOD_IDS.UPS_GROUND}`, {
         headers: authHeaders(),
       });
 
@@ -193,7 +194,7 @@ describe('Shipping Expanded Tests', () => {
       });
 
       if (createResp.status === 201 || createResp.status === 200) {
-        const carrierId = createResp.data.data.carrierId;
+        const carrierId = createResp.data.data.shippingCarrierId || createResp.data.data.carrierId;
         createdResources.carrierIds.push(carrierId);
 
         const updateResp = await client.put(
@@ -202,7 +203,7 @@ describe('Shipping Expanded Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([200, 400, 404]).toContain(updateResp.status);
+        expectStatus(updateResp, 200);
       }
     });
 
@@ -213,7 +214,7 @@ describe('Shipping Expanded Tests', () => {
       });
 
       if (createResp.status === 201 || createResp.status === 200) {
-        const carrierId = createResp.data.data.carrierId;
+        const carrierId = createResp.data.data.shippingCarrierId || createResp.data.data.carrierId;
         createdResources.carrierIds.push(carrierId);
 
         const updateResp = await client.put(
@@ -222,7 +223,7 @@ describe('Shipping Expanded Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([200, 400, 404]).toContain(updateResp.status);
+        expectStatus(updateResp, 200);
       }
     });
   });

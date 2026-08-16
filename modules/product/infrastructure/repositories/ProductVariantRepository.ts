@@ -6,40 +6,9 @@
 import { query, queryOne } from '../../../../libs/db';
 import { ProductVariant, VariantAttribute } from '../../domain/entities/ProductVariant';
 import { Price } from '../../domain/valueObjects/Price';
-import { Dimensions, WeightUnit, DimensionUnit } from '../../domain/valueObjects/Dimensions';
-
-interface VariantRow {
-  variantId: string;
-  productId: string;
-  sku: string;
-  name: string;
-  basePrice: string;
-  salePrice: string | null;
-  cost: string | null;
-  currency: string | null;
-  weight: string | null;
-  weightUnit: string | null;
-  length: string | null;
-  width: string | null;
-  height: string | null;
-  dimensionUnit: string | null;
-  stockQuantity: string | null;
-  lowStockThreshold: string | null;
-  inventoryQuantity: number | null;
-  trackInventory: boolean | null;
-  allowBackorders: boolean | null;
-  isDefault: boolean;
-  isActive: boolean;
-  position: string | null;
-  imageId: string | null;
-  imageUrl: string | null;
-  barcode: string | null;
-  externalId: string | null;
-  metadata: string | Record<string, unknown> | null;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-}
+import { Dimensions } from '../../domain/valueObjects/Dimensions';
+import { ProductVariant as DbProductVariant } from '../../../../libs/db/types';
+import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 
 interface VariantAttributeRow {
   attributeId: string;
@@ -57,44 +26,28 @@ export interface ProductVariantFilters {
   attributes?: Record<string, string>;
 }
 
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
-  length: number;
-}
-
 export class ProductVariantRepository {
   async findById(variantId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<VariantRow>('SELECT * FROM "productVariant" WHERE "variantId" = $1 AND "deletedAt" IS NULL', [
+    const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE "productVariantId" = $1', [
       variantId,
     ]);
 
     if (!row) return null;
 
-    const attributes = await this.getVariantAttributes(variantId);
+    const attributes = await this.getVariantAttributes(row.productVariantId);
 
     return this.mapToProductVariant(row, attributes);
   }
 
   async findByProductId(productId: string): Promise<ProductVariant[]> {
-    const rows = await query<VariantRow[]>(
-      'SELECT * FROM "productVariant" WHERE "productId" = $1 AND "deletedAt" IS NULL ORDER BY "sortOrder" ASC, "createdAt" ASC',
+    const rows = await query<DbProductVariant[]>(
+      'SELECT * FROM "productVariant" WHERE "productId" = $1 ORDER BY "position" ASC, "createdAt" ASC',
       [productId],
     );
 
     const variants: ProductVariant[] = [];
     for (const row of rows || []) {
-      const attributes = await this.getVariantAttributes(row.variantId);
+      const attributes = await this.getVariantAttributes(row.productVariantId);
       variants.push(this.mapToProductVariant(row, attributes));
     }
 
@@ -102,24 +55,24 @@ export class ProductVariantRepository {
   }
 
   async findBySku(sku: string): Promise<ProductVariant | null> {
-    const row = await queryOne<VariantRow>('SELECT * FROM "productVariant" WHERE sku = $1 AND "deletedAt" IS NULL', [sku]);
+    const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE sku = $1', [sku]);
 
     if (!row) return null;
 
-    const attributes = await this.getVariantAttributes(row.variantId);
+    const attributes = await this.getVariantAttributes(row.productVariantId);
 
     return this.mapToProductVariant(row, attributes);
   }
 
   async findDefaultVariant(productId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<VariantRow>(
-      'SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
+    const row = await queryOne<DbProductVariant>(
+      'SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true AND status = \'active\'',
       [productId],
     );
 
     if (!row) return null;
 
-    const attributes = await this.getVariantAttributes(row.variantId);
+    const attributes = await this.getVariantAttributes(row.productVariantId);
 
     return this.mapToProductVariant(row, attributes);
   }
@@ -127,15 +80,13 @@ export class ProductVariantRepository {
   async findAll(filters?: ProductVariantFilters, pagination?: PaginationOptions): Promise<PaginatedResult<ProductVariant>> {
     const limit = pagination?.limit || 20;
     const offset = pagination?.offset || 0;
-    const _orderBy = pagination?.orderBy || 'createdAt';
-    const _orderDir = pagination?.orderDirection || 'desc';
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "productVariant" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<VariantRow[]>(
+    const rows = await query<DbProductVariant[]>(
       `SELECT * FROM "productVariant" ${whereClause}
        ORDER BY "position" ASC, "createdAt" ASC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -144,7 +95,7 @@ export class ProductVariantRepository {
 
     const variants: ProductVariant[] = [];
     for (const row of rows || []) {
-      const attributes = await this.getVariantAttributes(row.variantId);
+      const attributes = await this.getVariantAttributes(row.productVariantId);
       variants.push(this.mapToProductVariant(row, attributes));
     }
 
@@ -161,74 +112,67 @@ export class ProductVariantRepository {
   async save(variant: ProductVariant): Promise<ProductVariant> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<{ variantId: string }>('SELECT "variantId" FROM "productVariant" WHERE "variantId" = $1', [
+    const existing = await queryOne<{ productVariantId: string }>('SELECT "productVariantId" FROM "productVariant" WHERE "productVariantId" = $1', [
       variant.variantId,
     ]);
 
     if (existing) {
-      // Update existing variant
       await query(
         `UPDATE "productVariant" SET
           sku = $1, name = $2,
-          "basePrice" = $3, "salePrice" = $4, cost = $5, currency = $6,
-          weight = $7, "weightUnit" = $8, length = $9, width = $10, height = $11, "dimensionUnit" = $12,
-          "stockQuantity" = $13, "lowStockThreshold" = $14,
-          "isDefault" = $15, "isActive" = $16, position = $17, metadata = $18, "updatedAt" = $19
-        WHERE "variantId" = $23`,
+          price = $3, "salePrice" = $4, "costPrice" = $5, "compareAtPrice" = $6,
+          weight = $7, length = $8, width = $9, height = $10,
+          "isDefault" = $11, status = $12, position = $13,
+          "optionValues" = $14, barcode = $15, mpn = $16, "updatedAt" = $17
+        WHERE "productVariantId" = $18`,
         [
           variant.sku,
           variant.name,
-          variant.price.effectivePrice,
-          variant.price.salePrice,
-          variant.price.cost,
-          variant.price.currency,
-          variant.dimensions.weight,
-          variant.dimensions.weightUnit,
-          variant.dimensions.length,
-          variant.dimensions.width,
-          variant.dimensions.height,
-          variant.dimensions.dimensionUnit,
-          variant.stockQuantity,
-          variant.lowStockThreshold,
+          String(variant.price.effectivePrice),
+          variant.price.salePrice ? String(variant.price.salePrice) : null,
+          variant.price.cost ? String(variant.price.cost) : null,
+          null,
+          variant.dimensions.weight ? String(variant.dimensions.weight) : null,
+          variant.dimensions.length ? String(variant.dimensions.length) : null,
+          variant.dimensions.width ? String(variant.dimensions.width) : null,
+          variant.dimensions.height ? String(variant.dimensions.height) : null,
           variant.isDefault,
-          variant.isActive,
+          variant.isActive ? 'active' : 'inactive',
           variant.position,
-          variant.metadata ? JSON.stringify(variant.metadata) : null,
+          {},
+          variant.barcode ?? null,
+          null,
           now,
           variant.variantId,
         ],
       );
     } else {
-      // Create new variant
       await query(
         `INSERT INTO "productVariant" (
-          variantId, "productId", sku, name,
-          "basePrice", "salePrice", cost, currency,
-          weight, "weightUnit", length, width, height, "dimensionUnit",
-          "stockQuantity", "lowStockThreshold",
-          "isDefault", "isActive", position, metadata, "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
+          "productVariantId", "productId", sku, name,
+          price, "salePrice", "costPrice", "compareAtPrice",
+          weight, length, width, height,
+          "isDefault", status, position, "optionValues", barcode, mpn, "createdAt", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
         [
           variant.variantId,
           variant.productId,
           variant.sku,
           variant.name,
-          variant.price.effectivePrice,
-          variant.price.salePrice,
-          variant.price.cost,
-          variant.price.currency,
-          variant.dimensions.weight,
-          variant.dimensions.weightUnit,
-          variant.dimensions.length,
-          variant.dimensions.width,
-          variant.dimensions.height,
-          variant.dimensions.dimensionUnit,
-          variant.stockQuantity,
-          variant.lowStockThreshold,
+          String(variant.price.effectivePrice),
+          variant.price.salePrice ? String(variant.price.salePrice) : null,
+          variant.price.cost ? String(variant.price.cost) : null,
+          null,
+          variant.dimensions.weight ? String(variant.dimensions.weight) : null,
+          variant.dimensions.length ? String(variant.dimensions.length) : null,
+          variant.dimensions.width ? String(variant.dimensions.width) : null,
+          variant.dimensions.height ? String(variant.dimensions.height) : null,
           variant.isDefault,
-          variant.isActive,
+          variant.isActive ? 'active' : 'inactive',
           variant.position,
-          variant.metadata ? JSON.stringify(variant.metadata) : null,
+          {},
+          variant.barcode ?? null,
+          null,
           now,
           now,
         ],
@@ -243,58 +187,7 @@ export class ProductVariantRepository {
 
   async delete(variantId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query('UPDATE "productVariant" SET "deletedAt" = $1, "isActive" = false, "updatedAt" = $1 WHERE "variantId" = $2', [
-      now,
-      variantId,
-    ]);
-  }
-
-  async updateInventory(variantId: string, quantity: number): Promise<void> {
-    const now = new Date().toISOString();
-    await query('UPDATE "productVariant" SET "inventoryQuantity" = $1, "updatedAt" = $2 WHERE "variantId" = $3', [
-      quantity,
-      now,
-      variantId,
-    ]);
-  }
-
-  async adjustInventory(variantId: string, adjustment: number): Promise<void> {
-    const now = new Date().toISOString();
-    await query('UPDATE "productVariant" SET "inventoryQuantity" = "inventoryQuantity" + $1, "updatedAt" = $2 WHERE "variantId" = $3', [
-      adjustment,
-      now,
-      variantId,
-    ]);
-  }
-
-  async reserveInventory(variantId: string, quantity: number): Promise<boolean> {
-    const now = new Date().toISOString();
-
-    // Check if sufficient inventory
-    const row = await queryOne<Pick<VariantRow, 'inventoryQuantity' | 'allowBackorders' | 'trackInventory'>>(
-      'SELECT "inventoryQuantity", "allowBackorders", "trackInventory" FROM "productVariant" WHERE "variantId" = $1 AND "deletedAt" IS NULL',
-      [variantId],
-    );
-
-    if (!row) return false;
-
-    const canFulfill = !row.trackInventory || row.allowBackorders || (row.inventoryQuantity ?? 0) >= quantity;
-    if (!canFulfill) return false;
-
-    // Reserve inventory
-    await query('UPDATE "productVariant" SET "inventoryQuantity" = "inventoryQuantity" - $1, "updatedAt" = $2 WHERE "variantId" = $3', [
-      quantity,
-      now,
-      variantId,
-    ]);
-
-    return true;
-  }
-
-  async releaseInventory(variantId: string, quantity: number): Promise<void> {
-    const now = new Date().toISOString();
-    await query('UPDATE "productVariant" SET "inventoryQuantity" = "inventoryQuantity" + $1, "updatedAt" = $2 WHERE "variantId" = $3', [
-      quantity,
+    await query('UPDATE "productVariant" SET status = \'archived\', "updatedAt" = $1 WHERE "productVariantId" = $2', [
       now,
       variantId,
     ]);
@@ -331,7 +224,7 @@ export class ProductVariantRepository {
   }
 
   private buildWhereClause(filters?: ProductVariantFilters): { whereClause: string; params: unknown[] } {
-    const conditions: string[] = ['"deletedAt" IS NULL'];
+    const conditions: string[] = [];
     const params: unknown[] = [];
 
     if (filters?.productId) {
@@ -345,21 +238,13 @@ export class ProductVariantRepository {
     }
 
     if (filters?.isActive !== undefined) {
-      conditions.push('"isActive" = $' + (params.length + 1));
-      params.push(filters.isActive);
+      conditions.push('status = $' + (params.length + 1));
+      params.push(filters.isActive ? 'active' : 'inactive');
     }
 
     if (filters?.isDefault !== undefined) {
       conditions.push('"isDefault" = $' + (params.length + 1));
       params.push(filters.isDefault);
-    }
-
-    if (filters?.inStock !== undefined) {
-      if (filters.inStock) {
-        conditions.push('("trackInventory" = false OR "allowBackorders" = true OR "inventoryQuantity" > 0)');
-      } else {
-        conditions.push('"trackInventory" = true AND "allowBackorders" = false AND "inventoryQuantity" <= 0');
-      }
     }
 
     return {
@@ -368,37 +253,31 @@ export class ProductVariantRepository {
     };
   }
 
-  private mapToProductVariant(row: VariantRow, attributes: VariantAttribute[]): ProductVariant {
+  private mapToProductVariant(row: DbProductVariant, attributes: VariantAttribute[]): ProductVariant {
     return ProductVariant.reconstitute({
-      variantId: row.variantId,
+      variantId: row.productVariantId,
       productId: row.productId,
       sku: row.sku,
-      name: row.name,
+      name: row.name ?? '',
       price: Price.create(
-        parseFloat(row.basePrice),
-        row.currency || 'USD',
+        row.price ? parseFloat(row.price) : 0,
+        'USD',
         row.salePrice ? parseFloat(row.salePrice) : undefined,
-        row.cost ? parseFloat(row.cost) : undefined,
+        row.costPrice ? parseFloat(row.costPrice) : undefined,
       ),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
-        weightUnit: (row.weightUnit as WeightUnit) ?? undefined,
         length: row.length ? parseFloat(row.length) : undefined,
         width: row.width ? parseFloat(row.width) : undefined,
         height: row.height ? parseFloat(row.height) : undefined,
-        dimensionUnit: (row.dimensionUnit as DimensionUnit) ?? undefined,
       }),
       attributes,
-      imageId: row.imageId ?? undefined,
-      imageUrl: row.imageUrl ?? undefined,
-      stockQuantity: parseInt(row.stockQuantity || '0'),
-      lowStockThreshold: parseInt(row.lowStockThreshold || '5'),
+      stockQuantity: 0,
+      lowStockThreshold: 5,
       isDefault: Boolean(row.isDefault),
-      isActive: Boolean(row.isActive),
-      position: parseInt(row.position || '0'),
+      isActive: row.status === 'active',
+      position: row.position ?? 0,
       barcode: row.barcode ?? undefined,
-      externalId: row.externalId ?? undefined,
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

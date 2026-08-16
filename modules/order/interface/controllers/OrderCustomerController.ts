@@ -54,7 +54,7 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  */
 export const getMyOrders = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401, 'order/error');
@@ -83,7 +83,7 @@ export const getMyOrders = async (req: TypedRequest, res: Response): Promise<voi
 export const getOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
     const command = new GetOrderCommand(orderId, undefined, customerId);
     const useCase = new GetOrderUseCase(OrderRepo);
@@ -114,7 +114,7 @@ export const getOrder = async (req: TypedRequest, res: Response): Promise<void> 
 export const getOrderByNumber = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderNumber } = req.params;
-    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
     const command = new GetOrderCommand(undefined, orderNumber, customerId);
     const useCase = new GetOrderUseCase(OrderRepo);
@@ -144,7 +144,7 @@ export const getOrderByNumber = async (req: TypedRequest, res: Response): Promis
  */
 export const createOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
     const body = req.body as {
       items: unknown[];
       shippingAddress: unknown;
@@ -250,7 +250,7 @@ export const cancelOrder = async (req: TypedRequest, res: Response): Promise<voi
     const { orderId } = req.params;
     const body = req.body as { reason?: string };
     const { reason } = body;
-    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401, 'order/error');

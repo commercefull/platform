@@ -7,6 +7,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { randomUUID } from 'node:crypto';
+import { expectStatus } from '../testUtils';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
@@ -64,7 +65,7 @@ describe('Store CRUD Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 404);
       expect(response.data.success).toBe(false);
     });
 
@@ -75,7 +76,7 @@ describe('Store CRUD Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 404);
       expect(response.data.success).toBe(false);
     });
 
@@ -85,20 +86,19 @@ describe('Store CRUD Tests', () => {
         {
           name: `Integration Test Store ${randomUUID().substring(0, 8)}`,
           slug: `int-test-${Date.now()}`,
-          storeType: 'online_store',
+          storeType: 'merchant_store',
+          merchantId: '01a004e6-11d9-7923-b6bd-139f2ba3cd46',
           description: 'Store created by integration test',
           isActive: true,
         },
         { headers: authHeaders() },
       );
 
-      expect([201, 200, 400]).toContain(response.status);
-      if (response.status === 201 || response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toBeDefined();
-        expect(response.data.data).toHaveProperty('storeId');
-        createdStoreId = response.data.data.storeId;
-      }
+      expectStatus(response, 201);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toBeDefined();
+      expect(response.data.data).toHaveProperty('storeId');
+      createdStoreId = response.data.data.storeId;
     });
   });
 
@@ -112,7 +112,7 @@ describe('Store CRUD Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([404, 500]).toContain(response.status);
+      expectStatus(response, 404);
       expect(response.data.success).toBe(false);
     });
 
@@ -150,10 +150,8 @@ describe('Store CRUD Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404, 500]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
   });
 
@@ -167,7 +165,7 @@ describe('Store CRUD Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([404, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
 
     it('should get a store by slug', async () => {
@@ -175,12 +173,10 @@ describe('Store CRUD Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toBeDefined();
-        expect(response.data.data.slug).toBe('active-test-store');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toBeDefined();
+      expect(response.data.data.slug).toBe('active-test-store');
     });
   });
 
@@ -194,10 +190,8 @@ describe('Store CRUD Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404, 500]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
   });
 
@@ -218,11 +212,9 @@ describe('Store CRUD Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400, 500]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toBeDefined();
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toBeDefined();
     });
 
     it('should return error for non-existent store update', async () => {
@@ -232,7 +224,7 @@ describe('Store CRUD Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([404, 400, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -256,10 +248,8 @@ describe('Store CRUD Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400, 500]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should return error for pickup config on non-existent store', async () => {
@@ -269,7 +259,7 @@ describe('Store CRUD Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([404, 400, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -293,10 +283,8 @@ describe('Store CRUD Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400, 500]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should return error for local delivery on non-existent store', async () => {
@@ -306,7 +294,7 @@ describe('Store CRUD Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([404, 400, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -322,16 +310,14 @@ describe('Store CRUD Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 204, 400, 500]).toContain(response.status);
-      if (response.status === 200 || response.status === 204) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
 
       // Verify deletion
       const getResponse = await client.get(`/business/stores/${createdStoreId}`, {
         headers: authHeaders(),
       });
-      expect([404, 500]).toContain(getResponse.status);
+      expectStatus(getResponse, 404);
     });
 
     it('should return error or success for deleting non-existent store', async () => {
@@ -339,7 +325,8 @@ describe('Store CRUD Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 204, 404, 400, 500]).toContain(response.status);
+      // Controller returns 200 (idempotent delete) or 400/404
+      expect([200, 400, 404].includes(response.status)).toBe(true);
     });
   });
 });

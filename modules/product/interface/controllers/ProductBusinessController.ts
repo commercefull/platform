@@ -305,7 +305,7 @@ export const getProductStoreAvailability = async (req: TypedRequest, res: Respon
  */
 export const createProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId;
+    const merchantId = req.user?.merchantId || req.user?.id;
     const body = req.body as CreateProductBody;
     const {
       name,
@@ -983,7 +983,7 @@ export const listCollections = async (req: TypedRequest, res: Response): Promise
  */
 export const createCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId;
+    const merchantId = req.user?.merchantId || req.user?.id;
     const { name, slug, description, imageUrl, isActive, position, addProducts } = req.body as CollectionBody;
     if (!name?.trim()) {
       errorResponse(res, 'name is required', 400);
@@ -1020,7 +1020,7 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
 export const updateCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { collectionId } = req.params;
-    const merchantId = req.user?.merchantId;
+    const merchantId = req.user?.merchantId || req.user?.id;
     const { name, slug, description, imageUrl, isActive, position, addProducts, removeMapIds } = req.body as CollectionBody;
     if (!name?.trim()) {
       errorResponse(res, 'name is required', 400);

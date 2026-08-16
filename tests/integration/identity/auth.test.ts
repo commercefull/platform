@@ -66,9 +66,9 @@ describe('Auth Feature Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty('accessToken');
-      expect(response.data).toHaveProperty('merchant');
-      expect(response.data.merchant).toHaveProperty('id');
-      expect(response.data.merchant).toHaveProperty('email');
+      expect(response.data).toHaveProperty('organization');
+      expect(response.data.organization).toHaveProperty('id');
+      expect(response.data.organization).toHaveProperty('email');
     });
 
     // TODO: Admin login endpoint not implemented separately

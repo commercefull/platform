@@ -216,7 +216,7 @@ describe('Identity Feature Tests', () => {
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
         expect(response.data).toHaveProperty('accessToken');
-        expect(response.data).toHaveProperty('merchant');
+        expect(response.data).toHaveProperty('organization');
 
         merchantToken = response.data.accessToken;
       });
@@ -245,7 +245,7 @@ describe('Identity Feature Tests', () => {
 
         expect(response.status).toBe(201);
         expect(response.data.success).toBe(true);
-        expect(response.data).toHaveProperty('merchant');
+        expect(response.data).toHaveProperty('organization');
         expect(response.data.merchant).toHaveProperty('status', 'pending');
       });
     });
@@ -320,7 +320,7 @@ describe('Identity Feature Tests', () => {
 
   describe('Authorization', () => {
     it('should reject requests without token to protected endpoints', async () => {
-      const response = await client.get('/customer/profile');
+      const response = await client.get('/customer/me');
 
       expect(response.status).toBe(401);
     });

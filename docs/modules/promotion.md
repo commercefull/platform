@@ -77,3 +77,60 @@ The Promotion feature manages discounts, coupons, gift cards, and promotional ca
 | UC-PRO-008 to UC-PRO-013 | `promotion/giftcard.test.ts`          | ✅     |
 | UC-PRO-014 to UC-PRO-015 | `promotion/coupon.test.ts`            | ✅     |
 | UC-PRO-016 to UC-PRO-017 | `promotion/giftcard-customer.test.ts` | ✅     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/business/cart-promotions` | `applyPromotion` | — |
+| GET | `/business/cart-promotions/:id` | `getCartPromotionById` | Cart Promotion routes |
+| PUT | `/business/cart-promotions/:id` | `updateCartPromotion` | — |
+| DELETE | `/business/cart-promotions/:id` | `removePromotion` | — |
+| GET | `/business/cart-promotions/cart/:cartId` | `getPromotionsByCartId` | — |
+| POST | `/business/category-promotions` | `createCategoryPromotion` | — |
+| GET | `/business/category-promotions/:id` | `getCategoryPromotionById` | — |
+| PUT | `/business/category-promotions/:id` | `updateCategoryPromotion` | — |
+| DELETE | `/business/category-promotions/:id` | `deleteCategoryPromotion` | — |
+| GET | `/business/category-promotions/active` | `getActiveCategoryPromotions` | Category Promotion routes |
+| GET | `/business/category-promotions/category/:categoryId` | `getPromotionsByCategoryId` | — |
+| GET | `/business/coupons` | `getActiveCoupons` | Coupon routes |
+| POST | `/business/coupons` | `createCoupon` | — |
+| GET | `/business/coupons/:id` | `getCouponById` | — |
+| PUT | `/business/coupons/:id` | `updateCoupon` | — |
+| DELETE | `/business/coupons/:id` | `deleteCoupon` | — |
+| GET | `/business/coupons/:id/usage` | `getCouponUsage` | — |
+| POST | `/business/coupons/calculate` | `calculateCouponDiscount` | — |
+| GET | `/business/coupons/code/:code` | `getCouponByCode` | — |
+| POST | `/business/coupons/validate` | `validateCoupon` | — |
+| GET | `/business/discounts` | `getActiveDiscounts` | Discount routes |
+| POST | `/business/discounts` | `createDiscount` | — |
+| GET | `/business/discounts/:id` | `getDiscountById` | — |
+| PUT | `/business/discounts/:id` | `updateDiscount` | — |
+| DELETE | `/business/discounts/:id` | `deleteDiscount` | — |
+| GET | `/business/discounts/category/:categoryId` | `getDiscountsByCategoryId` | — |
+| GET | `/business/discounts/product/:productId` | `getDiscountsByProductId` | — |
+| GET | `/business/gift-cards` | `getGiftCards` | Gift Card routes |
+| POST | `/business/gift-cards` | `createGiftCard` | — |
+| GET | `/business/gift-cards/:id` | `getGiftCard` | — |
+| POST | `/business/gift-cards/:id/activate` | `activateGiftCard` | — |
+| POST | `/business/gift-cards/:id/cancel` | `cancelGiftCard` | — |
+| POST | `/business/gift-cards/:id/refund` | `refundToGiftCard` | — |
+| GET | `/business/promotions` | `getPromotions` | Promotion routes |
+| POST | `/business/promotions` | `createPromotion` | — |
+| GET | `/business/promotions/:id` | `getPromotionById` | — |
+| PUT | `/business/promotions/:id` | `updatePromotion` | — |
+| DELETE | `/business/promotions/:id` | `deletePromotion` | — |
+| POST | `/business/promotions/:id/activate` | `activatePromotion` | — |
+| POST | `/business/promotions/:id/pause` | `pausePromotion` | — |
+| GET | `/business/promotions/active` | `getActivePromotions` | — |
+| GET | `/customer/active` | `(_req, res) => {
+  res.json({ success: true, message: 'Get a` | — |
+| GET | `/customer/gift-cards/balance/:code` | `checkGiftCardBalance` | Gift Card routes |
+| GET | `/customer/gift-cards/mine` | `getMyGiftCards` | — |
+| POST | `/customer/gift-cards/redeem` | `redeemGiftCard` | — |
+| POST | `/customer/gift-cards/reload` | `reloadGiftCard` | — |
+| POST | `/customer/validate` | `(_req, res) => {
+  res.json({ success: true, message: 'Valid` | Placeholder routes - implement with DDD controllers |
+
+<!-- GENERATED:ENDPOINTS:END -->

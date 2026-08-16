@@ -4,7 +4,7 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../../testUtils';
+import { createTestClient, loginTestAdmin, expectStatus } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID } from '../testUtils';
 
 describe('Merchant: Product Lifecycle', () => {
@@ -288,8 +288,7 @@ describe('Merchant: Product Lifecycle', () => {
         `/business/products/${SEEDED_PRODUCT_1_ID}/store-availability`,
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
-      // 200 if store data exists, 500 if no store/inventory data seeded
-      expect([200, 500]).toContain(res.status);
+      expectStatus(res, 200);
     });
 
     it('should return 404 for non-existent product store availability', async () => {

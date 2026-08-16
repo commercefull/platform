@@ -3,6 +3,7 @@
  * Defines the contract for customer persistence operations
  */
 
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 import { Customer, CustomerAddress } from '../../../../libs/db/types';
 
 export interface CustomerFilters {
@@ -13,22 +14,6 @@ export interface CustomerFilters {
   search?: string;
   createdAfter?: Date;
   createdBefore?: Date;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
-  length: number;
 }
 
 export interface CustomerRepository {

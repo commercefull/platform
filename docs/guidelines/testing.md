@@ -61,7 +61,6 @@ yarn test                                    # Full Jest suite with coverage
 yarn test:unit                               # Unit tests only
 yarn test:int                                # Integration tests only
 npx jest tests/integration/product.test.ts   # Single file
-yarn test:e2e                                # Cypress E2E suite
 ```
 
 ## Discipline

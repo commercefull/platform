@@ -8,7 +8,7 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../../testUtils';
+import { createTestClient, loginTestAdmin, expectStatus } from '../../testUtils';
 import { SEEDED_ATTRIBUTE_COLOR_ID, SEEDED_ATTRIBUTE_SET_APPAREL_ID, SEEDED_ATTRIBUTE_SET_DEFAULT_ID, SEEDED_ATTRIBUTE_SET_ELECTRONICS_ID, SEEDED_ATTRIBUTE_SIZE_ID, SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID, SEEDED_PRODUCT_1_ID } from '../testUtils';
 
 describe('Attribute Set Tests', () => {
@@ -280,7 +280,7 @@ describe('Attribute Set Tests', () => {
         expect(res.data.data.applied).toBe(true);
         expect(res.data.data).toHaveProperty('attributesAssigned');
       } else {
-        expect([400, 500]).toContain(res.status);
+        expectStatus(res, 400);
       }
     });
 
@@ -324,7 +324,7 @@ describe('Attribute Set Tests', () => {
       const res = await client.post(`/business/products/${SEEDED_PRODUCT_1_ID}/apply-attribute-set`, {
         attributeSetId: SEEDED_ATTRIBUTE_SET_DEFAULT_ID,
       });
-      expect([401, 403]).toContain(res.status);
+      expectStatus(res, 401);
     });
   });
 });

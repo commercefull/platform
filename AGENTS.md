@@ -50,9 +50,9 @@ yarn dev                    # Start development server (nodemon)
 ### Access Points
 
 - Admin Panel: `http://localhost:3000/admin`
-- Merchant Dashboard: `http://localhost:3000/merchant`
-- B2B Portal: `http://localhost:3000/b2b`
 - Storefront: `http://localhost:3000`
+- Customer API: `http://localhost:3000/customer`
+- Business API: `http://localhost:3000/business`
 - Health Check: `http://localhost:3000/health`
 
 ## Common Commands
@@ -77,7 +77,6 @@ yarn db:types               # Generate Knex types from DB schema
 yarn test                   # Full Jest suite with coverage
 yarn test:unit              # Unit tests
 yarn test:int               # Integration tests
-yarn test:e2e               # Cypress E2E
 
 # Code Quality
 yarn lint                   # TypeScript check + ESLint
@@ -95,7 +94,7 @@ yarn css:watch              # Watch mode for Tailwind CSS
 
 # Jobs
 yarn job:new:admin          # Create a new admin user
-yarn job:new:merchant       # Create a new merchant
+yarn job:new:organization   # Create a new organization
 yarn job:new:business       # Create a new business
 ```
 

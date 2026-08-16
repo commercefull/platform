@@ -2,6 +2,7 @@
  * User Repository Interface (Identity)
  */
 
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 import { User, UserType, UserStatus } from '../entities/User';
 
 export interface UserFilters {
@@ -9,21 +10,6 @@ export interface UserFilters {
   status?: UserStatus;
   emailVerified?: boolean;
   search?: string;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
 }
 
 export interface UserRepository {

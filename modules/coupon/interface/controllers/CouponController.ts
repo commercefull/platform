@@ -103,6 +103,10 @@ export const validateCoupon = async (req: TypedRequest, res: Response): Promise<
     const useCase = new ValidateCouponUseCase(couponRepository);
     const command = new ValidateCouponCommand(body.code || req.params.code, body.orderValue, body.customerId, body.items);
     const result = await useCase.execute(command);
+    if (!result.valid) {
+      res.status(400).json({ success: false, error: { message: result.error || 'Invalid coupon' } });
+      return;
+    }
     res.json({ success: true, data: result });
   } catch (error: unknown) {
     logger.error('Error:', error);
@@ -147,7 +151,16 @@ export const redeemCoupon = async (req: TypedRequest, res: Response): Promise<vo
 
 export const getCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const coupon = await couponRepository.findById(req.params.couponId);
+    const { couponId } = req.params;
+
+    // Validate UUID format to prevent route collisions (e.g. /coupons/inventory-receipts)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!couponId || !uuidRegex.test(couponId)) {
+      res.status(400).json({ success: false, error: 'Invalid coupon ID format' });
+      return;
+    }
+
+    const coupon = await couponRepository.findById(couponId);
     if (!coupon) {
       res.status(404).json({ success: false, error: 'Coupon not found' });
       return;

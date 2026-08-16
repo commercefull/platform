@@ -10,9 +10,8 @@ import { FulfillmentItem } from '../../domain/entities/FulfillmentItem';
 import {
   IFulfillmentRepository,
   FulfillmentFilters,
-  PaginationOptions,
-  PaginatedResult,
 } from '../../domain/repositories/FulfillmentRepository';
+import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 
 export class FulfillmentRepository implements IFulfillmentRepository {
   // ===== Fulfillment Operations =====
@@ -21,7 +20,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     const props = fulfillment.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<{ fulfillmentId: string }>('SELECT "fulfillmentId" FROM fulfillment WHERE "fulfillmentId" = $1', [
+    const existing = await queryOne<Pick<DbFulfillment, 'fulfillmentId'>>('SELECT "fulfillmentId" FROM fulfillment WHERE "fulfillmentId" = $1', [
       props.fulfillmentId,
     ]);
 
@@ -188,9 +187,8 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 
   async findAll(filters?: FulfillmentFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Fulfillment>> {
-    const page = pagination?.page || 1;
     const limit = pagination?.limit || 20;
-    const offset = (page - 1) * limit;
+    const offset = pagination?.offset || 0;
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
@@ -209,9 +207,10 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     return {
       data,
       total,
-      page,
       limit,
-      totalPages: Math.ceil(total / limit),
+      offset,
+      hasMore: offset + limit < total,
+      length: data.length,
     };
   }
 
@@ -237,7 +236,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     const props = item.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<{ fulfillmentItemId: string }>(
+    const existing = await queryOne<Pick<DbFulfillmentItem, 'fulfillmentItemId'>>(
       'SELECT "fulfillmentItemId" FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1',
       [props.fulfillmentItemId],
     );

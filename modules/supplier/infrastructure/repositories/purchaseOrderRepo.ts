@@ -31,7 +31,7 @@ export interface SupplierPurchaseOrder {
   updatedAt: string;
   poNumber: string;
   supplierId: string;
-  warehouseId: string;
+  distributionWarehouseId: string;
   status: SupplierPurchaseOrderStatus;
   orderType: SupplierPurchaseOrderType;
   priority: SupplierPurchaseOrderPriority;
@@ -172,7 +172,7 @@ export class SupplierPurchaseOrderRepo {
   async findByWarehouseId(warehouseId: string, limit: number = 50, offset: number = 0): Promise<SupplierPurchaseOrder[]> {
     const results = await query<SupplierPurchaseOrder[]>(
       `SELECT * FROM "supplierPurchaseOrder" 
-       WHERE "warehouseId" = $1 
+       WHERE "distributionWarehouseId" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
       [warehouseId, limit, offset],
@@ -230,7 +230,7 @@ export class SupplierPurchaseOrderRepo {
 
     const result = await queryOne<SupplierPurchaseOrder>(
       `INSERT INTO "supplierPurchaseOrder" (
-        "poNumber", "supplierId", "warehouseId", "status", "orderType", "priority",
+        "poNumber", "supplierId", "distributionWarehouseId", "status", "orderType", "priority",
         "orderDate", "expectedDeliveryDate", "deliveryDate", "shippingMethod",
         "trackingNumber", "carrierName", "paymentTerms", "currency",
         "subtotal", "tax", "shipping", "discount", "total",
@@ -243,7 +243,7 @@ export class SupplierPurchaseOrderRepo {
       [
         poNumber,
         params.supplierId,
-        params.warehouseId,
+        params.distributionWarehouseId,
         params.status || 'draft',
         params.orderType || 'standard',
         params.priority || 'normal',
@@ -436,6 +436,11 @@ export class SupplierPurchaseOrderRepo {
    */
   async createItem(params: SupplierPurchaseOrderItemCreateParams): Promise<SupplierPurchaseOrderItem> {
     const now = unixTimestamp();
+    const quantity = params.quantity;
+    const unitCost = params.unitCost;
+    const tax = params.tax || 0;
+    const discount = params.discount || 0;
+    const total = params.total ?? quantity * unitCost + tax - discount;
 
     const result = await queryOne<SupplierPurchaseOrderItem>(
       `INSERT INTO "supplierPurchaseOrderItem" (
@@ -457,12 +462,12 @@ export class SupplierPurchaseOrderRepo {
         params.supplierSku || null,
         params.name,
         params.description || null,
-        params.quantity,
+        quantity,
         params.receivedQuantity || 0,
-        params.unitCost,
-        params.tax || 0,
-        params.discount || 0,
-        params.total,
+        unitCost,
+        tax,
+        discount,
+        total,
         params.status || 'pending',
         params.expectedDeliveryDate || null,
         params.notes || null,

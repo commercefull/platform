@@ -4,6 +4,7 @@
  */
 
 import { Router } from 'express';
+import { isCustomerLoggedIn } from '../../../../libs/auth';
 import {
   // Browse
   getAvailableSubscriptionProducts,
@@ -39,14 +40,14 @@ router.get('/subscriptions/plans/:planId', getSubscriptionPlanDetails);
 // ============================================================================
 
 // List and view subscriptions
-router.get('/subscriptions/mine', getMySubscriptions);
-router.get('/subscriptions/mine/:id', getMySubscription);
+router.get('/subscriptions/mine', isCustomerLoggedIn, getMySubscriptions);
+router.get('/subscriptions/mine/:id', isCustomerLoggedIn, getMySubscription);
 
 // Create subscription
-router.post('/subscriptions/subscribe', createSubscription);
+router.post('/subscriptions/subscribe', isCustomerLoggedIn, createSubscription);
 
 // Manage subscription
-router.put('/subscriptions/mine/:id', updateMySubscription);
+router.put('/subscriptions/mine/:id', isCustomerLoggedIn, updateMySubscription);
 router.post('/subscriptions/mine/:id/change-plan', changePlan);
 router.post('/subscriptions/mine/:id/pause', pauseMySubscription);
 router.post('/subscriptions/mine/:id/resume', resumeMySubscription);

@@ -87,7 +87,7 @@ export const listFees = async (req: Request, res: Response): Promise<void> => {
 
 export const getSettings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id;
+    const merchantId = req.user?.merchantId || req.user?.id || req.user?._id;
     if (!merchantId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -102,7 +102,7 @@ export const getSettings = async (req: Request, res: Response): Promise<void> =>
 
 export const updateSettings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id;
+    const merchantId = req.user?.merchantId || req.user?.id || req.user?._id;
     if (!merchantId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -131,7 +131,7 @@ export const updateSettings = async (req: Request, res: Response): Promise<void>
 
 export const getBalance = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id;
+    const merchantId = req.user?.merchantId || req.user?.id || req.user?._id;
     if (!merchantId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -152,7 +152,7 @@ export const getBalance = async (req: Request, res: Response): Promise<void> => 
 
 export const listReports = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id;
+    const merchantId = req.user?.merchantId || req.user?.id || req.user?._id;
     if (!merchantId) {
       errorResponse(res, 'Authentication required', 401);
       return;
@@ -167,7 +167,7 @@ export const listReports = async (req: Request, res: Response): Promise<void> =>
 
 export const getReport = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id;
+    const merchantId = req.user?.merchantId || req.user?.id || req.user?._id;
     if (!merchantId) {
       errorResponse(res, 'Authentication required', 401);
       return;

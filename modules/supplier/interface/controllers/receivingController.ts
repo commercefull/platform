@@ -78,7 +78,7 @@ export const createReceivingRecord = async (req: TypedRequest, res: Response): P
   try {
     const {
       supplierPurchaseOrderId,
-      warehouseId,
+      distributionWarehouseId,
       supplierId,
       status,
       receivedDate,
@@ -93,7 +93,7 @@ export const createReceivingRecord = async (req: TypedRequest, res: Response): P
 
     // Validate required fields
     const errors: string[] = [];
-    if (!warehouseId) errors.push('warehouseId is required');
+    if (!distributionWarehouseId) errors.push('distributionWarehouseId is required');
     if (!supplierId) errors.push('supplierId is required');
     if (!items || !Array.isArray(items) || items.length === 0) errors.push('items array is required and must not be empty');
 
@@ -105,7 +105,7 @@ export const createReceivingRecord = async (req: TypedRequest, res: Response): P
     // Create receiving record
     const recordParams: SupplierReceivingRecordCreateParams = {
       supplierPurchaseOrderId,
-      warehouseId,
+      distributionWarehouseId,
       supplierId,
       status,
       receivedDate,

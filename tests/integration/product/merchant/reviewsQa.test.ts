@@ -12,7 +12,7 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin, loginTestUser } from '../../testUtils';
+import { createTestClient, loginTestAdmin, loginTestUser, expectStatus } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID, SEEDED_REVIEW_1_ID } from '../testUtils';
 
 describe('Reviews & Q&A', () => {
@@ -133,8 +133,7 @@ describe('Reviews & Q&A', () => {
         { isHelpful: 'yes' },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
-      // 400 if customerId is in token, 401 if token lacks customerId claim
-      expect([400, 401]).toContain(res.status);
+      expectStatus(res, 400);
     });
 
     it('should record a vote when authenticated', async () => {
@@ -147,8 +146,7 @@ describe('Reviews & Q&A', () => {
         { isHelpful: true },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
-      // 200 on success, 400 on duplicate, 401 if token lacks customerId claim
-      expect([200, 400, 401]).toContain(res.status);
+      expectStatus(res, 200);
     });
   });
 
@@ -319,8 +317,7 @@ describe('Reviews & Q&A', () => {
         `/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media?reviewId=${SEEDED_REVIEW_1_ID}`,
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
-      // 200 if media exists, 500 if repo errors on unseeded media data
-      expect([200, 500]).toContain(res.status);
+      expectStatus(res, 200);
     });
 
     it('should return 404 when deleting non-existent review media', async () => {

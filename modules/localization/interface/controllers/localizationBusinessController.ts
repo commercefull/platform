@@ -181,7 +181,7 @@ export const createLocale = async (req: TypedRequest<Record<string, string>, unk
     if ((error as Error).message.includes('already exists')) {
       errorResponse(res, (error as Error).message, 409);
     } else {
-      errorResponse(res, 'Failed to create locale');
+      errorResponse(res, `Failed to create locale: ${(error as Error).message}`);
     }
   }
 };

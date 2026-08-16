@@ -85,3 +85,33 @@ Total Tax = Sum of all item taxes
 | UC-TAX-006 to UC-TAX-010 | `tax/taxCategories.test.ts`     | ✅     |
 | UC-TAX-011 to UC-TAX-014 | `tax/taxZones.test.ts`             | ✅     |
 | UC-TAX-015 to UC-TAX-016 | `tax/taxCalculation.test.ts`    | ✅     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/business/tax/categories` | `getAllTaxCategories` | -------------------- Tax Category Routes -------------------- |
+| POST | `/business/tax/categories` | `createTaxCategory` | — |
+| GET | `/business/tax/categories/:id` | `getTaxCategory` | — |
+| PUT | `/business/tax/categories/:id` | `updateTaxCategory` | — |
+| DELETE | `/business/tax/categories/:id` | `deleteTaxCategory` | — |
+| GET | `/business/tax/rates` | `getAllTaxRates` | -------------------- Tax Rate Routes -------------------- |
+| POST | `/business/tax/rates` | `createTaxRate` | — |
+| GET | `/business/tax/rates/:id` | `getTaxRate` | — |
+| PUT | `/business/tax/rates/:id` | `updateTaxRate` | — |
+| DELETE | `/business/tax/rates/:id` | `deleteTaxRate` | — |
+| GET | `/business/tax/zones` | `getAllTaxZones` | -------------------- Tax Zone Routes -------------------- |
+| POST | `/business/tax/zones` | `createTaxZone` | — |
+| GET | `/business/tax/zones/:id` | `getTaxZoneById` | — |
+| PUT | `/business/tax/zones/:id` | `updateTaxZone` | — |
+| DELETE | `/business/tax/zones/:id` | `deleteTaxZone` | — |
+| POST | `/customer/tax/calculate` | `calculateTaxForLineItem` | Public tax calculation endpoints |
+| POST | `/customer/tax/calculate/basket/:basketId` | `isCustomerLoggedIn` | Protected routes require authentication |
+| GET | `/customer/tax/categories/:code` | `getTaxCategoryByCode` | — |
+| GET | `/customer/tax/exemption/:customerId` | `isCustomerLoggedIn` | Customer exemption check (requires authentication) |
+| GET | `/customer/tax/rates` | `getTaxRates` | Public tax information endpoints |
+| GET | `/customer/tax/settings/:merchantId` | `getCustomerTaxSettings` | NEW: Get public tax settings for storefront |
+| POST | `/customer/tax/zones/find` | `findTaxZoneForAddress` | NEW: Tax zone finder endpoint |
+
+<!-- GENERATED:ENDPOINTS:END -->

@@ -9,9 +9,8 @@ import {
   GdprDataRequestRepository,
   GdprCookieConsentRepository,
   GdprRequestFilters,
-  PaginationOptions,
-  PaginatedResult,
 } from '../../domain/repositories/GdprRepository';
+import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 import { GdprDataRequest, GdprRequestType, GdprRequestStatus } from '../../domain/entities/GdprDataRequest';
 import { GdprCookieConsent } from '../../domain/entities/GdprCookieConsent';
 
@@ -90,6 +89,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
       limit,
       offset,
       hasMore: offset + limit < total,
+      length: (rows || []).length,
     };
   }
 
@@ -394,6 +394,7 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
       limit,
       offset,
       hasMore: offset + limit < total,
+      length: (rows || []).length,
     };
   }
 

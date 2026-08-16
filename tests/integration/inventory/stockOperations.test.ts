@@ -7,6 +7,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { randomUUID } from 'node:crypto';
+import { expectStatus } from '../testUtils';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
@@ -110,7 +111,7 @@ describe('Inventory Stock Operations Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([404, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -126,7 +127,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
 
     it('should create a store-type inventory location with address', async () => {
@@ -143,14 +144,14 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([201, 200, 400, 500]).toContain(response.status);
+      expectStatus(response, 201);
     });
 
     it('should create a legacy inventory location with SKU', async () => {
       const response = await client.post(
         '/business/inventory/locations',
         {
-          distributionWarehouseId: randomUUID(),
+          distributionWarehouseId: '0193b000-0000-7000-8000-000000000002',
           productId: TEST_PRODUCT_1_ID,
           sku: `TEST-SKU-${Date.now()}`,
           quantity: 100,
@@ -159,7 +160,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([201, 200, 400, 500]).toContain(response.status);
+      expectStatus(response, 201);
     });
   });
 
@@ -175,7 +176,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 404, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
 
     it('should reject adjust with invalid location ID', async () => {
@@ -185,7 +186,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([404, 400, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -201,7 +202,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 404, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
 
     it('should reject reserve with non-positive quantity', async () => {
@@ -211,7 +212,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 404, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
   });
 
@@ -227,7 +228,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 404, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
 
     it('should reject release with non-positive quantity', async () => {
@@ -237,7 +238,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 404, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
   });
 
@@ -314,7 +315,7 @@ describe('Inventory Stock Operations Tests', () => {
       const createRes = await client.post(
         '/business/inventory/locations',
         {
-          distributionWarehouseId: randomUUID(),
+          distributionWarehouseId: '0193b000-0000-7000-8000-000000000002',
           productId: TEST_PRODUCT_1_ID,
           sku: `LIFECYCLE-${Date.now()}`,
           quantity: 100,
@@ -364,13 +365,13 @@ describe('Inventory Stock Operations Tests', () => {
         { quantity: 200, minimumStockLevel: 20 },
         { headers: authHeaders() },
       );
-      expect([200, 400, 500]).toContain(updateRes.status);
+      expectStatus(updateRes, 200);
 
       // Delete location
       const deleteRes = await client.delete(`/business/inventory/locations/${locationId}`, {
         headers: authHeaders(),
       });
-      expect([200, 400, 500]).toContain(deleteRes.status);
+      expectStatus(deleteRes, 200);
     });
   });
 
@@ -386,7 +387,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([404, 400, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -400,7 +401,7 @@ describe('Inventory Stock Operations Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 204, 404, 400, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -416,7 +417,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
 
     it('should reject transfer with same store', async () => {
@@ -430,7 +431,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
   });
 
@@ -478,7 +479,7 @@ describe('Inventory Stock Operations Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([404, 400, 500]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -494,7 +495,7 @@ describe('Inventory Stock Operations Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 404, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
   });
 });

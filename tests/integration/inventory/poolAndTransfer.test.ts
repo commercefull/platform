@@ -7,6 +7,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { randomUUID } from 'node:crypto';
+import { expectStatus } from '../testUtils';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
@@ -52,7 +53,7 @@ describe('Inventory Pool & Transfer Tests', () => {
       const itemData = {
         productId: '00000000-0000-0000-0000-000000000001',
         sku: `TEST-ITEM-${Date.now()}`,
-        warehouseId: 'default-warehouse',
+        warehouseId: '0193b000-0000-7000-8000-000000000002',
         quantity: 50,
         reservedQuantity: 0,
         reorderPoint: 10,
@@ -65,11 +66,9 @@ describe('Inventory Pool & Transfer Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400, 500]).toContain(response.status);
-      if (response.status === 201 || response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toBeDefined();
-      }
+      expectStatus(response, 201);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toBeDefined();
     });
 
     it('should reject missing required fields', async () => {
@@ -121,24 +120,22 @@ describe('Inventory Pool & Transfer Tests', () => {
     it('should look up an inventory item by SKU', async () => {
       const response = await client.get('/business/inventory/items/lookup', {
         headers: authHeaders(),
-        params: { sku: 'TEST-SKU-001', warehouseId: 'default-warehouse' },
+        params: { sku: 'TEST-SKU-001', warehouseId: '0193b000-0000-7000-8000-000000000002' },
       });
 
-      expect([200, 404, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toBeDefined();
-        expect(response.data.data).toHaveProperty('sku');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toBeDefined();
+      expect(response.data.data).toHaveProperty('sku');
     });
 
     it('should return 404 for non-existent item', async () => {
       const response = await client.get('/business/inventory/items/lookup', {
         headers: authHeaders(),
-        params: { sku: `NONEXISTENT-${Date.now()}`, warehouseId: 'default-warehouse' },
+        params: { sku: `NONEXISTENT-${Date.now()}`, warehouseId: '0193b000-0000-7000-8000-000000000002' },
       });
 
-      expect([404, 200, 400]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -162,15 +159,15 @@ describe('Inventory Pool & Transfer Tests', () => {
       const response = await client.post(
         '/business/inventory/transfer',
         {
-          sourceLocationId: 'same-loc',
-          destinationLocationId: 'same-loc',
+          sourceLocationId: '00000000-0000-0000-0000-000000000099',
+          destinationLocationId: '00000000-0000-0000-0000-000000000099',
           items: [{ productId: '00000000-0000-0000-0000-000000000001', quantity: 5 }],
           reason: 'test',
         },
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
       expect(response.data.success).toBe(false);
     });
   });
@@ -191,7 +188,7 @@ describe('Inventory Pool & Transfer Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
       expect(response.data.success).toBe(false);
     });
 
@@ -206,7 +203,7 @@ describe('Inventory Pool & Transfer Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
       expect(response.data.success).toBe(false);
     });
   });
@@ -233,12 +230,10 @@ describe('Inventory Pool & Transfer Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([201, 200]).toContain(response.status);
-      if (response.status === 201 || response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toBeDefined();
-        poolId = response.data.data?.inventoryPoolId || response.data.data?.poolId;
-      }
+      expectStatus(response, 201);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toBeDefined();
+      poolId = response.data.data?.inventoryPoolId || response.data.data?.poolId;
     });
 
     it('should reject pool creation with missing required fields', async () => {

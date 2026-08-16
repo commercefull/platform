@@ -4,6 +4,7 @@
 
 import { InventoryItem } from '../entities/InventoryItem';
 import { InventoryLocation } from '../entities/Inventory';
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 
 export interface InventoryFilters {
   productId?: string;
@@ -11,21 +12,6 @@ export interface InventoryFilters {
   sku?: string;
   isLowStock?: boolean;
   needsReorder?: boolean;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
 }
 
 export interface InventoryRepository {

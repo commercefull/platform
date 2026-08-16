@@ -57,3 +57,47 @@ The Shipping feature manages carrier integrations, rate calculations, and label 
 | UC-SHP-006               | `shipping/shipping.test.ts` | ✅     |
 | UC-SHP-007 to UC-SHP-009 | —                           | ❌     |
 | UC-SHP-010               | —                           | ❌     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/business/calculate-rates` | `calculateRates` | — |
+| GET | `/business/carriers` | `getCarriers` | — |
+| POST | `/business/carriers` | `createCarrier` | — |
+| GET | `/business/carriers/:id` | `getCarrierById` | — |
+| PUT | `/business/carriers/:id` | `updateCarrier` | — |
+| DELETE | `/business/carriers/:id` | `deleteCarrier` | — |
+| POST | `/business/labels` | `createLabel` | — |
+| GET | `/business/labels/:id` | `getLabel` | — |
+| POST | `/business/labels/:id/void` | `voidLabel` | — |
+| GET | `/business/labels/order/:orderId` | `getLabelsByOrder` | — |
+| GET | `/business/methods` | `getMethods` | — |
+| POST | `/business/methods` | `createMethod` | — |
+| GET | `/business/methods/:id` | `getMethodById` | — |
+| PUT | `/business/methods/:id` | `updateMethod` | — |
+| DELETE | `/business/methods/:id` | `deleteMethod` | — |
+| GET | `/business/packaging-types` | `getPackagingTypes` | — |
+| POST | `/business/packaging-types` | `createPackagingType` | — |
+| GET | `/business/packaging-types/:id` | `getPackagingTypeById` | — |
+| PUT | `/business/packaging-types/:id` | `updatePackagingType` | — |
+| DELETE | `/business/packaging-types/:id` | `deletePackagingType` | — |
+| GET | `/business/rates` | `getRates` | — |
+| POST | `/business/rates` | `createRate` | — |
+| GET | `/business/rates/:id` | `getRateById` | — |
+| PUT | `/business/rates/:id` | `updateRate` | — |
+| DELETE | `/business/rates/:id` | `deleteRate` | — |
+| GET | `/business/track` | `trackShipment` | — |
+| GET | `/business/track/:id` | `trackShipment` | — |
+| GET | `/business/zones` | `getZones` | — |
+| POST | `/business/zones` | `createZone` | — |
+| GET | `/business/zones/:id` | `getZoneById` | — |
+| PUT | `/business/zones/:id` | `updateZone` | — |
+| DELETE | `/business/zones/:id` | `deleteZone` | — |
+| POST | `/customer/calculate-rates` | `calculateRates` | Calculate shipping rates for an order |
+| POST | `/customer/estimate-delivery` | `estimateDelivery` | Estimate delivery time for a shipping method |
+| GET | `/customer/methods` | `getMethods` | Get available shipping methods (for checkout) |
+| GET | `/customer/packaging-types` | `getPackagingTypes` | Get packaging types (for reference) |
+
+<!-- GENERATED:ENDPOINTS:END -->

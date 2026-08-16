@@ -98,3 +98,58 @@ The Payment feature handles all payment processing including transactions, refun
 | UC-PAY-018 | `payment/fraud.test.ts`         | ✅     |
 | UC-PAY-019 | `payment/fraud.test.ts`         | ✅     |
 | UC-PAY-020 | `payment/fraud.test.ts`         | ✅     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/business/fraud/blacklist` | `getBlacklist` | — |
+| POST | `/business/fraud/blacklist` | `addToBlacklist` | — |
+| DELETE | `/business/fraud/blacklist/:id` | `removeFromBlacklist` | — |
+| GET | `/business/fraud/checks` | `getFraudChecks` | — |
+| GET | `/business/fraud/checks/:id` | `getFraudCheck` | — |
+| POST | `/business/fraud/checks/:id/review` | `reviewFraudCheck` | — |
+| GET | `/business/fraud/reviews` | `getPendingReviews` | — |
+| GET | `/business/fraud/rules` | `getFraudRules` | Fraud Prevention routes |
+| POST | `/business/fraud/rules` | `createFraudRule` | — |
+| GET | `/business/fraud/rules/:id` | `getFraudRule` | — |
+| PUT | `/business/fraud/rules/:id` | `updateFraudRule` | — |
+| DELETE | `/business/fraud/rules/:id` | `deleteFraudRule` | — |
+| GET | `/business/gateways` | `listGateways` | ============================================================================ Gateway Routes ============================================================================ |
+| POST | `/business/gateways` | `createGateway` | — |
+| GET | `/business/gateways/:gatewayId` | `getGateway` | — |
+| PUT | `/business/gateways/:gatewayId` | `updateGateway` | — |
+| DELETE | `/business/gateways/:gatewayId` | `deleteGateway` | — |
+| GET | `/business/method-configs` | `listMethodConfigs` | ============================================================================ Method Config Routes ============================================================================ |
+| POST | `/business/method-configs` | `createMethodConfig` | — |
+| GET | `/business/method-configs/:methodConfigId` | `getMethodConfig` | — |
+| PUT | `/business/method-configs/:methodConfigId` | `updateMethodConfig` | — |
+| DELETE | `/business/method-configs/:methodConfigId` | `deleteMethodConfig` | — |
+| GET | `/business/payment/balance` | `getBalance` | ============================================================================ Balance Routes ============================================================================ |
+| GET | `/business/payment/disputes` | `listDisputes` | ============================================================================ Dispute Routes ============================================================================ |
+| POST | `/business/payment/disputes` | `listDisputes` | — |
+| GET | `/business/payment/disputes/:disputeId` | `getDispute` | — |
+| PATCH | `/business/payment/disputes/:disputeId` | `updateDisputeStatus` | — |
+| GET | `/business/payment/fees` | `listFees` | ============================================================================ Fee Routes ============================================================================ |
+| GET | `/business/payment/reports` | `listReports` | ============================================================================ Report Routes ============================================================================ |
+| GET | `/business/payment/settings` | `getSettings` | ============================================================================ Settings Routes ============================================================================ |
+| POST | `/business/payment/settings` | `updateSettings` | — |
+| GET | `/business/transactions` | `listTransactions` | ============================================================================ Transaction Routes ============================================================================ |
+| POST | `/business/transactions` | `initiatePayment` | — |
+| GET | `/business/transactions/:transactionId` | `getTransaction` | — |
+| DELETE | `/business/transactions/:transactionId` | `deleteTransaction` | — |
+| POST | `/business/transactions/:transactionId/refund` | `processRefund` | — |
+| GET | `/business/transactions/:transactionId/refunds` | `getRefunds` | — |
+| GET | `/customer/payment-methods` | `listStoredMethods` | — |
+| POST | `/customer/payment-methods` | `saveStoredMethod` | — |
+| DELETE | `/customer/payment-methods/:methodId` | `deleteStoredMethod` | — |
+| POST | `/customer/payment-methods/:methodId/default` | `setDefaultMethod` | — |
+| GET | `/customer/payment/methods` | `getPaymentMethods` | Get available payment methods
+GET /payments/methods |
+| GET | `/customer/payment/orders/:orderId` | `getTransactionByOrder` | Get transactions for an order
+GET /payments/orders/:orderId |
+| GET | `/customer/payment/transactions` | `getMyTransactions` | Get my transactions
+GET /payments/transactions |
+
+<!-- GENERATED:ENDPOINTS:END -->

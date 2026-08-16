@@ -13,14 +13,14 @@ export type ProductReviewVoteCreateParams = Omit<ProductReviewVote, 'productRevi
 export class ProductReviewVoteRepo {
   async findByReview(productReviewId: string): Promise<ProductReviewVote[]> {
     return (
-      (await query<ProductReviewVote[]>(`SELECT * FROM "productReviewVote" WHERE "productReviewId" = $1 ORDER BY "createdAt" DESC`, [
+      (await query<ProductReviewVote[]>(`SELECT "productReviewVoteId", "createdAt", "reviewId" AS "productReviewId", "customerId", "isHelpful" FROM "productReviewVote" WHERE "reviewId" = $1 ORDER BY "createdAt" DESC`, [
         productReviewId,
       ])) || []
     );
   }
 
   async findByCustomer(productReviewId: string, customerId: string): Promise<ProductReviewVote | null> {
-    return queryOne<ProductReviewVote>(`SELECT * FROM "productReviewVote" WHERE "productReviewId" = $1 AND "customerId" = $2`, [
+    return queryOne<ProductReviewVote>(`SELECT "productReviewVoteId", "createdAt", "reviewId" AS "productReviewId", "customerId", "isHelpful" FROM "productReviewVote" WHERE "reviewId" = $1 AND "customerId" = $2`, [
       productReviewId,
       customerId,
     ]);
@@ -29,11 +29,11 @@ export class ProductReviewVoteRepo {
   async create(params: ProductReviewVoteCreateParams): Promise<ProductReviewVote | null> {
     const now = new Date();
     return queryOne<ProductReviewVote>(
-      `INSERT INTO "productReviewVote" ("productReviewId", "customerId", "isHelpful", "createdAt")
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO "productReviewVote" ("reviewId", "customerId", "sessionId", "isHelpful", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6)
        ON CONFLICT DO NOTHING
-       RETURNING *`,
-      [params.productReviewId, params.customerId, params.isHelpful, now],
+       RETURNING "productReviewVoteId", "createdAt", "reviewId" AS "productReviewId", "customerId", "isHelpful"`,
+      [params.productReviewId, params.customerId, params.customerId || 'anonymous', params.isHelpful, now, now],
     );
   }
 
@@ -43,7 +43,7 @@ export class ProductReviewVoteRepo {
          COUNT(*) FILTER (WHERE "isHelpful" = true) AS helpful,
          COUNT(*) FILTER (WHERE "isHelpful" = false) AS unhelpful
        FROM "productReviewVote"
-       WHERE "productReviewId" = $1`,
+       WHERE "reviewId" = $1`,
       [productReviewId],
     );
     return {

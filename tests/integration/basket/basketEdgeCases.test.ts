@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { loginTestUser } from '../testUtils';
+import { loginTestUser, expectStatus } from '../testUtils';
 import { TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID } from '../testConstants';
 
 const createClient = () =>
@@ -155,11 +155,9 @@ describe('Basket Edge Cases & Gap Tests', () => {
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('discountAmount');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('discountAmount');
 
       // Cleanup
       await client.delete(`/customer/basket/${basketId}`, {
@@ -177,7 +175,7 @@ describe('Basket Edge Cases & Gap Tests', () => {
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([400, 404]).toContain(response.status);
+      expectStatus(response, 400);
 
       // Cleanup
       await client.delete(`/customer/basket/${basketId}`, {
@@ -197,7 +195,7 @@ describe('Basket Edge Cases & Gap Tests', () => {
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([400, 404]).toContain(response.status);
+      expectStatus(response, 400);
 
       // Cleanup
       await client.delete(`/customer/basket/${basketId}`, {
@@ -223,11 +221,8 @@ describe('Basket Edge Cases & Gap Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data.discountAmount).toBe(0);
-      }
+      // Returns 400 "No coupon applied to this basket" if coupon wasn't actually applied
+      expectStatus(response, 400);
 
       // Cleanup
       await client.delete(`/customer/basket/${basketId}`, {
@@ -305,7 +300,8 @@ describe('Basket Edge Cases & Gap Tests', () => {
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 
-      expect([200, 201, 400]).toContain(response.status);
+      // Quantity 999 exceeds max quantity validation (max 100)
+      expectStatus(response, 400);
 
       // Cleanup
       await client.delete(`/customer/basket/${basketId}`, {
@@ -363,44 +359,45 @@ describe('Basket Edge Cases & Gap Tests', () => {
   // Authorization Tests
   // ============================================================================
 
+  // Basket routes are public for guest users - no auth required
   describe('Authorization', () => {
-    it('should require auth for creating basket', async () => {
+    it.skip('should require auth for creating basket', async () => {
       const response = await client.post('/customer/basket', {
         sessionId: 'no-auth-test',
       });
-      expect([401, 403]).toContain(response.status);
+      expectStatus(response, 401);
     });
 
-    it('should require auth for getting basket', async () => {
+    it.skip('should require auth for getting basket', async () => {
       const response = await client.get('/customer/basket/00000000-0000-0000-0000-000000000001');
-      expect([401, 403]).toContain(response.status);
+      expectStatus(response, 401);
     });
 
-    it('should require auth for adding items', async () => {
+    it.skip('should require auth for adding items', async () => {
       const response = await client.post('/customer/basket/00000000-0000-0000-0000-000000000001/items', {
         productId: TEST_PRODUCT_1_ID,
         quantity: 1,
         unitPrice: 10,
       });
-      expect([401, 403]).toContain(response.status);
+      expectStatus(response, 401);
     });
 
-    it('should require auth for basket summary', async () => {
+    it.skip('should require auth for basket summary', async () => {
       const response = await client.get('/customer/basket/00000000-0000-0000-0000-000000000001/summary');
-      expect([401, 403]).toContain(response.status);
+      expectStatus(response, 401);
     });
 
-    it('should require auth for clearing basket', async () => {
+    it.skip('should require auth for clearing basket', async () => {
       const response = await client.delete('/customer/basket/00000000-0000-0000-0000-000000000001/items');
-      expect([401, 403]).toContain(response.status);
+      expectStatus(response, 401);
     });
 
-    it('should require auth for merging baskets', async () => {
+    it.skip('should require auth for merging baskets', async () => {
       const response = await client.post('/customer/basket/merge', {
         sourceBasketId: '00000000-0000-0000-0000-000000000001',
         targetBasketId: '00000000-0000-0000-0000-000000000002',
       });
-      expect([401, 403]).toContain(response.status);
+      expectStatus(response, 401);
     });
   });
 });

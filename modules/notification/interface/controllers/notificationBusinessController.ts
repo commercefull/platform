@@ -360,7 +360,7 @@ export const listWebhooks = async (req: UserRequest, res: Response): Promise<voi
  */
 export const createWebhook = async (req: UserRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId;
+    const merchantId = req.user?.merchantId || req.user?.id;
     const { url, secret, events } = req.body as CreateWebhookBody;
     const useCase = new ManageNotificationWebhookUseCase();
     const result = await useCase.execute(new ManageNotificationWebhookCommand('create', merchantId, undefined, url, secret, events));

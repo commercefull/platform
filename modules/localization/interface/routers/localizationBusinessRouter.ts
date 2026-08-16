@@ -14,8 +14,8 @@ router.get('/locales/default', localizationController.getDefaultLocale);
 router.get('/locales/statistics', localizationController.getLocaleStatistics);
 router.get('/locales/language/:language', localizationController.getLocalesByLanguage);
 router.get('/locales/country/:countryCode', localizationController.getLocalesByCountry);
-router.get('/locales/:id', localizationController.getLocaleById);
 router.get('/locales/code/:code', localizationController.getLocaleByCode);
+router.get('/locales/:id', localizationController.getLocaleById);
 
 router.post('/locales', localizationController.createLocale);
 router.put('/locales/:id', localizationController.updateLocale);

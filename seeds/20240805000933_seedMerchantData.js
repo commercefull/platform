@@ -14,9 +14,7 @@ exports.up = async function (knex) {
       website,
       status,
       "verificationStatus",
-      "businessType",
-      "commissionRate",
-      "payoutSchedule"
+      "businessType"
     )
     VALUES (
       'Sample Merchant',
@@ -28,9 +26,7 @@ exports.up = async function (knex) {
       'https://example.com',
       'active',
       'verified',
-      'llc',
-      10.00,
-      'monthly'
+      'llc'
     )
   `);
 
@@ -67,30 +63,6 @@ exports.up = async function (knex) {
       true
     )
   `);
-
-  await knex.raw(`
-    WITH sample_merchant AS (SELECT "merchantId" FROM merchant WHERE slug = 'sample-merchant')
-    INSERT INTO "merchantContact" (
-      "merchantId",
-      "firstName",
-      "lastName",
-      email,
-      phone,
-      "jobTitle",
-      "isPrimary",
-      department
-    )
-    VALUES (
-      (SELECT "merchantId" FROM sample_merchant),
-      'John',
-      'Doe',
-      'john.doe@example.com',
-      '555-123-4567',
-      'Owner',
-      true,
-      'general'
-    )
-  `);
 };
 
 /**
@@ -98,7 +70,6 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function (knex) {
-  await knex('merchantContact').where('email', 'john.doe@example.com').delete();
   await knex('merchantAddress').where('company', 'Sample Merchant LLC').delete();
   await knex('merchant').where('slug', 'sample-merchant').delete();
 };

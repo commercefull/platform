@@ -125,3 +125,57 @@ The Support feature manages customer service operations including support ticket
 | UC-SUP-013 to UC-SUP-022 | `support/support.test.ts`      | ✅     |
 | UC-SUP-023 to UC-SUP-026 | `support/support.test.ts`      | ✅     |
 | UC-SUP-027 to UC-SUP-041 | `support/support.test.ts`      | ✅     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/business/support/agents` | `getAgents` | — |
+| POST | `/business/support/agents` | `createAgent` | — |
+| GET | `/business/support/agents/:id` | `getAgent` | — |
+| PUT | `/business/support/agents/:id` | `updateAgent` | — |
+| GET | `/business/support/alerts/price` | `getPriceAlerts` | — |
+| POST | `/business/support/alerts/price/notify` | `notifyPriceAlerts` | — |
+| GET | `/business/support/alerts/stock` | `getStockAlerts` | — |
+| POST | `/business/support/alerts/stock/notify` | `notifyStockAlerts` | — |
+| GET | `/business/support/faq/articles` | `getFaqArticles` | — |
+| POST | `/business/support/faq/articles` | `createFaqArticle` | — |
+| GET | `/business/support/faq/articles/:id` | `getFaqArticle` | — |
+| PUT | `/business/support/faq/articles/:id` | `updateFaqArticle` | — |
+| DELETE | `/business/support/faq/articles/:id` | `deleteFaqArticle` | — |
+| POST | `/business/support/faq/articles/:id/publish` | `publishFaqArticle` | — |
+| POST | `/business/support/faq/articles/:id/unpublish` | `unpublishFaqArticle` | — |
+| GET | `/business/support/faq/categories` | `getFaqCategories` | — |
+| POST | `/business/support/faq/categories` | `createFaqCategory` | — |
+| GET | `/business/support/faq/categories/:id` | `getFaqCategory` | — |
+| PUT | `/business/support/faq/categories/:id` | `updateFaqCategory` | — |
+| DELETE | `/business/support/faq/categories/:id` | `deleteFaqCategory` | — |
+| GET | `/business/support/tickets` | `getTickets` | — |
+| GET | `/business/support/tickets/:id` | `getTicket` | — |
+| PUT | `/business/support/tickets/:id` | `updateTicket` | — |
+| POST | `/business/support/tickets/:id/assign` | `assignTicket` | — |
+| POST | `/business/support/tickets/:id/close` | `closeTicket` | — |
+| POST | `/business/support/tickets/:id/escalate` | `escalateTicket` | — |
+| POST | `/business/support/tickets/:id/messages` | `addAgentMessage` | — |
+| POST | `/business/support/tickets/:id/resolve` | `resolveTicket` | — |
+| POST | `/customer/support/alerts/price` | `createPriceAlert` | — |
+| GET | `/customer/support/alerts/price/mine` | `getMyPriceAlerts` | — |
+| DELETE | `/customer/support/alerts/price/mine/:id` | `cancelMyPriceAlert` | — |
+| POST | `/customer/support/alerts/stock` | `createStockAlert` | — |
+| GET | `/customer/support/alerts/stock/mine` | `getMyStockAlerts` | — |
+| DELETE | `/customer/support/alerts/stock/mine/:id` | `cancelMyStockAlert` | — |
+| POST | `/customer/support/faq/articles/:id/feedback` | `submitFaqFeedback` | — |
+| GET | `/customer/support/faq/articles/:slug` | `getFaqArticleBySlug` | — |
+| GET | `/customer/support/faq/articles/popular` | `getPopularFaqArticles` | — |
+| GET | `/customer/support/faq/categories` | `getFaqCategories` | — |
+| GET | `/customer/support/faq/categories/:slug` | `getFaqCategoryBySlug` | — |
+| GET | `/customer/support/faq/categories/featured` | `getFeaturedFaqCategories` | — |
+| GET | `/customer/support/faq/search` | `searchFaq` | — |
+| POST | `/customer/support/tickets` | `createTicket` | — |
+| GET | `/customer/support/tickets/mine` | `getMyTickets` | — |
+| GET | `/customer/support/tickets/mine/:id` | `getMyTicket` | — |
+| POST | `/customer/support/tickets/mine/:id/feedback` | `submitTicketFeedback` | — |
+| POST | `/customer/support/tickets/mine/:id/messages` | `addCustomerMessage` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

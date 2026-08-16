@@ -5,7 +5,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { FulfillmentLocation } from '../../../../libs/db/dataModelTypes';
+import { FulfillmentLocation } from '../../../../libs/db/types';
 
 import { generateUUID } from '../../../../libs/uuid';
 

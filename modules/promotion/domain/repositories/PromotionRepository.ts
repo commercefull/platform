@@ -2,6 +2,7 @@
  * Promotion Repository Interface
  */
 
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 import { Promotion, PromotionStatus, PromotionType } from '../entities/Promotion';
 
 export interface PromotionFilters {
@@ -10,21 +11,6 @@ export interface PromotionFilters {
   merchantId?: string;
   isActive?: boolean;
   search?: string;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
 }
 
 export interface PromotionRepository {

@@ -8,7 +8,7 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../../testUtils';
+import { createTestClient, loginTestAdmin, expectStatus } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID } from '../testUtils';
 
 describe('Download Management', () => {
@@ -179,7 +179,7 @@ describe('Download Management', () => {
   describe('Auth Guards', () => {
     it('should reject download listing without auth', async () => {
       const res = await client.get(`/business/products/${SEEDED_PRODUCT_1_ID}/downloads`);
-      expect([401, 403]).toContain(res.status);
+      expectStatus(res, 401);
     });
 
     it('should reject download creation without auth', async () => {
@@ -187,7 +187,7 @@ describe('Download Management', () => {
         name: 'Test',
         fileUrl: 'https://example.com/file.pdf',
       });
-      expect([401, 403]).toContain(res.status);
+      expectStatus(res, 401);
     });
   });
 });

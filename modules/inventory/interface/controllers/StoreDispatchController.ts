@@ -47,6 +47,12 @@ function respondError(res: Response, message: string, statusCode: number = 500):
   res.status(statusCode).json({ success: false, error: message });
 }
 
+function errorStatus(error: unknown, fallback: number = 400): number {
+  const msg = error instanceof Error ? error.message.toLowerCase() : '';
+  if (msg.includes('not found')) return 404;
+  return fallback;
+}
+
 export const createStoreDispatch = async (req: TypedRequest<Record<string, string>, unknown, CreateDispatchBody>, res: Response): Promise<void> => {
   try {
     const useCase = new CreateStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
@@ -109,7 +115,7 @@ export const approveStoreDispatch = async (req: TypedRequest<Record<string, stri
     respond(res, result);
   } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(res, error instanceof Error ? error.message : 'Failed to approve dispatch', 400);
+    respondError(res, error instanceof Error ? error.message : 'Failed to approve dispatch', errorStatus(error));
   }
 };
 
@@ -124,7 +130,7 @@ export const dispatchFromStore = async (req: TypedRequest<Record<string, string>
     respond(res, result);
   } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(res, error instanceof Error ? error.message : 'Failed to dispatch stock', 400);
+    respondError(res, error instanceof Error ? error.message : 'Failed to dispatch stock', errorStatus(error));
   }
 };
 
@@ -140,7 +146,7 @@ export const receiveStoreDispatch = async (req: TypedRequest<Record<string, stri
     respond(res, result);
   } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(res, error instanceof Error ? error.message : 'Failed to receive dispatch', 400);
+    respondError(res, error instanceof Error ? error.message : 'Failed to receive dispatch', errorStatus(error));
   }
 };
 
@@ -151,6 +157,6 @@ export const cancelStoreDispatch = async (req: TypedRequest<Record<string, strin
     respond(res, result);
   } catch (error: unknown) {
     logger.error('Error:', error);
-    respondError(res, error instanceof Error ? error.message : 'Failed to cancel dispatch', 400);
+    respondError(res, error instanceof Error ? error.message : 'Failed to cancel dispatch', errorStatus(error));
   }
 };

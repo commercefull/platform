@@ -121,6 +121,12 @@ function respondError(res: Response, message: string, statusCode: number = 500):
   res.status(statusCode).json({ success: false, error: message });
 }
 
+function errorStatus(error: unknown, fallback: number = 400): number {
+  const msg = error instanceof Error ? error.message.toLowerCase() : '';
+  if (msg.includes('not found')) return 404;
+  return fallback;
+}
+
 // ============================================================================
 // Inventory Location Controllers
 // ============================================================================
@@ -605,7 +611,7 @@ export const createInventoryItem = async (req: TypedRequest<Record<string, strin
     });
     respond(res, result, 201);
   } catch (error: unknown) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to create inventory item', 400);
+    respondError(res, error instanceof Error ? error.message : "Operation failed", errorStatus(error));
   }
 };
 
@@ -637,7 +643,7 @@ export const createInventoryPool = async (req: TypedRequest<Record<string, strin
     });
     respond(res, result, 201);
   } catch (error: unknown) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to create inventory pool', 400);
+    respondError(res, error instanceof Error ? error.message : "Operation failed", errorStatus(error));
   }
 };
 
@@ -661,7 +667,7 @@ export const allocateFromPool = async (req: TypedRequest<Record<string, string>,
     });
     respond(res, result);
   } catch (error: unknown) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to allocate from pool', 400);
+    respondError(res, error instanceof Error ? error.message : "Operation failed", errorStatus(error));
   }
 };
 
@@ -685,7 +691,7 @@ export const getInventoryItem = async (req: TypedRequest, res: Response): Promis
     }
     respond(res, result.item);
   } catch (error: unknown) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to get inventory item', 400);
+    respondError(res, error instanceof Error ? error.message : "Operation failed", errorStatus(error));
   }
 };
 
@@ -709,7 +715,7 @@ export const listInventoryItems = async (req: TypedRequest, res: Response): Prom
     });
     respond(res, result);
   } catch (error: unknown) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to list inventory items', 400);
+    respondError(res, error instanceof Error ? error.message : "Operation failed", errorStatus(error));
   }
 };
 
@@ -739,7 +745,7 @@ export const transferBetweenStores = async (req: TypedRequest<Record<string, str
     });
     respond(res, result, 201);
   } catch (error: unknown) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to transfer between stores', 400);
+    respondError(res, error instanceof Error ? error.message : "Operation failed", errorStatus(error));
   }
 };
 
@@ -765,7 +771,7 @@ export const confirmReservation = async (req: TypedRequest<Record<string, string
     }
     respond(res, result);
   } catch (error: unknown) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to confirm reservation', 400);
+    respondError(res, error instanceof Error ? error.message : "Operation failed", errorStatus(error));
   }
 };
 
@@ -793,6 +799,6 @@ export const setLowStockThreshold = async (req: TypedRequest<Record<string, stri
     });
     respond(res, result);
   } catch (error: unknown) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to set low stock threshold', 400);
+    respondError(res, error instanceof Error ? error.message : "Operation failed", errorStatus(error));
   }
 };

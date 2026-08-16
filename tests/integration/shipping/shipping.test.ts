@@ -11,6 +11,7 @@ import {
   SEEDED_RATE_IDS,
   SEEDED_PACKAGING_IDS,
 } from './testUtils';
+import { expectStatus } from '../testUtils';
 
 describe('Shipping Feature Tests', () => {
   let client: AxiosInstance;
@@ -93,12 +94,12 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 204]).toContain(response.status);
+      expectStatus(response, 200);
 
       const getResponse = await client.get(`/business/carriers/${testCarrierId}`, {
         headers: authHeaders(),
       });
-      expect([404, 400]).toContain(getResponse.status);
+      expectStatus(getResponse, 404);
     });
 
     it('should return 404 for non-existent carrier', async () => {
@@ -169,7 +170,7 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 204]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 
@@ -195,10 +196,8 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should create a new zone', async () => {
@@ -208,12 +207,10 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400, 500]).toContain(response.status);
-      if (response.status === 201 || response.status === 200) {
-        expect(response.data.success).toBe(true);
-        testZoneId = response.data.data.shippingZoneId;
-        createdResources.zoneIds.push(testZoneId);
-      }
+      expectStatus(response, 201);
+      expect(response.data.success).toBe(true);
+      testZoneId = response.data.data.shippingZoneId;
+      createdResources.zoneIds.push(testZoneId);
     });
 
     it('should update a zone', async () => {
@@ -225,10 +222,8 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should delete a zone', async () => {
@@ -238,7 +233,7 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 204, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 
@@ -252,10 +247,8 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400, 500]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should get seeded UPS Ground US rate by ID', async () => {
@@ -263,10 +256,8 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should filter rates by zone', async () => {
@@ -274,10 +265,8 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400, 500]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
   });
 
@@ -303,10 +292,8 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should create a new packaging type', async () => {
@@ -321,10 +308,8 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400]).toContain(response.status);
-      if (response.status === 201 || response.status === 200) {
-        testPackagingId = response.data.data?.shippingPackagingTypeId;
-      }
+      expectStatus(response, 201);
+      testPackagingId = response.data.data?.shippingPackagingTypeId;
     });
 
     it('should update a packaging type', async () => {
@@ -336,7 +321,7 @@ describe('Shipping Feature Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should delete a packaging type', async () => {
@@ -346,7 +331,7 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 204, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 
@@ -375,7 +360,7 @@ describe('Shipping Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should return empty rates for unsupported destination', async () => {
@@ -433,10 +418,8 @@ describe('Shipping Feature Tests', () => {
         { headers: { 'X-Test-Request': 'true' } },
       );
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should reject estimate without methodId', async () => {
@@ -448,7 +431,7 @@ describe('Shipping Feature Tests', () => {
         { headers: { 'X-Test-Request': 'true' } },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
     });
   });
 

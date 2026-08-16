@@ -1,11 +1,5 @@
 /**
- * Organization Use Cases
- *
- * Barrel export for all organization-related use cases.
+ * Organization Use Cases - Barrel Export
  */
 
 export * from './CreateOrganization';
-export * from './UpdateOrganization';
-export * from './GetOrganization';
-export * from './ListOrganizations';
-export * from './GetOrganizationStores';

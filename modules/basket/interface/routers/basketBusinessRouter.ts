@@ -9,28 +9,28 @@ import * as basketController from '../controllers/BasketController';
 const router = express.Router();
 
 // List/search baskets (admin)
-router.get('/', basketController.getBasket);
+router.get('/basket', basketController.getBasket);
 
 // Get basket by ID
-router.get('/:basketId', basketController.getBasket);
+router.get('/basket/:basketId', basketController.getBasket);
 
 // Get basket summary
-router.get('/:basketId/summary', basketController.getBasketSummary);
+router.get('/basket/:basketId/summary', basketController.getBasketSummary);
 
 // Apply coupon (admin override)
-router.post('/:basketId/coupon', basketController.applyCoupon);
+router.post('/basket/:basketId/coupon', basketController.applyCoupon);
 
 // Remove coupon
-router.delete('/:basketId/coupon', basketController.removeCoupon);
+router.delete('/basket/:basketId/coupon', basketController.removeCoupon);
 
 // Assign basket to customer
-router.post('/:basketId/assign', basketController.assignToCustomer);
+router.post('/basket/:basketId/assign', basketController.assignToCustomer);
 
 // Extend expiration
-router.put('/:basketId/expiration', basketController.extendExpiration);
+router.put('/basket/:basketId/expiration', basketController.extendExpiration);
 
 // Delete basket
-router.delete('/:basketId', basketController.deleteBasket);
+router.delete('/basket/:basketId', basketController.deleteBasket);
 
 export const basketBusinessRouter = router;
 export default router;

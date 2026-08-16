@@ -42,7 +42,7 @@ describe('Organization Feature Tests', () => {
 
   describe('List Organizations', () => {
     it('should list all organizations', async () => {
-      const response = await client.get('/business/organization', {
+      const response = await client.get('/business/organizations', {
         headers: { Authorization: `Bearer ${merchantToken}` },
       });
 
@@ -53,7 +53,7 @@ describe('Organization Feature Tests', () => {
     });
 
     it('should support pagination', async () => {
-      const response = await client.get('/business/organization', {
+      const response = await client.get('/business/organizations', {
         headers: { Authorization: `Bearer ${merchantToken}` },
         params: { page: 1, limit: 10 },
       });
@@ -73,7 +73,7 @@ describe('Organization Feature Tests', () => {
         isActive: true,
       };
 
-      const response = await client.post('/business/organization', orgData, {
+      const response = await client.post('/business/organizations', orgData, {
         headers: { Authorization: `Bearer ${merchantToken}` },
       });
 
@@ -89,7 +89,7 @@ describe('Organization Feature Tests', () => {
 
     it('should require name field', async () => {
       const response = await client.post(
-        '/business/organization',
+        '/business/organizations',
         { description: 'Missing name' },
         { headers: { Authorization: `Bearer ${merchantToken}` } },
       );
@@ -121,7 +121,7 @@ describe('Organization Feature Tests', () => {
     });
 
     it('should return 404 for non-existent organization', async () => {
-      const response = await client.get('/business/organization/00000000-0000-0000-0000-000000000000', {
+      const response = await client.get('/business/organizations/00000000-0000-0000-0000-000000000000', {
         headers: { Authorization: `Bearer ${merchantToken}` },
       });
 
@@ -176,12 +176,12 @@ describe('Organization Feature Tests', () => {
 
   describe('Authorization', () => {
     it('should require auth for listing organizations', async () => {
-      const response = await client.get('/business/organization');
+      const response = await client.get('/business/organizations');
       expect(response.status).toBe(401);
     });
 
     it('should require auth for creating organization', async () => {
-      const response = await client.post('/business/organization', {});
+      const response = await client.post('/business/organizations', {});
       expect(response.status).toBe(401);
     });
   });

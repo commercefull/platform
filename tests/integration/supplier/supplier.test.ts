@@ -8,6 +8,7 @@ import {
   SEEDED_SUPPLIER_IDS,
   SEEDED_WAREHOUSE_ID,
 } from './testUtils';
+import { expectStatus } from '../testUtils';
 
 describe('Supplier Feature Tests', () => {
   let client: AxiosInstance;
@@ -43,13 +44,11 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400]).toContain(response.status);
-      if (response.status === 201 || response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('supplierId');
-        testSupplierId = response.data.data.supplierId;
-        createdResources.supplierIds.push(testSupplierId);
-      }
+      expectStatus(response, 201);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('supplierId');
+      testSupplierId = response.data.data.supplierId;
+      createdResources.supplierIds.push(testSupplierId);
     });
 
     it('should list suppliers', async () => {
@@ -67,11 +66,9 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('supplierId');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('supplierId');
     });
 
     it('should get supplier by code', async () => {
@@ -79,7 +76,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should get supplier statistics', async () => {
@@ -87,10 +84,8 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should update a supplier', async () => {
@@ -102,10 +97,8 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should delete a supplier', async () => {
@@ -115,7 +108,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 204, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should return 404 for non-existent supplier', async () => {
@@ -123,7 +116,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([404, 400]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -154,10 +147,8 @@ describe('Supplier Feature Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should update supplier visibility', async () => {
@@ -169,7 +160,7 @@ describe('Supplier Feature Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should approve a supplier', async () => {
@@ -179,7 +170,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should suspend a supplier', async () => {
@@ -189,7 +180,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 
@@ -219,10 +210,8 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should create a supplier address', async () => {
@@ -234,10 +223,8 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400]).toContain(response.status);
-      if (response.status === 201 || response.status === 200) {
-        testAddressId = response.data.data?.supplierAddressId;
-      }
+      expectStatus(response, 201);
+      testAddressId = response.data.data?.supplierAddressId;
     });
 
     it('should update a supplier address', async () => {
@@ -249,7 +236,7 @@ describe('Supplier Feature Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should delete a supplier address', async () => {
@@ -259,7 +246,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 204, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 
@@ -288,10 +275,8 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should link product to supplier', async () => {
@@ -299,16 +284,16 @@ describe('Supplier Feature Tests', () => {
 
       const linkData = {
         productId: '00000000-0000-0000-0000-000000000001',
-        supplierSku: `SUP-SKU-${Date.now()}`,
-        cost: 15.0,
-        minOrderQuantity: 10,
+        sku: `SUP-SKU-${Date.now()}`,
+        unitCost: 15.0,
+        minimumOrderQuantity: 10,
       };
 
       const response = await client.post(`/business/suppliers/${testSupplierId}/products`, linkData, {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400]).toContain(response.status);
+      expectStatus(response, 201);
     });
   });
 
@@ -340,13 +325,11 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400, 500]).toContain(response.status);
-      if (response.status === 201 || response.status === 200) {
-        expect(response.data.success).toBe(true);
-        testPOId = response.data.data?.purchaseOrder?.supplierPurchaseOrderId
-          || response.data.data?.supplierPurchaseOrderId;
-        if (testPOId) createdResources.poIds.push(testPOId);
-      }
+      expectStatus(response, 201);
+      expect(response.data.success).toBe(true);
+      testPOId = response.data.data?.purchaseOrder?.supplierPurchaseOrderId
+        || response.data.data?.supplierPurchaseOrderId;
+      if (testPOId) createdResources.poIds.push(testPOId);
     });
 
     it('should list purchase orders', async () => {
@@ -354,10 +337,8 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should get a specific purchase order', async () => {
@@ -367,7 +348,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should get purchase orders by supplier', async () => {
@@ -377,7 +358,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should update a purchase order', async () => {
@@ -389,7 +370,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should send a purchase order', async () => {
@@ -399,7 +380,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should approve a purchase order', async () => {
@@ -409,7 +390,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should cancel a purchase order', async () => {
@@ -421,7 +402,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
+      expectStatus(response, 200);
     });
   });
 
@@ -460,7 +441,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 404]).toContain(response.status);
+      expectStatus(response, 200);
     });
 
     it('should add a purchase order item', async () => {
@@ -476,7 +457,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400]).toContain(response.status);
+      expectStatus(response, 201);
     });
   });
 
@@ -490,10 +471,8 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([200, 400]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should return 404 for non-existent receiving record', async () => {
@@ -501,7 +480,7 @@ describe('Supplier Feature Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([404, 400]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 

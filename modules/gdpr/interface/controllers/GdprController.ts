@@ -374,7 +374,7 @@ export const verifyIdentity: AsyncHandler = async (req, res, _next) => {
  */
 export const processExportRequest: AsyncHandler = async (req, res, _next) => {
   try {
-    const adminId = req.user?.userId || req.user?.userId;
+    const adminId = req.user?.userId || req.user?.id || "";
     const gdprService = createGdprService();
 
     const useCase = new ProcessDataRequestUseCase(gdprDataRequestRepo, gdprService);
@@ -394,7 +394,7 @@ export const processExportRequest: AsyncHandler = async (req, res, _next) => {
  */
 export const processDeletionRequest: AsyncHandler = async (req, res, _next) => {
   try {
-    const adminId = req.user?.userId || req.user?.userId;
+    const adminId = req.user?.userId || req.user?.id || "";
     const gdprService = createGdprService();
 
     const useCase = new ProcessDataRequestUseCase(gdprDataRequestRepo, gdprService);
@@ -414,7 +414,7 @@ export const processDeletionRequest: AsyncHandler = async (req, res, _next) => {
  */
 export const rejectRequest: AsyncHandler = async (req, res, _next) => {
   try {
-    const adminId = req.user?.userId || req.user?.userId;
+    const adminId = req.user?.userId || req.user?.id || "";
     const gdprService = createGdprService();
 
     const useCase = new ProcessDataRequestUseCase(gdprDataRequestRepo, gdprService);

@@ -726,18 +726,6 @@ router.delete('/operations/merchants/:merchantId', merchantController.deleteMerc
 router.post('/operations/merchants/:merchantId/approve', merchantController.approveMerchant);
 router.post('/operations/merchants/:merchantId/suspend', merchantController.suspendMerchant);
 
-// Merchant Contacts
-router.get('/operations/merchants/:merchantId/contacts', merchantController.listMerchantContacts);
-router.post('/operations/merchants/:merchantId/contacts', merchantController.addMerchantContact);
-
-// Merchant Verification Documents
-router.get('/operations/merchants/:merchantId/documents', merchantController.listVerificationDocs);
-router.post('/operations/merchants/:merchantId/documents/:docId/status', merchantController.updateDocumentStatus);
-
-// Merchant Reviews
-router.get('/operations/merchants/:merchantId/reviews', merchantController.listMerchantReviews);
-router.post('/operations/merchants/:merchantId/reviews/:reviewId/status', merchantController.updateReviewStatus);
-
 // ============================================================================
 // Media Library Routes
 // ============================================================================

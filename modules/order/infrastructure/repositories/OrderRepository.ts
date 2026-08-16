@@ -8,9 +8,8 @@ import { generateUUID } from '../../../../libs/uuid';
 import {
   OrderRepository as IOrderRepository,
   OrderFilters,
-  PaginationOptions,
-  PaginatedResult,
 } from '../../domain/repositories/OrderRepository';
+import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 import { Order } from '../../domain/entities/Order';
 import { OrderItem } from '../../domain/entities/OrderItem';
 import { OrderAddress } from '../../domain/entities/OrderAddress';
@@ -71,7 +70,7 @@ export class OrderRepo implements IOrderRepository {
       orders.push(this.mapToOrder(row, items, shippingAddress, billingAddress));
     }
 
-    return { data: orders, total, limit, offset, hasMore: offset + orders.length < total };
+    return { data: orders, total, limit, offset, hasMore: offset + orders.length < total, length: orders.length };
   }
 
   async findAll(filters?: OrderFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Order>> {
@@ -100,7 +99,7 @@ export class OrderRepo implements IOrderRepository {
       orders.push(this.mapToOrder(row, items, shippingAddress, billingAddress));
     }
 
-    return { data: orders, total, limit, offset, hasMore: offset + orders.length < total };
+    return { data: orders, total, limit, offset, hasMore: offset + orders.length < total, length: orders.length };
   }
 
   async findByStatus(status: OrderStatus, pagination?: PaginationOptions): Promise<PaginatedResult<Order>> {

@@ -31,7 +31,7 @@ export interface SupplierReceivingItem {
   expectedQuantity?: number;
   receivedQuantity: number;
   rejectedQuantity: number;
-  warehouseBinId?: string;
+  distributionWarehouseBinId?: string;
   lotNumber?: string;
   serialNumbers?: string[];
   expiryDate?: string;
@@ -122,11 +122,12 @@ export class SupplierReceivingItemRepo {
 
   async create(params: SupplierReceivingItemCreateParams): Promise<SupplierReceivingItem> {
     const now = unixTimestamp();
+    const receivedQuantity = params.receivedQuantity ?? params.expectedQuantity ?? 0;
 
     const result = await queryOne<SupplierReceivingItem>(
       `INSERT INTO "supplierReceivingItem" (
         "supplierReceivingRecordId", "supplierPurchaseOrderItemId", "productId", "productVariantId", "sku", "name",
-        "expectedQuantity", "receivedQuantity", "rejectedQuantity", "warehouseBinId", "lotNumber",
+        "expectedQuantity", "receivedQuantity", "rejectedQuantity", "distributionWarehouseBinId", "lotNumber",
         "serialNumbers", "expiryDate", "status", "acceptanceStatus", "inspectionNotes",
         "discrepancyReason", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *`,
@@ -138,9 +139,9 @@ export class SupplierReceivingItemRepo {
         params.sku,
         params.name,
         params.expectedQuantity || null,
-        params.receivedQuantity,
+        receivedQuantity,
         params.rejectedQuantity || 0,
-        params.warehouseBinId || null,
+        params.distributionWarehouseBinId || null,
         params.lotNumber || null,
         params.serialNumbers || null,
         params.expiryDate || null,

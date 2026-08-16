@@ -5,6 +5,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { eventBus } from '../../../libs/events/eventBus';
+import { expectStatus } from '../testUtils';
 
 const createClient = (): AxiosInstance =>
   axios.create({
@@ -63,7 +64,7 @@ describe('Outbound Webhook Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${merchantToken}` } },
       );
-      expect([400, 422]).toContain(resp.status);
+      expectStatus(resp, 400);
     });
   });
 

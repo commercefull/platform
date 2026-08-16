@@ -69,7 +69,7 @@ export const getSubscriptionPlanDetails: AsyncHandler = async (req, res, _next) 
 
 export const getMySubscriptions: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { status, limit, offset } = req.query;
 
     const result = await subscriptionRepo.getCustomerSubscriptions(
@@ -86,7 +86,7 @@ export const getMySubscriptions: AsyncHandler = async (req, res, _next) => {
 
 export const getMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
     if (!subscription || subscription.customerId !== customerId) {
@@ -111,7 +111,7 @@ export const getMySubscription: AsyncHandler = async (req, res, _next) => {
 
 export const createSubscription: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { subscriptionPlanId, productVariantId, quantity, shippingAddressId, billingAddressId, paymentMethodId, customizations } =
       req.body as {
         subscriptionPlanId: string;
@@ -156,7 +156,7 @@ export const createSubscription: AsyncHandler = async (req, res, _next) => {
 
 export const updateMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
     if (!subscription || subscription.customerId !== customerId) {
@@ -185,7 +185,7 @@ export const updateMySubscription: AsyncHandler = async (req, res, _next) => {
 
 export const changePlan: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
     if (!subscription || subscription.customerId !== customerId) {
@@ -217,7 +217,7 @@ export const changePlan: AsyncHandler = async (req, res, _next) => {
 
 export const pauseMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
     if (!subscription || subscription.customerId !== customerId) {
@@ -271,7 +271,7 @@ export const pauseMySubscription: AsyncHandler = async (req, res, _next) => {
 
 export const resumeMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
     if (!subscription || subscription.customerId !== customerId) {
@@ -295,7 +295,7 @@ export const resumeMySubscription: AsyncHandler = async (req, res, _next) => {
 
 export const cancelMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
     if (!subscription || subscription.customerId !== customerId) {
@@ -350,7 +350,7 @@ export const cancelMySubscription: AsyncHandler = async (req, res, _next) => {
 
 export const reactivateMySubscription: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
     if (!subscription || subscription.customerId !== customerId) {
@@ -384,7 +384,7 @@ export const reactivateMySubscription: AsyncHandler = async (req, res, _next) =>
 
 export const getMySubscriptionOrders: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
     if (!subscription || subscription.customerId !== customerId) {
@@ -407,7 +407,7 @@ export const getMySubscriptionOrders: AsyncHandler = async (req, res, _next) => 
 
 export const skipNextDelivery: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
     if (!subscription || subscription.customerId !== customerId) {

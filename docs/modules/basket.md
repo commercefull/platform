@@ -68,3 +68,49 @@ The Basket (Shopping Cart) feature manages customer shopping sessions, allowing 
 | UC-BSK-008 | `basket/basket.test.ts` | 🟡     |
 | UC-BSK-009 | `basket/basket.test.ts` | ❌     |
 | UC-BSK-010 | `basket/basket.test.ts` | ❌     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/business/` | `getBasket` | List/search baskets (admin) |
+| GET | `/business/:basketId` | `getBasket` | Get basket by ID |
+| DELETE | `/business/:basketId` | `deleteBasket` | Delete basket |
+| POST | `/business/:basketId/assign` | `assignToCustomer` | Assign basket to customer |
+| POST | `/business/:basketId/coupon` | `applyCoupon` | Apply coupon (admin override) |
+| DELETE | `/business/:basketId/coupon` | `removeCoupon` | Remove coupon |
+| PUT | `/business/:basketId/expiration` | `extendExpiration` | Extend expiration |
+| GET | `/business/:basketId/summary` | `getBasketSummary` | Get basket summary |
+| POST | `/customer/basket` | `getOrCreateBasket` | Get or create basket for current user/session
+POST /basket |
+| GET | `/customer/basket/:basketId` | `getBasket` | Get basket by ID
+GET /basket/:basketId |
+| DELETE | `/customer/basket/:basketId` | `deleteBasket` | Delete basket
+DELETE /basket/:basketId |
+| POST | `/customer/basket/:basketId/assign` | `assignToCustomer` | Assign basket to customer
+POST /basket/:basketId/assign |
+| POST | `/customer/basket/:basketId/coupon` | `applyCoupon` | Apply coupon to basket
+POST /basket/:basketId/coupon |
+| DELETE | `/customer/basket/:basketId/coupon` | `removeCoupon` | Remove coupon from basket
+DELETE /basket/:basketId/coupon |
+| PUT | `/customer/basket/:basketId/expiration` | `extendExpiration` | Extend basket expiration
+PUT /basket/:basketId/expiration |
+| POST | `/customer/basket/:basketId/items` | `addItem` | Add item to basket
+POST /basket/:basketId/items |
+| DELETE | `/customer/basket/:basketId/items` | `clearBasket` | Clear all items from basket
+DELETE /basket/:basketId/items |
+| PATCH | `/customer/basket/:basketId/items/:basketItemId` | `updateItemQuantity` | Update item quantity
+PATCH /basket/:basketId/items/:basketItemId |
+| DELETE | `/customer/basket/:basketId/items/:basketItemId` | `removeItem` | Remove item from basket
+DELETE /basket/:basketId/items/:basketItemId |
+| POST | `/customer/basket/:basketId/items/:basketItemId/gift` | `setItemAsGift` | Set item as gift
+POST /basket/:basketId/items/:basketItemId/gift |
+| GET | `/customer/basket/:basketId/summary` | `getBasketSummary` | Get basket summary (lightweight response)
+GET /basket/:basketId/summary |
+| GET | `/customer/basket/me` | `getMyBasket` | Get current user's basket
+GET /basket/me |
+| POST | `/customer/basket/merge` | `mergeBaskets` | Merge baskets (typically when guest logs in)
+POST /basket/merge |
+
+<!-- GENERATED:ENDPOINTS:END -->

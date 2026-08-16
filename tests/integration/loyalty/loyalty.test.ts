@@ -91,8 +91,8 @@ describe('Loyalty Feature Tests', () => {
 
         expect(response.status).toBe(201);
         expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('loyaltyTierId');
-        testTierId = response.data.data.loyaltyTierId;
+        expect(response.data.data).toHaveProperty('tierId');
+        testTierId = response.data.data.tierId;
       });
 
       it('should require name and pointsThreshold', async () => {
@@ -121,7 +121,7 @@ describe('Loyalty Feature Tests', () => {
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('loyaltyTierId', testTierId);
+        expect(response.data.data).toHaveProperty('tierId', testTierId);
       });
 
       it('should return 404 for non-existent tier', async () => {
@@ -191,8 +191,8 @@ describe('Loyalty Feature Tests', () => {
 
         expect(response.status).toBe(201);
         expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('loyaltyRewardId');
-        testRewardId = response.data.data.loyaltyRewardId;
+        expect(response.data.data).toHaveProperty('rewardId');
+        testRewardId = response.data.data.rewardId;
       });
 
       it('should require name and pointsCost', async () => {
@@ -221,7 +221,7 @@ describe('Loyalty Feature Tests', () => {
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('loyaltyRewardId', testRewardId);
+        expect(response.data.data).toHaveProperty('rewardId', testRewardId);
       });
     });
 

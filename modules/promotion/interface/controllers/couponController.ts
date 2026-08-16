@@ -209,6 +209,14 @@ export const validateCoupon = async (req: TypedRequest<Record<string, string>, u
     // Validate the coupon
     const result = await couponRepo.validate(code, parseFloat(orderTotal), customerId, merchantId);
 
+    if (!result.valid) {
+      res.status(400).json({
+        success: false,
+        data: result,
+      });
+      return;
+    }
+
     res.status(200).json({
       success: true,
       data: result,

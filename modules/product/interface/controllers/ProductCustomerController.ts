@@ -310,7 +310,7 @@ export const getProductReviews = async (req: TypedRequest, res: Response): Promi
 export const createReview = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { rating, title, content, reviewerName, reviewerEmail } = req.body as { rating?: number; title?: string; content?: string; reviewerName?: string; reviewerEmail?: string };
 
     if (!rating || rating < 1 || rating > 5) {
@@ -394,7 +394,7 @@ export const listProductQaCustomer = async (req: TypedRequest, res: Response): P
 export const submitProductQa = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { question, askerName, askerEmail } = req.body as { question?: string; askerName?: string; askerEmail?: string };
 
     if (!question?.trim()) {
@@ -420,7 +420,7 @@ export const submitProductQa = async (req: TypedRequest, res: Response): Promise
 export const voteOnReview = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { reviewId } = req.params;
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { isHelpful } = req.body as { isHelpful?: boolean };
 
     if (!customerId) {

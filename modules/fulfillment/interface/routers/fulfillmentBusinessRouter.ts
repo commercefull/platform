@@ -21,40 +21,40 @@ import {
 const router = Router();
 
 // List all fulfillments (with filters/pagination)
-router.get('/', listFulfillments);
+router.get('/fulfillments', listFulfillments);
 
 // Create fulfillment
-router.post('/', createFulfillment);
+router.post('/fulfillments', createFulfillment);
 
 // List by order
-router.get('/order/:orderId', listFulfillmentsByOrder);
+router.get('/fulfillments/order/:orderId', listFulfillmentsByOrder);
 
 // Get fulfillment by ID
-router.get('/:fulfillmentId', getFulfillment);
+router.get('/fulfillments/:fulfillmentId', getFulfillment);
 
 // Process picking
-router.post('/:fulfillmentId/pick', processPicking);
+router.post('/fulfillments/:fulfillmentId/pick', processPicking);
 
 // Process packing
-router.post('/:fulfillmentId/pack', processPacking);
+router.post('/fulfillments/:fulfillmentId/pack', processPacking);
 
 // Ship order
-router.post('/:fulfillmentId/ship', shipOrder);
+router.post('/fulfillments/:fulfillmentId/ship', shipOrder);
 
 // Mark delivered
-router.post('/:fulfillmentId/deliver', markDelivered);
+router.post('/fulfillments/:fulfillmentId/deliver', markDelivered);
 
 // Cancel fulfillment
-router.post('/:fulfillmentId/cancel', cancelFulfillment);
+router.post('/fulfillments/:fulfillmentId/cancel', cancelFulfillment);
 
 // Update tracking info
-router.put('/:fulfillmentId/tracking', updateTracking);
+router.put('/fulfillments/:fulfillmentId/tracking', updateTracking);
 
 // Initiate return
-router.post('/:fulfillmentId/return', initiateReturn);
+router.post('/fulfillments/:fulfillmentId/return', initiateReturn);
 
 // Assign fulfillment
-router.post('/:fulfillmentId/assign', assignFulfillment);
+router.post('/fulfillments/:fulfillmentId/assign', assignFulfillment);
 
 export const fulfillmentBusinessRouter = router;
 export default router;

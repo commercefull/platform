@@ -10,6 +10,7 @@ import {
   CustomerGroupMembership as DbCustomerGroupMembership,
   CustomerWishlist as DbCustomerWishlist,
   CustomerWishlistItem as DbCustomerWishlistItem,
+  CustomerPasswordReset as DbCustomerPasswordReset,
 } from '../../../../libs/db/types';
 
 // Re-export DB types for use in this feature
@@ -67,7 +68,7 @@ export class CustomerRepo {
   async authenticateCustomer(credentials: CustomerAuthCredentials): Promise<CustomerAuthResult | null> {
     const { email, password } = credentials;
 
-    const customer = await queryOne<{ customerId: string; email: string; password: string; firstName?: string; lastName?: string }>(
+    const customer = await queryOne<Pick<DbCustomer, 'customerId' | 'email' | 'password' | 'firstName' | 'lastName'>>(
       'SELECT "customerId", "email", "password", "firstName", "lastName" FROM "customer" WHERE "email" = $1',
       [email],
     );
@@ -190,7 +191,7 @@ export class CustomerRepo {
     const now = new Date();
 
     await queryOne(
-      `INSERT INTO "customerPasswordReset" ("customerId", "token", "expiresAt", "isUsed", "createdAt", "updatedAt")
+      `INSERT INTO "customerPasswordReset" ("userId", "token", "expiresAt", "isUsed", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, false, $4, $4) RETURNING "customerPasswordResetId"`,
       [customerId, hashedToken, expiresAt, now],
     );
@@ -198,8 +199,8 @@ export class CustomerRepo {
   }
 
   async verifyPasswordResetToken(token: string): Promise<string | null> {
-    const resetRecord = await queryOne<{ customerPasswordResetId: string; customerId: string; token: string }>(
-      `SELECT "customerPasswordResetId", "customerId", "token" FROM "customerPasswordReset"
+    const resetRecord = await queryOne<Pick<DbCustomerPasswordReset, 'customerPasswordResetId' | 'userId' | 'token'>>(
+      `SELECT "customerPasswordResetId", "userId", "token" FROM "customerPasswordReset"
        WHERE "isUsed" = false AND "expiresAt" > $1 ORDER BY "createdAt" DESC LIMIT 1`,
       [new Date()],
     );
@@ -213,12 +214,12 @@ export class CustomerRepo {
       new Date(),
       resetRecord.customerPasswordResetId,
     ]);
-    return resetRecord.customerId;
+    return resetRecord.userId;
   }
 
   async changePassword(customerId: string, newPassword: string): Promise<boolean> {
     const hashedPassword = await this.hashPassword(newPassword);
-    const result = await queryOne<{ customerId: string }>(
+    const result = await queryOne<Pick<DbCustomer, 'customerId'>>(
       'UPDATE "customer" SET "password" = $1, "updatedAt" = $2 WHERE "customerId" = $3 RETURNING "customerId"',
       [hashedPassword, new Date(), customerId],
     );

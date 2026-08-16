@@ -7,6 +7,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { randomUUID } from 'node:crypto';
+import { expectStatus } from '../testUtils';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
@@ -64,13 +65,11 @@ describe('Fulfillment Location & Partner Tests', () => {
           headers: authHeaders(),
         });
 
-        expect([201, 200]).toContain(response.status);
-        if (response.status === 201 || response.status === 200) {
-          expect(response.data.success).toBe(true);
-          expect(response.data.data).toBeDefined();
-          createdLocationId =
-            response.data.data?.fulfillmentLocationId || response.data.data?.id;
-        }
+        expectStatus(response, 201);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toBeDefined();
+        createdLocationId =
+          response.data.data?.fulfillmentLocationId || response.data.data?.id;
       });
 
       it('should reject creation with missing name', async () => {
@@ -80,7 +79,7 @@ describe('Fulfillment Location & Partner Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([400, 500]).toContain(response.status);
+        expectStatus(response, 400);
         expect(response.data.success).toBe(false);
       });
     });
@@ -114,7 +113,7 @@ describe('Fulfillment Location & Partner Tests', () => {
           headers: authHeaders(),
         });
 
-        expect([404, 500]).toContain(response.status);
+        expectStatus(response, 404);
         expect(response.data.success).toBe(false);
       });
 
@@ -141,10 +140,8 @@ describe('Fulfillment Location & Partner Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([200, 404]).toContain(response.status);
-        if (response.status === 200) {
-          expect(response.data.success).toBe(true);
-        }
+        expectStatus(response, 200);
+        expect(response.data.success).toBe(true);
       });
     });
 
@@ -158,10 +155,8 @@ describe('Fulfillment Location & Partner Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([200, 404]).toContain(response.status);
-        if (response.status === 200) {
-          expect(response.data.success).toBe(true);
-        }
+        expectStatus(response, 200);
+        expect(response.data.success).toBe(true);
       });
     });
 
@@ -175,10 +170,8 @@ describe('Fulfillment Location & Partner Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([200, 404]).toContain(response.status);
-        if (response.status === 200) {
-          expect(response.data.success).toBe(true);
-        }
+        expectStatus(response, 200);
+        expect(response.data.success).toBe(true);
       });
     });
 
@@ -234,13 +227,11 @@ describe('Fulfillment Location & Partner Tests', () => {
           headers: authHeaders(),
         });
 
-        expect([201, 200]).toContain(response.status);
-        if (response.status === 201 || response.status === 200) {
-          expect(response.data.success).toBe(true);
-          expect(response.data.data).toBeDefined();
-          createdPartnerId =
-            response.data.data?.fulfillmentPartnerId || response.data.data?.id;
-        }
+        expectStatus(response, 201);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toBeDefined();
+        createdPartnerId =
+          response.data.data?.fulfillmentPartnerId || response.data.data?.id;
       });
 
       it('should reject partner creation with missing name', async () => {
@@ -250,7 +241,7 @@ describe('Fulfillment Location & Partner Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([400, 500]).toContain(response.status);
+        expectStatus(response, 400);
         expect(response.data.success).toBe(false);
       });
     });

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { loginTestUser } from '../testUtils';
+import { loginTestUser, expectStatus } from '../testUtils';
 import { TEST_CHECKOUT_ID, TEST_SHIPPING_ADDRESS, TEST_BILLING_ADDRESS, ADMIN_CREDENTIALS } from '../testConstants';
 
 // Create axios client for tests
@@ -875,7 +875,7 @@ describe('Checkout Gap Tests', () => {
       { firstName: 'Jane', lastName: 'Doe', addressLine1: '123 Main St', city: 'Portland', postalCode: '97201', country: 'US' },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
-    expect([400, 500]).toContain(resp.status);
+    expectStatus(resp, 400);
   });
 
   it('REQ 5.1.1 — GET /customer/checkout/:id for another customer session → 404', async () => {
@@ -894,7 +894,7 @@ describe('Checkout Gap Tests', () => {
       { basketId: '00000000-0000-0000-0000-000000000000' },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
-    expect([400, 404]).toContain(resp.status);
+    expectStatus(resp, 404);
   });
 
   it('REQ 5.2.4 — POST /customer/checkout with empty basket → 400', async () => {

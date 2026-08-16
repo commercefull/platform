@@ -15,7 +15,7 @@ export type ProductReviewMediaCreateParams = Omit<ProductReviewMedia, 'productRe
 export class ProductReviewMediaRepo {
   async findByReview(productReviewId: string): Promise<ProductReviewMedia[]> {
     return (
-      (await query<ProductReviewMedia[]>(`SELECT * FROM "productReviewMedia" WHERE "productReviewId" = $1 ORDER BY "position" ASC`, [
+      (await query<ProductReviewMedia[]>(`SELECT * FROM "productReviewMedia" WHERE "reviewId" = $1 ORDER BY "position" ASC`, [
         productReviewId,
       ])) || []
     );
@@ -24,7 +24,7 @@ export class ProductReviewMediaRepo {
   async create(params: ProductReviewMediaCreateParams): Promise<ProductReviewMedia> {
     const now = new Date();
     const result = await queryOne<ProductReviewMedia>(
-      `INSERT INTO "productReviewMedia" ("productReviewId", "url", "type", "position", "createdAt", "updatedAt")
+      `INSERT INTO "productReviewMedia" ("reviewId", "url", "type", "position", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [params.productReviewId, params.url, params.type, params.position ?? 0, now, now],
     );

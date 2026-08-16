@@ -225,21 +225,8 @@ describe('Basket Feature Tests', () => {
 
   describe('Basket Items API', () => {
     it('should add an item to a basket', async () => {
-      // Create a fresh basket for this test
-      const createResponse = await client.post(
-        '/customer/basket',
-        {
-          sessionId: 'add-item-test-session-' + Date.now(),
-        },
-        {
-          headers: { Authorization: `Bearer ${customerToken}` },
-        },
-      );
-
-      const testBasketId = createResponse.data.data.basketId;
-
       const response = await client.post(
-        `/customer/basket/${testBasketId}/items`,
+        `/customer/basket/${guestBasketId}/items`,
         {
           productId: basketItem1.productId || '00000000-0000-0000-0000-000000000001',
           sku: 'TEST-SKU-001',
@@ -256,7 +243,7 @@ describe('Basket Feature Tests', () => {
       expect(response.data.success).toBe(true);
 
       const basket = response.data.data;
-      expect(basket).toHaveProperty('basketId', testBasketId);
+      expect(basket).toHaveProperty('basketId', guestBasketId);
       expect(basket).toHaveProperty('items');
       expect(Array.isArray(basket.items)).toBe(true);
       expect(basket.items.length).toBeGreaterThan(0);

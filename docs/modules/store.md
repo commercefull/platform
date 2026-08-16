@@ -68,3 +68,28 @@ The Store feature manages store entities for both marketplace (merchant-owned) a
 | UC-STR-010  | `store/hierarchyAndList.test.ts`   | ✅     |
 | UC-STR-011  | `store/store.test.ts`              | ✅     |
 | UC-STR-012  | `store/store.test.ts`              | ✅     |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/customer/stores` | `async (req: TypedRequest, res: Response) => {
+  try {
+    co` | — |
+| GET | `/customer/stores/:storeId` | `async (req: TypedRequest, res: Response) => {
+  try {
+    co` | — |
+| POST | `/stores` | `bind` | Create store |
+| GET | `/stores` | `bind` | List stores with filtering and pagination |
+| GET | `/stores/:storeId` | `bind` | Get store by ID |
+| PUT | `/stores/:storeId` | `bind` | Update store |
+| DELETE | `/stores/:storeId` | `bind` | Delete store |
+| PUT | `/stores/:storeId/local-delivery` | `bind` | Set local delivery zone |
+| PUT | `/stores/:storeId/pickup` | `bind` | Configure store pickup (BOPIS) |
+| GET | `/stores/active` | `bind` | Get active stores |
+| GET | `/stores/business/:businessId` | `bind` | Get stores by business |
+| POST | `/stores/hierarchy` | `bind` | Create store hierarchy |
+| GET | `/stores/slug/:slug` | `bind` | Get store by slug |
+
+<!-- GENERATED:ENDPOINTS:END -->

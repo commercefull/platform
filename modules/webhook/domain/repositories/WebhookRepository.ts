@@ -4,6 +4,7 @@
 
 import { WebhookEndpointProps } from '../entities/WebhookEndpoint';
 import { WebhookDeliveryProps, DeliveryStatus } from '../entities/WebhookDelivery';
+import { PaginationOptions } from 'libs/types/shared';
 
 export interface WebhookEndpointFilters {
   merchantId?: string;
@@ -16,11 +17,6 @@ export interface WebhookDeliveryFilters {
   eventType?: string;
   status?: DeliveryStatus;
   since?: Date;
-}
-
-export interface PaginationOptions {
-  limit: number;
-  offset: number;
 }
 
 export interface WebhookRepositoryInterface {

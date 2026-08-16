@@ -97,7 +97,7 @@ export const getCustomer = async (req: TypedRequest, res: Response): Promise<voi
 
 export const getMyProfile = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -122,7 +122,7 @@ export const getMyProfile = async (req: TypedRequest, res: Response): Promise<vo
 
 export const updateMyProfile = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -155,7 +155,7 @@ export const updateMyProfile = async (req: TypedRequest, res: Response): Promise
 
 export const getAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -174,7 +174,7 @@ export const getAddresses = async (req: TypedRequest, res: Response): Promise<vo
 
 export const addAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -240,7 +240,7 @@ export const addAddress = async (req: TypedRequest, res: Response): Promise<void
 
 export const updateAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     const { addressId } = req.params;
 
     if (!customerId) {
@@ -262,7 +262,7 @@ export const updateAddress = async (req: TypedRequest, res: Response): Promise<v
 
 export const deleteAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     const { addressId } = req.params;
 
     if (!customerId) {
@@ -284,7 +284,7 @@ export const deleteAddress = async (req: TypedRequest, res: Response): Promise<v
 
 export const setDefaultAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     const { addressId } = req.params;
     const { addressType } = req.body as { addressType: 'billing' | 'shipping' };
 
@@ -464,7 +464,7 @@ export const reactivateCustomer = async (req: TypedRequest, res: Response): Prom
 
 export const changePassword = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId || req.user?._id;
+    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;

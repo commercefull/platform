@@ -213,9 +213,9 @@ describe('Support Feature Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('id');
+      expect(response.data.data).toHaveProperty('supportTicketId');
 
-      customerTicketId = response.data.data.id;
+      customerTicketId = response.data.data.supportTicketId || response.data.data.id;
       createdResources.ticketIds.push(customerTicketId);
     });
 
@@ -285,7 +285,7 @@ describe('Support Feature Tests', () => {
       const response = await client.post(
         '/customer/support/alerts/stock',
         {
-          productId: 'prod-001',
+          productId: '10000000-0000-0000-0000-000000000001',
         },
         {
           headers: { Authorization: `Bearer ${customerToken}` },
@@ -299,7 +299,7 @@ describe('Support Feature Tests', () => {
       const response = await client.post(
         '/customer/support/alerts/price',
         {
-          productId: 'prod-001',
+          productId: '10000000-0000-0000-0000-000000000001',
           targetPrice: 50.0,
         },
         {

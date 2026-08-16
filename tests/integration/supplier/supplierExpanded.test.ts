@@ -13,6 +13,7 @@ import {
   SEEDED_SUPPLIER_IDS,
   SEEDED_WAREHOUSE_ID,
 } from './testUtils';
+import { expectStatus } from '../testUtils';
 
 describe('Supplier Expanded Tests', () => {
   let client: AxiosInstance;
@@ -56,11 +57,11 @@ describe('Supplier Expanded Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([201, 200, 400]).toContain(resp.status);
+      expectStatus(resp, 201);
       if (resp.status === 201 || resp.status === 200) {
         expect(resp.data.success).toBe(true);
-        expect(resp.data.data).toHaveProperty('purchaseOrderId');
-        createdResources.poIds.push(resp.data.data.purchaseOrderId);
+        expect(resp.data.data).toHaveProperty('purchaseOrder');
+        createdResources.poIds.push(resp.data.data.purchaseOrder.supplierPurchaseOrderId);
       }
     });
 
@@ -80,7 +81,7 @@ describe('Supplier Expanded Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([400, 404]).toContain(resp.status);
+      expectStatus(resp, 400);
     });
   });
 
@@ -90,7 +91,7 @@ describe('Supplier Expanded Tests', () => {
 
   describe('Receiving', () => {
     it('should list receipts for a warehouse', async () => {
-      const resp = await client.get('/business/inventory-receipts', {
+      const resp = await client.get('/business/receiving', {
         params: { warehouseId: SEEDED_WAREHOUSE_ID },
         headers: authHeaders(),
       });
@@ -106,22 +107,23 @@ describe('Supplier Expanded Tests', () => {
       });
 
       if (poResp.status === 201 || poResp.status === 200) {
-        const poId = poResp.data.data.purchaseOrderId;
+        const poId = poResp.data.data.purchaseOrder.supplierPurchaseOrderId;
         createdResources.poIds.push(poId);
 
         const receiptResp = await client.post(
-          '/business/inventory-receipts',
+          '/business/receiving',
           {
             purchaseOrderId: poId,
-            warehouseId: SEEDED_WAREHOUSE_ID,
+            supplierId: SEEDED_SUPPLIER_IDS.ACME_CORP,
+            distributionWarehouseId: SEEDED_WAREHOUSE_ID,
             items: [
-              { productId: '00000000-0000-0000-0000-000000000001', quantityReceived: 5 },
+              { productId: '00000000-0000-0000-0000-000000000001', sku: 'TEST-SKU-001', name: 'Test Product', receivedQuantity: 5 },
             ],
           },
           { headers: authHeaders() },
         );
 
-        expect([201, 200, 400, 404]).toContain(receiptResp.status);
+        expectStatus(receiptResp, 201);
       }
     });
   });
@@ -163,7 +165,7 @@ describe('Supplier Expanded Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([201, 200, 400]).toContain(resp.status);
+      expectStatus(resp, 201);
     });
   });
 
@@ -188,7 +190,7 @@ describe('Supplier Expanded Tests', () => {
           { headers: authHeaders() },
         );
 
-        expect([200, 400, 404]).toContain(updateResp.status);
+        expectStatus(updateResp, 200);
       }
     });
 
@@ -206,7 +208,7 @@ describe('Supplier Expanded Tests', () => {
         headers: authHeaders(),
       });
 
-      expect([404, 400]).toContain(resp.status);
+      expectStatus(resp, 404);
     });
 
     it('should filter suppliers by status', async () => {

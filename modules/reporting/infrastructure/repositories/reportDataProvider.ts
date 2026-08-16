@@ -268,7 +268,7 @@ async function generateInventoryReport(params: ReportParameters): Promise<Report
         WHEN i."quantity" <= COALESCE(i."minimumStockLevel", 0) THEN 'low_stock'
         ELSE 'in_stock'
       END as "stockStatus"
-     FROM "inventory" i
+     FROM "inventoryLocation" i
      LEFT JOIN "product" p ON i."productId" = p."productId"
      ${whereClause}
      ORDER BY p."name" ASC`,
@@ -281,7 +281,7 @@ async function generateInventoryReport(params: ReportParameters): Promise<Report
       COALESCE(SUM(i."quantity"), 0) as "totalUnits",
       COUNT(CASE WHEN i."quantity" = 0 THEN 1 END) as "outOfStockCount",
       COUNT(CASE WHEN i."quantity" <= COALESCE(i."minimumStockLevel", 0) AND i."quantity" > 0 THEN 1 END) as "lowStockCount"
-     FROM "inventory" i
+     FROM "inventoryLocation" i
      ${whereClause}`,
     values,
   );

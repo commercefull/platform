@@ -2,6 +2,8 @@
  * CreateInventoryItem Use Case
  */
 
+import { generateUUID } from '../../../../libs/uuid';
+
 export interface CreateInventoryItemInput {
   productId: string;
   variantId?: string;
@@ -70,7 +72,7 @@ export class CreateInventoryItemUseCase {
       throw new Error(`Inventory item with SKU ${input.sku} already exists in this warehouse`);
     }
 
-    const inventoryItemId = `inv_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+    const inventoryItemId = generateUUID();
 
     const item = await this.inventoryRepository.create({
       inventoryItemId,

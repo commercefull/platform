@@ -20,7 +20,7 @@ type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => P
 
 export const createTicket: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const body = req.body as {
       orderId?: string;
       email: string;
@@ -35,8 +35,8 @@ export const createTicket: AsyncHandler = async (req, res, _next) => {
     const ticket = await supportRepo.createTicket({
       customerId,
       orderId: body.orderId,
-      email: body.email,
-      name: body.name,
+      email: body.email || req.user?.email || '',
+      name: body.name || req.user?.name || '',
       phone: body.phone,
       subject: body.subject,
       description: body.description,
@@ -67,7 +67,7 @@ export const createTicket: AsyncHandler = async (req, res, _next) => {
 
 export const getMyTickets: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { status, limit, offset } = req.query;
 
     const result = await supportRepo.getTickets(
@@ -84,7 +84,7 @@ export const getMyTickets: AsyncHandler = async (req, res, _next) => {
 
 export const getMyTicket: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const ticket = await supportRepo.getTicket(req.params.id);
 
     if (!ticket || ticket.customerId !== customerId) {
@@ -108,7 +108,7 @@ export const getMyTicket: AsyncHandler = async (req, res, _next) => {
 
 export const addCustomerMessage: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const ticket = await supportRepo.getTicket(req.params.id);
 
     if (!ticket || ticket.customerId !== customerId) {
@@ -141,7 +141,7 @@ export const addCustomerMessage: AsyncHandler = async (req, res, _next) => {
 
 export const submitTicketFeedback: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const ticket = await supportRepo.getTicket(req.params.id);
 
     if (!ticket || ticket.customerId !== customerId) {
@@ -288,7 +288,7 @@ export const submitFaqFeedback: AsyncHandler = async (req, res, _next) => {
 
 export const createStockAlert: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const body = req.body as {
       email?: string;
       phone?: string;
@@ -324,7 +324,7 @@ export const createStockAlert: AsyncHandler = async (req, res, _next) => {
 
 export const getMyStockAlerts: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { status, limit, offset } = req.query;
 
     const result = await alertRepo.getStockAlerts(
@@ -341,7 +341,7 @@ export const getMyStockAlerts: AsyncHandler = async (req, res, _next) => {
 
 export const cancelMyStockAlert: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const alert = await alertRepo.getStockAlert(req.params.id);
 
     if (!alert || alert.customerId !== customerId) {
@@ -364,7 +364,7 @@ export const cancelMyStockAlert: AsyncHandler = async (req, res, _next) => {
 
 export const createPriceAlert: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const body = req.body as {
       email?: string;
       phone?: string;
@@ -410,7 +410,7 @@ export const createPriceAlert: AsyncHandler = async (req, res, _next) => {
 
 export const getMyPriceAlerts: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { status, limit, offset } = req.query;
 
     const result = await alertRepo.getPriceAlerts(
@@ -427,7 +427,7 @@ export const getMyPriceAlerts: AsyncHandler = async (req, res, _next) => {
 
 export const cancelMyPriceAlert: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const alert = await alertRepo.getPriceAlert(req.params.id);
 
     if (!alert || alert.customerId !== customerId) {

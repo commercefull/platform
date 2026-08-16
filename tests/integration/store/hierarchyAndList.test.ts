@@ -6,6 +6,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
+import { expectStatus } from '../testUtils';
 import { randomUUID } from 'node:crypto';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
@@ -223,8 +224,7 @@ describe('Store Hierarchy & List Stores Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
-      expect(response.data.success).toBe(false);
+      expectStatus(response, 400);
     });
 
     it('should reject hierarchy creation when default store not in storeIds', async () => {
@@ -241,7 +241,7 @@ describe('Store Hierarchy & List Stores Tests', () => {
         { headers: authHeaders() },
       );
 
-      expect([400, 500]).toContain(response.status);
+      expectStatus(response, 400);
       expect(response.data.success).toBe(false);
     });
   });

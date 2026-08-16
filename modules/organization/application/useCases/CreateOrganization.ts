@@ -2,52 +2,65 @@
  * CreateOrganization Use Case
  */
 
-import organizationRepo from '../../infrastructure/repositories/organizationRepo';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface CreateOrganizationInput {
   name: string;
-  slug: string;
-  type?: 'single' | 'multi_store' | 'marketplace';
-  settings?: Record<string, unknown>;
+  email: string;
+  phone?: string;
+  businessType?: string;
+  taxId?: string;
+  website?: string;
+  description?: string;
+  logo?: string;
+  password?: string;
 }
 
 export interface CreateOrganizationOutput {
   organizationId: string;
   name: string;
-  slug: string;
-  type: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface CreateOrganizationRepository {
+  findByEmail(email: string): Promise<{ merchantId: string } | null>;
+  create(params: Record<string, unknown>): Promise<{ merchantId: string; name: string; email: string; status: string; createdAt: Date }>;
 }
 
 export class CreateOrganizationUseCase {
+  constructor(private readonly repository: CreateOrganizationRepository) {}
+
   async execute(input: CreateOrganizationInput): Promise<CreateOrganizationOutput> {
-    if (!input.name || !input.slug) {
-      throw new Error('Name and slug are required');
-    }
-
-    // Check slug format
-    const slugRegex = /^[a-z0-9-]+$/;
-    if (!slugRegex.test(input.slug)) {
-      throw new Error('Slug must contain only lowercase letters, numbers, and hyphens');
-    }
-
-    // Check if slug exists
-    const existing = await organizationRepo.findBySlug(input.slug);
+    const existing = await this.repository.findByEmail(input.email);
     if (existing) {
-      throw new Error('Organization with this slug already exists');
+      throw new Error(`Organization with email '${input.email}' already exists`);
     }
 
-    const organization = await organizationRepo.create({
+    const org = await this.repository.create({
       name: input.name,
-      slug: input.slug,
-      type: input.type,
-      settings: input.settings,
+      email: input.email,
+      phone: input.phone,
+      businessType: input.businessType,
+      taxId: input.taxId,
+      website: input.website,
+      description: input.description,
+      logo: input.logo,
+      password: input.password,
+      status: 'pending',
+    });
+
+    eventBus.emit('merchant.created', {
+      organizationId: org.merchantId,
+      name: org.name,
+      email: org.email,
     });
 
     return {
-      organizationId: organization.organizationId,
-      name: organization.name,
-      slug: organization.slug,
-      type: organization.type,
+      organizationId: org.merchantId,
+      name: org.name,
+      status: org.status,
+      createdAt: org.createdAt.toISOString(),
     };
   }
 }

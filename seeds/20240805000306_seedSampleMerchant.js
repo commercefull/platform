@@ -7,7 +7,6 @@ const TEST_MERCHANT_ID = '01911000-0000-7000-8000-000000000001';
 exports.seed = async function (knex) {
   await knex.transaction(async trx => {
     // Delete by ID if exists, or by slug
-    await trx('merchantContact').where('merchantId', TEST_MERCHANT_ID).del();
     await trx('merchantAddress').where('merchantId', TEST_MERCHANT_ID).del();
     await trx('merchant').where('merchantId', TEST_MERCHANT_ID).del();
 
@@ -16,7 +15,6 @@ exports.seed = async function (knex) {
 
     if (merchantIds.length > 0) {
       const ids = merchantIds.map(m => m.merchantId);
-      await trx('merchantContact').whereIn('merchantId', ids).del();
       await trx('merchantAddress').whereIn('merchantId', ids).del();
       await trx('merchant').whereIn('merchantId', ids).del();
     }
@@ -34,8 +32,6 @@ exports.seed = async function (knex) {
         status: 'active',
         verificationStatus: 'verified',
         businessType: 'llc',
-        commissionRate: 10.0,
-        payoutSchedule: 'monthly',
       })
       .returning(['merchantId']);
 
@@ -55,17 +51,6 @@ exports.seed = async function (knex) {
       country: 'US',
       phone: '555-123-4567',
       isVerified: true,
-    });
-
-    await trx('merchantContact').insert({
-      merchantId,
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      phone: '555-123-4567',
-      jobTitle: 'Owner',
-      isPrimary: true,
-      department: 'general',
     });
   });
 };

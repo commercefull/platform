@@ -56,6 +56,7 @@ export interface CreateLoyaltyTierInput {
   name: string;
   description?: string;
   type: string;
+  level?: number;
   pointsThreshold: number;
   multiplier: number;
   benefits?: unknown;
@@ -75,6 +76,7 @@ export interface UpdateLoyaltyTierInput {
 export interface CreateLoyaltyRewardInput {
   name: string;
   description?: string;
+  type?: string;
   pointsCost: number;
   discountAmount?: number;
   discountPercent?: number;
@@ -116,9 +118,9 @@ export class LoyaltyRepo {
   // Tier Management
   // ==========================================================================
 
-  async findTierById(loyaltyTierId: string): Promise<LoyaltyTier | null> {
-    const sql = `SELECT * FROM "loyaltyTier" WHERE "loyaltyTierId" = $1`;
-    return await queryOne<LoyaltyTier>(sql, [loyaltyTierId]);
+  async findTierById(tierId: string): Promise<LoyaltyTier | null> {
+    const sql = `SELECT * FROM "loyaltyTier" WHERE "tierId" = $1`;
+    return await queryOne<LoyaltyTier>(sql, [tierId]);
   }
 
   async findAllTiers(includeInactive: boolean = false): Promise<LoyaltyTier[]> {
@@ -145,7 +147,7 @@ export class LoyaltyRepo {
     const now = new Date();
     const sql = `
       INSERT INTO "loyaltyTier" (
-        "name", "description", "type", "pointsThreshold", "multiplier", 
+        "name", "description", "level", "pointsThreshold", "pointsMultiplier", 
         "benefits", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
@@ -153,9 +155,9 @@ export class LoyaltyRepo {
     const result = await queryOne<LoyaltyTier>(sql, [
       input.name,
       input.description || null,
-      input.type,
+      input.level || 1,
       input.pointsThreshold,
-      input.multiplier,
+      input.multiplier || '1.0',
       input.benefits ? JSON.stringify(input.benefits) : null,
       input.isActive !== false,
       now,
@@ -165,7 +167,7 @@ export class LoyaltyRepo {
     return result;
   }
 
-  async updateTier(loyaltyTierId: string, input: UpdateLoyaltyTierInput): Promise<LoyaltyTier> {
+  async updateTier(tierId: string, input: UpdateLoyaltyTierInput): Promise<LoyaltyTier> {
     const updates: string[] = [];
     const params: unknown[] = [];
     let paramIndex = 1;
@@ -179,7 +181,7 @@ export class LoyaltyRepo {
       params.push(input.description);
     }
     if (input.type !== undefined) {
-      updates.push(`"type" = $${paramIndex++}`);
+      updates.push(`"level" = $${paramIndex++}`);
       params.push(input.type);
     }
     if (input.pointsThreshold !== undefined) {
@@ -187,7 +189,7 @@ export class LoyaltyRepo {
       params.push(input.pointsThreshold);
     }
     if (input.multiplier !== undefined) {
-      updates.push(`"multiplier" = $${paramIndex++}`);
+      updates.push(`"pointsMultiplier" = $${paramIndex++}`);
       params.push(input.multiplier);
     }
     if (input.benefits !== undefined) {
@@ -201,22 +203,22 @@ export class LoyaltyRepo {
 
     updates.push(`"updatedAt" = $${paramIndex++}`);
     params.push(new Date());
-    params.push(loyaltyTierId);
+    params.push(tierId);
 
     const sql = `
       UPDATE "loyaltyTier" 
       SET ${updates.join(', ')}
-      WHERE "loyaltyTierId" = $${paramIndex}
+      WHERE "tierId" = $${paramIndex}
       RETURNING *
     `;
     const result = await queryOne<LoyaltyTier>(sql, params);
-    if (!result) throw new Error(`Loyalty tier ${loyaltyTierId} not found`);
+    if (!result) throw new Error(`Loyalty tier ${tierId} not found`);
     return result;
   }
 
-  async deleteTier(loyaltyTierId: string): Promise<boolean> {
-    const sql = `DELETE FROM "loyaltyTier" WHERE "loyaltyTierId" = $1`;
-    await query(sql, [loyaltyTierId]);
+  async deleteTier(tierId: string): Promise<boolean> {
+    const sql = `DELETE FROM "loyaltyTier" WHERE "tierId" = $1`;
+    await query(sql, [tierId]);
     return true;
   }
 
@@ -341,6 +343,8 @@ export class LoyaltyRepo {
 
   async createTransaction(input: CreateLoyaltyTransactionInput): Promise<LoyaltyTransaction> {
     const now = new Date();
+    // DB constraint only allows 'credit' or 'debit' — map application-level actions
+    const dbAction = input.points >= 0 ? 'credit' : 'debit';
     const sql = `
       INSERT INTO "loyaltyTransaction" (
         "customerId", "orderId", "action", "points", "description", 
@@ -351,7 +355,7 @@ export class LoyaltyRepo {
     const result = await queryOne<LoyaltyTransaction>(sql, [
       input.customerId,
       input.orderId || null,
-      input.action,
+      dbAction,
       input.points,
       input.description || null,
       input.referenceId || null,
@@ -366,9 +370,9 @@ export class LoyaltyRepo {
   // Reward Management
   // ==========================================================================
 
-  async findRewardById(loyaltyRewardId: string): Promise<LoyaltyReward | null> {
-    const sql = `SELECT * FROM "loyaltyReward" WHERE "loyaltyRewardId" = $1`;
-    return await queryOne<LoyaltyReward>(sql, [loyaltyRewardId]);
+  async findRewardById(rewardId: string): Promise<LoyaltyReward | null> {
+    const sql = `SELECT * FROM "loyaltyReward" WHERE "rewardId" = $1`;
+    return await queryOne<LoyaltyReward>(sql, [rewardId]);
   }
 
   async findAllRewards(includeInactive: boolean = false): Promise<LoyaltyReward[]> {
@@ -395,22 +399,18 @@ export class LoyaltyRepo {
     const now = new Date();
     const sql = `
       INSERT INTO "loyaltyReward" (
-        "name", "description", "pointsCost", "discountAmount", "discountPercent",
-        "discountCode", "freeShipping", "productIds", "expiresAt", "isActive",
-        "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        "name", "description", "type", "pointsCost", "value", "valueType",
+        "isActive", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
     const result = await queryOne<LoyaltyReward>(sql, [
       input.name,
       input.description || null,
+      input.type || 'discount',
       input.pointsCost,
-      input.discountAmount || null,
-      input.discountPercent || null,
-      input.discountCode || null,
-      input.freeShipping || false,
-      input.productIds ? JSON.stringify(input.productIds) : JSON.stringify([]),
-      input.expiresAt || null,
+      input.discountAmount ? String(input.discountAmount) : null,
+      input.discountPercent ? 'percent' : 'amount',
       input.isActive !== false,
       now,
       now,
@@ -419,7 +419,7 @@ export class LoyaltyRepo {
     return result;
   }
 
-  async updateReward(loyaltyRewardId: string, input: UpdateLoyaltyRewardInput): Promise<LoyaltyReward> {
+  async updateReward(rewardId: string, input: UpdateLoyaltyRewardInput): Promise<LoyaltyReward> {
     const updates: string[] = [];
     const params: unknown[] = [];
     let paramIndex = 1;
@@ -436,30 +436,6 @@ export class LoyaltyRepo {
       updates.push(`"pointsCost" = $${paramIndex++}`);
       params.push(input.pointsCost);
     }
-    if (input.discountAmount !== undefined) {
-      updates.push(`"discountAmount" = $${paramIndex++}`);
-      params.push(input.discountAmount);
-    }
-    if (input.discountPercent !== undefined) {
-      updates.push(`"discountPercent" = $${paramIndex++}`);
-      params.push(input.discountPercent);
-    }
-    if (input.discountCode !== undefined) {
-      updates.push(`"discountCode" = $${paramIndex++}`);
-      params.push(input.discountCode);
-    }
-    if (input.freeShipping !== undefined) {
-      updates.push(`"freeShipping" = $${paramIndex++}`);
-      params.push(input.freeShipping);
-    }
-    if (input.productIds !== undefined) {
-      updates.push(`"productIds" = $${paramIndex++}`);
-      params.push(JSON.stringify(input.productIds));
-    }
-    if (input.expiresAt !== undefined) {
-      updates.push(`"expiresAt" = $${paramIndex++}`);
-      params.push(input.expiresAt);
-    }
     if (input.isActive !== undefined) {
       updates.push(`"isActive" = $${paramIndex++}`);
       params.push(input.isActive);
@@ -467,22 +443,22 @@ export class LoyaltyRepo {
 
     updates.push(`"updatedAt" = $${paramIndex++}`);
     params.push(new Date());
-    params.push(loyaltyRewardId);
+    params.push(rewardId);
 
     const sql = `
       UPDATE "loyaltyReward" 
       SET ${updates.join(', ')}
-      WHERE "loyaltyRewardId" = $${paramIndex}
+      WHERE "rewardId" = $${paramIndex}
       RETURNING *
     `;
     const result = await queryOne<LoyaltyReward>(sql, params);
-    if (!result) throw new Error(`Loyalty reward ${loyaltyRewardId} not found`);
+    if (!result) throw new Error(`Loyalty reward ${rewardId} not found`);
     return result;
   }
 
-  async deleteReward(loyaltyRewardId: string): Promise<boolean> {
-    const sql = `DELETE FROM "loyaltyReward" WHERE "loyaltyRewardId" = $1`;
-    await query(sql, [loyaltyRewardId]);
+  async deleteReward(rewardId: string): Promise<boolean> {
+    const sql = `DELETE FROM "loyaltyReward" WHERE "rewardId" = $1`;
+    await query(sql, [rewardId]);
     return true;
   }
 
@@ -504,7 +480,7 @@ export class LoyaltyRepo {
     const sql = `
       SELECT * FROM "loyaltyRedemption" 
       WHERE "customerId" = $1 
-      ORDER BY "createdAt" DESC 
+      ORDER BY "redeemedAt" DESC 
       LIMIT $2
     `;
     const results = await query<LoyaltyRedemption[]>(sql, [customerId, limit]);

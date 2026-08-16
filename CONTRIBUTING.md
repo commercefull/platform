@@ -401,7 +401,6 @@ describe('Product API', () => {
 yarn test          # All tests with coverage
 yarn test:unit     # Unit tests only
 yarn test:int      # Integration tests only
-yarn test:e2e      # Cypress E2E tests
 ```
 
 ---

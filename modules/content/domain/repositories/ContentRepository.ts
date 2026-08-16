@@ -4,6 +4,7 @@
  * Defines the contract for Content persistence operations.
  */
 
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 import { ContentPage, ContentStatus } from '../entities/ContentPage';
 
 export interface ContentPageFilters {
@@ -14,19 +15,6 @@ export interface ContentPageFilters {
   author?: string;
   isHomepage?: boolean;
   search?: string;
-}
-
-export interface PaginationOptions {
-  page: number;
-  limit: number;
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
 export interface IContentRepository {

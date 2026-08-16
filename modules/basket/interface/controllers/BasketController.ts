@@ -174,7 +174,7 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  */
 export const getOrCreateBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const body = req.body as GetOrCreateBasketBody;
     const sessionId = req.sessionID || body.sessionId;
     const currency = body.currency || 'USD';
@@ -260,6 +260,11 @@ export const addItem = async (req: TypedRequest, res: Response): Promise<void> =
 
     if (quantity < 1) {
       respondError(req, res, 'Quantity must be at least 1', 400, 'basket/error');
+      return;
+    }
+
+    if (quantity > 100) {
+      respondError(req, res, 'Quantity cannot exceed 100', 400, 'basket/error');
       return;
     }
 
@@ -368,7 +373,7 @@ export const clearBasket = async (req: TypedRequest, res: Response): Promise<voi
  */
 export const getMyBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const sessionId = req.sessionID;
 
     if (!customerId && !sessionId) {

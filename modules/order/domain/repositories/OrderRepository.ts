@@ -9,6 +9,7 @@ import { OrderAddress } from '../entities/OrderAddress';
 import { OrderStatus } from '../valueObjects/OrderStatus';
 import { PaymentStatus } from '../valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../valueObjects/FulfillmentStatus';
+import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
 
 export interface OrderFilters {
   customerId?: string;
@@ -25,21 +26,6 @@ export interface OrderFilters {
   maxAmount?: number;
   tags?: string[];
   search?: string;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
 }
 
 export interface OrderRepository {

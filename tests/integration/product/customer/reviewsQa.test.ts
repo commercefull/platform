@@ -4,7 +4,7 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestUser } from '../../testUtils';
+import { createTestClient, loginTestUser, expectStatus } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID } from '../testUtils';
 
 ;
@@ -105,8 +105,7 @@ describe('Customer: Reviews & Q&A', () => {
         { isHelpful: 'yes' },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
-      // 400 if customerId in token, 401 if token lacks customerId claim
-      expect([400, 401]).toContain(res.status);
+      expectStatus(res, 400);
     });
 
     it('should record vote when authenticated', async () => {
@@ -116,7 +115,7 @@ describe('Customer: Reviews & Q&A', () => {
         { isHelpful: true },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
-      expect([200, 400, 401]).toContain(res.status);
+      expectStatus(res, 200);
     });
   });
 

@@ -3,7 +3,8 @@
  * Lists products with filters and pagination
  */
 
-import { ProductRepository, ProductFilters, PaginationOptions } from '../../domain/repositories/ProductRepository';
+import { ProductRepository, ProductFilters } from '../../domain/repositories/ProductRepository';
+import { PaginationOptions } from 'libs/types/shared';
 import { Product } from '../../domain/entities/Product';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';

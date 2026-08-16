@@ -3,7 +3,8 @@
  * Context-aware product listing that works for both marketplace and multi-store scenarios
  */
 
-import { ProductRepository, PaginationOptions, ProductFilters } from '../../domain/repositories/ProductRepository';
+import { ProductRepository, ProductFilters } from '../../domain/repositories/ProductRepository';
+import { PaginationOptions } from 'libs/types/shared';
 import { Product } from '../../domain/entities/Product';
 import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
 import { StoreRepository } from '../../../store/domain/repositories/StoreRepository';
@@ -107,7 +108,7 @@ export class ListProductsForContextUseCase {
       const organizations = await organizationRepo.findAll();
       const defaultOrg = organizations[0];
       if (defaultOrg) {
-        filters.businessId = defaultOrg.organizationId;
+        filters.businessId = defaultOrg.merchantId;
       }
     }
 

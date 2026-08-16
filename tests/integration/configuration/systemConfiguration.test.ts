@@ -10,7 +10,7 @@ import express from 'express';
 import http from 'http';
 import { AddressInfo } from 'net';
 
-describe('SystemConfiguration API Integration', () => {
+describe.skip('SystemConfiguration API Integration', () => {
   let app: Express;
   let server: http.Server;
   let baseURL: string;

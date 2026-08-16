@@ -54,7 +54,7 @@ export const checkGiftCardBalance: AsyncHandler = async (req, res, _next) => {
 
 export const redeemGiftCard: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { code, amount, orderId } = req.body as RedeemOrReloadBody;
 
     const giftCard = await giftCardRepo.getGiftCardByCode(code);
@@ -75,7 +75,7 @@ export const redeemGiftCard: AsyncHandler = async (req, res, _next) => {
 
 export const getMyGiftCards: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { limit, offset } = req.query;
 
     const result = await giftCardRepo.getGiftCards(
@@ -93,7 +93,7 @@ export const getMyGiftCards: AsyncHandler = async (req, res, _next) => {
 
 export const reloadGiftCard: AsyncHandler = async (req, res, _next) => {
   try {
-    const customerId = req.user?.customerId;
+    const customerId = req.user?.customerId || req.user?.id;
     const { code, amount, orderId } = req.body as RedeemOrReloadBody;
 
     const giftCard = await giftCardRepo.getGiftCardByCode(code);

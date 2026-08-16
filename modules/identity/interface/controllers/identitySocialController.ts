@@ -8,7 +8,7 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { CustomerRepo } from '../../../customer/infrastructure/repositories/customerRepo';
-import { MerchantRepo } from '../../../merchant/infrastructure/repositories/merchantRepo';
+import { OrganizationRepo } from '../../../organization/infrastructure/repositories/organizationRepo';
 import { SocialAccountRepo } from '../../infrastructure/repositories/socialAccountRepo';
 import { SocialProvider, SocialProfileData } from '../../domain/entities/SocialAccount';
 import {
@@ -27,7 +27,7 @@ const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 
 // Repositories
 const customerRepo = new CustomerRepo();
-const merchantRepo = new MerchantRepo();
+const merchantRepo = new OrganizationRepo();
 const socialAccountRepo = new SocialAccountRepo();
 
 // Supported providers
@@ -331,7 +331,7 @@ export async function merchantSocialLogin(req: TypedRequest<Record<string, strin
       }
 
       // Create new merchant (pending approval)
-      merchant = await merchantRepo.createMerchantWithPassword({
+      merchant = await merchantRepo.createWithPassword({
         name: profileData.displayName || `${profileData.firstName} ${profileData.lastName}`.trim() || email.split('@')[0],
         email,
         password: '', // No password for social-only accounts

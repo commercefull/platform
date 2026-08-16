@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { loginTestAdmin } from '../testUtils';
+import { loginTestAdmin, expectStatus } from '../testUtils';
 import { TEST_GUEST_BASKET_ID, CUSTOMER_CREDENTIALS } from '../testConstants';
 
 const createClient = () =>
@@ -121,11 +121,9 @@ describe('Basket Admin/Business API Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('basketId');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('basketId');
     });
 
     it('should get basket summary with admin auth', async () => {
@@ -135,13 +133,11 @@ describe('Basket Admin/Business API Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('basketId');
-        expect(response.data.data).toHaveProperty('itemCount');
-        expect(response.data.data).toHaveProperty('subtotal');
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('basketId');
+      expect(response.data.data).toHaveProperty('itemCount');
+      expect(response.data.data).toHaveProperty('subtotal');
     });
 
     it('should return 404 for non-existent basket', async () => {
@@ -176,10 +172,8 @@ describe('Basket Admin/Business API Tests', () => {
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should remove a coupon from a basket', async () => {
@@ -189,10 +183,8 @@ describe('Basket Admin/Business API Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
     });
 
     it('should reject applying coupon to non-existent basket', async () => {
@@ -204,7 +196,7 @@ describe('Basket Admin/Business API Tests', () => {
         { headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      expect([404, 400]).toContain(response.status);
+      expectStatus(response, 404);
     });
   });
 
@@ -225,10 +217,8 @@ describe('Basket Admin/Business API Tests', () => {
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
 
       // Cleanup
       await client.delete(`/customer/basket/${basketId}`, {
@@ -254,10 +244,8 @@ describe('Basket Admin/Business API Tests', () => {
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
 
-      expect([200, 400, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expectStatus(response, 200);
+      expect(response.data.success).toBe(true);
 
       // Cleanup
       await client.delete(`/customer/basket/${basketId}`, {
@@ -301,13 +289,11 @@ describe('Basket Admin/Business API Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      expect([200, 204, 500]).toContain(response.status);
-      if (response.status === 200 || response.status === 204) {
-        const verifyResponse = await client.get(`/business/basket/${basketId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-        expect(verifyResponse.status).toBe(404);
-      }
+      expectStatus(response, 200);
+      const verifyResponse = await client.get(`/business/basket/${basketId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expectStatus(verifyResponse, 404);
     });
   });
 
