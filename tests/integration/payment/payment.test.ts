@@ -23,7 +23,7 @@ const loginCustomer = async (client: AxiosInstance, email = 'testcustomer@exampl
   return r.data?.accessToken || '';
 };
 
-const loginMerchant = async (client: AxiosInstance): Promise<string> => {
+const loginOrganization = async (client: AxiosInstance): Promise<string> => {
   const r = await client.post(
     '/business/auth/login',
     { email: 'merchant@example.com', password: 'password123' },
@@ -47,7 +47,7 @@ describe('Payment Integration Tests', () => {
   beforeAll(async () => {
     client = createClient();
     customerToken = await loginCustomer(client);
-    adminToken = await loginMerchant(client);
+    adminToken = await loginOrganization(client);
   });
 
   // ============================================================================

@@ -6,6 +6,7 @@
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { NotFoundError } from '../../../../libs/errors';
 
 // ============================================================================
 // Command
@@ -25,7 +26,7 @@ export class RemoveCouponUseCase {
   async execute(command: RemoveCouponCommand): Promise<CheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
     if (!session) {
-      throw new Error('Checkout session not found');
+      throw new NotFoundError('Checkout session not found');
     }
 
     const previousCoupon = session.couponCode;

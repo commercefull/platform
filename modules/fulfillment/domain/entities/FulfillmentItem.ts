@@ -175,6 +175,8 @@ export class FulfillmentItem {
   }
 }
 
+import { randomUUID } from 'node:crypto';
+
 function generateFulfillmentItemId(): string {
-  return `fli_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+  return randomUUID();
 }

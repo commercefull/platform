@@ -6,7 +6,7 @@ exports.up = function (knex) {
   return knex.schema
     .createTable('analyticsSalesDaily', table => {
       table.uuid('analyticsSalesDailyId').primary().defaultTo(knex.raw('uuidv7()'));
-      table.uuid('merchantId').references('merchantId').inTable('merchant');
+      table.uuid('organizationId').references('organizationId').inTable('organization');
       table.date('date').notNullable();
       table.string('channel').defaultTo('all'); // web, mobile, api, pos, all
       table.string('currency', 3).defaultTo('USD');
@@ -43,10 +43,10 @@ exports.up = function (knex) {
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
 
-      table.unique(['merchantId', 'date', 'channel', 'currency']);
+      table.unique(['organizationId', 'date', 'channel', 'currency']);
     })
     .then(() => knex.raw('CREATE INDEX ON "analyticsSalesDaily"("date")'))
-    .then(() => knex.raw('CREATE INDEX ON "analyticsSalesDaily"("merchantId", "date")'));
+    .then(() => knex.raw('CREATE INDEX ON "analyticsSalesDaily"("organizationId", "date")'));
 };
 
 /**

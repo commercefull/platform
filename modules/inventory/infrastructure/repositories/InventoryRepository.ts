@@ -163,14 +163,29 @@ export class InventoryRepository {
     const movementId = generateUUID();
     const now = new Date().toISOString();
 
+    const typeCodeMap: Record<string, string> = {
+      inbound: 'RECEIVE',
+      outbound: 'SHIP',
+      transfer: 'TRANSFER_OUT',
+      adjustment: 'ADJUST_UP',
+      count: 'ADJUST_UP',
+    };
+    const typeCode = typeCodeMap[movement.type] || 'ADJUST_UP';
+    const typeRow = await queryOne<{ inventoryTransactionTypeId: string }>(
+      `SELECT "inventoryTransactionTypeId" FROM "inventoryTransactionType" WHERE code = $1`,
+      [typeCode],
+    );
+    const typeId = typeRow?.inventoryTransactionTypeId;
+
     await query(
       `INSERT INTO "inventoryTransaction" (
-        "inventoryTransactionId", "distributionWarehouseId", "productId", "productVariantId", sku,
+        "inventoryTransactionId", "typeId", "distributionWarehouseId", "productId", "productVariantId", sku,
         quantity, "previousQuantity", "newQuantity", reason,
         "referenceId", "referenceType", notes, "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
       [
         movementId,
+        typeId,
         movement.locationId,
         movement.productId,
         movement.variantId || null,
@@ -521,6 +536,8 @@ export class InventoryRepository {
   }): Promise<Inventory & { createdAt: Date }> {
     const now = new Date().toISOString();
     const available = input.quantity - (input.reservedQuantity || 0);
+    // If binLocation is a human-readable code (e.g., 'A-1-2'), do not coerce into UUID column
+    const binId = input.binLocation && /^[0-9a-fA-F-]{36}$/.test(input.binLocation) ? input.binLocation : null;
 
     await query(
       `INSERT INTO "inventoryLocation" (
@@ -538,7 +555,7 @@ export class InventoryRepository {
         input.reservedQuantity || 0,
         available,
         input.reorderPoint || 0,
-        input.binLocation || null,
+        binId,
         now,
         now,
       ],

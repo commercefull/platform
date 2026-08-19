@@ -242,13 +242,13 @@ exports.seed = async function (knex) {
   ]);
 
   // Check if test merchant exists before seeding tax settings
-  const merchantExists = await knex('merchant').where('merchantId', TEST_MERCHANT_ID).first();
+  const merchantExists = await knex('organization').where('organizationId', TEST_MERCHANT_ID).first();
 
   if (merchantExists) {
     await knex('taxSettings').insert([
       {
         taxSettingsId: TAX_SETTINGS_IDS.DEFAULT,
-        merchantId: TEST_MERCHANT_ID,
+        organizationId: TEST_MERCHANT_ID,
         calculationMethod: 'unitBased',
         pricesIncludeTax: false,
         displayPricesWithTax: false,

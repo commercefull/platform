@@ -6,6 +6,7 @@
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { BadRequestError, NotFoundError } from '../../../../libs/errors';
 
 // ============================================================================
 // Command
@@ -28,14 +29,14 @@ export class SetPaymentMethodUseCase {
   async execute(command: SetPaymentMethodCommand): Promise<CheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
     if (!session) {
-      throw new Error('Checkout session not found');
+      throw new NotFoundError('Checkout session not found');
     }
 
     const methods = await this.checkoutRepository.getAvailablePaymentMethods();
     const selectedMethod = methods.find(m => m.id === command.paymentMethodId);
 
     if (!selectedMethod) {
-      throw new Error('Invalid payment method');
+      throw new BadRequestError('Invalid payment method');
     }
 
     session.setPaymentMethod(command.paymentMethodId);

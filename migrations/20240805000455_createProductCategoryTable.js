@@ -18,7 +18,7 @@ exports.up = function (knex) {
     t.string('metaKeywords', 255);
     t.boolean('includeInMenu').notNullable().defaultTo(true);
     t.integer('productCount').notNullable().defaultTo(0);
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('organizationId').references('organizationId').inTable('organization');
     t.boolean('isGlobal').notNullable().defaultTo(true);
     t.text('customLayout');
     t.jsonb('displaySettings');
@@ -34,7 +34,7 @@ exports.up = function (knex) {
     t.index('isActive');
     t.index('isFeatured');
     t.index('includeInMenu');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isGlobal');
   });
 };

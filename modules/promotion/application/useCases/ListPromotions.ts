@@ -11,7 +11,7 @@ export class ListPromotionsCommand {
     public readonly filters?: {
       status?: string | string[];
       isActive?: boolean;
-      merchantId?: string;
+      organizationId?: string;
     },
     public readonly pagination?: {
       limit?: number;
@@ -40,7 +40,7 @@ export class ListPromotionsUseCase {
       {
         status: command.filters?.status as PromotionStatus[] | PromotionStatus | undefined,
         isActive: command.filters?.isActive,
-        merchantId: command.filters?.merchantId,
+        organizationId: command.filters?.organizationId,
       },
       {
         limit: command.pagination?.limit || 50,

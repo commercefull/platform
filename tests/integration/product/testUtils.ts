@@ -205,7 +205,7 @@ export async function setupProductTests() {
   let adminToken = '';
 
   try {
-    // Use merchant login for business routes
+    // Use organization login for business routes
     adminToken = await loginTestAdmin(client);
   } catch {}
 

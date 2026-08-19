@@ -25,7 +25,7 @@ export class MarkDeliveredUseCase {
       throw new Error(`Fulfillment not found: ${input.fulfillmentId}`);
     }
 
-    // Mark as delivered
+    // Allow deliver after ship; if not shipped yet but in transit/out_for_delivery, also allow
     fulfillment.markDelivered();
 
     // Save

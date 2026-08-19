@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('taxSettingsId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').unique();
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').unique();
     t.enum('calculationMethod', ['unitBased', 'itemBased']).notNullable().defaultTo('unitBased');
     t.boolean('pricesIncludeTax').notNullable().defaultTo(false);
     t.boolean('displayPricesWithTax').notNullable().defaultTo(false);
@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.enum('taxProvider', ['internal', 'external']).defaultTo('internal');
     t.jsonb('taxProviderSettings');
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('calculationMethod');
     t.index('taxBasedOn');
     t.index('shippingTaxClass');

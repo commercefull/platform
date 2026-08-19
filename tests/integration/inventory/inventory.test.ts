@@ -19,7 +19,7 @@ const TEST_MERCHANT = {
 };
 
 let client: AxiosInstance;
-let merchantToken: string;
+let organizationToken: string;
 
 // ============================================================================
 // Setup
@@ -35,9 +35,9 @@ beforeAll(async () => {
     },
   });
 
-  // Login as merchant
+  // Login as organization
   const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, { headers: { 'X-Test-Request': 'true' } });
-  merchantToken = loginResponse.data.accessToken;
+  organizationToken = loginResponse.data.accessToken;
 });
 
 // ============================================================================
@@ -53,7 +53,7 @@ describe('Inventory Feature Tests', () => {
     describe('GET /business/inventory/locations', () => {
       it('should list inventory locations with pagination', async () => {
         const response = await client.get('/business/inventory/locations', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
           params: { limit: 10, offset: 0 },
         });
 
@@ -67,7 +67,7 @@ describe('Inventory Feature Tests', () => {
 
       it('should filter locations by warehouse', async () => {
         const response = await client.get('/business/inventory/locations', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
           params: { warehouseId: '00000000-0000-0000-0000-000000000001' },
         });
 
@@ -86,7 +86,7 @@ describe('Inventory Feature Tests', () => {
     describe('GET /business/inventory/locations/low-stock', () => {
       it('should return low stock items', async () => {
         const response = await client.get('/business/inventory/locations/low-stock', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -98,7 +98,7 @@ describe('Inventory Feature Tests', () => {
     describe('GET /business/inventory/locations/out-of-stock', () => {
       it('should return out of stock items', async () => {
         const response = await client.get('/business/inventory/locations/out-of-stock', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -118,7 +118,7 @@ describe('Inventory Feature Tests', () => {
     beforeAll(async () => {
       // Get a test location
       const response = await client.get('/business/inventory/locations', {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
         params: { limit: 1 },
       });
 
@@ -136,7 +136,7 @@ describe('Inventory Feature Tests', () => {
         const response = await client.post(
           `/business/inventory/locations/${testLocationId}/adjust`,
           { quantityChange: 10, reason: 'Test adjustment' },
-          { headers: { Authorization: `Bearer ${merchantToken}` } },
+          { headers: { Authorization: `Bearer ${organizationToken}` } },
         );
 
         expect(response.status).toBe(200);
@@ -152,7 +152,7 @@ describe('Inventory Feature Tests', () => {
         const response = await client.post(
           `/business/inventory/locations/${testLocationId}/adjust`,
           { reason: 'Missing quantity' },
-          { headers: { Authorization: `Bearer ${merchantToken}` } },
+          { headers: { Authorization: `Bearer ${organizationToken}` } },
         );
 
         expect(response.status).toBe(400);
@@ -169,7 +169,7 @@ describe('Inventory Feature Tests', () => {
         const response = await client.post(
           `/business/inventory/locations/${testLocationId}/reserve`,
           { quantity: 5 },
-          { headers: { Authorization: `Bearer ${merchantToken}` } },
+          { headers: { Authorization: `Bearer ${organizationToken}` } },
         );
 
         expect(response.status).toBe(200);
@@ -185,7 +185,7 @@ describe('Inventory Feature Tests', () => {
         const response = await client.post(
           `/business/inventory/locations/${testLocationId}/reserve`,
           { quantity: -5 },
-          { headers: { Authorization: `Bearer ${merchantToken}` } },
+          { headers: { Authorization: `Bearer ${organizationToken}` } },
         );
 
         expect(response.status).toBe(400);
@@ -202,7 +202,7 @@ describe('Inventory Feature Tests', () => {
         const response = await client.post(
           `/business/inventory/locations/${testLocationId}/release`,
           { quantity: 2 },
-          { headers: { Authorization: `Bearer ${merchantToken}` } },
+          { headers: { Authorization: `Bearer ${organizationToken}` } },
         );
 
         expect(response.status).toBe(200);
@@ -219,7 +219,7 @@ describe('Inventory Feature Tests', () => {
     describe('GET /business/inventory/transactions/types', () => {
       it('should return transaction types', async () => {
         const response = await client.get('/business/inventory/transactions/types', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(200);

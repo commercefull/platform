@@ -11,9 +11,8 @@ export interface StoreCreatedEvent {
   storeId: string;
   name: string;
   slug: string;
-  storeType: 'merchant_store' | 'business_store';
-  merchantId?: string;
-  businessId?: string;
+  storeType: 'merchant_store' | 'organization_store';
+  organizationId?: string;
 }
 
 export interface StoreUpdatedEvent {

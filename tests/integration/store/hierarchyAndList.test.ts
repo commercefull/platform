@@ -17,7 +17,7 @@ const TEST_MERCHANT = {
 };
 
 let client: AxiosInstance;
-let merchantToken: string;
+let organizationToken: string;
 
 beforeAll(async () => {
   client = axios.create({
@@ -34,10 +34,10 @@ beforeAll(async () => {
   const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, {
     headers: { 'X-Test-Request': 'true' },
   });
-  merchantToken = loginResponse.data?.accessToken || '';
+  organizationToken = loginResponse.data?.accessToken || '';
 });
 
-const authHeaders = () => ({ Authorization: `Bearer ${merchantToken}` });
+const authHeaders = () => ({ Authorization: `Bearer ${organizationToken}` });
 
 // ============================================================================
 // Tests
@@ -80,7 +80,7 @@ describe('Store Hierarchy & List Stores Tests', () => {
     it('should filter stores by storeType', async () => {
       const response = await client.get('/business/stores', {
         headers: authHeaders(),
-        params: { storeType: 'business_store' },
+        params: { storeType: 'organization_store' },
       });
 
       expect(response.status).toBe(200);
@@ -90,7 +90,7 @@ describe('Store Hierarchy & List Stores Tests', () => {
       // All returned stores should have the correct type
       response.data.data.forEach((store: Record<string, unknown>) => {
         if (store.storeType) {
-          expect(store.storeType).toBe('business_store');
+          expect(store.storeType).toBe('organization_store');
         }
       });
     });
@@ -151,8 +151,8 @@ describe('Store Hierarchy & List Stores Tests', () => {
         { headers: authHeaders() },
       );
 
-      if (businessResponse.data?.data?.businessId) {
-        testBusinessId = businessResponse.data.data.businessId;
+      if (businessResponse.data?.data?.organizationId) {
+        testBusinessId = businessResponse.data.data.organizationId;
 
         // Create two test stores under this business
         for (let i = 0; i < 2; i++) {
@@ -161,8 +161,8 @@ describe('Store Hierarchy & List Stores Tests', () => {
             {
               name: `Hierarchy Store ${i + 1}`,
               slug: `hierarchy-store-${i}-${Date.now()}`,
-              businessId: testBusinessId,
-              storeType: 'business_store',
+              organizationId: testBusinessId,
+              storeType: 'organization_store',
               defaultCurrency: 'USD',
               storeEmail: `hierarchy${i}@test.com`,
               address: {
@@ -187,7 +187,7 @@ describe('Store Hierarchy & List Stores Tests', () => {
       if (!testBusinessId || testStoreIds.length < 2) return;
 
       const hierarchyData = {
-        businessId: testBusinessId,
+        organizationId: testBusinessId,
         name: `Test Hierarchy ${randomUUID().substring(0, 8)}`,
         defaultStoreId: testStoreIds[0],
         storeIds: testStoreIds,
@@ -207,13 +207,13 @@ describe('Store Hierarchy & List Stores Tests', () => {
         expect(response.data.success).toBe(true);
         expect(response.data.data).toBeDefined();
         expect(response.data.data).toHaveProperty('hierarchyId');
-        expect(response.data.data).toHaveProperty('businessId', testBusinessId);
+        expect(response.data.data).toHaveProperty('organizationId', testBusinessId);
         expect(response.data.data).toHaveProperty('defaultStoreId', testStoreIds[0]);
         expect(response.data.data).toHaveProperty('storeCount', 2);
       }
     });
 
-    it('should reject hierarchy creation with missing businessId', async () => {
+    it('should reject hierarchy creation with missing organizationId', async () => {
       const response = await client.post(
         '/business/stores/hierarchy',
         {
@@ -233,7 +233,7 @@ describe('Store Hierarchy & List Stores Tests', () => {
       const response = await client.post(
         '/business/stores/hierarchy',
         {
-          businessId: testBusinessId,
+          organizationId: testBusinessId,
           name: 'Invalid Default Hierarchy',
           defaultStoreId: 'nonexistent-store-id',
           storeIds: testStoreIds,

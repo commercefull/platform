@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('paymentMethodConfigId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.enum('paymentMethod', ['creditCard', 'debitCard', 'giftCard', 'storeCredit', 'other']).notNullable();
     t.boolean('isEnabled').notNullable().defaultTo(true);
     t.string('displayName', 100);
@@ -20,7 +20,7 @@ exports.up = function (knex) {
     t.jsonb('metadata');
     t.timestamp('deletedAt');
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('paymentMethod');
     t.index('isEnabled');
     t.index('displayOrder');

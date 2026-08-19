@@ -1,15 +1,15 @@
 import { AxiosInstance } from 'axios';
-import { setupAuthTests, cleanupAuthTests, testCustomer, testMerchant, testAdmin } from './testUtils';
+import { setupAuthTests, cleanupAuthTests, testCustomer, testOrganization, testAdmin } from './testUtils';
 
 describe('Auth Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let testCustomerId: string;
-  let testMerchantId: string;
+  let testOrganizationId: string;
   let testAdminId: string;
   let customerResetToken: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let merchantResetToken: string;
+  let organizationResetToken: string;
   let customerRefreshToken: string;
 
   beforeAll(async () => {
@@ -21,10 +21,10 @@ describe('Auth Feature Tests', () => {
       client = setup.client;
       adminToken = setup.adminToken;
       testCustomerId = setup.testCustomerId;
-      testMerchantId = setup.testMerchantId;
+      testOrganizationId = setup.testOrganizationId;
       testAdminId = setup.testAdminId;
       customerResetToken = setup.customerResetToken;
-      merchantResetToken = setup.merchantResetToken;
+      organizationResetToken = setup.organizationResetToken;
       customerRefreshToken = setup.customerRefreshToken;
     } catch (error) {
       console.error('Auth test setup failed:', error);
@@ -35,7 +35,7 @@ describe('Auth Feature Tests', () => {
   afterAll(async () => {
     await cleanupAuthTests(client, adminToken, {
       testCustomerId,
-      testMerchantId,
+      testOrganizationId,
       testAdminId,
       customerRefreshToken,
     });
@@ -58,10 +58,10 @@ describe('Auth Feature Tests', () => {
       expect(response.data.customer).toHaveProperty('email');
     });
 
-    it('should authenticate a merchant with camelCase properties', async () => {
+    it('should authenticate a organization with camelCase properties', async () => {
       const response = await client.post('/business/auth/login', {
-        email: testMerchant.email,
-        password: testMerchant.password,
+        email: testOrganization.email,
+        password: testOrganization.password,
       });
 
       expect(response.status).toBe(200);

@@ -1,5 +1,5 @@
 import express from 'express';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import {
   createStoreDispatch,
   listStoreDispatches,
@@ -11,7 +11,7 @@ import {
 } from '../controllers/StoreDispatchController';
 
 const router = express.Router();
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 router.post('/dispatches', createStoreDispatch);
 router.get('/dispatches', listStoreDispatches);

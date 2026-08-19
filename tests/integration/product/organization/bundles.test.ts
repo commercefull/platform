@@ -1,8 +1,8 @@
 /**
  * Integration tests for bundles
  * Covers: spec 06-relationships-bundles-collections.md Part B
- * - Merchant: bundle CRUD
- * - Merchant: bundle items CRUD
+ * - Organization: bundle CRUD
+ * - Organization: bundle items CRUD
  * - Customer: list active bundles, get by ID, get by product, calculate price
  */
 
@@ -32,9 +32,9 @@ describe('Bundle Management', () => {
     }
   });
 
-  // ── Merchant: Bundle CRUD ────────────────────────────────────────────────
+  // ── Organization: Bundle CRUD ────────────────────────────────────────────────
 
-  describe('Merchant: Bundle CRUD', () => {
+  describe('Organization: Bundle CRUD', () => {
     it('should create a bundle', async () => {
       const res = await client.post(
         '/business/bundles',
@@ -91,9 +91,9 @@ describe('Bundle Management', () => {
     });
   });
 
-  // ── Merchant: Bundle Items ───────────────────────────────────────────────
+  // ── Organization: Bundle Items ───────────────────────────────────────────────
 
-  describe('Merchant: Bundle items', () => {
+  describe('Organization: Bundle items', () => {
     it('should add an item to a bundle', async () => {
       if (!createdBundleId) return;
       const res = await client.post(

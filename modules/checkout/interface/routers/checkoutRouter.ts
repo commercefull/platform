@@ -52,6 +52,12 @@ router.post('/checkout', checkoutController.initiateCheckout);
 router.get('/checkout/:checkoutId', checkoutController.getCheckout);
 
 /**
+ * Get checkout summary
+ * GET /checkout/:checkoutId/summary
+ */
+router.get('/checkout/:checkoutId/summary', checkoutController.getCheckoutSummary);
+
+/**
  * Set fulfillment method (shipping, pickup, local_delivery, digital)
  * PUT /checkout/:checkoutId/fulfillment-method
  */

@@ -7,14 +7,14 @@ interface ValidateCouponBody {
   code: string;
   orderTotal: string;
   customerId?: string;
-  merchantId?: string;
+  organizationId?: string;
 }
 
 interface CalculateDiscountBody {
   code: string;
   orderTotal: string;
   items?: unknown[];
-  merchantId?: string;
+  organizationId?: string;
 }
 
 /**
@@ -22,9 +22,9 @@ interface CalculateDiscountBody {
  */
 export const getActiveCoupons = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { merchantId, limit, offset, orderBy, direction } = req.query;
+    const { organizationId, limit, offset, orderBy, direction } = req.query;
 
-    const coupons = await couponRepo.findActiveCoupons(merchantId as string | undefined, {
+    const coupons = await couponRepo.findActiveCoupons(organizationId as string | undefined, {
       limit: limit ? parseInt(limit as string) : undefined,
       offset: offset ? parseInt(offset as string) : undefined,
       orderBy: orderBy as string | undefined,
@@ -71,9 +71,9 @@ export const getCouponById = async (req: TypedRequest, res: Response): Promise<v
 export const getCouponByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
-    const { merchantId } = req.query;
+    const { organizationId } = req.query;
 
-    const coupon = await couponRepo.findByCode(code, merchantId as string | undefined);
+    const coupon = await couponRepo.findByCode(code, organizationId as string | undefined);
 
     if (!coupon) {
       res.status(404).json({ success: false, message: 'Coupon not found' });
@@ -104,7 +104,7 @@ export const createCoupon = async (req: TypedRequest<Record<string, string>, unk
     }
 
     // Check if code already exists
-    const existingCoupon = await couponRepo.findByCode(couponData.code, couponData.merchantId);
+    const existingCoupon = await couponRepo.findByCode(couponData.code, couponData.organizationId);
     if (existingCoupon) {
       res.status(400).json({
         success: false,
@@ -195,7 +195,7 @@ export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<vo
  */
 export const validateCoupon = async (req: TypedRequest<Record<string, string>, unknown, ValidateCouponBody>, res: Response): Promise<void> => {
   try {
-    const { code, orderTotal, customerId, merchantId } = req.body;
+    const { code, orderTotal, customerId, organizationId } = req.body;
 
     // Validation
     if (!code || orderTotal === undefined) {
@@ -207,7 +207,7 @@ export const validateCoupon = async (req: TypedRequest<Record<string, string>, u
     }
 
     // Validate the coupon
-    const result = await couponRepo.validate(code, parseFloat(orderTotal), customerId, merchantId);
+    const result = await couponRepo.validate(code, parseFloat(orderTotal), customerId, organizationId);
 
     if (!result.valid) {
       res.status(400).json({
@@ -266,7 +266,7 @@ export const getCouponUsage = async (req: TypedRequest, res: Response): Promise<
  */
 export const calculateCouponDiscount = async (req: TypedRequest<Record<string, string>, unknown, CalculateDiscountBody>, res: Response): Promise<void> => {
   try {
-    const { code, orderTotal, items: _items, merchantId } = req.body;
+    const { code, orderTotal, items: _items, organizationId } = req.body;
 
     // Validation
     if (!code || orderTotal === undefined) {
@@ -278,7 +278,7 @@ export const calculateCouponDiscount = async (req: TypedRequest<Record<string, s
     }
 
     // Get coupon
-    const coupon = await couponRepo.findByCode(code, merchantId);
+    const coupon = await couponRepo.findByCode(code, organizationId);
     if (!coupon) {
       res.status(404).json({
         success: false,

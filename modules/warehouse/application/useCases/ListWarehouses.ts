@@ -7,8 +7,7 @@
 export interface ListWarehousesInput {
   filters?: {
     type?: string;
-    businessId?: string;
-    merchantId?: string;
+    organizationId?: string;
     isActive?: boolean;
   };
   pagination?: {
@@ -49,8 +48,7 @@ interface WarehouseRecord {
   isDefault: boolean;
   currentCapacity?: number;
   maxCapacity?: number;
-  merchantId?: string;
-  businessId?: string;
+  organizationId?: string;
 }
 
 interface WarehouseRepositoryPort {
@@ -74,11 +72,11 @@ export class ListWarehousesUseCase {
       const filterType = input.filters.type;
       filtered = filtered.filter(wh => wh.description === filterType);
     }
-    if (input.filters?.merchantId) {
-      filtered = filtered.filter(wh => wh.merchantId === input.filters?.merchantId);
+    if (input.filters?.organizationId) {
+      filtered = filtered.filter(wh => wh.organizationId === input.filters?.organizationId);
     }
-    if (input.filters?.businessId) {
-      filtered = filtered.filter(wh => wh.businessId === input.filters?.businessId);
+    if (input.filters?.organizationId) {
+      filtered = filtered.filter(wh => wh.organizationId === input.filters?.organizationId);
     }
 
     const total = filtered.length;

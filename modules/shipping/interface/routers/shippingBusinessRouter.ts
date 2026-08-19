@@ -4,12 +4,12 @@
  */
 
 import { Router } from 'express';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as shippingController from '../controllers/shippingController';
 
 const router = Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ============================================================================
 // Carriers

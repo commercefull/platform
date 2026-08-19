@@ -6,11 +6,11 @@
 
 import express from 'express';
 import * as inventoryController from '../controllers/inventoryController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import { storeDispatchRouter } from './storeDispatchRouter';
 
 const router = express.Router();
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ============================================================================
 // Inventory Location Routes

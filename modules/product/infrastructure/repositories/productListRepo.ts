@@ -5,20 +5,20 @@ export interface ProductList {
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
-  merchantId: string;
+  organizationId: string;
   name: string;
   description?: string | null;
   isActive: boolean;
 }
 
 export type ProductListCreateParams = Omit<ProductList, 'productListId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
-export type ProductListUpdateParams = Partial<Omit<ProductListCreateParams, 'merchantId'>>;
+export type ProductListUpdateParams = Partial<Omit<ProductListCreateParams, 'organizationId'>>;
 
 export class ProductListRepo {
-  async findByMerchant(merchantId: string): Promise<ProductList[]> {
+  async findByMerchant(organizationId: string): Promise<ProductList[]> {
     return (
-      (await query<ProductList[]>(`SELECT * FROM "productList" WHERE "merchantId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC`, [
-        merchantId,
+      (await query<ProductList[]>(`SELECT * FROM "productList" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC`, [
+        organizationId,
       ])) || []
     );
   }
@@ -30,9 +30,9 @@ export class ProductListRepo {
   async create(params: ProductListCreateParams): Promise<ProductList> {
     const now = new Date();
     const result = await queryOne<ProductList>(
-      `INSERT INTO "productList" ("merchantId", "name", "description", "isActive", "createdAt", "updatedAt")
+      `INSERT INTO "productList" ("organizationId", "name", "description", "isActive", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [params.merchantId, params.name, params.description || null, params.isActive ?? true, now, now],
+      [params.organizationId, params.name, params.description || null, params.isActive ?? true, now, now],
     );
     if (!result) throw new Error('Failed to create productList');
     return result;

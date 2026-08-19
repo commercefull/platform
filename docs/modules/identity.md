@@ -70,13 +70,40 @@ Unlink a social account from a customer (requires auth) |
 | POST | `/identity/:provider/merchant` | `merchantSocialLogin` | POST /identity/social/:provider/merchant
 Authenticate or register a merchant via social login
 Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
+| POST | `/identity/:provider/organization` | `merchantSocialLogin` | POST /identity/social/:provider/organization
+Authenticate or register an organization via social login
+Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
 | GET | `/identity/customer/accounts` | `getCustomerLinkedAccounts` | GET /identity/social/customer/accounts
 Get all linked social accounts for a customer (requires auth) |
 | GET | `/identity/merchant/accounts` | `getMerchantLinkedAccounts` | GET /identity/social/merchant/accounts
 Get all linked social accounts for a merchant (requires auth) |
+| GET | `/identity/organization/accounts` | `getOrganizationLinkedAccounts` | GET /identity/social/organization/accounts
+Get all linked social accounts for an organization (requires auth) |
 | GET | `/stores/:storeId/users` | `listStoreUsers` | — |
 | POST | `/users/:userId/stores` | `assignUserToStore` | — |
 | GET | `/users/:userId/stores` | `getUserStores` | — |
 | DELETE | `/users/:userId/stores/:storeId` | `removeUserFromStore` | — |
+
+---
+
+## Integration Test Coverage
+
+| Use Case   | Test File                          | Status |
+| ---------- | ---------------------------------- | ------ |
+| UC-IDT-001 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-002 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-003 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-004 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-005 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-006 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-007 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-008 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-009 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-010 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-011 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-012 | `identity/auth.test.ts`            | ✅     |
+| UC-IDT-013 | `identity/auth.test.ts`            | ✅     |
+| Social Login | `identity/socialLogin.test.ts`   | ✅     |
+| Admin Auth  | `identity/identityExpanded.test.ts` | ✅     |
 
 <!-- GENERATED:ENDPOINTS:END -->

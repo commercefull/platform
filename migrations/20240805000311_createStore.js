@@ -10,9 +10,8 @@ exports.up = function (knex) {
     t.string('name', 100).notNullable();
     t.string('slug', 150).notNullable().unique();
     t.text('description');
-    t.enum('storeType', ['merchant_store', 'business_store']).notNullable();
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
-    t.uuid('businessId').references('businessId').inTable('business');
+    t.enum('storeType', ['merchant_store', 'organization_store']).notNullable();
+    t.uuid('organizationId').references('organizationId').inTable('organization');
     t.boolean('isHeadquarters').notNullable().defaultTo(false);
     t.uuid('parentStoreId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
     t.text('logo');
@@ -48,21 +47,18 @@ exports.up = function (knex) {
     t.jsonb('customPages');
     t.jsonb('customFields');
     t.jsonb('metadata');
-    t.string('organizationId', 50).nullable();
     t.string('taxZoneId', 50).nullable();
     t.jsonb('priceRoundingRules').defaultTo('{}');
     t.string('defaultLanguage', 10).defaultTo('en');
 
     t.index('storeType');
-    t.index('merchantId');
-    t.index('businessId');
+    t.index('organizationId');
     t.index('isHeadquarters');
     t.index('parentStoreId');
     t.index('isActive');
     t.index('isVerified');
     t.index('isFeatured');
     t.index('slug');
-    t.index('organizationId');
     t.index('taxZoneId');
     t.index('storeUrl');
   });

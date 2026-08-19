@@ -183,7 +183,7 @@ export const escalateTicket: AsyncHandler = async (req, res, _next) => {
 
 export const addAgentMessage: AsyncHandler = async (req, res, _next) => {
   try {
-    const agentId = req.user?.userId || req.user?.merchantId || '';
+    const agentId = req.user?.userId || req.user?.organizationId || '';
     const agent = await supportRepo.getAgent(agentId);
 
     const body = req.body as { message: string; messageHtml?: string; isInternal?: boolean };
@@ -315,7 +315,7 @@ export const getFaqArticle: AsyncHandler = async (req, res, _next) => {
 
 export const createFaqArticle: AsyncHandler = async (req, res, _next) => {
   try {
-    const authorId = req.user?.userId || req.user?.merchantId;
+    const authorId = req.user?.userId || req.user?.organizationId;
     const body = req.body as Partial<faqRepo.FaqArticle> & { title: string; content: string };
     const article = await faqRepo.saveArticle({
       authorId,
@@ -331,7 +331,7 @@ export const createFaqArticle: AsyncHandler = async (req, res, _next) => {
 
 export const updateFaqArticle: AsyncHandler = async (req, res, _next) => {
   try {
-    const lastEditedBy = req.user?.userId || req.user?.merchantId;
+    const lastEditedBy = req.user?.userId || req.user?.organizationId;
     const body = req.body as Partial<faqRepo.FaqArticle> & { title: string; content: string };
     const article = await faqRepo.saveArticle({
       faqArticleId: req.params.id,

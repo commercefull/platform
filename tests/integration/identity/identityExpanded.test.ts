@@ -172,11 +172,11 @@ describe('Identity Expanded Tests', () => {
   });
 
   // ============================================================================
-  // Merchant Auth Tests
+  // Organization Auth Tests
   // ============================================================================
 
-  describe('Merchant Auth', () => {
-    it('should login merchant with valid credentials', async () => {
+  describe('Organization Auth', () => {
+    it('should login organization with valid credentials', async () => {
       const resp = await client.post('/business/auth/login', {
         email: TEST_MERCHANT.email,
         password: TEST_MERCHANT.password,
@@ -186,7 +186,7 @@ describe('Identity Expanded Tests', () => {
       expect(resp.data).toHaveProperty('accessToken');
     });
 
-    it('should reject merchant login with invalid password', async () => {
+    it('should reject organization login with invalid password', async () => {
       const resp = await client.post('/business/auth/login', {
         email: TEST_MERCHANT.email,
         password: 'wrong-password',
@@ -195,7 +195,7 @@ describe('Identity Expanded Tests', () => {
       expectStatus(resp, 401);
     });
 
-    it('should validate merchant token', async () => {
+    it('should validate organization token', async () => {
       const loginResp = await client.post('/business/auth/login', {
         email: TEST_MERCHANT.email,
         password: TEST_MERCHANT.password,

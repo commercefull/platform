@@ -56,18 +56,18 @@ The Basket (Shopping Cart) feature manages customer shopping sessions, allowing 
 
 ## Integration Test Coverage
 
-| Use Case   | Test File               | Status |
-| ---------- | ----------------------- | ------ |
-| UC-BSK-001 | `basket/basket.test.ts` | ✅     |
-| UC-BSK-002 | `basket/basket.test.ts` | ✅     |
-| UC-BSK-003 | `basket/basket.test.ts` | ✅     |
-| UC-BSK-004 | `basket/basket.test.ts` | 🟡     |
-| UC-BSK-005 | `basket/basket.test.ts` | ✅     |
-| UC-BSK-006 | `basket/basket.test.ts` | ✅     |
-| UC-BSK-007 | `basket/basket.test.ts` | ✅     |
-| UC-BSK-008 | `basket/basket.test.ts` | 🟡     |
-| UC-BSK-009 | `basket/basket.test.ts` | ❌     |
-| UC-BSK-010 | `basket/basket.test.ts` | ❌     |
+| Use Case   | Test File                       | Status |
+| ---------- | ------------------------------- | ------ |
+| UC-BSK-001 | `basket/basket.test.ts`         | ✅     |
+| UC-BSK-002 | `basket/basket.test.ts`         | ✅     |
+| UC-BSK-003 | `basket/basket.test.ts`         | ✅     |
+| UC-BSK-004 | `basket/basketExpanded.test.ts` | ✅     |
+| UC-BSK-005 | `basket/basket.test.ts`         | ✅     |
+| UC-BSK-006 | `basket/basket.test.ts`         | ✅     |
+| UC-BSK-007 | `basket/basket.test.ts`         | ✅     |
+| UC-BSK-008 | `basket/basketExpanded.test.ts` | ✅     |
+| UC-BSK-009 | `basket/basketEdgeCases.test.ts` | ✅    |
+| UC-BSK-010 | `basket/basketAdmin.test.ts`    | ✅     |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

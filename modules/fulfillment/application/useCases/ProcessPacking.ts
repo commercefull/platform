@@ -24,9 +24,12 @@ export class ProcessPackingUseCase {
       throw new Error(`Fulfillment ${command.fulfillmentId} not found`);
     }
 
-    fulfillment.startPacking();
+    // Start packing if not already in packing/packed state
+    if (fulfillment.status !== 'packing' && fulfillment.status !== 'packed') {
+      fulfillment.startPacking();
+    }
 
-    if (command.completePackingProcess) {
+    if (command.completePackingProcess && fulfillment.status !== 'packed') {
       fulfillment.completePacking(command.weight, command.dimensions);
     }
 

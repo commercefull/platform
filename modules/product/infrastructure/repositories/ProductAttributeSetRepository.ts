@@ -8,7 +8,7 @@ export interface ProductAttributeSet {
   description?: string;
   productTypeId?: string;
   isActive: boolean;
-  merchantId?: string;
+  organizationId?: string;
   isGlobal: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -34,7 +34,7 @@ export interface ProductAttributeSetCreateInput {
   description?: string;
   productTypeId?: string;
   isActive?: boolean;
-  merchantId?: string;
+  organizationId?: string;
   isGlobal?: boolean;
 }
 
@@ -143,7 +143,7 @@ export class ProductAttributeSetRepository {
   async create(input: ProductAttributeSetCreateInput): Promise<ProductAttributeSet> {
     const sql = `
       INSERT INTO "${this.tableName}" (
-        "name", "code", "description", "productTypeId", "isActive", "merchantId", "isGlobal"
+        "name", "code", "description", "productTypeId", "isActive", "organizationId", "isGlobal"
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
@@ -155,7 +155,7 @@ export class ProductAttributeSetRepository {
       input.description || null,
       input.productTypeId || null,
       input.isActive !== false,
-      input.merchantId || null,
+      input.organizationId || null,
       input.isGlobal !== false,
     ]);
 

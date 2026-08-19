@@ -443,14 +443,14 @@ function registerInventoryEventHandlers(): void {
 
     try {
       // Find merchants who carry this product
-      const merchants = await query<Array<{ merchantId: string; businessId: string }>>(
-        'SELECT DISTINCT m."merchantId", m."businessId" FROM merchant m JOIN product p ON p."merchantId" = m."merchantId" WHERE p."productId" = $1 AND m.status = \'active\'',
+      const merchants = await query<Array<{ organizationId: string }>>(
+        'SELECT DISTINCT m."organizationId", m."organizationId" FROM merchant m JOIN product p ON p."organizationId" = m."organizationId" WHERE p."productId" = $1 AND m.status = \'active\'',
         [productId],
       );
 
       for (const merchant of merchants || []) {
         await JobScheduler.scheduleNotification({
-          userId: merchant.merchantId,
+          userId: merchant.organizationId,
           type: 'low_stock_alert',
           title: 'Low Stock Alert',
           message: `Product ${sku || productId} is running low (${currentStock} remaining, reorder at ${reorderPoint}).`,
@@ -472,14 +472,14 @@ function registerInventoryEventHandlers(): void {
     if (!productId) return;
 
     try {
-      const merchants = await query<Array<{ merchantId: string }>>(
-        'SELECT DISTINCT m."merchantId" FROM merchant m JOIN product p ON p."merchantId" = m."merchantId" WHERE p."productId" = $1 AND m.status = \'active\'',
+      const merchants = await query<Array<{ organizationId: string }>>(
+        'SELECT DISTINCT m."organizationId" FROM merchant m JOIN product p ON p."organizationId" = m."organizationId" WHERE p."productId" = $1 AND m.status = \'active\'',
         [productId],
       );
 
       for (const merchant of merchants || []) {
         await JobScheduler.scheduleNotification({
-          userId: merchant.merchantId,
+          userId: merchant.organizationId,
           type: 'out_of_stock_alert',
           title: 'Out of Stock Alert',
           message: `Product ${sku || productId} is now out of stock.`,
@@ -672,13 +672,13 @@ function registerStoreEventHandlers(): void {
     const data = payload.data as Record<string, unknown>;
     const storeId = data.storeId as string;
     const storeName = data.storeName as string;
-    const merchantId = data.merchantId as string;
+    const organizationId = data.organizationId as string;
     if (!storeId) return;
 
     try {
-      if (merchantId) {
+      if (organizationId) {
         await JobScheduler.scheduleNotification({
-          userId: merchantId,
+          userId: organizationId,
           type: 'store_created',
           title: 'Store Created',
           message: `Store "${storeName || storeId}" has been created successfully.`,
@@ -706,69 +706,69 @@ function registerStoreEventHandlers(): void {
 
 function registerMerchantEventHandlers(): void {
   // Merchant approved -> send welcome notification
-  eventBus.registerHandler('merchant.approved', async payload => {
+  eventBus.registerHandler('organization.approved', async payload => {
     const data = payload.data as Record<string, unknown>;
-    const merchantId = data.merchantId as string;
+    const organizationId = data.organizationId as string;
     const businessName = data.businessName as string;
-    if (!merchantId) return;
+    if (!organizationId) return;
 
     try {
       await JobScheduler.scheduleNotification({
-        userId: merchantId,
+        userId: organizationId,
         type: 'merchant_approved',
         title: 'Merchant Account Approved',
         message: `Welcome to CommerceFull! Your merchant account${businessName ? ` "${businessName}"` : ''} has been approved.`,
-        data: { merchantId, businessName },
+        data: { organizationId, businessName },
         channels: ['email', 'in_app'],
       });
-      logger.info(`merchant.approved: merchant ${merchantId} (${businessName}) approved`);
+      logger.info(`organization.approved: merchant ${organizationId} (${businessName}) approved`);
     } catch (err: unknown) {
-      logger.error(`merchant.approved handler error: ${(err as Error).message}`);
+      logger.error(`organization.approved handler error: ${(err as Error).message}`);
     }
   });
 
   // Settlement created -> notify merchant
-  eventBus.registerHandler('merchant.settlement_created', async payload => {
+  eventBus.registerHandler('organization.settlement_created', async payload => {
     const data = payload.data as Record<string, unknown>;
-    const merchantId = data.merchantId as string;
+    const organizationId = data.organizationId as string;
     const settlementId = data.settlementId as string;
     const amount = data.amount as number;
-    if (!merchantId) return;
+    if (!organizationId) return;
 
     try {
       await JobScheduler.scheduleNotification({
-        userId: merchantId,
+        userId: organizationId,
         type: 'settlement_created',
         title: 'Settlement Created',
         message: `A settlement of $${amount} has been created.`,
-        data: { merchantId, settlementId, amount },
+        data: { organizationId, settlementId, amount },
       });
-      logger.info(`merchant.settlement_created: settlement ${settlementId} for merchant ${merchantId}, amount=${amount}`);
+      logger.info(`organization.settlement_created: settlement ${settlementId} for merchant ${organizationId}, amount=${amount}`);
     } catch (err: unknown) {
-      logger.error(`merchant.settlement_created handler error: ${(err as Error).message}`);
+      logger.error(`organization.settlement_created handler error: ${(err as Error).message}`);
     }
   });
 
   // Payout processed -> notify merchant
-  eventBus.registerHandler('merchant.payout_processed', async payload => {
+  eventBus.registerHandler('organization.payout_processed', async payload => {
     const data = payload.data as Record<string, unknown>;
-    const merchantId = data.merchantId as string;
+    const organizationId = data.organizationId as string;
     const payoutId = data.payoutId as string;
     const amount = data.amount as number;
-    if (!merchantId) return;
+    if (!organizationId) return;
 
     try {
       await JobScheduler.scheduleNotification({
-        userId: merchantId,
+        userId: organizationId,
         type: 'payout_processed',
         title: 'Payout Processed',
         message: `A payout of $${amount} has been processed to your account.`,
-        data: { merchantId, payoutId, amount },
+        data: { organizationId, payoutId, amount },
         channels: ['email', 'in_app'],
       });
-      logger.info(`merchant.payout_processed: payout ${payoutId} for merchant ${merchantId}, amount=${amount}`);
+      logger.info(`organization.payout_processed: payout ${payoutId} for merchant ${organizationId}, amount=${amount}`);
     } catch (err: unknown) {
-      logger.error(`merchant.payout_processed handler error: ${(err as Error).message}`);
+      logger.error(`organization.payout_processed handler error: ${(err as Error).message}`);
     }
   });
 }

@@ -9,7 +9,7 @@ export interface ProductCollection {
   description?: string | null;
   imageUrl?: string | null;
   isActive: boolean;
-  merchantId?: string | null;
+  organizationId?: string | null;
 }
 
 export type ProductCollectionCreateParams = Omit<ProductCollection, 'productCollectionId' | 'createdAt' | 'updatedAt'>;
@@ -30,7 +30,7 @@ export class ProductCollectionRepo {
   async create(params: ProductCollectionCreateParams): Promise<ProductCollection> {
     const now = new Date();
     const result = await queryOne<ProductCollection>(
-      `INSERT INTO "productCollection" ("name", "slug", "description", "imageUrl", "isActive", "merchantId", "createdAt", "updatedAt")
+      `INSERT INTO "productCollection" ("name", "slug", "description", "imageUrl", "isActive", "organizationId", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
         params.name,
@@ -38,7 +38,7 @@ export class ProductCollectionRepo {
         params.description || null,
         params.imageUrl || null,
         params.isActive ?? true,
-        params.merchantId || null,
+        params.organizationId || null,
         now,
         now,
       ],

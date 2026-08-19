@@ -5,6 +5,7 @@
 
 import { Address } from '../valueObjects/Address';
 import { Money } from '../../../basket/domain/valueObjects/Money';
+import { BadRequestError } from '../../../../libs/errors';
 
 export type CheckoutStatus = 'active' | 'pending_payment' | 'processing' | 'completed' | 'abandoned' | 'expired' | 'failed';
 export type PaymentStatus = 'pending' | 'authorized' | 'captured' | 'failed' | 'refunded';
@@ -344,10 +345,10 @@ export class CheckoutSession {
 
   private ensureActive(): void {
     if (!this.isActive) {
-      throw new Error(`Cannot modify checkout: status is ${this.props.status}`);
+      throw new BadRequestError(`Cannot modify checkout: status is ${this.props.status}`);
     }
     if (this.isExpired) {
-      throw new Error('Cannot modify checkout: session has expired');
+      throw new BadRequestError('Cannot modify checkout: session has expired');
     }
   }
 

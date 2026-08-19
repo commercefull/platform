@@ -244,12 +244,12 @@ describe('Warehouse Feature Tests', () => {
   });
 
   // ============================================================================
-  // Merchant Warehouses
+  // Organization Warehouses
   // ============================================================================
 
-  describe('Merchant Warehouses', () => {
-    it('should get warehouses by merchant', async () => {
-      const response = await client.get('/business/merchants/00000000-0000-0000-0000-000000000001/warehouses', {
+  describe('Organization Warehouses', () => {
+    it('should get warehouses by organization', async () => {
+      const response = await client.get('/business/organizations/01911000-0000-7000-8000-000000000001/warehouses', {
         headers: authHeaders(),
       });
 

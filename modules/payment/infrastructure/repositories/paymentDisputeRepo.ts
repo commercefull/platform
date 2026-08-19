@@ -3,7 +3,7 @@ import { query, queryOne } from '../../../../libs/db';
 export interface PaymentDispute {
   paymentDisputeId: string;
   paymentId: string;
-  merchantId: string;
+  organizationId: string;
   externalDisputeId?: string;
   status: string;
   reason?: string;
@@ -29,11 +29,11 @@ export async function findById(paymentDisputeId: string): Promise<PaymentDispute
 export async function create(params: Omit<PaymentDispute, 'paymentDisputeId' | 'createdAt' | 'updatedAt'>): Promise<PaymentDispute | null> {
   const now = new Date();
   return queryOne<PaymentDispute>(
-    `INSERT INTO "paymentDispute" ("paymentId", "merchantId", "externalDisputeId", status, reason, amount, currency, evidence, "dueBy", "resolvedAt", "createdAt", "updatedAt")
+    `INSERT INTO "paymentDispute" ("paymentId", "organizationId", "externalDisputeId", status, reason, amount, currency, evidence, "dueBy", "resolvedAt", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
     [
       params.paymentId,
-      params.merchantId,
+      params.organizationId,
       params.externalDisputeId || null,
       params.status,
       params.reason || null,

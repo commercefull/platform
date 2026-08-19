@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('subscriptionInvoiceId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('paymentSubscriptionId').notNullable().references('paymentSubscriptionId').inTable('paymentSubscription').onDelete('CASCADE');
     t.uuid('customerId').notNullable().references('customerId').inTable('customer');
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization');
     t.decimal('amount', 15, 2).notNullable();
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
     t.string('status', 20).notNullable().checkIn(['draft', 'open', 'paid', 'past_due', 'failed', 'voided']).defaultTo('draft');
@@ -26,7 +26,7 @@ exports.up = function (knex) {
 
     t.index('paymentSubscriptionId');
     t.index('customerId');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('status');
     t.index('dueDate');
     t.index('orderPaymentId');

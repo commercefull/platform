@@ -69,10 +69,10 @@ export const createCategory = async (req: TypedRequest, res: Response): Promise<
   try {
     const { name, description, parentId, isActive, isFeatured, includeInMenu, position,
             imageUrl, bannerUrl, iconUrl, metaTitle, metaDescription, metaKeywords,
-            merchantId, isGlobal, customLayout, displaySettings } = req.body as {
+            organizationId, isGlobal, customLayout, displaySettings } = req.body as {
       name?: string; description?: string; parentId?: string; isActive?: boolean; isFeatured?: boolean;
       includeInMenu?: boolean; position?: number; imageUrl?: string; bannerUrl?: string; iconUrl?: string;
-      metaTitle?: string; metaDescription?: string; metaKeywords?: string; merchantId?: string;
+      metaTitle?: string; metaDescription?: string; metaKeywords?: string; organizationId?: string;
       isGlobal?: boolean; customLayout?: string; displaySettings?: Record<string, unknown>;
     };
 
@@ -84,7 +84,7 @@ export const createCategory = async (req: TypedRequest, res: Response): Promise<
     const category = await categoryRepo.create({
       name, description, parentId, isActive, isFeatured, includeInMenu, position,
       imageUrl, bannerUrl, iconUrl, metaTitle, metaDescription, metaKeywords,
-      merchantId, isGlobal, customLayout, displaySettings,
+      organizationId, isGlobal, customLayout, displaySettings,
     });
 
     res.status(201).json({ success: true, data: category });

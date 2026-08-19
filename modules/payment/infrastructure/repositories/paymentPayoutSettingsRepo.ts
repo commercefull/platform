@@ -9,7 +9,7 @@ export interface PayoutSettings {
   payoutSettingsId: string;
   createdAt: string;
   updatedAt: string;
-  merchantId: string;
+  organizationId: string;
   frequency: PayoutFrequency;
   minimumAmount: number;
   bankAccountId?: string;
@@ -23,27 +23,27 @@ export interface PayoutSettings {
 }
 
 export type PayoutSettingsCreateParams = Omit<PayoutSettings, 'payoutSettingsId' | 'createdAt' | 'updatedAt'>;
-export type PayoutSettingsUpdateParams = Partial<Omit<PayoutSettings, 'payoutSettingsId' | 'merchantId' | 'createdAt' | 'updatedAt'>>;
+export type PayoutSettingsUpdateParams = Partial<Omit<PayoutSettings, 'payoutSettingsId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
 
 export class PayoutSettingsRepo {
   async findById(id: string): Promise<PayoutSettings | null> {
     return await queryOne<PayoutSettings>(`SELECT * FROM "paymentPayoutSettings" WHERE "payoutSettingsId" = $1`, [id]);
   }
 
-  async findByMerchant(merchantId: string): Promise<PayoutSettings | null> {
-    return await queryOne<PayoutSettings>(`SELECT * FROM "paymentPayoutSettings" WHERE "merchantId" = $1`, [merchantId]);
+  async findByMerchant(organizationId: string): Promise<PayoutSettings | null> {
+    return await queryOne<PayoutSettings>(`SELECT * FROM "paymentPayoutSettings" WHERE "organizationId" = $1`, [organizationId]);
   }
 
   async create(params: PayoutSettingsCreateParams): Promise<PayoutSettings> {
     const now = unixTimestamp();
     const result = await queryOne<PayoutSettings>(
       `INSERT INTO "paymentPayoutSettings" (
-        "merchantId", "frequency", "minimumAmount", "bankAccountId", "payoutDay", "holdPeriod",
+        "organizationId", "frequency", "minimumAmount", "bankAccountId", "payoutDay", "holdPeriod",
         "automaticPayouts", "currencyCode", "payoutProvider", "payoutMethod", "providerSettings",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
       [
-        params.merchantId,
+        params.organizationId,
         params.frequency || 'weekly',
         params.minimumAmount || 1.0,
         params.bankAccountId || null,
@@ -85,8 +85,8 @@ export class PayoutSettingsRepo {
     );
   }
 
-  async updateByMerchant(merchantId: string, params: PayoutSettingsUpdateParams): Promise<PayoutSettings | null> {
-    const existing = await this.findByMerchant(merchantId);
+  async updateByMerchant(organizationId: string, params: PayoutSettingsUpdateParams): Promise<PayoutSettings | null> {
+    const existing = await this.findByMerchant(organizationId);
     if (!existing) return null;
     return this.update(existing.payoutSettingsId, params);
   }

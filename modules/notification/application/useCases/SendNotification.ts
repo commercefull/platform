@@ -7,7 +7,7 @@ export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
 
 export interface SendNotificationInput {
   recipientId: string;
-  recipientType: 'customer' | 'merchant' | 'admin';
+  recipientType: 'customer' | 'organization' | 'admin';
   templateId?: string;
   channel: NotificationChannel;
   subject?: string;

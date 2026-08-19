@@ -35,7 +35,7 @@ export interface CreateAttributeCommand {
   defaultValue?: string;
   validationRules?: Record<string, unknown>;
   options?: Array<{ value: string; displayValue?: string; position?: number; isDefault?: boolean }>;
-  merchantId?: string;
+  organizationId?: string;
   isGlobal?: boolean;
 }
 
@@ -85,7 +85,7 @@ export class CreateAttributeUseCase {
         position: command.position,
         defaultValue: command.defaultValue,
         validationRules: command.validationRules,
-        merchantId: command.merchantId,
+        organizationId: command.organizationId,
         isGlobal: command.isGlobal,
       };
 

@@ -28,7 +28,7 @@ export interface CreateShippingMethodInput {
   isActive?: boolean;
   isDefault?: boolean;
   storeId?: string;
-  merchantId?: string;
+  organizationId?: string;
 }
 
 export interface CreateShippingMethodOutput {
@@ -74,7 +74,7 @@ export class CreateShippingMethodUseCase {
       isDefault: input.isDefault ?? false,
       sortOrder: 0,
       storeId: input.storeId,
-      merchantId: input.merchantId,
+      organizationId: input.organizationId,
     });
 
     const saved = await this.shippingRepository.saveMethod(shippingMethod);

@@ -6,7 +6,7 @@ exports.up = function (knex) {
     t.string('name', 255).notNullable();
     t.text('description');
     t.enum('status', ['active', 'scheduled', 'expired', 'disabled', 'pendingApproval']).notNullable().defaultTo('active');
-    t.enum('scope', ['cart', 'product', 'category', 'merchant', 'shipping', 'global']).notNullable();
+    t.enum('scope', ['cart', 'product', 'category', 'organization', 'shipping', 'global']).notNullable();
     t.integer('priority').notNullable().defaultTo(0);
     t.timestamp('startDate').notNullable().defaultTo(knex.fn.now());
     t.timestamp('endDate');
@@ -17,7 +17,7 @@ exports.up = function (knex) {
     t.integer('maxUsagePerCustomer');
     t.decimal('minOrderAmount', 15, 2);
     t.decimal('maxDiscountAmount', 15, 2);
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('organizationId').references('organizationId').inTable('organization');
     t.boolean('isGlobal').notNullable().defaultTo(false);
     t.jsonb('eligibleCustomerGroups');
     t.jsonb('excludedCustomerGroups');
@@ -29,7 +29,7 @@ exports.up = function (knex) {
     t.index('isActive');
     t.index('isExclusive');
     t.index('priority');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isGlobal');
   });
 };

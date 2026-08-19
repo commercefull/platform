@@ -1,10 +1,10 @@
 import express from 'express';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as warehouseController from '../controllers/warehouseBusinessController';
 
 const router = express.Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ========== WAREHOUSE CRUD ROUTES ==========
 
@@ -33,8 +33,8 @@ router.post('/warehouses/:id/deactivate', warehouseController.deactivateWarehous
 router.post('/warehouses/:id/shipping-methods', warehouseController.addShippingMethod);
 router.delete('/warehouses/:id/shipping-methods/:method', warehouseController.removeShippingMethod);
 
-// Merchant warehouses
-router.get('/merchants/:merchantId/warehouses', warehouseController.getWarehousesByMerchant);
+// Organization warehouses
+router.get('/organizations/:organizationId/warehouses', warehouseController.getWarehousesByMerchant);
 
 // ========== ZONE ROUTES ==========
 

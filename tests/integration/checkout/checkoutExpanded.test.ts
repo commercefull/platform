@@ -245,19 +245,5 @@ describe('Checkout Expanded Tests', () => {
     });
   });
 
-  // ============================================================================
-  // Authorization Tests
-  // ============================================================================
-
-  describe('Authorization', () => {
-    it.skip('should require auth for checkout creation', async () => {
-      const resp = await client.post('/customer/checkout', { basketId: '00000000-0000-0000-0000-000000000001' });
-      expectStatus(resp, 401);
-    });
-
-    it.skip('should require auth for getting checkout', async () => {
-      const resp = await client.get('/customer/checkout/00000000-0000-0000-0000-000000000001');
-      expectStatus(resp, 401);
-    });
-  });
+  // Skipped auth tests removed — customer checkout endpoints support optional auth in this project setup
 });

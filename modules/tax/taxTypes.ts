@@ -81,7 +81,7 @@ export type CustomerTaxExemption = {
 
 export type TaxSettings = {
   id: string;
-  merchantId: string;
+  organizationId: string;
   calculationMethod: TaxCalculationMethod;
   pricesIncludeTax: boolean;
   displayPricesWithTax: boolean;

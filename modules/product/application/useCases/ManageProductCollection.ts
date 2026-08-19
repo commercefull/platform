@@ -26,7 +26,7 @@ export class ManageProductCollectionCommand {
     public readonly imageUrl?: string,
     public readonly isActive?: boolean,
     public readonly position?: number,
-    public readonly merchantId?: string,
+    public readonly organizationId?: string,
     /** Products to add to the collection */
     public readonly addProducts?: CollectionMapItem[],
     /** productCollectionMapIds to remove from the collection */
@@ -66,7 +66,7 @@ export class ManageProductCollectionUseCase {
         description: command.description,
         imageUrl: command.imageUrl,
         isActive: command.isActive,
-        merchantId: command.merchantId,
+        organizationId: command.organizationId,
       });
       if (!updated) {
         throw new Error(`Collection not found: ${command.productCollectionId}`);
@@ -80,7 +80,7 @@ export class ManageProductCollectionUseCase {
         description: command.description,
         imageUrl: command.imageUrl,
         isActive: command.isActive ?? true,
-        merchantId: command.merchantId,
+        organizationId: command.organizationId,
       });
     }
 

@@ -24,7 +24,7 @@ const TEST_STORE_IDS = {
 };
 
 let client: AxiosInstance;
-let merchantToken: string;
+let organizationToken: string;
 
 beforeAll(async () => {
   client = axios.create({
@@ -41,10 +41,10 @@ beforeAll(async () => {
   const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, {
     headers: { 'X-Test-Request': 'true' },
   });
-  merchantToken = loginResponse.data?.accessToken || '';
+  organizationToken = loginResponse.data?.accessToken || '';
 });
 
-const authHeaders = () => ({ Authorization: `Bearer ${merchantToken}` });
+const authHeaders = () => ({ Authorization: `Bearer ${organizationToken}` });
 
 // ============================================================================
 // Tests
@@ -87,7 +87,7 @@ describe('Store CRUD Tests', () => {
           name: `Integration Test Store ${randomUUID().substring(0, 8)}`,
           slug: `int-test-${Date.now()}`,
           storeType: 'merchant_store',
-          merchantId: '01a004e6-11d9-7923-b6bd-139f2ba3cd46',
+          organizationId: '01911000-0000-7000-8000-000000000001',
           description: 'Store created by integration test',
           isActive: true,
         },
@@ -141,10 +141,10 @@ describe('Store CRUD Tests', () => {
   });
 
   // ==========================================================================
-  // GET /business/stores/business/:businessId
+  // GET /business/stores/business/:organizationId
   // ==========================================================================
 
-  describe('GET /business/stores/business/:businessId', () => {
+  describe('GET /business/stores/business/:organizationId', () => {
     it('should return stores for a business', async () => {
       const response = await client.get('/business/stores/business/00000000-0000-0000-0000-000000000001', {
         headers: authHeaders(),

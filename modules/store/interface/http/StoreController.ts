@@ -46,9 +46,8 @@ export class StoreController {
         name: body.name as string,
         slug: body.slug as string | undefined,
         description: body.description as string | undefined,
-        storeType: body.storeType as 'merchant_store' | 'business_store',
-        merchantId: body.merchantId as string | undefined,
-        businessId: body.businessId as string | undefined,
+        storeType: body.storeType as 'merchant_store' | 'organization_store',
+        organizationId: body.organizationId as string | undefined,
         isHeadquarters: body.isHeadquarters as boolean | undefined,
         parentStoreId: body.parentStoreId as string | undefined,
         storeUrl: body.storeUrl as string | undefined,
@@ -120,8 +119,8 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(500).json({
+      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      res.status(statusCode).json({
         success: false,
         message: 'Failed to get store',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
@@ -153,8 +152,8 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(500).json({
+      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      res.status(statusCode).json({
         success: false,
         message: 'Failed to get store',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
@@ -164,12 +163,12 @@ export class StoreController {
 
   /**
    * Get stores by business
-   * GET /business/stores/business/:businessId
+   * GET /business/stores/business/:organizationId
    */
   async getStoresByBusiness(req: TypedRequest, res: Response) {
     try {
       const storeRepository = new StoreRepo();
-      const stores = await storeRepository.findByBusiness(req.params.businessId);
+      const stores = await storeRepository.findByBusiness(req.params.organizationId);
 
       res.json({
         success: true,
@@ -180,8 +179,8 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(500).json({
+      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      res.status(statusCode).json({
         success: false,
         message: 'Failed to get stores',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
@@ -207,8 +206,8 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(500).json({
+      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      res.status(statusCode).json({
         success: false,
         message: 'Failed to get active stores',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
@@ -232,9 +231,9 @@ export class StoreController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(400).json({
+      const errorMessage = error instanceof Error ? (error as Error).message : "Unknown error";
+      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      res.status(statusCode).json({
         success: false,
         message: 'Failed to update store',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
@@ -263,8 +262,8 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(500).json({
+      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      res.status(statusCode).json({
         success: false,
         message: 'Failed to delete store',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
@@ -292,9 +291,9 @@ export class StoreController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(400).json({
+      const errorMessage = error instanceof Error ? (error as Error).message : "Unknown error";
+      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      res.status(statusCode).json({
         success: false,
         message: 'Failed to configure pickup',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
@@ -328,9 +327,9 @@ export class StoreController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(400).json({
+      const errorMessage = error instanceof Error ? (error as Error).message : "Unknown error";
+      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      res.status(statusCode).json({
         success: false,
         message: 'Failed to set local delivery zone',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
@@ -346,7 +345,7 @@ export class StoreController {
     try {
       const body = req.body as Record<string, unknown>;
       const result = await this.createStoreHierarchyUseCase.execute({
-        businessId: body.businessId as string,
+        organizationId: body.organizationId as string,
         name: body.name as string,
         defaultStoreId: body.defaultStoreId as string,
         storeIds: body.storeIds as string[],
@@ -362,9 +361,9 @@ export class StoreController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(400).json({
+      const errorMessage = error instanceof Error ? (error as Error).message : "Unknown error";
+      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      res.status(statusCode).json({
         success: false,
         message: 'Failed to create store hierarchy',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
@@ -380,9 +379,8 @@ export class StoreController {
     try {
       const query = new ListStoresQuery(
         {
-          storeType: req.query.storeType as 'merchant_store' | 'business_store' | undefined,
-          merchantId: req.query.merchantId as string | undefined,
-          businessId: req.query.businessId as string | undefined,
+          storeType: req.query.storeType as 'merchant_store' | 'organization_store' | undefined,
+          organizationId: req.query.organizationId as string | undefined,
           isHeadquarters: req.query.isHeadquarters === 'true',
           parentStoreId: req.query.parentStoreId as string | undefined,
           isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
@@ -415,7 +413,6 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
       res.status(500).json({
         success: false,
         message: 'Failed to list stores',

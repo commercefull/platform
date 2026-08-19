@@ -5,7 +5,7 @@
 export interface ToggleFeatureFlagInput {
   key: string;
   enabled: boolean;
-  scope?: 'global' | 'store' | 'merchant';
+  scope?: 'global' | 'store' | 'organization';
   scopeId?: string;
   rolloutPercentage?: number;
   conditions?: Record<string, unknown>;

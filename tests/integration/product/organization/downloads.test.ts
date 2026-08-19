@@ -29,9 +29,9 @@ describe('Download Management', () => {
     }
   });
 
-  // ── Merchant: Download CRUD ──────────────────────────────────────────────
+  // ── Organization: Download CRUD ──────────────────────────────────────────────
 
-  describe('Merchant: Download CRUD', () => {
+  describe('Organization: Download CRUD', () => {
     it('should create a download for a product', async () => {
       const res = await client.post(
         `/business/products/${SEEDED_PRODUCT_1_ID}/downloads`,
@@ -117,9 +117,9 @@ describe('Download Management', () => {
     });
   });
 
-  // ── Merchant: Download Validation ────────────────────────────────────────
+  // ── Organization: Download Validation ────────────────────────────────────────
 
-  describe('Merchant: Download Validation', () => {
+  describe('Organization: Download Validation', () => {
     it('should reject download creation without name', async () => {
       const res = await client.post(
         `/business/products/${SEEDED_PRODUCT_1_ID}/downloads`,

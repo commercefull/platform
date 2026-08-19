@@ -1,10 +1,10 @@
 import express from 'express';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as localizationController from '../controllers/localizationBusinessController';
 
 const router = express.Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ========== LOCALE ROUTES ==========
 

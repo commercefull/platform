@@ -80,7 +80,7 @@ class DashboardQueryRepositoryClass {
   /**
    * Get merchant-specific dashboard stats
    */
-  async getMerchantDashboardStats(merchantId: string): Promise<DashboardStats> {
+  async getMerchantDashboardStats(organizationId: string): Promise<DashboardStats> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -89,8 +89,8 @@ class DashboardQueryRepositoryClass {
        FROM "order" o
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
-       WHERE p."merchantId" = $1 AND o."deletedAt" IS NULL`,
-      [merchantId],
+       WHERE p."organizationId" = $1 AND o."deletedAt" IS NULL`,
+      [organizationId],
     );
 
     const todayResult = await queryOne<{ count: string; total: string }>(
@@ -98,13 +98,13 @@ class DashboardQueryRepositoryClass {
        FROM "order" o
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
-       WHERE p."merchantId" = $1 AND o."deletedAt" IS NULL AND o."createdAt" >= $2`,
-      [merchantId, today],
+       WHERE p."organizationId" = $1 AND o."deletedAt" IS NULL AND o."createdAt" >= $2`,
+      [organizationId, today],
     );
 
     const productsResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "product" WHERE "merchantId" = $1 AND "deletedAt" IS NULL`,
-      [merchantId],
+      `SELECT COUNT(*) as count FROM "product" WHERE "organizationId" = $1 AND "deletedAt" IS NULL`,
+      [organizationId],
     );
 
     const pendingResult = await queryOne<{ count: string }>(
@@ -112,16 +112,16 @@ class DashboardQueryRepositoryClass {
        FROM "order" o
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
-       WHERE p."merchantId" = $1 AND o."deletedAt" IS NULL AND o."status" IN ('pending', 'processing')`,
-      [merchantId],
+       WHERE p."organizationId" = $1 AND o."deletedAt" IS NULL AND o."status" IN ('pending', 'processing')`,
+      [organizationId],
     );
 
     const lowStockResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count 
        FROM "product" p
        JOIN "inventoryLevel" il ON p."productId" = il."productId"
-       WHERE p."merchantId" = $1 AND p."deletedAt" IS NULL AND (il."availableQuantity" - il."reservedQuantity") <= il."reorderQuantity"`,
-      [merchantId],
+       WHERE p."organizationId" = $1 AND p."deletedAt" IS NULL AND (il."availableQuantity" - il."reservedQuantity") <= il."reorderQuantity"`,
+      [organizationId],
     );
 
     return {
@@ -158,7 +158,7 @@ class DashboardQueryRepositoryClass {
   /**
    * Get recent orders for a specific merchant
    */
-  async getMerchantRecentOrders(merchantId: string, limit: number = 5): Promise<RecentOrder[]> {
+  async getMerchantRecentOrders(organizationId: string, limit: number = 5): Promise<RecentOrder[]> {
     const orders = await query<RecentOrder[]>(
       `SELECT DISTINCT ON (o."orderId")
          o."orderId", o."orderNumber", 
@@ -168,10 +168,10 @@ class DashboardQueryRepositoryClass {
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
        LEFT JOIN "customer" c ON o."customerId" = c."customerId"
-       WHERE p."merchantId" = $1 AND o."deletedAt" IS NULL
+       WHERE p."organizationId" = $1 AND o."deletedAt" IS NULL
        ORDER BY o."orderId", o."createdAt" DESC
        LIMIT $2`,
-      [merchantId, limit],
+      [organizationId, limit],
     );
     return orders || [];
   }
@@ -199,7 +199,7 @@ class DashboardQueryRepositoryClass {
   /**
    * Get top products for a specific merchant
    */
-  async getMerchantTopProducts(merchantId: string, limit: number = 5): Promise<TopProduct[]> {
+  async getMerchantTopProducts(organizationId: string, limit: number = 5): Promise<TopProduct[]> {
     const products = await query<TopProduct[]>(
       `SELECT 
          p."productId", p."name",
@@ -207,11 +207,11 @@ class DashboardQueryRepositoryClass {
          COALESCE(SUM(oi."lineTotal"), 0) as "revenue"
        FROM "product" p
        LEFT JOIN "orderItem" oi ON p."productId" = oi."productId"
-       WHERE p."merchantId" = $1 AND p."deletedAt" IS NULL
+       WHERE p."organizationId" = $1 AND p."deletedAt" IS NULL
        GROUP BY p."productId", p."name"
        ORDER BY "totalSold" DESC
        LIMIT $2`,
-      [merchantId, limit],
+      [organizationId, limit],
     );
     return products || [];
   }

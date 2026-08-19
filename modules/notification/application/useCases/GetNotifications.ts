@@ -4,7 +4,7 @@
 
 export interface GetNotificationsInput {
   recipientId: string;
-  recipientType?: 'customer' | 'merchant' | 'admin';
+  recipientType?: 'customer' | 'organization' | 'admin';
   channel?: string;
   status?: string;
   unreadOnly?: boolean;

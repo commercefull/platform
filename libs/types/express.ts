@@ -26,9 +26,9 @@ declare global {
       name?: string;
       role?: string;
       roles?: Roles;
-      type?: 'admin' | 'merchant' | 'b2b' | 'customer';
+      type?: 'admin' | 'organization' | 'b2b' | 'customer';
       status?: boolean;
-      merchantId?: string;
+      organizationId?: string;
       companyId?: string;
       storeId?: string;
       storeRole?: string;

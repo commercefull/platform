@@ -3,8 +3,8 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex.schema.createTable('merchant', t => {
-    t.uuid('merchantId').primary().defaultTo(knex.raw('uuidv7()'));
+  return knex.schema.createTable('organization', t => {
+    t.uuid('organizationId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.string('name', 100).notNullable();
@@ -51,7 +51,7 @@ exports.up = function (knex) {
     t.boolean('autoApproveProducts').notNullable().defaultTo(false);
     t.boolean('autoApproveReviews').notNullable().defaultTo(false);
     t.decimal('sellerRating', 3, 2);
-    t.boolean('featuredMerchant').notNullable().defaultTo(false);
+    t.boolean('featuredOrganization').notNullable().defaultTo(false);
     t.jsonb('storePolicies');
     t.jsonb('notificationPreferences');
     t.specificType('allowedCategories', 'uuid[]');
@@ -69,7 +69,7 @@ exports.up = function (knex) {
     t.index('verificationStatus');
     t.index('businessType');
     t.index('commissionRate');
-    t.index('featuredMerchant');
+    t.index('featuredOrganization');
     t.index('sellerRating');
     t.index('lastLoginAt');
     t.index('createdAt');
@@ -86,5 +86,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema.dropTable('merchant');
+  return knex.schema.dropTable('organization');
 };

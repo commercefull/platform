@@ -16,7 +16,7 @@ import storedPaymentMethodRepo, { StoredPaymentMethod } from '../../infrastructu
 export class SaveStoredPaymentMethodCommand {
   constructor(
     public readonly customerId: string,
-    public readonly merchantId: string,
+    public readonly organizationId: string,
     public readonly type: string,
     public readonly provider: string,
     public readonly providerToken: string,
@@ -35,7 +35,7 @@ export class SaveStoredPaymentMethodCommand {
 export interface SaveStoredPaymentMethodResponse {
   storedPaymentMethodId: string;
   customerId: string;
-  merchantId: string;
+  organizationId: string;
   type: string;
   provider: string;
   last4?: string;
@@ -56,7 +56,7 @@ export class SaveStoredPaymentMethodUseCase {
   async execute(command: SaveStoredPaymentMethodCommand): Promise<SaveStoredPaymentMethodResponse> {
     const method = await this.repo.create({
       customerId: command.customerId,
-      merchantId: command.merchantId,
+      organizationId: command.organizationId,
       type: command.type,
       provider: command.provider,
       providerToken: command.providerToken,
@@ -88,7 +88,7 @@ export class SaveStoredPaymentMethodUseCase {
     return {
       storedPaymentMethodId: m.storedPaymentMethodId,
       customerId: m.customerId,
-      merchantId: m.merchantId,
+      organizationId: m.organizationId,
       type: m.type,
       provider: m.provider,
       last4: m.last4,

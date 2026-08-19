@@ -26,7 +26,7 @@ const TEST_STORE_IDS = {
 const TEST_PRODUCT_1_ID = '00000000-0000-0000-0000-000000000001';
 
 let client: AxiosInstance;
-let merchantToken: string;
+let organizationToken: string;
 
 beforeAll(async () => {
   client = axios.create({
@@ -43,10 +43,10 @@ beforeAll(async () => {
   const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, {
     headers: { 'X-Test-Request': 'true' },
   });
-  merchantToken = loginResponse.data?.accessToken || '';
+  organizationToken = loginResponse.data?.accessToken || '';
 });
 
-const authHeaders = () => ({ Authorization: `Bearer ${merchantToken}` });
+const authHeaders = () => ({ Authorization: `Bearer ${organizationToken}` });
 
 // ============================================================================
 // Tests

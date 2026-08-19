@@ -22,9 +22,9 @@ describe('Configurable Product', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-  // ── Merchant: Variant Matrix ─────────────────────────────────────────────
+  // ── Organization: Variant Matrix ─────────────────────────────────────────────
 
-  describe('Merchant: Variant Matrix', () => {
+  describe('Organization: Variant Matrix', () => {
     it('should get variant matrix for a product', async () => {
       const res = await client.get(`/business/products/${SEEDED_PRODUCT_1_ID}/variant-matrix`, {
         headers: { Authorization: `Bearer ${adminToken}` },
@@ -48,9 +48,9 @@ describe('Configurable Product', () => {
     });
   });
 
-  // ── Merchant: Configure Variant ──────────────────────────────────────────
+  // ── Organization: Configure Variant ──────────────────────────────────────────
 
-  describe('Merchant: Configure Variant', () => {
+  describe('Organization: Configure Variant', () => {
     it('should configure a variant by options', async () => {
       const res = await client.post(
         `/business/products/${SEEDED_PRODUCT_1_ID}/configure`,

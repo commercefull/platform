@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('taxCalculationId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.uuid('orderId').references('orderId').inTable('order');
     t.uuid('invoiceId');
     t.uuid('basketId').references('basketId').inTable('basket');
@@ -23,7 +23,7 @@ exports.up = function (knex) {
     t.string('taxProviderReference', 255);
     t.text('errorMessage');
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('orderId');
     t.index('invoiceId');
     t.index('basketId');

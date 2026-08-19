@@ -154,7 +154,7 @@ export const updateOrganization = async (req: TypedRequest<Record<string, string
 
     if (email && email !== existing.email) {
       const orgWithEmail = await repo.findByEmail(email);
-      if (orgWithEmail && orgWithEmail.merchantId !== id) {
+      if (orgWithEmail && orgWithEmail.organizationId !== id) {
         res.status(409).json({ success: false, message: `Email ${email} is already in use by another organization` });
         return;
       }
@@ -247,7 +247,7 @@ export const addOrganizationAddress = async (req: TypedRequest<Record<string, st
     }
 
     const address = await repo.createAddress({
-      merchantId: organizationId,
+      organizationId: organizationId,
       addressLine1,
       addressLine2,
       city,
@@ -276,7 +276,7 @@ export const updateOrganizationAddress = async (req: TypedRequest<Record<string,
     }
 
     const existingAddress = await repo.findAddressById(addressId);
-    if (!existingAddress || existingAddress.merchantId !== organizationId) {
+    if (!existingAddress || existingAddress.organizationId !== organizationId) {
       res.status(404).json({ success: false, message: `Address with ID ${addressId} not found for organization ${organizationId}` });
       return;
     }
@@ -343,7 +343,7 @@ export const addOrganizationPaymentInfo = async (req: TypedRequest<Record<string
     }
 
     const paymentInfo = await repo.createPaymentInfo({
-      merchantId: organizationId,
+      organizationId: organizationId,
       accountHolderName,
       bankName,
       accountNumber,
@@ -372,7 +372,7 @@ export const updateOrganizationPaymentInfo = async (req: TypedRequest<Record<str
     }
 
     const existingPaymentInfo = await repo.findPaymentInfoById(paymentInfoId);
-    if (!existingPaymentInfo || existingPaymentInfo.merchantId !== organizationId) {
+    if (!existingPaymentInfo || existingPaymentInfo.organizationId !== organizationId) {
       res.status(404).json({ success: false, message: `Payment info with ID ${paymentInfoId} not found for organization ${organizationId}` });
       return;
     }

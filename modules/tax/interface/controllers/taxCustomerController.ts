@@ -36,10 +36,10 @@ export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) 
       price?: number;
       shippingAddress?: ShippingAddressBody;
       customerId?: string;
-      merchantId?: string;
+      organizationId?: string;
     };
 
-    const { productId, quantity, price, shippingAddress, customerId, merchantId } = body;
+    const { productId, quantity, price, shippingAddress, customerId, organizationId } = body;
 
     // Validate required fields
     if (!productId || !quantity || !price || !shippingAddress || !shippingAddress.country) {
@@ -135,7 +135,7 @@ export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) 
       parsedPrice * parsedQuantity, // Subtotal
       0, // No shipping amount for single line item
       customerId,
-      merchantId,
+      organizationId,
     );
 
     res.json(taxResult);
@@ -156,9 +156,9 @@ export const calculateTaxForBasket = async (req: TypedRequest, res: Response) =>
       shippingAddress?: ShippingAddressBody;
       billingAddress?: ShippingAddressBody;
       customerId?: string;
-      merchantId?: string;
+      organizationId?: string;
     };
-    const { shippingAddress, billingAddress, customerId, merchantId } = body;
+    const { shippingAddress, billingAddress, customerId, organizationId } = body;
 
     // Validate required fields
     if (!basketId || !shippingAddress || !shippingAddress.country) {
@@ -248,7 +248,7 @@ export const calculateTaxForBasket = async (req: TypedRequest, res: Response) =>
         basket.subtotal.amount,
         0,
         customerId,
-        merchantId,
+        organizationId,
       );
 
       res.json(taxResult);
@@ -371,9 +371,9 @@ export const findTaxZoneForAddress = async (req: TypedRequest, res: Response) =>
  */
 export const getCustomerTaxSettings = async (req: TypedRequest, res: Response) => {
   try {
-    const { merchantId } = req.params;
+    const { organizationId } = req.params;
 
-    if (!merchantId) {
+    if (!organizationId) {
       res.status(400).json({ error: 'Merchant ID is required' });
       return;
     }

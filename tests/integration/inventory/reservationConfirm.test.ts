@@ -18,7 +18,7 @@ const TEST_MERCHANT = {
 const TEST_PRODUCT_ID = '00000000-0000-0000-0000-000000000001';
 
 let client: AxiosInstance;
-let merchantToken: string;
+let organizationToken: string;
 
 beforeAll(async () => {
   client = axios.create({
@@ -35,10 +35,10 @@ beforeAll(async () => {
   const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, {
     headers: { 'X-Test-Request': 'true' },
   });
-  merchantToken = loginResponse.data?.accessToken || '';
+  organizationToken = loginResponse.data?.accessToken || '';
 });
 
-const authHeaders = () => ({ Authorization: `Bearer ${merchantToken}` });
+const authHeaders = () => ({ Authorization: `Bearer ${organizationToken}` });
 
 // ============================================================================
 // Tests
@@ -51,7 +51,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
 
   describe('UC-INV-006: Confirm Reservation', () => {
     it('should reject confirm with non-existent reservation ID', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
 
       const response = await client.post(
         `/business/inventory/reservations/${randomUUID()}/confirm`,
@@ -64,7 +64,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
     });
 
     it('should reject confirm without reservationId in body', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
 
       const response = await client.post(
         `/business/inventory/reservations/${randomUUID()}/confirm`,
@@ -85,7 +85,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
     });
 
     it('should confirm an active reservation (full lifecycle)', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
 
       // Create a legacy inventory location
       const createRes = await client.post(
@@ -133,7 +133,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
 
   describe('UC-INV-012: Set Low Stock Threshold', () => {
     it('should set low stock threshold for a product', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
 
       const response = await client.put(
         `/business/inventory/products/${TEST_PRODUCT_ID}/threshold`,
@@ -156,7 +156,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
     });
 
     it('should reject negative reorder point', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
 
       const response = await client.put(
         `/business/inventory/products/${TEST_PRODUCT_ID}/threshold`,
@@ -172,7 +172,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
     });
 
     it('should reject without required productId', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
 
       const response = await client.put(
         `/business/inventory/products/${TEST_PRODUCT_ID}/threshold`,
@@ -187,7 +187,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
     });
 
     it('should reject without required locationId', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
 
       const response = await client.put(
         `/business/inventory/products/${TEST_PRODUCT_ID}/threshold`,
@@ -215,7 +215,7 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
     });
 
     it('should return 404 for non-existent product', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
 
       const response = await client.put(
         `/business/inventory/products/${randomUUID()}/threshold`,

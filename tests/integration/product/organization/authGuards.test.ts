@@ -1,6 +1,6 @@
 /**
  * Integration tests for authentication guards on business endpoints
- * Verifies that all /business/* product routes require a valid merchant token
+ * Verifies that all /business/* product routes require a valid organization token
  */
 
 import { AxiosInstance } from 'axios';

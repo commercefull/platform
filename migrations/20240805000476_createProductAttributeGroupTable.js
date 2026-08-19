@@ -9,14 +9,14 @@ exports.up = function (knex) {
     t.integer('position').notNullable().defaultTo(0);
     t.boolean('isVisible').notNullable().defaultTo(true);
     t.boolean('isComparable').notNullable().defaultTo(true);
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('organizationId').references('organizationId').inTable('organization');
     t.boolean('isGlobal').notNullable().defaultTo(true);
 
     t.index('code');
     t.index('position');
     t.index('isVisible');
     t.index('isComparable');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isGlobal');
   });
 };

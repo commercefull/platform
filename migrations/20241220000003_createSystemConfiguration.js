@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.enum('systemMode', ['marketplace', 'multi_store', 'single_store']).notNullable().defaultTo('single_store');
     t.boolean('isActive').notNullable().defaultTo(true);
     t.jsonb('features');
-    t.jsonb('businessSettings');
+    t.jsonb('organizationSettings');
     t.jsonb('platformSettings');
     t.jsonb('securitySettings');
     t.jsonb('notificationSettings');

@@ -9,11 +9,11 @@ exports.up = async function (knex) {
   await knex.schema.createTable('identityUserSession', table => {
     table.uuid('sessionId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('userId').notNullable();
-    table.string('userType', 20).notNullable(); // 'admin', 'merchant', 'b2b', 'customer'
+    table.string('userType', 20).notNullable(); // 'admin', 'organization', 'b2b', 'customer'
     table.string('email', 255).notNullable();
     table.string('name', 255).nullable();
     table.string('role', 50).nullable();
-    table.string('merchantId', 50).nullable();
+    table.string('organizationId', 50).nullable();
     table.string('companyId', 50).nullable();
     table.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
     table.string('storeRole', 50).nullable();

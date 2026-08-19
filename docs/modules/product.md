@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Product feature manages the product catalog, including products, variants, bundles, media, and categorization. It supports both business/admin operations and customer-facing product browsing.
+The Product feature manages the product catalog, including products, variants, bundles, media, and categorization. It supports both organization/admin operations and customer-facing product browsing.
 
 ---
 
@@ -88,21 +88,21 @@ The Product feature manages the product catalog, including products, variants, b
 
 | Use Case                 | Test File                              | Status |
 | ------------------------ | -------------------------------------- | ------ |
-| UC-PRD-001               | `product/merchant/lifecycle.test.ts`   | ✅     |
-| UC-PRD-002               | `product/merchant/lifecycle.test.ts`   | ✅     |
-| UC-PRD-003               | `product/merchant/lifecycle.test.ts`   | ✅     |
-| UC-PRD-004               | `product/merchant/lifecycle.test.ts`   | ✅     |
-| UC-PRD-005               | `product/merchant/lifecycle.test.ts`   | ✅     |
-| UC-PRD-006               | `product/merchant/lifecycle.test.ts`   | ✅     |
-| UC-PRD-007               | `product/merchant/lifecycle.test.ts`   | ✅     |
-| UC-PRD-008               | `product/merchant/lifecycle.test.ts`   | ✅     |
+| UC-PRD-001               | `product/organization/lifecycle.test.ts`   | ✅     |
+| UC-PRD-002               | `product/organization/lifecycle.test.ts`   | ✅     |
+| UC-PRD-003               | `product/organization/lifecycle.test.ts`   | ✅     |
+| UC-PRD-004               | `product/organization/lifecycle.test.ts`   | ✅     |
+| UC-PRD-005               | `product/organization/lifecycle.test.ts`   | ✅     |
+| UC-PRD-006               | `product/organization/lifecycle.test.ts`   | ✅     |
+| UC-PRD-007               | `product/organization/lifecycle.test.ts`   | ✅     |
+| UC-PRD-008               | `product/organization/lifecycle.test.ts`   | ✅     |
 | UC-PRD-009               | `product/customer/search.test.ts`      | ✅     |
 | UC-PRD-010               | `product/customer/browsing.test.ts`    | ✅     |
 | UC-PRD-011               | `product/customer/categories.test.ts`  | ✅     |
 | UC-PRD-012               | `product/customer/browsing.test.ts`    | ✅     |
 | UC-PRD-013               | `product/customer/browsing.test.ts`    | ✅     |
 | UC-PRD-014               | `product/customer/browsing.test.ts`    | ✅     |
-| UC-PRD-015 to UC-PRD-020 | `product/merchant/bundles.test.ts`     | ✅     |
+| UC-PRD-015 to UC-PRD-020 | `product/organization/bundles.test.ts`     | ✅     |
 | UC-PRD-021 to UC-PRD-024 | `product/customer/bundles.test.ts`     | ✅     |
 
 

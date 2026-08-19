@@ -81,7 +81,7 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
       eventType: 'order.created',
       eventCategory: 'order',
       eventAction: 'created',
-      merchantId: data.merchantId as string | undefined,
+      organizationId: data.organizationId as string | undefined,
       customerId: data.customerId as string | undefined,
       orderId: data.orderId as string | undefined,
       eventValue: (data.grandTotal || data.total) as number | undefined,
@@ -101,7 +101,7 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: data.merchantId as string | undefined,
+      organizationId: data.organizationId as string | undefined,
       channel: (data.channel as string) || 'all',
       currency: (data.currency as string) || 'USD',
       orderCount: 1,
@@ -181,7 +181,7 @@ async function handleOrderRefunded(payload: unknown): Promise<void> {
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: data.merchantId as string | undefined,
+      organizationId: data.organizationId as string | undefined,
       refundTotal: (data.refundAmount as number) || 0,
     });
   } catch {}
@@ -209,7 +209,7 @@ async function handleCartCreated(payload: unknown): Promise<void> {
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: data.merchantId as string | undefined,
+      organizationId: data.organizationId as string | undefined,
       cartCreated: 1,
     });
   } catch {}
@@ -283,7 +283,7 @@ async function handleCartAbandoned(payload: unknown): Promise<void> {
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: data.merchantId as string | undefined,
+      organizationId: data.organizationId as string | undefined,
       cartAbandoned: 1,
     });
   } catch {}
@@ -310,7 +310,7 @@ async function handleCheckoutStarted(payload: unknown): Promise<void> {
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: data.merchantId as string | undefined,
+      organizationId: data.organizationId as string | undefined,
       checkoutStarted: 1,
     });
   } catch {}
@@ -352,7 +352,7 @@ async function handlePaymentSuccess(payload: unknown): Promise<void> {
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: data.merchantId as string | undefined,
+      organizationId: data.organizationId as string | undefined,
       paymentSuccessCount: 1,
     });
   } catch {}
@@ -376,7 +376,7 @@ async function handlePaymentFailed(payload: unknown): Promise<void> {
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      merchantId: data.merchantId as string | undefined,
+      organizationId: data.organizationId as string | undefined,
       paymentFailedCount: 1,
     });
   } catch {}

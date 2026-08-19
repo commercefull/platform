@@ -17,7 +17,7 @@ const TEST_MERCHANT = {
 };
 
 let client: AxiosInstance;
-let merchantToken: string;
+let organizationToken: string;
 
 beforeAll(async () => {
   client = axios.create({
@@ -34,10 +34,10 @@ beforeAll(async () => {
   const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, {
     headers: { 'X-Test-Request': 'true' },
   });
-  merchantToken = loginResponse.data?.accessToken || '';
+  organizationToken = loginResponse.data?.accessToken || '';
 });
 
-const authHeaders = () => ({ Authorization: `Bearer ${merchantToken}` });
+const authHeaders = () => ({ Authorization: `Bearer ${organizationToken}` });
 
 // ============================================================================
 // Tests
@@ -218,8 +218,8 @@ describe('Inventory Pool & Transfer Tests', () => {
 
     it('should create an inventory pool', async () => {
       const poolData = {
-        ownerType: 'merchant',
-        ownerId: 'test-merchant-123',
+        ownerType: 'organization',
+        ownerId: 'test-organization-123',
         name: `Test Pool ${randomUUID().substring(0, 8)}`,
         poolType: 'shared',
         allocationStrategy: 'round_robin',

@@ -8,6 +8,7 @@ import { OrderRepository } from '../../../order/domain/repositories/OrderReposit
 import { CancelOrderUseCase, CancelOrderCommand } from '../../../order/application/useCases/CancelOrder';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { logger } from '../../../../libs/logger';
+import { NotFoundError } from '../../../../libs/errors';
 
 // ============================================================================
 // Command
@@ -59,6 +60,8 @@ export class AbandonCheckoutUseCase {
         basketId: session.basketId,
         customerId: session.customerId,
       });
+    } else {
+      throw new NotFoundError('Checkout session not found');
     }
 
     return {

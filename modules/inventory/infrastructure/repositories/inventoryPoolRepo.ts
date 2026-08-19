@@ -14,7 +14,7 @@ import {
 
 export interface InventoryPool {
   poolId: string;
-  ownerType: 'business' | 'merchant';
+  ownerType: 'organization';
   ownerId: string;
   name: string;
   poolType: 'shared' | 'virtual' | 'aggregated';
@@ -46,7 +46,7 @@ export interface AllocationResultItem {
 
 export async function createPool(input: {
   poolId: string;
-  ownerType: 'business' | 'merchant';
+  ownerType: 'organization';
   ownerId: string;
   name: string;
   poolType: 'shared' | 'virtual' | 'aggregated';
@@ -114,7 +114,7 @@ export async function findPoolById(poolId: string): Promise<InventoryPool | null
 
   return {
     poolId: row.inventoryPoolId,
-    ownerType: row.ownerType as 'business' | 'merchant',
+    ownerType: row.ownerType as 'organization',
     ownerId: row.ownerId,
     name: row.name,
     poolType: row.poolType as 'shared' | 'virtual' | 'aggregated',

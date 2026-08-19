@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('paymentGatewayId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.string('name', 100).notNullable();
     t.enum('provider', ['stripe', 'square', 'paypal', 'manual', 'other']).notNullable();
     t.boolean('isActive').notNullable().defaultTo(true);
@@ -21,7 +21,7 @@ exports.up = function (knex) {
     t.jsonb('metadata');
     t.timestamp('deletedAt');
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('provider');
     t.index('isActive');
   });

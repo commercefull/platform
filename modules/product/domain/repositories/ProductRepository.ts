@@ -14,8 +14,7 @@ export interface ProductFilters {
   status?: ProductStatus | ProductStatus[];
   visibility?: ProductVisibility | ProductVisibility[];
   categoryId?: string;
-  merchantId?: string;
-  businessId?: string;
+  organizationId?: string;
   storeId?: string;
   isFeatured?: boolean;
   isVirtual?: boolean;
@@ -40,10 +39,10 @@ export interface ProductRepository {
 
   // Product queries
   findByCategory(categoryId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
-  findByMerchant(merchantId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
-  findByBusiness(businessId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
+  findByMerchant(organizationId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
+  findByBusiness(organizationId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findByStore(storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
-  findByBusinessAndStore(businessId: string, storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
+  findByBusinessAndStore(organizationId: string, storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findFeatured(pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findRelated(productId: string, limit?: number): Promise<Product[]>;
   search(query: string, filters?: ProductFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;

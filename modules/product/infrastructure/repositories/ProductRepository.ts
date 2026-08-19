@@ -101,8 +101,8 @@ export class ProductRepo implements IProductRepository {
           weight = $17, "weightUnit" = $18, length = $19, width = $20, height = $21,
           "dimensionUnit" = $22, "metaTitle" = $23, "metaDescription" = $24, "metaKeywords" = $25,
           "isFeatured" = $26, "isNew" = $27, "isBestseller" = $28, "hasVariants" = $29,
-          "merchantId" = $30, "businessId" = $31, "storeId" = $32, "publishedAt" = $33, "updatedAt" = $34
-        WHERE "productId" = $35`,
+          "organizationId" = $30, "storeId" = $31, "publishedAt" = $32, "updatedAt" = $33
+        WHERE "productId" = $34`,
         [
           product.name,
           product.description,
@@ -133,8 +133,7 @@ export class ProductRepo implements IProductRepository {
           false,
           false,
           product.hasVariants,
-          product.merchantId || null,
-          product.businessId || null,
+          product.organizationId || null,
           product.storeId || null,
           product.publishedAt?.toISOString() || null,
           now,
@@ -150,10 +149,10 @@ export class ProductRepo implements IProductRepository {
           weight, "weightUnit", length, width, height, "dimensionUnit",
           "metaTitle", "metaDescription", "metaKeywords",
           "isFeatured", "isNew", "isBestseller", "hasVariants",
-          "merchantId", "businessId", "storeId", "publishedAt", "createdAt", "updatedAt"
+          "organizationId", "storeId", "publishedAt", "createdAt", "updatedAt"
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36
+          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35
         )`,
         [
           product.productId,
@@ -186,8 +185,7 @@ export class ProductRepo implements IProductRepository {
           false,
           false,
           product.hasVariants,
-          product.merchantId || null,
-          product.businessId || null,
+          product.organizationId || null,
           product.storeId || null,
           product.publishedAt?.toISOString() || null,
           now,
@@ -224,20 +222,20 @@ export class ProductRepo implements IProductRepository {
     return this.findAll({ categoryId }, pagination);
   }
 
-  async findByMerchant(merchantId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
-    return this.findAll({ merchantId }, pagination);
+  async findByMerchant(organizationId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
+    return this.findAll({ organizationId }, pagination);
   }
 
-  async findByBusiness(businessId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
-    return this.findAll({ businessId }, pagination);
+  async findByBusiness(organizationId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
+    return this.findAll({ organizationId }, pagination);
   }
 
   async findByStore(storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
     return this.findAll({ storeId }, pagination);
   }
 
-  async findByBusinessAndStore(businessId: string, storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
-    return this.findAll({ businessId, storeId }, pagination);
+  async findByBusinessAndStore(organizationId: string, storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
+    return this.findAll({ organizationId, storeId }, pagination);
   }
 
   async findFeatured(pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
@@ -445,13 +443,13 @@ export class ProductRepo implements IProductRepository {
     if (filters?.categoryId) {
       // Category filtering not implemented in current schema
     }
-    if (filters?.merchantId) {
-      conditions.push(`"merchantId" = $${paramIndex++}`);
-      params.push(filters.merchantId);
+    if (filters?.organizationId) {
+      conditions.push(`"organizationId" = $${paramIndex++}`);
+      params.push(filters.organizationId);
     }
-    if (filters?.businessId) {
-      conditions.push(`"businessId" = $${paramIndex++}`);
-      params.push(filters.businessId);
+    if (filters?.organizationId) {
+      conditions.push(`"organizationId" = $${paramIndex++}`);
+      params.push(filters.organizationId);
     }
     if (filters?.storeId) {
       conditions.push(`"storeId" = $${paramIndex++}`);
@@ -495,8 +493,7 @@ export class ProductRepo implements IProductRepository {
       slug: row.slug,
       productTypeId: row.type,
       categoryId: undefined,
-      merchantId: row.merchantId ?? undefined,
-      businessId: row.businessId ?? undefined,
+      organizationId: row.organizationId ?? undefined,
       storeId: row.storeId ?? undefined,
       status: row.status as ProductStatus,
       visibility: row.visibility as ProductVisibility,

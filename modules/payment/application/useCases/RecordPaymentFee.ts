@@ -15,7 +15,7 @@ import paymentFeeRepo, { PaymentFee } from '../../infrastructure/repositories/pa
 export class RecordPaymentFeeCommand {
   constructor(
     public readonly transactionId: string,
-    public readonly merchantId: string,
+    public readonly organizationId: string,
     public readonly type: string,
     public readonly amount: number,
     public readonly currency: string,
@@ -30,7 +30,7 @@ export class RecordPaymentFeeCommand {
 export interface RecordPaymentFeeResponse {
   paymentFeeId: string;
   transactionId: string;
-  merchantId: string;
+  organizationId: string;
   type: string;
   amount: number;
   currency: string;
@@ -48,7 +48,7 @@ export class RecordPaymentFeeUseCase {
   async execute(command: RecordPaymentFeeCommand): Promise<RecordPaymentFeeResponse> {
     const fee = await this.repo.create({
       transactionId: command.transactionId,
-      merchantId: command.merchantId,
+      organizationId: command.organizationId,
       type: command.type,
       amount: command.amount,
       currency: command.currency,
@@ -66,7 +66,7 @@ export class RecordPaymentFeeUseCase {
     return {
       paymentFeeId: f.paymentFeeId,
       transactionId: f.transactionId,
-      merchantId: f.merchantId,
+      organizationId: f.organizationId,
       type: f.type,
       amount: f.amount,
       currency: f.currency,

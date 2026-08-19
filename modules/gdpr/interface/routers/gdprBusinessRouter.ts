@@ -15,12 +15,12 @@ import {
   rejectRequest,
   getCookieConsentStatistics,
 } from '../controllers/GdprController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
 
 // Apply merchant authentication to all routes
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ============================================================================
 // GDPR Data Request Management (Admin)

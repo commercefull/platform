@@ -14,7 +14,7 @@ exports.up = function (knex) {
 
     // User reference (polymorphic - can be customer or merchant)
     table.uuid('userId').notNullable().index();
-    table.string('userType', 20).notNullable().defaultTo('customer'); // 'customer' | 'merchant'
+    table.string('userType', 20).notNullable().defaultTo('customer'); // 'customer' | 'organization'
 
     // OAuth provider information
     table.string('provider', 50).notNullable(); // 'google' | 'facebook' | 'apple' | 'github' | 'twitter' | 'linkedin' | 'microsoft'

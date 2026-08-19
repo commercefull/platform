@@ -37,7 +37,7 @@ export const generateReport = async (req: TypedRequest, res: Response): Promise<
         dateFrom: body.dateFrom || undefined,
         dateTo: body.dateTo || undefined,
         storeId: body.storeId || undefined,
-        merchantId: body.merchantId || undefined,
+        organizationId: body.organizationId || undefined,
         categoryId: body.categoryId || undefined,
         status: body.status || undefined,
         lowStockOnly: body.lowStockOnly === 'true' || undefined,

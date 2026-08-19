@@ -18,8 +18,8 @@ export {
 export { VerifyCustomerEmailUseCase, VerifyEmailInput, ResendVerificationInput, VerifyEmailOutput, ResendVerificationOutput } from './customer/VerifyCustomerEmail';
 
 // Merchant authentication
-export { LoginMerchantUseCase, LoginMerchantInput, LoginMerchantOutput } from './merchant/LoginMerchant';
-export { RegisterMerchantUseCase, RegisterMerchantInput, RegisterMerchantOutput } from './merchant/RegisterMerchant';
+export { LoginOrganizationUseCase, LoginOrganizationInput, LoginOrganizationOutput } from './organization/LoginOrganization';
+export { RegisterOrganizationUseCase, RegisterOrganizationInput, RegisterOrganizationOutput } from './organization/RegisterOrganization';
 
 // Admin authentication
 export * from './admin';

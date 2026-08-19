@@ -13,11 +13,11 @@ import {
   addOrganizationPaymentInfo,
   updateOrganizationPaymentInfo,
 } from '../controllers/organizationBusinessController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 router.get('/organizations', getOrganizations);
 router.post('/organizations', createOrganization);

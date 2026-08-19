@@ -195,7 +195,7 @@ export const getCustomerSubscription: AsyncHandler = async (req, res, _next) => 
 export const cancelSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
   try {
     const { reason, cancelAtPeriodEnd } = req.body as { reason?: string; cancelAtPeriodEnd?: boolean };
-    const adminId = req.user?.userId || req.user?.merchantId;
+    const adminId = req.user?.userId || req.user?.organizationId;
 
     await subscriptionRepo.cancelSubscription(req.params.id, reason, `admin:${adminId}`, cancelAtPeriodEnd !== false);
 
@@ -210,7 +210,7 @@ export const cancelSubscriptionAdmin: AsyncHandler = async (req, res, _next) => 
 export const pauseSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
   try {
     const { resumeAt, reason } = req.body as { resumeAt?: string; reason?: string };
-    const adminId = req.user?.userId || req.user?.merchantId;
+    const adminId = req.user?.userId || req.user?.organizationId;
 
     const pause = await subscriptionRepo.pauseSubscription(
       req.params.id,
@@ -229,7 +229,7 @@ export const pauseSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
 
 export const resumeSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
   try {
-    const adminId = req.user?.userId || req.user?.merchantId;
+    const adminId = req.user?.userId || req.user?.organizationId;
     await subscriptionRepo.resumeSubscription(req.params.id, `admin:${adminId}`);
     res.json({ success: true, message: 'Subscription resumed' });
   } catch (error: unknown) {

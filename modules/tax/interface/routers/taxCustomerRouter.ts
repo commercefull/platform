@@ -30,6 +30,6 @@ router.get('/tax/exemption/:customerId', isCustomerLoggedIn, checkCustomerTaxExe
 router.post('/tax/zones/find', findTaxZoneForAddress);
 
 // NEW: Get public tax settings for storefront
-router.get('/tax/settings/:merchantId', getCustomerTaxSettings);
+router.get('/tax/settings/:organizationId', getCustomerTaxSettings);
 
 export const taxCustomerRouter = router;

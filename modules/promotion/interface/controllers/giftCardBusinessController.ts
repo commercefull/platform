@@ -88,7 +88,7 @@ export const activateGiftCard: AsyncHandler = async (req, res, _next) => {
 
 export const refundToGiftCard: AsyncHandler = async (req, res, _next) => {
   try {
-    const adminId = req.user?.userId || req.user?.merchantId;
+    const adminId = req.user?.userId || req.user?.organizationId;
     const body = req.body as RefundBody;
     const transaction = await giftCardRepo.refundToGiftCard(req.params.id, body.amount, body.orderId, adminId, body.notes);
     res.json({ success: true, data: transaction });

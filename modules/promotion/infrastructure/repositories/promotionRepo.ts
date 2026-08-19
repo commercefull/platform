@@ -15,7 +15,7 @@ export type PromotionStatus = 'active' | 'scheduled' | 'expired' | 'disabled' | 
 /**
  * Promotion scope types
  */
-export type PromotionScope = 'cart' | 'product' | 'category' | 'merchant' | 'shipping' | 'global';
+export type PromotionScope = 'cart' | 'product' | 'category' | 'organization' | 'shipping' | 'global';
 
 export type PromotionUsage = {
   promotionUsageId: string;
@@ -66,7 +66,7 @@ export interface CreatePromotionInput {
   maxUsagePerCustomer?: number;
   minOrderAmount?: number;
   maxDiscountAmount?: number;
-  merchantId?: string;
+  organizationId?: string;
   isGlobal?: boolean;
   eligibleCustomerGroups?: string[];
   excludedCustomerGroups?: string[];
@@ -119,7 +119,7 @@ export class PromotionRepo {
     filters: {
       status?: PromotionStatus | PromotionStatus[];
       scope?: PromotionScope | PromotionScope[];
-      merchantId?: string;
+      organizationId?: string;
       isActive?: boolean;
       isGlobal?: boolean;
       startBefore?: Date;
@@ -132,7 +132,7 @@ export class PromotionRepo {
       direction?: 'ASC' | 'DESC';
     } = {},
   ): Promise<Promotion[]> {
-    const { status, scope, merchantId, isActive, isGlobal, startBefore, endAfter } = filters;
+    const { status, scope, organizationId, isActive, isGlobal, startBefore, endAfter } = filters;
     const { limit = 50, offset = 0, orderBy = 'priority', direction = 'DESC' } = options;
 
     let sql = `SELECT * FROM "${PROMOTION_TABLE}" WHERE 1=1`;
@@ -163,9 +163,9 @@ export class PromotionRepo {
       }
     }
 
-    if (merchantId) {
-      sql += ` AND "merchantId" = $${paramIndex}`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` AND "organizationId" = $${paramIndex}`;
+      params.push(organizationId);
       paramIndex++;
     }
 
@@ -202,14 +202,14 @@ export class PromotionRepo {
   /**
    * Find active promotions
    */
-  async findActive(scope?: PromotionScope | PromotionScope[], merchantId?: string): Promise<Promotion[]> {
+  async findActive(scope?: PromotionScope | PromotionScope[], organizationId?: string): Promise<Promotion[]> {
     const now = new Date();
 
     return this.findAll(
       {
         status: 'active',
         scope,
-        merchantId,
+        organizationId,
         isActive: true,
         startBefore: now,
         endAfter: now,
@@ -236,7 +236,7 @@ export class PromotionRepo {
           "name", "description", "status", "scope", "priority",
           "startDate", "endDate", "isActive", "isExclusive", "maxUsage",
           "usageCount", "maxUsagePerCustomer", "minOrderAmount", "maxDiscountAmount",
-          "merchantId", "isGlobal", "eligibleCustomerGroups", "excludedCustomerGroups",
+          "organizationId", "isGlobal", "eligibleCustomerGroups", "excludedCustomerGroups",
           "createdAt", "updatedAt"
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
@@ -256,7 +256,7 @@ export class PromotionRepo {
           input.maxUsagePerCustomer || null,
           input.minOrderAmount || null,
           input.maxDiscountAmount || null,
-          input.merchantId || null,
+          input.organizationId || null,
           input.isGlobal || false,
           input.eligibleCustomerGroups ? JSON.stringify(input.eligibleCustomerGroups) : null,
           input.excludedCustomerGroups ? JSON.stringify(input.excludedCustomerGroups) : null,
@@ -313,7 +313,7 @@ export class PromotionRepo {
       'maxUsagePerCustomer',
       'minOrderAmount',
       'maxDiscountAmount',
-      'merchantId',
+      'organizationId',
       'isGlobal',
       'eligibleCustomerGroups',
       'excludedCustomerGroups',

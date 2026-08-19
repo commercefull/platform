@@ -9,7 +9,7 @@ exports.up = async function (knex) {
   await knex.schema.createTable('inventoryPool', table => {
     table.uuid('inventoryPoolId').primary().defaultTo(knex.raw('uuidv7()'));
     table.string('name').notNullable();
-    table.string('ownerType').notNullable(); // business, merchant
+    table.string('ownerType').notNullable(); // organization
     table.string('ownerId').notNullable();
     table.string('poolType').notNullable().defaultTo('shared'); // shared, virtual, aggregated
     table.string('allocationStrategy').defaultTo('fifo'); // fifo, nearest, even_split

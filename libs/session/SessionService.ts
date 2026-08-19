@@ -9,11 +9,11 @@ import { query, queryOne } from '../db';
 export interface SessionData {
   sessionId: string;
   userId: string;
-  userType: 'admin' | 'merchant' | 'b2b' | 'customer';
+  userType: 'admin' | 'organization' | 'b2b' | 'customer';
   email: string;
   name?: string;
   role?: string;
-  merchantId?: string;
+  organizationId?: string;
   companyId?: string;
   storeId?: string;
   storeRole?: string;
@@ -28,11 +28,11 @@ export interface SessionData {
 
 export interface CreateSessionInput {
   userId: string;
-  userType: 'admin' | 'merchant' | 'b2b' | 'customer';
+  userType: 'admin' | 'organization' | 'b2b' | 'customer';
   email: string;
   name?: string;
   role?: string;
-  merchantId?: string;
+  organizationId?: string;
   companyId?: string;
   storeId?: string;
   storeRole?: string;
@@ -58,7 +58,7 @@ class SessionServiceClass {
     const sql = `
       INSERT INTO "${this.tableName}" 
         ("sessionId", "userId", "userType", "email", "name", "role", 
-         "merchantId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt", 
+         "organizationId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt", 
          "createdAt", "lastActivityAt", "userAgent", "ipAddress")
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING "sessionId"
@@ -71,7 +71,7 @@ class SessionServiceClass {
       input.email,
       input.name || null,
       input.role || null,
-      input.merchantId || null,
+      input.organizationId || null,
       input.companyId || null,
       input.storeId || null,
       input.storeRole || null,
@@ -93,7 +93,7 @@ class SessionServiceClass {
   async getSession(sessionId: string): Promise<SessionData | null> {
     const sql = `
       SELECT "sessionId", "userId", "userType", "email", "name", "role",
-             "merchantId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt",
+             "organizationId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt",
              "createdAt", "lastActivityAt", "userAgent", "ipAddress"
       FROM "${this.tableName}"
       WHERE "sessionId" = $1 AND "expiresAt" > NOW()
@@ -176,7 +176,7 @@ class SessionServiceClass {
   async getUserSessions(userId: string, userType: string): Promise<SessionData[]> {
     const sql = `
       SELECT "sessionId", "userId", "userType", "email", "name", "role",
-             "merchantId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt",
+             "organizationId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt",
              "createdAt", "lastActivityAt", "userAgent", "ipAddress"
       FROM "${this.tableName}"
       WHERE "userId" = $1 AND "userType" = $2 AND "expiresAt" > NOW()

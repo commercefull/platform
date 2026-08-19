@@ -9,7 +9,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 export interface GenerateSalesReportCommand {
   startDate: Date;
   endDate: Date;
-  merchantId?: string;
+  organizationId?: string;
   generatedBy?: string;
 }
 
@@ -38,7 +38,7 @@ export class GenerateSalesReportUseCase {
       }
 
       // Get sales summary from analytics repo
-      const summary = await analyticsRepo.getSalesSummary(command.startDate, command.endDate, command.merchantId);
+      const summary = await analyticsRepo.getSalesSummary(command.startDate, command.endDate, command.organizationId);
 
       const reportId = `report_${Date.now()}`;
 

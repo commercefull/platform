@@ -296,14 +296,14 @@ export const registerInventoryEventHandlers = () => {
     console.log(`Low inventory alert: ${sku} (${currentStock} remaining, reorder at ${reorderPoint})`);
 
     // Send low stock notification to merchants who carry this product
-    const merchants = await query<Array<{ merchantId: string }>>(
-      `SELECT DISTINCT m."merchantId" FROM merchant m JOIN product p ON p."merchantId" = m."merchantId" WHERE p."productId" = $1 AND m.status = 'active'`,
+    const merchants = await query<Array<{ organizationId: string }>>(
+      `SELECT DISTINCT m."organizationId" FROM "organization" m JOIN product p ON p."organizationId" = m."organizationId" WHERE p."productId" = $1 AND m.status = 'active'`,
       [productId],
     );
 
     for (const merchant of merchants || []) {
       await JobScheduler.scheduleNotification({
-        userId: merchant.merchantId,
+        userId: merchant.organizationId,
         type: 'low_stock_alert',
         title: 'Low Stock Alert',
         message: `Product ${sku} is running low on stock (${currentStock} remaining, reorder at ${reorderPoint}).`,
@@ -316,14 +316,14 @@ export const registerInventoryEventHandlers = () => {
     const { productId, sku } = payload.data as InventoryOutOfStockPayload;
 
     // Send out of stock notification to merchants who carry this product
-    const merchants = await query<Array<{ merchantId: string }>>(
-      `SELECT DISTINCT m."merchantId" FROM merchant m JOIN product p ON p."merchantId" = m."merchantId" WHERE p."productId" = $1 AND m.status = 'active'`,
+    const merchants = await query<Array<{ organizationId: string }>>(
+      `SELECT DISTINCT m."organizationId" FROM "organization" m JOIN product p ON p."organizationId" = m."organizationId" WHERE p."productId" = $1 AND m.status = 'active'`,
       [productId],
     );
 
     for (const merchant of merchants || []) {
       await JobScheduler.scheduleNotification({
-        userId: merchant.merchantId,
+        userId: merchant.organizationId,
         type: 'out_of_stock_alert',
         title: 'Out of Stock Alert',
         message: `Product ${sku} is now out of stock.`,

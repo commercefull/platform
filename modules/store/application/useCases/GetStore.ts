@@ -29,8 +29,7 @@ export interface GetStoreResponse {
     slug: string;
     description?: string;
     storeType: string;
-    merchantId?: string;
-    businessId?: string;
+    organizationId?: string;
     storeUrl?: string;
     storeEmail?: string;
     storePhone?: string;
@@ -88,8 +87,7 @@ export class GetStoreUseCase {
         slug: store.slug,
         description: store.description,
         storeType: store.storeType,
-        merchantId: store.merchantId,
-        businessId: store.businessId,
+        organizationId: store.organizationId,
         storeUrl: store.storeUrl,
         storeEmail: store.storeEmail,
         storePhone: store.storePhone,

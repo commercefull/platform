@@ -5,12 +5,12 @@
 
 import express from 'express';
 import * as customerController from '../controllers/CustomerController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
 
 // Apply authentication middleware
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ============================================================================
 // Business/Admin Customer Routes

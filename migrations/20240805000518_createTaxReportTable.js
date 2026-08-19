@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('taxReportId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.string('name', 255).notNullable();
     t.enum('reportType', ['sales', 'filing', 'jurisdiction', 'summary', 'exemption', 'audit']).notNullable();
     t.timestamp('dateFrom').notNullable();
@@ -12,12 +12,12 @@ exports.up = function (knex) {
     t.text('fileUrl');
     t.enum('fileFormat', ['csv', 'xlsx', 'pdf', 'json']);
     t.enum('status', ['pending', 'processing', 'completed', 'failed']).notNullable().defaultTo('pending');
-    t.uuid('generatedBy').references('merchantId').inTable('merchant').onDelete('SET NULL');
+    t.uuid('generatedBy').references('organizationId').inTable('organization').onDelete('SET NULL');
     t.jsonb('parameters');
     t.jsonb('results');
     t.text('errorMessage');
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('reportType');
     t.index('dateFrom');
     t.index('dateTo');

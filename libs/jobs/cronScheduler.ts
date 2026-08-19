@@ -585,7 +585,7 @@ export const initializeScheduledJobs = (): void => {
             const userRow = await query<Array<{ email: string }>>(
               `SELECT email FROM customer WHERE "customerId" = $1
             UNION ALL
-            SELECT email FROM merchant WHERE "merchantId" = $1`,
+            SELECT email FROM "organization" WHERE "organizationId" = $1`,
               [entry.userId],
             );
             const email = userRow?.[0]?.email;
@@ -738,7 +738,7 @@ export class JobScheduler {
         const repo = new NotificationRepo();
         await repo.create({
           userId: data.recipientEmail,
-          userType: 'merchant',
+          userType: 'organization',
           type: 'report_ready',
           title: `Report Ready: ${data.reportType}`,
           content: `Your ${data.reportType} report has been generated.`,

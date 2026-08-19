@@ -12,7 +12,7 @@ export interface CreateShippingZoneInput {
   isDefault?: boolean;
   isActive?: boolean;
   storeId?: string;
-  merchantId?: string;
+  organizationId?: string;
 }
 
 export interface CreateShippingZoneOutput {
@@ -34,7 +34,7 @@ export class CreateShippingZoneUseCase {
       isDefault: input.isDefault ?? false,
       isActive: input.isActive ?? true,
       storeId: input.storeId,
-      merchantId: input.merchantId,
+      organizationId: input.organizationId,
     });
 
     const saved = await this.shippingRepository.saveZone(shippingZone);

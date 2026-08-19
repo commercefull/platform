@@ -1,17 +1,17 @@
 /**
- * LoginMerchant Use Case
+ * LoginOrganization Use Case
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-export interface LoginMerchantInput {
+export interface LoginOrganizationInput {
   email: string;
   password: string;
   rememberMe?: boolean;
 }
 
-export interface LoginMerchantOutput {
-  merchantId: string;
+export interface LoginOrganizationOutput {
+  organizationId: string;
   email: string;
   accessToken: string;
   refreshToken: string;
@@ -19,17 +19,17 @@ export interface LoginMerchantOutput {
   permissions: string[];
 }
 
-export interface MerchantRecord {
-  merchantId: string;
+export interface OrganizationRecord {
+  organizationId: string;
   email: string;
   passwordHash: string;
   status: string;
   permissions?: string[];
 }
 
-export interface MerchantRepository {
-  findByEmail(email: string): Promise<MerchantRecord | null>;
-  updateLastLogin(merchantId: string): Promise<void>;
+export interface OrganizationRepository {
+  findByEmail(email: string): Promise<OrganizationRecord | null>;
+  updateLastLogin(organizationId: string): Promise<void>;
 }
 
 export interface AuthService {
@@ -41,20 +41,20 @@ export interface TokenService {
   generateRefreshToken(payload: Record<string, unknown>): Promise<string>;
 }
 
-export class LoginMerchantUseCase {
+export class LoginOrganizationUseCase {
   constructor(
-    private readonly merchantRepo: MerchantRepository,
+    private readonly organizationRepo: OrganizationRepository,
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
   ) {}
 
-  async execute(input: LoginMerchantInput): Promise<LoginMerchantOutput> {
+  async execute(input: LoginOrganizationInput): Promise<LoginOrganizationOutput> {
     if (!input.email || !input.password) {
       throw new Error('Email and password are required');
     }
 
     // Find merchant by email
-    const merchant = await this.merchantRepo.findByEmail(input.email);
+    const merchant = await this.organizationRepo.findByEmail(input.email);
     if (!merchant) {
       throw new Error('Invalid credentials');
     }
@@ -62,7 +62,7 @@ export class LoginMerchantUseCase {
     // Verify password
     const isValidPassword = await this.authService.verifyPassword(input.password, merchant.passwordHash);
     if (!isValidPassword) {
-      eventBus.emit('merchant.login_failed', {
+      eventBus.emit('organization.login_failed', {
         email: input.email,
         reason: 'invalid_password',
       });
@@ -77,26 +77,26 @@ export class LoginMerchantUseCase {
     // Generate tokens
     const expiresIn = input.rememberMe ? 7 * 24 * 60 * 60 : 8 * 60 * 60; // 7 days or 8 hours
     const accessToken = await this.tokenService.generateAccessToken({
-      merchantId: merchant.merchantId,
+      organizationId: merchant.organizationId,
       email: merchant.email,
-      type: 'merchant',
+      type: 'organization',
       permissions: merchant.permissions || [],
     });
     const refreshToken = await this.tokenService.generateRefreshToken({
-      merchantId: merchant.merchantId,
+      organizationId: merchant.organizationId,
     });
 
     // Update last login
-    await this.merchantRepo.updateLastLogin(merchant.merchantId);
+    await this.organizationRepo.updateLastLogin(merchant.organizationId);
 
     // Emit success event
-    eventBus.emit('merchant.logged_in', {
-      merchantId: merchant.merchantId,
+    eventBus.emit('organization.logged_in', {
+      organizationId: merchant.organizationId,
       email: merchant.email,
     });
 
     return {
-      merchantId: merchant.merchantId,
+      organizationId: merchant.organizationId,
       email: merchant.email,
       accessToken,
       refreshToken,

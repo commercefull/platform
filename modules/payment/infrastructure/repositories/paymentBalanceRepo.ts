@@ -2,7 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 
 export interface PaymentBalance {
   paymentBalanceId: string;
-  merchantId: string;
+  organizationId: string;
   currency: string;
   amount: number;
   createdAt: Date;
@@ -11,7 +11,7 @@ export interface PaymentBalance {
 
 export interface BalanceTransaction {
   paymentBalanceId: string;
-  merchantId: string;
+  organizationId: string;
   currency: string;
   amount: number;
   type: 'credit' | 'debit';
@@ -21,44 +21,44 @@ export interface BalanceTransaction {
   updatedAt: Date;
 }
 
-export async function findByMerchant(merchantId: string): Promise<PaymentBalance[]> {
+export async function findByMerchant(organizationId: string): Promise<PaymentBalance[]> {
   return (
-    (await query<PaymentBalance[]>(`SELECT * FROM "paymentBalance" WHERE "merchantId" = $1 ORDER BY currency ASC`, [merchantId])) || []
+    (await query<PaymentBalance[]>(`SELECT * FROM "paymentBalance" WHERE "organizationId" = $1 ORDER BY currency ASC`, [organizationId])) || []
   );
 }
 
-export async function credit(merchantId: string, currency: string, amount: number): Promise<PaymentBalance | null> {
+export async function credit(organizationId: string, currency: string, amount: number): Promise<PaymentBalance | null> {
   const now = new Date();
   return queryOne<PaymentBalance>(
-    `INSERT INTO "paymentBalance" ("merchantId", currency, amount, "createdAt", "updatedAt")
+    `INSERT INTO "paymentBalance" ("organizationId", currency, amount, "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5)
-     ON CONFLICT ("merchantId", currency) DO UPDATE SET amount = "paymentBalance".amount + $3, "updatedAt" = $5
+     ON CONFLICT ("organizationId", currency) DO UPDATE SET amount = "paymentBalance".amount + $3, "updatedAt" = $5
      RETURNING *`,
-    [merchantId, currency, amount, now, now],
+    [organizationId, currency, amount, now, now],
   );
 }
 
-export async function debit(merchantId: string, currency: string, amount: number): Promise<PaymentBalance | null> {
+export async function debit(organizationId: string, currency: string, amount: number): Promise<PaymentBalance | null> {
   const now = new Date();
   return queryOne<PaymentBalance>(
     `UPDATE "paymentBalance" SET amount = amount - $1, "updatedAt" = $2
-     WHERE "merchantId" = $3 AND currency = $4
+     WHERE "organizationId" = $3 AND currency = $4
      RETURNING *`,
-    [amount, now, merchantId, currency],
+    [amount, now, organizationId, currency],
   );
 }
 
-export async function getBalance(merchantId: string, currency: string): Promise<number> {
+export async function getBalance(organizationId: string, currency: string): Promise<number> {
   const result = await queryOne<{ amount: string }>(
-    `SELECT COALESCE(amount, 0) AS amount FROM "paymentBalance" WHERE "merchantId" = $1 AND currency = $2`,
-    [merchantId, currency],
+    `SELECT COALESCE(amount, 0) AS amount FROM "paymentBalance" WHERE "organizationId" = $1 AND currency = $2`,
+    [organizationId, currency],
   );
   return result ? parseFloat(result.amount) : 0;
 }
 
 export async function findAll(): Promise<PaymentBalance[]> {
   return (
-    (await query<PaymentBalance[]>(`SELECT * FROM "paymentBalance" ORDER BY "merchantId", currency`)) || []
+    (await query<PaymentBalance[]>(`SELECT * FROM "paymentBalance" ORDER BY "organizationId", currency`)) || []
   );
 }
 

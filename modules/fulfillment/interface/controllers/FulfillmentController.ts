@@ -30,7 +30,7 @@ interface CreateFulfillmentBody {
   orderNumber?: string;
   sourceType: SourceType;
   sourceId: string;
-  merchantId?: string;
+  organizationId?: string;
   supplierId?: string;
   storeId?: string;
   channelId?: string;
@@ -86,7 +86,7 @@ export const createFulfillment = async (req: TypedRequest, res: Response): Promi
       orderNumber: body.orderNumber,
       sourceType: body.sourceType,
       sourceId: body.sourceId,
-      merchantId: body.merchantId,
+      organizationId: body.organizationId,
       supplierId: body.supplierId,
       storeId: body.storeId,
       channelId: body.channelId,
@@ -100,7 +100,12 @@ export const createFulfillment = async (req: TypedRequest, res: Response): Promi
       items: body.items,
       notes: body.notes,
     });
-    res.status(201).json({ success: true, data: result });
+    // Serialize domain entities to plain objects
+    const plain = {
+      fulfillment: result.fulfillment.toPersistence(),
+      items: result.items.map(i => i.toPersistence()),
+    };
+    res.status(201).json({ success: true, data: plain });
   } catch (error: unknown) {
     logger.error('Error:', error);
     const msg = (error as Error).message; res.status(msg.toLowerCase().includes("not found") ? 404 : 400).json({ success: false, error: msg });
@@ -190,7 +195,7 @@ export const listFulfillments = async (req: TypedRequest, res: Response): Promis
         orderId: req.query.orderId as string | undefined,
         status: req.query.status as FulfillmentStatus | FulfillmentStatus[] | undefined,
         sourceType: req.query.sourceType as SourceType | undefined,
-        merchantId: req.query.merchantId as string | undefined,
+        organizationId: req.query.organizationId as string | undefined,
         storeId: req.query.storeId as string | undefined,
       },
       {

@@ -69,6 +69,7 @@ The Supplier feature manages supplier/vendor relationships for inventory sourcin
 | UC-SUP-001 to UC-SUP-005 | `supplier/supplier.test.ts`        | ✅     |
 | UC-SUP-006 to UC-SUP-009 | `supplier/supplier.test.ts`        | ✅     |
 | UC-SUP-010 to UC-SUP-016 | `supplier/supplier.test.ts`        | ✅     |
+| UC-SUP-017 to UC-SUP-025 | `supplier/supplierExpanded.test.ts`| ✅     |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

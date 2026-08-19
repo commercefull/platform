@@ -15,7 +15,7 @@ export interface TaxCalculation {
   taxCalculationId: string;
   createdAt: string;
   updatedAt: string;
-  merchantId: string;
+  organizationId: string;
   orderId?: string;
   invoiceId?: string;
   basketId?: string;
@@ -37,7 +37,7 @@ export interface TaxCalculation {
 }
 
 export type TaxCalculationCreateParams = Omit<TaxCalculation, 'taxCalculationId' | 'createdAt' | 'updatedAt'>;
-export type TaxCalculationUpdateParams = Partial<Omit<TaxCalculation, 'taxCalculationId' | 'merchantId' | 'createdAt' | 'updatedAt'>>;
+export type TaxCalculationUpdateParams = Partial<Omit<TaxCalculation, 'taxCalculationId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
 
 export class TaxCalculationRepo {
   async findById(id: string): Promise<TaxCalculation | null> {
@@ -65,9 +65,9 @@ export class TaxCalculationRepo {
     );
   }
 
-  async findByMerchant(merchantId: string, status?: TaxCalculationStatus, limit = 100): Promise<TaxCalculation[]> {
-    let sql = `SELECT * FROM "taxCalculation" WHERE "merchantId" = $1`;
-    const params: unknown[] = [merchantId];
+  async findByMerchant(organizationId: string, status?: TaxCalculationStatus, limit = 100): Promise<TaxCalculation[]> {
+    let sql = `SELECT * FROM "taxCalculation" WHERE "organizationId" = $1`;
+    const params: unknown[] = [organizationId];
     if (status) {
       sql += ` AND "status" = $2`;
       params.push(status);
@@ -81,13 +81,13 @@ export class TaxCalculationRepo {
     const now = unixTimestamp();
     const result = await queryOne<TaxCalculation>(
       `INSERT INTO "taxCalculation" (
-        "merchantId", "orderId", "invoiceId", "basketId", "customerId", "calculationMethod",
+        "organizationId", "orderId", "invoiceId", "basketId", "customerId", "calculationMethod",
         "status", "sourceType", "sourceId", "taxAddress", "taxableAmount", "taxExemptAmount",
         "taxAmount", "totalAmount", "currencyCode", "exchangeRate", "taxProviderResponse",
         "taxProviderReference", "errorMessage", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *`,
       [
-        params.merchantId,
+        params.organizationId,
         params.orderId || null,
         params.invoiceId || null,
         params.basketId || null,
@@ -157,13 +157,13 @@ export class TaxCalculationRepo {
     return !!result;
   }
 
-  async count(merchantId?: string, status?: TaxCalculationStatus): Promise<number> {
+  async count(organizationId?: string, status?: TaxCalculationStatus): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "taxCalculation" WHERE 1=1`;
     const params: unknown[] = [];
 
-    if (merchantId) {
-      sql += ` AND "merchantId" = $${params.length + 1}`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` AND "organizationId" = $${params.length + 1}`;
+      params.push(organizationId);
     }
     if (status) {
       sql += ` AND "status" = $${params.length + 1}`;

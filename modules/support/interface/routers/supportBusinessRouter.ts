@@ -4,7 +4,7 @@
  */
 
 import { Router } from 'express';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import {
   // Agents
   getAgents,
@@ -43,7 +43,7 @@ import {
 
 const router = Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ============================================================================
 // Agent Routes

@@ -5,7 +5,7 @@ export const webhookTypeDefs = `#graphql
     url: String!
     events: [String!]!
     isActive: Boolean!
-    merchantId: String
+    organizationId: String
     createdAt: String!
   }
 
@@ -23,12 +23,12 @@ export const webhookTypeDefs = `#graphql
     name: String!
     url: String!
     events: [String!]!
-    merchantId: String
+    organizationId: String
     headers: String
   }
 
   type Query {
-    webhooks(merchantId: String, limit: Int, offset: Int): [WebhookEndpoint!]!
+    webhooks(organizationId: String, limit: Int, offset: Int): [WebhookEndpoint!]!
   }
 
   type Mutation {

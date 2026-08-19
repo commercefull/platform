@@ -14,7 +14,7 @@ import paymentBalanceRepo, { PaymentBalance } from '../../infrastructure/reposit
 
 export class GetPaymentBalanceCommand {
   constructor(
-    public readonly merchantId: string,
+    public readonly organizationId: string,
     public readonly currency?: string,
   ) {}
 }
@@ -31,7 +31,7 @@ export interface BalanceEntry {
 }
 
 export interface GetPaymentBalanceResponse {
-  merchantId: string;
+  organizationId: string;
   balances: BalanceEntry[];
   currentBalance?: number;
 }
@@ -44,15 +44,15 @@ export class GetPaymentBalanceUseCase {
   constructor(private readonly repo: typeof paymentBalanceRepo = paymentBalanceRepo) {}
 
   async execute(command: GetPaymentBalanceCommand): Promise<GetPaymentBalanceResponse> {
-    const balances = await this.repo.findByMerchant(command.merchantId);
+    const balances = await this.repo.findByMerchant(command.organizationId);
 
     let currentBalance: number | undefined;
     if (command.currency) {
-      currentBalance = await this.repo.getBalance(command.merchantId, command.currency);
+      currentBalance = await this.repo.getBalance(command.organizationId, command.currency);
     }
 
     return {
-      merchantId: command.merchantId,
+      organizationId: command.organizationId,
       balances: balances.map(b => this.mapEntry(b)),
       currentBalance,
     };

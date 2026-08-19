@@ -22,11 +22,11 @@ import {
   updateReward,
   updateTier,
 } from '../controllers/loyaltyBusinessController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // Tier Management
 router.get('/loyalty/tiers', getTiers);

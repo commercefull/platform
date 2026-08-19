@@ -60,15 +60,17 @@ The Inventory feature manages product stock levels, reservations, and availabili
 | UC-INV-001 | `inventory/inventory.test.ts`          | ✅     |
 | UC-INV-002 | `inventory/stockOperations.test.ts`    | ✅     |
 | UC-INV-003 | `inventory/stockOperations.test.ts`    | ✅     |
-| UC-INV-004 | `inventory/reservation.test.ts`        | ✅     |
-| UC-INV-005 | `inventory/reservation.test.ts`        | ✅     |
+| UC-INV-004 | `inventory/reservationConfirm.test.ts` | ✅     |
+| UC-INV-005 | `inventory/reservationConfirm.test.ts` | ✅     |
 | UC-INV-006 | `inventory/reservationConfirm.test.ts` | ✅     |
-| UC-INV-007 | `inventory/transaction.test.ts`        | ✅     |
+| UC-INV-007 | `inventory/inventory.test.ts`          | ✅     |
 | UC-INV-008 | `inventory/stockOperations.test.ts`    | ✅     |
 | UC-INV-009 | `inventory/poolAndTransfer.test.ts`    | ✅     |
 | UC-INV-010 | `inventory/stockOperations.test.ts`    | ✅     |
 | UC-INV-011 | `inventory/stockOperations.test.ts`    | ✅     |
 | UC-INV-012 | `inventory/reservationConfirm.test.ts` | ✅     |
+| Store Dispatch | `inventory/storeDispatch.test.ts`  | ✅     |
+| Locations  | `inventory/location.test.ts`           | ✅     |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

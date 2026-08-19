@@ -23,7 +23,7 @@ describe('Payment Gateway Tests', () => {
   });
 
   describe('Admin Gateway Operations', () => {
-    it('should get all gateways for a merchant', async () => {
+    it('should get all gateways for a organization', async () => {
       const response = await client.get('/business/gateways', {
         headers: { Authorization: `Bearer ${adminToken}` },
       });

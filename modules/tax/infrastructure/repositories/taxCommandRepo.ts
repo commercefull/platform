@@ -571,7 +571,7 @@ export class TaxCommandRepo {
 
     const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "${TABLES.TAX_SETTINGS}" (
-        "taxSettingsId", "merchantId", "calculationMethod", "pricesIncludeTax", 
+        "taxSettingsId", "organizationId", "calculationMethod", "pricesIncludeTax", 
         "displayPricesWithTax", "taxBasedOn", "shippingTaxClass", 
         "displayTaxTotals", "applyTaxToShipping", "applyDiscountBeforeTax", 
         "roundTaxAtSubtotal", "taxDecimalPlaces", "defaultTaxCategory", 
@@ -582,7 +582,7 @@ export class TaxCommandRepo {
       ) RETURNING *`,
       [
         id,
-        settings.merchantId,
+        settings.organizationId,
         settings.calculationMethod,
         settings.pricesIncludeTax,
         settings.displayPricesWithTax,
@@ -611,7 +611,7 @@ export class TaxCommandRepo {
 
   async updateTaxSettings(
     id: string,
-    settings: Partial<Omit<TaxSettings, 'id' | 'merchantId' | 'createdAt' | 'updatedAt'>>,
+    settings: Partial<Omit<TaxSettings, 'id' | 'organizationId' | 'createdAt' | 'updatedAt'>>,
   ): Promise<TaxSettings> {
     const now = unixTimestamp();
 

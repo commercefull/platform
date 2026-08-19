@@ -12,7 +12,7 @@ import {
   linkCustomerSocialAccount,
   unlinkCustomerSocialAccount,
   getCustomerLinkedAccounts,
-  getMerchantLinkedAccounts,
+  getOrganizationLinkedAccounts,
 } from '../controllers/identitySocialController';
 
 const router = Router();
@@ -67,11 +67,13 @@ router.get('/identity/customer/accounts', getCustomerLinkedAccounts);
  * Body: { accessToken, idToken?, profile: { id, email, name?, ... } }
  */
 router.post('/identity/:provider/merchant', merchantSocialLogin);
+router.post('/identity/:provider/organization', merchantSocialLogin);
 
 /**
  * GET /identity/social/merchant/accounts
  * Get all linked social accounts for a merchant (requires auth)
  */
-router.get('/identity/merchant/accounts', getMerchantLinkedAccounts);
+router.get('/identity/merchant/accounts', getOrganizationLinkedAccounts);
+router.get('/identity/organization/accounts', getOrganizationLinkedAccounts);
 
 export const identitySocialRouter = router;

@@ -3,7 +3,7 @@
  * Unified store concept that works for both marketplace and multi-store scenarios
  */
 
-export type StoreType = 'merchant_store' | 'business_store';
+export type StoreType = 'merchant_store' | 'organization_store';
 
 export interface StoreProps {
   storeId: string;
@@ -12,9 +12,8 @@ export interface StoreProps {
   description?: string;
   storeType: StoreType;
 
-  // Ownership - either merchant or business
-  merchantId?: string; // For marketplace stores
-  businessId?: string; // For business stores
+  // Ownership
+  organizationId?: string;
   isHeadquarters: boolean;
   parentStoreId?: string;
 
@@ -125,8 +124,7 @@ export class Store {
     storeId: string;
     name: string;
     storeType: StoreType;
-    merchantId?: string;
-    businessId?: string;
+    organizationId?: string;
     isHeadquarters?: boolean;
     parentStoreId?: string;
     description?: string;
@@ -147,11 +145,11 @@ export class Store {
     const now = new Date();
 
     // Validate ownership
-    if (props.storeType === 'merchant_store' && !props.merchantId) {
-      throw new Error('Merchant stores must have a merchantId');
+    if (props.storeType === 'merchant_store' && !props.organizationId) {
+      throw new Error('Merchant stores must have a organizationId');
     }
-    if (props.storeType === 'business_store' && !props.businessId) {
-      throw new Error('Business stores must have a businessId');
+    if (props.storeType === 'organization_store' && !props.organizationId) {
+      throw new Error('Organization stores must have a organizationId');
     }
 
     return new Store({
@@ -160,8 +158,7 @@ export class Store {
       slug: Store.generateSlug(props.name),
       description: props.description,
       storeType: props.storeType,
-      merchantId: props.merchantId,
-      businessId: props.businessId,
+      organizationId: props.organizationId,
       isHeadquarters: props.isHeadquarters ?? false,
       parentStoreId: props.parentStoreId,
       storeUrl: props.storeUrl,
@@ -214,11 +211,8 @@ export class Store {
   get storeType(): StoreType {
     return this.props.storeType;
   }
-  get merchantId(): string | undefined {
-    return this.props.merchantId;
-  }
-  get businessId(): string | undefined {
-    return this.props.businessId;
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
   }
   get isHeadquarters(): boolean {
     return this.props.isHeadquarters;
@@ -227,13 +221,13 @@ export class Store {
     return this.props.parentStoreId;
   }
   get ownerId(): string {
-    return this.props.merchantId || this.props.businessId!;
+    return this.props.organizationId!;
   }
   get isMerchantStore(): boolean {
     return this.props.storeType === 'merchant_store';
   }
-  get isBusinessStore(): boolean {
-    return this.props.storeType === 'business_store';
+  get isOrganizationStore(): boolean {
+    return this.props.storeType === 'organization_store';
   }
 
   // Branding getters
@@ -532,13 +526,12 @@ export class Store {
       slug: this.props.slug,
       description: this.props.description,
       storeType: this.props.storeType,
-      merchantId: this.props.merchantId,
-      businessId: this.props.businessId,
+      organizationId: this.props.organizationId,
       isHeadquarters: this.props.isHeadquarters,
       parentStoreId: this.props.parentStoreId,
       ownerId: this.ownerId,
       isMerchantStore: this.isMerchantStore,
-      isBusinessStore: this.isBusinessStore,
+      isOrganizationStore: this.isOrganizationStore,
       logo: this.props.logo,
       banner: this.props.banner,
       favicon: this.props.favicon,

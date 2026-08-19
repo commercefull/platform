@@ -7,8 +7,8 @@
  * - Customer: vote on review (one-per-customer)
  * - Customer: submit Q&A (valid + invalid guards)
  * - Customer: list approved Q&A
- * - Merchant: list / approve / reject / respond / delete review
- * - Merchant: update Q&A status
+ * - Organization: list / approve / reject / respond / delete review
+ * - Organization: update Q&A status
  */
 
 import { AxiosInstance } from 'axios';
@@ -150,9 +150,9 @@ describe('Reviews & Q&A', () => {
     });
   });
 
-  // ── Merchant: Review moderation ──────────────────────────────────────────
+  // ── Organization: Review moderation ──────────────────────────────────────────
 
-  describe('Merchant: Review moderation', () => {
+  describe('Organization: Review moderation', () => {
     it('should list reviews with optional filters', async () => {
       const res = await client.get('/business/reviews', {
         headers: { Authorization: `Bearer ${adminToken}` },
@@ -266,9 +266,9 @@ describe('Reviews & Q&A', () => {
     });
   });
 
-  // ── Merchant: Q&A moderation ─────────────────────────────────────────────
+  // ── Organization: Q&A moderation ─────────────────────────────────────────────
 
-  describe('Merchant: Q&A moderation', () => {
+  describe('Organization: Q&A moderation', () => {
     it('should list all Q&A for a product (all statuses)', async () => {
       const res = await client.get(`/business/products/${SEEDED_PRODUCT_1_ID}/qa`, {
         headers: { Authorization: `Bearer ${adminToken}` },
@@ -301,9 +301,9 @@ describe('Reviews & Q&A', () => {
     });
   });
 
-  // ── Merchant: Review Media ───────────────────────────────────────────────
+  // ── Organization: Review Media ───────────────────────────────────────────────
 
-  describe('Merchant: Review Media', () => {
+  describe('Organization: Review Media', () => {
     it('should reject listing review media without reviewId query param', async () => {
       const res = await client.get(
         `/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media`,

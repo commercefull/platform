@@ -277,7 +277,7 @@ export interface OrderExtended {
   storeId: string | null;
   channelId: string | null;
   accountId: string | null;
-  merchantId: string | null;
+  organizationId: string | null;
   purchaseOrderNumber: string | null;
   parentOrderId: string | null;
 }
@@ -286,7 +286,7 @@ export interface OrderLineExtended {
   sellerId: string | null;
 }
 
-export interface MerchantExtended {
+export interface OrganizationExtended {
   type: 'internal' | 'external';
   commissionPlanId: string | null;
 }

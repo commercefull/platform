@@ -6,8 +6,8 @@ import discountRepo, { CreateProductDiscountInput, UpdateProductDiscountInput } 
 // Get all active discounts
 export const getActiveDiscounts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { merchantId } = req.query;
-    const discounts = await discountRepo.findActive(merchantId as string | undefined);
+    const { organizationId } = req.query;
+    const discounts = await discountRepo.findActive(organizationId as string | undefined);
     res.status(200).json({ success: true, data: discounts || [] });
   } catch (error: unknown) {
     logger.error('Error:', error);
@@ -19,8 +19,8 @@ export const getActiveDiscounts = async (req: TypedRequest, res: Response): Prom
 export const getDiscountsByProductId = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { merchantId } = req.query;
-    const discounts = await discountRepo.findDiscountsForProduct(productId, merchantId as string | undefined);
+    const { organizationId } = req.query;
+    const discounts = await discountRepo.findDiscountsForProduct(productId, organizationId as string | undefined);
     res.status(200).json({ success: true, data: discounts || [] });
   } catch (error: unknown) {
     logger.error('Error:', error);
@@ -32,8 +32,8 @@ export const getDiscountsByProductId = async (req: TypedRequest, res: Response):
 export const getDiscountsByCategoryId = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId } = req.params;
-    const { merchantId } = req.query;
-    const discounts = await discountRepo.findDiscountsForCategory(categoryId, merchantId as string | undefined);
+    const { organizationId } = req.query;
+    const discounts = await discountRepo.findDiscountsForCategory(categoryId, organizationId as string | undefined);
     res.status(200).json({ success: true, data: discounts || [] });
   } catch (error: unknown) {
     logger.error('Error:', error);

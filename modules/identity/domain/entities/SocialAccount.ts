@@ -10,7 +10,7 @@
 
 export type SocialProvider = 'google' | 'facebook' | 'apple' | 'github' | 'twitter' | 'linkedin' | 'microsoft';
 
-export type UserType = 'customer' | 'merchant';
+export type UserType = 'customer' | 'organization';
 
 export interface SocialAccountProps {
   socialAccountId: string;

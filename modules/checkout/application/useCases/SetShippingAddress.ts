@@ -12,6 +12,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 import { calculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
 import { promotionEvaluationService } from '../../../promotion/application/services/PromotionEvaluationService';
 import taxSettingsRepo from '../../../tax/infrastructure/repositories/taxSettingsRepo';
+import { BadRequestError, NotFoundError } from '../../../../libs/errors';
 
 // ============================================================================
 // Command
@@ -46,7 +47,7 @@ export class SetShippingAddressUseCase {
   async execute(command: SetShippingAddressCommand): Promise<CheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
     if (!session) {
-      throw new Error('Checkout session not found');
+      throw new NotFoundError('Checkout session not found');
     }
 
     const validation = await this.checkoutRepository.validateShippingAddress({
@@ -59,7 +60,7 @@ export class SetShippingAddressUseCase {
     });
 
     if (!validation.valid) {
-      throw new Error(`Invalid address: ${validation.errors.join(', ')}`);
+      throw new BadRequestError(`Invalid address: ${validation.errors.join(', ')}`);
     }
 
     const address = Address.create({

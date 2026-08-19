@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('paymentFeeId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.string('type', 50)
       .notNullable()
       .checkIn(['transaction', 'subscription', 'dispute', 'refund', 'chargeback', 'payout', 'platform', 'other']);
@@ -16,7 +16,7 @@ exports.up = function (knex) {
     t.uuid('payoutId').references('payoutId').inTable('paymentPayout').onDelete('CASCADE');
     t.timestamp('appliedAt').notNullable().defaultTo(knex.fn.now());
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('type');
     t.index('orderPaymentId');
     t.index('orderId');

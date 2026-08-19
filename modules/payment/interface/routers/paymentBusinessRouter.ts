@@ -6,12 +6,12 @@ import express from 'express';
 import * as paymentController from '../controllers/PaymentController';
 import * as fraudController from '../controllers/fraudController';
 import * as paymentBusinessController from '../controllers/paymentBusinessController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
 
 // Apply authentication middleware
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ============================================================================
 // Gateway Routes

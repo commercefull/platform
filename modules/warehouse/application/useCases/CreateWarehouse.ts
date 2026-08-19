@@ -14,8 +14,7 @@ export interface CreateWarehouseInput {
   type: WarehouseType;
 
   // Ownership
-  businessId?: string;
-  merchantId?: string;
+  organizationId?: string;
 
   // Address
   address: {
@@ -101,8 +100,7 @@ export class CreateWarehouseUseCase {
       name: input.name,
       code: input.code,
       type: input.type,
-      businessId: input.businessId,
-      merchantId: input.merchantId,
+      organizationId: input.organizationId,
       address: input.address,
       timezone: input.timezone || 'UTC',
       cutoffTime: input.cutoffTime,

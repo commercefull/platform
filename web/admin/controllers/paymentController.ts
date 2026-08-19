@@ -15,10 +15,10 @@ import { adminRespond } from '../../respond';
 
 export const listPaymentGateways = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // For now, we'll use a default merchant ID. In a real app, this would come from the authenticated user
-    const merchantId = 'default-merchant';
+    // For now, we'll use a default organization ID. In a real app, this would come from the authenticated user
+    const organizationId = 'default-organization';
 
-    const gateways = await PaymentRepo.findAllGateways(merchantId);
+    const gateways = await PaymentRepo.findAllGateways(organizationId);
 
     adminRespond(req, res, 'payments/gateways/index', {
       pageName: 'Payment Gateways',
@@ -53,12 +53,12 @@ export const createPaymentGatewayForm = async (req: TypedRequest, res: Response)
 
 export const createPaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = 'default-merchant';
+    const organizationId = 'default-organization';
     const body = req.body as RequestBody;
     const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint } = body;
 
     const gateway = await PaymentRepo.createGateway({
-      merchantId,
+      organizationId,
       name,
       provider,
       isActive: isActive === 'true' || isActive === true,
@@ -213,9 +213,9 @@ export const deletePaymentGateway = async (req: TypedRequest, res: Response): Pr
 
 export const listPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = 'default-merchant';
+    const organizationId = 'default-organization';
 
-    const methods = await PaymentRepo.findAllMethodConfigs(merchantId);
+    const methods = await PaymentRepo.findAllMethodConfigs(organizationId);
 
     adminRespond(req, res, 'payments/methods/index', {
       pageName: 'Payment Methods',
@@ -356,12 +356,12 @@ export const listPaymentSettings = async (req: TypedRequest, res: Response): Pro
 
 export const updatePaymentSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { merchantId } = req.params;
+    const { organizationId } = req.params;
     const body = req.body as RequestBody;
     const { provider, isEnabled, config } = body;
 
     await paymentSettingsRepo.upsert({
-      merchantId,
+      organizationId,
       provider,
       isEnabled: isEnabled === 'true' || isEnabled === true,
       config: config ? (typeof config === 'string' ? JSON.parse(config) : config) : {},

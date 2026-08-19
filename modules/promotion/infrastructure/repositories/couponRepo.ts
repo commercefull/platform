@@ -54,7 +54,7 @@ export interface PromotionCoupon {
   isReferral: boolean;
   referrerId?: string;
   isPublic: boolean;
-  merchantId?: string;
+  organizationId?: string;
 }
 
 /**
@@ -95,7 +95,7 @@ export interface CreateCouponInput {
   isReferral?: boolean;
   referrerId?: string;
   isPublic?: boolean;
-  merchantId?: string;
+  organizationId?: string;
 }
 
 /**
@@ -128,7 +128,7 @@ export class CouponRepo {
         "discountAmount", "currencyCode", "minOrderAmount", "maxDiscountAmount",
         "startDate", "endDate", "isActive", "isOneTimeUse", "maxUsage",
         "usageCount", "maxUsagePerCustomer", "generationMethod", "isReferral",
-        "referrerId", "isPublic", "merchantId", "createdAt", "updatedAt"
+        "referrerId", "isPublic", "organizationId", "createdAt", "updatedAt"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
       ) RETURNING *`,
@@ -153,7 +153,7 @@ export class CouponRepo {
         input.isReferral || false,
         input.referrerId || null,
         input.isPublic || false,
-        input.merchantId || null,
+        input.organizationId || null,
         now,
         now,
       ],
@@ -194,7 +194,7 @@ export class CouponRepo {
       'isReferral',
       'referrerId',
       'isPublic',
-      'merchantId',
+      'organizationId',
     ];
 
     for (const [key, value] of Object.entries(input)) {
@@ -238,13 +238,13 @@ export class CouponRepo {
   /**
    * Find a coupon by its code
    */
-  async findByCode(code: string, merchantId?: string): Promise<PromotionCoupon | null> {
+  async findByCode(code: string, organizationId?: string): Promise<PromotionCoupon | null> {
     let sql = `SELECT * FROM "${COUPON_TABLE}" WHERE "code" = $1`;
     const params: unknown[] = [code];
 
-    if (merchantId) {
-      sql += ' AND "merchantId" = $2';
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ' AND "organizationId" = $2';
+      params.push(organizationId);
     }
 
     return await queryOne<PromotionCoupon>(sql, params);
@@ -254,7 +254,7 @@ export class CouponRepo {
    * Find all active coupons
    */
   async findActiveCoupons(
-    merchantId?: string,
+    organizationId?: string,
     options: {
       limit?: number;
       offset?: number;
@@ -275,9 +275,9 @@ export class CouponRepo {
     const params: unknown[] = [now];
     let paramIndex = 2;
 
-    if (merchantId) {
-      sql += ` AND "merchantId" = $${paramIndex}`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` AND "organizationId" = $${paramIndex}`;
+      params.push(organizationId);
       paramIndex++;
     }
 
@@ -291,7 +291,7 @@ export class CouponRepo {
    * Find all coupons with pagination
    */
   async findAll(
-    merchantId?: string,
+    organizationId?: string,
     options: {
       limit?: number;
       offset?: number;
@@ -306,9 +306,9 @@ export class CouponRepo {
     const params: unknown[] = [];
     let paramIndex = 1;
 
-    if (merchantId) {
-      sql += ` AND "merchantId" = $${paramIndex}`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` AND "organizationId" = $${paramIndex}`;
+      params.push(organizationId);
       paramIndex++;
     }
 
@@ -413,9 +413,9 @@ export class CouponRepo {
   /**
    * Validate a coupon for use
    */
-  async validate(code: string, orderTotal: number, customerId?: string, merchantId?: string): Promise<CouponValidationResult> {
+  async validate(code: string, orderTotal: number, customerId?: string, organizationId?: string): Promise<CouponValidationResult> {
     // Find coupon by code
-    const coupon = await this.findByCode(code, merchantId);
+    const coupon = await this.findByCode(code, organizationId);
 
     if (!coupon) {
       return { valid: false, message: 'Coupon not found' };

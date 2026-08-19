@@ -19,7 +19,7 @@ export const fulfillmentTypeDefs = `#graphql
     orderNumber: String
     sourceType: String!
     sourceId: String!
-    merchantId: String
+    organizationId: String
     supplierId: String
     storeId: String
     channelId: String
@@ -89,7 +89,7 @@ export const fulfillmentTypeDefs = `#graphql
     orderNumber: String
     sourceType: String!
     sourceId: String!
-    merchantId: String
+    organizationId: String
     supplierId: String
     storeId: String
     channelId: String

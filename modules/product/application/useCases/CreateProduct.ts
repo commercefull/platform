@@ -23,7 +23,7 @@ export class CreateProductCommand {
     public readonly slug?: string,
     public readonly shortDescription?: string,
     public readonly categoryId?: string,
-    public readonly merchantId?: string,
+    public readonly organizationId?: string,
     public readonly basePrice?: number,
     public readonly salePrice?: number,
     public readonly cost?: number,
@@ -107,7 +107,7 @@ export class CreateProductUseCase {
       slug: command.slug,
       shortDescription: command.shortDescription,
       categoryId: command.categoryId,
-      merchantId: command.merchantId,
+      organizationId: command.organizationId,
       basePrice: command.basePrice,
       salePrice: command.salePrice,
       cost: command.cost,
@@ -161,7 +161,7 @@ export class CreateProductUseCase {
       name: savedProduct.name,
       sku: savedProduct.sku,
       categoryId: savedProduct.categoryId,
-      merchantId: savedProduct.merchantId,
+      organizationId: savedProduct.organizationId,
     });
 
     return this.mapToResponse(savedProduct);

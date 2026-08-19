@@ -32,7 +32,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
           "orderNumber" = $2,
           "sourceType" = $3,
           "sourceId" = $4,
-          "merchantId" = $5,
+          "organizationId" = $5,
           "supplierId" = $6,
           "storeId" = $7,
           "channelId" = $8,
@@ -71,7 +71,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
           props.orderNumber || null,
           props.sourceType,
           props.sourceId,
-          props.merchantId || null,
+          props.organizationId || null,
           props.supplierId || null,
           props.storeId || null,
           props.channelId || null,
@@ -112,7 +112,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
       await query(
         `INSERT INTO fulfillment (
           "fulfillmentId", "orderId", "orderNumber", "sourceType", "sourceId",
-          "merchantId", "supplierId", "storeId", "channelId", status,
+          "organizationId", "supplierId", "storeId", "channelId", status,
           "carrierId", "carrierName", "shippingMethodId", "shippingMethodName",
           "trackingNumber", "trackingUrl", "shipFromAddress", "shipToAddress",
           "fulfillmentPartnerId", "weightGrams", "lengthCm", "widthCm", "heightCm",
@@ -131,7 +131,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
           props.orderNumber || null,
           props.sourceType,
           props.sourceId,
-          props.merchantId || null,
+          props.organizationId || null,
           props.supplierId || null,
           props.storeId || null,
           props.channelId || null,
@@ -403,9 +403,9 @@ export class FulfillmentRepository implements IFulfillmentRepository {
       params.push(filters.sourceId);
     }
 
-    if (filters?.merchantId) {
-      conditions.push(`"merchantId" = $${params.length + 1}`);
-      params.push(filters.merchantId);
+    if (filters?.organizationId) {
+      conditions.push(`"organizationId" = $${params.length + 1}`);
+      params.push(filters.organizationId);
     }
 
     if (filters?.supplierId) {
@@ -446,7 +446,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
       orderNumber: row.orderNumber ?? undefined,
       sourceType: row.sourceType as SourceType,
       sourceId: row.sourceId,
-      merchantId: row.merchantId ?? undefined,
+      organizationId: row.organizationId ?? undefined,
       supplierId: row.supplierId ?? undefined,
       storeId: row.storeId ?? undefined,
       channelId: row.channelId ?? undefined,

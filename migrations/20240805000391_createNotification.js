@@ -10,7 +10,7 @@ exports.up = function (knex) {
 
     // User information
     t.uuid('userId').notNullable();
-    t.enum('userType', ['customer', 'merchant', 'admin']).notNullable().defaultTo('customer');
+    t.enum('userType', ['customer', 'organization', 'admin']).notNullable().defaultTo('customer');
 
     // Notification content
     t.enum('type', [

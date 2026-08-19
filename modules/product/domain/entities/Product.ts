@@ -35,8 +35,7 @@ export interface ProductProps {
   slug: string;
   productTypeId: string;
   categoryId?: string;
-  merchantId?: string; // For marketplace products owned by merchants
-  businessId?: string; // For multi-store products owned by businesses
+  organizationId?: string;
   storeId?: string; // For store-specific product overrides
   status: ProductStatus;
   visibility: ProductVisibility;
@@ -84,8 +83,7 @@ export class Product {
     shortDescription?: string;
     sku?: string;
     categoryId?: string;
-    merchantId?: string;
-    businessId?: string;
+    organizationId?: string;
     storeId?: string;
     basePrice?: number;
     salePrice?: number;
@@ -128,8 +126,7 @@ export class Product {
       slug,
       productTypeId: props.productTypeId,
       categoryId: props.categoryId,
-      merchantId: props.merchantId,
-      businessId: props.businessId,
+      organizationId: props.organizationId,
       storeId: props.storeId,
       status: ProductStatus.DRAFT,
       visibility: ProductVisibility.NOT_VISIBLE,
@@ -195,23 +192,17 @@ export class Product {
   get categoryId(): string | undefined {
     return this.props.categoryId;
   }
-  get merchantId(): string | undefined {
-    return this.props.merchantId;
-  }
-  get businessId(): string | undefined {
-    return this.props.businessId;
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
   }
   get storeId(): string | undefined {
     return this.props.storeId;
   }
   get ownerId(): string {
-    return this.props.merchantId || this.props.businessId!;
+    return this.props.organizationId!;
   }
-  get isMerchantOwned(): boolean {
-    return !!this.props.merchantId;
-  }
-  get isBusinessOwned(): boolean {
-    return !!this.props.businessId;
+  get isOrganizationOwned(): boolean {
+    return !!this.props.organizationId;
   }
   get isStoreSpecific(): boolean {
     return !!this.props.storeId;
@@ -543,12 +534,10 @@ export class Product {
       slug: this.props.slug,
       productTypeId: this.props.productTypeId,
       categoryId: this.props.categoryId,
-      merchantId: this.props.merchantId,
-      businessId: this.props.businessId,
+      organizationId: this.props.organizationId,
       storeId: this.props.storeId,
       ownerId: this.ownerId,
-      isMerchantOwned: this.isMerchantOwned,
-      isBusinessOwned: this.isBusinessOwned,
+      isOrganizationOwned: this.isOrganizationOwned,
       isStoreSpecific: this.isStoreSpecific,
       status: this.props.status,
       visibility: this.props.visibility,

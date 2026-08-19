@@ -2,7 +2,7 @@ import * as reportingRepo from '../../infrastructure/repositories/reportingRepo'
 import type { ReportScheduleProps, ReportType, ReportFrequency, ReportFormat } from '../../domain/entities/ReportEntities';
 
 export interface CreateReportScheduleInput {
-  merchantId?: string;
+  organizationId?: string;
   name: string;
   reportType: ReportType;
   frequency: ReportFrequency;

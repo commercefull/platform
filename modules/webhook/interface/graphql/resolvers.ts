@@ -6,11 +6,11 @@ import { UnregisterWebhookUseCase } from '../../application/useCases/UnregisterW
 
 export const webhookResolvers = {
   Query: {
-    webhooks: async (_parent: unknown, args: { merchantId?: string; limit?: number; offset?: number }, context: GraphQLAuthContext) => {
+    webhooks: async (_parent: unknown, args: { organizationId?: string; limit?: number; offset?: number }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
       const useCase = new ListWebhooksUseCase(WebhookRepo);
       const result = await useCase.execute(
-        args.merchantId ? { merchantId: args.merchantId } : undefined,
+        args.organizationId ? { organizationId: args.organizationId } : undefined,
         args.limit ?? 50,
         args.offset ?? 0,
       );
@@ -19,14 +19,14 @@ export const webhookResolvers = {
   },
 
   Mutation: {
-    registerWebhook: async (_parent: unknown, args: { input: { name: string; url: string; events: string[]; merchantId?: string; headers?: string } }, context: GraphQLAuthContext) => {
+    registerWebhook: async (_parent: unknown, args: { input: { name: string; url: string; events: string[]; organizationId?: string; headers?: string } }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
       const useCase = new RegisterWebhookUseCase(WebhookRepo);
       const input: RegisterWebhookInput = {
         name: args.input.name,
         url: args.input.url,
         events: args.input.events,
-        merchantId: args.input.merchantId,
+        organizationId: args.input.organizationId,
         headers: args.input.headers ? JSON.parse(args.input.headers) : undefined,
       };
       return useCase.execute(input);

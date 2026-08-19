@@ -40,24 +40,23 @@ export class StoreRepo implements IStoreRepository {
       await query(
         `UPDATE store SET
           name = $1, slug = $2, description = $3, "storeType" = $4,
-          "merchantId" = $5, "businessId" = $6, "storeUrl" = $7, "storeEmail" = $8,
-          "storePhone" = $9, logo = $10, banner = $11, "favicon" = $12,
-          "primaryColor" = $13, "secondaryColor" = $14, theme = $15, "colorScheme" = $16,
-          address = $17, "isActive" = $18, "isVerified" = $19, "isFeatured" = $20,
-          "storeRating" = $21, "reviewCount" = $22, "followerCount" = $23,
-          "productCount" = $24, "orderCount" = $25, "storePolicies" = $26,
-          "shippingMethods" = $27, "paymentMethods" = $28, "supportedCurrencies" = $29,
-          "defaultCurrency" = $30, settings = $31, "metaTitle" = $32, "metaDescription" = $33,
-          "metaKeywords" = $34, "socialLinks" = $35, "openingHours" = $36,
-          "customPages" = $37, "customFields" = $38, metadata = $39, "updatedAt" = $40
-        WHERE "storeId" = $41`,
+          "organizationId" = $5, "storeUrl" = $6, "storeEmail" = $7,
+          "storePhone" = $8, logo = $9, banner = $10, "favicon" = $11,
+          "primaryColor" = $12, "secondaryColor" = $13, theme = $14, "colorScheme" = $15,
+          address = $16, "isActive" = $17, "isVerified" = $18, "isFeatured" = $19,
+          "storeRating" = $20, "reviewCount" = $21, "followerCount" = $22,
+          "productCount" = $23, "orderCount" = $24, "storePolicies" = $25,
+          "shippingMethods" = $26, "paymentMethods" = $27, "supportedCurrencies" = $28,
+          "defaultCurrency" = $29, settings = $30, "metaTitle" = $31, "metaDescription" = $32,
+          "metaKeywords" = $33, "socialLinks" = $34, "openingHours" = $35,
+          "customPages" = $36, "customFields" = $37, metadata = $38, "updatedAt" = $39
+        WHERE "storeId" = $40`,
         [
           store.name,
           store.slug,
           store.description,
           store.storeType,
-          store.merchantId,
-          store.businessId,
+          store.organizationId,
           store.storeUrl,
           store.storeEmail,
           store.storePhone,
@@ -78,14 +77,14 @@ export class StoreRepo implements IStoreRepository {
           store.productCount,
           store.orderCount,
           JSON.stringify(store.storePolicies || {}),
-          JSON.stringify(store.shippingMethods || []),
-          JSON.stringify(store.paymentMethods || []),
-          JSON.stringify(store.supportedCurrencies || []),
+          store.shippingMethods || [],
+          store.paymentMethods || [],
+          store.supportedCurrencies || [],
           store.defaultCurrency,
           JSON.stringify(store.settings || {}),
           store.metaTitle,
           store.metaDescription,
-          JSON.stringify(store.metaKeywords || []),
+          store.metaKeywords || [],
           JSON.stringify(store.socialLinks || {}),
           JSON.stringify(store.openingHours || {}),
           JSON.stringify(store.customPages || {}),
@@ -99,7 +98,7 @@ export class StoreRepo implements IStoreRepository {
       await query(
         `INSERT INTO store (
           "storeId", name, slug, description, "storeType",
-          "merchantId", "businessId", "storeUrl", "storeEmail", "storePhone",
+          "organizationId", "storeUrl", "storeEmail", "storePhone",
           logo, banner, "favicon", "primaryColor", "secondaryColor", theme, "colorScheme",
           address, "isActive", "isVerified", "isFeatured", "storeRating", "reviewCount",
           "followerCount", "productCount", "orderCount", "storePolicies", "shippingMethods",
@@ -107,9 +106,9 @@ export class StoreRepo implements IStoreRepository {
           "metaTitle", "metaDescription", "metaKeywords", "socialLinks", "openingHours",
           "customPages", "customFields", metadata, "createdAt", "updatedAt"
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34,
-          $35, $36, $37, $38, $39, $40, $41
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
+          $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33,
+          $34, $35, $36, $37, $38, $39, $40, $41
         )`,
         [
           store.storeId,
@@ -117,8 +116,7 @@ export class StoreRepo implements IStoreRepository {
           store.slug,
           store.description,
           store.storeType,
-          store.merchantId,
-          store.businessId,
+          store.organizationId,
           store.storeUrl,
           store.storeEmail,
           store.storePhone,
@@ -139,14 +137,14 @@ export class StoreRepo implements IStoreRepository {
           store.productCount,
           store.orderCount,
           JSON.stringify(store.storePolicies || {}),
-          JSON.stringify(store.shippingMethods || []),
-          JSON.stringify(store.paymentMethods || []),
-          JSON.stringify(store.supportedCurrencies || []),
+          store.shippingMethods || [],
+          store.paymentMethods || [],
+          store.supportedCurrencies || [],
           store.defaultCurrency,
           JSON.stringify(store.settings || {}),
           store.metaTitle,
           store.metaDescription,
-          JSON.stringify(store.metaKeywords || []),
+          store.metaKeywords || [],
           JSON.stringify(store.socialLinks || {}),
           JSON.stringify(store.openingHours || {}),
           JSON.stringify(store.customPages || {}),
@@ -171,18 +169,18 @@ export class StoreRepo implements IStoreRepository {
     return parseInt(result?.count || '0');
   }
 
-  async findByMerchant(merchantId: string): Promise<Store[]> {
-    return this.findAll({ merchantId });
+  async findByMerchant(organizationId: string): Promise<Store[]> {
+    return this.findAll({ organizationId });
   }
 
-  async findByBusiness(businessId: string): Promise<Store[]> {
-    return this.findAll({ businessId });
+  async findByBusiness(organizationId: string): Promise<Store[]> {
+    return this.findAll({ organizationId });
   }
 
-  async findHeadquarters(businessId: string): Promise<Store | null> {
+  async findHeadquarters(organizationId: string): Promise<Store | null> {
     const row = await queryOne<Record<string, unknown>>(
-      'SELECT * FROM store WHERE "businessId" = $1 AND "isHeadquarters" = true ORDER BY "createdAt" ASC LIMIT 1',
-      [businessId],
+      'SELECT * FROM store WHERE "organizationId" = $1 AND "isHeadquarters" = true ORDER BY "createdAt" ASC LIMIT 1',
+      [organizationId],
     );
 
     return row ? this.mapToStore(row) : null;
@@ -264,7 +262,7 @@ export class StoreRepo implements IStoreRepository {
 
   async createHierarchy(input: {
     hierarchyId: string;
-    businessId: string;
+    organizationId: string;
     name: string;
     defaultStoreId: string;
     storeIds: string[];
@@ -277,7 +275,7 @@ export class StoreRepo implements IStoreRepository {
     };
   }): Promise<{
     hierarchyId: string;
-    businessId: string;
+    organizationId: string;
     name: string;
     defaultStoreId: string;
     createdAt: Date;
@@ -285,12 +283,12 @@ export class StoreRepo implements IStoreRepository {
     const now = new Date().toISOString();
     await query(
       `INSERT INTO "storeHierarchy" (
-        "storeHierarchyId", "businessId", "defaultStoreId",
+        "storeHierarchyId", "organizationId", "defaultStoreId",
         "sharedInventoryPoolId", "sharedCatalogId", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, true, $6, $7)`,
       [
         input.hierarchyId,
-        input.businessId,
+        input.organizationId,
         input.defaultStoreId,
         input.sharedInventoryPoolId || null,
         input.sharedCatalogId || null,
@@ -301,7 +299,7 @@ export class StoreRepo implements IStoreRepository {
 
     return {
       hierarchyId: input.hierarchyId,
-      businessId: input.businessId,
+      organizationId: input.organizationId,
       name: input.name,
       defaultStoreId: input.defaultStoreId,
       createdAt: new Date(now),
@@ -317,13 +315,9 @@ export class StoreRepo implements IStoreRepository {
       conditions.push(`"storeType" = $${paramIndex++}`);
       params.push(filters.storeType);
     }
-    if (filters?.merchantId) {
-      conditions.push(`"merchantId" = $${paramIndex++}`);
-      params.push(filters.merchantId);
-    }
-    if (filters?.businessId) {
-      conditions.push(`"businessId" = $${paramIndex++}`);
-      params.push(filters.businessId);
+    if (filters?.organizationId) {
+      conditions.push(`"organizationId" = $${paramIndex++}`);
+      params.push(filters.organizationId);
     }
     if (filters?.isHeadquarters !== undefined) {
       conditions.push(`"isHeadquarters" = $${paramIndex++}`);
@@ -359,9 +353,8 @@ export class StoreRepo implements IStoreRepository {
       name: str(row.name) as string,
       slug: str(row.slug) as string,
       description: str(row.description),
-      storeType: str(row.storeType) as 'merchant_store' | 'business_store',
-      merchantId: str(row.merchantId),
-      businessId: str(row.businessId),
+      storeType: str(row.storeType) as 'merchant_store' | 'organization_store',
+      organizationId: str(row.organizationId),
       isHeadquarters: Boolean(row.isHeadquarters),
       parentStoreId: str(row.parentStoreId) || undefined,
       storeUrl: str(row.storeUrl),

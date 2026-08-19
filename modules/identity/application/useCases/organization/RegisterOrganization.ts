@@ -1,10 +1,10 @@
 /**
- * RegisterMerchant Use Case
+ * RegisterOrganization Use Case
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-export interface RegisterMerchantInput {
+export interface RegisterOrganizationInput {
   email: string;
   password: string;
   businessName: string;
@@ -15,22 +15,22 @@ export interface RegisterMerchantInput {
   website?: string;
 }
 
-export interface RegisterMerchantOutput {
-  merchantId: string;
+export interface RegisterOrganizationOutput {
+  organizationId: string;
   email: string;
   status: string;
   requiresApproval: boolean;
 }
 
-export interface MerchantRecord {
-  merchantId: string;
+export interface OrganizationRecord {
+  organizationId: string;
   email: string;
 }
 
-export interface MerchantRepository {
-  findByEmail(email: string): Promise<MerchantRecord | null>;
+export interface OrganizationRepository {
+  findByEmail(email: string): Promise<OrganizationRecord | null>;
   create(data: {
-    merchantId: string;
+    organizationId: string;
     email: string;
     passwordHash: string;
     businessName: string;
@@ -49,17 +49,17 @@ export interface AuthService {
 }
 
 export interface EmailService {
-  sendMerchantWelcomeEmail(params: { to: string; businessName: string; firstName?: string }): Promise<void>;
+  sendOrganizationWelcomeEmail(params: { to: string; businessName: string; firstName?: string }): Promise<void>;
 }
 
-export class RegisterMerchantUseCase {
+export class RegisterOrganizationUseCase {
   constructor(
-    private readonly merchantRepo: MerchantRepository,
+    private readonly organizationRepo: OrganizationRepository,
     private readonly authService: AuthService,
     private readonly emailService: EmailService,
   ) {}
 
-  async execute(input: RegisterMerchantInput): Promise<RegisterMerchantOutput> {
+  async execute(input: RegisterOrganizationInput): Promise<RegisterOrganizationOutput> {
     if (!input.email || !input.password || !input.businessName) {
       throw new Error('Email, password, and business name are required');
     }
@@ -76,8 +76,8 @@ export class RegisterMerchantUseCase {
     }
 
     // Check if email already exists
-    const existingMerchant = await this.merchantRepo.findByEmail(input.email);
-    if (existingMerchant) {
+    const existingOrganization = await this.organizationRepo.findByEmail(input.email);
+    if (existingOrganization) {
       throw new Error('Email already registered');
     }
 
@@ -85,10 +85,10 @@ export class RegisterMerchantUseCase {
     const passwordHash = await this.authService.hashPassword(input.password);
 
     // Create merchant
-    const merchantId = `merch_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+    const organizationId = `merch_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
 
-    await this.merchantRepo.create({
-      merchantId,
+    await this.organizationRepo.create({
+      organizationId,
       email: input.email.toLowerCase(),
       passwordHash,
       businessName: input.businessName,
@@ -103,7 +103,7 @@ export class RegisterMerchantUseCase {
 
     // Send welcome email
     try {
-      await this.emailService.sendMerchantWelcomeEmail({
+      await this.emailService.sendOrganizationWelcomeEmail({
         to: input.email,
         businessName: input.businessName,
         firstName: input.firstName,
@@ -111,14 +111,14 @@ export class RegisterMerchantUseCase {
     } catch {}
 
     // Emit event
-    eventBus.emit('merchant.registered', {
-      merchantId,
+    eventBus.emit('organization.registered', {
+      organizationId,
       email: input.email,
       businessName: input.businessName,
     });
 
     return {
-      merchantId,
+      organizationId,
       email: input.email,
       status: 'pending_approval',
       requiresApproval: true,

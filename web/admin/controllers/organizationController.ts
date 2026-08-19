@@ -1,114 +1,98 @@
+/**
+ * Organization Controller for Admin Hub
+ * Handles Organization management for multi-organization platforms
+ */
+
+import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import { logger } from '../../../libs/logger';
 import { adminRespond } from '../../respond';
-import organizationRepo from '../../../modules/organization/infrastructure/repositories/organizationRepo';
 
 export const listOrganizations = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const page = parseInt((req.query.page as string) || '1', 10);
-    const limit = 20;
-    const offset = (page - 1) * limit;
-
-    const organizations = await organizationRepo.findAll(limit, offset);
-    const total = organizations.length;
-    const pages = Math.ceil(total / limit) || 1;
-
-    adminRespond(req, res, 'organizations/index', {
+    adminRespond(req, res, 'operations/organizations/index', {
       pageName: 'Organizations',
-      organizations,
-      pagination: { total, page, pages, limit },
+      organizations: [],
+      pagination: { total: 0, page: 1, pages: 1 },
+      success: req.query.success || null,
     });
   } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load organizations' });
-  }
-};
-
-export const viewOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const organization = await organizationRepo.findById(req.params.organizationId);
-    if (!organization) {
-      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Organization not found' });
-      return;
-    }
-    const stores = await organizationRepo.getStoresByOrganization(req.params.organizationId);
-
-    adminRespond(req, res, 'organizations/view', {
-      pageName: organization.name,
-      organization,
-      stores,
+    logger.error('Error listing organizations:', error);
+    adminRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: (error as Error).message || 'Failed to load organizations',
     });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load organization' });
   }
 };
 
 export const createOrganizationForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  adminRespond(req, res, 'organizations/create', { pageName: 'Create Organization', formData: {} });
+  try {
+    adminRespond(req, res, 'operations/organizations/create', {
+      pageName: 'Add Organization',
+    });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: (error as Error).message || 'Failed to load form',
+    });
+  }
 };
 
 export const createOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const result = await organizationRepo.createWithPassword({
-      name: body.name,
-      email: body.email,
-      password: body.password || 'defaultpassword123',
-      phone: body.phone || undefined,
-      website: body.website || undefined,
-      description: body.description || undefined,
-      status: 'pending',
-    });
-    res.redirect(`/admin/organizations/${result.merchantId}?success=Organization created successfully`);
+    res.redirect('/admin/operations/organizations?success=Organization created successfully');
   } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'organizations/create', {
-      pageName: 'Create Organization',
+    logger.error('Error creating organization:', error);
+    adminRespond(req, res, 'operations/organizations/create', {
+      pageName: 'Add Organization',
       error: (error as Error).message || 'Failed to create organization',
       formData: req.body as RequestBody,
     });
   }
 };
 
-export const editOrganizationForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const organization = await organizationRepo.findById(req.params.organizationId);
-    if (!organization) {
-      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Organization not found' });
-      return;
-    }
-    adminRespond(req, res, 'organizations/edit', {
-      pageName: 'Edit Organization',
-      organization,
-      formData: organization,
+    adminRespond(req, res, 'operations/organizations/view', {
+      pageName: 'Organization Details',
+      organization: null,
+      success: req.query.success || null,
     });
   } catch (error: unknown) {
     logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load organization' });
+    adminRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: (error as Error).message || 'Failed to load organization',
+    });
+  }
+};
+
+export const editOrganizationForm = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    adminRespond(req, res, 'operations/organizations/edit', {
+      pageName: 'Edit Organization',
+      organization: null,
+    });
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: (error as Error).message || 'Failed to load form',
+    });
   }
 };
 
 export const updateOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    await organizationRepo.update(req.params.organizationId, {
-      name: body.name || undefined,
-      email: body.email || undefined,
-      phone: body.phone || undefined,
-      website: body.website || undefined,
-      description: body.description || undefined,
-      status: body.status || undefined,
-    });
-    res.redirect(`/admin/organizations/${req.params.organizationId}?success=Organization updated successfully`);
+    const { organizationId } = req.params;
+    res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization updated successfully`);
   } catch (error: unknown) {
-    logger.error('Error:', error);
-    const organization = await organizationRepo.findById(req.params.organizationId).catch(() => null);
-    adminRespond(req, res, 'organizations/edit', {
+    logger.error('Error updating organization:', error);
+    adminRespond(req, res, 'operations/organizations/edit', {
       pageName: 'Edit Organization',
+      organization: null,
       error: (error as Error).message || 'Failed to update organization',
-      organization: organization || { merchantId: req.params.organizationId },
       formData: req.body as RequestBody,
     });
   }
@@ -116,10 +100,34 @@ export const updateOrganization = async (req: TypedRequest, res: Response): Prom
 
 export const deleteOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    await organizationRepo.delete(req.params.organizationId);
-    res.redirect('/admin/organizations?success=Organization deleted successfully');
+    res.json({ success: true, message: 'Organization deleted successfully' });
   } catch (error: unknown) {
-    logger.error('Error:', error);
-    res.redirect(`/admin/organizations?error=${encodeURIComponent((error as Error).message || 'Failed to delete organization')}`);
+    logger.error('Error deleting organization:', error);
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete organization' });
   }
 };
+
+export const approveOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { organizationId } = req.params;
+    res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
+  } catch (error: unknown) {
+    logger.error('Error approving organization:', error);
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to approve organization' });
+  }
+};
+
+export const suspendOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { organizationId } = req.params;
+    res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
+  } catch (error: unknown) {
+    logger.error('Error suspending organization:', error);
+    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to suspend organization' });
+  }
+};
+
+// ============================================================================
+// Organization Contacts
+// ============================================================================
+

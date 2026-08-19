@@ -15,7 +15,7 @@ const TEST_MERCHANT = {
 };
 
 let client: AxiosInstance;
-let merchantToken: string;
+let organizationToken: string;
 
 beforeAll(async () => {
   client = axios.create({
@@ -30,9 +30,9 @@ beforeAll(async () => {
 
   try {
     const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, { headers: { 'X-Test-Request': 'true' } });
-    merchantToken = loginResponse.data?.accessToken || '';
+    organizationToken = loginResponse.data?.accessToken || '';
   } catch {
-    merchantToken = '';
+    organizationToken = '';
   }
 });
 
@@ -46,7 +46,7 @@ describe('Reporting Feature Tests', () => {
   describe('GET /business/reports/templates', () => {
     it.skip('should list all report templates', async () => {
       const response = await client.get('/business/reports/templates', {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -57,7 +57,7 @@ describe('Reporting Feature Tests', () => {
 
     it.skip('should include standard report types', async () => {
       const response = await client.get('/business/reports/templates', {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       const types = response.data.data.map((t: Record<string, unknown>) => t.reportType);
@@ -82,7 +82,7 @@ describe('Reporting Feature Tests', () => {
             dateTo: '2024-12-31',
           },
         },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
 
       if (response.status === 200) {
@@ -98,7 +98,7 @@ describe('Reporting Feature Tests', () => {
           reportType: 'product_performance',
           parameters: {},
         },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
 
       if (response.status === 200) {
@@ -110,7 +110,7 @@ describe('Reporting Feature Tests', () => {
       const response = await client.post(
         '/business/reports/generate',
         { parameters: {} },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
 
       expect(response.status).toBe(400);
@@ -120,7 +120,7 @@ describe('Reporting Feature Tests', () => {
       const response = await client.post(
         '/business/reports/generate',
         { reportType: 'invalid_type' },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
 
       expect(response.status).toBe(400);
@@ -143,7 +143,7 @@ describe('Reporting Feature Tests', () => {
       };
 
       const response = await client.post('/business/reports/schedules', scheduleData, {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       if (response.status === 201) {
@@ -157,7 +157,7 @@ describe('Reporting Feature Tests', () => {
       const response = await client.post(
         '/business/reports/schedules',
         { frequency: 'daily' },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
 
       expect(response.status).toBe(400);
@@ -167,7 +167,7 @@ describe('Reporting Feature Tests', () => {
   describe('GET /business/reports/schedules', () => {
     it('should list all report schedules', async () => {
       const response = await client.get('/business/reports/schedules', {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -181,7 +181,7 @@ describe('Reporting Feature Tests', () => {
       if (!testScheduleId) return;
 
       const response = await client.get(`/business/reports/schedules/${testScheduleId}`, {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -190,7 +190,7 @@ describe('Reporting Feature Tests', () => {
 
     it('should return 404 for non-existent schedule', async () => {
       const response = await client.get('/business/reports/schedules/00000000-0000-0000-0000-000000000000', {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       expect(response.status).toBe(404);
@@ -204,7 +204,7 @@ describe('Reporting Feature Tests', () => {
       const response = await client.put(
         `/business/reports/schedules/${testScheduleId}`,
         { name: 'Updated Schedule Name' },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
 
       if (response.status === 200) {
@@ -218,7 +218,7 @@ describe('Reporting Feature Tests', () => {
       if (!testScheduleId) return;
 
       const response = await client.get(`/business/reports/schedules/${testScheduleId}/executions`, {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -232,7 +232,7 @@ describe('Reporting Feature Tests', () => {
       if (!testScheduleId) return;
 
       const response = await client.delete(`/business/reports/schedules/${testScheduleId}`, {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       if (response.status === 200) {

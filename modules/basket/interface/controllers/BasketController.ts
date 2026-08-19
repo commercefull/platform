@@ -4,6 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
+import { query } from '../../../../libs/db';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import BasketRepo from '../../infrastructure/repositories/BasketRepository';
@@ -40,6 +41,7 @@ import {
   BasketNotActiveError,
   BasketExpiredError,
 } from '../../domain/errors/BasketErrors';
+import { CouponRepository } from '../../../coupon/infrastructure/repositories/CouponRepository';
 
 // ============================================================================
 // Request Body Interfaces
@@ -119,7 +121,61 @@ function mapBasketToResponse(basket: Basket): BasketResponse {
     createdAt: basket.createdAt.toISOString(),
     updatedAt: basket.updatedAt.toISOString(),
   };
+
 }
+
+// Admin override: apply a coupon without strict customer validations
+export const applyCouponAdmin = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { basketId } = req.params;
+    const body = req.body as ApplyCouponBody;
+    const { couponCode } = body;
+
+    if (!couponCode) {
+      respondError(req, res, 'couponCode is required', 400, 'basket/error');
+      return;
+    }
+
+    const basket = await BasketRepo.findById(basketId);
+    if (!basket) {
+      respondError(req, res, 'Basket not found', 404, 'basket/error');
+      return;
+    }
+
+    const couponRepo = new CouponRepository();
+    const coupon = await couponRepo.findByCode(couponCode);
+    if (!coupon) {
+      respondError(req, res, 'Invalid coupon code', 400, 'basket/error');
+      return;
+    }
+
+    const discountType = coupon.type === 'fixed_amount' ? 'fixed' : 'percentage';
+    const discountValue = coupon.value;
+    basket.applyCoupon(couponCode, discountType, discountValue);
+    await BasketRepo.save(basket);
+
+    respond(req, res, basket.toJSON(), 200, 'basket/view');
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    respondError(req, res, (error as Error).message || 'Failed to apply coupon (admin)', 400, 'basket/error');
+  }
+};
+
+export const listBaskets = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 20;
+    const offset = req.query.offset ? parseInt(String(req.query.offset), 10) : 0;
+    const rows = await query<Record<string, unknown>[]>(
+      `SELECT "basketId", status, currency, "customerId", "sessionId", "createdAt", "updatedAt" FROM basket
+       ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`,
+      [limit, offset],
+    );
+    respond(req, res, { items: rows || [], count: (rows || []).length }, 200, 'basket/list');
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    respondError(req, res, (error as Error).message || 'Failed to list baskets', 500, 'basket/error');
+  }
+};
 
 function mapBasketToSummary(basket: Basket): { basketId: string; itemCount: number; subtotal: number; currency: string } {
   return {
@@ -552,6 +608,10 @@ export const applyCoupon = async (req: TypedRequest, res: Response): Promise<voi
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: unknown) {
     logger.error('Error:', error);
+    if (error instanceof BasketNotFoundError) {
+      respondError(req, res, (error as Error).message, 404, 'basket/error');
+      return;
+    }
     respondError(req, res, (error as Error).message || 'Failed to apply coupon', 400, 'basket/error');
   }
 };

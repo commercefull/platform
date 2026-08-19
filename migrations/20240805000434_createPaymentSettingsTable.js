@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('paymentSettingsId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE').unique();
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE').unique();
     t.boolean('capturePaymentsAutomatically').notNullable().defaultTo(true);
     t.integer('authorizationValidityPeriod').notNullable().defaultTo(7);
     t.boolean('cardVaultingEnabled').notNullable().defaultTo(true);
@@ -18,7 +18,7 @@ exports.up = function (knex) {
     t.boolean('autoRefundOnCancel').notNullable().defaultTo(false);
     t.integer('paymentAttemptLimit').notNullable().defaultTo(3);
 
-    t.index('merchantId');
+    t.index('organizationId');
   });
 };
 

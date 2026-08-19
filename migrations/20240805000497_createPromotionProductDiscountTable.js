@@ -21,7 +21,7 @@ exports.up = function (knex) {
     t.boolean('displayInListing').notNullable().defaultTo(true);
     t.string('badgeText', 100);
     t.jsonb('badgeStyle');
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('organizationId').references('organizationId').inTable('organization');
 
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
@@ -33,7 +33,7 @@ exports.up = function (knex) {
     t.index('isActive');
     t.index('priority');
     t.index('appliesTo');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('stackable');
     t.index('displayOnProductPage');
     t.index('displayInListing');

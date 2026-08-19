@@ -2,7 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 
 export interface NotificationWebhook {
   notificationWebhookId: string;
-  merchantId?: string;
+  organizationId?: string;
   url: string;
   secret?: string;
   events: string[];
@@ -19,8 +19,8 @@ export async function findActive(event: string): Promise<NotificationWebhook[]> 
   );
 }
 
-export async function findByMerchant(merchantId: string): Promise<NotificationWebhook[]> {
-  return (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" WHERE "merchantId" = $1`, [merchantId])) || [];
+export async function findByMerchant(organizationId: string): Promise<NotificationWebhook[]> {
+  return (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" WHERE "organizationId" = $1`, [organizationId])) || [];
 }
 
 export async function create(
@@ -28,9 +28,9 @@ export async function create(
 ): Promise<NotificationWebhook | null> {
   const now = new Date();
   return queryOne<NotificationWebhook>(
-    `INSERT INTO "notificationWebhook" ("merchantId", url, secret, events, "isActive", "createdAt", "updatedAt")
+    `INSERT INTO "notificationWebhook" ("organizationId", url, secret, events, "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-    [params.merchantId || null, params.url, params.secret || null, JSON.stringify(params.events), params.isActive, now, now],
+    [params.organizationId || null, params.url, params.secret || null, JSON.stringify(params.events), params.isActive, now, now],
   );
 }
 

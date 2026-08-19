@@ -20,7 +20,7 @@ export interface Category {
   metaKeywords?: string;
   includeInMenu: boolean;
   productCount: number;
-  merchantId?: string;
+  organizationId?: string;
   isGlobal: boolean;
   customLayout?: string;
   displaySettings?: Record<string, unknown>;
@@ -46,7 +46,7 @@ export interface CategoryCreateProps {
   metaDescription?: string;
   metaKeywords?: string;
   includeInMenu?: boolean;
-  merchantId?: string;
+  organizationId?: string;
   isGlobal?: boolean;
   customLayout?: string;
   displaySettings?: Record<string, unknown>;
@@ -118,7 +118,7 @@ export class CategoryRepo {
         "name", "slug", "description", "parentId", "path", "depth", "position",
         "isActive", "isFeatured", "imageUrl", "bannerUrl", "iconUrl",
         "metaTitle", "metaDescription", "metaKeywords",
-        "includeInMenu", "merchantId", "isGlobal", "customLayout", "displaySettings"
+        "includeInMenu", "organizationId", "isGlobal", "customLayout", "displaySettings"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
       )
@@ -142,7 +142,7 @@ export class CategoryRepo {
       props.metaDescription || null,
       props.metaKeywords || null,
       props.includeInMenu !== false,
-      props.merchantId || null,
+      props.organizationId || null,
       props.isGlobal !== false,
       props.customLayout || null,
       props.displaySettings ? JSON.stringify(props.displaySettings) : null,
@@ -177,7 +177,7 @@ export class CategoryRepo {
       'metaDescription',
       'metaKeywords',
       'includeInMenu',
-      'merchantId',
+      'organizationId',
       'isGlobal',
       'customLayout',
       'displaySettings',

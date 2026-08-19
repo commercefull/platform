@@ -421,7 +421,7 @@ export const createWebhookForm = async (req: TypedRequest, res: Response): Promi
 export const createWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const body = req.body as RequestBody;
-    const { url, secret, events, merchantId } = body;
+    const { url, secret, events, organizationId } = body;
     const eventsArray = Array.isArray(events) ? events : events ? [events] : [];
 
     await notificationWebhookRepo.create({
@@ -429,7 +429,7 @@ export const createWebhook = async (req: TypedRequest, res: Response): Promise<v
       secret: secret || undefined,
       events: eventsArray,
       isActive: true,
-      merchantId: merchantId || undefined,
+      organizationId: organizationId || undefined,
     });
 
     res.redirect('/admin/notifications/webhooks?success=Webhook+created+successfully');

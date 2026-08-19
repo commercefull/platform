@@ -3,12 +3,12 @@
  */
 
 import express from 'express';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as reportingController from '../controllers/ReportingController';
 
 const router = express.Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // Report generation (on-demand)
 router.post('/reports/generate', reportingController.generateReport);

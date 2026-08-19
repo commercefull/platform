@@ -59,7 +59,7 @@ interface UserRequest extends TypedRequest {
   user?: {
     _id?: string;
     id?: string;
-    merchantId?: string;
+    organizationId?: string;
   };
   flash: {
     (): { [key: string]: string[] };
@@ -341,9 +341,9 @@ export const sendBatch = async (req: TypedRequest<Record<string, string>, unknow
  */
 export const listWebhooks = async (req: UserRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || (req.query.merchantId as string);
+    const organizationId = req.user?.organizationId || (req.query.organizationId as string);
     const useCase = new ManageNotificationWebhookUseCase();
-    const result = await useCase.execute(new ManageNotificationWebhookCommand('list', merchantId));
+    const result = await useCase.execute(new ManageNotificationWebhookCommand('list', organizationId));
     if (!result.success) {
       errorResponse(res, result.error || 'Failed to list webhooks', 400);
       return;
@@ -360,10 +360,10 @@ export const listWebhooks = async (req: UserRequest, res: Response): Promise<voi
  */
 export const createWebhook = async (req: UserRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?.id;
+    const organizationId = req.user?.organizationId || req.user?.id;
     const { url, secret, events } = req.body as CreateWebhookBody;
     const useCase = new ManageNotificationWebhookUseCase();
-    const result = await useCase.execute(new ManageNotificationWebhookCommand('create', merchantId, undefined, url, secret, events));
+    const result = await useCase.execute(new ManageNotificationWebhookCommand('create', organizationId, undefined, url, secret, events));
     if (!result.success) {
       errorResponse(res, result.error || 'Failed to create webhook', 400);
       return;

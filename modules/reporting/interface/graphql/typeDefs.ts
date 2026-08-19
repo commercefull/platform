@@ -44,7 +44,7 @@ export const reportingTypeDefs = `#graphql
   }
 
   input CreateReportScheduleInput {
-    merchantId: String
+    organizationId: String
     name: String!
     reportType: String!
     frequency: String!
@@ -54,7 +54,7 @@ export const reportingTypeDefs = `#graphql
   }
 
   type Query {
-    reportSchedules(merchantId: String): ListReportSchedulesResult!
+    reportSchedules(organizationId: String): ListReportSchedulesResult!
   }
 
   type Mutation {

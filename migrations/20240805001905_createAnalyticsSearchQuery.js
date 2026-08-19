@@ -6,7 +6,7 @@ exports.up = function (knex) {
   return knex.schema
     .createTable('analyticsSearchQuery', table => {
       table.uuid('analyticsSearchQueryId').primary().defaultTo(knex.raw('uuidv7()'));
-      table.uuid('merchantId').references('merchantId').inTable('merchant');
+      table.uuid('organizationId').references('organizationId').inTable('organization');
       table.string('query').notNullable();
       table.string('queryNormalized'); // lowercase, trimmed
       table.date('date').notNullable();
@@ -35,7 +35,7 @@ exports.up = function (knex) {
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
 
-      table.unique(['merchantId', 'queryNormalized', 'date']);
+      table.unique(['organizationId', 'queryNormalized', 'date']);
     })
     .then(() => knex.raw('CREATE INDEX ON "analyticsSearchQuery"("date")'))
     .then(() => knex.raw('CREATE INDEX ON "analyticsSearchQuery"("isZeroResult")'))

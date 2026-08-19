@@ -87,7 +87,7 @@ export async function setupPromotionTests() {
   let adminToken = '';
 
   try {
-    // Use merchant login for business routes
+    // Use organization login for business routes
     const loginResponse = await client.post('/business/auth/login', {
       email: 'merchant@example.com',
       password: 'password123',

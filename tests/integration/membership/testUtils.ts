@@ -99,7 +99,7 @@ export const setupMembershipTests = async () => {
   let testUserMembershipId = '';
 
   try {
-    // Login as merchant (admin) for business routes and customer for public routes
+    // Login as organization (admin) for business routes and customer for public routes
     adminToken = await loginTestAdmin(client);
     userToken = await loginTestUser(client, 'customer@example.com', 'password123');
   } catch {}

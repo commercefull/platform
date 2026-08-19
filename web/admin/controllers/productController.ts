@@ -165,7 +165,7 @@ export const createProductForm = async (req: TypedRequest, res: Response): Promi
 
 export const createProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId;
+    const organizationId = req.user?.organizationId;
     const body = req.body as RequestBody;
     const {
       name,
@@ -222,7 +222,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       slug,
       shortDescription,
       categoryId,
-      merchantId,
+      organizationId,
       parseFloat(basePrice) || 0,
       salePrice ? parseFloat(salePrice) : undefined,
       cost ? parseFloat(cost) : undefined,
@@ -675,7 +675,7 @@ export const createProductCollection = async (req: TypedRequest, res: Response):
       description: description || null,
       imageUrl: imageUrl || null,
       isActive: isActive !== 'false',
-      merchantId: null,
+      organizationId: null,
     });
     res.redirect('/admin/products/collections?success=Collection created successfully');
   } catch (error: unknown) {

@@ -11,6 +11,7 @@ const SEEDED_COUPON_PERCENTAGE_ID = '01935f00-0000-7000-8000-000000000011';
 const SEEDED_COUPON_EXPIRED_ID = '01935f00-0000-7000-8000-000000000012';
 const SEEDED_COUPON_TEST10_ID = '01935f00-0000-7000-8000-000000000013';
 const SEEDED_COUPON_SAVE10_ID = '01935f00-0000-7000-8000-000000000014';
+const SEEDED_COUPON_FIXED10_MIN100_ID = '01935f00-0000-7000-8000-000000000015';
 const SEEDED_PRODUCT_DISCOUNT_ID = '01935f00-0000-7000-8000-000000000020';
 const SEEDED_GIFT_CARD_ID = '01935f00-0000-7000-8000-000000000030';
 const SEEDED_GIFT_CARD_DEPLETED_ID = '01935f00-0000-7000-8000-000000000031';
@@ -54,7 +55,7 @@ exports.seed = async function (knex) {
       maxUsagePerCustomer: 5,
       minOrderAmount: 10.0,
       maxDiscountAmount: 100.0,
-      merchantId: null,
+      organizationId: null,
       isGlobal: true,
       createdAt: now,
       updatedAt: now,
@@ -75,7 +76,7 @@ exports.seed = async function (knex) {
       maxUsagePerCustomer: 3,
       minOrderAmount: 50.0,
       maxDiscountAmount: 50.0,
-      merchantId: null,
+      organizationId: null,
       isGlobal: true,
       createdAt: now,
       updatedAt: now,
@@ -143,6 +144,32 @@ exports.seed = async function (knex) {
   // Seed coupons
   await knex('promotionCoupon').insert([
     {
+      promotionCouponId: SEEDED_COUPON_FIXED10_MIN100_ID,
+      code: 'TESTFIXED10_MIN100',
+      promotionId: SEEDED_PROMOTION_ID,
+      name: 'Test Fixed $10 Min 100',
+      description: '$10 off, min order $100',
+      type: 'fixedAmount',
+      discountAmount: 10.0,
+      currencyCode: 'USD',
+      minOrderAmount: 100.0,
+      maxDiscountAmount: null,
+      startDate: now,
+      endDate: futureDate,
+      isActive: true,
+      isOneTimeUse: false,
+      maxUsage: 100,
+      usageCount: 0,
+      maxUsagePerCustomer: 3,
+      generationMethod: 'manual',
+      isReferral: false,
+      referrerId: null,
+      isPublic: true,
+      organizationId: null,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
       promotionCouponId: SEEDED_COUPON_ID,
       code: 'TESTFIXED10',
       promotionId: SEEDED_PROMOTION_ID,
@@ -164,7 +191,7 @@ exports.seed = async function (knex) {
       isReferral: false,
       referrerId: null,
       isPublic: true,
-      merchantId: null,
+      organizationId: null,
       createdAt: now,
       updatedAt: now,
     },
@@ -190,7 +217,7 @@ exports.seed = async function (knex) {
       isReferral: false,
       referrerId: null,
       isPublic: true,
-      merchantId: null,
+      organizationId: null,
       createdAt: now,
       updatedAt: now,
     },
@@ -216,7 +243,7 @@ exports.seed = async function (knex) {
       isReferral: false,
       referrerId: null,
       isPublic: false,
-      merchantId: null,
+      organizationId: null,
       createdAt: pastDate,
       updatedAt: pastDate,
     },
@@ -242,7 +269,7 @@ exports.seed = async function (knex) {
       isReferral: false,
       referrerId: null,
       isPublic: true,
-      merchantId: null,
+      organizationId: null,
       createdAt: now,
       updatedAt: now,
     },
@@ -268,7 +295,7 @@ exports.seed = async function (knex) {
       isReferral: false,
       referrerId: null,
       isPublic: true,
-      merchantId: null,
+      organizationId: null,
       createdAt: now,
       updatedAt: now,
     },
@@ -298,7 +325,7 @@ exports.seed = async function (knex) {
       displayInListing: true,
       badgeText: '10% OFF',
       badgeStyle: JSON.stringify({ backgroundColor: '#ff0000', color: '#ffffff' }),
-      merchantId: null,
+      organizationId: null,
       createdAt: now,
       updatedAt: now,
     },
@@ -401,6 +428,7 @@ module.exports.SEEDED_PROMOTION_CART_ID = SEEDED_PROMOTION_CART_ID;
 module.exports.SEEDED_COUPON_ID = SEEDED_COUPON_ID;
 module.exports.SEEDED_COUPON_PERCENTAGE_ID = SEEDED_COUPON_PERCENTAGE_ID;
 module.exports.SEEDED_COUPON_EXPIRED_ID = SEEDED_COUPON_EXPIRED_ID;
+module.exports.SEEDED_COUPON_FIXED10_MIN100_ID = SEEDED_COUPON_FIXED10_MIN100_ID;
 module.exports.SEEDED_PRODUCT_DISCOUNT_ID = SEEDED_PRODUCT_DISCOUNT_ID;
 module.exports.SEEDED_GIFT_CARD_ID = SEEDED_GIFT_CARD_ID;
 module.exports.SEEDED_GIFT_CARD_DEPLETED_ID = SEEDED_GIFT_CARD_DEPLETED_ID;

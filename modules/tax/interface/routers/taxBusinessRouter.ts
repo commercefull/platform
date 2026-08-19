@@ -16,11 +16,11 @@ import {
   updateTaxZone,
   deleteTaxZone,
 } from '../controllers/taxBusinessController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // -------------------- Tax Rate Routes --------------------
 router.get('/tax/rates', getAllTaxRates);

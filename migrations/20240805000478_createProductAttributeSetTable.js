@@ -8,13 +8,13 @@ exports.up = function (knex) {
     t.text('description');
     t.uuid('productTypeId').references('productTypeId').inTable('productType').onDelete('CASCADE');
     t.boolean('isActive').notNullable().defaultTo(true);
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('organizationId').references('organizationId').inTable('organization');
     t.boolean('isGlobal').notNullable().defaultTo(true);
 
     t.index('code');
     t.index('productTypeId');
     t.index('isActive');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isGlobal');
   });
 };

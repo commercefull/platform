@@ -20,17 +20,17 @@ export type IdentityEventType =
   | 'identity.customer.social_login'
   | 'identity.customer.social_account_linked'
   | 'identity.customer.social_account_unlinked'
-  | 'identity.merchant.login'
-  | 'identity.merchant.logout'
-  | 'identity.merchant.registered'
-  | 'identity.merchant.password_reset_requested'
-  | 'identity.merchant.password_reset_completed'
-  | 'identity.merchant.token_refreshed'
-  | 'identity.merchant.session_created'
-  | 'identity.merchant.session_invalidated'
-  | 'identity.merchant.social_login'
-  | 'identity.merchant.social_account_linked'
-  | 'identity.merchant.social_account_unlinked'
+  | 'identity.organization.login'
+  | 'identity.organization.logout'
+  | 'identity.organization.registered'
+  | 'identity.organization.password_reset_requested'
+  | 'identity.organization.password_reset_completed'
+  | 'identity.organization.token_refreshed'
+  | 'identity.organization.session_created'
+  | 'identity.organization.session_invalidated'
+  | 'identity.organization.social_login'
+  | 'identity.organization.social_account_linked'
+  | 'identity.organization.social_account_unlinked'
   | 'identity.token.blacklisted'
   | 'identity.tokens.cleanup';
 
@@ -62,7 +62,7 @@ export interface CustomerRegisteredEvent {
 
 export interface PasswordResetRequestedEvent {
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
   email: string;
   resetToken: string;
   expiresAt: Date;
@@ -71,13 +71,13 @@ export interface PasswordResetRequestedEvent {
 
 export interface PasswordResetCompletedEvent {
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
   timestamp: Date;
 }
 
 export interface TokenRefreshedEvent {
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
   ipAddress?: string;
   timestamp: Date;
 }
@@ -85,7 +85,7 @@ export interface TokenRefreshedEvent {
 export interface SessionCreatedEvent {
   sessionId: string;
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
   ipAddress?: string;
   userAgent?: string;
   expiresAt: Date;
@@ -95,13 +95,13 @@ export interface SessionCreatedEvent {
 export interface SessionInvalidatedEvent {
   sessionId: string;
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
   reason: 'logout' | 'expired' | 'revoked' | 'security';
   timestamp: Date;
 }
 
-export interface MerchantLoginEvent {
-  merchantId: string;
+export interface OrganizationLoginEvent {
+  organizationId: string;
   email: string;
   name: string;
   ipAddress?: string;
@@ -109,14 +109,14 @@ export interface MerchantLoginEvent {
   timestamp: Date;
 }
 
-export interface MerchantLogoutEvent {
-  merchantId: string;
+export interface OrganizationLogoutEvent {
+  organizationId: string;
   sessionId?: string;
   timestamp: Date;
 }
 
-export interface MerchantRegisteredEvent {
-  merchantId: string;
+export interface OrganizationRegisteredEvent {
+  organizationId: string;
   email: string;
   name: string;
   status: string;
@@ -126,7 +126,7 @@ export interface MerchantRegisteredEvent {
 export interface TokenBlacklistedEvent {
   token: string;
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
   reason: string;
   timestamp: Date;
 }
@@ -140,7 +140,7 @@ export interface TokensCleanupEvent {
 
 export interface SocialLoginEvent {
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
   email: string;
   provider: string;
   providerUserId: string;
@@ -151,7 +151,7 @@ export interface SocialLoginEvent {
 
 export interface SocialAccountLinkedEvent {
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
   provider: string;
   providerUserId: string;
   providerEmail?: string;
@@ -160,7 +160,7 @@ export interface SocialAccountLinkedEvent {
 
 export interface SocialAccountUnlinkedEvent {
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
   provider: string;
   timestamp: Date;
 }
@@ -178,13 +178,13 @@ export type IdentityEvent =
   | { type: 'identity.customer.token_refreshed'; payload: TokenRefreshedEvent }
   | { type: 'identity.customer.session_created'; payload: SessionCreatedEvent }
   | { type: 'identity.customer.session_invalidated'; payload: SessionInvalidatedEvent }
-  | { type: 'identity.merchant.login'; payload: MerchantLoginEvent }
-  | { type: 'identity.merchant.logout'; payload: MerchantLogoutEvent }
-  | { type: 'identity.merchant.registered'; payload: MerchantRegisteredEvent }
-  | { type: 'identity.merchant.password_reset_requested'; payload: PasswordResetRequestedEvent }
-  | { type: 'identity.merchant.password_reset_completed'; payload: PasswordResetCompletedEvent }
-  | { type: 'identity.merchant.token_refreshed'; payload: TokenRefreshedEvent }
-  | { type: 'identity.merchant.session_created'; payload: SessionCreatedEvent }
-  | { type: 'identity.merchant.session_invalidated'; payload: SessionInvalidatedEvent }
+  | { type: 'identity.organization.login'; payload: OrganizationLoginEvent }
+  | { type: 'identity.organization.logout'; payload: OrganizationLogoutEvent }
+  | { type: 'identity.organization.registered'; payload: OrganizationRegisteredEvent }
+  | { type: 'identity.organization.password_reset_requested'; payload: PasswordResetRequestedEvent }
+  | { type: 'identity.organization.password_reset_completed'; payload: PasswordResetCompletedEvent }
+  | { type: 'identity.organization.token_refreshed'; payload: TokenRefreshedEvent }
+  | { type: 'identity.organization.session_created'; payload: SessionCreatedEvent }
+  | { type: 'identity.organization.session_invalidated'; payload: SessionInvalidatedEvent }
   | { type: 'identity.token.blacklisted'; payload: TokenBlacklistedEvent }
   | { type: 'identity.tokens.cleanup'; payload: TokensCleanupEvent };

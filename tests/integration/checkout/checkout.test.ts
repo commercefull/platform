@@ -141,11 +141,6 @@ describe('Checkout Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
-      // Accept 200 (success) or 500 (server issues)
-      if (response.status === 500) {
-        return;
-      }
-
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
 
@@ -174,11 +169,6 @@ describe('Checkout Feature Tests', () => {
       const response = await client.put(`/customer/checkout/${checkoutId}/billing-address`, TEST_BILLING_ADDRESS, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
-
-      // Accept 200 (success) or 500 (server issues)
-      if (response.status === 500) {
-        return;
-      }
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -259,10 +249,6 @@ describe('Checkout Feature Tests', () => {
         },
       );
 
-      if (response.status === 500) {
-        return;
-      }
-
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
 
@@ -322,10 +308,6 @@ describe('Checkout Feature Tests', () => {
           headers: { Authorization: `Bearer ${customerToken}` },
         },
       );
-
-      if (response.status === 500) {
-        return;
-      }
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -459,11 +441,6 @@ describe('Checkout Feature Tests', () => {
           headers: { Authorization: `Bearer ${customerToken}` },
         },
       );
-
-      // Accept 200 or 500 (may fail due to server state)
-      if (response.status === 500) {
-        return;
-      }
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);

@@ -5,8 +5,7 @@ export const storeTypeDefs = `#graphql
     slug: String!
     description: String
     storeType: String!
-    merchantId: String
-    businessId: String
+    organizationId: String
     storeUrl: String
     storeEmail: String
     storePhone: String
@@ -31,8 +30,7 @@ export const storeTypeDefs = `#graphql
     name: String!
     slug: String!
     storeType: String!
-    merchantId: String
-    businessId: String
+    organizationId: String
     isHeadquarters: Boolean!
     parentStoreId: String
     storeUrl: String
@@ -66,8 +64,7 @@ export const storeTypeDefs = `#graphql
 
   input StoreFilterInput {
     storeType: String
-    merchantId: String
-    businessId: String
+    organizationId: String
     isHeadquarters: Boolean
     parentStoreId: String
     isActive: Boolean
@@ -86,8 +83,7 @@ export const storeTypeDefs = `#graphql
     slug: String
     description: String
     storeType: String!
-    merchantId: String
-    businessId: String
+    organizationId: String
     isHeadquarters: Boolean
     parentStoreId: String
     storeUrl: String

@@ -105,7 +105,7 @@ The Warehouse feature manages warehouse operations including receiving, put-away
 
 | Method | Endpoint | Controller | Description |
 |---|---|---|---|
-| GET | `/business/merchants/:merchantId/warehouses` | `getWarehousesByMerchant` | Merchant warehouses |
+| GET | `/business/organizations/:organizationId/warehouses` | `getWarehousesByMerchant` | Organization warehouses |
 | GET | `/business/warehouses` | `getWarehouses` | Warehouse listing with various filters |
 | POST | `/business/warehouses` | `createWarehouse` | Warehouse CRUD operations |
 | GET | `/business/warehouses/:id` | `getWarehouseById` | — |

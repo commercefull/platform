@@ -416,7 +416,7 @@ export class TaxQueryRepo {
     subtotal: number,
     shippingAmount: number = 0,
     customerId?: string,
-    _merchantId?: string,
+    _organizationId?: string,
   ): Promise<TaxCalculationResult> {
     // Convert DB format back to TS format for internal processing
     const items = dbItems.map(item => ({

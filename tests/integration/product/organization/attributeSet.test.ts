@@ -1,10 +1,10 @@
 /**
  * Integration tests for attribute sets
  * Covers: spec 03-attributes.md section 2.4
- * - Merchant: attribute set CRUD
- * - Merchant: add / remove / reorder attributes in a set
- * - Merchant: get attribute set with full attribute list
- * - Merchant: product type → attribute set relationship
+ * - Organization: attribute set CRUD
+ * - Organization: add / remove / reorder attributes in a set
+ * - Organization: get attribute set with full attribute list
+ * - Organization: product type → attribute set relationship
  */
 
 import { AxiosInstance } from 'axios';
@@ -161,7 +161,7 @@ describe('Attribute Set Tests', () => {
 
   // ── Attribute Set CRUD ────────────────────────────────────────────────────
 
-  describe('Merchant: Attribute Set CRUD', () => {
+  describe('Organization: Attribute Set CRUD', () => {
     it('should reject creation without name or code', async () => {
       const res = await client.post('/business/attribute-sets',
         { name: 'No Code' },
@@ -265,9 +265,9 @@ describe('Attribute Set Tests', () => {
     });
   });
 
-  // ── Merchant: Apply Attribute Set to Product ─────────────────────────────
+  // ── Organization: Apply Attribute Set to Product ─────────────────────────────
 
-  describe('Merchant: Apply Attribute Set to Product', () => {
+  describe('Organization: Apply Attribute Set to Product', () => {
     it('should apply an attribute set to an existing product', async () => {
       const res = await client.post(
         `/business/products/${SEEDED_PRODUCT_1_ID}/apply-attribute-set`,

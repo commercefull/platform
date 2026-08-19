@@ -13,7 +13,7 @@ const hasPermission = (user: Express.User | undefined, permission?: string): boo
 };
 
 // Environment variables should be properly loaded in your application
-const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
+const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'organization-secret-key-should-be-in-env';
 const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
 const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET || 'admin-secret-key-should-be-in-env';
 const B2B_JWT_SECRET = process.env.B2B_JWT_SECRET || 'b2b-secret-key-should-be-in-env';
@@ -52,7 +52,7 @@ const authenticateSession = async (
   req: Request,
   res: Response,
   next: NextFunction,
-  userType: 'admin' | 'merchant' | 'b2b' | 'customer',
+  userType: 'admin' | 'organization' | 'b2b' | 'customer',
   loginPath: string,
 ): Promise<void> => {
   // Get session ID from cookie
@@ -87,7 +87,7 @@ const authenticateSession = async (
       name: session.name,
       role: session.role,
       type: session.userType,
-      merchantId: session.merchantId,
+      organizationId: session.organizationId,
       companyId: session.companyId,
       storeId: session.storeId,
       storeRole: session.storeRole,
@@ -120,14 +120,14 @@ export const isAdminLoggedIn = async (req: Request, res: Response, next: NextFun
  * Merchant authentication middleware
  * Uses session for web, JWT for API
  */
-export const isMerchantLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
+export const isOrganizationLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
   // Check if it's an API call
   if (isJsonRequest(req)) {
-    return authenticateToken(req, res, next, MERCHANT_JWT_SECRET);
+    return authenticateToken(req, res, next, ORGANIZATION_JWT_SECRET);
   }
 
   // Web request - use session
-  return authenticateSession(req, res, next, 'merchant', '/merchant/login');
+  return authenticateSession(req, res, next, 'organization', '/organization/login');
 };
 
 /**

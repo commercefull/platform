@@ -3,11 +3,11 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex.schema.createTable('merchantPaymentInfo', t => {
-    t.uuid('merchantPaymentInfoId').primary().defaultTo(knex.raw('uuidv7()'));
+  return knex.schema.createTable('organizationPaymentInfo', t => {
+    t.uuid('organizationPaymentInfoId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.enum('paymentType', ['bankAccount', 'paypal', 'stripe', 'venmo', 'other']).notNullable();
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.string('accountHolderName', 100);
@@ -25,7 +25,7 @@ exports.up = function (knex) {
     t.text('notes');
 
     t.uuid('createdBy');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('paymentType');
     t.index('isDefault');
     t.index('isVerified');
@@ -39,5 +39,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema.dropTable('merchantPaymentInfo');
+  return knex.schema.dropTable('organizationPaymentInfo');
 };

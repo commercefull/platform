@@ -9,7 +9,7 @@ exports.up = function (knex) {
   return knex.schema
     .createTable('analyticsReportEvent', table => {
       table.uuid('analyticsReportEventId').primary().defaultTo(knex.raw('uuidv7()'));
-      table.uuid('merchantId').references('merchantId').inTable('merchant');
+      table.uuid('organizationId').references('organizationId').inTable('organization');
 
       // Event identification
       table.string('eventType').notNullable(); // order.created, product.viewed, cart.abandoned, etc.

@@ -31,7 +31,7 @@ import {
 
 export interface AnalyticsReportEvent {
   analyticsReportEventId: string;
-  merchantId?: string;
+  organizationId?: string;
   eventType: string;
   eventCategory: string;
   eventAction: string;
@@ -62,7 +62,7 @@ export interface AnalyticsReportEvent {
 
 export interface AnalyticsReportSnapshot {
   analyticsReportSnapshotId: string;
-  merchantId?: string;
+  organizationId?: string;
   snapshotType: 'hourly' | 'daily' | 'weekly' | 'monthly';
   snapshotTime: Date;
   snapshotDate: Date;
@@ -95,7 +95,7 @@ export interface AnalyticsReportSnapshot {
 
 export interface AnalyticsReportDashboard {
   analyticsReportDashboardId: string;
-  merchantId?: string;
+  organizationId?: string;
   createdBy?: string;
   name: string;
   slug?: string;
@@ -118,7 +118,7 @@ export async function trackEvent(event: {
   eventType: string;
   eventCategory: string;
   eventAction: string;
-  merchantId?: string;
+  organizationId?: string;
   customerId?: string;
   orderId?: string;
   productId?: string;
@@ -143,7 +143,7 @@ export async function trackEvent(event: {
   const result = await queryOne<AnalyticsReportEventRow>(
     `INSERT INTO "analyticsReportEvent" (
       "eventType", "eventCategory", "eventAction",
-      "merchantId", "customerId", "orderId", "productId", "basketId",
+      "organizationId", "customerId", "orderId", "productId", "basketId",
       "sessionId", "visitorId", "channel",
       "eventData", "eventValue", "eventQuantity", "currency",
       "ipAddress", "userAgent", "referrer",
@@ -156,7 +156,7 @@ export async function trackEvent(event: {
       event.eventType,
       event.eventCategory,
       event.eventAction,
-      event.merchantId,
+      event.organizationId,
       event.customerId,
       event.orderId,
       event.productId,
@@ -311,7 +311,7 @@ export async function createSnapshot(
 ): Promise<AnalyticsReportSnapshot> {
   const result = await queryOne<AnalyticsReportSnapshotRow>(
     `INSERT INTO "analyticsReportSnapshot" (
-      "merchantId", "snapshotType", "snapshotTime", "snapshotDate", "snapshotHour",
+      "organizationId", "snapshotType", "snapshotTime", "snapshotDate", "snapshotHour",
       "totalOrders", "pendingOrders", "processingOrders", "shippedOrders",
       "deliveredOrders", "cancelledOrders", "refundedOrders",
       "totalRevenue", "pendingRevenue", "refundedAmount",
@@ -322,7 +322,7 @@ export async function createSnapshot(
       "activeSubscriptions", "monthlyRecurringRevenue",
       "createdAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, NOW())
-    ON CONFLICT ("merchantId", "snapshotType", "snapshotTime") DO UPDATE SET
+    ON CONFLICT ("organizationId", "snapshotType", "snapshotTime") DO UPDATE SET
       "totalOrders" = EXCLUDED."totalOrders",
       "pendingOrders" = EXCLUDED."pendingOrders",
       "processingOrders" = EXCLUDED."processingOrders",
@@ -348,7 +348,7 @@ export async function createSnapshot(
       "monthlyRecurringRevenue" = EXCLUDED."monthlyRecurringRevenue"
     RETURNING *`,
     [
-      snapshot.merchantId,
+      snapshot.organizationId,
       snapshot.snapshotType,
       snapshot.snapshotTime,
       snapshot.snapshotDate,
@@ -386,14 +386,14 @@ export async function getSnapshots(
   snapshotType: 'hourly' | 'daily' | 'weekly' | 'monthly',
   startDate: Date,
   endDate: Date,
-  merchantId?: string,
+  organizationId?: string,
 ): Promise<AnalyticsReportSnapshot[]> {
   let whereClause = '"snapshotType" = $1 AND "snapshotDate" >= $2 AND "snapshotDate" <= $3';
   const params: unknown[] = [snapshotType, startDate, endDate];
 
-  if (merchantId) {
-    whereClause += ' AND "merchantId" = $4';
-    params.push(merchantId);
+  if (organizationId) {
+    whereClause += ' AND "organizationId" = $4';
+    params.push(organizationId);
   }
 
   const rows = await query<AnalyticsReportSnapshotRow[]>(
@@ -406,14 +406,14 @@ export async function getSnapshots(
 
 export async function getLatestSnapshot(
   snapshotType: 'hourly' | 'daily' | 'weekly' | 'monthly',
-  merchantId?: string,
+  organizationId?: string,
 ): Promise<AnalyticsReportSnapshot | null> {
   let whereClause = '"snapshotType" = $1';
   const params: unknown[] = [snapshotType];
 
-  if (merchantId) {
-    whereClause += ' AND "merchantId" = $2';
-    params.push(merchantId);
+  if (organizationId) {
+    whereClause += ' AND "organizationId" = $2';
+    params.push(organizationId);
   }
 
   const row = await queryOne<AnalyticsReportSnapshotRow>(
@@ -428,13 +428,13 @@ export async function getLatestSnapshot(
 // Dashboards
 // ============================================================================
 
-export async function getDashboards(merchantId?: string): Promise<AnalyticsReportDashboard[]> {
+export async function getDashboards(organizationId?: string): Promise<AnalyticsReportDashboard[]> {
   let whereClause = '1=1';
   const params: unknown[] = [];
 
-  if (merchantId) {
-    whereClause = '"merchantId" = $1 OR "isShared" = true';
-    params.push(merchantId);
+  if (organizationId) {
+    whereClause = '"organizationId" = $1 OR "isShared" = true';
+    params.push(organizationId);
   }
 
   const rows = await query<AnalyticsReportDashboardRow[]>(
@@ -485,13 +485,13 @@ export async function saveDashboard(
   } else {
     const result = await queryOne<AnalyticsReportDashboardRow>(
       `INSERT INTO "analyticsReportDashboard" (
-        "merchantId", "createdBy", "name", "slug", "description",
+        "organizationId", "createdBy", "name", "slug", "description",
         "isDefault", "isShared", "layout", "widgets", "filters", "dateRange",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *`,
       [
-        dashboard.merchantId,
+        dashboard.organizationId,
         dashboard.createdBy,
         dashboard.name,
         dashboard.slug,
@@ -519,7 +519,7 @@ export async function deleteDashboard(dashboardId: string): Promise<void> {
 // ============================================================================
 
 export async function getRealTimeMetrics(
-  merchantId?: string,
+  organizationId?: string,
   minutes: number = 60,
 ): Promise<{
   activeVisitors: number;
@@ -533,9 +533,9 @@ export async function getRealTimeMetrics(
   let merchantFilter = '';
   const params: unknown[] = [since];
 
-  if (merchantId) {
-    merchantFilter = ' AND "merchantId" = $2';
-    params.push(merchantId);
+  if (organizationId) {
+    merchantFilter = ' AND "organizationId" = $2';
+    params.push(organizationId);
   }
 
   const visitors = await queryOne<{ count: string }>(
@@ -579,7 +579,7 @@ export async function getRealTimeMetrics(
 function mapToAnalyticsReportEvent(row: AnalyticsReportEventRow): AnalyticsReportEvent {
   return {
     analyticsReportEventId: row.analyticsReportEventId,
-    merchantId: row.merchantId ?? undefined,
+    organizationId: row.organizationId ?? undefined,
     eventType: row.eventType,
     eventCategory: row.eventCategory,
     eventAction: row.eventAction,
@@ -612,7 +612,7 @@ function mapToAnalyticsReportEvent(row: AnalyticsReportEventRow): AnalyticsRepor
 function mapToAnalyticsReportSnapshot(row: AnalyticsReportSnapshotRow): AnalyticsReportSnapshot {
   return {
     analyticsReportSnapshotId: row.analyticsReportSnapshotId,
-    merchantId: row.merchantId ?? undefined,
+    organizationId: row.organizationId ?? undefined,
     snapshotType: row.snapshotType as 'hourly' | 'daily' | 'weekly' | 'monthly',
     snapshotTime: new Date(row.snapshotTime),
     snapshotDate: new Date(row.snapshotDate),
@@ -647,7 +647,7 @@ function mapToAnalyticsReportSnapshot(row: AnalyticsReportSnapshotRow): Analytic
 function mapToAnalyticsReportDashboard(row: AnalyticsReportDashboardRow): AnalyticsReportDashboard {
   return {
     analyticsReportDashboardId: row.analyticsReportDashboardId,
-    merchantId: row.merchantId ?? undefined,
+    organizationId: row.organizationId ?? undefined,
     createdBy: row.createdBy ?? undefined,
     name: row.name,
     slug: row.slug ?? undefined,

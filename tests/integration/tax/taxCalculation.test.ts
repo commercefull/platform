@@ -230,11 +230,11 @@ describe('Tax Calculation API Integration Tests', () => {
     });
   });
 
-  describe('GET /api/tax/settings/:merchantId', () => {
-    it('should retrieve tax display settings for a merchant', async () => {
-      const testMerchantId = 'test-merchant-id'; // Replace with actual test merchant ID
+  describe('GET /api/tax/settings/:organizationId', () => {
+    it('should retrieve tax display settings for an organization', async () => {
+      const testOrganizationId = 'test-org-id'; // Replace with actual test org ID
 
-      const response = await client.get(`/customer/tax/settings/${testMerchantId}`);
+      const response = await client.get(`/customer/tax/settings/${testOrganizationId}`);
 
       expect(response.status).toBe(200);
 

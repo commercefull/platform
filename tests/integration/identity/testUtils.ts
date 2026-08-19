@@ -14,14 +14,14 @@ export const TEST_CUSTOMER = {
 export const TEST_MERCHANT = {
   email: 'merchant@example.com',
   password: 'password123',
-  name: 'Test Merchant',
+  name: 'Test Organization',
   businessName: 'Test Store',
 };
 
 // Legacy exports for backward compatibility
 export const testCustomer = TEST_CUSTOMER;
-export const testMerchant = TEST_MERCHANT;
-export const testAdmin = TEST_MERCHANT; // Use merchant as admin for now
+export const testOrganization = TEST_MERCHANT;
+export const testAdmin = TEST_MERCHANT; // Use organization as admin for now
 
 // ============================================================================
 // Setup Functions
@@ -46,7 +46,7 @@ export async function setupIdentityTests() {
   let adminToken = '';
 
   try {
-    // Get admin/merchant token
+    // Get admin/organization token
     const adminLoginResponse = await client.post('/business/auth/login', {
       email: TEST_MERCHANT.email,
       password: TEST_MERCHANT.password,
@@ -70,10 +70,10 @@ export async function setupAuthTests() {
     client,
     adminToken,
     testCustomerId: '',
-    testMerchantId: '',
+    testOrganizationId: '',
     testAdminId: '',
     customerResetToken: '',
-    merchantResetToken: '',
+    organizationResetToken: '',
     customerRefreshToken: '',
   };
 }
@@ -93,7 +93,7 @@ export async function cleanupAuthTests(
   _adminToken: string,
   _params: {
     testCustomerId?: string;
-    testMerchantId?: string;
+    testOrganizationId?: string;
     testAdminId?: string;
     customerRefreshToken?: string;
   },

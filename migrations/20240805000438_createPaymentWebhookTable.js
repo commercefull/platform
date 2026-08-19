@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('paymentWebhookId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.uuid('gatewayId').references('paymentGatewayId').inTable('paymentGateway').onDelete('CASCADE');
     t.enum('provider', ['stripe', 'square', 'paypal', 'manual', 'other']).notNullable();
     t.string('eventType', 100).notNullable();
@@ -16,7 +16,7 @@ exports.up = function (knex) {
     t.string('relatedEntityType', 50);
     t.uuid('relatedEntityId');
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('gatewayId');
     t.index('provider');
     t.index('eventType');

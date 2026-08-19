@@ -144,10 +144,10 @@ describe.skip('SystemConfiguration API Integration', () => {
 
     it('should update business settings', async () => {
       const updateData = {
-        businessSettings: {
-          maxStoresPerBusiness: 25,
-          maxWarehousesPerBusiness: 10,
-          allowBusinessTypeChanges: true,
+        organizationSettings: {
+          maxStoresPerOrganization: 25,
+          maxWarehousesPerOrganization: 10,
+          allowOrganizationTypeChanges: true,
         },
       };
 
@@ -155,9 +155,9 @@ describe.skip('SystemConfiguration API Integration', () => {
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.businessSettings.maxStoresPerBusiness).toBe(25);
-      expect(response.data.data.businessSettings.maxWarehousesPerBusiness).toBe(10);
-      expect(response.data.data.businessSettings.allowBusinessTypeChanges).toBe(true);
+      expect(response.data.data.organizationSettings.maxStoresPerOrganization).toBe(25);
+      expect(response.data.data.organizationSettings.maxWarehousesPerOrganization).toBe(10);
+      expect(response.data.data.organizationSettings.allowOrganizationTypeChanges).toBe(true);
     });
 
     it('should return 400 for non-existent configuration', async () => {

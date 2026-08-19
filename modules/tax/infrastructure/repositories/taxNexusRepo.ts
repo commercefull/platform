@@ -11,7 +11,7 @@ export interface TaxNexus {
   taxNexusId: string;
   createdAt: string;
   updatedAt: string;
-  merchantId: string;
+  organizationId: string;
   name: string;
   country: string;
   region?: string;
@@ -29,33 +29,33 @@ export interface TaxNexus {
 }
 
 export type TaxNexusCreateParams = Omit<TaxNexus, 'taxNexusId' | 'createdAt' | 'updatedAt'>;
-export type TaxNexusUpdateParams = Partial<Omit<TaxNexus, 'taxNexusId' | 'merchantId' | 'createdAt' | 'updatedAt'>>;
+export type TaxNexusUpdateParams = Partial<Omit<TaxNexus, 'taxNexusId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
 
 export class TaxNexusRepo {
   async findById(id: string): Promise<TaxNexus | null> {
     return await queryOne<TaxNexus>(`SELECT * FROM "taxNexus" WHERE "taxNexusId" = $1`, [id]);
   }
 
-  async findByMerchant(merchantId: string, activeOnly = false): Promise<TaxNexus[]> {
-    let sql = `SELECT * FROM "taxNexus" WHERE "merchantId" = $1`;
+  async findByMerchant(organizationId: string, activeOnly = false): Promise<TaxNexus[]> {
+    let sql = `SELECT * FROM "taxNexus" WHERE "organizationId" = $1`;
     if (activeOnly) sql += ` AND "isActive" = true AND "startDate" <= $2 AND ("endDate" IS NULL OR "endDate" >= $2)`;
     sql += ` ORDER BY "isDefault" DESC, "name" ASC`;
-    const params = activeOnly ? [merchantId, unixTimestamp()] : [merchantId];
+    const params = activeOnly ? [organizationId, unixTimestamp()] : [organizationId];
     return (await query<TaxNexus[]>(sql, params)) || [];
   }
 
-  async findByCountry(merchantId: string, country: string, activeOnly = false): Promise<TaxNexus[]> {
-    let sql = `SELECT * FROM "taxNexus" WHERE "merchantId" = $1 AND "country" = $2`;
+  async findByCountry(organizationId: string, country: string, activeOnly = false): Promise<TaxNexus[]> {
+    let sql = `SELECT * FROM "taxNexus" WHERE "organizationId" = $1 AND "country" = $2`;
     if (activeOnly) sql += ` AND "isActive" = true AND "startDate" <= $3 AND ("endDate" IS NULL OR "endDate" >= $3)`;
     sql += ` ORDER BY "name" ASC`;
-    const params = activeOnly ? [merchantId, country, unixTimestamp()] : [merchantId, country];
+    const params = activeOnly ? [organizationId, country, unixTimestamp()] : [organizationId, country];
     return (await query<TaxNexus[]>(sql, params)) || [];
   }
 
-  async findDefault(merchantId: string): Promise<TaxNexus | null> {
+  async findDefault(organizationId: string): Promise<TaxNexus | null> {
     return await queryOne<TaxNexus>(
-      `SELECT * FROM "taxNexus" WHERE "merchantId" = $1 AND "isDefault" = true AND "isActive" = true LIMIT 1`,
-      [merchantId],
+      `SELECT * FROM "taxNexus" WHERE "organizationId" = $1 AND "isDefault" = true AND "isActive" = true LIMIT 1`,
+      [organizationId],
     );
   }
 
@@ -63,20 +63,20 @@ export class TaxNexusRepo {
     const now = unixTimestamp();
 
     if (params.isDefault) {
-      await query(`UPDATE "taxNexus" SET "isDefault" = false, "updatedAt" = $1 WHERE "merchantId" = $2 AND "isDefault" = true`, [
+      await query(`UPDATE "taxNexus" SET "isDefault" = false, "updatedAt" = $1 WHERE "organizationId" = $2 AND "isDefault" = true`, [
         now,
-        params.merchantId,
+        params.organizationId,
       ]);
     }
 
     const result = await queryOne<TaxNexus>(
       `INSERT INTO "taxNexus" (
-        "merchantId", "name", "country", "region", "regionCode", "city", "postalCode",
+        "organizationId", "name", "country", "region", "regionCode", "city", "postalCode",
         "streetAddress", "taxId", "registrationNumber", "isDefault", "startDate", 
         "endDate", "isActive", "notes", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
       [
-        params.merchantId,
+        params.organizationId,
         params.name,
         params.country,
         params.region || null,
@@ -105,8 +105,8 @@ export class TaxNexusRepo {
 
     if (params.isDefault === true) {
       await query(
-        `UPDATE "taxNexus" SET "isDefault" = false, "updatedAt" = $1 WHERE "merchantId" = $2 AND "isDefault" = true AND "taxNexusId" != $3`,
-        [unixTimestamp(), nexus.merchantId, id],
+        `UPDATE "taxNexus" SET "isDefault" = false, "updatedAt" = $1 WHERE "organizationId" = $2 AND "isDefault" = true AND "taxNexusId" != $3`,
+        [unixTimestamp(), nexus.organizationId, id],
       );
     }
 
@@ -145,13 +145,13 @@ export class TaxNexusRepo {
     return !!result;
   }
 
-  async count(merchantId?: string): Promise<number> {
+  async count(organizationId?: string): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "taxNexus"`;
     const params: unknown[] = [];
 
-    if (merchantId) {
-      sql += ` WHERE "merchantId" = $1`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` WHERE "organizationId" = $1`;
+      params.push(organizationId);
     }
 
     const result = await queryOne<{ count: string }>(sql, params);

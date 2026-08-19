@@ -5,10 +5,10 @@ import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/g
 
 export const reportingResolvers = {
   Query: {
-    reportSchedules: async (_parent: unknown, args: { merchantId?: string }, context: GraphQLAuthContext) => {
+    reportSchedules: async (_parent: unknown, args: { organizationId?: string }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
       const useCase = new ListReportSchedulesUseCase();
-      const schedules = await useCase.execute(args.merchantId);
+      const schedules = await useCase.execute(args.organizationId);
       return {
         schedules: schedules.map(s => ({
           scheduleId: s.reportScheduleId,
@@ -44,7 +44,7 @@ export const reportingResolvers = {
 
     createReportSchedule: async (_parent: unknown, args: {
       input: {
-        merchantId?: string;
+        organizationId?: string;
         name: string;
         reportType: string;
         frequency: string;
@@ -56,7 +56,7 @@ export const reportingResolvers = {
       requireBusinessAuth(context);
       const useCase = new CreateReportScheduleUseCase();
       const result = await useCase.execute({
-        merchantId: args.input.merchantId,
+        organizationId: args.input.organizationId,
         name: args.input.name,
         reportType: args.input.reportType as never,
         frequency: args.input.frequency as never,

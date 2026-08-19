@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin, expectStatus } from '../testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Payment Fraud Prevention Tests', () => {
   let client: AxiosInstance;

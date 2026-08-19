@@ -1,6 +1,6 @@
 /**
  * Customer: Category Browsing
- * Covers: docs/specs/product/merchant/04-categories.md §3
+ * Covers: docs/specs/product/organization/04-categories.md §3
  */
 
 import { AxiosInstance } from 'axios';

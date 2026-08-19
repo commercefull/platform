@@ -33,7 +33,7 @@ export interface PaymentRepository {
 
   // Payment Methods
   getEnabledPaymentMethods(
-    merchantId: string,
+    organizationId: string,
     currency?: string,
   ): Promise<
     Array<{
@@ -47,7 +47,7 @@ export interface PaymentRepository {
   >;
 
   // Gateways
-  getDefaultGateway(merchantId: string): Promise<{
+  getDefaultGateway(organizationId: string): Promise<{
     gatewayId: string;
     provider: string;
     isTestMode: boolean;

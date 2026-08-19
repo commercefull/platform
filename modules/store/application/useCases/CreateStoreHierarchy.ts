@@ -7,7 +7,7 @@
 import type { StoreRepository } from '../../domain/repositories/StoreRepository';
 
 export interface CreateStoreHierarchyInput {
-  businessId: string;
+  organizationId: string;
   name: string;
   defaultStoreId: string;
   storeIds: string[];
@@ -22,7 +22,7 @@ export interface CreateStoreHierarchyInput {
 
 export interface CreateStoreHierarchyOutput {
   hierarchyId: string;
-  businessId: string;
+  organizationId: string;
   name: string;
   defaultStoreId: string;
   storeCount: number;
@@ -33,8 +33,8 @@ export class CreateStoreHierarchyUseCase {
   constructor(private readonly storeRepository: StoreRepository) {}
 
   async execute(input: CreateStoreHierarchyInput): Promise<CreateStoreHierarchyOutput> {
-    if (!input.businessId || !input.name || !input.defaultStoreId) {
-      throw new Error('Business ID, name, and default store ID are required');
+    if (!input.organizationId || !input.name || !input.defaultStoreId) {
+      throw new Error('Organization ID, name, and default store ID are required');
     }
 
     if (!input.storeIds.includes(input.defaultStoreId)) {
@@ -53,7 +53,7 @@ export class CreateStoreHierarchyUseCase {
 
     const hierarchy = await this.storeRepository.createHierarchy({
       hierarchyId,
-      businessId: input.businessId,
+      organizationId: input.organizationId,
       name: input.name,
       defaultStoreId: input.defaultStoreId,
       storeIds: input.storeIds,
@@ -68,7 +68,7 @@ export class CreateStoreHierarchyUseCase {
 
     return {
       hierarchyId: hierarchy.hierarchyId,
-      businessId: hierarchy.businessId,
+      organizationId: hierarchy.organizationId,
       name: hierarchy.name,
       defaultStoreId: hierarchy.defaultStoreId,
       storeCount: input.storeIds.length,

@@ -3,7 +3,7 @@ import { query, queryOne } from '../../../../libs/db';
 export interface StoredPaymentMethod {
   storedPaymentMethodId: string;
   customerId: string;
-  merchantId: string;
+  organizationId: string;
   type: string;
   provider: string;
   providerToken: string;
@@ -37,11 +37,11 @@ export async function create(
 ): Promise<StoredPaymentMethod | null> {
   const now = new Date();
   return queryOne<StoredPaymentMethod>(
-    `INSERT INTO "storedPaymentMethod" ("customerId", "merchantId", type, provider, "providerToken", last4, brand, "expiryMonth", "expiryYear", "isDefault", "createdAt", "updatedAt")
+    `INSERT INTO "storedPaymentMethod" ("customerId", "organizationId", type, provider, "providerToken", last4, brand, "expiryMonth", "expiryYear", "isDefault", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
     [
       params.customerId,
-      params.merchantId,
+      params.organizationId,
       params.type,
       params.provider,
       params.providerToken,

@@ -5,10 +5,10 @@ import { AuthRefreshTokenRepo } from '../../infrastructure/repositories/identity
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import { OrganizationRepo } from '../../../organization/infrastructure/repositories/organizationRepo';
-import { emitMerchantLogin, emitMerchantRegistered, emitMerchantTokenRefreshed } from '../../domain/events/emitIdentityEvent';
+import { emitOrganizationLogin, emitOrganizationRegistered, emitOrganizationTokenRefreshed } from '../../domain/events/emitIdentityEvent';
 
 // Environment configuration with secure defaults
-const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
+const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
@@ -83,8 +83,8 @@ export const loginorganization = async (req: TypedRequest<Record<string, string>
     }
 
     // Emit login event
-    emitMerchantLogin({
-      merchantId: organization.merchantId,
+    emitOrganizationLogin({
+      organizationId: organization.organizationId,
       email: organization.email,
       name: organization.name || '',
       ipAddress: req.ip,
@@ -92,13 +92,13 @@ export const loginorganization = async (req: TypedRequest<Record<string, string>
     });
 
     // Generate access token
-    const accessToken = generateAccessToken(organization.merchantId, organization.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
+    const accessToken = generateAccessToken(organization.organizationId, organization.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     res.json({
       success: true,
       accessToken,
       organization: {
-        id: organization.merchantId,
+        id: organization.organizationId,
         email: organization.email,
         name: organization.name,
         status: organization.status,
@@ -154,8 +154,8 @@ export const registerorganization = async (req: TypedRequest<Record<string, stri
     });
 
     // Emit registration event
-    emitMerchantRegistered({
-      merchantId: newOrganization.merchantId,
+    emitOrganizationRegistered({
+      organizationId: newOrganization.organizationId,
       email: newOrganization.email,
       name: newOrganization.name || '',
       status: newOrganization.status || 'pending',
@@ -165,7 +165,7 @@ export const registerorganization = async (req: TypedRequest<Record<string, stri
       success: true,
       message: 'organization account created successfully. Your account is pending approval.',
       organization: {
-        id: newOrganization.merchantId,
+        id: newOrganization.organizationId,
         email: newOrganization.email,
         name: newOrganization.name,
         status: newOrganization.status,
@@ -217,16 +217,16 @@ export const issueTokenPair = async (req: TypedRequest<Record<string, string>, u
     }
 
     // Generate access token (short-lived)
-    const accessToken = generateAccessToken(organization.merchantId, organization.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
+    const accessToken = generateAccessToken(organization.organizationId, organization.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     // Generate refresh token (long-lived)
-    const refreshToken = generateAccessToken(organization.merchantId, organization.email, 'merchant', MERCHANT_JWT_SECRET, REFRESH_TOKEN_DURATION);
+    const refreshToken = generateAccessToken(organization.organizationId, organization.email, 'organization', ORGANIZATION_JWT_SECRET, REFRESH_TOKEN_DURATION);
 
     // Store refresh token in database for tracking/revocation
     await refreshTokenRepo.create({
       token: refreshToken,
-      userType: 'merchant',
-      userId: organization.merchantId,
+      userType: 'organization',
+      userId: organization.organizationId,
       expiresAt: parseExpirationDate(REFRESH_TOKEN_DURATION),
       userAgent: req.headers['user-agent'] || null,
       ipAddress: req.ip || null,
@@ -239,7 +239,7 @@ export const issueTokenPair = async (req: TypedRequest<Record<string, string>, u
       tokenType: 'Bearer',
       expiresIn: ACCESS_TOKEN_DURATION,
       organization: {
-        id: organization.merchantId,
+        id: organization.organizationId,
         email: organization.email,
         name: organization.name,
       },
@@ -270,7 +270,7 @@ export const renewAccessToken = async (req: TypedRequest<Record<string, string>,
     }
 
     // Verify refresh token signature
-    const tokenPayload = verifyAccessToken(refreshToken, MERCHANT_JWT_SECRET);
+    const tokenPayload = verifyAccessToken(refreshToken, ORGANIZATION_JWT_SECRET);
     if (!tokenPayload || !tokenPayload.id) {
       res.status(401).json({
         success: false,
@@ -281,7 +281,7 @@ export const renewAccessToken = async (req: TypedRequest<Record<string, string>,
 
     // Verify refresh token exists in database and hasn't been revoked
     const storedToken = await refreshTokenRepo.findValidByToken(refreshToken);
-    if (!storedToken || storedToken.userId !== tokenPayload.id || storedToken.userType !== 'merchant') {
+    if (!storedToken || storedToken.userId !== tokenPayload.id || storedToken.userType !== 'organization') {
       res.status(401).json({
         success: false,
         message: 'Refresh token has been revoked or is invalid',
@@ -308,14 +308,14 @@ export const renewAccessToken = async (req: TypedRequest<Record<string, string>,
     }
 
     // Generate new access token
-    const newAccessToken = generateAccessToken(organization.merchantId, organization.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
+    const newAccessToken = generateAccessToken(organization.organizationId, organization.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     // Mark refresh token as used (optional - for tracking)
     await refreshTokenRepo.markUsed(refreshToken);
 
     // Emit token refreshed event
-    emitMerchantTokenRefreshed({
-      userId: organization.merchantId,
+    emitOrganizationTokenRefreshed({
+      userId: organization.organizationId,
       ipAddress: req.ip,
     });
 
@@ -351,9 +351,9 @@ export const checkTokenValidity = async (req: TypedRequest<Record<string, string
     }
 
     // Verify token signature and expiration
-    const decodedPayload = verifyAccessToken(token, MERCHANT_JWT_SECRET);
+    const decodedPayload = verifyAccessToken(token, ORGANIZATION_JWT_SECRET);
 
-    if (!decodedPayload || decodedPayload.role !== 'merchant') {
+    if (!decodedPayload || decodedPayload.role !== 'organization') {
       res.status(401).json({
         success: false,
         valid: false,
@@ -399,7 +399,7 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
     const organization = await organizationRepo.findByEmail(email);
 
     // Always return success to prevent email enumeration attacks
-    if (!organization?.merchantId) {
+    if (!organization?.organizationId) {
       res.json({
         success: true,
         message: 'If an account exists with that email, a password reset link has been sent',
@@ -408,7 +408,7 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
     }
 
     // Generate secure reset token
-    const resetToken = await organizationRepo.createPasswordResetToken(organization.merchantId);
+    const resetToken = await organizationRepo.createPasswordResetToken(organization.organizationId);
 
     // Send password reset email
     await JobScheduler.scheduleEmail({

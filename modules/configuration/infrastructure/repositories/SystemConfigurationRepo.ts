@@ -38,14 +38,14 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
     if (existing) {
       await query(
         `UPDATE "systemConfiguration" SET
-          "systemMode" = $1, features = $2, "businessSettings" = $3,
+          "systemMode" = $1, features = $2, "organizationSettings" = $3,
           "platformSettings" = $4, "securitySettings" = $5, "notificationSettings" = $6,
           "integrationSettings" = $7, metadata = $8, "updatedAt" = $9
         WHERE "configId" = $10`,
         [
           config.systemMode,
           JSON.stringify(config.features),
-          JSON.stringify(config.businessSettings),
+          JSON.stringify(config.organizationSettings),
           JSON.stringify(config.platformSettings),
           JSON.stringify(config.securitySettings),
           JSON.stringify(config.notificationSettings),
@@ -58,7 +58,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
     } else {
       await query(
         `INSERT INTO "systemConfiguration" (
-          "configId", "systemMode", features, "businessSettings",
+          "configId", "systemMode", features, "organizationSettings",
           "platformSettings", "securitySettings", "notificationSettings",
           "integrationSettings", metadata, "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
@@ -66,7 +66,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
           config.configId,
           config.systemMode,
           JSON.stringify(config.features),
-          JSON.stringify(config.businessSettings),
+          JSON.stringify(config.organizationSettings),
           JSON.stringify(config.platformSettings),
           JSON.stringify(config.securitySettings),
           JSON.stringify(config.notificationSettings),
@@ -95,7 +95,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
       configId: row.configId,
       systemMode: row.systemMode as SystemMode,
       features: typeof row.features === 'string' ? JSON.parse(row.features) : row.features,
-      businessSettings: typeof row.businessSettings === 'string' ? JSON.parse(row.businessSettings) : row.businessSettings,
+      organizationSettings: typeof row.organizationSettings === 'string' ? JSON.parse(row.organizationSettings) : row.organizationSettings,
       platformSettings: typeof row.platformSettings === 'string' ? JSON.parse(row.platformSettings) : row.platformSettings,
       securitySettings: typeof row.securitySettings === 'string' ? JSON.parse(row.securitySettings) : row.securitySettings,
       notificationSettings: typeof row.notificationSettings === 'string' ? JSON.parse(row.notificationSettings) : row.notificationSettings,

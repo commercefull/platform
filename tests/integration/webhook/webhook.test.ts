@@ -1,6 +1,6 @@
 /**
  * Outbound Webhook Integration Tests
- * Covers docs/specs/webhook/merchant.md §7 gaps
+ * Covers docs/specs/webhook/organization.md §7 gaps
  */
 
 import axios, { AxiosInstance } from 'axios';
@@ -14,7 +14,7 @@ const createClient = (): AxiosInstance =>
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
   });
 
-const loginMerchant = async (client: AxiosInstance): Promise<string> => {
+const loginOrganization = async (client: AxiosInstance): Promise<string> => {
   const r = await client.post(
     '/business/auth/login',
     { email: 'merchant@example.com', password: 'password123' },
@@ -25,17 +25,17 @@ const loginMerchant = async (client: AxiosInstance): Promise<string> => {
 
 describe('Outbound Webhook Integration Tests', () => {
   let client: AxiosInstance;
-  let merchantToken: string;
+  let organizationToken: string;
   let endpointId: string;
 
   beforeAll(async () => {
     client = createClient();
-    merchantToken = await loginMerchant(client);
+    organizationToken = await loginOrganization(client);
   });
 
   describe('Endpoint registration', () => {
     it('REQ 2.1.1 — POST /business/webhooks creates endpoint, response includes secret', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
       const resp = await client.post(
         '/business/webhooks',
         {
@@ -43,7 +43,7 @@ describe('Outbound Webhook Integration Tests', () => {
           url: 'https://example.com/webhook',
           events: ['order.created', 'order.paid'],
         },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
 
       expect(resp.status).toBe(201);
@@ -54,7 +54,7 @@ describe('Outbound Webhook Integration Tests', () => {
     });
 
     it('REQ 2.1.2 — POST /business/webhooks with empty events → validation error', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
       const resp = await client.post(
         '/business/webhooks',
         {
@@ -62,7 +62,7 @@ describe('Outbound Webhook Integration Tests', () => {
           url: 'https://example.com/webhook',
           events: [],
         },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
       expectStatus(resp, 400);
     });
@@ -70,7 +70,7 @@ describe('Outbound Webhook Integration Tests', () => {
 
   describe('Event dispatch', () => {
     it('REQ 2.2.3 — emitting order.created on eventBus → delivery attempted for subscribed endpoint', async () => {
-      if (!merchantToken || !endpointId) return;
+      if (!organizationToken || !endpointId) return;
 
       eventBus.emit('order.created', {
         orderId: '00000000-0000-0000-0000-000000000001',
@@ -83,7 +83,7 @@ describe('Outbound Webhook Integration Tests', () => {
       await new Promise(r => setTimeout(r, 200));
 
       const resp = await client.get(`/business/webhooks/${endpointId}/deliveries`, {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
       if (resp.status === 200) {
         const deliveries = resp.data.data?.data || resp.data.data || [];
@@ -93,9 +93,9 @@ describe('Outbound Webhook Integration Tests', () => {
   });
 
   describe('Endpoint management', () => {
-    it('REQ 2.4.11 — GET /business/webhooks returns only authenticated merchant endpoints', async () => {
-      if (!merchantToken) return;
-      const resp = await client.get('/business/webhooks', { headers: { Authorization: `Bearer ${merchantToken}` } });
+    it('REQ 2.4.11 — GET /business/webhooks returns only authenticated organization endpoints', async () => {
+      if (!organizationToken) return;
+      const resp = await client.get('/business/webhooks', { headers: { Authorization: `Bearer ${organizationToken}` } });
       expect(resp.status).toBe(200);
       expect(resp.data.success).toBe(true);
       const endpoints = resp.data.data?.data || resp.data.data || [];
@@ -103,16 +103,16 @@ describe('Outbound Webhook Integration Tests', () => {
     });
 
     it('REQ 4.4 — GET /business/webhooks/:id response does not include secret field', async () => {
-      if (!merchantToken || !endpointId) return;
-      const resp = await client.get(`/business/webhooks/${endpointId}`, { headers: { Authorization: `Bearer ${merchantToken}` } });
+      if (!organizationToken || !endpointId) return;
+      const resp = await client.get(`/business/webhooks/${endpointId}`, { headers: { Authorization: `Bearer ${organizationToken}` } });
       if (resp.status !== 200) return;
       expect(resp.data.data).not.toHaveProperty('secret');
     });
 
     it('REQ 4.3 — GET /business/webhooks/unknown-id → 404', async () => {
-      if (!merchantToken) return;
+      if (!organizationToken) return;
       const resp = await client.get('/business/webhooks/00000000-0000-0000-0000-000000000000', {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
       expect(resp.status).toBe(404);
     });
@@ -120,11 +120,11 @@ describe('Outbound Webhook Integration Tests', () => {
 
   describe('Test delivery', () => {
     it('REQ 2.5.13 — POST /business/webhooks/:id/test → returns statusCode and durationMs', async () => {
-      if (!merchantToken || !endpointId) return;
+      if (!organizationToken || !endpointId) return;
       const resp = await client.post(
         `/business/webhooks/${endpointId}/test`,
         {},
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
       if (resp.status !== 200) return;
       const data = resp.data.data || resp.data;
@@ -134,8 +134,8 @@ describe('Outbound Webhook Integration Tests', () => {
   });
 
   afterAll(async () => {
-    if (merchantToken && endpointId) {
-      await client.delete(`/business/webhooks/${endpointId}`, { headers: { Authorization: `Bearer ${merchantToken}` } });
+    if (organizationToken && endpointId) {
+      await client.delete(`/business/webhooks/${endpointId}`, { headers: { Authorization: `Bearer ${organizationToken}` } });
     }
   });
 });

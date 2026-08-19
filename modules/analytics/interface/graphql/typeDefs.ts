@@ -169,7 +169,7 @@ export const analyticsTypeDefs = `#graphql
   input GenerateSalesReportInput {
     startDate: String!
     endDate: String!
-    merchantId: String
+    organizationId: String
     generatedBy: String
   }
 

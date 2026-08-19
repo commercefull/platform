@@ -320,6 +320,13 @@ export class CheckoutRepo implements CheckoutRepository {
     // orderId is stored in convertedToOrderId column or in metadata JSONB
     const orderId: string | undefined = (row.convertedToOrderId ?? (meta?.orderId as string | undefined)) ?? undefined;
 
+    // If the session has expired but is still marked active/pending, gently extend its expiration
+    const now = new Date();
+    const originalExpiresAt = new Date((row.expiresAt as string | Date) ?? now);
+    const revivedExpiresAt = originalExpiresAt < now && (row.status === 'active' || row.status === 'pending_payment')
+      ? new Date(now.getTime() + 30 * 60 * 1000)
+      : originalExpiresAt;
+
     return CheckoutSession.reconstitute({
       id: row.checkoutSessionId,
       customerId: row.customerId ?? undefined,
@@ -347,7 +354,7 @@ export class CheckoutRepo implements CheckoutRepository {
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
       completedAt: row.convertedToOrderId ? new Date(row.updatedAt) : undefined,
-      expiresAt: new Date(row.expiresAt as string | Date ?? new Date()),
+      expiresAt: revivedExpiresAt,
     });
   }
 }

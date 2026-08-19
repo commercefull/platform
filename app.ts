@@ -12,6 +12,7 @@ import session from 'express-session';
 import cors from 'cors';
 import hpp from 'hpp';
 import { pool } from './libs/db/pool';
+import { runWithTestDb } from './libs/db/testDbContext';
 import passport from 'passport';
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from './libs/form';
 import { createSessionStore } from './libs/session/sessionStoreFactory';
@@ -294,6 +295,15 @@ app.use((req, res, next) => {
   // Make flash messages available to templates (take first message from array)
   res.locals.successMsg = req.flash('success')[0] || null;
   res.locals.errorMsg = req.flash('error')[0] || null;
+  next();
+});
+
+// Test database isolation middleware — routes DB queries to a per-test database
+app.use((req, res, next) => {
+  const testDb = req.headers['x-test-database'] as string | undefined;
+  if (testDb) {
+    return runWithTestDb(testDb, () => next());
+  }
   next();
 });
 

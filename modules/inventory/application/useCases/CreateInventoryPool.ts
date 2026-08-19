@@ -7,7 +7,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 
 export interface CreateInventoryPoolInput {
-  ownerType: 'business' | 'merchant';
+  ownerType: 'organization';
   ownerId: string;
   name: string;
   poolType: 'shared' | 'virtual' | 'aggregated';
@@ -37,7 +37,7 @@ interface PoolRecord {
 interface CreatePoolRepositoryPort {
   createPool(input: {
     poolId: string;
-    ownerType: 'business' | 'merchant';
+    ownerType: 'organization';
     ownerId: string;
     name: string;
     poolType: 'shared' | 'virtual' | 'aggregated';

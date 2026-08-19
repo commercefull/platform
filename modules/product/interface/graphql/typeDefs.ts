@@ -56,7 +56,7 @@ export const productTypeDefs = `#graphql
     slug: String!
     productTypeId: String!
     categoryId: String
-    merchantId: String
+    organizationId: String
     status: String!
     visibility: String!
     basePrice: Float!
@@ -153,8 +153,7 @@ export const productTypeDefs = `#graphql
 
   input ProductFilterInput {
     categoryId: String
-    merchantId: String
-    businessId: String
+    organizationId: String
     storeId: String
     isFeatured: Boolean
     isVirtual: Boolean

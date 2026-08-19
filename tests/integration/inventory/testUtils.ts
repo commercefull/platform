@@ -38,7 +38,7 @@ export const setupInventoryTests = async () => {
     }, // Don't throw HTTP errors
   });
 
-  // Get admin token (merchant login for business routes)
+  // Get admin token (organization login for business routes)
   let adminToken = '';
   try {
     const adminLogin = await client.post('/business/auth/login', {

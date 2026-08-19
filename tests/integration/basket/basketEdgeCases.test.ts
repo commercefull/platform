@@ -21,11 +21,50 @@ const createClient = () =>
 describe('Basket Edge Cases & Gap Tests', () => {
   let client: AxiosInstance;
   let customerToken: string;
+  let adminToken: string;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
     client = createClient();
     customerToken = await loginTestUser(client);
+    // Login as organization for coupon management
+    try {
+      const loginResp = await client.post('/business/auth/login', { email: 'merchant@example.com', password: 'password123' });
+      adminToken = loginResp.data?.accessToken || '';
+    } catch {
+      adminToken = '';
+    }
+    // Ensure TESTFIXED10_MIN100 exists
+    if (adminToken) {
+      try {
+        const listResp = await client.get('/business/coupons', { headers: { Authorization: `Bearer ${adminToken}` }, params: { code: 'TESTFIXED10_MIN100' } });
+        const exists = Array.isArray(listResp.data?.data?.items)
+          ? listResp.data.data.items.some((c: {code: string}) => c.code === 'TESTFIXED10_MIN100')
+          : false;
+        if (!exists) {
+          await client.post(
+            '/business/coupons',
+            {
+              code: 'TESTFIXED10_MIN100',
+              name: 'Test Fixed $10 Min 100',
+              description: '$10 off, min order $100',
+              type: 'fixedAmount',
+              discountAmount: 10,
+              currencyCode: 'USD',
+              minOrderAmount: 100,
+              maxUsage: 100,
+              maxUsagePerCustomer: 3,
+              isActive: true,
+              isOneTimeUse: false,
+              generationMethod: 'manual',
+              isReferral: false,
+              isPublic: true,
+            },
+            { headers: { Authorization: `Bearer ${adminToken}` } },
+          );
+        }
+      } catch {}
+    }
   });
 
   // Helper to create a fresh basket
@@ -209,10 +248,10 @@ describe('Basket Edge Cases & Gap Tests', () => {
 
       await addItem(basketId, TEST_PRODUCT_1_ID, 2, 29.99);
 
-      // Apply first
+      // Apply first (use coupon that requires min order 100 so apply fails for this basket)
       await client.post(
         `/customer/basket/${basketId}/coupon`,
-        { couponCode: 'TESTFIXED10' },
+        { couponCode: 'TESTFIXED10_MIN100' },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
 

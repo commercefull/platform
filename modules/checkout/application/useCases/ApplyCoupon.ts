@@ -8,6 +8,7 @@ import { Money } from '../../../basket/domain/valueObjects/Money';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { CouponRepository } from '../../../coupon/infrastructure/repositories/CouponRepository';
+import { BadRequestError, NotFoundError } from '../../../../libs/errors';
 
 // ============================================================================
 // Command
@@ -30,7 +31,7 @@ export class ApplyCouponUseCase {
   async execute(command: ApplyCouponCommand): Promise<CheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
     if (!session) {
-      throw new Error('Checkout session not found');
+      throw new NotFoundError('Checkout session not found');
     }
 
     // Validate coupon code against coupon repository
@@ -38,7 +39,7 @@ export class ApplyCouponUseCase {
     const validation = await couponRepo.validateCouponCode(command.couponCode, session.subtotal.amount);
 
     if (!validation.valid || !validation.coupon) {
-      throw new Error(validation.error || `Invalid coupon code: ${command.couponCode}`);
+      throw new BadRequestError(validation.error || `Invalid coupon code: ${command.couponCode}`);
     }
 
     const discountAmount = Money.create(validation.discountAmount || 0, session.subtotal.currency);

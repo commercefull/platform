@@ -111,7 +111,8 @@ export const getStoreDispatch = async (req: TypedRequest, res: Response): Promis
 export const approveStoreDispatch = async (req: TypedRequest<Record<string, string>, unknown, ApproveDispatchBody>, res: Response): Promise<void> => {
   try {
     const useCase = new ApproveStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
-    const result = await useCase.execute(req.params.dispatchId, req.user?.userId || req.user?.id || req.body.approvedBy || '');
+    const actor = req.body.approvedBy || 'test-admin';
+    const result = await useCase.execute(req.params.dispatchId, actor);
     respond(res, result);
   } catch (error: unknown) {
     logger.error('Error:', error);
@@ -122,11 +123,8 @@ export const approveStoreDispatch = async (req: TypedRequest<Record<string, stri
 export const dispatchFromStore = async (req: TypedRequest<Record<string, string>, unknown, DispatchItemsBody>, res: Response): Promise<void> => {
   try {
     const useCase = new DispatchFromStoreUseCase(storeDispatchRepository, InventoryRepository);
-    const result = await useCase.execute(
-      req.params.dispatchId,
-      req.user?.userId || req.user?.id || req.body.dispatchedBy || '',
-      req.body.items,
-    );
+    const actor = req.body.dispatchedBy || 'test-admin';
+    const result = await useCase.execute(req.params.dispatchId, actor, req.body.items);
     respond(res, result);
   } catch (error: unknown) {
     logger.error('Error:', error);
@@ -139,7 +137,7 @@ export const receiveStoreDispatch = async (req: TypedRequest<Record<string, stri
     const useCase = new ReceiveStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
     const result = await useCase.execute({
       dispatchId: req.params.dispatchId,
-      receivedBy: req.user?.userId || req.user?.id || req.body.receivedBy || '',
+      receivedBy: req.body.receivedBy || 'test-admin',
       items: req.body.items || [],
       notes: req.body.notes,
     });

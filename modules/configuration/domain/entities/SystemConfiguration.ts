@@ -24,12 +24,12 @@ export interface SystemConfigurationProps {
     enableProductReviews: boolean;
     enableStoreLocator: boolean;
   };
-  businessSettings: {
-    defaultBusinessType: SystemMode;
-    allowBusinessTypeChanges: boolean;
-    maxStoresPerBusiness: number;
-    maxWarehousesPerBusiness: number;
-    maxMerchantsInMarketplace: number;
+  organizationSettings: {
+    defaultOrganizationType: SystemMode;
+    allowOrganizationTypeChanges: boolean;
+    maxStoresPerOrganization: number;
+    maxWarehousesPerOrganization: number;
+    maxOrganizationsInMarketplace: number;
   };
   platformSettings: {
     platformName: string;
@@ -117,12 +117,12 @@ export class SystemConfiguration {
         enableProductReviews: true,
         enableStoreLocator: systemMode === 'multi_store',
       },
-      businessSettings: {
-        defaultBusinessType: systemMode,
-        allowBusinessTypeChanges: systemMode === 'marketplace',
-        maxStoresPerBusiness: systemMode === 'multi_store' ? 50 : 1,
-        maxWarehousesPerBusiness: systemMode !== 'single_store' ? 20 : 1,
-        maxMerchantsInMarketplace: systemMode === 'marketplace' ? 10000 : 0,
+      organizationSettings: {
+        defaultOrganizationType: systemMode,
+        allowOrganizationTypeChanges: systemMode === 'marketplace',
+        maxStoresPerOrganization: systemMode === 'multi_store' ? 50 : 1,
+        maxWarehousesPerOrganization: systemMode !== 'single_store' ? 20 : 1,
+        maxOrganizationsInMarketplace: systemMode === 'marketplace' ? 10000 : 0,
       },
       platformSettings: {
         platformName: props.platformName,
@@ -185,8 +185,8 @@ export class SystemConfiguration {
   get features(): SystemConfigurationProps['features'] {
     return this.props.features;
   }
-  get businessSettings(): SystemConfigurationProps['businessSettings'] {
-    return this.props.businessSettings;
+  get organizationSettings(): SystemConfigurationProps['organizationSettings'] {
+    return this.props.organizationSettings;
   }
   get platformSettings(): SystemConfigurationProps['platformSettings'] {
     return this.props.platformSettings;
@@ -232,11 +232,11 @@ export class SystemConfiguration {
     this.props.features.enableStoreLocator = newMode === 'multi_store';
 
     // Update business settings
-    this.props.businessSettings.defaultBusinessType = newMode;
-    this.props.businessSettings.allowBusinessTypeChanges = newMode === 'marketplace';
-    this.props.businessSettings.maxStoresPerBusiness = newMode === 'multi_store' ? 50 : 1;
-    this.props.businessSettings.maxWarehousesPerBusiness = newMode !== 'single_store' ? 20 : 1;
-    this.props.businessSettings.maxMerchantsInMarketplace = newMode === 'marketplace' ? 10000 : 0;
+    this.props.organizationSettings.defaultOrganizationType = newMode;
+    this.props.organizationSettings.allowOrganizationTypeChanges = newMode === 'marketplace';
+    this.props.organizationSettings.maxStoresPerOrganization = newMode === 'multi_store' ? 50 : 1;
+    this.props.organizationSettings.maxWarehousesPerOrganization = newMode !== 'single_store' ? 20 : 1;
+    this.props.organizationSettings.maxOrganizationsInMarketplace = newMode === 'marketplace' ? 10000 : 0;
 
     // Update commission structure
     this.props.platformSettings.commissionStructure.defaultCommissionRate = newMode === 'marketplace' ? 15 : 0;
@@ -269,8 +269,8 @@ export class SystemConfiguration {
     this.touch();
   }
 
-  updateBusinessSettings(settings: Partial<SystemConfigurationProps['businessSettings']>): void {
-    this.props.businessSettings = { ...this.props.businessSettings, ...settings };
+  updateOrganizationSettings(settings: Partial<SystemConfigurationProps['organizationSettings']>): void {
+    this.props.organizationSettings = { ...this.props.organizationSettings, ...settings };
     this.touch();
   }
 

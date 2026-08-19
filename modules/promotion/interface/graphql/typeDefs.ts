@@ -8,7 +8,7 @@ export const promotionTypeDefs = `#graphql
     isActive: Boolean!
     startDate: String
     endDate: String
-    merchantId: String
+    organizationId: String
     createdAt: String!
     updatedAt: String!
   }
@@ -43,7 +43,7 @@ export const promotionTypeDefs = `#graphql
   input PromotionFilterInput {
     status: String
     isActive: Boolean
-    merchantId: String
+    organizationId: String
   }
 
   input PromotionPaginationInput {

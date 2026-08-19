@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('paymentBalanceId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization');
     t.decimal('availableAmount', 15, 2).notNullable().defaultTo(0);
     t.decimal('pendingAmount', 15, 2).notNullable().defaultTo(0);
     t.decimal('reservedAmount', 15, 2).notNullable().defaultTo(0);
@@ -13,7 +13,7 @@ exports.up = function (knex) {
     t.timestamp('nextPayoutDate');
     t.decimal('nextPayoutAmount', 15, 2);
 
-    t.unique(['merchantId', 'currencyCode']);
+    t.unique(['organizationId', 'currencyCode']);
   });
 };
 

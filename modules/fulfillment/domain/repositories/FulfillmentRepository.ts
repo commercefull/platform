@@ -13,7 +13,7 @@ export interface FulfillmentFilters {
   status?: FulfillmentStatus | FulfillmentStatus[];
   sourceType?: SourceType;
   sourceId?: string;
-  merchantId?: string;
+  organizationId?: string;
   supplierId?: string;
   storeId?: string;
   channelId?: string;

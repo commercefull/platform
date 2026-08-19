@@ -1,5 +1,5 @@
 import express from 'express';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import {
   getAllNotifications,
   getNotificationById,
@@ -24,7 +24,7 @@ import {
 
 const router = express.Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ============================================================================
 // Admin CRUD routes for notifications

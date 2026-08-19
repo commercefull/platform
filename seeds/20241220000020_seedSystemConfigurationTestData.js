@@ -36,11 +36,11 @@ exports.seed = async function (knex) {
         enableProductReviews: true,
         enableStoreLocator: false,
       }),
-      businessSettings: JSON.stringify({
-        defaultBusinessType: 'single_store',
-        allowBusinessTypeChanges: false,
-        maxStoresPerBusiness: 1,
-        maxWarehousesPerBusiness: 1,
+      organizationSettings: JSON.stringify({
+        defaultOrganizationType: 'single_store',
+        allowOrganizationTypeChanges: false,
+        maxStoresPerOrganization: 1,
+        maxWarehousesPerOrganization: 1,
         maxMerchantsInMarketplace: 0,
       }),
       platformSettings: JSON.stringify({
@@ -107,11 +107,11 @@ exports.seed = async function (knex) {
         enableProductReviews: true,
         enableStoreLocator: false,
       }),
-      businessSettings: JSON.stringify({
-        defaultBusinessType: 'marketplace',
-        allowBusinessTypeChanges: true,
-        maxStoresPerBusiness: 1,
-        maxWarehousesPerBusiness: 5,
+      organizationSettings: JSON.stringify({
+        defaultOrganizationType: 'marketplace',
+        allowOrganizationTypeChanges: true,
+        maxStoresPerOrganization: 1,
+        maxWarehousesPerOrganization: 5,
         maxMerchantsInMarketplace: 1000,
       }),
       platformSettings: JSON.stringify({

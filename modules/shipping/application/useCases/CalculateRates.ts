@@ -25,7 +25,7 @@ export interface CalculateRatesInput {
   items: ShippingItem[];
   orderValue: number;
   storeId?: string;
-  merchantId?: string;
+  organizationId?: string;
   channelId?: string;
 }
 
@@ -66,7 +66,7 @@ interface ShippingMethodEntity {
 interface ShippingRepository {
   findZonesForAddress(countryCode: string, stateCode?: string, postalCode?: string): Promise<ShippingZoneEntity[]>;
   findDefaultZone(): Promise<ShippingZoneEntity | null>;
-  findMethodsForZones(zoneIds: string[], options: { storeId?: string; merchantId?: string }): Promise<ShippingMethodEntity[]>;
+  findMethodsForZones(zoneIds: string[], options: { storeId?: string; organizationId?: string }): Promise<ShippingMethodEntity[]>;
 }
 
 export class CalculateRatesUseCase {
@@ -99,7 +99,7 @@ export class CalculateRatesUseCase {
     // Get shipping methods for zones
     const methods = await this.shippingRepository.findMethodsForZones(zoneIds, {
       storeId: input.storeId,
-      merchantId: input.merchantId,
+      organizationId: input.organizationId,
     });
 
     // Calculate rates for each method

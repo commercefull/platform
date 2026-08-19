@@ -7,7 +7,7 @@
 exports.up = function (knex) {
   return knex.schema.createTable('analyticsReportDashboard', table => {
     table.uuid('analyticsReportDashboardId').primary().defaultTo(knex.raw('uuidv7()'));
-    table.uuid('merchantId').references('merchantId').inTable('merchant');
+    table.uuid('organizationId').references('organizationId').inTable('organization');
     table.uuid('createdBy'); // User who created the dashboard
 
     table.string('name').notNullable();

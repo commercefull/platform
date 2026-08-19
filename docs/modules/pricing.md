@@ -100,12 +100,12 @@ Final Price =
 
 | Use Case                 | Test File                       | Status |
 | ------------------------ | ------------------------------- | ------ |
-| UC-PRC-001 to UC-PRC-005 | `pricing/rules.test.ts`         | ❌     |
-| UC-PRC-006 to UC-PRC-010 | `pricing/tiers.test.ts`         | ❌     |
-| UC-PRC-011 to UC-PRC-016 | `pricing/pricelists.test.ts`    | ❌     |
-| UC-PRC-017 to UC-PRC-021 | `pricing/currencies.test.ts`    | ❌     |
-| UC-PRC-022 to UC-PRC-025 | `pricing/regions.test.ts`       | ❌     |
-| UC-PRC-026 to UC-PRC-029 | `pricing/currencyrules.test.ts` | ❌     |
+| UC-PRC-001 to UC-PRC-005 | `pricing/pricing.test.ts`       | ✅     |
+| UC-PRC-006 to UC-PRC-010 | `pricing/pricing.test.ts`       | ✅     |
+| UC-PRC-011 to UC-PRC-016 | `pricing/pricing.test.ts`       | ✅     |
+| UC-PRC-017 to UC-PRC-021 | `pricing/currency.test.ts`      | ✅     |
+| UC-PRC-022 to UC-PRC-025 | `pricing/pricing.test.ts`       | ✅     |
+| UC-PRC-026 to UC-PRC-029 | `pricing/currency.test.ts`      | ✅     |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

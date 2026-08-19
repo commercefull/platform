@@ -14,7 +14,7 @@ import paymentReportRepo, { PaymentReport } from '../../infrastructure/repositor
 
 export class GeneratePaymentReportCommand {
   constructor(
-    public readonly merchantId: string,
+    public readonly organizationId: string,
     public readonly type: string,
     public readonly currency: string,
     public readonly periodStart: Date,
@@ -31,7 +31,7 @@ export class GeneratePaymentReportCommand {
 
 export interface GeneratePaymentReportResponse {
   paymentReportId: string;
-  merchantId: string;
+  organizationId: string;
   type: string;
   currency: string;
   totalAmount: number;
@@ -54,7 +54,7 @@ export class GeneratePaymentReportUseCase {
     }
 
     const report = await this.repo.create({
-      merchantId: command.merchantId,
+      organizationId: command.organizationId,
       type: command.type,
       currency: command.currency,
       totalAmount: command.totalAmount,
@@ -74,7 +74,7 @@ export class GeneratePaymentReportUseCase {
   private mapToResponse(r: PaymentReport): GeneratePaymentReportResponse {
     return {
       paymentReportId: r.paymentReportId,
-      merchantId: r.merchantId,
+      organizationId: r.organizationId,
       type: r.type,
       currency: r.currency,
       totalAmount: r.totalAmount,

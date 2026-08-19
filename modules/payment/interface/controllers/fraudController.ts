@@ -127,7 +127,7 @@ export const getPendingReviews: AsyncHandler = async (req, res, _next) => {
 export const reviewFraudCheck: AsyncHandler = async (req, res, _next) => {
   try {
     const body = req.body as { decision: 'approved' | 'rejected'; notes?: string };
-    const reviewedBy = req.user?.userId || req.user?.merchantId || '';
+    const reviewedBy = req.user?.userId || req.user?.organizationId || '';
     await fraudRepo.reviewCheck(req.params.id, body.decision, reviewedBy, body.notes);
     res.json({ success: true, message: 'Review submitted' });
   } catch (error: unknown) {
@@ -158,7 +158,7 @@ export const getBlacklist: AsyncHandler = async (req, res, _next) => {
 
 export const addToBlacklist: AsyncHandler = async (req, res, _next) => {
   try {
-    const addedBy = req.user?.userId || req.user?.merchantId;
+    const addedBy = req.user?.userId || req.user?.organizationId;
     const body = req.body as {
       type: fraudRepo.BlacklistType;
       value: string;

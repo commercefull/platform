@@ -7,11 +7,11 @@ describe('Identity Feature Tests', () => {
   let adminToken: string;
   let customerToken: string;
    
-  let merchantToken: string;
+  let organizationToken: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let customerRefreshToken: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let merchantRefreshToken: string;
+  let organizationRefreshToken: string;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
@@ -202,12 +202,12 @@ describe('Identity Feature Tests', () => {
   });
 
   // ============================================================================
-  // Merchant Authentication
+  // Organization Authentication
   // ============================================================================
 
-  describe('Merchant Authentication', () => {
+  describe('Organization Authentication', () => {
     describe('POST /business/auth/login', () => {
-      it('should authenticate merchant with valid credentials', async () => {
+      it('should authenticate organization with valid credentials', async () => {
         const response = await client.post('/business/auth/login', {
           email: TEST_MERCHANT.email,
           password: TEST_MERCHANT.password,
@@ -218,7 +218,7 @@ describe('Identity Feature Tests', () => {
         expect(response.data).toHaveProperty('accessToken');
         expect(response.data).toHaveProperty('organization');
 
-        merchantToken = response.data.accessToken;
+        organizationToken = response.data.accessToken;
       });
 
       it('should reject invalid credentials', async () => {
@@ -233,25 +233,25 @@ describe('Identity Feature Tests', () => {
     });
 
     describe('POST /business/auth/register', () => {
-      const newMerchant = {
-        email: `new-merchant-${Date.now()}@example.com`,
+      const newOrganization = {
+        email: `new-organization-${Date.now()}@example.com`,
         password: 'NewPassword123!',
-        name: 'New Merchant Store',
+        name: 'New Organization Store',
       };
 
-      // TODO: Merchant registration has server-side issues
-      it.skip('should register a new merchant with pending status', async () => {
-        const response = await client.post('/business/auth/register', newMerchant);
+      // TODO: Organization registration has server-side issues
+      it.skip('should register a new organization with pending status', async () => {
+        const response = await client.post('/business/auth/register', newOrganization);
 
         expect(response.status).toBe(201);
         expect(response.data.success).toBe(true);
         expect(response.data).toHaveProperty('organization');
-        expect(response.data.merchant).toHaveProperty('status', 'pending');
+        expect(response.data.organization).toHaveProperty('status', 'pending');
       });
     });
 
     describe('POST /business/auth/token', () => {
-      it('should issue access and refresh tokens for merchant', async () => {
+      it('should issue access and refresh tokens for organization', async () => {
         const response = await client.post('/business/auth/token', {
           email: TEST_MERCHANT.email,
           password: TEST_MERCHANT.password,
@@ -262,12 +262,12 @@ describe('Identity Feature Tests', () => {
         expect(response.data).toHaveProperty('accessToken');
         expect(response.data).toHaveProperty('refreshToken');
 
-        merchantRefreshToken = response.data.refreshToken;
+        organizationRefreshToken = response.data.refreshToken;
       });
     });
 
     describe('POST /business/auth/refresh', () => {
-      it('should refresh merchant access token', async () => {
+      it('should refresh organization access token', async () => {
         // First get a refresh token
         const tokenResponse = await client.post('/business/auth/token', {
           email: TEST_MERCHANT.email,
@@ -290,9 +290,9 @@ describe('Identity Feature Tests', () => {
     });
 
     describe('POST /business/auth/validate', () => {
-      it('should validate merchant token', async () => {
+      it('should validate organization token', async () => {
         const response = await client.post('/business/auth/validate', {
-          token: merchantToken,
+          token: organizationToken,
         });
 
         expect(response.status).toBe(200);
@@ -302,8 +302,8 @@ describe('Identity Feature Tests', () => {
     });
 
     describe('POST /business/auth/forgot-password', () => {
-      // TODO: Merchant password reset has server-side issues
-      it.skip('should initiate merchant password reset', async () => {
+      // TODO: Organization password reset has server-side issues
+      it.skip('should initiate organization password reset', async () => {
         const response = await client.post('/business/auth/forgot-password', {
           email: TEST_MERCHANT.email,
         });

@@ -8,12 +8,12 @@ export interface RevokeTokenInput {
   token: string;
   tokenType: 'access' | 'refresh';
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
 }
 
 export interface RevokeAllTokensInput {
   userId: string;
-  userType: 'customer' | 'merchant';
+  userType: 'customer' | 'organization';
 }
 
 export interface RevokeTokenOutput {
@@ -28,7 +28,7 @@ export interface TokenBlacklistRepository {
 export interface RefreshTokenRepository {
   revoke(token: string): Promise<void>;
   revokeAllForCustomer(customerId: string): Promise<number>;
-  revokeAllForMerchant(merchantId: string): Promise<number>;
+  revokeAllForMerchant(organizationId: string): Promise<number>;
 }
 
 export class RevokeTokenUseCase {
@@ -45,7 +45,7 @@ export class RevokeTokenUseCase {
     if (input.tokenType === 'access') {
       await this.tokenBlacklistRepo.add({
         token: input.token,
-        [input.userType === 'customer' ? 'customerId' : 'merchantId']: input.userId,
+        [input.userType === 'customer' ? 'customerId' : 'organizationId']: input.userId,
         type: 'access',
         blacklistedAt: new Date(),
       });

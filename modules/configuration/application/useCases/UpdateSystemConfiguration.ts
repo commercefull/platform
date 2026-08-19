@@ -18,7 +18,7 @@ export class UpdateSystemConfigurationCommand {
       timezone?: string;
       systemMode?: 'marketplace' | 'multi_store' | 'single_store';
       features?: Partial<SystemConfigurationProps['features']>;
-      businessSettings?: Partial<SystemConfigurationProps['businessSettings']>;
+      organizationSettings?: Partial<SystemConfigurationProps['organizationSettings']>;
       platformSettings?: Partial<SystemConfigurationProps['platformSettings']>;
       securitySettings?: Partial<SystemConfigurationProps['securitySettings']>;
       notificationSettings?: Partial<SystemConfigurationProps['notificationSettings']>;
@@ -72,8 +72,8 @@ export class UpdateSystemConfigurationUseCase {
       existingConfig.updateFeatures(command.updates.features);
     }
 
-    if (command.updates.businessSettings) {
-      existingConfig.updateBusinessSettings(command.updates.businessSettings);
+    if (command.updates.organizationSettings) {
+      existingConfig.updateOrganizationSettings(command.updates.organizationSettings);
     }
 
     if (command.updates.securitySettings) {

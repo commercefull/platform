@@ -4,7 +4,8 @@
  */
 exports.up = async function (knex) {
   await knex.raw(`
-    INSERT INTO "merchant" (
+    INSERT INTO "organization" (
+      "organizationId",
       name,
       slug,
       description,
@@ -17,6 +18,7 @@ exports.up = async function (knex) {
       "businessType"
     )
     VALUES (
+      '01911000-0000-7000-8000-000000000001',
       'Sample Merchant',
       'sample-merchant',
       'This is a sample merchant for demonstration purposes',
@@ -31,9 +33,9 @@ exports.up = async function (knex) {
   `);
 
   await knex.raw(`
-    WITH sample_merchant AS (SELECT "merchantId" FROM merchant WHERE slug = 'sample-merchant')
-    INSERT INTO "merchantAddress" (
-      "merchantId",
+    WITH sample_org AS (SELECT "organizationId" FROM "organization" WHERE slug = 'sample-merchant')
+    INSERT INTO "organizationAddress" (
+      "organizationId",
       "addressType",
       "isDefault",
       "firstName",
@@ -48,7 +50,7 @@ exports.up = async function (knex) {
       "isVerified"
     )
     VALUES (
-      (SELECT "merchantId" FROM sample_merchant),
+      (SELECT "organizationId" FROM sample_org),
       'business',
       true,
       'John',
@@ -70,8 +72,8 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function (knex) {
-  await knex('merchantAddress').where('company', 'Sample Merchant LLC').delete();
-  await knex('merchant').where('slug', 'sample-merchant').delete();
+  await knex('organizationAddress').where('company', 'Sample Merchant LLC').delete();
+  await knex('organization').where('slug', 'sample-merchant').delete();
 };
 
 exports.seed = async function (knex) {

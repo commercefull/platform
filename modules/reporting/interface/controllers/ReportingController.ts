@@ -62,8 +62,8 @@ export const createSchedule = async (req: TypedRequest<Record<string, string>, u
 export const listSchedules = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new ListReportSchedulesUseCase();
-    const merchantId = req.query.merchantId as string | undefined;
-    const result = await useCase.execute(merchantId);
+    const organizationId = req.query.organizationId as string | undefined;
+    const result = await useCase.execute(organizationId);
     res.json({ success: true, data: result });
   } catch (error: unknown) {
     logger.error('Error listing report schedules:', error);

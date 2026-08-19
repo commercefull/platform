@@ -12,12 +12,12 @@ import attributeGroupController from '../controllers/AttributeGroupController';
 import attributeOptionController from '../controllers/AttributeOptionController';
 import attributeSetController from '../controllers/AttributeSetController';
 import productTypeController from '../controllers/ProductTypeController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
 
 // Apply authentication middleware
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ============================================================================
 // Category Routes (Business)

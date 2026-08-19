@@ -71,7 +71,7 @@ import { webhookTypeDefs } from '../modules/webhook/interface/graphql/typeDefs';
 import { webhookResolvers } from '../modules/webhook/interface/graphql/resolvers';
 
 const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
-const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
+const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
 const SESSION_COOKIE_NAME = 'cf_session';
 
 import { GraphQLAuthContext as GraphQLContext } from '../libs/graphqlAuth';
@@ -88,7 +88,7 @@ async function buildContext({ req }: ExpressContextFunctionArgument): Promise<Gr
 
   if (token) {
     // Try customer token first, then merchant token
-    for (const secret of [CUSTOMER_JWT_SECRET, MERCHANT_JWT_SECRET]) {
+    for (const secret of [CUSTOMER_JWT_SECRET, ORGANIZATION_JWT_SECRET]) {
       try {
         const decoded = jwt.verify(token, String(secret)) as Record<string, unknown>;
         context.user = decoded as GraphQLContext['user'];
@@ -113,7 +113,7 @@ async function buildContext({ req }: ExpressContextFunctionArgument): Promise<Gr
             email: session.email,
             role: session.role,
             type: session.userType,
-            merchantId: session.merchantId,
+            organizationId: session.organizationId,
             storeId: session.storeId,
             permissions: session.permissions,
           };

@@ -9,10 +9,10 @@ import * as couponController from '../controllers/couponController';
 import * as promotionController from '../controllers/promotionController';
 import * as cartPromotionController from '../controllers/cartPromotionController';
 import * as categoryPromotionController from '../controllers/categoryPromotionController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // Promotion routes
 router.get('/promotions', promotionController.getPromotions);

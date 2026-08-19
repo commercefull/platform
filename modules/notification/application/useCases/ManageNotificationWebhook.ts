@@ -17,7 +17,7 @@ export type WebhookAction = 'create' | 'deactivate' | 'list';
 export class ManageNotificationWebhookCommand {
   constructor(
     public readonly action: WebhookAction,
-    public readonly merchantId?: string,
+    public readonly organizationId?: string,
     public readonly notificationWebhookId?: string,
     public readonly url?: string,
     public readonly secret?: string,
@@ -32,7 +32,7 @@ export class ManageNotificationWebhookCommand {
 
 export interface WebhookRecord {
   notificationWebhookId: string;
-  merchantId?: string;
+  organizationId?: string;
   url: string;
   events: string[];
   isActive: boolean;
@@ -61,7 +61,7 @@ export class ManageNotificationWebhookUseCase {
         if (!command.events || command.events.length === 0) return { success: false, error: 'events are required' };
 
         const webhook = await this.webhookRepo.create({
-          merchantId: command.merchantId,
+          organizationId: command.organizationId,
           url: command.url,
           secret: command.secret,
           events: command.events,
@@ -85,9 +85,9 @@ export class ManageNotificationWebhookUseCase {
       }
 
       case 'list': {
-        if (!command.merchantId) return { success: false, error: 'merchantId is required' };
+        if (!command.organizationId) return { success: false, error: 'organizationId is required' };
 
-        const webhooks = await this.webhookRepo.findByMerchant(command.merchantId);
+        const webhooks = await this.webhookRepo.findByMerchant(command.organizationId);
 
         return {
           success: true,
@@ -103,7 +103,7 @@ export class ManageNotificationWebhookUseCase {
   private mapWebhook(webhook: notificationWebhookRepo.NotificationWebhook): WebhookRecord {
     return {
       notificationWebhookId: webhook.notificationWebhookId,
-      merchantId: webhook.merchantId,
+      organizationId: webhook.organizationId,
       url: webhook.url,
       events: webhook.events,
       isActive: webhook.isActive,

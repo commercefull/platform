@@ -7,7 +7,7 @@ export interface SubscriptionInvoice {
   subscriptionInvoiceId: string;
   paymentSubscriptionId: string;
   customerId: string;
-  merchantId: string;
+  organizationId: string;
   amount: number;
   currencyCode: string;
   status: SubscriptionInvoiceStatus;
@@ -32,7 +32,7 @@ export type SubscriptionInvoiceCreateParams = Omit<SubscriptionInvoice, 'subscri
 export type SubscriptionInvoiceUpdateParams = Partial<
   Omit<
     SubscriptionInvoice,
-    'subscriptionInvoiceId' | 'paymentSubscriptionId' | 'customerId' | 'merchantId' | 'createdAt' | 'updatedAt' | 'deletedAt'
+    'subscriptionInvoiceId' | 'paymentSubscriptionId' | 'customerId' | 'organizationId' | 'createdAt' | 'updatedAt' | 'deletedAt'
   >
 >;
 
@@ -84,14 +84,14 @@ export class SubscriptionInvoiceRepo {
     const now = unixTimestamp();
     const result = await queryOne<SubscriptionInvoice>(
       `INSERT INTO "subscriptionInvoice" (
-        "paymentSubscriptionId", "customerId", "merchantId", "amount", "currencyCode", "status",
+        "paymentSubscriptionId", "customerId", "organizationId", "amount", "currencyCode", "status",
         "dueDate", "paidDate", "periodStart", "periodEnd", "orderPaymentId", "invoiceNumber",
         "invoiceUrl", "items", "subtotal", "tax", "discount", "gatewayInvoiceId", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING *`,
       [
         params.paymentSubscriptionId,
         params.customerId,
-        params.merchantId,
+        params.organizationId,
         params.amount,
         params.currencyCode || 'USD',
         params.status || 'draft',

@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('taxNexusId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.string('name', 100).notNullable();
     t.string('country', 2).notNullable();
     t.string('region', 100);
@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.boolean('isActive').notNullable().defaultTo(true);
     t.text('notes');
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('country');
     t.index('regionCode');
     t.index('city');

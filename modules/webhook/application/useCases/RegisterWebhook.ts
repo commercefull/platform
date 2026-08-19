@@ -12,7 +12,7 @@ export interface RegisterWebhookInput {
   name: string;
   url: string;
   events: string[];
-  merchantId?: string;
+  organizationId?: string;
   headers?: Record<string, string>;
   retryPolicy?: {
     maxRetries?: number;
@@ -46,14 +46,14 @@ export class RegisterWebhookUseCase {
       name: input.name,
       url: input.url,
       events: input.events,
-      merchantId: input.merchantId,
+      organizationId: input.organizationId,
       headers: input.headers,
       retryPolicy: input.retryPolicy,
     });
 
     const saved = await this.repo.createEndpoint({
       webhookEndpointId: entity.webhookEndpointId,
-      merchantId: entity.merchantId,
+      organizationId: entity.organizationId,
       name: entity.name,
       url: entity.url,
       secret: entity.secret,

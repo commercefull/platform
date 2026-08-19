@@ -20,7 +20,7 @@ export interface ProductItem {
 export class ApplyProductDiscountCommand {
   constructor(
     public readonly items: ProductItem[],
-    public readonly merchantId?: string,
+    public readonly organizationId?: string,
   ) {}
 }
 
@@ -82,7 +82,7 @@ export class ApplyProductDiscountUseCase {
       totalOriginal += itemTotal;
 
       // Find applicable discounts for this product
-      const discounts = await discountRepo.findDiscountsForProduct(item.productId, command.merchantId);
+      const discounts = await discountRepo.findDiscountsForProduct(item.productId, command.organizationId);
 
       const itemDiscounts: DiscountedItem['discounts'] = [];
       let itemTotalDiscount = 0;

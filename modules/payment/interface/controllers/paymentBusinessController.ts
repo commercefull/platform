@@ -87,12 +87,12 @@ export const listFees = async (req: Request, res: Response): Promise<void> => {
 
 export const getSettings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?.id || req.user?._id;
-    if (!merchantId) {
+    const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
+    if (!organizationId) {
       errorResponse(res, 'Authentication required', 401);
       return;
     }
-    const settings = await paymentSettingsRepo.findByMerchant(merchantId);
+    const settings = await paymentSettingsRepo.findByMerchant(organizationId);
     successResponse(res, { settings });
   } catch (error: unknown) {
     logger.error('getSettings error:', error);
@@ -102,8 +102,8 @@ export const getSettings = async (req: Request, res: Response): Promise<void> =>
 
 export const updateSettings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?.id || req.user?._id;
-    if (!merchantId) {
+    const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
+    if (!organizationId) {
       errorResponse(res, 'Authentication required', 401);
       return;
     }
@@ -113,7 +113,7 @@ export const updateSettings = async (req: Request, res: Response): Promise<void>
       return;
     }
     const settings = await paymentSettingsRepo.upsert({
-      merchantId,
+      organizationId,
       provider,
       isEnabled: isEnabled ?? true,
       config: config || {},
@@ -131,14 +131,14 @@ export const updateSettings = async (req: Request, res: Response): Promise<void>
 
 export const getBalance = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?.id || req.user?._id;
-    if (!merchantId) {
+    const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
+    if (!organizationId) {
       errorResponse(res, 'Authentication required', 401);
       return;
     }
     const { currency } = req.query;
     const useCase = new GetPaymentBalanceUseCase();
-    const result = await useCase.execute(new GetPaymentBalanceCommand(merchantId, currency as string | undefined));
+    const result = await useCase.execute(new GetPaymentBalanceCommand(organizationId, currency as string | undefined));
     successResponse(res, result);
   } catch (error: unknown) {
     logger.error('getBalance error:', error);
@@ -152,12 +152,12 @@ export const getBalance = async (req: Request, res: Response): Promise<void> => 
 
 export const listReports = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?.id || req.user?._id;
-    if (!merchantId) {
+    const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
+    if (!organizationId) {
       errorResponse(res, 'Authentication required', 401);
       return;
     }
-    const reports = await paymentReportRepo.findByMerchant(merchantId);
+    const reports = await paymentReportRepo.findByMerchant(organizationId);
     successResponse(res, { reports });
   } catch (error: unknown) {
     logger.error('listReports error:', error);
@@ -167,8 +167,8 @@ export const listReports = async (req: Request, res: Response): Promise<void> =>
 
 export const getReport = async (req: Request, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?.id || req.user?._id;
-    if (!merchantId) {
+    const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
+    if (!organizationId) {
       errorResponse(res, 'Authentication required', 401);
       return;
     }
@@ -177,7 +177,7 @@ export const getReport = async (req: Request, res: Response): Promise<void> => {
       errorResponse(res, 'from and to query parameters are required', 400);
       return;
     }
-    const reports = await paymentReportRepo.findByDateRange(merchantId, new Date(from as string), new Date(to as string));
+    const reports = await paymentReportRepo.findByDateRange(organizationId, new Date(from as string), new Date(to as string));
     successResponse(res, { reports });
   } catch (error: unknown) {
     logger.error('getReport error:', error);

@@ -14,8 +14,7 @@ export interface WarehouseDetails {
   name: string;
   code: string;
   type: string;
-  businessId?: string;
-  merchantId?: string;
+  organizationId?: string;
   address: {
     addressLine1: string;
     addressLine2?: string;
@@ -53,8 +52,7 @@ interface WarehouseRecord {
   isFulfillmentCenter: boolean;
   isReturnCenter: boolean;
   isVirtual: boolean;
-  merchantId?: string;
-  businessId?: string;
+  organizationId?: string;
   addressLine1: string;
   addressLine2?: string;
   city: string;
@@ -107,8 +105,7 @@ export class GetWarehouseUseCase {
         name: warehouse.name,
         code: warehouse.code,
         type: warehouse.description || '',
-        businessId: warehouse.businessId,
-        merchantId: warehouse.merchantId,
+        organizationId: warehouse.organizationId,
         address: {
           addressLine1: warehouse.addressLine1,
           addressLine2: warehouse.addressLine2,

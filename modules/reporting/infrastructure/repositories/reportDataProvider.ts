@@ -12,7 +12,7 @@ export interface ReportParameters {
   dateFrom?: string;
   dateTo?: string;
   storeId?: string;
-  merchantId?: string;
+  organizationId?: string;
   categoryId?: string;
   customerGroupId?: string;
   warehouseId?: string;

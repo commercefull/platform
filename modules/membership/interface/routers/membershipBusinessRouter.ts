@@ -18,11 +18,11 @@ import {
   cancelUserMembership,
   getUserMembershipBenefits,
 } from '../controllers/membershipBusinessController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // Admin routes for membership tier management
 router.get('/membership/tiers', getMembershipTiers);

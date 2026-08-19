@@ -6,6 +6,7 @@
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
 import { Money } from '../../../basket/domain/valueObjects/Money';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
+import { BadRequestError, NotFoundError } from '../../../../libs/errors';
 import { CalculateShippingRatesUseCase, CalculateShippingRatesCommand } from '../../../shipping/application/useCases/CalculateShippingRates';
 import { eventBus } from '../../../../libs/events/eventBus';
 
@@ -30,11 +31,11 @@ export class SetShippingMethodUseCase {
   async execute(command: SetShippingMethodCommand): Promise<CheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
     if (!session) {
-      throw new Error('Checkout session not found');
+      throw new NotFoundError('Checkout session not found');
     }
 
     if (!session.shippingAddress) {
-      throw new Error('Shipping address must be set first');
+      throw new BadRequestError('Shipping address must be set first');
     }
 
     const shippingUseCase = new CalculateShippingRatesUseCase();
@@ -50,12 +51,12 @@ export class SetShippingMethodUseCase {
     const result = await shippingUseCase.execute(shippingCommand);
 
     if (!result.success || result.rates.length === 0) {
-      throw new Error('No shipping methods available for this address');
+      throw new BadRequestError('No shipping methods available for this address');
     }
 
     const selectedRate = result.rates.find(r => r.shippingMethodId === command.shippingMethodId);
     if (!selectedRate) {
-      throw new Error('Invalid shipping method');
+      throw new BadRequestError('Invalid shipping method');
     }
 
     session.setShippingMethod(selectedRate.shippingMethodId, selectedRate.shippingMethodName, Money.create(selectedRate.amount, selectedRate.currency));

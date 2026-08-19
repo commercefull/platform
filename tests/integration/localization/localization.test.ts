@@ -14,7 +14,7 @@ const TEST_MERCHANT = {
 };
 
 let client: AxiosInstance;
-let merchantToken: string;
+let organizationToken: string;
 
 beforeAll(async () => {
   client = axios.create({
@@ -29,9 +29,9 @@ beforeAll(async () => {
 
   try {
     const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, { headers: { 'X-Test-Request': 'true' } });
-    merchantToken = loginResponse.data?.accessToken || '';
+    organizationToken = loginResponse.data?.accessToken || '';
   } catch {
-    merchantToken = '';
+    organizationToken = '';
   }
 });
 
@@ -43,7 +43,7 @@ describe('Localization Feature Tests', () => {
     describe('GET /business/locales', () => {
       it('should list all locales', async () => {
         const response = await client.get('/business/locales', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -53,7 +53,7 @@ describe('Localization Feature Tests', () => {
 
       it('should filter active locales only', async () => {
         const response = await client.get('/business/locales', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
           params: { activeOnly: 'true' },
         });
 
@@ -71,7 +71,7 @@ describe('Localization Feature Tests', () => {
     describe('GET /business/locales/default', () => {
       it('should get default locale', async () => {
         const response = await client.get('/business/locales/default', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -83,7 +83,7 @@ describe('Localization Feature Tests', () => {
     describe('GET /business/locales/statistics', () => {
       it('should get locale statistics', async () => {
         const response = await client.get('/business/locales/statistics', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -96,7 +96,7 @@ describe('Localization Feature Tests', () => {
     describe('GET /business/locales/language/:language', () => {
       it('should get locales by language', async () => {
         const response = await client.get('/business/locales/language/en', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -108,7 +108,7 @@ describe('Localization Feature Tests', () => {
     describe('GET /business/locales/country/:countryCode', () => {
       it('should get locales by country code', async () => {
         const response = await client.get('/business/locales/country/US', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -132,7 +132,7 @@ describe('Localization Feature Tests', () => {
         };
 
         const response = await client.post('/business/locales', localeData, {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(201);
@@ -145,13 +145,13 @@ describe('Localization Feature Tests', () => {
     describe('GET /business/locales/:id', () => {
       it('should get locale by ID', async () => {
         const listResponse = await client.get('/business/locales', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         if (listResponse.data.data && listResponse.data.data.length > 0) {
           const localeId = listResponse.data.data[0].localeId;
           const response = await client.get(`/business/locales/${localeId}`, {
-            headers: { Authorization: `Bearer ${merchantToken}` },
+            headers: { Authorization: `Bearer ${organizationToken}` },
           });
 
           expect(response.status).toBe(200);
@@ -162,7 +162,7 @@ describe('Localization Feature Tests', () => {
 
       it('should return 404 for non-existent locale', async () => {
         const response = await client.get('/business/locales/00000000-0000-0000-0000-000000000000', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(404);
@@ -172,7 +172,7 @@ describe('Localization Feature Tests', () => {
     describe('GET /business/locales/code/:code', () => {
       it('should get locale by code', async () => {
         const response = await client.get('/business/locales/code/en-US', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -184,7 +184,7 @@ describe('Localization Feature Tests', () => {
     describe('PUT /business/locales/:id', () => {
       it('should update a locale', async () => {
         const listResponse = await client.get('/business/locales', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         if (listResponse.data.data && listResponse.data.data.length > 0) {
@@ -192,7 +192,7 @@ describe('Localization Feature Tests', () => {
           const response = await client.put(
             `/business/locales/${localeId}`,
             { dateFormat: 'dd/MM/yyyy' },
-            { headers: { Authorization: `Bearer ${merchantToken}` } },
+            { headers: { Authorization: `Bearer ${organizationToken}` } },
           );
 
           expect(response.status).toBe(200);
@@ -206,7 +206,7 @@ describe('Localization Feature Tests', () => {
     describe('GET /business/countries', () => {
       it('should list all countries', async () => {
         const response = await client.get('/business/countries', {
-          headers: { Authorization: `Bearer ${merchantToken}` },
+          headers: { Authorization: `Bearer ${organizationToken}` },
         });
 
         expect(response.status).toBe(200);

@@ -13,15 +13,8 @@ const TEST_STORE_IDS = {
   MERCHANT: '20000000-0000-0000-0000-000000000004',
 };
 
-// Merchant ID (if needed)
-const TEST_MERCHANT_ID = '40000000-0000-0000-0000-000000000001';
-
-// Reference business IDs from business seed
-const TEST_BUSINESS_IDS = {
-  MULTI_STORE: '10000000-0000-0000-0000-000000000001',
-  SINGLE_STORE: '10000000-0000-0000-0000-000000000002',
-  MARKETPLACE: '10000000-0000-0000-0000-000000000003',
-};
+// Reference organization ID from organization seed
+const TEST_ORG_ID = '01911000-0000-7000-8000-000000000001';
 
 exports.seed = async function (knex) {
   // Clean up existing test data
@@ -34,8 +27,8 @@ exports.seed = async function (knex) {
       name: 'Active Test Store',
       slug: 'active-test-store',
       storeUrl: 'https://activeteststore.com',
-      businessId: TEST_BUSINESS_IDS.MULTI_STORE,
-      storeType: 'business_store',
+      organizationId: TEST_ORG_ID,
+      storeType: 'organization_store',
       storeEmail: 'store@activeteststore.com',
       storePhone: '+1-555-0101',
       address: JSON.stringify({
@@ -93,8 +86,8 @@ exports.seed = async function (knex) {
       name: 'Inactive Test Store',
       slug: 'inactive-test-store',
       storeUrl: 'https://inactiveteststore.com',
-      businessId: TEST_BUSINESS_IDS.MULTI_STORE,
-      storeType: 'business_store',
+      organizationId: TEST_ORG_ID,
+      storeType: 'organization_store',
       storeEmail: 'store@inactiveteststore.com',
       defaultCurrency: 'USD',
       settings: JSON.stringify({
@@ -121,8 +114,8 @@ exports.seed = async function (knex) {
       name: 'Featured Test Store',
       slug: 'featured-test-store',
       storeUrl: 'https://featuredteststore.com',
-      businessId: TEST_BUSINESS_IDS.MULTI_STORE,
-      storeType: 'business_store',
+      organizationId: TEST_ORG_ID,
+      storeType: 'organization_store',
       storeEmail: 'store@featuredteststore.com',
       storePhone: '+1-555-0199',
       theme: 'minimal',

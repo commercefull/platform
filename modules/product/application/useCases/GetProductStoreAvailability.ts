@@ -39,27 +39,30 @@ export class GetProductStoreAvailabilityUseCase {
     let storeClause = '';
     if (input.storeId) {
       params.push(input.storeId);
-      storeClause = ` AND l."storeId" = $${params.length}`;
+      storeClause = ` AND il."storeId" = $${params.length}`;
     }
 
     interface StoreAvailabilityRow {
       storeId: string;
       storeName: string | null;
-      locationId: string;
-      quantity: string | null;
-      reservedQuantity: string | null;
-      availableQuantity: string | null;
+      inventoryLocationId: string;
+      quantity: number;
+      reservedQuantity: number;
+      availableQuantity: number;
     }
 
     const rows = await query<StoreAvailabilityRow[]>(
-      `SELECT l."storeId", s.name as "storeName", i."locationId",
-              i.quantity, i."reservedQuantity", i."availableQuantity"
-       FROM inventory i
-       INNER JOIN "inventoryLocation" l ON l."locationId" = i."locationId"
-       LEFT JOIN store s ON s."storeId" = l."storeId"
-       WHERE i."productId" = $1
-         AND i."variantId" IS NOT DISTINCT FROM $2
-         AND l."storeId" IS NOT NULL${storeClause}
+      `SELECT il."storeId",
+              s.name AS "storeName",
+              il."inventoryLocationId",
+              il.quantity::int AS quantity,
+              il."reservedQuantity"::int AS "reservedQuantity",
+              il."availableQuantity"::int AS "availableQuantity"
+       FROM "inventoryLocation" il
+       LEFT JOIN store s ON s."storeId" = il."storeId"
+       WHERE il."productId" = $1
+         AND il."productVariantId" IS NOT DISTINCT FROM $2
+         AND il."storeId" IS NOT NULL${storeClause}
        ORDER BY s.name ASC NULLS LAST`,
       params,
     );
@@ -67,10 +70,10 @@ export class GetProductStoreAvailabilityUseCase {
     const stores = (rows || []).map(row => ({
       storeId: row.storeId,
       storeName: row.storeName || 'Unknown Store',
-      locationId: row.locationId,
-      quantity: parseInt(row.quantity || '0', 10),
-      reservedQuantity: parseInt(row.reservedQuantity || '0', 10),
-      availableQuantity: parseInt(row.availableQuantity || '0', 10),
+      locationId: row.inventoryLocationId,
+      quantity: row.quantity ?? 0,
+      reservedQuantity: row.reservedQuantity ?? 0,
+      availableQuantity: row.availableQuantity ?? 0,
     }));
 
     const resolvedSku = variant?.sku || product.sku || input.variantId || input.productId;

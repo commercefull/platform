@@ -24,8 +24,8 @@ export interface CreateOrganizationOutput {
 }
 
 export interface CreateOrganizationRepository {
-  findByEmail(email: string): Promise<{ merchantId: string } | null>;
-  create(params: Record<string, unknown>): Promise<{ merchantId: string; name: string; email: string; status: string; createdAt: Date }>;
+  findByEmail(email: string): Promise<{ organizationId: string } | null>;
+  create(params: Record<string, unknown>): Promise<{ organizationId: string; name: string; email: string; status: string; createdAt: Date }>;
 }
 
 export class CreateOrganizationUseCase {
@@ -50,14 +50,14 @@ export class CreateOrganizationUseCase {
       status: 'pending',
     });
 
-    eventBus.emit('merchant.created', {
-      organizationId: org.merchantId,
+    eventBus.emit('organization.created', {
+      organizationId: org.organizationId,
       name: org.name,
       email: org.email,
     });
 
     return {
-      organizationId: org.merchantId,
+      organizationId: org.organizationId,
       name: org.name,
       status: org.status,
       createdAt: org.createdAt.toISOString(),

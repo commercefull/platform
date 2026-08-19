@@ -467,7 +467,7 @@ describe('GDPR Feature Tests', () => {
 
   describe('Authorization', () => {
     it('should require admin auth for admin endpoints', async () => {
-      // Note: In test environment, customer and merchant JWT secrets may be the same
+      // Note: In test environment, customer and organization JWT secrets may be the same
       // so this test verifies the endpoint exists and responds
       const response = await client.get('/business/gdpr/requests', {
         headers: { Authorization: `Bearer ${customerToken}` },

@@ -7,7 +7,7 @@ import { RedeemGiftCardUseCase, RedeemGiftCardCommand } from '../../application/
 export const promotionResolvers = {
   Query: {
     promotions: async (_parent: unknown, args: {
-      filters?: { status?: string; isActive?: boolean; merchantId?: string };
+      filters?: { status?: string; isActive?: boolean; organizationId?: string };
       pagination?: { limit?: number; offset?: number; orderBy?: string; direction?: 'ASC' | 'DESC' };
     }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);

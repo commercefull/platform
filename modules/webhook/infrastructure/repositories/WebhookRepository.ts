@@ -23,14 +23,14 @@ class WebhookRepository implements WebhookRepositoryInterface {
   async createEndpoint(props: Omit<WebhookEndpointProps, 'createdAt' | 'updatedAt'>): Promise<WebhookEndpointProps> {
     const sql = `
       INSERT INTO "${Table.WebhookEndpoint}" (
-        "webhookEndpointId", "merchantId", "name", "url", "secret",
+        "webhookEndpointId", "organizationId", "name", "url", "secret",
         "events", "isActive", "headers", "retryPolicy"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
     const values = [
       props.webhookEndpointId,
-      props.merchantId,
+      props.organizationId,
       props.name,
       props.url,
       props.secret,
@@ -75,9 +75,9 @@ class WebhookRepository implements WebhookRepositoryInterface {
     const conditions: string[] = [];
     const values: unknown[] = [];
 
-    if (filters?.merchantId) {
-      conditions.push(`"merchantId" = $${values.length + 1}`);
-      values.push(filters.merchantId);
+    if (filters?.organizationId) {
+      conditions.push(`"organizationId" = $${values.length + 1}`);
+      values.push(filters.organizationId);
     }
     if (filters?.isActive !== undefined) {
       conditions.push(`"isActive" = $${values.length + 1}`);

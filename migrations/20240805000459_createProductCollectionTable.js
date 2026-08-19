@@ -15,13 +15,13 @@ exports.up = function (knex) {
     t.text('metaDescription');
     t.jsonb('conditions');
     t.string('sortOrder', 50).defaultTo('manual');
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('organizationId').references('organizationId').inTable('organization');
 
     t.index('slug');
     t.index('isActive');
     t.index('isAutomated');
     t.index('isFeatured');
-    t.index('merchantId');
+    t.index('organizationId');
   });
 };
 

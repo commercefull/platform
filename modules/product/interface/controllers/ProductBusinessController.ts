@@ -216,19 +216,19 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  */
 export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { status, visibility, categoryId, merchantId, search, limit, offset, orderBy, orderDirection } = req.query;
+    const { status, visibility, categoryId, organizationId, search, limit, offset, orderBy, orderDirection } = req.query;
 
     const filters: {
       status?: ProductStatus;
       visibility?: ProductVisibility;
       categoryId?: string;
-      merchantId?: string;
+      organizationId?: string;
       search?: string;
     } = {};
     if (status) filters.status = status as ProductStatus;
     if (visibility) filters.visibility = visibility as ProductVisibility;
     if (categoryId) filters.categoryId = categoryId as string;
-    if (merchantId) filters.merchantId = merchantId as string;
+    if (organizationId) filters.organizationId = organizationId as string;
     if (search) filters.search = search as string;
 
     const command = new ListProductsCommand(
@@ -305,7 +305,7 @@ export const getProductStoreAvailability = async (req: TypedRequest, res: Respon
  */
 export const createProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?.id;
+    const organizationId = req.user?.organizationId || req.user?.id;
     const body = req.body as CreateProductBody;
     const {
       name,
@@ -359,7 +359,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       slug,
       shortDescription,
       categoryId,
-      merchantId,
+      organizationId,
       basePrice,
       salePrice,
       cost,
@@ -983,7 +983,7 @@ export const listCollections = async (req: TypedRequest, res: Response): Promise
  */
 export const createCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?.id;
+    const organizationId = req.user?.organizationId || req.user?.id;
     const { name, slug, description, imageUrl, isActive, position, addProducts } = req.body as CollectionBody;
     if (!name?.trim()) {
       errorResponse(res, 'name is required', 400);
@@ -1001,7 +1001,7 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
       imageUrl,
       isActive,
       position,
-      merchantId,
+      organizationId,
       addProducts,
     );
     const useCase = new ManageProductCollectionUseCase();
@@ -1020,7 +1020,7 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
 export const updateCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { collectionId } = req.params;
-    const merchantId = req.user?.merchantId || req.user?.id;
+    const organizationId = req.user?.organizationId || req.user?.id;
     const { name, slug, description, imageUrl, isActive, position, addProducts, removeMapIds } = req.body as CollectionBody;
     if (!name?.trim()) {
       errorResponse(res, 'name is required', 400);
@@ -1038,7 +1038,7 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
       imageUrl,
       isActive,
       position,
-      merchantId,
+      organizationId,
       addProducts,
       removeMapIds,
     );

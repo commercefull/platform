@@ -5,7 +5,7 @@
 exports.up = function (knex) {
   return knex.schema.createTable('webhookEndpoint', t => {
     t.uuid('webhookEndpointId').primary().defaultTo(knex.raw('uuidv7()'));
-    t.uuid('merchantId');
+    t.uuid('organizationId');
     t.string('name', 255).notNullable();
     t.text('url').notNullable();
     t.string('secret', 255).notNullable();
@@ -16,7 +16,7 @@ exports.up = function (knex) {
     t.timestamp('createdAt', { useTz: true }).notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isActive');
   });
 };

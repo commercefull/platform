@@ -14,7 +14,7 @@ export interface TaxProviderLog {
   taxProviderLogId: string;
   createdAt: string;
   updatedAt: string;
-  merchantId: string;
+  organizationId: string;
   provider: TaxProvider;
   requestType: TaxProviderRequestType;
   entityType: string;
@@ -36,9 +36,9 @@ export class TaxProviderLogRepo {
     return await queryOne<TaxProviderLog>(`SELECT * FROM "taxProviderLog" WHERE "taxProviderLogId" = $1`, [id]);
   }
 
-  async findByMerchant(merchantId: string, provider?: TaxProvider, limit = 100): Promise<TaxProviderLog[]> {
-    let sql = `SELECT * FROM "taxProviderLog" WHERE "merchantId" = $1`;
-    const params: unknown[] = [merchantId];
+  async findByMerchant(organizationId: string, provider?: TaxProvider, limit = 100): Promise<TaxProviderLog[]> {
+    let sql = `SELECT * FROM "taxProviderLog" WHERE "organizationId" = $1`;
+    const params: unknown[] = [organizationId];
     if (provider) {
       sql += ` AND "provider" = $2`;
       params.push(provider);
@@ -52,12 +52,12 @@ export class TaxProviderLogRepo {
     const now = unixTimestamp();
     const result = await queryOne<TaxProviderLog>(
       `INSERT INTO "taxProviderLog" (
-        "merchantId", "provider", "requestType", "entityType", "entityId", "requestData",
+        "organizationId", "provider", "requestType", "entityType", "entityId", "requestData",
         "responseData", "responseStatus", "isSuccess", "errorCode", "errorMessage",
         "processingTimeMs", "providerReference", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
       [
-        params.merchantId,
+        params.organizationId,
         params.provider,
         params.requestType,
         params.entityType,
@@ -78,12 +78,12 @@ export class TaxProviderLogRepo {
     return result;
   }
 
-  async count(merchantId?: string): Promise<number> {
+  async count(organizationId?: string): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "taxProviderLog"`;
     const params: unknown[] = [];
-    if (merchantId) {
-      sql += ` WHERE "merchantId" = $1`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` WHERE "organizationId" = $1`;
+      params.push(organizationId);
     }
     const result = await queryOne<{ count: string }>(sql, params);
     return result ? parseInt(result.count, 10) : 0;

@@ -40,7 +40,7 @@ export function parseExpirationDate(durationString: string): Date {
 export function generateAccessToken(
   userId: string,
   userEmail: string,
-  userRole: 'customer' | 'merchant' | 'admin',
+  userRole: 'customer' | 'organization' | 'admin',
   jwtSecret: string,
   expiresIn: string,
 ): string {

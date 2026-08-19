@@ -1,12 +1,12 @@
 import express from 'express';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as supplierController from '../controllers/supplierBusinessController';
 import * as purchaseOrderController from '../controllers/purchaseOrderController';
 import * as receivingController from '../controllers/receivingController';
 
 const router = express.Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ========== SUPPLIER ROUTES ==========
 

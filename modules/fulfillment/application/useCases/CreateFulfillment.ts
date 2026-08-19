@@ -25,7 +25,7 @@ export interface CreateFulfillmentInput {
   orderNumber?: string;
   sourceType: SourceType;
   sourceId: string;
-  merchantId?: string;
+  organizationId?: string;
   supplierId?: string;
   storeId?: string;
   channelId?: string;
@@ -55,7 +55,7 @@ export class CreateFulfillmentUseCase {
       orderNumber: input.orderNumber,
       sourceType: input.sourceType,
       sourceId: input.sourceId,
-      merchantId: input.merchantId,
+      organizationId: input.organizationId,
       supplierId: input.supplierId,
       storeId: input.storeId,
       channelId: input.channelId,

@@ -3,7 +3,7 @@
  */
 
 export interface GetFeatureFlagsInput {
-  scope?: 'global' | 'store' | 'merchant';
+  scope?: 'global' | 'store' | 'organization';
   scopeId?: string;
   includeDisabled?: boolean;
 }

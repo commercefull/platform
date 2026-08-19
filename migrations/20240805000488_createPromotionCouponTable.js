@@ -23,7 +23,7 @@ exports.up = function (knex) {
     t.boolean('isReferral').notNullable().defaultTo(false);
     t.uuid('referrerId').references('customerId').inTable('customer');
     t.boolean('isPublic').notNullable().defaultTo(false);
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('organizationId').references('organizationId').inTable('organization');
 
     t.index('code');
     t.index('promotionId');
@@ -37,7 +37,7 @@ exports.up = function (knex) {
     t.index('isReferral');
     t.index('referrerId');
     t.index('isPublic');
-    t.index('merchantId');
+    t.index('organizationId');
   });
 };
 

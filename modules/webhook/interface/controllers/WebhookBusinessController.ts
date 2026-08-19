@@ -18,7 +18,7 @@ interface RegisterWebhookBody {
   name: string;
   url: string;
   events: string[];
-  merchantId?: string;
+  organizationId?: string;
   headers?: Record<string, string>;
   retryPolicy?: Record<string, unknown>;
 }
@@ -47,7 +47,7 @@ export const registerWebhook = async (req: TypedRequest<Record<string, string>, 
       name: req.body.name,
       url: req.body.url,
       events: req.body.events,
-      merchantId: req.body.merchantId || req.user?.merchantId,
+      organizationId: req.body.organizationId || req.user?.organizationId,
       headers: req.body.headers,
       retryPolicy: req.body.retryPolicy,
     });
@@ -83,11 +83,11 @@ export const unregisterWebhook = async (req: TypedRequest, res: Response): Promi
  */
 export const listWebhooks = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { merchantId, isActive, limit, offset } = req.query;
+    const { organizationId, isActive, limit, offset } = req.query;
     const useCase = new ListWebhooksUseCase(WebhookRepo);
     const result = await useCase.execute(
       {
-        merchantId: merchantId as string,
+        organizationId: organizationId as string,
         isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
       },
       parseInt(limit as string) || 50,

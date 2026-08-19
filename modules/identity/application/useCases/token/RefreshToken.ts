@@ -15,7 +15,7 @@ export interface RefreshTokenOutput {
 export interface RefreshTokenRecord {
   token: string;
   customerId?: string;
-  merchantId?: string;
+  organizationId?: string;
   revoked: boolean;
   expiresAt: Date;
 }
@@ -36,8 +36,8 @@ export interface CustomerRecord {
   status: string;
 }
 
-export interface MerchantRecord {
-  merchantId: string;
+export interface OrganizationRecord {
+  organizationId: string;
   email: string;
   status: string;
   permissions?: string[];
@@ -47,8 +47,8 @@ export interface CustomerRepository {
   findById(customerId: string): Promise<CustomerRecord | null>;
 }
 
-export interface MerchantRepository {
-  findById(merchantId: string): Promise<MerchantRecord | null>;
+export interface OrganizationRepository {
+  findById(organizationId: string): Promise<OrganizationRecord | null>;
 }
 
 export class RefreshTokenUseCase {
@@ -56,7 +56,7 @@ export class RefreshTokenUseCase {
     private readonly refreshTokenRepo: RefreshTokenRepository,
     private readonly tokenService: TokenService,
     private readonly customerRepo: CustomerRepository,
-    private readonly merchantRepo: MerchantRepository,
+    private readonly organizationRepo: OrganizationRepository,
   ) {}
 
   async execute(input: RefreshTokenInput): Promise<RefreshTokenOutput> {
@@ -93,16 +93,16 @@ export class RefreshTokenUseCase {
         type: 'customer',
       };
       expiresIn = 24 * 60 * 60; // 24 hours
-    } else if (tokenRecord.merchantId) {
+    } else if (tokenRecord.organizationId) {
       // Merchant token
-      const merchant = await this.merchantRepo.findById(tokenRecord.merchantId);
+      const merchant = await this.organizationRepo.findById(tokenRecord.organizationId);
       if (!merchant || (merchant.status !== 'active' && merchant.status !== 'approved')) {
         throw new Error('Account is not active');
       }
       payload = {
-        merchantId: merchant.merchantId,
+        organizationId: merchant.organizationId,
         email: merchant.email,
-        type: 'merchant',
+        type: 'organization',
         permissions: merchant.permissions || [],
       };
       expiresIn = 8 * 60 * 60; // 8 hours
@@ -113,7 +113,7 @@ export class RefreshTokenUseCase {
     // Generate new tokens
     const accessToken = await this.tokenService.generateAccessToken(payload);
     const newRefreshToken = await this.tokenService.generateRefreshToken(
-      tokenRecord.customerId ? { customerId: tokenRecord.customerId } : { merchantId: tokenRecord.merchantId },
+      tokenRecord.customerId ? { customerId: tokenRecord.customerId } : { organizationId: tokenRecord.organizationId },
     );
 
     // Revoke old refresh token

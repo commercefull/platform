@@ -67,6 +67,8 @@ The Order feature manages the complete order lifecycle from creation through ful
 | UC-ORD-009 | `order/order.test.ts`           | ✅     |
 | UC-ORD-010 | `order/order.test.ts`           | ✅     |
 | UC-ORD-011 | `order/orderExpanded.test.ts`   | ✅     |
+| Order Items | `order/orderItem.test.ts`      | ✅     |
+| Order Status | `order/orderStatus.test.ts`   | ✅     |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

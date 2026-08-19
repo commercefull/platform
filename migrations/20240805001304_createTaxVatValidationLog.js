@@ -11,7 +11,7 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     // Who requested validation
     t.uuid('customerId').references('customerId').inTable('customer').onDelete('SET NULL');
-    t.uuid('merchantId').references('merchantId').inTable('merchant').onDelete('SET NULL');
+    t.uuid('organizationId').references('organizationId').inTable('organization').onDelete('SET NULL');
     t.uuid('orderId').references('orderId').inTable('order').onDelete('SET NULL');
     // VAT number being validated
     t.string('vatNumber', 50).notNullable();
@@ -54,7 +54,7 @@ exports.up = function (knex) {
 
     t.index('vatNumber');
     t.index('customerId');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('orderId');
     t.index('countryCode');
     t.index('isValid');

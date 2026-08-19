@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('taxProviderLogId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.enum('provider', ['internal', 'avalara', 'taxjar', 'external']).notNullable();
     t.enum('requestType', ['calculation', 'verification', 'filing', 'refund', 'adjustment', 'validation']).notNullable();
     t.string('entityType', 50).notNullable();
@@ -17,7 +17,7 @@ exports.up = function (knex) {
     t.integer('processingTimeMs');
     t.string('providerReference', 255);
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('provider');
     t.index('requestType');
     t.index('entityType');

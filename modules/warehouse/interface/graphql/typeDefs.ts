@@ -4,8 +4,7 @@ export const warehouseTypeDefs = `#graphql
     name: String!
     code: String!
     type: String!
-    businessId: String
-    merchantId: String
+    organizationId: String
     timezone: String!
     cutoffTime: String
     processingTime: Int!
@@ -60,8 +59,7 @@ export const warehouseTypeDefs = `#graphql
 
   input ListWarehousesInput {
     type: String
-    businessId: String
-    merchantId: String
+    organizationId: String
     isActive: Boolean
     page: Int
     limit: Int
@@ -71,8 +69,7 @@ export const warehouseTypeDefs = `#graphql
     name: String!
     code: String!
     type: String!
-    businessId: String
-    merchantId: String
+    organizationId: String
     timezone: String
     cutoffTime: String
     processingTime: Int

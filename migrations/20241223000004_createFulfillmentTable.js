@@ -10,9 +10,9 @@ exports.up = async function (knex) {
     table.uuid('fulfillmentId').primary().defaultTo(knex.raw('uuidv7()'));
     table.string('orderId').notNullable();
     table.string('orderNumber');
-    table.string('sourceType').notNullable(); // warehouse, merchant, supplier, dropship, store
+    table.string('sourceType').notNullable(); // warehouse, organization, supplier, dropship, store
     table.string('sourceId').notNullable();
-    table.string('merchantId');
+    table.string('organizationId');
     table.string('supplierId');
     table.string('storeId');
     table.string('channelId');
@@ -49,7 +49,7 @@ exports.up = async function (knex) {
 
     table.index(['orderId']);
     table.index(['status']);
-    table.index(['merchantId']);
+    table.index(['organizationId']);
     table.index(['storeId']);
     table.index(['trackingNumber']);
   });

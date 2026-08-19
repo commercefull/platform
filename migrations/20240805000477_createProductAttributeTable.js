@@ -38,7 +38,7 @@ exports.up = function (knex) {
     t.text('defaultValue');
     t.jsonb('validationRules');
     t.jsonb('options');
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('organizationId').references('organizationId').inTable('organization');
     t.boolean('isGlobal').notNullable().defaultTo(true);
 
     t.index('code');
@@ -52,7 +52,7 @@ exports.up = function (knex) {
     t.index('useForVariants');
     t.index('useForConfigurations');
     t.index('position');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isGlobal');
   });
 };

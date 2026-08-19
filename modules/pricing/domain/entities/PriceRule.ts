@@ -27,7 +27,7 @@ export interface PriceRuleProps {
   endDate?: Date;
   priority: number;
   isActive: boolean;
-  merchantId?: string;
+  organizationId?: string;
   metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
@@ -54,7 +54,7 @@ export class PriceRule {
     startDate?: Date;
     endDate?: Date;
     priority?: number;
-    merchantId?: string;
+    organizationId?: string;
     metadata?: Record<string, unknown>;
   }): PriceRule {
     const now = new Date();
@@ -73,7 +73,7 @@ export class PriceRule {
       endDate: props.endDate,
       priority: props.priority ?? 0,
       isActive: true,
-      merchantId: props.merchantId,
+      organizationId: props.organizationId,
       metadata: props.metadata,
       createdAt: now,
       updatedAt: now,

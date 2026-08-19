@@ -248,7 +248,7 @@ export class PaymentRepo implements IPaymentRepository {
 
   // Payment Methods
   async getEnabledPaymentMethods(
-    merchantId: string,
+    organizationId: string,
     currency?: string,
   ): Promise<
     Array<{
@@ -260,8 +260,8 @@ export class PaymentRepo implements IPaymentRepository {
       processingFee?: number;
     }>
   > {
-    let sql = 'SELECT * FROM "paymentMethod" WHERE "merchantId" = $1 AND "isEnabled" = true AND "deletedAt" IS NULL';
-    const params: unknown[] = [merchantId];
+    let sql = 'SELECT * FROM "paymentMethod" WHERE "organizationId" = $1 AND "isEnabled" = true AND "deletedAt" IS NULL';
+    const params: unknown[] = [organizationId];
 
     if (currency) {
       sql += ' AND ("supportedCurrencies" IS NULL OR $2 = ANY("supportedCurrencies"))';
@@ -282,17 +282,17 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   // Gateways
-  async getDefaultGateway(merchantId: string): Promise<{
+  async getDefaultGateway(organizationId: string): Promise<{
     gatewayId: string;
     provider: string;
     isTestMode: boolean;
   } | null> {
     let row: Record<string, unknown> | null = null;
 
-    if (merchantId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(merchantId)) {
+    if (organizationId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(organizationId)) {
       row = await queryOne<Record<string, unknown>>(
-        'SELECT * FROM "paymentGateway" WHERE "merchantId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
-        [merchantId],
+        'SELECT * FROM "paymentGateway" WHERE "organizationId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
+        [organizationId],
       );
     }
 

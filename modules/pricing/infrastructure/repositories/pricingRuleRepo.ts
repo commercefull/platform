@@ -98,7 +98,7 @@ export class PricingRuleRepo {
       categoryId?: string;
       customerId?: string;
       customerGroupId?: string;
-      merchantId?: string;
+      organizationId?: string;
       activeOnly?: boolean;
     } = {},
     pagination: {

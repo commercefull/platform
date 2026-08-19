@@ -8,7 +8,7 @@ import { Promotion, PromotionStatus, PromotionType } from '../entities/Promotion
 export interface PromotionFilters {
   status?: PromotionStatus | PromotionStatus[];
   type?: PromotionType;
-  merchantId?: string;
+  organizationId?: string;
   isActive?: boolean;
   search?: string;
 }

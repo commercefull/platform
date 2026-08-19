@@ -14,7 +14,7 @@ export class ValidateCouponCommand {
     public readonly code: string,
     public readonly orderTotal: number,
     public readonly customerId?: string,
-    public readonly merchantId?: string,
+    public readonly organizationId?: string,
   ) {}
 }
 
@@ -48,7 +48,7 @@ export class ValidateCouponUseCase {
     }
 
     // Find coupon by code
-    const coupon = await couponRepo.findByCode(command.code.toUpperCase(), command.merchantId);
+    const coupon = await couponRepo.findByCode(command.code.toUpperCase(), command.organizationId);
 
     if (!coupon) {
       return { valid: false, message: 'Coupon not found', errors: ['coupon_not_found'] };

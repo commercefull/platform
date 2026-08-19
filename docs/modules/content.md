@@ -75,12 +75,23 @@ The Content feature provides a headless CMS for managing dynamic pages, content 
 
 ## Integration Test Coverage
 
-| Use Case                 | Test File                          | Status |
-| ------------------------ | ---------------------------------- | ------ |
-| UC-CNT-001 to UC-CNT-005 | `content/content.test.ts`          | ✅     |
-| UC-CNT-006 to UC-CNT-011 | `content/content.test.ts`          | ✅     |
-| UC-CNT-012 to UC-CNT-017 | `content/blocks.test.ts`           | ✅     |
-| UC-CNT-018 to UC-CNT-022 | `content/content.test.ts`          | ✅     |
+| Use Case                 | Test File                              | Status |
+| ------------------------ | -------------------------------------- | ------ |
+| UC-CNT-001 to UC-CNT-005 | `content/content.test.ts`              | ✅     |
+| UC-CNT-006 to UC-CNT-011 | `content/blocks.test.ts`               | ✅     |
+| UC-CNT-012 to UC-CNT-017 | `content/blockValidation.test.ts`      | ✅     |
+| UC-CNT-018 to UC-CNT-022 | `content/categories.test.ts`           | ✅     |
+| Pages                    | `content/pages/pages.test.ts`          | ✅     |
+| Page Actions             | `content/pageActions.test.ts`          | ✅     |
+| Page Translations        | `content/pageTranslations.test.ts`     | ✅     |
+| Page Versions            | `content/pageVersions.test.ts`         | ✅     |
+| Navigation               | `content/navigation.test.ts`           | ✅     |
+| Redirects                | `content/redirects/redirects.test.ts`  | ✅     |
+| Templates                | `content/templates/templates.test.ts`  | ✅     |
+| Media                    | `content/media/media.test.ts`          | ✅     |
+| Categorization           | `content/categorization.test.ts`       | ✅     |
+| Customer Content         | `content/customerContent.test.ts`      | ✅     |
+| Media & Redirects        | `content/mediaAndRedirects.test.ts`    | ✅     |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

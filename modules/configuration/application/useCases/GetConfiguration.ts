@@ -2,7 +2,7 @@
  * GetConfiguration Use Case
  */
 
-export type ConfigurationScope = 'global' | 'store' | 'merchant' | 'channel';
+export type ConfigurationScope = 'global' | 'store' | 'organization' | 'channel';
 
 export interface GetConfigurationInput {
   key: string;

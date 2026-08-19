@@ -26,7 +26,7 @@ import {
 
 export interface SalesDaily {
   analyticsSalesDailyId: string;
-  merchantId?: string;
+  organizationId?: string;
   date: Date;
   channel: string;
   currency: string;
@@ -85,7 +85,7 @@ export interface ProductPerformance {
 
 export interface CustomerCohort {
   analyticsCustomerCohortId: string;
-  merchantId?: string;
+  organizationId?: string;
   cohortMonth: Date;
   monthNumber: number;
   customersInCohort: number;
@@ -104,7 +104,7 @@ export interface CustomerCohort {
 
 export interface SearchQuery {
   analyticsSearchQueryId: string;
-  merchantId?: string;
+  organizationId?: string;
   query: string;
   queryNormalized?: string;
   date: Date;
@@ -127,7 +127,7 @@ export interface SearchQuery {
 
 export interface ChannelAttribution {
   analyticsChannelAttributionId: string;
-  merchantId?: string;
+  organizationId?: string;
   date: Date;
   channel: string;
   source?: string;
@@ -169,7 +169,7 @@ const TABLES = {
 // ============================================================================
 
 export async function getSalesDaily(
-  filters: { startDate?: Date; endDate?: Date; channel?: string; merchantId?: string },
+  filters: { startDate?: Date; endDate?: Date; channel?: string; organizationId?: string },
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: SalesDaily[]; total: number }> {
   let whereClause = '1=1';
@@ -188,9 +188,9 @@ export async function getSalesDaily(
     whereClause += ` AND "channel" = $${paramIndex++}`;
     params.push(filters.channel);
   }
-  if (filters.merchantId) {
-    whereClause += ` AND "merchantId" = $${paramIndex++}`;
-    params.push(filters.merchantId);
+  if (filters.organizationId) {
+    whereClause += ` AND "organizationId" = $${paramIndex++}`;
+    params.push(filters.organizationId);
   }
 
   const countResult = await queryOne<{ count: string }>(
@@ -216,7 +216,7 @@ export async function getSalesDaily(
 export async function getSalesSummary(
   startDate: Date,
   endDate: Date,
-  merchantId?: string,
+  organizationId?: string,
 ): Promise<{
   totalRevenue: number;
   totalOrders: number;
@@ -227,9 +227,9 @@ export async function getSalesSummary(
   let whereClause = '"date" >= $1 AND "date" <= $2';
   const params: unknown[] = [startDate, endDate];
 
-  if (merchantId) {
-    whereClause += ' AND "merchantId" = $3';
-    params.push(merchantId);
+  if (organizationId) {
+    whereClause += ' AND "organizationId" = $3';
+    params.push(organizationId);
   }
 
   const result = await queryOne<{
@@ -266,7 +266,7 @@ export async function upsertSalesDaily(
   data: Partial<SalesDaily> & {
     date: Date;
     channel?: string;
-    merchantId?: string;
+    organizationId?: string;
   },
 ): Promise<void> {
   const now = new Date().toISOString();
@@ -274,7 +274,7 @@ export async function upsertSalesDaily(
 
   await query(
     `INSERT INTO "analyticsSalesDaily" (
-      "merchantId", "date", "channel", "currency",
+      "organizationId", "date", "channel", "currency",
       "orderCount", "itemsSold", "grossRevenue", "discountTotal", "refundTotal",
       "netRevenue", "taxTotal", "shippingRevenue", "averageOrderValue",
       "newCustomers", "returningCustomers", "guestOrders",
@@ -282,7 +282,7 @@ export async function upsertSalesDaily(
       "paymentSuccessCount", "paymentFailedCount", "paymentSuccessRate",
       "computedAt", "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
-    ON CONFLICT ("merchantId", "date", "channel", "currency") DO UPDATE SET
+    ON CONFLICT ("organizationId", "date", "channel", "currency") DO UPDATE SET
       "orderCount" = "analyticsSalesDaily"."orderCount" + EXCLUDED."orderCount",
       "itemsSold" = "analyticsSalesDaily"."itemsSold" + EXCLUDED."itemsSold",
       "grossRevenue" = "analyticsSalesDaily"."grossRevenue" + EXCLUDED."grossRevenue",
@@ -302,7 +302,7 @@ export async function upsertSalesDaily(
       "paymentFailedCount" = "analyticsSalesDaily"."paymentFailedCount" + EXCLUDED."paymentFailedCount",
       "updatedAt" = $27`,
     [
-      data.merchantId,
+      data.organizationId,
       data.date,
       channel,
       data.currency || 'USD',
@@ -516,7 +516,7 @@ export async function getSearchQueries(
 export async function upsertSearchQuery(data: {
   query: string;
   date: Date;
-  merchantId?: string;
+  organizationId?: string;
   resultCount?: number;
   clicked?: boolean;
   purchased?: boolean;
@@ -527,19 +527,19 @@ export async function upsertSearchQuery(data: {
 
   await query(
     `INSERT INTO "analyticsSearchQuery" (
-      "merchantId", "query", "queryNormalized", "date",
+      "organizationId", "query", "queryNormalized", "date",
       "searchCount", "resultCount", "isZeroResult",
       "clickCount", "purchaseCount", "revenue",
       "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, 1, $5, $6, $7, $8, $9, $10, $11)
-    ON CONFLICT ("merchantId", "queryNormalized", "date") DO UPDATE SET
+    ON CONFLICT ("organizationId", "queryNormalized", "date") DO UPDATE SET
       "searchCount" = "analyticsSearchQuery"."searchCount" + 1,
       "clickCount" = "analyticsSearchQuery"."clickCount" + EXCLUDED."clickCount",
       "purchaseCount" = "analyticsSearchQuery"."purchaseCount" + EXCLUDED."purchaseCount",
       "revenue" = "analyticsSearchQuery"."revenue" + EXCLUDED."revenue",
       "updatedAt" = $11`,
     [
-      data.merchantId,
+      data.organizationId,
       data.query,
       normalized,
       data.date,
@@ -588,7 +588,7 @@ export async function getCustomerCohorts(startMonth?: Date, endMonth?: Date): Pr
 function mapToSalesDaily(row: AnalyticsSalesDailyRow): SalesDaily {
   return {
     analyticsSalesDailyId: row.analyticsSalesDailyId,
-    merchantId: row.merchantId ?? undefined,
+    organizationId: row.organizationId ?? undefined,
     date: new Date(row.date),
     channel: row.channel ?? 'all',
     currency: row.currency ?? 'USD',
@@ -651,7 +651,7 @@ function mapToProductPerformance(row: AnalyticsProductPerformanceRow): ProductPe
 function mapToSearchQuery(row: AnalyticsSearchQueryRow): SearchQuery {
   return {
     analyticsSearchQueryId: row.analyticsSearchQueryId,
-    merchantId: row.merchantId ?? undefined,
+    organizationId: row.organizationId ?? undefined,
     query: row.query,
     queryNormalized: row.queryNormalized ?? undefined,
     date: new Date(row.date),
@@ -676,7 +676,7 @@ function mapToSearchQuery(row: AnalyticsSearchQueryRow): SearchQuery {
 function mapToCustomerCohort(row: AnalyticsCustomerCohortRow): CustomerCohort {
   return {
     analyticsCustomerCohortId: row.analyticsCustomerCohortId,
-    merchantId: row.merchantId ?? undefined,
+    organizationId: row.organizationId ?? undefined,
     cohortMonth: new Date(row.cohortMonth),
     monthNumber: row.monthNumber ?? 0,
     customersInCohort: row.customersInCohort ?? 0,

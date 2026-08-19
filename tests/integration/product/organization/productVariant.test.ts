@@ -1,9 +1,9 @@
 /**
  * Integration tests for product variants and barcode lookup
  * Covers: spec 02-variants-images.md
- * - Merchant: variant CRUD (create, read, update, delete)
- * - Merchant: inventory patch
- * - Merchant: barcode lookup
+ * - Organization: variant CRUD (create, read, update, delete)
+ * - Organization: inventory patch
+ * - Organization: barcode lookup
  * - State: isLowStock / isOutOfStock flags
  */
 
@@ -35,9 +35,9 @@ describe('Product Variants & Barcode', () => {
     await cleanupProductTests(client, adminToken, testProductId, testCategoryId, testAttributeGroupId);
   });
 
-  // ── Merchant: Variant CRUD ───────────────────────────────────────────────
+  // ── Organization: Variant CRUD ───────────────────────────────────────────────
 
-  describe('Merchant: Variant CRUD', () => {
+  describe('Organization: Variant CRUD', () => {
     it('should get a variant by ID', async () => {
       if (!testVariantId) return;
       const res = await client.get(`/business/products/variants/${testVariantId}`, {
@@ -166,9 +166,9 @@ describe('Product Variants & Barcode', () => {
     });
   });
 
-  // ── Merchant: Barcode Lookup ─────────────────────────────────────────────
+  // ── Organization: Barcode Lookup ─────────────────────────────────────────────
 
-  describe('Merchant: Barcode lookup', () => {
+  describe('Organization: Barcode lookup', () => {
     it('should return 400 for empty barcode', async () => {
       // An empty/whitespace barcode path segment falls through to /:productId
       // The controller guards against non-UUID productIds and returns 404

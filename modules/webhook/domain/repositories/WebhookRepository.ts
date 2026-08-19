@@ -7,7 +7,7 @@ import { WebhookDeliveryProps, DeliveryStatus } from '../entities/WebhookDeliver
 import { PaginationOptions } from 'libs/types/shared';
 
 export interface WebhookEndpointFilters {
-  merchantId?: string;
+  organizationId?: string;
   isActive?: boolean;
   eventType?: string;
 }

@@ -4,7 +4,7 @@
  */
 
 import { Router } from 'express';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import {
   // Subscription Products
   getSubscriptionProducts,
@@ -39,7 +39,7 @@ import {
 
 const router = Router();
 
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 
 // ============================================================================
 // Subscription Product Routes

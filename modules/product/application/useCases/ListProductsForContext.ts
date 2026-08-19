@@ -21,11 +21,7 @@ import { ProductListItemResponse, ListProductsResponse } from './ListProducts';
 export class ListProductsForContextCommand {
   constructor(
     public readonly context: {
-      // Marketplace context
-      merchantId?: string;
-
-      // Multi-store context
-      businessId?: string;
+      organizationId?: string;
       storeId?: string;
 
       // Common filters
@@ -88,19 +84,19 @@ export class ListProductsForContextUseCase {
     // Apply context-based ownership filtering
     if (systemConfig?.isMarketplace) {
       // Marketplace mode: products belong to merchants
-      if (command.context.merchantId) {
-        filters.merchantId = command.context.merchantId;
+      if (command.context.organizationId) {
+        filters.organizationId = command.context.organizationId;
       }
       // In marketplace, we might show products from multiple merchants
     } else if (systemConfig?.isMultiStore) {
       // Multi-store mode: products belong to organizations
-      if (command.context.businessId) {
-        filters.businessId = command.context.businessId;
+      if (command.context.organizationId) {
+        filters.organizationId = command.context.organizationId;
       } else if (command.context.storeId) {
         // If storeId is provided, find the organization for that store
         const store = await this.storeRepository.findById(command.context.storeId);
-        if (store?.businessId) {
-          filters.businessId = store.businessId;
+        if (store?.organizationId) {
+          filters.organizationId = store.organizationId;
         }
       }
     } else {
@@ -108,7 +104,7 @@ export class ListProductsForContextUseCase {
       const organizations = await organizationRepo.findAll();
       const defaultOrg = organizations[0];
       if (defaultOrg) {
-        filters.businessId = defaultOrg.merchantId;
+        filters.organizationId = defaultOrg.organizationId;
       }
     }
 

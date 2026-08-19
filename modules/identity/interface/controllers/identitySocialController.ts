@@ -22,12 +22,12 @@ import { eventBus } from '../../../../libs/events/eventBus';
 
 // Environment configuration
 const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
-const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
+const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 
 // Repositories
 const customerRepo = new CustomerRepo();
-const merchantRepo = new OrganizationRepo();
+const organizationRepo = new OrganizationRepo();
 const socialAccountRepo = new SocialAccountRepo();
 
 // Supported providers
@@ -320,41 +320,41 @@ export async function merchantSocialLogin(req: TypedRequest<Record<string, strin
     // Create use case with merchant finder/creator
     const socialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData, _userType) => {
       // Try to find existing merchant
-      let merchant = await merchantRepo.findByEmail(email);
+      let merchant = await organizationRepo.findByEmail(email);
 
       if (merchant) {
         // Check if merchant is active
         if (merchant.status !== 'active') {
           throw new Error(`Your account is ${merchant.status}. Please contact support.`);
         }
-        return { userId: merchant.merchantId, isNew: false };
+        return { userId: merchant.organizationId, isNew: false };
       }
 
       // Create new merchant (pending approval)
-      merchant = await merchantRepo.createWithPassword({
+      merchant = await organizationRepo.createWithPassword({
         name: profileData.displayName || `${profileData.firstName} ${profileData.lastName}`.trim() || email.split('@')[0],
         email,
         password: '', // No password for social-only accounts
         status: 'pending',
       });
 
-      return { userId: merchant.merchantId, isNew: true };
+      return { userId: merchant.organizationId, isNew: true };
     });
 
     const result = await socialLoginUseCase.execute({
       provider,
       profile,
-      userType: 'merchant',
+      userType: 'organization',
       ip: req.ip,
     });
 
     // Generate JWT token
-    const jwtToken = generateAccessToken(result.userId, result.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
+    const jwtToken = generateAccessToken(result.userId, result.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     // Emit social login event
-    eventBus.emit('identity.merchant.social_login', {
+    eventBus.emit('identity.organization.social_login', {
       userId: result.userId,
-      userType: 'merchant',
+      userType: 'organization',
       email: result.email,
       provider,
       providerUserId: profile.providerUserId,
@@ -557,11 +557,11 @@ export async function getCustomerLinkedAccounts(req: TypedRequest, res: Response
 /**
  * Get linked social accounts for a merchant
  */
-export async function getMerchantLinkedAccounts(req: TypedRequest, res: Response): Promise<void> {
+export async function getOrganizationLinkedAccounts(req: TypedRequest, res: Response): Promise<void> {
   try {
-    const merchantId = req.user?.id;
+    const organizationId = req.user?.id;
 
-    if (!merchantId) {
+    if (!organizationId) {
       res.status(401).json({
         success: false,
         message: 'Authentication required',
@@ -570,7 +570,7 @@ export async function getMerchantLinkedAccounts(req: TypedRequest, res: Response
     }
 
     const getLinkedUseCase = new GetLinkedAccountsUseCase(socialAccountRepo);
-    const linkedAccounts = await getLinkedUseCase.execute(merchantId, 'merchant');
+    const linkedAccounts = await getLinkedUseCase.execute(organizationId, 'organization');
 
     res.json({
       success: true,

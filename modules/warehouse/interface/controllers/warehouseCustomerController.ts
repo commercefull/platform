@@ -16,7 +16,10 @@ import { query } from '../../../../libs/db';
  */
 export const findNearestStores = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { latitude, longitude, radiusKm = '50', limit = '5' } = req.query;
+    const latitude = (req.query.latitude as string | undefined) ?? (req.query.lat as string | undefined);
+    const longitude = (req.query.longitude as string | undefined) ?? (req.query.lng as string | undefined);
+    const radiusKm = (req.query.radiusKm as string | undefined) ?? '50';
+    const limit = (req.query.limit as string | undefined) ?? '5';
 
     if (!latitude || !longitude) {
       errorResponse(res, 'Latitude and longitude are required', 400);

@@ -1,6 +1,6 @@
 /**
  * Settings Controller
- * Handles merchant settings and store configuration
+ * Handles organization settings and store configuration
  * for the Commercefull Admin Hub - Phase 8
  */
 
@@ -17,7 +17,7 @@ import CountryRepo from '../../../modules/localization/infrastructure/repositori
 // ============================================================================
 
 interface StoreSettings {
-  merchantId: string;
+  organizationId: string;
   storeName: string;
   storeUrl?: string;
   storeEmail?: string;
@@ -51,7 +51,7 @@ interface StoreSettings {
 
 export const storeSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || 'default';
+    const organizationId = req.user?.organizationId || 'default';
 
     const timezones = getTimezones();
     const currencies = await currencyRepo.listActiveCurrencyCodes();
@@ -59,7 +59,7 @@ export const storeSettings = async (req: TypedRequest, res: Response): Promise<v
 
     adminRespond(req, res, 'settings/store', {
       pageName: 'Store Settings',
-      settings: getDefaultSettings(merchantId),
+      settings: getDefaultSettings(organizationId),
       timezones,
       currencies: currencies.length > 0 ? currencies : getDefaultCurrencyList(),
       locales,
@@ -102,11 +102,11 @@ export const updateStoreSettings = async (req: TypedRequest, res: Response): Pro
 
 export const businessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || 'default';
+    const organizationId = req.user?.organizationId || 'default';
 
     adminRespond(req, res, 'settings/business', {
       pageName: 'Business Information',
-      settings: getDefaultSettings(merchantId),
+      settings: getDefaultSettings(organizationId),
     });
   } catch (error: unknown) {
     logger.error('Error:', error);
@@ -291,9 +291,9 @@ export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<
 // Helper Functions
 // ============================================================================
 
-function getDefaultSettings(merchantId: string): StoreSettings {
+function getDefaultSettings(organizationId: string): StoreSettings {
   return {
-    merchantId,
+    organizationId,
     storeName: 'My Store',
     timezone: 'UTC',
     currency: 'USD',

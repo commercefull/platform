@@ -69,6 +69,12 @@ export class BasketRepo implements BasketRepository {
     // Check if basket exists
     const existing = await queryOne<DbBasket>('SELECT "basketId" FROM basket WHERE "basketId" = $1', [basket.basketId]);
 
+    // Merge coupon into metadata so it persists across requests
+    const rawMetadata = basket.metadata ? { ...basket.metadata } : {};
+    const metadataToPersist = basket.coupon
+      ? { ...rawMetadata, coupon: { ...basket.coupon, appliedAt: basket.coupon.appliedAt.toISOString() } }
+      : rawMetadata;
+
     if (existing) {
       // Update
       await query(
@@ -81,18 +87,20 @@ export class BasketRepo implements BasketRepository {
           "expiresAt" = $6,
           "convertedToOrderId" = $7,
           "updatedAt" = $8,
-          "lastActivityAt" = $9
-        WHERE "basketId" = $10`,
+          "lastActivityAt" = $9,
+          "discountAmount" = $10
+        WHERE "basketId" = $11`,
         [
           basket.customerId || null,
           basket.sessionId || null,
           basket.status,
           basket.currency,
-          basket.metadata ? JSON.stringify(basket.metadata) : null,
+          Object.keys(metadataToPersist).length > 0 ? JSON.stringify(metadataToPersist) : null,
           basket.expiresAt?.toISOString() || null,
           basket.convertedToOrderId || null,
           now,
           basket.lastActivityAt.toISOString(),
+          basket.discountAmount,
           basket.basketId,
         ],
       );
@@ -102,20 +110,21 @@ export class BasketRepo implements BasketRepository {
         `INSERT INTO basket (
           "basketId", "customerId", "sessionId", status, currency,
           metadata, "expiresAt", "convertedToOrderId",
-          "createdAt", "updatedAt", "lastActivityAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+          "createdAt", "updatedAt", "lastActivityAt", "discountAmount"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [
           basket.basketId,
           basket.customerId || null,
           basket.sessionId || null,
           basket.status,
           basket.currency,
-          basket.metadata ? JSON.stringify(basket.metadata) : null,
+          Object.keys(metadataToPersist).length > 0 ? JSON.stringify(metadataToPersist) : null,
           basket.expiresAt?.toISOString() || null,
           basket.convertedToOrderId || null,
           now,
           now,
           now,
+          basket.discountAmount,
         ],
       );
     }
@@ -163,6 +172,13 @@ export class BasketRepo implements BasketRepository {
       await query('DELETE FROM "basketMerge" WHERE "sourceBasketId" = $1 OR "targetBasketId" = $1', [basketId]);
     } catch {
       // Table may not exist
+    }
+
+    // Clear checkout sessions referencing this basket (to allow basket deletion without FK violation)
+    try {
+      await query('DELETE FROM "checkoutSession" WHERE "basketId" = $1', [basketId]);
+    } catch {
+      // Table may not exist or column naming variation
     }
 
     // Finally delete the basket
@@ -406,6 +422,20 @@ export class BasketRepo implements BasketRepository {
   }
 
   private mapToBasket(row: DbBasket, items: BasketItem[]): Basket {
+    // Rehydrate coupon information from metadata if present
+    const md = (row.metadata as Record<string, unknown> | null) ?? undefined;
+    const couponContainer: Record<string, unknown> | undefined =
+      md && typeof md === 'object' && 'coupon' in md ? (md as Record<string, unknown>) : undefined;
+    const couponRaw = couponContainer && (couponContainer.coupon as Record<string, unknown>);
+    const coupon = couponRaw
+      ? {
+          couponCode: String(couponRaw.couponCode as string),
+          discountType: (couponRaw.discountType as 'percentage' | 'fixed') || 'fixed',
+          discountValue: Number(couponRaw.discountValue as number),
+          appliedAt: new Date(String(couponRaw.appliedAt)),
+        }
+      : undefined;
+
     return Basket.reconstitute({
       basketId: row.basketId,
       customerId: row.customerId ?? undefined,
@@ -413,7 +443,9 @@ export class BasketRepo implements BasketRepository {
       status: row.status as BasketStatus,
       currency: row.currency,
       items,
-      metadata: row.metadata as Record<string, unknown> | undefined ?? undefined,
+      metadata: md,
+      coupon,
+      discountAmount: row.discountAmount != null ? Number(row.discountAmount) : undefined,
       expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
       convertedToOrderId: row.convertedToOrderId ?? undefined,
       createdAt: new Date(row.createdAt),

@@ -8,7 +8,7 @@ exports.up = function (knex) {
   return knex.schema
     .createTable('analyticsReportSnapshot', table => {
       table.uuid('analyticsReportSnapshotId').primary().defaultTo(knex.raw('uuidv7()'));
-      table.uuid('merchantId').references('merchantId').inTable('merchant');
+      table.uuid('organizationId').references('organizationId').inTable('organization');
 
       // Snapshot timing
       table.string('snapshotType').notNullable(); // hourly, daily, weekly, monthly
@@ -55,10 +55,10 @@ exports.up = function (knex) {
 
       table.timestamp('createdAt').defaultTo(knex.fn.now());
 
-      table.unique(['merchantId', 'snapshotType', 'snapshotTime']);
+      table.unique(['organizationId', 'snapshotType', 'snapshotTime']);
     })
     .then(() => knex.raw('CREATE INDEX ON "analyticsReportSnapshot"("snapshotDate", "snapshotType")'))
-    .then(() => knex.raw('CREATE INDEX ON "analyticsReportSnapshot"("merchantId", "snapshotDate")'));
+    .then(() => knex.raw('CREATE INDEX ON "analyticsReportSnapshot"("organizationId", "snapshotDate")'));
 };
 
 /**

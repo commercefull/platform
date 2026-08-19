@@ -7,7 +7,7 @@ exports.up = function (knex) {
     t.uuid('notificationPreferenceId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('userId').notNullable();
-    t.enum('userType', ['customer', 'merchant', 'admin']).notNullable().defaultTo('customer');
+    t.enum('userType', ['customer', 'organization', 'admin']).notNullable().defaultTo('customer');
     t.enum('type', [
       'account_registration',
       'password_reset',

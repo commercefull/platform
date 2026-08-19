@@ -7,12 +7,12 @@ exports.up = function (knex) {
     t.string('slug', 100).unique();
     t.text('description');
     t.boolean('isActive').notNullable().defaultTo(true);
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('organizationId').references('organizationId').inTable('organization');
     t.boolean('isGlobal').notNullable().defaultTo(true);
 
     t.index('slug');
     t.index('isActive');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isGlobal');
   });
 };

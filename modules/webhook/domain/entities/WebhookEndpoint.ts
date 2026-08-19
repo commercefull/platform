@@ -8,7 +8,7 @@ import { randomBytes } from 'crypto';
 
 export interface WebhookEndpointProps {
   webhookEndpointId: string;
-  merchantId: string | null;
+  organizationId: string | null;
   name: string;
   url: string;
   secret: string;
@@ -36,14 +36,14 @@ export class WebhookEndpointEntity {
     name: string;
     url: string;
     events: string[];
-    merchantId?: string;
+    organizationId?: string;
     headers?: Record<string, string>;
     retryPolicy?: Partial<WebhookEndpointProps['retryPolicy']>;
   }): WebhookEndpointEntity {
     const now = new Date();
     return new WebhookEndpointEntity({
       webhookEndpointId: props.webhookEndpointId,
-      merchantId: props.merchantId || null,
+      organizationId: props.organizationId || null,
       name: props.name,
       url: props.url,
       secret: randomBytes(32).toString('hex'),
@@ -68,8 +68,8 @@ export class WebhookEndpointEntity {
   get webhookEndpointId(): string {
     return this.props.webhookEndpointId;
   }
-  get merchantId(): string | null {
-    return this.props.merchantId;
+  get organizationId(): string | null {
+    return this.props.organizationId;
   }
   get name(): string {
     return this.props.name;
@@ -151,7 +151,7 @@ export class WebhookEndpointEntity {
   toJSON(): Record<string, unknown> {
     return {
       webhookEndpointId: this.props.webhookEndpointId,
-      merchantId: this.props.merchantId,
+      organizationId: this.props.organizationId,
       name: this.props.name,
       url: this.props.url,
       events: this.props.events,

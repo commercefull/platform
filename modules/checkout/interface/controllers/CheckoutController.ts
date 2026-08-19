@@ -13,6 +13,7 @@ import PaymentRepo from '../../../payment/infrastructure/repositories/PaymentRep
 import { CalculateShippingRatesUseCase, CalculateShippingRatesCommand } from '../../../shipping/application/useCases/CalculateShippingRates';
 import { getLocations as getAllPickupLocations, getLocation as getPickupLocation, findNearestLocations as findNearestPickupLocations } from '../../../store/infrastructure/repositories/pickupLocationRepo';
 import InventoryRepo from '../../../inventory/infrastructure/repositories/inventoryRepo';
+import { AppError } from '../../../../libs/errors';
 import {
   InitiateCheckoutCommand,
   InitiateCheckoutUseCase,
@@ -174,6 +175,29 @@ export const getCheckout = async (req: TypedRequest, res: Response): Promise<voi
 };
 
 /**
+ * Get checkout summary (totals and selected options)
+ * GET /checkout/:checkoutId/summary
+ */
+export const getCheckoutSummary = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { checkoutId } = req.params;
+
+    const session = await CheckoutRepo.findById(checkoutId);
+
+    if (!session) {
+      respondError(req, res, 'Checkout session not found', 404, 'checkout/error');
+      return;
+    }
+
+    // Reuse the same mapper; response includes subtotal, tax, shipping, discount, total
+    respond(req, res, mapCheckoutToResponse(session) as unknown as ResponseData, 200, 'checkout/summary');
+  } catch (error: unknown) {
+    logger.error('Error:', error);
+    respondError(req, res, (error as Error).message || 'Failed to get checkout summary', 500, 'checkout/error');
+  }
+};
+
+/**
  * Set shipping address
  * PUT /checkout/:checkoutId/shipping-address
  */
@@ -202,12 +226,8 @@ export const setShippingAddress = async (req: TypedRequest<Record<string, string
     respond(req, res, checkout as unknown as ResponseData, 200, 'checkout/shipping');
   } catch (error: unknown) {
     logger.error('Error:', error);
-    const message = (error as Error).message || 'Failed to set shipping address';
-    const msgLower = message.toLowerCase();
-    const statusCode = msgLower.includes('not found') ? 404 
-      : (msgLower.includes('completed') || msgLower.includes('invalid state') || msgLower.includes('cannot modify')) ? 400 
-      : 500;
-    respondError(req, res, message, statusCode, 'checkout/error');
+    if (error instanceof AppError) return respondError(req, res, error.message, error.statusCode, 'checkout/error');
+    respondError(req, res, (error as Error).message || 'Failed to set shipping address', 500, 'checkout/error');
   }
 };
 
@@ -428,7 +448,7 @@ export const setShippingMethod = async (req: TypedRequest<Record<string, string>
     respond(req, res, checkout as unknown as ResponseData, 200, 'checkout/view');
   } catch (error: unknown) {
     logger.error('Error:', error);
-
+    if (error instanceof AppError) return respondError(req, res, error.message, error.statusCode, 'checkout/error');
     respondError(req, res, (error as Error).message || 'Failed to set shipping method', 500, 'checkout/error');
   }
 };
@@ -469,7 +489,7 @@ export const setPaymentMethod = async (req: TypedRequest<Record<string, string>,
     respond(req, res, checkout as unknown as ResponseData, 200, 'checkout/view');
   } catch (error: unknown) {
     logger.error('Error:', error);
-
+    if (error instanceof AppError) return respondError(req, res, error.message, error.statusCode, 'checkout/error');
     respondError(req, res, (error as Error).message || 'Failed to set payment method', 500, 'checkout/error');
   }
 };
@@ -495,7 +515,7 @@ export const applyCoupon = async (req: TypedRequest<Record<string, string>, unkn
     respond(req, res, checkout as unknown as ResponseData, 200, 'checkout/view');
   } catch (error: unknown) {
     logger.error('Error:', error);
-
+    if (error instanceof AppError) return respondError(req, res, error.message, error.statusCode, 'checkout/error');
     respondError(req, res, (error as Error).message || 'Failed to apply coupon', 500, 'checkout/error');
   }
 };
@@ -515,7 +535,7 @@ export const removeCoupon = async (req: TypedRequest, res: Response): Promise<vo
     respond(req, res, checkout as unknown as ResponseData, 200, 'checkout/view');
   } catch (error: unknown) {
     logger.error('Error:', error);
-
+    if (error instanceof AppError) return respondError(req, res, error.message, error.statusCode, 'checkout/error');
     respondError(req, res, (error as Error).message || 'Failed to remove coupon', 500, 'checkout/error');
   }
 };
@@ -535,13 +555,8 @@ export const completeCheckout = async (req: TypedRequest, res: Response): Promis
     respond(req, res, result as unknown as ResponseData, 201, 'checkout/complete');
   } catch (error: unknown) {
     logger.error('Error:', error);
-
-    const message = (error as Error).message || 'Failed to complete checkout';
-    const isNotFound = message.includes('not found');
-    const isBadRequest = message.includes('payment has not been confirmed') || message.includes('shipping address') || message.includes('shipping method') || message.includes('payment method');
-
-    const statusCode = isNotFound ? 404 : isBadRequest ? 400 : 500;
-    respondError(req, res, message, statusCode, 'checkout/error');
+    if (error instanceof AppError) return respondError(req, res, error.message, error.statusCode, 'checkout/error');
+    respondError(req, res, (error as Error).message || 'Failed to complete checkout', 500, 'checkout/error');
   }
 };
 

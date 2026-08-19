@@ -22,7 +22,7 @@ router.get('/stores/slug/:slug', storeController.getStoreBySlug.bind(storeContro
 router.get('/stores/:storeId', storeController.getStore.bind(storeController));
 
 // Get stores by business
-router.get('/stores/business/:businessId', storeController.getStoresByBusiness.bind(storeController));
+router.get('/stores/business/:organizationId', storeController.getStoresByBusiness.bind(storeController));
 
 // Update store
 router.put('/stores/:storeId', storeController.updateStore.bind(storeController));

@@ -11,6 +11,8 @@ const WAREHOUSE_IDS = {
   RETURNS: '0193b000-0000-7000-8000-000000000004',
 };
 
+const ORG_ID = '01911000-0000-7000-8000-000000000001';
+
 const BIN_IDS = {
   A1_01: '0193b002-0000-7000-8000-000000000001',
   A1_02: '0193b002-0000-7000-8000-000000000002',
@@ -39,6 +41,7 @@ exports.seed = async function (knex) {
   await knex('distributionWarehouse').insert([
     {
       distributionWarehouseId: WAREHOUSE_IDS.MAIN,
+      organizationId: ORG_ID,
       name: 'Test Main Warehouse',
       code: 'TEST-MAIN',
       description: 'Primary test distribution center',
@@ -72,6 +75,7 @@ exports.seed = async function (knex) {
     },
     {
       distributionWarehouseId: WAREHOUSE_IDS.WEST_COAST,
+      organizationId: ORG_ID,
       name: 'Test West Coast Warehouse',
       code: 'TEST-WEST',
       description: 'West coast distribution center',
@@ -96,6 +100,7 @@ exports.seed = async function (knex) {
     },
     {
       distributionWarehouseId: WAREHOUSE_IDS.EAST_COAST,
+      organizationId: ORG_ID,
       name: 'Test East Coast Warehouse',
       code: 'TEST-EAST',
       description: 'East coast distribution center',
@@ -120,6 +125,7 @@ exports.seed = async function (knex) {
     },
     {
       distributionWarehouseId: WAREHOUSE_IDS.RETURNS,
+      organizationId: ORG_ID,
       name: 'Test Returns Center',
       code: 'TEST-RETURNS',
       description: 'Dedicated returns processing center',

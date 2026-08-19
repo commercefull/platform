@@ -1,13 +1,13 @@
 /**
- * Merchant: Product Lifecycle
- * Covers: docs/specs/product/merchant/01-product-lifecycle.md
+ * Organization: Product Lifecycle
+ * Covers: docs/specs/product/organization/01-product-lifecycle.md
  */
 
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin, expectStatus } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID } from '../testUtils';
 
-describe('Merchant: Product Lifecycle', () => {
+describe('Organization: Product Lifecycle', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let createdProductId: string | null = null;

@@ -65,22 +65,19 @@ exports.up = function (knex) {
     t.timestamp('publishedAt');
     t.timestamp('deletedAt');
     t.uuid('userId');
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('organizationId').references('organizationId').inTable('organization');
     t.text('returnPolicy');
     t.text('warranty');
     t.string('externalId', 255);
     t.boolean('hasVariants').notNullable().defaultTo(false);
     t.jsonb('variantAttributes');
 
-    t.uuid('businessId');
     t.uuid('storeId');
-    t.string('organizationId', 50).nullable();
     t.string('approvalStatus', 20).defaultTo('approved');
     t.boolean('platformVisible').defaultTo(true);
 
     t.uuid('createdBy');
     t.uuid('updatedBy');
-    t.index('businessId');
     t.index('storeId');
     t.index('organizationId');
     t.index('approvalStatus');

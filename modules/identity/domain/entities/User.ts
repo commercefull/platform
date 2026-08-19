@@ -2,7 +2,7 @@
  * User Entity (Identity)
  */
 
-export type UserType = 'customer' | 'merchant' | 'admin';
+export type UserType = 'customer' | 'organization' | 'admin';
 export type UserStatus = 'active' | 'inactive' | 'suspended' | 'pending_verification';
 
 export interface UserProps {

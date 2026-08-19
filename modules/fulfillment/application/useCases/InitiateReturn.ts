@@ -26,7 +26,10 @@ export class InitiateReturnUseCase {
       throw new Error(`Fulfillment not found: ${input.fulfillmentId}`);
     }
 
-    fulfillment.markReturned();
+    // If already returned, treat as idempotent
+    if (fulfillment.status !== 'returned') {
+      fulfillment.markReturned();
+    }
     const saved = await this.fulfillmentRepository.save(fulfillment);
 
     return {

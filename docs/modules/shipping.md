@@ -51,12 +51,12 @@ The Shipping feature manages carrier integrations, rate calculations, and label 
 
 ## Integration Test Coverage
 
-| Use Case                 | Test File                   | Status |
-| ------------------------ | --------------------------- | ------ |
-| UC-SHP-001 to UC-SHP-005 | `shipping/shipping.test.ts` | ✅     |
-| UC-SHP-006               | `shipping/shipping.test.ts` | ✅     |
-| UC-SHP-007 to UC-SHP-009 | —                           | ❌     |
-| UC-SHP-010               | —                           | ❌     |
+| Use Case                 | Test File                           | Status |
+| ------------------------ | ----------------------------------- | ------ |
+| UC-SHP-001 to UC-SHP-005 | `shipping/shipping.test.ts`         | ✅     |
+| UC-SHP-006               | `shipping/shipping.test.ts`         | ✅     |
+| UC-SHP-007 to UC-SHP-009 | `shipping/shippingExpanded.test.ts` | ✅     |
+| UC-SHP-010               | `shipping/shippingExpanded.test.ts` | ✅     |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

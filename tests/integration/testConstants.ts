@@ -28,7 +28,7 @@ export const TEST_CONTENT_BLOCK_ID = '00000000-0000-0000-0000-000000005003';
 export const TEST_CONTENT_TEMPLATE_ID = '00000000-0000-0000-0000-000000005004';
 export const TEST_BLOCK_TYPE_ID = '00000000-0000-0000-0000-000000005005';
 
-// Test Credentials (must match seeded merchant/customer data)
+// Test Credentials (must match seeded organization/customer data)
 export const ADMIN_CREDENTIALS = {
   email: 'merchant@example.com',
   password: 'password123',

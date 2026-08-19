@@ -1,6 +1,6 @@
 /**
  * Basket Admin/Business API Integration Tests
- * Tests basket management endpoints for admin/merchant users
+ * Tests basket management endpoints for admin/organization users
  */
 
 import axios, { AxiosInstance } from 'axios';

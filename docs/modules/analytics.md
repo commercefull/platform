@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Analytics feature provides business intelligence and reporting capabilities, tracking events across the platform and aggregating them into actionable insights. It includes real-time metrics, historical analytics, custom dashboards, and event tracking.
+The Analytics feature provides analytics and reporting capabilities, tracking events across the platform and aggregating them into actionable insights. It includes real-time metrics, historical analytics, custom dashboards, and event tracking.
 
 ---
 
@@ -19,8 +19,8 @@ The Analytics feature provides business intelligence and reporting capabilities,
 | UC-ANA-007 | Get Customer Cohorts | Merchant/Admin | Analyze customer retention by acquisition month with revenue and LTV per cohort |
 | UC-ANA-008 | Get Events | Merchant/Admin | Retrieve raw tracked events with optional filtering by type, category, or entity |
 | UC-ANA-009 | Get Event Counts | Merchant/Admin | Retrieve event counts aggregated by hour or day for trend analysis |
-| UC-ANA-010 | Get Snapshots | Merchant/Admin | Retrieve historical point-in-time business state snapshots (hourly/daily/weekly/monthly) |
-| UC-ANA-011 | Get Latest Snapshot | Merchant/Admin | Retrieve the most recent business snapshot for a quick current-state overview |
+| UC-ANA-010 | Get Snapshots | Merchant/Admin | Retrieve historical point-in-time organization state snapshots (hourly/daily/weekly/monthly) |
+| UC-ANA-011 | Get Latest Snapshot | Merchant/Admin | Retrieve the most recent organization snapshot for a quick current-state overview |
 | UC-ANA-012 | Get Real-time Metrics | Merchant/Admin | Retrieve live activity metrics (visitors, orders, revenue, cart activity) for the last N minutes |
 | UC-ANA-013 | List Dashboards | Merchant/Admin | List all available custom and shared analytics dashboards |
 | UC-ANA-014 | Get Dashboard | Merchant/Admin | Retrieve a specific dashboard configuration including layout, widgets, and filters |
@@ -75,23 +75,23 @@ The analytics system listens to and tracks these events:
 
 | Use Case   | Test File                     | Status |
 | ---------- | ----------------------------- | ------ |
-| UC-ANA-001 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-002 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-003 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-004 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-005 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-006 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-007 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-008 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-009 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-010 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-011 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-012 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-013 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-014 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-015 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-016 | `analytics/analytics.test.ts` | ❌     |
-| UC-ANA-017 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-001 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-002 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-003 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-004 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-005 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-006 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-007 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-008 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-009 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-010 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-011 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-012 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-013 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-014 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-015 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-016 | `analytics/analytics.skip.test.ts` | 🟡     |
+| UC-ANA-017 | `analytics/analytics.skip.test.ts` | 🟡     |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

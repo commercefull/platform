@@ -12,9 +12,8 @@ import { StoreRepository } from '../../domain/repositories/StoreRepository';
 export class ListStoresQuery {
   constructor(
     public readonly filters?: {
-      storeType?: 'merchant_store' | 'business_store';
-      merchantId?: string;
-      businessId?: string;
+      storeType?: 'merchant_store' | 'organization_store';
+      organizationId?: string;
       isHeadquarters?: boolean;
       parentStoreId?: string;
       isActive?: boolean;
@@ -43,8 +42,7 @@ export interface ListStoresResponse {
     name: string;
     slug: string;
     storeType: string;
-    merchantId?: string;
-    businessId?: string;
+    organizationId?: string;
     isHeadquarters: boolean;
     parentStoreId?: string;
     storeUrl?: string;
@@ -76,8 +74,7 @@ export class ListStoresUseCase {
     // Build filters from query
     const filters = {
       storeType: query.filters?.storeType,
-      merchantId: query.filters?.merchantId,
-      businessId: query.filters?.businessId,
+      organizationId: query.filters?.organizationId,
       isHeadquarters: query.filters?.isHeadquarters,
       parentStoreId: query.filters?.parentStoreId,
       isActive: query.filters?.isActive,
@@ -98,8 +95,7 @@ export class ListStoresUseCase {
       name: store.name,
       slug: store.slug,
       storeType: store.storeType,
-      merchantId: store.merchantId,
-      businessId: store.businessId,
+      organizationId: store.organizationId,
       isHeadquarters: store.isHeadquarters,
       parentStoreId: store.parentStoreId,
       storeUrl: store.storeUrl,

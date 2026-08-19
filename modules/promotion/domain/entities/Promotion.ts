@@ -31,7 +31,7 @@ export interface PromotionProps {
   perCustomerLimit?: number;
   stackable: boolean;
   priority: number;
-  merchantId?: string;
+  organizationId?: string;
   metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
@@ -62,7 +62,7 @@ export class Promotion {
     perCustomerLimit?: number;
     stackable?: boolean;
     priority?: number;
-    merchantId?: string;
+    organizationId?: string;
     metadata?: Record<string, unknown>;
   }): Promotion {
     const now = new Date();
@@ -86,7 +86,7 @@ export class Promotion {
       perCustomerLimit: props.perCustomerLimit,
       stackable: props.stackable ?? false,
       priority: props.priority ?? 0,
-      merchantId: props.merchantId,
+      organizationId: props.organizationId,
       metadata: props.metadata,
       createdAt: now,
       updatedAt: now,
@@ -155,8 +155,8 @@ export class Promotion {
   get priority(): number {
     return this.props.priority;
   }
-  get merchantId(): string | undefined {
-    return this.props.merchantId;
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
   }
   get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;

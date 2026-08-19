@@ -87,7 +87,7 @@ export interface Product {
   publishedAt?: Date;
   deletedAt?: Date;
   userId?: string;
-  merchantId?: string;
+  organizationId?: string;
   returnPolicy?: string;
   warranty?: string;
   externalId?: string;
@@ -127,7 +127,7 @@ export interface ProductFilterOptions {
   hasVariants?: boolean;
   priceMin?: number;
   priceMax?: number;
-  merchantId?: string;
+  organizationId?: string;
   searchTerm?: string;
   limit?: number;
   offset?: number;
@@ -184,7 +184,7 @@ export class ProductRepo {
       hasVariants,
       priceMin,
       priceMax,
-      merchantId,
+      organizationId,
       searchTerm,
       limit = 50,
       offset = 0,
@@ -254,9 +254,9 @@ export class ProductRepo {
       params.push(priceMax);
     }
 
-    if (merchantId) {
-      sql += ` AND "merchantId" = $${paramIndex++}`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` AND "organizationId" = $${paramIndex++}`;
+      params.push(organizationId);
     }
 
     if (searchTerm) {
@@ -281,7 +281,7 @@ export class ProductRepo {
    * Count products based on filter options
    */
   async count(options: Omit<ProductFilterOptions, 'limit' | 'offset' | 'orderBy' | 'orderDirection'> = {}): Promise<number> {
-    const { status, visibility, type, isFeatured, isVirtual, hasVariants, priceMin, priceMax, merchantId, searchTerm } = options;
+    const { status, visibility, type, isFeatured, isVirtual, hasVariants, priceMin, priceMax, organizationId, searchTerm } = options;
 
     let sql = `SELECT COUNT(*) as count FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
     const params: unknown[] = [];
@@ -345,9 +345,9 @@ export class ProductRepo {
       params.push(priceMax);
     }
 
-    if (merchantId) {
-      sql += ` AND "merchantId" = $${paramIndex++}`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` AND "organizationId" = $${paramIndex++}`;
+      params.push(organizationId);
     }
 
     if (searchTerm) {
@@ -380,7 +380,7 @@ export class ProductRepo {
         "relatedProducts", "crossSellProducts", "upSellProducts",
         "isVirtual", "isDownloadable", "isSubscription",
         "primaryImageId", "publishedAt",
-        "userId", "merchantId",
+        "userId", "organizationId",
         "returnPolicy", "warranty", "externalId",
         "hasVariants", "variantAttributes",
         "createdBy", "updatedBy"
@@ -459,7 +459,7 @@ export class ProductRepo {
       data.primaryImageId || null,
       data.publishedAt || null,
       data.userId || null,
-      data.merchantId || null,
+      data.organizationId || null,
       data.returnPolicy || null,
       data.warranty || null,
       data.externalId || null,
@@ -539,7 +539,7 @@ export class ProductRepo {
       'primaryImageId',
       'publishedAt',
       'userId',
-      'merchantId',
+      'organizationId',
       'returnPolicy',
       'warranty',
       'externalId',
@@ -710,8 +710,8 @@ export class ProductRepo {
   /**
    * Find products by merchant
    */
-  async findByMerchant(merchantId: string, options: Omit<ProductFilterOptions, 'merchantId'> = {}): Promise<Product[]> {
-    return this.findAll({ ...options, merchantId });
+  async findByMerchant(organizationId: string, options: Omit<ProductFilterOptions, 'organizationId'> = {}): Promise<Product[]> {
+    return this.findAll({ ...options, organizationId });
   }
 
   /**

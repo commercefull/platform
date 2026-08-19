@@ -20,7 +20,7 @@ export class CreatePromotionCommand {
     public readonly usageLimitPerCustomer?: number,
     public readonly startsAt?: Date,
     public readonly endsAt?: Date,
-    public readonly merchantId?: string,
+    public readonly organizationId?: string,
   ) {}
 }
 
@@ -70,7 +70,7 @@ export class CreatePromotionUseCase {
       maxUsagePerCustomer: command.usageLimitPerCustomer,
       minOrderAmount: command.minOrderAmount,
       maxDiscountAmount: command.maxDiscountAmount,
-      merchantId: command.merchantId,
+      organizationId: command.organizationId,
       // Add actions based on type
       actions: [
         {

@@ -16,8 +16,6 @@ export enum Table {
   BasketHistory = "basketHistory",
   BasketItem = "basketItem",
   BasketMerge = "basketMerge",
-  Business = "business",
-  BusinessApiKey = "businessApiKey",
   CheckoutSession = "checkoutSession",
   ContentBlock = "contentBlock",
   ContentBlockType = "contentBlockType",
@@ -69,7 +67,7 @@ export enum Table {
   GdprDataRequest = "gdprDataRequest",
   IdentityAdminUser = "identityAdminUser",
   IdentityCustomerSession = "identityCustomerSession",
-  IdentityMerchantSession = "identityMerchantSession",
+  IdentityOrganizationSession = "identityOrganizationSession",
   IdentityRefreshTokens = "identityRefreshTokens",
   IdentitySocialAccount = "identitySocialAccount",
   IdentityTokenBlacklist = "identityTokenBlacklist",
@@ -101,21 +99,6 @@ export enum Table {
   MembershipPlan = "membershipPlan",
   MembershipPlanBenefit = "membershipPlanBenefit",
   MembershipSubscription = "membershipSubscription",
-  Merchant = "merchant",
-  MerchantAddress = "merchantAddress",
-  MerchantContact = "merchantContact",
-  MerchantFollower = "merchantFollower",
-  MerchantOrder = "merchantOrder",
-  MerchantPasswordReset = "merchantPasswordReset",
-  MerchantPaymentInfo = "merchantPaymentInfo",
-  MerchantProduct = "merchantProduct",
-  MerchantProductVariant = "merchantProductVariant",
-  MerchantReview = "merchantReview",
-  MerchantSettings = "merchantSettings",
-  MerchantShippingTemplate = "merchantShippingTemplate",
-  MerchantStore = "merchantStore",
-  MerchantTaxInfo = "merchantTaxInfo",
-  MerchantVerificationDocument = "merchantVerificationDocument",
   Notification = "notification",
   NotificationBatch = "notificationBatch",
   NotificationCategory = "notificationCategory",
@@ -147,6 +130,10 @@ export enum Table {
   OrderStatusHistory = "orderStatusHistory",
   OrderTax = "orderTax",
   Organization = "organization",
+  OrganizationAddress = "organizationAddress",
+  OrganizationApiKey = "organizationApiKey",
+  OrganizationPasswordReset = "organizationPasswordReset",
+  OrganizationPaymentInfo = "organizationPaymentInfo",
   PaymentBalance = "paymentBalance",
   PaymentDispute = "paymentDispute",
   PaymentFee = "paymentFee",
@@ -297,8 +284,6 @@ export type Tables = {
   "basketHistory": BasketHistory,
   "basketItem": BasketItem,
   "basketMerge": BasketMerge,
-  "business": Business,
-  "businessApiKey": BusinessApiKey,
   "checkoutSession": CheckoutSession,
   "contentBlock": ContentBlock,
   "contentBlockType": ContentBlockType,
@@ -350,7 +335,7 @@ export type Tables = {
   "gdprDataRequest": GdprDataRequest,
   "identityAdminUser": IdentityAdminUser,
   "identityCustomerSession": IdentityCustomerSession,
-  "identityMerchantSession": IdentityMerchantSession,
+  "identityOrganizationSession": IdentityOrganizationSession,
   "identityRefreshTokens": IdentityRefreshTokens,
   "identitySocialAccount": IdentitySocialAccount,
   "identityTokenBlacklist": IdentityTokenBlacklist,
@@ -382,21 +367,6 @@ export type Tables = {
   "membershipPlan": MembershipPlan,
   "membershipPlanBenefit": MembershipPlanBenefit,
   "membershipSubscription": MembershipSubscription,
-  "merchant": Merchant,
-  "merchantAddress": MerchantAddress,
-  "merchantContact": MerchantContact,
-  "merchantFollower": MerchantFollower,
-  "merchantOrder": MerchantOrder,
-  "merchantPasswordReset": MerchantPasswordReset,
-  "merchantPaymentInfo": MerchantPaymentInfo,
-  "merchantProduct": MerchantProduct,
-  "merchantProductVariant": MerchantProductVariant,
-  "merchantReview": MerchantReview,
-  "merchantSettings": MerchantSettings,
-  "merchantShippingTemplate": MerchantShippingTemplate,
-  "merchantStore": MerchantStore,
-  "merchantTaxInfo": MerchantTaxInfo,
-  "merchantVerificationDocument": MerchantVerificationDocument,
   "notification": Notification,
   "notificationBatch": NotificationBatch,
   "notificationCategory": NotificationCategory,
@@ -428,6 +398,10 @@ export type Tables = {
   "orderStatusHistory": OrderStatusHistory,
   "orderTax": OrderTax,
   "organization": Organization,
+  "organizationAddress": OrganizationAddress,
+  "organizationApiKey": OrganizationApiKey,
+  "organizationPasswordReset": OrganizationPasswordReset,
+  "organizationPaymentInfo": OrganizationPaymentInfo,
   "paymentBalance": PaymentBalance,
   "paymentDispute": PaymentDispute,
   "paymentFee": PaymentFee,
@@ -595,7 +569,7 @@ export type AnalyticsCustomer = {
 
 export type AnalyticsCustomerCohort = {
   analyticsCustomerCohortId: string;
-  merchantId: string | null;
+  organizationId: string | null;
   cohortMonth: Date;
   monthNumber: number;
   customersInCohort: number | null;
@@ -642,7 +616,7 @@ export type AnalyticsProductPerformance = {
 
 export type AnalyticsReportDashboard = {
   analyticsReportDashboardId: string;
-  merchantId: string | null;
+  organizationId: string | null;
   createdBy: string | null;
   name: string;
   slug: string | null;
@@ -659,7 +633,7 @@ export type AnalyticsReportDashboard = {
 
 export type AnalyticsReportEvent = {
   analyticsReportEventId: string;
-  merchantId: string | null;
+  organizationId: string | null;
   eventType: string;
   eventCategory: string;
   eventAction: string;
@@ -690,7 +664,7 @@ export type AnalyticsReportEvent = {
 
 export type AnalyticsReportSnapshot = {
   analyticsReportSnapshotId: string;
-  merchantId: string | null;
+  organizationId: string | null;
   snapshotType: string;
   snapshotTime: Date;
   snapshotDate: Date;
@@ -723,7 +697,7 @@ export type AnalyticsReportSnapshot = {
 
 export type AnalyticsSalesDaily = {
   analyticsSalesDailyId: string;
-  merchantId: string | null;
+  organizationId: string | null;
   date: Date;
   channel: string | null;
   currency: string | null;
@@ -754,7 +728,7 @@ export type AnalyticsSalesDaily = {
 
 export type AnalyticsSearchQuery = {
   analyticsSearchQueryId: string;
-  merchantId: string | null;
+  organizationId: string | null;
   query: string;
   queryNormalized: string | null;
   date: Date;
@@ -879,46 +853,6 @@ export type BasketMerge = {
   itemsMerged: number;
   conflictStrategy: string;
   mergedBy: string | null;
-};
-
-export type Business = {
-  businessId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  slug: string;
-  description: string | null;
-  businessType: string;
-  domain: string | null;
-  logo: string | null;
-  favicon: string | null;
-  primaryColor: string | null;
-  secondaryColor: string | null;
-  theme: string | null;
-  colorScheme: unknown | null;
-  isActive: boolean;
-  allowMultipleStores: boolean;
-  allowMultipleWarehouses: boolean;
-  enableMarketplace: boolean;
-  defaultCurrency: string;
-  defaultLanguage: string;
-  timezone: string;
-  metadata: unknown | null;
-};
-
-export type BusinessApiKey = {
-  apiKeyId: string;
-  merchantId: string | null;
-  name: string;
-  keyHash: string;
-  keyPrefix: string;
-  permissions: unknown[];
-  rateLimit: number;
-  expiresAt: Date | null;
-  lastUsedAt: Date | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 export type CheckoutSession = {
@@ -1544,7 +1478,7 @@ export type DistributionWarehouse = {
   isFulfillmentCenter: boolean;
   isReturnCenter: boolean;
   isVirtual: boolean;
-  merchantId: string | null;
+  organizationId: string | null;
   addressLine1: string;
   addressLine2: string | null;
   city: string;
@@ -1565,7 +1499,6 @@ export type DistributionWarehouse = {
   createdAt: Date;
   updatedAt: Date;
   createdBy: string | null;
-  businessId: string | null;
   storeId: string | null;
 };
 
@@ -1682,7 +1615,7 @@ export type Fulfillment = {
   orderNumber: string | null;
   sourceType: string;
   sourceId: string;
-  merchantId: string | null;
+  organizationId: string | null;
   supplierId: string | null;
   storeId: string | null;
   channelId: string | null;
@@ -1889,11 +1822,11 @@ export type IdentityCustomerSession = {
   isActive: boolean;
 };
 
-export type IdentityMerchantSession = {
-  merchantSessionId: string;
+export type IdentityOrganizationSession = {
+  organizationSessionId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   sessionToken: string;
   ipAddress: string | null;
   userAgent: string | null;
@@ -1961,7 +1894,7 @@ export type IdentityUserSession = {
   email: string;
   name: string | null;
   role: string | null;
-  merchantId: string | null;
+  organizationId: string | null;
   companyId: string | null;
   storeId: string | null;
   storeRole: string | null;
@@ -2443,350 +2376,6 @@ export type MembershipSubscription = {
   createdBy: string | null;
 };
 
-export type Merchant = {
-  merchantId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  slug: string;
-  description: string | null;
-  email: string;
-  phone: string | null;
-  password: string;
-  website: string | null;
-  logo: string | null;
-  bannerImage: string | null;
-  status: string;
-  verificationStatus: string;
-  verifiedAt: Date | null;
-  verifiedBy: string | null;
-  verificationNotes: string | null;
-  businessType: string | null;
-  yearEstablished: number | null;
-  employeeCount: number | null;
-  taxIdNumber: string | null;
-  legalName: string | null;
-  vatNumber: string | null;
-  vatVerified: boolean | null;
-  vatVerifiedAt: Date | null;
-  vatVerificationSource: string | null;
-  ossRegistered: boolean | null;
-  ossRegistrationCountry: string | null;
-  iossRegistered: boolean | null;
-  iossNumber: string | null;
-  eoriNumber: string | null;
-  ukVatNumber: string | null;
-  reverseChargeEligible: boolean | null;
-  defaultTaxCountry: string | null;
-  socialLinks: unknown | null;
-  metaTitle: string | null;
-  metaDescription: string | null;
-  metaKeywords: string | null;
-  commissionRate: string | null;
-  commissionType: string | null;
-  commissionTiers: unknown | null;
-  minimumPayoutAmount: string | null;
-  payoutSchedule: string | null;
-  autoApproveProducts: boolean;
-  autoApproveReviews: boolean;
-  sellerRating: string | null;
-  featuredMerchant: boolean;
-  storePolicies: unknown | null;
-  notificationPreferences: unknown | null;
-  allowedCategories: string[] | null;
-  notes: string | null;
-  customFields: unknown | null;
-  lastLoginAt: Date | null;
-  emailVerified: boolean;
-  createdBy: string | null;
-  updatedBy: string | null;
-  type: string | null;
-  commissionPlanId: string | null;
-};
-
-export type MerchantAddress = {
-  merchantAddressId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  addressType: string;
-  isDefault: boolean;
-  firstName: string | null;
-  lastName: string | null;
-  company: string | null;
-  addressLine1: string;
-  addressLine2: string | null;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  phone: string | null;
-  email: string | null;
-  isVerified: boolean;
-  verifiedAt: Date | null;
-  latitude: string | null;
-  longitude: string | null;
-  notes: string | null;
-};
-
-export type MerchantContact = {
-  merchantContactId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string | null;
-  jobTitle: string | null;
-  isPrimary: boolean;
-  department: string | null;
-  notes: string | null;
-};
-
-export type MerchantFollower = {
-  merchantFollowerId: string;
-  merchantId: string;
-  customerId: string;
-  followedAt: Date;
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-};
-
-export type MerchantOrder = {
-  merchantOrderId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  orderId: string;
-  orderItemIds: string[];
-  status: string;
-  subtotal: string;
-  shipping: string;
-  tax: string;
-  discount: string;
-  total: string;
-  commissionAmount: string;
-  payoutAmount: string;
-  currency: string;
-  shippingAddress: unknown | null;
-  billingAddress: unknown | null;
-  shippingMethod: string | null;
-  trackingNumber: string | null;
-  trackingUrl: string | null;
-  carrierName: string | null;
-  customerNotes: string | null;
-  merchantNotes: string | null;
-  adminNotes: string | null;
-  isPayoutProcessed: boolean;
-  payoutDate: Date | null;
-  payoutTransactionId: string | null;
-};
-
-export type MerchantPasswordReset = {
-  merchantPasswordResetId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  token: string;
-  expiresAt: Date;
-  isUsed: boolean;
-};
-
-export type MerchantPaymentInfo = {
-  merchantPaymentInfoId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  paymentType: string;
-  isDefault: boolean;
-  accountHolderName: string | null;
-  bankName: string | null;
-  accountNumber: string | null;
-  routingNumber: string | null;
-  accountType: string | null;
-  paypalEmail: string | null;
-  providerId: string | null;
-  providerData: unknown | null;
-  currency: string;
-  isVerified: boolean;
-  verifiedAt: Date | null;
-  lastPayoutDate: Date | null;
-  notes: string | null;
-  createdBy: string | null;
-};
-
-export type MerchantProduct = {
-  merchantProductId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  productId: string;
-  isActive: boolean;
-  isApproved: boolean;
-  approvedAt: Date | null;
-  approvedBy: string | null;
-  approvalNotes: string | null;
-  isFeatured: boolean;
-  featuredFrom: Date | null;
-  featuredTo: Date | null;
-  merchantSku: string | null;
-  merchantPrice: string | null;
-  merchantCost: string | null;
-  merchantStock: number | null;
-  commissionRate: string | null;
-  shippingTemplate: string | null;
-  handlingTime: number | null;
-};
-
-export type MerchantProductVariant = {
-  merchantProductVariantId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantProductId: string;
-  productVariantId: string;
-  isActive: boolean;
-  merchantSku: string | null;
-  merchantPrice: string | null;
-  merchantCost: string | null;
-  merchantStock: number | null;
-};
-
-export type MerchantReview = {
-  merchantReviewId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  customerId: string;
-  orderId: string | null;
-  rating: number;
-  title: string | null;
-  content: string | null;
-  isVerifiedPurchase: boolean;
-  isApproved: boolean;
-  isPublished: boolean;
-  publishedAt: Date | null;
-  status: string;
-  reviewedAt: Date | null;
-  reviewedBy: string | null;
-  reviewNotes: string | null;
-};
-
-export type MerchantSettings = {
-  merchantId: string;
-  storeName: string;
-  storeUrl: string | null;
-  storeEmail: string | null;
-  storePhone: string | null;
-  storeAddress: unknown | null;
-  timezone: string;
-  currency: string;
-  locale: string;
-  logo: string | null;
-  favicon: string | null;
-  socialLinks: unknown | null;
-  businessInfo: unknown | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type MerchantShippingTemplate = {
-  merchantShippingTemplateId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  name: string;
-  description: string | null;
-  isDefault: boolean;
-  isActive: boolean;
-  flatRate: string | null;
-  freeShippingThreshold: string | null;
-  processingTime: number | null;
-  rulesType: string;
-  rules: unknown | null;
-  shippingDestinations: unknown | null;
-  restrictedDestinations: unknown | null;
-  supportedCarriers: unknown | null;
-};
-
-export type MerchantStore = {
-  merchantStoreId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  shortDescription: string | null;
-  logo: string | null;
-  banner: string | null;
-  isActive: boolean;
-  isVerified: boolean;
-  isFeatured: boolean;
-  storeUrl: string | null;
-  storeEmail: string | null;
-  storePhone: string | null;
-  theme: string | null;
-  colorScheme: unknown | null;
-  metaTitle: string | null;
-  metaDescription: string | null;
-  metaKeywords: string | null;
-  openingHours: unknown | null;
-  socialLinks: unknown | null;
-  storePolicies: unknown | null;
-  shippingMethods: unknown | null;
-  paymentMethods: unknown | null;
-  storeRating: string | null;
-  reviewCount: number | null;
-  followerCount: number | null;
-  productCount: number | null;
-  orderCount: number | null;
-  featuredProducts: string[] | null;
-  storeCategories: unknown | null;
-  customPages: unknown | null;
-  customFields: unknown | null;
-};
-
-export type MerchantTaxInfo = {
-  merchantTaxInfoId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  taxIdentificationType: string;
-  taxIdentificationNumber: string;
-  businessType: string | null;
-  legalName: string;
-  taxAddress: unknown;
-  isVerified: boolean;
-  verifiedAt: Date | null;
-  verifiedBy: string | null;
-  verificationNotes: string | null;
-  taxFormFiled: boolean;
-  taxFormType: string | null;
-  taxFormFiledAt: Date | null;
-  taxExempt: boolean;
-  taxExemptionReason: string | null;
-};
-
-export type MerchantVerificationDocument = {
-  merchantVerificationDocumentId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  merchantId: string;
-  documentType: string;
-  documentName: string;
-  description: string | null;
-  fileUrl: string;
-  fileType: string | null;
-  fileSize: number | null;
-  uploadedAt: Date;
-  expiryDate: Date | null;
-  verificationStatus: string;
-  reviewedAt: Date | null;
-  reviewedBy: string | null;
-  reviewNotes: string | null;
-};
-
 export type Notification = {
   notificationId: string;
   createdAt: Date;
@@ -3029,7 +2618,7 @@ export type Order = {
   isSubscriptionOrder: boolean;
   parentOrderId: string | null;
   accountId: string | null;
-  merchantId: string | null;
+  organizationId: string | null;
   purchaseOrderNumber: string | null;
   tags: string[] | null;
   metadata: Record<string, unknown> | null;
@@ -3343,15 +2932,66 @@ export type OrderTax = {
 
 export type Organization = {
   organizationId: string;
+  createdAt: Date;
+  updatedAt: Date;
   name: string;
   slug: string;
-  type: string | null;
-  settings: Record<string, unknown> | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-  parentOrganizationId: string | null;
   description: string | null;
+  email: string;
+  phone: string | null;
+  password: string;
+  website: string | null;
+  logo: string | null;
+  bannerImage: string | null;
+  status: string;
+  verificationStatus: string;
+  verifiedAt: Date | null;
+  verifiedBy: string | null;
+  verificationNotes: string | null;
+  businessType: string | null;
+  yearEstablished: number | null;
+  employeeCount: number | null;
+  taxIdNumber: string | null;
+  legalName: string | null;
+  vatNumber: string | null;
+  vatVerified: boolean | null;
+  vatVerifiedAt: Date | null;
+  vatVerificationSource: string | null;
+  ossRegistered: boolean | null;
+  ossRegistrationCountry: string | null;
+  iossRegistered: boolean | null;
+  iossNumber: string | null;
+  eoriNumber: string | null;
+  ukVatNumber: string | null;
+  reverseChargeEligible: boolean | null;
+  defaultTaxCountry: string | null;
+  socialLinks: unknown | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  metaKeywords: string | null;
+  commissionRate: string | null;
+  commissionType: string | null;
+  commissionTiers: unknown | null;
+  minimumPayoutAmount: string | null;
+  payoutSchedule: string | null;
+  autoApproveProducts: boolean;
+  autoApproveReviews: boolean;
+  sellerRating: string | null;
+  featuredOrganization: boolean;
+  storePolicies: unknown | null;
+  notificationPreferences: unknown | null;
+  allowedCategories: string[] | null;
+  notes: string | null;
+  customFields: unknown | null;
+  lastLoginAt: Date | null;
+  emailVerified: boolean;
+  createdBy: string | null;
+  updatedBy: string | null;
+  type: string | null;
+  commissionPlanId: string | null;
+  deletedAt: Date | null;
+  settings: Record<string, unknown> | null;
+  parentOrganizationId: string | null;
   logoUrl: string | null;
   websiteUrl: string | null;
   contactEmail: string | null;
@@ -3363,11 +3003,84 @@ export type Organization = {
   isActive: boolean | null;
 };
 
+export type OrganizationAddress = {
+  organizationAddressId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  organizationId: string;
+  addressType: string;
+  isDefault: boolean;
+  firstName: string | null;
+  lastName: string | null;
+  company: string | null;
+  addressLine1: string;
+  addressLine2: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone: string | null;
+  email: string | null;
+  isVerified: boolean;
+  verifiedAt: Date | null;
+  latitude: string | null;
+  longitude: string | null;
+  notes: string | null;
+};
+
+export type OrganizationApiKey = {
+  apiKeyId: string;
+  organizationId: string | null;
+  name: string;
+  keyHash: string;
+  keyPrefix: string;
+  permissions: unknown[];
+  rateLimit: number;
+  expiresAt: Date | null;
+  lastUsedAt: Date | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type OrganizationPasswordReset = {
+  organizationPasswordResetId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  token: string;
+  expiresAt: Date;
+  isUsed: boolean;
+};
+
+export type OrganizationPaymentInfo = {
+  organizationPaymentInfoId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  organizationId: string;
+  paymentType: string;
+  isDefault: boolean;
+  accountHolderName: string | null;
+  bankName: string | null;
+  accountNumber: string | null;
+  routingNumber: string | null;
+  accountType: string | null;
+  paypalEmail: string | null;
+  providerId: string | null;
+  providerData: unknown | null;
+  currency: string;
+  isVerified: boolean;
+  verifiedAt: Date | null;
+  lastPayoutDate: Date | null;
+  notes: string | null;
+  createdBy: string | null;
+};
+
 export type PaymentBalance = {
   paymentBalanceId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   availableAmount: string;
   pendingAmount: string;
   reservedAmount: string;
@@ -3382,7 +3095,7 @@ export type PaymentDispute = {
   paymentDisputeId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   orderPaymentId: string | null;
   orderId: string | null;
   customerId: string | null;
@@ -3401,7 +3114,7 @@ export type PaymentFee = {
   paymentFeeId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   type: string;
   amount: string;
   currencyCode: string;
@@ -3417,7 +3130,7 @@ export type PaymentGateway = {
   paymentGatewayId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   name: string;
   provider: string;
   isActive: boolean;
@@ -3459,7 +3172,7 @@ export type PaymentMethodConfig = {
   paymentMethodConfigId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   paymentMethod: string;
   isEnabled: boolean;
   displayName: string | null;
@@ -3516,7 +3229,7 @@ export type PaymentPayoutSettings = {
   payoutSettingsId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   frequency: string;
   minimumAmount: string;
   bankAccountId: string | null;
@@ -3533,7 +3246,7 @@ export type PaymentPlan = {
   paymentPlanId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   name: string;
   description: string | null;
   isActive: boolean;
@@ -3577,7 +3290,7 @@ export type PaymentReport = {
   paymentReportId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   name: string;
   type: string;
   format: string;
@@ -3599,7 +3312,7 @@ export type PaymentSettings = {
   paymentSettingsId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   capturePaymentsAutomatically: boolean;
   authorizationValidityPeriod: number;
   cardVaultingEnabled: boolean;
@@ -3621,7 +3334,7 @@ export type PaymentSubscription = {
   updatedAt: Date;
   customerId: string;
   paymentPlanId: string;
-  merchantId: string;
+  organizationId: string;
   status: string;
   storedPaymentMethodId: string | null;
   startDate: Date;
@@ -3686,7 +3399,7 @@ export type PaymentWebhook = {
   paymentWebhookId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   gatewayId: string | null;
   provider: string;
   eventType: string;
@@ -3847,15 +3560,13 @@ export type Product = {
   publishedAt: Date | null;
   deletedAt: Date | null;
   userId: string | null;
-  merchantId: string | null;
+  organizationId: string | null;
   returnPolicy: string | null;
   warranty: string | null;
   externalId: string | null;
   hasVariants: boolean;
   variantAttributes: unknown | null;
-  businessId: string | null;
   storeId: string | null;
-  organizationId: string | null;
   approvalStatus: string | null;
   platformVisible: boolean | null;
   createdBy: string | null;
@@ -3886,7 +3597,7 @@ export type ProductAttribute = {
   defaultValue: string | null;
   validationRules: unknown | null;
   options: unknown | null;
-  merchantId: string | null;
+  organizationId: string | null;
   isGlobal: boolean;
 };
 
@@ -3900,7 +3611,7 @@ export type ProductAttributeGroup = {
   position: number;
   isVisible: boolean;
   isComparable: boolean;
-  merchantId: string | null;
+  organizationId: string | null;
   isGlobal: boolean;
 };
 
@@ -3937,7 +3648,7 @@ export type ProductAttributeSet = {
   description: string | null;
   productTypeId: string | null;
   isActive: boolean;
-  merchantId: string | null;
+  organizationId: string | null;
   isGlobal: boolean;
 };
 
@@ -4075,7 +3786,7 @@ export type ProductCategory = {
   metaKeywords: string | null;
   includeInMenu: boolean;
   productCount: number;
-  merchantId: string | null;
+  organizationId: string | null;
   isGlobal: boolean;
   customLayout: string | null;
   displaySettings: unknown | null;
@@ -4109,7 +3820,7 @@ export type ProductCollection = {
   metaDescription: string | null;
   conditions: unknown | null;
   sortOrder: string | null;
-  merchantId: string | null;
+  organizationId: string | null;
 };
 
 export type ProductCollectionMap = {
@@ -4363,7 +4074,7 @@ export type ProductTag = {
   slug: string | null;
   description: string | null;
   isActive: boolean;
-  merchantId: string | null;
+  organizationId: string | null;
   isGlobal: boolean;
 };
 
@@ -4464,7 +4175,7 @@ export type Promotion = {
   maxUsagePerCustomer: number | null;
   minOrderAmount: string | null;
   maxDiscountAmount: string | null;
-  merchantId: string | null;
+  organizationId: string | null;
   isGlobal: boolean;
   eligibleCustomerGroups: unknown | null;
   excludedCustomerGroups: unknown | null;
@@ -4541,7 +4252,7 @@ export type PromotionCoupon = {
   isReferral: boolean;
   referrerId: string | null;
   isPublic: boolean;
-  merchantId: string | null;
+  organizationId: string | null;
 };
 
 export type PromotionCouponUsage = {
@@ -4630,7 +4341,7 @@ export type PromotionProductDiscount = {
   displayInListing: boolean;
   badgeText: string | null;
   badgeStyle: unknown | null;
-  merchantId: string | null;
+  organizationId: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -4683,7 +4394,7 @@ export type ReportingReportExecution = {
 
 export type ReportingReportSchedule = {
   reportScheduleId: string;
-  merchantId: string | null;
+  organizationId: string | null;
   name: string;
   reportType: string;
   type: string;
@@ -4858,8 +4569,7 @@ export type Store = {
   slug: string;
   description: string | null;
   storeType: string;
-  merchantId: string | null;
-  businessId: string | null;
+  organizationId: string | null;
   isHeadquarters: boolean;
   parentStoreId: string | null;
   logo: string | null;
@@ -4895,7 +4605,6 @@ export type Store = {
   customPages: unknown | null;
   customFields: unknown | null;
   metadata: unknown | null;
-  organizationId: string | null;
   taxZoneId: string | null;
   priceRoundingRules: Record<string, unknown> | null;
   defaultLanguage: string | null;
@@ -4958,7 +4667,7 @@ export type StoreDispatchItem = {
 
 export type StoreHierarchy = {
   storeHierarchyId: string;
-  businessId: string;
+  organizationId: string;
   defaultStoreId: string | null;
   sharedInventoryPoolId: string | null;
   sharedCatalogId: string | null;
@@ -5111,7 +4820,7 @@ export type SubscriptionInvoice = {
   subscriptionInvoiceId: string;
   paymentSubscriptionId: string;
   customerId: string;
-  merchantId: string;
+  organizationId: string;
   amount: string;
   currencyCode: string;
   status: string;
@@ -5604,7 +5313,7 @@ export type SystemConfiguration = {
   systemMode: string;
   isActive: boolean;
   features: unknown | null;
-  businessSettings: unknown | null;
+  organizationSettings: unknown | null;
   platformSettings: unknown | null;
   securitySettings: unknown | null;
   notificationSettings: unknown | null;
@@ -5616,7 +5325,7 @@ export type TaxCalculation = {
   taxCalculationId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   orderId: string | null;
   invoiceId: string | null;
   basketId: string | null;
@@ -5710,7 +5419,7 @@ export type TaxNexus = {
   taxNexusId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   name: string;
   country: string;
   region: string | null;
@@ -5731,7 +5440,7 @@ export type TaxProviderLog = {
   taxProviderLogId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   provider: string;
   requestType: string;
   entityType: string;
@@ -5772,7 +5481,7 @@ export type TaxReport = {
   taxReportId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   name: string;
   reportType: string;
   dateFrom: Date;
@@ -5804,7 +5513,7 @@ export type TaxSettings = {
   taxSettingsId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   calculationMethod: string;
   pricesIncludeTax: boolean;
   displayPricesWithTax: boolean;
@@ -5825,7 +5534,7 @@ export type TaxVatRegistration = {
   vatRegistrationId: string;
   createdAt: Date;
   updatedAt: Date;
-  merchantId: string;
+  organizationId: string;
   countryCode: string;
   vatNumber: string;
   tradingName: string | null;
@@ -5853,7 +5562,7 @@ export type TaxVatValidationLog = {
   vatValidationLogId: string;
   createdAt: Date;
   customerId: string | null;
-  merchantId: string | null;
+  organizationId: string | null;
   orderId: string | null;
   vatNumber: string;
   countryCode: string;
@@ -5949,7 +5658,7 @@ export type WebhookDelivery = {
 
 export type WebhookEndpoint = {
   webhookEndpointId: string;
-  merchantId: string | null;
+  organizationId: string | null;
   name: string;
   url: string;
   secret: string;

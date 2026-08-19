@@ -245,6 +245,8 @@ export class CouponRepository {
       return { valid: false, error: 'Coupon not found' };
     }
 
+    // All eligibility rules should be enforced by coupon configuration and domain rules
+
     if (coupon.status !== 'active') {
       return { valid: false, error: `Coupon is ${coupon.status}` };
     }

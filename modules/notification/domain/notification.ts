@@ -27,7 +27,7 @@ export type NotificationChannel = 'email' | 'sms' | 'push' | 'in_app';
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
 
-export type NotificationUserType = 'customer' | 'merchant' | 'admin';
+export type NotificationUserType = 'customer' | 'organization' | 'admin';
 
 /**
  * BaseNotification interface representing the TypeScript model for notifications

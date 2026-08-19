@@ -41,12 +41,12 @@ import {
   updatePriceRule,
   deletePriceRule,
 } from '../controllers/pricingBusinessController';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
 
 // Apply authentication and permission middleware for all routes
-router.use('/pricing', isMerchantLoggedIn);
+router.use('/pricing', isOrganizationLoggedIn);
 
 /**
  * Pricing Rules Routes

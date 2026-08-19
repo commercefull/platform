@@ -111,7 +111,7 @@ Total Tax = Sum of all item taxes
 | GET | `/customer/tax/categories/:code` | `getTaxCategoryByCode` | — |
 | GET | `/customer/tax/exemption/:customerId` | `isCustomerLoggedIn` | Customer exemption check (requires authentication) |
 | GET | `/customer/tax/rates` | `getTaxRates` | Public tax information endpoints |
-| GET | `/customer/tax/settings/:merchantId` | `getCustomerTaxSettings` | NEW: Get public tax settings for storefront |
+| GET | `/customer/tax/settings/:organizationId` | `getCustomerTaxSettings` | NEW: Get public tax settings for storefront |
 | POST | `/customer/tax/zones/find` | `findTaxZoneForAddress` | NEW: Tax zone finder endpoint |
 
 <!-- GENERATED:ENDPOINTS:END -->

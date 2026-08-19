@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.uuid('vatRegistrationId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     // Registration details
     t.string('countryCode', 2).notNullable(); // ISO country code
     t.string('vatNumber', 50).notNullable();
@@ -49,13 +49,13 @@ exports.up = function (knex) {
     // Document storage
     t.string('certificateUrl', 500); // VAT registration certificate
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('countryCode');
     t.index('vatNumber');
     t.index('registrationType');
     t.index('isVerified');
     t.index('isActive');
-    t.unique(['merchantId', 'countryCode', 'registrationType']);
+    t.unique(['organizationId', 'countryCode', 'registrationType']);
   });
 };
 

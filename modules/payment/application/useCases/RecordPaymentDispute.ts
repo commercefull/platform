@@ -17,7 +17,7 @@ import paymentRepo from '../../infrastructure/repositories/paymentRepo';
 export class RecordPaymentDisputeCommand {
   constructor(
     public readonly paymentId: string,
-    public readonly merchantId: string,
+    public readonly organizationId: string,
     public readonly amount: number,
     public readonly currency: string,
     public readonly status: string = 'open',
@@ -35,7 +35,7 @@ export class RecordPaymentDisputeCommand {
 export interface RecordPaymentDisputeResponse {
   paymentDisputeId: string;
   paymentId: string;
-  merchantId: string;
+  organizationId: string;
   externalDisputeId?: string;
   status: string;
   reason?: string;
@@ -58,7 +58,7 @@ export class RecordPaymentDisputeUseCase {
   async execute(command: RecordPaymentDisputeCommand): Promise<RecordPaymentDisputeResponse> {
     const dispute = await this.disputeRepo.create({
       paymentId: command.paymentId,
-      merchantId: command.merchantId,
+      organizationId: command.organizationId,
       externalDisputeId: command.externalDisputeId,
       status: command.status,
       reason: command.reason,
@@ -86,7 +86,7 @@ export class RecordPaymentDisputeUseCase {
     return {
       paymentDisputeId: d.paymentDisputeId,
       paymentId: d.paymentId,
-      merchantId: d.merchantId,
+      organizationId: d.organizationId,
       externalDisputeId: d.externalDisputeId,
       status: d.status,
       reason: d.reason,

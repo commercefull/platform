@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Store feature manages store entities for both marketplace (merchant-owned) and multi-store (business-owned) scenarios. It supports store hierarchy, BOPIS (Buy Online, Pick Up In Store) configuration, local delivery zones, and store listing with filtering and pagination.
+The Store feature manages store entities for both marketplace (merchant-owned) and multi-store (organization-owned) scenarios. It supports store hierarchy, BOPIS (Buy Online, Pick Up In Store) configuration, local delivery zones, and store listing with filtering and pagination.
 
 ---
 
@@ -11,11 +11,11 @@ The Store feature manages store entities for both marketplace (merchant-owned) a
 | ID | Use Case | Actor | Purpose |
 |---|---|---|---|
 | UC-STR-001 | List Stores | Merchant/Admin | List stores with filtering by type, ownership, status, search, and pagination |
-| UC-STR-002 | Create Store | Merchant/Admin | Create a store (merchant_store or business_store) with unique slug and optional hierarchy |
+| UC-STR-002 | Create Store | Merchant/Admin | Create a store (merchant_store or organization_store) with unique slug and optional hierarchy |
 | UC-STR-003 | Get Store | Merchant/Admin | Retrieve a specific store by ID or slug |
 | UC-STR-004 | Update Store | Merchant/Admin | Update an existing store's fields (only provided fields are updated) |
 | UC-STR-005 | Delete Store | Merchant/Admin | Soft delete a store |
-| UC-STR-006 | Get Stores by Business | Merchant/Admin | Retrieve all stores belonging to a specific business |
+| UC-STR-006 | Get Stores by Organization | Merchant/Admin | Retrieve all stores belonging to a specific organization |
 | UC-STR-007 | Get Active Stores | Merchant/Admin | Retrieve all active stores |
 | UC-STR-008 | Configure Store Pickup / BOPIS | Merchant/Admin | Enable/disable Buy Online Pick Up In Store with prepare time, hold days, notifications, and curbside options |
 | UC-STR-009 | Set Local Delivery Zone | Merchant/Admin | Enable/disable local delivery with radius or postal codes, fees, and daily order limits |
@@ -32,7 +32,7 @@ The Store feature manages store entities for both marketplace (merchant-owned) a
 | UC-STR-003 | GET | `/business/stores/:storeId` or `/business/stores/slug/:slug` |
 | UC-STR-004 | PUT | `/business/stores/:storeId` |
 | UC-STR-005 | DELETE | `/business/stores/:storeId` |
-| UC-STR-006 | GET | `/business/stores/business/:businessId` |
+| UC-STR-006 | GET | `/business/stores/organization/:organizationId` |
 | UC-STR-007 | GET | `/business/stores/active` |
 | UC-STR-008 | PUT | `/business/stores/:storeId/pickup` |
 | UC-STR-009 | PUT | `/business/stores/:storeId/local-delivery` |
@@ -88,7 +88,7 @@ The Store feature manages store entities for both marketplace (merchant-owned) a
 | PUT | `/stores/:storeId/local-delivery` | `bind` | Set local delivery zone |
 | PUT | `/stores/:storeId/pickup` | `bind` | Configure store pickup (BOPIS) |
 | GET | `/stores/active` | `bind` | Get active stores |
-| GET | `/stores/business/:businessId` | `bind` | Get stores by business |
+| GET | `/stores/organization/:organizationId` | `bind` | Get stores by organization |
 | POST | `/stores/hierarchy` | `bind` | Create store hierarchy |
 | GET | `/stores/slug/:slug` | `bind` | Get store by slug |
 

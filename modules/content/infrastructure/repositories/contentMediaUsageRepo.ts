@@ -12,7 +12,7 @@ import { ContentMediaUsage } from '../../../../libs/db/types';
 
 export type MediaUsageCreateParams = {
   mediaId: string;
-  entityType: 'contentPage' | 'contentBlock' | 'product' | 'category' | 'merchant' | 'blog';
+  entityType: 'contentPage' | 'contentBlock' | 'product' | 'category' | 'organization' | 'blog';
   entityId: string;
   field?: string;
   sortOrder?: number;

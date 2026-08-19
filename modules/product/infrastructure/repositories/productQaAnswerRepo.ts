@@ -8,7 +8,7 @@ export interface ProductQaAnswer {
   updatedAt: string;
   productQaId: string;
   customerId?: string | null;
-  merchantId?: string | null;
+  organizationId?: string | null;
   answer: string;
   status: ProductQaAnswerStatus;
   isOfficial: boolean;
@@ -33,12 +33,12 @@ export class ProductQaAnswerRepo {
   async create(params: ProductQaAnswerCreateParams): Promise<ProductQaAnswer> {
     const now = new Date();
     const result = await queryOne<ProductQaAnswer>(
-      `INSERT INTO "productQaAnswer" ("productQaId", "customerId", "merchantId", "answer", "status", "isOfficial", "createdAt", "updatedAt")
+      `INSERT INTO "productQaAnswer" ("productQaId", "customerId", "organizationId", "answer", "status", "isOfficial", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
         params.productQaId,
         params.customerId || null,
-        params.merchantId || null,
+        params.organizationId || null,
         params.answer,
         params.status || 'pending',
         params.isOfficial ?? false,

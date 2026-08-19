@@ -1,5 +1,11 @@
 import axios, { AxiosInstance } from 'axios';
 
+// Global type for per-test-file database isolation
+declare global {
+   
+  var __testDb: { testDatabaseName?: string } | undefined;
+}
+
 // Token cache to avoid repeated login calls
 let cachedAdminToken: string | null = null;
 let cachedCustomerToken: string | null = null;
@@ -16,11 +22,21 @@ export const createTestClient = (baseURL: string = 'http://localhost:3000'): Axi
     validateStatus: () => true, // Don't throw HTTP errors so we can test them
     timeout: 10000, // 10 second timeout to prevent hanging
     headers: {
+      ...getTestDbHeaders(),
       Accept: 'application/json',
       'Content-Type': 'application/json',
       'X-Test-Request': 'true', // Skip rate limiting for test requests
     },
   });
+};
+
+/**
+ * Returns the X-Test-Database header for the current test file's isolated DB.
+ * Use this when creating axios clients manually outside of createTestClient.
+ */
+export const getTestDbHeaders = (): Record<string, string> => {
+  const testDbName = global.__testDb?.testDatabaseName;
+  return testDbName ? { 'X-Test-Database': testDbName } : {};
 };
 
 /**
@@ -65,7 +81,7 @@ export const loginTestUser = async (
 };
 
 /**
- * Test authentication helper - logs in an admin/merchant user and returns auth token
+ * Test authentication helper - logs in an admin/organization user and returns auth token
  * Uses caching to avoid repeated login calls
  */
 export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => {
@@ -95,7 +111,7 @@ export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => 
 
     return response.data.accessToken;
   } catch (error: unknown) {
-    console.error('❌ Merchant login error (server may not be running):', (error as Error).message);
+    console.error('❌ Organization login error (server may not be running):', (error as Error).message);
     return '';
   }
 };

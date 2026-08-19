@@ -18,9 +18,8 @@ export class CreateStoreCommand {
       name: string;
       slug?: string;
       description?: string;
-      storeType: 'merchant_store' | 'business_store';
-      merchantId?: string; // For marketplace mode
-      businessId?: string; // For multi-store mode
+      storeType: 'merchant_store' | 'organization_store';
+      organizationId?: string;
       isHeadquarters?: boolean;
       parentStoreId?: string;
       storeUrl?: string;
@@ -60,8 +59,7 @@ export interface CreateStoreResponse {
   name: string;
   slug: string;
   storeType: string;
-  merchantId?: string;
-  businessId?: string;
+  organizationId?: string;
   isHeadquarters: boolean;
   parentStoreId?: string;
   storeUrl?: string;
@@ -81,7 +79,13 @@ export class CreateStoreUseCase {
   ) {}
 
   async execute(command: CreateStoreCommand): Promise<CreateStoreResponse> {
-    // Validate store creation against system configuration
+    if (!command.storeData.name) {
+      throw new Error('Store name not found.');
+    }
+    if (!command.storeData.slug) {
+      throw new Error('Store slug not found.');
+    }
+
     const systemConfig = await this.systemConfigRepository.findActive();
 
     if (!systemConfig) {
@@ -113,8 +117,7 @@ export class CreateStoreUseCase {
       storeId: this.generateStoreId(),
       name: command.storeData.name,
       storeType: command.storeData.storeType,
-      merchantId: command.storeData.merchantId,
-      businessId: command.storeData.businessId,
+      organizationId: command.storeData.organizationId,
       isHeadquarters: command.storeData.isHeadquarters,
       parentStoreId: command.storeData.parentStoreId,
       description: command.storeData.description,
@@ -141,8 +144,7 @@ export class CreateStoreUseCase {
       name: savedStore.name,
       slug: savedStore.slug,
       storeType: savedStore.storeType,
-      merchantId: savedStore.merchantId,
-      businessId: savedStore.businessId,
+      organizationId: savedStore.organizationId,
       isHeadquarters: savedStore.isHeadquarters,
       parentStoreId: savedStore.parentStoreId,
       storeUrl: savedStore.storeUrl,
@@ -153,31 +155,19 @@ export class CreateStoreUseCase {
   }
 
   private async validateStoreOwnership(command: CreateStoreCommand, _systemConfig: unknown): Promise<void> {
-    const { storeType, merchantId, businessId, isHeadquarters, parentStoreId } = command.storeData;
+    const { storeType, organizationId, isHeadquarters, parentStoreId } = command.storeData;
 
     if (storeType === 'merchant_store') {
-      // Marketplace mode: store must belong to a merchant
-      if (!merchantId) {
-        throw new Error('Merchant ID is required for merchant-owned stores.');
+      if (!organizationId) {
+        throw new Error('Organization ID is required for merchant-owned stores.');
       }
-
-      // In marketplace mode, businessId should not be provided
-      if (businessId) {
-        throw new Error('Business ID should not be provided for merchant-owned stores.');
-      }
-    } else if (storeType === 'business_store') {
-      // Multi-store mode: store must belong to an organization
-      if (!businessId) {
+    } else if (storeType === 'organization_store') {
+      if (!organizationId) {
         throw new Error('Organization ID is required for organization-owned stores.');
       }
 
-      // In multi-store mode, merchantId should not be provided
-      if (merchantId) {
-        throw new Error('Merchant ID should not be provided for organization-owned stores.');
-      }
-
       // Check if organization exists
-      const organization = await organizationRepo.findById(businessId);
+      const organization = await organizationRepo.findById(organizationId);
       if (!organization) {
         throw new Error('Organization not found.');
       }
@@ -191,12 +181,12 @@ export class CreateStoreUseCase {
         if (!parentStore) {
           throw new Error('Parent store not found.');
         }
-        if (parentStore.businessId !== businessId) {
+        if (parentStore.organizationId !== organizationId) {
           throw new Error('Parent store must belong to the same organization.');
         }
       }
     } else {
-      throw new Error('Invalid store type. Must be either "merchant_store" or "business_store".');
+      throw new Error('Invalid store type. Must be either "merchant_store" or "organization_store".');
     }
   }
 

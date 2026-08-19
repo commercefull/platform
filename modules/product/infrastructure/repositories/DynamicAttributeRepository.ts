@@ -26,7 +26,7 @@ export interface ProductAttribute {
   defaultValue?: string;
   validationRules?: Record<string, unknown>;
   options?: Record<string, unknown>;
-  merchantId?: string;
+  organizationId?: string;
   isGlobal: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -103,7 +103,7 @@ export interface ProductAttributeCreateInput {
   defaultValue?: string;
   validationRules?: Record<string, unknown>;
   options?: Record<string, unknown>;
-  merchantId?: string;
+  organizationId?: string;
   isGlobal?: boolean;
 }
 
@@ -189,7 +189,7 @@ export class DynamicAttributeRepository {
         "name", "code", "description", "groupId", "type", "inputType",
         "isRequired", "isUnique", "isSearchable", "isFilterable", "isComparable",
         "isVisibleOnFront", "isUsedInProductListing", "useForVariants", "useForConfigurations",
-        "position", "defaultValue", "validationRules", "options", "merchantId", "isGlobal"
+        "position", "defaultValue", "validationRules", "options", "organizationId", "isGlobal"
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       RETURNING *
@@ -215,7 +215,7 @@ export class DynamicAttributeRepository {
       input.defaultValue || null,
       input.validationRules ? JSON.stringify(input.validationRules) : null,
       input.options ? JSON.stringify(input.options) : null,
-      input.merchantId || null,
+      input.organizationId || null,
       input.isGlobal !== false,
     ]);
 

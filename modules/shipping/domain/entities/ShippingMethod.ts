@@ -44,7 +44,7 @@ export interface ShippingMethodProps {
 
   // Multi-tenant
   storeId?: string;
-  merchantId?: string;
+  organizationId?: string;
 
   // Audit
   createdAt: Date;
@@ -104,8 +104,8 @@ export class ShippingMethod {
   get storeId(): string | undefined {
     return this.props.storeId;
   }
-  get merchantId(): string | undefined {
-    return this.props.merchantId;
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
   }
   get createdAt(): Date {
     return this.props.createdAt;

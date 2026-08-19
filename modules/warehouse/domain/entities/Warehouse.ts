@@ -10,8 +10,7 @@ export interface WarehouseProps {
   name: string;
   code: string;
   type: WarehouseType;
-  businessId?: string; // For business-owned warehouses in multi-store setup
-  merchantId?: string; // For merchant-owned warehouses in marketplace setup
+  organizationId?: string;
   storeId?: string; // For store-attached warehouses
   address: {
     line1: string;
@@ -48,9 +47,9 @@ export class Warehouse {
   static create(props: Omit<WarehouseProps, 'isActive' | 'autoFulfillment' | 'createdAt' | 'updatedAt'>): Warehouse {
     const now = new Date();
 
-    // Validate ownership - must have either businessId or merchantId
-    if (!props.businessId && !props.merchantId) {
-      throw new Error('Warehouse must be owned by either a business or merchant');
+    // Validate ownership - must have an organizationId
+    if (!props.organizationId) {
+      throw new Error('Warehouse must be owned by an organization');
     }
 
     return new Warehouse({
@@ -78,23 +77,17 @@ export class Warehouse {
   get type(): WarehouseType {
     return this.props.type;
   }
-  get businessId(): string | undefined {
-    return this.props.businessId;
-  }
-  get merchantId(): string | undefined {
-    return this.props.merchantId;
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
   }
   get storeId(): string | undefined {
     return this.props.storeId;
   }
   get ownerId(): string {
-    return this.props.businessId || this.props.merchantId!;
+    return this.props.organizationId!;
   }
-  get isBusinessOwned(): boolean {
-    return !!this.props.businessId;
-  }
-  get isMerchantOwned(): boolean {
-    return !!this.props.merchantId;
+  get isOrganizationOwned(): boolean {
+    return !!this.props.organizationId;
   }
   get isActive(): boolean {
     return this.props.isActive;
@@ -121,14 +114,13 @@ export class Warehouse {
     this.touch();
   }
 
-  updateOwnership(ownership: { businessId?: string; merchantId?: string; storeId?: string }): void {
-    if (ownership.businessId) this.props.businessId = ownership.businessId;
-    if (ownership.merchantId) this.props.merchantId = ownership.merchantId;
+  updateOwnership(ownership: { organizationId?: string; storeId?: string }): void {
+    if (ownership.organizationId) this.props.organizationId = ownership.organizationId;
     if (ownership.storeId) this.props.storeId = ownership.storeId;
 
     // Validate that we still have valid ownership
-    if (!this.props.businessId && !this.props.merchantId) {
-      throw new Error('Warehouse must have at least one owner (business or merchant)');
+    if (!this.props.organizationId) {
+      throw new Error('Warehouse must have an organization owner');
     }
 
     this.touch();
@@ -155,8 +147,7 @@ export class Warehouse {
     return {
       ...this.props,
       ownerId: this.ownerId,
-      isBusinessOwned: this.isBusinessOwned,
-      isMerchantOwned: this.isMerchantOwned,
+      isOrganizationOwned: this.isOrganizationOwned,
     };
   }
 }

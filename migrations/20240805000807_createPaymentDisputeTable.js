@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('paymentDisputeId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.uuid('orderPaymentId').references('orderPaymentId').inTable('orderPayment').onDelete('CASCADE');
     t.uuid('orderId').references('orderId').inTable('order').onDelete('CASCADE');
     t.uuid('customerId').references('customerId').inTable('customer').onDelete('CASCADE');
@@ -17,7 +17,7 @@ exports.up = function (knex) {
     t.string('gatewayDisputeId', 255);
     t.timestamp('resolvedAt');
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('orderPaymentId');
     t.index('orderId');
     t.index('customerId');

@@ -8,7 +8,7 @@ exports.up = async function (knex) {
 
   await knex.schema.createTable('storeHierarchy', table => {
     table.uuid('storeHierarchyId').primary().defaultTo(knex.raw('uuidv7()'));
-    table.string('businessId').notNullable();
+    table.uuid('organizationId').notNullable();
     table.string('defaultStoreId');
     table.string('sharedInventoryPoolId');
     table.string('sharedCatalogId');
@@ -16,7 +16,7 @@ exports.up = async function (knex) {
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
 
-    table.index(['businessId']);
+    table.index(['organizationId']);
   });
 };
 

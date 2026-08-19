@@ -8,6 +8,7 @@ import { OrderRepository } from '../../../order/domain/repositories/OrderReposit
 import { OrderStatus } from '../../../order/domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../../order/domain/valueObjects/PaymentStatus';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { BadRequestError, NotFoundError } from '../../../../libs/errors';
 
 // ============================================================================
 // Command
@@ -42,7 +43,7 @@ export class CompleteCheckoutUseCase {
   async execute(command: CompleteCheckoutCommand): Promise<CompleteCheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
     if (!session) {
-      throw new Error('Checkout session not found');
+      throw new NotFoundError('Checkout session not found');
     }
 
     // Idempotency: already completed
@@ -57,17 +58,17 @@ export class CompleteCheckoutUseCase {
     }
 
     if (session.status !== 'processing') {
-      throw new Error('Cannot complete checkout: payment has not been confirmed yet');
+      throw new BadRequestError('Cannot complete checkout: payment has not been confirmed yet');
     }
 
     // Verify linked order is in the right state
     if (this.orderRepository && session.orderId) {
       const order = await this.orderRepository.findById(session.orderId);
       if (!order) {
-        throw new Error('Linked order not found');
+        throw new NotFoundError('Linked order not found');
       }
       if (order.status !== OrderStatus.PROCESSING || order.paymentStatus !== PaymentStatus.PAID) {
-        throw new Error('Cannot complete checkout: payment has not been confirmed yet');
+        throw new BadRequestError('Cannot complete checkout: payment has not been confirmed yet');
       }
     }
 

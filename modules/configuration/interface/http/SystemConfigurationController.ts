@@ -29,7 +29,7 @@ interface UpdateConfigBody {
   timezone?: string;
   systemMode?: 'marketplace' | 'multi_store' | 'single_store';
   features?: Record<string, unknown>;
-  businessSettings?: Record<string, unknown>;
+  organizationSettings?: Record<string, unknown>;
   platformSettings?: Record<string, unknown>;
   securitySettings?: Record<string, unknown>;
   notificationSettings?: Record<string, unknown>;
@@ -97,7 +97,7 @@ export class SystemConfigurationController {
         timezone: body.timezone,
         systemMode: body.systemMode,
         features: body.features,
-        businessSettings: body.businessSettings,
+        organizationSettings: body.organizationSettings,
         platformSettings: body.platformSettings,
         securitySettings: body.securitySettings,
         notificationSettings: body.notificationSettings,

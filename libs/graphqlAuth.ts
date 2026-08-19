@@ -8,7 +8,7 @@ export interface GraphQLAuthUser {
   email?: string;
   role?: string;
   type?: string;
-  merchantId?: string;
+  organizationId?: string;
   storeId?: string;
   permissions?: string[];
 }
@@ -53,11 +53,11 @@ export function requireCustomerAuth(context: GraphQLAuthContext): { customerId: 
 export function requireBusinessAuth(context: GraphQLAuthContext): GraphQLAuthUser {
   const user = requireAuth(context);
   const isBusiness =
-    user.type === 'merchant' ||
+    user.type === 'organization' ||
     user.type === 'admin' ||
     user.role === 'ADMIN' ||
     user.role === 'MERCHANT' ||
-    !!user.merchantId;
+    !!user.organizationId;
   if (!isBusiness) {
     throw new GraphQLError('Business access required', {
       extensions: { code: 'FORBIDDEN' },

@@ -7,8 +7,7 @@ import { Store } from '../entities/Store';
 
 export interface StoreFilters {
   storeType?: string;
-  merchantId?: string;
-  businessId?: string;
+  organizationId?: string;
   isHeadquarters?: boolean;
   parentStoreId?: string;
   isActive?: boolean;
@@ -27,9 +26,9 @@ export interface StoreRepository {
   count(filters?: StoreFilters): Promise<number>;
 
   // Store queries
-  findByMerchant(merchantId: string): Promise<Store[]>;
-  findByBusiness(businessId: string): Promise<Store[]>;
-  findHeadquarters(businessId: string): Promise<Store | null>;
+  findByMerchant(organizationId: string): Promise<Store[]>;
+  findByBusiness(organizationId: string): Promise<Store[]>;
+  findHeadquarters(organizationId: string): Promise<Store | null>;
   findOutlets(parentStoreId: string): Promise<Store[]>;
   findActive(): Promise<Store[]>;
   findFeatured(): Promise<Store[]>;
@@ -53,7 +52,7 @@ export interface StoreRepository {
   // Store hierarchy
   createHierarchy(input: {
     hierarchyId: string;
-    businessId: string;
+    organizationId: string;
     name: string;
     defaultStoreId: string;
     storeIds: string[];
@@ -66,7 +65,7 @@ export interface StoreRepository {
     };
   }): Promise<{
     hierarchyId: string;
-    businessId: string;
+    organizationId: string;
     name: string;
     defaultStoreId: string;
     createdAt: Date;

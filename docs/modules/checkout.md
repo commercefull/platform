@@ -75,20 +75,20 @@ The Checkout feature manages the checkout flow, transforming a basket into an or
 
 ## Integration Test Coverage
 
-| Use Case   | Test File                   | Status |
-| ---------- | --------------------------- | ------ |
-| UC-CHK-001 | `checkout/checkout.test.ts` | ✅     |
-| UC-CHK-002 | `checkout/checkout.test.ts` | ✅     |
-| UC-CHK-003 | `checkout/checkout.test.ts` | ✅     |
-| UC-CHK-004 | `checkout/checkout.test.ts` | ✅     |
-| UC-CHK-005 | `checkout/checkout.test.ts` | 🟡     |
-| UC-CHK-006 | `checkout/checkout.test.ts` | ✅     |
-| UC-CHK-007 | `checkout/checkout.test.ts` | ✅     |
-| UC-CHK-008 | `checkout/checkout.test.ts` | 🟡     |
-| UC-CHK-009 | `checkout/checkout.test.ts` | ❌     |
-| UC-CHK-010 | `checkout/checkout.test.ts` | ✅     |
-| UC-CHK-011 | `checkout/checkout.test.ts` | ❌     |
-| UC-CHK-012 | `checkout/checkout.test.ts` | ❌     |
+| Use Case   | Test File                           | Status |
+| ---------- | ----------------------------------- | ------ |
+| UC-CHK-001 | `checkout/checkout.test.ts`         | ✅     |
+| UC-CHK-002 | `checkout/checkout.test.ts`         | ✅     |
+| UC-CHK-003 | `checkout/checkout.test.ts`         | ✅     |
+| UC-CHK-004 | `checkout/checkout.test.ts`         | ✅     |
+| UC-CHK-005 | `checkout/checkoutExpanded.test.ts` | ✅     |
+| UC-CHK-006 | `checkout/checkout.test.ts`         | ✅     |
+| UC-CHK-007 | `checkout/checkout.test.ts`         | ✅     |
+| UC-CHK-008 | `checkout/checkoutExpanded.test.ts` | ✅     |
+| UC-CHK-009 | `checkout/checkoutExpanded.test.ts` | ✅     |
+| UC-CHK-010 | `checkout/checkout.test.ts`         | ✅     |
+| UC-CHK-011 | `checkout/checkoutExpanded.test.ts` | ✅     |
+| UC-CHK-012 | `checkout/checkoutExpanded.test.ts` | ✅     |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

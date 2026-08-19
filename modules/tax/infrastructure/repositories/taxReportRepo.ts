@@ -15,7 +15,7 @@ export interface TaxReport {
   taxReportId: string;
   createdAt: string;
   updatedAt: string;
-  merchantId: string;
+  organizationId: string;
   name: string;
   reportType: TaxReportType;
   dateFrom: string;
@@ -31,16 +31,16 @@ export interface TaxReport {
 }
 
 export type TaxReportCreateParams = Omit<TaxReport, 'taxReportId' | 'createdAt' | 'updatedAt'>;
-export type TaxReportUpdateParams = Partial<Omit<TaxReport, 'taxReportId' | 'merchantId' | 'createdAt' | 'updatedAt'>>;
+export type TaxReportUpdateParams = Partial<Omit<TaxReport, 'taxReportId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
 
 export class TaxReportRepo {
   async findById(id: string): Promise<TaxReport | null> {
     return await queryOne<TaxReport>(`SELECT * FROM "taxReport" WHERE "taxReportId" = $1`, [id]);
   }
 
-  async findByMerchant(merchantId: string, reportType?: TaxReportType, limit = 100): Promise<TaxReport[]> {
-    let sql = `SELECT * FROM "taxReport" WHERE "merchantId" = $1`;
-    const params: unknown[] = [merchantId];
+  async findByMerchant(organizationId: string, reportType?: TaxReportType, limit = 100): Promise<TaxReport[]> {
+    let sql = `SELECT * FROM "taxReport" WHERE "organizationId" = $1`;
+    const params: unknown[] = [organizationId];
     if (reportType) {
       sql += ` AND "reportType" = $2`;
       params.push(reportType);
@@ -50,20 +50,20 @@ export class TaxReportRepo {
     return (await query<TaxReport[]>(sql, params)) || [];
   }
 
-  async findByStatus(merchantId: string, status: TaxReportStatus): Promise<TaxReport[]> {
+  async findByStatus(organizationId: string, status: TaxReportStatus): Promise<TaxReport[]> {
     return (
-      (await query<TaxReport[]>(`SELECT * FROM "taxReport" WHERE "merchantId" = $1 AND "status" = $2 ORDER BY "createdAt" DESC`, [
-        merchantId,
+      (await query<TaxReport[]>(`SELECT * FROM "taxReport" WHERE "organizationId" = $1 AND "status" = $2 ORDER BY "createdAt" DESC`, [
+        organizationId,
         status,
       ])) || []
     );
   }
 
-  async findByDateRange(merchantId: string, dateFrom: string, dateTo: string): Promise<TaxReport[]> {
+  async findByDateRange(organizationId: string, dateFrom: string, dateTo: string): Promise<TaxReport[]> {
     return (
       (await query<TaxReport[]>(
-        `SELECT * FROM "taxReport" WHERE "merchantId" = $1 AND "dateFrom" >= $2 AND "dateTo" <= $3 ORDER BY "createdAt" DESC`,
-        [merchantId, dateFrom, dateTo],
+        `SELECT * FROM "taxReport" WHERE "organizationId" = $1 AND "dateFrom" >= $2 AND "dateTo" <= $3 ORDER BY "createdAt" DESC`,
+        [organizationId, dateFrom, dateTo],
       )) || []
     );
   }
@@ -72,12 +72,12 @@ export class TaxReportRepo {
     const now = unixTimestamp();
     const result = await queryOne<TaxReport>(
       `INSERT INTO "taxReport" (
-        "merchantId", "name", "reportType", "dateFrom", "dateTo", "taxJurisdictions",
+        "organizationId", "name", "reportType", "dateFrom", "dateTo", "taxJurisdictions",
         "fileUrl", "fileFormat", "status", "generatedBy", "parameters", "results",
         "errorMessage", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
       [
-        params.merchantId,
+        params.organizationId,
         params.name,
         params.reportType,
         params.dateFrom,
@@ -140,13 +140,13 @@ export class TaxReportRepo {
     return !!result;
   }
 
-  async count(merchantId?: string, reportType?: TaxReportType): Promise<number> {
+  async count(organizationId?: string, reportType?: TaxReportType): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "taxReport" WHERE 1=1`;
     const params: unknown[] = [];
 
-    if (merchantId) {
-      sql += ` AND "merchantId" = $${params.length + 1}`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` AND "organizationId" = $${params.length + 1}`;
+      params.push(organizationId);
     }
     if (reportType) {
       sql += ` AND "reportType" = $${params.length + 1}`;

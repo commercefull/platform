@@ -89,7 +89,7 @@ exports.up = function (knex) {
     t.boolean('isSubscriptionOrder').notNullable().defaultTo(false);
     t.uuid('parentOrderId').references('orderId').inTable('order');
     t.uuid('accountId').nullable();
-    t.uuid('merchantId').nullable().references('merchantId').inTable('merchant');
+    t.uuid('organizationId').nullable().references('organizationId').inTable('organization');
     t.string('purchaseOrderNumber', 100).nullable();
     t.specificType('tags', 'text[]');
     t.jsonb('metadata').defaultTo('{}');
@@ -110,7 +110,7 @@ exports.up = function (knex) {
     t.index('billingAddressId');
     t.index('customerEmail');
     t.index('accountId');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isSubscriptionOrder');
     t.index('parentOrderId');
     t.index('tags', null, 'gin');

@@ -23,7 +23,7 @@ export interface ProductAttributeProps {
   position: number;
   defaultValue?: string;
   validationRules?: ValidationRules;
-  merchantId?: string;
+  organizationId?: string;
   isGlobal: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -139,8 +139,8 @@ export class ProductAttribute {
   get validationRules(): ValidationRules | undefined {
     return this.props.validationRules;
   }
-  get merchantId(): string | undefined {
-    return this.props.merchantId;
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
   }
   get isGlobal(): boolean {
     return this.props.isGlobal;

@@ -32,7 +32,7 @@ export interface Warehouse {
   isFulfillmentCenter: boolean;
   isReturnCenter: boolean;
   isVirtual: boolean;
-  merchantId?: string;
+  organizationId?: string;
   addressLine1: string;
   addressLine2?: string;
   city: string;
@@ -129,9 +129,9 @@ export class WarehouseRepo {
   /**
    * Find warehouses by merchant
    */
-  async findByMerchantId(merchantId: string): Promise<Warehouse[]> {
-    const results = await query<Warehouse[]>(`SELECT * FROM "distributionWarehouse" WHERE "merchantId" = $1 ORDER BY "name" ASC`, [
-      merchantId,
+  async findByMerchantId(organizationId: string): Promise<Warehouse[]> {
+    const results = await query<Warehouse[]>(`SELECT * FROM "distributionWarehouse" WHERE "organizationId" = $1 ORDER BY "name" ASC`, [
+      organizationId,
     ]);
     return results || [];
   }
@@ -162,22 +162,20 @@ export class WarehouseRepo {
     radiusKm: number = 100,
     limit: number = 10,
   ): Promise<Array<Warehouse & { distance: number }>> {
-    // Using Haversine formula for distance calculation
+    // Postgres-safe approximate distance calculation (degrees -> km ~ 111km/deg)
+    const radiusDeg = radiusKm / 111.0;
     const results = await query<Array<Warehouse & { distance: number }>>(
       `SELECT *,
-        (6371 * acos(
-          cos(radians($1)) * cos(radians("latitude")) *
-          cos(radians("longitude") - radians($2)) +
-          sin(radians($1)) * sin(radians("latitude"))
-        )) AS distance
+        sqrt(power(("latitude" - $1), 2) + power(("longitude" - $2), 2)) AS distance
        FROM "distributionWarehouse"
-       WHERE "latitude" IS NOT NULL 
+       WHERE "latitude" IS NOT NULL
          AND "longitude" IS NOT NULL
          AND "isActive" = true
-       HAVING distance < $3
+         AND abs("latitude" - $1) <= $3
+         AND abs("longitude" - $2) <= $3
        ORDER BY distance ASC
        LIMIT $4`,
-      [latitude, longitude, radiusKm, limit],
+      [latitude, longitude, radiusDeg, limit],
     );
     return results || [];
   }
@@ -202,7 +200,7 @@ export class WarehouseRepo {
     const result = await queryOne<Warehouse>(
       `INSERT INTO "distributionWarehouse" (
         "name", "code", "description", "isActive", "isDefault",
-        "isFulfillmentCenter", "isReturnCenter", "isVirtual", "merchantId",
+        "isFulfillmentCenter", "isReturnCenter", "isVirtual", "organizationId",
         "addressLine1", "addressLine2", "city", "state", "postalCode", "country",
         "latitude", "longitude", "email", "phone", "contactName",
         "timezone", "cutoffTime", "processingTime",
@@ -222,7 +220,7 @@ export class WarehouseRepo {
         params.isFulfillmentCenter !== undefined ? params.isFulfillmentCenter : true,
         params.isReturnCenter !== undefined ? params.isReturnCenter : true,
         params.isVirtual || false,
-        params.merchantId || null,
+        params.organizationId || null,
         params.addressLine1,
         params.addressLine2 || null,
         params.city,

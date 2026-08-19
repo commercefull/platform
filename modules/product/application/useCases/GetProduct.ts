@@ -82,7 +82,7 @@ export interface ProductDetailResponse {
   slug: string;
   productTypeId: string;
   categoryId?: string;
-  merchantId?: string;
+  organizationId?: string;
   status: string;
   visibility: string;
   basePrice: number;
@@ -153,7 +153,7 @@ export class GetProductUseCase {
     let variants: ProductVariant[] = [];
     let images: ProductImageResponse[] = [];
 
-    if (command.includeVariants && product.hasVariants) {
+    if (command.includeVariants) {
       variants = await this.productRepository.findVariantsByProductId(product.productId);
     }
 
@@ -183,7 +183,7 @@ export class GetProductUseCase {
       slug: product.slug,
       productTypeId: product.productTypeId,
       categoryId: product.categoryId,
-      merchantId: product.merchantId,
+      organizationId: product.organizationId,
       status: product.status,
       visibility: product.visibility,
       basePrice: product.price.basePrice,
@@ -202,7 +202,7 @@ export class GetProductUseCase {
       isTaxable: product.isTaxable,
       taxClass: product.taxClass,
       isPurchasable: product.isPurchasable,
-      hasVariants: product.hasVariants,
+      hasVariants: product.hasVariants || variants.length > 0,
       variantAttributes: product.variantAttributes,
       minOrderQuantity: product.minOrderQuantity,
       maxOrderQuantity: product.maxOrderQuantity,

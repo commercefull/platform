@@ -4,22 +4,22 @@
 
 exports.seed = async function (knex) {
   // Get the test merchant
-  const testMerchant = await knex('merchant').where({ email: 'merchant@example.com' }).first('merchantId');
+  const testMerchant = await knex('organization').where({ email: 'merchant@example.com' }).first('organizationId');
 
   if (!testMerchant) {
     return;
   }
 
-  const merchantId = testMerchant.merchantId;
+  const organizationId = testMerchant.organizationId;
 
   // Clean up existing test data
-  await knex('paymentMethodConfig').where({ merchantId }).del();
-  await knex('paymentGateway').where({ merchantId }).del();
+  await knex('paymentMethodConfig').where({ organizationId }).del();
+  await knex('paymentGateway').where({ organizationId }).del();
 
   // Insert test payment gateway
   const [gateway] = await knex('paymentGateway')
     .insert({
-      merchantId,
+      organizationId,
       name: 'Test Stripe Gateway',
       provider: 'stripe',
       isActive: true,
@@ -39,7 +39,7 @@ exports.seed = async function (knex) {
   // Insert test payment method configs
   await knex('paymentMethodConfig').insert([
     {
-      merchantId,
+      organizationId,
       paymentMethod: 'creditCard',
       isEnabled: true,
       displayName: 'Credit Card',
@@ -52,7 +52,7 @@ exports.seed = async function (knex) {
       updatedAt: knex.fn.now(),
     },
     {
-      merchantId,
+      organizationId,
       paymentMethod: 'debitCard',
       isEnabled: true,
       displayName: 'Debit Card',

@@ -15,7 +15,7 @@ const TEST_MERCHANT = {
 };
 
 let client: AxiosInstance;
-let merchantToken: string;
+let organizationToken: string;
 
 beforeAll(async () => {
   client = axios.create({
@@ -30,9 +30,9 @@ beforeAll(async () => {
 
   try {
     const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, { headers: { 'X-Test-Request': 'true' } });
-    merchantToken = loginResponse.data?.accessToken || '';
+    organizationToken = loginResponse.data?.accessToken || '';
   } catch {
-    merchantToken = '';
+    organizationToken = '';
   }
 });
 
@@ -43,7 +43,7 @@ describe('Organization Feature Tests', () => {
   describe('List Organizations', () => {
     it('should list all organizations', async () => {
       const response = await client.get('/business/organizations', {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       if (response.status === 200) {
@@ -54,7 +54,7 @@ describe('Organization Feature Tests', () => {
 
     it('should support pagination', async () => {
       const response = await client.get('/business/organizations', {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
         params: { page: 1, limit: 10 },
       });
 
@@ -74,7 +74,7 @@ describe('Organization Feature Tests', () => {
       };
 
       const response = await client.post('/business/organizations', orgData, {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       if (response.status === 201) {
@@ -91,7 +91,7 @@ describe('Organization Feature Tests', () => {
       const response = await client.post(
         '/business/organizations',
         { description: 'Missing name' },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
 
       expect(response.status).toBe(400);
@@ -103,7 +103,7 @@ describe('Organization Feature Tests', () => {
       if (!testOrgId) return;
 
       const response = await client.get(`/business/organization/${testOrgId}`, {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -112,7 +112,7 @@ describe('Organization Feature Tests', () => {
 
     it('should get organization by slug', async () => {
       const response = await client.get(`/business/organization/slug/${testSlug}`, {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       if (response.status === 200) {
@@ -122,7 +122,7 @@ describe('Organization Feature Tests', () => {
 
     it('should return 404 for non-existent organization', async () => {
       const response = await client.get('/business/organizations/00000000-0000-0000-0000-000000000000', {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       expect(response.status).toBe(404);
@@ -136,7 +136,7 @@ describe('Organization Feature Tests', () => {
       const response = await client.put(
         `/business/organization/${testOrgId}`,
         { description: 'Updated description' },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
 
       if (response.status === 200) {
@@ -150,7 +150,7 @@ describe('Organization Feature Tests', () => {
       const response = await client.patch(
         `/business/organization/${testOrgId}`,
         { description: 'Patched description' },
-        { headers: { Authorization: `Bearer ${merchantToken}` } },
+        { headers: { Authorization: `Bearer ${organizationToken}` } },
       );
 
       if (response.status === 200) {
@@ -164,7 +164,7 @@ describe('Organization Feature Tests', () => {
       if (!testOrgId) return;
 
       const response = await client.get(`/business/organization/${testOrgId}/stores`, {
-        headers: { Authorization: `Bearer ${merchantToken}` },
+        headers: { Authorization: `Bearer ${organizationToken}` },
       });
 
       if (response.status === 200) {

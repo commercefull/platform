@@ -5,7 +5,7 @@
 exports.up = function (knex) {
   return knex.schema.createTable('reportingReportSchedule', t => {
     t.uuid('reportScheduleId').primary().defaultTo(knex.raw('uuidv7()'));
-    t.uuid('merchantId');
+    t.uuid('organizationId');
     t.string('name', 255).notNullable();
     t.string('reportType', 50).notNullable();
     t.enu('type', ['daily', 'weekly', 'monthly', 'quarterly', 'yearly']).notNullable();
@@ -18,7 +18,7 @@ exports.up = function (knex) {
     t.timestamp('createdAt', { useTz: true }).notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isActive');
     t.index('nextRunAt');
   });

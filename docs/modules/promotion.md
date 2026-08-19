@@ -73,10 +73,11 @@ The Promotion feature manages discounts, coupons, gift cards, and promotional ca
 
 | Use Case                 | Test File                             | Status |
 | ------------------------ | ------------------------------------- | ------ |
-| UC-PRO-001 to UC-PRO-007 | `promotion/promotion.test.ts`         | 🟡     |
+| UC-PRO-001 to UC-PRO-007 | `promotion/cartPromotion.skip.test.ts` | 🟡    |
 | UC-PRO-008 to UC-PRO-013 | `promotion/giftcard.test.ts`          | ✅     |
 | UC-PRO-014 to UC-PRO-015 | `promotion/coupon.test.ts`            | ✅     |
-| UC-PRO-016 to UC-PRO-017 | `promotion/giftcard-customer.test.ts` | ✅     |
+| UC-PRO-016 to UC-PRO-017 | `promotion/couponExpanded.test.ts`    | ✅     |
+| UC-PRO-018 to UC-PRO-020 | `promotion/giftcard-customer.test.ts` | ✅     |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

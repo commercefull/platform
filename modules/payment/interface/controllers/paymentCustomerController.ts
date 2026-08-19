@@ -35,7 +35,7 @@ export const saveStoredMethod = async (req: Request, res: Response): Promise<voi
       errorResponse(res, 'Authentication required', 401);
       return;
     }
-    const { merchantId, type, provider, providerToken, isDefault, last4, brand, expiryMonth, expiryYear } = req.body;
+    const { organizationId, type, provider, providerToken, isDefault, last4, brand, expiryMonth, expiryYear } = req.body;
     if (!type || !provider || !providerToken) {
       errorResponse(res, 'type, provider, and providerToken are required', 400);
       return;
@@ -44,7 +44,7 @@ export const saveStoredMethod = async (req: Request, res: Response): Promise<voi
     const result = await useCase.execute(
       new SaveStoredPaymentMethodCommand(
         customerId,
-        merchantId || '',
+        organizationId || '',
         type,
         provider,
         providerToken,

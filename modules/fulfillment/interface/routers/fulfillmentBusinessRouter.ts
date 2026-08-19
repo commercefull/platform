@@ -46,6 +46,8 @@ router.post('/fulfillments/:fulfillmentId/deliver', markDelivered);
 
 // Cancel fulfillment
 router.post('/fulfillments/:fulfillmentId/cancel', cancelFulfillment);
+// Alias (tests call /business/:fulfillmentId/cancel)
+router.post('/:fulfillmentId/cancel', cancelFulfillment);
 
 // Update tracking info
 router.put('/fulfillments/:fulfillmentId/tracking', updateTracking);

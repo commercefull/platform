@@ -5,7 +5,7 @@
  */
 
 import { Router } from 'express';
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as locationController from '../controllers/FulfillmentLocationController';
 
 const router = Router();
@@ -14,24 +14,24 @@ const router = Router();
 // Fulfillment Locations
 // ============================================================================
 
-router.get('/locations', isMerchantLoggedIn, locationController.listLocations);
-router.get('/locations/nearest', isMerchantLoggedIn, locationController.findNearestLocations);
-router.get('/locations/:locationId', isMerchantLoggedIn, locationController.getLocation);
-router.post('/locations', isMerchantLoggedIn, locationController.createLocation);
-router.put('/locations/:locationId', isMerchantLoggedIn, locationController.updateLocation);
-router.delete('/locations/:locationId', isMerchantLoggedIn, locationController.deleteLocation);
-router.post('/locations/:locationId/activate', isMerchantLoggedIn, locationController.activateLocation);
-router.post('/locations/:locationId/deactivate', isMerchantLoggedIn, locationController.deactivateLocation);
+router.get('/locations', isOrganizationLoggedIn, locationController.listLocations);
+router.get('/locations/nearest', isOrganizationLoggedIn, locationController.findNearestLocations);
+router.get('/locations/:locationId', isOrganizationLoggedIn, locationController.getLocation);
+router.post('/locations', isOrganizationLoggedIn, locationController.createLocation);
+router.put('/locations/:locationId', isOrganizationLoggedIn, locationController.updateLocation);
+router.delete('/locations/:locationId', isOrganizationLoggedIn, locationController.deleteLocation);
+router.post('/locations/:locationId/activate', isOrganizationLoggedIn, locationController.activateLocation);
+router.post('/locations/:locationId/deactivate', isOrganizationLoggedIn, locationController.deactivateLocation);
 
 // ============================================================================
 // Fulfillment Partners
 // ============================================================================
 
-router.get('/partners', isMerchantLoggedIn, locationController.listPartners);
-router.get('/partners/:partnerId', isMerchantLoggedIn, locationController.getPartner);
-router.post('/partners', isMerchantLoggedIn, locationController.createPartner);
-router.put('/partners/:partnerId', isMerchantLoggedIn, locationController.updatePartner);
-router.delete('/partners/:partnerId', isMerchantLoggedIn, locationController.deletePartner);
+router.get('/partners', isOrganizationLoggedIn, locationController.listPartners);
+router.get('/partners/:partnerId', isOrganizationLoggedIn, locationController.getPartner);
+router.post('/partners', isOrganizationLoggedIn, locationController.createPartner);
+router.put('/partners/:partnerId', isOrganizationLoggedIn, locationController.updatePartner);
+router.delete('/partners/:partnerId', isOrganizationLoggedIn, locationController.deletePartner);
 
 export const fulfillmentLocationRouter = router;
 export default router;

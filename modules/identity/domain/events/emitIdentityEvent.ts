@@ -9,9 +9,9 @@ import {
   CustomerLoginEvent,
   CustomerLogoutEvent,
   CustomerRegisteredEvent,
-  MerchantLoginEvent,
-  MerchantLogoutEvent,
-  MerchantRegisteredEvent,
+  OrganizationLoginEvent,
+  OrganizationLogoutEvent,
+  OrganizationRegisteredEvent,
   PasswordResetRequestedEvent,
   PasswordResetCompletedEvent,
   TokenRefreshedEvent,
@@ -74,47 +74,47 @@ export function emitCustomerTokenRefreshed(payload: Omit<TokenRefreshedEvent, 't
 // Merchant Events
 // ============================================================================
 
-export function emitMerchantLogin(payload: Omit<MerchantLoginEvent, 'timestamp'>): void {
-  eventBus.emit('identity.merchant.login', {
+export function emitOrganizationLogin(payload: Omit<OrganizationLoginEvent, 'timestamp'>): void {
+  eventBus.emit('identity.organization.login', {
     ...payload,
     timestamp: new Date(),
   });
 }
 
-export function emitMerchantLogout(payload: Omit<MerchantLogoutEvent, 'timestamp'>): void {
-  eventBus.emit('identity.merchant.logout', {
+export function emitOrganizationLogout(payload: Omit<OrganizationLogoutEvent, 'timestamp'>): void {
+  eventBus.emit('identity.organization.logout', {
     ...payload,
     timestamp: new Date(),
   });
 }
 
-export function emitMerchantRegistered(payload: Omit<MerchantRegisteredEvent, 'timestamp'>): void {
-  eventBus.emit('identity.merchant.registered', {
+export function emitOrganizationRegistered(payload: Omit<OrganizationRegisteredEvent, 'timestamp'>): void {
+  eventBus.emit('identity.organization.registered', {
     ...payload,
     timestamp: new Date(),
   });
 }
 
-export function emitMerchantPasswordResetRequested(payload: Omit<PasswordResetRequestedEvent, 'timestamp' | 'userType'>): void {
-  eventBus.emit('identity.merchant.password_reset_requested', {
+export function emitOrganizationPasswordResetRequested(payload: Omit<PasswordResetRequestedEvent, 'timestamp' | 'userType'>): void {
+  eventBus.emit('identity.organization.password_reset_requested', {
     ...payload,
-    userType: 'merchant',
+    userType: 'organization',
     timestamp: new Date(),
   });
 }
 
-export function emitMerchantPasswordResetCompleted(payload: Omit<PasswordResetCompletedEvent, 'timestamp' | 'userType'>): void {
-  eventBus.emit('identity.merchant.password_reset_completed', {
+export function emitOrganizationPasswordResetCompleted(payload: Omit<PasswordResetCompletedEvent, 'timestamp' | 'userType'>): void {
+  eventBus.emit('identity.organization.password_reset_completed', {
     ...payload,
-    userType: 'merchant',
+    userType: 'organization',
     timestamp: new Date(),
   });
 }
 
-export function emitMerchantTokenRefreshed(payload: Omit<TokenRefreshedEvent, 'timestamp' | 'userType'>): void {
-  eventBus.emit('identity.merchant.token_refreshed', {
+export function emitOrganizationTokenRefreshed(payload: Omit<TokenRefreshedEvent, 'timestamp' | 'userType'>): void {
+  eventBus.emit('identity.organization.token_refreshed', {
     ...payload,
-    userType: 'merchant',
+    userType: 'organization',
     timestamp: new Date(),
   });
 }
@@ -124,7 +124,7 @@ export function emitMerchantTokenRefreshed(payload: Omit<TokenRefreshedEvent, 't
 // ============================================================================
 
 export function emitSessionCreated(payload: Omit<SessionCreatedEvent, 'timestamp'>): void {
-  const eventType = payload.userType === 'customer' ? 'identity.customer.session_created' : 'identity.merchant.session_created';
+  const eventType = payload.userType === 'customer' ? 'identity.customer.session_created' : 'identity.organization.session_created';
 
   eventBus.emit(eventType, {
     ...payload,
@@ -133,7 +133,7 @@ export function emitSessionCreated(payload: Omit<SessionCreatedEvent, 'timestamp
 }
 
 export function emitSessionInvalidated(payload: Omit<SessionInvalidatedEvent, 'timestamp'>): void {
-  const eventType = payload.userType === 'customer' ? 'identity.customer.session_invalidated' : 'identity.merchant.session_invalidated';
+  const eventType = payload.userType === 'customer' ? 'identity.customer.session_invalidated' : 'identity.organization.session_invalidated';
 
   eventBus.emit(eventType, {
     ...payload,

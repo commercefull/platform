@@ -3,17 +3,17 @@ import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
 
 import {
-  Merchant as DbOrganization,
-  MerchantAddress as DbOrganizationAddress,
-  MerchantPaymentInfo as DbOrganizationPaymentInfo,
-  MerchantPasswordReset as DbOrganizationPasswordReset,
+  Organization as DbOrganization,
+  OrganizationAddress as DbOrganizationAddress,
+  OrganizationPaymentInfo as DbOrganizationPaymentInfo,
+  OrganizationPasswordReset as DbOrganizationPasswordReset,
 } from '../../../../libs/db/types';
 
 export type Organization = DbOrganization;
 export type OrganizationAddress = DbOrganizationAddress;
 export type OrganizationPaymentInfo = DbOrganizationPaymentInfo;
 
-type OrganizationCreateParams = Partial<Omit<Organization, 'merchantId' | 'createdAt' | 'updatedAt'>> & {
+type OrganizationCreateParams = Partial<Omit<Organization, 'organizationId' | 'createdAt' | 'updatedAt'>> & {
   name: string;
   email: string;
   password: string;
@@ -21,10 +21,10 @@ type OrganizationCreateParams = Partial<Omit<Organization, 'merchantId' | 'creat
   status?: string;
 };
 
-type OrganizationUpdateParams = Partial<Omit<Organization, 'merchantId' | 'createdAt' | 'updatedAt'>>;
+type OrganizationUpdateParams = Partial<Omit<Organization, 'organizationId' | 'createdAt' | 'updatedAt'>>;
 
-type OrganizationAddressCreateParams = Partial<Omit<OrganizationAddress, 'merchantAddressId' | 'createdAt' | 'updatedAt'>> & {
-  merchantId: string;
+type OrganizationAddressCreateParams = Partial<Omit<OrganizationAddress, 'organizationAddressId' | 'createdAt' | 'updatedAt'>> & {
+  organizationId: string;
   addressLine1: string;
   city: string;
   state: string;
@@ -32,8 +32,8 @@ type OrganizationAddressCreateParams = Partial<Omit<OrganizationAddress, 'mercha
   country: string;
 };
 
-type OrganizationPaymentInfoCreateParams = Partial<Omit<OrganizationPaymentInfo, 'merchantPaymentInfoId' | 'createdAt' | 'updatedAt'>> & {
-  merchantId: string;
+type OrganizationPaymentInfoCreateParams = Partial<Omit<OrganizationPaymentInfo, 'organizationPaymentInfoId' | 'createdAt' | 'updatedAt'>> & {
+  organizationId: string;
   paymentType: string;
   currency: string;
 };
@@ -44,24 +44,24 @@ type OrganizationCreateWithPasswordParams = Omit<OrganizationCreateParams, 'pass
 
 export class OrganizationRepo {
   async findById(organizationId: string): Promise<Organization | null> {
-    return await queryOne<Organization>('SELECT * FROM merchant WHERE "merchantId" = $1', [organizationId]);
+    return await queryOne<Organization>('SELECT * FROM "organization" WHERE "organizationId" = $1', [organizationId]);
   }
 
   async findByEmail(email: string): Promise<Organization | null> {
-    return await queryOne<Organization>('SELECT * FROM merchant WHERE email = $1', [email]);
+    return await queryOne<Organization>('SELECT * FROM "organization" WHERE email = $1', [email]);
   }
 
   async findBySlug(slug: string): Promise<Organization | null> {
-    return await queryOne<Organization>('SELECT * FROM merchant WHERE slug = $1', [slug]);
+    return await queryOne<Organization>('SELECT * FROM "organization" WHERE slug = $1', [slug]);
   }
 
   async findAll(limit: number = 50, offset: number = 0): Promise<Organization[]> {
-    const results = await query<Organization[]>('SELECT * FROM merchant ORDER BY name ASC LIMIT $1 OFFSET $2', [limit, offset]);
+    const results = await query<Organization[]>('SELECT * FROM "organization" ORDER BY name ASC LIMIT $1 OFFSET $2', [limit, offset]);
     return results || [];
   }
 
   async findByStatus(status: string, limit: number = 50): Promise<Organization[]> {
-    const results = await query<Organization[]>('SELECT * FROM merchant WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2', [status, limit]);
+    const results = await query<Organization[]>('SELECT * FROM "organization" WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2', [status, limit]);
     return results || [];
   }
 
@@ -71,7 +71,7 @@ export class OrganizationRepo {
     const slug = params.slug || this.generateSlug(params.name);
 
     const result = await queryOne<Organization>(
-      `INSERT INTO merchant (
+      `INSERT INTO "organization" (
         name, slug, email, password, phone, website, logo, description, status,
         "businessType", "emailVerified", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
@@ -106,7 +106,7 @@ export class OrganizationRepo {
     const hashedPassword = params.password ? await this.hashPassword(params.password) : null;
 
     const result = await queryOne<Organization>(
-      `INSERT INTO merchant (
+      `INSERT INTO "organization" (
         name, slug, email, password, phone, website, logo, description, status,
         "businessType", "emailVerified", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
@@ -162,7 +162,7 @@ export class OrganizationRepo {
     values.push(organizationId);
 
     const result = await queryOne<Organization>(
-      `UPDATE merchant SET ${updateFields.join(', ')} WHERE "merchantId" = $${paramIndex} RETURNING *`,
+      `UPDATE "organization" SET ${updateFields.join(', ')} WHERE "organizationId" = $${paramIndex} RETURNING *`,
       values,
     );
 
@@ -174,8 +174,8 @@ export class OrganizationRepo {
   }
 
   async delete(organizationId: string): Promise<boolean> {
-    const result = await queryOne<Pick<DbOrganization, 'merchantId'>>(
-      'DELETE FROM merchant WHERE "merchantId" = $1 RETURNING "merchantId"',
+    const result = await queryOne<Pick<DbOrganization, 'organizationId'>>(
+      'DELETE FROM "organization" WHERE "organizationId" = $1 RETURNING "organizationId"',
       [organizationId],
     );
     return !!result;
@@ -191,35 +191,35 @@ export class OrganizationRepo {
   // ============================================================================
 
   async findAddressesByOrganizationId(organizationId: string): Promise<OrganizationAddress[]> {
-    const results = await query<OrganizationAddress[]>('SELECT * FROM "merchantAddress" WHERE "merchantId" = $1 ORDER BY "isDefault" DESC', [
+    const results = await query<OrganizationAddress[]>('SELECT * FROM "organizationAddress" WHERE "organizationId" = $1 ORDER BY "isDefault" DESC', [
       organizationId,
     ]);
     return results || [];
   }
 
   async findAddressById(addressId: string): Promise<OrganizationAddress | null> {
-    return await queryOne<OrganizationAddress>('SELECT * FROM "merchantAddress" WHERE "merchantAddressId" = $1', [addressId]);
+    return await queryOne<OrganizationAddress>('SELECT * FROM "organizationAddress" WHERE "organizationAddressId" = $1', [addressId]);
   }
 
   async createAddress(params: OrganizationAddressCreateParams): Promise<OrganizationAddress> {
     const now = new Date();
 
     if (params.isDefault) {
-      await query('UPDATE "merchantAddress" SET "isDefault" = false, "updatedAt" = $1 WHERE "merchantId" = $2 AND "isDefault" = true', [
+      await query('UPDATE "organizationAddress" SET "isDefault" = false, "updatedAt" = $1 WHERE "organizationId" = $2 AND "isDefault" = true', [
         now,
-        params.merchantId,
+        params.organizationId,
       ]);
     }
 
     const result = await queryOne<OrganizationAddress>(
-      `INSERT INTO "merchantAddress" (
-        "merchantId", "addressType", "isDefault", "firstName", "lastName", company,
+      `INSERT INTO "organizationAddress" (
+        "organizationId", "addressType", "isDefault", "firstName", "lastName", company,
         "addressLine1", "addressLine2", city, state, "postalCode", country,
         phone, email, "isVerified", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING *`,
       [
-        params.merchantId,
+        params.organizationId,
         params.addressType || 'business',
         params.isDefault || false,
         params.firstName || null,
@@ -247,8 +247,8 @@ export class OrganizationRepo {
   }
 
   async deleteAddress(addressId: string): Promise<boolean> {
-    const result = await queryOne<Pick<DbOrganizationAddress, 'merchantAddressId'>>(
-      'DELETE FROM "merchantAddress" WHERE "merchantAddressId" = $1 RETURNING "merchantAddressId"',
+    const result = await queryOne<Pick<DbOrganizationAddress, 'organizationAddressId'>>(
+      'DELETE FROM "organizationAddress" WHERE "organizationAddressId" = $1 RETURNING "organizationAddressId"',
       [addressId],
     );
     return !!result;
@@ -260,14 +260,14 @@ export class OrganizationRepo {
 
   async findPaymentInfoByOrganizationId(organizationId: string): Promise<OrganizationPaymentInfo[]> {
     const results = await query<OrganizationPaymentInfo[]>(
-      'SELECT * FROM "merchantPaymentInfo" WHERE "merchantId" = $1 ORDER BY "isDefault" DESC',
+      'SELECT * FROM "organizationPaymentInfo" WHERE "organizationId" = $1 ORDER BY "isDefault" DESC',
       [organizationId],
     );
     return results || [];
   }
 
   async findPaymentInfoById(paymentInfoId: string): Promise<OrganizationPaymentInfo | null> {
-    return await queryOne<OrganizationPaymentInfo>('SELECT * FROM "merchantPaymentInfo" WHERE "merchantPaymentInfoId" = $1', [
+    return await queryOne<OrganizationPaymentInfo>('SELECT * FROM "organizationPaymentInfo" WHERE "organizationPaymentInfoId" = $1', [
       paymentInfoId,
     ]);
   }
@@ -276,14 +276,14 @@ export class OrganizationRepo {
     const now = new Date();
 
     const result = await queryOne<OrganizationPaymentInfo>(
-      `INSERT INTO "merchantPaymentInfo" (
-        "merchantId", "paymentType", "isDefault", "accountHolderName", "bankName",
+      `INSERT INTO "organizationPaymentInfo" (
+        "organizationId", "paymentType", "isDefault", "accountHolderName", "bankName",
         "accountNumber", "routingNumber", "accountType", "paypalEmail",
         currency, "isVerified", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *`,
       [
-        params.merchantId,
+        params.organizationId,
         params.paymentType,
         params.isDefault || false,
         params.accountHolderName || null,
@@ -313,8 +313,8 @@ export class OrganizationRepo {
   async authenticate(credentials: {
     email: string;
     password: string;
-  }): Promise<{ merchantId: string; email: string; name: string; status: string } | null> {
-    const org = await queryOne<Organization>('SELECT * FROM merchant WHERE email = $1', [credentials.email]);
+  }): Promise<{ organizationId: string; email: string; name: string; status: string } | null> {
+    const org = await queryOne<Organization>('SELECT * FROM "organization" WHERE email = $1', [credentials.email]);
 
     if (!org) return null;
 
@@ -322,7 +322,7 @@ export class OrganizationRepo {
     if (!passwordMatch) return null;
 
     return {
-      merchantId: org.merchantId,
+      organizationId: org.organizationId,
       email: org.email,
       name: org.name,
       status: org.status,
@@ -336,8 +336,8 @@ export class OrganizationRepo {
 
   async changePassword(organizationId: string, newPassword: string): Promise<boolean> {
     const hashedPassword = await this.hashPassword(newPassword);
-    const result = await queryOne<Pick<DbOrganization, 'merchantId'>>(
-      `UPDATE merchant SET password = $1, "updatedAt" = $2 WHERE "merchantId" = $3 RETURNING "merchantId"`,
+    const result = await queryOne<Pick<DbOrganization, 'organizationId'>>(
+      `UPDATE "organization" SET password = $1, "updatedAt" = $2 WHERE "organizationId" = $3 RETURNING "organizationId"`,
       [hashedPassword, new Date(), organizationId],
     );
     return !!result;
@@ -350,9 +350,9 @@ export class OrganizationRepo {
     const now = new Date();
 
     await queryOne(
-      `INSERT INTO "merchantPasswordReset" ("userId", token, "expiresAt", "isUsed", "createdAt", "updatedAt")
+      `INSERT INTO "organizationPasswordReset" ("userId", token, "expiresAt", "isUsed", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, false, $4, $5)
-       RETURNING "merchantPasswordResetId"`,
+       RETURNING "organizationPasswordResetId"`,
       [organizationId, hashedToken, expiresAt, now, now],
     );
 
@@ -360,9 +360,9 @@ export class OrganizationRepo {
   }
 
   async verifyPasswordResetToken(token: string): Promise<string | null> {
-    const record = await queryOne<Pick<DbOrganizationPasswordReset, 'merchantPasswordResetId' | 'userId' | 'token'>>(
-      `SELECT "merchantPasswordResetId", "userId", token
-       FROM "merchantPasswordReset"
+    const record = await queryOne<Pick<DbOrganizationPasswordReset, 'organizationPasswordResetId' | 'userId' | 'token'>>(
+      `SELECT "organizationPasswordResetId", "userId", token
+       FROM "organizationPasswordReset"
        WHERE "isUsed" = false AND "expiresAt" > $1
        ORDER BY "createdAt" DESC
        LIMIT 1`,
@@ -374,16 +374,16 @@ export class OrganizationRepo {
     const isValid = await bcryptjs.compare(token, record.token);
     if (!isValid) return null;
 
-    await queryOne(`UPDATE "merchantPasswordReset" SET "isUsed" = true, "updatedAt" = $1 WHERE "merchantPasswordResetId" = $2`, [
+    await queryOne(`UPDATE "organizationPasswordReset" SET "isUsed" = true, "updatedAt" = $1 WHERE "organizationPasswordResetId" = $2`, [
       new Date(),
-      record.merchantPasswordResetId,
+      record.organizationPasswordResetId,
     ]);
 
     return record.userId;
   }
 
   async updateLastLogin(organizationId: string): Promise<void> {
-    await query('UPDATE merchant SET "lastLoginAt" = $1, "updatedAt" = $2 WHERE "merchantId" = $3', [new Date(), new Date(), organizationId]);
+    await query('UPDATE "organization" SET "lastLoginAt" = $1, "updatedAt" = $2 WHERE "organizationId" = $3', [new Date(), new Date(), organizationId]);
   }
 
   private generateSlug(name: string): string {

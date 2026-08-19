@@ -4,6 +4,7 @@
  * Represents the fulfillment of an order, including picking, packing,
  * shipping, and delivery tracking.
  */
+import { randomUUID } from 'node:crypto';
 
 export type FulfillmentStatus =
   | 'pending'
@@ -21,7 +22,7 @@ export type FulfillmentStatus =
   | 'cancelled'
   | 'returned';
 
-export type SourceType = 'warehouse' | 'merchant' | 'supplier' | 'dropship' | 'store';
+export type SourceType = 'warehouse' | 'organization' | 'supplier' | 'dropship' | 'store';
 
 export interface Address {
   firstName?: string;
@@ -47,7 +48,7 @@ export interface FulfillmentProps {
   sourceId: string;
 
   // For marketplace - which merchant
-  merchantId?: string;
+  organizationId?: string;
 
   supplierId?: string;
 
@@ -129,8 +130,8 @@ export class Fulfillment {
   get sourceId(): string {
     return this.props.sourceId;
   }
-  get merchantId(): string | undefined {
-    return this.props.merchantId;
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
   }
   get supplierId(): string | undefined {
     return this.props.supplierId;
@@ -271,11 +272,14 @@ export class Fulfillment {
     this.validateTransition('packed');
     this.props.status = 'packed';
     this.props.packedAt = new Date();
-    if (weight) this.props.weightGrams = weight;
+    if (typeof weight === 'number' && !Number.isNaN(weight)) {
+      // Interpret input weight as kilograms and store as integer grams
+      this.props.weightGrams = Math.round(weight * 1000);
+    }
     if (dimensions) {
-      this.props.lengthCm = dimensions.length;
-      this.props.widthCm = dimensions.width;
-      this.props.heightCm = dimensions.height;
+      this.props.lengthCm = Math.round(dimensions.length);
+      this.props.widthCm = Math.round(dimensions.width);
+      this.props.heightCm = Math.round(dimensions.height);
     }
     this.props.updatedAt = new Date();
   }
@@ -376,12 +380,12 @@ export class Fulfillment {
    */
   private validateTransition(newStatus: FulfillmentStatus): void {
     const validTransitions: Record<FulfillmentStatus, FulfillmentStatus[]> = {
-      pending: ['assigned', 'cancelled'],
-      assigned: ['picking', 'cancelled'],
+      pending: ['assigned', 'picking', 'packing', 'cancelled'],
+      assigned: ['picking', 'packing', 'cancelled'],
       picking: ['picked', 'failed', 'cancelled'],
-      picked: ['packing', 'failed', 'cancelled'],
-      packing: ['packed', 'failed', 'cancelled'],
-      packed: ['ready_to_ship', 'failed', 'cancelled'],
+      picked: ['packing', 'shipped', 'failed', 'cancelled'],
+      packing: ['packed', 'shipped', 'failed', 'cancelled'],
+      packed: ['ready_to_ship', 'shipped', 'failed', 'cancelled'],
       ready_to_ship: ['shipped', 'failed', 'cancelled'],
       shipped: ['in_transit', 'delivered', 'failed'],
       in_transit: ['out_for_delivery', 'delivered', 'failed'],
@@ -422,5 +426,5 @@ export class Fulfillment {
 
 function generateFulfillmentId(): string {
   // Use crypto.randomUUID for proper UUID format
-  return crypto.randomUUID();
+  return randomUUID();
 }

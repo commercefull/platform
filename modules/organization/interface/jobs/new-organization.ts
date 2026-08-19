@@ -51,7 +51,7 @@ async function run() {
     console.log('✅ Organization created successfully!');
     console.log(`   📧 Email: ${org.email}`);
     console.log(`   👤 Name: ${org.name}`);
-    console.log(`   🆔 ID: ${org.merchantId}`);
+    console.log(`   🆔 ID: ${org.organizationId}`);
     console.log(`   📅 Created: ${org.createdAt.toISOString()}`);
     console.log('');
     console.log('🔐 You can now log in with the provided email and password.');

@@ -19,8 +19,8 @@ export const loginTestUser = async (
   }
 };
 
-// Export loginTestMerchant function (merchant/admin login)
-export const loginTestMerchant = async (
+// Export loginTestOrganization function (organization/admin login)
+export const loginTestOrganization = async (
   client: AxiosInstance,
   email: string = 'merchant@example.com',
   password: string = 'password123',

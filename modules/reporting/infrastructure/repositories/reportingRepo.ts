@@ -15,7 +15,7 @@ import type {
 } from '../../domain/entities/ReportEntities';
 
 export interface CreateReportScheduleParams {
-  merchantId?: string;
+  organizationId?: string;
   name: string;
   reportType: ReportType;
   frequency: ReportFrequency;
@@ -38,7 +38,7 @@ export async function createSchedule(params: CreateReportScheduleParams): Promis
   const now = new Date();
   const sql = `
     INSERT INTO "reportingReportSchedule" (
-      "merchantId", "name", "reportType", "type", "parameters",
+      "organizationId", "name", "reportType", "type", "parameters",
       "recipients", "format", "isActive", "nextRunAt",
       "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
@@ -46,7 +46,7 @@ export async function createSchedule(params: CreateReportScheduleParams): Promis
   `;
   const nextRunAt = computeNextRunDate(params.frequency || 'daily', now);
   const row = await queryOne<ReportingReportSchedule>(sql, [
-    params.merchantId || null,
+    params.organizationId || null,
     params.name,
     params.reportType,
     params.frequency || 'daily',
@@ -69,12 +69,12 @@ export async function findScheduleById(id: string): Promise<ReportScheduleProps 
   return row ? mapScheduleRow(row) : null;
 }
 
-export async function listSchedules(merchantId?: string): Promise<ReportScheduleProps[]> {
+export async function listSchedules(organizationId?: string): Promise<ReportScheduleProps[]> {
   let sql = `SELECT * FROM "reportingReportSchedule"`;
   const params: unknown[] = [];
-  if (merchantId) {
-    sql += ` WHERE "merchantId" = $1`;
-    params.push(merchantId);
+  if (organizationId) {
+    sql += ` WHERE "organizationId" = $1`;
+    params.push(organizationId);
   }
   sql += ` ORDER BY "createdAt" DESC`;
   const rows = await query<ReportingReportSchedule[]>(sql, params);
@@ -185,7 +185,7 @@ export async function findExecutionById(id: string): Promise<ReportExecutionProp
 function mapScheduleRow(row: ReportingReportSchedule): ReportScheduleProps {
   return {
     reportScheduleId: row.reportScheduleId,
-    merchantId: row.merchantId ?? undefined,
+    organizationId: row.organizationId ?? undefined,
     name: row.name,
     reportType: row.reportType as ReportType,
     frequency: (row.type || 'daily') as ReportFrequency,

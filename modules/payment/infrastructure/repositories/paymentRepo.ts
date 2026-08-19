@@ -39,12 +39,12 @@ export class PaymentRepo {
   // Payment Gateway Methods
   // ============================================================================
 
-  async findAllGateways(merchantId: string): Promise<PaymentGateway[]> {
+  async findAllGateways(organizationId: string): Promise<PaymentGateway[]> {
     const results = await query<PaymentGateway[]>(
       `SELECT * FROM "paymentGateway" 
-       WHERE "merchantId" = $1 AND "deletedAt" IS NULL 
+       WHERE "organizationId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "name" ASC`,
-      [merchantId],
+      [organizationId],
     );
     return results || [];
   }
@@ -57,11 +57,11 @@ export class PaymentRepo {
     );
   }
 
-  async findDefaultGateway(merchantId: string): Promise<PaymentGateway | null> {
+  async findDefaultGateway(organizationId: string): Promise<PaymentGateway | null> {
     return queryOne<PaymentGateway>(
       `SELECT * FROM "paymentGateway" 
-       WHERE "merchantId" = $1 AND "isDefault" = true AND "deletedAt" IS NULL`,
-      [merchantId],
+       WHERE "organizationId" = $1 AND "isDefault" = true AND "deletedAt" IS NULL`,
+      [organizationId],
     );
   }
 
@@ -69,14 +69,14 @@ export class PaymentRepo {
     const now = new Date();
     const result = await queryOne<PaymentGateway>(
       `INSERT INTO "paymentGateway" 
-       ("merchantId", "name", "provider", "isActive", "isDefault", "isTestMode",
+       ("organizationId", "name", "provider", "isActive", "isDefault", "isTestMode",
         "apiKey", "apiSecret", "publicKey", "webhookSecret", "apiEndpoint",
         "supportedPaymentMethods", "supportedCurrencies", "processingFees",
         "checkoutSettings", "metadata", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
        RETURNING *`,
       [
-        params.merchantId,
+        params.organizationId,
         params.name,
         params.provider,
         params.isActive ?? true,
@@ -104,8 +104,8 @@ export class PaymentRepo {
       await query(
         `UPDATE "paymentGateway" 
          SET "isDefault" = false 
-         WHERE "merchantId" = $1 AND "paymentGatewayId" != $2 AND "deletedAt" IS NULL`,
-        [params.merchantId, result.paymentGatewayId],
+         WHERE "organizationId" = $1 AND "paymentGatewayId" != $2 AND "deletedAt" IS NULL`,
+        [params.organizationId, result.paymentGatewayId],
       );
     }
 
@@ -152,8 +152,8 @@ export class PaymentRepo {
         await query(
           `UPDATE "paymentGateway" 
            SET "isDefault" = false 
-           WHERE "merchantId" = $1 AND "paymentGatewayId" != $2 AND "deletedAt" IS NULL`,
-          [existing.merchantId, id],
+           WHERE "organizationId" = $1 AND "paymentGatewayId" != $2 AND "deletedAt" IS NULL`,
+          [existing.organizationId, id],
         );
       }
     }
@@ -177,12 +177,12 @@ export class PaymentRepo {
   // Payment Method Config Methods
   // ============================================================================
 
-  async findAllMethodConfigs(merchantId: string): Promise<PaymentMethodConfig[]> {
+  async findAllMethodConfigs(organizationId: string): Promise<PaymentMethodConfig[]> {
     const results = await query<PaymentMethodConfig[]>(
       `SELECT * FROM "paymentMethodConfig" 
-       WHERE "merchantId" = $1 AND "deletedAt" IS NULL 
+       WHERE "organizationId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "displayOrder" ASC, "displayName" ASC`,
-      [merchantId],
+      [organizationId],
     );
     return results || [];
   }
@@ -195,12 +195,12 @@ export class PaymentRepo {
     );
   }
 
-  async findEnabledMethodConfigs(merchantId: string): Promise<PaymentMethodConfig[]> {
+  async findEnabledMethodConfigs(organizationId: string): Promise<PaymentMethodConfig[]> {
     const results = await query<PaymentMethodConfig[]>(
       `SELECT * FROM "paymentMethodConfig" 
-       WHERE "merchantId" = $1 AND "isEnabled" = true AND "deletedAt" IS NULL 
+       WHERE "organizationId" = $1 AND "isEnabled" = true AND "deletedAt" IS NULL 
        ORDER BY "displayOrder" ASC, "displayName" ASC`,
-      [merchantId],
+      [organizationId],
     );
     return results || [];
   }
@@ -209,14 +209,14 @@ export class PaymentRepo {
     const now = new Date();
     const result = await queryOne<PaymentMethodConfig>(
       `INSERT INTO "paymentMethodConfig" 
-       ("merchantId", "paymentMethod", "isEnabled", "displayName", "description",
+       ("organizationId", "paymentMethod", "isEnabled", "displayName", "description",
         "processingFee", "minimumAmount", "maximumAmount", "displayOrder", "icon",
         "supportedCurrencies", "countries", "gatewayId", "configuration",
         "metadata", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
        RETURNING *`,
       [
-        params.merchantId,
+        params.organizationId,
         params.paymentMethod,
         params.isEnabled ?? true,
         params.displayName || null,

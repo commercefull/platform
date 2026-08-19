@@ -20,14 +20,14 @@ export const listCoupons = async (req: TypedRequest, res: Response): Promise<voi
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const coupons = await couponRepo.findAll('default-merchant', {
+    const coupons = await couponRepo.findAll('default-organization', {
       isActive,
       limit,
       offset,
     });
 
     // Get active coupons count for stats
-    const activeCoupons = await couponRepo.findActiveCoupons('default-merchant');
+    const activeCoupons = await couponRepo.findActiveCoupons('default-organization');
 
     adminRespond(req, res, 'promotions/coupons/index', {
       pageName: 'Coupon Management',
@@ -98,7 +98,7 @@ export const createCoupon = async (req: TypedRequest, res: Response): Promise<vo
       isOneTimeUse: isOneTimeUse === 'true',
       maxUsage: maxUsage ? parseInt(maxUsage) : undefined,
       maxUsagePerCustomer: maxUsagePerCustomer ? parseInt(maxUsagePerCustomer) : 1,
-      merchantId: 'default-merchant',
+      organizationId: 'default-organization',
     });
 
     res.redirect(`/hub/promotions/coupons/${coupon.promotionCouponId}?success=Coupon created successfully`);
@@ -258,7 +258,7 @@ export const validateCoupon = async (req: TypedRequest, res: Response): Promise<
     const body = req.body as RequestBody;
     const { code, orderTotal, customerId } = body;
 
-    const result = await couponRepo.validate(code, orderTotal, customerId, 'default-merchant');
+    const result = await couponRepo.validate(code, orderTotal, customerId, 'default-organization');
 
     res.json({
       valid: result.valid,

@@ -65,6 +65,8 @@ The Notification feature manages in-app notifications for merchants and administ
 | Use Case                 | Test File                                  | Status |
 | ------------------------ | ------------------------------------------ | ------ |
 | UC-NOT-001 to UC-NOT-006 | `notification/notificationExpanded.test.ts` | ✅    |
+| Preferences              | `notification/preference.skip.test.ts`     | 🟡    |
+| Templates                | `notification/template.skip.test.ts`       | 🟡    |
 
 
 <!-- GENERATED:ENDPOINTS:START -->

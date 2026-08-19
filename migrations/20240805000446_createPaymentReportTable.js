@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('paymentReportId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.string('name', 255).notNullable();
     t.string('type', 50).notNullable().checkIn(['transaction', 'payout', 'fee', 'settlement', 'summary', 'tax', 'custom']);
     t.string('format', 10).notNullable().checkIn(['csv', 'pdf', 'json', 'xlsx']).defaultTo('csv');
@@ -20,7 +20,7 @@ exports.up = function (knex) {
     t.timestamp('completedAt');
     t.timestamp('expiresAt');
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('type');
     t.index('status');
     t.index('createdBy');

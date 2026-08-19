@@ -17,15 +17,15 @@ type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => P
 
 export const getSalesDashboard: AsyncHandler = async (req, res, _next) => {
   try {
-    const { startDate, endDate, merchantId } = req.query;
+    const { startDate, endDate, organizationId } = req.query;
 
     const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate as string) : new Date();
 
     const [summary, dailyData, realTime] = await Promise.all([
-      analyticsRepo.getSalesSummary(start, end, merchantId as string),
-      analyticsRepo.getSalesDaily({ startDate: start, endDate: end, merchantId: merchantId as string }),
-      reportingRepo.getRealTimeMetrics(merchantId as string, 60),
+      analyticsRepo.getSalesSummary(start, end, organizationId as string),
+      analyticsRepo.getSalesDaily({ startDate: start, endDate: end, organizationId: organizationId as string }),
+      reportingRepo.getRealTimeMetrics(organizationId as string, 60),
     ]);
 
     res.json({
@@ -45,14 +45,14 @@ export const getSalesDashboard: AsyncHandler = async (req, res, _next) => {
 
 export const getSalesDaily: AsyncHandler = async (req, res, _next) => {
   try {
-    const { startDate, endDate, channel, merchantId, limit, offset } = req.query;
+    const { startDate, endDate, channel, organizationId, limit, offset } = req.query;
 
     const result = await analyticsRepo.getSalesDaily(
       {
         startDate: startDate ? new Date(startDate as string) : undefined,
         endDate: endDate ? new Date(endDate as string) : undefined,
         channel: channel as string,
-        merchantId: merchantId as string,
+        organizationId: organizationId as string,
       },
       { limit: parseInt(limit as string) || 30, offset: parseInt(offset as string) || 0 },
     );
@@ -232,7 +232,7 @@ export const getEventCounts: AsyncHandler = async (req, res, _next) => {
 
 export const getSnapshots: AsyncHandler = async (req, res, _next) => {
   try {
-    const { snapshotType, startDate, endDate, merchantId } = req.query;
+    const { snapshotType, startDate, endDate, organizationId } = req.query;
 
     const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate as string) : new Date();
@@ -241,7 +241,7 @@ export const getSnapshots: AsyncHandler = async (req, res, _next) => {
       (snapshotType as 'hourly' | 'daily' | 'weekly' | 'monthly') || 'daily',
       start,
       end,
-      merchantId as string,
+      organizationId as string,
     );
 
     res.json({ success: true, data: snapshots });
@@ -254,11 +254,11 @@ export const getSnapshots: AsyncHandler = async (req, res, _next) => {
 
 export const getLatestSnapshot: AsyncHandler = async (req, res, _next) => {
   try {
-    const { snapshotType, merchantId } = req.query;
+    const { snapshotType, organizationId } = req.query;
 
     const snapshot = await reportingRepo.getLatestSnapshot(
       (snapshotType as 'hourly' | 'daily' | 'weekly' | 'monthly') || 'daily',
-      merchantId as string,
+      organizationId as string,
     );
 
     res.json({ success: true, data: snapshot });
@@ -275,9 +275,9 @@ export const getLatestSnapshot: AsyncHandler = async (req, res, _next) => {
 
 export const getRealTimeMetrics: AsyncHandler = async (req, res, _next) => {
   try {
-    const { merchantId, minutes } = req.query;
+    const { organizationId, minutes } = req.query;
 
-    const metrics = await reportingRepo.getRealTimeMetrics(merchantId as string, parseInt(minutes as string) || 60);
+    const metrics = await reportingRepo.getRealTimeMetrics(organizationId as string, parseInt(minutes as string) || 60);
 
     res.json({ success: true, data: metrics });
   } catch (error: unknown) {
@@ -293,8 +293,8 @@ export const getRealTimeMetrics: AsyncHandler = async (req, res, _next) => {
 
 export const getDashboards: AsyncHandler = async (req, res, _next) => {
   try {
-    const merchantId = req.user?.merchantId || req.user?.id;
-    const dashboards = await reportingRepo.getDashboards(merchantId);
+    const organizationId = req.user?.organizationId || req.user?.id;
+    const dashboards = await reportingRepo.getDashboards(organizationId);
     res.json({ success: true, data: dashboards });
   } catch (error: unknown) {
     logger.error('Error:', error);
@@ -320,14 +320,14 @@ export const getDashboard: AsyncHandler = async (req, res, _next) => {
 
 export const createDashboard: AsyncHandler = async (req, res, _next) => {
   try {
-    const merchantId = req.user?.merchantId || req.user?.id;
+    const organizationId = req.user?.organizationId || req.user?.id;
     const createdBy = req.user?.userId;
 
     const body = req.body as Record<string, unknown>;
     const dashboard = await reportingRepo.saveDashboard({
       ...body,
       name: (body.name as string) || 'Untitled',
-      merchantId,
+      organizationId,
       createdBy,
     });
 

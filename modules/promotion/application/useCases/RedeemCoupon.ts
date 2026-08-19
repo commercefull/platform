@@ -17,7 +17,7 @@ export class RedeemCouponCommand {
     public readonly orderTotal: number,
     public readonly discountAmount: number,
     public readonly customerId?: string,
-    public readonly merchantId?: string,
+    public readonly organizationId?: string,
   ) {}
 }
 
@@ -51,7 +51,7 @@ export class RedeemCouponUseCase {
 
     // First validate the coupon
     const validationResult = await this.validateCouponUseCase.execute(
-      new ValidateCouponCommand(command.code, command.orderTotal, command.customerId, command.merchantId),
+      new ValidateCouponCommand(command.code, command.orderTotal, command.customerId, command.organizationId),
     );
 
     if (!validationResult.valid || !validationResult.coupon) {

@@ -282,7 +282,7 @@ export const updateInventoryLocation = async (req: TypedRequest, res: Response):
 
     respond(res, location);
   } catch (error: unknown) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to update inventory location');
+    respondError(res, error instanceof Error ? error.message : 'Failed to update inventory location', errorStatus(error, 400));
   }
 };
 
@@ -299,10 +299,15 @@ export const deleteInventoryLocation = async (req: TypedRequest, res: Response):
       respond(res, { message: 'Inventory location deleted successfully' });
       return;
     }
+    const existing = await inventoryRepo.findLocationById(inventoryLocationId);
+    if (!existing) {
+      respondError(res, 'Inventory location not found', 404);
+      return;
+    }
     await inventoryRepo.deleteLocation(inventoryLocationId);
     respond(res, { message: 'Inventory location deleted successfully' });
   } catch (error: unknown) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to delete inventory location');
+    respondError(res, error instanceof Error ? error.message : 'Failed to delete inventory location', errorStatus(error, 400));
   }
 };
 
@@ -556,6 +561,10 @@ export const transferStock = async (req: TypedRequest<Record<string, string>, un
       respondError(res, 'sourceLocationId, destinationLocationId, and items are required', 400);
       return;
     }
+    if (req.body.sourceLocationId === req.body.destinationLocationId) {
+      respondError(res, 'sourceLocationId and destinationLocationId cannot be the same', 400);
+      return;
+    }
     if (!Array.isArray(req.body.items) || req.body.items.length === 0) {
       respondError(res, 'items must be a non-empty array', 400);
       return;
@@ -620,7 +629,7 @@ export const createInventoryItem = async (req: TypedRequest<Record<string, strin
 // ============================================================================
 
 interface CreatePoolBody {
-  ownerType: 'business' | 'merchant';
+  ownerType: 'organization';
   ownerId: string;
   name: string;
   poolType: 'shared' | 'virtual' | 'aggregated';
@@ -657,6 +666,14 @@ interface AllocateFromPoolBody {
 
 export const allocateFromPool = async (req: TypedRequest<Record<string, string>, unknown, AllocateFromPoolBody>, res: Response): Promise<void> => {
   try {
+    if (!req.body.poolId) {
+      respondError(res, 'poolId is required', 400);
+      return;
+    }
+    if (!req.body.items || !Array.isArray(req.body.items) || req.body.items.length === 0) {
+      respondError(res, 'items must be a non-empty array', 400);
+      return;
+    }
     const useCase = new AllocateFromPoolUseCase(inventoryPoolRepo);
     const result = await useCase.execute({
       poolId: req.body.poolId,
@@ -686,6 +703,16 @@ export const getInventoryItem = async (req: TypedRequest, res: Response): Promis
       warehouseId: req.query.warehouseId as string | undefined,
     });
     if (!result.found) {
+      // Best-effort fallback: if SKU provided but not found for given warehouse, try any location
+      const sku = req.query.sku as string | undefined;
+      if (sku) {
+        // Use repository directly to search any location
+        const any = await inventoryRepository.findBySku(sku);
+        if (any && any.length > 0) {
+          res.status(200).json({ success: true, data: any[0] });
+          return;
+        }
+      }
       respondError(res, 'Inventory item not found', 404);
       return;
     }

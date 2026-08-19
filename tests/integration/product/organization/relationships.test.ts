@@ -30,9 +30,9 @@ describe('Product Relationships', () => {
     }
   });
 
-  // ── Merchant: Relationship CRUD ──────────────────────────────────────────
+  // ── Organization: Relationship CRUD ──────────────────────────────────────────
 
-  describe('Merchant: Relationship CRUD', () => {
+  describe('Organization: Relationship CRUD', () => {
     it('should create a related product relationship', async () => {
       const res = await client.post(
         `/business/products/${SEEDED_PRODUCT_1_ID}/relationships`,
@@ -158,9 +158,9 @@ describe('Product Relationships', () => {
     });
   });
 
-  // ── Merchant: Relationship Validation ────────────────────────────────────
+  // ── Organization: Relationship Validation ────────────────────────────────────
 
-  describe('Merchant: Relationship Validation', () => {
+  describe('Organization: Relationship Validation', () => {
     it('should reject relationship without relatedProductId', async () => {
       const res = await client.post(
         `/business/products/${SEEDED_PRODUCT_1_ID}/relationships`,
@@ -182,9 +182,9 @@ describe('Product Relationships', () => {
     });
   });
 
-  // ── Merchant: Grouped Product Children ───────────────────────────────────
+  // ── Organization: Grouped Product Children ───────────────────────────────────
 
-  describe('Merchant: Grouped Product Children', () => {
+  describe('Organization: Grouped Product Children', () => {
     it('should list grouped children for a product with no grouped relationships', async () => {
       const res = await client.get(`/business/products/${SEEDED_PRODUCT_3_ID}/grouped-children`, {
         headers: { Authorization: `Bearer ${adminToken}` },

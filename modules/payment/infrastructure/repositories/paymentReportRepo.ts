@@ -2,7 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 
 export interface PaymentReport {
   paymentReportId: string;
-  merchantId: string;
+  organizationId: string;
   type: string;
   currency: string;
   totalAmount: number;
@@ -14,17 +14,17 @@ export interface PaymentReport {
   updatedAt: Date;
 }
 
-export async function findByMerchant(merchantId: string): Promise<PaymentReport[]> {
+export async function findByMerchant(organizationId: string): Promise<PaymentReport[]> {
   return (
-    (await query<PaymentReport[]>(`SELECT * FROM "paymentReport" WHERE "merchantId" = $1 ORDER BY "periodStart" DESC`, [merchantId])) || []
+    (await query<PaymentReport[]>(`SELECT * FROM "paymentReport" WHERE "organizationId" = $1 ORDER BY "periodStart" DESC`, [organizationId])) || []
   );
 }
 
-export async function findByDateRange(merchantId: string, from: Date, to: Date): Promise<PaymentReport[]> {
+export async function findByDateRange(organizationId: string, from: Date, to: Date): Promise<PaymentReport[]> {
   return (
     (await query<PaymentReport[]>(
-      `SELECT * FROM "paymentReport" WHERE "merchantId" = $1 AND "periodStart" >= $2 AND "periodEnd" <= $3 ORDER BY "periodStart" DESC`,
-      [merchantId, from, to],
+      `SELECT * FROM "paymentReport" WHERE "organizationId" = $1 AND "periodStart" >= $2 AND "periodEnd" <= $3 ORDER BY "periodStart" DESC`,
+      [organizationId, from, to],
     )) || []
   );
 }
@@ -32,10 +32,10 @@ export async function findByDateRange(merchantId: string, from: Date, to: Date):
 export async function create(params: Omit<PaymentReport, 'paymentReportId' | 'createdAt' | 'updatedAt'>): Promise<PaymentReport | null> {
   const now = new Date();
   return queryOne<PaymentReport>(
-    `INSERT INTO "paymentReport" ("merchantId", type, currency, "totalAmount", "transactionCount", data, "periodStart", "periodEnd", "createdAt", "updatedAt")
+    `INSERT INTO "paymentReport" ("organizationId", type, currency, "totalAmount", "transactionCount", data, "periodStart", "periodEnd", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
     [
-      params.merchantId,
+      params.organizationId,
       params.type,
       params.currency,
       params.totalAmount,

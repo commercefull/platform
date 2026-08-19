@@ -3,11 +3,11 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex.schema.createTable('merchantAddress', t => {
-    t.uuid('merchantAddressId').primary().defaultTo(knex.raw('uuidv7()'));
+  return knex.schema.createTable('organizationAddress', t => {
+    t.uuid('organizationAddressId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.enum('addressType', ['billing', 'shipping', 'business', 'warehouse', 'returns']).notNullable();
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.string('firstName', 100);
@@ -27,7 +27,7 @@ exports.up = function (knex) {
     t.decimal('longitude', 10, 7);
     t.text('notes');
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('addressType');
     t.index('isDefault');
     t.index('city');
@@ -43,5 +43,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema.dropTable('merchantAddress');
+  return knex.schema.dropTable('organizationAddress');
 };

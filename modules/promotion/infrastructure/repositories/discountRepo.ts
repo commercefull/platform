@@ -45,7 +45,7 @@ export interface CreateProductDiscountInput {
   displayInListing?: boolean;
   badgeText?: string;
   badgeStyle?: Record<string, unknown>;
-  merchantId?: string;
+  organizationId?: string;
 }
 
 /**
@@ -80,7 +80,7 @@ export class DiscountRepo {
         "currencyCode", "startDate", "endDate", "isActive", "priority",
         "appliesTo", "minimumQuantity", "maximumQuantity", "minimumAmount",
         "maximumDiscountAmount", "stackable", "displayOnProductPage", "displayInListing",
-        "badgeText", "badgeStyle", "merchantId", "createdAt", "updatedAt"
+        "badgeText", "badgeStyle", "organizationId", "createdAt", "updatedAt"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
       ) RETURNING *`,
@@ -105,7 +105,7 @@ export class DiscountRepo {
         input.displayInListing !== false,
         input.badgeText || null,
         input.badgeStyle ? JSON.stringify(input.badgeStyle) : null,
-        input.merchantId || null,
+        input.organizationId || null,
         now,
         now,
       ],
@@ -147,7 +147,7 @@ export class DiscountRepo {
       'displayInListing',
       'badgeText',
       'badgeStyle',
-      'merchantId',
+      'organizationId',
     ];
 
     for (const [key, value] of Object.entries(input)) {
@@ -199,7 +199,7 @@ export class DiscountRepo {
   async findAll(
     filters: {
       promotionId?: string;
-      merchantId?: string;
+      organizationId?: string;
       isActive?: boolean;
       discountType?: DiscountType;
       startBefore?: Date;
@@ -212,7 +212,7 @@ export class DiscountRepo {
       direction?: 'ASC' | 'DESC';
     } = {},
   ): Promise<PromotionProductDiscount[]> {
-    const { promotionId, merchantId, isActive, discountType, startBefore, endAfter } = filters;
+    const { promotionId, organizationId, isActive, discountType, startBefore, endAfter } = filters;
     const { limit = 50, offset = 0, orderBy = 'priority', direction = 'DESC' } = options;
 
     let sql = `SELECT * FROM "${DISCOUNT_TABLE}" WHERE 1=1`;
@@ -225,9 +225,9 @@ export class DiscountRepo {
       paramIndex++;
     }
 
-    if (merchantId) {
-      sql += ` AND "merchantId" = $${paramIndex}`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` AND "organizationId" = $${paramIndex}`;
+      params.push(organizationId);
       paramIndex++;
     }
 
@@ -264,12 +264,12 @@ export class DiscountRepo {
   /**
    * Find active product discounts
    */
-  async findActive(merchantId?: string): Promise<PromotionProductDiscount[]> {
+  async findActive(organizationId?: string): Promise<PromotionProductDiscount[]> {
     const now = new Date();
 
     return this.findAll(
       {
-        merchantId,
+        organizationId,
         isActive: true,
         startBefore: now,
         endAfter: now,
@@ -408,7 +408,7 @@ export class DiscountRepo {
   /**
    * Find discounts applicable to a product
    */
-  async findDiscountsForProduct(productId: string, merchantId?: string): Promise<PromotionProductDiscount[]> {
+  async findDiscountsForProduct(productId: string, organizationId?: string): Promise<PromotionProductDiscount[]> {
     const now = new Date();
 
     let sql = `
@@ -426,9 +426,9 @@ export class DiscountRepo {
     const params: unknown[] = [now, productId];
     let paramIndex = 3;
 
-    if (merchantId) {
-      sql += ` AND d."merchantId" = $${paramIndex}`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` AND d."organizationId" = $${paramIndex}`;
+      params.push(organizationId);
     }
 
     sql += ` ORDER BY d."priority" DESC`;
@@ -439,7 +439,7 @@ export class DiscountRepo {
   /**
    * Find discounts applicable to a category
    */
-  async findDiscountsForCategory(categoryId: string, merchantId?: string): Promise<PromotionProductDiscount[]> {
+  async findDiscountsForCategory(categoryId: string, organizationId?: string): Promise<PromotionProductDiscount[]> {
     const now = new Date();
 
     let sql = `
@@ -457,9 +457,9 @@ export class DiscountRepo {
     const params: unknown[] = [now, categoryId];
     let paramIndex = 3;
 
-    if (merchantId) {
-      sql += ` AND d."merchantId" = $${paramIndex}`;
-      params.push(merchantId);
+    if (organizationId) {
+      sql += ` AND d."organizationId" = $${paramIndex}`;
+      params.push(organizationId);
     }
 
     sql += ` ORDER BY d."priority" DESC`;

@@ -1,4 +1,5 @@
 import PG from 'pg';
+import { getTestDbName } from './testDbContext';
 
 export const pool = new PG.Pool({
   port: parseInt(process.env.POSTGRES_PORT || '', 10),
@@ -11,14 +12,65 @@ export const pool = new PG.Pool({
   connectionTimeoutMillis: 2000, // how long to wait for a connection to be established
 });
 
+// Cache of per-database pools for test isolation
+const testPools = new Map<string, PG.Pool>();
+
+const getTestPool = (database: string): PG.Pool => {
+  let p = testPools.get(database);
+  if (!p) {
+    p = new PG.Pool({
+      port: parseInt(process.env.POSTGRES_PORT || '', 10),
+      host: process.env.POSTGRES_HOST,
+      user: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database,
+      max: 10,
+      idleTimeoutMillis: 5000,
+      connectionTimeoutMillis: 2000,
+    });
+    // Swallow pool-level errors so the server doesn't crash when
+    // a test DB is dropped (connections get killed by DROP DATABASE FORCE)
+    p.on('error', (_err: Error) => {
+      // Pool error — likely a killed connection during test DB teardown
+    });
+    testPools.set(database, p);
+  }
+  return p;
+};
+
+const getActivePool = (): PG.Pool => {
+  const testDb = getTestDbName();
+  if (testDb) {
+    return getTestPool(testDb);
+  }
+  return pool;
+};
+
+export const closeAllTestPools = async (): Promise<void> => {
+  const entries = [...testPools.entries()];
+  testPools.clear();
+  for (const [, p] of entries) {
+    await p.end().catch(() => {});
+  }
+};
+
+export const closeTestPool = async (database: string): Promise<void> => {
+  const p = testPools.get(database);
+  if (p) {
+    testPools.delete(database);
+    await p.end().catch(() => {});
+  }
+};
+
 export const query = async <T>(text: string, params?: Array<unknown>): Promise<T | null> => {
   let res: PG.QueryResult;
 
   try {
+    const activePool = getActivePool();
     if (params !== undefined) {
-      res = await pool.query(text, params);
+      res = await activePool.query(text, params);
     } else {
-      res = await pool.query(text);
+      res = await activePool.query(text);
     }
   } catch (e: unknown) {
     throw new Error(`Query failed: ${(e as Error).message}`, { cause: e });
@@ -35,7 +87,8 @@ export const queryOne = async <T>(text: string, params: Array<unknown>): Promise
   let res: PG.QueryResult;
 
   try {
-    res = await pool.query(text, params);
+    const activePool = getActivePool();
+    res = await activePool.query(text, params);
   } catch (e: unknown) {
     throw new Error(`Query failed: ${(e as Error).message}`, { cause: e });
   }

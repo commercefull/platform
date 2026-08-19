@@ -3,7 +3,7 @@ exports.up = function (knex) {
     t.uuid('paymentPlanId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant');
+    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization');
     t.string('name', 100).notNullable();
     t.text('description');
     t.boolean('isActive').notNullable().defaultTo(true);
@@ -23,7 +23,7 @@ exports.up = function (knex) {
     t.jsonb('cancelationPolicy');
     t.enum('allowedPaymentMethods', ['creditCard', 'debitCard', 'giftCard', 'storeCredit', 'other']).notNullable();
 
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isActive');
     t.index('isPublic');
     t.index('billingInterval');

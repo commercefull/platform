@@ -46,7 +46,7 @@ describe.skip('Store API Integration', () => {
 
       const businessResponse = await axios.post('/business/businesses', businessData);
 
-      testBusinessId = businessResponse.data.data.businessId;
+      testBusinessId = businessResponse.data.data.organizationId;
     });
 
     it('should create a business-owned store successfully', async () => {
@@ -54,8 +54,8 @@ describe.skip('Store API Integration', () => {
         name: 'Test Store',
         slug: 'test-store',
         storeUrl: 'https://teststore.com',
-        businessId: testBusinessId,
-        storeType: 'business_store',
+        organizationId: testBusinessId,
+        storeType: 'organization_store',
         defaultCurrency: 'USD',
         storeEmail: 'store@teststore.com',
         storePhone: '+1-555-0123',
@@ -78,13 +78,13 @@ describe.skip('Store API Integration', () => {
       expect(store.storeId).toBeDefined();
       expect(store.name).toBe('Test Store');
       expect(store.slug).toBe('test-store');
-      expect(store.businessId).toBe(testBusinessId);
-      expect(store.storeType).toBe('business_store');
+      expect(store.organizationId).toBe(testBusinessId);
+      expect(store.storeType).toBe('organization_store');
       expect(store.isActive).toBe(true);
       expect(store.isVerified).toBe(false);
     });
 
-    it('should create a merchant-owned store in marketplace mode', async () => {
+    it('should create a organization-owned store in marketplace mode', async () => {
       // First, update system configuration to marketplace mode
       const configData = {
         platformName: 'Marketplace Test Platform',
@@ -96,13 +96,13 @@ describe.skip('Store API Integration', () => {
       await axios.put('/business/configuration/test-system-config', configData);
 
       const storeData = {
-        name: 'Merchant Store',
-        slug: 'merchant-store',
-        storeUrl: 'https://merchantstore.com',
-        merchantId: 'test-merchant-123',
+        name: 'Organization Store',
+        slug: 'organization-store',
+        storeUrl: 'https://organizationstore.com',
+        organizationId: 'test-org-123',
         storeType: 'merchant_store',
         defaultCurrency: 'EUR',
-        storeEmail: 'merchant@store.com',
+        storeEmail: 'organization@store.com',
       };
 
       const response = await axios.post('/business/stores', storeData);
@@ -110,8 +110,8 @@ describe.skip('Store API Integration', () => {
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data.storeType).toBe('merchant_store');
-      expect(response.data.data.merchantId).toBe('test-merchant-123');
-      expect(response.data.data.businessId).toBeUndefined();
+      expect(response.data.data.organizationId).toBe('test-org-123');
+      expect(response.data.data.organizationId).toBeUndefined();
 
       // Reset system configuration
       await axios.put('/business/configuration/test-system-config', { systemMode: 'multi_store' });
@@ -122,8 +122,8 @@ describe.skip('Store API Integration', () => {
         name: 'Settings Test Store',
         slug: 'settings-store',
         storeUrl: 'https://settingsstore.com',
-        businessId: testBusinessId,
-        storeType: 'business_store',
+        organizationId: testBusinessId,
+        storeType: 'organization_store',
         settings: {
           allowGuestCheckout: false,
           requireAccountForPurchase: true,
@@ -154,8 +154,8 @@ describe.skip('Store API Integration', () => {
         name: 'First Store',
         slug: 'unique-store-slug',
         storeUrl: 'https://firststore.com',
-        businessId: testBusinessId,
-        storeType: 'business_store',
+        organizationId: testBusinessId,
+        storeType: 'organization_store',
       };
 
       await axios.post('/business/stores', storeData1);
@@ -165,8 +165,8 @@ describe.skip('Store API Integration', () => {
         name: 'Second Store',
         slug: 'unique-store-slug', // Same slug
         storeUrl: 'https://secondstore.com',
-        businessId: testBusinessId,
-        storeType: 'business_store',
+        organizationId: testBusinessId,
+        storeType: 'organization_store',
       };
 
       const response = await axios.post('/business/stores', storeData2);
@@ -182,8 +182,8 @@ describe.skip('Store API Integration', () => {
         name: 'URL Store 1',
         slug: 'url-store-1',
         storeUrl: 'https://uniquestore.com',
-        businessId: testBusinessId,
-        storeType: 'business_store',
+        organizationId: testBusinessId,
+        storeType: 'organization_store',
       };
 
       await axios.post('/business/stores', storeData1);
@@ -193,8 +193,8 @@ describe.skip('Store API Integration', () => {
         name: 'URL Store 2',
         slug: 'url-store-2',
         storeUrl: 'https://uniquestore.com', // Same URL
-        businessId: testBusinessId,
-        storeType: 'business_store',
+        organizationId: testBusinessId,
+        storeType: 'organization_store',
       };
 
       const response = await axios.post('/business/stores', storeData2);
@@ -205,20 +205,20 @@ describe.skip('Store API Integration', () => {
     });
 
     it('should validate ownership constraints', async () => {
-      // Try to create merchant store without merchant ID
+      // Try to create organization store without organization ID
       const invalidStoreData = {
         name: 'Invalid Store',
         slug: 'invalid-store',
         storeUrl: 'https://invalid.com',
         storeType: 'merchant_store',
-        // Missing merchantId
+        // Missing organizationId
       };
 
       const response = await axios.post('/business/stores', invalidStoreData);
 
       expect(response.status).toBe(400);
       expect(response.data.success).toBe(false);
-      expect(response.data.message).toContain('Merchant');
+      expect(response.data.message).toContain('organization');
     });
 
     it('should validate store type against system mode', async () => {
@@ -227,7 +227,7 @@ describe.skip('Store API Integration', () => {
         name: 'Invalid Type Store',
         slug: 'invalid-type-store',
         storeUrl: 'https://invalidtype.com',
-        businessId: testBusinessId,
+        organizationId: testBusinessId,
         storeType: 'marketplace_store', // Invalid type
       };
 
@@ -256,7 +256,7 @@ describe.skip('Store API Integration', () => {
 
       const businessResponse = await axios.post('/business/businesses', businessData);
 
-      testStoreId = businessResponse.data.data.businessId;
+      testStoreId = businessResponse.data.data.organizationId;
     });
 
     it('should get store by ID', async () => {
@@ -270,8 +270,8 @@ describe.skip('Store API Integration', () => {
       expect(store.storeId).toBe(testStoreId);
       expect(store.name).toBe('Store Get Test Business');
       expect(store.slug).toBe('store-get-test-business');
-      expect(store.businessId).toBe(testStoreId);
-      expect(store.storeType).toBe('business_store');
+      expect(store.organizationId).toBe(testStoreId);
+      expect(store.storeType).toBe('organization_store');
       expect(store.isActive).toBe(true);
       expect(store.isVerified).toBe(false);
     });

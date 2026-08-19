@@ -24,7 +24,7 @@ export interface TaxSettings {
   taxSettingsId: string;
   createdAt: string;
   updatedAt: string;
-  merchantId: string;
+  organizationId: string;
   calculationMethod: TaxCalculationMethod;
   pricesIncludeTax: boolean;
   displayPricesWithTax: boolean;
@@ -42,28 +42,28 @@ export interface TaxSettings {
 }
 
 export type TaxSettingsCreateParams = Omit<TaxSettings, 'taxSettingsId' | 'createdAt' | 'updatedAt'>;
-export type TaxSettingsUpdateParams = Partial<Omit<TaxSettings, 'taxSettingsId' | 'merchantId' | 'createdAt' | 'updatedAt'>>;
+export type TaxSettingsUpdateParams = Partial<Omit<TaxSettings, 'taxSettingsId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
 
 export class TaxSettingsRepo {
   async findById(id: string): Promise<TaxSettings | null> {
     return await queryOne<TaxSettings>(`SELECT * FROM "taxSettings" WHERE "taxSettingsId" = $1`, [id]);
   }
 
-  async findByMerchant(merchantId: string): Promise<TaxSettings | null> {
-    return await queryOne<TaxSettings>(`SELECT * FROM "taxSettings" WHERE "merchantId" = $1`, [merchantId]);
+  async findByMerchant(organizationId: string): Promise<TaxSettings | null> {
+    return await queryOne<TaxSettings>(`SELECT * FROM "taxSettings" WHERE "organizationId" = $1`, [organizationId]);
   }
 
   async create(params: TaxSettingsCreateParams): Promise<TaxSettings> {
     const now = unixTimestamp();
     const result = await queryOne<TaxSettings>(
       `INSERT INTO "taxSettings" (
-        "merchantId", "calculationMethod", "pricesIncludeTax", "displayPricesWithTax", "taxBasedOn",
+        "organizationId", "calculationMethod", "pricesIncludeTax", "displayPricesWithTax", "taxBasedOn",
         "shippingTaxClass", "displayTaxTotals", "applyTaxToShipping", "applyDiscountBeforeTax",
         "roundTaxAtSubtotal", "taxDecimalPlaces", "defaultTaxCategory", "defaultTaxZone",
         "taxProvider", "taxProviderSettings", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
       [
-        params.merchantId,
+        params.organizationId,
         params.calculationMethod || 'unitBased',
         params.pricesIncludeTax || false,
         params.displayPricesWithTax || false,
@@ -109,8 +109,8 @@ export class TaxSettingsRepo {
     );
   }
 
-  async updateByMerchant(merchantId: string, params: TaxSettingsUpdateParams): Promise<TaxSettings | null> {
-    const existing = await this.findByMerchant(merchantId);
+  async updateByMerchant(organizationId: string, params: TaxSettingsUpdateParams): Promise<TaxSettings | null> {
+    const existing = await this.findByMerchant(organizationId);
     if (!existing) return null;
     return this.update(existing.taxSettingsId, params);
   }

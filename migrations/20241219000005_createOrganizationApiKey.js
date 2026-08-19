@@ -3,9 +3,9 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex.schema.createTable('businessApiKey', t => {
+  return knex.schema.createTable('organizationApiKey', t => {
     t.uuid('apiKeyId').primary().defaultTo(knex.raw('uuidv7()'));
-    t.uuid('merchantId');
+    t.uuid('organizationId');
     t.string('name', 255).notNullable();
     t.string('keyHash', 255).notNullable();
     t.string('keyPrefix', 20).notNullable();
@@ -18,7 +18,7 @@ exports.up = function (knex) {
     t.timestamp('updatedAt', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     t.index('keyPrefix');
-    t.index('merchantId');
+    t.index('organizationId');
     t.index('isActive');
   });
 };
@@ -28,5 +28,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema.dropTable('businessApiKey');
+  return knex.schema.dropTable('organizationApiKey');
 };

@@ -70,7 +70,7 @@ export interface PricingRule {
   minimumOrderAmount?: number;
   createdAt: Date;
   updatedAt: Date;
-  merchantId?: string;
+  organizationId?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -148,7 +148,7 @@ export interface CustomerPriceList {
   status: PricingRuleStatus;
   createdAt: Date;
   updatedAt: Date;
-  merchantId?: string;
+  organizationId?: string;
 }
 
 export interface CustomerPrice {

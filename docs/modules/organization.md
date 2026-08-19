@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Organization module manages business/organization accounts. It handles organization profiles, addresses, and payment information. This module replaced the former Merchant module.
+The Organization module manages organization accounts. It handles organization profiles, addresses, and payment information. This module replaced the former Merchant module.
 
 ---
 
@@ -19,7 +19,7 @@ The Organization module manages business/organization accounts. It handles organ
 | UC-ORG-007 | Add Organization Address | Admin | Add a business, warehouse, or return address to an organization |
 | UC-ORG-008 | Get Organization Payment Info | Admin | Retrieve an organization's payment method details |
 | UC-ORG-009 | Add Organization Payment Info | Admin | Add a payment method (bank transfer, PayPal, Stripe) |
-| UC-ORG-010 | Get Organization Stores | Admin/Business | List all stores belonging to an organization |
+| UC-ORG-010 | Get Organization Stores | Admin/Organization | List all stores belonging to an organization |
 
 ### API Endpoints
 
@@ -42,9 +42,26 @@ The Organization module manages business/organization accounts. It handles organ
 
 | Event | Trigger | Payload |
 |---|---|---|
-| `merchant.created` | Organization created | merchantId, name, email |
-| `merchant.login` | Organization login | merchantId, email, name |
-| `merchant.registered` | Organization registered | merchantId, email, name, status |
+| `organization.created` | Organization created | organizationId, name, email |
+| `organization.login` | Organization login | organizationId, email, name |
+| `organization.registered` | Organization registered | organizationId, email, name, status |
+
+---
+
+## Integration Test Coverage
+
+| Use Case   | Test File                        | Status |
+| ---------- | -------------------------------- | ------ |
+| UC-ORG-001 | `organization/organization.test.ts` | ✅     |
+| UC-ORG-002 | `organization/organization.test.ts` | ✅     |
+| UC-ORG-003 | `organization/organization.test.ts` | ✅     |
+| UC-ORG-004 | `organization/organization.test.ts` | ✅     |
+| UC-ORG-005 | `organization/organization.test.ts` | ✅     |
+| UC-ORG-006 | `organization/organization.test.ts` | ✅     |
+| UC-ORG-007 | `organization/organization.test.ts` | ✅     |
+| UC-ORG-008 | `organization/organization.test.ts` | ✅     |
+| UC-ORG-009 | `organization/organization.test.ts` | ✅     |
+| UC-ORG-010 | `organization/organization.test.ts` | ✅     |
 
 ---
 

@@ -9,8 +9,10 @@ import {
   StoreDispatch as DbStoreDispatch,
   StoreDispatchItem as DbStoreDispatchItem,
 } from '../../../../libs/db/types';
+import { isUuid } from '../../../../libs/uuid';
 
 export class StoreDispatchRepository implements IStoreDispatchRepository {
+
   async findById(dispatchId: string): Promise<StoreDispatch | null> {
     const row = await queryOne<DbStoreDispatch>('SELECT * FROM "storeDispatch" WHERE "dispatchId" = $1', [dispatchId]);
     if (!row) return null;
@@ -65,6 +67,22 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
     ]);
     const now = new Date().toISOString();
 
+    // Sanitize actor IDs that are stored in UUID columns; persist human names in metadata when not UUIDs
+    const approvedById = isUuid(dispatch.approvedBy) ? dispatch.approvedBy : null;
+    const dispatchedById = isUuid(dispatch.dispatchedBy) ? dispatch.dispatchedBy : null;
+    const receivedById = isUuid(dispatch.receivedBy) ? dispatch.receivedBy : null;
+    const requestedById = isUuid(dispatch.requestedBy) ? dispatch.requestedBy : null;
+
+    const metadata = {
+      ...(dispatch.metadata || {}),
+      actorNames: {
+        requestedByName: !requestedById && dispatch.requestedBy ? String(dispatch.requestedBy) : undefined,
+        approvedByName: !approvedById && dispatch.approvedBy ? String(dispatch.approvedBy) : undefined,
+        dispatchedByName: !dispatchedById && dispatch.dispatchedBy ? String(dispatch.dispatchedBy) : undefined,
+        receivedByName: !receivedById && dispatch.receivedBy ? String(dispatch.receivedBy) : undefined,
+      },
+    } as Record<string, unknown>;
+
     if (existing) {
       await query(
         `UPDATE "storeDispatch" SET
@@ -89,16 +107,16 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
           dispatch.toStoreId,
           dispatch.dispatchNumber,
           dispatch.status,
-          dispatch.requestedBy || null,
-          dispatch.approvedBy || null,
-          dispatch.dispatchedBy || null,
-          dispatch.receivedBy || null,
+          requestedById,
+          approvedById,
+          dispatchedById,
+          receivedById,
           dispatch.requestedAt?.toISOString() || null,
           dispatch.approvedAt?.toISOString() || null,
           dispatch.dispatchedAt?.toISOString() || null,
           dispatch.receivedAt?.toISOString() || null,
           dispatch.notes || null,
-          JSON.stringify(dispatch.metadata || {}),
+          JSON.stringify(metadata),
           now,
           dispatch.dispatchId,
         ],
@@ -122,16 +140,16 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
           dispatch.toStoreId,
           dispatch.dispatchNumber,
           dispatch.status,
-          dispatch.requestedBy || null,
-          dispatch.approvedBy || null,
-          dispatch.dispatchedBy || null,
-          dispatch.receivedBy || null,
+          requestedById,
+          approvedById,
+          dispatchedById,
+          receivedById,
           dispatch.requestedAt?.toISOString() || null,
           dispatch.approvedAt?.toISOString() || null,
           dispatch.dispatchedAt?.toISOString() || null,
           dispatch.receivedAt?.toISOString() || null,
           dispatch.notes || null,
-          JSON.stringify(dispatch.metadata || {}),
+          JSON.stringify(metadata),
           dispatch.createdAt.toISOString(),
           now,
         ],
@@ -223,6 +241,12 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
   }
 
   private mapToDispatch(row: DbStoreDispatch, items: StoreDispatchItemProps[]): StoreDispatch {
+    const md: Record<string, unknown> | undefined = row.metadata
+      ? (typeof row.metadata === 'string'
+          ? (JSON.parse(row.metadata as string) as Record<string, unknown>)
+          : (row.metadata as Record<string, unknown>))
+      : undefined;
+    const actorNames = (md?.actorNames as Record<string, unknown> | undefined) || {};
     return StoreDispatch.reconstitute({
       dispatchId: row.dispatchId,
       fromStoreId: row.fromStoreId,
@@ -230,16 +254,16 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
       dispatchNumber: row.dispatchNumber,
       status: row.status as StoreDispatch['status'],
       items,
-      requestedBy: row.requestedBy ?? undefined,
-      approvedBy: row.approvedBy ?? undefined,
-      dispatchedBy: row.dispatchedBy ?? undefined,
-      receivedBy: row.receivedBy ?? undefined,
+      requestedBy: (row.requestedBy as unknown as string) ?? (actorNames.requestedByName as string | undefined) ?? undefined,
+      approvedBy: (row.approvedBy as unknown as string) ?? (actorNames.approvedByName as string | undefined) ?? undefined,
+      dispatchedBy: (row.dispatchedBy as unknown as string) ?? (actorNames.dispatchedByName as string | undefined) ?? undefined,
+      receivedBy: (row.receivedBy as unknown as string) ?? (actorNames.receivedByName as string | undefined) ?? undefined,
       requestedAt: row.requestedAt ? new Date(row.requestedAt) : undefined,
       approvedAt: row.approvedAt ? new Date(row.approvedAt) : undefined,
       dispatchedAt: row.dispatchedAt ? new Date(row.dispatchedAt) : undefined,
       receivedAt: row.receivedAt ? new Date(row.receivedAt) : undefined,
       notes: row.notes ?? undefined,
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata as Record<string, unknown>) : undefined,
+      metadata: md,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

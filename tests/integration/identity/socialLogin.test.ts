@@ -170,12 +170,12 @@ describe('Social Login Feature Tests', () => {
   });
 
   // ==========================================================================
-  // Merchant Social Login
+  // Organization Social Login
   // ==========================================================================
 
-  describe('POST /identity/social/:provider/merchant', () => {
+  describe('POST /identity/social/:provider/organization', () => {
     it('should require access token or id token', async () => {
-      const response = await client.post('/customer/identity/google/merchant', {
+      const response = await client.post('/customer/identity/google/organization', {
         profile: mockGoogleProfile,
       });
 
@@ -183,23 +183,23 @@ describe('Social Login Feature Tests', () => {
       expect(response.data.success).toBe(false);
     });
 
-    // TODO: Merchant social login has server-side issues
-    it.skip('should authenticate merchant with valid profile', async () => {
-      const merchantProfile = {
-        id: `google-merchant-${Date.now()}`,
-        email: `merchant-${Date.now()}@business.com`,
+    // TODO: Organization social login has server-side issues
+    it.skip('should authenticate organization with valid profile', async () => {
+      const organizationProfile = {
+        id: `google-organization-${Date.now()}`,
+        email: `organization-${Date.now()}@business.com`,
         name: 'Business Owner',
       };
 
-      const response = await client.post('/customer/identity/google/merchant', {
+      const response = await client.post('/customer/identity/google/organization', {
         accessToken: 'mock-google-access-token',
-        profile: merchantProfile,
+        profile: organizationProfile,
       });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data).toHaveProperty('accessToken');
-      expect(response.data).toHaveProperty('merchant');
+      expect(response.data).toHaveProperty('organization');
       expect(response.data.provider).toBe('google');
     });
   });
@@ -241,9 +241,9 @@ describe('Social Login Feature Tests', () => {
     });
   });
 
-  describe('GET /identity/social/merchant/accounts', () => {
+  describe('GET /identity/social/organization/accounts', () => {
     it('should require authentication', async () => {
-      const response = await client.get('/customer/identity/merchant/accounts');
+      const response = await client.get('/customer/identity/organization/accounts');
 
       expect(response.status).toBe(401);
       expect(response.data.success).toBe(false);

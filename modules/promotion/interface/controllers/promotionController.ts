@@ -25,7 +25,7 @@ interface ValidatePromotionBody {
  */
 export const getActivePromotions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { scope, merchantId } = req.query;
+    const { scope, organizationId } = req.query;
 
     // Handle scope as array or single value
     let scopeFilter: PromotionScope | PromotionScope[] | undefined = undefined;
@@ -37,7 +37,7 @@ export const getActivePromotions = async (req: TypedRequest, res: Response): Pro
       }
     }
 
-    const promotions = await promotionRepo.findActive(scopeFilter, merchantId as string | undefined);
+    const promotions = await promotionRepo.findActive(scopeFilter, organizationId as string | undefined);
 
     res.status(200).json({
       success: true,
@@ -60,7 +60,7 @@ export const getPromotions = async (req: TypedRequest, res: Response): Promise<v
     const {
       status,
       scope,
-      merchantId,
+      organizationId,
       withCoupon,
       startBefore,
       endAfter,
@@ -93,7 +93,7 @@ export const getPromotions = async (req: TypedRequest, res: Response): Promise<v
       {
         status: statusFilter,
         scope: scopeFilter,
-        merchantId: merchantId as string | undefined,
+        organizationId: organizationId as string | undefined,
         isActive: withCoupon === 'true' ? true : withCoupon === 'false' ? false : undefined,
         startBefore: startBefore ? new Date(startBefore as string) : undefined,
         endAfter: endAfter ? new Date(endAfter as string) : undefined,

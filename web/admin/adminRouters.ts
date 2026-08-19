@@ -36,11 +36,10 @@ import * as supportController from './controllers/supportController';
 import * as assortmentController from './controllers/assortmentController';
 import * as pricingController from './controllers/pricingController';
 import * as localizationController from './controllers/localizationController';
-import * as merchantController from './controllers/merchantController';
+import * as organizationController from './controllers/organizationController';
 import * as mediaController from './controllers/mediaController';
 import * as checkoutController from './controllers/checkoutController';
 import * as storeController from './controllers/storeController';
-import * as organizationController from './controllers/organizationController';
 import * as reportingController from './controllers/reportingController';
 
 const router = express.Router();
@@ -383,7 +382,7 @@ router.get('/payments/fees', paymentController.listPaymentFees);
 
 // Payment Settings
 router.get('/payments/settings', paymentController.listPaymentSettings);
-router.post('/payments/settings/:merchantId', paymentController.updatePaymentSettings);
+router.post('/payments/settings/:organizationId', paymentController.updatePaymentSettings);
 
 // Payment Balance
 router.get('/payments/balance', paymentController.viewPaymentBalance);
@@ -711,20 +710,20 @@ router.get('/settings/checkout/shipping-options', checkoutController.listShippin
 router.post('/settings/checkout/shipping-options/order', checkoutController.updateShippingOptionOrder);
 
 // ============================================================================
-// Merchants Routes
+// Organizations Routes
 // ============================================================================
 
-router.get('/operations/merchants', merchantController.listMerchants);
-router.get('/operations/merchants/create', merchantController.createMerchantForm);
-router.post('/operations/merchants', merchantController.createMerchant);
+router.get('/operations/organizations', organizationController.listOrganizations);
+router.get('/operations/organizations/create', organizationController.createOrganizationForm);
+router.post('/operations/organizations', organizationController.createOrganization);
 
-router.get('/operations/merchants/:merchantId', merchantController.viewMerchant);
-router.get('/operations/merchants/:merchantId/edit', merchantController.editMerchantForm);
-router.post('/operations/merchants/:merchantId', merchantController.updateMerchant);
-router.put('/operations/merchants/:merchantId', merchantController.updateMerchant);
-router.delete('/operations/merchants/:merchantId', merchantController.deleteMerchant);
-router.post('/operations/merchants/:merchantId/approve', merchantController.approveMerchant);
-router.post('/operations/merchants/:merchantId/suspend', merchantController.suspendMerchant);
+router.get('/operations/organizations/:organizationId', organizationController.viewOrganization);
+router.get('/operations/organizations/:organizationId/edit', organizationController.editOrganizationForm);
+router.post('/operations/organizations/:organizationId', organizationController.updateOrganization);
+router.put('/operations/organizations/:organizationId', organizationController.updateOrganization);
+router.delete('/operations/organizations/:organizationId', organizationController.deleteOrganization);
+router.post('/operations/organizations/:organizationId/approve', organizationController.approveOrganization);
+router.post('/operations/organizations/:organizationId/suspend', organizationController.suspendOrganization);
 
 // ============================================================================
 // Media Library Routes

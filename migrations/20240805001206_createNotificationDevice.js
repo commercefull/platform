@@ -8,7 +8,7 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('userId').notNullable();
-    t.enum('userType', ['customer', 'merchant', 'admin']).notNullable().defaultTo('customer');
+    t.enum('userType', ['customer', 'organization', 'admin']).notNullable().defaultTo('customer');
     t.text('deviceToken').notNullable();
     t.enum('deviceType', ['ios', 'android', 'web', 'desktop', 'other']).notNullable();
     t.string('deviceName', 100);

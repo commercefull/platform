@@ -220,15 +220,15 @@ export const getRefunds = async (req: TypedRequest, res: Response): Promise<void
 
 export const listGateways = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id || req.user?.id;
-    if (!merchantId) {
+    const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
+    if (!organizationId) {
       respondError(req, res, 'Authentication required', 401);
       return;
     }
 
     const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "paymentGateway" WHERE "merchantId" = $1 AND "deletedAt" IS NULL ORDER BY "name" ASC',
-      [merchantId],
+      'SELECT * FROM "paymentGateway" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "name" ASC',
+      [organizationId],
     );
     respond(req, res, rows || []);
   } catch (error: unknown) {
@@ -260,8 +260,8 @@ export const getGateway = async (req: TypedRequest, res: Response): Promise<void
 
 export const createGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id || req.user?.id;
-    if (!merchantId) {
+    const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
+    if (!organizationId) {
       respondError(req, res, 'Authentication required', 401);
       return;
     }
@@ -303,13 +303,13 @@ export const createGateway = async (req: TypedRequest, res: Response): Promise<v
 
     const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "paymentGateway" (
-        "merchantId", name, provider, "isActive", "isDefault", "isTestMode",
+        "organizationId", name, provider, "isActive", "isDefault", "isTestMode",
         "apiKey", "apiSecret", "publicKey", "webhookSecret", "apiEndpoint", "supportedPaymentMethods",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING *`,
       [
-        merchantId,
+        organizationId,
         name,
         provider,
         isActive ?? true,
@@ -406,15 +406,15 @@ export const deleteGateway = async (req: TypedRequest, res: Response): Promise<v
 
 export const listMethodConfigs = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id || req.user?.id;
-    if (!merchantId) {
+    const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
+    if (!organizationId) {
       respondError(req, res, 'Authentication required', 401);
       return;
     }
 
     const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "paymentMethodConfig" WHERE "merchantId" = $1 AND "deletedAt" IS NULL ORDER BY "displayOrder" ASC',
-      [merchantId],
+      'SELECT * FROM "paymentMethodConfig" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "displayOrder" ASC',
+      [organizationId],
     );
     respond(req, res, rows || []);
   } catch (error: unknown) {
@@ -446,8 +446,8 @@ export const getMethodConfig = async (req: TypedRequest, res: Response): Promise
 
 export const createMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = req.user?.merchantId || req.user?._id || req.user?.id;
-    if (!merchantId) {
+    const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
+    if (!organizationId) {
       respondError(req, res, 'Authentication required', 401);
       return;
     }
@@ -493,13 +493,13 @@ export const createMethodConfig = async (req: TypedRequest, res: Response): Prom
 
     const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "paymentMethodConfig" (
-        "merchantId", "paymentMethod", "isEnabled", "displayName", description, "processingFee",
+        "organizationId", "paymentMethod", "isEnabled", "displayName", description, "processingFee",
         "minimumAmount", "maximumAmount", "displayOrder", icon, "supportedCurrencies", countries,
         "gatewayId", configuration, "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *`,
       [
-        merchantId,
+        organizationId,
         paymentMethod,
         isEnabled ?? true,
         displayName,

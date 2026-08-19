@@ -9,7 +9,7 @@ import * as basketController from '../controllers/BasketController';
 const router = express.Router();
 
 // List/search baskets (admin)
-router.get('/basket', basketController.getBasket);
+router.get('/basket', basketController.listBaskets);
 
 // Get basket by ID
 router.get('/basket/:basketId', basketController.getBasket);
@@ -18,7 +18,7 @@ router.get('/basket/:basketId', basketController.getBasket);
 router.get('/basket/:basketId/summary', basketController.getBasketSummary);
 
 // Apply coupon (admin override)
-router.post('/basket/:basketId/coupon', basketController.applyCoupon);
+router.post('/basket/:basketId/coupon', basketController.applyCouponAdmin);
 
 // Remove coupon
 router.delete('/basket/:basketId/coupon', basketController.removeCoupon);

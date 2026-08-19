@@ -23,7 +23,7 @@ describe('Payment Method Configuration Tests', () => {
   });
 
   describe('Admin Method Config Operations', () => {
-    it('should get all method configurations for a merchant', async () => {
+    it('should get all method configurations for a organization', async () => {
       const response = await client.get('/business/method-configs', {
         headers: { Authorization: `Bearer ${adminToken}` },
       });

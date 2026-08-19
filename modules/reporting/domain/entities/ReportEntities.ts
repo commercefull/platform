@@ -23,7 +23,7 @@ export type ReportExecutionStatus = 'pending' | 'running' | 'completed' | 'faile
 
 export interface ReportScheduleProps {
   reportScheduleId: string;
-  merchantId?: string;
+  organizationId?: string;
   name: string;
   reportType: ReportType;
   frequency: ReportFrequency;
@@ -74,7 +74,7 @@ export const REPORT_TEMPLATES: Record<ReportType, ReportTemplate> = {
     description: 'Overview of sales performance including revenue, orders, and averages',
     defaultFormat: 'pdf',
     requiredParameters: ['dateFrom', 'dateTo'],
-    optionalParameters: ['storeId', 'merchantId'],
+    optionalParameters: ['storeId', 'organizationId'],
   },
   product_performance: {
     reportType: 'product_performance',

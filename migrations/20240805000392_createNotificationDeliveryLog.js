@@ -4,7 +4,7 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('notificationId').references('notificationId').inTable('notification').onDelete('SET NULL');
     t.uuid('userId').notNullable();
-    t.string('userType', 20).notNullable().defaultTo('customer').checkIn(['customer', 'merchant', 'admin']);
+    t.string('userType', 20).notNullable().defaultTo('customer').checkIn(['customer', 'organization', 'admin']);
     t.enum('type', ['orderStatus', 'promotion', 'accountAlert']).notNullable();
     t.enum('channel', ['email', 'sms', 'in_app', 'push']).notNullable();
     t.string('recipient', 255).notNullable();
