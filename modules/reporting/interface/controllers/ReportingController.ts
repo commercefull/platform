@@ -25,6 +25,10 @@ interface GenerateReportBody {
 
 export const generateReport = async (req: TypedRequest<Record<string, string>, unknown, GenerateReportBody>, res: Response): Promise<void> => {
   try {
+    if (!req.body.reportType) {
+      res.status(400).json({ success: false, error: 'reportType is required' });
+      return;
+    }
     const useCase = new GenerateReportUseCase();
     const result = await useCase.execute({
       reportType: req.body.reportType as ReportType,
@@ -41,7 +45,8 @@ export const getReportTemplates = async (_req: TypedRequest, res: Response): Pro
   try {
     const useCase = new GetReportTemplatesUseCase();
     const templates = await useCase.execute();
-    res.json({ success: true, data: templates });
+    const templateList = Object.values(templates);
+    res.json({ success: true, data: templateList });
   } catch (error: unknown) {
     logger.error('Error getting report templates:', error);
     res.status(500).json({ success: false, error: (error as Error).message });
@@ -50,6 +55,10 @@ export const getReportTemplates = async (_req: TypedRequest, res: Response): Pro
 
 export const createSchedule = async (req: TypedRequest<Record<string, string>, unknown, CreateReportScheduleInput>, res: Response): Promise<void> => {
   try {
+    if (!req.body.name || !req.body.reportType) {
+      res.status(400).json({ success: false, error: 'name and reportType are required' });
+      return;
+    }
     const useCase = new CreateReportScheduleUseCase();
     const result = await useCase.execute(req.body);
     res.status(201).json({ success: true, data: result });

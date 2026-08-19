@@ -4,6 +4,7 @@
  */
 
 import { Router } from 'express';
+import { isCustomerLoggedIn } from '../../../../libs/auth';
 import {
   loginCustomer,
   registerCustomer,
@@ -12,6 +13,8 @@ import {
   checkTokenValidity,
   requestPasswordReset,
   resetPassword,
+  logoutCustomer,
+  get2FAStatus,
 } from '../controllers/identityCustomerController';
 
 const router = Router();
@@ -36,5 +39,13 @@ router.post('/identity/validate', checkTokenValidity);
 // Password reset flow
 router.post('/identity/forgot-password', requestPasswordReset);
 router.post('/identity/reset-password', resetPassword);
+
+// -------------------- Authenticated Routes --------------------
+
+// Logout (requires auth to blacklist token)
+router.post('/identity/logout', isCustomerLoggedIn, logoutCustomer);
+
+// 2FA status (requires auth)
+router.get('/identity/2fa/status', isCustomerLoggedIn, get2FAStatus);
 
 export const identityCustomerRouter = router;

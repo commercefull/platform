@@ -400,10 +400,10 @@ describe('Fulfillment Lifecycle Tests', () => {
   });
 
   // ==========================================================================
-  // POST /business/:fulfillmentId/cancel (separate fulfillment)
+  // POST /business/fulfillments/:fulfillmentId/cancel (separate fulfillment)
   // ==========================================================================
 
-  describe('POST /business/:fulfillmentId/cancel', () => {
+  describe('POST /business/fulfillments/:fulfillmentId/cancel', () => {
     it('should return 404 for non-existent fulfillment', async () => {
       const response = await client.post(
         `/business/fulfillments/${randomUUID()}/cancel`,
@@ -427,7 +427,7 @@ describe('Fulfillment Lifecycle Tests', () => {
       const fulfillmentId = fulfillment.fulfillmentId;
 
       const response = await client.post(
-        `/business/${fulfillmentId}/cancel`,
+        `/business/fulfillments/${fulfillmentId}/cancel`,
         { reason: 'No longer needed' },
         { headers: authHeaders() },
       );

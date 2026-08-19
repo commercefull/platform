@@ -5,9 +5,12 @@
 
 import { Router } from 'express';
 import { StoreController } from './StoreController';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = Router();
 const storeController = new StoreController();
+
+router.use(isOrganizationLoggedIn);
 
 // Create store
 router.post('/stores', storeController.createStore.bind(storeController));

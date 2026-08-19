@@ -148,12 +148,26 @@ describe('Identity Expanded Tests', () => {
   // ============================================================================
 
   describe('Two-Factor Authentication', () => {
-    it.skip('should get 2FA status for authenticated user', () => {
-      // 2FA REST endpoint not yet implemented
+    it('should get 2FA status for authenticated user', async () => {
+      const loginResp = await client.post('/customer/identity/login', {
+        email: TEST_CUSTOMER.email,
+        password: TEST_CUSTOMER.password,
+      });
+
+      if (loginResp.status === 200 && loginResp.data?.accessToken) {
+        const resp = await client.get('/customer/identity/2fa/status', {
+          headers: { Authorization: `Bearer ${loginResp.data.accessToken}` },
+        });
+
+        expect(resp.status).toBe(200);
+        expect(resp.data.success).toBe(true);
+        expect(resp.data.data).toHaveProperty('enabled');
+      }
     });
 
-    it.skip('should require auth for 2FA status', () => {
-      // 2FA REST endpoint not yet implemented
+    it('should require auth for 2FA status', async () => {
+      const resp = await client.get('/customer/identity/2fa/status');
+      expectStatus(resp, 401);
     });
   });
 
@@ -162,12 +176,27 @@ describe('Identity Expanded Tests', () => {
   // ============================================================================
 
   describe('Logout', () => {
-    it.skip('should logout successfully with valid token', () => {
-      // Logout REST endpoint not yet implemented
+    it('should logout successfully with valid token', async () => {
+      const loginResp = await client.post('/customer/identity/login', {
+        email: TEST_CUSTOMER.email,
+        password: TEST_CUSTOMER.password,
+      });
+
+      if (loginResp.status === 200 && loginResp.data?.accessToken) {
+        const resp = await client.post(
+          '/customer/identity/logout',
+          { refreshToken: loginResp.data.refreshToken },
+          { headers: { Authorization: `Bearer ${loginResp.data.accessToken}` } },
+        );
+
+        expectStatus(resp, 200);
+        expect(resp.data.success).toBe(true);
+      }
     });
 
-    it.skip('should require auth for logout', () => {
-      // Logout REST endpoint not yet implemented
+    it('should require auth for logout', async () => {
+      const resp = await client.post('/customer/identity/logout', {});
+      expectStatus(resp, 401);
     });
   });
 

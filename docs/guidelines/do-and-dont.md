@@ -13,6 +13,8 @@ Quick reference. For the full rules, see the individual standards documents.
 - Use `successResponse()` / `errorResponse()` for API responses.
 - Use `adminRespond()` / `merchantRespond()` / `b2bRespond()` / `storefrontRespond()` for portal views.
 - Apply auth middleware at the router level.
+- Use `isOrganizationLoggedIn` for all `/business` routers (except public auth endpoints in identity).
+- Follow the `/business/{topic}/...` route naming convention for all business routes.
 - Use the Winston logger (`logger.error()`, `logger.info()`) instead of `console.log`.
 - Write use cases as classes with an `execute()` method.
 - Create domain entities with `create()` and `reconstitute()` factory methods.
@@ -39,6 +41,8 @@ Quick reference. For the full rules, see the individual standards documents.
 - Use `t.increments()` for primary keys (use UUIDv7).
 - Create TypeScript migration files (use JavaScript).
 - Skip auth middleware on protected routes.
+- Leave any `/business` router without `isOrganizationLoggedIn` middleware.
+- Use bare route paths without a topic prefix (e.g. `/business/upload` instead of `/business/media/upload`).
 - Expose stack traces in production error responses.
 - Use inline SQL string interpolation (SQL injection risk).
 - Import from `web/` into `modules/` (dependency flows: `web → modules → libs`).

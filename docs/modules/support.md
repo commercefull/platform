@@ -159,12 +159,12 @@ The Support feature manages customer service operations including support ticket
 | POST | `/business/support/tickets/:id/escalate` | `escalateTicket` | — |
 | POST | `/business/support/tickets/:id/messages` | `addAgentMessage` | — |
 | POST | `/business/support/tickets/:id/resolve` | `resolveTicket` | — |
-| POST | `/customer/support/alerts/price` | `createPriceAlert` | — |
-| GET | `/customer/support/alerts/price/mine` | `getMyPriceAlerts` | — |
-| DELETE | `/customer/support/alerts/price/mine/:id` | `cancelMyPriceAlert` | — |
-| POST | `/customer/support/alerts/stock` | `createStockAlert` | — |
-| GET | `/customer/support/alerts/stock/mine` | `getMyStockAlerts` | — |
-| DELETE | `/customer/support/alerts/stock/mine/:id` | `cancelMyStockAlert` | — |
+| POST | `/customer/support/alerts/price` | `isCustomerLoggedIn` | — |
+| GET | `/customer/support/alerts/price/mine` | `isCustomerLoggedIn` | — |
+| DELETE | `/customer/support/alerts/price/mine/:id` | `isCustomerLoggedIn` | — |
+| POST | `/customer/support/alerts/stock` | `isCustomerLoggedIn` | — |
+| GET | `/customer/support/alerts/stock/mine` | `isCustomerLoggedIn` | — |
+| DELETE | `/customer/support/alerts/stock/mine/:id` | `isCustomerLoggedIn` | — |
 | POST | `/customer/support/faq/articles/:id/feedback` | `submitFaqFeedback` | — |
 | GET | `/customer/support/faq/articles/:slug` | `getFaqArticleBySlug` | — |
 | GET | `/customer/support/faq/articles/popular` | `getPopularFaqArticles` | — |
@@ -172,10 +172,10 @@ The Support feature manages customer service operations including support ticket
 | GET | `/customer/support/faq/categories/:slug` | `getFaqCategoryBySlug` | — |
 | GET | `/customer/support/faq/categories/featured` | `getFeaturedFaqCategories` | — |
 | GET | `/customer/support/faq/search` | `searchFaq` | — |
-| POST | `/customer/support/tickets` | `createTicket` | — |
-| GET | `/customer/support/tickets/mine` | `getMyTickets` | — |
-| GET | `/customer/support/tickets/mine/:id` | `getMyTicket` | — |
-| POST | `/customer/support/tickets/mine/:id/feedback` | `submitTicketFeedback` | — |
-| POST | `/customer/support/tickets/mine/:id/messages` | `addCustomerMessage` | — |
+| POST | `/customer/support/tickets` | `isCustomerLoggedIn` | — |
+| GET | `/customer/support/tickets/mine` | `isCustomerLoggedIn` | — |
+| GET | `/customer/support/tickets/mine/:id` | `isCustomerLoggedIn` | — |
+| POST | `/customer/support/tickets/mine/:id/feedback` | `isCustomerLoggedIn` | — |
+| POST | `/customer/support/tickets/mine/:id/messages` | `isCustomerLoggedIn` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -121,7 +121,6 @@ export const setupNotificationTests = async () => {
 
       if (createNotificationResponse.data?.data?.notificationId) {
         testNotificationId = createNotificationResponse.data.data.notificationId;
-      } else {
       }
 
       // Create test template
@@ -129,9 +128,25 @@ export const setupNotificationTests = async () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      if (createTemplateResponse.data?.data?.notificationTemplateId) {
-        testTemplateId = createTemplateResponse.data.data.notificationTemplateId;
-      } else {
+      if (createTemplateResponse.data?.data?.id) {
+        testTemplateId = createTemplateResponse.data.data.id;
+      }
+    } catch {}
+  }
+
+  // Create test preference using customer token
+  if (customerToken) {
+    try {
+      const createPreferenceResponse = await client.post(
+        '/customer/notifications/preferences',
+        testPreferenceData,
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
+
+      if (createPreferenceResponse.data?.data?.id) {
+        testPreferenceId = createPreferenceResponse.data.data.id;
       }
     } catch {}
   }
@@ -184,7 +199,7 @@ export const cleanupNotificationTests = async (
     // Delete test preference
     if (testPreferenceId) {
       await client
-        .delete(`/business/notification-preferences/${testPreferenceId}`, {
+        .delete(`/customer/notifications/preferences/${testPreferenceId}`, {
           headers: { Authorization: `Bearer ${adminToken}` },
         })
         .catch(() => {});

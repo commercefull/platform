@@ -39,7 +39,7 @@ describe('Notification Expanded Tests', () => {
   // Notification CRUD Tests
   // ============================================================================
 
-  describe.skip('Notification CRUD', () => {
+  describe('Notification CRUD', () => {
     it('should list user notifications', async () => {
       if (!customerToken) return;
 
@@ -106,7 +106,7 @@ describe('Notification Expanded Tests', () => {
   // Notification Preferences Tests
   // ============================================================================
 
-  describe.skip('Notification Preferences', () => {
+  describe('Notification Preferences', () => {
     it('should get user notification preferences', async () => {
       if (!customerToken) return;
 
@@ -165,26 +165,26 @@ describe('Notification Expanded Tests', () => {
   // Notification Template Tests (Admin)
   // ============================================================================
 
-  describe.skip('Notification Templates (Admin)', () => {
+  describe('Notification Templates (Admin)', () => {
     let createdTemplateId: string;
 
     it('should create a notification template', async () => {
       if (!adminToken) return;
 
-      const resp = await client.post('/business/notifications/templates', testTemplateData, {
+      const resp = await client.post('/business/notification-templates', testTemplateData, {
         headers: adminAuthHeaders(),
       });
 
       expectStatus(resp, 201);
       expect(resp.data.success).toBe(true);
-      expect(resp.data.data).toHaveProperty('notificationTemplateId');
-      createdTemplateId = resp.data.data.notificationTemplateId;
+      expect(resp.data.data).toHaveProperty('id');
+      createdTemplateId = resp.data.data.id;
     });
 
     it('should list notification templates', async () => {
       if (!adminToken) return;
 
-      const resp = await client.get('/business/notifications/templates', {
+      const resp = await client.get('/business/notification-templates', {
         headers: adminAuthHeaders(),
       });
 
@@ -196,13 +196,13 @@ describe('Notification Expanded Tests', () => {
     it('should get a specific template', async () => {
       if (!adminToken) return;
 
-      const resp = await client.get('/business/notifications/templates', {
+      const resp = await client.get('/business/notification-templates', {
         headers: adminAuthHeaders(),
       });
 
       if (resp.data.data?.length > 0) {
-        const templateId = resp.data.data[0].notificationTemplateId;
-        const getResp = await client.get(`/business/notifications/templates/${templateId}`, {
+        const templateId = resp.data.data[0].id;
+        const getResp = await client.get(`/business/notification-templates/${templateId}`, {
           headers: adminAuthHeaders(),
         });
 
@@ -213,8 +213,8 @@ describe('Notification Expanded Tests', () => {
     it('should update a template', async () => {
       if (!adminToken || !createdTemplateId) return;
 
-      const resp = await client.post(
-        `/business/notifications/templates/${createdTemplateId}`,
+      const resp = await client.put(
+        `/business/notification-templates/${createdTemplateId}`,
         { ...testTemplateData, description: 'Updated template' },
         { headers: adminAuthHeaders() },
       );
@@ -225,7 +225,7 @@ describe('Notification Expanded Tests', () => {
     it('should delete a template', async () => {
       if (!adminToken || !createdTemplateId) return;
 
-      const resp = await client.delete(`/business/notifications/templates/${createdTemplateId}`, {
+      const resp = await client.delete(`/business/notification-templates/${createdTemplateId}`, {
         headers: adminAuthHeaders(),
       });
 
@@ -237,14 +237,14 @@ describe('Notification Expanded Tests', () => {
   // Admin Notification Sending Tests
   // ============================================================================
 
-  describe.skip('Admin Notification Sending', () => {
+  describe('Admin Notification Sending', () => {
     it('should send a notification to a user', async () => {
       if (!adminToken) return;
 
       const resp = await client.post(
-        '/business/notifications/batcheses',
+        '/business/notifications/batches',
         {
-          userId: testUserId || '00000000-0000-0000-0000-000000001001',
+          userIds: [testUserId || '00000000-0000-0000-0000-000000001001'],
           type: 'test_notification',
           title: 'Test Notification',
           content: 'This is a test notification from admin',
@@ -279,7 +279,7 @@ describe('Notification Expanded Tests', () => {
   // Unread Count Tests
   // ============================================================================
 
-  describe.skip('Unread Count', () => {
+  describe('Unread Count', () => {
     it('should get unread notification count', async () => {
       if (!customerToken) return;
 
@@ -309,8 +309,8 @@ describe('Notification Expanded Tests', () => {
     });
 
     it('should require admin for sending notifications', async () => {
-      const resp = await client.post('/business/notifications/batcheses', {
-        userId: 'test',
+      const resp = await client.post('/business/notifications/batches', {
+        userIds: ['test'],
         type: 'test',
         title: 'Test',
         content: 'Test',

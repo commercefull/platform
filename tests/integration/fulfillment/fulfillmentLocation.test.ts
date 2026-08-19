@@ -51,7 +51,7 @@ describe('Fulfillment Location & Partner Tests', () => {
   describe('Fulfillment Locations', () => {
     let createdLocationId: string | undefined;
 
-    describe('POST /business/locations', () => {
+    describe('POST /business/fulfillment/locations', () => {
       it('should create a fulfillment location', async () => {
         const locationData = {
           organizationId: 'test-org-1',
@@ -61,7 +61,7 @@ describe('Fulfillment Location & Partner Tests', () => {
           capabilities: { canShip: true, canPickup: false, canLocalDeliver: false },
         };
 
-        const response = await client.post('/business/locations', locationData, {
+        const response = await client.post('/business/fulfillment/locations', locationData, {
           headers: authHeaders(),
         });
 
@@ -74,7 +74,7 @@ describe('Fulfillment Location & Partner Tests', () => {
 
       it('should reject creation with missing name', async () => {
         const response = await client.post(
-          '/business/locations',
+          '/business/fulfillment/locations',
           { organizationId: 'test-org-1', type: 'warehouse' },
           { headers: authHeaders() },
         );
@@ -84,9 +84,9 @@ describe('Fulfillment Location & Partner Tests', () => {
       });
     });
 
-    describe('GET /business/locations', () => {
+    describe('GET /business/fulfillment/locations', () => {
       it('should list fulfillment locations', async () => {
-        const response = await client.get('/business/locations', {
+        const response = await client.get('/business/fulfillment/locations', {
           headers: authHeaders(),
           params: { organizationId: 'test-org-1' },
         });
@@ -97,7 +97,7 @@ describe('Fulfillment Location & Partner Tests', () => {
       });
 
       it('should filter by active status', async () => {
-        const response = await client.get('/business/locations', {
+        const response = await client.get('/business/fulfillment/locations', {
           headers: authHeaders(),
           params: { organizationId: 'test-org-1', isActive: 'true' },
         });
@@ -107,9 +107,9 @@ describe('Fulfillment Location & Partner Tests', () => {
       });
     });
 
-    describe('GET /business/locations/:locationId', () => {
+    describe('GET /business/fulfillment/locations/:locationId', () => {
       it('should return 404 for non-existent location', async () => {
-        const response = await client.get(`/business/locations/${randomUUID()}`, {
+        const response = await client.get(`/business/fulfillment/locations/${randomUUID()}`, {
           headers: authHeaders(),
         });
 
@@ -120,7 +120,7 @@ describe('Fulfillment Location & Partner Tests', () => {
       it('should get a location by ID if created', async () => {
         if (!createdLocationId) return;
 
-        const response = await client.get(`/business/locations/${createdLocationId}`, {
+        const response = await client.get(`/business/fulfillment/locations/${createdLocationId}`, {
           headers: authHeaders(),
         });
 
@@ -130,12 +130,12 @@ describe('Fulfillment Location & Partner Tests', () => {
       });
     });
 
-    describe('PUT /business/locations/:locationId', () => {
+    describe('PUT /business/fulfillment/locations/:locationId', () => {
       it('should update a location', async () => {
         if (!createdLocationId) return;
 
         const response = await client.put(
-          `/business/locations/${createdLocationId}`,
+          `/business/fulfillment/locations/${createdLocationId}`,
           { name: `Updated Location ${Date.now()}` },
           { headers: authHeaders() },
         );
@@ -145,12 +145,12 @@ describe('Fulfillment Location & Partner Tests', () => {
       });
     });
 
-    describe('POST /business/locations/:locationId/activate', () => {
+    describe('POST /business/fulfillment/locations/:locationId/activate', () => {
       it('should activate a location', async () => {
         if (!createdLocationId) return;
 
         const response = await client.post(
-          `/business/locations/${createdLocationId}/activate`,
+          `/business/fulfillment/locations/${createdLocationId}/activate`,
           {},
           { headers: authHeaders() },
         );
@@ -160,12 +160,12 @@ describe('Fulfillment Location & Partner Tests', () => {
       });
     });
 
-    describe('POST /business/locations/:locationId/deactivate', () => {
+    describe('POST /business/fulfillment/locations/:locationId/deactivate', () => {
       it('should deactivate a location', async () => {
         if (!createdLocationId) return;
 
         const response = await client.post(
-          `/business/locations/${createdLocationId}/deactivate`,
+          `/business/fulfillment/locations/${createdLocationId}/deactivate`,
           {},
           { headers: authHeaders() },
         );
@@ -175,9 +175,9 @@ describe('Fulfillment Location & Partner Tests', () => {
       });
     });
 
-    describe('GET /business/locations/nearest', () => {
+    describe('GET /business/fulfillment/locations/nearest', () => {
       it('should find nearest locations by coordinates', async () => {
-        const response = await client.get('/business/locations/nearest', {
+        const response = await client.get('/business/fulfillment/locations/nearest', {
           headers: authHeaders(),
           params: {
             latitude: 45.5152,
@@ -200,9 +200,9 @@ describe('Fulfillment Location & Partner Tests', () => {
   describe('Fulfillment Partners', () => {
     let createdPartnerId: string | undefined;
 
-    describe('GET /business/partners', () => {
+    describe('GET /business/fulfillment/partners', () => {
       it('should list fulfillment partners', async () => {
-        const response = await client.get('/business/partners', {
+        const response = await client.get('/business/fulfillment/partners', {
           headers: authHeaders(),
         });
 
@@ -212,7 +212,7 @@ describe('Fulfillment Location & Partner Tests', () => {
       });
     });
 
-    describe('POST /business/partners', () => {
+    describe('POST /business/fulfillment/partners', () => {
       it('should create a fulfillment partner', async () => {
         const partnerData = {
           name: `Test Partner ${randomUUID().substring(0, 8)}`,
@@ -223,7 +223,7 @@ describe('Fulfillment Location & Partner Tests', () => {
           isActive: true,
         };
 
-        const response = await client.post('/business/partners', partnerData, {
+        const response = await client.post('/business/fulfillment/partners', partnerData, {
           headers: authHeaders(),
         });
 
@@ -236,7 +236,7 @@ describe('Fulfillment Location & Partner Tests', () => {
 
       it('should reject partner creation with missing name', async () => {
         const response = await client.post(
-          '/business/partners',
+          '/business/fulfillment/partners',
           { code: 'MISSING-NAME' },
           { headers: authHeaders() },
         );
@@ -246,9 +246,9 @@ describe('Fulfillment Location & Partner Tests', () => {
       });
     });
 
-    describe('GET /business/partners/:partnerId', () => {
+    describe('GET /business/fulfillment/partners/:partnerId', () => {
       it('should return 404 for non-existent partner', async () => {
-        const response = await client.get(`/business/partners/${randomUUID()}`, {
+        const response = await client.get(`/business/fulfillment/partners/${randomUUID()}`, {
           headers: authHeaders(),
         });
 
@@ -259,7 +259,7 @@ describe('Fulfillment Location & Partner Tests', () => {
       it('should get a partner by ID if created', async () => {
         if (!createdPartnerId) return;
 
-        const response = await client.get(`/business/partners/${createdPartnerId}`, {
+        const response = await client.get(`/business/fulfillment/partners/${createdPartnerId}`, {
           headers: authHeaders(),
         });
 

@@ -33,9 +33,25 @@ router.get('/notifications', async (req, res) => {
       ? await notificationRepo.findUnreadByUser(customerId)
       : await notificationRepo.findByUser(customerId, limit);
 
-    const unreadCount = await notificationRepo.countUnread(customerId);
+    res.json({ success: true, data: notifications });
+  } catch (error: unknown) {
+    res.status(400).json({ success: false, error: (error as Error).message });
+  }
+});
 
-    res.json({ success: true, data: { notifications, unreadCount, total: notifications.length } });
+router.get('/notifications/:id', async (req, res) => {
+  try {
+    const customerId = req.user?.customerId || req.user?.id;
+
+    if (!customerId) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+
+    const notification = await notificationRepo.findById(String(req.params.id));
+    if (!notification) {
+      return res.status(404).json({ success: false, error: 'Notification not found' });
+    }
+    res.json({ success: true, data: notification });
   } catch (error: unknown) {
     res.status(400).json({ success: false, error: (error as Error).message });
   }
@@ -56,6 +72,21 @@ router.get('/notifications/count', async (req, res) => {
   }
 });
 
+router.get('/notifications/unread-count', async (req, res) => {
+  try {
+    const customerId = req.user?.customerId || req.user?.id;
+
+    if (!customerId) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+
+    const count = await notificationRepo.countUnread(customerId);
+    res.json({ success: true, data: { count } });
+  } catch (error: unknown) {
+    res.status(400).json({ success: false, error: (error as Error).message });
+  }
+});
+
 router.put('/notifications/:notificationId/read', async (req, res) => {
   try {
     const useCase = new MarkAsReadUseCase(notificationRepo);
@@ -70,6 +101,21 @@ router.put('/notifications/:notificationId/read', async (req, res) => {
       recipientId: customerId,
     });
 
+    res.json({ success: true, data: result });
+  } catch (error: unknown) {
+    res.status(400).json({ success: false, error: (error as Error).message });
+  }
+});
+
+router.patch('/notifications/:notificationId/read', async (req, res) => {
+  try {
+    const customerId = req.user?.customerId || req.user?.id;
+
+    if (!customerId) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+
+    const result = await notificationRepo.markAsRead(req.params.notificationId);
     res.json({ success: true, data: result });
   } catch (error: unknown) {
     res.status(400).json({ success: false, error: (error as Error).message });
@@ -99,12 +145,33 @@ router.put('/notifications/read', async (req, res) => {
   }
 });
 
+router.post('/notifications/read', async (req, res) => {
+  try {
+    const customerId = req.user?.customerId || req.user?.id;
+
+    if (!customerId) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+
+    const count = await notificationRepo.markAllAsRead(customerId);
+    res.json({ success: true, data: { markedCount: count } });
+  } catch (error: unknown) {
+    res.status(400).json({ success: false, error: (error as Error).message });
+  }
+});
+
 // ============================================================================
 // Preferences
 // ============================================================================
 
 router.get('/notifications/preferences', notificationCustomerController.getPreferences);
-router.post('/notifications/preferences', notificationCustomerController.updatePreference);
+router.get('/notifications/preferences/type/:type', notificationCustomerController.getPreferenceByType);
+router.get('/notifications/preferences/:id', notificationCustomerController.getPreferenceById);
+router.post('/notifications/preferences', notificationCustomerController.createPreference);
+router.post('/notifications/preferences/bulk', notificationCustomerController.bulkUpdatePreferences);
+router.put('/notifications/preferences/:id/schedule', notificationCustomerController.updateSchedule);
+router.put('/notifications/preferences/:id', notificationCustomerController.updatePreference);
+router.delete('/notifications/preferences/:id', notificationCustomerController.deletePreference);
 
 // ============================================================================
 // Devices

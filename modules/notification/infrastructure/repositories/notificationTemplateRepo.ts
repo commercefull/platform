@@ -1,23 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 
-export type NotificationType =
-  | 'account_registration'
-  | 'password_reset'
-  | 'email_verification'
-  | 'order_confirmation'
-  | 'order_shipped'
-  | 'order_delivered'
-  | 'order_cancelled'
-  | 'return_initiated'
-  | 'refund_processed'
-  | 'back_in_stock'
-  | 'price_drop'
-  | 'new_product'
-  | 'review_request'
-  | 'abandoned_cart'
-  | 'coupon_offer'
-  | 'promotion';
+export type NotificationType = string;
 
 export type NotificationChannel = 'email' | 'sms' | 'push' | 'in_app';
 
@@ -29,8 +13,8 @@ export interface NotificationTemplate {
   name: string;
   description?: string;
   type: NotificationType;
-  supportedChannels: NotificationChannel;
-  defaultChannel: NotificationChannel;
+  supportedChannels: string[];
+  defaultChannel: string;
   subject?: string;
   htmlTemplate?: string;
   textTemplate?: string;
@@ -109,8 +93,8 @@ export class NotificationTemplateRepo {
    * Find templates by channel
    */
   async findByChannel(channel: NotificationChannel, activeOnly: boolean = true): Promise<NotificationTemplate[]> {
-    let sql = `SELECT * FROM "notificationTemplate" WHERE "supportedChannels" = $1`;
-    const params: unknown[] = [channel];
+    let sql = `SELECT * FROM "notificationTemplate" WHERE "supportedChannels" @> $1::jsonb`;
+    const params: unknown[] = [JSON.stringify([channel])];
 
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -149,7 +133,7 @@ export class NotificationTemplateRepo {
         params.name,
         params.description || null,
         params.type,
-        params.supportedChannels,
+        JSON.stringify(params.supportedChannels),
         params.defaultChannel,
         params.subject || null,
         params.htmlTemplate || null,
@@ -184,7 +168,7 @@ export class NotificationTemplateRepo {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
         updateFields.push(`"${key}" = $${paramIndex++}`);
-        const jsonFields = ['parameters', 'previewData'];
+        const jsonFields = ['parameters', 'previewData', 'supportedChannels'];
         values.push(jsonFields.includes(key) && value ? JSON.stringify(value) : value);
       }
     });

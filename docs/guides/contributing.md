@@ -23,9 +23,9 @@ All engineering standards are in [`docs/guidelines/`](#/guidelines/modules-ddd):
 - **[Migrations]** — Knex format, file naming convention
 - **[Web Layer]** — EJS portals, direct use-case imports
 - **[API Responses]** — consistent JSON response patterns
-- **[Authentication]** — session-based + JWT
+- **[Authentication]** — session-based + JWT, `isOrganizationLoggedIn` for business routes
 - **[Events]** — EventBus for decoupled communication
-- **[Testing]** — Jest unit/integration, k6 performance
+- **[Testing]** — Jest unit/integration, shared test harness with `createTestClient` and `loginTestAdmin`
 - **[Code Style]** — TypeScript strict, Prettier, ESLint
 - **[Security]** — Helmet, CORS, HPP, parameterized SQL
 - **[i18n]** — i18next with locale files under `locales/`

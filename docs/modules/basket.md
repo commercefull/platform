@@ -74,14 +74,14 @@ The Basket (Shopping Cart) feature manages customer shopping sessions, allowing 
 
 | Method | Endpoint | Controller | Description |
 |---|---|---|---|
-| GET | `/business/` | `getBasket` | List/search baskets (admin) |
-| GET | `/business/:basketId` | `getBasket` | Get basket by ID |
-| DELETE | `/business/:basketId` | `deleteBasket` | Delete basket |
-| POST | `/business/:basketId/assign` | `assignToCustomer` | Assign basket to customer |
-| POST | `/business/:basketId/coupon` | `applyCoupon` | Apply coupon (admin override) |
-| DELETE | `/business/:basketId/coupon` | `removeCoupon` | Remove coupon |
-| PUT | `/business/:basketId/expiration` | `extendExpiration` | Extend expiration |
-| GET | `/business/:basketId/summary` | `getBasketSummary` | Get basket summary |
+| GET | `/business/basket` | `listBaskets` | List/search baskets (admin) |
+| GET | `/business/basket/:basketId` | `getBasket` | Get basket by ID |
+| DELETE | `/business/basket/:basketId` | `deleteBasket` | Delete basket |
+| POST | `/business/basket/:basketId/assign` | `assignToCustomer` | Assign basket to customer |
+| POST | `/business/basket/:basketId/coupon` | `applyCouponAdmin` | Apply coupon (admin override) |
+| DELETE | `/business/basket/:basketId/coupon` | `removeCoupon` | Remove coupon |
+| PUT | `/business/basket/:basketId/expiration` | `extendExpiration` | Extend expiration |
+| GET | `/business/basket/:basketId/summary` | `getBasketSummary` | Get basket summary |
 | POST | `/customer/basket` | `getOrCreateBasket` | Get or create basket for current user/session
 POST /basket |
 | GET | `/customer/basket/:basketId` | `getBasket` | Get basket by ID

@@ -4,10 +4,12 @@ import { TypedRequest } from 'libs/types/express';
 import { NotificationRepo } from '../../infrastructure/repositories/notificationRepo';
 import * as notificationBatchRepo from '../../infrastructure/repositories/notificationBatchRepo';
 import * as notificationTemplateTranslationRepo from '../../infrastructure/repositories/notificationTemplateTranslationRepo';
+import notificationTemplateRepo, { NotificationTemplate } from '../../infrastructure/repositories/notificationTemplateRepo';
 import { SendNotificationBatchUseCase, SendNotificationBatchCommand } from '../../application/useCases/SendNotificationBatch';
 import { ManageNotificationWebhookUseCase, ManageNotificationWebhookCommand } from '../../application/useCases/ManageNotificationWebhook';
 import { UpsertTemplateTranslationUseCase, UpsertTemplateTranslationCommand } from '../../application/useCases/UpsertTemplateTranslation';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
+import * as notificationPreferenceRepo from '../../infrastructure/repositories/notificationPreferenceRepo';
 
 // Typed body interfaces
 interface CreateNotificationBody {
@@ -425,5 +427,283 @@ export const upsertTranslation = async (req: TypedRequest<Record<string, string>
   } catch (error: unknown) {
     logger.error('upsertTranslation error:', error);
     errorResponse(res, (error as Error).message || 'Failed to upsert translation');
+  }
+};
+
+// ============================================================================
+// Notification Template CRUD handlers
+// ============================================================================
+
+interface CreateTemplateBody {
+  code: string;
+  name: string;
+  description?: string;
+  type: string;
+  supportedChannels: string[];
+  defaultChannel: string;
+  subject?: string;
+  htmlTemplate?: string;
+  textTemplate?: string;
+  pushTemplate?: string;
+  smsTemplate?: string;
+  parameters?: Record<string, unknown>;
+  isActive?: boolean;
+  categoryCode?: string;
+  previewData?: Record<string, unknown>;
+}
+
+interface UpdateTemplateBody {
+  name?: string;
+  description?: string;
+  type?: string;
+  supportedChannels?: string[];
+  defaultChannel?: string;
+  subject?: string;
+  htmlTemplate?: string;
+  textTemplate?: string;
+  pushTemplate?: string;
+  smsTemplate?: string;
+  parameters?: Record<string, unknown>;
+  isActive?: boolean;
+  categoryCode?: string;
+  previewData?: Record<string, unknown>;
+}
+
+function mapTemplate(t: NotificationTemplate) {
+  return {
+    id: t.notificationTemplateId,
+    code: t.code,
+    name: t.name,
+    description: t.description,
+    type: t.type,
+    supportedChannels: t.supportedChannels,
+    defaultChannel: t.defaultChannel,
+    subject: t.subject,
+    htmlTemplate: t.htmlTemplate,
+    textTemplate: t.textTemplate,
+    pushTemplate: t.pushTemplate,
+    smsTemplate: t.smsTemplate,
+    parameters: t.parameters,
+    isActive: t.isActive,
+    categoryCode: t.categoryCode,
+    previewData: t.previewData,
+    createdBy: t.createdBy,
+    createdAt: t.createdAt,
+    updatedAt: t.updatedAt,
+  };
+}
+
+export const getAllTemplates = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const activeOnly = req.query.activeOnly === 'true';
+    const templates = await notificationTemplateRepo.findAll(activeOnly);
+    successResponse(res, templates.map(mapTemplate));
+  } catch (error: unknown) {
+    logger.error('getAllTemplates error:', error);
+    errorResponse(res, (error as Error).message || 'Failed to fetch templates');
+  }
+};
+
+export const getTemplateById = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const template = await notificationTemplateRepo.findById(String(req.params.id));
+    if (!template) {
+      errorResponse(res, 'Template not found', 404);
+      return;
+    }
+    successResponse(res, mapTemplate(template));
+  } catch (error: unknown) {
+    logger.error('getTemplateById error:', error);
+    errorResponse(res, (error as Error).message || 'Failed to fetch template');
+  }
+};
+
+export const getTemplatesByType = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { type } = req.params;
+    const all = await notificationTemplateRepo.findAll(false);
+    const filtered = all.filter((t) => t.type === type);
+    successResponse(res, filtered.map(mapTemplate));
+  } catch (error: unknown) {
+    logger.error('getTemplatesByType error:', error);
+    errorResponse(res, (error as Error).message || 'Failed to fetch templates by type');
+  }
+};
+
+export const createTemplate = async (req: TypedRequest<Record<string, string>, unknown, CreateTemplateBody>, res: Response): Promise<void> => {
+  try {
+    const { code, name, type, supportedChannels, defaultChannel } = req.body;
+    if (!code || !name || !type || !supportedChannels || !defaultChannel) {
+      errorResponse(res, 'code, name, type, supportedChannels, and defaultChannel are required', 400);
+      return;
+    }
+
+    const created = await notificationTemplateRepo.create({
+      code,
+      name,
+      description: req.body.description,
+      type: type as never,
+      supportedChannels: supportedChannels as never,
+      defaultChannel: defaultChannel as never,
+      subject: req.body.subject,
+      htmlTemplate: req.body.htmlTemplate,
+      textTemplate: req.body.textTemplate,
+      pushTemplate: req.body.pushTemplate,
+      smsTemplate: req.body.smsTemplate,
+      parameters: req.body.parameters,
+      isActive: req.body.isActive ?? true,
+      categoryCode: req.body.categoryCode,
+      previewData: req.body.previewData,
+    });
+
+    successResponse(res, mapTemplate(created), 201);
+  } catch (error: unknown) {
+    logger.error('createTemplate error:', error);
+    errorResponse(res, (error as Error).message || 'Failed to create template');
+  }
+};
+
+export const updateTemplate = async (req: TypedRequest<Record<string, string>, unknown, UpdateTemplateBody>, res: Response): Promise<void> => {
+  try {
+    const id = String(req.params.id);
+    const existing = await notificationTemplateRepo.findById(id);
+    if (!existing) {
+      errorResponse(res, 'Template not found', 404);
+      return;
+    }
+
+    const updated = await notificationTemplateRepo.update(id, {
+      name: req.body.name,
+      description: req.body.description,
+      type: req.body.type as never,
+      supportedChannels: req.body.supportedChannels as never,
+      defaultChannel: req.body.defaultChannel as never,
+      subject: req.body.subject,
+      htmlTemplate: req.body.htmlTemplate,
+      textTemplate: req.body.textTemplate,
+      pushTemplate: req.body.pushTemplate,
+      smsTemplate: req.body.smsTemplate,
+      parameters: req.body.parameters,
+      isActive: req.body.isActive,
+      categoryCode: req.body.categoryCode,
+      previewData: req.body.previewData,
+    });
+
+    successResponse(res, mapTemplate(updated || existing));
+  } catch (error: unknown) {
+    logger.error('updateTemplate error:', error);
+    errorResponse(res, (error as Error).message || 'Failed to update template');
+  }
+};
+
+export const deleteTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const id = String(req.params.id);
+    const existing = await notificationTemplateRepo.findById(id);
+    if (!existing) {
+      errorResponse(res, 'Template not found', 404);
+      return;
+    }
+
+    const deleted = await notificationTemplateRepo.delete(id);
+    if (!deleted) {
+      errorResponse(res, 'Failed to delete template', 500);
+      return;
+    }
+    successResponse(res, { id });
+  } catch (error: unknown) {
+    logger.error('deleteTemplate error:', error);
+    errorResponse(res, (error as Error).message || 'Failed to delete template');
+  }
+};
+
+export const previewTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const id = String(req.params.id);
+    const { data, channel } = req.body as { data?: Record<string, unknown>; channel?: string };
+    const result = await notificationTemplateRepo.getPreview(id, data);
+
+    const template = result.template;
+    const html = channel === 'email' || !channel ? result.compiledHtml : undefined;
+    const text = channel === 'email' || !channel ? result.compiledText : undefined;
+
+    successResponse(res, { html, text, template: mapTemplate(template) });
+  } catch (error: unknown) {
+    logger.error('previewTemplate error:', error);
+    errorResponse(res, (error as Error).message || 'Failed to preview template');
+  }
+};
+
+// ============================================================================
+// Admin Notification Preference handlers
+// ============================================================================
+
+function mapPreferenceAdmin(p: notificationPreferenceRepo.NotificationPreference) {
+  return {
+    id: p.notificationPreferenceId,
+    userId: p.userId,
+    userType: p.userType,
+    type: p.type,
+    channelPreferences: p.channelPreferences,
+    isEnabled: p.isEnabled,
+    schedulePreferences: p.schedulePreferences || null,
+    metadata: p.metadata || null,
+    updatedAt: p.updatedAt.toISOString ? p.updatedAt.toISOString() : String(p.updatedAt),
+  };
+}
+
+export const getAllPreferences = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const preferences = await notificationPreferenceRepo.findAll();
+    successResponse(res, preferences.map(mapPreferenceAdmin));
+  } catch (error: unknown) {
+    logger.error('getAllPreferences error:', error);
+    errorResponse(res, (error as Error).message || 'Failed to fetch preferences');
+  }
+};
+
+export const getPreferencesByUser = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const userId = String(req.params.userId);
+    const preferences = await notificationPreferenceRepo.findByUser(userId, 'customer');
+    successResponse(res, preferences.map(mapPreferenceAdmin));
+  } catch (error: unknown) {
+    logger.error('getPreferencesByUser error:', error);
+    errorResponse(res, (error as Error).message || 'Failed to fetch preferences');
+  }
+};
+
+interface UpdatePreferenceAdminBody {
+  channelPreferences?: Record<string, boolean>;
+  isEnabled?: boolean;
+  schedulePreferences?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+export const updatePreferenceAdmin = async (req: TypedRequest<Record<string, string>, unknown, UpdatePreferenceAdminBody>, res: Response): Promise<void> => {
+  try {
+    const id = String(req.params.id);
+    const existing = await notificationPreferenceRepo.findById(id);
+    if (!existing) {
+      errorResponse(res, 'Preference not found', 404);
+      return;
+    }
+
+    const { channelPreferences, isEnabled, schedulePreferences, metadata } = req.body;
+    const updated = await notificationPreferenceRepo.update(id, {
+      channelPreferences,
+      isEnabled,
+      schedulePreferences,
+      metadata,
+    });
+
+    if (!updated) {
+      errorResponse(res, 'Failed to update preference', 500);
+      return;
+    }
+    successResponse(res, mapPreferenceAdmin(updated));
+  } catch (error: unknown) {
+    logger.error('updatePreferenceAdmin error:', error);
+    errorResponse(res, (error as Error).message || 'Failed to update preference');
   }
 };

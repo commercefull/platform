@@ -6,8 +6,11 @@
 
 import { Router } from 'express';
 import * as webhookController from '../controllers/WebhookBusinessController';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = Router();
+
+router.use(isOrganizationLoggedIn);
 
 /**
  * Get available event types

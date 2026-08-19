@@ -3,9 +3,9 @@ import { assignUserToStore, getUserStores, listStoreUsers, removeUserFromStore }
 
 const router = Router();
 
-router.post('/users/:userId/stores', assignUserToStore);
-router.get('/users/:userId/stores', getUserStores);
-router.get('/stores/:storeId/users', listStoreUsers);
-router.delete('/users/:userId/stores/:storeId', removeUserFromStore);
+router.post('/auth/users/:userId/stores', assignUserToStore);
+router.get('/auth/users/:userId/stores', getUserStores);
+router.get('/auth/stores/:storeId/users', listStoreUsers);
+router.delete('/auth/users/:userId/stores/:storeId', removeUserFromStore);
 
 export const userStoreRouter = router;

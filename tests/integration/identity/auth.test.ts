@@ -71,8 +71,7 @@ describe('Auth Feature Tests', () => {
       expect(response.data.organization).toHaveProperty('email');
     });
 
-    // TODO: Admin login endpoint not implemented separately
-    it.skip('should authenticate an admin with camelCase properties', async () => {
+    it('should authenticate an admin with camelCase properties', async () => {
       const response = await client.post('/business/auth/login', {
         email: testAdmin.email,
         password: testAdmin.password,
@@ -155,13 +154,15 @@ describe('Auth Feature Tests', () => {
 
       const response = await client.post('/customer/identity/logout', {
         refreshToken,
+      }, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
 
       // Verify the refresh token no longer works
-      const refreshResponse = await client.post('/api/auth/refresh', {
+      const refreshResponse = await client.post('/customer/identity/refresh', {
         refreshToken,
       });
 
@@ -171,8 +172,7 @@ describe('Auth Feature Tests', () => {
   });
 
   describe('Password Reset API', () => {
-    // TODO: Password reset has server-side issues
-    it.skip('should request a password reset with camelCase properties', async () => {
+    it('should request a password reset with camelCase properties', async () => {
       const response = await client.post('/customer/identity/forgot-password', {
         email: testCustomer.email,
         userType: 'customer',
@@ -278,8 +278,7 @@ describe('Auth Feature Tests', () => {
   });
 
   describe('Security Checks', () => {
-    // TODO: Password strength check may not return expected error format
-    it.skip('should check for password strength when registering', async () => {
+    it('should check for password strength when registering', async () => {
       const response = await client.post('/customer/identity/register', {
         email: 'new-customer@example.com',
         password: 'weak',
@@ -319,8 +318,7 @@ describe('Auth Feature Tests', () => {
     });
   });
 
-  // TODO: Admin auth management endpoints not implemented
-  describe.skip('Admin Auth Management API', () => {
+  describe('Admin Auth Management API', () => {
     it('should get user authentication details with camelCase properties', async () => {
       const response = await client.get(`/business/auth/user/${testCustomerId}?userType=customer`, {
         headers: { Authorization: `Bearer ${adminToken}` },
@@ -386,8 +384,7 @@ describe('Auth Feature Tests', () => {
     });
   });
 
-  // TODO: Cleanup API endpoints not implemented
-  describe.skip('Cleanup API', () => {
+  describe('Cleanup API', () => {
     it('should clean up expired tokens with proper count reporting', async () => {
       const response = await client.post(
         '/business/auth/cleanup-tokens',

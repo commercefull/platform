@@ -44,7 +44,7 @@ describe('Reporting Feature Tests', () => {
   // ==========================================================================
 
   describe('GET /business/reports/templates', () => {
-    it.skip('should list all report templates', async () => {
+    it('should list all report templates', async () => {
       const response = await client.get('/business/reports/templates', {
         headers: { Authorization: `Bearer ${organizationToken}` },
       });
@@ -55,7 +55,7 @@ describe('Reporting Feature Tests', () => {
       expect(response.data.data.length).toBeGreaterThan(0);
     });
 
-    it.skip('should include standard report types', async () => {
+    it('should include standard report types', async () => {
       const response = await client.get('/business/reports/templates', {
         headers: { Authorization: `Bearer ${organizationToken}` },
       });

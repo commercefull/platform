@@ -72,7 +72,7 @@ Routes are configured in `boot/routes.ts`:
 | `/`         | Storefront (public)      | None / `isCustomerLoggedIn` if needed |
 | `/admin`    | Admin panel (EJS)        | `isAdminLoggedIn`                     |
 | `/customer` | Customer-facing API      | `isCustomerLoggedIn` where needed     |
-| `/business` | Business / merchant API  | `isMerchantLoggedIn`                  |
+| `/business` | Business / merchant API  | `isOrganizationLoggedIn`              |
 | `/health`   | Health check             | None                                  |
 
 ## Modules (36 bounded contexts)
@@ -87,6 +87,26 @@ Routes are configured in `boot/routes.ts`:
 | Content     | `content`, `media`, `notification`                                                                                                 |
 | Commerce   | `merchant`, `supplier`, `business`                                                                                                 |
 | Platform    | `identity`, `configuration`, `localization`, `channel`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`             |
+
+## Route Naming Convention
+
+All business routes follow the `/business/{topic}/...` pattern. The topic prefix must match the module name.
+
+| Module | Path prefix |
+| ------ | ----------- |
+| product | `/business/products`, `/business/categories` |
+| order | `/business/orders` |
+| store | `/business/stores` |
+| media | `/business/media` |
+| fulfillment | `/business/fulfillments`, `/business/fulfillment/locations`, `/business/fulfillment/partners` |
+| configuration | `/business/configuration` |
+| coupon | `/business/coupons` |
+| identity | `/business/auth` (login, register, user-store management) |
+| inventory | `/business/inventory` |
+| content | `/business/content` |
+| webhook | `/business/webhooks` |
+| reporting | `/business/reports` |
+| basket | `/business/basket` |
 
 ## Technology Stack (at a glance)
 

@@ -45,7 +45,50 @@ See [authentication.md](./authentication.md) for session cookie settings.
 - [ ] SQL queries use parameterized bindings (`$1`, `$2`, …)
 - [ ] User input validated before use
 - [ ] Auth middleware applied to protected routes
+- [ ] All `/business` routes protected with `isOrganizationLoggedIn`
 - [ ] No `console.log` of sensitive data (use Winston logger)
 - [ ] No hardcoded secrets (use environment variables)
 - [ ] File uploads go through secure handling (Sharp for images, S3 for storage)
 - [ ] Error responses don't leak stack traces in production
+
+## Route Protection Audit
+
+Every business router mounted under `/business` must apply `isOrganizationLoggedIn` middleware. The only exception is `identityBusinessRouter`, which exposes public auth endpoints (login, register, token refresh, password reset) before the middleware is applied.
+
+### Routers verified as protected
+
+| Router | Middleware |
+| ------ | ---------- |
+| `identityBusinessRouter` | `isOrganizationLoggedIn` (after public auth routes) |
+| `organizationBusinessRouter` | `isOrganizationLoggedIn` |
+| `promotionBusinessRouter` | `isOrganizationLoggedIn` |
+| `productBusinessRouter` | `isOrganizationLoggedIn` |
+| `orderBusinessRouter` | `isOrganizationLoggedIn` |
+| `taxBusinessRouter` | `isOrganizationLoggedIn` |
+| `customerBusinessRouter` | `isOrganizationLoggedIn` |
+| `gdprBusinessRouter` | `isOrganizationLoggedIn` |
+| `subscriptionBusinessRouter` | `isOrganizationLoggedIn` |
+| `supportBusinessRouter` | `isOrganizationLoggedIn` |
+| `analyticsBusinessRouter` | `isOrganizationLoggedIn` |
+| `warehouseMerchantRouter` | `isOrganizationLoggedIn` |
+| `supplierMerchantRouter` | `isOrganizationLoggedIn` |
+| `localizationMerchantRouter` | `isOrganizationLoggedIn` |
+| `pricingMerchantRouter` | `isOrganizationLoggedIn` |
+| `loyaltyMerchantRouter` | `isOrganizationLoggedIn` |
+| `notificationMerchantRouter` | `isOrganizationLoggedIn` |
+| `contentRouterAdmin` | `isOrganizationLoggedIn` |
+| `membershipBusinessRouter` | `isOrganizationLoggedIn` |
+| `shippingBusinessRouter` | `isOrganizationLoggedIn` |
+| `inventoryBusinessRouter` | `isOrganizationLoggedIn` |
+| `paymentBusinessRouter` | `isOrganizationLoggedIn` |
+| `basketBusinessRouter` | `isOrganizationLoggedIn` |
+| `attributeBusinessRouter` | `isOrganizationLoggedIn` |
+| `webhookBusinessRouter` | `isOrganizationLoggedIn` |
+| `reportingBusinessRouter` | `isOrganizationLoggedIn` |
+| `fulfillmentLocationRouter` | `isOrganizationLoggedIn` (per-route) |
+| `fulfillmentBusinessRouter` | `isOrganizationLoggedIn` |
+| `storeRouter` | `isOrganizationLoggedIn` |
+| `mediaRouter` | `isOrganizationLoggedIn` |
+| `systemConfigurationRouter` | `isOrganizationLoggedIn` |
+| `couponBusinessRouter` | `isOrganizationLoggedIn` |
+| `userStoreRouter` | Protected via parent `identityBusinessRouter` |

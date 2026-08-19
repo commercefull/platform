@@ -73,10 +73,6 @@
       "description": "membership module"
     },
     {
-      "name": "merchant",
-      "description": "merchant module"
-    },
-    {
       "name": "notification",
       "description": "notification module"
     },
@@ -527,12 +523,12 @@
         }
       }
     },
-    "/business/": {
+    "/business/basket": {
       "get": {
-        "summary": "List all fulfillments (with filters/pagination)",
-        "operationId": "listFulfillments_fulfillment",
+        "summary": "List/search baskets (admin)",
+        "operationId": "listBaskets_basket",
         "tags": [
-          "fulfillment"
+          "basket"
         ],
         "responses": {
           "200": {
@@ -546,42 +542,11 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "summary": "Create fulfillment",
-        "operationId": "createFulfillment_fulfillment",
-        "tags": [
-          "fulfillment"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FulfillmentMethodBody"
-              }
-            }
           }
         }
       }
     },
-    "/business/{basketId}": {
+    "/business/basket/{basketId}": {
       "get": {
         "summary": "Get basket by ID",
         "operationId": "getBasket_basket",
@@ -625,7 +590,7 @@
         }
       }
     },
-    "/business/{basketId}/summary": {
+    "/business/basket/{basketId}/summary": {
       "get": {
         "summary": "Get basket summary",
         "operationId": "getBasketSummary_basket",
@@ -648,10 +613,10 @@
         }
       }
     },
-    "/business/{basketId}/coupon": {
+    "/business/basket/{basketId}/coupon": {
       "post": {
         "summary": "Apply coupon (admin override)",
-        "operationId": "applyCoupon_basket",
+        "operationId": "applyCouponAdmin_basket",
         "tags": [
           "basket"
         ],
@@ -702,7 +667,7 @@
         }
       }
     },
-    "/business/{basketId}/assign": {
+    "/business/basket/{basketId}/assign": {
       "post": {
         "summary": "Assign basket to customer",
         "operationId": "assignToCustomer_basket",
@@ -735,7 +700,7 @@
         }
       }
     },
-    "/business/{basketId}/expiration": {
+    "/business/basket/{basketId}/expiration": {
       "put": {
         "summary": "Extend expiration",
         "operationId": "extendExpiration_basket",
@@ -1324,6 +1289,29 @@
       "get": {
         "summary": "Get checkout session\nGET /checkout/:checkoutId",
         "operationId": "getCheckout_checkout",
+        "tags": [
+          "checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/customer/checkout/{checkoutId}/summary": {
+      "get": {
+        "summary": "Get checkout summary\nGET /checkout/:checkoutId/summary",
+        "operationId": "getCheckoutSummary_checkout",
         "tags": [
           "checkout"
         ],
@@ -4139,12 +4127,33 @@
         }
       }
     },
-    "/business/validate": {
-      "post": {
-        "summary": "validateCoupon",
-        "operationId": "validateCoupon_coupon",
+    "/business/coupons": {
+      "get": {
+        "summary": "Coupon routes",
+        "operationId": "getActiveCoupons_promotion",
         "tags": [
-          "coupon"
+          "promotion"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "createCoupon",
+        "operationId": "createCoupon_promotion",
+        "tags": [
+          "promotion"
         ],
         "responses": {
           "200": {
@@ -4172,7 +4181,40 @@
         }
       }
     },
-    "/business/validate/{code}": {
+    "/business/coupons/validate": {
+      "post": {
+        "summary": "validateCoupon",
+        "operationId": "validateCoupon_promotion",
+        "tags": [
+          "promotion"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyCouponBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/business/coupons/validate/{code}": {
       "get": {
         "summary": "validateCoupon",
         "operationId": "validateCoupon_coupon",
@@ -4195,7 +4237,7 @@
         }
       }
     },
-    "/business/apply": {
+    "/business/coupons/apply": {
       "post": {
         "summary": "applyCoupon",
         "operationId": "applyCoupon_coupon",
@@ -4228,7 +4270,7 @@
         }
       }
     },
-    "/business/redeem": {
+    "/business/coupons/redeem": {
       "post": {
         "summary": "redeemCoupon",
         "operationId": "redeemCoupon_coupon",
@@ -4261,7 +4303,7 @@
         }
       }
     },
-    "/business/{couponId}": {
+    "/business/coupons/{couponId}": {
       "get": {
         "summary": "getCoupon",
         "operationId": "getCoupon_coupon",
@@ -4815,7 +4857,61 @@
         }
       }
     },
-    "/business/order/{orderId}": {
+    "/business/fulfillments": {
+      "get": {
+        "summary": "List all fulfillments (with filters/pagination)",
+        "operationId": "listFulfillments_fulfillment",
+        "tags": [
+          "fulfillment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create fulfillment",
+        "operationId": "createFulfillment_fulfillment",
+        "tags": [
+          "fulfillment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentMethodBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/business/fulfillments/order/{orderId}": {
       "get": {
         "summary": "List by order",
         "operationId": "listFulfillmentsByOrder_fulfillment",
@@ -4838,7 +4934,7 @@
         }
       }
     },
-    "/business/{fulfillmentId}": {
+    "/business/fulfillments/{fulfillmentId}": {
       "get": {
         "summary": "Get fulfillment by ID",
         "operationId": "getFulfillment_fulfillment",
@@ -4861,7 +4957,7 @@
         }
       }
     },
-    "/business/{fulfillmentId}/pick": {
+    "/business/fulfillments/{fulfillmentId}/pick": {
       "post": {
         "summary": "Process picking",
         "operationId": "processPicking_fulfillment",
@@ -4894,7 +4990,7 @@
         }
       }
     },
-    "/business/{fulfillmentId}/pack": {
+    "/business/fulfillments/{fulfillmentId}/pack": {
       "post": {
         "summary": "Process packing",
         "operationId": "processPacking_fulfillment",
@@ -4927,7 +5023,7 @@
         }
       }
     },
-    "/business/{fulfillmentId}/ship": {
+    "/business/fulfillments/{fulfillmentId}/ship": {
       "post": {
         "summary": "Ship order",
         "operationId": "shipOrder_fulfillment",
@@ -4960,7 +5056,7 @@
         }
       }
     },
-    "/business/{fulfillmentId}/deliver": {
+    "/business/fulfillments/{fulfillmentId}/deliver": {
       "post": {
         "summary": "Mark delivered",
         "operationId": "markDelivered_fulfillment",
@@ -4993,7 +5089,7 @@
         }
       }
     },
-    "/business/{fulfillmentId}/cancel": {
+    "/business/fulfillments/{fulfillmentId}/cancel": {
       "post": {
         "summary": "Cancel fulfillment",
         "operationId": "cancelFulfillment_fulfillment",
@@ -5026,7 +5122,7 @@
         }
       }
     },
-    "/business/{fulfillmentId}/tracking": {
+    "/business/fulfillments/{fulfillmentId}/tracking": {
       "put": {
         "summary": "Update tracking info",
         "operationId": "updateTracking_fulfillment",
@@ -5059,7 +5155,7 @@
         }
       }
     },
-    "/business/{fulfillmentId}/return": {
+    "/business/fulfillments/{fulfillmentId}/return": {
       "post": {
         "summary": "Initiate return",
         "operationId": "initiateReturn_fulfillment",
@@ -5092,7 +5188,7 @@
         }
       }
     },
-    "/business/{fulfillmentId}/assign": {
+    "/business/fulfillments/{fulfillmentId}/assign": {
       "post": {
         "summary": "Assign fulfillment",
         "operationId": "assignFulfillment_fulfillment",
@@ -5194,10 +5290,10 @@
         }
       }
     },
-    "/business/locations": {
+    "/business/fulfillment/locations": {
       "get": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5217,8 +5313,8 @@
         }
       },
       "post": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5248,10 +5344,10 @@
         }
       }
     },
-    "/business/locations/nearest": {
+    "/business/fulfillment/locations/nearest": {
       "get": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5271,10 +5367,10 @@
         }
       }
     },
-    "/business/locations/{locationId}": {
+    "/business/fulfillment/locations/{locationId}": {
       "get": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5294,8 +5390,8 @@
         }
       },
       "put": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5325,8 +5421,8 @@
         }
       },
       "delete": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5346,10 +5442,10 @@
         }
       }
     },
-    "/business/locations/{locationId}/activate": {
+    "/business/fulfillment/locations/{locationId}/activate": {
       "post": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5379,10 +5475,10 @@
         }
       }
     },
-    "/business/locations/{locationId}/deactivate": {
+    "/business/fulfillment/locations/{locationId}/deactivate": {
       "post": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5412,10 +5508,10 @@
         }
       }
     },
-    "/business/partners": {
+    "/business/fulfillment/partners": {
       "get": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5435,8 +5531,8 @@
         }
       },
       "post": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5466,10 +5562,10 @@
         }
       }
     },
-    "/business/partners/{partnerId}": {
+    "/business/fulfillment/partners/{partnerId}": {
       "get": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5489,8 +5585,8 @@
         }
       },
       "put": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5520,8 +5616,8 @@
         }
       },
       "delete": {
-        "summary": "isMerchantLoggedIn",
-        "operationId": "isMerchantLoggedIn_fulfillment",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_fulfillment",
         "tags": [
           "fulfillment"
         ],
@@ -5971,7 +6067,7 @@
     "/business/auth/login": {
       "post": {
         "summary": "Simple login (returns access token only)",
-        "operationId": "loginMerchant_identity",
+        "operationId": "loginOrganization_identity",
         "tags": [
           "identity"
         ],
@@ -6004,7 +6100,7 @@
     "/business/auth/register": {
       "post": {
         "summary": "Register new merchant account",
-        "operationId": "registerMerchant_identity",
+        "operationId": "registerOrganization_identity",
         "tags": [
           "identity"
         ],
@@ -6170,6 +6266,128 @@
       "post": {
         "summary": "resetPassword",
         "operationId": "resetPassword_identity",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyIdentityBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/business/auth/user/{userId}": {
+      "get": {
+        "summary": "getUserAuthDetails",
+        "operationId": "getUserAuthDetails_identity",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/business/auth/revoke-tokens": {
+      "post": {
+        "summary": "revokeUserTokens",
+        "operationId": "revokeUserTokens_identity",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyIdentityBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/business/auth/force-reset": {
+      "post": {
+        "summary": "forceResetPassword",
+        "operationId": "forceResetPassword_identity",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyIdentityBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/business/auth/cleanup-tokens": {
+      "post": {
+        "summary": "cleanupExpiredTokens",
+        "operationId": "cleanupExpiredTokens_identity",
         "tags": [
           "identity"
         ],
@@ -6430,6 +6648,62 @@
         }
       }
     },
+    "/customer/identity/logout": {
+      "post": {
+        "summary": "Logout (requires auth to blacklist token)",
+        "operationId": "isCustomerLoggedIn_identity",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyIdentityBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer/identity/2fa/status": {
+      "get": {
+        "summary": "2FA status (requires auth)",
+        "operationId": "isCustomerLoggedIn_identity",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/identity/{provider}/config": {
       "get": {
         "summary": "GET /identity/social/:provider/config\nGet OAuth configuration for a provider (client ID, auth URL, scopes)",
@@ -6598,10 +6872,43 @@
         }
       }
     },
+    "/identity/{provider}/organization": {
+      "post": {
+        "summary": "merchantSocialLogin",
+        "operationId": "merchantSocialLogin_identity",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyIdentityBody"
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/merchant/accounts": {
       "get": {
         "summary": "GET /identity/social/merchant/accounts\nGet all linked social accounts for a merchant (requires auth)",
-        "operationId": "getMerchantLinkedAccounts_identity",
+        "operationId": "getOrganizationLinkedAccounts_identity",
         "tags": [
           "identity"
         ],
@@ -6621,7 +6928,30 @@
         }
       }
     },
-    "/users/{userId}/stores": {
+    "/identity/organization/accounts": {
+      "get": {
+        "summary": "getOrganizationLinkedAccounts",
+        "operationId": "getOrganizationLinkedAccounts_identity",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/auth/users/{userId}/stores": {
       "post": {
         "summary": "assignUserToStore",
         "operationId": "assignUserToStore_identity",
@@ -6675,7 +7005,7 @@
         }
       }
     },
-    "/stores/{storeId}/users": {
+    "/auth/stores/{storeId}/users": {
       "get": {
         "summary": "listStoreUsers",
         "operationId": "listStoreUsers_identity",
@@ -6698,7 +7028,7 @@
         }
       }
     },
-    "/users/{userId}/stores/{storeId}": {
+    "/auth/users/{userId}/stores/{storeId}": {
       "delete": {
         "summary": "removeUserFromStore",
         "operationId": "removeUserFromStore_identity",
@@ -7885,6 +8215,29 @@
         }
       }
     },
+    "/business/locales/code/{code}": {
+      "get": {
+        "summary": "getLocaleByCode",
+        "operationId": "getLocaleByCode_localization",
+        "tags": [
+          "localization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/business/locales/{id}": {
       "get": {
         "summary": "getLocaleById",
@@ -7941,29 +8294,6 @@
       "delete": {
         "summary": "deleteLocale",
         "operationId": "deleteLocale_localization",
-        "tags": [
-          "localization"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/business/locales/code/{code}": {
-      "get": {
-        "summary": "getLocaleByCode",
-        "operationId": "getLocaleByCode_localization",
         "tags": [
           "localization"
         ],
@@ -8880,7 +9210,7 @@
         }
       }
     },
-    "/upload": {
+    "/media/upload": {
       "post": {
         "summary": "Upload single image",
         "operationId": "uploadSingle_media",
@@ -8913,7 +9243,7 @@
         }
       }
     },
-    "/upload/batch": {
+    "/media/upload/batch": {
       "post": {
         "summary": "Upload multiple images",
         "operationId": "uploadMultiple_media",
@@ -9506,378 +9836,6 @@
         }
       }
     },
-    "/business/merchants": {
-      "get": {
-        "summary": "Admin routes for merchant management",
-        "operationId": "getMerchants_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "summary": "createMerchant",
-        "operationId": "createMerchant_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMerchantBody"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/business/merchants/{id}": {
-      "get": {
-        "summary": "getMerchantById",
-        "operationId": "getMerchantById_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "put": {
-        "summary": "updateMerchant",
-        "operationId": "updateMerchant_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMerchantBody"
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "deleteMerchant",
-        "operationId": "deleteMerchant_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/business/merchants/{merchantId}/addresses": {
-      "get": {
-        "summary": "Admin routes for merchant addresses",
-        "operationId": "getMerchantAddresses_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "summary": "addMerchantAddress",
-        "operationId": "addMerchantAddress_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMerchantBody"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/business/merchants/{merchantId}/addresses/{addressId}": {
-      "put": {
-        "summary": "updateMerchantAddress",
-        "operationId": "updateMerchantAddress_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMerchantBody"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/business/merchants/{merchantId}/payment-info": {
-      "get": {
-        "summary": "Admin routes for merchant payment information",
-        "operationId": "getMerchantPaymentInfo_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "summary": "addMerchantPaymentInfo",
-        "operationId": "addMerchantPaymentInfo_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMerchantBody"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/business/merchants/{merchantId}/payment-info/{paymentInfoId}": {
-      "put": {
-        "summary": "updateMerchantPaymentInfo",
-        "operationId": "updateMerchantPaymentInfo_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMerchantBody"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/customer/": {
-      "get": {
-        "summary": "Get active merchants (public storefront view)",
-        "operationId": "getActiveMerchants_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/customer/{id}": {
-      "get": {
-        "summary": "Get specific merchant by ID (if active)",
-        "operationId": "getMerchantById_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/customer/{id}/products": {
-      "get": {
-        "summary": "Get products from a specific merchant",
-        "operationId": "(req, res) => {\n  res.status(404).json({\n    success: false,_merchant",
-        "tags": [
-          "merchant"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
     "/business/notifications": {
       "get": {
         "summary": "============================================================================ Admin CRUD routes for notifications ============================================================================",
@@ -10329,6 +10287,191 @@
         }
       }
     },
+    "/business/notification-templates": {
+      "get": {
+        "summary": "============================================================================ Template routes ============================================================================",
+        "operationId": "getAllTemplates_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "createTemplate",
+        "operationId": "createTemplate_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTemplateBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/business/notification-templates/type/{type}": {
+      "get": {
+        "summary": "getTemplatesByType",
+        "operationId": "getTemplatesByType_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/business/notification-templates/{id}": {
+      "get": {
+        "summary": "getTemplateById",
+        "operationId": "getTemplateById_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "updateTemplate",
+        "operationId": "updateTemplate_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTemplateBody"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "deleteTemplate",
+        "operationId": "deleteTemplate_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/business/notification-templates/{id}/preview": {
+      "post": {
+        "summary": "previewTemplate",
+        "operationId": "previewTemplate_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      }
+    },
     "/business/notifications/templates/{templateId}/translations": {
       "get": {
         "summary": "============================================================================ Template translation routes ============================================================================",
@@ -10383,10 +10526,112 @@
         }
       }
     },
+    "/business/notification-preferences": {
+      "get": {
+        "summary": "============================================================================ Admin preference routes ============================================================================",
+        "operationId": "getAllPreferences_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/business/notification-preferences/user/{userId}": {
+      "get": {
+        "summary": "getPreferencesByUser",
+        "operationId": "getPreferencesByUser_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/business/notification-preferences/{id}": {
+      "put": {
+        "summary": "updatePreferenceAdmin",
+        "operationId": "updatePreferenceAdmin_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      }
+    },
     "/customer/notifications": {
       "get": {
-        "summary": "async (req, res) => {\n  try {\n    const useCase = new GetNot",
-        "operationId": "async (req, res) => {\n  try {\n    const useCase = new GetNot_notification",
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/customer/notifications/{id}": {
+      "get": {
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
         "tags": [
           "notification"
         ],
@@ -10408,8 +10653,31 @@
     },
     "/customer/notifications/count": {
       "get": {
-        "summary": "async (req, res) => {\n  try {\n    const useCase = new GetNot",
-        "operationId": "async (req, res) => {\n  try {\n    const useCase = new GetNot_notification",
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/customer/notifications/unread-count": {
+      "get": {
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
         "tags": [
           "notification"
         ],
@@ -10460,12 +10728,74 @@
             }
           }
         }
+      },
+      "patch": {
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
       }
     },
     "/customer/notifications/read": {
       "put": {
-        "summary": "async (req, res) => {\n  try {\n    const useCase = new MarkAs",
-        "operationId": "async (req, res) => {\n  try {\n    const useCase = new MarkAs_notification",
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
         "tags": [
           "notification"
         ],
@@ -10518,6 +10848,83 @@
         }
       },
       "post": {
+        "summary": "createPreference",
+        "operationId": "createPreference_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer/notifications/preferences/type/{type}": {
+      "get": {
+        "summary": "getPreferenceByType",
+        "operationId": "getPreferenceByType_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/customer/notifications/preferences/{id}": {
+      "get": {
+        "summary": "getPreferenceById",
+        "operationId": "getPreferenceById_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
         "summary": "updatePreference",
         "operationId": "updatePreference_notification",
         "tags": [
@@ -10543,6 +10950,93 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "deletePreference",
+        "operationId": "deletePreference_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/customer/notifications/preferences/bulk": {
+      "post": {
+        "summary": "bulkUpdatePreferences",
+        "operationId": "bulkUpdatePreferences_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer/notifications/preferences/{id}/schedule": {
+      "put": {
+        "summary": "updateSchedule",
+        "operationId": "updateSchedule_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulePageBody"
               }
             }
           }
@@ -11480,10 +11974,10 @@
         }
       }
     },
-    "/business/organization": {
+    "/business/organizations": {
       "get": {
-        "summary": "List all organizations",
-        "operationId": "listOrganizations_organization",
+        "summary": "getOrganizations",
+        "operationId": "getOrganizations_organization",
         "tags": [
           "organization"
         ],
@@ -11503,7 +11997,7 @@
         }
       },
       "post": {
-        "summary": "Create organization",
+        "summary": "createOrganization",
         "operationId": "createOrganization_organization",
         "tags": [
           "organization"
@@ -11521,13 +12015,23 @@
           "500": {
             "description": "Internal server error"
           }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationBody"
+              }
+            }
+          }
         }
       }
     },
-    "/business/organization/{organizationId}": {
+    "/business/organizations/{id}": {
       "get": {
-        "summary": "Get organization by ID",
-        "operationId": "getOrganization_organization",
+        "summary": "getOrganizationById",
+        "operationId": "getOrganizationById_organization",
         "tags": [
           "organization"
         ],
@@ -11547,27 +12051,6 @@
         }
       },
       "put": {
-        "summary": "Update organization",
-        "operationId": "updateOrganization_organization",
-        "tags": [
-          "organization"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "patch": {
         "summary": "updateOrganization",
         "operationId": "updateOrganization_organization",
         "tags": [
@@ -11586,13 +12069,21 @@
           "500": {
             "description": "Internal server error"
           }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationBody"
+              }
+            }
+          }
         }
-      }
-    },
-    "/business/organization/slug/{slug}": {
-      "get": {
-        "summary": "Get organization by slug",
-        "operationId": "getOrganizationBySlug_organization",
+      },
+      "delete": {
+        "summary": "deleteOrganization",
+        "operationId": "deleteOrganization_organization",
         "tags": [
           "organization"
         ],
@@ -11612,9 +12103,9 @@
         }
       }
     },
-    "/business/organization/{organizationId}/stores": {
+    "/business/organizations/{id}/stores": {
       "get": {
-        "summary": "Get stores for organization",
+        "summary": "getOrganizationStores",
         "operationId": "getOrganizationStores_organization",
         "tags": [
           "organization"
@@ -11631,6 +12122,180 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/business/organizations/{organizationId}/addresses": {
+      "get": {
+        "summary": "getOrganizationAddresses",
+        "operationId": "getOrganizationAddresses_organization",
+        "tags": [
+          "organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "addOrganizationAddress",
+        "operationId": "addOrganizationAddress_organization",
+        "tags": [
+          "organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/business/organizations/{organizationId}/addresses/{addressId}": {
+      "put": {
+        "summary": "updateOrganizationAddress",
+        "operationId": "updateOrganizationAddress_organization",
+        "tags": [
+          "organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/business/organizations/{organizationId}/payment-info": {
+      "get": {
+        "summary": "getOrganizationPaymentInfo",
+        "operationId": "getOrganizationPaymentInfo_organization",
+        "tags": [
+          "organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "addOrganizationPaymentInfo",
+        "operationId": "addOrganizationPaymentInfo_organization",
+        "tags": [
+          "organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/business/organizations/{organizationId}/payment-info/{paymentInfoId}": {
+      "put": {
+        "summary": "updateOrganizationPaymentInfo",
+        "operationId": "updateOrganizationPaymentInfo_organization",
+        "tags": [
+          "organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationBody"
+              }
+            }
           }
         }
       }
@@ -16881,8 +17546,8 @@
         }
       },
       "post": {
-        "summary": "createReview",
-        "operationId": "createReview_product",
+        "summary": "optionalCustomerAuth",
+        "operationId": "optionalCustomerAuth_product",
         "tags": [
           "product"
         ],
@@ -16914,8 +17579,8 @@
     },
     "/customer/reviews/{reviewId}/helpful": {
       "post": {
-        "summary": "markReviewHelpful",
-        "operationId": "markReviewHelpful_product",
+        "summary": "optionalCustomerAuth",
+        "operationId": "optionalCustomerAuth_product",
         "tags": [
           "product"
         ],
@@ -16947,8 +17612,8 @@
     },
     "/customer/reviews/{reviewId}/report": {
       "post": {
-        "summary": "reportReview",
-        "operationId": "reportReview_product",
+        "summary": "optionalCustomerAuth",
+        "operationId": "optionalCustomerAuth_product",
         "tags": [
           "product"
         ],
@@ -17034,8 +17699,8 @@
     },
     "/customer/products/{productId}/reviews/{reviewId}/vote": {
       "post": {
-        "summary": "voteOnReview",
-        "operationId": "voteOnReview_product",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_product",
         "tags": [
           "product"
         ],
@@ -18123,60 +18788,6 @@
         }
       }
     },
-    "/business/coupons": {
-      "get": {
-        "summary": "Coupon routes",
-        "operationId": "getActiveCoupons_promotion",
-        "tags": [
-          "promotion"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "summary": "createCoupon",
-        "operationId": "createCoupon_promotion",
-        "tags": [
-          "promotion"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApplyCouponBody"
-              }
-            }
-          }
-        }
-      }
-    },
     "/business/coupons/{id}": {
       "get": {
         "summary": "getCouponById",
@@ -18271,39 +18882,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/business/coupons/validate": {
-      "post": {
-        "summary": "validateCoupon",
-        "operationId": "validateCoupon_promotion",
-        "tags": [
-          "promotion"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApplyCouponBody"
-              }
-            }
           }
         }
       }
@@ -19742,6 +20320,52 @@
         }
       }
     },
+    "/stores/active": {
+      "get": {
+        "summary": "Get active stores (must be before :storeId to avoid collision)",
+        "operationId": "bind_store",
+        "tags": [
+          "store"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/stores/slug/{slug}": {
+      "get": {
+        "summary": "Get store by slug",
+        "operationId": "bind_store",
+        "tags": [
+          "store"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/stores/{storeId}": {
       "get": {
         "summary": "Get store by ID",
@@ -19817,55 +20441,9 @@
         }
       }
     },
-    "/stores/slug/{slug}": {
-      "get": {
-        "summary": "Get store by slug",
-        "operationId": "bind_store",
-        "tags": [
-          "store"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/stores/business/{businessId}": {
+    "/stores/business/{organizationId}": {
       "get": {
         "summary": "Get stores by business",
-        "operationId": "bind_store",
-        "tags": [
-          "store"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/stores/active": {
-      "get": {
-        "summary": "Get active stores",
         "operationId": "bind_store",
         "tags": [
           "store"
@@ -20620,7 +21198,7 @@
     "/customer/subscriptions/mine": {
       "get": {
         "summary": "List and view subscriptions",
-        "operationId": "getMySubscriptions_subscription",
+        "operationId": "isCustomerLoggedIn_subscription",
         "tags": [
           "subscription"
         ],
@@ -20642,8 +21220,8 @@
     },
     "/customer/subscriptions/mine/{id}": {
       "get": {
-        "summary": "getMySubscription",
-        "operationId": "getMySubscription_subscription",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_subscription",
         "tags": [
           "subscription"
         ],
@@ -20664,7 +21242,7 @@
       },
       "put": {
         "summary": "Manage subscription",
-        "operationId": "updateMySubscription_subscription",
+        "operationId": "isCustomerLoggedIn_subscription",
         "tags": [
           "subscription"
         ],
@@ -20687,7 +21265,7 @@
     "/customer/subscriptions/subscribe": {
       "post": {
         "summary": "Create subscription",
-        "operationId": "createSubscription_subscription",
+        "operationId": "isCustomerLoggedIn_subscription",
         "tags": [
           "subscription"
         ],
@@ -22616,8 +23194,8 @@
     },
     "/customer/support/tickets": {
       "post": {
-        "summary": "createTicket",
-        "operationId": "createTicket_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -22639,8 +23217,8 @@
     },
     "/customer/support/tickets/mine": {
       "get": {
-        "summary": "getMyTickets",
-        "operationId": "getMyTickets_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -22662,8 +23240,8 @@
     },
     "/customer/support/tickets/mine/{id}": {
       "get": {
-        "summary": "getMyTicket",
-        "operationId": "getMyTicket_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -22685,8 +23263,8 @@
     },
     "/customer/support/tickets/mine/{id}/messages": {
       "post": {
-        "summary": "addCustomerMessage",
-        "operationId": "addCustomerMessage_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -22708,8 +23286,8 @@
     },
     "/customer/support/tickets/mine/{id}/feedback": {
       "post": {
-        "summary": "submitTicketFeedback",
-        "operationId": "submitTicketFeedback_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -22731,8 +23309,8 @@
     },
     "/customer/support/alerts/stock": {
       "post": {
-        "summary": "createStockAlert",
-        "operationId": "createStockAlert_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -22754,8 +23332,8 @@
     },
     "/customer/support/alerts/stock/mine": {
       "get": {
-        "summary": "getMyStockAlerts",
-        "operationId": "getMyStockAlerts_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -22777,8 +23355,8 @@
     },
     "/customer/support/alerts/stock/mine/{id}": {
       "delete": {
-        "summary": "cancelMyStockAlert",
-        "operationId": "cancelMyStockAlert_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -22800,8 +23378,8 @@
     },
     "/customer/support/alerts/price": {
       "post": {
-        "summary": "createPriceAlert",
-        "operationId": "createPriceAlert_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -22823,8 +23401,8 @@
     },
     "/customer/support/alerts/price/mine": {
       "get": {
-        "summary": "getMyPriceAlerts",
-        "operationId": "getMyPriceAlerts_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -22846,8 +23424,8 @@
     },
     "/customer/support/alerts/price/mine/{id}": {
       "delete": {
-        "summary": "cancelMyPriceAlert",
-        "operationId": "cancelMyPriceAlert_support",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_support",
         "tags": [
           "support"
         ],
@@ -23332,7 +23910,7 @@
         }
       }
     },
-    "/customer/tax/settings/{merchantId}": {
+    "/customer/tax/settings/{organizationId}": {
       "get": {
         "summary": "NEW: Get public tax settings for storefront",
         "operationId": "getCustomerTaxSettings_tax",
@@ -23524,6 +24102,29 @@
         }
       }
     },
+    "/business/warehouses/code/{code}": {
+      "get": {
+        "summary": "getWarehouseByCode",
+        "operationId": "getWarehouseByCode_warehouse",
+        "tags": [
+          "warehouse"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/business/warehouses/country/{country}": {
       "get": {
         "summary": "getWarehousesByCountry",
@@ -23603,29 +24204,6 @@
       "delete": {
         "summary": "deleteWarehouse",
         "operationId": "deleteWarehouse_warehouse",
-        "tags": [
-          "warehouse"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/business/warehouses/code/{code}": {
-      "get": {
-        "summary": "getWarehouseByCode",
-        "operationId": "getWarehouseByCode_warehouse",
         "tags": [
           "warehouse"
         ],
@@ -23800,9 +24378,9 @@
         }
       }
     },
-    "/business/merchants/{merchantId}/warehouses": {
+    "/business/organizations/{organizationId}/warehouses": {
       "get": {
-        "summary": "Merchant warehouses",
+        "summary": "Organization warehouses",
         "operationId": "getWarehousesByMerchant_warehouse",
         "tags": [
           "warehouse"
@@ -25251,56 +25829,71 @@
       "CreateTemplateBody": {
         "type": "object",
         "properties": {
-          "name": {
+          "code": {
             "type": "string"
           },
-          "slug": {
+          "name": {
             "type": "string"
           },
           "description": {
             "type": "string",
             "description": "string | undefined"
           },
-          "thumbnail": {
+          "type": {
+            "type": "string"
+          },
+          "supportedChannels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defaultChannel": {
+            "type": "string"
+          },
+          "subject": {
             "type": "string",
             "description": "string | undefined"
           },
-          "htmlStructure": {
+          "htmlTemplate": {
             "type": "string",
             "description": "string | undefined"
           },
-          "cssStyles": {
+          "textTemplate": {
             "type": "string",
             "description": "string | undefined"
           },
-          "jsScripts": {
+          "pushTemplate": {
             "type": "string",
             "description": "string | undefined"
           },
-          "areas": {
+          "smsTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "parameters": {
             "type": "object",
             "description": "Record type: Record<string, unknown> | undefined"
-          },
-          "defaultBlocks": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          },
-          "compatibleContentTypes": {
-            "type": "string",
-            "description": "string[] | undefined"
-          },
-          "isSystem": {
-            "type": "string",
-            "description": "boolean | undefined"
           },
           "isActive": {
             "type": "string",
             "description": "boolean | undefined"
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "previewData": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
           }
         },
         "required": [
+          "code",
           "name",
-          "slug"
+          "type",
+          "supportedChannels",
+          "defaultChannel"
         ]
       },
       "UpdateTemplateBody": {
@@ -25310,25 +25903,57 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "slug": {
-            "type": "string",
-            "description": "string | undefined"
-          },
           "description": {
             "type": "string",
             "description": "string | undefined"
           },
-          "htmlStructure": {
+          "type": {
             "type": "string",
             "description": "string | undefined"
           },
-          "areas": {
+          "supportedChannels": {
+            "type": "string",
+            "description": "string[] | undefined"
+          },
+          "defaultChannel": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "subject": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "htmlTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "textTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "pushTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "smsTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "parameters": {
             "type": "object",
             "description": "Record type: Record<string, unknown> | undefined"
           },
           "isActive": {
             "type": "string",
             "description": "boolean | undefined"
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "previewData": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
           }
         }
       },
@@ -26025,7 +26650,7 @@
           },
           "entityType": {
             "type": "string",
-            "description": "\"contentPage\" | \"contentBlock\" | \"product\" | \"category\" | \"merchant\" | \"blog\""
+            "description": "\"contentPage\" | \"contentBlock\" | \"product\" | \"category\" | \"organization\" | \"blog\""
           },
           "entityId": {
             "type": "string"
@@ -26146,7 +26771,7 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "merchantId": {
+          "organizationId": {
             "type": "string",
             "description": "string | undefined"
           }
@@ -26196,7 +26821,7 @@
           "sourceId": {
             "type": "string"
           },
-          "merchantId": {
+          "organizationId": {
             "type": "string",
             "description": "string | undefined"
           },
@@ -26624,13 +27249,60 @@
             "type": "string"
           },
           "newPassword": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "password": {
+            "type": "string",
+            "description": "string | undefined"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "RevokeTokensBody": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "userType": {
             "type": "string"
           }
         },
         "required": [
-          "token",
+          "userId",
+          "userType"
+        ]
+      },
+      "ForceResetBody": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "userType": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "userType",
           "newPassword"
         ]
+      },
+      "LogoutBody": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "string | undefined"
+          }
+        }
       },
       "SocialLoginBody": {
         "type": "object",
@@ -27047,7 +27719,7 @@
         "properties": {
           "ownerType": {
             "type": "string",
-            "description": "\"business\" | \"merchant\""
+            "description": "\"organization\""
           },
           "ownerId": {
             "type": "string"
@@ -27467,7 +28139,7 @@
         "properties": {
           "user": {
             "type": "string",
-            "description": "{ _id?: string; id?: string; merchantId?: string; } | undefined"
+            "description": "{ _id?: string; id?: string; organizationId?: string; } | undefined"
           },
           "flash": {
             "type": "string",
@@ -27637,214 +28309,6 @@
           }
         }
       },
-      "CreateMerchantBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "phone": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "website": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "logoUrl": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "logo": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "password": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "status": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        },
-        "required": [
-          "name",
-          "email"
-        ]
-      },
-      "UpdateMerchantBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "email": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "phone": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "website": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "logoUrl": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "status": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        }
-      },
-      "AddMerchantAddressBody": {
-        "type": "object",
-        "properties": {
-          "addressLine1": {
-            "type": "string"
-          },
-          "addressLine2": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "city": {
-            "type": "string"
-          },
-          "state": {
-            "type": "string"
-          },
-          "postalCode": {
-            "type": "string"
-          },
-          "country": {
-            "type": "string"
-          },
-          "isPrimary": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        },
-        "required": [
-          "addressLine1",
-          "city",
-          "state",
-          "postalCode",
-          "country"
-        ]
-      },
-      "UpdateMerchantAddressBody": {
-        "type": "object",
-        "properties": {
-          "addressLine1": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "addressLine2": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "city": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "state": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "postalCode": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "country": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isDefault": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        }
-      },
-      "AddMerchantPaymentInfoBody": {
-        "type": "object",
-        "properties": {
-          "accountHolderName": {
-            "type": "string"
-          },
-          "bankName": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "accountNumber": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "routingNumber": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "paymentProcessor": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "processorAccountId": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isVerified": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        },
-        "required": [
-          "accountHolderName"
-        ]
-      },
-      "UpdateMerchantPaymentInfoBody": {
-        "type": "object",
-        "properties": {
-          "accountHolderName": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "bankName": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "accountNumber": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "routingNumber": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "paymentProcessor": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isVerified": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        }
-      },
       "CreateNotificationBody": {
         "type": "object",
         "properties": {
@@ -28000,6 +28464,235 @@
           "locale",
           "body"
         ]
+      },
+      "UpdatePreferenceAdminBody": {
+        "type": "object",
+        "properties": {
+          "channelPreferences": {
+            "type": "object",
+            "description": "Record type: Record<string, boolean> | undefined"
+          },
+          "isEnabled": {
+            "type": "string",
+            "description": "boolean | undefined"
+          },
+          "schedulePreferences": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
+          }
+        }
+      },
+      "CreateOrganizationBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "website": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "logo": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "description": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "password": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "status": {
+            "type": "string",
+            "description": "string | undefined"
+          }
+        },
+        "required": [
+          "name",
+          "email"
+        ]
+      },
+      "UpdateOrganizationBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "email": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "phone": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "website": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "description": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "status": {
+            "type": "string",
+            "description": "string | undefined"
+          }
+        }
+      },
+      "AddOrganizationAddressBody": {
+        "type": "object",
+        "properties": {
+          "addressLine1": {
+            "type": "string"
+          },
+          "addressLine2": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "string",
+            "description": "boolean | undefined"
+          }
+        },
+        "required": [
+          "addressLine1",
+          "city",
+          "state",
+          "postalCode",
+          "country"
+        ]
+      },
+      "UpdateOrganizationAddressBody": {
+        "type": "object",
+        "properties": {
+          "addressLine1": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "addressLine2": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "city": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "state": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "country": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "isDefault": {
+            "type": "string",
+            "description": "boolean | undefined"
+          }
+        }
+      },
+      "AddOrganizationPaymentInfoBody": {
+        "type": "object",
+        "properties": {
+          "accountHolderName": {
+            "type": "string"
+          },
+          "bankName": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "accountNumber": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "routingNumber": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "paymentProcessor": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "processorAccountId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "isVerified": {
+            "type": "string",
+            "description": "boolean | undefined"
+          }
+        },
+        "required": [
+          "accountHolderName"
+        ]
+      },
+      "UpdateOrganizationPaymentInfoBody": {
+        "type": "object",
+        "properties": {
+          "accountHolderName": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "bankName": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "accountNumber": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "routingNumber": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "paymentProcessor": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "isVerified": {
+            "type": "string",
+            "description": "boolean | undefined"
+          }
+        }
       },
       "ExchangeRateBody": {
         "type": "object",
@@ -28681,7 +29374,7 @@
             "type": "string",
             "description": "unknown[] | undefined"
           },
-          "merchantId": {
+          "organizationId": {
             "type": "string",
             "description": "string | undefined"
           }
@@ -28982,7 +29675,7 @@
             "type": "string",
             "description": "boolean | undefined"
           },
-          "merchantId": {
+          "organizationId": {
             "type": "string",
             "description": "string | undefined"
           },
@@ -29247,7 +29940,7 @@
               "type": "string"
             }
           },
-          "merchantId": {
+          "organizationId": {
             "type": "string",
             "description": "string | undefined"
           },

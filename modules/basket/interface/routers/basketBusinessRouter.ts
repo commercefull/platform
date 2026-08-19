@@ -5,8 +5,11 @@
 
 import express from 'express';
 import * as basketController from '../controllers/BasketController';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
+
+router.use(isOrganizationLoggedIn);
 
 // List/search baskets (admin)
 router.get('/basket', basketController.listBaskets);

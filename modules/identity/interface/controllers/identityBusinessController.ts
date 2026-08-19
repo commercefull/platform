@@ -2,9 +2,11 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { AuthRefreshTokenRepo } from '../../infrastructure/repositories/identityRefreshTokenRepo';
+import { AuthTokenBlacklistRepo } from '../../infrastructure/repositories/identityTokenBlacklistRepo';
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import { OrganizationRepo } from '../../../organization/infrastructure/repositories/organizationRepo';
+import { CustomerRepo } from '../../../customer/infrastructure/repositories/customerRepo';
 import { emitOrganizationLogin, emitOrganizationRegistered, emitOrganizationTokenRefreshed } from '../../domain/events/emitIdentityEvent';
 
 // Environment configuration with secure defaults
@@ -14,6 +16,8 @@ const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
 const organizationRepo = new OrganizationRepo();
 const refreshTokenRepo = new AuthRefreshTokenRepo();
+const tokenBlacklistRepo = new AuthTokenBlacklistRepo();
+const customerRepo = new CustomerRepo();
 
 interface LoginBody {
   email: string;
@@ -43,14 +47,15 @@ interface EmailBody {
 
 interface ResetPasswordBody {
   token: string;
-  newPassword: string;
+  newPassword?: string;
+  password?: string;
 }
 
 /**
  * Authenticates a organization and returns a basic JWT token
  * Use this for simple session-based auth
  */
-export const loginorganization = async (req: TypedRequest<Record<string, string>, unknown, LoginBody>, res: Response): Promise<void> => {
+export const loginOrganization = async (req: TypedRequest<Record<string, string>, unknown, LoginBody>, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -118,7 +123,7 @@ export const loginorganization = async (req: TypedRequest<Record<string, string>
  * Registers a new organization account
  * New accounts start with 'pending' status and require admin approval
  */
-export const registerorganization = async (req: TypedRequest<Record<string, string>, unknown, RegisterBody>, res: Response): Promise<void> => {
+export const registerOrganization = async (req: TypedRequest<Record<string, string>, unknown, RegisterBody>, res: Response): Promise<void> => {
   try {
     const { email, password, name, phone, website, description } = req.body;
 
@@ -439,9 +444,10 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
  */
 export const resetPassword = async (req: TypedRequest<Record<string, string>, unknown, ResetPasswordBody>, res: Response): Promise<void> => {
   try {
-    const { token, newPassword } = req.body;
+    const { token, newPassword, password } = req.body;
+    const finalPassword = newPassword || password;
 
-    if (!token || !newPassword) {
+    if (!token || !finalPassword) {
       res.status(400).json({
         success: false,
         message: 'Reset token and new password are required',
@@ -460,7 +466,7 @@ export const resetPassword = async (req: TypedRequest<Record<string, string>, un
     }
 
     // Update organization password
-    await organizationRepo.changePassword(organizationId, newPassword);
+    await organizationRepo.changePassword(organizationId, finalPassword);
 
     res.json({
       success: true,
@@ -473,5 +479,123 @@ export const resetPassword = async (req: TypedRequest<Record<string, string>, un
       success: false,
       message: 'Password reset failed. Please request a new reset link.',
     });
+  }
+};
+
+// ============================================================================
+// Admin Auth Management
+// ============================================================================
+
+interface RevokeTokensBody {
+  userId: string;
+  userType: string;
+}
+
+interface ForceResetBody {
+  userId: string;
+  userType: string;
+  newPassword: string;
+}
+
+export const getUserAuthDetails = async (req: TypedRequest<Record<string, string>, { userType?: string }>, res: Response): Promise<void> => {
+  try {
+    const userId = String(req.params.userId);
+    const userType = (req.query.userType as string) || 'customer';
+
+    if (userType === 'customer') {
+      const customer = await customerRepo.findCustomerById(userId);
+      if (!customer) {
+        res.status(404).json({ success: false, message: 'User not found' });
+        return;
+      }
+      res.json({
+        success: true,
+        data: {
+          id: customer.customerId,
+          email: customer.email,
+          lastLogin: customer.lastLoginAt || null,
+          emailVerified: customer.isVerified || false,
+          status: customer.isActive ? 'active' : 'inactive',
+        },
+      });
+    } else {
+      const org = await organizationRepo.findById(userId);
+      if (!org) {
+        res.status(404).json({ success: false, message: 'User not found' });
+        return;
+      }
+      res.json({
+        success: true,
+        data: {
+          id: org.organizationId,
+          email: org.email,
+          lastLogin: null,
+          emailVerified: false,
+          status: org.status,
+        },
+      });
+    }
+  } catch (error) {
+    logger.error('Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to get user auth details' });
+  }
+};
+
+export const revokeUserTokens = async (req: TypedRequest<Record<string, string>, unknown, RevokeTokensBody>, res: Response): Promise<void> => {
+  try {
+    const { userId, userType } = req.body;
+
+    if (!userId || !userType) {
+      res.status(400).json({ success: false, message: 'userId and userType are required' });
+      return;
+    }
+
+    const revokedCount = await refreshTokenRepo.revokeAllForUser(userId, userType);
+    res.json({ success: true, data: { revokedCount } });
+  } catch (error) {
+    logger.error('Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to revoke tokens' });
+  }
+};
+
+export const forceResetPassword = async (req: TypedRequest<Record<string, string>, unknown, ForceResetBody>, res: Response): Promise<void> => {
+  try {
+    const { userId, userType, newPassword } = req.body;
+
+    if (!userId || !userType || !newPassword) {
+      res.status(400).json({ success: false, message: 'userId, userType, and newPassword are required' });
+      return;
+    }
+
+    if (userType === 'customer') {
+      await customerRepo.changePassword(userId, newPassword);
+    } else {
+      await organizationRepo.changePassword(userId, newPassword);
+    }
+
+    res.json({ success: true, message: 'Password has been reset successfully' });
+  } catch (error) {
+    logger.error('Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to reset password' });
+  }
+};
+
+export const cleanupExpiredTokens = async (_req: TypedRequest<Record<string, string>, unknown>, res: Response): Promise<void> => {
+  try {
+    const refreshTokens = await refreshTokenRepo.cleanupExpired();
+    const blacklistTokens = await tokenBlacklistRepo.cleanupExpired();
+
+    res.json({
+      success: true,
+      data: {
+        passwordReset: 0,
+        emailVerification: 0,
+        refreshTokens,
+        blacklistTokens,
+      },
+    });
+  } catch (error) {
+    logger.error('Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to cleanup tokens' });
   }
 };

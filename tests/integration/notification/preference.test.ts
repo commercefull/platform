@@ -17,7 +17,7 @@ interface NotificationPreference {
   [key: string]: unknown;
 }
 
-describe.skip('Notification Preference Tests', () => {
+describe('Notification Preference Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let customerToken: string;
@@ -43,7 +43,7 @@ describe.skip('Notification Preference Tests', () => {
 
   describe('Customer Preference Operations', () => {
     it('should get all preferences for customer', async () => {
-      const response = await client.get('/api/account/notification-preferences', {
+      const response = await client.get('/customer/notifications/preferences', {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
@@ -69,7 +69,7 @@ describe.skip('Notification Preference Tests', () => {
     });
 
     it('should get a preference by ID for customer', async () => {
-      const response = await client.get(`/api/account/notification-preferences/${testPreferenceId}`, {
+      const response = await client.get(`/customer/notifications/preferences/${testPreferenceId}`, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
@@ -86,7 +86,7 @@ describe.skip('Notification Preference Tests', () => {
     });
 
     it('should get preference by notification type for customer', async () => {
-      const response = await client.get(`/api/account/notification-preferences/type/${testPreferenceData.type}`, {
+      const response = await client.get(`/customer/notifications/preferences/type/${testPreferenceData.type}`, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
@@ -112,11 +112,11 @@ describe.skip('Notification Preference Tests', () => {
         isEnabled: true,
       };
 
-      const response = await client.post('/api/account/notification-preferences', newPreferenceData, {
+      const response = await client.post('/customer/notifications/preferences', newPreferenceData, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
-      expect(response.status).toBe(201);
+      expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('id');
 
@@ -128,7 +128,7 @@ describe.skip('Notification Preference Tests', () => {
       expect(createdPreference.userId).toBe(testUserId);
 
       // Clean up
-      await client.delete(`/api/account/notification-preferences/${createdPreference.id}`, {
+      await client.delete(`/customer/notifications/preferences/${createdPreference.id}`, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
     });
@@ -144,7 +144,7 @@ describe.skip('Notification Preference Tests', () => {
         isEnabled: false,
       };
 
-      const response = await client.put(`/api/account/notification-preferences/${testPreferenceId}`, updateData, {
+      const response = await client.put(`/customer/notifications/preferences/${testPreferenceId}`, updateData, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
@@ -171,7 +171,7 @@ describe.skip('Notification Preference Tests', () => {
         },
       };
 
-      const response = await client.put(`/api/account/notification-preferences/${testPreferenceId}/schedule`, scheduleData, {
+      const response = await client.put(`/customer/notifications/preferences/${testPreferenceId}/schedule`, scheduleData, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
@@ -196,14 +196,14 @@ describe.skip('Notification Preference Tests', () => {
         isEnabled: true,
       };
 
-      const createResponse = await client.post('/api/account/notification-preferences', deletePreferenceData, {
+      const createResponse = await client.post('/customer/notifications/preferences', deletePreferenceData, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
       const deleteId = createResponse.data.data.id;
 
       // Delete the preference
-      const response = await client.delete(`/api/account/notification-preferences/${deleteId}`, {
+      const response = await client.delete(`/customer/notifications/preferences/${deleteId}`, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
@@ -211,7 +211,7 @@ describe.skip('Notification Preference Tests', () => {
       expect(response.data.success).toBe(true);
 
       // Verify deletion
-      const getResponse = await client.get(`/api/account/notification-preferences/${deleteId}`, {
+      const getResponse = await client.get(`/customer/notifications/preferences/${deleteId}`, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
@@ -308,7 +308,7 @@ describe.skip('Notification Preference Tests', () => {
         ],
       };
 
-      const response = await client.post('/api/account/notification-preferences/bulk', bulkUpdateData, {
+      const response = await client.post('/customer/notifications/preferences/bulk', bulkUpdateData, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 
@@ -319,7 +319,7 @@ describe.skip('Notification Preference Tests', () => {
       expect(response.data.data.updated + response.data.data.created).toBe(bulkUpdateData.updates.length);
 
       // Verify the updates worked
-      const getResponse = await client.get(`/api/account/notification-preferences/type/${testPreferenceData.type}`, {
+      const getResponse = await client.get(`/customer/notifications/preferences/type/${testPreferenceData.type}`, {
         headers: { Authorization: `Bearer ${customerToken}` },
       });
 

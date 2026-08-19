@@ -24,16 +24,20 @@ const CUSTOMER_SUBSCRIPTION_IDS = {
   CANCELLED_ANNUAL: '01937002-0000-7000-8000-000000000003',
 };
 
-// We need a product ID - use a fixed one that should exist from product seeds
-const TEST_PRODUCT_ID = '01912000-0000-7000-8000-000000000001';
-const TEST_CUSTOMER_ID = '01911000-0000-7000-8000-000000000001';
+// We need product IDs - use the ones from product test data seed
+const TEST_PRODUCT_IDS = {
+  MONTHLY_BOX: '10000000-0000-0000-0000-000000000001',
+  WEEKLY_DELIVERY: '10000000-0000-0000-0000-000000000002',
+  ANNUAL_MEMBERSHIP: '10000000-0000-0000-0000-000000000003',
+};
+const TEST_CUSTOMER_ID = '00000000-0000-0000-0000-000000001001';
 
 exports.seed = async function (knex) {
-  // Check if test product exists, if not skip seeding
-  const productExists = await knex('product').where('productId', TEST_PRODUCT_ID).first();
+  // Check if test products exist, if not skip seeding
+  const productExists = await knex('product').where('productId', TEST_PRODUCT_IDS.MONTHLY_BOX).first();
 
   if (!productExists) {
-    console.log('Skipping subscription seed - test product does not exist (productId:', TEST_PRODUCT_ID, ')');
+    console.log('Skipping subscription seed - test product does not exist (productId:', TEST_PRODUCT_IDS.MONTHLY_BOX, ')');
     return;
   }
 
@@ -53,7 +57,7 @@ exports.seed = async function (knex) {
       if (key === 'MONTHLY_BOX') {
         productData = {
           subscriptionProductId: subProductId,
-          productId: TEST_PRODUCT_ID,
+          productId: TEST_PRODUCT_IDS.MONTHLY_BOX,
           isSubscriptionOnly: false,
           allowOneTimePurchase: true,
           minSubscriptionLength: 1,
@@ -76,7 +80,7 @@ exports.seed = async function (knex) {
       } else if (key === 'WEEKLY_DELIVERY') {
         productData = {
           subscriptionProductId: subProductId,
-          productId: TEST_PRODUCT_ID,
+          productId: TEST_PRODUCT_IDS.WEEKLY_DELIVERY,
           isSubscriptionOnly: true,
           allowOneTimePurchase: false,
           minSubscriptionLength: 4,
@@ -98,7 +102,7 @@ exports.seed = async function (knex) {
       } else if (key === 'ANNUAL_MEMBERSHIP') {
         productData = {
           subscriptionProductId: subProductId,
-          productId: TEST_PRODUCT_ID,
+          productId: TEST_PRODUCT_IDS.ANNUAL_MEMBERSHIP,
           isSubscriptionOnly: true,
           allowOneTimePurchase: false,
           minSubscriptionLength: 12,

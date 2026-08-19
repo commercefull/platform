@@ -20,6 +20,16 @@ import {
   deactivateWebhook,
   listTranslations,
   upsertTranslation,
+  getAllTemplates,
+  getTemplateById,
+  getTemplatesByType,
+  createTemplate,
+  updateTemplate,
+  deleteTemplate,
+  previewTemplate,
+  getAllPreferences,
+  getPreferencesByUser,
+  updatePreferenceAdmin,
 } from '../controllers/notificationBusinessController';
 
 const router = express.Router();
@@ -60,9 +70,27 @@ router.post('/notifications/webhooks', createWebhook);
 router.delete('/notifications/webhooks/:webhookId', deactivateWebhook);
 
 // ============================================================================
+// Template routes
+// ============================================================================
+router.get('/notification-templates', getAllTemplates);
+router.post('/notification-templates', createTemplate);
+router.get('/notification-templates/type/:type', getTemplatesByType);
+router.get('/notification-templates/:id', getTemplateById);
+router.put('/notification-templates/:id', updateTemplate);
+router.delete('/notification-templates/:id', deleteTemplate);
+router.post('/notification-templates/:id/preview', previewTemplate);
+
+// ============================================================================
 // Template translation routes
 // ============================================================================
 router.get('/notifications/templates/:templateId/translations', listTranslations);
 router.post('/notifications/templates/:templateId/translations', upsertTranslation);
+
+// ============================================================================
+// Admin preference routes
+// ============================================================================
+router.get('/notification-preferences', getAllPreferences);
+router.get('/notification-preferences/user/:userId', getPreferencesByUser);
+router.put('/notification-preferences/:id', updatePreferenceAdmin);
 
 export const notificationMerchantRouter = router;

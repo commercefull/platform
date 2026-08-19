@@ -73,6 +73,16 @@ The Notification feature manages in-app notifications for merchants and administ
 
 | Method | Endpoint | Controller | Description |
 |---|---|---|---|
+| GET | `/business/notification-preferences` | `getAllPreferences` | ============================================================================ Admin preference routes ============================================================================ |
+| PUT | `/business/notification-preferences/:id` | `updatePreferenceAdmin` | — |
+| GET | `/business/notification-preferences/user/:userId` | `getPreferencesByUser` | — |
+| GET | `/business/notification-templates` | `getAllTemplates` | ============================================================================ Template routes ============================================================================ |
+| POST | `/business/notification-templates` | `createTemplate` | — |
+| GET | `/business/notification-templates/:id` | `getTemplateById` | — |
+| PUT | `/business/notification-templates/:id` | `updateTemplate` | — |
+| DELETE | `/business/notification-templates/:id` | `deleteTemplate` | — |
+| POST | `/business/notification-templates/:id/preview` | `previewTemplate` | — |
+| GET | `/business/notification-templates/type/:type` | `getTemplatesByType` | — |
 | GET | `/business/notifications` | `getAllNotifications` | ============================================================================ Admin CRUD routes for notifications ============================================================================ |
 | POST | `/business/notifications` | `createNotification` | — |
 | GET | `/business/notifications/:id` | `getNotificationById` | — |
@@ -94,20 +104,38 @@ The Notification feature manages in-app notifications for merchants and administ
 | DELETE | `/business/notifications/webhooks/:webhookId` | `deactivateWebhook` | — |
 | GET | `/customer/notifications` | `async (req, res) => {
   try {
-    const useCase = new GetNot` | — |
+    const customerId = req.use` | — |
+| GET | `/customer/notifications/:id` | `async (req, res) => {
+  try {
+    const customerId = req.use` | — |
 | PUT | `/customer/notifications/:notificationId/read` | `async (req, res) => {
   try {
     const useCase = new MarkAs` | — |
+| PATCH | `/customer/notifications/:notificationId/read` | `async (req, res) => {
+  try {
+    const customerId = req.use` | — |
 | GET | `/customer/notifications/count` | `async (req, res) => {
   try {
-    const useCase = new GetNot` | — |
+    const customerId = req.use` | — |
 | GET | `/customer/notifications/devices` | `listDevices` | — |
 | POST | `/customer/notifications/devices` | `registerDevice` | — |
 | DELETE | `/customer/notifications/devices/:deviceToken` | `deleteDevice` | — |
 | GET | `/customer/notifications/preferences` | `getPreferences` | — |
-| POST | `/customer/notifications/preferences` | `updatePreference` | — |
+| POST | `/customer/notifications/preferences` | `createPreference` | — |
+| GET | `/customer/notifications/preferences/:id` | `getPreferenceById` | — |
+| PUT | `/customer/notifications/preferences/:id` | `updatePreference` | — |
+| DELETE | `/customer/notifications/preferences/:id` | `deletePreference` | — |
+| PUT | `/customer/notifications/preferences/:id/schedule` | `updateSchedule` | — |
+| POST | `/customer/notifications/preferences/bulk` | `bulkUpdatePreferences` | — |
+| GET | `/customer/notifications/preferences/type/:type` | `getPreferenceByType` | — |
 | PUT | `/customer/notifications/read` | `async (req, res) => {
   try {
-    const useCase = new MarkAs` | — |
+    const customerId = req.use` | — |
+| POST | `/customer/notifications/read` | `async (req, res) => {
+  try {
+    const customerId = req.use` | — |
+| GET | `/customer/notifications/unread-count` | `async (req, res) => {
+  try {
+    const customerId = req.use` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -43,15 +43,25 @@ The Identity feature unifies customer and merchant authentication under `feature
 
 | Method | Endpoint | Controller | Description |
 |---|---|---|---|
+| GET | `/auth/stores/:storeId/users` | `listStoreUsers` | — |
+| POST | `/auth/users/:userId/stores` | `assignUserToStore` | — |
+| GET | `/auth/users/:userId/stores` | `getUserStores` | — |
+| DELETE | `/auth/users/:userId/stores/:storeId` | `removeUserFromStore` | — |
+| POST | `/business/auth/cleanup-tokens` | `cleanupExpiredTokens` | — |
+| POST | `/business/auth/force-reset` | `forceResetPassword` | — |
 | POST | `/business/auth/forgot-password` | `requestPasswordReset` | Password reset flow |
-| POST | `/business/auth/login` | `loginMerchant` | Simple login (returns access token only) |
+| POST | `/business/auth/login` | `loginOrganization` | Simple login (returns access token only) |
 | POST | `/business/auth/refresh` | `renewAccessToken` | Refresh access token |
-| POST | `/business/auth/register` | `registerMerchant` | Register new merchant account |
+| POST | `/business/auth/register` | `registerOrganization` | Register new merchant account |
 | POST | `/business/auth/reset-password` | `resetPassword` | — |
+| POST | `/business/auth/revoke-tokens` | `revokeUserTokens` | — |
 | POST | `/business/auth/token` | `issueTokenPair` | Token-based auth (returns access + refresh tokens) |
+| GET | `/business/auth/user/:userId` | `getUserAuthDetails` | — |
 | POST | `/business/auth/validate` | `checkTokenValidity` | Validate token |
+| GET | `/customer/identity/2fa/status` | `isCustomerLoggedIn` | 2FA status (requires auth) |
 | POST | `/customer/identity/forgot-password` | `requestPasswordReset` | Password reset flow |
 | POST | `/customer/identity/login` | `loginCustomer` | Simple login (returns access token only) |
+| POST | `/customer/identity/logout` | `isCustomerLoggedIn` | Logout (requires auth to blacklist token) |
 | POST | `/customer/identity/refresh` | `renewAccessToken` | Refresh access token |
 | POST | `/customer/identity/register` | `registerCustomer` | Register new customer account |
 | POST | `/customer/identity/reset-password` | `resetPassword` | — |
@@ -70,40 +80,11 @@ Unlink a social account from a customer (requires auth) |
 | POST | `/identity/:provider/merchant` | `merchantSocialLogin` | POST /identity/social/:provider/merchant
 Authenticate or register a merchant via social login
 Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
-| POST | `/identity/:provider/organization` | `merchantSocialLogin` | POST /identity/social/:provider/organization
-Authenticate or register an organization via social login
-Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
+| POST | `/identity/:provider/organization` | `merchantSocialLogin` | — |
 | GET | `/identity/customer/accounts` | `getCustomerLinkedAccounts` | GET /identity/social/customer/accounts
 Get all linked social accounts for a customer (requires auth) |
-| GET | `/identity/merchant/accounts` | `getMerchantLinkedAccounts` | GET /identity/social/merchant/accounts
+| GET | `/identity/merchant/accounts` | `getOrganizationLinkedAccounts` | GET /identity/social/merchant/accounts
 Get all linked social accounts for a merchant (requires auth) |
-| GET | `/identity/organization/accounts` | `getOrganizationLinkedAccounts` | GET /identity/social/organization/accounts
-Get all linked social accounts for an organization (requires auth) |
-| GET | `/stores/:storeId/users` | `listStoreUsers` | — |
-| POST | `/users/:userId/stores` | `assignUserToStore` | — |
-| GET | `/users/:userId/stores` | `getUserStores` | — |
-| DELETE | `/users/:userId/stores/:storeId` | `removeUserFromStore` | — |
-
----
-
-## Integration Test Coverage
-
-| Use Case   | Test File                          | Status |
-| ---------- | ---------------------------------- | ------ |
-| UC-IDT-001 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-002 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-003 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-004 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-005 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-006 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-007 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-008 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-009 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-010 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-011 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-012 | `identity/auth.test.ts`            | ✅     |
-| UC-IDT-013 | `identity/auth.test.ts`            | ✅     |
-| Social Login | `identity/socialLogin.test.ts`   | ✅     |
-| Admin Auth  | `identity/identityExpanded.test.ts` | ✅     |
+| GET | `/identity/organization/accounts` | `getOrganizationLinkedAccounts` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

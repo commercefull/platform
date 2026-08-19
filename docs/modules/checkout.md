@@ -129,6 +129,8 @@ PUT /checkout/:checkoutId/shipping-address |
 PUT /checkout/:checkoutId/shipping-method |
 | GET | `/customer/checkout/:checkoutId/shipping-methods` | `getShippingMethods` | Get available shipping methods
 GET /checkout/:checkoutId/shipping-methods |
+| GET | `/customer/checkout/:checkoutId/summary` | `getCheckoutSummary` | Get checkout summary
+GET /checkout/:checkoutId/summary |
 | GET | `/customer/checkout/payment-methods` | `getPaymentMethods` | Get available payment methods (no checkout required)
 GET /checkout/payment-methods |
 | GET | `/customer/checkout/pickup-locations` | `getPickupLocations` | Get available pickup locations

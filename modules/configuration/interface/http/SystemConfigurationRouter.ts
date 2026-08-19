@@ -5,9 +5,12 @@
 
 import { Router } from 'express';
 import { SystemConfigurationController } from './SystemConfigurationController';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = Router();
 const systemConfigurationController = new SystemConfigurationController();
+
+router.use(isOrganizationLoggedIn);
 
 // Create system configuration
 router.post('/configuration', systemConfigurationController.createSystemConfiguration.bind(systemConfigurationController));

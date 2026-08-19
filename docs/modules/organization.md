@@ -69,17 +69,17 @@ The Organization module manages organization accounts. It handles organization p
 
 | Method | Endpoint | Controller | Description |
 |---|---|---|---|
-| GET | `/business/organizations` | `listOrganizations` | List all organizations |
-| POST | `/business/organizations` | `createOrganization` | Create a new organization |
-| GET | `/business/organizations/:id` | `viewOrganization` | Get organization by ID |
-| PUT | `/business/organizations/:id` | `updateOrganization` | Update organization |
-| DELETE | `/business/organizations/:id` | `deleteOrganization` | Delete organization |
-| GET | `/business/organizations/:organizationId/addresses` | `getOrganizationAddresses` | Get organization addresses |
-| POST | `/business/organizations/:organizationId/addresses` | `addOrganizationAddress` | Add organization address |
-| PUT | `/business/organizations/:organizationId/addresses/:addressId` | `updateOrganizationAddress` | Update organization address |
-| GET | `/business/organizations/:organizationId/payment-info` | `getOrganizationPaymentInfo` | Get organization payment info |
-| POST | `/business/organizations/:organizationId/payment-info` | `addOrganizationPaymentInfo` | Add organization payment info |
-| PUT | `/business/organizations/:organizationId/payment-info/:paymentInfoId` | `updateOrganizationPaymentInfo` | Update organization payment info |
-| GET | `/business/organizations/:id/stores` | `getOrganizationStores` | Get stores by organization |
+| GET | `/business/organizations` | `getOrganizations` | — |
+| POST | `/business/organizations` | `createOrganization` | — |
+| GET | `/business/organizations/:id` | `getOrganizationById` | — |
+| PUT | `/business/organizations/:id` | `updateOrganization` | — |
+| DELETE | `/business/organizations/:id` | `deleteOrganization` | — |
+| GET | `/business/organizations/:id/stores` | `getOrganizationStores` | — |
+| GET | `/business/organizations/:organizationId/addresses` | `getOrganizationAddresses` | — |
+| POST | `/business/organizations/:organizationId/addresses` | `addOrganizationAddress` | — |
+| PUT | `/business/organizations/:organizationId/addresses/:addressId` | `updateOrganizationAddress` | — |
+| GET | `/business/organizations/:organizationId/payment-info` | `getOrganizationPaymentInfo` | — |
+| POST | `/business/organizations/:organizationId/payment-info` | `addOrganizationPaymentInfo` | — |
+| PUT | `/business/organizations/:organizationId/payment-info/:paymentInfoId` | `updateOrganizationPaymentInfo` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

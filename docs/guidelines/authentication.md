@@ -15,19 +15,19 @@ export const isAdminLoggedIn = async (req, res, next) => {
 
 ## Auth Middleware
 
-| Middleware           | User Type | JWT Secret            | Login Redirect    |
-| -------------------- | --------- | --------------------- | ----------------- |
-| `isAdminLoggedIn`    | Admin     | `ADMIN_JWT_SECRET`    | `/admin/login`    |
-| `isMerchantLoggedIn` | Merchant  | `MERCHANT_JWT_SECRET` | `/admin/login`    |
-| `isCustomerLoggedIn` | Customer  | `CUSTOMER_JWT_SECRET` | `/login`          |
+| Middleware             | User Type    | JWT Secret            | Login Redirect    |
+| ---------------------- | ------------ | --------------------- | ----------------- |
+| `isAdminLoggedIn`      | Admin        | `ADMIN_JWT_SECRET`    | `/admin/login`    |
+| `isOrganizationLoggedIn` | Organization | `MERCHANT_JWT_SECRET` | `/admin/login`    |
+| `isCustomerLoggedIn`   | Customer     | `CUSTOMER_JWT_SECRET` | `/login`          |
 
 Apply at router level:
 
 ```typescript
-import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
-router.use(isMerchantLoggedIn);
+router.use(isOrganizationLoggedIn);
 router.get('/products', controller.listProducts);
 ```
 
@@ -35,6 +35,38 @@ Or per route where only some endpoints are protected:
 
 ```typescript
 router.get('/profile', isCustomerLoggedIn, getProfile);
+```
+
+## Route Protection Requirements
+
+**All `/business` routes must be protected** with `isOrganizationLoggedIn` middleware. The only exceptions are:
+
+- **Public auth endpoints** in `identityBusinessRouter` — login, register, token, refresh, validate, forgot-password, reset-password (these must remain public)
+- **Payment gateway webhooks** — HMAC-verified separately, not token-authenticated
+
+### Applying auth to a business router
+
+Add `router.use(isOrganizationLoggedIn)` immediately after router creation, before any route definitions:
+
+```typescript
+const router = express.Router();
+router.use(isOrganizationLoggedIn);
+
+router.get('/items', controller.listItems);
+```
+
+For routers with mixed public/protected routes (e.g. identity), place the middleware after the public routes:
+
+```typescript
+const router = express.Router();
+
+// Public routes
+router.post('/auth/login', login);
+router.post('/auth/register', register);
+
+// Protected routes
+router.use(isOrganizationLoggedIn);
+router.get('/auth/user/:userId', getUserDetails);
 ```
 
 ## Session Configuration
@@ -54,7 +86,7 @@ router.get('/profile', isCustomerLoggedIn, getProfile);
 ```bash
 SESSION_SECRET=<64-char-hex>         # Session encryption
 CUSTOMER_JWT_SECRET=<secure-secret>  # Customer JWT signing
-MERCHANT_JWT_SECRET=<secure-secret>  # Merchant JWT signing
+MERCHANT_JWT_SECRET=<secure-secret>  # Organization JWT signing
 ADMIN_JWT_SECRET=<secure-secret>     # Admin JWT signing
 B2B_JWT_SECRET=<secure-secret>       # B2B JWT signing
 COOKIE_SECRET=<secure-secret>        # Cookie signing

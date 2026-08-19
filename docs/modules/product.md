@@ -130,23 +130,23 @@ The Product feature manages the product catalog, including products, variants, b
 | POST | `/business/attribute-sets/:id/attributes` | `bind` | — |
 | DELETE | `/business/attribute-sets/:id/attributes/:attributeId` | `bind` | — |
 | POST | `/business/attribute-sets/:id/attributes/reorder` | `bind` | — |
-| GET | `/business/attributes` | `isMerchantLoggedIn` | List all attributes |
-| POST | `/business/attributes` | `isMerchantLoggedIn` | Create attribute |
+| GET | `/business/attributes` | `isOrganizationLoggedIn` | List all attributes |
+| POST | `/business/attributes` | `isOrganizationLoggedIn` | Create attribute |
 | GET | `/business/attributes` | `bind` | — |
 | POST | `/business/attributes` | `bind` | — |
-| GET | `/business/attributes/:id` | `isMerchantLoggedIn` | Get attribute by ID |
-| PUT | `/business/attributes/:id` | `isMerchantLoggedIn` | Update attribute |
-| DELETE | `/business/attributes/:id` | `isMerchantLoggedIn` | Delete attribute |
+| GET | `/business/attributes/:id` | `isOrganizationLoggedIn` | Get attribute by ID |
+| PUT | `/business/attributes/:id` | `isOrganizationLoggedIn` | Update attribute |
+| DELETE | `/business/attributes/:id` | `isOrganizationLoggedIn` | Delete attribute |
 | GET | `/business/attributes/:id` | `bind` | — |
 | PUT | `/business/attributes/:id` | `bind` | — |
 | DELETE | `/business/attributes/:id` | `bind` | — |
-| GET | `/business/attributes/:id/values` | `isMerchantLoggedIn` | Get attribute values |
-| POST | `/business/attributes/:id/values` | `isMerchantLoggedIn` | Add attribute value |
+| GET | `/business/attributes/:id/values` | `isOrganizationLoggedIn` | Get attribute values |
+| POST | `/business/attributes/:id/values` | `isOrganizationLoggedIn` | Add attribute value |
 | GET | `/business/attributes/:id/values` | `bind` | Attribute Values |
 | POST | `/business/attributes/:id/values` | `bind` | — |
-| DELETE | `/business/attributes/:id/values/:valueId` | `isMerchantLoggedIn` | Remove attribute value |
+| DELETE | `/business/attributes/:id/values/:valueId` | `isOrganizationLoggedIn` | Remove attribute value |
 | DELETE | `/business/attributes/:id/values/:valueId` | `bind` | — |
-| GET | `/business/attributes/code/:code` | `isMerchantLoggedIn` | Get attribute by code |
+| GET | `/business/attributes/code/:code` | `isOrganizationLoggedIn` | Get attribute by code |
 | GET | `/business/attributes/code/:code` | `bind` | — |
 | GET | `/business/attributes/group/:groupId` | `bind` | — |
 | GET | `/business/bundles` | `getBundles` | — |
@@ -171,19 +171,19 @@ The Product feature manages the product catalog, including products, variants, b
 | DELETE | `/business/collections/:collectionId` | `deleteCollection` | — |
 | PUT | `/business/downloads/:downloadId` | `updateDownload` | — |
 | DELETE | `/business/downloads/:downloadId` | `deleteDownload` | — |
-| GET | `/business/product-types` | `isMerchantLoggedIn` | List all product types |
-| POST | `/business/product-types` | `isMerchantLoggedIn` | Create product type |
+| GET | `/business/product-types` | `isOrganizationLoggedIn` | List all product types |
+| POST | `/business/product-types` | `isOrganizationLoggedIn` | Create product type |
 | GET | `/business/product-types` | `bind` | — |
 | POST | `/business/product-types` | `bind` | — |
-| GET | `/business/product-types/:id` | `isMerchantLoggedIn` | Get product type by ID |
-| PUT | `/business/product-types/:id` | `isMerchantLoggedIn` | Update product type |
-| DELETE | `/business/product-types/:id` | `isMerchantLoggedIn` | Delete product type |
+| GET | `/business/product-types/:id` | `isOrganizationLoggedIn` | Get product type by ID |
+| PUT | `/business/product-types/:id` | `isOrganizationLoggedIn` | Update product type |
+| DELETE | `/business/product-types/:id` | `isOrganizationLoggedIn` | Delete product type |
 | GET | `/business/product-types/:id` | `bind` | — |
 | PUT | `/business/product-types/:id` | `bind` | — |
 | DELETE | `/business/product-types/:id` | `bind` | — |
-| GET | `/business/product-types/:id/attributes` | `isMerchantLoggedIn` | Get attributes for a product type |
+| GET | `/business/product-types/:id/attributes` | `isOrganizationLoggedIn` | Get attributes for a product type |
 | GET | `/business/product-types/:id/attributes` | `bind` | — |
-| GET | `/business/product-types/slug/:slug` | `isMerchantLoggedIn` | Get product type by slug |
+| GET | `/business/product-types/slug/:slug` | `isOrganizationLoggedIn` | Get product type by slug |
 | GET | `/business/product-types/slug/:slug` | `bind` | — |
 | GET | `/business/products` | `listProducts` | List all products
 GET /business/products |
@@ -196,13 +196,13 @@ PUT /business/products/:productId |
 | DELETE | `/business/products/:productId` | `deleteProduct` | Delete a product
 DELETE /business/products/:productId |
 | POST | `/business/products/:productId/apply-attribute-set` | `applyAttributeSet` | — |
-| GET | `/business/products/:productId/attributes` | `isMerchantLoggedIn` | Get product attributes |
-| POST | `/business/products/:productId/attributes` | `isMerchantLoggedIn` | Set single product attribute |
-| PUT | `/business/products/:productId/attributes` | `isMerchantLoggedIn` | Set multiple product attributes |
+| GET | `/business/products/:productId/attributes` | `isOrganizationLoggedIn` | Get product attributes |
+| POST | `/business/products/:productId/attributes` | `isOrganizationLoggedIn` | Set single product attribute |
+| PUT | `/business/products/:productId/attributes` | `isOrganizationLoggedIn` | Set multiple product attributes |
 | GET | `/business/products/:productId/attributes` | `bind` | Product Attributes |
 | POST | `/business/products/:productId/attributes` | `bind` | — |
 | PUT | `/business/products/:productId/attributes` | `bind` | — |
-| DELETE | `/business/products/:productId/attributes/:attributeId` | `isMerchantLoggedIn` | Remove product attribute |
+| DELETE | `/business/products/:productId/attributes/:attributeId` | `isOrganizationLoggedIn` | Remove product attribute |
 | DELETE | `/business/products/:productId/attributes/:attributeId` | `bind` | — |
 | POST | `/business/products/:productId/configure` | `configureVariant` | — |
 | GET | `/business/products/:productId/downloads` | `listDownloads` | — |
@@ -273,8 +273,8 @@ GET /products/:productId/availability |
 | GET | `/customer/products/:productId/related` | `getRelatedProducts` | Get related products
 GET /products/:productId/related |
 | GET | `/customer/products/:productId/reviews` | `getProductReviews` | — |
-| POST | `/customer/products/:productId/reviews` | `createReview` | — |
-| POST | `/customer/products/:productId/reviews/:reviewId/vote` | `voteOnReview` | — |
+| POST | `/customer/products/:productId/reviews` | `optionalCustomerAuth` | — |
+| POST | `/customer/products/:productId/reviews/:reviewId/vote` | `isCustomerLoggedIn` | — |
 | GET | `/customer/products/:productId/similar` | `bind` | Find similar products
 GET /customer/products/:productId/similar |
 | GET | `/customer/products/barcode/:barcode` | `findByBarcode` | Find product by variant barcode
@@ -295,7 +295,7 @@ GET /customer/products/search |
 POST /customer/products/search |
 | GET | `/customer/products/search/suggestions` | `bind` | Get search suggestions for autocomplete
 GET /customer/products/search/suggestions |
-| POST | `/customer/reviews/:reviewId/helpful` | `markReviewHelpful` | — |
-| POST | `/customer/reviews/:reviewId/report` | `reportReview` | — |
+| POST | `/customer/reviews/:reviewId/helpful` | `optionalCustomerAuth` | — |
+| POST | `/customer/reviews/:reviewId/report` | `optionalCustomerAuth` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

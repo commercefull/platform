@@ -141,9 +141,9 @@ The Subscription feature manages recurring billing products, subscription plans,
 | GET | `/business/subscriptions/products/:productId/plans/:planId` | `getSubscriptionPlan` | — |
 | PUT | `/business/subscriptions/products/:productId/plans/:planId` | `updateSubscriptionPlan` | — |
 | DELETE | `/business/subscriptions/products/:productId/plans/:planId` | `deleteSubscriptionPlan` | — |
-| GET | `/customer/subscriptions/mine` | `getMySubscriptions` | List and view subscriptions |
-| GET | `/customer/subscriptions/mine/:id` | `getMySubscription` | — |
-| PUT | `/customer/subscriptions/mine/:id` | `updateMySubscription` | Manage subscription |
+| GET | `/customer/subscriptions/mine` | `isCustomerLoggedIn` | List and view subscriptions |
+| GET | `/customer/subscriptions/mine/:id` | `isCustomerLoggedIn` | — |
+| PUT | `/customer/subscriptions/mine/:id` | `isCustomerLoggedIn` | Manage subscription |
 | POST | `/customer/subscriptions/mine/:id/cancel` | `cancelMySubscription` | — |
 | POST | `/customer/subscriptions/mine/:id/change-plan` | `changePlan` | — |
 | GET | `/customer/subscriptions/mine/:id/orders` | `getMySubscriptionOrders` | Billing history |
@@ -154,6 +154,6 @@ The Subscription feature manages recurring billing products, subscription plans,
 | GET | `/customer/subscriptions/plans/:planId` | `getSubscriptionPlanDetails` | — |
 | GET | `/customer/subscriptions/products` | `getAvailableSubscriptionProducts` | — |
 | GET | `/customer/subscriptions/products/:productId` | `getSubscriptionProductDetails` | — |
-| POST | `/customer/subscriptions/subscribe` | `createSubscription` | Create subscription |
+| POST | `/customer/subscriptions/subscribe` | `isCustomerLoggedIn` | Create subscription |
 
 <!-- GENERATED:ENDPOINTS:END -->

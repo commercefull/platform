@@ -200,7 +200,7 @@ describe('Pricing Feature Tests', () => {
       expect(response.data.data).toHaveProperty('tierPriceId', testTierId);
     });
 
-    it.skip('UC-PRC-009: should update a tier price', async () => {
+    it('UC-PRC-009: should update a tier price', async () => {
       // Create a tier price to update using seeded product
       const createResponse = await client.post(
         '/business/pricing/tier-prices',

@@ -327,7 +327,10 @@ async function getProductPrice(productId: string, productVariantId?: string): Pr
       `SELECT "price" FROM "productVariant" WHERE "productVariantId" = $1`,
       [productVariantId],
     );
-    if (variant) return parseFloat(variant.price);
+    if (variant) {
+      const vp = parseFloat(variant.price);
+      return Number.isFinite(vp) ? vp : 0;
+    }
   }
   const product = await queryOne<{ basePrice: string; salePrice: string | null }>(
     `SELECT "basePrice", "salePrice" FROM "product" WHERE "productId" = $1`,
@@ -336,7 +339,9 @@ async function getProductPrice(productId: string, productVariantId?: string): Pr
   if (!product) return 0;
   const base = parseFloat(product.basePrice);
   const sale = product.salePrice ? parseFloat(product.salePrice) : null;
-  return sale !== null && sale < base ? sale : base;
+  const safeBase = Number.isFinite(base) ? base : 0;
+  const safeSale = sale !== null && Number.isFinite(sale) ? sale : null;
+  return safeSale !== null && safeSale < safeBase ? safeSale : safeBase;
 }
 
 export async function calculateBundlePrice(

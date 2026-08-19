@@ -108,6 +108,8 @@ yarn job:new:business       # Create a new business
 - **camelCase everywhere in the database** — tables, columns, JSON fields, and FK columns all use camelCase with double-quoted PostgreSQL identifiers.
 - **Parameterized SQL only** — never interpolate user input into query strings.
 - **Always use `libs/logger`** in production code — never `console.log`.
+- **All `/business` routes must use `isOrganizationLoggedIn`** — except public auth endpoints in `identityBusinessRouter` (login, register, token refresh, password reset).
+- **Follow `/business/{topic}/...` route naming** — every business router must include its module topic as a path prefix (e.g. `/business/media/upload`, not `/business/upload`).
 
 ## Module & Migration Documentation
 
@@ -116,4 +118,4 @@ yarn job:new:business       # Create a new business
 
 ---
 
-**Last Updated**: April 2026
+**Last Updated**: August 2026

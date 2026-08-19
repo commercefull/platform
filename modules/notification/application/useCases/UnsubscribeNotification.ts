@@ -62,8 +62,8 @@ export class UnsubscribeNotificationUseCase {
       await this.preferenceRepo.upsert({
         userId: command.userId,
         userType: command.userType,
-        channel: command.channel,
         type: command.type,
+        channelPreferences: { [command.channel]: false },
         isEnabled: false,
       });
     }

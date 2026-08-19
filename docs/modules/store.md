@@ -87,8 +87,8 @@ The Store feature manages store entities for both marketplace (merchant-owned) a
 | DELETE | `/stores/:storeId` | `bind` | Delete store |
 | PUT | `/stores/:storeId/local-delivery` | `bind` | Set local delivery zone |
 | PUT | `/stores/:storeId/pickup` | `bind` | Configure store pickup (BOPIS) |
-| GET | `/stores/active` | `bind` | Get active stores |
-| GET | `/stores/organization/:organizationId` | `bind` | Get stores by organization |
+| GET | `/stores/active` | `bind` | Get active stores (must be before :storeId to avoid collision) |
+| GET | `/stores/business/:organizationId` | `bind` | Get stores by business |
 | POST | `/stores/hierarchy` | `bind` | Create store hierarchy |
 | GET | `/stores/slug/:slug` | `bind` | Get store by slug |
 

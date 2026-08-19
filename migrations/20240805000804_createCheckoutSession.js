@@ -10,7 +10,10 @@ exports.up = function (knex) {
     t.uuid('customerId').references('customerId').inTable('customer');
     t.string('email', 255).notNullable();
     t.string('phoneNumber', 50);
-    t.enum('status', ['active', 'completed', 'abandoned', 'expired']).notNullable().defaultTo('active');
+    t.text('status').notNullable().defaultTo('active');
+    t.check("status = ANY (ARRAY['active'::text, 'pending_payment'::text, 'processing'::text, 'completed'::text, 'abandoned'::text, 'expired'::text, 'failed'::text])", {
+      constraintName: 'checkoutSession_status_check',
+    });
     t.enum('step', ['cart', 'contact', 'shipping', 'billing', 'payment', 'review']).notNullable().defaultTo('cart');
     t.uuid('shippingAddressId').references('customerAddressId').inTable('customerAddress');
     t.uuid('billingAddressId').references('customerAddressId').inTable('customerAddress');

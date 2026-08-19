@@ -400,43 +400,43 @@ describe('Basket Edge Cases & Gap Tests', () => {
 
   // Basket routes are public for guest users - no auth required
   describe('Authorization', () => {
-    it.skip('should require auth for creating basket', async () => {
+    it('should allow guest basket creation without auth', async () => {
       const response = await client.post('/customer/basket', {
         sessionId: 'no-auth-test',
       });
-      expectStatus(response, 401);
+      expect([200, 201].includes(response.status)).toBe(true);
     });
 
-    it.skip('should require auth for getting basket', async () => {
+    it('should allow guest basket retrieval without auth', async () => {
       const response = await client.get('/customer/basket/00000000-0000-0000-0000-000000000001');
-      expectStatus(response, 401);
+      expect([200, 404].includes(response.status)).toBe(true);
     });
 
-    it.skip('should require auth for adding items', async () => {
+    it('should allow guest adding items without auth', async () => {
       const response = await client.post('/customer/basket/00000000-0000-0000-0000-000000000001/items', {
         productId: TEST_PRODUCT_1_ID,
         quantity: 1,
         unitPrice: 10,
       });
-      expectStatus(response, 401);
+      expect([200, 201, 400, 404].includes(response.status)).toBe(true);
     });
 
-    it.skip('should require auth for basket summary', async () => {
+    it('should allow guest basket summary without auth', async () => {
       const response = await client.get('/customer/basket/00000000-0000-0000-0000-000000000001/summary');
-      expectStatus(response, 401);
+      expect([200, 404].includes(response.status)).toBe(true);
     });
 
-    it.skip('should require auth for clearing basket', async () => {
+    it('should allow guest clearing basket without auth', async () => {
       const response = await client.delete('/customer/basket/00000000-0000-0000-0000-000000000001/items');
-      expectStatus(response, 401);
+      expect([200, 404].includes(response.status)).toBe(true);
     });
 
-    it.skip('should require auth for merging baskets', async () => {
+    it('should allow guest merging baskets without auth', async () => {
       const response = await client.post('/customer/basket/merge', {
         sourceBasketId: '00000000-0000-0000-0000-000000000001',
         targetBasketId: '00000000-0000-0000-0000-000000000002',
       });
-      expectStatus(response, 401);
+      expect([200, 400, 404].includes(response.status)).toBe(true);
     });
   });
 });

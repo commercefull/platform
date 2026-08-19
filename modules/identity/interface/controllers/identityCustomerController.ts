@@ -3,9 +3,11 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { CustomerRepo } from '../../../customer/infrastructure/repositories/customerRepo';
 import { AuthRefreshTokenRepo } from '../../infrastructure/repositories/identityRefreshTokenRepo';
+import { AuthTokenBlacklistRepo } from '../../infrastructure/repositories/identityTokenBlacklistRepo';
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
 import { emitCustomerLogin, emitCustomerRegistered, emitCustomerTokenRefreshed } from '../../domain/events/emitIdentityEvent';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 // Environment configuration with secure defaults
 const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
@@ -14,6 +16,7 @@ const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
 const customerRepo = new CustomerRepo();
 const refreshTokenRepo = new AuthRefreshTokenRepo();
+const tokenBlacklistRepo = new AuthTokenBlacklistRepo();
 
 interface LoginBody {
   email: string;
@@ -42,7 +45,8 @@ interface EmailBody {
 
 interface ResetPasswordBody {
   token: string;
-  newPassword: string;
+  newPassword?: string;
+  password?: string;
 }
 
 /**
@@ -430,9 +434,10 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
  */
 export const resetPassword = async (req: TypedRequest<Record<string, string>, unknown, ResetPasswordBody>, res: Response): Promise<void> => {
   try {
-    const { token, newPassword } = req.body;
+    const { token, newPassword, password } = req.body;
+    const finalPassword = newPassword || password;
 
-    if (!token || !newPassword) {
+    if (!token || !finalPassword) {
       res.status(400).json({
         success: false,
         message: 'Reset token and new password are required',
@@ -451,7 +456,7 @@ export const resetPassword = async (req: TypedRequest<Record<string, string>, un
     }
 
     // Update customer password
-    await customerRepo.changePassword(customerId, newPassword);
+    await customerRepo.changePassword(customerId, finalPassword);
 
     res.json({
       success: true,
@@ -463,6 +468,87 @@ export const resetPassword = async (req: TypedRequest<Record<string, string>, un
     res.status(500).json({
       success: false,
       message: 'Password reset failed. Please request a new reset link.',
+    });
+  }
+};
+
+/**
+ * Logout customer by blacklisting access token and revoking refresh token
+ */
+interface LogoutBody {
+  refreshToken?: string;
+}
+
+export const logoutCustomer = async (req: TypedRequest<Record<string, string>, unknown, LogoutBody>, res: Response): Promise<void> => {
+  try {
+    const customerId = req.user?.customerId || req.user?.id;
+    const accessToken = req.headers['authorization']?.split(' ')[1];
+    const { refreshToken } = req.body;
+
+    if (!customerId || !accessToken) {
+      res.status(401).json({
+        success: false,
+        message: 'Not authenticated',
+      });
+      return;
+    }
+
+    // Blacklist the access token
+    await tokenBlacklistRepo.create({
+      token: accessToken,
+      userId: customerId,
+      userType: 'customer',
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    // Revoke refresh token if provided
+    if (refreshToken) {
+      await refreshTokenRepo.revoke(refreshToken);
+    }
+
+    // Emit logout event
+    eventBus.emit('customer.logged_out', { customerId });
+
+    res.json({
+      success: true,
+      message: 'Logged out successfully',
+    });
+  } catch (error) {
+    logger.error('Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Logout failed. Please try again.',
+    });
+  }
+};
+
+/**
+ * Get 2FA status for authenticated customer
+ */
+export const get2FAStatus = async (req: TypedRequest<Record<string, string>, unknown>, res: Response): Promise<void> => {
+  try {
+    const customerId = req.user?.customerId || req.user?.id;
+
+    if (!customerId) {
+      res.status(401).json({
+        success: false,
+        message: 'Not authenticated',
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        enabled: false,
+        method: null,
+      },
+    });
+  } catch (error) {
+    logger.error('Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get 2FA status',
     });
   }
 };

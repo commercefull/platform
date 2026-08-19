@@ -85,7 +85,7 @@ The server starts with hot reload via nodemon.
 | Storefront | `http://localhost:3000` | Public |
 | Admin Panel | `http://localhost:3000/admin` | `isAdminLoggedIn` |
 | Customer API | `http://localhost:3000/customer/*` | Session or JWT |
-| Business API | `http://localhost:3000/business/*` | `isMerchantLoggedIn` |
+| Business API | `http://localhost:3000/business/*` | `isOrganizationLoggedIn` |
 | Health Check | `http://localhost:3000/health` | None |
 | **Docs** | `http://localhost:3000/docs` | None |
 

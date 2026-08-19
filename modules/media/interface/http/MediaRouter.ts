@@ -5,14 +5,17 @@
 
 import { Router } from 'express';
 import { MediaController } from './MediaController';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = Router();
 const mediaController = new MediaController();
 
+router.use(isOrganizationLoggedIn);
+
 // Upload single image
-router.post('/upload', mediaController.uploadSingle, mediaController.uploadImage);
+router.post('/media/upload', mediaController.uploadSingle, mediaController.uploadImage);
 
 // Upload multiple images
-router.post('/upload/batch', mediaController.uploadMultiple, mediaController.uploadImages);
+router.post('/media/upload/batch', mediaController.uploadMultiple, mediaController.uploadImages);
 
 export { router as mediaRouter };

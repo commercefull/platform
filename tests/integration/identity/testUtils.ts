@@ -66,15 +66,41 @@ export async function setupIdentityTests() {
 export async function setupAuthTests() {
   const { client, adminToken } = await setupIdentityTests();
 
+  let testCustomerId = '';
+  let customerRefreshToken = '';
+  let customerResetToken = '';
+
+  try {
+    // Login as customer to get ID and refresh token
+    const customerLoginResp = await client.post('/customer/identity/token', {
+      email: TEST_CUSTOMER.email,
+      password: TEST_CUSTOMER.password,
+    });
+
+    if (customerLoginResp.data?.customer?.id) {
+      testCustomerId = customerLoginResp.data.customer.id;
+      customerRefreshToken = customerLoginResp.data.refreshToken || '';
+    }
+
+    // Request password reset to get a reset token
+    const resetResp = await client.post('/customer/identity/forgot-password', {
+      email: TEST_CUSTOMER.email,
+    });
+
+    if (resetResp.data?.resetToken) {
+      customerResetToken = resetResp.data.resetToken;
+    }
+  } catch {}
+
   return {
     client,
     adminToken,
-    testCustomerId: '',
+    testCustomerId,
     testOrganizationId: '',
     testAdminId: '',
-    customerResetToken: '',
+    customerResetToken,
     organizationResetToken: '',
-    customerRefreshToken: '',
+    customerRefreshToken,
   };
 }
 

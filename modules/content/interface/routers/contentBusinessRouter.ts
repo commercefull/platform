@@ -1,8 +1,11 @@
 import express from 'express';
 import { ContentController } from '../controllers/contentBusinessController';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
 const contentController = new ContentController();
+
+router.use(isOrganizationLoggedIn);
 
 // Content Type routes
 router.get('/content/types', contentController.getContentTypes);

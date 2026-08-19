@@ -17,8 +17,11 @@ import {
   listFulfillments,
   assignFulfillment,
 } from '../controllers/FulfillmentController';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = Router();
+
+router.use(isOrganizationLoggedIn);
 
 // List all fulfillments (with filters/pagination)
 router.get('/fulfillments', listFulfillments);
@@ -46,8 +49,6 @@ router.post('/fulfillments/:fulfillmentId/deliver', markDelivered);
 
 // Cancel fulfillment
 router.post('/fulfillments/:fulfillmentId/cancel', cancelFulfillment);
-// Alias (tests call /business/:fulfillmentId/cancel)
-router.post('/:fulfillmentId/cancel', cancelFulfillment);
 
 // Update tracking info
 router.put('/fulfillments/:fulfillmentId/tracking', updateTracking);

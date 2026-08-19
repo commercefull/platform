@@ -3,7 +3,7 @@
 > Auto-generated from router source files. Do not edit manually.
 > Run `yarn docs:routes` to regenerate.
 
-**Total routes:** 975
+**Total routes:** 995
 
 ## (unmounted)
 
@@ -11,6 +11,10 @@
 |---|---|---|---|
 | <span class="badge badge-get">GET</span> | `/:fulfillmentId` | `getFulfillment` | Get fulfillment by ID (customer view) |
 | <span class="badge badge-get">GET</span> | `/:fulfillmentId/track` | `getTrackingInfo` | Track fulfillment |
+| <span class="badge badge-get">GET</span> | `/auth/stores/:storeId/users` | `listStoreUsers` | — |
+| <span class="badge badge-post">POST</span> | `/auth/users/:userId/stores` | `assignUserToStore` | — |
+| <span class="badge badge-get">GET</span> | `/auth/users/:userId/stores` | `getUserStores` | — |
+| <span class="badge badge-delete">DELETE</span> | `/auth/users/:userId/stores/:storeId` | `removeUserFromStore` | — |
 | <span class="badge badge-post">POST</span> | `/configuration` | `bind` | Create system configuration |
 | <span class="badge badge-get">GET</span> | `/configuration` | `bind` | List all system configurations |
 | <span class="badge badge-put">PUT</span> | `/configuration/:configId` | `bind` | Update system configuration |
@@ -36,10 +40,12 @@ Unlink a social account from a customer (requires auth) |
 | <span class="badge badge-post">POST</span> | `/identity/:provider/merchant` | `merchantSocialLogin` | POST /identity/social/:provider/merchant
 Authenticate or register a merchant via social login
 Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
+| <span class="badge badge-post">POST</span> | `/identity/:provider/organization` | `merchantSocialLogin` | — |
 | <span class="badge badge-get">GET</span> | `/identity/customer/accounts` | `getCustomerLinkedAccounts` | GET /identity/social/customer/accounts
 Get all linked social accounts for a customer (requires auth) |
-| <span class="badge badge-get">GET</span> | `/identity/merchant/accounts` | `getMerchantLinkedAccounts` | GET /identity/social/merchant/accounts
+| <span class="badge badge-get">GET</span> | `/identity/merchant/accounts` | `getOrganizationLinkedAccounts` | GET /identity/social/merchant/accounts
 Get all linked social accounts for a merchant (requires auth) |
+| <span class="badge badge-get">GET</span> | `/identity/organization/accounts` | `getOrganizationLinkedAccounts` | — |
 | <span class="badge badge-get">GET</span> | `/me` | `getMyProfile` | Get my profile
 GET /customers/me |
 | <span class="badge badge-put">PUT</span> | `/me` | `updateMyProfile` | Update my profile
@@ -54,6 +60,8 @@ PUT /customers/me/addresses/:addressId |
 DELETE /customers/me/addresses/:addressId |
 | <span class="badge badge-post">POST</span> | `/me/addresses/:addressId/default` | `setDefaultAddress` | Set default address
 POST /customers/me/addresses/:addressId/default |
+| <span class="badge badge-post">POST</span> | `/media/upload` | `uploadSingle` | Upload single image |
+| <span class="badge badge-post">POST</span> | `/media/upload/batch` | `uploadMultiple` | Upload multiple images |
 | <span class="badge badge-get">GET</span> | `/order/:orderId` | `listFulfillmentsByOrder` | List fulfillments by order (customer view) |
 | <span class="badge badge-post">POST</span> | `/register` | `registerCustomer` | Register a new customer
 POST /customers/register |
@@ -64,44 +72,15 @@ POST /customers/register |
 | <span class="badge badge-delete">DELETE</span> | `/stores/:storeId` | `bind` | Delete store |
 | <span class="badge badge-put">PUT</span> | `/stores/:storeId/local-delivery` | `bind` | Set local delivery zone |
 | <span class="badge badge-put">PUT</span> | `/stores/:storeId/pickup` | `bind` | Configure store pickup (BOPIS) |
-| <span class="badge badge-get">GET</span> | `/stores/:storeId/users` | `listStoreUsers` | — |
-| <span class="badge badge-get">GET</span> | `/stores/active` | `bind` | Get active stores |
-| <span class="badge badge-get">GET</span> | `/stores/business/:businessId` | `bind` | Get stores by business |
+| <span class="badge badge-get">GET</span> | `/stores/active` | `bind` | Get active stores (must be before :storeId to avoid collision) |
+| <span class="badge badge-get">GET</span> | `/stores/business/:organizationId` | `bind` | Get stores by business |
 | <span class="badge badge-post">POST</span> | `/stores/hierarchy` | `bind` | Create store hierarchy |
 | <span class="badge badge-get">GET</span> | `/stores/slug/:slug` | `bind` | Get store by slug |
-| <span class="badge badge-post">POST</span> | `/upload` | `uploadSingle` | Upload single image |
-| <span class="badge badge-post">POST</span> | `/upload/batch` | `uploadMultiple` | Upload multiple images |
-| <span class="badge badge-post">POST</span> | `/users/:userId/stores` | `assignUserToStore` | — |
-| <span class="badge badge-get">GET</span> | `/users/:userId/stores` | `getUserStores` | — |
-| <span class="badge badge-delete">DELETE</span> | `/users/:userId/stores/:storeId` | `removeUserFromStore` | — |
 
 ## /business
 
 | Method | Path | Controller | Description |
 |---|---|---|---|
-| <span class="badge badge-get">GET</span> | `/business/` | `getBasket` | List/search baskets (admin) |
-| <span class="badge badge-get">GET</span> | `/business/` | `listCoupons` | — |
-| <span class="badge badge-post">POST</span> | `/business/` | `createCoupon` | — |
-| <span class="badge badge-get">GET</span> | `/business/` | `listFulfillments` | List all fulfillments (with filters/pagination) |
-| <span class="badge badge-post">POST</span> | `/business/` | `createFulfillment` | Create fulfillment |
-| <span class="badge badge-get">GET</span> | `/business/:basketId` | `getBasket` | Get basket by ID |
-| <span class="badge badge-delete">DELETE</span> | `/business/:basketId` | `deleteBasket` | Delete basket |
-| <span class="badge badge-post">POST</span> | `/business/:basketId/assign` | `assignToCustomer` | Assign basket to customer |
-| <span class="badge badge-post">POST</span> | `/business/:basketId/coupon` | `applyCoupon` | Apply coupon (admin override) |
-| <span class="badge badge-delete">DELETE</span> | `/business/:basketId/coupon` | `removeCoupon` | Remove coupon |
-| <span class="badge badge-put">PUT</span> | `/business/:basketId/expiration` | `extendExpiration` | Extend expiration |
-| <span class="badge badge-get">GET</span> | `/business/:basketId/summary` | `getBasketSummary` | Get basket summary |
-| <span class="badge badge-get">GET</span> | `/business/:couponId` | `getCoupon` | — |
-| <span class="badge badge-delete">DELETE</span> | `/business/:couponId` | `deleteCoupon` | — |
-| <span class="badge badge-get">GET</span> | `/business/:fulfillmentId` | `getFulfillment` | Get fulfillment by ID |
-| <span class="badge badge-post">POST</span> | `/business/:fulfillmentId/assign` | `assignFulfillment` | Assign fulfillment |
-| <span class="badge badge-post">POST</span> | `/business/:fulfillmentId/cancel` | `cancelFulfillment` | Cancel fulfillment |
-| <span class="badge badge-post">POST</span> | `/business/:fulfillmentId/deliver` | `markDelivered` | Mark delivered |
-| <span class="badge badge-post">POST</span> | `/business/:fulfillmentId/pack` | `processPacking` | Process packing |
-| <span class="badge badge-post">POST</span> | `/business/:fulfillmentId/pick` | `processPicking` | Process picking |
-| <span class="badge badge-post">POST</span> | `/business/:fulfillmentId/return` | `initiateReturn` | Initiate return |
-| <span class="badge badge-post">POST</span> | `/business/:fulfillmentId/ship` | `shipOrder` | Ship order |
-| <span class="badge badge-put">PUT</span> | `/business/:fulfillmentId/tracking` | `updateTracking` | Update tracking info |
 | <span class="badge badge-get">GET</span> | `/business/analytics/customers/cohorts` | `getCustomerCohorts` | GET /business/analytics/customers/cohorts - Get customer cohort analysis |
 | <span class="badge badge-get">GET</span> | `/business/analytics/dashboards` | `getDashboards` | GET /business/analytics/dashboards - List dashboards |
 | <span class="badge badge-post">POST</span> | `/business/analytics/dashboards` | `createDashboard` | POST /business/analytics/dashboards - Create dashboard |
@@ -119,7 +98,6 @@ POST /customers/register |
 | <span class="badge badge-get">GET</span> | `/business/analytics/search/zero-results` | `getZeroResultSearches` | GET /business/analytics/search/zero-results - Get zero result searches |
 | <span class="badge badge-get">GET</span> | `/business/analytics/snapshots` | `getSnapshots` | GET /business/analytics/snapshots - Get historical snapshots |
 | <span class="badge badge-get">GET</span> | `/business/analytics/snapshots/latest` | `getLatestSnapshot` | GET /business/analytics/snapshots/latest - Get latest snapshot |
-| <span class="badge badge-post">POST</span> | `/business/apply` | `applyCoupon` | — |
 | <span class="badge badge-get">GET</span> | `/business/attribute-groups` | `bind` | — |
 | <span class="badge badge-post">POST</span> | `/business/attribute-groups` | `bind` | — |
 | <span class="badge badge-get">GET</span> | `/business/attribute-groups/:id` | `bind` | — |
@@ -140,32 +118,44 @@ POST /customers/register |
 | <span class="badge badge-post">POST</span> | `/business/attribute-sets/:id/attributes` | `bind` | — |
 | <span class="badge badge-delete">DELETE</span> | `/business/attribute-sets/:id/attributes/:attributeId` | `bind` | — |
 | <span class="badge badge-post">POST</span> | `/business/attribute-sets/:id/attributes/reorder` | `bind` | — |
-| <span class="badge badge-get">GET</span> | `/business/attributes` | `isMerchantLoggedIn` | List all attributes |
-| <span class="badge badge-post">POST</span> | `/business/attributes` | `isMerchantLoggedIn` | Create attribute |
+| <span class="badge badge-get">GET</span> | `/business/attributes` | `isOrganizationLoggedIn` | List all attributes |
+| <span class="badge badge-post">POST</span> | `/business/attributes` | `isOrganizationLoggedIn` | Create attribute |
 | <span class="badge badge-get">GET</span> | `/business/attributes` | `bind` | — |
 | <span class="badge badge-post">POST</span> | `/business/attributes` | `bind` | — |
-| <span class="badge badge-get">GET</span> | `/business/attributes/:id` | `isMerchantLoggedIn` | Get attribute by ID |
-| <span class="badge badge-put">PUT</span> | `/business/attributes/:id` | `isMerchantLoggedIn` | Update attribute |
-| <span class="badge badge-delete">DELETE</span> | `/business/attributes/:id` | `isMerchantLoggedIn` | Delete attribute |
+| <span class="badge badge-get">GET</span> | `/business/attributes/:id` | `isOrganizationLoggedIn` | Get attribute by ID |
+| <span class="badge badge-put">PUT</span> | `/business/attributes/:id` | `isOrganizationLoggedIn` | Update attribute |
+| <span class="badge badge-delete">DELETE</span> | `/business/attributes/:id` | `isOrganizationLoggedIn` | Delete attribute |
 | <span class="badge badge-get">GET</span> | `/business/attributes/:id` | `bind` | — |
 | <span class="badge badge-put">PUT</span> | `/business/attributes/:id` | `bind` | — |
 | <span class="badge badge-delete">DELETE</span> | `/business/attributes/:id` | `bind` | — |
-| <span class="badge badge-get">GET</span> | `/business/attributes/:id/values` | `isMerchantLoggedIn` | Get attribute values |
-| <span class="badge badge-post">POST</span> | `/business/attributes/:id/values` | `isMerchantLoggedIn` | Add attribute value |
+| <span class="badge badge-get">GET</span> | `/business/attributes/:id/values` | `isOrganizationLoggedIn` | Get attribute values |
+| <span class="badge badge-post">POST</span> | `/business/attributes/:id/values` | `isOrganizationLoggedIn` | Add attribute value |
 | <span class="badge badge-get">GET</span> | `/business/attributes/:id/values` | `bind` | Attribute Values |
 | <span class="badge badge-post">POST</span> | `/business/attributes/:id/values` | `bind` | — |
-| <span class="badge badge-delete">DELETE</span> | `/business/attributes/:id/values/:valueId` | `isMerchantLoggedIn` | Remove attribute value |
+| <span class="badge badge-delete">DELETE</span> | `/business/attributes/:id/values/:valueId` | `isOrganizationLoggedIn` | Remove attribute value |
 | <span class="badge badge-delete">DELETE</span> | `/business/attributes/:id/values/:valueId` | `bind` | — |
-| <span class="badge badge-get">GET</span> | `/business/attributes/code/:code` | `isMerchantLoggedIn` | Get attribute by code |
+| <span class="badge badge-get">GET</span> | `/business/attributes/code/:code` | `isOrganizationLoggedIn` | Get attribute by code |
 | <span class="badge badge-get">GET</span> | `/business/attributes/code/:code` | `bind` | — |
 | <span class="badge badge-get">GET</span> | `/business/attributes/group/:groupId` | `bind` | — |
+| <span class="badge badge-post">POST</span> | `/business/auth/cleanup-tokens` | `cleanupExpiredTokens` | — |
+| <span class="badge badge-post">POST</span> | `/business/auth/force-reset` | `forceResetPassword` | — |
 | <span class="badge badge-post">POST</span> | `/business/auth/forgot-password` | `requestPasswordReset` | Password reset flow |
-| <span class="badge badge-post">POST</span> | `/business/auth/login` | `loginMerchant` | Simple login (returns access token only) |
+| <span class="badge badge-post">POST</span> | `/business/auth/login` | `loginOrganization` | Simple login (returns access token only) |
 | <span class="badge badge-post">POST</span> | `/business/auth/refresh` | `renewAccessToken` | Refresh access token |
-| <span class="badge badge-post">POST</span> | `/business/auth/register` | `registerMerchant` | Register new merchant account |
+| <span class="badge badge-post">POST</span> | `/business/auth/register` | `registerOrganization` | Register new merchant account |
 | <span class="badge badge-post">POST</span> | `/business/auth/reset-password` | `resetPassword` | — |
+| <span class="badge badge-post">POST</span> | `/business/auth/revoke-tokens` | `revokeUserTokens` | — |
 | <span class="badge badge-post">POST</span> | `/business/auth/token` | `issueTokenPair` | Token-based auth (returns access + refresh tokens) |
+| <span class="badge badge-get">GET</span> | `/business/auth/user/:userId` | `getUserAuthDetails` | — |
 | <span class="badge badge-post">POST</span> | `/business/auth/validate` | `checkTokenValidity` | Validate token |
+| <span class="badge badge-get">GET</span> | `/business/basket` | `listBaskets` | List/search baskets (admin) |
+| <span class="badge badge-get">GET</span> | `/business/basket/:basketId` | `getBasket` | Get basket by ID |
+| <span class="badge badge-delete">DELETE</span> | `/business/basket/:basketId` | `deleteBasket` | Delete basket |
+| <span class="badge badge-post">POST</span> | `/business/basket/:basketId/assign` | `assignToCustomer` | Assign basket to customer |
+| <span class="badge badge-post">POST</span> | `/business/basket/:basketId/coupon` | `applyCouponAdmin` | Apply coupon (admin override) |
+| <span class="badge badge-delete">DELETE</span> | `/business/basket/:basketId/coupon` | `removeCoupon` | Remove coupon |
+| <span class="badge badge-put">PUT</span> | `/business/basket/:basketId/expiration` | `extendExpiration` | Extend expiration |
+| <span class="badge badge-get">GET</span> | `/business/basket/:basketId/summary` | `getBasketSummary` | Get basket summary |
 | <span class="badge badge-get">GET</span> | `/business/bundles` | `getBundles` | — |
 | <span class="badge badge-post">POST</span> | `/business/bundles` | `createBundle` | — |
 | <span class="badge badge-get">GET</span> | `/business/bundles/:id` | `getBundle` | — |
@@ -292,15 +282,23 @@ POST /customers/register |
 | <span class="badge badge-post">POST</span> | `/business/countries/:id/deactivate` | `deactivateCountry` | — |
 | <span class="badge badge-get">GET</span> | `/business/countries/code/:code` | `getCountryByCode` | — |
 | <span class="badge badge-get">GET</span> | `/business/countries/region/:region` | `getCountriesByRegion` | — |
+| <span class="badge badge-get">GET</span> | `/business/coupons` | `listCoupons` | — |
+| <span class="badge badge-post">POST</span> | `/business/coupons` | `createCoupon` | — |
 | <span class="badge badge-get">GET</span> | `/business/coupons` | `getActiveCoupons` | Coupon routes |
 | <span class="badge badge-post">POST</span> | `/business/coupons` | `createCoupon` | — |
+| <span class="badge badge-get">GET</span> | `/business/coupons/:couponId` | `getCoupon` | — |
+| <span class="badge badge-delete">DELETE</span> | `/business/coupons/:couponId` | `deleteCoupon` | — |
 | <span class="badge badge-get">GET</span> | `/business/coupons/:id` | `getCouponById` | — |
 | <span class="badge badge-put">PUT</span> | `/business/coupons/:id` | `updateCoupon` | — |
 | <span class="badge badge-delete">DELETE</span> | `/business/coupons/:id` | `deleteCoupon` | — |
 | <span class="badge badge-get">GET</span> | `/business/coupons/:id/usage` | `getCouponUsage` | — |
+| <span class="badge badge-post">POST</span> | `/business/coupons/apply` | `applyCoupon` | — |
 | <span class="badge badge-post">POST</span> | `/business/coupons/calculate` | `calculateCouponDiscount` | — |
 | <span class="badge badge-get">GET</span> | `/business/coupons/code/:code` | `getCouponByCode` | — |
+| <span class="badge badge-post">POST</span> | `/business/coupons/redeem` | `redeemCoupon` | — |
 | <span class="badge badge-post">POST</span> | `/business/coupons/validate` | `validateCoupon` | — |
+| <span class="badge badge-post">POST</span> | `/business/coupons/validate` | `validateCoupon` | — |
+| <span class="badge badge-get">GET</span> | `/business/coupons/validate/:code` | `validateCoupon` | — |
 | <span class="badge badge-get">GET</span> | `/business/customers` | `listCustomers` | List all customers
 GET /business/customers |
 | <span class="badge badge-post">POST</span> | `/business/customers` | `createCustomer` | Create a new customer
@@ -342,6 +340,31 @@ POST /business/customers/:customerId/verify |
 | <span class="badge badge-get">GET</span> | `/business/fraud/rules/:id` | `getFraudRule` | — |
 | <span class="badge badge-put">PUT</span> | `/business/fraud/rules/:id` | `updateFraudRule` | — |
 | <span class="badge badge-delete">DELETE</span> | `/business/fraud/rules/:id` | `deleteFraudRule` | — |
+| <span class="badge badge-get">GET</span> | `/business/fulfillment/locations` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/business/fulfillment/locations` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/business/fulfillment/locations/:locationId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-put">PUT</span> | `/business/fulfillment/locations/:locationId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-delete">DELETE</span> | `/business/fulfillment/locations/:locationId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/business/fulfillment/locations/:locationId/activate` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/business/fulfillment/locations/:locationId/deactivate` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/business/fulfillment/locations/nearest` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/business/fulfillment/partners` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/business/fulfillment/partners` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/business/fulfillment/partners/:partnerId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-put">PUT</span> | `/business/fulfillment/partners/:partnerId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-delete">DELETE</span> | `/business/fulfillment/partners/:partnerId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/business/fulfillments` | `listFulfillments` | List all fulfillments (with filters/pagination) |
+| <span class="badge badge-post">POST</span> | `/business/fulfillments` | `createFulfillment` | Create fulfillment |
+| <span class="badge badge-get">GET</span> | `/business/fulfillments/:fulfillmentId` | `getFulfillment` | Get fulfillment by ID |
+| <span class="badge badge-post">POST</span> | `/business/fulfillments/:fulfillmentId/assign` | `assignFulfillment` | Assign fulfillment |
+| <span class="badge badge-post">POST</span> | `/business/fulfillments/:fulfillmentId/cancel` | `cancelFulfillment` | Cancel fulfillment |
+| <span class="badge badge-post">POST</span> | `/business/fulfillments/:fulfillmentId/deliver` | `markDelivered` | Mark delivered |
+| <span class="badge badge-post">POST</span> | `/business/fulfillments/:fulfillmentId/pack` | `processPacking` | Process packing |
+| <span class="badge badge-post">POST</span> | `/business/fulfillments/:fulfillmentId/pick` | `processPicking` | Process picking |
+| <span class="badge badge-post">POST</span> | `/business/fulfillments/:fulfillmentId/return` | `initiateReturn` | Initiate return |
+| <span class="badge badge-post">POST</span> | `/business/fulfillments/:fulfillmentId/ship` | `shipOrder` | Ship order |
+| <span class="badge badge-put">PUT</span> | `/business/fulfillments/:fulfillmentId/tracking` | `updateTracking` | Update tracking info |
+| <span class="badge badge-get">GET</span> | `/business/fulfillments/order/:orderId` | `listFulfillmentsByOrder` | List by order |
 | <span class="badge badge-get">GET</span> | `/business/gateways` | `listGateways` | ============================================================================ Gateway Routes ============================================================================ |
 | <span class="badge badge-post">POST</span> | `/business/gateways` | `createGateway` | — |
 | <span class="badge badge-get">GET</span> | `/business/gateways/:gatewayId` | `getGateway` | — |
@@ -406,14 +429,6 @@ POST /business/customers/:customerId/verify |
 | <span class="badge badge-get">GET</span> | `/business/locales/default` | `getDefaultLocale` | — |
 | <span class="badge badge-get">GET</span> | `/business/locales/language/:language` | `getLocalesByLanguage` | — |
 | <span class="badge badge-get">GET</span> | `/business/locales/statistics` | `getLocaleStatistics` | — |
-| <span class="badge badge-get">GET</span> | `/business/locations` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/business/locations` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-get">GET</span> | `/business/locations/:locationId` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-put">PUT</span> | `/business/locations/:locationId` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-delete">DELETE</span> | `/business/locations/:locationId` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/business/locations/:locationId/activate` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/business/locations/:locationId/deactivate` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-get">GET</span> | `/business/locations/nearest` | `isMerchantLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/business/loyalty/customers/:customerId/points` | `getCustomerPoints` | Customer Management |
 | <span class="badge badge-post">POST</span> | `/business/loyalty/customers/:customerId/points/adjust` | `adjustCustomerPoints` | — |
 | <span class="badge badge-get">GET</span> | `/business/loyalty/customers/:customerId/redemptions` | `getCustomerRedemptions` | — |
@@ -445,18 +460,6 @@ POST /business/customers/:customerId/verify |
 | <span class="badge badge-post">POST</span> | `/business/membership/user-memberships/:id/cancel` | `cancelUserMembership` | — |
 | <span class="badge badge-get">GET</span> | `/business/membership/users/:userId/benefits` | `getUserMembershipBenefits` | — |
 | <span class="badge badge-get">GET</span> | `/business/membership/users/:userId/membership` | `getUserMembershipByUserId` | Admin routes for fetching user-specific membership data |
-| <span class="badge badge-get">GET</span> | `/business/merchants` | `getMerchants` | Admin routes for merchant management |
-| <span class="badge badge-post">POST</span> | `/business/merchants` | `createMerchant` | — |
-| <span class="badge badge-get">GET</span> | `/business/merchants/:id` | `getMerchantById` | — |
-| <span class="badge badge-put">PUT</span> | `/business/merchants/:id` | `updateMerchant` | — |
-| <span class="badge badge-delete">DELETE</span> | `/business/merchants/:id` | `deleteMerchant` | — |
-| <span class="badge badge-get">GET</span> | `/business/merchants/:merchantId/addresses` | `getMerchantAddresses` | Admin routes for merchant addresses |
-| <span class="badge badge-post">POST</span> | `/business/merchants/:merchantId/addresses` | `addMerchantAddress` | — |
-| <span class="badge badge-put">PUT</span> | `/business/merchants/:merchantId/addresses/:addressId` | `updateMerchantAddress` | — |
-| <span class="badge badge-get">GET</span> | `/business/merchants/:merchantId/payment-info` | `getMerchantPaymentInfo` | Admin routes for merchant payment information |
-| <span class="badge badge-post">POST</span> | `/business/merchants/:merchantId/payment-info` | `addMerchantPaymentInfo` | — |
-| <span class="badge badge-put">PUT</span> | `/business/merchants/:merchantId/payment-info/:paymentInfoId` | `updateMerchantPaymentInfo` | — |
-| <span class="badge badge-get">GET</span> | `/business/merchants/:merchantId/warehouses` | `getWarehousesByMerchant` | Merchant warehouses |
 | <span class="badge badge-get">GET</span> | `/business/method-configs` | `listMethodConfigs` | ============================================================================ Method Config Routes ============================================================================ |
 | <span class="badge badge-post">POST</span> | `/business/method-configs` | `createMethodConfig` | — |
 | <span class="badge badge-get">GET</span> | `/business/method-configs/:methodConfigId` | `getMethodConfig` | — |
@@ -467,6 +470,16 @@ POST /business/customers/:customerId/verify |
 | <span class="badge badge-get">GET</span> | `/business/methods/:id` | `getMethodById` | — |
 | <span class="badge badge-put">PUT</span> | `/business/methods/:id` | `updateMethod` | — |
 | <span class="badge badge-delete">DELETE</span> | `/business/methods/:id` | `deleteMethod` | — |
+| <span class="badge badge-get">GET</span> | `/business/notification-preferences` | `getAllPreferences` | ============================================================================ Admin preference routes ============================================================================ |
+| <span class="badge badge-put">PUT</span> | `/business/notification-preferences/:id` | `updatePreferenceAdmin` | — |
+| <span class="badge badge-get">GET</span> | `/business/notification-preferences/user/:userId` | `getPreferencesByUser` | — |
+| <span class="badge badge-get">GET</span> | `/business/notification-templates` | `getAllTemplates` | ============================================================================ Template routes ============================================================================ |
+| <span class="badge badge-post">POST</span> | `/business/notification-templates` | `createTemplate` | — |
+| <span class="badge badge-get">GET</span> | `/business/notification-templates/:id` | `getTemplateById` | — |
+| <span class="badge badge-put">PUT</span> | `/business/notification-templates/:id` | `updateTemplate` | — |
+| <span class="badge badge-delete">DELETE</span> | `/business/notification-templates/:id` | `deleteTemplate` | — |
+| <span class="badge badge-post">POST</span> | `/business/notification-templates/:id/preview` | `previewTemplate` | — |
+| <span class="badge badge-get">GET</span> | `/business/notification-templates/type/:type` | `getTemplatesByType` | — |
 | <span class="badge badge-get">GET</span> | `/business/notifications` | `getAllNotifications` | ============================================================================ Admin CRUD routes for notifications ============================================================================ |
 | <span class="badge badge-post">POST</span> | `/business/notifications` | `createNotification` | — |
 | <span class="badge badge-get">GET</span> | `/business/notifications/:id` | `getNotificationById` | — |
@@ -490,7 +503,6 @@ POST /business/customers/:customerId/verify |
 | <span class="badge badge-get">GET</span> | `/business/order-items/:orderItemId` | `getOrderItemById` | — |
 | <span class="badge badge-put">PUT</span> | `/business/order-items/:orderItemId` | `updateOrderItem` | — |
 | <span class="badge badge-delete">DELETE</span> | `/business/order-items/:orderItemId` | `deleteOrderItem` | — |
-| <span class="badge badge-get">GET</span> | `/business/order/:orderId` | `listFulfillmentsByOrder` | List by order |
 | <span class="badge badge-get">GET</span> | `/business/orders` | `listOrders` | List all orders with filters
 GET /business/orders |
 | <span class="badge badge-get">GET</span> | `/business/orders/:orderId` | `getOrder` | Get order details
@@ -523,23 +535,24 @@ GET /business/orders/number/:orderNumber |
 GET /business/orders/stats |
 | <span class="badge badge-get">GET</span> | `/business/orders/store-summary` | `getStoreSalesSummary` | Get store sales summary
 GET /business/orders/store-summary |
-| <span class="badge badge-get">GET</span> | `/business/organization` | `listOrganizations` | List all organizations |
-| <span class="badge badge-post">POST</span> | `/business/organization` | `createOrganization` | Create organization |
-| <span class="badge badge-get">GET</span> | `/business/organization/:organizationId` | `getOrganization` | Get organization by ID |
-| <span class="badge badge-put">PUT</span> | `/business/organization/:organizationId` | `updateOrganization` | Update organization |
-| <span class="badge badge-patch">PATCH</span> | `/business/organization/:organizationId` | `updateOrganization` | — |
-| <span class="badge badge-get">GET</span> | `/business/organization/:organizationId/stores` | `getOrganizationStores` | Get stores for organization |
-| <span class="badge badge-get">GET</span> | `/business/organization/slug/:slug` | `getOrganizationBySlug` | Get organization by slug |
+| <span class="badge badge-get">GET</span> | `/business/organizations` | `getOrganizations` | — |
+| <span class="badge badge-post">POST</span> | `/business/organizations` | `createOrganization` | — |
+| <span class="badge badge-get">GET</span> | `/business/organizations/:id` | `getOrganizationById` | — |
+| <span class="badge badge-put">PUT</span> | `/business/organizations/:id` | `updateOrganization` | — |
+| <span class="badge badge-delete">DELETE</span> | `/business/organizations/:id` | `deleteOrganization` | — |
+| <span class="badge badge-get">GET</span> | `/business/organizations/:id/stores` | `getOrganizationStores` | — |
+| <span class="badge badge-get">GET</span> | `/business/organizations/:organizationId/addresses` | `getOrganizationAddresses` | — |
+| <span class="badge badge-post">POST</span> | `/business/organizations/:organizationId/addresses` | `addOrganizationAddress` | — |
+| <span class="badge badge-put">PUT</span> | `/business/organizations/:organizationId/addresses/:addressId` | `updateOrganizationAddress` | — |
+| <span class="badge badge-get">GET</span> | `/business/organizations/:organizationId/payment-info` | `getOrganizationPaymentInfo` | — |
+| <span class="badge badge-post">POST</span> | `/business/organizations/:organizationId/payment-info` | `addOrganizationPaymentInfo` | — |
+| <span class="badge badge-put">PUT</span> | `/business/organizations/:organizationId/payment-info/:paymentInfoId` | `updateOrganizationPaymentInfo` | — |
+| <span class="badge badge-get">GET</span> | `/business/organizations/:organizationId/warehouses` | `getWarehousesByMerchant` | Organization warehouses |
 | <span class="badge badge-get">GET</span> | `/business/packaging-types` | `getPackagingTypes` | — |
 | <span class="badge badge-post">POST</span> | `/business/packaging-types` | `createPackagingType` | — |
 | <span class="badge badge-get">GET</span> | `/business/packaging-types/:id` | `getPackagingTypeById` | — |
 | <span class="badge badge-put">PUT</span> | `/business/packaging-types/:id` | `updatePackagingType` | — |
 | <span class="badge badge-delete">DELETE</span> | `/business/packaging-types/:id` | `deletePackagingType` | — |
-| <span class="badge badge-get">GET</span> | `/business/partners` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/business/partners` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-get">GET</span> | `/business/partners/:partnerId` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-put">PUT</span> | `/business/partners/:partnerId` | `isMerchantLoggedIn` | — |
-| <span class="badge badge-delete">DELETE</span> | `/business/partners/:partnerId` | `isMerchantLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/business/payment/balance` | `getBalance` | ============================================================================ Balance Routes ============================================================================ |
 | <span class="badge badge-get">GET</span> | `/business/payment/disputes` | `listDisputes` | ============================================================================ Dispute Routes ============================================================================ |
 | <span class="badge badge-post">POST</span> | `/business/payment/disputes` | `listDisputes` | — |
@@ -581,19 +594,19 @@ GET /business/orders/store-summary |
 | <span class="badge badge-get">GET</span> | `/business/pricing/tier-prices/:id` | `getTierPrice` | — |
 | <span class="badge badge-put">PUT</span> | `/business/pricing/tier-prices/:id` | `updateTierPrice` | — |
 | <span class="badge badge-delete">DELETE</span> | `/business/pricing/tier-prices/:id` | `deleteTierPrice` | — |
-| <span class="badge badge-get">GET</span> | `/business/product-types` | `isMerchantLoggedIn` | List all product types |
-| <span class="badge badge-post">POST</span> | `/business/product-types` | `isMerchantLoggedIn` | Create product type |
+| <span class="badge badge-get">GET</span> | `/business/product-types` | `isOrganizationLoggedIn` | List all product types |
+| <span class="badge badge-post">POST</span> | `/business/product-types` | `isOrganizationLoggedIn` | Create product type |
 | <span class="badge badge-get">GET</span> | `/business/product-types` | `bind` | — |
 | <span class="badge badge-post">POST</span> | `/business/product-types` | `bind` | — |
-| <span class="badge badge-get">GET</span> | `/business/product-types/:id` | `isMerchantLoggedIn` | Get product type by ID |
-| <span class="badge badge-put">PUT</span> | `/business/product-types/:id` | `isMerchantLoggedIn` | Update product type |
-| <span class="badge badge-delete">DELETE</span> | `/business/product-types/:id` | `isMerchantLoggedIn` | Delete product type |
+| <span class="badge badge-get">GET</span> | `/business/product-types/:id` | `isOrganizationLoggedIn` | Get product type by ID |
+| <span class="badge badge-put">PUT</span> | `/business/product-types/:id` | `isOrganizationLoggedIn` | Update product type |
+| <span class="badge badge-delete">DELETE</span> | `/business/product-types/:id` | `isOrganizationLoggedIn` | Delete product type |
 | <span class="badge badge-get">GET</span> | `/business/product-types/:id` | `bind` | — |
 | <span class="badge badge-put">PUT</span> | `/business/product-types/:id` | `bind` | — |
 | <span class="badge badge-delete">DELETE</span> | `/business/product-types/:id` | `bind` | — |
-| <span class="badge badge-get">GET</span> | `/business/product-types/:id/attributes` | `isMerchantLoggedIn` | Get attributes for a product type |
+| <span class="badge badge-get">GET</span> | `/business/product-types/:id/attributes` | `isOrganizationLoggedIn` | Get attributes for a product type |
 | <span class="badge badge-get">GET</span> | `/business/product-types/:id/attributes` | `bind` | — |
-| <span class="badge badge-get">GET</span> | `/business/product-types/slug/:slug` | `isMerchantLoggedIn` | Get product type by slug |
+| <span class="badge badge-get">GET</span> | `/business/product-types/slug/:slug` | `isOrganizationLoggedIn` | Get product type by slug |
 | <span class="badge badge-get">GET</span> | `/business/product-types/slug/:slug` | `bind` | — |
 | <span class="badge badge-get">GET</span> | `/business/products` | `listProducts` | List all products
 GET /business/products |
@@ -606,13 +619,13 @@ PUT /business/products/:productId |
 | <span class="badge badge-delete">DELETE</span> | `/business/products/:productId` | `deleteProduct` | Delete a product
 DELETE /business/products/:productId |
 | <span class="badge badge-post">POST</span> | `/business/products/:productId/apply-attribute-set` | `applyAttributeSet` | — |
-| <span class="badge badge-get">GET</span> | `/business/products/:productId/attributes` | `isMerchantLoggedIn` | Get product attributes |
-| <span class="badge badge-post">POST</span> | `/business/products/:productId/attributes` | `isMerchantLoggedIn` | Set single product attribute |
-| <span class="badge badge-put">PUT</span> | `/business/products/:productId/attributes` | `isMerchantLoggedIn` | Set multiple product attributes |
+| <span class="badge badge-get">GET</span> | `/business/products/:productId/attributes` | `isOrganizationLoggedIn` | Get product attributes |
+| <span class="badge badge-post">POST</span> | `/business/products/:productId/attributes` | `isOrganizationLoggedIn` | Set single product attribute |
+| <span class="badge badge-put">PUT</span> | `/business/products/:productId/attributes` | `isOrganizationLoggedIn` | Set multiple product attributes |
 | <span class="badge badge-get">GET</span> | `/business/products/:productId/attributes` | `bind` | Product Attributes |
 | <span class="badge badge-post">POST</span> | `/business/products/:productId/attributes` | `bind` | — |
 | <span class="badge badge-put">PUT</span> | `/business/products/:productId/attributes` | `bind` | — |
-| <span class="badge badge-delete">DELETE</span> | `/business/products/:productId/attributes/:attributeId` | `isMerchantLoggedIn` | Remove product attribute |
+| <span class="badge badge-delete">DELETE</span> | `/business/products/:productId/attributes/:attributeId` | `isOrganizationLoggedIn` | Remove product attribute |
 | <span class="badge badge-delete">DELETE</span> | `/business/products/:productId/attributes/:attributeId` | `bind` | — |
 | <span class="badge badge-post">POST</span> | `/business/products/:productId/configure` | `configureVariant` | — |
 | <span class="badge badge-get">GET</span> | `/business/products/:productId/downloads` | `listDownloads` | — |
@@ -692,7 +705,6 @@ GET /business/products/barcode/:barcode |
 | <span class="badge badge-post">POST</span> | `/business/receiving/:id/complete` | `completeReceiving` | — |
 | <span class="badge badge-get">GET</span> | `/business/receiving/:id/items` | `getReceivingItems` | Receiving items |
 | <span class="badge badge-post">POST</span> | `/business/receiving/:id/items` | `createReceivingItem` | — |
-| <span class="badge badge-post">POST</span> | `/business/redeem` | `redeemCoupon` | — |
 | <span class="badge badge-delete">DELETE</span> | `/business/relationships/:relationshipId` | `deleteRelationship` | — |
 | <span class="badge badge-post">POST</span> | `/business/reports/generate` | `generateReport` | Report generation (on-demand) |
 | <span class="badge badge-get">GET</span> | `/business/reports/schedules` | `listSchedules` | Report schedule CRUD |
@@ -802,8 +814,6 @@ GET /business/products/barcode/:barcode |
 | <span class="badge badge-delete">DELETE</span> | `/business/transactions/:transactionId` | `deleteTransaction` | — |
 | <span class="badge badge-post">POST</span> | `/business/transactions/:transactionId/refund` | `processRefund` | — |
 | <span class="badge badge-get">GET</span> | `/business/transactions/:transactionId/refunds` | `getRefunds` | — |
-| <span class="badge badge-post">POST</span> | `/business/validate` | `validateCoupon` | — |
-| <span class="badge badge-get">GET</span> | `/business/validate/:code` | `validateCoupon` | — |
 | <span class="badge badge-get">GET</span> | `/business/warehouses` | `getWarehouses` | Warehouse listing with various filters |
 | <span class="badge badge-post">POST</span> | `/business/warehouses` | `createWarehouse` | Warehouse CRUD operations |
 | <span class="badge badge-get">GET</span> | `/business/warehouses/:id` | `getWarehouseById` | — |
@@ -869,11 +879,6 @@ GET /business/webhooks/events |
 
 | Method | Path | Controller | Description |
 |---|---|---|---|
-| <span class="badge badge-get">GET</span> | `/customer/` | `getActiveMerchants` | Get active merchants (public storefront view) |
-| <span class="badge badge-get">GET</span> | `/customer/:id` | `getMerchantById` | Get specific merchant by ID (if active) |
-| <span class="badge badge-get">GET</span> | `/customer/:id/products` | `(req, res) => {
-  res.status(404).json({
-    success: false,` | Get products from a specific merchant |
 | <span class="badge badge-get">GET</span> | `/customer/active` | `(_req, res) => {
   res.json({ success: true, message: 'Get a` | — |
 | <span class="badge badge-post">POST</span> | `/customer/basket` | `getOrCreateBasket` | Get or create basket for current user/session
@@ -948,6 +953,8 @@ PUT /checkout/:checkoutId/shipping-address |
 PUT /checkout/:checkoutId/shipping-method |
 | <span class="badge badge-get">GET</span> | `/customer/checkout/:checkoutId/shipping-methods` | `getShippingMethods` | Get available shipping methods
 GET /checkout/:checkoutId/shipping-methods |
+| <span class="badge badge-get">GET</span> | `/customer/checkout/:checkoutId/summary` | `getCheckoutSummary` | Get checkout summary
+GET /checkout/:checkoutId/summary |
 | <span class="badge badge-get">GET</span> | `/customer/checkout/payment-methods` | `getPaymentMethods` | Get available payment methods (no checkout required)
 GET /checkout/payment-methods |
 | <span class="badge badge-get">GET</span> | `/customer/checkout/pickup-locations` | `getPickupLocations` | Get available pickup locations
@@ -971,8 +978,10 @@ GET /checkout/pickup-locations |
 | <span class="badge badge-get">GET</span> | `/customer/gift-cards/mine` | `getMyGiftCards` | — |
 | <span class="badge badge-post">POST</span> | `/customer/gift-cards/redeem` | `redeemGiftCard` | — |
 | <span class="badge badge-post">POST</span> | `/customer/gift-cards/reload` | `reloadGiftCard` | — |
+| <span class="badge badge-get">GET</span> | `/customer/identity/2fa/status` | `isCustomerLoggedIn` | 2FA status (requires auth) |
 | <span class="badge badge-post">POST</span> | `/customer/identity/forgot-password` | `requestPasswordReset` | Password reset flow |
 | <span class="badge badge-post">POST</span> | `/customer/identity/login` | `loginCustomer` | Simple login (returns access token only) |
+| <span class="badge badge-post">POST</span> | `/customer/identity/logout` | `isCustomerLoggedIn` | Logout (requires auth to blacklist token) |
 | <span class="badge badge-post">POST</span> | `/customer/identity/refresh` | `renewAccessToken` | Refresh access token |
 | <span class="badge badge-post">POST</span> | `/customer/identity/register` | `registerCustomer` | Register new customer account |
 | <span class="badge badge-post">POST</span> | `/customer/identity/reset-password` | `resetPassword` | — |
@@ -999,21 +1008,39 @@ GET /checkout/pickup-locations |
 | <span class="badge badge-get">GET</span> | `/customer/methods` | `getMethods` | Get available shipping methods (for checkout) |
 | <span class="badge badge-get">GET</span> | `/customer/notifications` | `async (req, res) => {
   try {
-    const useCase = new GetNot` | — |
+    const customerId = req.use` | — |
+| <span class="badge badge-get">GET</span> | `/customer/notifications/:id` | `async (req, res) => {
+  try {
+    const customerId = req.use` | — |
 | <span class="badge badge-put">PUT</span> | `/customer/notifications/:notificationId/read` | `async (req, res) => {
   try {
     const useCase = new MarkAs` | — |
+| <span class="badge badge-patch">PATCH</span> | `/customer/notifications/:notificationId/read` | `async (req, res) => {
+  try {
+    const customerId = req.use` | — |
 | <span class="badge badge-get">GET</span> | `/customer/notifications/count` | `async (req, res) => {
   try {
-    const useCase = new GetNot` | — |
+    const customerId = req.use` | — |
 | <span class="badge badge-get">GET</span> | `/customer/notifications/devices` | `listDevices` | — |
 | <span class="badge badge-post">POST</span> | `/customer/notifications/devices` | `registerDevice` | — |
 | <span class="badge badge-delete">DELETE</span> | `/customer/notifications/devices/:deviceToken` | `deleteDevice` | — |
 | <span class="badge badge-get">GET</span> | `/customer/notifications/preferences` | `getPreferences` | — |
-| <span class="badge badge-post">POST</span> | `/customer/notifications/preferences` | `updatePreference` | — |
+| <span class="badge badge-post">POST</span> | `/customer/notifications/preferences` | `createPreference` | — |
+| <span class="badge badge-get">GET</span> | `/customer/notifications/preferences/:id` | `getPreferenceById` | — |
+| <span class="badge badge-put">PUT</span> | `/customer/notifications/preferences/:id` | `updatePreference` | — |
+| <span class="badge badge-delete">DELETE</span> | `/customer/notifications/preferences/:id` | `deletePreference` | — |
+| <span class="badge badge-put">PUT</span> | `/customer/notifications/preferences/:id/schedule` | `updateSchedule` | — |
+| <span class="badge badge-post">POST</span> | `/customer/notifications/preferences/bulk` | `bulkUpdatePreferences` | — |
+| <span class="badge badge-get">GET</span> | `/customer/notifications/preferences/type/:type` | `getPreferenceByType` | — |
 | <span class="badge badge-put">PUT</span> | `/customer/notifications/read` | `async (req, res) => {
   try {
-    const useCase = new MarkAs` | — |
+    const customerId = req.use` | — |
+| <span class="badge badge-post">POST</span> | `/customer/notifications/read` | `async (req, res) => {
+  try {
+    const customerId = req.use` | — |
+| <span class="badge badge-get">GET</span> | `/customer/notifications/unread-count` | `async (req, res) => {
+  try {
+    const customerId = req.use` | — |
 | <span class="badge badge-get">GET</span> | `/customer/order` | `getMyOrders` | Get customer's orders
 GET /orders |
 | <span class="badge badge-post">POST</span> | `/customer/order` | `createOrder` | Create a new order
@@ -1048,8 +1075,8 @@ GET /products/:productId/availability |
 | <span class="badge badge-get">GET</span> | `/customer/products/:productId/related` | `getRelatedProducts` | Get related products
 GET /products/:productId/related |
 | <span class="badge badge-get">GET</span> | `/customer/products/:productId/reviews` | `getProductReviews` | — |
-| <span class="badge badge-post">POST</span> | `/customer/products/:productId/reviews` | `createReview` | — |
-| <span class="badge badge-post">POST</span> | `/customer/products/:productId/reviews/:reviewId/vote` | `voteOnReview` | — |
+| <span class="badge badge-post">POST</span> | `/customer/products/:productId/reviews` | `optionalCustomerAuth` | — |
+| <span class="badge badge-post">POST</span> | `/customer/products/:productId/reviews/:reviewId/vote` | `isCustomerLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/customer/products/:productId/similar` | `bind` | Find similar products
 GET /customer/products/:productId/similar |
 | <span class="badge badge-get">GET</span> | `/customer/products/barcode/:barcode` | `findByBarcode` | Find product by variant barcode
@@ -1070,17 +1097,17 @@ GET /customer/products/search |
 POST /customer/products/search |
 | <span class="badge badge-get">GET</span> | `/customer/products/search/suggestions` | `bind` | Get search suggestions for autocomplete
 GET /customer/products/search/suggestions |
-| <span class="badge badge-post">POST</span> | `/customer/reviews/:reviewId/helpful` | `markReviewHelpful` | — |
-| <span class="badge badge-post">POST</span> | `/customer/reviews/:reviewId/report` | `reportReview` | — |
+| <span class="badge badge-post">POST</span> | `/customer/reviews/:reviewId/helpful` | `optionalCustomerAuth` | — |
+| <span class="badge badge-post">POST</span> | `/customer/reviews/:reviewId/report` | `optionalCustomerAuth` | — |
 | <span class="badge badge-get">GET</span> | `/customer/stores` | `async (req: TypedRequest, res: Response) => {
   try {
     co` | — |
 | <span class="badge badge-get">GET</span> | `/customer/stores/:storeId` | `async (req: TypedRequest, res: Response) => {
   try {
     co` | — |
-| <span class="badge badge-get">GET</span> | `/customer/subscriptions/mine` | `getMySubscriptions` | List and view subscriptions |
-| <span class="badge badge-get">GET</span> | `/customer/subscriptions/mine/:id` | `getMySubscription` | — |
-| <span class="badge badge-put">PUT</span> | `/customer/subscriptions/mine/:id` | `updateMySubscription` | Manage subscription |
+| <span class="badge badge-get">GET</span> | `/customer/subscriptions/mine` | `isCustomerLoggedIn` | List and view subscriptions |
+| <span class="badge badge-get">GET</span> | `/customer/subscriptions/mine/:id` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-put">PUT</span> | `/customer/subscriptions/mine/:id` | `isCustomerLoggedIn` | Manage subscription |
 | <span class="badge badge-post">POST</span> | `/customer/subscriptions/mine/:id/cancel` | `cancelMySubscription` | — |
 | <span class="badge badge-post">POST</span> | `/customer/subscriptions/mine/:id/change-plan` | `changePlan` | — |
 | <span class="badge badge-get">GET</span> | `/customer/subscriptions/mine/:id/orders` | `getMySubscriptionOrders` | Billing history |
@@ -1091,13 +1118,13 @@ GET /customer/products/search/suggestions |
 | <span class="badge badge-get">GET</span> | `/customer/subscriptions/plans/:planId` | `getSubscriptionPlanDetails` | — |
 | <span class="badge badge-get">GET</span> | `/customer/subscriptions/products` | `getAvailableSubscriptionProducts` | — |
 | <span class="badge badge-get">GET</span> | `/customer/subscriptions/products/:productId` | `getSubscriptionProductDetails` | — |
-| <span class="badge badge-post">POST</span> | `/customer/subscriptions/subscribe` | `createSubscription` | Create subscription |
-| <span class="badge badge-post">POST</span> | `/customer/support/alerts/price` | `createPriceAlert` | — |
-| <span class="badge badge-get">GET</span> | `/customer/support/alerts/price/mine` | `getMyPriceAlerts` | — |
-| <span class="badge badge-delete">DELETE</span> | `/customer/support/alerts/price/mine/:id` | `cancelMyPriceAlert` | — |
-| <span class="badge badge-post">POST</span> | `/customer/support/alerts/stock` | `createStockAlert` | — |
-| <span class="badge badge-get">GET</span> | `/customer/support/alerts/stock/mine` | `getMyStockAlerts` | — |
-| <span class="badge badge-delete">DELETE</span> | `/customer/support/alerts/stock/mine/:id` | `cancelMyStockAlert` | — |
+| <span class="badge badge-post">POST</span> | `/customer/subscriptions/subscribe` | `isCustomerLoggedIn` | Create subscription |
+| <span class="badge badge-post">POST</span> | `/customer/support/alerts/price` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/customer/support/alerts/price/mine` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-delete">DELETE</span> | `/customer/support/alerts/price/mine/:id` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/customer/support/alerts/stock` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/customer/support/alerts/stock/mine` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-delete">DELETE</span> | `/customer/support/alerts/stock/mine/:id` | `isCustomerLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/customer/support/faq/articles/:id/feedback` | `submitFaqFeedback` | — |
 | <span class="badge badge-get">GET</span> | `/customer/support/faq/articles/:slug` | `getFaqArticleBySlug` | — |
 | <span class="badge badge-get">GET</span> | `/customer/support/faq/articles/popular` | `getPopularFaqArticles` | — |
@@ -1105,17 +1132,17 @@ GET /customer/products/search/suggestions |
 | <span class="badge badge-get">GET</span> | `/customer/support/faq/categories/:slug` | `getFaqCategoryBySlug` | — |
 | <span class="badge badge-get">GET</span> | `/customer/support/faq/categories/featured` | `getFeaturedFaqCategories` | — |
 | <span class="badge badge-get">GET</span> | `/customer/support/faq/search` | `searchFaq` | — |
-| <span class="badge badge-post">POST</span> | `/customer/support/tickets` | `createTicket` | — |
-| <span class="badge badge-get">GET</span> | `/customer/support/tickets/mine` | `getMyTickets` | — |
-| <span class="badge badge-get">GET</span> | `/customer/support/tickets/mine/:id` | `getMyTicket` | — |
-| <span class="badge badge-post">POST</span> | `/customer/support/tickets/mine/:id/feedback` | `submitTicketFeedback` | — |
-| <span class="badge badge-post">POST</span> | `/customer/support/tickets/mine/:id/messages` | `addCustomerMessage` | — |
+| <span class="badge badge-post">POST</span> | `/customer/support/tickets` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/customer/support/tickets/mine` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/customer/support/tickets/mine/:id` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/customer/support/tickets/mine/:id/feedback` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/customer/support/tickets/mine/:id/messages` | `isCustomerLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/customer/tax/calculate` | `calculateTaxForLineItem` | Public tax calculation endpoints |
 | <span class="badge badge-post">POST</span> | `/customer/tax/calculate/basket/:basketId` | `isCustomerLoggedIn` | Protected routes require authentication |
 | <span class="badge badge-get">GET</span> | `/customer/tax/categories/:code` | `getTaxCategoryByCode` | — |
 | <span class="badge badge-get">GET</span> | `/customer/tax/exemption/:customerId` | `isCustomerLoggedIn` | Customer exemption check (requires authentication) |
 | <span class="badge badge-get">GET</span> | `/customer/tax/rates` | `getTaxRates` | Public tax information endpoints |
-| <span class="badge badge-get">GET</span> | `/customer/tax/settings/:merchantId` | `getCustomerTaxSettings` | NEW: Get public tax settings for storefront |
+| <span class="badge badge-get">GET</span> | `/customer/tax/settings/:organizationId` | `getCustomerTaxSettings` | NEW: Get public tax settings for storefront |
 | <span class="badge badge-post">POST</span> | `/customer/tax/zones/find` | `findTaxZoneForAddress` | NEW: Tax zone finder endpoint |
 | <span class="badge badge-post">POST</span> | `/customer/validate` | `(_req, res) => {
   res.json({ success: true, message: 'Valid` | Placeholder routes - implement with DDD controllers |

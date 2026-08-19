@@ -179,8 +179,7 @@ describe('Identity Feature Tests', () => {
     });
 
     describe('POST /identity/forgot-password', () => {
-      // TODO: Password reset has server-side issues
-      it.skip('should initiate password reset', async () => {
+      it('should initiate password reset', async () => {
         const response = await client.post('/customer/identity/forgot-password', {
           email: TEST_CUSTOMER.email,
         });
@@ -239,8 +238,7 @@ describe('Identity Feature Tests', () => {
         name: 'New Organization Store',
       };
 
-      // TODO: Organization registration has server-side issues
-      it.skip('should register a new organization with pending status', async () => {
+      it('should register a new organization with pending status', async () => {
         const response = await client.post('/business/auth/register', newOrganization);
 
         expect(response.status).toBe(201);
@@ -302,8 +300,7 @@ describe('Identity Feature Tests', () => {
     });
 
     describe('POST /business/auth/forgot-password', () => {
-      // TODO: Organization password reset has server-side issues
-      it.skip('should initiate organization password reset', async () => {
+      it('should initiate organization password reset', async () => {
         const response = await client.post('/business/auth/forgot-password', {
           email: TEST_MERCHANT.email,
         });

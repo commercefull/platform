@@ -12,8 +12,11 @@ import {
   getCoupon,
   deleteCoupon,
 } from '../controllers/CouponController';
+import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = Router();
+
+router.use(isOrganizationLoggedIn);
 
 router.get('/coupons', listCoupons);
 router.post('/coupons', createCoupon);

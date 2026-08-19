@@ -38,26 +38,26 @@ The Fulfillment feature manages order fulfillment operations including picking, 
 
 | ID | Method | Endpoint |
 |---|---|---|
-| UC-FLF-001 | POST | `/business/` |
-| UC-FLF-002 | GET | `/business/` |
-| UC-FLF-003 | GET | `/business/order/:orderId` |
-| UC-FLF-004 | GET | `/business/:fulfillmentId` |
-| UC-FLF-005 | POST | `/business/:fulfillmentId/pick` |
-| UC-FLF-006 | POST | `/business/:fulfillmentId/pack` |
-| UC-FLF-007 | POST | `/business/:fulfillmentId/ship` |
-| UC-FLF-008 | PUT | `/business/:fulfillmentId/tracking` |
-| UC-FLF-009 | POST | `/business/:fulfillmentId/deliver` |
-| UC-FLF-010 | POST | `/business/:fulfillmentId/cancel` |
-| UC-FLF-011 | POST | `/business/:fulfillmentId/return` |
-| UC-FLF-012 | GET | `/business/locations` |
-| UC-FLF-013 | GET | `/business/locations/:locationId` |
-| UC-FLF-014 | POST | `/business/locations` |
-| UC-FLF-015 | PUT | `/business/locations/:locationId` |
-| UC-FLF-016 | POST | `/business/locations/:locationId/activate` or `/deactivate` |
-| UC-FLF-017 | GET | `/business/locations/nearest` |
-| UC-FLF-018 | GET | `/business/partners` |
-| UC-FLF-019 | GET | `/business/partners/:partnerId` |
-| UC-FLF-020 | POST | `/business/partners` |
+| UC-FLF-001 | POST | `/business/fulfillments` |
+| UC-FLF-002 | GET | `/business/fulfillments` |
+| UC-FLF-003 | GET | `/business/fulfillments/order/:orderId` |
+| UC-FLF-004 | GET | `/business/fulfillments/:fulfillmentId` |
+| UC-FLF-005 | POST | `/business/fulfillments/:fulfillmentId/pick` |
+| UC-FLF-006 | POST | `/business/fulfillments/:fulfillmentId/pack` |
+| UC-FLF-007 | POST | `/business/fulfillments/:fulfillmentId/ship` |
+| UC-FLF-008 | PUT | `/business/fulfillments/:fulfillmentId/tracking` |
+| UC-FLF-009 | POST | `/business/fulfillments/:fulfillmentId/deliver` |
+| UC-FLF-010 | POST | `/business/fulfillments/:fulfillmentId/cancel` |
+| UC-FLF-011 | POST | `/business/fulfillments/:fulfillmentId/return` |
+| UC-FLF-012 | GET | `/business/fulfillment/locations` |
+| UC-FLF-013 | GET | `/business/fulfillment/locations/:locationId` |
+| UC-FLF-014 | POST | `/business/fulfillment/locations` |
+| UC-FLF-015 | PUT | `/business/fulfillment/locations/:locationId` |
+| UC-FLF-016 | POST | `/business/fulfillment/locations/:locationId/activate` or `/deactivate` |
+| UC-FLF-017 | GET | `/business/fulfillment/locations/nearest` |
+| UC-FLF-018 | GET | `/business/fulfillment/partners` |
+| UC-FLF-019 | GET | `/business/fulfillment/partners/:partnerId` |
+| UC-FLF-020 | POST | `/business/fulfillment/partners` |
 | UC-FLF-021 | GET | `/order/:orderId` |
 | UC-FLF-022 | GET | `/:fulfillmentId` |
 | UC-FLF-023 | GET | `/:fulfillmentId/track` |
@@ -99,31 +99,31 @@ The Fulfillment feature manages order fulfillment operations including picking, 
 |---|---|---|---|
 | GET | `/:fulfillmentId` | `getFulfillment` | Get fulfillment by ID (customer view) |
 | GET | `/:fulfillmentId/track` | `getTrackingInfo` | Track fulfillment |
-| GET | `/business/` | `listFulfillments` | List all fulfillments (with filters/pagination) |
-| POST | `/business/` | `createFulfillment` | Create fulfillment |
-| GET | `/business/:fulfillmentId` | `getFulfillment` | Get fulfillment by ID |
-| POST | `/business/:fulfillmentId/assign` | `assignFulfillment` | Assign fulfillment |
-| POST | `/business/:fulfillmentId/cancel` | `cancelFulfillment` | Cancel fulfillment |
-| POST | `/business/:fulfillmentId/deliver` | `markDelivered` | Mark delivered |
-| POST | `/business/:fulfillmentId/pack` | `processPacking` | Process packing |
-| POST | `/business/:fulfillmentId/pick` | `processPicking` | Process picking |
-| POST | `/business/:fulfillmentId/return` | `initiateReturn` | Initiate return |
-| POST | `/business/:fulfillmentId/ship` | `shipOrder` | Ship order |
-| PUT | `/business/:fulfillmentId/tracking` | `updateTracking` | Update tracking info |
-| GET | `/business/locations` | `isMerchantLoggedIn` | — |
-| POST | `/business/locations` | `isMerchantLoggedIn` | — |
-| GET | `/business/locations/:locationId` | `isMerchantLoggedIn` | — |
-| PUT | `/business/locations/:locationId` | `isMerchantLoggedIn` | — |
-| DELETE | `/business/locations/:locationId` | `isMerchantLoggedIn` | — |
-| POST | `/business/locations/:locationId/activate` | `isMerchantLoggedIn` | — |
-| POST | `/business/locations/:locationId/deactivate` | `isMerchantLoggedIn` | — |
-| GET | `/business/locations/nearest` | `isMerchantLoggedIn` | — |
-| GET | `/business/order/:orderId` | `listFulfillmentsByOrder` | List by order |
-| GET | `/business/partners` | `isMerchantLoggedIn` | — |
-| POST | `/business/partners` | `isMerchantLoggedIn` | — |
-| GET | `/business/partners/:partnerId` | `isMerchantLoggedIn` | — |
-| PUT | `/business/partners/:partnerId` | `isMerchantLoggedIn` | — |
-| DELETE | `/business/partners/:partnerId` | `isMerchantLoggedIn` | — |
+| GET | `/business/fulfillment/locations` | `isOrganizationLoggedIn` | — |
+| POST | `/business/fulfillment/locations` | `isOrganizationLoggedIn` | — |
+| GET | `/business/fulfillment/locations/:locationId` | `isOrganizationLoggedIn` | — |
+| PUT | `/business/fulfillment/locations/:locationId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/business/fulfillment/locations/:locationId` | `isOrganizationLoggedIn` | — |
+| POST | `/business/fulfillment/locations/:locationId/activate` | `isOrganizationLoggedIn` | — |
+| POST | `/business/fulfillment/locations/:locationId/deactivate` | `isOrganizationLoggedIn` | — |
+| GET | `/business/fulfillment/locations/nearest` | `isOrganizationLoggedIn` | — |
+| GET | `/business/fulfillment/partners` | `isOrganizationLoggedIn` | — |
+| POST | `/business/fulfillment/partners` | `isOrganizationLoggedIn` | — |
+| GET | `/business/fulfillment/partners/:partnerId` | `isOrganizationLoggedIn` | — |
+| PUT | `/business/fulfillment/partners/:partnerId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/business/fulfillment/partners/:partnerId` | `isOrganizationLoggedIn` | — |
+| GET | `/business/fulfillments` | `listFulfillments` | List all fulfillments (with filters/pagination) |
+| POST | `/business/fulfillments` | `createFulfillment` | Create fulfillment |
+| GET | `/business/fulfillments/:fulfillmentId` | `getFulfillment` | Get fulfillment by ID |
+| POST | `/business/fulfillments/:fulfillmentId/assign` | `assignFulfillment` | Assign fulfillment |
+| POST | `/business/fulfillments/:fulfillmentId/cancel` | `cancelFulfillment` | Cancel fulfillment |
+| POST | `/business/fulfillments/:fulfillmentId/deliver` | `markDelivered` | Mark delivered |
+| POST | `/business/fulfillments/:fulfillmentId/pack` | `processPacking` | Process packing |
+| POST | `/business/fulfillments/:fulfillmentId/pick` | `processPicking` | Process picking |
+| POST | `/business/fulfillments/:fulfillmentId/return` | `initiateReturn` | Initiate return |
+| POST | `/business/fulfillments/:fulfillmentId/ship` | `shipOrder` | Ship order |
+| PUT | `/business/fulfillments/:fulfillmentId/tracking` | `updateTracking` | Update tracking info |
+| GET | `/business/fulfillments/order/:orderId` | `listFulfillmentsByOrder` | List by order |
 | GET | `/order/:orderId` | `listFulfillmentsByOrder` | List fulfillments by order (customer view) |
 
 <!-- GENERATED:ENDPOINTS:END -->

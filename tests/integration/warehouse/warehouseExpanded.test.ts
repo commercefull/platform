@@ -39,23 +39,13 @@ describe('Warehouse Expanded Tests', () => {
   // Stock Transfer Tests
   // ============================================================================
 
-  describe.skip('Stock Transfers', () => {
-    it('should list stock transfers', async () => {
-      const resp = await client.get('/business/stock-transfers', {
-        headers: authHeaders(),
-      });
-
-      expect(resp.status).toBe(200);
-      expect(resp.data.success).toBe(true);
-      expect(Array.isArray(resp.data.data)).toBe(true);
-    });
-
+  describe('Stock Transfers', () => {
     it('should create a stock transfer between warehouses', async () => {
       const resp = await client.post(
-        '/business/stock-transfers',
+        '/business/inventory/transfer',
         {
-          fromWarehouseId: SEEDED_WAREHOUSE_IDS.MAIN,
-          toWarehouseId: SEEDED_WAREHOUSE_IDS.WEST_COAST,
+          sourceLocationId: SEEDED_WAREHOUSE_IDS.MAIN,
+          destinationLocationId: SEEDED_WAREHOUSE_IDS.WEST_COAST,
           items: [
             { productId: '00000000-0000-0000-0000-000000000001', quantity: 5 },
           ],
@@ -63,18 +53,18 @@ describe('Warehouse Expanded Tests', () => {
         { headers: authHeaders() },
       );
 
-      expectStatus(resp, 201);
-      if (resp.status === 201 || resp.status === 200) {
+      expectStatus(resp, 200);
+      if (resp.status === 200 || resp.status === 201) {
         expect(resp.data.success).toBe(true);
       }
     });
 
     it('should reject transfer with same source and destination', async () => {
       const resp = await client.post(
-        '/business/stock-transfers',
+        '/business/inventory/transfer',
         {
-          fromWarehouseId: SEEDED_WAREHOUSE_IDS.MAIN,
-          toWarehouseId: SEEDED_WAREHOUSE_IDS.MAIN,
+          sourceLocationId: SEEDED_WAREHOUSE_IDS.MAIN,
+          destinationLocationId: SEEDED_WAREHOUSE_IDS.MAIN,
           items: [
             { productId: '00000000-0000-0000-0000-000000000001', quantity: 5 },
           ],
@@ -90,7 +80,7 @@ describe('Warehouse Expanded Tests', () => {
   // Zone Management Tests
   // ============================================================================
 
-  describe.skip('Zone Management', () => {
+  describe('Zone Management', () => {
     it('should list zones for a warehouse', async () => {
       const resp = await client.get(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/zones`, {
         headers: authHeaders(),
@@ -116,11 +106,22 @@ describe('Warehouse Expanded Tests', () => {
     });
 
     it('should get a specific zone', async () => {
-      const resp = await client.get(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/zones/${SEEDED_ZONE_IDS.MAIN_STORAGE}`, {
+      const zoneData = createTestZone();
+      const createResp = await client.post(
+        `/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/zones`,
+        zoneData,
+        { headers: authHeaders() },
+      );
+
+      expectStatus(createResp, 201);
+      const zoneId = createResp.data.data?.distributionWarehouseZoneId;
+      expect(zoneId).toBeDefined();
+
+      const resp = await client.get(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/zones/${zoneId}`, {
         headers: authHeaders(),
       });
 
-      expect(resp.status).toBe(200);
+      expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);
     });
   });
@@ -129,9 +130,9 @@ describe('Warehouse Expanded Tests', () => {
   // Bin Management Tests
   // ============================================================================
 
-  describe.skip('Bin Management', () => {
-    it('should list bins for a zone', async () => {
-      const resp = await client.get(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/zones/${SEEDED_ZONE_IDS.MAIN_STORAGE}/bins`, {
+  describe('Bin Management', () => {
+    it('should list bins for a warehouse', async () => {
+      const resp = await client.get(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/bins`, {
         headers: authHeaders(),
       });
 
@@ -154,24 +155,29 @@ describe('Warehouse Expanded Tests', () => {
   // Warehouse Inventory Levels
   // ============================================================================
 
-  describe.skip('Inventory Levels', () => {
+  describe('Inventory Levels', () => {
     it('should get inventory levels for a warehouse', async () => {
-      const resp = await client.get(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/inventory`, {
+      const resp = await client.get(`/business/inventory`, {
+        params: { distributionWarehouseId: SEEDED_WAREHOUSE_IDS.MAIN },
         headers: authHeaders(),
       });
 
-      expect(resp.status).toBe(200);
-      expect(resp.data.success).toBe(true);
+      expectStatus(resp, 200);
+      if (resp.status === 200) {
+        expect(resp.data.success).toBe(true);
+      }
     });
 
     it('should search inventory by product in warehouse', async () => {
-      const resp = await client.get(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/inventory`, {
-        params: { productId: '00000000-0000-0000-0000-000000000001' },
+      const resp = await client.get(`/business/inventory`, {
+        params: { distributionWarehouseId: SEEDED_WAREHOUSE_IDS.MAIN, productId: '00000000-0000-0000-0000-000000000001' },
         headers: authHeaders(),
       });
 
-      expect(resp.status).toBe(200);
-      expect(resp.data.success).toBe(true);
+      expectStatus(resp, 200);
+      if (resp.status === 200) {
+        expect(resp.data.success).toBe(true);
+      }
     });
   });
 

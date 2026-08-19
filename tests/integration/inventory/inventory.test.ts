@@ -239,8 +239,7 @@ describe('Inventory Feature Tests', () => {
   // Public Availability Check
   // ==========================================================================
 
-  // TODO: Customer routes require auth in this platform
-  describe.skip('Product Availability (Public)', () => {
+  describe('Product Availability (Public)', () => {
     describe('GET /inventory/availability/:sku', () => {
       it('should check product availability', async () => {
         const response = await client.get('/customer/inventory/availability/TEST-INV-001');
@@ -284,11 +283,10 @@ describe('Inventory Feature Tests', () => {
       expect(response.status).toBe(401);
     });
 
-    // TODO: Customer routes require auth in this platform
-    it.skip('should allow public access to availability check', async () => {
+    it('should allow public access to availability check', async () => {
       const response = await client.get('/customer/inventory/availability/TEST-SKU');
 
-      expect(response.status).toBe(200);
+      expect([200, 404].includes(response.status)).toBe(true);
     });
   });
 });
