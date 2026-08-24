@@ -1,6 +1,13 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Currency, CurrencyRegion } from '../../domain/currency';
 import { Table } from '../../../../libs/db/types';
+import {
+  PricingValidationError,
+  FailedToCreatePricingError,
+  CurrencyNotFoundError,
+  CurrencyRegionNotFoundError,
+  CurrencyRegionAlreadyExistsError,
+} from '../../domain/errors/PricingErrors';
 
 /**
  * Currency Repository
@@ -121,7 +128,7 @@ export class CurrencyRepo {
 
     // Don't allow deleting the default currency
     if (currency.isDefault) {
-      throw new Error('Cannot delete the default currency');
+      throw new PricingValidationError('Cannot delete the default currency');
     }
 
     const sql = `DELETE FROM "${this.currencyTable}" WHERE "code" = $1`;
@@ -164,7 +171,7 @@ export class CurrencyRepo {
   async updateExchangeRates(source: string): Promise<Currency[]> {
     const defaultCurrency = await this.getDefaultCurrency();
     if (!defaultCurrency) {
-      throw new Error('No default currency found to use as base for exchange rate updates');
+      throw new CurrencyNotFoundError('default');
     }
 
     let currencies: Currency[];
@@ -186,7 +193,7 @@ export class CurrencyRepo {
     } else if (source === 'manual') {
       currencies = await this.getAllCurrencies(false);
     } else {
-      throw new Error(`Unsupported exchange rate source: ${source}`);
+      throw new PricingValidationError(`Unsupported exchange rate source: ${source}`);
     }
 
     return currencies;
@@ -232,7 +239,7 @@ export class CurrencyRepo {
     const name = region.regionName || region.name || '';
     const existingRegion = await this.getCurrencyRegionByCode(code);
     if (existingRegion) {
-      throw new Error(`Currency region with code ${code} already exists`);
+      throw new CurrencyRegionAlreadyExistsError(code);
     }
 
     const sql = `
@@ -251,7 +258,7 @@ export class CurrencyRepo {
     ]);
 
     if (!result) {
-      throw new Error('Failed to create currency region');
+      throw new FailedToCreatePricingError('Failed to create currency region');
     }
 
     return result;
@@ -263,7 +270,7 @@ export class CurrencyRepo {
   async updateCurrencyRegion(id: string, region: Partial<CurrencyRegion>): Promise<CurrencyRegion> {
     const existingRegion = await this.getCurrencyRegionById(id);
     if (!existingRegion) {
-      throw new Error(`Currency region with ID ${id} not found`);
+      throw new CurrencyRegionNotFoundError(id);
     }
 
     const setStatements: string[] = ['"updatedAt" = now()'];
@@ -287,7 +294,7 @@ export class CurrencyRepo {
     const result = await queryOne<CurrencyRegion>(sql, values);
 
     if (!result) {
-      throw new Error('Failed to update currency region');
+      throw new FailedToCreatePricingError('Failed to update currency region');
     }
 
     return result;
@@ -299,7 +306,7 @@ export class CurrencyRepo {
   async deleteCurrencyRegion(id: string): Promise<boolean> {
     const existingRegion = await this.getCurrencyRegionById(id);
     if (!existingRegion) {
-      throw new Error(`Currency region with ID ${id} not found`);
+      throw new CurrencyRegionNotFoundError(id);
     }
 
     const sql = `DELETE FROM "${this.currencyRegionTable}" WHERE "currencyRegionId" = $1`;

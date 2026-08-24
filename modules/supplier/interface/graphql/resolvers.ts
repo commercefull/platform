@@ -1,5 +1,8 @@
-import SupplierRepo from '../../infrastructure/repositories/supplierRepo';
-import PurchaseOrderRepo from '../../infrastructure/repositories/purchaseOrderRepo';
+import supplierDataRepository from '../../infrastructure/repositories/SupplierDataRepository';
+import supplierPurchaseOrderDataRepository from '../../infrastructure/repositories/SupplierPurchaseOrderDataRepository';
+
+const SupplierRepo = supplierDataRepository.suppliers;
+const PurchaseOrderRepo = supplierPurchaseOrderDataRepository.purchaseOrders;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CreateSupplierUseCase, CreateSupplierInput } from '../../application/useCases/CreateSupplier';
 import { CreatePurchaseOrderUseCase, CreatePurchaseOrderInput } from '../../application/useCases/CreatePurchaseOrder';

@@ -2,6 +2,8 @@
  * CreateLocale Use Case
  */
 
+import { LocaleCodeAlreadyExistsError, LocalizationValidationError } from '../../domain/errors/LocalizationErrors';
+
 export interface CreateLocaleInput {
   code: string;
   name: string;
@@ -59,13 +61,13 @@ export class CreateLocaleUseCase {
 
   async execute(input: CreateLocaleInput): Promise<CreateLocaleOutput> {
     if (!input.code || !input.name) {
-      throw new Error('Locale code and name are required');
+      throw new LocalizationValidationError('Locale code and name are required');
     }
 
     // Check for duplicate code
     const existing = await this.localizationRepository.findLocaleByCode(input.code);
     if (existing) {
-      throw new Error(`Locale with code '${input.code}' already exists`);
+      throw new LocaleCodeAlreadyExistsError(input.code);
     }
 
     const localeId = `loc_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

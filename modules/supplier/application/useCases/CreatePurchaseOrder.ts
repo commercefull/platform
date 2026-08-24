@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { SupplierNotFoundError, SupplierNotActiveError, SupplierValidationError } from '../../domain/errors/SupplierErrors';
 
 export interface PurchaseOrderItem {
   productId: string;
@@ -70,11 +71,11 @@ export class CreatePurchaseOrderUseCase {
   async execute(input: CreatePurchaseOrderInput): Promise<CreatePurchaseOrderOutput> {
     const supplier = await this.supplierRepository.findById(input.supplierId);
     if (!supplier) {
-      throw new Error(`Supplier not found: ${input.supplierId}`);
+      throw new SupplierNotFoundError(input.supplierId);
     }
 
     if (supplier.status !== 'approved' || !supplier.isActive) {
-      throw new Error('Supplier is not active');
+      throw new SupplierNotActiveError(input.supplierId);
     }
 
     // Calculate total
@@ -82,7 +83,7 @@ export class CreatePurchaseOrderUseCase {
 
     // Check minimum order value
     if (supplier.minimumOrderValue && totalAmount < supplier.minimumOrderValue) {
-      throw new Error(`Order total ${totalAmount} is below minimum ${supplier.minimumOrderValue}`);
+      throw new SupplierValidationError(`Order total ${totalAmount} is below minimum ${supplier.minimumOrderValue}`);
     }
 
     const purchaseOrderId = `po_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

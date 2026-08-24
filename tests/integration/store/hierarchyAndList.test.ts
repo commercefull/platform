@@ -7,7 +7,6 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { expectStatus } from '../testUtils';
-import { randomUUID } from 'node:crypto';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
@@ -15,6 +14,12 @@ const TEST_MERCHANT = {
   email: 'merchant@example.com',
   password: 'password123',
 };
+
+// Seeded test data from seeds/20241220000022_seedStoreTestData.js
+const SEEDED_ORG_ID = '01911000-0000-7000-8000-000000000001';
+const SEEDED_STORE_ACTIVE_ID = '20000000-0000-0000-0000-000000000001';
+const _SEEDED_STORE_INACTIVE_ID = '20000000-0000-0000-0000-000000000002';
+const SEEDED_STORE_FEATURED_ID = '20000000-0000-0000-0000-000000000003';
 
 let client: AxiosInstance;
 let organizationToken: string;
@@ -134,63 +139,12 @@ describe('Store Hierarchy & List Stores Tests', () => {
   // ==========================================================================
 
   describe('POST /business/stores/hierarchy', () => {
-    let testBusinessId: string;
-    let testStoreIds: string[] = [];
-
-    beforeAll(async () => {
-      // Create a test business
-      const businessResponse = await client.post(
-        '/business/businesses',
-        {
-          name: `Hierarchy Test Business ${randomUUID().substring(0, 8)}`,
-          slug: `hierarchy-test-${Date.now()}`,
-          domain: `hierarchytest${Date.now()}.com`,
-          businessType: 'multi_store',
-          allowMultipleStores: true,
-        },
-        { headers: authHeaders() },
-      );
-
-      if (businessResponse.data?.data?.organizationId) {
-        testBusinessId = businessResponse.data.data.organizationId;
-
-        // Create two test stores under this business
-        for (let i = 0; i < 2; i++) {
-          const storeResponse = await client.post(
-            '/business/stores',
-            {
-              name: `Hierarchy Store ${i + 1}`,
-              slug: `hierarchy-store-${i}-${Date.now()}`,
-              organizationId: testBusinessId,
-              storeType: 'organization_store',
-              defaultCurrency: 'USD',
-              storeEmail: `hierarchy${i}@test.com`,
-              address: {
-                street1: `${i + 1} Test St`,
-                city: 'Test City',
-                state: 'TS',
-                postalCode: '12345',
-                country: 'US',
-              },
-            },
-            { headers: authHeaders() },
-          );
-
-          if (storeResponse.data?.data?.storeId) {
-            testStoreIds.push(storeResponse.data.data.storeId);
-          }
-        }
-      }
-    });
-
     it('should create a store hierarchy', async () => {
-      if (!testBusinessId || testStoreIds.length < 2) return;
-
       const hierarchyData = {
-        organizationId: testBusinessId,
-        name: `Test Hierarchy ${randomUUID().substring(0, 8)}`,
-        defaultStoreId: testStoreIds[0],
-        storeIds: testStoreIds,
+        organizationId: SEEDED_ORG_ID,
+        name: `Test Hierarchy ${Date.now()}`,
+        defaultStoreId: SEEDED_STORE_ACTIVE_ID,
+        storeIds: [SEEDED_STORE_ACTIVE_ID, SEEDED_STORE_FEATURED_ID],
         settings: {
           allowCrossStoreTransfers: true,
           allowCrossStoreFulfillment: true,
@@ -207,8 +161,8 @@ describe('Store Hierarchy & List Stores Tests', () => {
         expect(response.data.success).toBe(true);
         expect(response.data.data).toBeDefined();
         expect(response.data.data).toHaveProperty('hierarchyId');
-        expect(response.data.data).toHaveProperty('organizationId', testBusinessId);
-        expect(response.data.data).toHaveProperty('defaultStoreId', testStoreIds[0]);
+        expect(response.data.data).toHaveProperty('organizationId', SEEDED_ORG_ID);
+        expect(response.data.data).toHaveProperty('defaultStoreId', SEEDED_STORE_ACTIVE_ID);
         expect(response.data.data).toHaveProperty('storeCount', 2);
       }
     });
@@ -228,15 +182,13 @@ describe('Store Hierarchy & List Stores Tests', () => {
     });
 
     it('should reject hierarchy creation when default store not in storeIds', async () => {
-      if (!testBusinessId) return;
-
       const response = await client.post(
         '/business/stores/hierarchy',
         {
-          organizationId: testBusinessId,
+          organizationId: SEEDED_ORG_ID,
           name: 'Invalid Default Hierarchy',
           defaultStoreId: 'nonexistent-store-id',
-          storeIds: testStoreIds,
+          storeIds: [SEEDED_STORE_ACTIVE_ID, SEEDED_STORE_FEATURED_ID],
         },
         { headers: authHeaders() },
       );

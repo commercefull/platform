@@ -1,0 +1,70 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Create Page</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admin/page-builder">Page Builder</a></li>
+            <li class="breadcrumb-item active">Create</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
+
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">New Page Details</h3></div>
+        <div class="card-body">
+          <form method="POST" action="/admin/page-builder/create">
+            <div class="form-group">
+              <label>Page Title <span class="text-danger">*</span></label>
+              <input type="text" name="title" class="form-control" required placeholder="Home Page">
+            </div>
+            <div class="form-group">
+              <label>Slug <span class="text-danger">*</span></label>
+              <input type="text" name="slug" class="form-control" required placeholder="home">
+              <small class="text-muted">URL-friendly identifier (lowercase, hyphens)</small>
+            </div>
+            <div class="form-group">
+              <label>Page Type</label>
+              <select name="pageType" class="form-control">
+                <option value="page">Standard Page</option>
+                <option value="home">Home Page</option>
+                <option value="landing">Landing Page</option>
+                <option value="product">Product Page</option>
+                <option value="category">Category Page</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Store ID <span class="text-danger">*</span></label>
+              <input type="text" name="storeId" class="form-control" required placeholder="store UUID">
+            </div>
+            <div class="form-group">
+              <label>Theme ID <span class="text-danger">*</span></label>
+              <input type="text" name="themeId" class="form-control" required placeholder="theme UUID or slug">
+              <small class="text-muted">The theme to use for this page's styling</small>
+            </div>
+            <div class="d-flex">
+              <button type="submit" class="btn btn-primary">Create & Open Builder</button>
+              <a href="/admin/page-builder" class="btn btn-secondary ml-2">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<% endcontent %>

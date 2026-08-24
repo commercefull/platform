@@ -2,7 +2,8 @@ import { generateUUID } from '../../../../../libs/uuid';
 import { UserStoreAssignment, StoreRole } from '../../../domain/entities/UserStoreAssignment';
 import { StoreUserRepository } from '../../../domain/repositories/StoreUserRepository';
 import { UserRepository } from '../../../domain/repositories/UserRepository';
-import { StoreRepository } from '../../../../store/domain/repositories/StoreRepository';
+import { StoreLookupPort } from '../../ports/StoreLookupPort';
+import { UserNotFoundError, StoreNotFoundError, UserAlreadyAssignedToStoreError } from '../../../domain/errors/IdentityErrors';
 
 export interface AssignUserToStoreInput {
   userId: string;
@@ -26,23 +27,23 @@ export class AssignUserToStoreUseCase {
   constructor(
     private readonly userStoreRepository: StoreUserRepository,
     private readonly userRepository: UserRepository,
-    private readonly storeRepository: StoreRepository,
+    private readonly storeLookupPort: StoreLookupPort,
   ) {}
 
   async execute(input: AssignUserToStoreInput): Promise<AssignUserToStoreOutput> {
     const user = await this.userRepository.findById(input.userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new UserNotFoundError();
     }
 
-    const store = await this.storeRepository.findById(input.storeId);
+    const store = await this.storeLookupPort.findById(input.storeId);
     if (!store) {
-      throw new Error('Store not found');
+      throw new StoreNotFoundError();
     }
 
     const existing = await this.userStoreRepository.findByUserAndStore(input.userId, input.storeId);
     if (existing) {
-      throw new Error('User is already assigned to this store');
+      throw new UserAlreadyAssignedToStoreError();
     }
 
     const assignment = UserStoreAssignment.create({

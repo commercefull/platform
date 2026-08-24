@@ -5,6 +5,7 @@
 
 import { Money } from '../valueObjects/Money';
 import { FulfillmentStatus } from '../valueObjects/FulfillmentStatus';
+import { QuantityMustBeAtLeastOneError } from '../errors/OrderErrors';
 
 export interface OrderItemProps {
   orderItemId: string;
@@ -210,7 +211,7 @@ export class OrderItem {
   // Domain methods
   updateQuantity(newQuantity: number): void {
     if (newQuantity < 1) {
-      throw new Error('Quantity must be at least 1');
+      throw new QuantityMustBeAtLeastOneError();
     }
     this.props.quantity = newQuantity;
     this.recalculateTotals();

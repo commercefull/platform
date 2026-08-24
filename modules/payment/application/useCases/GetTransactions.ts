@@ -6,6 +6,7 @@ import { PaymentRepository, PaymentFilters } from '../../domain/repositories/Pay
 import { PaginationOptions } from 'libs/types/shared';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
+import { TransactionIdOrExternalIdRequiredError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
 // Command
@@ -17,7 +18,7 @@ export class GetTransactionCommand {
     public readonly externalId?: string,
   ) {
     if (!transactionId && !externalId) {
-      throw new Error('Either transactionId or externalId must be provided');
+      throw new TransactionIdOrExternalIdRequiredError();
     }
   }
 }

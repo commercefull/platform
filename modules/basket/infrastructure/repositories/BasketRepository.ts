@@ -3,7 +3,7 @@
  * PostgreSQL implementation of the basket repository interface
  */
 
-import { query, queryOne } from '../../../../libs/db';
+import { query, queryOne, withTransaction } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { Basket, BasketStatus } from '../../domain/entities/Basket';
@@ -378,14 +378,15 @@ export class BasketRepo implements BasketRepository {
       customerBasket.addItem(newItem);
     }
 
-    // Save merged basket
-    await this.save(customerBasket);
+    // Save merged basket and mark session basket as merged atomically
+    await withTransaction(async () => {
+      await this.save(customerBasket);
 
-    // Mark session basket as merged
-    await query('UPDATE basket SET status = \'merged\', "updatedAt" = $1 WHERE "basketId" = $2', [
-      new Date().toISOString(),
-      sessionBasketId,
-    ]);
+      await query('UPDATE basket SET status = \'merged\', "updatedAt" = $1 WHERE "basketId" = $2', [
+        new Date().toISOString(),
+        sessionBasketId,
+      ]);
+    });
 
     return customerBasket;
   }

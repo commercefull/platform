@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateNotificationDeliveryLogError } from '../../domain/errors/NotificationErrors';
 
 export type NotificationChannel = 'email' | 'sms' | 'in_app' | 'push';
 export type NotificationType = 'orderStatus' | 'promotion' | 'accountAlert';
@@ -198,7 +199,7 @@ export class NotificationDeliveryLogRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create notification delivery log');
+      throw new FailedToCreateNotificationDeliveryLogError();
     }
 
     return result;

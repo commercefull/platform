@@ -3,7 +3,7 @@
  * Calculates applicable discounts for products
  */
 
-import discountRepo from '../../infrastructure/repositories/discountRepo';
+import couponDiscountRepository from '../../infrastructure/repositories/CouponDiscountRepository';
 
 // ============================================================================
 // Command
@@ -82,7 +82,7 @@ export class ApplyProductDiscountUseCase {
       totalOriginal += itemTotal;
 
       // Find applicable discounts for this product
-      const discounts = await discountRepo.findDiscountsForProduct(item.productId, command.organizationId);
+      const discounts = await couponDiscountRepository.discounts.findDiscountsForProduct(item.productId, command.organizationId);
 
       const itemDiscounts: DiscountedItem['discounts'] = [];
       let itemTotalDiscount = 0;
@@ -94,7 +94,7 @@ export class ApplyProductDiscountUseCase {
       // Apply best non-stackable discount
       if (nonStackable.length > 0) {
         const bestDiscount = nonStackable[0]; // Already sorted by priority
-        const discountAmount = discountRepo.calculateDiscount(bestDiscount, item.price, item.quantity);
+        const discountAmount = couponDiscountRepository.discounts.calculateDiscount(bestDiscount, item.price, item.quantity);
 
         if (discountAmount > 0) {
           itemDiscounts.push({
@@ -111,7 +111,7 @@ export class ApplyProductDiscountUseCase {
 
       // Apply stackable discounts
       for (const discount of stackable) {
-        const discountAmount = discountRepo.calculateDiscount(discount, item.price, item.quantity);
+        const discountAmount = couponDiscountRepository.discounts.calculateDiscount(discount, item.price, item.quantity);
 
         if (discountAmount > 0) {
           itemDiscounts.push({

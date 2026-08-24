@@ -136,6 +136,7 @@ describe('Coupon Expanded Tests', () => {
       await cleanup(basketId);
     });
 
+    // TODO(phase-3.4): Fix — gift card feature not yet implemented (no giftCard table). Track in gap-analysis-and-roadmap.md Phase 3.4.
     it.skip('should apply gift card code correctly', async () => {
       // Gift card feature not yet implemented (no giftCard table)
       const basketId = await createBasketWithItems(50);

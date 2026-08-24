@@ -4,6 +4,8 @@
  * Retrieves a warehouse by ID or code.
  */
 
+import { WarehouseValidationError } from '../../domain/errors/WarehouseErrors';
+
 export interface GetWarehouseInput {
   warehouseId?: string;
   code?: string;
@@ -84,7 +86,7 @@ export class GetWarehouseUseCase {
 
   async execute(input: GetWarehouseInput): Promise<GetWarehouseOutput> {
     if (!input.warehouseId && !input.code) {
-      throw new Error('Either warehouseId or code must be provided');
+      throw new WarehouseValidationError('Either warehouseId or code must be provided');
     }
 
     let warehouse: WarehouseRecord | null = null;

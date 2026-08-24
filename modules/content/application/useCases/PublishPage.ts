@@ -3,8 +3,9 @@
  * Publishes a content page
  */
 
-import { ContentRepo } from '../../infrastructure/repositories/contentRepo';
+import type { ContentRepo } from '../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { ContentPageNotFoundError, ContentValidationError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Command
@@ -39,18 +40,18 @@ export class PublishPageUseCase {
   async execute(command: PublishPageCommand): Promise<PublishPageResponse> {
     // Validate command
     if (!command.pageId) {
-      throw new Error('Page ID is required');
+      throw new ContentValidationError('Page ID is required');
     }
 
     // Get existing page
     const page = await this.contentRepo.findPageById(command.pageId);
     if (!page) {
-      throw new Error(`Page with ID ${command.pageId} not found`);
+      throw new ContentPageNotFoundError(command.pageId);
     }
 
     // Check if already published
     if (page.status === 'published') {
-      throw new Error('Page is already published');
+      throw new ContentValidationError('Page is already published');
     }
 
     // Update page status to published

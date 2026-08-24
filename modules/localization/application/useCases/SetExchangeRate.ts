@@ -2,6 +2,8 @@
  * SetExchangeRate Use Case
  */
 
+import { InvalidExchangeRateError, CurrencyNotFoundError, LocalizationValidationError } from '../../domain/errors/LocalizationErrors';
+
 export interface SetExchangeRateInput {
   currencyCode: string;
   exchangeRate: number;
@@ -39,16 +41,16 @@ export class SetExchangeRateUseCase {
 
   async execute(input: SetExchangeRateInput): Promise<SetExchangeRateOutput> {
     if (!input.currencyCode || input.exchangeRate === undefined) {
-      throw new Error('Currency code and exchange rate are required');
+      throw new LocalizationValidationError('Currency code and exchange rate are required');
     }
 
     if (input.exchangeRate <= 0) {
-      throw new Error('Exchange rate must be positive');
+      throw new InvalidExchangeRateError('Exchange rate must be positive');
     }
 
     const currency = await this.localizationRepository.findCurrencyByCode(input.currencyCode);
     if (!currency) {
-      throw new Error(`Currency not found: ${input.currencyCode}`);
+      throw new CurrencyNotFoundError(input.currencyCode);
     }
 
     const previousRate = currency.exchangeRate;

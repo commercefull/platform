@@ -1,0 +1,135 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/returns" class="btn btn-secondary"><i class="ti ti-arrow-left"></i> <%= t('common.back') %></a>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><%= t('common.details') %></h3></div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-4">Return Number</dt><dd class="col-sm-8"><%= returnRequest.returnNumber || '-' %></dd>
+              <dt class="col-sm-4">Order ID</dt><dd class="col-sm-8"><%= returnRequest.orderId || '-' %></dd>
+              <dt class="col-sm-4">Customer ID</dt><dd class="col-sm-8"><%= returnRequest.customerId || '-' %></dd>
+              <dt class="col-sm-4">Return Type</dt><dd class="col-sm-8"><span class="badge bg-info"><%= returnRequest.returnType %></span></dd>
+              <dt class="col-sm-4"><%= t('common.status') %></dt>
+              <dd class="col-sm-8">
+                <% const statusColors = { requested: 'warning', approved: 'info', denied: 'danger', inTransit: 'primary', received: 'primary', inspected: 'primary', completed: 'success', cancelled: 'secondary' }; %>
+                <span class="badge bg-<%= statusColors[returnRequest.status] || 'secondary' %>"><%= returnRequest.status %></span>
+              </dd>
+              <dt class="col-sm-4">RMA Number</dt><dd class="col-sm-8"><%= returnRequest.rmaNumber || '-' %></dd>
+              <dt class="col-sm-4">Return Reason</dt><dd class="col-sm-8"><%= returnRequest.returnReason || '-' %></dd>
+              <dt class="col-sm-4">Customer Notes</dt><dd class="col-sm-8"><%= returnRequest.customerNotes || '-' %></dd>
+              <dt class="col-sm-4">Admin Notes</dt><dd class="col-sm-8"><%= returnRequest.adminNotes || '-' %></dd>
+              <dt class="col-sm-4">Carrier</dt><dd class="col-sm-8"><%= returnRequest.returnCarrier || '-' %></dd>
+              <dt class="col-sm-4">Tracking Number</dt><dd class="col-sm-8"><%= returnRequest.returnTrackingNumber || '-' %></dd>
+              <dt class="col-sm-4">Shipping Paid</dt><dd class="col-sm-8"><%= returnRequest.returnShippingPaid ? 'Yes' : 'No' %></dd>
+              <dt class="col-sm-4">Requires Inspection</dt><dd class="col-sm-8"><%= returnRequest.requiresInspection ? 'Yes' : 'No' %></dd>
+              <dt class="col-sm-4">Requested At</dt><dd class="col-sm-8"><%= returnRequest.requestedAt ? new Date(returnRequest.requestedAt).toLocaleString() : '-' %></dd>
+              <dt class="col-sm-4">Approved At</dt><dd class="col-sm-8"><%= returnRequest.approvedAt ? new Date(returnRequest.approvedAt).toLocaleString() : '-' %></dd>
+              <dt class="col-sm-4">Received At</dt><dd class="col-sm-8"><%= returnRequest.receivedAt ? new Date(returnRequest.receivedAt).toLocaleString() : '-' %></dd>
+              <dt class="col-sm-4">Completed At</dt><dd class="col-sm-8"><%= returnRequest.completedAt ? new Date(returnRequest.completedAt).toLocaleString() : '-' %></dd>
+            </dl>
+          </div>
+        </div>
+        <div class="card mt-3">
+          <div class="card-header"><h3 class="card-title">Return Items</h3></div>
+          <div class="card-body">
+            <table class="table table-sm">
+              <thead>
+                <tr><th>Order Item ID</th><th><%= t('common.quantity') %></th><th>Reason</th><th>Condition</th><th>Restock</th><th>Refund Amount</th><th>Warranty</th></tr>
+              </thead>
+              <tbody>
+                <% (returnRequest.items || []).forEach(item => { %>
+                  <tr>
+                    <td><%= item.orderItemId %></td>
+                    <td><%= item.quantity %></td>
+                    <td><%= item.returnReason %></td>
+                    <td><%= item.condition %></td>
+                    <td><%= item.restockItem ? 'Yes' : 'No' %></td>
+                    <td><%= item.refundAmount ? '$' + Number(item.refundAmount).toFixed(2) : '-' %></td>
+                    <td><%= item.warrantyStatus || 'none' %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Workflow Actions</h3></div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <% if (returnRequest.status === 'requested') { %>
+                <form method="POST" action="/admin/returns/<%= returnRequest.orderReturnId %>/approve">
+                  <div class="mb-2">
+                    <input type="text" name="rmaNumber" class="form-control form-control-sm" placeholder="RMA Number (optional)">
+                  </div>
+                  <button type="submit" class="btn btn-outline-success w-100">Approve</button>
+                </form>
+                <form method="POST" action="/admin/returns/<%= returnRequest.orderReturnId %>/deny">
+                  <div class="mb-2">
+                    <input type="text" name="reason" class="form-control form-control-sm" placeholder="Denial reason (optional)">
+                  </div>
+                  <button type="submit" class="btn btn-outline-danger w-100">Deny</button>
+                </form>
+              <% } %>
+
+              <% if (returnRequest.status === 'approved') { %>
+                <form method="POST" action="/admin/returns/<%= returnRequest.orderReturnId %>/in-transit">
+                  <div class="mb-2">
+                    <input type="text" name="trackingNumber" class="form-control form-control-sm" placeholder="Tracking Number">
+                    <input type="text" name="trackingUrl" class="form-control form-control-sm mt-1" placeholder="Tracking URL">
+                  </div>
+                  <button type="submit" class="btn btn-outline-primary w-100">Mark In Transit</button>
+                </form>
+              <% } %>
+
+              <% if (returnRequest.status === 'inTransit') { %>
+                <form method="POST" action="/admin/returns/<%= returnRequest.orderReturnId %>/received">
+                  <button type="submit" class="btn btn-outline-primary w-100">Mark Received</button>
+                </form>
+              <% } %>
+
+              <% if (returnRequest.status === 'received' && returnRequest.requiresInspection) { %>
+                <form method="POST" action="/admin/returns/<%= returnRequest.orderReturnId %>/inspect">
+                  <div class="mb-2">
+                    <textarea name="passedItems" class="form-control form-control-sm" rows="2" placeholder="Passed items JSON (optional)"></textarea>
+                    <textarea name="failedItems" class="form-control form-control-sm mt-1" rows="2" placeholder="Failed items JSON (optional)"></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-outline-primary w-100">Complete Inspection</button>
+                </form>
+              <% } %>
+
+              <% if (returnRequest.status === 'received' || returnRequest.status === 'inspected') { %>
+                <form method="POST" action="/admin/returns/<%= returnRequest.orderReturnId %>/complete">
+                  <button type="submit" class="btn btn-outline-success w-100">Complete Return</button>
+                </form>
+              <% } %>
+
+              <% if (['requested', 'approved', 'inTransit', 'inspected'].includes(returnRequest.status)) { %>
+                <form method="POST" action="/admin/returns/<%= returnRequest.orderReturnId %>/cancel">
+                  <div class="mb-2">
+                    <input type="text" name="reason" class="form-control form-control-sm" placeholder="Cancellation reason (optional)">
+                  </div>
+                  <button type="submit" class="btn btn-outline-danger w-100">Cancel Return</button>
+                </form>
+              <% } %>
+
+              <a href="/admin/returns" class="btn btn-outline-secondary"><%= t('common.backToList') %></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

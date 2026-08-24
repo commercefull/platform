@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierErrors';
 
 export type SupplierProductStatus = 'active' | 'inactive' | 'discontinued' | 'pending';
 
@@ -117,7 +118,7 @@ export class SupplierProductRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create supplier product');
+    if (!result) throw new FailedToCreateSupplierEntityError('Failed to create supplier product');
     return result;
   }
 

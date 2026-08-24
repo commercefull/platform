@@ -3,6 +3,8 @@
  * Manages discount codes and promotional rules
  */
 
+import { CouponValidationError } from '../errors/CouponErrors';
+
 export type DiscountType = 'percentage' | 'fixed_amount' | 'free_shipping';
 
 export type CouponType = 'single_use' | 'multi_use' | 'unlimited';
@@ -86,19 +88,19 @@ export class Coupon {
   }): Coupon {
     // Validate inputs
     if (!props.code?.trim()) {
-      throw new Error('Coupon code is required');
+      throw new CouponValidationError('Coupon code is required');
     }
 
     if (props.type === 'percentage' && (props.value < 0 || props.value > 100)) {
-      throw new Error('Percentage discount must be between 0 and 100');
+      throw new CouponValidationError('Percentage discount must be between 0 and 100');
     }
 
     if (props.type === 'fixed_amount' && !props.currency) {
-      throw new Error('Currency is required for fixed amount discounts');
+      throw new CouponValidationError('Currency is required for fixed amount discounts');
     }
 
     if (props.usageType === 'multi_use' && !props.usageLimit) {
-      throw new Error('Usage limit is required for multi-use coupons');
+      throw new CouponValidationError('Usage limit is required for multi-use coupons');
     }
 
     const now = new Date();

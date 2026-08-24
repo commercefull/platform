@@ -3,42 +3,35 @@ import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../libs/session';
-import AdminRepository from '../../../modules/identity/infrastructure/repositories/AdminRepository';
-import StoreUserRepository from '../../../modules/identity/infrastructure/repositories/StoreUserRepository';
-import DashboardQueryRepository from '../../../modules/analytics/infrastructure/repositories/DashboardQueryRepository';
+import { AdminAuthUseCase, GetDashboardDataUseCase } from '../../../modules/identity/application/useCases/AdminAuth';
 import { adminRespond } from '../../respond';
 
 // Session cookie name
 const SESSION_COOKIE_NAME = 'cf_session';
 
+const adminAuthUseCase = new AdminAuthUseCase();
+const getDashboardDataUseCase = new GetDashboardDataUseCase();
+
 // GET: admin dashboard
 export const getAdminDashboard = async (req: TypedRequest, res: Response) => {
-  try {
-    // Fetch real dashboard data using query repository
-    const [stats, recentOrders, topProducts, revenueByDay] = await Promise.all([
-      DashboardQueryRepository.getAdminDashboardStats(),
-      DashboardQueryRepository.getRecentOrders(5),
-      DashboardQueryRepository.getTopProducts(5),
-      DashboardQueryRepository.getRevenueByDay(7),
-    ]);
+  // Fetch real dashboard data using query repository
+  const [stats, recentOrders, topProducts, revenueByDay] = await Promise.all([
+    getDashboardDataUseCase.getAdminDashboardStats(),
+    getDashboardDataUseCase.getRecentOrders(5),
+    getDashboardDataUseCase.getTopProducts(5),
+    getDashboardDataUseCase.getRevenueByDay(7),
+  ]);
 
-    const dashboardData = {
-      pageName: 'Dashboard',
-      stats,
-      recentOrders,
-      topProducts,
-      revenueByDay,
-    };
+  const dashboardData = {
+    pageName: 'Dashboard',
+    stats,
+    recentOrders,
+    topProducts,
+    revenueByDay,
+  };
 
-    adminRespond(req, res, 'dashboard', dashboardData);
-  } catch (error) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: 'Failed to load dashboard',
-    });
-  }
+  adminRespond(req, res, 'dashboard', dashboardData);
+  
 };
 
 // GET: admin login page
@@ -77,7 +70,7 @@ export const postAdminLogin = async (req: TypedRequest, res: Response) => {
     }
 
     // Authenticate against admin database
-    const admin = await AdminRepository.findByEmail(email);
+    const admin = await adminAuthUseCase.findByEmail(email);
 
     if (!admin) {
       res.status(500);
@@ -106,7 +99,7 @@ export const postAdminLogin = async (req: TypedRequest, res: Response) => {
       });
     }
 
-    const storeAssignments = await StoreUserRepository.findByUserId(admin.adminId);
+    const storeAssignments = await adminAuthUseCase.findStoreAssignmentsByUserId(admin.adminId);
     const primaryStore = storeAssignments.find(assignment => assignment.isPrimary) || storeAssignments[0];
 
     // Create session
@@ -134,12 +127,12 @@ export const postAdminLogin = async (req: TypedRequest, res: Response) => {
     });
 
     // Update last login
-    await AdminRepository.updateLastLogin(admin.adminId);
+    await adminAuthUseCase.updateLastLogin(admin.adminId);
 
     // Redirect to dashboard
     return res.redirect('/admin');
   } catch (error) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'login', {
       pageName: 'Admin Login',
@@ -165,7 +158,7 @@ export const postAdminLogout = async (req: TypedRequest, res: Response) => {
     // Redirect to login page
     res.redirect('/admin/login');
   } catch (error) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     res.clearCookie(SESSION_COOKIE_NAME);
     res.redirect('/admin/login');
@@ -174,16 +167,8 @@ export const postAdminLogout = async (req: TypedRequest, res: Response) => {
 
 // GET: admin profile
 export const getAdminProfile = async (req: TypedRequest, res: Response) => {
-  try {
-    adminRespond(req, res, 'profile', {
-      pageName: 'Admin Profile',
-    });
-  } catch (error) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: 'Failed to load profile',
-    });
-  }
+  adminRespond(req, res, 'profile', {
+    pageName: 'Admin Profile',
+  });
+  
 };

@@ -4,6 +4,8 @@
  * Calculates the final price for a product considering all pricing rules.
  */
 
+import { PricingValidationError } from '../../domain/errors/PricingErrors';
+
 export interface CalculatePriceInput {
   productId: string;
   variantId?: string;
@@ -52,7 +54,7 @@ export class CalculatePriceUseCase {
     // Get product base price
     const product = await this.productRepository.findById(input.productId);
     if (!product) {
-      throw new Error(`Product not found: ${input.productId}`);
+      throw new PricingValidationError(`Product not found: ${input.productId}`);
     }
 
     let basePrice = product.price;

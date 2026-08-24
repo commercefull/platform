@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierErrors';
 
 export type SupplierAddressType = 'headquarters' | 'billing' | 'warehouse' | 'returns' | 'manufacturing';
 
@@ -89,7 +90,7 @@ export class SupplierAddressRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create supplier address');
+    if (!result) throw new FailedToCreateSupplierEntityError('Failed to create supplier address');
     return result;
   }
 

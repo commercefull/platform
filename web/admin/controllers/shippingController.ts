@@ -6,46 +6,32 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import shippingMethodRepo from '../../../modules/shipping/infrastructure/repositories/shippingMethodRepo';
+import { ManageShippingMethodsUseCase } from '../../../modules/shipping/application/useCases/ManageShippingAdmin';
 import { adminRespond } from '../../respond';
+
+const manageShippingMethodsUseCase = new ManageShippingMethodsUseCase();
 
 // ============================================================================
 // Shipping Methods
 // ============================================================================
 
 export const listShippingMethods = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const methods = await shippingMethodRepo.findAll();
+  const methods = await manageShippingMethodsUseCase.findAll();
 
-    adminRespond(req, res, 'shipping/methods/index', {
-      pageName: 'Shipping Methods',
-      methods,
+  adminRespond(req, res, 'shipping/methods/index', {
+    pageName: 'Shipping Methods',
+    methods,
 
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load shipping methods',
-    });
-  }
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createShippingMethodForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'shipping/methods/create', {
-      pageName: 'Create Shipping Method',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'shipping/methods/create', {
+    pageName: 'Create Shipping Method',
+  });
+  
 };
 
 export const createShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -71,7 +57,7 @@ export const createShippingMethod = async (req: TypedRequest, res: Response): Pr
       shippingClass,
     } = body;
 
-    const method = await shippingMethodRepo.create({
+    const method = await manageShippingMethodsUseCase.create({
       shippingCarrierId: null,
       name,
       code,
@@ -97,7 +83,7 @@ export const createShippingMethod = async (req: TypedRequest, res: Response): Pr
 
     res.redirect(`/hub/shipping/methods/${method.shippingMethodId}?success=Shipping method created successfully`);
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'shipping/methods/create', {
       pageName: 'Create Shipping Method',
@@ -108,186 +94,136 @@ export const createShippingMethod = async (req: TypedRequest, res: Response): Pr
 };
 
 export const viewShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { methodId } = req.params;
+  const { methodId } = req.params;
 
-    const method = await shippingMethodRepo.findById(methodId);
+  const method = await manageShippingMethodsUseCase.findById(methodId);
 
-    if (!method) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Shipping method not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'shipping/methods/view', {
-      pageName: `Method: ${method.name}`,
-      method,
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!method) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load shipping method',
+      pageName: 'Not Found',
+      error: 'Shipping method not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'shipping/methods/view', {
+    pageName: `Method: ${method.name}`,
+    method,
+
+    success: req.query.success || null,
+  });
+  
 };
 
 export const editShippingMethodForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { methodId } = req.params;
+  const { methodId } = req.params;
 
-    const method = await shippingMethodRepo.findById(methodId);
+  const method = await manageShippingMethodsUseCase.findById(methodId);
 
-    if (!method) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Shipping method not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'shipping/methods/edit', {
-      pageName: `Edit: ${method.name}`,
-      method,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!method) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
+      pageName: 'Not Found',
+      error: 'Shipping method not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'shipping/methods/edit', {
+    pageName: `Edit: ${method.name}`,
+    method,
+  });
+  
 };
 
 export const updateShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { methodId } = req.params;
-    const updates: Record<string, unknown> = {};
+  const { methodId } = req.params;
+  const updates: Record<string, unknown> = {};
 
-    const body = req.body as RequestBody;
-    const {
-      name,
-      code,
-      description,
-      isActive,
-      isDefault,
-      serviceCode,
-      domesticInternational,
-      estimatedDeliveryDays,
-      handlingDays,
-      priority,
-      displayOnFrontend,
-      allowFreeShipping,
-      minWeight,
-      maxWeight,
-      minOrderValue,
-      maxOrderValue,
-      shippingClass,
-    } = body;
+  const body = req.body as RequestBody;
+  const {
+    name,
+    code,
+    description,
+    isActive,
+    isDefault,
+    serviceCode,
+    domesticInternational,
+    estimatedDeliveryDays,
+    handlingDays,
+    priority,
+    displayOnFrontend,
+    allowFreeShipping,
+    minWeight,
+    maxWeight,
+    minOrderValue,
+    maxOrderValue,
+    shippingClass,
+  } = body;
 
-    if (name !== undefined) updates.name = name;
-    if (code !== undefined) updates.code = code;
-    if (description !== undefined) updates.description = description;
-    if (isActive !== undefined) updates.isActive = isActive === 'true' || isActive === true;
-    if (isDefault !== undefined) updates.isDefault = isDefault === 'true' || isDefault === true;
-    if (serviceCode !== undefined) updates.serviceCode = serviceCode || undefined;
-    if (domesticInternational !== undefined) updates.domesticInternational = domesticInternational;
-    if (estimatedDeliveryDays !== undefined)
-      updates.estimatedDeliveryDays = estimatedDeliveryDays ? JSON.parse(estimatedDeliveryDays) : undefined;
-    if (handlingDays !== undefined) updates.handlingDays = handlingDays ? parseInt(handlingDays) : undefined;
-    if (priority !== undefined) updates.priority = priority ? parseInt(priority) : undefined;
-    if (displayOnFrontend !== undefined) updates.displayOnFrontend = displayOnFrontend === 'true' || displayOnFrontend === true;
-    if (allowFreeShipping !== undefined) updates.allowFreeShipping = allowFreeShipping === 'true' || allowFreeShipping === true;
-    if (minWeight !== undefined) updates.minWeight = minWeight ? parseFloat(minWeight).toString() : null;
-    if (maxWeight !== undefined) updates.maxWeight = maxWeight ? parseFloat(maxWeight).toString() : null;
-    if (minOrderValue !== undefined) updates.minOrderValue = minOrderValue ? parseFloat(minOrderValue).toString() : null;
-    if (maxOrderValue !== undefined) updates.maxOrderValue = maxOrderValue ? parseFloat(maxOrderValue).toString() : null;
-    if (shippingClass !== undefined) updates.shippingClass = shippingClass || undefined;
+  if (name !== undefined) updates.name = name;
+  if (code !== undefined) updates.code = code;
+  if (description !== undefined) updates.description = description;
+  if (isActive !== undefined) updates.isActive = isActive === 'true' || isActive === true;
+  if (isDefault !== undefined) updates.isDefault = isDefault === 'true' || isDefault === true;
+  if (serviceCode !== undefined) updates.serviceCode = serviceCode || undefined;
+  if (domesticInternational !== undefined) updates.domesticInternational = domesticInternational;
+  if (estimatedDeliveryDays !== undefined)
+    updates.estimatedDeliveryDays = estimatedDeliveryDays ? JSON.parse(estimatedDeliveryDays) : undefined;
+  if (handlingDays !== undefined) updates.handlingDays = handlingDays ? parseInt(handlingDays) : undefined;
+  if (priority !== undefined) updates.priority = priority ? parseInt(priority) : undefined;
+  if (displayOnFrontend !== undefined) updates.displayOnFrontend = displayOnFrontend === 'true' || displayOnFrontend === true;
+  if (allowFreeShipping !== undefined) updates.allowFreeShipping = allowFreeShipping === 'true' || allowFreeShipping === true;
+  if (minWeight !== undefined) updates.minWeight = minWeight ? parseFloat(minWeight).toString() : null;
+  if (maxWeight !== undefined) updates.maxWeight = maxWeight ? parseFloat(maxWeight).toString() : null;
+  if (minOrderValue !== undefined) updates.minOrderValue = minOrderValue ? parseFloat(minOrderValue).toString() : null;
+  if (maxOrderValue !== undefined) updates.maxOrderValue = maxOrderValue ? parseFloat(maxOrderValue).toString() : null;
+  if (shippingClass !== undefined) updates.shippingClass = shippingClass || undefined;
 
-    const method = await shippingMethodRepo.update(methodId, updates);
+  const method = await manageShippingMethodsUseCase.update(methodId, updates);
 
-    if (!method) {
-      throw new Error('Shipping method not found after update');
-    }
-
-    res.redirect(`/hub/shipping/methods/${methodId}?success=Shipping method updated successfully`);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    try {
-      const method = await shippingMethodRepo.findById(req.params.methodId);
-
-      adminRespond(req, res, 'shipping/methods/edit', {
-        pageName: `Edit: ${method?.name || 'Method'}`,
-        method,
-        error: (error as Error).message || 'Failed to update shipping method',
-        formData: req.body as RequestBody,
-      });
-    } catch {
-      adminRespond(req, res, 'error', {
-        pageName: 'Error',
-        error: (error as Error).message || 'Failed to update shipping method',
-      });
-    }
+  if (!method) {
+    throw new Error('Shipping method not found after update');
   }
+
+  res.redirect(`/hub/shipping/methods/${methodId}?success=Shipping method updated successfully`);
+  
 };
 
 export const deleteShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { methodId } = req.params;
+  const { methodId } = req.params;
 
-    const success = await shippingMethodRepo.delete(methodId);
+  const success = await manageShippingMethodsUseCase.delete(methodId);
 
-    if (!success) {
-      throw new Error('Failed to delete shipping method');
-    }
-
-    res.json({ success: true, message: 'Shipping method deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete shipping method' });
+  if (!success) {
+    throw new Error('Failed to delete shipping method');
   }
+
+  res.json({ success: true, message: 'Shipping method deleted successfully' });
+  
 };
 
 export const activateShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { methodId } = req.params;
+  const { methodId } = req.params;
 
-    const method = await shippingMethodRepo.activate(methodId);
+  const method = await manageShippingMethodsUseCase.activate(methodId);
 
-    if (!method) {
-      throw new Error('Shipping method not found');
-    }
-
-    res.json({ success: true, message: 'Shipping method activated successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate shipping method' });
+  if (!method) {
+    throw new Error('Shipping method not found');
   }
+
+  res.json({ success: true, message: 'Shipping method activated successfully' });
+  
 };
 
 export const deactivateShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { methodId } = req.params;
+  const { methodId } = req.params;
 
-    const method = await shippingMethodRepo.deactivate(methodId);
+  const method = await manageShippingMethodsUseCase.deactivate(methodId);
 
-    if (!method) {
-      throw new Error('Shipping method not found');
-    }
-
-    res.json({ success: true, message: 'Shipping method deactivated successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate shipping method' });
+  if (!method) {
+    throw new Error('Shipping method not found');
   }
+
+  res.json({ success: true, message: 'Shipping method deactivated successfully' });
+  
 };

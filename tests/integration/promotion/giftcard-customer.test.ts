@@ -1,6 +1,7 @@
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin, loginTestUser, expectStatus } from '../testUtils';
 
+// TODO(phase-3.4): Fix — gift card customer API tests need seed data and endpoint wiring. Track in gap-analysis-and-roadmap.md Phase 3.4.
 describe.skip('Gift Card Customer API Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;

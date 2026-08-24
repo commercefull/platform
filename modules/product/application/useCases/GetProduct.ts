@@ -6,6 +6,7 @@
 import { ProductRepository } from '../../domain/repositories/ProductRepository';
 import { Product } from '../../domain/entities/Product';
 import { ProductVariant } from '../../domain/entities/ProductVariant';
+import { ProductValidationError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================
 // Command
@@ -20,7 +21,7 @@ export class GetProductCommand {
     public readonly includeImages: boolean = true,
   ) {
     if (!productId && !slug && !sku) {
-      throw new Error('Either productId, slug, or sku must be provided');
+      throw new ProductValidationError('Either productId, slug, or sku must be provided');
     }
   }
 }

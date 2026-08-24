@@ -4,6 +4,7 @@
  */
 
 import { Router } from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import { SystemConfigurationController } from './SystemConfigurationController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
@@ -13,18 +14,18 @@ const systemConfigurationController = new SystemConfigurationController();
 router.use(isOrganizationLoggedIn);
 
 // Create system configuration
-router.post('/configuration', systemConfigurationController.createSystemConfiguration.bind(systemConfigurationController));
+router.post('/configuration', asyncHandler(systemConfigurationController.createSystemConfiguration.bind(systemConfigurationController)));
 
 // Update system configuration
-router.put('/configuration/:configId', systemConfigurationController.updateSystemConfiguration.bind(systemConfigurationController));
+router.put('/configuration/:configId', asyncHandler(systemConfigurationController.updateSystemConfiguration.bind(systemConfigurationController)));
+
+// Get active system configuration (must be before /:configId to avoid matching "active" as an ID)
+router.get('/configuration/active', asyncHandler(systemConfigurationController.getActiveSystemConfiguration.bind(systemConfigurationController)));
 
 // Get system configuration by ID
-router.get('/configuration/:configId', systemConfigurationController.getSystemConfiguration.bind(systemConfigurationController));
-
-// Get active system configuration
-router.get('/configuration/active', systemConfigurationController.getActiveSystemConfiguration.bind(systemConfigurationController));
+router.get('/configuration/:configId', asyncHandler(systemConfigurationController.getSystemConfiguration.bind(systemConfigurationController)));
 
 // List all system configurations
-router.get('/configuration', systemConfigurationController.listSystemConfigurations.bind(systemConfigurationController));
+router.get('/configuration', asyncHandler(systemConfigurationController.listSystemConfigurations.bind(systemConfigurationController)));
 
 export { router as systemConfigurationRouter };

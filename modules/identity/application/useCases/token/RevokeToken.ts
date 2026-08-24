@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { TokenRequiredOnlyError, UserIdRequiredError } from '../../../domain/errors/IdentityErrors';
 
 export interface RevokeTokenInput {
   token: string;
@@ -39,7 +40,7 @@ export class RevokeTokenUseCase {
 
   async revokeOne(input: RevokeTokenInput): Promise<RevokeTokenOutput> {
     if (!input.token) {
-      throw new Error('Token is required');
+      throw new TokenRequiredOnlyError();
     }
 
     if (input.tokenType === 'access') {
@@ -61,7 +62,7 @@ export class RevokeTokenUseCase {
 
   async revokeAll(input: RevokeAllTokensInput): Promise<RevokeTokenOutput> {
     if (!input.userId) {
-      throw new Error('User ID is required');
+      throw new UserIdRequiredError();
     }
 
     const revokedCount =

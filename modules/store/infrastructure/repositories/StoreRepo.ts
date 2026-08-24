@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { StoreRepository as IStoreRepository, StoreFilters } from '../../domain/repositories/StoreRepository';
 import { Store, type StoreProps } from '../../domain/entities/Store';
+import { StoreNotFoundError } from '../../domain/errors/StoreErrors';
 
 export class StoreRepo implements IStoreRepository {
   async findById(storeId: string): Promise<Store | null> {
@@ -244,7 +245,7 @@ export class StoreRepo implements IStoreRepository {
       `UPDATE store SET "settings" = COALESCE("settings", '{}'::jsonb) || jsonb_build_object('pickup', $1::jsonb), "updatedAt" = $2 WHERE "storeId" = $3 RETURNING *`,
       [JSON.stringify(pickupSettings), new Date().toISOString(), storeId],
     );
-    if (!row) throw new Error(`Store not found: ${storeId}`);
+    if (!row) throw new StoreNotFoundError(storeId);
     return this.mapToStore(row);
   }
 
@@ -256,7 +257,7 @@ export class StoreRepo implements IStoreRepository {
       `UPDATE store SET "settings" = COALESCE("settings", '{}'::jsonb) || jsonb_build_object('localDelivery', $1::jsonb), "updatedAt" = $2 WHERE "storeId" = $3 RETURNING *`,
       [JSON.stringify(deliverySettings), new Date().toISOString(), storeId],
     );
-    if (!row) throw new Error(`Store not found: ${storeId}`);
+    if (!row) throw new StoreNotFoundError(storeId);
     return this.mapToStore(row);
   }
 

@@ -1,5 +1,26 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateOrderFulfillmentError, FailedToCreateOrderFulfillmentPackageError } from '../../domain/errors/OrderErrors';
+
+export interface OrderFulfillmentPackage {
+  orderFulfillmentPackageId: string;
+  createdAt: string;
+  updatedAt: string;
+  orderFulfillmentId: string;
+  packageNumber: string;
+  trackingNumber?: string;
+  weight?: number;
+  dimensions?: Record<string, unknown>;
+  packageType?: string;
+  shippingLabelUrl?: string;
+  commercialInvoiceUrl?: string;
+  customsInfo?: Record<string, unknown>;
+}
+
+export type OrderFulfillmentPackageCreateParams = Omit<OrderFulfillmentPackage, 'orderFulfillmentPackageId' | 'createdAt' | 'updatedAt'>;
+export type OrderFulfillmentPackageTrackingParams = Partial<
+  Pick<OrderFulfillmentPackage, 'trackingNumber' | 'shippingLabelUrl' | 'commercialInvoiceUrl'>
+>;
 
 export type FulfillmentType = 'shipping' | 'pickup' | 'digital' | 'service';
 export type FulfillmentStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'failed' | 'cancelled';
@@ -161,7 +182,7 @@ export class OrderFulfillmentRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create order fulfillment');
+      throw new FailedToCreateOrderFulfillmentError();
     }
 
     return result;
@@ -335,6 +356,102 @@ export class OrderFulfillmentRepo {
       [],
     );
     return results || [];
+  }
+
+  // ==========================================================================
+  // Fulfillment Package Methods
+  // ==========================================================================
+
+  async findPackagesByOrder(orderId: string): Promise<OrderFulfillmentPackage[]> {
+    const results = await query<OrderFulfillmentPackage[]>(
+      `SELECT p.* FROM "orderFulfillmentPackage" p
+       JOIN "orderFulfillment" f ON f."orderFulfillmentId" = p."orderFulfillmentId"
+       WHERE f."orderId" = $1
+       ORDER BY p."createdAt" ASC`,
+      [orderId],
+    );
+    return results || [];
+  }
+
+  async findPackagesByFulfillment(orderFulfillmentId: string): Promise<OrderFulfillmentPackage[]> {
+    const results = await query<OrderFulfillmentPackage[]>(
+      `SELECT * FROM "orderFulfillmentPackage" WHERE "orderFulfillmentId" = $1 ORDER BY "createdAt" ASC`,
+      [orderFulfillmentId],
+    );
+    return results || [];
+  }
+
+  async findByOrder(orderId: string): Promise<OrderFulfillmentPackage[]> {
+    return this.findPackagesByOrder(orderId);
+  }
+
+  async findByFulfillment(orderFulfillmentId: string): Promise<OrderFulfillmentPackage[]> {
+    return this.findPackagesByFulfillment(orderFulfillmentId);
+  }
+
+  async createPackage(params: OrderFulfillmentPackageCreateParams): Promise<OrderFulfillmentPackage> {
+    const now = unixTimestamp();
+    const result = await queryOne<OrderFulfillmentPackage>(
+      `INSERT INTO "orderFulfillmentPackage" (
+        "orderFulfillmentId", "packageNumber", "trackingNumber", "weight", "dimensions",
+        "packageType", "shippingLabelUrl", "commercialInvoiceUrl", "customsInfo",
+        "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *`,
+      [
+        params.orderFulfillmentId,
+        params.packageNumber,
+        params.trackingNumber || null,
+        params.weight || null,
+        params.dimensions ? JSON.stringify(params.dimensions) : null,
+        params.packageType || null,
+        params.shippingLabelUrl || null,
+        params.commercialInvoiceUrl || null,
+        params.customsInfo ? JSON.stringify(params.customsInfo) : null,
+        now,
+        now,
+      ],
+    );
+    if (!result) throw new FailedToCreateOrderFulfillmentPackageError();
+    return result;
+  }
+
+  async updateTracking(
+    orderFulfillmentPackageId: string,
+    params: OrderFulfillmentPackageTrackingParams,
+  ): Promise<OrderFulfillmentPackage | null> {
+    return this.updatePackageTracking(orderFulfillmentPackageId, params);
+  }
+
+  async updatePackageTracking(
+    orderFulfillmentPackageId: string,
+    params: OrderFulfillmentPackageTrackingParams,
+  ): Promise<OrderFulfillmentPackage | null> {
+    const fields: string[] = [];
+    const values: unknown[] = [];
+    let i = 1;
+
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined) {
+        fields.push(`"${key}" = $${i++}`);
+        values.push(value);
+      }
+    }
+
+    if (fields.length === 0) {
+      return queryOne<OrderFulfillmentPackage>(`SELECT * FROM "orderFulfillmentPackage" WHERE "orderFulfillmentPackageId" = $1`, [
+        orderFulfillmentPackageId,
+      ]);
+    }
+
+    fields.push(`"updatedAt" = $${i++}`);
+    values.push(unixTimestamp());
+    values.push(orderFulfillmentPackageId);
+
+    return queryOne<OrderFulfillmentPackage>(
+      `UPDATE "orderFulfillmentPackage" SET ${fields.join(', ')} WHERE "orderFulfillmentPackageId" = $${i} RETURNING *`,
+      values,
+    );
   }
 }
 

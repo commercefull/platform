@@ -7,23 +7,22 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import multer from 'multer';
-
-// Extend Express Request to include multer file properties
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Express {
-    interface Request {
-      file?: Express.Multer.File;
-      files?: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[];
-    }
-  }
-}
 import { ProcessImageUseCase } from '../../application/useCases/ProcessImage';
+import { DownloadImageUseCase } from '../../application/useCases/DownloadImage';
 import { PostgreSQLMediaRepository } from '../../infrastructure/repositories/mediaRepo';
 import { SharpImageProcessingService } from '../../infrastructure/services/SharpImageProcessingService';
 import { StorageServiceFactory } from '../../infrastructure/services/StorageServiceFactory';
 
 interface MediaUploadBody {
+  altText?: string;
+  title?: string;
+  description?: string;
+  tags?: string;
+  metadata?: string;
+}
+
+interface MediaDownloadBody {
+  url: string;
   altText?: string;
   title?: string;
   description?: string;
@@ -49,6 +48,7 @@ const upload = multer({
 
 export class MediaController {
   private processImageUseCase: ProcessImageUseCase;
+  private downloadImageUseCase: DownloadImageUseCase;
 
   constructor() {
     const mediaRepository = new PostgreSQLMediaRepository();
@@ -56,6 +56,7 @@ export class MediaController {
     const storageService = StorageServiceFactory.create();
 
     this.processImageUseCase = new ProcessImageUseCase(mediaRepository, imageProcessingService, storageService);
+    this.downloadImageUseCase = new DownloadImageUseCase(this.processImageUseCase);
   }
 
   // Middleware for handling single file upload
@@ -155,6 +156,49 @@ export class MediaController {
       res.status(500).json({
         success: false,
         message: 'Failed to process images',
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      });
+    }
+  };
+
+  /**
+   * Download a remote image by URL, process it, and store it
+   */
+  downloadImage = async (req: TypedRequest<Record<string, string>, unknown, MediaDownloadBody>, res: Response) => {
+    try {
+      const body = req.body;
+
+      if (!body.url) {
+        return res.status(400).json({
+          success: false,
+          message: 'No URL provided',
+        });
+      }
+
+      const result = await this.downloadImageUseCase.execute({
+        url: body.url,
+        altText: body.altText,
+        title: body.title,
+        description: body.description,
+        tags: body.tags ? JSON.parse(body.tags) : undefined,
+        metadata: body.metadata ? JSON.parse(body.metadata) : undefined,
+      });
+
+      res.json({
+        success: true,
+        data: {
+          media: result.media.toJSON(),
+          urls: result.urls,
+        },
+      });
+    } catch (error) {
+      logger.error('Error:', error);
+
+      const statusCode = (error as { statusCode?: number }).statusCode || 500;
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
+      res.status(statusCode).json({
+        success: false,
+        message: 'Failed to download image',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }

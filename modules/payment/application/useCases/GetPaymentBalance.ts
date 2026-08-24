@@ -6,7 +6,10 @@
  * Validates: Requirements 1.7
  */
 
-import paymentBalanceRepo, { PaymentBalance } from '../../infrastructure/repositories/paymentBalanceRepo';
+import { PaymentBillingRepository, PaymentBalance } from '../../domain/repositories/PaymentBillingRepository';
+import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
+
+const paymentBillingRepo = paymentBillingDataRepository.billing;
 
 // ============================================================================
 // Command
@@ -41,10 +44,10 @@ export interface GetPaymentBalanceResponse {
 // ============================================================================
 
 export class GetPaymentBalanceUseCase {
-  constructor(private readonly repo: typeof paymentBalanceRepo = paymentBalanceRepo) {}
+  constructor(private readonly repo: PaymentBillingRepository = paymentBillingRepo) {}
 
   async execute(command: GetPaymentBalanceCommand): Promise<GetPaymentBalanceResponse> {
-    const balances = await this.repo.findByMerchant(command.organizationId);
+    const balances = await this.repo.findBalancesByMerchant(command.organizationId);
 
     let currentBalance: number | undefined;
     if (command.currency) {

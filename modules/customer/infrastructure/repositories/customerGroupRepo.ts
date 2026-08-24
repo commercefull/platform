@@ -3,6 +3,7 @@ import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
 import { CustomerGroup as DbCustomerGroup } from '../../../../libs/db/types';
+import { FailedToCreateCustomerError, CustomerGroupAlreadyExistsError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
 export type CustomerGroup = DbCustomerGroup;
@@ -38,7 +39,7 @@ export class CustomerGroupRepo {
   async create(params: CustomerGroupCreateParams): Promise<CustomerGroup> {
     const now = unixTimestamp();
     const existing = await this.findByCode(params.code);
-    if (existing) throw new Error(`Customer group with code '${params.code}' already exists`);
+    if (existing) throw new CustomerGroupAlreadyExistsError(params.code);
 
     const result = await queryOne<CustomerGroup>(
       `INSERT INTO "customerGroup" (
@@ -59,7 +60,7 @@ export class CustomerGroupRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create customer group');
+    if (!result) throw new FailedToCreateCustomerError('Failed to create customer group');
     return result;
   }
 

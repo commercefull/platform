@@ -4,10 +4,11 @@
  * Handles public and customer-facing loyalty endpoints.
  */
 
-import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import loyaltyRepo from '../../infrastructure/repositories/loyaltyRepo';
+import loyaltyDataRepository from '../../infrastructure/repositories/LoyaltyDataRepository';
+
+const loyaltyRepo = loyaltyDataRepository.points;
 
 // ============================================================================
 // Types
@@ -48,49 +49,39 @@ function getCustomerId(req: UserRequest): string | null {
  * Get publicly available loyalty tiers
  */
 export const getPublicTiers = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const tiers = await loyaltyRepo.findAllTiers(false);
+  const tiers = await loyaltyRepo.findAllTiers(false);
 
-    // Return limited tier information for public view
-    const publicTiers = tiers.map(tier => ({
-      id: tier.tierId,
-      name: tier.name,
-      description: tier.description,
-      pointsThreshold: tier.pointsThreshold,
-      benefits: tier.benefits,
-    }));
+  // Return limited tier information for public view
+  const publicTiers = tiers.map(tier => ({
+    id: tier.tierId,
+    name: tier.name,
+    description: tier.description,
+    pointsThreshold: tier.pointsThreshold,
+    benefits: tier.benefits,
+  }));
 
-    respond(res, publicTiers);
-  } catch (error) {
-    logger.error('Error:', error);
-
-    respondError(res, 'Failed to fetch loyalty tiers');
-  }
+  respond(res, publicTiers);
+  
 };
 
 /**
  * Get publicly available loyalty rewards
  */
 export const getPublicRewards = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const rewards = await loyaltyRepo.findAllRewards(false);
+  const rewards = await loyaltyRepo.findAllRewards(false);
 
-    // Return limited reward information for public view
-    const publicRewards = rewards.map(reward => ({
-      id: reward.rewardId,
-      name: reward.name,
-      description: reward.description,
-      pointsCost: reward.pointsCost,
-      freeShipping: reward.metadata && typeof reward.metadata === 'object' && 'freeShipping' in reward.metadata ? reward.metadata.freeShipping : undefined,
-      expiresAt: reward.validTo,
-    }));
+  // Return limited reward information for public view
+  const publicRewards = rewards.map(reward => ({
+    id: reward.rewardId,
+    name: reward.name,
+    description: reward.description,
+    pointsCost: reward.pointsCost,
+    freeShipping: reward.metadata && typeof reward.metadata === 'object' && 'freeShipping' in reward.metadata ? reward.metadata.freeShipping : undefined,
+    expiresAt: reward.validTo,
+  }));
 
-    respond(res, publicRewards);
-  } catch (error) {
-    logger.error('Error:', error);
-
-    respondError(res, 'Failed to fetch loyalty rewards');
-  }
+  respond(res, publicRewards);
+  
 };
 
 // ============================================================================
@@ -101,172 +92,143 @@ export const getPublicRewards = async (req: TypedRequest, res: Response): Promis
  * Get customer's loyalty status and points
  */
 export const getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = getCustomerId(req);
+  const customerId = getCustomerId(req);
 
-    if (!customerId) {
-      respondError(res, 'Authentication required', 401);
-      return;
-    }
+  if (!customerId) {
+    respondError(res, 'Authentication required', 401);
+    return;
+  }
 
-    const pointsData = await loyaltyRepo.findCustomerPointsWithTier(customerId);
+  const pointsData = await loyaltyRepo.findCustomerPointsWithTier(customerId);
 
-    if (!pointsData) {
-      // Return default values for new customers
-      respond(res, {
-        currentPoints: 0,
-        lifetimePoints: 0,
-        tier: {
-          name: 'Not Enrolled',
-          description: 'Enroll in our loyalty program to start earning points',
-          pointsThreshold: 0,
-        },
-      });
-      return;
-    }
-
-    const { points, tier } = pointsData;
-
+  if (!pointsData) {
+    // Return default values for new customers
     respond(res, {
-      currentPoints: points.currentPoints,
-      lifetimePoints: points.lifetimePoints,
-      lastActivity: points.lastActivity,
-      expiryDate: points.expiryDate,
+      currentPoints: 0,
+      lifetimePoints: 0,
       tier: {
-        name: tier.name,
-        description: tier.description,
-        pointsThreshold: tier.pointsThreshold,
-        benefits: tier.benefits,
+        name: 'Not Enrolled',
+        description: 'Enroll in our loyalty program to start earning points',
+        pointsThreshold: 0,
       },
     });
-  } catch (error) {
-    logger.error('Error:', error);
-
-    respondError(res, 'Failed to fetch loyalty status');
+    return;
   }
+
+  const { points, tier } = pointsData;
+
+  respond(res, {
+    currentPoints: points.currentPoints,
+    lifetimePoints: points.lifetimePoints,
+    lastActivity: points.lastActivity,
+    expiryDate: points.expiryDate,
+    tier: {
+      name: tier.name,
+      description: tier.description,
+      pointsThreshold: tier.pointsThreshold,
+      benefits: tier.benefits,
+    },
+  });
+  
 };
 
 /**
  * Get my loyalty transactions
  */
 export const getMyTransactions = async (req: UserRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = getCustomerId(req);
+  const customerId = getCustomerId(req);
 
-    if (!customerId) {
-      respondError(res, 'Authentication required', 401);
-      return;
-    }
-
-    const limit = parseInt(req.query.limit as string) || 20;
-    const transactions = await loyaltyRepo.findCustomerTransactions(customerId, limit);
-
-    // Format transactions for customer view
-    const formattedTransactions = transactions.map(transaction => ({
-      id: transaction.loyaltyTransactionId,
-      action: transaction.action,
-      points: transaction.points,
-      description: transaction.description,
-      date: transaction.createdAt,
-    }));
-
-    res.json({
-      success: true,
-      data: formattedTransactions,
-      pagination: { limit },
-    });
-  } catch (error) {
-    logger.error('Error:', error);
-
-    respondError(res, 'Failed to fetch loyalty transactions');
+  if (!customerId) {
+    respondError(res, 'Authentication required', 401);
+    return;
   }
+
+  const limit = parseInt(req.query.limit as string) || 20;
+  const transactions = await loyaltyRepo.findCustomerTransactions(customerId, limit);
+
+  // Format transactions for customer view
+  const formattedTransactions = transactions.map(transaction => ({
+    id: transaction.loyaltyTransactionId,
+    action: transaction.action,
+    points: transaction.points,
+    description: transaction.description,
+    date: transaction.createdAt,
+  }));
+
+  res.json({
+    success: true,
+    data: formattedTransactions,
+    pagination: { limit },
+  });
+  
 };
 
 /**
  * Redeem points for a reward
  */
 export const redeemReward = async (req: UserRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = getCustomerId(req);
+  const customerId = getCustomerId(req);
 
-    if (!customerId) {
-      respondError(res, 'Authentication required', 401);
-      return;
-    }
-
-    const { rewardId } = req.body as { rewardId?: string };
-
-    if (!rewardId) {
-      respondError(res, 'Reward ID is required', 400);
-      return;
-    }
-
-    const redemption = await loyaltyRepo.redeemReward(customerId, rewardId);
-
-    respondWithMessage(
-      res,
-      {
-        redemptionCode: redemption.couponCode,
-        pointsSpent: redemption.pointsSpent,
-        expiresAt: redemption.expiresAt,
-      },
-      'Reward redeemed successfully',
-    );
-  } catch (error) {
-    logger.error('Error:', error);
-
-    const errorMessage = (error as Error).message;
-
-    if (errorMessage.includes('Insufficient points')) {
-      respondError(res, errorMessage, 400);
-    } else if (errorMessage.includes('not active')) {
-      respondError(res, 'This reward is no longer available', 400);
-    } else {
-      respondError(res, 'Failed to redeem reward');
-    }
+  if (!customerId) {
+    respondError(res, 'Authentication required', 401);
+    return;
   }
+
+  const { rewardId } = req.body as { rewardId?: string };
+
+  if (!rewardId) {
+    respondError(res, 'Reward ID is required', 400);
+    return;
+  }
+
+  const redemption = await loyaltyRepo.redeemReward(customerId, rewardId);
+
+  respondWithMessage(
+    res,
+    {
+      redemptionCode: redemption.couponCode,
+      pointsSpent: redemption.pointsSpent,
+      expiresAt: redemption.expiresAt,
+    },
+    'Reward redeemed successfully',
+  );
 };
 
 /**
  * Get my active redemptions
  */
 export const getMyRedemptions = async (req: UserRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = getCustomerId(req);
+  const customerId = getCustomerId(req);
 
-    if (!customerId) {
-      respondError(res, 'Authentication required', 401);
-      return;
-    }
-
-    const limit = parseInt(req.query.limit as string) || 50;
-    const redemptions = await loyaltyRepo.findCustomerRedemptions(customerId, limit);
-
-    // Add reward details to each redemption
-    const detailedRedemptions = await Promise.all(
-      redemptions.map(async redemption => {
-        const reward = await loyaltyRepo.findRewardById(redemption.rewardId);
-        return {
-          id: redemption.redemptionId,
-          redemptionCode: redemption.couponCode,
-          pointsSpent: redemption.pointsSpent,
-          status: redemption.status,
-          createdAt: redemption.redeemedAt,
-          expiresAt: redemption.expiresAt,
-          reward: reward
-            ? {
-                name: reward.name,
-                description: reward.description,
-              }
-            : undefined,
-        };
-      }),
-    );
-
-    respond(res, detailedRedemptions);
-  } catch (error) {
-    logger.error('Error:', error);
-
-    respondError(res, 'Failed to fetch redemptions');
+  if (!customerId) {
+    respondError(res, 'Authentication required', 401);
+    return;
   }
+
+  const limit = parseInt(req.query.limit as string) || 50;
+  const redemptions = await loyaltyRepo.findCustomerRedemptions(customerId, limit);
+
+  // Add reward details to each redemption
+  const detailedRedemptions = await Promise.all(
+    redemptions.map(async redemption => {
+      const reward = await loyaltyRepo.findRewardById(redemption.rewardId);
+      return {
+        id: redemption.redemptionId,
+        redemptionCode: redemption.couponCode,
+        pointsSpent: redemption.pointsSpent,
+        status: redemption.status,
+        createdAt: redemption.redeemedAt,
+        expiresAt: redemption.expiresAt,
+        reward: reward
+          ? {
+              name: reward.name,
+              description: reward.description,
+            }
+          : undefined,
+      };
+    }),
+  );
+
+  respond(res, detailedRedemptions);
+  
 };

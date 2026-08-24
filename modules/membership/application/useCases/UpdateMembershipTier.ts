@@ -4,6 +4,8 @@
  * Updates an existing membership tier's configuration.
  */
 
+import { MembershipPlanNotFoundError } from '../../domain/errors/MembershipErrors';
+
 export interface UpdateMembershipTierInput {
   tierId: string;
   name?: string;
@@ -52,7 +54,7 @@ export class UpdateMembershipTierUseCase {
     // Get existing tier
     const tier = await this.membershipRepository.getTierById(tierId);
     if (!tier) {
-      throw new Error('Membership tier not found');
+      throw new MembershipPlanNotFoundError(tierId);
     }
 
     // Build update object with only provided fields

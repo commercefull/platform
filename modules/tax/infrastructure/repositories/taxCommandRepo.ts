@@ -8,6 +8,7 @@ import { queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { generateUUID } from '../../../../libs/uuid';
 import { TaxZone, TaxRate, TaxCategory, CustomerTaxExemption, TaxSettings } from '../../taxTypes';
+import { FailedToCreateTaxError, TaxRateNotFoundError, TaxValidationError, TaxCategoryNotFoundError, TaxZoneNotFoundError, TaxExemptionNotFoundError, TaxSettingsNotFoundError } from '../../domain/errors/TaxErrors';
 
 // ============================================================================
 // Table Constants
@@ -75,7 +76,7 @@ export class TaxCommandRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create tax rate');
+      throw new FailedToCreateTaxError('Failed to create tax rate');
     }
 
     return addId<TaxRate>(result, 'taxRateId');
@@ -177,13 +178,13 @@ export class TaxCommandRepo {
     params.push(now);
 
     if (sets.length === 0) {
-      throw new Error('No fields to update');
+      throw new TaxValidationError('No fields to update');
     }
 
     const result = await queryOne<Record<string, unknown>>(`UPDATE "${TABLES.TAX_RATE}" SET ${sets.join(', ')} WHERE "taxRateId" = $1 RETURNING *`, params);
 
     if (!result) {
-      throw new Error(`Tax rate with ID ${id} not found`);
+      throw new TaxRateNotFoundError(id);
     }
 
     return addId<TaxRate>(result, 'taxRateId');
@@ -215,7 +216,7 @@ export class TaxCommandRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create tax category');
+      throw new FailedToCreateTaxError('Failed to create tax category');
     }
 
     return addId<TaxCategory>(result, 'taxCategoryId');
@@ -266,7 +267,7 @@ export class TaxCommandRepo {
     params.push(now);
 
     if (sets.length === 0) {
-      throw new Error('No fields to update');
+      throw new TaxValidationError('No fields to update');
     }
 
     const result = await queryOne<Record<string, unknown>>(
@@ -275,7 +276,7 @@ export class TaxCommandRepo {
     );
 
     if (!result) {
-      throw new Error(`Tax category with ID ${id} not found`);
+      throw new TaxCategoryNotFoundError(id);
     }
 
     return addId<TaxCategory>(result, 'taxCategoryId');
@@ -319,7 +320,7 @@ export class TaxCommandRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create tax zone');
+      throw new FailedToCreateTaxError('Failed to create tax zone');
     }
 
     return addId<TaxZone>(result, 'taxZoneId');
@@ -385,13 +386,13 @@ export class TaxCommandRepo {
     params.push(now);
 
     if (sets.length === 0) {
-      throw new Error('No fields to update');
+      throw new TaxValidationError('No fields to update');
     }
 
     const result = await queryOne<Record<string, unknown>>(`UPDATE "${TABLES.TAX_ZONE}" SET ${sets.join(', ')} WHERE "taxZoneId" = $1 RETURNING *`, params);
 
     if (!result) {
-      throw new Error(`Tax zone with ID ${id} not found`);
+      throw new TaxZoneNotFoundError(id);
     }
 
     return addId<TaxZone>(result, 'taxZoneId');
@@ -444,7 +445,7 @@ export class TaxCommandRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create tax exemption');
+      throw new FailedToCreateTaxError('Failed to create tax exemption');
     }
 
     return addId<CustomerTaxExemption>(result, 'customerTaxExemptionId');
@@ -538,7 +539,7 @@ export class TaxCommandRepo {
     params.push(now);
 
     if (sets.length === 0) {
-      throw new Error('No fields to update');
+      throw new TaxValidationError('No fields to update');
     }
 
     const result = await queryOne<Record<string, unknown>>(
@@ -547,7 +548,7 @@ export class TaxCommandRepo {
     );
 
     if (!result) {
-      throw new Error(`Tax exemption with ID ${id} not found`);
+      throw new TaxExemptionNotFoundError(id);
     }
 
     return addId<CustomerTaxExemption>(result, 'customerTaxExemptionId');
@@ -603,7 +604,7 @@ export class TaxCommandRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create tax settings');
+      throw new FailedToCreateTaxError('Failed to create tax settings');
     }
 
     return addId<TaxSettings>(result, 'taxSettingsId');
@@ -697,7 +698,7 @@ export class TaxCommandRepo {
     params.push(now);
 
     if (sets.length === 0) {
-      throw new Error('No fields to update');
+      throw new TaxValidationError('No fields to update');
     }
 
     const result = await queryOne<Record<string, unknown>>(
@@ -706,7 +707,7 @@ export class TaxCommandRepo {
     );
 
     if (!result) {
-      throw new Error(`Tax settings with ID ${id} not found`);
+      throw new TaxSettingsNotFoundError(id);
     }
 
     return addId<TaxSettings>(result, 'taxSettingsId');

@@ -5,6 +5,7 @@
  * shipping, and delivery tracking.
  */
 import { randomUUID } from 'node:crypto';
+import { FulfillmentValidationError } from '../errors/FulfillmentErrors';
 
 export type FulfillmentStatus =
   | 'pending'
@@ -368,7 +369,7 @@ export class Fulfillment {
    */
   cancel(): void {
     if (this.props.status === 'delivered') {
-      throw new Error('Cannot cancel a delivered fulfillment');
+      throw new FulfillmentValidationError('Cannot cancel a delivered fulfillment');
     }
     this.props.status = 'cancelled';
     this.props.cancelledAt = new Date();
@@ -398,7 +399,7 @@ export class Fulfillment {
 
     const allowed = validTransitions[this.props.status];
     if (!allowed.includes(newStatus)) {
-      throw new Error(`Invalid status transition from '${this.props.status}' to '${newStatus}'`);
+      throw new FulfillmentValidationError(`Invalid status transition from '${this.props.status}' to '${newStatus}'`);
     }
   }
 

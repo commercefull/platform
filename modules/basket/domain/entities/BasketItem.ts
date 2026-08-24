@@ -4,6 +4,7 @@
  */
 
 import { Money } from '../valueObjects/Money';
+import { BasketItemQuantityError, BasketItemDiscountError } from '../errors/BasketErrors';
 
 export interface BasketItemProps {
   basketItemId: string;
@@ -125,10 +126,10 @@ export class BasketItem {
   // Domain methods
   updateQuantity(newQuantity: number): void {
     if (newQuantity < 1) {
-      throw new Error('Quantity must be at least 1');
+      throw new BasketItemQuantityError('Quantity must be at least 1');
     }
     if (newQuantity > 100) {
-      throw new Error('Quantity cannot exceed 100');
+      throw new BasketItemQuantityError('Quantity cannot exceed 100');
     }
     this.props.quantity = newQuantity;
     this.props.updatedAt = new Date();
@@ -155,7 +156,7 @@ export class BasketItem {
   }
 
   setDiscountAmount(amount: number): void {
-    if (amount < 0) throw new Error('Discount amount cannot be negative');
+    if (amount < 0) throw new BasketItemDiscountError('Discount amount cannot be negative');
     this.props.discountAmount = amount;
     this.props.updatedAt = new Date();
   }

@@ -4,6 +4,7 @@
 
 import { Fulfillment } from '../../domain/entities/Fulfillment';
 import { IFulfillmentRepository } from '../../domain/repositories/FulfillmentRepository';
+import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 export class UpdateTrackingCommand {
@@ -20,7 +21,7 @@ export class UpdateTrackingUseCase {
   async execute(command: UpdateTrackingCommand): Promise<{ fulfillment: Fulfillment }> {
     const fulfillment = await this.repository.findById(command.fulfillmentId);
     if (!fulfillment) {
-      throw new Error(`Fulfillment ${command.fulfillmentId} not found`);
+      throw new FulfillmentNotFoundError(command.fulfillmentId);
     }
 
     fulfillment.updateTracking(command.trackingNumber, command.trackingUrl);

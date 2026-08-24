@@ -1,0 +1,47 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/automation/create" class="btn btn-primary"><i class="ti ti-plus"></i> <%= t('common.create') %></a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="card">
+      <div class="card-body p-0">
+        <table class="table table-striped table-vcenter">
+          <thead>
+            <tr>
+              <th><%= t('common.name') %></th>
+              <th>Trigger</th>
+              <th><%= t('common.status') %></th>
+              <th>Executions</th>
+              <th><%= t('common.priority') %></th>
+              <th><%= t('common.actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (rules && rules.length > 0) { %>
+              <% rules.forEach(rule => { %>
+                <tr>
+                  <td><%= rule.name || '-' %></td>
+                  <td><span class="badge bg-info"><%= rule.triggerType %></span></td>
+                  <td><span class="badge bg-<%= rule.isActive ? 'success' : 'secondary' %>"><%= rule.isActive ? t('common.active') : t('common.inactive') %></span></td>
+                  <td><%= rule.executionCount || 0 %> (<span class="text-success"><%= rule.successCount || 0 %></span> / <span class="text-danger"><%= rule.failureCount || 0 %></span>)</td>
+                  <td><%= rule.priority ?? 0 %></td>
+                  <td>
+                    <a href="/admin/automation/<%= rule.automationRuleId %>" class="btn btn-sm btn-outline-primary"><%= t('common.view') %></a>
+                    <a href="/admin/automation/<%= rule.automationRuleId %>/edit" class="btn btn-sm btn-outline-secondary"><%= t('common.edit') %></a>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="6" class="text-center text-muted py-4"><%= t('common.noData') %></td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

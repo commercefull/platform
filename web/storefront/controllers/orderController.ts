@@ -3,63 +3,53 @@
  * Handles order history and order details for customers
  */
 
-import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
-import { ListOrdersCommand, ListOrdersUseCase } from '../../../modules/order/application/useCases/ListOrders';
-import { GetOrderCommand, GetOrderUseCase } from '../../../modules/order/application/useCases/GetOrder';
+import { listOrdersUseCase, getOrderUseCase } from '../../../modules/order/application/useCases/wired';
+import { ListOrdersCommand } from '../../../modules/order/application/useCases/ListOrders';
+import { GetOrderCommand } from '../../../modules/order/application/useCases/GetOrder';
 
 // ============================================================================
 // Order History
 // ============================================================================
 
 export const orderHistory = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    if (!req.user) {
-      return res.redirect('/signin?redirect=/orders');
-    }
-
-    const customerId = req.user.customerId;
-    const { page = '1', limit = '10', status } = req.query;
-
-    const filters: { customerId?: string; status?: string } = { customerId };
-    if (status && status !== 'all') {
-      filters.status = status as string;
-    }
-
-    const command = new ListOrdersCommand(
-      filters as Record<string, unknown>,
-      parseInt(limit as string),
-      (parseInt(page as string) - 1) * parseInt(limit as string),
-    );
-
-    const useCase = new ListOrdersUseCase(OrderRepo);
-    const result = await useCase.execute(command);
-
-    storefrontRespond(req, res, 'user/order-history', {
-      pageName: 'Order History',
-      orders: result.orders,
-      pagination: {
-        currentPage: parseInt(page as string),
-        totalPages: Math.ceil(result.total / parseInt(limit as string)),
-        totalOrders: result.total,
-        hasNext: parseInt(page as string) * parseInt(limit as string) < result.total,
-        hasPrev: parseInt(page as string) > 1,
-      },
-      filters: { status },
-      user: req.user,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load order history',
-      user: req.user,
-    });
+  if (!req.user) {
+    return res.redirect('/signin?redirect=/orders');
   }
+
+  const customerId = req.user.customerId;
+  const { page = '1', limit = '10', status } = req.query;
+
+  const filters: { customerId?: string; status?: string } = { customerId };
+  if (status && status !== 'all') {
+    filters.status = status as string;
+  }
+
+  const command = new ListOrdersCommand(
+    filters as Record<string, unknown>,
+    parseInt(limit as string),
+    (parseInt(page as string) - 1) * parseInt(limit as string),
+  );
+
+  const useCase = listOrdersUseCase;
+  const result = await useCase.execute(command);
+
+  storefrontRespond(req, res, 'user/order-history', {
+    pageName: 'Order History',
+    orders: result.orders,
+    pagination: {
+      currentPage: parseInt(page as string),
+      totalPages: Math.ceil(result.total / parseInt(limit as string)),
+      totalOrders: result.total,
+      hasNext: parseInt(page as string) * parseInt(limit as string) < result.total,
+      hasPrev: parseInt(page as string) > 1,
+    },
+    filters: { status },
+    user: req.user,
+  });
+  
 };
 
 // ============================================================================
@@ -67,48 +57,39 @@ export const orderHistory = async (req: TypedRequest, res: Response): Promise<vo
 // ============================================================================
 
 export const orderDetails = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    if (!req.user) {
-      return res.redirect('/signin?redirect=/orders');
-    }
-
-    const { orderId } = req.params;
-    const customerId = req.user.customerId;
-
-    const command = new GetOrderCommand(orderId);
-    const useCase = new GetOrderUseCase(OrderRepo);
-    const order = await useCase.execute(command);
-
-    if (!order) {
-      storefrontRespond(req, res, '404', {
-        pageName: 'Order Not Found',
-        user: req.user,
-      });
-      return;
-    }
-
-    // Verify order belongs to customer
-    if (order.customerId !== customerId) {
-      return res.status(403).redirect('/orders?error=' + encodeURIComponent('Access denied'));
-    }
-
-    // Calculate totals
-    const totals = calculateOrderTotals(order as unknown as Record<string, unknown>);
-
-    storefrontRespond(req, res, 'user/order-details', {
-      pageName: `Order ${order.orderNumber}`,
-      order: { ...order, totals },
-      user: req.user,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load order details',
-      user: req.user,
-    });
+  if (!req.user) {
+    return res.redirect('/signin?redirect=/orders');
   }
+
+  const { orderId } = req.params;
+  const customerId = req.user.customerId;
+
+  const command = new GetOrderCommand(orderId);
+  const useCase = getOrderUseCase;
+  const order = await useCase.execute(command);
+
+  if (!order) {
+    storefrontRespond(req, res, '404', {
+      pageName: 'Order Not Found',
+      user: req.user,
+    });
+    return;
+  }
+
+  // Verify order belongs to customer
+  if (order.customerId !== customerId) {
+    return res.status(403).redirect('/orders?error=' + encodeURIComponent('Access denied'));
+  }
+
+  // Calculate totals
+  const totals = calculateOrderTotals(order as unknown as Record<string, unknown>);
+
+  storefrontRespond(req, res, 'user/order-details', {
+    pageName: `Order ${order.orderNumber}`,
+    order: { ...order, totals },
+    user: req.user,
+  });
+  
 };
 
 // ============================================================================
@@ -116,44 +97,35 @@ export const orderDetails = async (req: TypedRequest, res: Response): Promise<vo
 // ============================================================================
 
 export const orderTracking = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { orderNumber } = req.params;
+  const { orderNumber } = req.params;
 
-    // For guest tracking, we don't require authentication
-    // but we should verify the order exists
+  // For guest tracking, we don't require authentication
+  // but we should verify the order exists
 
-    const command = new GetOrderCommand(undefined, orderNumber); // Lookup by order number
-    const useCase = new GetOrderUseCase(OrderRepo);
-    const order = await useCase.execute(command);
+  const command = new GetOrderCommand(undefined, orderNumber); // Lookup by order number
+  const useCase = getOrderUseCase;
+  const order = await useCase.execute(command);
 
-    if (!order) {
-      storefrontRespond(req, res, '404', {
-        pageName: 'Order Not Found',
-        user: req.user,
-      });
-      return;
-    }
-
-    // For security, we might want to hide sensitive info for guest tracking
-    // or require email verification
-
-    const totals = calculateOrderTotals(order as unknown as Record<string, unknown>);
-    const timeline = generateOrderTimeline(order as unknown as Record<string, unknown>);
-
-    storefrontRespond(req, res, 'shop/order-tracking', {
-      pageName: `Track Order ${order.orderNumber}`,
-      order: { ...order, totals, timeline },
+  if (!order) {
+    storefrontRespond(req, res, '404', {
+      pageName: 'Order Not Found',
       user: req.user,
     });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load order tracking',
-      user: req.user,
-    });
+    return;
   }
+
+  // For security, we might want to hide sensitive info for guest tracking
+  // or require email verification
+
+  const totals = calculateOrderTotals(order as unknown as Record<string, unknown>);
+  const timeline = generateOrderTimeline(order as unknown as Record<string, unknown>);
+
+  storefrontRespond(req, res, 'shop/order-tracking', {
+    pageName: `Track Order ${order.orderNumber}`,
+    order: { ...order, totals, timeline },
+    user: req.user,
+  });
+  
 };
 
 // ============================================================================

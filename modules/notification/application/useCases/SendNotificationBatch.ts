@@ -8,10 +8,14 @@
  * Validates: Requirements 7.3
  */
 
-import * as notificationBatchRepo from '../../infrastructure/repositories/notificationBatchRepo';
-import notificationRepo from '../../infrastructure/repositories/notificationRepo';
-import * as notificationUnsubscribeRepo from '../../infrastructure/repositories/notificationUnsubscribeRepo';
-import * as notificationEventLogRepo from '../../infrastructure/repositories/notificationEventLogRepo';
+import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
+import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
+
+const notificationBatchRepo = notificationDataRepository.batches;
+const notificationRepo = notificationDataRepository.notifications;
+const notificationUnsubscribeRepo = notificationConfigRepository.unsubscribes;
+const notificationEventLogRepo = notificationDataRepository.eventLogs;
 
 // ============================================================================
 // Command
@@ -62,9 +66,9 @@ export class SendNotificationBatchUseCase {
   ) {}
 
   async execute(command: SendNotificationBatchCommand): Promise<SendNotificationBatchResponse> {
-    if (!command.name) throw new Error('Batch name is required');
-    if (!command.channel) throw new Error('channel is required');
-    if (!command.recipients || command.recipients.length === 0) throw new Error('At least one recipient is required');
+    if (!command.name) throw new NotificationValidationError('Batch name is required');
+    if (!command.channel) throw new NotificationValidationError('channel is required');
+    if (!command.recipients || command.recipients.length === 0) throw new NotificationValidationError('At least one recipient is required');
 
     const batch = await this.batchRepo.create({
       name: command.name,
@@ -73,7 +77,7 @@ export class SendNotificationBatchUseCase {
       scheduledAt: command.scheduledAt,
     });
 
-    if (!batch) throw new Error('Failed to create notification batch');
+    if (!batch) throw new NotificationValidationError('Failed to create notification batch');
 
     let enqueuedCount = 0;
     let suppressedCount = 0;

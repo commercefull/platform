@@ -6,7 +6,10 @@
  * Validates: Requirements 7.7, 7.8
  */
 
-import * as notificationTemplateTranslationRepo from '../../infrastructure/repositories/notificationTemplateTranslationRepo';
+import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
+
+const notificationTemplateTranslationRepo = notificationConfigRepository.templateTranslations;
 
 // ============================================================================
 // Command
@@ -42,9 +45,9 @@ export class UpsertTemplateTranslationUseCase {
   constructor(private readonly translationRepo: typeof notificationTemplateTranslationRepo = notificationTemplateTranslationRepo) {}
 
   async execute(command: UpsertTemplateTranslationCommand): Promise<UpsertTemplateTranslationResponse> {
-    if (!command.templateId) throw new Error('templateId is required');
-    if (!command.locale) throw new Error('locale is required');
-    if (!command.body) throw new Error('body is required');
+    if (!command.templateId) throw new NotificationValidationError('templateId is required');
+    if (!command.locale) throw new NotificationValidationError('locale is required');
+    if (!command.body) throw new NotificationValidationError('body is required');
 
     const translation = await this.translationRepo.upsert({
       templateId: command.templateId,
@@ -53,7 +56,7 @@ export class UpsertTemplateTranslationUseCase {
       body: command.body,
     });
 
-    if (!translation) throw new Error('Failed to upsert template translation');
+    if (!translation) throw new NotificationValidationError('Failed to upsert template translation');
 
     return {
       notificationTemplateTranslationId: translation.notificationTemplateTranslationId,

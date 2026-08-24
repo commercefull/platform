@@ -1,5 +1,6 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ProductAttributeGroup } from '../../../../libs/db/types';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 // Use ProductAttributeGroup type directly from libs/db/types.ts
 export type { ProductAttributeGroup };
@@ -31,7 +32,7 @@ export class AttributeGroupRepo {
     );
 
     if (!row) {
-      throw new Error('Attribute group not saved');
+      throw new FailedToCreateProductError();
     }
     return row;
   }

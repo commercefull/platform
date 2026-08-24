@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
+import { logger } from '../libs/logger';
 
 type ResponseData = Record<string, unknown>;
 
@@ -28,7 +29,7 @@ export async function adminRespond(req: TypedRequest, res: Response, view: strin
   // Render the view content
   res.render(`admin/views/${view}`, viewData, (err, bodyContent) => {
     if (err) {
-      console.error('Error rendering view:', err);
+      logger.error('Error rendering view', { error: err });
       return res.status(500).send('Internal Server Error');
     }
 

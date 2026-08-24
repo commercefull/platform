@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as customerController from '../controllers/CustomerController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
@@ -20,49 +21,49 @@ router.use(isOrganizationLoggedIn);
  * List all customers
  * GET /business/customers
  */
-router.get('/customers', customerController.listCustomers);
+router.get('/customers', asyncHandler(customerController.listCustomers));
 
 /**
  * Create a new customer
  * POST /business/customers
  */
-router.post('/customers', customerController.createCustomer);
+router.post('/customers', asyncHandler(customerController.createCustomer));
 
 /**
  * Get customer by ID
  * GET /business/customers/:customerId
  */
-router.get('/customers/:customerId', customerController.getCustomer);
+router.get('/customers/:customerId', asyncHandler(customerController.getCustomer));
 
 /**
  * Update customer
  * PUT /business/customers/:customerId
  */
-router.put('/customers/:customerId', customerController.updateCustomer);
+router.put('/customers/:customerId', asyncHandler(customerController.updateCustomer));
 
 /**
  * Delete customer
  * DELETE /business/customers/:customerId
  */
-router.delete('/customers/:customerId', customerController.deleteCustomer);
+router.delete('/customers/:customerId', asyncHandler(customerController.deleteCustomer));
 
 /**
  * Verify customer
  * POST /business/customers/:customerId/verify
  */
-router.post('/customers/:customerId/verify', customerController.verifyCustomer);
+router.post('/customers/:customerId/verify', asyncHandler(customerController.verifyCustomer));
 
 /**
  * Deactivate customer
  * POST /business/customers/:customerId/deactivate
  */
-router.post('/customers/:customerId/deactivate', customerController.deactivateCustomer);
+router.post('/customers/:customerId/deactivate', asyncHandler(customerController.deactivateCustomer));
 
 /**
  * Reactivate customer
  * POST /business/customers/:customerId/reactivate
  */
-router.post('/customers/:customerId/reactivate', customerController.reactivateCustomer);
+router.post('/customers/:customerId/reactivate', asyncHandler(customerController.reactivateCustomer));
 
 // ============================================================================
 // Customer Address Routes (Business)
@@ -72,12 +73,12 @@ router.post('/customers/:customerId/reactivate', customerController.reactivateCu
  * Get customer addresses
  * GET /business/customers/:customerId/addresses
  */
-router.get('/customers/:customerId/addresses', customerController.getCustomerAddresses);
+router.get('/customers/:customerId/addresses', asyncHandler(customerController.getCustomerAddresses));
 
 /**
  * Add customer address
  * POST /business/customers/:customerId/addresses
  */
-router.post('/customers/:customerId/addresses', customerController.addCustomerAddress);
+router.post('/customers/:customerId/addresses', asyncHandler(customerController.addCustomerAddress));
 
 export const customerBusinessRouter = router;

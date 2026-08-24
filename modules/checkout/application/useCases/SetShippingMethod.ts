@@ -4,10 +4,10 @@
  */
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
-import { Money } from '../../../basket/domain/valueObjects/Money';
+import { ShippingQuotePort } from '../../application/ports/ShippingQuotePort';
+import { Money } from '../../../../libs/money';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { BadRequestError, NotFoundError } from '../../../../libs/errors';
-import { CalculateShippingRatesUseCase, CalculateShippingRatesCommand } from '../../../shipping/application/useCases/CalculateShippingRates';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -26,7 +26,10 @@ export class SetShippingMethodCommand {
 // ============================================================================
 
 export class SetShippingMethodUseCase {
-  constructor(private readonly checkoutRepository: CheckoutRepository) {}
+  constructor(
+    private readonly checkoutRepository: CheckoutRepository,
+    private readonly shippingQuotePort?: ShippingQuotePort,
+  ) {}
 
   async execute(command: SetShippingMethodCommand): Promise<CheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
@@ -38,36 +41,39 @@ export class SetShippingMethodUseCase {
       throw new BadRequestError('Shipping address must be set first');
     }
 
-    const shippingUseCase = new CalculateShippingRatesUseCase();
-    const shippingCommand = new CalculateShippingRatesCommand(
-      {
+    if (!this.shippingQuotePort) {
+      throw new BadRequestError('Shipping service unavailable');
+    }
+
+    const shippingOptions = await this.shippingQuotePort.getShippingOptions({
+      basketId: session.basketId,
+      shippingAddress: {
         country: session.shippingAddress.country,
-        state: session.shippingAddress.region,
+        region: session.shippingAddress.region,
         city: session.shippingAddress.city,
         postalCode: session.shippingAddress.postalCode,
       },
-      { subtotal: session.subtotal.amount, itemCount: 0, currency: session.subtotal.currency },
-    );
-    const result = await shippingUseCase.execute(shippingCommand);
+      totalValue: session.subtotal.amount,
+    });
 
-    if (!result.success || result.rates.length === 0) {
+    if (shippingOptions.length === 0) {
       throw new BadRequestError('No shipping methods available for this address');
     }
 
-    const selectedRate = result.rates.find(r => r.shippingMethodId === command.shippingMethodId);
+    const selectedRate = shippingOptions.find(r => r.methodId === command.shippingMethodId);
     if (!selectedRate) {
       throw new BadRequestError('Invalid shipping method');
     }
 
-    session.setShippingMethod(selectedRate.shippingMethodId, selectedRate.shippingMethodName, Money.create(selectedRate.amount, selectedRate.currency));
+    session.setShippingMethod(selectedRate.methodId, selectedRate.methodName, Money.create(selectedRate.amount, selectedRate.currency));
 
     await this.checkoutRepository.save(session);
 
     eventBus.emit('checkout.updated', {
       checkoutId: session.id,
       field: 'shippingMethod',
-      methodId: selectedRate.shippingMethodId,
-      methodName: selectedRate.shippingMethodName,
+      methodId: selectedRate.methodId,
+      methodName: selectedRate.methodName,
       amount: selectedRate.amount,
     });
 

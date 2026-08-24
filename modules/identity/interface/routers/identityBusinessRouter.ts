@@ -4,6 +4,7 @@
  */
 
 import { Router } from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   loginOrganization,
   registerOrganization,
@@ -25,32 +26,32 @@ const router = Router();
 // -------------------- Public Auth Routes --------------------
 
 // Simple login (returns access token only)
-router.post('/auth/login', loginOrganization);
+router.post('/auth/login', asyncHandler(loginOrganization));
 
 // Register new merchant account
-router.post('/auth/register', registerOrganization);
+router.post('/auth/register', asyncHandler(registerOrganization));
 
 // Token-based auth (returns access + refresh tokens)
-router.post('/auth/token', issueTokenPair);
+router.post('/auth/token', asyncHandler(issueTokenPair));
 
 // Refresh access token
-router.post('/auth/refresh', renewAccessToken);
+router.post('/auth/refresh', asyncHandler(renewAccessToken));
 
 // Validate token
-router.post('/auth/validate', checkTokenValidity);
+router.post('/auth/validate', asyncHandler(checkTokenValidity));
 
 // Password reset flow
-router.post('/auth/forgot-password', requestPasswordReset);
-router.post('/auth/reset-password', resetPassword);
+router.post('/auth/forgot-password', asyncHandler(requestPasswordReset));
+router.post('/auth/reset-password', asyncHandler(resetPassword));
 
 // -------------------- Admin Auth Management Routes (Protected) --------------------
 
 router.use(isOrganizationLoggedIn);
 
-router.get('/auth/user/:userId', getUserAuthDetails);
-router.post('/auth/revoke-tokens', revokeUserTokens);
-router.post('/auth/force-reset', forceResetPassword);
-router.post('/auth/cleanup-tokens', cleanupExpiredTokens);
+router.get('/auth/user/:userId', asyncHandler(getUserAuthDetails));
+router.post('/auth/revoke-tokens', asyncHandler(revokeUserTokens));
+router.post('/auth/force-reset', asyncHandler(forceResetPassword));
+router.post('/auth/cleanup-tokens', asyncHandler(cleanupExpiredTokens));
 
 router.use(userStoreRouter);
 

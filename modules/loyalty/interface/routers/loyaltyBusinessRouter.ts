@@ -6,6 +6,7 @@
  */
 
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   adjustCustomerPoints,
   createReward,
@@ -29,27 +30,27 @@ const router = express.Router();
 router.use(isOrganizationLoggedIn);
 
 // Tier Management
-router.get('/loyalty/tiers', getTiers);
-router.get('/loyalty/tiers/:id', getTierById);
-router.post('/loyalty/tiers', createTier);
-router.put('/loyalty/tiers/:id', updateTier);
+router.get('/loyalty/tiers', asyncHandler(getTiers));
+router.get('/loyalty/tiers/:id', asyncHandler(getTierById));
+router.post('/loyalty/tiers', asyncHandler(createTier));
+router.put('/loyalty/tiers/:id', asyncHandler(updateTier));
 
 // Reward Management
-router.get('/loyalty/rewards', getRewards);
-router.get('/loyalty/rewards/:id', getRewardById);
-router.post('/loyalty/rewards', createReward);
-router.put('/loyalty/rewards/:id', updateReward);
+router.get('/loyalty/rewards', asyncHandler(getRewards));
+router.get('/loyalty/rewards/:id', asyncHandler(getRewardById));
+router.post('/loyalty/rewards', asyncHandler(createReward));
+router.put('/loyalty/rewards/:id', asyncHandler(updateReward));
 
 // Customer Management
-router.get('/loyalty/customers/:customerId/points', getCustomerPoints);
-router.get('/loyalty/customers/:customerId/transactions', getCustomerPointsTransactions);
-router.post('/loyalty/customers/:customerId/points/adjust', adjustCustomerPoints);
-router.get('/loyalty/customers/:customerId/redemptions', getCustomerRedemptions);
+router.get('/loyalty/customers/:customerId/points', asyncHandler(getCustomerPoints));
+router.get('/loyalty/customers/:customerId/transactions', asyncHandler(getCustomerPointsTransactions));
+router.post('/loyalty/customers/:customerId/points/adjust', asyncHandler(adjustCustomerPoints));
+router.get('/loyalty/customers/:customerId/redemptions', asyncHandler(getCustomerRedemptions));
 
 // Redemption Management
-router.put('/loyalty/redemptions/:id/status', updateRedemptionStatus);
+router.put('/loyalty/redemptions/:id/status', asyncHandler(updateRedemptionStatus));
 
 // Order Processing
-router.post('/loyalty/orders/:orderId/points', processOrderPoints);
+router.post('/loyalty/orders/:orderId/points', asyncHandler(processOrderPoints));
 
 export const loyaltyMerchantRouter = router;

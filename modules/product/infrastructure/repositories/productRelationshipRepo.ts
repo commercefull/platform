@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export type RelationType = 'related' | 'accessory' | 'bundle' | 'cross_sell' | 'up_sell' | 'grouped';
 
@@ -115,13 +116,13 @@ export class ProductRelationshipRepo {
 
     // Prevent self-relationship
     if (params.productId === params.relatedProductId) {
-      throw new Error('Product cannot be related to itself');
+      throw new ProductValidationError('Product cannot be related to itself');
     }
 
     // Check if relationship already exists
     const exists = await this.exists(params.productId, params.relatedProductId, params.type);
     if (exists) {
-      throw new Error(`Relationship already exists between products for type '${params.type}'`);
+      throw new ProductValidationError(`Relationship already exists between products for type '${params.type}'`);
     }
 
     const result = await queryOne<ProductRelationship>(
@@ -134,7 +135,7 @@ export class ProductRelationshipRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create product relationship');
+      throw new FailedToCreateProductError();
     }
 
     return result;

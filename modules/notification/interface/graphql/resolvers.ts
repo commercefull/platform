@@ -1,4 +1,6 @@
-import NotificationRepo from '../../infrastructure/repositories/notificationRepo';
+import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
+
+const NotificationRepo = notificationDataRepository.notifications;
 import { requireAuth, requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetNotificationsUseCase, GetNotificationsInput } from '../../application/useCases/GetNotifications';
 import { SendNotificationUseCase, SendNotificationInput } from '../../application/useCases/SendNotification';

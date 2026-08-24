@@ -5,8 +5,9 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import { SocialAccountRepo } from '../../infrastructure/repositories/socialAccountRepo';
+import type { SocialAccountRepo } from '../../infrastructure/repositories/socialAccountRepo';
 import { SocialProvider, UserType, SocialProfileData } from '../../domain/entities/SocialAccount';
+import { EmailRequiredError, SocialAccountAlreadyLinkedError, SocialAccountNotLinkedError, CannotUnlinkOnlyLoginMethodError } from '../../domain/errors/IdentityErrors';
 
 // ============================================================================
 // Commands
@@ -103,7 +104,7 @@ export class SocialLoginUseCase {
       // New social login - find or create user
       const email = profile.email;
       if (!email) {
-        throw new Error('Email is required for social login');
+        throw new EmailRequiredError();
       }
 
       const userResult = await this.findOrCreateUser(email, profile, userType);
@@ -172,7 +173,7 @@ export class LinkSocialAccountUseCase {
     const existing = await this.socialAccountRepo.findByProviderUserId(provider, profile.providerUserId);
 
     if (existing && existing.userId !== userId) {
-      throw new Error(`This ${provider} account is already linked to another user`);
+      throw new SocialAccountAlreadyLinkedError(provider);
     }
 
     // Check if user already has this provider linked
@@ -242,7 +243,7 @@ export class UnlinkSocialAccountUseCase {
     const socialAccount = await this.socialAccountRepo.findByUserAndProvider(userId, userType, provider);
 
     if (!socialAccount) {
-      throw new Error(`No ${provider} account linked to this user`);
+      throw new SocialAccountNotLinkedError(provider);
     }
 
     // Check if this is the only login method
@@ -251,7 +252,7 @@ export class UnlinkSocialAccountUseCase {
     // Note: In a real implementation, you'd also check if the user has a password set
     // For now, we'll allow unlinking as long as there's at least one other social account
     if (linkedCount <= 1) {
-      throw new Error('Cannot unlink the only login method. Please add another login method first.');
+      throw new CannotUnlinkOnlyLoginMethodError();
     }
 
     // Deactivate the social account

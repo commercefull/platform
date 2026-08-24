@@ -5,6 +5,7 @@
  */
 
 import { generateUUID } from '../../../../libs/uuid';
+import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 export interface CreateInventoryPoolInput {
   ownerType: 'organization';
@@ -53,7 +54,7 @@ export class CreateInventoryPoolUseCase {
 
   async execute(input: CreateInventoryPoolInput): Promise<CreateInventoryPoolOutput> {
     if (!input.ownerId || !input.name || !input.poolType) {
-      throw new Error('Owner ID, name, and pool type are required');
+      throw new InventoryValidationError('Owner ID, name, and pool type are required');
     }
 
     const poolId = generateUUID();

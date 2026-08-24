@@ -7,14 +7,20 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
-import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
-import { GetOrCreateBasketCommand, GetOrCreateBasketUseCase } from '../../../modules/basket/application/useCases/GetOrCreateBasket';
-import { AddItemCommand, AddItemUseCase } from '../../../modules/basket/application/useCases/AddItem';
-import { UpdateItemQuantityCommand, UpdateItemQuantityUseCase } from '../../../modules/basket/application/useCases/UpdateItemQuantity';
-import { RemoveItemCommand, RemoveItemUseCase } from '../../../modules/basket/application/useCases/RemoveItem';
-import { ClearBasketCommand, ClearBasketUseCase } from '../../../modules/basket/application/useCases/ClearBasket';
-import { GetProductCommand, GetProductUseCase } from '../../../modules/product/application/useCases/GetProduct';
+import { GetOrCreateBasketCommand } from '../../../modules/basket/application/useCases/GetOrCreateBasket';
+import { AddItemCommand } from '../../../modules/basket/application/useCases/AddItem';
+import { UpdateItemQuantityCommand } from '../../../modules/basket/application/useCases/UpdateItemQuantity';
+import { RemoveItemCommand } from '../../../modules/basket/application/useCases/RemoveItem';
+import { ClearBasketCommand } from '../../../modules/basket/application/useCases/ClearBasket';
+import {
+  getOrCreateBasketUseCase,
+  addItemUseCase,
+  updateItemQuantityUseCase,
+  removeItemUseCase,
+  clearBasketUseCase,
+} from '../../../modules/basket/application/useCases/wired';
+import { GetProductCommand } from '../../../modules/product/application/useCases/GetProduct';
+import { getProductUseCase } from '../../../modules/product/application/useCases/wired';
 import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../modules/tax/application/useCases/CalculateOrderTax';
 
 // ============================================================================
@@ -22,29 +28,20 @@ import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../mod
 // ============================================================================
 
 export const viewBasket = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId;
-    const sessionId = req.session?.id;
+  const customerId = req.user?.customerId;
+  const sessionId = req.session?.id;
 
-    const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
-    const getUc = new GetOrCreateBasketUseCase(BasketRepo);
-    const basket = await getUc.execute(getCmd);
+  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
+  const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
-    // Calculate totals with tax
-    const totals = await calculateBasketTotals(basket as unknown as Record<string, unknown>, req.user as Record<string, unknown> | undefined);
+  // Calculate totals with tax
+  const totals = await calculateBasketTotals(basket as unknown as Record<string, unknown>, req.user as Record<string, unknown> | undefined);
 
-    storefrontRespond(req, res, 'basket/basket', {
-      pageName: 'Shopping Cart',
-      basket: { ...basket, totals },
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load shopping cart',
-    });
-  }
+  storefrontRespond(req, res, 'basket/basket', {
+    pageName: 'Shopping Cart',
+    basket: { ...basket, totals },
+  });
+  
 };
 
 // ============================================================================
@@ -61,13 +58,11 @@ export const addToBasket = async (req: TypedRequest, res: Response): Promise<voi
 
     // Get or create basket
     const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
-    const getUc = new GetOrCreateBasketUseCase(BasketRepo);
-    const basket = await getUc.execute(getCmd);
+    const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
     // Verify product exists and is available
     const productCmd = new GetProductCommand(productId);
-    const productUc = new GetProductUseCase(ProductRepo);
-    const product = await productUc.execute(productCmd);
+    const product = await getProductUseCase.execute(productCmd);
 
     if (!product || product.status !== 'active') {
       return res.redirect('/?error=' + encodeURIComponent('Product not found or unavailable'));
@@ -86,14 +81,13 @@ export const addToBasket = async (req: TypedRequest, res: Response): Promise<voi
       product.hasVariants ? 'physical' : 'physical',
     );
 
-    const addUc = new AddItemUseCase(BasketRepo);
-    await addUc.execute(addCmd);
+    await addItemUseCase.execute(addCmd);
 
     // Redirect back to product page or cart with success message
     const redirectTo = (req.body as RequestBody).redirectTo || '/basket';
     res.redirect(redirectTo + '?success=' + encodeURIComponent('Item added to cart'));
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     res.redirect('/?error=' + encodeURIComponent((error as Error).message || 'Failed to add item to cart'));
   }
@@ -104,36 +98,25 @@ export const addToBasket = async (req: TypedRequest, res: Response): Promise<voi
 // ============================================================================
 
 export const updateBasketItem = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { basketItemId } = req.params;
-    const body = req.body as RequestBody;
-    const { quantity } = body;
-    const customerId = req.user?.customerId;
-    const sessionId = req.session?.id;
+  const { basketItemId } = req.params;
+  const body = req.body as RequestBody;
+  const { quantity } = body;
+  const customerId = req.user?.customerId;
+  const sessionId = req.session?.id;
 
-    const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
-    const getUc = new GetOrCreateBasketUseCase(BasketRepo);
-    const basket = await getUc.execute(getCmd);
+  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
+  const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
-    const updCmd = new UpdateItemQuantityCommand(basket.basketId, basketItemId, parseInt(quantity as string));
+  const updCmd = new UpdateItemQuantityCommand(basket.basketId, basketItemId, parseInt(quantity as string));
 
-    const updUc = new UpdateItemQuantityUseCase(BasketRepo);
-    await updUc.execute(updCmd);
+  await updateItemQuantityUseCase.execute(updCmd);
 
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.json({ success: true });
-    } else {
-      res.redirect('/basket?success=' + encodeURIComponent('Cart updated'));
-    }
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: (error as Error).message });
-    } else {
-      res.redirect('/basket?error=' + encodeURIComponent((error as Error).message || 'Failed to update cart'));
-    }
+  if (req.xhr || req.headers.accept?.includes('application/json')) {
+    res.json({ success: true });
+  } else {
+    res.redirect('/basket?success=' + encodeURIComponent('Cart updated'));
   }
+  
 };
 
 // ============================================================================
@@ -141,33 +124,22 @@ export const updateBasketItem = async (req: TypedRequest, res: Response): Promis
 // ============================================================================
 
 export const removeFromBasket = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { basketItemId } = req.params;
-    const customerId = req.user?.customerId;
-    const sessionId = req.session?.id;
+  const { basketItemId } = req.params;
+  const customerId = req.user?.customerId;
+  const sessionId = req.session?.id;
 
-    const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
-    const getUc = new GetOrCreateBasketUseCase(BasketRepo);
-    const basket = await getUc.execute(getCmd);
+  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
+  const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
-    const remCmd = new RemoveItemCommand(basket.basketId, basketItemId);
-    const remUc = new RemoveItemUseCase(BasketRepo);
-    await remUc.execute(remCmd);
+  const remCmd = new RemoveItemCommand(basket.basketId, basketItemId);
+  await removeItemUseCase.execute(remCmd);
 
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.json({ success: true });
-    } else {
-      res.redirect('/basket?success=' + encodeURIComponent('Item removed from cart'));
-    }
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: (error as Error).message });
-    } else {
-      res.redirect('/basket?error=' + encodeURIComponent((error as Error).message || 'Failed to remove item'));
-    }
+  if (req.xhr || req.headers.accept?.includes('application/json')) {
+    res.json({ success: true });
+  } else {
+    res.redirect('/basket?success=' + encodeURIComponent('Item removed from cart'));
   }
+  
 };
 
 // ============================================================================
@@ -175,32 +147,21 @@ export const removeFromBasket = async (req: TypedRequest, res: Response): Promis
 // ============================================================================
 
 export const clearBasket = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId;
-    const sessionId = req.session?.id;
+  const customerId = req.user?.customerId;
+  const sessionId = req.session?.id;
 
-    const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
-    const getUc = new GetOrCreateBasketUseCase(BasketRepo);
-    const basket = await getUc.execute(getCmd);
+  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
+  const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
-    const clrCmd = new ClearBasketCommand(basket.basketId);
-    const clrUc = new ClearBasketUseCase(BasketRepo);
-    await clrUc.execute(clrCmd);
+  const clrCmd = new ClearBasketCommand(basket.basketId);
+  await clearBasketUseCase.execute(clrCmd);
 
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.json({ success: true });
-    } else {
-      res.redirect('/basket?success=' + encodeURIComponent('Cart cleared'));
-    }
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: (error as Error).message });
-    } else {
-      res.redirect('/basket?error=' + encodeURIComponent((error as Error).message || 'Failed to clear cart'));
-    }
+  if (req.xhr || req.headers.accept?.includes('application/json')) {
+    res.json({ success: true });
+  } else {
+    res.redirect('/basket?success=' + encodeURIComponent('Cart cleared'));
   }
+  
 };
 
 // ============================================================================

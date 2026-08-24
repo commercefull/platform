@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingZone } from '../../../../libs/db/types';
+import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 
 export { ShippingZone };
 
@@ -74,7 +75,7 @@ export async function create(input: CreateShippingZoneInput): Promise<ShippingZo
     ],
   );
 
-  if (!result) throw new Error('Failed to create shipping zone');
+  if (!result) throw new FailedToCreateShippingEntityError('Failed to create shipping zone');
   return result;
 }
 

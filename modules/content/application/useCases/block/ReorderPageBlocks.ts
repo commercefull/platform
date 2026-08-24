@@ -3,8 +3,9 @@
  * Reorders content blocks within a page
  */
 
-import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { ContentPageNotFoundError, ContentBlockNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class ReorderPageBlocksCommand {
   constructor(
@@ -24,17 +25,17 @@ export class ReorderPageBlocksUseCase {
 
   async execute(command: ReorderPageBlocksCommand): Promise<ReorderBlocksResponse> {
     if (!command.pageId) {
-      throw new Error('Page ID is required');
+      throw new ContentValidationError('Page ID is required');
     }
 
     if (!command.blockOrders || command.blockOrders.length === 0) {
-      throw new Error('Block orders are required');
+      throw new ContentValidationError('Block orders are required');
     }
 
     // Verify page exists
     const page = await this.contentRepo.findPageById(command.pageId);
     if (!page) {
-      throw new Error(`Page with ID ${command.pageId} not found`);
+      throw new ContentPageNotFoundError(command.pageId);
     }
 
     // Verify all blocks exist and belong to this page
@@ -43,7 +44,7 @@ export class ReorderPageBlocksUseCase {
 
     for (const blockOrder of command.blockOrders) {
       if (!existingBlockIds.has(blockOrder.id)) {
-        throw new Error(`Block with ID ${blockOrder.id} not found on page ${command.pageId}`);
+        throw new ContentBlockNotFoundError(blockOrder.id);
       }
     }
 

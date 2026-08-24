@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
+import { FailedToCreateWarehouseEntityError } from '../../domain/errors/WarehouseErrors';
 
 export interface WarehouseZone {
   distributionWarehouseZoneId: string;
@@ -59,7 +60,7 @@ export async function createZone(input: CreateZoneInput): Promise<WarehouseZone>
     now,
   ]);
 
-  if (!result) throw new Error('Failed to create warehouse zone');
+  if (!result) throw new FailedToCreateWarehouseEntityError('Failed to create warehouse zone');
   return result;
 }
 

@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export type ReviewStatus = 'pending' | 'approved' | 'rejected';
 export type ReviewRating = 1 | 2 | 3 | 4 | 5;
@@ -224,7 +225,7 @@ export class ProductReviewRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create product review');
+      throw new FailedToCreateProductError();
     }
 
     return result;

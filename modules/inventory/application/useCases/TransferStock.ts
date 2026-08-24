@@ -5,6 +5,8 @@
  */
 
 
+import { InventoryLocationNotFoundError } from '../../domain/errors/InventoryErrors';
+
 export interface TransferStockItemInput {
   productId: string;
   variantId?: string;
@@ -99,10 +101,10 @@ export class TransferStockUseCase {
     const destLocation = await this.inventoryRepository.findLocationById(input.destinationLocationId);
 
     if (!sourceLocation) {
-      throw new Error(`Source location not found: ${input.sourceLocationId}`);
+      throw new InventoryLocationNotFoundError(input.sourceLocationId);
     }
     if (!destLocation) {
-      throw new Error(`Destination location not found: ${input.destinationLocationId}`);
+      throw new InventoryLocationNotFoundError(input.destinationLocationId);
     }
 
     for (const item of input.items) {

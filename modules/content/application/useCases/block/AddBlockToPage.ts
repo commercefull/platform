@@ -3,8 +3,9 @@
  * Adds a new content block to a page
  */
 
-import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { ContentPageNotFoundError, ContentTypeNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class AddBlockToPageCommand {
   constructor(
@@ -34,19 +35,19 @@ export class AddBlockToPageUseCase {
 
   async execute(command: AddBlockToPageCommand): Promise<BlockResponse> {
     if (!command.contentPageId || !command.blockTypeId || !command.title) {
-      throw new Error('Content page ID, block type ID, and title are required');
+      throw new ContentValidationError('Content page ID, block type ID, and title are required');
     }
 
     // Verify page exists
     const page = await this.contentRepo.findPageById(command.contentPageId);
     if (!page) {
-      throw new Error(`Page with ID ${command.contentPageId} not found`);
+      throw new ContentPageNotFoundError(command.contentPageId);
     }
 
     // Verify content type exists
     const contentType = await this.contentRepo.findBlockTypeById(command.blockTypeId);
     if (!contentType) {
-      throw new Error(`Block type with ID ${command.blockTypeId} not found`);
+      throw new ContentTypeNotFoundError(command.blockTypeId);
     }
 
     // Get existing blocks to determine sort order

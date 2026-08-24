@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductSeo {
   productSeoId: string;
@@ -48,7 +49,7 @@ export class ProductSeoRepo {
 
     // Check if SEO already exists for product
     const existing = await this.findByProductId(params.productId);
-    if (existing) throw new Error('SEO already exists for this product');
+    if (existing) throw new ProductValidationError('SEO already exists for this product');
 
     const result = await queryOne<ProductSeo>(
       `INSERT INTO "productSeo" (
@@ -76,7 +77,7 @@ export class ProductSeoRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create product SEO');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 
@@ -85,7 +86,7 @@ export class ProductSeoRepo {
     if (existing) {
       const { productId: _productId, ...updateData } = params;
       const updated = await this.update(existing.productSeoId, updateData as ProductSeoUpdateParams);
-      if (!updated) throw new Error('Failed to update SEO');
+      if (!updated) throw new ProductValidationError('Failed to update SEO');
       return updated;
     }
     return this.create(params);

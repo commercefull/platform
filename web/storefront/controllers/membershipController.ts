@@ -7,75 +7,65 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import * as storefrontMembershipRepo from '../../../modules/membership/infrastructure/repositories/storefrontMembershipRepo';
+import { ManageStorefrontMembershipUseCase } from '../../../modules/membership/application/useCases/ManageMembershipPrograms';
+
+const manageStorefrontMembershipUseCase = new ManageStorefrontMembershipUseCase();
 
 /**
  * GET: List available membership plans
  */
 export const listPlans = async (req: TypedRequest, res: Response) => {
-  try {
-    const plans = await storefrontMembershipRepo.findActivePlansWithBenefitCount();
+  const plans = await manageStorefrontMembershipUseCase.findActivePlansWithBenefitCount();
 
-    storefrontRespond(req, res, 'membership/plans', {
-      pageName: 'Membership Plans',
-      plans,
-    });
-  } catch (error) {
-    logger.error('Error:', error);
-    storefrontRespond(req, res, 'error', { pageName: 'Error', error: 'Failed to load membership plans' });
-  }
+  storefrontRespond(req, res, 'membership/plans', {
+    pageName: 'Membership Plans',
+    plans,
+  });
+  
 };
 
 /**
  * GET: View membership plan detail
  */
 export const viewPlan = async (req: TypedRequest, res: Response) => {
-  try {
-    const { planId } = req.params;
+  const { planId } = req.params;
 
-    const plan = await storefrontMembershipRepo.findPlanById(planId);
+  const plan = await manageStorefrontMembershipUseCase.findPlanById(planId);
 
-    if (!plan) {
-      req.flash?.('error', 'Membership plan not found');
-      return res.redirect('/membership');
-    }
-
-    const benefits = await storefrontMembershipRepo.findBenefitsByPlanId(planId);
-
-    storefrontRespond(req, res, 'membership/plan-detail', {
-      pageName: (plan as Record<string, unknown>).name as string,
-      plan,
-      benefits,
-    });
-  } catch (error) {
-    logger.error('Error:', error);
-    storefrontRespond(req, res, 'error', { pageName: 'Error', error: 'Failed to load plan details' });
+  if (!plan) {
+    req.flash?.('error', 'Membership plan not found');
+    return res.redirect('/membership');
   }
+
+  const benefits = await manageStorefrontMembershipUseCase.findBenefitsByPlanId(planId);
+
+  storefrontRespond(req, res, 'membership/plan-detail', {
+    pageName: (plan as Record<string, unknown>).name as string,
+    plan,
+    benefits,
+  });
+  
 };
 
 /**
  * GET: My membership dashboard
  */
 export const myMembership = async (req: TypedRequest, res: Response) => {
-  try {
-    const customerId = req.user?.customerId;
-    if (!customerId) return res.redirect('/signin');
+  const customerId = req.user?.customerId;
+  if (!customerId) return res.redirect('/signin');
 
-    const membership = await storefrontMembershipRepo.findActiveMembershipWithPlan(customerId);
+  const membership = await manageStorefrontMembershipUseCase.findActiveMembershipWithPlan(customerId);
 
-    const benefits = membership
-      ? await storefrontMembershipRepo.findBenefitsByPlanId((membership as Record<string, unknown>).membershipPlanId as string)
-      : [];
+  const benefits = membership
+    ? await manageStorefrontMembershipUseCase.findBenefitsByPlanId((membership as Record<string, unknown>).membershipPlanId as string)
+    : [];
 
-    storefrontRespond(req, res, 'membership/my-membership', {
-      pageName: 'My Membership',
-      membership,
-      benefits,
-    });
-  } catch (error) {
-    logger.error('Error:', error);
-    storefrontRespond(req, res, 'error', { pageName: 'Error', error: 'Failed to load membership' });
-  }
+  storefrontRespond(req, res, 'membership/my-membership', {
+    pageName: 'My Membership',
+    membership,
+    benefits,
+  });
+  
 };
 
 /**
@@ -88,26 +78,26 @@ export const joinPlan = async (req: TypedRequest, res: Response) => {
 
     const { planId } = req.params;
 
-    const plan = await storefrontMembershipRepo.findPlanById(planId);
+    const plan = await manageStorefrontMembershipUseCase.findPlanById(planId);
 
     if (!plan) {
       req.flash?.('error', 'Membership plan not found');
       return res.redirect('/membership');
     }
 
-    const existing = await storefrontMembershipRepo.findActiveMembershipByCustomerId(customerId);
+    const existing = await manageStorefrontMembershipUseCase.findActiveMembershipByCustomerId(customerId);
 
     if (existing) {
       req.flash?.('error', 'You already have an active membership. Please cancel it first to switch plans.');
       return res.redirect('/membership/my');
     }
 
-    await storefrontMembershipRepo.createMembership(customerId, planId);
+    await manageStorefrontMembershipUseCase.createMembership(customerId, planId);
 
     req.flash?.('success', `Welcome! You've joined the ${(plan as Record<string, unknown>).name} plan.`);
     res.redirect('/membership/my');
   } catch (error) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
     req.flash?.('error', 'Failed to join membership plan');
     res.redirect('/membership');
   }

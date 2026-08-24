@@ -2,6 +2,8 @@
  * AddTicketComment Use Case
  */
 
+import { SupportTicketNotFoundError, SupportValidationError } from '../../domain/errors/SupportErrors';
+
 export interface AddTicketCommentInput {
   ticketId: string;
   authorId: string;
@@ -51,17 +53,17 @@ export class AddTicketCommentUseCase {
 
   async execute(input: AddTicketCommentInput): Promise<AddTicketCommentOutput> {
     if (!input.ticketId || !input.authorId || !input.content) {
-      throw new Error('Ticket ID, author ID, and content are required');
+      throw new SupportValidationError('Ticket ID, author ID, and content are required');
     }
 
     const ticket = await this.supportRepository.findTicketById(input.ticketId);
     if (!ticket) {
-      throw new Error(`Ticket not found: ${input.ticketId}`);
+      throw new SupportTicketNotFoundError(input.ticketId);
     }
 
     // Customers cannot add internal comments
     if (input.authorType === 'customer' && input.isInternal) {
-      throw new Error('Customers cannot add internal comments');
+      throw new SupportValidationError('Customers cannot add internal comments');
     }
 
     const commentId = `cmt_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

@@ -1,0 +1,146 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Page Builder</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+            <li class="breadcrumb-item active">Page Builder</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <%= success %>
+        </div>
+      <% } %>
+
+      <div class="row mb-3">
+        <div class="col-12">
+          <a href="/admin/page-builder/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create New Page
+          </a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Page Drafts</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Slug</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Blocks</th>
+                <th>Version</th>
+                <th>Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (!drafts || drafts.length === 0) { %>
+                <tr>
+                  <td colspan="8" class="text-center py-4">
+                    <em>No pages yet. <a href="/admin/page-builder/create">Create your first page</a>.</em>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% drafts.forEach(draft => { %>
+                  <tr>
+                    <td><strong><%= draft.title %></strong></td>
+                    <td><code><%= draft.slug %></code></td>
+                    <td><%= draft.pageType %></td>
+                    <td>
+                      <span class="badge badge-<%= draft.status === 'published' ? 'success' : 'secondary' %>">
+                        <%= draft.status %>
+                      </span>
+                    </td>
+                    <td><%= draft.blocks.length %></td>
+                    <td>v<%= draft.version %></td>
+                    <td><%= new Date(draft.updatedAt).toLocaleDateString() %></td>
+                    <td>
+                      <a href="/admin/page-builder/<%= draft.draftId %>" class="btn btn-sm btn-primary" title="Edit">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <a href="/admin/page-builder/<%= draft.draftId %>/preview" class="btn btn-sm btn-info" title="Preview" target="_blank">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <% if (draft.status === 'draft') { %>
+                        <button class="btn btn-sm btn-success" onclick="publishDraft('<%= draft.draftId %>')" title="Publish">
+                          <i class="fas fa-paper-plane"></i>
+                        </button>
+                      <% } %>
+                      <button class="btn btn-sm btn-danger" onclick="deleteDraft('<%= draft.draftId %>', '<%= draft.title %>')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Page</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Delete "<strong id="deleteDraftTitle"></strong>"? This cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function deleteDraft(draftId, title) {
+  document.getElementById('deleteDraftTitle').textContent = title;
+  document.getElementById('confirmDeleteBtn').onclick = function() {
+    fetch(`/admin/page-builder/${draftId}`, { method: 'DELETE' })
+      .then(r => r.json())
+      .then(data => { if (data.success) location.reload(); })
+      .catch(() => alert('Error deleting draft'));
+  };
+  $('#deleteModal').modal('show');
+}
+
+function publishDraft(draftId) {
+  if (confirm('Publish this page?')) {
+    fetch(`/admin/page-builder/${draftId}/publish`, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) { alert('Published!'); location.reload(); }
+        else { alert(data.message || 'Error publishing'); }
+      })
+      .catch(() => alert('Error publishing draft'));
+  }
+}
+</script>
+<% endcontent %>

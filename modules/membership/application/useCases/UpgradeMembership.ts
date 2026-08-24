@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { MembershipNotFoundError, MembershipPlanNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
 export interface UpgradeMembershipInput {
   membershipId: string;
@@ -58,21 +59,21 @@ export class UpgradeMembershipUseCase {
     // Get current membership
     const membership = await this.membershipRepository.getMembershipById(membershipId);
     if (!membership) {
-      throw new Error('Membership not found');
+      throw new MembershipNotFoundError(membershipId);
     }
 
     if (membership.status !== 'active') {
-      throw new Error('Can only upgrade active memberships');
+      throw new MembershipValidationError('Can only upgrade active memberships');
     }
 
     // Get new tier
     const newTier = await this.membershipRepository.getTierById(newTierId);
     if (!newTier) {
-      throw new Error('New tier not found');
+      throw new MembershipPlanNotFoundError(newTierId);
     }
 
     if (!newTier.isActive) {
-      throw new Error('New tier is not active');
+      throw new MembershipValidationError('New tier is not active');
     }
 
     // Get current tier for comparison
@@ -80,7 +81,7 @@ export class UpgradeMembershipUseCase {
 
     // Validate upgrade (new tier should have higher price or level)
     if (!currentTier || newTier.price <= currentTier.price) {
-      throw new Error('Cannot upgrade to a tier with equal or lower price. Use downgrade instead.');
+      throw new MembershipValidationError('Cannot upgrade to a tier with equal or lower price. Use downgrade instead.');
     }
 
     const now = new Date();

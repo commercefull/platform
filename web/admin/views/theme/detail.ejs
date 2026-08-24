@@ -1,0 +1,290 @@
+<%- include('../layout') %>
+
+<% content %>
+<style>
+  .theme-customizer { display: flex; height: calc(100vh - 120px); }
+  .tc-sidebar { width: 380px; min-width: 380px; border-right: 1px solid #e9ecef; overflow-y: auto; background: #fff; }
+  .tc-preview { flex: 1; overflow-y: auto; background: #e9ecef; padding: 24px; }
+  .tc-setting-group { margin-bottom: 20px; }
+  .tc-setting-group-header { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 700; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #f1f3f5; }
+  .tc-setting { margin-bottom: 12px; }
+  .tc-setting label { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+  .tc-setting .help-text { font-size: 10px; color: #adb5bd; }
+  .tc-preview-frame { background: #fff; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); max-width: 1200px; margin: 0 auto; min-height: 600px; }
+  .tc-store-bar { background: #fff; border-bottom: 1px solid #e9ecef; padding: 8px 16px; display: flex; align-items: center; gap: 8px; }
+  .tc-color-swatch { width: 24px; height: 24px; border-radius: 4px; border: 1px solid #dee2e6; display: inline-block; vertical-align: middle; }
+</style>
+
+<div class="content-wrapper" style="padding: 0;">
+  <!-- Store Context Bar -->
+  <div class="tc-store-bar">
+    <h5 class="mb-0"><%= theme.name %></h5>
+    <span class="badge badge-<%= theme.status === 'active' ? 'success' : 'secondary' %>"><%= theme.status %></span>
+    <span class="badge badge-<%= theme.type === 'built_in' ? 'info' : 'warning' %>"><%= theme.type === 'built_in' ? 'Built-in' : 'Custom' %></span>
+    <span class="badge badge-light">v<%= theme.version %></span>
+    <div class="ml-auto d-flex align-items-center gap-2">
+      <label class="mb-0 small font-weight-bold">Store:</label>
+      <input type="text" id="storeIdInput" class="form-control form-control-sm" style="width:200px;" placeholder="Store UUID" value="<%= storeId %>">
+      <button class="btn btn-sm btn-primary" onclick="loadStoreContext()"><i class="fas fa-sync"></i> Load</button>
+      <a href="/admin/themes/<%= theme.themeId %>/preview<%= storeId ? '?storeId=' + storeId : '' %>" target="_blank" class="btn btn-sm btn-outline-info">
+        <i class="fas fa-eye"></i> Preview
+      </a>
+      <a href="/admin/themes" class="btn btn-sm btn-secondary">Back</a>
+    </div>
+  </div>
+
+  <!-- Customizer Layout -->
+  <div class="theme-customizer">
+    <!-- Left: Settings Panel -->
+    <div class="tc-sidebar" style="padding: 16px;">
+      <div id="assignment-section" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e9ecef;">
+        <h6 style="font-weight:700;margin-bottom:10px;">Store Assignment</h6>
+        <div id="assignment-status">
+          <% if (assignment && assignment.themeId === theme.themeId) { %>
+            <div class="alert alert-success py-2 mb-2" style="font-size:12px;">
+              <i class="fas fa-check-circle"></i> This theme is assigned to the store.
+            </div>
+            <form method="POST" action="/admin/themes/<%= theme.themeId %>/unassign" class="d-inline">
+              <input type="hidden" name="storeId" value="<%= storeId %>">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Unassign</button>
+            </form>
+          <% } else if (storeId) { %>
+            <div class="alert alert-warning py-2 mb-2" style="font-size:12px;">
+              <i class="fas fa-exclamation-triangle"></i> This theme is not assigned to the store.
+            </div>
+            <form method="POST" action="/admin/themes/<%= theme.themeId %>/assign" class="d-inline">
+              <input type="hidden" name="storeId" value="<%= storeId %>">
+              <input type="hidden" name="organizationId" id="orgIdInput">
+              <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-link"></i> Assign to Store</button>
+            </form>
+          <% } else { %>
+            <p class="text-muted" style="font-size:12px;">Enter a store ID above to manage assignment.</p>
+          <% } %>
+        </div>
+      </div>
+
+      <div id="override-section" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e9ecef;">
+        <h6 style="font-weight:700;margin-bottom:10px;">Store Overrides</h6>
+        <p class="text-muted" style="font-size:11px;">Customize theme settings for this store. Changes only affect this store.</p>
+        <div class="form-group">
+          <label style="font-size:12px;">Custom Logo URL</label>
+          <input type="text" id="customLogoUrl" class="form-control form-control-sm" placeholder="https://..." value="<%= override?.customLogoUrl || '' %>">
+        </div>
+        <div class="form-group">
+          <label style="font-size:12px;">Custom Favicon URL</label>
+          <input type="text" id="customFaviconUrl" class="form-control form-control-sm" placeholder="https://..." value="<%= override?.customFaviconUrl || '' %>">
+        </div>
+        <div class="form-group">
+          <label style="font-size:12px;">Custom Banner URL</label>
+          <input type="text" id="customBannerUrl" class="form-control form-control-sm" placeholder="https://..." value="<%= override?.customBannerUrl || '' %>">
+        </div>
+        <div class="form-group">
+          <label style="font-size:12px;">Custom CSS</label>
+          <textarea id="customCss" class="form-control form-control-sm" rows="4" placeholder="/* Add custom CSS here */" style="font-family:monospace;font-size:11px;"><%= override?.customCss || '' %></textarea>
+        </div>
+      </div>
+
+      <!-- Theme Settings -->
+      <div id="settings-section">
+        <h6 style="font-weight:700;margin-bottom:10px;">Theme Settings</h6>
+        <div id="settings-container">
+          <p class="text-muted" style="font-size:12px;">Loading settings...</p>
+        </div>
+        <button class="btn btn-sm btn-primary mt-3 w-100" onclick="saveOverrides()">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Live Preview -->
+    <div class="tc-preview">
+      <div class="tc-preview-frame" id="preview-frame">
+        <div style="padding:40px;text-align:center;">
+          <div id="preview-logo" style="margin-bottom:24px;">
+            <% if (override?.customLogoUrl) { %>
+              <img src="<%= override.customLogoUrl %>" style="max-height:60px;">
+            <% } else { %>
+              <h2 style="color:var(--color-primary,#007bff);"><%= theme.name %></h2>
+            <% } %>
+          </div>
+          <div id="preview-hero" style="background:var(--color-primary,#007bff);color:#fff;padding:48px;border-radius:8px;margin-bottom:24px;">
+            <h1 style="margin:0 0 8px;font-family:var(--font-heading,inherit);">Welcome to our store</h1>
+            <p style="margin:0 0 16px;opacity:0.9;">Discover amazing products tailored for you</p>
+            <span style="display:inline-block;padding:10px 28px;background:#fff;color:var(--color-primary,#007bff);border-radius:6px;font-weight:600;">Shop Now</span>
+          </div>
+          <div id="preview-products" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+            <% for (let i = 0; i < 4; i++) { %>
+              <div style="border:1px solid #e9ecef;border-radius:var(--card-border-radius,8px);padding:12px;text-align:center;">
+                <div style="width:100%;aspect-ratio:1;background:#f1f3f5;border-radius:4px;margin-bottom:8px;"></div>
+                <div style="font-weight:600;font-size:13px;">Product <%= i+1 %></div>
+                <div style="font-size:12px;color:var(--color-primary,#007bff);font-weight:700;">$<%= (i+1)*29 %>.99</div>
+              </div>
+            <% } %>
+          </div>
+          <div id="preview-footer" style="background:var(--color-footer-bg,#f8f9fa);padding:24px;border-radius:8px;color:var(--color-text,#333);">
+            <p style="margin:0;font-size:12px;">&copy; 2026 Store Name. Powered by CommerceFull.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const THEME = <%- themeJson %>;
+const SETTINGS_SCHEMA = <%- settingsSchemaJson %>;
+const DEFAULT_SETTINGS = <%- defaultSettingsJson %>;
+const OVERRIDE = <%- overrideJson || 'null' %>;
+const STORE_ID = '<%= storeId %>';
+
+// Current settings state (override settings take priority over defaults)
+let currentSettings = { ...DEFAULT_SETTINGS };
+if (OVERRIDE && OVERRIDE.settings) {
+  currentSettings = { ...currentSettings, ...OVERRIDE.settings };
+}
+
+// ── Render Settings Forms ──────────────────────────────────
+
+function renderSettings() {
+  const container = document.getElementById('settings-container');
+  let html = '';
+
+  SETTINGS_SCHEMA.groups.forEach(group => {
+    html += `<div class="tc-setting-group">`;
+    html += `<div class="tc-setting-group-header">${group.label}</div>`;
+
+    group.settings.forEach(setting => {
+      const val = currentSettings[setting.key] !== undefined ? currentSettings[setting.key] : setting.defaultValue;
+      html += `<div class="tc-setting">`;
+      html += `<label>${setting.label}</label>`;
+
+      if (setting.type === 'color') {
+        html += `<div class="d-flex align-items-center gap-2">
+          <input type="color" class="form-control form-control-sm" style="width:50px;padding:2px;" value="${val}" data-key="${setting.key}" data-css-var="${setting.cssVariable || ''}" onchange="updateSetting(this)">
+          <input type="text" class="form-control form-control-sm" style="flex:1;" value="${val}" data-key="${setting.key}" data-css-var="${setting.cssVariable || ''}" onchange="updateSetting(this)">
+        </div>`;
+      } else if (setting.type === 'select') {
+        html += `<select class="form-control form-control-sm" data-key="${setting.key}" data-css-var="${setting.cssVariable || ''}" onchange="updateSetting(this)">`;
+        (setting.options || []).forEach(opt => {
+          html += `<option value="${opt.value}" ${val === opt.value ? 'selected' : ''}>${opt.label}</option>`;
+        });
+        html += `</select>`;
+      } else if (setting.type === 'checkbox') {
+        html += `<input type="checkbox" data-key="${setting.key}" ${val === true || val === 'true' ? 'checked' : ''} onchange="updateSetting(this)">`;
+      } else if (setting.type === 'range') {
+        html += `<input type="range" class="form-control-range" min="${setting.min || 0}" max="${setting.max || 100}" step="${setting.step || 1}" value="${val}" data-key="${setting.key}" data-css-var="${setting.cssVariable || ''}" onchange="updateSetting(this)" oninput="updateRangeDisplay(this)">
+                 <span class="help-text" id="range-${setting.key}">${val}</span>`;
+      } else if (setting.type === 'font') {
+        html += `<input type="text" class="form-control form-control-sm" value="${val}" data-key="${setting.key}" data-css-var="${setting.cssVariable || ''}" onchange="updateSetting(this)" placeholder="e.g. Inter, sans-serif">`;
+      } else if (setting.type === 'image') {
+        html += `<input type="text" class="form-control form-control-sm" value="${val}" data-key="${setting.key}" onchange="updateSetting(this)" placeholder="Image URL...">`;
+      } else {
+        html += `<input type="text" class="form-control form-control-sm" value="${val}" data-key="${setting.key}" onchange="updateSetting(this)">`;
+      }
+
+      if (setting.description) {
+        html += `<div class="help-text">${setting.description}</div>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+  applyPreviewStyles();
+}
+
+function updateRangeDisplay(input) {
+  const key = input.dataset.key;
+  const display = document.getElementById(`range-${key}`);
+  if (display) display.textContent = input.value;
+}
+
+function updateSetting(input) {
+  const key = input.dataset.key;
+  let val = input.value;
+  if (input.type === 'checkbox') val = input.checked;
+  if (input.type === 'range') val = parseInt(input.value);
+  currentSettings[key] = val;
+  applyPreviewStyles();
+}
+
+// ── Live Preview ───────────────────────────────────────────
+
+function applyPreviewStyles() {
+  const frame = document.getElementById('preview-frame');
+  let cssVars = '';
+  SETTINGS_SCHEMA.groups.forEach(group => {
+    group.settings.forEach(setting => {
+      if (setting.cssVariable && currentSettings[setting.key] !== undefined) {
+        cssVars += `${setting.cssVariable}: ${currentSettings[setting.key]};`;
+      }
+    });
+  });
+  frame.style.cssText = `background:#fff;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.08);max-width:1200px;margin:0 auto;min-height:600px;${cssVars}`;
+
+  // Update product grid columns
+  const productsEl = document.getElementById('preview-products');
+  if (productsEl && currentSettings.productsPerRow) {
+    productsEl.style.gridTemplateColumns = `repeat(${currentSettings.productsPerRow}, 1fr)`;
+  }
+
+  // Update custom CSS
+  let styleEl = document.getElementById('custom-css-style');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'custom-css-style';
+    document.head.appendChild(styleEl);
+  }
+  const customCss = document.getElementById('customCss')?.value || '';
+  styleEl.textContent = customCss;
+}
+
+// ── Save Overrides ─────────────────────────────────────────
+
+async function saveOverrides() {
+  const storeId = document.getElementById('storeIdInput').value;
+  if (!storeId) { alert('Enter a store ID first'); return; }
+
+  const orgId = document.getElementById('orgIdInput')?.value || '';
+
+  const body = {
+    storeId,
+    organizationId: orgId,
+    settings: currentSettings,
+    customCss: document.getElementById('customCss')?.value || '',
+    customLogoUrl: document.getElementById('customLogoUrl')?.value || '',
+    customFaviconUrl: document.getElementById('customFaviconUrl')?.value || '',
+    customBannerUrl: document.getElementById('customBannerUrl')?.value || '',
+  };
+
+  try {
+    const res = await fetch(`/admin/themes/${THEME.themeId}/override`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('Overrides saved successfully!');
+    } else {
+      alert(data.message || 'Failed to save');
+    }
+  } catch (err) {
+    alert('Error saving overrides');
+  }
+}
+
+// ── Load Store Context ─────────────────────────────────────
+
+function loadStoreContext() {
+  const storeId = document.getElementById('storeIdInput').value;
+  if (storeId) {
+    location.href = `/admin/themes/${THEME.themeId}?storeId=${storeId}`;
+  }
+}
+
+// ── Init ───────────────────────────────────────────────────
+renderSettings();
+</script>
+<% endcontent %>

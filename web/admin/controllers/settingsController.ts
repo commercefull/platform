@@ -4,13 +4,14 @@
  * for the Commercefull Admin Hub - Phase 8
  */
 
-import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../respond';
-import * as languageRepo from '../../../modules/localization/infrastructure/repositories/languageRepo';
-import * as currencyRepo from '../../../modules/localization/infrastructure/repositories/currencyRepo';
-import CountryRepo from '../../../modules/localization/infrastructure/repositories/countryRepo';
+import { ManageLanguagesUseCase, ManageCurrenciesUseCase, ManageCountriesUseCase } from '../../../modules/localization/application/useCases/ManageLocalization';
+
+const manageLanguagesUseCase = new ManageLanguagesUseCase();
+const manageCurrenciesUseCase = new ManageCurrenciesUseCase();
+const manageCountriesUseCase = new ManageCountriesUseCase();
 
 // ============================================================================
 // Types
@@ -50,50 +51,37 @@ interface StoreSettings {
 // ============================================================================
 
 export const storeSettings = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || 'default';
+  const organizationId = req.user?.organizationId || 'default';
 
-    const timezones = getTimezones();
-    const currencies = await currencyRepo.listActiveCurrencyCodes();
-    const locales = getLocales();
+  const timezones = getTimezones();
+  const currencies = await manageCurrenciesUseCase.listActiveCurrencyCodes();
+  const locales = getLocales();
 
-    adminRespond(req, res, 'settings/store', {
-      pageName: 'Store Settings',
-      settings: getDefaultSettings(organizationId),
-      timezones,
-      currencies: currencies.length > 0 ? currencies : getDefaultCurrencyList(),
-      locales,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load settings',
-    });
-  }
+  adminRespond(req, res, 'settings/store', {
+    pageName: 'Store Settings',
+    settings: getDefaultSettings(organizationId),
+    timezones,
+    currencies: currencies.length > 0 ? currencies : getDefaultCurrencyList(),
+    locales,
+  });
+  
 };
 
 export const updateStoreSettings = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const body = req.body as RequestBody;
-    const {
-      addressLine1,
-      addressLine2,
-      city,
-      state,
-      postalCode,
-      country,
-    } = body;
+  const body = req.body as RequestBody;
+  const {
+    addressLine1,
+    addressLine2,
+    city,
+    state,
+    postalCode,
+    country,
+  } = body;
 
-    void { addressLine1, addressLine2, city, state, postalCode, country };
+  void { addressLine1, addressLine2, city, state, postalCode, country };
 
-    res.json({ success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
-  }
+  res.json({ success: true });
+  
 };
 
 // ============================================================================
@@ -101,35 +89,22 @@ export const updateStoreSettings = async (req: TypedRequest, res: Response): Pro
 // ============================================================================
 
 export const businessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || 'default';
+  const organizationId = req.user?.organizationId || 'default';
 
-    adminRespond(req, res, 'settings/business', {
-      pageName: 'Business Information',
-      settings: getDefaultSettings(organizationId),
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load business info',
-    });
-  }
+  adminRespond(req, res, 'settings/business', {
+    pageName: 'Business Information',
+    settings: getDefaultSettings(organizationId),
+  });
+  
 };
 
 export const updateBusinessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const body = req.body as RequestBody;
-    const { legalName, taxId, registrationNumber } = body;
-    void { legalName, taxId, registrationNumber };
+  const body = req.body as RequestBody;
+  const { legalName, taxId, registrationNumber } = body;
+  void { legalName, taxId, registrationNumber };
 
-    res.json({ success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
-  }
+  res.json({ success: true });
+  
 };
 
 // ============================================================================
@@ -137,30 +112,22 @@ export const updateBusinessInfo = async (req: TypedRequest, res: Response): Prom
 // ============================================================================
 
 export const localizationSettings = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    // Get languages
-    const languages = await languageRepo.listLanguages();
+  // Get languages
+  const languages = await manageLanguagesUseCase.listLanguages();
 
-    // Get currencies
-    const currencies = await currencyRepo.listCurrencies();
+  // Get currencies
+  const currencies = await manageCurrenciesUseCase.listCurrencies();
 
-    // Get countries
-    const countries = await CountryRepo.findAll();
+  // Get countries
+  const countries = await manageCountriesUseCase.findAll();
 
-    adminRespond(req, res, 'settings/localization', {
-      pageName: 'Localization',
-      languages,
-      currencies,
-      countries,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load localization settings',
-    });
-  }
+  adminRespond(req, res, 'settings/localization', {
+    pageName: 'Localization',
+    languages,
+    currencies,
+    countries,
+  });
+  
 };
 
 // ============================================================================
@@ -168,61 +135,46 @@ export const localizationSettings = async (req: TypedRequest, res: Response): Pr
 // ============================================================================
 
 export const createLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const body = req.body as RequestBody;
-    const { code, name, nativeName, isDefault, isActive } = body;
+  const body = req.body as RequestBody;
+  const { code, name, nativeName, isDefault, isActive } = body;
 
-    if (!code || !name) {
-      res.status(400).json({ success: false, message: 'Code and name are required' });
-      return;
-    }
-
-    const languageId = await languageRepo.createLanguage({ code, name, nativeName, isDefault, isActive });
-
-    res.json({ success: true, languageId });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
+  if (!code || !name) {
+    res.status(400).json({ success: false, message: 'Code and name are required' });
+    return;
   }
+
+  const languageId = await manageLanguagesUseCase.createLanguage({ code, name, nativeName, isDefault, isActive });
+
+  res.json({ success: true, languageId });
+  
 };
 
 export const updateLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { languageId } = req.params;
-    const body = req.body as RequestBody;
-    const { name, nativeName, isDefault, isActive } = body;
-    // const _now = new Date();
+  const { languageId } = req.params;
+  const body = req.body as RequestBody;
+  const { name, nativeName, isDefault, isActive } = body;
+  // const _now = new Date();
 
-    await languageRepo.updateLanguage(languageId, { name, nativeName, isDefault, isActive });
+  await manageLanguagesUseCase.updateLanguage(languageId, { name, nativeName, isDefault, isActive });
 
-    res.json({ success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
-  }
+  res.json({ success: true });
+  
 };
 
 export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { languageId } = req.params;
+  const { languageId } = req.params;
 
-    const language = await languageRepo.findLanguageById(languageId);
+  const language = await manageLanguagesUseCase.findLanguageById(languageId);
 
-    if (language?.isDefault) {
-      res.status(400).json({ success: false, message: 'Cannot delete the default language' });
-      return;
-    }
-
-    await languageRepo.deleteLanguage(languageId);
-
-    res.json({ success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
+  if (language?.isDefault) {
+    res.status(400).json({ success: false, message: 'Cannot delete the default language' });
+    return;
   }
+
+  await manageLanguagesUseCase.deleteLanguage(languageId);
+
+  res.json({ success: true });
+  
 };
 
 // ============================================================================
@@ -230,61 +182,46 @@ export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<
 // ============================================================================
 
 export const createCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const body = req.body as RequestBody;
-    const { code, name, symbol, exchangeRate, isDefault, isActive } = body;
+  const body = req.body as RequestBody;
+  const { code, name, symbol, exchangeRate, isDefault, isActive } = body;
 
-    if (!code || !name) {
-      res.status(400).json({ success: false, message: 'Code and name are required' });
-      return;
-    }
-
-    const currencyId = await currencyRepo.createCurrency({ code, name, symbol, exchangeRate, isDefault, isActive });
-
-    res.json({ success: true, currencyId });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
+  if (!code || !name) {
+    res.status(400).json({ success: false, message: 'Code and name are required' });
+    return;
   }
+
+  const currencyId = await manageCurrenciesUseCase.createCurrency({ code, name, symbol, exchangeRate, isDefault, isActive });
+
+  res.json({ success: true, currencyId });
+  
 };
 
 export const updateCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { currencyId } = req.params;
-    const body = req.body as RequestBody;
-    const { name, symbol, exchangeRate, isDefault, isActive } = body;
-    // const _now = new Date();
+  const { currencyId } = req.params;
+  const body = req.body as RequestBody;
+  const { name, symbol, exchangeRate, isDefault, isActive } = body;
+  // const _now = new Date();
 
-    await currencyRepo.updateCurrency(currencyId, { name, symbol, exchangeRate, isDefault, isActive });
+  await manageCurrenciesUseCase.updateCurrency(currencyId, { name, symbol, exchangeRate, isDefault, isActive });
 
-    res.json({ success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
-  }
+  res.json({ success: true });
+  
 };
 
 export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { currencyId } = req.params;
+  const { currencyId } = req.params;
 
-    const currency = await currencyRepo.findCurrencyById(currencyId);
+  const currency = await manageCurrenciesUseCase.findCurrencyById(currencyId);
 
-    if (currency?.isDefault) {
-      res.status(400).json({ success: false, message: 'Cannot delete the default currency' });
-      return;
-    }
-
-    await currencyRepo.deleteCurrency(currencyId);
-
-    res.json({ success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
+  if (currency?.isDefault) {
+    res.status(400).json({ success: false, message: 'Cannot delete the default currency' });
+    return;
   }
+
+  await manageCurrenciesUseCase.deleteCurrency(currencyId);
+
+  res.json({ success: true });
+  
 };
 
 // ============================================================================

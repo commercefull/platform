@@ -3,6 +3,8 @@
  * Represents a content block within a page
  */
 
+import { ContentValidationError } from '../errors/ContentErrors';
+
 export interface ContentBlockProps {
   contentBlockId: string;
   pageId: string;
@@ -83,7 +85,7 @@ export class ContentBlock {
 
   updateName(name: string): void {
     if (!name || name.trim().length === 0) {
-      throw new Error('Block name cannot be empty');
+      throw new ContentValidationError('Block name cannot be empty');
     }
     this.props.name = name.trim();
     this.props.updatedAt = new Date();
@@ -96,7 +98,7 @@ export class ContentBlock {
 
   setOrder(order: number): void {
     if (order < 0) {
-      throw new Error('Order cannot be negative');
+      throw new ContentValidationError('Order cannot be negative');
     }
     this.props.order = order;
     this.props.updatedAt = new Date();

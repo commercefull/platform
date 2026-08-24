@@ -4,6 +4,7 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
 
 export interface LoginAdminInput {
   email: string;
@@ -55,7 +56,7 @@ export class LoginAdminUseCase {
 
   async execute(input: LoginAdminInput): Promise<LoginAdminOutput> {
     if (!input.email || !input.password) {
-      throw new Error('Email and password are required');
+      throw new EmailAndPasswordRequiredError();
     }
 
     // Find admin by email
@@ -65,7 +66,7 @@ export class LoginAdminUseCase {
         email: input.email,
         reason: 'user_not_found',
       });
-      throw new Error('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
     // Verify password
@@ -75,12 +76,12 @@ export class LoginAdminUseCase {
         email: input.email,
         reason: 'invalid_password',
       });
-      throw new Error('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
     // Check if account is active
     if (admin.status !== 'active') {
-      throw new Error('Account is not active');
+      throw new AccountNotActiveError();
     }
 
     // Create session

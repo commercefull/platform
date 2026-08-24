@@ -3,6 +3,8 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { logger } from '../../../../../libs/logger';
+import { EmailAndPasswordRequiredError, InvalidEmailFormatError, PasswordTooShortError, EmailAlreadyRegisteredError } from '../../../domain/errors/IdentityErrors';
 
 export interface RegisterCustomerInput {
   email: string;
@@ -57,24 +59,24 @@ export class RegisterCustomerUseCase {
 
   async execute(input: RegisterCustomerInput): Promise<RegisterCustomerOutput> {
     if (!input.email || !input.password) {
-      throw new Error('Email and password are required');
+      throw new EmailAndPasswordRequiredError();
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(input.email)) {
-      throw new Error('Invalid email format');
+      throw new InvalidEmailFormatError();
     }
 
     // Validate password strength
     if (input.password.length < 8) {
-      throw new Error('Password must be at least 8 characters');
+      throw new PasswordTooShortError();
     }
 
     // Check if email already exists
     const existingCustomer = await this.customerRepo.findByEmail(input.email);
     if (existingCustomer) {
-      throw new Error('Email already registered');
+      throw new EmailAlreadyRegisteredError();
     }
 
     // Hash password
@@ -105,7 +107,9 @@ export class RegisterCustomerUseCase {
         token: verificationToken,
         firstName: input.firstName,
       });
-    } catch {}
+    } catch (err) {
+      logger.warn('Failed to send customer welcome email', { error: err });
+    }
 
     // Emit event
     eventBus.emit('customer.registered', {

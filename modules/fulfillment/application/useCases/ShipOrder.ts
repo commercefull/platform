@@ -6,7 +6,9 @@
 
 import { Fulfillment } from '../../domain/entities/Fulfillment';
 import { IFulfillmentRepository } from '../../domain/repositories/FulfillmentRepository';
+import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 import { emitFulfillmentShipped } from '../../domain/events/FulfillmentEvents';
+import { logger } from '../../../../libs/logger';
 
 export interface ShipOrderInput {
   fulfillmentId: string;
@@ -27,7 +29,7 @@ export class ShipOrderUseCase {
   async execute(input: ShipOrderInput): Promise<ShipOrderOutput> {
     const fulfillment = await this.fulfillmentRepository.findById(input.fulfillmentId);
     if (!fulfillment) {
-      throw new Error(`Fulfillment not found: ${input.fulfillmentId}`);
+      throw new FulfillmentNotFoundError(input.fulfillmentId);
     }
 
     // Ensure valid precondition: allow shipping from packed or ready_to_ship
@@ -35,7 +37,7 @@ export class ShipOrderUseCase {
       // ok
     } else if (fulfillment.status === 'pending' || fulfillment.status === 'assigned') {
       // fast-path to ready_to_ship per test expectations
-      try { fulfillment.markReadyToShip(); } catch {}
+      try { fulfillment.markReadyToShip(); } catch (err) { logger.debug('Fulfillment auto-transition to ready_to_ship skipped', { error: err }); }
     }
 
     // Mark as shipped with tracking info

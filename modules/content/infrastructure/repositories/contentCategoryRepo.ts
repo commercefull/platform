@@ -6,6 +6,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { ContentCategory } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
+import { SlugAlreadyExistsError, FailedToCreateContentError, ContentValidationError, CategoryNotFoundError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Types
@@ -90,7 +91,7 @@ export class ContentCategoryRepo {
       [params.slug, params.parentId || null],
     );
     if (existing) {
-      throw new Error(`Category with slug "${params.slug}" already exists in this parent`);
+      throw new SlugAlreadyExistsError(params.slug);
     }
 
     // Calculate depth and path
@@ -129,7 +130,7 @@ export class ContentCategoryRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create category');
+      throw new FailedToCreateContentError('Failed to create category');
     }
 
     return result;
@@ -184,7 +185,7 @@ export class ContentCategoryRepo {
     );
 
     if (!result) {
-      throw new Error(`Failed to update category with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update category with ID ${id}`);
     }
 
     return result;
@@ -195,7 +196,7 @@ export class ContentCategoryRepo {
     const childCount = await query<Array<{ count: string }>>('SELECT COUNT(*) as count FROM "contentCategory" WHERE "parentId" = $1', [id]);
 
     if (childCount && childCount.length > 0 && parseInt(childCount[0].count) > 0) {
-      throw new Error(`Cannot delete category as it has ${childCount[0].count} child categories`);
+      throw new ContentValidationError(`Cannot delete category as it has ${childCount[0].count} child categories`);
     }
 
     const result = await queryOne<{ id: string }>(
@@ -208,7 +209,7 @@ export class ContentCategoryRepo {
   async moveCategory(id: string, newParentId: string | null): Promise<ContentCategory> {
     const category = await this.findCategoryById(id);
     if (!category) {
-      throw new Error(`Category with ID ${id} not found`);
+      throw new CategoryNotFoundError(id);
     }
 
     // Calculate new depth and path

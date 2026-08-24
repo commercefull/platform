@@ -19,7 +19,7 @@
 | <span class="badge badge-get">GET</span> | `/configuration` | `bind` | List all system configurations |
 | <span class="badge badge-put">PUT</span> | `/configuration/:configId` | `bind` | Update system configuration |
 | <span class="badge badge-get">GET</span> | `/configuration/:configId` | `bind` | Get system configuration by ID |
-| <span class="badge badge-get">GET</span> | `/configuration/active` | `bind` | Get active system configuration |
+| <span class="badge badge-get">GET</span> | `/configuration/active` | `bind` | Get active system configuration (must be before /:configId to avoid matching "active" as an ID) |
 | <span class="badge badge-post">POST</span> | `/dispatches` | `createStoreDispatch` | — |
 | <span class="badge badge-get">GET</span> | `/dispatches` | `listStoreDispatches` | — |
 | <span class="badge badge-get">GET</span> | `/dispatches/:dispatchId` | `getStoreDispatch` | — |

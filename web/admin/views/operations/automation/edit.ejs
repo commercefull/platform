@@ -1,0 +1,76 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/automation" class="btn btn-secondary"><i class="ti ti-arrow-left"></i> <%= t('common.back') %></a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><%= pageName %></h3></div>
+      <div class="card-body">
+        <form method="POST" action="/admin/automation/<%= rule.automationRuleId %>">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label"><%= t('common.name') %> *</label>
+              <input type="text" name="name" class="form-control" value="<%= rule.name || '' %>" required>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label"><%= t('common.priority') %></label>
+              <input type="number" name="priority" class="form-control" value="<%= rule.priority ?? 0 %>">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label"><%= t('common.status') %></label>
+              <select name="isActive" class="form-select">
+                <option value="true" <%= rule.isActive ? 'selected' : '' %>><%= t('common.active') %></option>
+                <option value="false" <%= !rule.isActive ? 'selected' : '' %>><%= t('common.inactive') %></option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Event Name</label>
+              <input type="text" name="eventName" class="form-control" value="<%= rule.triggerConfig?.eventName || '' %>">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Cron Expression</label>
+              <input type="text" name="cronExpression" class="form-control" value="<%= rule.triggerConfig?.cronExpression || '' %>">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label"><%= t('common.description') %></label>
+            <textarea name="description" class="form-control" rows="2"><%= rule.description || '' %></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Condition Match Mode</label>
+              <select name="conditionMatchMode" class="form-select">
+                <option value="all" <%= rule.conditionMatchMode === 'all' ? 'selected' : '' %>>All (AND)</option>
+                <option value="any" <%= rule.conditionMatchMode === 'any' ? 'selected' : '' %>>Any (OR)</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Action Execution Mode</label>
+              <select name="actionExecutionMode" class="form-select">
+                <option value="sequential" <%= rule.actionExecutionMode === 'sequential' ? 'selected' : '' %>>Sequential</option>
+                <option value="parallel" <%= rule.actionExecutionMode === 'parallel' ? 'selected' : '' %>>Parallel</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Conditions (JSON array)</label>
+            <textarea name="conditions" class="form-control" rows="4"><%= JSON.stringify(rule.conditions || []) %></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Actions (JSON array) *</label>
+            <textarea name="actions" class="form-control" rows="4" required><%= JSON.stringify(rule.actions || []) %></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary"><%= t('common.saveChanges') %></button>
+          <a href="/admin/automation/<%= rule.automationRuleId %>" class="btn btn-secondary"><%= t('common.cancel') %></a>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

@@ -5,9 +5,12 @@
  */
 
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 import { MarkAsReadUseCase } from '../../application/useCases';
-import notificationRepo from '../../infrastructure/repositories/notificationRepo';
+import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
+
+const notificationRepo = notificationDataRepository.notifications;
 import * as notificationCustomerController from '../controllers/notificationCustomerController';
 
 const router = express.Router();
@@ -164,21 +167,21 @@ router.post('/notifications/read', async (req, res) => {
 // Preferences
 // ============================================================================
 
-router.get('/notifications/preferences', notificationCustomerController.getPreferences);
-router.get('/notifications/preferences/type/:type', notificationCustomerController.getPreferenceByType);
-router.get('/notifications/preferences/:id', notificationCustomerController.getPreferenceById);
-router.post('/notifications/preferences', notificationCustomerController.createPreference);
-router.post('/notifications/preferences/bulk', notificationCustomerController.bulkUpdatePreferences);
-router.put('/notifications/preferences/:id/schedule', notificationCustomerController.updateSchedule);
-router.put('/notifications/preferences/:id', notificationCustomerController.updatePreference);
-router.delete('/notifications/preferences/:id', notificationCustomerController.deletePreference);
+router.get('/notifications/preferences', asyncHandler(notificationCustomerController.getPreferences));
+router.get('/notifications/preferences/type/:type', asyncHandler(notificationCustomerController.getPreferenceByType));
+router.get('/notifications/preferences/:id', asyncHandler(notificationCustomerController.getPreferenceById));
+router.post('/notifications/preferences', asyncHandler(notificationCustomerController.createPreference));
+router.post('/notifications/preferences/bulk', asyncHandler(notificationCustomerController.bulkUpdatePreferences));
+router.put('/notifications/preferences/:id/schedule', asyncHandler(notificationCustomerController.updateSchedule));
+router.put('/notifications/preferences/:id', asyncHandler(notificationCustomerController.updatePreference));
+router.delete('/notifications/preferences/:id', asyncHandler(notificationCustomerController.deletePreference));
 
 // ============================================================================
 // Devices
 // ============================================================================
 
-router.get('/notifications/devices', notificationCustomerController.listDevices);
-router.post('/notifications/devices', notificationCustomerController.registerDevice);
-router.delete('/notifications/devices/:deviceToken', notificationCustomerController.deleteDevice);
+router.get('/notifications/devices', asyncHandler(notificationCustomerController.listDevices));
+router.post('/notifications/devices', asyncHandler(notificationCustomerController.registerDevice));
+router.delete('/notifications/devices/:deviceToken', asyncHandler(notificationCustomerController.deleteDevice));
 
 export const notificationCustomerRouter = router;

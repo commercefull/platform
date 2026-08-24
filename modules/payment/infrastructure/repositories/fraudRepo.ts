@@ -3,6 +3,8 @@
  * Handles CRUD operations for fraud rules, checks, and blacklists
  */
 
+import { FraudCheckNotFoundError } from '../../domain/errors/PaymentErrors';
+
 import { query, queryOne } from '../../../../libs/db';
 
 // ============================================================================
@@ -317,7 +319,7 @@ export async function createCheck(check: {
 
 export async function runFraudCheck(fraudCheckId: string): Promise<FraudCheck> {
   const check = await getCheck(fraudCheckId);
-  if (!check) throw new Error('Fraud check not found');
+  if (!check) throw new FraudCheckNotFoundError();
 
   const rules = await getRules(true);
   const triggeredRules: unknown[] = [];
@@ -437,7 +439,7 @@ export async function isBlacklisted(type: BlacklistType, value: string): Promise
     `SELECT COUNT(*) as count FROM "fraudBlacklist" 
      WHERE "type" = $1 AND "value" = $2 AND "isActive" = true
      AND ("expiresAt" IS NULL OR "expiresAt" > NOW())`,
-    [type, value.toLowerCase()],
+    [type, (value || '').toLowerCase()],
   );
   return parseInt(row?.count || '0') > 0;
 }
@@ -465,7 +467,7 @@ export async function addToBlacklist(entry: {
     RETURNING *`,
     [
       entry.type,
-      entry.value.toLowerCase(),
+      (entry.value || '').toLowerCase(),
       entry.reason,
       entry.source || 'manual',
       entry.relatedOrderId,

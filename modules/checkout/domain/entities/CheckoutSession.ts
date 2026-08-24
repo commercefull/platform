@@ -4,8 +4,9 @@
  */
 
 import { Address } from '../valueObjects/Address';
-import { Money } from '../../../basket/domain/valueObjects/Money';
+import { Money } from '../../../../libs/money';
 import { BadRequestError } from '../../../../libs/errors';
+import { InvalidCheckoutStateError } from '../errors/CheckoutErrors';
 
 export type CheckoutStatus = 'active' | 'pending_payment' | 'processing' | 'completed' | 'abandoned' | 'expired' | 'failed';
 export type PaymentStatus = 'pending' | 'authorized' | 'captured' | 'failed' | 'refunded';
@@ -326,7 +327,7 @@ export class CheckoutSession {
 
   complete(): void {
     if (this.props.paymentStatus !== 'captured' && this.props.paymentStatus !== 'authorized') {
-      throw new Error('Cannot complete checkout: payment not confirmed');
+      throw new InvalidCheckoutStateError('payment not confirmed');
     }
     this.props.status = 'completed';
     this.props.completedAt = new Date();

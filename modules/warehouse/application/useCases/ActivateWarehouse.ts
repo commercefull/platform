@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { WarehouseNotFoundError } from '../../domain/errors/WarehouseErrors';
 
 export interface ActivateWarehouseInput {
   warehouseId: string;
@@ -32,7 +33,7 @@ export class ActivateWarehouseUseCase {
   async execute(input: ActivateWarehouseInput): Promise<ActivateWarehouseOutput> {
     const warehouse = await this.warehouseRepository.findById(input.warehouseId);
     if (!warehouse) {
-      throw new Error(`Warehouse not found: ${input.warehouseId}`);
+      throw new WarehouseNotFoundError(input.warehouseId);
     }
 
     if (warehouse.isActive) {

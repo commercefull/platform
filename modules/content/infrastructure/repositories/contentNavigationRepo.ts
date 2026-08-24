@@ -6,6 +6,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { ContentNavigation, ContentNavigationItem } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
+import { SlugAlreadyExistsError, FailedToCreateContentError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Types
@@ -55,7 +56,7 @@ export class ContentNavigationRepo {
     // Check slug uniqueness
     const existing = await this.findNavigationBySlug(params.slug);
     if (existing) {
-      throw new Error(`Navigation with slug "${params.slug}" already exists`);
+      throw new SlugAlreadyExistsError(params.slug);
     }
 
     const result = await queryOne<ContentNavigation>(
@@ -77,7 +78,7 @@ export class ContentNavigationRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create navigation');
+      throw new FailedToCreateContentError('Failed to create navigation');
     }
 
     return result;
@@ -120,7 +121,7 @@ export class ContentNavigationRepo {
     );
 
     if (!result) {
-      throw new Error(`Failed to update navigation with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update navigation with ID ${id}`);
     }
 
     return result;
@@ -197,7 +198,7 @@ export class ContentNavigationRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create navigation item');
+      throw new FailedToCreateContentError('Failed to create navigation item');
     }
 
     return result;
@@ -252,7 +253,7 @@ export class ContentNavigationRepo {
     );
 
     if (!result) {
-      throw new Error(`Failed to update navigation item with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update navigation item with ID ${id}`);
     }
 
     return result;

@@ -4,6 +4,7 @@
  */
 
 import { Router } from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as shippingController from '../controllers/shippingController';
 
@@ -15,72 +16,72 @@ router.use(isOrganizationLoggedIn);
 // Carriers
 // ============================================================================
 
-router.get('/carriers', shippingController.getCarriers);
-router.get('/carriers/:id', shippingController.getCarrierById);
-router.post('/carriers', shippingController.createCarrier);
-router.put('/carriers/:id', shippingController.updateCarrier);
-router.delete('/carriers/:id', shippingController.deleteCarrier);
+router.get('/carriers', asyncHandler(shippingController.getCarriers));
+router.get('/carriers/:id', asyncHandler(shippingController.getCarrierById));
+router.post('/carriers', asyncHandler(shippingController.createCarrier));
+router.put('/carriers/:id', asyncHandler(shippingController.updateCarrier));
+router.delete('/carriers/:id', asyncHandler(shippingController.deleteCarrier));
 
 // ============================================================================
 // Methods
 // ============================================================================
 
-router.get('/methods', shippingController.getMethods);
-router.get('/methods/:id', shippingController.getMethodById);
-router.post('/methods', shippingController.createMethod);
-router.put('/methods/:id', shippingController.updateMethod);
-router.delete('/methods/:id', shippingController.deleteMethod);
+router.get('/methods', asyncHandler(shippingController.getMethods));
+router.get('/methods/:id', asyncHandler(shippingController.getMethodById));
+router.post('/methods', asyncHandler(shippingController.createMethod));
+router.put('/methods/:id', asyncHandler(shippingController.updateMethod));
+router.delete('/methods/:id', asyncHandler(shippingController.deleteMethod));
 
 // ============================================================================
 // Zones
 // ============================================================================
 
-router.get('/zones', shippingController.getZones);
-router.get('/zones/:id', shippingController.getZoneById);
-router.post('/zones', shippingController.createZone);
-router.put('/zones/:id', shippingController.updateZone);
-router.delete('/zones/:id', shippingController.deleteZone);
+router.get('/zones', asyncHandler(shippingController.getZones));
+router.get('/zones/:id', asyncHandler(shippingController.getZoneById));
+router.post('/zones', asyncHandler(shippingController.createZone));
+router.put('/zones/:id', asyncHandler(shippingController.updateZone));
+router.delete('/zones/:id', asyncHandler(shippingController.deleteZone));
 
 // ============================================================================
 // Rates
 // ============================================================================
 
-router.get('/rates', shippingController.getRates);
-router.get('/rates/:id', shippingController.getRateById);
-router.post('/rates', shippingController.createRate);
-router.put('/rates/:id', shippingController.updateRate);
-router.delete('/rates/:id', shippingController.deleteRate);
+router.get('/rates', asyncHandler(shippingController.getRates));
+router.get('/rates/:id', asyncHandler(shippingController.getRateById));
+router.post('/rates', asyncHandler(shippingController.createRate));
+router.put('/rates/:id', asyncHandler(shippingController.updateRate));
+router.delete('/rates/:id', asyncHandler(shippingController.deleteRate));
 
 // ============================================================================
 // Packaging Types
 // ============================================================================
 
-router.get('/packaging-types', shippingController.getPackagingTypes);
-router.get('/packaging-types/:id', shippingController.getPackagingTypeById);
-router.post('/packaging-types', shippingController.createPackagingType);
-router.put('/packaging-types/:id', shippingController.updatePackagingType);
-router.delete('/packaging-types/:id', shippingController.deletePackagingType);
+router.get('/packaging-types', asyncHandler(shippingController.getPackagingTypes));
+router.get('/packaging-types/:id', asyncHandler(shippingController.getPackagingTypeById));
+router.post('/packaging-types', asyncHandler(shippingController.createPackagingType));
+router.put('/packaging-types/:id', asyncHandler(shippingController.updatePackagingType));
+router.delete('/packaging-types/:id', asyncHandler(shippingController.deletePackagingType));
 
 // ============================================================================
 // Rate Calculation
 // ============================================================================
 
-router.post('/calculate-rates', shippingController.calculateRates);
+router.post('/calculate-rates', asyncHandler(shippingController.calculateRates));
 
 // ============================================================================
 // Shipping Labels
 // ============================================================================
 
-router.post('/labels', shippingController.createLabel);
-router.get('/labels/:id', shippingController.getLabel);
-router.get('/labels/order/:orderId', shippingController.getLabelsByOrder);
-router.post('/labels/:id/void', shippingController.voidLabel);
+router.post('/labels', asyncHandler(shippingController.createLabel));
+router.get('/labels/:id', asyncHandler(shippingController.getLabel));
+router.get('/labels/order/:orderId', asyncHandler(shippingController.getLabelsByOrder));
+router.post('/labels/:id/void', asyncHandler(shippingController.voidLabel));
 
 // ============================================================================
 // Tracking
 // ============================================================================
 
-router.get('/track/:id', shippingController.trackShipment);
-router.get('/track', shippingController.trackShipment);
+router.get('/track/:id', asyncHandler(shippingController.trackShipment));
+router.get('/track', asyncHandler(shippingController.trackShipment));
 
 export const shippingBusinessRouter = router;

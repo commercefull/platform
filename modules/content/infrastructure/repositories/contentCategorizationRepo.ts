@@ -5,6 +5,7 @@
 
 import { queryOne, query } from '../../../../libs/db';
 import { ContentCategorization } from '../../../../libs/db/types';
+import { FailedToCreateContentError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Types
@@ -72,7 +73,7 @@ export class ContentCategorizationRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create categorization');
+      throw new FailedToCreateContentError('Failed to create categorization');
     }
 
     return result;
@@ -88,7 +89,7 @@ export class ContentCategorizationRepo {
     );
 
     if (!result) {
-      throw new Error(`Failed to set primary category with ID ${categorizationId}`);
+      throw new FailedToCreateContentError(`Failed to set primary category with ID ${categorizationId}`);
     }
 
     return result;

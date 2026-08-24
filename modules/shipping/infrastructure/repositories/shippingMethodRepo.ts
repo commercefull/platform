@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingMethod } from '../../../../libs/db/types';
+import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 
 export { ShippingMethod };
 
@@ -77,7 +78,7 @@ export async function create(input: CreateShippingMethodInput): Promise<Shipping
     ],
   );
 
-  if (!result) throw new Error('Failed to create shipping method');
+  if (!result) throw new FailedToCreateShippingEntityError('Failed to create shipping method');
   return result;
 }
 

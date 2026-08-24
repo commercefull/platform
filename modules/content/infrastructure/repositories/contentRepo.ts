@@ -1,6 +1,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ContentType, ContentPage, ContentBlock, ContentBlockType, ContentTemplate } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
+import { ContentTypeNotFoundError, ContentPageNotFoundError, ContentBlockNotFoundError, ContentTemplateNotFoundError, ContentValidationError, FailedToCreateContentError, SlugAlreadyExistsError } from '../../domain/errors/ContentErrors';
 
 // Table constants
 const TABLES = {
@@ -80,7 +81,7 @@ export class ContentRepo {
     // Validate slug uniqueness
     const existingType = await this.findContentTypeBySlug(params.slug);
     if (existingType) {
-      throw new Error(`Content type with slug "${params.slug}" already exists`);
+      throw new SlugAlreadyExistsError(params.slug);
     }
 
     const result = await queryOne<ContentType>(
@@ -106,7 +107,7 @@ export class ContentRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create content type');
+      throw new FailedToCreateContentError('Failed to create content type');
     }
 
     return result;
@@ -117,14 +118,14 @@ export class ContentRepo {
     const currentType = await this.findContentTypeById(id);
 
     if (!currentType) {
-      throw new Error(`Content type with ID ${id} not found`);
+      throw new ContentTypeNotFoundError(id);
     }
 
     // Check slug uniqueness if it's being updated
     if (params.slug && params.slug !== currentType.slug) {
       const existingType = await this.findContentTypeBySlug(params.slug);
       if (existingType) {
-        throw new Error(`Content type with slug "${params.slug}" already exists`);
+        throw new SlugAlreadyExistsError(params.slug);
       }
     }
 
@@ -179,7 +180,7 @@ export class ContentRepo {
     const result = await queryOne<ContentType>(query, values);
 
     if (!result) {
-      throw new Error(`Failed to update content type with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update content type with ID ${id}`);
     }
 
     return result;
@@ -193,7 +194,7 @@ export class ContentRepo {
     );
 
     if (blocksUsingType && blocksUsingType.length > 0 && parseInt(blocksUsingType[0].count) > 0) {
-      throw new Error(`Cannot delete content type as it is being used by ${blocksUsingType[0].count} content blocks`);
+      throw new ContentValidationError(`Cannot delete content type as it is being used by ${blocksUsingType[0].count} content blocks`);
     }
 
     const result = await queryOne<{ id: string }>(
@@ -266,7 +267,7 @@ export class ContentRepo {
     // Validate slug uniqueness
     const existingPage = await this.findPageBySlug(params.slug);
     if (existingPage) {
-      throw new Error(`Page with slug "${params.slug}" already exists`);
+      throw new SlugAlreadyExistsError(params.slug);
     }
 
     // Build dynamic insert - DB uses camelCase
@@ -303,7 +304,7 @@ export class ContentRepo {
     const result = await queryOne<ContentPage>(sqlQuery, fieldValues);
 
     if (!result) {
-      throw new Error('Failed to create content page');
+      throw new FailedToCreateContentError('Failed to create content page');
     }
 
     return result;
@@ -314,7 +315,7 @@ export class ContentRepo {
     const currentPage = await this.findPageById(id);
 
     if (!currentPage) {
-      throw new Error(`Page with ID ${id} not found`);
+      throw new ContentPageNotFoundError(id);
     }
 
     // If setting as home page, clear any existing home page
@@ -326,7 +327,7 @@ export class ContentRepo {
     if (params.slug && params.slug !== currentPage.slug) {
       const existingPage = await this.findPageBySlug(params.slug);
       if (existingPage && existingPage.contentPageId !== id) {
-        throw new Error(`Page with slug "${params.slug}" already exists`);
+        throw new SlugAlreadyExistsError(params.slug);
       }
     }
 
@@ -365,7 +366,7 @@ export class ContentRepo {
     const result = await queryOne<ContentPage>(sql, values);
 
     if (!result) {
-      throw new Error(`Failed to update page with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update page with ID ${id}`);
     }
 
     return result;
@@ -396,7 +397,7 @@ export class ContentRepo {
     );
 
     if (!result) {
-      throw new Error(`Failed to publish page with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to publish page with ID ${id}`);
     }
 
     return result;
@@ -418,13 +419,13 @@ export class ContentRepo {
     // Validate that page exists
     const page = await this.findPageById(params.contentPageId);
     if (!page) {
-      throw new Error(`Page with ID ${params.contentPageId} not found`);
+      throw new ContentPageNotFoundError(params.contentPageId);
     }
 
     // Validate that block type exists
     const blockType = await this.findBlockTypeById(params.blockTypeId);
     if (!blockType) {
-      throw new Error(`Block type with ID ${params.blockTypeId} not found`);
+      throw new ContentTypeNotFoundError(params.blockTypeId);
     }
 
     const result = await queryOne<ContentBlock>(
@@ -446,7 +447,7 @@ export class ContentRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create content block');
+      throw new FailedToCreateContentError('Failed to create content block');
     }
 
     return result;
@@ -457,7 +458,7 @@ export class ContentRepo {
     const currentBlock = await this.findBlockById(id);
 
     if (!currentBlock) {
-      throw new Error(`Content block with ID ${id} not found`);
+      throw new ContentBlockNotFoundError(id);
     }
 
     // Build dynamic query with DB column names
@@ -498,7 +499,7 @@ export class ContentRepo {
     const result = await queryOne<ContentBlock>(sql, values);
 
     if (!result) {
-      throw new Error(`Failed to update content block with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update content block with ID ${id}`);
     }
 
     return result;
@@ -568,7 +569,7 @@ export class ContentRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create content template');
+      throw new FailedToCreateContentError('Failed to create content template');
     }
 
     return result;
@@ -579,7 +580,7 @@ export class ContentRepo {
     const currentTemplate = await this.findTemplateById(id);
 
     if (!currentTemplate) {
-      throw new Error(`Content template with ID ${id} not found`);
+      throw new ContentTemplateNotFoundError(id);
     }
 
     // Build dynamic query
@@ -620,7 +621,7 @@ export class ContentRepo {
     const result = await queryOne<ContentTemplate>(sql, values);
 
     if (!result) {
-      throw new Error(`Failed to update content template with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update content template with ID ${id}`);
     }
 
     return result;
@@ -634,7 +635,7 @@ export class ContentRepo {
     );
 
     if (pagesUsingTemplate && pagesUsingTemplate.length > 0 && parseInt(pagesUsingTemplate[0].count) > 0) {
-      throw new Error(`Cannot delete template as it is being used by ${pagesUsingTemplate[0].count} pages`);
+      throw new ContentValidationError(`Cannot delete template as it is being used by ${pagesUsingTemplate[0].count} pages`);
     }
 
     const result = await queryOne<{ id: string }>(
@@ -655,7 +656,7 @@ export class ContentRepo {
     // Verify page exists
     const page = await this.findPageById(pageId);
     if (!page) {
-      throw new Error(`Page with ID ${pageId} not found`);
+      throw new ContentPageNotFoundError(pageId);
     }
 
     // Process each block order update individually
@@ -663,11 +664,11 @@ export class ContentRepo {
       // Verify block exists and belongs to this page
       const block = await this.findBlockById(blockOrder.id);
       if (!block) {
-        throw new Error(`Block with ID ${blockOrder.id} not found`);
+        throw new ContentBlockNotFoundError(blockOrder.id);
       }
 
       if (block.contentPageId !== pageId) {
-        throw new Error(`Block with ID ${blockOrder.id} does not belong to page ${pageId}`);
+        throw new ContentValidationError(`Block with ID ${blockOrder.id} does not belong to page ${pageId}`);
       }
 
       // Update the block order

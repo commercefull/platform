@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { LoyaltyMemberNotFoundError } from '../../domain/errors/LoyaltyErrors';
 
 export interface CalculateTierStatusInput {
   customerId: string;
@@ -71,7 +72,7 @@ export class CalculateTierStatusUseCase {
     // Get customer's current tier and qualifying metrics
     const customer = await this.loyaltyRepository.getCustomerLoyalty(customerId, programId);
     if (!customer) {
-      throw new Error('Customer not found in loyalty program');
+      throw new LoyaltyMemberNotFoundError(customerId);
     }
 
     // Get all tier thresholds

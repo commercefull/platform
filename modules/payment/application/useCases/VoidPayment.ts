@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { TransactionNotFoundError, TransactionCannotBeVoidedError, VoidFailedError } from '../../domain/errors/PaymentErrors';
 
 export interface VoidPaymentInput {
   transactionId: string;
@@ -51,12 +52,12 @@ export class VoidPaymentUseCase {
     // Get the transaction
     const transaction = await this.paymentRepository.findTransactionById(input.transactionId);
     if (!transaction) {
-      throw new Error(`Transaction not found: ${input.transactionId}`);
+      throw new TransactionNotFoundError(input.transactionId);
     }
 
     // Validate transaction can be voided (only authorized transactions)
     if (transaction.status !== 'authorized') {
-      throw new Error(`Transaction cannot be voided. Current status: ${transaction.status}. Only authorized transactions can be voided.`);
+      throw new TransactionCannotBeVoidedError(transaction.status);
     }
 
     // Call payment gateway to void
@@ -71,7 +72,7 @@ export class VoidPaymentUseCase {
       transaction.gatewayResponse = gatewayResult.error;
       await this.paymentRepository.updateTransaction(transaction);
 
-      throw new Error(`Void failed: ${gatewayResult.error}`);
+      throw new VoidFailedError(gatewayResult.error ?? 'Unknown gateway error');
     }
 
     // Update transaction

@@ -1,6 +1,8 @@
 import { eventBus } from '../../../../libs/events/eventBus';
+import { withTransaction } from '../../../../libs/db';
 import { StoreDispatchRepository } from '../../domain/repositories/StoreDispatchRepository';
 import { InventoryLocation, Inventory, InventoryMovement } from '../../domain/entities/Inventory';
+import { StoreDispatchNotFoundError } from '../../domain/errors/InventoryErrors';
 
 interface DispatchFromStoreInventoryPort {
   getLocationByStoreId(storeId: string): Promise<InventoryLocation | null>;
@@ -22,7 +24,7 @@ export class DispatchFromStoreUseCase {
   ): Promise<Record<string, unknown>> {
     const dispatch = await this.dispatchRepository.findById(dispatchId);
     if (!dispatch) {
-      throw new Error('Dispatch not found');
+      throw new StoreDispatchNotFoundError(dispatchId);
     }
 
     const sourceLocation = await this.inventoryRepository.getLocationByStoreId(dispatch.fromStoreId);
@@ -41,44 +43,46 @@ export class DispatchFromStoreUseCase {
 
     dispatch.markDispatched(dispatchedBy, dispatchedItems);
 
-    for (const item of dispatch.items) {
-      if (item.dispatchedQuantity <= 0) {
-        continue;
+    await withTransaction(async () => {
+      for (const item of dispatch.items) {
+        if (item.dispatchedQuantity <= 0) {
+          continue;
+        }
+
+        const inventory = sourceLocation
+          ? await this.inventoryRepository.findByProductAndLocation(item.productId, sourceLocation.locationId, item.variantId)
+          : null;
+        if (!inventory) {
+          continue;
+        }
+
+        inventory.fulfillReservation(item.dispatchedQuantity, dispatchedBy);
+        await this.inventoryRepository.save(inventory);
+        await this.inventoryRepository.recordMovement({
+          inventoryId: inventory.inventoryId,
+          productId: inventory.productId,
+          variantId: inventory.variantId,
+          locationId: inventory.locationId,
+          type: 'outbound',
+          quantity: item.dispatchedQuantity,
+          previousQuantity: inventory.quantity + item.dispatchedQuantity,
+          newQuantity: inventory.quantity,
+          reason: 'Store dispatch shipped',
+          referenceId: dispatch.dispatchId,
+          referenceType: 'store_dispatch',
+          performedBy: dispatchedBy,
+          notes: dispatch.dispatchNumber,
+        });
       }
 
-      const inventory = sourceLocation
-        ? await this.inventoryRepository.findByProductAndLocation(item.productId, sourceLocation.locationId, item.variantId)
-        : null;
-      if (!inventory) {
-        continue;
-      }
-
-      inventory.fulfillReservation(item.dispatchedQuantity, dispatchedBy);
-      await this.inventoryRepository.save(inventory);
-      await this.inventoryRepository.recordMovement({
-        inventoryId: inventory.inventoryId,
-        productId: inventory.productId,
-        variantId: inventory.variantId,
-        locationId: inventory.locationId,
-        type: 'outbound',
-        quantity: item.dispatchedQuantity,
-        previousQuantity: inventory.quantity + item.dispatchedQuantity,
-        newQuantity: inventory.quantity,
-        reason: 'Store dispatch shipped',
-        referenceId: dispatch.dispatchId,
-        referenceType: 'store_dispatch',
-        performedBy: dispatchedBy,
-        notes: dispatch.dispatchNumber,
-      });
-    }
-
-    const savedDispatch = await this.dispatchRepository.save(dispatch);
+      await this.dispatchRepository.save(dispatch);
+    });
 
     eventBus.emit('inventory.dispatch.shipped', {
-      dispatchId: savedDispatch.dispatchId,
+      dispatchId: dispatch.dispatchId,
       dispatchedBy,
     });
 
-    return savedDispatch.toJSON();
+    return dispatch.toJSON();
   }
 }

@@ -13,21 +13,14 @@ import { adminRespond } from '../../respond';
 // ============================================================================
 
 export const localizationDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/localization/index', {
-      pageName: 'Localization',
-      languages: [],
-      currencies: [],
-      regions: [],
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error loading localization dashboard:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load localization settings',
-    });
-  }
+  adminRespond(req, res, 'settings/localization/index', {
+    pageName: 'Localization',
+    languages: [],
+    currencies: [],
+    regions: [],
+    success: req.query.success || null,
+  });
+  
 };
 
 // ============================================================================
@@ -35,41 +28,27 @@ export const localizationDashboard = async (req: TypedRequest, res: Response): P
 // ============================================================================
 
 export const listLanguages = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/localization/languages/index', {
-      pageName: 'Languages',
-      languages: [],
-      pagination: { total: 0, page: 1, pages: 1 },
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error listing languages:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load languages',
-    });
-  }
+  adminRespond(req, res, 'settings/localization/languages/index', {
+    pageName: 'Languages',
+    languages: [],
+    pagination: { total: 0, page: 1, pages: 1 },
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createLanguageForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/localization/languages/create', {
-      pageName: 'Add Language',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'settings/localization/languages/create', {
+    pageName: 'Add Language',
+  });
+  
 };
 
 export const createLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/languages?success=Language added successfully');
   } catch (error: unknown) {
-    logger.error('Error creating language:', error);
+    logger.warn('Error creating language:', error);
     adminRespond(req, res, 'settings/localization/languages/create', {
       pageName: 'Add Language',
       error: (error as Error).message || 'Failed to add language',
@@ -79,25 +58,18 @@ export const createLanguage = async (req: TypedRequest, res: Response): Promise<
 };
 
 export const editLanguageForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/localization/languages/edit', {
-      pageName: 'Edit Language',
-      language: null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'settings/localization/languages/edit', {
+    pageName: 'Edit Language',
+    language: null,
+  });
+  
 };
 
 export const updateLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/languages?success=Language updated successfully');
   } catch (error: unknown) {
-    logger.error('Error updating language:', error);
+    logger.warn('Error updating language:', error);
     adminRespond(req, res, 'settings/localization/languages/edit', {
       pageName: 'Edit Language',
       language: null,
@@ -108,12 +80,8 @@ export const updateLanguage = async (req: TypedRequest, res: Response): Promise<
 };
 
 export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    res.json({ success: true, message: 'Language deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error deleting language:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete language' });
-  }
+  res.json({ success: true, message: 'Language deleted successfully' });
+  
 };
 
 // ============================================================================
@@ -121,41 +89,27 @@ export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<
 // ============================================================================
 
 export const listCurrencies = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/localization/currencies/index', {
-      pageName: 'Currencies',
-      currencies: [],
-      pagination: { total: 0, page: 1, pages: 1 },
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error listing currencies:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load currencies',
-    });
-  }
+  adminRespond(req, res, 'settings/localization/currencies/index', {
+    pageName: 'Currencies',
+    currencies: [],
+    pagination: { total: 0, page: 1, pages: 1 },
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createCurrencyForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/localization/currencies/create', {
-      pageName: 'Add Currency',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'settings/localization/currencies/create', {
+    pageName: 'Add Currency',
+  });
+  
 };
 
 export const createCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/currencies?success=Currency added successfully');
   } catch (error: unknown) {
-    logger.error('Error creating currency:', error);
+    logger.warn('Error creating currency:', error);
     adminRespond(req, res, 'settings/localization/currencies/create', {
       pageName: 'Add Currency',
       error: (error as Error).message || 'Failed to add currency',
@@ -165,25 +119,18 @@ export const createCurrency = async (req: TypedRequest, res: Response): Promise<
 };
 
 export const editCurrencyForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/localization/currencies/edit', {
-      pageName: 'Edit Currency',
-      currency: null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'settings/localization/currencies/edit', {
+    pageName: 'Edit Currency',
+    currency: null,
+  });
+  
 };
 
 export const updateCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/currencies?success=Currency updated successfully');
   } catch (error: unknown) {
-    logger.error('Error updating currency:', error);
+    logger.warn('Error updating currency:', error);
     adminRespond(req, res, 'settings/localization/currencies/edit', {
       pageName: 'Edit Currency',
       currency: null,
@@ -194,12 +141,8 @@ export const updateCurrency = async (req: TypedRequest, res: Response): Promise<
 };
 
 export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    res.json({ success: true, message: 'Currency deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error deleting currency:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete currency' });
-  }
+  res.json({ success: true, message: 'Currency deleted successfully' });
+  
 };
 
 // ============================================================================
@@ -207,41 +150,27 @@ export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<
 // ============================================================================
 
 export const listRegions = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/localization/regions/index', {
-      pageName: 'Regions',
-      regions: [],
-      pagination: { total: 0, page: 1, pages: 1 },
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error listing regions:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load regions',
-    });
-  }
+  adminRespond(req, res, 'settings/localization/regions/index', {
+    pageName: 'Regions',
+    regions: [],
+    pagination: { total: 0, page: 1, pages: 1 },
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createRegionForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/localization/regions/create', {
-      pageName: 'Add Region',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'settings/localization/regions/create', {
+    pageName: 'Add Region',
+  });
+  
 };
 
 export const createRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/regions?success=Region added successfully');
   } catch (error: unknown) {
-    logger.error('Error creating region:', error);
+    logger.warn('Error creating region:', error);
     adminRespond(req, res, 'settings/localization/regions/create', {
       pageName: 'Add Region',
       error: (error as Error).message || 'Failed to add region',
@@ -251,25 +180,18 @@ export const createRegion = async (req: TypedRequest, res: Response): Promise<vo
 };
 
 export const editRegionForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/localization/regions/edit', {
-      pageName: 'Edit Region',
-      region: null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'settings/localization/regions/edit', {
+    pageName: 'Edit Region',
+    region: null,
+  });
+  
 };
 
 export const updateRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/regions?success=Region updated successfully');
   } catch (error: unknown) {
-    logger.error('Error updating region:', error);
+    logger.warn('Error updating region:', error);
     adminRespond(req, res, 'settings/localization/regions/edit', {
       pageName: 'Edit Region',
       region: null,
@@ -280,10 +202,6 @@ export const updateRegion = async (req: TypedRequest, res: Response): Promise<vo
 };
 
 export const deleteRegion = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    res.json({ success: true, message: 'Region deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error deleting region:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete region' });
-  }
+  res.json({ success: true, message: 'Region deleted successfully' });
+  
 };

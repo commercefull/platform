@@ -4,6 +4,9 @@
  * Listens to the platform eventBus and dispatches matching events
  * to registered webhook endpoints with HMAC signature verification,
  * retry logic, and delivery tracking.
+ *
+ * Retry processing uses a claim-based polling worker (setTimeout-based,
+ * not setInterval) with FOR UPDATE SKIP LOCKED for multi-node safety.
  */
 
 import { createHmac } from 'crypto';
@@ -14,8 +17,14 @@ import { WebhookEndpointEntity } from '../../domain/entities/WebhookEndpoint';
 import { WebhookDeliveryEntity } from '../../domain/entities/WebhookDelivery';
 import { WebhookRepositoryInterface } from '../../domain/repositories/WebhookRepository';
 
+const RETRY_POLL_INTERVAL_MS = 5_000;
+const RETRY_BATCH_SIZE = 20;
+
 export class WebhookDispatchService {
-  private retryTimer: ReturnType<typeof setInterval> | null = null;
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
+  private isPolling = false;
+  private shuttingDown = false;
+  private readonly nodeId = `${process.pid}-${Date.now()}`;
 
   constructor(private readonly repo: WebhookRepositoryInterface) {}
 
@@ -24,16 +33,17 @@ export class WebhookDispatchService {
    */
   start(): void {
     eventBus.on('*', this.handleEvent.bind(this));
-    this.startRetryLoop();
-    logger.info('[WEBHOOK] Dispatch service started');
+    this.startRetryWorker();
+    logger.info('[WEBHOOK] Dispatch service started', { nodeId: this.nodeId });
   }
 
   /**
    * Stop listening and clean up
    */
   stop(): void {
+    this.shuttingDown = true;
     if (this.retryTimer) {
-      clearInterval(this.retryTimer);
+      clearTimeout(this.retryTimer);
       this.retryTimer = null;
     }
     logger.info('[WEBHOOK] Dispatch service stopped');
@@ -174,16 +184,20 @@ export class WebhookDispatchService {
   }
 
   /**
-   * Process pending retries
+   * Process pending retries using claim-based locking.
+   * Multi-node safe via FOR UPDATE SKIP LOCKED.
    */
   private async processRetries(): Promise<void> {
+    if (this.isPolling) return;
+    this.isPolling = true;
+
     try {
-      const pendingDeliveries = await this.repo.findPendingRetries();
-      if (pendingDeliveries.length === 0) return;
+      const claimedDeliveries = await this.repo.claimPendingRetries(this.nodeId, RETRY_BATCH_SIZE);
+      if (claimedDeliveries.length === 0) return;
 
-      logger.info(`[WEBHOOK] Processing ${pendingDeliveries.length} pending retries`);
+      logger.info(`[WEBHOOK] Claimed ${claimedDeliveries.length} pending retries`, { nodeId: this.nodeId });
 
-      for (const deliveryProps of pendingDeliveries) {
+      for (const deliveryProps of claimedDeliveries) {
         const delivery = WebhookDeliveryEntity.reconstitute(deliveryProps);
         const endpointProps = await this.repo.findEndpointById(delivery.webhookEndpointId);
 
@@ -194,26 +208,45 @@ export class WebhookDispatchService {
             errorMessage: 'Endpoint no longer active',
             nextRetryAt: null,
           });
+          await this.repo.releaseDeliveryLock(delivery.webhookDeliveryId);
           continue;
         }
 
         const endpoint = WebhookEndpointEntity.reconstitute(endpointProps);
         await this.attemptDelivery(delivery, endpoint);
+        await this.repo.releaseDeliveryLock(delivery.webhookDeliveryId);
       }
     } catch (error) {
       logger.error('[WEBHOOK] Error processing retries:', error);
+    } finally {
+      this.isPolling = false;
     }
   }
 
   /**
-   * Start the retry processing loop (runs every 30 seconds)
+   * Start the claim-based retry worker.
+   * Uses setTimeout (not setInterval) with .unref() so:
+   * - The process can exit gracefully without the timer blocking
+   * - The next poll only schedules after the current batch completes
+   * - Multi-node safe via FOR UPDATE SKIP LOCKED in claimPendingRetries()
    */
-  private startRetryLoop(): void {
-    this.retryTimer = setInterval(() => {
-      this.processRetries().catch(err => {
-        logger.error('[WEBHOOK] Retry loop error:', err);
-      });
-    }, 30000);
+  private startRetryWorker(): void {
+    const poll = async () => {
+      if (this.shuttingDown) return;
+
+      try {
+        await this.processRetries();
+      } catch (err: unknown) {
+        logger.error('[WEBHOOK] Retry worker error:', err);
+      }
+
+      if (!this.shuttingDown) {
+        this.retryTimer = setTimeout(poll, RETRY_POLL_INTERVAL_MS);
+        this.retryTimer.unref();
+      }
+    };
+
+    poll();
   }
 
   /**

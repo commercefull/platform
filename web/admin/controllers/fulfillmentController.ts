@@ -3,223 +3,184 @@
  * Handles order fulfillment tracking and warehouse operations
  */
 
-import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import orderFulfillmentRepo from '../../../modules/order/infrastructure/repositories/orderFulfillmentRepo';
-import orderRepo from '../../../modules/order/infrastructure/repositories/orderRepo';
-import warehouseRepo from '../../../modules/warehouse/infrastructure/repositories/warehouseRepo';
+import { ManageOrderFulfillmentsUseCase, GetOrderForFulfillmentUseCase } from '../../../modules/order/application/useCases/ManageOrderFulfillments';
+import { ManageWarehouseAdminUseCase } from '../../../modules/warehouse/application/useCases/ManageWarehouseAdmin';
 import { adminRespond } from '../../respond';
+
+const manageFulfillmentsUseCase = new ManageOrderFulfillmentsUseCase();
+const getOrderForFulfillmentUseCase = new GetOrderForFulfillmentUseCase();
+const manageWarehouseUseCase = new ManageWarehouseAdminUseCase();
 
 // ============================================================================
 // Fulfillment Tracking & Management
 // ============================================================================
 
 export const listFulfillments = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const status = req.query.status as string;
-    const warehouseId = req.query.warehouseId as string;
-    const limit = parseInt(req.query.limit as string) || 50;
-    const offset = parseInt(req.query.offset as string) || 0;
+  const status = req.query.status as string;
+  const warehouseId = req.query.warehouseId as string;
+  const limit = parseInt(req.query.limit as string) || 50;
+  const offset = parseInt(req.query.offset as string) || 0;
 
-    let fulfillments: unknown[] = [];
+  let fulfillments: unknown[];
 
-    if (status) {
-      fulfillments = await orderFulfillmentRepo.findByStatus(status as 'pending' | 'processing' | 'shipped' | 'delivered' | 'failed' | 'cancelled', limit, offset);
-    } else {
-      // Get recent fulfillments (this would need to be implemented in the repo)
-      // For now, get pending fulfillments
-      fulfillments = await orderFulfillmentRepo.findByStatus('pending', limit, offset);
-    }
-
-    // Get fulfillment statistics
-    const stats = await orderFulfillmentRepo.getStatusStatistics();
-
-    // Get warehouses for filtering
-    const warehouses = await warehouseRepo.findAll(true);
-
-    adminRespond(req, res, 'operations/fulfillments/index', {
-      pageName: 'Order Fulfillments',
-      fulfillments,
-      stats,
-      filters: { status, warehouseId },
-      warehouses,
-      pagination: { limit, offset },
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load fulfillments',
-    });
+  if (status) {
+    fulfillments = await manageFulfillmentsUseCase.findByStatus(status, limit, offset);
+  } else {
+    // Get recent fulfillments (this would need to be implemented in the repo)
+    // For now, get pending fulfillments
+    fulfillments = await manageFulfillmentsUseCase.findByStatus('pending', limit, offset);
   }
+
+  // Get fulfillment statistics
+  const stats = await manageFulfillmentsUseCase.getStatusStatistics();
+
+  // Get warehouses for filtering
+  const warehouses = await manageWarehouseUseCase.findAll(true);
+
+  adminRespond(req, res, 'operations/fulfillments/index', {
+    pageName: 'Order Fulfillments',
+    fulfillments,
+    stats,
+    filters: { status, warehouseId },
+    warehouses,
+    pagination: { limit, offset },
+
+    success: req.query.success || null,
+  });
+  
 };
 
 export const viewFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { fulfillmentId } = req.params;
+  const { fulfillmentId } = req.params;
 
-    const fulfillment = await orderFulfillmentRepo.findById(fulfillmentId);
+  const fulfillment = await manageFulfillmentsUseCase.findById(fulfillmentId);
 
-    if (!fulfillment) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Fulfillment not found',
-      });
-      return;
-    }
-
-    // Get associated order details
-    const order = await orderRepo.findById(fulfillment.orderId);
-
-    adminRespond(req, res, 'operations/fulfillments/view', {
-      pageName: `Fulfillment: ${fulfillment.fulfillmentNumber}`,
-      fulfillment,
-      order,
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!fulfillment) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load fulfillment',
+      pageName: 'Not Found',
+      error: 'Fulfillment not found',
     });
+    return;
   }
+
+  // Get associated order details
+  const order = await getOrderForFulfillmentUseCase.findById(fulfillment.orderId);
+
+  adminRespond(req, res, 'operations/fulfillments/view', {
+    pageName: `Fulfillment: ${fulfillment.fulfillmentNumber}`,
+    fulfillment,
+    order,
+
+    success: req.query.success || null,
+  });
+  
 };
 
 export const updateFulfillmentStatus = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { fulfillmentId } = req.params;
-    const body = req.body as RequestBody;
-    const { status, trackingNumber, carrierCode, carrierName, trackingUrl, notes } = body;
+  const { fulfillmentId } = req.params;
+  const body = req.body as RequestBody;
+  const { status, trackingNumber, carrierCode, carrierName, trackingUrl, notes } = body;
 
-    // Update fulfillment status
-    const fulfillment = await orderFulfillmentRepo.updateStatus(fulfillmentId, status);
+  // Update fulfillment status
+  const fulfillment = await manageFulfillmentsUseCase.updateStatus(fulfillmentId, status);
 
-    if (!fulfillment) {
-      throw new Error('Fulfillment not found');
-    }
-
-    // Add tracking info if provided
-    if (trackingNumber && status === 'shipped') {
-      await orderFulfillmentRepo.addTracking(fulfillmentId, trackingNumber, carrierCode, carrierName, trackingUrl);
-    }
-
-    // Update notes if provided
-    if (notes) {
-      await orderFulfillmentRepo.update(fulfillmentId, { notes });
-    }
-
-    res.json({
-      success: true,
-      message: `Fulfillment status updated to ${status}`,
-      fulfillment,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to update fulfillment status' });
+  if (!fulfillment) {
+    throw new Error('Fulfillment not found');
   }
+
+  // Add tracking info if provided
+  if (trackingNumber && status === 'shipped') {
+    await manageFulfillmentsUseCase.addTracking(fulfillmentId, trackingNumber, carrierCode, carrierName, trackingUrl);
+  }
+
+  // Update notes if provided
+  if (notes) {
+    await manageFulfillmentsUseCase.update(fulfillmentId, { notes });
+  }
+
+  res.json({
+    success: true,
+    message: `Fulfillment status updated to ${status}`,
+    fulfillment,
+  });
+  
 };
 
 export const markAsShipped = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { fulfillmentId } = req.params;
-    const body = req.body as RequestBody;
-    const { trackingNumber, carrierCode, carrierName, trackingUrl } = body;
+  const { fulfillmentId } = req.params;
+  const body = req.body as RequestBody;
+  const { trackingNumber, carrierCode, carrierName, trackingUrl } = body;
 
-    // Mark as shipped
-    const fulfillment = await orderFulfillmentRepo.markAsShipped(fulfillmentId);
+  // Mark as shipped
+  const fulfillment = await manageFulfillmentsUseCase.markAsShipped(fulfillmentId);
 
-    if (!fulfillment) {
-      throw new Error('Fulfillment not found');
-    }
-
-    // Add tracking info
-    if (trackingNumber) {
-      await orderFulfillmentRepo.addTracking(fulfillmentId, trackingNumber, carrierCode, carrierName, trackingUrl);
-    }
-
-    res.json({
-      success: true,
-      message: 'Fulfillment marked as shipped',
-      fulfillment,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to mark as shipped' });
+  if (!fulfillment) {
+    throw new Error('Fulfillment not found');
   }
+
+  // Add tracking info
+  if (trackingNumber) {
+    await manageFulfillmentsUseCase.addTracking(fulfillmentId, trackingNumber, carrierCode, carrierName, trackingUrl);
+  }
+
+  res.json({
+    success: true,
+    message: 'Fulfillment marked as shipped',
+    fulfillment,
+  });
+  
 };
 
 export const markAsDelivered = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { fulfillmentId } = req.params;
+  const { fulfillmentId } = req.params;
 
-    const fulfillment = await orderFulfillmentRepo.markAsDelivered(fulfillmentId);
+  const fulfillment = await manageFulfillmentsUseCase.markAsDelivered(fulfillmentId);
 
-    if (!fulfillment) {
-      throw new Error('Fulfillment not found');
-    }
-
-    res.json({
-      success: true,
-      message: 'Fulfillment marked as delivered',
-      fulfillment,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to mark as delivered' });
+  if (!fulfillment) {
+    throw new Error('Fulfillment not found');
   }
+
+  res.json({
+    success: true,
+    message: 'Fulfillment marked as delivered',
+    fulfillment,
+  });
+  
 };
 
 export const cancelFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { fulfillmentId } = req.params;
-    const body = req.body as RequestBody;
-    const { notes } = body;
+  const { fulfillmentId } = req.params;
+  const body = req.body as RequestBody;
+  const { notes } = body;
 
-    const fulfillment = await orderFulfillmentRepo.cancel(fulfillmentId, notes);
+  const fulfillment = await manageFulfillmentsUseCase.cancel(fulfillmentId, notes);
 
-    if (!fulfillment) {
-      throw new Error('Fulfillment not found');
-    }
-
-    res.json({
-      success: true,
-      message: 'Fulfillment cancelled',
-      fulfillment,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to cancel fulfillment' });
+  if (!fulfillment) {
+    throw new Error('Fulfillment not found');
   }
+
+  res.json({
+    success: true,
+    message: 'Fulfillment cancelled',
+    fulfillment,
+  });
+  
 };
 
 export const getFulfillmentStats = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const stats = await orderFulfillmentRepo.getStatusStatistics();
-    const overdue = await orderFulfillmentRepo.findOverdue();
-    const shippedToday = await orderFulfillmentRepo.findShippedToday();
+  const stats = await manageFulfillmentsUseCase.getStatusStatistics();
+  const overdue = await manageFulfillmentsUseCase.findOverdue();
+  const shippedToday = await manageFulfillmentsUseCase.findShippedToday();
 
-    res.json({
-      success: true,
-      stats,
-      overdueCount: overdue.length,
-      shippedTodayCount: shippedToday.length,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to get fulfillment stats' });
-  }
+  res.json({
+    success: true,
+    stats,
+    overdueCount: overdue.length,
+    shippedTodayCount: shippedToday.length,
+  });
+  
 };
 
 // ============================================================================
@@ -227,39 +188,31 @@ export const getFulfillmentStats = async (req: TypedRequest, res: Response): Pro
 // ============================================================================
 
 export const warehouseDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const warehouseId = req.query.warehouseId as string;
+  const warehouseId = req.query.warehouseId as string;
 
-    // Get warehouse stats
-    const warehouseStats = await warehouseRepo.getStatistics();
+  // Get warehouse stats
+  const warehouseStats = await manageWarehouseUseCase.getStatistics();
 
-    // Get fulfillment stats
-    const fulfillmentStats = await orderFulfillmentRepo.getStatusStatistics();
+  // Get fulfillment stats
+  const fulfillmentStats = await manageFulfillmentsUseCase.getStatusStatistics();
 
-    // Get overdue fulfillments
-    const overdueFulfillments = await orderFulfillmentRepo.findOverdue();
+  // Get overdue fulfillments
+  const overdueFulfillments = await manageFulfillmentsUseCase.findOverdue();
 
-    // Get recent shipments
-    const recentShipments = await orderFulfillmentRepo.findShippedToday();
+  // Get recent shipments
+  const recentShipments = await manageFulfillmentsUseCase.findShippedToday();
 
-    // Get pending fulfillments
-    const pendingFulfillments = await orderFulfillmentRepo.findByStatus('pending', 10);
+  // Get pending fulfillments
+  const pendingFulfillments = await manageFulfillmentsUseCase.findByStatus('pending', 10);
 
-    adminRespond(req, res, 'operations/dashboard', {
-      pageName: 'Warehouse Operations',
-      warehouseStats,
-      fulfillmentStats,
-      overdueFulfillments,
-      recentShipments,
-      pendingFulfillments,
-      selectedWarehouse: warehouseId,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load warehouse dashboard',
-    });
-  }
+  adminRespond(req, res, 'operations/dashboard', {
+    pageName: 'Warehouse Operations',
+    warehouseStats,
+    fulfillmentStats,
+    overdueFulfillments,
+    recentShipments,
+    pendingFulfillments,
+    selectedWarehouse: warehouseId,
+  });
+  
 };

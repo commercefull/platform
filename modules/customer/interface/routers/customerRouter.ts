@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as customerController from '../controllers/CustomerController';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 
@@ -17,7 +18,7 @@ const router = express.Router();
  * Register a new customer
  * POST /customers/register
  */
-router.post('/register', customerController.registerCustomer);
+router.post('/register', asyncHandler(customerController.registerCustomer));
 
 // ============================================================================
 // Protected Routes
@@ -30,42 +31,42 @@ router.use('/me', isCustomerLoggedIn);
  * Get my profile
  * GET /customers/me
  */
-router.get('/me', customerController.getMyProfile);
+router.get('/me', asyncHandler(customerController.getMyProfile));
 
 /**
  * Update my profile
  * PUT /customers/me
  */
-router.put('/me', customerController.updateMyProfile);
+router.put('/me', asyncHandler(customerController.updateMyProfile));
 
 /**
  * Get my addresses
  * GET /customers/me/addresses
  */
-router.get('/me/addresses', customerController.getAddresses);
+router.get('/me/addresses', asyncHandler(customerController.getAddresses));
 
 /**
  * Add a new address
  * POST /customers/me/addresses
  */
-router.post('/me/addresses', customerController.addAddress);
+router.post('/me/addresses', asyncHandler(customerController.addAddress));
 
 /**
  * Update an address
  * PUT /customers/me/addresses/:addressId
  */
-router.put('/me/addresses/:addressId', customerController.updateAddress);
+router.put('/me/addresses/:addressId', asyncHandler(customerController.updateAddress));
 
 /**
  * Delete an address
  * DELETE /customers/me/addresses/:addressId
  */
-router.delete('/me/addresses/:addressId', customerController.deleteAddress);
+router.delete('/me/addresses/:addressId', asyncHandler(customerController.deleteAddress));
 
 /**
  * Set default address
  * POST /customers/me/addresses/:addressId/default
  */
-router.post('/me/addresses/:addressId/default', customerController.setDefaultAddress);
+router.post('/me/addresses/:addressId/default', asyncHandler(customerController.setDefaultAddress));
 
 export const customerRouter = router;

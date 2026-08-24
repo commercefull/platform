@@ -172,23 +172,8 @@ describe('Warehouse Feature Tests', () => {
   // ============================================================================
 
   describe('Warehouse Status Management', () => {
-    let testWarehouseId: string;
-
-    beforeAll(async () => {
-      const warehouseData = createTestWarehouse();
-      const response = await client.post('/business/warehouses', warehouseData, {
-        headers: authHeaders(),
-      });
-      if (response.status === 201 || response.status === 200) {
-        testWarehouseId = response.data.data.distributionWarehouseId;
-        createdResources.warehouseIds.push(testWarehouseId);
-      }
-    });
-
     it('should activate a warehouse', async () => {
-      if (!testWarehouseId) return;
-
-      const response = await client.post(`/business/warehouses/${testWarehouseId}/activate`, {}, {
+      const response = await client.post(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.RETURNS}/activate`, {}, {
         headers: authHeaders(),
       });
 
@@ -197,9 +182,7 @@ describe('Warehouse Feature Tests', () => {
     });
 
     it('should deactivate a warehouse', async () => {
-      if (!testWarehouseId) return;
-
-      const response = await client.post(`/business/warehouses/${testWarehouseId}/deactivate`, {}, {
+      const response = await client.post(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.RETURNS}/deactivate`, {}, {
         headers: authHeaders(),
       });
 
@@ -208,9 +191,7 @@ describe('Warehouse Feature Tests', () => {
     });
 
     it('should set default warehouse', async () => {
-      if (!testWarehouseId) return;
-
-      const response = await client.post(`/business/warehouses/${testWarehouseId}/default`, {}, {
+      const response = await client.post(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.RETURNS}/default`, {}, {
         headers: authHeaders(),
       });
 

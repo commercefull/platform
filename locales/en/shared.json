@@ -24,7 +24,9 @@
     "gateways": "Gateways",
     "finance": "Finance",
     "storeConfiguration": "Store Configuration",
-    "administration": "Administration"
+    "administration": "Administration",
+    "automation": "Automation",
+    "returns": "Returns"
   },
   "footer": {
     "documentation": "Documentation",

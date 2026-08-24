@@ -2,6 +2,8 @@
  * CreateMembershipTier Use Case
  */
 
+import { MembershipValidationError } from '../../domain/errors/MembershipErrors';
+
 export interface TierBenefit {
   type: 'discount' | 'free_shipping' | 'early_access' | 'points_multiplier' | 'exclusive_products' | 'custom';
   value: number | string;
@@ -60,13 +62,13 @@ export class CreateMembershipTierUseCase {
 
   async execute(input: CreateMembershipTierInput): Promise<CreateMembershipTierOutput> {
     if (!input.name || input.level === undefined) {
-      throw new Error('Name and level are required');
+      throw new MembershipValidationError('Name and level are required');
     }
 
     // Check for duplicate level
     const existingTier = await this.membershipRepository.findTierByLevel(input.level);
     if (existingTier) {
-      throw new Error(`A tier with level ${input.level} already exists`);
+      throw new MembershipValidationError(`A tier with level ${input.level} already exists`);
     }
 
     const tierId = `mbt_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

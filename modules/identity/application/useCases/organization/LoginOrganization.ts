@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
 
 export interface LoginOrganizationInput {
   email: string;
@@ -50,13 +51,13 @@ export class LoginOrganizationUseCase {
 
   async execute(input: LoginOrganizationInput): Promise<LoginOrganizationOutput> {
     if (!input.email || !input.password) {
-      throw new Error('Email and password are required');
+      throw new EmailAndPasswordRequiredError();
     }
 
     // Find merchant by email
     const merchant = await this.organizationRepo.findByEmail(input.email);
     if (!merchant) {
-      throw new Error('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
     // Verify password
@@ -66,12 +67,12 @@ export class LoginOrganizationUseCase {
         email: input.email,
         reason: 'invalid_password',
       });
-      throw new Error('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
     // Check if account is active
     if (merchant.status !== 'active' && merchant.status !== 'approved') {
-      throw new Error('Account is not active');
+      throw new AccountNotActiveError();
     }
 
     // Generate tokens

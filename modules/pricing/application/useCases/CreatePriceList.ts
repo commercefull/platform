@@ -2,6 +2,8 @@
  * CreatePriceList Use Case
  */
 
+import { PricingValidationError } from '../../domain/errors/PricingErrors';
+
 export interface CreatePriceListInput {
   name: string;
   description?: string;
@@ -42,7 +44,7 @@ export class CreatePriceListUseCase {
 
   async execute(input: CreatePriceListInput): Promise<CreatePriceListOutput> {
     if (!input.name || !input.currencyCode) {
-      throw new Error('Name and currency code are required');
+      throw new PricingValidationError('Name and currency code are required');
     }
 
     const priceListId = `pl_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

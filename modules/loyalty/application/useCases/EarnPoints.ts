@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { LoyaltyProgramNotFoundError } from '../../domain/errors/LoyaltyErrors';
 
 export interface EarnPointsInput {
   customerId: string;
@@ -64,7 +65,7 @@ export class EarnPointsUseCase {
     // Get active loyalty program
     const program = await this.loyaltyProgramRepository.findActive();
     if (!program) {
-      throw new Error('No active loyalty program');
+      throw new LoyaltyProgramNotFoundError();
     }
 
     // Get or create member

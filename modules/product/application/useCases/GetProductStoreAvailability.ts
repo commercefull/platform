@@ -1,5 +1,6 @@
 import { query } from '../../../../libs/db';
 import { ProductRepository } from '../../domain/repositories/ProductRepository';
+import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
 
 export interface ProductStoreAvailabilityInput {
   productId: string;
@@ -28,7 +29,7 @@ export class GetProductStoreAvailabilityUseCase {
   async execute(input: ProductStoreAvailabilityInput): Promise<ProductStoreAvailabilityOutput> {
     const product = await this.productRepository.findById(input.productId);
     if (!product) {
-      throw new Error('Product not found');
+      throw new ProductNotFoundError(input.productId);
     }
 
     const variant = input.variantId

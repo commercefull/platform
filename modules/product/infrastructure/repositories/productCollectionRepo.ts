@@ -1,4 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductCollection {
   productCollectionId: string;
@@ -43,7 +44,7 @@ export class ProductCollectionRepo {
         now,
       ],
     );
-    if (!result) throw new Error('Failed to create productCollection');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 

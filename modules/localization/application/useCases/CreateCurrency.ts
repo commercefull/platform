@@ -2,6 +2,8 @@
  * CreateCurrency Use Case
  */
 
+import { CurrencyCodeAlreadyExistsError, LocalizationValidationError } from '../../domain/errors/LocalizationErrors';
+
 export interface CreateCurrencyInput {
   code: string;
   name: string;
@@ -59,13 +61,13 @@ export class CreateCurrencyUseCase {
 
   async execute(input: CreateCurrencyInput): Promise<CreateCurrencyOutput> {
     if (!input.code || !input.name || !input.symbol) {
-      throw new Error('Currency code, name, and symbol are required');
+      throw new LocalizationValidationError('Currency code, name, and symbol are required');
     }
 
     // Check for duplicate code
     const existing = await this.localizationRepository.findCurrencyByCode(input.code);
     if (existing) {
-      throw new Error(`Currency with code '${input.code}' already exists`);
+      throw new CurrencyCodeAlreadyExistsError(input.code);
     }
 
     const currencyId = `cur_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

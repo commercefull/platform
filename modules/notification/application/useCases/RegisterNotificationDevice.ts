@@ -6,7 +6,10 @@
  * Validates: Requirements 7.2
  */
 
-import * as notificationDeviceRepo from '../../infrastructure/repositories/notificationDeviceRepo';
+import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
+
+const notificationDeviceRepo = notificationConfigRepository.devices;
 
 // ============================================================================
 // Command
@@ -44,9 +47,9 @@ export class RegisterNotificationDeviceUseCase {
   constructor(private readonly deviceRepo: typeof notificationDeviceRepo = notificationDeviceRepo) {}
 
   async execute(command: RegisterNotificationDeviceCommand): Promise<RegisterNotificationDeviceResponse> {
-    if (!command.userId) throw new Error('userId is required');
-    if (!command.deviceToken) throw new Error('deviceToken is required');
-    if (!command.platform) throw new Error('platform is required');
+    if (!command.userId) throw new NotificationValidationError('userId is required');
+    if (!command.deviceToken) throw new NotificationValidationError('deviceToken is required');
+    if (!command.platform) throw new NotificationValidationError('platform is required');
 
     const device = await this.deviceRepo.upsert({
       userId: command.userId,
@@ -56,7 +59,7 @@ export class RegisterNotificationDeviceUseCase {
       isActive: command.isActive,
     });
 
-    if (!device) throw new Error('Failed to register notification device');
+    if (!device) throw new NotificationValidationError('Failed to register notification device');
 
     return {
       notificationDeviceId: device.notificationDeviceId,

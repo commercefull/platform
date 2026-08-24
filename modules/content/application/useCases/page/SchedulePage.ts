@@ -3,8 +3,9 @@
  * Schedules a page for future publication
  */
 
-import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { ContentPageNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class SchedulePageCommand {
   constructor(
@@ -27,24 +28,24 @@ export class SchedulePageUseCase {
 
   async execute(command: SchedulePageCommand): Promise<SchedulePageResponse> {
     if (!command.pageId || !command.scheduledAt) {
-      throw new Error('Page ID and scheduled date are required');
+      throw new ContentValidationError('Page ID and scheduled date are required');
     }
 
     // Validate scheduled date is in the future
     const now = new Date();
     if (command.scheduledAt <= now) {
-      throw new Error('Scheduled date must be in the future');
+      throw new ContentValidationError('Scheduled date must be in the future');
     }
 
     // Get existing page
     const page = await this.contentRepo.findPageById(command.pageId);
     if (!page) {
-      throw new Error(`Page with ID ${command.pageId} not found`);
+      throw new ContentPageNotFoundError(command.pageId);
     }
 
     // Cannot schedule already published pages
     if (page.status === 'published') {
-      throw new Error('Cannot schedule an already published page');
+      throw new ContentValidationError('Cannot schedule an already published page');
     }
 
     // Update page status to scheduled

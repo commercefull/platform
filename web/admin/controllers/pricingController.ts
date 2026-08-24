@@ -13,42 +13,28 @@ import { adminRespond } from '../../respond';
 // ============================================================================
 
 export const listPriceLists = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/pricing/index', {
-      pageName: 'Pricing',
-      priceLists: [],
-      priceRules: [],
-      pagination: { total: 0, page: 1, pages: 1 },
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error listing price lists:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load pricing',
-    });
-  }
+  adminRespond(req, res, 'catalog/pricing/index', {
+    pageName: 'Pricing',
+    priceLists: [],
+    priceRules: [],
+    pagination: { total: 0, page: 1, pages: 1 },
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createPriceListForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/pricing/lists/create', {
-      pageName: 'Create Price List',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'catalog/pricing/lists/create', {
+    pageName: 'Create Price List',
+  });
+  
 };
 
 export const createPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/catalog/pricing?success=Price list created successfully');
   } catch (error: unknown) {
-    logger.error('Error creating price list:', error);
+    logger.warn('Error creating price list:', error);
     adminRespond(req, res, 'catalog/pricing/lists/create', {
       pageName: 'Create Price List',
       error: (error as Error).message || 'Failed to create price list',
@@ -58,34 +44,20 @@ export const createPriceList = async (req: TypedRequest, res: Response): Promise
 };
 
 export const viewPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/pricing/lists/view', {
-      pageName: 'Price List Details',
-      priceList: null,
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load price list',
-    });
-  }
+  adminRespond(req, res, 'catalog/pricing/lists/view', {
+    pageName: 'Price List Details',
+    priceList: null,
+    success: req.query.success || null,
+  });
+  
 };
 
 export const editPriceListForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/pricing/lists/edit', {
-      pageName: 'Edit Price List',
-      priceList: null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'catalog/pricing/lists/edit', {
+    pageName: 'Edit Price List',
+    priceList: null,
+  });
+  
 };
 
 export const updatePriceList = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -93,7 +65,7 @@ export const updatePriceList = async (req: TypedRequest, res: Response): Promise
     const { listId } = req.params;
     res.redirect(`/admin/catalog/pricing/lists/${listId}?success=Price list updated successfully`);
   } catch (error: unknown) {
-    logger.error('Error updating price list:', error);
+    logger.warn('Error updating price list:', error);
     adminRespond(req, res, 'catalog/pricing/lists/edit', {
       pageName: 'Edit Price List',
       priceList: null,
@@ -104,12 +76,8 @@ export const updatePriceList = async (req: TypedRequest, res: Response): Promise
 };
 
 export const deletePriceList = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    res.json({ success: true, message: 'Price list deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error deleting price list:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete price list' });
-  }
+  res.json({ success: true, message: 'Price list deleted successfully' });
+  
 };
 
 // ============================================================================
@@ -117,41 +85,27 @@ export const deletePriceList = async (req: TypedRequest, res: Response): Promise
 // ============================================================================
 
 export const listPriceRules = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/pricing/rules/index', {
-      pageName: 'Price Rules',
-      priceRules: [],
-      pagination: { total: 0, page: 1, pages: 1 },
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error listing price rules:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load price rules',
-    });
-  }
+  adminRespond(req, res, 'catalog/pricing/rules/index', {
+    pageName: 'Price Rules',
+    priceRules: [],
+    pagination: { total: 0, page: 1, pages: 1 },
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createPriceRuleForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/pricing/rules/create', {
-      pageName: 'Create Price Rule',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'catalog/pricing/rules/create', {
+    pageName: 'Create Price Rule',
+  });
+  
 };
 
 export const createPriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/catalog/pricing/rules?success=Price rule created successfully');
   } catch (error: unknown) {
-    logger.error('Error creating price rule:', error);
+    logger.warn('Error creating price rule:', error);
     adminRespond(req, res, 'catalog/pricing/rules/create', {
       pageName: 'Create Price Rule',
       error: (error as Error).message || 'Failed to create price rule',
@@ -161,34 +115,20 @@ export const createPriceRule = async (req: TypedRequest, res: Response): Promise
 };
 
 export const viewPriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/pricing/rules/view', {
-      pageName: 'Price Rule Details',
-      priceRule: null,
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load price rule',
-    });
-  }
+  adminRespond(req, res, 'catalog/pricing/rules/view', {
+    pageName: 'Price Rule Details',
+    priceRule: null,
+    success: req.query.success || null,
+  });
+  
 };
 
 export const editPriceRuleForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/pricing/rules/edit', {
-      pageName: 'Edit Price Rule',
-      priceRule: null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'catalog/pricing/rules/edit', {
+    pageName: 'Edit Price Rule',
+    priceRule: null,
+  });
+  
 };
 
 export const updatePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -196,7 +136,7 @@ export const updatePriceRule = async (req: TypedRequest, res: Response): Promise
     const { ruleId } = req.params;
     res.redirect(`/admin/catalog/pricing/rules/${ruleId}?success=Price rule updated successfully`);
   } catch (error: unknown) {
-    logger.error('Error updating price rule:', error);
+    logger.warn('Error updating price rule:', error);
     adminRespond(req, res, 'catalog/pricing/rules/edit', {
       pageName: 'Edit Price Rule',
       priceRule: null,
@@ -207,10 +147,6 @@ export const updatePriceRule = async (req: TypedRequest, res: Response): Promise
 };
 
 export const deletePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    res.json({ success: true, message: 'Price rule deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error deleting price rule:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete price rule' });
-  }
+  res.json({ success: true, message: 'Price rule deleted successfully' });
+  
 };

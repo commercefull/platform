@@ -6,7 +6,10 @@
  * Validates: Requirements 7.6
  */
 
-import * as notificationWebhookRepo from '../../infrastructure/repositories/notificationWebhookRepo';
+import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import type { NotificationWebhook } from '../../infrastructure/repositories/notificationWebhookRepo';
+
+const notificationWebhookRepo = notificationConfigRepository.webhooks;
 
 // ============================================================================
 // Command
@@ -100,7 +103,7 @@ export class ManageNotificationWebhookUseCase {
     }
   }
 
-  private mapWebhook(webhook: notificationWebhookRepo.NotificationWebhook): WebhookRecord {
+  private mapWebhook(webhook: NotificationWebhook): WebhookRecord {
     return {
       notificationWebhookId: webhook.notificationWebhookId,
       organizationId: webhook.organizationId,

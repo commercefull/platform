@@ -1,8 +1,10 @@
-import promotionRepo from '../../infrastructure/repositories/promotionRepo';
+import promotionRuleRepository from '../../infrastructure/repositories/PromotionRuleRepository';
 import { requireBusinessAuth, requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { ListPromotionsUseCase, ListPromotionsCommand } from '../../application/useCases/ListPromotions';
 import { CheckGiftCardBalanceUseCase, CheckGiftCardBalanceQuery } from '../../application/useCases/CheckGiftCardBalance';
 import { RedeemGiftCardUseCase, RedeemGiftCardCommand } from '../../application/useCases/RedeemGiftCard';
+
+const promotionRepo = promotionRuleRepository.promotions;
 
 export const promotionResolvers = {
   Query: {

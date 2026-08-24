@@ -4,8 +4,10 @@
 
 import { generateUUID } from '../../../../libs/uuid';
 import { Customer } from '../../../../libs/db/types';
+import { withTransaction } from '../../../../libs/db';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import { CustomerEmailAlreadyExistsError, EmailRequiredError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 
 // ============================================================================
 // Command
@@ -48,22 +50,22 @@ export class RegisterCustomerUseCase {
   async execute(command: RegisterCustomerCommand): Promise<RegisterCustomerResponse> {
     // Validate
     if (!command.email?.trim()) {
-      throw new Error('Email is required');
+      throw new EmailRequiredError();
     }
     if (!command.firstName?.trim()) {
-      throw new Error('First name is required');
+      throw new CustomerValidationError('First name is required');
     }
     if (!command.lastName?.trim()) {
-      throw new Error('Last name is required');
+      throw new CustomerValidationError('Last name is required');
     }
     if (!command.password || command.password.length < 8) {
-      throw new Error('Password must be at least 8 characters');
+      throw new CustomerValidationError('Password must be at least 8 characters');
     }
 
     // Check for existing customer
     const existing = await this.customerRepository.findByEmail(command.email);
     if (existing) {
-      throw new Error('Customer with this email already exists');
+      throw new CustomerEmailAlreadyExistsError(command.email);
     }
 
     const customerId = generateUUID();
@@ -109,13 +111,15 @@ export class RegisterCustomerUseCase {
       deletedAt: null,
     };
 
-    // Save customer
-    await this.customerRepository.save(customer);
-
-    // Hash and store password
+    // Hash password before saving so both writes happen in a single transaction
     const bcrypt = await import('bcryptjs');
     const passwordHash = await bcrypt.hash(command.password, 12);
-    await this.customerRepository.updatePassword(customerId, passwordHash);
+
+    // Save customer + password atomically
+    await withTransaction(async () => {
+      await this.customerRepository.save(customer);
+      await this.customerRepository.updatePassword(customerId, passwordHash);
+    });
 
     // Emit event
     eventBus.emit('customer.registered', {

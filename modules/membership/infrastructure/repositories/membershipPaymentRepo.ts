@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
 
 export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded';
 export type PaymentType = 'subscription' | 'setupFee' | 'manual' | 'refund';
@@ -96,7 +97,7 @@ export class MembershipPaymentRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create membership payment');
+    if (!result) throw new FailedToCreateMembershipError('Failed to create membership payment');
     return result;
   }
 

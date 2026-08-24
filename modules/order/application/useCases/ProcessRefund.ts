@@ -7,6 +7,8 @@ import { OrderRepository } from '../../domain/repositories/OrderRepository';
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { withTransaction } from '../../../../libs/db';
+import { OrderNotFoundError, OrderCannotBeRefundedError, RefundAmountMustBePositiveError, RefundExceedsOrderTotalError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Command
@@ -47,21 +49,21 @@ export class ProcessRefundUseCase {
     const order = await this.orderRepository.findById(command.orderId);
 
     if (!order) {
-      throw new Error('Order not found');
+      throw new OrderNotFoundError();
     }
 
     // Check if order can be refunded
     if (!order.canBeRefunded) {
-      throw new Error(`Order cannot be refunded. Current status: ${order.status}, Payment status: ${order.paymentStatus}`);
+      throw new OrderCannotBeRefundedError(order.status, order.paymentStatus);
     }
 
     // Validate refund amount
     if (command.amount <= 0) {
-      throw new Error('Refund amount must be greater than zero');
+      throw new RefundAmountMustBePositiveError();
     }
 
     if (command.amount > order.totalAmount.amount) {
-      throw new Error('Refund amount cannot exceed order total');
+      throw new RefundExceedsOrderTotalError();
     }
 
     const previousPaymentStatus = order.paymentStatus;
@@ -78,11 +80,11 @@ export class ProcessRefundUseCase {
     // Add admin note
     order.addAdminNote(`Refund processed: $${command.amount.toFixed(2)} - Reason: ${command.reason}`);
 
-    // Save updated order
-    await this.orderRepository.save(order);
-
-    // Record payment status change
-    await this.orderRepository.recordPaymentStatusChange(command.orderId, order.paymentStatus, command.transactionId);
+    // Save updated order and record payment status change in a single transaction
+    await withTransaction(async () => {
+      await this.orderRepository.save(order);
+      await this.orderRepository.recordPaymentStatusChange(command.orderId, order.paymentStatus, command.transactionId);
+    });
 
     // Emit event
     eventBus.emit('order.refunded', {

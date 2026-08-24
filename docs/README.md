@@ -2,7 +2,7 @@
 
 > E-commerce platform — Admin, Storefront, Customer API & Business API
 
-CommerceFull is a modular e-commerce platform built with Express 5, TypeScript, and PostgreSQL. It follows a DDD architecture with 36 bounded contexts, server-rendered EJS views, and REST + GraphQL APIs.
+CommerceFull is a modular e-commerce platform built with Express 5, TypeScript, and PostgreSQL. It follows a DDD architecture with 37 bounded contexts, server-rendered EJS views, and REST + GraphQL APIs.
 
 ## Explore
 
@@ -19,7 +19,7 @@ CommerceFull is a modular e-commerce platform built with Express 5, TypeScript, 
 - **Admin Panel** — full platform management (Tabler UI)
 - **Customer API** — JWT-authenticated REST + GraphQL at `/customer`
 - **Business API** — merchant management at `/business`
-- **36 Modules** — product, order, basket, checkout, payment, fulfillment, shipping, inventory, coupon, promotion, loyalty, membership, subscription, and more
+- **37 Modules** — product, order, basket, checkout, payment, fulfillment, shipping, inventory, coupon, promotion, loyalty, membership, subscription, tracking, SSO/SCIM, and more
 - **Internationalization** — 15+ locales via i18next
 - **Performance Testing** — k6 smoke, load, stress, and spike tests
 

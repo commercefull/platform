@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { withTransaction } from '../../../../libs/db';
 import { Fulfillment as DbFulfillment, FulfillmentItem as DbFulfillmentItem } from '../../../../libs/db/types';
 import { Fulfillment, FulfillmentStatus, SourceType } from '../../domain/entities/Fulfillment';
 import { FulfillmentItem } from '../../domain/entities/FulfillmentItem';
@@ -222,12 +223,14 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 
   async delete(fulfillmentId: string): Promise<boolean> {
-    // Delete items first
-    await query('DELETE FROM "fulfillmentItem" WHERE "fulfillmentId" = $1', [fulfillmentId]);
+    return withTransaction(async (tx) => {
+      // Delete items first
+      await tx.query('DELETE FROM "fulfillmentItem" WHERE "fulfillmentId" = $1', [fulfillmentId]);
 
-    await query('DELETE FROM fulfillment WHERE "fulfillmentId" = $1', [fulfillmentId]);
+      await tx.query('DELETE FROM fulfillment WHERE "fulfillmentId" = $1', [fulfillmentId]);
 
-    return true;
+      return true;
+    });
   }
 
   // ===== Fulfillment Item Operations =====

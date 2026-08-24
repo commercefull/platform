@@ -7,7 +7,9 @@
  */
 
 import { hashAString } from '../../../../libs/hash';
-import AdminRepository from '../../infrastructure/repositories/AdminRepository';
+import identityDataRepository from '../../infrastructure/repositories/IdentityDataRepository';
+
+const identityRepo = identityDataRepository.users;
 
 async function run() {
   const args = process.argv.slice(2);
@@ -47,7 +49,7 @@ async function run() {
 
   try {
     // Check if admin user already exists
-    const existingAdmin = await AdminRepository.findByEmail(email);
+    const existingAdmin = await identityRepo.findAdminByEmail(email);
     if (existingAdmin) {
       console.error(`❌ Admin user with email "${email}" already exists`);
       process.exit(1);
@@ -85,7 +87,7 @@ async function run() {
 
     // Create the admin user
     console.log(`👤 Creating admin user "${name}" with role "${role}"...`);
-    const adminUser = await AdminRepository.create({
+    const result = await identityRepo.createAdmin({
       email,
       name,
       passwordHash,
@@ -95,11 +97,11 @@ async function run() {
     });
 
     console.log('✅ Admin user created successfully!');
-    console.log(`   📧 Email: ${adminUser.email}`);
-    console.log(`   👤 Name: ${adminUser.name}`);
-    console.log(`   🛡️ Role: ${adminUser.role}`);
-    console.log(`   🔑 Permissions: ${adminUser.permissions.join(', ')}`);
-    console.log(`   📅 Created: ${adminUser.createdAt.toISOString()}`);
+    console.log(`   📧 Email: ${result.email}`);
+    console.log(`   👤 Name: ${result.name}`);
+    console.log(`   🛡️ Role: ${result.role}`);
+    console.log(`   🔑 Permissions: ${result.permissions.join(', ')}`);
+    console.log(`   📅 Created: ${result.createdAt.toISOString()}`);
     console.log('');
     console.log('🔐 You can now log in with the provided email and password.');
   } catch (error) {

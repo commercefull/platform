@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateLoyaltyError } from '../../domain/errors/LoyaltyErrors';
 
 export type TransactionType = 'earn' | 'redeem' | 'expire' | 'adjust' | 'bonus' | 'refund';
 
@@ -88,7 +89,7 @@ export class CustomerLoyaltyTransactionRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create loyalty transaction');
+    if (!result) throw new FailedToCreateLoyaltyError('Failed to create loyalty transaction');
     return result;
   }
 

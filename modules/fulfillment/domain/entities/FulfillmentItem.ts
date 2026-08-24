@@ -4,6 +4,8 @@
  * Represents an item within a fulfillment.
  */
 
+import { FulfillmentValidationError } from '../errors/FulfillmentErrors';
+
 export interface FulfillmentItemProps {
   fulfillmentItemId: string;
   fulfillmentId: string;
@@ -127,7 +129,7 @@ export class FulfillmentItem {
    */
   pick(quantity: number, serialNumbers?: string[], lotNumbers?: string[]): void {
     if (quantity > this.props.quantityOrdered) {
-      throw new Error('Cannot pick more than ordered quantity');
+      throw new FulfillmentValidationError('Cannot pick more than ordered quantity');
     }
     this.props.quantityPicked = quantity;
     this.props.isPicked = true;
@@ -142,7 +144,7 @@ export class FulfillmentItem {
    */
   pack(quantity: number): void {
     if (quantity > (this.props.quantityPicked ?? this.props.quantityOrdered)) {
-      throw new Error('Cannot pack more than picked quantity');
+      throw new FulfillmentValidationError('Cannot pack more than picked quantity');
     }
     this.props.quantityPacked = quantity;
     this.props.isPacked = true;

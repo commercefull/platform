@@ -1,5 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
-import { cleanupCustomerTests, testCustomer, testCustomerAddress, testCustomerGroup } from './testUtils';
+import {
+  SEEDED_CUSTOMER_ID,
+  SEEDED_CUSTOMER_ADDRESS_ID,
+  SEEDED_CUSTOMER_GROUP_ID,
+  testCustomer,
+} from './testUtils';
 
 const createClient = () =>
   axios.create({
@@ -15,10 +20,9 @@ const createClient = () =>
 describe('Customer Actions API', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testCustomerId: string;
-  let testCustomerAddressId: string;
-  let testCustomerGroupId: string | null;
-  let _testWishlistId: string | null;
+  const testCustomerId = SEEDED_CUSTOMER_ID;
+  const _testCustomerAddressId = SEEDED_CUSTOMER_ADDRESS_ID;
+  const _testCustomerGroupId = SEEDED_CUSTOMER_GROUP_ID;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
@@ -36,63 +40,10 @@ describe('Customer Actions API', () => {
       adminToken = loginResponse.data?.accessToken || '';
     } catch {
       adminToken = '';
-      return;
-    }
-
-    try {
-      if (adminToken) {
-        const customerResponse = await client.post('/business/customers', testCustomer, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-
-        if (customerResponse.data?.success && customerResponse.data?.data) {
-          testCustomerId = customerResponse.data.data.customerId || customerResponse.data.data.id || '';
-        }
-
-        if (testCustomerId) {
-          const addressResponse = await client.post(
-            `/business/customers/${testCustomerId}/addresses`,
-            testCustomerAddress,
-            { headers: { Authorization: `Bearer ${adminToken}` } },
-          );
-
-          if (addressResponse.data?.success && addressResponse.data?.data) {
-            testCustomerAddressId =
-              addressResponse.data.data.customerAddressId || addressResponse.data.data.addressId || addressResponse.data.data.id || '';
-          }
-
-          try {
-            const groupResponse = await client.post('/business/customer-groups', testCustomerGroup, {
-              headers: { Authorization: `Bearer ${adminToken}` },
-            });
-
-            if (groupResponse.data?.success && groupResponse.data?.data) {
-              testCustomerGroupId = groupResponse.data.data.customerGroupId || groupResponse.data.data.id;
-
-              await client.post(
-                `/business/customers/${testCustomerId}/groups/${testCustomerGroupId}`,
-                {},
-                { headers: { Authorization: `Bearer ${adminToken}` } },
-              );
-            }
-          } catch {
-            testCustomerGroupId = null;
-          }
-        }
-      }
-    } catch {}
-  });
-
-  afterAll(async () => {
-    if (adminToken && testCustomerId) {
-      await cleanupCustomerTests(client, adminToken, {
-        testCustomerId,
-        testCustomerAddressId,
-        testCustomerGroupId,
-        testWishlistId: null,
-      });
     }
   });
+
+  // No afterAll cleanup — using seeded data
 
   describe('POST /business/customers', () => {
     it('should create a new customer with camelCase properties', async () => {

@@ -9,6 +9,7 @@ import { Money } from '../valueObjects/Money';
 import { OrderStatus, canTransitionTo } from '../valueObjects/OrderStatus';
 import { PaymentStatus, canTransitionPaymentTo } from '../valueObjects/PaymentStatus';
 import { FulfillmentStatus, canTransitionFulfillmentTo } from '../valueObjects/FulfillmentStatus';
+import { OrderItemNotFoundError, InvalidOrderTransitionError, InvalidPaymentTransitionError, InvalidFulfillmentTransitionError, OrderCannotBeCancelledError, OrderCannotBeModifiedError } from '../errors/OrderErrors';
 
 export interface OrderProps {
   orderId: string;
@@ -331,7 +332,7 @@ export class Order {
     this.ensureModifiable();
     const index = this.props.items.findIndex(i => i.orderItemId === orderItemId);
     if (index === -1) {
-      throw new Error(`Item ${orderItemId} not found in order`);
+      throw new OrderItemNotFoundError(orderItemId);
     }
     this.props.items.splice(index, 1);
     this.recalculateTotals();
@@ -344,7 +345,7 @@ export class Order {
 
   updateStatus(newStatus: OrderStatus, _reason?: string): void {
     if (!canTransitionTo(this.props.status, newStatus)) {
-      throw new Error(`Cannot transition order from ${this.props.status} to ${newStatus}`);
+      throw new InvalidOrderTransitionError(this.props.status, newStatus);
     }
 
     this.props.status = newStatus;
@@ -360,7 +361,7 @@ export class Order {
 
   updatePaymentStatus(newStatus: PaymentStatus): void {
     if (!canTransitionPaymentTo(this.props.paymentStatus, newStatus)) {
-      throw new Error(`Cannot transition payment from ${this.props.paymentStatus} to ${newStatus}`);
+      throw new InvalidPaymentTransitionError(this.props.paymentStatus, newStatus);
     }
     this.props.paymentStatus = newStatus;
     this.touch();
@@ -368,7 +369,7 @@ export class Order {
 
   updateFulfillmentStatus(newStatus: FulfillmentStatus): void {
     if (!canTransitionFulfillmentTo(this.props.fulfillmentStatus, newStatus)) {
-      throw new Error(`Cannot transition fulfillment from ${this.props.fulfillmentStatus} to ${newStatus}`);
+      throw new InvalidFulfillmentTransitionError(this.props.fulfillmentStatus, newStatus);
     }
     this.props.fulfillmentStatus = newStatus;
     this.touch();
@@ -447,7 +448,7 @@ export class Order {
 
   cancel(reason?: string): void {
     if (!this.canBeCancelled) {
-      throw new Error(`Order cannot be cancelled in status: ${this.props.status}`);
+      throw new OrderCannotBeCancelledError(this.props.status);
     }
     this.updateStatus(OrderStatus.CANCELLED, reason);
     this.props.cancelledAt = new Date();
@@ -466,7 +467,7 @@ export class Order {
 
   private ensureModifiable(): void {
     if (this.isCancelled || this.isRefunded || this.isCompleted) {
-      throw new Error(`Cannot modify order in status: ${this.props.status}`);
+      throw new OrderCannotBeModifiedError(this.props.status);
     }
   }
 

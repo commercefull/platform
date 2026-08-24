@@ -4,7 +4,10 @@
  * Upserts customer notification preferences via notificationPreferenceRepo.
  */
 
-import * as notificationPreferenceRepo from '../../infrastructure/repositories/notificationPreferenceRepo';
+import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
+
+const notificationPreferenceRepo = notificationConfigRepository.preferences;
 
 // ============================================================================
 // Command
@@ -46,8 +49,8 @@ export class ManageNotificationPreferenceUseCase {
   constructor(private readonly preferenceRepo: typeof notificationPreferenceRepo = notificationPreferenceRepo) {}
 
   async execute(command: ManageNotificationPreferenceCommand): Promise<ManageNotificationPreferenceResponse> {
-    if (!command.userId) throw new Error('userId is required');
-    if (!command.type) throw new Error('type is required');
+    if (!command.userId) throw new NotificationValidationError('userId is required');
+    if (!command.type) throw new NotificationValidationError('type is required');
 
     const preference = await this.preferenceRepo.upsert({
       userId: command.userId,
@@ -59,7 +62,7 @@ export class ManageNotificationPreferenceUseCase {
       metadata: command.metadata || null,
     });
 
-    if (!preference) throw new Error('Failed to upsert notification preference');
+    if (!preference) throw new NotificationValidationError('Failed to upsert notification preference');
 
     return {
       id: preference.notificationPreferenceId,

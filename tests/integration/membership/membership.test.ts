@@ -261,6 +261,7 @@ describe('Membership Tests', () => {
       }
     });
 
+    // TODO(phase-3.4): Fix — membership module has legacy facade; auth guard may not cover /customer/membership. Track in gap-analysis-and-roadmap.md Phase 3.4.
     it.skip('should deny access to membership details without authentication', async () => {
       const response = await client.get('/customer/membership/my-membership');
 

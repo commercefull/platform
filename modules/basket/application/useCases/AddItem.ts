@@ -8,6 +8,7 @@ import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { Basket } from '../../domain/entities/Basket';
 import { BasketItem } from '../../domain/entities/BasketItem';
 import { Money } from '../../domain/valueObjects/Money';
+import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BasketResponse } from './GetOrCreateBasket';
 
@@ -40,7 +41,7 @@ export class AddItemUseCase {
   async execute(command: AddItemCommand): Promise<BasketResponse> {
     const basket = await this.basketRepository.findById(command.basketId);
     if (!basket) {
-      throw new Error('Basket not found');
+      throw new BasketNotFoundError(command.basketId);
     }
 
     const existingItem = basket.findItemByProduct(command.productId, command.productVariantId);

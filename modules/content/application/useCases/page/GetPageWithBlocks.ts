@@ -3,7 +3,8 @@
  * Retrieves a complete page with all its content blocks and related data
  */
 
-import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class GetPageWithBlocksQuery {
   constructor(
@@ -66,7 +67,7 @@ export class GetPageWithBlocksUseCase {
     } else if (query.slug) {
       page = await this.contentRepo.findPageBySlug(query.slug);
     } else {
-      throw new Error('Page ID or slug is required');
+      throw new ContentValidationError('Page ID or slug is required');
     }
 
     if (!page) {

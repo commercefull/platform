@@ -7,6 +7,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import type { ReportData, ReportType } from '../../domain/entities/ReportEntities';
+import { UnknownReportTypeError } from '../../domain/errors/ReportingErrors';
 
 export interface ReportParameters {
   dateFrom?: string;
@@ -52,7 +53,7 @@ export async function generateReport(
     case 'fulfillment_report':
       return generateFulfillmentReport(dateFrom, dateTo, params);
     default:
-      throw new Error(`Unknown report type: ${reportType}`);
+      throw new UnknownReportTypeError(reportType);
   }
 }
 

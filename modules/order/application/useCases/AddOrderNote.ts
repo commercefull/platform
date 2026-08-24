@@ -5,8 +5,13 @@
  * Validates: Requirements 2.11
  */
 
-import orderRepo from '../../infrastructure/repositories/orderRepo';
-import orderNoteRepo, { OrderNote } from '../../infrastructure/repositories/orderNoteRepo';
+import { OrderRepository } from '../../domain/repositories/OrderRepository';
+import { OrderQueryRepository, OrderNote } from '../../domain/repositories/OrderQueryRepository';
+import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
+
+const orderRepo = orderDataRepository.commands;
+const orderQueryRepo = orderDataRepository.queries;
+import { OrderNotFoundError, NoteContentEmptyError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Command
@@ -40,21 +45,21 @@ export interface AddOrderNoteResponse {
 
 export class AddOrderNoteUseCase {
   constructor(
-    private readonly orders: typeof orderRepo = orderRepo,
-    private readonly noteRepo: typeof orderNoteRepo = orderNoteRepo,
+    private readonly orders: OrderRepository = orderRepo,
+    private readonly queryRepo: OrderQueryRepository = orderQueryRepo,
   ) {}
 
   async execute(command: AddOrderNoteCommand): Promise<AddOrderNoteResponse> {
     const order = await this.orders.findById(command.orderId);
     if (!order) {
-      throw new Error('Order not found');
+      throw new OrderNotFoundError();
     }
 
     if (!command.content || command.content.trim().length === 0) {
-      throw new Error('Note content cannot be empty');
+      throw new NoteContentEmptyError();
     }
 
-    const note: OrderNote = await this.noteRepo.create({
+    const note: OrderNote = await this.queryRepo.createNote({
       orderId: command.orderId,
       content: command.content.trim(),
       isCustomerVisible: command.isCustomerVisible,

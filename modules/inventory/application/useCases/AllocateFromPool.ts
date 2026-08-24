@@ -4,6 +4,8 @@
  * Allocates inventory from a shared pool to fulfill an order.
  */
 
+import { InventoryLocationNotFoundError, InventoryValidationError } from '../../domain/errors/InventoryErrors';
+
 export interface AllocateFromPoolInput {
   poolId: string;
   orderId: string;
@@ -78,11 +80,11 @@ export class AllocateFromPoolUseCase {
   async execute(input: AllocateFromPoolInput): Promise<AllocateFromPoolOutput> {
     const pool = await this.inventoryRepository.findPoolById(input.poolId);
     if (!pool) {
-      throw new Error(`Inventory pool not found: ${input.poolId}`);
+      throw new InventoryLocationNotFoundError(input.poolId);
     }
 
     if (!pool.isActive) {
-      throw new Error('Inventory pool is not active');
+      throw new InventoryValidationError('Inventory pool is not active');
     }
 
     const allocationId = `alloc_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

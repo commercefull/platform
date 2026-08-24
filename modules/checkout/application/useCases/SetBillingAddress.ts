@@ -5,6 +5,7 @@
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
 import { Address } from '../../domain/valueObjects/Address';
+import { CheckoutSessionNotFoundError } from '../../domain/errors/CheckoutErrors';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { eventBus } from '../../../../libs/events/eventBus';
 
@@ -39,7 +40,7 @@ export class SetBillingAddressUseCase {
   async execute(command: SetBillingAddressCommand): Promise<CheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
     if (!session) {
-      throw new Error('Checkout session not found');
+      throw new CheckoutSessionNotFoundError(command.checkoutId);
     }
 
     const address = Address.create({

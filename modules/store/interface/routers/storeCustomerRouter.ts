@@ -6,9 +6,9 @@
 
 import { Router, Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { StoreRepo } from '../../infrastructure/repositories/StoreRepo';
+import storeDataRepository from '../../infrastructure/repositories/StoreDataRepository';
 
-const storeRepo = new StoreRepo();
+const storeRepo = storeDataRepository.stores;
 const router = Router();
 
 router.get('/stores', async (req: TypedRequest, res: Response) => {

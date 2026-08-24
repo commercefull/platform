@@ -7,7 +7,11 @@
  * Validates: Requirements 1.4, 1.10
  */
 
-import paymentWebhookRepo, { PaymentWebhook } from '../../infrastructure/repositories/paymentWebhookRepo';
+import { PaymentRepository, PaymentWebhook } from '../../domain/repositories/PaymentRepository';
+import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+
+const PaymentRepo = paymentDataRepository.payments;
+import { FailedToCreatePaymentWebhookError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
 // Command
@@ -41,16 +45,16 @@ export interface ProcessPaymentWebhookResponse {
 // ============================================================================
 
 export class ProcessPaymentWebhookUseCase {
-  constructor(private readonly repo: typeof paymentWebhookRepo = paymentWebhookRepo) {}
+  constructor(private readonly repo: PaymentRepository = PaymentRepo) {}
 
   async execute(command: ProcessPaymentWebhookCommand): Promise<ProcessPaymentWebhookResponse> {
     // Idempotency check: skip insert if this externalId already exists
-    const existing = await this.repo.findByExternalId(command.externalId);
+    const existing = await this.repo.findWebhookByExternalId(command.externalId);
     if (existing) {
       return { ...this.mapToResponse(existing), alreadyExisted: true };
     }
 
-    const webhook = await this.repo.create({
+    const webhook = await this.repo.createWebhook({
       externalId: command.externalId,
       provider: command.provider,
       eventType: command.eventType,
@@ -59,7 +63,7 @@ export class ProcessPaymentWebhookUseCase {
     });
 
     if (!webhook) {
-      throw new Error('Failed to create payment webhook record');
+      throw new FailedToCreatePaymentWebhookError();
     }
 
     return { ...this.mapToResponse(webhook), alreadyExisted: false };

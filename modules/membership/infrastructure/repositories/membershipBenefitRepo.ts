@@ -3,6 +3,7 @@ import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
 import { MembershipBenefit as DbMembershipBenefit } from '../../../../libs/db/types';
+import { MembershipBenefitAlreadyExistsError, FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
 
 // Re-export DB type
 export type MembershipBenefit = DbMembershipBenefit;
@@ -68,7 +69,7 @@ export class MembershipBenefitRepo {
   async create(params: MembershipBenefitCreateParams): Promise<MembershipBenefit> {
     const now = unixTimestamp();
     const existing = await this.findByCode(params.code);
-    if (existing) throw new Error(`Benefit with code '${params.code}' already exists`);
+    if (existing) throw new MembershipBenefitAlreadyExistsError(params.code);
 
     const result = await queryOne<MembershipBenefit>(
       `INSERT INTO "membershipBenefit" (
@@ -93,7 +94,7 @@ export class MembershipBenefitRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create membership benefit');
+    if (!result) throw new FailedToCreateMembershipError('Failed to create membership benefit');
     return result;
   }
 

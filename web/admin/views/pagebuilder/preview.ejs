@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — Preview</title>
+  <% if (theme.headTags) { %>
+    <% theme.headTags.forEach(tag => { %>
+      <%- tag %>
+    <% }); %>
+  <% } %>
+  <style>
+    :root {
+      <% if (theme.cssVariables) { %>
+        <% Object.entries(theme.cssVariables).forEach(([key, val]) => { %>
+          <%= key %>: <%= val %>;
+        <% }); %>
+      <% } %>
+    }
+    <% if (theme.customCss) { %>
+      <%- theme.customCss %>
+    <% } %>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--color-bg, #ffffff); color: var(--color-text, #333333); }
+    .preview-container { max-width: 1200px; margin: 0 auto; padding: 0 var(--spacing-md, 16px); }
+    .preview-region { min-height: 50px; }
+    .preview-banner { background: var(--color-primary, #007bff); color: #fff; padding: 8px 16px; text-align: center; font-size: 12px; position: sticky; top: 0; z-index: 100; }
+  </style>
+</head>
+<body<% if (theme.bodyAttributes) { %><% Object.entries(theme.bodyAttributes).forEach(([key, val]) => { %> <%= key %>="<%= val %>"<% }); %><% } %>>
+  <div class="preview-banner">Page Builder Preview — <%= title %> (v<%= draft.version %>)</div>
+
+  <div class="preview-container">
+    <% ['header', 'main', 'sidebar', 'footer'].forEach(region => { %>
+      <%
+        const regionBlocks = (blocks || []).filter(b => b.region === region && !b.parentBlockId).sort((a, b) => a.order - b.order);
+      %>
+      <div class="preview-region" id="preview-<%= region %>">
+        <% regionBlocks.forEach(block => { %>
+          <%- renderBlock(block) %>
+        <% }); %>
+      </div>
+    <% }); %>
+  </div>
+
+  <script>
+    function renderBlock(block) {
+      const c = block.content || {};
+      const s = block.settings || {};
+      const mt = s.marginTop !== undefined ? s.marginTop + 'px' : '0';
+      const mb = s.marginBottom !== undefined ? s.marginBottom + 'px' : '16px';
+      const style = `margin-top:${mt};margin-bottom:${mb};`;
+
+      switch(block.typeId) {
+        case 'heading':
+          const lvl = c.level || 'h2';
+          const align = c.alignment || 'left';
+          return `<${lvl} style="${style}text-align:${align};color:var(--color-heading, #333);">${c.text || ''}</${lvl}>`;
+        case 'text':
+          return `<p style="${style}text-align:${c.alignment || 'left'};color:var(--color-text, #333);">${c.text || ''}</p>`;
+        case 'rich-text':
+          return `<div style="${style}">${c.html || ''}</div>`;
+        case 'image':
+          const widths = { full: '100%', large: '75%', medium: '50%', small: '25%', original: 'auto' };
+          return `<div style="${style}text-align:center;">
+            <img src="${c.src || ''}" alt="${c.alt || ''}" style="max-width:${widths[c.width] || '100%'};border-radius:${c.rounded ? '8px' : '0'};">
+            ${c.caption ? `<p style="font-size:12px;color:#6c757d;margin-top:4px;">${c.caption}</p>` : ''}
+          </div>`;
+        case 'hero-banner':
+          const overlay = c.overlayColor || '#000000';
+          const opacity = (c.overlayOpacity || 40) / 100;
+          return `<div style="${style}position:relative;height:${c.height || 400}px;background:${c.backgroundImage ? 'url(' + c.backgroundImage + ')' : 'var(--color-primary, #007bff)'};background-size:cover;background-position:center;border-radius:8px;display:flex;align-items:center;justify-content:${c.alignment === 'left' ? 'flex-start' : c.alignment === 'right' ? 'flex-end' : 'center'};padding:32px;">
+            <div style="position:absolute;inset:0;background:${overlay};opacity:${opacity};border-radius:8px;"></div>
+            <div style="position:relative;z-index:1;text-align:${c.alignment || 'center'};color:${c.textColor || '#fff'};">
+              <h1 style="font-size:32px;margin-bottom:8px;">${c.headline || ''}</h1>
+              ${c.subtext ? `<p style="font-size:16px;margin-bottom:16px;">${c.subtext}</p>` : ''}
+              ${c.ctaText ? `<a href="${c.ctaLink || '#'}" style="display:inline-block;padding:12px 32px;background:var(--color-primary, #007bff);color:#fff;border-radius:6px;text-decoration:none;font-weight:600;">${c.ctaText}</a>` : ''}
+            </div>
+          </div>`;
+        case 'spacer':
+          return `<div style="height:${c.height || 32}px;"></div>`;
+        case 'divider':
+          return `<hr style="${style}border:none;border-top:${c.thickness || 1}px ${c.style || 'solid'} ${c.color || '#e0e0e0'};width:${c.width || 100}%;margin-left:auto;margin-right:auto;">`;
+        case 'video':
+          return `<div style="${style}"><video src="${c.url || ''}" ${c.controls ? 'controls' : ''} ${c.autoplay ? 'autoplay' : ''} ${c.loop ? 'loop' : ''} ${c.poster ? 'poster="' + c.poster + '"' : ''} style="width:100%;border-radius:8px;"></video></div>`;
+        case 'html':
+          return `<div style="${style}">${c.html || ''}</div>`;
+        case 'call-to-action':
+          const btnSizes = { small: '6px 16px', medium: '10px 24px', large: '14px 32px' };
+          const btnStyles = { primary: 'var(--color-primary,#007bff)', secondary: 'var(--color-secondary,#6c757d)', outline: 'transparent', ghost: 'transparent' };
+          const isOutline = c.style === 'outline' || c.style === 'ghost';
+          return `<div style="${style}text-align:${c.alignment || 'center'};">
+            <a href="${c.link || '#'}" style="display:${c.fullWidth ? 'block' : 'inline-block'};padding:${btnSizes[c.size] || btnSizes.medium};background:${btnStyles[c.style] || btnStyles.primary};color:${isOutline ? 'var(--color-primary,#007bff)' : '#fff'};border:${isOutline ? '2px solid var(--color-primary,#007bff)' : 'none'};border-radius:6px;text-decoration:none;font-weight:600;${c.fullWidth ? 'text-align:center;' : ''}">${c.text || ''}</a>
+          </div>`;
+        case 'product-grid':
+          const cols = parseInt(c.columns) || 4;
+          return `<div style="${style}">
+            ${c.showTitle && c.title ? `<h2 style="margin-bottom:16px;color:var(--color-heading,#333);">${c.title}</h2>` : ''}
+            <div style="display:grid;grid-template-columns:repeat(${cols}, 1fr);gap:16px;">
+              ${Array.from({length: Math.min(c.limit || 8, 8)}, (_, i) => `
+                <div style="border:1px solid #e9ecef;border-radius:8px;padding:12px;text-align:center;">
+                  <div style="width:100%;aspect-ratio:1;background:#f1f3f5;border-radius:4px;margin-bottom:8px;"></div>
+                  <div style="font-size:13px;font-weight:600;">Product ${i+1}</div>
+                  <div style="font-size:12px;color:var(--color-primary,#007bff);font-weight:700;">$${(i+1)*29}.99</div>
+                </div>`).join('')}
+            </div>
+          </div>`;
+        case 'product-carousel':
+          return `<div style="${style}">
+            ${c.title ? `<h2 style="margin-bottom:16px;color:var(--color-heading,#333);">${c.title}</h2>` : ''}
+            <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;">
+              ${Array.from({length: c.limit || 10}, (_, i) => `
+                <div style="min-width:200px;border:1px solid #e9ecef;border-radius:8px;padding:12px;text-align:center;">
+                  <div style="width:100%;aspect-ratio:1;background:#f1f3f5;border-radius:4px;margin-bottom:8px;"></div>
+                  <div style="font-size:13px;font-weight:600;">Product ${i+1}</div>
+                  <div style="font-size:12px;color:var(--color-primary,#007bff);">$${(i+1)*19}.99</div>
+                </div>`).join('')}
+            </div>
+          </div>`;
+        case 'category-grid':
+          const catCols = parseInt(c.columns) || 4;
+          return `<div style="${style}">
+            ${c.title ? `<h2 style="margin-bottom:16px;color:var(--color-heading,#333);">${c.title}</h2>` : ''}
+            <div style="display:grid;grid-template-columns:repeat(${catCols}, 1fr);gap:16px;">
+              ${Array.from({length: 4}, (_, i) => `
+                <div style="border:1px solid #e9ecef;border-radius:8px;overflow:hidden;text-align:center;">
+                  <div style="width:100%;aspect-ratio:1;background:#f1f3f5;"></div>
+                  <div style="padding:8px;font-weight:600;">Category ${i+1}</div>
+                </div>`).join('')}
+            </div>
+          </div>`;
+        case 'container':
+          return `<div style="${style}background:${c.background || 'transparent'};padding:${c.padding || 24}px;border-radius:8px;">
+            <div style="max-width:${c.maxWidth === 'full' ? '100%' : c.maxWidth === 'narrow' ? '640px' : '1200px'};margin:0 auto;">
+              <p style="color:#adb5bd;text-align:center;font-size:12px;">Container (${c.layout || 'single'})</p>
+            </div>
+          </div>`;
+        default:
+          return `<div style="${style}padding:12px;border:1px dashed #dee2e6;border-radius:4px;color:#6c757d;font-size:12px;">Unknown block: ${block.typeId}</div>`;
+      }
+    }
+  </script>
+
+  <script>
+    // Render blocks client-side
+    (function() {
+      const blocks = <%- JSON.stringify(blocks) %>;
+      const regions = ['header', 'main', 'sidebar', 'footer'];
+      regions.forEach(region => {
+        const container = document.getElementById('preview-' + region);
+        if (!container) return;
+        const regionBlocks = blocks.filter(b => b.region === region && !b.parentBlockId).sort((a,b) => a.order - b.order);
+        container.innerHTML = regionBlocks.map(b => renderBlock(b)).join('');
+      });
+    })();
+  </script>
+</body>
+</html>

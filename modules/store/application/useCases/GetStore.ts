@@ -5,6 +5,7 @@
 
 import { StoreRepository } from '../../domain/repositories/StoreRepository';
 import { Store } from '../../domain/entities/Store';
+import { StoreValidationError } from '../../domain/errors/StoreErrors';
 
 // ============================================================================
 // Query
@@ -63,7 +64,7 @@ export class GetStoreUseCase {
 
   async execute(query: GetStoreQuery): Promise<GetStoreResponse> {
     if (!query.storeId && !query.slug && !query.storeUrl) {
-      throw new Error('Either storeId, slug, or storeUrl must be provided');
+      throw new StoreValidationError('Either storeId, slug, or storeUrl must be provided');
     }
 
     let store: Store | null = null;

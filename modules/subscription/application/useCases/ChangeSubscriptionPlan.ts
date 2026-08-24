@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { SubscriptionNotFoundError, SubscriptionPlanNotFoundError, SubscriptionValidationError } from '../../domain/errors/SubscriptionErrors';
 
 export interface ChangeSubscriptionPlanInput {
   subscriptionId: string;
@@ -50,21 +51,21 @@ export class ChangeSubscriptionPlanUseCase {
 
   async execute(input: ChangeSubscriptionPlanInput): Promise<ChangeSubscriptionPlanOutput> {
     if (!input.subscriptionId || !input.newPlanId) {
-      throw new Error('Subscription ID and new plan ID are required');
+      throw new SubscriptionValidationError('Subscription ID and new plan ID are required');
     }
 
     const subscription = await this.subscriptionRepo.findById(input.subscriptionId);
     if (!subscription) {
-      throw new Error('Subscription not found');
+      throw new SubscriptionNotFoundError(input.subscriptionId);
     }
 
     if (subscription.status !== 'active' && subscription.status !== 'paused') {
-      throw new Error('Cannot change plan for inactive subscription');
+      throw new SubscriptionValidationError('Cannot change plan for inactive subscription');
     }
 
     const newPlan = await this.planRepo.findById(input.newPlanId);
     if (!newPlan) {
-      throw new Error('New plan not found');
+      throw new SubscriptionPlanNotFoundError(input.newPlanId);
     }
 
     const previousPlanId = subscription.planId;

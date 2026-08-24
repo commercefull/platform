@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateSupplierEntityError, PurchaseOrderItemNotFoundError } from '../../domain/errors/SupplierErrors';
 
 // ============================================================================
 // Table Constants
@@ -269,7 +270,7 @@ export class SupplierPurchaseOrderRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create purchase order');
+      throw new FailedToCreateSupplierEntityError('Failed to create purchase order');
     }
 
     return result;
@@ -477,7 +478,7 @@ export class SupplierPurchaseOrderRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create purchase order item');
+      throw new FailedToCreateSupplierEntityError('Failed to create purchase order item');
     }
 
     return result;
@@ -527,7 +528,7 @@ export class SupplierPurchaseOrderRepo {
     const item = await this.findItemById(supplierPurchaseOrderItemId);
 
     if (!item) {
-      throw new Error(`Purchase order item ${supplierPurchaseOrderItemId} not found`);
+      throw new PurchaseOrderItemNotFoundError(supplierPurchaseOrderItemId);
     }
 
     const newReceivedQuantity = item.receivedQuantity + quantityReceived;

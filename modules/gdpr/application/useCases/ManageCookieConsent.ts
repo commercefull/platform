@@ -5,6 +5,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { GdprCookieConsentRepository } from '../../domain/repositories/GdprRepository';
 import { GdprCookieConsent, CookiePreferences } from '../../domain/entities/GdprCookieConsent';
+import { GdprValidationError } from '../../domain/errors/GdprErrors';
 
 // ============================================================================
 // Commands
@@ -62,7 +63,7 @@ export class ManageCookieConsentUseCase {
    */
   async recordConsent(command: RecordCookieConsentCommand): Promise<CookieConsentResponse> {
     if (!command.sessionId?.trim()) {
-      throw new Error('Session ID is required');
+      throw new GdprValidationError('Session ID is required');
     }
 
     // Check for existing consent
@@ -116,7 +117,7 @@ export class ManageCookieConsentUseCase {
   async updateConsent(command: UpdateCookieConsentCommand): Promise<CookieConsentResponse> {
     const consent = await this.consentRepository.findById(command.cookieConsentId);
     if (!consent) {
-      throw new Error('Cookie consent not found');
+      throw new GdprValidationError('Cookie consent not found');
     }
 
     consent.updatePreferences(command.preferences);

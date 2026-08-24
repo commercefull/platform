@@ -5,9 +5,10 @@
 
 import { generateUUID } from '../../../../libs/uuid';
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
-import { BasketRepository } from '../../../basket/domain/repositories/BasketRepository';
+import { BasketSnapshotPort } from '../../application/ports/BasketSnapshotPort';
 import { CheckoutSession } from '../../domain/entities/CheckoutSession';
-import { Money } from '../../../basket/domain/valueObjects/Money';
+import { CheckoutValidationError } from '../../domain/errors/CheckoutErrors';
+import { Money } from '../../../../libs/money';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -121,17 +122,17 @@ export function mapCheckoutToResponse(session: CheckoutSession): CheckoutRespons
 export class InitiateCheckoutUseCase {
   constructor(
     private readonly checkoutRepository: CheckoutRepository,
-    private readonly basketRepository: BasketRepository,
+    private readonly basketSnapshotPort: BasketSnapshotPort,
   ) {}
 
   async execute(command: InitiateCheckoutCommand): Promise<CheckoutResponse> {
-    const basket = await this.basketRepository.findById(command.basketId);
+    const basket = await this.basketSnapshotPort.getSnapshot(command.basketId);
     if (!basket) {
-      throw new Error('Basket not found');
+      throw new CheckoutValidationError('Basket not found');
     }
 
     if (basket.isEmpty) {
-      throw new Error('Cannot checkout with empty basket');
+      throw new CheckoutValidationError('Cannot checkout with empty basket');
     }
 
     let session = await this.checkoutRepository.findByBasketId(command.basketId);

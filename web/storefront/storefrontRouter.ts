@@ -1,4 +1,5 @@
 import express from 'express';
+import { asyncHandler } from '../../libs/asyncHandler';
 import {
   userContactUsValidationRules,
   validateContactUs,
@@ -59,336 +60,336 @@ router.use(categoryController.loadCategoriesForNavigation);
 // ============================================================================
 
 // GET: home page
-router.get('/', getHomePage);
+router.get('/', asyncHandler(getHomePage));
 
 // GET: display about us page
-router.get('/pages/about-us', getAboutUsPage);
+router.get('/pages/about-us', asyncHandler(getAboutUsPage));
 
 // GET: display shipping policy page
-router.get('/pages/shipping-policy', getShippingPolicyPage);
+router.get('/pages/shipping-policy', asyncHandler(getShippingPolicyPage));
 
 // GET: display careers page
-router.get('/pages/careers', getCareersPage);
+router.get('/pages/careers', asyncHandler(getCareersPage));
 
 // GET: display contact us page
-router.get('/pages/contact-us', getContactUsPage);
+router.get('/pages/contact-us', asyncHandler(getContactUsPage));
 
 // GET: display contact form page
-router.get('/contact-form', getContactFormPage);
+router.get('/contact-form', asyncHandler(getContactFormPage));
 
 // GET: display FAQ page
-router.get('/faq', getFaqPage);
+router.get('/faq', asyncHandler(getFaqPage));
 
 // GET: display returns page
-router.get('/returns', getReturnsPage);
+router.get('/returns', asyncHandler(getReturnsPage));
 
 // GET: display support page
-router.get('/support', getSupportPage);
+router.get('/support', asyncHandler(getSupportPage));
 
 // GET: store locator page
-router.get('/stores', storeLocatorController.getStoreLocator);
+router.get('/stores', asyncHandler(storeLocatorController.getStoreLocator));
 
 // GET: promotions and coupons landing page
-router.get('/promotions', promotionsController.getPromotionsPage);
+router.get('/promotions', asyncHandler(promotionsController.getPromotionsPage));
 
 // POST: handle contact us form
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-router.post('/pages/contact-us', [...userContactUsValidationRules(), validateContactUs] as any[], submitContactForm);
+router.post('/pages/contact-us', [...userContactUsValidationRules(), validateContactUs] as any[], asyncHandler(submitContactForm));
 
 // POST: handle contact form submission
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-router.post('/contact-form', [...userContactFormValidationRules(), validateContactForm] as any[], submitContactFormAdvanced);
+router.post('/contact-form', [...userContactFormValidationRules(), validateContactForm] as any[], asyncHandler(submitContactFormAdvanced));
 
 // ============================================================================
 // Product Routes
 // ============================================================================
 
 // GET: all products (PLP)
-router.get('/products', productController.listProducts);
+router.get('/products', asyncHandler(productController.listProducts));
 
 // GET: products by category
-router.get('/products/category/:categorySlug', productController.getCategoryProducts);
+router.get('/products/category/:categorySlug', asyncHandler(productController.getCategoryProducts));
 
 // GET: product detail (PDP)
-router.get('/products/:categorySlug/:productId', productController.getProduct);
+router.get('/products/:categorySlug/:productId', asyncHandler(productController.getProduct));
 
 // GET: search products
-router.get('/search', productController.searchProducts);
+router.get('/search', asyncHandler(productController.searchProducts));
 
 // ============================================================================
 // Category Routes
 // ============================================================================
 
 // GET: categories for navigation (API)
-router.get('/api/categories/navigation', categoryController.getCategoriesForNavigation);
+router.get('/api/categories/navigation', asyncHandler(categoryController.getCategoriesForNavigation));
 
 // GET: all categories (API)
-router.get('/api/categories', categoryController.getAllCategories);
+router.get('/api/categories', asyncHandler(categoryController.getAllCategories));
 
 // GET: category details (API)
-router.get('/api/categories/:categoryId', categoryController.getCategoryDetails);
+router.get('/api/categories/:categoryId', asyncHandler(categoryController.getCategoryDetails));
 
 // GET: category landing page
-router.get('/categories/:categorySlug', categoryController.getCategoryPage);
+router.get('/categories/:categorySlug', asyncHandler(categoryController.getCategoryPage));
 
 // ============================================================================
 // Basket/Cart Routes
 // ============================================================================
 
 // GET: view basket
-router.get('/basket', basketController.viewBasket);
+router.get('/basket', asyncHandler(basketController.viewBasket));
 
 // POST: add item to basket
-router.post('/basket/add/:productId', basketController.addToBasket);
+router.post('/basket/add/:productId', asyncHandler(basketController.addToBasket));
 
 // PUT: update basket item
-router.put('/basket/item/:basketItemId', basketController.updateBasketItem);
+router.put('/basket/item/:basketItemId', asyncHandler(basketController.updateBasketItem));
 
 // DELETE: remove item from basket
-router.delete('/basket/item/:basketItemId', basketController.removeFromBasket);
+router.delete('/basket/item/:basketItemId', asyncHandler(basketController.removeFromBasket));
 
 // POST: clear basket
-router.post('/basket/clear', basketController.clearBasket);
+router.post('/basket/clear', asyncHandler(basketController.clearBasket));
 
 // ============================================================================
 // Authentication Routes
 // ============================================================================
 
 // GET: sign in form
-router.get('/signin', authController.signInForm);
+router.get('/signin', asyncHandler(authController.signInForm));
 
 // POST: sign in process
-router.post('/signin', authController.signIn);
+router.post('/signin', asyncHandler(authController.signIn));
 
 // GET: sign up form
-router.get('/signup', authController.signUpForm);
+router.get('/signup', asyncHandler(authController.signUpForm));
 
 // POST: sign up process
-router.post('/signup', authController.signUp);
+router.post('/signup', asyncHandler(authController.signUp));
 
 // GET: user profile
-router.get('/profile', authController.profile);
+router.get('/profile', asyncHandler(authController.profile));
 
 // POST: update profile
-router.post('/profile', authController.updateProfile);
+router.post('/profile', asyncHandler(authController.updateProfile));
 
 // POST: change password
-router.post('/profile/change-password', authController.changePassword);
+router.post('/profile/change-password', asyncHandler(authController.changePassword));
 
 // POST: sign out
-router.post('/signout', authController.signOut);
+router.post('/signout', asyncHandler(authController.signOut));
 
 // ============================================================================
 // Checkout Routes
 // ============================================================================
 
 // GET: checkout page
-router.get('/checkout', checkoutController.checkout);
+router.get('/checkout', asyncHandler(checkoutController.checkout));
 
 // POST: process checkout
-router.post('/checkout', checkoutController.processCheckout);
+router.post('/checkout', asyncHandler(checkoutController.processCheckout));
 
 // GET: order confirmation
-router.get('/order-confirmation/:orderId', checkoutController.orderConfirmation);
+router.get('/order-confirmation/:orderId', asyncHandler(checkoutController.orderConfirmation));
 
 // ============================================================================
 // Order Routes
 // ============================================================================
 
 // GET: order history
-router.get('/orders', orderController.orderHistory);
+router.get('/orders', asyncHandler(orderController.orderHistory));
 
 // GET: order details
-router.get('/orders/:orderId', orderController.orderDetails);
+router.get('/orders/:orderId', asyncHandler(orderController.orderDetails));
 
 // GET: order tracking (public)
-router.get('/track/:orderNumber', orderController.orderTracking);
+router.get('/track/:orderNumber', asyncHandler(orderController.orderTracking));
 
 // ============================================================================
 // Wishlist Routes
 // ============================================================================
 
 // GET: view wishlist
-router.get('/wishlist', wishlistController.viewWishlist);
+router.get('/wishlist', asyncHandler(wishlistController.viewWishlist));
 
 // POST: add to wishlist
-router.post('/wishlist/add/:productId', wishlistController.addToWishlist);
+router.post('/wishlist/add/:productId', asyncHandler(wishlistController.addToWishlist));
 
 // POST: remove from wishlist
-router.post('/wishlist/remove/:productId', wishlistController.removeFromWishlist);
+router.post('/wishlist/remove/:productId', asyncHandler(wishlistController.removeFromWishlist));
 
 // ============================================================================
 // Review Routes
 // ============================================================================
 
 // GET: product reviews (API)
-router.get('/api/reviews/:productId', reviewController.getProductReviews);
+router.get('/api/reviews/:productId', asyncHandler(reviewController.getProductReviews));
 
 // POST: submit review
-router.post('/reviews/:productId', reviewController.submitReview);
+router.post('/reviews/:productId', asyncHandler(reviewController.submitReview));
 
 // POST: mark review helpful
-router.post('/reviews/:reviewId/helpful', reviewController.markReviewHelpful);
+router.post('/reviews/:reviewId/helpful', asyncHandler(reviewController.markReviewHelpful));
 
 // ============================================================================
 // Address Routes
 // ============================================================================
 
 // GET: list addresses
-router.get('/addresses', addressController.listAddresses);
+router.get('/addresses', asyncHandler(addressController.listAddresses));
 
 // GET: add address form
-router.get('/addresses/add', addressController.addAddressForm);
+router.get('/addresses/add', asyncHandler(addressController.addAddressForm));
 
 // POST: add address
-router.post('/addresses', addressController.addAddress);
+router.post('/addresses', asyncHandler(addressController.addAddress));
 
 // GET: edit address form
-router.get('/addresses/:addressId/edit', addressController.editAddressForm);
+router.get('/addresses/:addressId/edit', asyncHandler(addressController.editAddressForm));
 
 // POST: update address
-router.post('/addresses/:addressId', addressController.updateAddress);
+router.post('/addresses/:addressId', asyncHandler(addressController.updateAddress));
 
 // POST: delete address
-router.post('/addresses/:addressId/delete', addressController.deleteAddress);
+router.post('/addresses/:addressId/delete', asyncHandler(addressController.deleteAddress));
 
 // ============================================================================
 // Return Routes
 // ============================================================================
 
 // GET: list returns
-router.get('/returns', returnController.listReturns);
+router.get('/returns', asyncHandler(returnController.listReturns));
 
 // GET: return request form
-router.get('/orders/:orderId/return', returnController.returnRequestForm);
+router.get('/orders/:orderId/return', asyncHandler(returnController.returnRequestForm));
 
 // POST: submit return request
-router.post('/orders/:orderId/return', returnController.submitReturnRequest);
+router.post('/orders/:orderId/return', asyncHandler(returnController.submitReturnRequest));
 
 // GET: view return details
-router.get('/returns/:returnId', returnController.viewReturn);
+router.get('/returns/:returnId', asyncHandler(returnController.viewReturn));
 
 // ============================================================================
 // Loyalty Routes
 // ============================================================================
 
 // GET: loyalty dashboard
-router.get('/loyalty', loyaltyController.loyaltyDashboard);
+router.get('/loyalty', asyncHandler(loyaltyController.loyaltyDashboard));
 
 // GET: points history
-router.get('/loyalty/history', loyaltyController.pointsHistory);
+router.get('/loyalty/history', asyncHandler(loyaltyController.pointsHistory));
 
 // POST: redeem reward
-router.post('/loyalty/redeem/:rewardId', loyaltyController.redeemReward);
+router.post('/loyalty/redeem/:rewardId', asyncHandler(loyaltyController.redeemReward));
 
 // ============================================================================
 // Subscription Routes
 // ============================================================================
 
 // GET: list subscription plans (public)
-router.get('/subscriptions', subscriptionController.listPlans);
+router.get('/subscriptions', asyncHandler(subscriptionController.listPlans));
 
 // GET: my subscriptions (auth required)
-router.get('/subscriptions/my', subscriptionController.mySubscriptions);
+router.get('/subscriptions/my', asyncHandler(subscriptionController.mySubscriptions));
 
 // GET: view subscription detail
-router.get('/subscriptions/:subscriptionId', subscriptionController.viewSubscription);
+router.get('/subscriptions/:subscriptionId', asyncHandler(subscriptionController.viewSubscription));
 
 // POST: cancel subscription
-router.post('/subscriptions/:subscriptionId/cancel', subscriptionController.cancelSubscription);
+router.post('/subscriptions/:subscriptionId/cancel', asyncHandler(subscriptionController.cancelSubscription));
 
 // ============================================================================
 // Membership Routes
 // ============================================================================
 
 // GET: list membership plans (public)
-router.get('/membership', membershipController.listPlans);
+router.get('/membership', asyncHandler(membershipController.listPlans));
 
 // GET: view plan detail
-router.get('/membership/plans/:planId', membershipController.viewPlan);
+router.get('/membership/plans/:planId', asyncHandler(membershipController.viewPlan));
 
 // GET: my membership
-router.get('/membership/my', membershipController.myMembership);
+router.get('/membership/my', asyncHandler(membershipController.myMembership));
 
 // POST: join a membership plan
-router.post('/membership/join/:planId', membershipController.joinPlan);
+router.post('/membership/join/:planId', asyncHandler(membershipController.joinPlan));
 
 // ============================================================================
 // Notification Routes
 // ============================================================================
 
 // GET: list notifications
-router.get('/notifications', notificationController.listNotifications);
+router.get('/notifications', asyncHandler(notificationController.listNotifications));
 
 // POST: mark notification as read
-router.post('/notifications/:notificationId/read', notificationController.markAsRead);
+router.post('/notifications/:notificationId/read', asyncHandler(notificationController.markAsRead));
 
 // POST: mark all notifications as read
-router.post('/notifications/read-all', notificationController.markAllAsRead);
+router.post('/notifications/read-all', asyncHandler(notificationController.markAllAsRead));
 
 // GET: notification preferences
-router.get('/notifications/preferences', notificationController.getPreferences);
+router.get('/notifications/preferences', asyncHandler(notificationController.getPreferences));
 
 // POST: update notification preferences
-router.post('/notifications/preferences', notificationController.updatePreferences);
+router.post('/notifications/preferences', asyncHandler(notificationController.updatePreferences));
 
 // GET: push notification devices
-router.get('/notifications/devices', isCustomerLoggedIn, notificationController.getDevices);
+router.get('/notifications/devices', isCustomerLoggedIn, asyncHandler(notificationController.getDevices));
 
 // POST: register a push notification device
-router.post('/notifications/devices', isCustomerLoggedIn, notificationController.registerDevice);
+router.post('/notifications/devices', isCustomerLoggedIn, asyncHandler(notificationController.registerDevice));
 
 // POST: delete a push notification device
-router.post('/notifications/devices/:deviceToken/delete', isCustomerLoggedIn, notificationController.deleteDevice);
+router.post('/notifications/devices/:deviceToken/delete', isCustomerLoggedIn, asyncHandler(notificationController.deleteDevice));
 
 // ============================================================================
 // Support Ticket Routes (Auth required)
 // ============================================================================
 
 // GET: list customer's support tickets
-router.get('/support/tickets', supportController.listTickets);
+router.get('/support/tickets', asyncHandler(supportController.listTickets));
 
 // GET: create ticket form
-router.get('/support/tickets/new', supportController.createTicketForm);
+router.get('/support/tickets/new', asyncHandler(supportController.createTicketForm));
 
 // POST: submit new ticket
-router.post('/support/tickets', supportController.createTicketSubmit);
+router.post('/support/tickets', asyncHandler(supportController.createTicketSubmit));
 
 // GET: view single ticket
-router.get('/support/tickets/:ticketId', supportController.viewTicket);
+router.get('/support/tickets/:ticketId', asyncHandler(supportController.viewTicket));
 
 // POST: add message to ticket
-router.post('/support/tickets/:ticketId/messages', supportController.addTicketMessage);
+router.post('/support/tickets/:ticketId/messages', asyncHandler(supportController.addTicketMessage));
 
 // POST: submit ticket feedback
-router.post('/support/tickets/:ticketId/feedback', supportController.submitTicketFeedback);
+router.post('/support/tickets/:ticketId/feedback', asyncHandler(supportController.submitTicketFeedback));
 
 // ============================================================================
 // GDPR Data Request Routes (Auth required)
 // ============================================================================
 
 // GET: list customer's GDPR data requests
-router.get('/gdpr/requests', gdprController.listRequests);
+router.get('/gdpr/requests', asyncHandler(gdprController.listRequests));
 
 // GET: create data request form
-router.get('/gdpr/requests/new', gdprController.createRequestForm);
+router.get('/gdpr/requests/new', asyncHandler(gdprController.createRequestForm));
 
 // POST: submit new data request
-router.post('/gdpr/requests', gdprController.createRequestSubmit);
+router.post('/gdpr/requests', asyncHandler(gdprController.createRequestSubmit));
 
 // GET: view single data request
-router.get('/gdpr/requests/:gdprDataRequestId', gdprController.viewRequest);
+router.get('/gdpr/requests/:gdprDataRequestId', asyncHandler(gdprController.viewRequest));
 
 // POST: cancel a data request
-router.post('/gdpr/requests/:gdprDataRequestId/cancel', gdprController.cancelRequest);
+router.post('/gdpr/requests/:gdprDataRequestId/cancel', asyncHandler(gdprController.cancelRequest));
 
 // ============================================================================
 // Content Routes
 // ============================================================================
 
 // Public routes for content access
-router.get('/pages', getPublishedPages);
-router.get('/pages/:slug', getPublishedPageBySlug);
-router.get('/types', getActiveContentTypes);
+router.get('/pages', asyncHandler(getPublishedPages));
+router.get('/pages/:slug', asyncHandler(getPublishedPageBySlug));
+router.get('/types', asyncHandler(getActiveContentTypes));
 
 export const storefrontCustomerRouter = router;

@@ -3,6 +3,8 @@
  * Supports both marketplace (merchant-owned) and multi-store (business-owned) scenarios
  */
 
+import { WarehouseValidationError } from '../errors/WarehouseErrors';
+
 export type WarehouseType = 'warehouse' | 'store' | 'fulfillment_center' | 'distribution_center';
 
 export interface WarehouseProps {
@@ -49,7 +51,7 @@ export class Warehouse {
 
     // Validate ownership - must have an organizationId
     if (!props.organizationId) {
-      throw new Error('Warehouse must be owned by an organization');
+      throw new WarehouseValidationError('Warehouse must be owned by an organization');
     }
 
     return new Warehouse({
@@ -120,7 +122,7 @@ export class Warehouse {
 
     // Validate that we still have valid ownership
     if (!this.props.organizationId) {
-      throw new Error('Warehouse must have an organization owner');
+      throw new WarehouseValidationError('Warehouse must have an organization owner');
     }
 
     this.touch();

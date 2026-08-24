@@ -24,6 +24,7 @@ const createClient = () =>
 describe('Pricing Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
+  const testProductId = '00000000-0000-0000-0000-000000000001';
   const createdResources = {
     ruleIds: [] as string[],
     tierIds: [] as string[],
@@ -161,7 +162,6 @@ describe('Pricing Feature Tests', () => {
 
   describe('Tier Pricing', () => {
     let testTierId: string;
-    const testProductId = '00000000-0000-0000-0000-000000000001';
 
     it('UC-PRC-008: should create a tier price', async () => {
       const tierData = createTestTierPrice(testProductId);
@@ -204,7 +204,7 @@ describe('Pricing Feature Tests', () => {
       // Create a tier price to update using seeded product
       const createResponse = await client.post(
         '/business/pricing/tier-prices',
-        createTestTierPrice('00000000-0000-0000-0000-000000000003'),
+        createTestTierPrice('00000000-0000-0000-0000-000000000002'),
         {
           headers: { Authorization: `Bearer ${adminToken}` },
         },

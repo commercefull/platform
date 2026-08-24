@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { InventoryValidationError, InsufficientStockError } from '../../domain/errors/InventoryErrors';
 
 export interface TransferBetweenStoresInput {
   sourceStoreId: string;
@@ -58,11 +59,11 @@ export class TransferBetweenStoresUseCase {
 
   async execute(input: TransferBetweenStoresInput): Promise<TransferBetweenStoresOutput> {
     if (input.sourceStoreId === input.targetStoreId) {
-      throw new Error('Source and target stores must be different');
+      throw new InventoryValidationError('Source and target stores must be different');
     }
 
     if (!input.items || input.items.length === 0) {
-      throw new Error('At least one item is required for transfer');
+      throw new InventoryValidationError('At least one item is required for transfer');
     }
 
     // Validate source store has sufficient inventory
@@ -70,7 +71,7 @@ export class TransferBetweenStoresUseCase {
       const available = await this.inventoryRepository.getAvailableQuantity(input.sourceStoreId, item.productId, item.variantId);
 
       if (available < item.quantity) {
-        throw new Error(`Insufficient inventory for product ${item.productId}: available ${available}, requested ${item.quantity}`);
+        throw new InsufficientStockError(item.productId, item.quantity, available);
       }
     }
 

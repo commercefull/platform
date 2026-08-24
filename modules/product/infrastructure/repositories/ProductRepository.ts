@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { logger } from '../../../../libs/logger';
 import {
   Product as DbProduct,
   ProductVariant as DbProductVariant,
@@ -208,7 +209,7 @@ export class ProductRepo implements IProductRepository {
 
   async hardDelete(productId: string): Promise<void> {
     // Remove FK-dependent records before hard deleting
-    await query('DELETE FROM "analyticsReportEvent" WHERE "productId" = $1', [productId]).catch(() => {});
+    await query('DELETE FROM "analyticsReportEvent" WHERE "productId" = $1', [productId]).catch((err: unknown) => { logger.debug('analyticsReportEvent cleanup skipped', { productId, error: err }); });
     await query('DELETE FROM product WHERE "productId" = $1', [productId]);
   }
 

@@ -8,6 +8,7 @@ import { ProductRepository } from '../../domain/repositories/ProductRepository';
 import { Product } from '../../domain/entities/Product';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { ProductAttributeSetRepository } from '../../infrastructure/repositories/ProductAttributeSetRepository';
+import { ProductSkuAlreadyExistsError, ProductSlugAlreadyExistsError, ProductValidationError } from '../../domain/errors/ProductErrors';
 import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 
 // ============================================================================
@@ -74,17 +75,17 @@ export class CreateProductUseCase {
   async execute(command: CreateProductCommand): Promise<CreateProductResponse> {
     // Validate command
     if (!command.name?.trim()) {
-      throw new Error('Product name is required');
+      throw new ProductValidationError('Product name is required');
     }
     if (!command.productTypeId) {
-      throw new Error('Product type is required');
+      throw new ProductValidationError('Product type is required');
     }
 
     // Check for duplicate SKU
     if (command.sku) {
       const existingProduct = await this.productRepository.findBySku(command.sku);
       if (existingProduct) {
-        throw new Error(`Product with SKU "${command.sku}" already exists`);
+        throw new ProductSkuAlreadyExistsError(command.sku);
       }
     }
 
@@ -92,7 +93,7 @@ export class CreateProductUseCase {
     const slug = command.slug || Product.generateSlug(command.name);
     const existingBySlug = await this.productRepository.findBySlug(slug);
     if (existingBySlug) {
-      throw new Error(`Product with slug "${slug}" already exists`);
+      throw new ProductSlugAlreadyExistsError(slug);
     }
 
     const productId = generateUUID();

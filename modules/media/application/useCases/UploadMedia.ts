@@ -2,6 +2,8 @@
  * UploadMedia Use Case
  */
 
+import { MediaValidationError } from '../../domain/errors/MediaErrors';
+
 export interface UploadMediaInput {
   fileName: string;
   mimeType: string;
@@ -57,7 +59,7 @@ export class UploadMediaUseCase {
 
   async execute(input: UploadMediaInput): Promise<UploadMediaOutput> {
     if (!input.fileName || !input.mimeType || !input.url) {
-      throw new Error('FileName, mimeType, and url are required');
+      throw new MediaValidationError('FileName, mimeType, and url are required');
     }
 
     const mediaId = `med_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

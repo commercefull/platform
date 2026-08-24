@@ -5,7 +5,7 @@
  * where different items ship from different locations.
  */
 
-import { OrderRouter } from '../../../order/domain/services/OrderRouter';
+import { OrderRouter } from '../../../order';
 import { logger } from '../../../../libs/logger';
 
 export interface FulfillmentGroupItem {
@@ -188,7 +188,7 @@ export class FulfillmentPlanner {
       });
     } else if (unassigned.length > 0) {
       // No warehouse fallback — put in a placeholder group
-      logger.warn(`FulfillmentPlanner: ${unassigned.length} items could not be assigned to any source`);
+      logger.warning(`FulfillmentPlanner: ${unassigned.length} items could not be assigned to any source`);
     }
 
     return { groups, isSplit: groups.length > 1 };

@@ -1,7 +1,9 @@
-import ProductRepo from '../../infrastructure/repositories/ProductRepository';
+import productCatalogRepository from '../../infrastructure/repositories/ProductCatalogRepository';
 import { GetProductUseCase, GetProductCommand } from '../../application/useCases/GetProduct';
 import { ListProductsUseCase, ListProductsCommand } from '../../application/useCases/ListProducts';
 import { SearchProductsUseCase, SearchProductsCommand } from '../../application/useCases/SearchProducts';
+
+const ProductRepo = productCatalogRepository.productRepository;
 
 export const productResolvers = {
   Query: {

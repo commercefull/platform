@@ -3,6 +3,8 @@
  * Represents a customer review for a product
  */
 
+import { ProductValidationError } from './errors/ProductErrors';
+
 export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'flagged';
 
 export interface ReviewProps {
@@ -46,7 +48,7 @@ export class Review {
     reviewerEmail?: string;
   }): Review {
     if (props.rating < 1 || props.rating > 5) {
-      throw new Error('Rating must be between 1 and 5');
+      throw new ProductValidationError('Rating must be between 1 and 5');
     }
     const now = new Date();
     return new Review({
@@ -186,7 +188,7 @@ export class Review {
   updateContent(updates: { title?: string; content?: string; rating?: number }): void {
     if (updates.rating !== undefined) {
       if (updates.rating < 1 || updates.rating > 5) {
-        throw new Error('Rating must be between 1 and 5');
+        throw new ProductValidationError('Rating must be between 1 and 5');
       }
       this.props.rating = updates.rating;
     }

@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductAttributeSet {
   productAttributeSetId: string;
@@ -160,7 +161,7 @@ export class ProductAttributeSetRepository {
     ]);
 
     if (!result) {
-      throw new Error('Failed to create attribute set');
+      throw new FailedToCreateProductError();
     }
 
     return result;

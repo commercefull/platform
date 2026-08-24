@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 /**
  * Product Attribute - defines an attribute that can be assigned to products
@@ -220,7 +221,7 @@ export class DynamicAttributeRepository {
     ]);
 
     if (!result) {
-      throw new Error('Failed to create attribute');
+      throw new FailedToCreateProductError();
     }
 
     return result;
@@ -314,7 +315,7 @@ export class DynamicAttributeRepository {
     ]);
 
     if (!result) {
-      throw new Error('Failed to create attribute value');
+      throw new FailedToCreateProductError();
     }
 
     return result;
@@ -395,7 +396,7 @@ export class DynamicAttributeRepository {
     const result = await queryOne<ProductAttributeData>(sql, [input.productId, input.attributeId, input.value, valueText, valueNumeric]);
 
     if (!result) {
-      throw new Error('Failed to set product attribute');
+      throw new FailedToCreateProductError();
     }
 
     return result;

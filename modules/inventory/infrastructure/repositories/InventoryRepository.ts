@@ -16,6 +16,7 @@ import {
   DistributionWarehouse as DbDistributionWarehouse,
 } from '../../../../libs/db/types';
 import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { InventoryItemNotFoundError, FailedToCreateInventoryError, InventoryLocationNotFoundError } from '../../domain/errors/InventoryErrors';
 
 export interface InventoryFilters {
   productId?: string;
@@ -516,7 +517,7 @@ export class InventoryRepository {
       'SELECT * FROM "inventoryLocation" WHERE "inventoryLocationId" = $1',
       [inventoryItemId],
     );
-    if (!row) throw new Error(`Inventory item not found after update: ${inventoryItemId}`);
+    if (!row) throw new InventoryItemNotFoundError(inventoryItemId);
     return this.mapToInventory(row);
   }
 
@@ -565,7 +566,7 @@ export class InventoryRepository {
       'SELECT * FROM "inventoryLocation" WHERE "inventoryLocationId" = $1',
       [input.inventoryItemId],
     );
-    if (!row) throw new Error('Failed to create inventory item');
+    if (!row) throw new FailedToCreateInventoryError('Failed to create inventory item');
     return this.mapToInventory(row) as Inventory & { createdAt: Date };
   }
 
@@ -663,9 +664,9 @@ export class InventoryRepository {
 
   async reserveForTransfer(storeId: string, productId: string, variantId: string | undefined, quantity: number, _transferId: string): Promise<void> {
     const location = await this.getLocationByStoreId(storeId);
-    if (!location) throw new Error(`Store location not found: ${storeId}`);
+    if (!location) throw new InventoryLocationNotFoundError(storeId);
     const inv = await this.findByProductAndLocation(productId, location.locationId, variantId);
-    if (!inv) throw new Error(`Product not found at store: ${productId}`);
+    if (!inv) throw new InventoryItemNotFoundError(productId);
     const now = new Date().toISOString();
     await query(
       `UPDATE "inventoryLocation" SET "reservedQuantity" = "reservedQuantity" + $1, "availableQuantity" = "availableQuantity" - $1, "updatedAt" = $2 WHERE "inventoryLocationId" = $3`,

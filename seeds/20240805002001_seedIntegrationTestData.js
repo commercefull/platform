@@ -25,6 +25,7 @@ const TEST_CONTENT_PAGE_ID = '00000000-0000-0000-0000-000000005002';
 const TEST_CONTENT_BLOCK_ID = '00000000-0000-0000-0000-000000005003';
 const TEST_CONTENT_TEMPLATE_ID = '00000000-0000-0000-0000-000000005004';
 const TEST_BLOCK_TYPE_ID = '00000000-0000-0000-0000-000000005005';
+const TEST_CONTENT_CATEGORY_ID = '00000000-0000-0000-0000-000000005006';
 
 // Subscription test IDs
 const TEST_SUBSCRIPTION_PRODUCT_ID = '00000000-0000-0000-0000-000000007001';
@@ -33,6 +34,8 @@ const TEST_SUBSCRIPTION_PLAN_ID = '00000000-0000-0000-0000-000000007002';
 // Customer test IDs
 const TEST_CUSTOMER_ADDRESS_ID = '00000000-0000-0000-0000-000000006001';
 const TEST_CUSTOMER_GROUP_ID = '00000000-0000-0000-0000-000000006002';
+const TEST_CUSTOMER_GROUP_MEMBERSHIP_ID = '00000000-0000-0000-0000-000000006003';
+const TEST_CUSTOMER_WISHLIST_ID = '00000000-0000-0000-0000-000000006004';
 
 /**
  * @param { import("knex").Knex } knex
@@ -106,6 +109,48 @@ exports.seed = async function (knex) {
         updatedAt: new Date(),
       })
       .onConflict('customerGroupId')
+      .ignore();
+  }
+
+  // =========================================================================
+  // Test Customer Group Membership (link customer to group)
+  // =========================================================================
+  const existingMembership = await knex('customerGroupMembership')
+    .where('customerId', TEST_CUSTOMER_ID)
+    .where('customerGroupId', TEST_CUSTOMER_GROUP_ID)
+    .first();
+
+  if (!existingMembership) {
+    await knex('customerGroupMembership')
+      .insert({
+        customerGroupMembershipId: TEST_CUSTOMER_GROUP_MEMBERSHIP_ID,
+        customerId: TEST_CUSTOMER_ID,
+        customerGroupId: TEST_CUSTOMER_GROUP_ID,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflict('customerGroupMembershipId')
+      .ignore();
+  }
+
+  // =========================================================================
+  // Test Customer Wishlist
+  // =========================================================================
+  const existingWishlist = await knex('customerWishlist').where('customerWishlistId', TEST_CUSTOMER_WISHLIST_ID).first();
+
+  if (!existingWishlist) {
+    await knex('customerWishlist')
+      .insert({
+        customerWishlistId: TEST_CUSTOMER_WISHLIST_ID,
+        customerId: TEST_CUSTOMER_ID,
+        wishlistName: 'Test Wishlist',
+        wishlistDescription: 'Test wishlist for integration tests',
+        isPublic: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflict('customerWishlistId')
       .ignore();
   }
 
@@ -455,6 +500,30 @@ exports.seed = async function (knex) {
   } catch (e) {}
 
   // =========================================================================
+  // Test Content Category
+  // =========================================================================
+  try {
+    const existingCategory = await knex('contentCategory').where('contentCategoryId', TEST_CONTENT_CATEGORY_ID).first();
+
+    if (!existingCategory) {
+      await knex('contentCategory')
+        .insert({
+          contentCategoryId: TEST_CONTENT_CATEGORY_ID,
+          name: 'Integration Test Category',
+          slug: 'integration-test-category',
+          description: 'Category for integration testing',
+          sortOrder: 0,
+          isActive: true,
+          depth: 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .onConflict('contentCategoryId')
+        .ignore();
+    }
+  } catch (e) {}
+
+  // =========================================================================
   // Test Subscription Product & Plan
   // =========================================================================
   try {
@@ -618,6 +687,8 @@ exports.seed = async function (knex) {
     TEST_CUSTOMER_ID,
     TEST_CUSTOMER_ADDRESS_ID,
     TEST_CUSTOMER_GROUP_ID,
+    TEST_CUSTOMER_GROUP_MEMBERSHIP_ID,
+    TEST_CUSTOMER_WISHLIST_ID,
     TEST_GUEST_BASKET_ID,
     TEST_CUSTOMER_BASKET_ID,
     TEST_CHECKOUT_BASKET_ID,
@@ -627,6 +698,7 @@ exports.seed = async function (knex) {
     TEST_CONTENT_BLOCK_ID,
     TEST_CONTENT_TEMPLATE_ID,
     TEST_BLOCK_TYPE_ID,
+    TEST_CONTENT_CATEGORY_ID,
     TEST_SUBSCRIPTION_PRODUCT_ID,
     TEST_SUBSCRIPTION_PLAN_ID,
   };

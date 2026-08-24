@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { MembershipPlanNotFoundError, MembershipAlreadyActiveError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
 export interface AssignMembershipInput {
   customerId: string;
@@ -64,22 +65,22 @@ export class AssignMembershipUseCase {
     // Validate tier exists
     const tier = await this.membershipRepository.findTierById(input.tierId);
     if (!tier) {
-      throw new Error(`Membership tier not found: ${input.tierId}`);
+      throw new MembershipPlanNotFoundError(input.tierId);
     }
 
     if (!tier.isActive) {
-      throw new Error('This membership tier is not currently available');
+      throw new MembershipValidationError('This membership tier is not currently available');
     }
 
     // Check if customer already has active membership
     const existingMembership = await this.membershipRepository.findActiveByCustomerId(input.customerId);
     if (existingMembership) {
-      throw new Error('Customer already has an active membership. Use upgrade instead.');
+      throw new MembershipAlreadyActiveError(input.customerId);
     }
 
     // Check tier capacity
     if (tier.maxMembers && tier.currentMembers && tier.currentMembers >= tier.maxMembers) {
-      throw new Error('This membership tier has reached maximum capacity');
+      throw new MembershipValidationError('This membership tier has reached maximum capacity');
     }
 
     const membershipId = `mbr_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

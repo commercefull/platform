@@ -1,5 +1,6 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ProductAttribute } from '../../../../libs/db/types';
+import { ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 // Use ProductAttribute type directly from libs/db/types.ts
 export type { ProductAttribute };
@@ -58,7 +59,7 @@ export class AttributeRepo {
     );
 
     if (!row) {
-      throw new Error('Failed to create attribute');
+      throw new FailedToCreateProductError();
     }
 
     return row;
@@ -90,7 +91,7 @@ export class AttributeRepo {
     );
 
     if (!row) {
-      throw new Error('Failed to update attribute');
+      throw new ProductValidationError('Failed to update attribute');
     }
 
     return row;
@@ -107,7 +108,7 @@ export class AttributeRepo {
     const hasAssociatedOptions = optionsResult && optionsResult.length > 0 && parseInt(optionsResult[0].count) > 0;
 
     if (hasAssociatedOptions) {
-      throw new Error('Cannot delete attribute with associated options');
+      throw new ProductValidationError('Cannot delete attribute with associated options');
     }
 
     const result = await query(`DELETE FROM "${Table.ProductAttribute}" WHERE "productAttributeId" = $1`, [id]);

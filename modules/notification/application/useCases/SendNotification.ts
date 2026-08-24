@@ -2,6 +2,8 @@
  * SendNotification Use Case
  */
 
+import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
+
 export type NotificationChannel = 'email' | 'sms' | 'push' | 'in_app';
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
 
@@ -42,7 +44,7 @@ export class SendNotificationUseCase {
 
   async execute(input: SendNotificationInput): Promise<SendNotificationOutput> {
     if (!input.recipientId || !input.channel || !input.content) {
-      throw new Error('Recipient ID, channel, and content are required');
+      throw new NotificationValidationError('Recipient ID, channel, and content are required');
     }
 
     const notificationId = `ntf_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

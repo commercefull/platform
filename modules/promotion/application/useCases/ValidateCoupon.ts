@@ -3,7 +3,9 @@
  * Validates a coupon code for a given order
  */
 
-import couponRepo, { PromotionCoupon } from '../../infrastructure/repositories/couponRepo';
+import couponDiscountRepository, { type PromotionCoupon } from '../../infrastructure/repositories/CouponDiscountRepository';
+
+const couponRepo = couponDiscountRepository.coupons;
 
 // ============================================================================
 // Command

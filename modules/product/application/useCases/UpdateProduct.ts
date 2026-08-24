@@ -5,6 +5,7 @@
 
 import { ProductRepository } from '../../domain/repositories/ProductRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================
 // Command
@@ -69,7 +70,7 @@ export class UpdateProductUseCase {
     const product = await this.productRepository.findById(command.productId);
 
     if (!product) {
-      throw new Error('Product not found');
+      throw new ProductNotFoundError(command.productId);
     }
 
     const updatedFields: string[] = [];

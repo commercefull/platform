@@ -4,6 +4,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
+import { FailedToCreateWarehouseEntityError } from '../../domain/errors/WarehouseErrors';
 
 export interface WarehouseReceiving {
   warehouseReceivingId: string;
@@ -60,7 +61,7 @@ export async function create(input: CreateReceivingInput): Promise<WarehouseRece
     input.items ? JSON.stringify(input.items) : null, input.receivedBy || null, now, now,
   ]);
 
-  if (!result) throw new Error('Failed to create receiving record');
+  if (!result) throw new FailedToCreateWarehouseEntityError('Failed to create receiving record');
   return result;
 }
 

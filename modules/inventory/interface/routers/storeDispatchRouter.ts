@@ -1,4 +1,5 @@
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import {
   createStoreDispatch,
@@ -13,13 +14,13 @@ import {
 const router = express.Router();
 router.use(isOrganizationLoggedIn);
 
-router.post('/dispatches', createStoreDispatch);
-router.get('/dispatches', listStoreDispatches);
-router.get('/dispatches/:dispatchId', getStoreDispatch);
-router.put('/dispatches/:dispatchId/approve', approveStoreDispatch);
-router.put('/dispatches/:dispatchId/dispatch', dispatchFromStore);
-router.put('/dispatches/:dispatchId/receive', receiveStoreDispatch);
-router.put('/dispatches/:dispatchId/cancel', cancelStoreDispatch);
+router.post('/dispatches', asyncHandler(createStoreDispatch));
+router.get('/dispatches', asyncHandler(listStoreDispatches));
+router.get('/dispatches/:dispatchId', asyncHandler(getStoreDispatch));
+router.put('/dispatches/:dispatchId/approve', asyncHandler(approveStoreDispatch));
+router.put('/dispatches/:dispatchId/dispatch', asyncHandler(dispatchFromStore));
+router.put('/dispatches/:dispatchId/receive', asyncHandler(receiveStoreDispatch));
+router.put('/dispatches/:dispatchId/cancel', asyncHandler(cancelStoreDispatch));
 
 export const storeDispatchRouter = router;
 export default router;

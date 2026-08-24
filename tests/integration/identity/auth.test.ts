@@ -245,7 +245,7 @@ describe('Auth Feature Tests', () => {
       }
     });
 
-    // TODO: Email verification endpoint has issues
+    // TODO(phase-3.1): Fix — email verification endpoint has issues. Track in gap-analysis-and-roadmap.md Phase 3.1.
     it.skip('should request email verification with camelCase properties', async () => {
       const response = await client.post('/customer/identity/request-verification', {
         email: testCustomer.email,

@@ -6,6 +6,7 @@
 
 import { Fulfillment } from '../../domain/entities/Fulfillment';
 import { IFulfillmentRepository } from '../../domain/repositories/FulfillmentRepository';
+import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 import { emitFulfillmentDelivered } from '../../domain/events/FulfillmentEvents';
 
 export interface MarkDeliveredInput {
@@ -22,7 +23,7 @@ export class MarkDeliveredUseCase {
   async execute(input: MarkDeliveredInput): Promise<MarkDeliveredOutput> {
     const fulfillment = await this.fulfillmentRepository.findById(input.fulfillmentId);
     if (!fulfillment) {
-      throw new Error(`Fulfillment not found: ${input.fulfillmentId}`);
+      throw new FulfillmentNotFoundError(input.fulfillmentId);
     }
 
     // Allow deliver after ship; if not shipped yet but in transit/out_for_delivery, also allow

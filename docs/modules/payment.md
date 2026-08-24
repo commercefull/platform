@@ -153,3 +153,89 @@ GET /payments/orders/:orderId |
 GET /payments/transactions |
 
 <!-- GENERATED:ENDPOINTS:END -->
+
+---
+
+## Domain Errors
+
+All errors extend `AppError` and are defined in `modules/payment/domain/errors/PaymentErrors.ts`.
+
+### Transaction Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `TransactionNotFoundError` | `payment.transaction_not_found` | 404 | Transaction not found by ID |
+| `TransactionCannotBeCapturedError` | `payment.transaction_cannot_be_captured` | 400 | Transaction is not in a capturable status |
+| `CaptureAmountExceedsAuthorizedError` | `payment.capture_amount_exceeds_authorized` | 400 | Capture amount exceeds authorized amount |
+| `CaptureFailedError` | `payment.capture_failed` | 502 | Gateway capture operation failed |
+| `TransactionCannotBeVoidedError` | `payment.transaction_cannot_be_voided` | 400 | Transaction is not in a voidable status |
+| `VoidFailedError` | `payment.void_failed` | 502 | Gateway void operation failed |
+| `TransactionCannotBeRefundedError` | `payment.transaction_cannot_be_refunded` | 400 | Transaction is not in a refundable status |
+| `RefundAmountExceedsRefundableError` | `payment.refund_amount_exceeds_refundable` | 400 | Refund amount exceeds refundable amount |
+| `RefundAmountExceedsRefundableBalanceError` | `payment.refund_exceeds_balance` | 400 | Refund amount exceeds refundable balance |
+| `MaxRetryAttemptsReachedError` | `payment.max_retry_attempts` | 400 | Maximum retry attempts reached |
+| `CannotRetryTransactionError` | `payment.cannot_retry_transaction` | 400 | Transaction status does not allow retry |
+
+### Validation Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `AmountMustBePositiveError` | `payment.amount_must_be_positive` | 400 | Amount must be greater than zero |
+| `RefundAmountMustBePositiveError` | `payment.refund_amount_must_be_positive` | 400 | Refund amount must be greater than zero |
+| `PeriodEndMustBeAfterStartError` | `payment.invalid_period` | 400 | Period end must be after period start |
+| `TransactionIdOrExternalIdRequiredError` | `payment.transaction_id_or_external_id_required` | 400 | Either transactionId or externalId required |
+
+### Gateway Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `NoPaymentGatewayConfiguredError` | `payment.no_gateway_configured` | 500 | No payment gateway configured |
+| `InvalidWebhookSignatureError` | `payment.invalid_webhook_signature` | 401 | Webhook signature verification failed |
+
+### Payment Method Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `PaymentMethodAlreadySavedError` | `payment.method_already_saved` | 409 | Payment method already saved |
+| `CustomerIdAndProviderMethodIdRequiredError` | `payment.customer_id_and_method_id_required` | 400 | Customer ID and provider method ID required |
+
+### Domain Entity Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `RefundExceedsRefundableAmountError` | `payment.refund_exceeds_refundable` | 400 | Refund exceeds refundable amount (entity-level) |
+| `InvalidPaymentTransitionError` | `payment.invalid_transition` | 400 | Invalid payment status transition |
+| `InvalidStatusTransitionError` | `payment.invalid_transition` | 400 | Invalid status transition (entity-level) |
+| `FraudCheckNotFoundError` | `payment.fraud_check_not_found` | 404 | Fraud check not found |
+
+### Infrastructure Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `FailedToCreatePaymentWebhookError` | `payment.webhook_creation_failed` | 500 | Failed to create payment webhook record |
+| `FailedToCreatePaymentDisputeError` | `payment.dispute_creation_failed` | 500 | Failed to create payment dispute |
+| `FailedToCreatePaymentFeeError` | `payment.fee_creation_failed` | 500 | Failed to create payment fee |
+| `FailedToCreateStoredPaymentMethodError` | `payment.stored_method_creation_failed` | 500 | Failed to create stored payment method |
+| `FailedToRetrieveSavedPaymentMethodError` | `payment.stored_method_retrieval_failed` | 500 | Failed to retrieve saved payment method |
+| `FailedToGenerateReportError` | `payment.report_generation_failed` | 500 | Failed to generate payment report |
+| `FailedToCreatePayoutItemError` | `payment.payout_item_creation_failed` | 500 | Failed to create payout item |
+| `FailedToCreatePayoutError` | `payment.payout_creation_failed` | 500 | Failed to create payout |
+| `FailedToCreatePayoutSettingsError` | `payment.payout_settings_creation_failed` | 500 | Failed to create payout settings |
+| `FailedToCreatePaymentGatewayError` | `payment.gateway_creation_failed` | 500 | Failed to create payment gateway |
+| `PaymentGatewayNotFoundError` | `payment.gateway_not_found` | 404 | Payment gateway not found |
+| `FailedToUpdatePaymentGatewayError` | `payment.gateway_update_failed` | 500 | Failed to update payment gateway |
+| `FailedToCreatePaymentMethodConfigError` | `payment.method_config_creation_failed` | 500 | Failed to create payment method config |
+| `PaymentMethodConfigNotFoundError` | `payment.method_config_not_found` | 404 | Payment method config not found |
+| `FailedToUpdatePaymentMethodConfigError` | `payment.method_config_update_failed` | 500 | Failed to update payment method config |
+| `FailedToCreatePaymentTransactionError` | `payment.transaction_creation_failed` | 500 | Failed to create payment transaction |
+| `PaymentTransactionNotFoundError` | `payment.transaction_not_found` | 404 | Payment transaction not found (repo-level) |
+| `FailedToUpdatePaymentTransactionError` | `payment.transaction_update_failed` | 500 | Failed to update payment transaction |
+| `FailedToCreatePaymentRefundError` | `payment.refund_creation_failed` | 500 | Failed to create payment refund |
+| `PaymentRefundNotFoundError` | `payment.refund_not_found` | 404 | Payment refund not found |
+| `FailedToUpdatePaymentRefundError` | `payment.refund_update_failed` | 500 | Failed to update payment refund |
+| `FailedToCreateSubscriptionInvoiceError` | `payment.subscription_invoice_creation_failed` | 500 | Failed to create subscription invoice |
+| `PaymentMethodNotFoundError` | `payment.method_not_found` | 404 | Payment method not found by ID |
+| `FailedToCreatePaymentMethodError` | `payment.method_creation_failed` | 500 | Failed to create payment method |
+| `FailedToUpdatePaymentMethodError` | `payment.method_update_failed` | 500 | Failed to update payment method |
+| `PaymentGatewayByIdNotFoundError` | `payment.gateway_not_found` | 404 | Payment gateway not found by ID |
+| `FailedToUpdatePaymentGatewayByIdError` | `payment.gateway_update_failed` | 500 | Failed to update payment gateway by ID |

@@ -3,9 +3,13 @@
  * Calculates available shipping rates for a given destination and order
  */
 
-import shippingZoneRepo, { ShippingZone } from '../../infrastructure/repositories/shippingZoneRepo';
-import shippingMethodRepo from '../../infrastructure/repositories/shippingMethodRepo';
-import shippingRateRepo, { ShippingRate } from '../../infrastructure/repositories/shippingRateRepo';
+import shippingConfigRepository from '../../infrastructure/repositories/ShippingConfigRepository';
+
+const shippingZoneRepo = shippingConfigRepository.zones;
+const shippingMethodRepo = shippingConfigRepository.methods;
+const shippingRateRepo = shippingConfigRepository.rates;
+import type { ShippingZone } from '../../infrastructure/repositories/ShippingConfigRepository';
+import type { ShippingRate } from '../../infrastructure/repositories/ShippingConfigRepository';
 import { evaluateConditions, ShippingConditionContext } from '../../domain/services/ShippingConditionsEvaluator';
 
 // ============================================================================

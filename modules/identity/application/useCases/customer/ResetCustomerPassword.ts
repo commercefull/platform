@@ -3,6 +3,8 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { logger } from '../../../../../libs/logger';
+import { EmailRequiredOnlyError, TokenRequiredError, PasswordTooShortError, InvalidOrExpiredTokenError, TokenAlreadyUsedError, TokenExpiredError } from '../../../domain/errors/IdentityErrors';
 
 export interface RequestPasswordResetInput {
   email: string;
@@ -66,7 +68,7 @@ export class ResetCustomerPasswordUseCase {
 
   async requestReset(input: RequestPasswordResetInput): Promise<RequestPasswordResetOutput> {
     if (!input.email) {
-      throw new Error('Email is required');
+      throw new EmailRequiredOnlyError();
     }
 
     // Find customer
@@ -99,7 +101,9 @@ export class ResetCustomerPasswordUseCase {
         token,
         firstName: customer.firstName,
       });
-    } catch {}
+    } catch (err) {
+      logger.warn('Failed to send password reset email', { error: err });
+    }
 
     // Emit event
     eventBus.emit('customer.password_reset_requested', {
@@ -115,26 +119,26 @@ export class ResetCustomerPasswordUseCase {
 
   async resetPassword(input: ResetPasswordInput): Promise<ResetPasswordOutput> {
     if (!input.token || !input.newPassword) {
-      throw new Error('Token and new password are required');
+      throw new TokenRequiredError();
     }
 
     // Validate password strength
     if (input.newPassword.length < 8) {
-      throw new Error('Password must be at least 8 characters');
+      throw new PasswordTooShortError();
     }
 
     // Find and validate reset token
     const resetRecord = await this.passwordResetRepo.findByToken(input.token);
     if (!resetRecord) {
-      throw new Error('Invalid or expired reset token');
+      throw new InvalidOrExpiredTokenError();
     }
 
     if (resetRecord.used) {
-      throw new Error('Reset token has already been used');
+      throw new TokenAlreadyUsedError();
     }
 
     if (new Date() > new Date(resetRecord.expiresAt)) {
-      throw new Error('Reset token has expired');
+      throw new TokenExpiredError();
     }
 
     // Hash new password

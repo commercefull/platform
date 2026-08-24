@@ -5,6 +5,7 @@
  */
 
 import productReviewVoteRepo from '../../infrastructure/repositories/productReviewVoteRepo';
+import { ProductValidationError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================
 // Command
@@ -41,10 +42,10 @@ export interface VoteOnReviewResponse {
 export class VoteOnReviewUseCase {
   async execute(command: VoteOnReviewCommand): Promise<VoteOnReviewResponse> {
     if (!command.productReviewId) {
-      throw new Error('productReviewId is required');
+      throw new ProductValidationError('productReviewId is required');
     }
     if (!command.customerId) {
-      throw new Error('customerId is required');
+      throw new ProductValidationError('customerId is required');
     }
 
     // Attempt insert — ON CONFLICT DO NOTHING enforces one-vote-per-customer

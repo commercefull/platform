@@ -3,10 +3,11 @@
  * HTTP interface for customer-facing order operations with content negotiation
  */
 
-import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import OrderRepo from '../../infrastructure/repositories/OrderRepository';
+import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
+
+const OrderRepo = orderDataRepository.commands;
 import { CreateOrderCommand, CreateOrderUseCase, OrderItemInput, AddressInput } from '../../application/useCases/CreateOrder';
 import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
 import { GetCustomerOrdersCommand, GetCustomerOrdersUseCase } from '../../application/useCases/GetCustomerOrders';
@@ -16,32 +17,12 @@ import { CancelOrderCommand, CancelOrderUseCase } from '../../application/useCas
 // Content Negotiation Helpers
 // ============================================================================
 
-type ResponseData = Record<string, unknown> | unknown[] | unknown;
-
-/**
- * Respond with JSON or HTML based on Accept header
- */
-function respond(req: TypedRequest, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
-  const acceptHeader = req.get('Accept') || 'application/json';
-
-  if (acceptHeader.includes('text/html') && htmlTemplate) {
-    res.status(statusCode).render(htmlTemplate, { data, success: true });
-  } else {
-    res.status(statusCode).json({ success: true, data });
-  }
+function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
+  res.status(statusCode).json({ success: true, data });
 }
 
-/**
- * Respond with error in JSON or HTML based on Accept header
- */
-function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
-  const acceptHeader = req.get('Accept') || 'application/json';
-
-  if (acceptHeader.includes('text/html') && htmlTemplate) {
-    res.status(statusCode).render(htmlTemplate, { error: message, success: false });
-  } else {
-    res.status(statusCode).json({ success: false, error: message });
-  }
+function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
+  res.status(statusCode).json({ success: false, error: message });
 }
 
 // ============================================================================
@@ -53,27 +34,22 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  * GET /orders
  */
 export const getMyOrders = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401, 'order/error');
-      return;
-    }
-
-    const limit = parseInt(req.query.limit as string) || 20;
-    const offset = parseInt(req.query.offset as string) || 0;
-
-    const command = new GetCustomerOrdersCommand(customerId, limit, offset);
-    const useCase = new GetCustomerOrdersUseCase(OrderRepo);
-    const result = await useCase.execute(command);
-
-    respond(req, res, result, 200, 'order/list');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get orders', 500, 'order/error');
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const limit = parseInt(req.query.limit as string) || 20;
+  const offset = parseInt(req.query.offset as string) || 0;
+
+  const command = new GetCustomerOrdersCommand(customerId, limit, offset);
+  const useCase = new GetCustomerOrdersUseCase(OrderRepo);
+  const result = await useCase.execute(command);
+
+  respond(req, res, result, 200);
+  
 };
 
 /**
@@ -81,30 +57,19 @@ export const getMyOrders = async (req: TypedRequest, res: Response): Promise<voi
  * GET /orders/:orderId
  */
 export const getOrder = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { orderId } = req.params;
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
+  const { orderId } = req.params;
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
-    const command = new GetOrderCommand(orderId, undefined, customerId);
-    const useCase = new GetOrderUseCase(OrderRepo);
-    const order = await useCase.execute(command);
+  const command = new GetOrderCommand(orderId, undefined, customerId);
+  const useCase = new GetOrderUseCase(OrderRepo);
+  const order = await useCase.execute(command);
 
-    if (!order) {
-      respondError(req, res, 'Order not found', 404, 'order/error');
-      return;
-    }
-
-    respond(req, res, order, 200, 'order/detail');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    if ((error as Error).message.includes('permission')) {
-      respondError(req, res, (error as Error).message, 403, 'order/error');
-      return;
-    }
-
-    respondError(req, res, (error as Error).message || 'Failed to get order', 500, 'order/error');
+  if (!order) {
+    respondError(req, res, 'Order not found', 404);
+    return;
   }
+
+  respond(req, res, order, 200);
 };
 
 /**
@@ -112,30 +77,19 @@ export const getOrder = async (req: TypedRequest, res: Response): Promise<void> 
  * GET /orders/number/:orderNumber
  */
 export const getOrderByNumber = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { orderNumber } = req.params;
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
+  const { orderNumber } = req.params;
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
-    const command = new GetOrderCommand(undefined, orderNumber, customerId);
-    const useCase = new GetOrderUseCase(OrderRepo);
-    const order = await useCase.execute(command);
+  const command = new GetOrderCommand(undefined, orderNumber, customerId);
+  const useCase = new GetOrderUseCase(OrderRepo);
+  const order = await useCase.execute(command);
 
-    if (!order) {
-      respondError(req, res, 'Order not found', 404, 'order/error');
-      return;
-    }
-
-    respond(req, res, order, 200, 'order/detail');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    if ((error as Error).message.includes('permission')) {
-      respondError(req, res, (error as Error).message, 403, 'order/error');
-      return;
-    }
-
-    respondError(req, res, (error as Error).message || 'Failed to get order', 500, 'order/error');
+  if (!order) {
+    respondError(req, res, 'Order not found', 404);
+    return;
   }
+
+  respond(req, res, order, 200);
 };
 
 /**
@@ -143,102 +97,97 @@ export const getOrderByNumber = async (req: TypedRequest, res: Response): Promis
  * POST /orders
  */
 export const createOrder = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
-    const body = req.body as {
-      items: unknown[];
-      shippingAddress: unknown;
-      billingAddress?: unknown;
-      basketId?: string;
-      storeId?: string;
-      channelId?: string;
-      createdByUserId?: string;
-      orderSource?: string;
-      currencyCode?: string;
-      customerEmail?: string;
-      customerPhone?: string;
-      customerName?: string;
-      customerNotes?: string;
-      shippingTotal?: number;
-      hasGiftWrapping?: boolean;
-      giftMessage?: string;
-      isGift?: boolean;
-    };
-    const {
-      items,
-      shippingAddress,
-      billingAddress,
-      basketId,
-      storeId,
-      channelId,
-      createdByUserId,
-      orderSource,
-      currencyCode,
-      customerEmail,
-      customerPhone,
-      customerName,
-      customerNotes,
-      shippingTotal,
-      hasGiftWrapping,
-      giftMessage,
-      isGift,
-    } = body;
-    const _channelCodeHeader = req.get('x-channel-code');
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
+  const body = req.body as {
+    items: unknown[];
+    shippingAddress: unknown;
+    billingAddress?: unknown;
+    basketId?: string;
+    storeId?: string;
+    channelId?: string;
+    createdByUserId?: string;
+    orderSource?: string;
+    currencyCode?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    customerName?: string;
+    customerNotes?: string;
+    shippingTotal?: number;
+    hasGiftWrapping?: boolean;
+    giftMessage?: string;
+    isGift?: boolean;
+  };
+  const {
+    items,
+    shippingAddress,
+    billingAddress,
+    basketId,
+    storeId,
+    channelId,
+    createdByUserId,
+    orderSource,
+    currencyCode,
+    customerEmail,
+    customerPhone,
+    customerName,
+    customerNotes,
+    shippingTotal,
+    hasGiftWrapping,
+    giftMessage,
+    isGift,
+  } = body;
+  const _channelCodeHeader = req.get('x-channel-code');
 
-    // Validation
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      respondError(req, res, 'Order must contain at least one item', 400, 'order/error');
-      return;
-    }
-
-    if (!shippingAddress) {
-      respondError(req, res, 'Shipping address is required', 400, 'order/error');
-      return;
-    }
-
-    if (!customerEmail) {
-      respondError(req, res, 'Customer email is required', 400, 'order/error');
-      return;
-    }
-
-    const email = customerEmail;
-
-    let resolvedStoreId = storeId || req.user?.storeId;
-    let resolvedChannelId = channelId;
-    let resolvedOrderSource = orderSource || 'web';
-
-    const command = new CreateOrderCommand(
-      customerId,
-      email,
-      items as OrderItemInput[],
-      shippingAddress as AddressInput,
-      billingAddress as AddressInput,
-      basketId,
-      resolvedStoreId,
-      resolvedChannelId,
-      createdByUserId || req.user?.userId || req.user?.id,
-      resolvedOrderSource,
-      currencyCode,
-      customerPhone,
-      customerName,
-      customerNotes,
-      shippingTotal,
-      hasGiftWrapping,
-      giftMessage,
-      isGift,
-      req.ip,
-      req.get('User-Agent'),
-    );
-
-    const useCase = new CreateOrderUseCase(OrderRepo);
-    const order = await useCase.execute(command);
-
-    respond(req, res, order, 201, 'order/confirmation');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to create order', 500, 'order/error');
+  // Validation
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    respondError(req, res, 'Order must contain at least one item', 400);
+    return;
   }
+
+  if (!shippingAddress) {
+    respondError(req, res, 'Shipping address is required', 400);
+    return;
+  }
+
+  if (!customerEmail) {
+    respondError(req, res, 'Customer email is required', 400);
+    return;
+  }
+
+  const email = customerEmail;
+
+  let resolvedStoreId = storeId || req.user?.storeId;
+  let resolvedChannelId = channelId;
+  let resolvedOrderSource = orderSource || 'web';
+
+  const command = new CreateOrderCommand(
+    customerId,
+    email,
+    items as OrderItemInput[],
+    shippingAddress as AddressInput,
+    billingAddress as AddressInput,
+    basketId,
+    resolvedStoreId,
+    resolvedChannelId,
+    createdByUserId || req.user?.userId || req.user?.id,
+    resolvedOrderSource,
+    currencyCode,
+    customerPhone,
+    customerName,
+    customerNotes,
+    shippingTotal,
+    hasGiftWrapping,
+    giftMessage,
+    isGift,
+    req.ip,
+    req.get('User-Agent'),
+  );
+
+  const useCase = new CreateOrderUseCase(OrderRepo);
+  const order = await useCase.execute(command);
+
+  respond(req, res, order, 201);
+  
 };
 
 /**
@@ -246,42 +195,21 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
  * POST /orders/:orderId/cancel
  */
 export const cancelOrder = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { orderId } = req.params;
-    const body = req.body as { reason?: string };
-    const { reason } = body;
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
+  const { orderId } = req.params;
+  const body = req.body as { reason?: string };
+  const { reason } = body;
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401, 'order/error');
-      return;
-    }
-
-    const cancelReason = reason || 'Cancelled by customer';
-
-    const command = new CancelOrderCommand(orderId, cancelReason, customerId);
-    const useCase = new CancelOrderUseCase(OrderRepo);
-    const result = await useCase.execute(command);
-
-    respond(req, res, result, 200, 'order/cancelled');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    if ((error as Error).message.includes('permission')) {
-      respondError(req, res, (error as Error).message, 403, 'order/error');
-      return;
-    }
-
-    if ((error as Error).message.includes('cannot be cancelled')) {
-      respondError(req, res, (error as Error).message, 400, 'order/error');
-      return;
-    }
-
-    if ((error as Error).message.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
-      respondError(req, res, 'Order not found', 404, 'order/error');
-      return;
-    }
-
-    respondError(req, res, (error as Error).message || 'Failed to cancel order', 500, 'order/error');
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const cancelReason = reason || 'Cancelled by customer';
+
+  const command = new CancelOrderCommand(orderId, cancelReason, customerId);
+  const useCase = new CancelOrderUseCase(OrderRepo);
+  const result = await useCase.execute(command);
+
+  respond(req, res, result, 200);
 };

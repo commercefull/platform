@@ -5,6 +5,7 @@
  */
 
 import { IFulfillmentRepository } from '../../domain/repositories/FulfillmentRepository';
+import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 
 export interface InitiateReturnInput {
   fulfillmentId: string;
@@ -23,7 +24,7 @@ export class InitiateReturnUseCase {
   async execute(input: InitiateReturnInput): Promise<InitiateReturnOutput> {
     const fulfillment = await this.fulfillmentRepository.findById(input.fulfillmentId);
     if (!fulfillment) {
-      throw new Error(`Fulfillment not found: ${input.fulfillmentId}`);
+      throw new FulfillmentNotFoundError(input.fulfillmentId);
     }
 
     // If already returned, treat as idempotent

@@ -5,6 +5,11 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import {
+  SupplierCodeAlreadyExistsError,
+  FailedToCreateSupplierError,
+  SupplierValidationError,
+} from '../../domain/errors/SupplierErrors';
 
 // ============================================================================
 // Table Constants
@@ -192,7 +197,7 @@ export class SupplierRepo {
     // Check if code already exists
     const existing = await this.findByCode(params.code);
     if (existing) {
-      throw new Error(`Supplier with code '${params.code}' already exists`);
+      throw new SupplierCodeAlreadyExistsError(params.code);
     }
 
     const result = await queryOne<Supplier>(
@@ -233,7 +238,7 @@ export class SupplierRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create supplier');
+      throw new FailedToCreateSupplierError();
     }
 
     return result;
@@ -320,7 +325,7 @@ export class SupplierRepo {
    */
   async updateRating(supplierId: string, rating: number): Promise<Supplier | null> {
     if (rating < 0 || rating > 5) {
-      throw new Error('Rating must be between 0 and 5');
+      throw new SupplierValidationError('Rating must be between 0 and 5');
     }
 
     return this.update(supplierId, { rating });

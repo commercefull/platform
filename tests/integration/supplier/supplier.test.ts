@@ -1,11 +1,12 @@
 import { AxiosInstance } from 'axios';
 import {
   setupSupplierTests,
-  cleanupSupplierTests,
   createTestSupplier,
   createTestPurchaseOrder,
   createTestSupplierAddress,
   SEEDED_SUPPLIER_IDS,
+  SEEDED_SUPPLIER_ADDRESS_IDS as _SEEDED_SUPPLIER_ADDRESS_IDS,
+  SEEDED_PURCHASE_ORDER_IDS,
   SEEDED_WAREHOUSE_ID,
 } from './testUtils';
 import { expectStatus } from '../testUtils';
@@ -13,19 +14,11 @@ import { expectStatus } from '../testUtils';
 describe('Supplier Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  const createdResources = {
-    supplierIds: [] as string[],
-    poIds: [] as string[],
-  };
 
   beforeAll(async () => {
     const setup = await setupSupplierTests();
     client = setup.client;
     adminToken = setup.adminToken;
-  });
-
-  afterAll(async () => {
-    await cleanupSupplierTests(client, adminToken, createdResources);
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });
@@ -48,7 +41,6 @@ describe('Supplier Feature Tests', () => {
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('supplierId');
       testSupplierId = response.data.data.supplierId;
-      createdResources.supplierIds.push(testSupplierId);
     });
 
     it('should list suppliers', async () => {
@@ -125,24 +117,9 @@ describe('Supplier Feature Tests', () => {
   // ============================================================================
 
   describe('Supplier Status Management', () => {
-    let testSupplierId: string;
-
-    beforeAll(async () => {
-      const supplierData = createTestSupplier();
-      const response = await client.post('/business/suppliers', supplierData, {
-        headers: authHeaders(),
-      });
-      if (response.status === 201 || response.status === 200) {
-        testSupplierId = response.data.data.supplierId;
-        createdResources.supplierIds.push(testSupplierId);
-      }
-    });
-
     it('should update supplier status', async () => {
-      if (!testSupplierId) return;
-
       const response = await client.patch(
-        `/business/suppliers/${testSupplierId}/status`,
+        `/business/suppliers/${SEEDED_SUPPLIER_IDS.QUALITY_GOODS}/status`,
         { status: 'inactive' },
         { headers: authHeaders() },
       );
@@ -152,10 +129,8 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should update supplier visibility', async () => {
-      if (!testSupplierId) return;
-
       const response = await client.patch(
-        `/business/suppliers/${testSupplierId}/visibility`,
+        `/business/suppliers/${SEEDED_SUPPLIER_IDS.QUALITY_GOODS}/visibility`,
         { isVisible: false },
         { headers: authHeaders() },
       );
@@ -164,9 +139,7 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should approve a supplier', async () => {
-      if (!testSupplierId) return;
-
-      const response = await client.post(`/business/suppliers/${testSupplierId}/approve`, {}, {
+      const response = await client.post(`/business/suppliers/${SEEDED_SUPPLIER_IDS.QUALITY_GOODS}/approve`, {}, {
         headers: authHeaders(),
       });
 
@@ -174,9 +147,7 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should suspend a supplier', async () => {
-      if (!testSupplierId) return;
-
-      const response = await client.post(`/business/suppliers/${testSupplierId}/suspend`, {}, {
+      const response = await client.post(`/business/suppliers/${SEEDED_SUPPLIER_IDS.QUALITY_GOODS}/suspend`, {}, {
         headers: authHeaders(),
       });
 
@@ -189,24 +160,10 @@ describe('Supplier Feature Tests', () => {
   // ============================================================================
 
   describe('Supplier Addresses', () => {
-    let testSupplierId: string;
     let testAddressId: string;
 
-    beforeAll(async () => {
-      const supplierData = createTestSupplier();
-      const response = await client.post('/business/suppliers', supplierData, {
-        headers: authHeaders(),
-      });
-      if (response.status === 201 || response.status === 200) {
-        testSupplierId = response.data.data.supplierId;
-        createdResources.supplierIds.push(testSupplierId);
-      }
-    });
-
     it('should list supplier addresses', async () => {
-      if (!testSupplierId) return;
-
-      const response = await client.get(`/business/suppliers/${testSupplierId}/addresses`, {
+      const response = await client.get(`/business/suppliers/${SEEDED_SUPPLIER_IDS.ACME_CORP}/addresses`, {
         headers: authHeaders(),
       });
 
@@ -215,11 +172,9 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should create a supplier address', async () => {
-      if (!testSupplierId) return;
+      const addressData = createTestSupplierAddress(SEEDED_SUPPLIER_IDS.ACME_CORP);
 
-      const addressData = createTestSupplierAddress(testSupplierId);
-
-      const response = await client.post(`/business/suppliers/${testSupplierId}/addresses`, addressData, {
+      const response = await client.post(`/business/suppliers/${SEEDED_SUPPLIER_IDS.ACME_CORP}/addresses`, addressData, {
         headers: authHeaders(),
       });
 
@@ -255,23 +210,8 @@ describe('Supplier Feature Tests', () => {
   // ============================================================================
 
   describe('Supplier Products', () => {
-    let testSupplierId: string;
-
-    beforeAll(async () => {
-      const supplierData = createTestSupplier();
-      const response = await client.post('/business/suppliers', supplierData, {
-        headers: authHeaders(),
-      });
-      if (response.status === 201 || response.status === 200) {
-        testSupplierId = response.data.data.supplierId;
-        createdResources.supplierIds.push(testSupplierId);
-      }
-    });
-
     it('should list supplier products', async () => {
-      if (!testSupplierId) return;
-
-      const response = await client.get(`/business/suppliers/${testSupplierId}/products`, {
+      const response = await client.get(`/business/suppliers/${SEEDED_SUPPLIER_IDS.ACME_CORP}/products`, {
         headers: authHeaders(),
       });
 
@@ -280,8 +220,6 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should link product to supplier', async () => {
-      if (!testSupplierId) return;
-
       const linkData = {
         productId: '00000000-0000-0000-0000-000000000001',
         sku: `SUP-SKU-${Date.now()}`,
@@ -289,7 +227,7 @@ describe('Supplier Feature Tests', () => {
         minimumOrderQuantity: 10,
       };
 
-      const response = await client.post(`/business/suppliers/${testSupplierId}/products`, linkData, {
+      const response = await client.post(`/business/suppliers/${SEEDED_SUPPLIER_IDS.GLOBAL_PARTS}/products`, linkData, {
         headers: authHeaders(),
       });
 
@@ -302,24 +240,8 @@ describe('Supplier Feature Tests', () => {
   // ============================================================================
 
   describe('Purchase Orders', () => {
-    let testSupplierId: string;
-    let testPOId: string;
-
-    beforeAll(async () => {
-      const supplierData = createTestSupplier();
-      const response = await client.post('/business/suppliers', supplierData, {
-        headers: authHeaders(),
-      });
-      if (response.status === 201 || response.status === 200) {
-        testSupplierId = response.data.data.supplierId;
-        createdResources.supplierIds.push(testSupplierId);
-      }
-    });
-
     it('should create a purchase order', async () => {
-      if (!testSupplierId) return;
-
-      const poData = createTestPurchaseOrder(testSupplierId, SEEDED_WAREHOUSE_ID);
+      const poData = createTestPurchaseOrder(SEEDED_SUPPLIER_IDS.ACME_CORP, SEEDED_WAREHOUSE_ID);
 
       const response = await client.post('/business/purchase-orders', poData, {
         headers: authHeaders(),
@@ -327,9 +249,6 @@ describe('Supplier Feature Tests', () => {
 
       expectStatus(response, 201);
       expect(response.data.success).toBe(true);
-      testPOId = response.data.data?.purchaseOrder?.supplierPurchaseOrderId
-        || response.data.data?.supplierPurchaseOrderId;
-      if (testPOId) createdResources.poIds.push(testPOId);
     });
 
     it('should list purchase orders', async () => {
@@ -342,9 +261,7 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should get a specific purchase order', async () => {
-      if (!testPOId) return;
-
-      const response = await client.get(`/business/purchase-orders/${testPOId}`, {
+      const response = await client.get(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_001}`, {
         headers: authHeaders(),
       });
 
@@ -352,9 +269,7 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should get purchase orders by supplier', async () => {
-      if (!testSupplierId) return;
-
-      const response = await client.get(`/business/suppliers/${testSupplierId}/purchase-orders`, {
+      const response = await client.get(`/business/suppliers/${SEEDED_SUPPLIER_IDS.ACME_CORP}/purchase-orders`, {
         headers: authHeaders(),
       });
 
@@ -362,9 +277,7 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should update a purchase order', async () => {
-      if (!testPOId) return;
-
-      const response = await client.put(`/business/purchase-orders/${testPOId}`, {
+      const response = await client.put(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}`, {
         notes: 'Updated PO notes',
       }, {
         headers: authHeaders(),
@@ -374,9 +287,7 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should send a purchase order', async () => {
-      if (!testPOId) return;
-
-      const response = await client.post(`/business/purchase-orders/${testPOId}/send`, {}, {
+      const response = await client.post(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}/send`, {}, {
         headers: authHeaders(),
       });
 
@@ -384,9 +295,7 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should approve a purchase order', async () => {
-      if (!testPOId) return;
-
-      const response = await client.post(`/business/purchase-orders/${testPOId}/approve`, {}, {
+      const response = await client.post(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}/approve`, {}, {
         headers: authHeaders(),
       });
 
@@ -394,9 +303,7 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should cancel a purchase order', async () => {
-      if (!testPOId) return;
-
-      const response = await client.post(`/business/purchase-orders/${testPOId}/cancel`, {
+      const response = await client.post(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}/cancel`, {
         reason: 'Test cancellation',
       }, {
         headers: authHeaders(),
@@ -411,33 +318,8 @@ describe('Supplier Feature Tests', () => {
   // ============================================================================
 
   describe('Purchase Order Items', () => {
-    let testPOId: string;
-
-    beforeAll(async () => {
-      const supplierData = createTestSupplier();
-      const supplierResponse = await client.post('/business/suppliers', supplierData, {
-        headers: authHeaders(),
-      });
-      if (supplierResponse.status !== 201 && supplierResponse.status !== 200) return;
-
-      const supplierId = supplierResponse.data.data.supplierId;
-      createdResources.supplierIds.push(supplierId);
-
-      const poData = createTestPurchaseOrder(supplierId, SEEDED_WAREHOUSE_ID);
-      const poResponse = await client.post('/business/purchase-orders', poData, {
-        headers: authHeaders(),
-      });
-      if (poResponse.status === 201 || poResponse.status === 200) {
-        testPOId = poResponse.data.data?.purchaseOrder?.supplierPurchaseOrderId
-          || poResponse.data.data?.supplierPurchaseOrderId;
-        if (testPOId) createdResources.poIds.push(testPOId);
-      }
-    });
-
     it('should list purchase order items', async () => {
-      if (!testPOId) return;
-
-      const response = await client.get(`/business/purchase-orders/${testPOId}/items`, {
+      const response = await client.get(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_001}/items`, {
         headers: authHeaders(),
       });
 
@@ -445,9 +327,7 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should add a purchase order item', async () => {
-      if (!testPOId) return;
-
-      const response = await client.post(`/business/purchase-orders/${testPOId}/items`, {
+      const response = await client.post(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_001}/items`, {
         productId: '00000000-0000-0000-0000-000000000002',
         sku: 'TEST-SKU-002',
         name: 'Test Product 2',

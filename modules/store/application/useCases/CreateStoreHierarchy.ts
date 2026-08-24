@@ -5,6 +5,7 @@
  */
 
 import type { StoreRepository } from '../../domain/repositories/StoreRepository';
+import { StoreNotFoundError, StoreValidationError } from '../../domain/errors/StoreErrors';
 
 export interface CreateStoreHierarchyInput {
   organizationId: string;
@@ -34,18 +35,18 @@ export class CreateStoreHierarchyUseCase {
 
   async execute(input: CreateStoreHierarchyInput): Promise<CreateStoreHierarchyOutput> {
     if (!input.organizationId || !input.name || !input.defaultStoreId) {
-      throw new Error('Organization ID, name, and default store ID are required');
+      throw new StoreValidationError('Organization ID, name, and default store ID are required');
     }
 
     if (!input.storeIds.includes(input.defaultStoreId)) {
-      throw new Error('Default store must be included in store IDs');
+      throw new StoreValidationError('Default store must be included in store IDs');
     }
 
     // Verify all stores exist
     for (const storeId of input.storeIds) {
       const store = await this.storeRepository.findById(storeId);
       if (!store) {
-        throw new Error(`Store not found: ${storeId}`);
+        throw new StoreNotFoundError(storeId);
       }
     }
 

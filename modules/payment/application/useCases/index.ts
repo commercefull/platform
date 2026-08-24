@@ -19,3 +19,4 @@ export * from './RecordPaymentFee';
 export * from './ProcessPaymentWebhook';
 export * from './GetPaymentBalance';
 export * from './GeneratePaymentReport';
+export * from './PSPRouting';

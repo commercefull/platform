@@ -1,4 +1,6 @@
-import OrderRepo from '../../infrastructure/repositories/OrderRepository';
+import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
+
+const OrderRepo = orderDataRepository.commands;
 import { GetOrderUseCase, GetOrderCommand } from '../../application/useCases/GetOrder';
 import { GetCustomerOrdersUseCase, GetCustomerOrdersCommand } from '../../application/useCases/GetCustomerOrders';
 import { ListOrdersUseCase, ListOrdersCommand } from '../../application/useCases/ListOrders';

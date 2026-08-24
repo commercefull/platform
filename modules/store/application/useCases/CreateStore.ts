@@ -4,9 +4,10 @@
  */
 
 import { StoreRepository } from '../../domain/repositories/StoreRepository';
-import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
-import { SystemConfigurationRepository } from '../../../configuration/domain/repositories/SystemConfigurationRepository';
+import { OrganizationLookupPort } from '../../application/ports/OrganizationLookupPort';
+import { SystemConfigPort } from '../../application/ports/SystemConfigPort';
 import { Store, type StoreProps } from '../../domain/entities/Store';
+import { StoreNotFoundError, StoreSlugAlreadyExistsError, StoreValidationError } from '../../domain/errors/StoreErrors';
 
 // ============================================================================
 // Command
@@ -75,21 +76,22 @@ export interface CreateStoreResponse {
 export class CreateStoreUseCase {
   constructor(
     private readonly storeRepository: StoreRepository,
-    private readonly systemConfigRepository: SystemConfigurationRepository,
+    private readonly systemConfigPort: SystemConfigPort,
+    private readonly organizationLookupPort?: OrganizationLookupPort,
   ) {}
 
   async execute(command: CreateStoreCommand): Promise<CreateStoreResponse> {
     if (!command.storeData.name) {
-      throw new Error('Store name not found.');
+      throw new StoreValidationError('Store name not found.');
     }
     if (!command.storeData.slug) {
-      throw new Error('Store slug not found.');
+      throw new StoreValidationError('Store slug not found.');
     }
 
-    const systemConfig = await this.systemConfigRepository.findActive();
+    const systemConfig = await this.systemConfigPort.findActive();
 
     if (!systemConfig) {
-      throw new Error('System configuration not found. Cannot create store.');
+      throw new StoreValidationError('System configuration not found. Cannot create store.');
     }
 
     // Validate ownership based on store type and system mode
@@ -101,14 +103,14 @@ export class CreateStoreUseCase {
     // Check if slug is unique
     const existingStore = await this.storeRepository.findBySlug(slug);
     if (existingStore) {
-      throw new Error(`Store with slug '${slug}' already exists.`);
+      throw new StoreSlugAlreadyExistsError(slug);
     }
 
     // Check if storeUrl is unique (if provided)
     if (command.storeData.storeUrl) {
       const existingUrlStore = await this.storeRepository.findByUrl(command.storeData.storeUrl);
       if (existingUrlStore) {
-        throw new Error(`Store with URL '${command.storeData.storeUrl}' already exists.`);
+        throw new StoreValidationError(`Store with URL '${command.storeData.storeUrl}' already exists.`);
       }
     }
 
@@ -159,34 +161,37 @@ export class CreateStoreUseCase {
 
     if (storeType === 'merchant_store') {
       if (!organizationId) {
-        throw new Error('Organization ID is required for merchant-owned stores.');
+        throw new StoreValidationError('Organization ID is required for merchant-owned stores.');
       }
     } else if (storeType === 'organization_store') {
       if (!organizationId) {
-        throw new Error('Organization ID is required for organization-owned stores.');
+        throw new StoreValidationError('Organization ID is required for organization-owned stores.');
       }
 
       // Check if organization exists
-      const organization = await organizationRepo.findById(organizationId);
+      if (!this.organizationLookupPort) {
+        throw new StoreValidationError('Organization lookup port is required for organization-owned stores.');
+      }
+      const organization = await this.organizationLookupPort.findById(organizationId);
       if (!organization) {
-        throw new Error('Organization not found.');
+        throw new StoreValidationError('Organization not found.');
       }
 
       if (isHeadquarters && parentStoreId) {
-        throw new Error('Headquarters store cannot have a parent store.');
+        throw new StoreValidationError('Headquarters store cannot have a parent store.');
       }
 
       if (parentStoreId) {
         const parentStore = await this.storeRepository.findById(parentStoreId);
         if (!parentStore) {
-          throw new Error('Parent store not found.');
+          throw new StoreNotFoundError(parentStoreId);
         }
         if (parentStore.organizationId !== organizationId) {
-          throw new Error('Parent store must belong to the same organization.');
+          throw new StoreValidationError('Parent store must belong to the same organization.');
         }
       }
     } else {
-      throw new Error('Invalid store type. Must be either "merchant_store" or "organization_store".');
+      throw new StoreValidationError('Invalid store type. Must be either "merchant_store" or "organization_store".');
     }
   }
 

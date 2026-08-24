@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 
 
 export type TaxRuleConditionType = 'product' | 'category' | 'brand';
@@ -63,7 +64,7 @@ export class TaxRuleRepo {
         now,
       ],
     );
-    if (!result) throw new Error('Failed to create tax rule');
+    if (!result) throw new FailedToCreateTaxError('Failed to create tax rule');
     return result;
   }
 

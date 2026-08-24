@@ -6,6 +6,7 @@
 import { StorageService } from '../../domain/services/StorageService';
 import { LocalStorageService } from './LocalStorageService';
 import { S3StorageService } from './S3StorageService';
+import { logger } from '../../../../libs/logger';
 
 export class StorageServiceFactory {
   static create(): StorageService {
@@ -15,7 +16,7 @@ export class StorageServiceFactory {
     switch (storageType) {
       case 's3':
         if (!isProduction && !process.env.AWS_S3_BUCKET) {
-          console.warn('AWS S3 configuration not found, falling back to local storage');
+          logger.warning('AWS S3 configuration not found, falling back to local storage');
           return this.createLocalStorage();
         }
 

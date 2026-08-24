@@ -8,6 +8,7 @@ import { Fulfillment, SourceType, Address } from '../../domain/entities/Fulfillm
 import { FulfillmentItem } from '../../domain/entities/FulfillmentItem';
 import { IFulfillmentRepository } from '../../domain/repositories/FulfillmentRepository';
 import { emitFulfillmentCreated } from '../../domain/events/FulfillmentEvents';
+import { withTransaction } from '../../../../libs/db';
 
 export interface CreateFulfillmentItemInput {
   orderItemId: string;
@@ -69,29 +70,33 @@ export class CreateFulfillmentUseCase {
       notes: input.notes,
     });
 
-    // Save the fulfillment
-    const savedFulfillment = await this.fulfillmentRepository.save(fulfillment);
+    // Save fulfillment and items in a single transaction
+    const { savedFulfillment, savedItems } = await withTransaction(async () => {
+      const savedFulfillment = await this.fulfillmentRepository.save(fulfillment);
 
-    // Create fulfillment items
-    const items: FulfillmentItem[] = [];
-    for (const itemInput of input.items) {
-      const item = FulfillmentItem.create({
-        fulfillmentId: savedFulfillment.fulfillmentId,
-        orderItemId: itemInput.orderItemId,
-        productId: itemInput.productId,
-        variantId: itemInput.variantId,
-        sku: itemInput.sku,
-        name: itemInput.name,
-        quantityOrdered: itemInput.quantityOrdered,
-        quantityFulfilled: 0,
-        warehouseLocation: itemInput.warehouseLocation,
-        binLocation: itemInput.binLocation,
-      });
-      items.push(item);
-    }
+      // Create fulfillment items
+      const items: FulfillmentItem[] = [];
+      for (const itemInput of input.items) {
+        const item = FulfillmentItem.create({
+          fulfillmentId: savedFulfillment.fulfillmentId,
+          orderItemId: itemInput.orderItemId,
+          productId: itemInput.productId,
+          variantId: itemInput.variantId,
+          sku: itemInput.sku,
+          name: itemInput.name,
+          quantityOrdered: itemInput.quantityOrdered,
+          quantityFulfilled: 0,
+          warehouseLocation: itemInput.warehouseLocation,
+          binLocation: itemInput.binLocation,
+        });
+        items.push(item);
+      }
 
-    // Save items
-    const savedItems = await this.fulfillmentRepository.saveItems(items);
+      // Save items
+      const savedItems = await this.fulfillmentRepository.saveItems(items);
+
+      return { savedFulfillment, savedItems };
+    });
 
     // Emit event
     emitFulfillmentCreated({

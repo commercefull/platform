@@ -2,6 +2,8 @@
  * ToggleFeatureFlag Use Case
  */
 
+import { ConfigurationValidationError } from '../../domain/errors/ConfigurationErrors';
+
 export interface ToggleFeatureFlagInput {
   key: string;
   enabled: boolean;
@@ -45,7 +47,7 @@ export class ToggleFeatureFlagUseCase {
 
   async execute(input: ToggleFeatureFlagInput): Promise<ToggleFeatureFlagOutput> {
     if (!input.key) {
-      throw new Error('Feature flag key is required');
+      throw new ConfigurationValidationError('Feature flag key is required');
     }
 
     const scope = input.scope || 'global';

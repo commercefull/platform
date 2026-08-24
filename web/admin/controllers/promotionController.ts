@@ -6,67 +6,66 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import PromotionRepo from '../../../modules/promotion/infrastructure/repositories/promotionRepo';
-import { ListPromotionsUseCase, ListPromotionsCommand } from '../../../modules/promotion/application/useCases/ListPromotions';
-import { CreatePromotionUseCase, CreatePromotionCommand } from '../../../modules/promotion/application/useCases/CreatePromotion';
-import { UpdatePromotionUseCase, UpdatePromotionCommand } from '../../../modules/promotion/application/useCases/UpdatePromotion';
-import { DeletePromotionUseCase, DeletePromotionCommand } from '../../../modules/promotion/application/useCases/DeletePromotion';
+import { ListPromotionsCommand } from '../../../modules/promotion/application/useCases/ListPromotions';
+import { CreatePromotionCommand } from '../../../modules/promotion/application/useCases/CreatePromotion';
+import { UpdatePromotionCommand } from '../../../modules/promotion/application/useCases/UpdatePromotion';
+import { DeletePromotionCommand } from '../../../modules/promotion/application/useCases/DeletePromotion';
+import {
+  listPromotionsUseCase,
+  createPromotionUseCase,
+  updatePromotionUseCase,
+  deletePromotionUseCase,
+} from '../../../modules/promotion/application/useCases/wired';
+import { ManagePromotionsUseCase } from '../../../modules/promotion/application/useCases/ManagePromotions';
 import { adminRespond } from '../../respond';
+
+const managePromotionsUseCase = new ManagePromotionsUseCase();
 
 // ============================================================================
 // List Promotions
 // ============================================================================
 
 export const listPromotions = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { status, type, search, limit, offset, orderBy, orderDirection } = req.query;
+  const { status, type, search, limit, offset, orderBy, orderDirection } = req.query;
 
-    const filters: Record<string, unknown> = {};
-    if (status) filters.status = status;
-    if (type) filters.type = type;
-    if (search) filters.search = search as string;
+  const filters: Record<string, unknown> = {};
+  if (status) filters.status = status;
+  if (type) filters.type = type;
+  if (search) filters.search = search as string;
 
-    const command = new ListPromotionsCommand(filters, {
-      limit: parseInt(limit as string) || 50,
-      offset: parseInt(offset as string) || 0,
-      orderBy: (orderBy as string) || 'createdAt',
-      direction: (orderDirection as 'ASC' | 'DESC') || 'DESC',
-    });
+  const command = new ListPromotionsCommand(filters, {
+    limit: parseInt(limit as string) || 50,
+    offset: parseInt(offset as string) || 0,
+    orderBy: (orderBy as string) || 'createdAt',
+    direction: (orderDirection as 'ASC' | 'DESC') || 'DESC',
+  });
 
-    const useCase = new ListPromotionsUseCase(PromotionRepo);
-    const result = await useCase.execute(command);
+  const result = await listPromotionsUseCase.execute(command);
 
-    // Calculate pagination info
-    const page = Math.floor((result.offset || 0) / (result.limit || 50)) + 1;
-    const pages = Math.ceil(result.total / (result.limit || 50));
+  // Calculate pagination info
+  const page = Math.floor((result.offset || 0) / (result.limit || 50)) + 1;
+  const pages = Math.ceil(result.total / (result.limit || 50));
 
-    adminRespond(req, res, 'promotions/index', {
-      pageName: 'Promotions',
-      promotions: result.data,
-      pagination: {
-        total: result.total,
-        limit: result.limit,
-        offset: result.offset,
-        page,
-        pages,
-        hasMore: result.hasMore,
-      },
-      filters: {
-        status: status || '',
-        type: type || '',
-        search: search || '',
-      },
+  adminRespond(req, res, 'promotions/index', {
+    pageName: 'Promotions',
+    promotions: result.data,
+    pagination: {
+      total: result.total,
+      limit: result.limit,
+      offset: result.offset,
+      page,
+      pages,
+      hasMore: result.hasMore,
+    },
+    filters: {
+      status: status || '',
+      type: type || '',
+      search: search || '',
+    },
 
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load promotions',
-    });
-  }
+    success: req.query.success || null,
+  });
+  
 };
 
 // ============================================================================
@@ -74,18 +73,10 @@ export const listPromotions = async (req: TypedRequest, res: Response): Promise<
 // ============================================================================
 
 export const createPromotionForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'promotions/create', {
-      pageName: 'Create Promotion',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'promotions/create', {
+    pageName: 'Create Promotion',
+  });
+  
 };
 
 // ============================================================================
@@ -111,12 +102,11 @@ export const createPromotion = async (req: TypedRequest, res: Response): Promise
       endsAt ? new Date(endsAt) : undefined,
     );
 
-    const useCase = new CreatePromotionUseCase(PromotionRepo);
-    const result = await useCase.execute(command);
+    const result = await createPromotionUseCase.execute(command);
 
     res.redirect(`/hub/promotions/${result.promotionId}?success=Promotion created successfully`);
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     // Reload form with error
     adminRespond(req, res, 'promotions/create', {
@@ -132,34 +122,26 @@ export const createPromotion = async (req: TypedRequest, res: Response): Promise
 // ============================================================================
 
 export const viewPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { promotionId } = req.params;
+  const { promotionId } = req.params;
 
-    // For now, we'll use the repository directly since we don't have a GetPromotion use case
-    const promotion = await PromotionRepo.findById(promotionId);
+  // For now, we'll use the repository directly since we don't have a GetPromotion use case
+  const promotion = await managePromotionsUseCase.findById(promotionId);
 
-    if (!promotion) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Promotion not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'promotions/view', {
-      pageName: `Promotion: ${promotion.name}`,
-      promotion,
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!promotion) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load promotion',
+      pageName: 'Not Found',
+      error: 'Promotion not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'promotions/view', {
+    pageName: `Promotion: ${promotion.name}`,
+    promotion,
+
+    success: req.query.success || null,
+  });
+  
 };
 
 // ============================================================================
@@ -167,31 +149,23 @@ export const viewPromotion = async (req: TypedRequest, res: Response): Promise<v
 // ============================================================================
 
 export const editPromotionForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { promotionId } = req.params;
+  const { promotionId } = req.params;
 
-    const promotion = await PromotionRepo.findById(promotionId);
+  const promotion = await managePromotionsUseCase.findById(promotionId);
 
-    if (!promotion) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Promotion not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'promotions/edit', {
-      pageName: `Edit: ${promotion.name}`,
-      promotion,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!promotion) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
+      pageName: 'Not Found',
+      error: 'Promotion not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'promotions/edit', {
+    pageName: `Edit: ${promotion.name}`,
+    promotion,
+  });
+  
 };
 
 // ============================================================================
@@ -199,64 +173,43 @@ export const editPromotionForm = async (req: TypedRequest, res: Response): Promi
 // ============================================================================
 
 export const updatePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { promotionId } = req.params;
-    const updates: Record<string, unknown> = {};
+  const { promotionId } = req.params;
+  const updates: Record<string, unknown> = {};
 
-    // Map form fields to update object
-    const body = req.body as RequestBody;
-    const {
-      name,
-      description,
-      status,
-      value,
-      minOrderAmount,
-      maxDiscountAmount,
-      usageLimit,
-      usageLimitPerCustomer,
-      startsAt,
-      endsAt,
-      isActive,
-    } = body;
+  // Map form fields to update object
+  const body = req.body as RequestBody;
+  const {
+    name,
+    description,
+    status,
+    value,
+    minOrderAmount,
+    maxDiscountAmount,
+    usageLimit,
+    usageLimitPerCustomer,
+    startsAt,
+    endsAt,
+    isActive,
+  } = body;
 
-    if (name !== undefined) updates.name = name;
-    if (description !== undefined) updates.description = description;
-    if (status !== undefined) updates.status = status;
-    if (value !== undefined) updates.value = parseFloat(value);
-    if (minOrderAmount !== undefined) updates.minOrderAmount = minOrderAmount ? parseFloat(minOrderAmount) : undefined;
-    if (maxDiscountAmount !== undefined) updates.maxDiscountAmount = maxDiscountAmount ? parseFloat(maxDiscountAmount) : undefined;
-    if (usageLimit !== undefined) updates.usageLimit = usageLimit ? parseInt(usageLimit) : undefined;
-    if (usageLimitPerCustomer !== undefined)
-      updates.usageLimitPerCustomer = usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined;
-    if (startsAt !== undefined) updates.startsAt = startsAt ? new Date(startsAt) : undefined;
-    if (endsAt !== undefined) updates.endsAt = endsAt ? new Date(endsAt) : undefined;
-    if (isActive !== undefined) updates.isActive = isActive === 'true' || isActive === true;
+  if (name !== undefined) updates.name = name;
+  if (description !== undefined) updates.description = description;
+  if (status !== undefined) updates.status = status;
+  if (value !== undefined) updates.value = parseFloat(value);
+  if (minOrderAmount !== undefined) updates.minOrderAmount = minOrderAmount ? parseFloat(minOrderAmount) : undefined;
+  if (maxDiscountAmount !== undefined) updates.maxDiscountAmount = maxDiscountAmount ? parseFloat(maxDiscountAmount) : undefined;
+  if (usageLimit !== undefined) updates.usageLimit = usageLimit ? parseInt(usageLimit) : undefined;
+  if (usageLimitPerCustomer !== undefined)
+    updates.usageLimitPerCustomer = usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined;
+  if (startsAt !== undefined) updates.startsAt = startsAt ? new Date(startsAt) : undefined;
+  if (endsAt !== undefined) updates.endsAt = endsAt ? new Date(endsAt) : undefined;
+  if (isActive !== undefined) updates.isActive = isActive === 'true' || isActive === true;
 
-    const command = new UpdatePromotionCommand(promotionId, updates);
-    const useCase = new UpdatePromotionUseCase(PromotionRepo);
-    await useCase.execute(command);
+  const command = new UpdatePromotionCommand(promotionId, updates);
+  await updatePromotionUseCase.execute(command);
 
-    res.redirect(`/hub/promotions/${promotionId}?success=Promotion updated successfully`);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    // Reload form with error
-    try {
-      const promotion = await PromotionRepo.findById(req.params.promotionId);
-
-      adminRespond(req, res, 'promotions/edit', {
-        pageName: `Edit: ${promotion?.name || 'Promotion'}`,
-        promotion,
-        error: (error as Error).message || 'Failed to update promotion',
-        formData: req.body as RequestBody,
-      });
-    } catch {
-      adminRespond(req, res, 'error', {
-        pageName: 'Error',
-        error: (error as Error).message || 'Failed to update promotion',
-      });
-    }
-  }
+  res.redirect(`/hub/promotions/${promotionId}?success=Promotion updated successfully`);
+  
 };
 
 // ============================================================================
@@ -264,17 +217,11 @@ export const updatePromotion = async (req: TypedRequest, res: Response): Promise
 // ============================================================================
 
 export const deletePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { promotionId } = req.params;
+  const { promotionId } = req.params;
 
-    const command = new DeletePromotionCommand(promotionId);
-    const useCase = new DeletePromotionUseCase(PromotionRepo);
-    await useCase.execute(command);
+  const command = new DeletePromotionCommand(promotionId);
+  await deletePromotionUseCase.execute(command);
 
-    res.json({ success: true, message: 'Promotion deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete promotion' });
-  }
+  res.json({ success: true, message: 'Promotion deleted successfully' });
+  
 };

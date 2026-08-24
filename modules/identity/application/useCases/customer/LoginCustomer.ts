@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
 
 export interface LoginCustomerInput {
   email: string;
@@ -48,13 +49,13 @@ export class LoginCustomerUseCase {
 
   async execute(input: LoginCustomerInput): Promise<LoginCustomerOutput> {
     if (!input.email || !input.password) {
-      throw new Error('Email and password are required');
+      throw new EmailAndPasswordRequiredError();
     }
 
     // Find customer by email
     const customer = await this.customerRepo.findByEmail(input.email);
     if (!customer) {
-      throw new Error('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
     // Verify password
@@ -65,12 +66,12 @@ export class LoginCustomerUseCase {
         email: input.email,
         reason: 'invalid_password',
       });
-      throw new Error('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
     // Check if account is active
     if (customer.status !== 'active') {
-      throw new Error('Account is not active');
+      throw new AccountNotActiveError();
     }
 
     // Generate tokens

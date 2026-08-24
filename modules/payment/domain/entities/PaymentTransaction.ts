@@ -3,6 +3,7 @@
  */
 
 import { TransactionStatus, canTransitionTo } from '../valueObjects/PaymentStatus';
+import { RefundAmountExceedsRefundableError, InvalidStatusTransitionError } from '../errors/PaymentErrors';
 
 export interface PaymentTransactionProps {
   transactionId: string;
@@ -202,7 +203,7 @@ export class PaymentTransaction {
 
   recordRefund(amount: number): void {
     if (amount > this.refundableAmount) {
-      throw new Error('Refund amount exceeds refundable amount');
+      throw new RefundAmountExceedsRefundableError(amount, this.refundableAmount);
     }
     this.props.refundedAmount += amount;
 
@@ -226,7 +227,7 @@ export class PaymentTransaction {
 
   private updateStatus(newStatus: TransactionStatus): void {
     if (!canTransitionTo(this.props.status, newStatus)) {
-      throw new Error(`Cannot transition payment from ${this.props.status} to ${newStatus}`);
+      throw new InvalidStatusTransitionError(this.props.status, newStatus);
     }
     this.props.status = newStatus;
   }

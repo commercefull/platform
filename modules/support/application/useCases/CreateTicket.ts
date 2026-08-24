@@ -2,6 +2,8 @@
  * CreateTicket Use Case
  */
 
+import { SupportValidationError } from '../../domain/errors/SupportErrors';
+
 export interface CreateTicketInput {
   customerId: string;
   subject: string;
@@ -54,7 +56,7 @@ export class CreateTicketUseCase {
 
   async execute(input: CreateTicketInput): Promise<CreateTicketOutput> {
     if (!input.customerId || !input.subject || !input.description || !input.type) {
-      throw new Error('Customer ID, subject, description, and type are required');
+      throw new SupportValidationError('Customer ID, subject, description, and type are required');
     }
 
     const ticketId = `tkt_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

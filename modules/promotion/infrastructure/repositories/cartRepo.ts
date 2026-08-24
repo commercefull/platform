@@ -1,5 +1,6 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, PromotionCart } from '../../../../libs/db/types';
+import { FailedToCreatePromotionError, PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
 
 // Use PromotionCart type directly from libs/db/types.ts
 export type { PromotionCart };
@@ -32,7 +33,7 @@ export class PromotionCartRepo {
     );
 
     if (!row) {
-      throw new Error('Cart promotion not saved');
+      throw new FailedToCreatePromotionError('Cart promotion not saved');
     }
     return row;
   }
@@ -60,7 +61,7 @@ export class PromotionCartRepo {
     );
 
     if (!row) {
-      throw new Error('Cart promotion not found');
+      throw new PromotionNotFoundError(id);
     }
     return row;
   }

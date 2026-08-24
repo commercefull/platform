@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingCarrier } from '../../../../libs/db/types';
+import { ShippingCarrierAlreadyExistsError, FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 
 // Re-export the type for convenience
 export { ShippingCarrier };
@@ -79,7 +80,7 @@ export async function search(searchTerm: string): Promise<ShippingCarrier[]> {
 export async function create(input: CreateShippingCarrierInput): Promise<ShippingCarrier> {
   const existing = await findByCode(input.code);
   if (existing) {
-    throw new Error(`Carrier with code '${input.code}' already exists`);
+    throw new ShippingCarrierAlreadyExistsError(input.code);
   }
 
   const result = await queryOne<ShippingCarrier>(
@@ -106,7 +107,7 @@ export async function create(input: CreateShippingCarrierInput): Promise<Shippin
     ],
   );
 
-  if (!result) throw new Error('Failed to create shipping carrier');
+  if (!result) throw new FailedToCreateShippingEntityError('Failed to create shipping carrier');
   return result;
 }
 

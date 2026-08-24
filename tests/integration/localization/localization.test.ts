@@ -118,6 +118,7 @@ describe('Localization Feature Tests', () => {
     });
 
     describe('POST /business/locales', () => {
+      // TODO(phase-3.6): Fix — localization module has no repository port; POST endpoint may not be wired. Track in gap-analysis-and-roadmap.md Phase 3.6.
       it.skip('should create a new locale', async () => {
         const localeData = {
           code: `test-${Date.now()}`,

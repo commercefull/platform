@@ -3,6 +3,8 @@
  * Represents product pricing with base and sale prices
  */
 
+import { ProductValidationError } from '../errors/ProductErrors';
+
 export class Price {
   private constructor(
     private readonly _basePrice: number,
@@ -13,13 +15,13 @@ export class Price {
 
   static create(basePrice: number, currency: string = 'USD', salePrice?: number, cost?: number): Price {
     if (basePrice < 0) {
-      throw new Error('Base price cannot be negative');
+      throw new ProductValidationError('Base price cannot be negative');
     }
     if (salePrice !== undefined && salePrice < 0) {
-      throw new Error('Sale price cannot be negative');
+      throw new ProductValidationError('Sale price cannot be negative');
     }
     if (salePrice !== undefined && salePrice > basePrice) {
-      throw new Error('Sale price cannot be greater than base price');
+      throw new ProductValidationError('Sale price cannot be greater than base price');
     }
     return new Price(basePrice, salePrice ?? null, cost ?? null, currency.toUpperCase());
   }
@@ -74,14 +76,14 @@ export class Price {
 
   setSalePrice(salePrice: number | null): Price {
     if (salePrice !== null && salePrice > this._basePrice) {
-      throw new Error('Sale price cannot be greater than base price');
+      throw new ProductValidationError('Sale price cannot be greater than base price');
     }
     return new Price(this._basePrice, salePrice, this._cost, this._currency);
   }
 
   updateBasePrice(basePrice: number): Price {
     if (basePrice < 0) {
-      throw new Error('Base price cannot be negative');
+      throw new ProductValidationError('Base price cannot be negative');
     }
     const newSalePrice = this._salePrice !== null && this._salePrice > basePrice ? null : this._salePrice;
     return new Price(basePrice, newSalePrice, this._cost, this._currency);

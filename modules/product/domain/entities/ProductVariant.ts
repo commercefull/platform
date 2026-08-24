@@ -5,6 +5,7 @@
 
 import { Price } from '../valueObjects/Price';
 import { Dimensions } from '../valueObjects/Dimensions';
+import { ProductValidationError } from '../errors/ProductErrors';
 
 export interface VariantAttribute {
   attributeId: string;
@@ -210,7 +211,7 @@ export class ProductVariant {
 
   updateStock(quantity: number): void {
     if (quantity < 0) {
-      throw new Error('Stock quantity cannot be negative');
+      throw new ProductValidationError('Stock quantity cannot be negative');
     }
     this.props.stockQuantity = quantity;
     this.touch();
@@ -223,7 +224,7 @@ export class ProductVariant {
 
   decrementStock(amount: number): void {
     if (this.props.stockQuantity - amount < 0) {
-      throw new Error('Insufficient stock');
+      throw new ProductValidationError('Insufficient stock');
     }
     this.props.stockQuantity -= amount;
     this.touch();
@@ -231,7 +232,7 @@ export class ProductVariant {
 
   setLowStockThreshold(threshold: number): void {
     if (threshold < 0) {
-      throw new Error('Threshold cannot be negative');
+      throw new ProductValidationError('Threshold cannot be negative');
     }
     this.props.lowStockThreshold = threshold;
     this.touch();

@@ -1,6 +1,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { CustomerPrice, CustomerPriceList } from '../../domain/pricingRule';
+import { FailedToCreatePricingError, PriceListNotFoundError, PriceNotFoundError } from '../../domain/errors/PricingErrors';
 
 /**
  * Customer Price Repository
@@ -69,7 +70,7 @@ export class CustomerPriceRepo {
     const result = await queryOne<CustomerPriceList>(sql, values);
 
     if (!result) {
-      throw new Error('Failed to create price list');
+      throw new FailedToCreatePricingError('Failed to create price list');
     }
 
     return result;
@@ -105,7 +106,7 @@ export class CustomerPriceRepo {
     const result = await queryOne<CustomerPriceList>(sql, values);
 
     if (!result) {
-      throw new Error('Price list not found or update failed');
+      throw new PriceListNotFoundError(id);
     }
 
     return result;
@@ -190,7 +191,7 @@ export class CustomerPriceRepo {
     const result = await queryOne<CustomerPrice>(sql, values);
 
     if (!result) {
-      throw new Error('Failed to create customer price');
+      throw new FailedToCreatePricingError('Failed to create customer price');
     }
 
     return result;
@@ -223,7 +224,7 @@ export class CustomerPriceRepo {
     const result = await queryOne<CustomerPrice>(sql, values);
 
     if (!result) {
-      throw new Error('Customer price not found or update failed');
+      throw new PriceNotFoundError(id);
     }
 
     return result;

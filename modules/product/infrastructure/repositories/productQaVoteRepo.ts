@@ -1,4 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductQaVote {
   productQaVoteId: string;
@@ -25,7 +26,7 @@ export class ProductQaVoteRepo {
        VALUES ($1, $2, $3, $4) RETURNING *`,
       [params.productQaId, params.customerId, params.isHelpful, now],
     );
-    if (!result) throw new Error('Failed to create productQaVote');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 

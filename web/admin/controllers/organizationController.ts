@@ -9,41 +9,27 @@ import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../respond';
 
 export const listOrganizations = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'operations/organizations/index', {
-      pageName: 'Organizations',
-      organizations: [],
-      pagination: { total: 0, page: 1, pages: 1 },
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error listing organizations:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load organizations',
-    });
-  }
+  adminRespond(req, res, 'operations/organizations/index', {
+    pageName: 'Organizations',
+    organizations: [],
+    pagination: { total: 0, page: 1, pages: 1 },
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createOrganizationForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'operations/organizations/create', {
-      pageName: 'Add Organization',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'operations/organizations/create', {
+    pageName: 'Add Organization',
+  });
+  
 };
 
 export const createOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/operations/organizations?success=Organization created successfully');
   } catch (error: unknown) {
-    logger.error('Error creating organization:', error);
+    logger.warn('Error creating organization:', error);
     adminRespond(req, res, 'operations/organizations/create', {
       pageName: 'Add Organization',
       error: (error as Error).message || 'Failed to create organization',
@@ -53,34 +39,20 @@ export const createOrganization = async (req: TypedRequest, res: Response): Prom
 };
 
 export const viewOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'operations/organizations/view', {
-      pageName: 'Organization Details',
-      organization: null,
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load organization',
-    });
-  }
+  adminRespond(req, res, 'operations/organizations/view', {
+    pageName: 'Organization Details',
+    organization: null,
+    success: req.query.success || null,
+  });
+  
 };
 
 export const editOrganizationForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'operations/organizations/edit', {
-      pageName: 'Edit Organization',
-      organization: null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'operations/organizations/edit', {
+    pageName: 'Edit Organization',
+    organization: null,
+  });
+  
 };
 
 export const updateOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -88,7 +60,7 @@ export const updateOrganization = async (req: TypedRequest, res: Response): Prom
     const { organizationId } = req.params;
     res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization updated successfully`);
   } catch (error: unknown) {
-    logger.error('Error updating organization:', error);
+    logger.warn('Error updating organization:', error);
     adminRespond(req, res, 'operations/organizations/edit', {
       pageName: 'Edit Organization',
       organization: null,
@@ -99,32 +71,20 @@ export const updateOrganization = async (req: TypedRequest, res: Response): Prom
 };
 
 export const deleteOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    res.json({ success: true, message: 'Organization deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error deleting organization:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete organization' });
-  }
+  res.json({ success: true, message: 'Organization deleted successfully' });
+  
 };
 
 export const approveOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { organizationId } = req.params;
-    res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
-  } catch (error: unknown) {
-    logger.error('Error approving organization:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to approve organization' });
-  }
+  const { organizationId } = req.params;
+  res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
+  
 };
 
 export const suspendOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { organizationId } = req.params;
-    res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
-  } catch (error: unknown) {
-    logger.error('Error suspending organization:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to suspend organization' });
-  }
+  const { organizationId } = req.params;
+  res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
+  
 };
 
 // ============================================================================

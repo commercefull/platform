@@ -27,7 +27,7 @@ CommerceFull is an e-commerce platform. A single Express application serves two 
 │   admin (Tabler)  ·  storefront (Tailwind)                │
 ├──────────────────────────────────────────────────────────┤
 │                  modules/ (Business Logic)                │
-│   36 bounded contexts organized as DDD:                   │
+│   37 bounded contexts organized as DDD:                   │
 │   domain → application → infrastructure → interface       │
 ├──────────────────────────────────────────────────────────┤
 │                    libs/ (Shared)                         │
@@ -85,7 +85,7 @@ Routes are configured in `boot/routes.ts`:
 | Customer    | `customer`, `loyalty`, `membership`, `subscription`                                                                                |
 | Content     | `content`, `media`, `notification`                                                                                                 |
 | Commerce   | `merchant`, `supplier`, `business`                                                                                                 |
-| Platform    | `identity`, `configuration`, `localization`, `channel`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`             |
+| Platform    | `identity`, `configuration`, `localization`, `channel`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`, `tracking`             |
 
 ## Route Naming Convention
 
@@ -100,12 +100,13 @@ All business routes follow the `/business/{topic}/...` pattern. The topic prefix
 | fulfillment | `/business/fulfillments`, `/business/fulfillment/locations`, `/business/fulfillment/partners` |
 | configuration | `/business/configuration` |
 | coupon | `/business/coupons` |
-| identity | `/business/auth` (login, register, user-store management) |
+| identity | `/business/auth` (login, register, user-store management), `/business/sso` (SAML/OIDC SSO), `/business/scim/v2` (SCIM provisioning) |
 | inventory | `/business/inventory` |
 | content | `/business/content` |
 | webhook | `/business/webhooks` |
 | reporting | `/business/reports` |
 | basket | `/business/basket` |
+| tracking | `/business/tracking` |
 
 ## Technology Stack
 

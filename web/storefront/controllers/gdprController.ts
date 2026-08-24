@@ -7,8 +7,8 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import { GdprDataRequestRepo } from '../../../modules/gdpr/infrastructure/repositories/GdprRepository';
-import { CreateDataRequestUseCase, CreateDataRequestCommand } from '../../../modules/gdpr/application/useCases/CreateDataRequest';
+import { createDataRequestUseCase, manageGdprRequestsUseCase } from '../../../modules/gdpr/application/useCases/wired';
+import { CreateDataRequestCommand } from '../../../modules/gdpr/application/useCases/CreateDataRequest';
 import type { GdprRequestType } from '../../../modules/gdpr/domain/entities/GdprDataRequest';
 
 interface CustomerUser {
@@ -17,9 +17,6 @@ interface CustomerUser {
   firstName: string;
   lastName: string;
 }
-
-const gdprDataRequestRepo = new GdprDataRequestRepo();
-const createDataRequestUseCase = new CreateDataRequestUseCase(gdprDataRequestRepo);
 
 const VALID_TYPES: GdprRequestType[] = ['access', 'export', 'deletion', 'rectification', 'objection', 'restriction'];
 
@@ -45,85 +42,64 @@ const REQUEST_TYPE_DESCRIPTIONS: Record<string, string> = {
  * GET: List customer's GDPR data requests
  */
 export const listRequests = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const user = req.user as CustomerUser;
-    if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/gdpr/requests');
-    }
-
-    const requests = await gdprDataRequestRepo.findByCustomerId(user.customerId);
-    const requestData = requests.map(r => r.toJSON());
-
-    storefrontRespond(req, res, 'gdpr/requests', {
-      pageName: 'My Data Requests',
-      requests: requestData,
-    });
-  } catch (error: unknown) {
-    logger.error('Error loading GDPR requests:', error);
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: 'Failed to load data requests',
-    });
+  const user = req.user as CustomerUser;
+  if (!user?.customerId) {
+    return res.redirect('/signin?redirect=/gdpr/requests');
   }
+
+  const requests = await manageGdprRequestsUseCase.findByCustomerId(user.customerId);
+  const requestData = requests.map(r => r.toJSON());
+
+  storefrontRespond(req, res, 'gdpr/requests', {
+    pageName: 'My Data Requests',
+    requests: requestData,
+  });
+  
 };
 
 /**
  * GET: View a single GDPR data request
  */
 export const viewRequest = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const user = req.user as CustomerUser;
-    if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/gdpr/requests');
-    }
+  const user = req.user as CustomerUser;
+  if (!user?.customerId) {
+    return res.redirect('/signin?redirect=/gdpr/requests');
+  }
 
-    const request = await gdprDataRequestRepo.findById(req.params.gdprDataRequestId);
-    if (!request || request.customerId !== user.customerId) {
-      return storefrontRespond(req, res, '404', {
-        pageName: 'Request Not Found',
-      });
-    }
-
-    storefrontRespond(req, res, 'gdpr/request-detail', {
-      pageName: `Data Request — ${REQUEST_TYPE_LABELS[request.requestType] || request.requestType}`,
-      request: request.toJSON(),
-      requestTypeLabel: REQUEST_TYPE_LABELS[request.requestType] || request.requestType,
-    });
-  } catch (error: unknown) {
-    logger.error('Error loading GDPR request:', error);
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: 'Failed to load request',
+  const request = await manageGdprRequestsUseCase.findById(req.params.gdprDataRequestId);
+  if (!request || request.customerId !== user.customerId) {
+    return storefrontRespond(req, res, '404', {
+      pageName: 'Request Not Found',
     });
   }
+
+  storefrontRespond(req, res, 'gdpr/request-detail', {
+    pageName: `Data Request — ${REQUEST_TYPE_LABELS[request.requestType] || request.requestType}`,
+    request: request.toJSON(),
+    requestTypeLabel: REQUEST_TYPE_LABELS[request.requestType] || request.requestType,
+  });
+  
 };
 
 /**
  * GET: Create data request form
  */
 export const createRequestForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const user = req.user as CustomerUser;
-    if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/gdpr/requests/new');
-    }
-
-    const requestType = req.query.type as string | undefined;
-
-    storefrontRespond(req, res, 'gdpr/create-request', {
-      pageName: 'New Data Request',
-      formData: {},
-      requestType: requestType && VALID_TYPES.includes(requestType as GdprRequestType) ? requestType : '',
-      requestTypeLabels: REQUEST_TYPE_LABELS,
-      requestTypeDescriptions: REQUEST_TYPE_DESCRIPTIONS,
-    });
-  } catch (error: unknown) {
-    logger.error('Error loading create request form:', error);
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: 'Failed to load form',
-    });
+  const user = req.user as CustomerUser;
+  if (!user?.customerId) {
+    return res.redirect('/signin?redirect=/gdpr/requests/new');
   }
+
+  const requestType = req.query.type as string | undefined;
+
+  storefrontRespond(req, res, 'gdpr/create-request', {
+    pageName: 'New Data Request',
+    formData: {},
+    requestType: requestType && VALID_TYPES.includes(requestType as GdprRequestType) ? requestType : '',
+    requestTypeLabels: REQUEST_TYPE_LABELS,
+    requestTypeDescriptions: REQUEST_TYPE_DESCRIPTIONS,
+  });
+  
 };
 
 /**
@@ -163,7 +139,7 @@ export const createRequestSubmit = async (req: TypedRequest, res: Response): Pro
 
     res.redirect(`/gdpr/requests/${result.gdprDataRequestId}?success=Your data request has been submitted`);
   } catch (error: unknown) {
-    logger.error('Error creating GDPR request:', error);
+    logger.warn('Error creating GDPR request:', error);
     storefrontRespond(req, res, 'gdpr/create-request', {
       pageName: 'New Data Request',
       error: (error as Error).message || 'Failed to create request',
@@ -185,19 +161,19 @@ export const cancelRequest = async (req: TypedRequest, res: Response): Promise<v
       return res.redirect('/signin?redirect=/gdpr/requests');
     }
 
-    const request = await gdprDataRequestRepo.findById(req.params.gdprDataRequestId);
+    const request = await manageGdprRequestsUseCase.findById(req.params.gdprDataRequestId);
     if (!request || request.customerId !== user.customerId) {
       req.flash('error', 'Request not found');
       return res.redirect('/gdpr/requests');
     }
 
     request.cancel();
-    await gdprDataRequestRepo.save(request);
+    await manageGdprRequestsUseCase.save(request);
 
     req.flash('success', 'Your data request has been cancelled');
     res.redirect('/gdpr/requests');
   } catch (error: unknown) {
-    logger.error('Error cancelling GDPR request:', error);
+    logger.warn('Error cancelling GDPR request:', error);
     req.flash('error', (error as Error).message || 'Failed to cancel request');
     res.redirect('/gdpr/requests');
   }

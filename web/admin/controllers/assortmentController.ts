@@ -1,57 +1,49 @@
 /**
- * Assortment Controller for Admin Hub
- * Handles Categories and Collections management
+ * Catalog Controller for Admin Panel
+ * Handles Categories and Collections management.
+ *
+ * NOTE: Despite the file name, there is no `assortment` module.
+ * Categories are backed by `modules/product/infrastructure/repositories/categoryRepo`.
+ * Collections are placeholder — a dedicated module is planned (see gap-analysis-and-roadmap.md).
  */
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import CategoryRepo from '../../../modules/product/infrastructure/repositories/categoryRepo';
+import { ManageCategoriesUseCase } from '../../../modules/product/application/useCases/ManageCategories';
 import { adminRespond } from '../../respond';
+
+const manageCategoriesUseCase = new ManageCategoriesUseCase();
 
 // ============================================================================
 // Categories
 // ============================================================================
 
 export const listCategories = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const categories = await CategoryRepo.findAll();
-    const total = categories.length;
+  const categories = await manageCategoriesUseCase.findAll();
+  const total = categories.length;
 
-    adminRespond(req, res, 'catalog/categories/index', {
-      pageName: 'Categories',
-      categories,
-      pagination: {
-        total,
-        page: 1,
-        pages: 1,
-      },
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error listing categories:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load categories',
-    });
-  }
+  adminRespond(req, res, 'catalog/categories/index', {
+    pageName: 'Categories',
+    categories,
+    pagination: {
+      total,
+      page: 1,
+      pages: 1,
+    },
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const parentCategories = await CategoryRepo.findAll();
+  const parentCategories = await manageCategoriesUseCase.findAll();
 
-    adminRespond(req, res, 'catalog/categories/create', {
-      pageName: 'Create Category',
-      parentCategories,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'catalog/categories/create', {
+    pageName: 'Create Category',
+    parentCategories,
+  });
+  
 };
 
 export const createCategory = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -59,7 +51,7 @@ export const createCategory = async (req: TypedRequest, res: Response): Promise<
     const body = req.body as RequestBody;
     const { name, slug, description, parentId, isActive, position, metaTitle, metaDescription } = body;
 
-    const category = await CategoryRepo.create({
+    const category = await manageCategoriesUseCase.create({
       name,
       slug,
       description,
@@ -72,8 +64,8 @@ export const createCategory = async (req: TypedRequest, res: Response): Promise<
 
     res.redirect(`/admin/catalog/categories/${category.productCategoryId}?success=Category created successfully`);
   } catch (error: unknown) {
-    logger.error('Error creating category:', error);
-    const parentCategories = await CategoryRepo.findAll();
+    logger.warn('Error creating category:', error);
+    const parentCategories = await manageCategoriesUseCase.findAll();
     adminRespond(req, res, 'catalog/categories/create', {
       pageName: 'Create Category',
       parentCategories,
@@ -84,62 +76,48 @@ export const createCategory = async (req: TypedRequest, res: Response): Promise<
 };
 
 export const viewCategory = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { categoryId } = req.params;
-    const category = await CategoryRepo.findOne(categoryId);
+  const { categoryId } = req.params;
+  const category = await manageCategoriesUseCase.findOne(categoryId);
 
-    if (!category) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Category not found',
-      });
-      return;
-    }
-
-    const childCategories = await CategoryRepo.findChildren(categoryId);
-
-    adminRespond(req, res, 'catalog/categories/view', {
-      pageName: `Category: ${category.name}`,
-      category,
-      childCategories,
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
+  if (!category) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load category',
+      pageName: 'Not Found',
+      error: 'Category not found',
     });
+    return;
   }
+
+  const childCategories = await manageCategoriesUseCase.findChildren(categoryId);
+
+  adminRespond(req, res, 'catalog/categories/view', {
+    pageName: `Category: ${category.name}`,
+    category,
+    childCategories,
+    success: req.query.success || null,
+  });
+  
 };
 
 export const editCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { categoryId } = req.params;
-    const category = await CategoryRepo.findOne(categoryId);
+  const { categoryId } = req.params;
+  const category = await manageCategoriesUseCase.findOne(categoryId);
 
-    if (!category) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Category not found',
-      });
-      return;
-    }
-
-    const parentCategories = await CategoryRepo.findAll();
-
-    adminRespond(req, res, 'catalog/categories/edit', {
-      pageName: `Edit: ${category.name}`,
-      category,
-      parentCategories: parentCategories.filter(c => c.productCategoryId !== categoryId),
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
+  if (!category) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
+      pageName: 'Not Found',
+      error: 'Category not found',
     });
+    return;
   }
+
+  const parentCategories = await manageCategoriesUseCase.findAll();
+
+  adminRespond(req, res, 'catalog/categories/edit', {
+    pageName: `Edit: ${category.name}`,
+    category,
+    parentCategories: parentCategories.filter(c => c.productCategoryId !== categoryId),
+  });
+  
 };
 
 export const updateCategory = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -148,7 +126,7 @@ export const updateCategory = async (req: TypedRequest, res: Response): Promise<
     const body = req.body as RequestBody;
     const { name, slug, description, parentId, isActive, position, metaTitle, metaDescription } = body;
 
-    await CategoryRepo.update(categoryId, {
+    await manageCategoriesUseCase.update(categoryId, {
       name,
       slug,
       description,
@@ -161,9 +139,9 @@ export const updateCategory = async (req: TypedRequest, res: Response): Promise<
 
     res.redirect(`/admin/catalog/categories/${categoryId}?success=Category updated successfully`);
   } catch (error: unknown) {
-    logger.error('Error updating category:', error);
-    const category = await CategoryRepo.findOne(req.params.categoryId);
-    const parentCategories = await CategoryRepo.findAll();
+    logger.warn('Error updating category:', error);
+    const category = await manageCategoriesUseCase.findOne(req.params.categoryId);
+    const parentCategories = await manageCategoriesUseCase.findAll();
     adminRespond(req, res, 'catalog/categories/edit', {
       pageName: `Edit: ${category?.name || 'Category'}`,
       category,
@@ -175,30 +153,22 @@ export const updateCategory = async (req: TypedRequest, res: Response): Promise<
 };
 
 export const deleteCategory = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { categoryId } = req.params;
-    await CategoryRepo.delete(categoryId);
-    res.json({ success: true, message: 'Category deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error deleting category:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete category' });
-  }
+  const { categoryId } = req.params;
+  await manageCategoriesUseCase.delete(categoryId);
+  res.json({ success: true, message: 'Category deleted successfully' });
+  
 };
 
 export const reorderCategories = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const body = req.body as RequestBody;
-    const { categories } = body; // Array of { categoryId, position }
+  const body = req.body as RequestBody;
+  const { categories } = body; // Array of { categoryId, position }
 
-    for (const cat of categories) {
-      await CategoryRepo.update(cat.categoryId, { position: cat.position });
-    }
-
-    res.json({ success: true, message: 'Categories reordered successfully' });
-  } catch (error: unknown) {
-    logger.error('Error reordering categories:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to reorder categories' });
+  for (const cat of categories) {
+    await manageCategoriesUseCase.update(cat.categoryId, { position: cat.position });
   }
+
+  res.json({ success: true, message: 'Categories reordered successfully' });
+  
 };
 
 // ============================================================================
@@ -209,38 +179,24 @@ export const reorderCategories = async (req: TypedRequest, res: Response): Promi
 // For now, providing placeholder implementations
 
 export const listCollections = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/collections/index', {
-      pageName: 'Collections',
-      collections: [],
-      pagination: {
-        total: 0,
-        page: 1,
-        pages: 1,
-      },
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error listing collections:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load collections',
-    });
-  }
+  adminRespond(req, res, 'catalog/collections/index', {
+    pageName: 'Collections',
+    collections: [],
+    pagination: {
+      total: 0,
+      page: 1,
+      pages: 1,
+    },
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/collections/create', {
-      pageName: 'Create Collection',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'catalog/collections/create', {
+    pageName: 'Create Collection',
+  });
+  
 };
 
 export const createCollection = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -248,7 +204,7 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
     // Placeholder - would need collection repository
     res.redirect('/admin/catalog/collections?success=Collection created successfully');
   } catch (error: unknown) {
-    logger.error('Error creating collection:', error);
+    logger.warn('Error creating collection:', error);
     adminRespond(req, res, 'catalog/collections/create', {
       pageName: 'Create Collection',
       error: (error as Error).message || 'Failed to create collection',
@@ -258,34 +214,20 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
 };
 
 export const viewCollection = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/collections/view', {
-      pageName: 'Collection Details',
-      collection: null,
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load collection',
-    });
-  }
+  adminRespond(req, res, 'catalog/collections/view', {
+    pageName: 'Collection Details',
+    collection: null,
+    success: req.query.success || null,
+  });
+  
 };
 
 export const editCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'catalog/collections/edit', {
-      pageName: 'Edit Collection',
-      collection: null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'catalog/collections/edit', {
+    pageName: 'Edit Collection',
+    collection: null,
+  });
+  
 };
 
 export const updateCollection = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -293,7 +235,7 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
     const { collectionId } = req.params;
     res.redirect(`/admin/catalog/collections/${collectionId}?success=Collection updated successfully`);
   } catch (error: unknown) {
-    logger.error('Error updating collection:', error);
+    logger.warn('Error updating collection:', error);
     adminRespond(req, res, 'catalog/collections/edit', {
       pageName: 'Edit Collection',
       collection: null,
@@ -304,10 +246,6 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
 };
 
 export const deleteCollection = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    res.json({ success: true, message: 'Collection deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error deleting collection:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete collection' });
-  }
+  res.json({ success: true, message: 'Collection deleted successfully' });
+  
 };

@@ -1,4 +1,5 @@
 import express from 'express';
+import { asyncHandler } from '../../libs/asyncHandler';
 import { isAdminLoggedIn } from '../../libs/auth';
 import { getAdminDashboard, getAdminLogin, getAdminProfile, postAdminLogin, postAdminLogout } from './controllers/adminController';
 
@@ -17,6 +18,8 @@ import * as shippingRateController from './controllers/shippingRateController';
 import * as notificationController from './controllers/notificationController';
 import * as seoController from './controllers/seoController';
 import * as contentBlocksController from './controllers/contentBlocksController';
+import * as pageBuilderController from './controllers/pageBuilderController';
+import * as themeController from './controllers/themeController';
 import * as warehouseController from './controllers/warehouseController';
 import * as basketController from './controllers/basketController';
 import * as fulfillmentController from './controllers/fulfillmentController';
@@ -41,6 +44,8 @@ import * as mediaController from './controllers/mediaController';
 import * as checkoutController from './controllers/checkoutController';
 import * as storeController from './controllers/storeController';
 import * as reportingController from './controllers/reportingController';
+import * as automationController from './controllers/automationController';
+import * as returnsController from './controllers/returnsController';
 
 const router = express.Router();
 
@@ -49,13 +54,13 @@ const router = express.Router();
 // ============================================================================
 
 // GET: admin login page
-router.get('/login', getAdminLogin);
+router.get('/login', asyncHandler(getAdminLogin));
 
 // POST: admin login form submission
-router.post('/login', postAdminLogin);
+router.post('/login', asyncHandler(postAdminLogin));
 
 // POST: admin logout
-router.post('/logout', postAdminLogout);
+router.post('/logout', asyncHandler(postAdminLogout));
 
 // ============================================================================
 // Protected Routes (admin auth required)
@@ -65,678 +70,736 @@ router.post('/logout', postAdminLogout);
 router.use(isAdminLoggedIn);
 
 // GET: admin dashboard (home)
-router.get('/', getAdminDashboard);
+router.get('/', asyncHandler(getAdminDashboard));
 
 // GET: admin profile
-router.get('/profile', getAdminProfile);
+router.get('/profile', asyncHandler(getAdminProfile));
 
 // ============================================================================
 // Catalog - Categories Routes
 // ============================================================================
 
-router.get('/catalog/categories', assortmentController.listCategories);
-router.get('/catalog/categories/create', assortmentController.createCategoryForm);
-router.post('/catalog/categories', assortmentController.createCategory);
-router.get('/catalog/categories/:categoryId', assortmentController.viewCategory);
-router.get('/catalog/categories/:categoryId/edit', assortmentController.editCategoryForm);
-router.post('/catalog/categories/:categoryId', assortmentController.updateCategory);
-router.put('/catalog/categories/:categoryId', assortmentController.updateCategory);
-router.delete('/catalog/categories/:categoryId', assortmentController.deleteCategory);
-router.post('/catalog/categories/reorder', assortmentController.reorderCategories);
+router.get('/catalog/categories', asyncHandler(assortmentController.listCategories));
+router.get('/catalog/categories/create', asyncHandler(assortmentController.createCategoryForm));
+router.post('/catalog/categories', asyncHandler(assortmentController.createCategory));
+router.get('/catalog/categories/:categoryId', asyncHandler(assortmentController.viewCategory));
+router.get('/catalog/categories/:categoryId/edit', asyncHandler(assortmentController.editCategoryForm));
+router.post('/catalog/categories/:categoryId', asyncHandler(assortmentController.updateCategory));
+router.put('/catalog/categories/:categoryId', asyncHandler(assortmentController.updateCategory));
+router.delete('/catalog/categories/:categoryId', asyncHandler(assortmentController.deleteCategory));
+router.post('/catalog/categories/reorder', asyncHandler(assortmentController.reorderCategories));
 
 // ============================================================================
 // Catalog - Collections Routes
 // ============================================================================
 
-router.get('/catalog/collections', assortmentController.listCollections);
-router.get('/catalog/collections/create', assortmentController.createCollectionForm);
-router.post('/catalog/collections', assortmentController.createCollection);
-router.get('/catalog/collections/:collectionId', assortmentController.viewCollection);
-router.get('/catalog/collections/:collectionId/edit', assortmentController.editCollectionForm);
-router.post('/catalog/collections/:collectionId', assortmentController.updateCollection);
-router.put('/catalog/collections/:collectionId', assortmentController.updateCollection);
-router.delete('/catalog/collections/:collectionId', assortmentController.deleteCollection);
+router.get('/catalog/collections', asyncHandler(assortmentController.listCollections));
+router.get('/catalog/collections/create', asyncHandler(assortmentController.createCollectionForm));
+router.post('/catalog/collections', asyncHandler(assortmentController.createCollection));
+router.get('/catalog/collections/:collectionId', asyncHandler(assortmentController.viewCollection));
+router.get('/catalog/collections/:collectionId/edit', asyncHandler(assortmentController.editCollectionForm));
+router.post('/catalog/collections/:collectionId', asyncHandler(assortmentController.updateCollection));
+router.put('/catalog/collections/:collectionId', asyncHandler(assortmentController.updateCollection));
+router.delete('/catalog/collections/:collectionId', asyncHandler(assortmentController.deleteCollection));
 
 // ============================================================================
 // Catalog - Pricing Routes
 // ============================================================================
 
-router.get('/catalog/pricing', pricingController.listPriceLists);
-router.get('/catalog/pricing/lists/create', pricingController.createPriceListForm);
-router.post('/catalog/pricing/lists', pricingController.createPriceList);
-router.get('/catalog/pricing/lists/:listId', pricingController.viewPriceList);
-router.get('/catalog/pricing/lists/:listId/edit', pricingController.editPriceListForm);
-router.post('/catalog/pricing/lists/:listId', pricingController.updatePriceList);
-router.put('/catalog/pricing/lists/:listId', pricingController.updatePriceList);
-router.delete('/catalog/pricing/lists/:listId', pricingController.deletePriceList);
+router.get('/catalog/pricing', asyncHandler(pricingController.listPriceLists));
+router.get('/catalog/pricing/lists/create', asyncHandler(pricingController.createPriceListForm));
+router.post('/catalog/pricing/lists', asyncHandler(pricingController.createPriceList));
+router.get('/catalog/pricing/lists/:listId', asyncHandler(pricingController.viewPriceList));
+router.get('/catalog/pricing/lists/:listId/edit', asyncHandler(pricingController.editPriceListForm));
+router.post('/catalog/pricing/lists/:listId', asyncHandler(pricingController.updatePriceList));
+router.put('/catalog/pricing/lists/:listId', asyncHandler(pricingController.updatePriceList));
+router.delete('/catalog/pricing/lists/:listId', asyncHandler(pricingController.deletePriceList));
 
-router.get('/catalog/pricing/rules', pricingController.listPriceRules);
-router.get('/catalog/pricing/rules/create', pricingController.createPriceRuleForm);
-router.post('/catalog/pricing/rules', pricingController.createPriceRule);
-router.get('/catalog/pricing/rules/:ruleId', pricingController.viewPriceRule);
-router.get('/catalog/pricing/rules/:ruleId/edit', pricingController.editPriceRuleForm);
-router.post('/catalog/pricing/rules/:ruleId', pricingController.updatePriceRule);
-router.put('/catalog/pricing/rules/:ruleId', pricingController.updatePriceRule);
-router.delete('/catalog/pricing/rules/:ruleId', pricingController.deletePriceRule);
+router.get('/catalog/pricing/rules', asyncHandler(pricingController.listPriceRules));
+router.get('/catalog/pricing/rules/create', asyncHandler(pricingController.createPriceRuleForm));
+router.post('/catalog/pricing/rules', asyncHandler(pricingController.createPriceRule));
+router.get('/catalog/pricing/rules/:ruleId', asyncHandler(pricingController.viewPriceRule));
+router.get('/catalog/pricing/rules/:ruleId/edit', asyncHandler(pricingController.editPriceRuleForm));
+router.post('/catalog/pricing/rules/:ruleId', asyncHandler(pricingController.updatePriceRule));
+router.put('/catalog/pricing/rules/:ruleId', asyncHandler(pricingController.updatePriceRule));
+router.delete('/catalog/pricing/rules/:ruleId', asyncHandler(pricingController.deletePriceRule));
 
 // ============================================================================
 // Product Routes
 // ============================================================================
 
-router.get('/products', productController.listProducts);
-router.get('/products/create', productController.createProductForm);
-router.post('/products', productController.createProduct);
+router.get('/products', asyncHandler(productController.listProducts));
+router.get('/products/create', asyncHandler(productController.createProductForm));
+router.post('/products', asyncHandler(productController.createProduct));
 
 // Product Categories (standalone productCategory records)
-router.get('/products/categories', productController.listProductCategories);
-router.get('/products/categories/create', productController.createProductCategoryForm);
-router.post('/products/categories', productController.createProductCategory);
-router.get('/products/categories/:categoryId/edit', productController.editProductCategoryForm);
-router.post('/products/categories/:categoryId', productController.updateProductCategory);
-router.delete('/products/categories/:categoryId', productController.deleteProductCategory);
+router.get('/products/categories', asyncHandler(productController.listProductCategories));
+router.get('/products/categories/create', asyncHandler(productController.createProductCategoryForm));
+router.post('/products/categories', asyncHandler(productController.createProductCategory));
+router.get('/products/categories/:categoryId/edit', asyncHandler(productController.editProductCategoryForm));
+router.post('/products/categories/:categoryId', asyncHandler(productController.updateProductCategory));
+router.delete('/products/categories/:categoryId', asyncHandler(productController.deleteProductCategory));
 
 // Product Tags
-router.get('/products/tags', productController.listProductTags);
-router.post('/products/tags', productController.createProductTag);
-router.delete('/products/tags/:tagId', productController.deleteProductTag);
+router.get('/products/tags', asyncHandler(productController.listProductTags));
+router.post('/products/tags', asyncHandler(productController.createProductTag));
+router.delete('/products/tags/:tagId', asyncHandler(productController.deleteProductTag));
 
 // Product Collections
-router.get('/products/collections', productController.listProductCollections);
-router.get('/products/collections/create', productController.createProductCollectionForm);
-router.post('/products/collections', productController.createProductCollection);
-router.get('/products/collections/:collectionId/edit', productController.editProductCollectionForm);
-router.post('/products/collections/:collectionId', productController.updateProductCollection);
-router.delete('/products/collections/:collectionId', productController.deleteProductCollection);
+router.get('/products/collections', asyncHandler(productController.listProductCollections));
+router.get('/products/collections/create', asyncHandler(productController.createProductCollectionForm));
+router.post('/products/collections', asyncHandler(productController.createProductCollection));
+router.get('/products/collections/:collectionId/edit', asyncHandler(productController.editProductCollectionForm));
+router.post('/products/collections/:collectionId', asyncHandler(productController.updateProductCollection));
+router.delete('/products/collections/:collectionId', asyncHandler(productController.deleteProductCollection));
 
-router.get('/products/:productId', productController.viewProduct);
-router.get('/products/:productId/edit', productController.editProductForm);
-router.post('/products/:productId', productController.updateProduct); // Form POST (method override)
-router.put('/products/:productId', productController.updateProduct); // API PUT
-router.delete('/products/:productId', productController.deleteProduct);
-router.post('/products/:productId/status', productController.updateProductStatus);
-router.post('/products/:productId/publish', productController.publishProduct);
-router.post('/products/:productId/unpublish', productController.unpublishProduct);
+router.get('/products/:productId', asyncHandler(productController.viewProduct));
+router.get('/products/:productId/edit', asyncHandler(productController.editProductForm));
+router.post('/products/:productId', asyncHandler(productController.updateProduct)); // Form POST (method override)
+router.put('/products/:productId', asyncHandler(productController.updateProduct)); // API PUT
+router.delete('/products/:productId', asyncHandler(productController.deleteProduct));
+router.post('/products/:productId/status', asyncHandler(productController.updateProductStatus));
+router.post('/products/:productId/publish', asyncHandler(productController.publishProduct));
+router.post('/products/:productId/unpublish', asyncHandler(productController.unpublishProduct));
 
 // Product Q&A
-router.get('/products/:productId/qa', productController.listProductQa);
-router.post('/products/:productId/qa/:qaId/status', productController.updateQaStatus);
+router.get('/products/:productId/qa', asyncHandler(productController.listProductQa));
+router.post('/products/:productId/qa/:qaId/status', asyncHandler(productController.updateQaStatus));
 
 // Product Review Media
-router.get('/products/:productId/reviews/media', productController.listReviewMedia);
-router.delete('/products/:productId/reviews/media/:mediaId', productController.deleteReviewMedia);
+router.get('/products/:productId/reviews/media', asyncHandler(productController.listReviewMedia));
+router.delete('/products/:productId/reviews/media/:mediaId', asyncHandler(productController.deleteReviewMedia));
 
 // Product Prices
-router.get('/products/:productId/prices', productController.listProductPrices);
-router.post('/products/:productId/prices', productController.upsertProductPrice);
+router.get('/products/:productId/prices', asyncHandler(productController.listProductPrices));
+router.post('/products/:productId/prices', asyncHandler(productController.upsertProductPrice));
 
 // ============================================================================
 // Order Routes
 // ============================================================================
 
-router.get('/orders', orderController.listOrders);
-router.get('/orders/:orderId', orderController.viewOrder);
-router.post('/orders/:orderId/status', orderController.updateOrderStatus);
-router.post('/orders/:orderId/cancel', orderController.cancelOrder);
-router.get('/orders/:orderId/refund', orderController.refundForm);
-router.post('/orders/:orderId/refund', orderController.processRefund);
+router.get('/orders', asyncHandler(orderController.listOrders));
+router.get('/orders/:orderId', asyncHandler(orderController.viewOrder));
+router.post('/orders/:orderId/status', asyncHandler(orderController.updateOrderStatus));
+router.post('/orders/:orderId/cancel', asyncHandler(orderController.cancelOrder));
+router.get('/orders/:orderId/refund', asyncHandler(orderController.refundForm));
+router.post('/orders/:orderId/refund', asyncHandler(orderController.processRefund));
 
 // Order sub-sections (notes, refunds, packages)
-router.get('/orders/:orderId/notes', orderController.listOrderNotes);
-router.post('/orders/:orderId/notes', orderController.addOrderNote);
-router.post('/orders/:orderId/notes/:noteId/delete', orderController.deleteOrderNote);
-router.get('/orders/:orderId/refunds', orderController.listOrderRefunds);
-router.get('/orders/:orderId/packages', orderController.listFulfillmentPackages);
-router.post('/orders/:orderId/packages/:packageId/tracking', orderController.updatePackageTracking);
+router.get('/orders/:orderId/notes', asyncHandler(orderController.listOrderNotes));
+router.post('/orders/:orderId/notes', asyncHandler(orderController.addOrderNote));
+router.post('/orders/:orderId/notes/:noteId/delete', asyncHandler(orderController.deleteOrderNote));
+router.get('/orders/:orderId/refunds', asyncHandler(orderController.listOrderRefunds));
+router.get('/orders/:orderId/packages', asyncHandler(orderController.listFulfillmentPackages));
+router.post('/orders/:orderId/packages/:packageId/tracking', asyncHandler(orderController.updatePackageTracking));
 
 // ============================================================================
 // Store Routes
 // ============================================================================
 
-router.get('/stores', storeController.listStores);
-router.get('/stores/create', storeController.createStoreForm);
-router.post('/stores', storeController.createStore);
-router.get('/stores/:storeId', storeController.viewStore);
-router.get('/stores/:storeId/edit', storeController.editStoreForm);
-router.post('/stores/:storeId', storeController.updateStore);
-router.get('/stores/:storeId/users', storeController.manageStoreUsers);
-router.post('/stores/:storeId/users', storeController.assignUserToStore);
-router.delete('/stores/:storeId/users/:userId', storeController.removeUserFromStore);
+router.get('/stores', asyncHandler(storeController.listStores));
+router.get('/stores/create', asyncHandler(storeController.createStoreForm));
+router.post('/stores', asyncHandler(storeController.createStore));
+router.get('/stores/:storeId', asyncHandler(storeController.viewStore));
+router.get('/stores/:storeId/edit', asyncHandler(storeController.editStoreForm));
+router.post('/stores/:storeId', asyncHandler(storeController.updateStore));
+router.get('/stores/:storeId/users', asyncHandler(storeController.manageStoreUsers));
+router.post('/stores/:storeId/users', asyncHandler(storeController.assignUserToStore));
+router.delete('/stores/:storeId/users/:userId', asyncHandler(storeController.removeUserFromStore));
 
 // ============================================================================
 // Organization Routes
 // ============================================================================
 
-router.get('/organizations', organizationController.listOrganizations);
-router.get('/organizations/create', organizationController.createOrganizationForm);
-router.post('/organizations', organizationController.createOrganization);
-router.get('/organizations/:organizationId', organizationController.viewOrganization);
-router.get('/organizations/:organizationId/edit', organizationController.editOrganizationForm);
-router.post('/organizations/:organizationId', organizationController.updateOrganization);
-router.delete('/organizations/:organizationId', organizationController.deleteOrganization);
+router.get('/organizations', asyncHandler(organizationController.listOrganizations));
+router.get('/organizations/create', asyncHandler(organizationController.createOrganizationForm));
+router.post('/organizations', asyncHandler(organizationController.createOrganization));
+router.get('/organizations/:organizationId', asyncHandler(organizationController.viewOrganization));
+router.get('/organizations/:organizationId/edit', asyncHandler(organizationController.editOrganizationForm));
+router.post('/organizations/:organizationId', asyncHandler(organizationController.updateOrganization));
+router.delete('/organizations/:organizationId', asyncHandler(organizationController.deleteOrganization));
 
 // ============================================================================
 // Reporting Routes
 // ============================================================================
 
-router.get('/reporting', reportingController.reportingDashboard);
-router.post('/reporting/generate', reportingController.generateReport);
-router.get('/reporting/schedules', reportingController.listSchedules);
-router.get('/reporting/schedules/create', reportingController.createScheduleForm);
-router.post('/reporting/schedules', reportingController.createSchedule);
-router.get('/reporting/schedules/:scheduleId', reportingController.viewSchedule);
-router.get('/reporting/schedules/:scheduleId/edit', reportingController.editScheduleForm);
-router.post('/reporting/schedules/:scheduleId', reportingController.updateSchedule);
-router.delete('/reporting/schedules/:scheduleId', reportingController.deleteSchedule);
+router.get('/reporting', asyncHandler(reportingController.reportingDashboard));
+router.post('/reporting/generate', asyncHandler(reportingController.generateReport));
+router.get('/reporting/schedules', asyncHandler(reportingController.listSchedules));
+router.get('/reporting/schedules/create', asyncHandler(reportingController.createScheduleForm));
+router.post('/reporting/schedules', asyncHandler(reportingController.createSchedule));
+router.get('/reporting/schedules/:scheduleId', asyncHandler(reportingController.viewSchedule));
+router.get('/reporting/schedules/:scheduleId/edit', asyncHandler(reportingController.editScheduleForm));
+router.post('/reporting/schedules/:scheduleId', asyncHandler(reportingController.updateSchedule));
+router.delete('/reporting/schedules/:scheduleId', asyncHandler(reportingController.deleteSchedule));
 
 // ============================================================================
 // Customer Routes
 // ============================================================================
 
-router.get('/customers', customerController.listCustomers);
-router.get('/customers/:customerId', customerController.viewCustomer);
-router.get('/customers/:customerId/edit', customerController.editCustomerForm);
-router.post('/customers/:customerId', customerController.updateCustomer); // Form POST
-router.put('/customers/:customerId', customerController.updateCustomer); // API PUT
-router.post('/customers/:customerId/deactivate', customerController.deactivateCustomer);
-router.post('/customers/:customerId/reactivate', customerController.reactivateCustomer);
-router.post('/customers/:customerId/verify', customerController.verifyCustomer);
-router.get('/customers/:customerId/addresses', customerController.customerAddresses);
-router.post('/customers/:customerId/addresses', customerController.addCustomerAddress);
+router.get('/customers', asyncHandler(customerController.listCustomers));
+router.get('/customers/:customerId', asyncHandler(customerController.viewCustomer));
+router.get('/customers/:customerId/edit', asyncHandler(customerController.editCustomerForm));
+router.post('/customers/:customerId', asyncHandler(customerController.updateCustomer)); // Form POST
+router.put('/customers/:customerId', asyncHandler(customerController.updateCustomer)); // API PUT
+router.post('/customers/:customerId/deactivate', asyncHandler(customerController.deactivateCustomer));
+router.post('/customers/:customerId/reactivate', asyncHandler(customerController.reactivateCustomer));
+router.post('/customers/:customerId/verify', asyncHandler(customerController.verifyCustomer));
+router.get('/customers/:customerId/addresses', asyncHandler(customerController.customerAddresses));
+router.post('/customers/:customerId/addresses', asyncHandler(customerController.addCustomerAddress));
 
 // ============================================================================
 // Inventory Routes
 // ============================================================================
 
-router.get('/inventory', inventoryController.listInventory);
-router.post('/inventory/adjust', inventoryController.adjustStock);
-router.get('/inventory/locations', inventoryController.listLocations);
-router.get('/inventory/low-stock', inventoryController.lowStockReport);
-router.get('/inventory/:inventoryLevelId/history', inventoryController.viewInventoryHistory);
-router.get('/dispatches', inventoryController.listDispatches);
-router.get('/dispatches/create', inventoryController.createDispatchForm);
-router.post('/dispatches', inventoryController.createDispatch);
-router.get('/dispatches/:dispatchId', inventoryController.viewDispatch);
-router.post('/dispatches/:dispatchId/approve', inventoryController.approveDispatch);
-router.post('/dispatches/:dispatchId/dispatch', inventoryController.markDispatched);
-router.post('/dispatches/:dispatchId/receive', inventoryController.receiveDispatch);
-router.post('/dispatches/:dispatchId/cancel', inventoryController.cancelDispatch);
+router.get('/inventory', asyncHandler(inventoryController.listInventory));
+router.post('/inventory/adjust', asyncHandler(inventoryController.adjustStock));
+router.get('/inventory/locations', asyncHandler(inventoryController.listLocations));
+router.get('/inventory/low-stock', asyncHandler(inventoryController.lowStockReport));
+router.get('/inventory/:inventoryLevelId/history', asyncHandler(inventoryController.viewInventoryHistory));
+router.get('/dispatches', asyncHandler(inventoryController.listDispatches));
+router.get('/dispatches/create', asyncHandler(inventoryController.createDispatchForm));
+router.post('/dispatches', asyncHandler(inventoryController.createDispatch));
+router.get('/dispatches/:dispatchId', asyncHandler(inventoryController.viewDispatch));
+router.post('/dispatches/:dispatchId/approve', asyncHandler(inventoryController.approveDispatch));
+router.post('/dispatches/:dispatchId/dispatch', asyncHandler(inventoryController.markDispatched));
+router.post('/dispatches/:dispatchId/receive', asyncHandler(inventoryController.receiveDispatch));
+router.post('/dispatches/:dispatchId/cancel', asyncHandler(inventoryController.cancelDispatch));
 
 // ============================================================================
 // Tax Routes
 // ============================================================================
 
-router.get('/tax', taxController.listTaxSettings);
-router.post('/tax/rates', taxController.createTaxRate);
-router.put('/tax/rates/:taxRateId', taxController.updateTaxRate);
-router.delete('/tax/rates/:taxRateId', taxController.deleteTaxRate);
-router.post('/tax/zones', taxController.createTaxZone);
-router.put('/tax/zones/:taxZoneId', taxController.updateTaxZone);
-router.delete('/tax/zones/:taxZoneId', taxController.deleteTaxZone);
-router.post('/tax/classes', taxController.createTaxClass);
-router.put('/tax/classes/:taxClassId', taxController.updateTaxClass);
-router.delete('/tax/classes/:taxClassId', taxController.deleteTaxClass);
+router.get('/tax', asyncHandler(taxController.listTaxSettings));
+router.post('/tax/rates', asyncHandler(taxController.createTaxRate));
+router.put('/tax/rates/:taxRateId', asyncHandler(taxController.updateTaxRate));
+router.delete('/tax/rates/:taxRateId', asyncHandler(taxController.deleteTaxRate));
+router.post('/tax/zones', asyncHandler(taxController.createTaxZone));
+router.put('/tax/zones/:taxZoneId', asyncHandler(taxController.updateTaxZone));
+router.delete('/tax/zones/:taxZoneId', asyncHandler(taxController.deleteTaxZone));
+router.post('/tax/classes', asyncHandler(taxController.createTaxClass));
+router.put('/tax/classes/:taxClassId', asyncHandler(taxController.updateTaxClass));
+router.delete('/tax/classes/:taxClassId', asyncHandler(taxController.deleteTaxClass));
 
 // ============================================================================
 // Programs Dashboard Routes
 // ============================================================================
 
-router.get('/programs/membership', programsController.membershipDashboard);
-router.get('/programs/subscription', programsController.subscriptionDashboard);
-router.get('/programs/loyalty', programsController.loyaltyDashboard);
+router.get('/programs/membership', asyncHandler(programsController.membershipDashboard));
+router.get('/programs/subscription', asyncHandler(programsController.subscriptionDashboard));
+router.get('/programs/loyalty', asyncHandler(programsController.loyaltyDashboard));
 
 // ============================================================================
 // Operations Dashboard
 // ============================================================================
 
-router.get('/operations', operationsController.operationsDashboard);
+router.get('/operations', asyncHandler(operationsController.operationsDashboard));
 
 // ============================================================================
 // GDPR Compliance
 // ============================================================================
 
-router.get('/gdpr', gdprController.gdprDashboard);
-router.post('/gdpr/requests', gdprController.createGdprRequest);
-router.get('/gdpr/requests/:requestId', gdprController.viewGdprRequest);
-router.post('/gdpr/requests/:requestId/process', gdprController.processGdprRequest);
-router.post('/gdpr/requests/:requestId/complete', gdprController.completeGdprRequest);
-router.get('/gdpr/consent', gdprController.consentManagement);
+router.get('/gdpr', asyncHandler(gdprController.gdprDashboard));
+router.post('/gdpr/requests', asyncHandler(gdprController.createGdprRequest));
+router.get('/gdpr/requests/:requestId', asyncHandler(gdprController.viewGdprRequest));
+router.post('/gdpr/requests/:requestId/process', asyncHandler(gdprController.processGdprRequest));
+router.post('/gdpr/requests/:requestId/complete', asyncHandler(gdprController.completeGdprRequest));
+router.get('/gdpr/consent', asyncHandler(gdprController.consentManagement));
 
 // ============================================================================
 // Support Center
 // ============================================================================
 
-router.get('/support', supportController.supportDashboard);
-router.get('/support/tickets', supportController.listSupportTickets);
-router.get('/support/tickets/:ticketId', supportController.viewSupportTicket);
-router.post('/support/tickets/:ticketId/status', supportController.updateTicketStatus);
-router.get('/support/faqs', supportController.listFaqs);
-router.post('/support/faqs', supportController.createFaq);
-router.put('/support/faqs/:faqId', supportController.updateFaq);
-router.delete('/support/faqs/:faqId', supportController.deleteFaq);
+router.get('/support', asyncHandler(supportController.supportDashboard));
+router.get('/support/tickets', asyncHandler(supportController.listSupportTickets));
+router.get('/support/tickets/:ticketId', asyncHandler(supportController.viewSupportTicket));
+router.post('/support/tickets/:ticketId/status', asyncHandler(supportController.updateTicketStatus));
+router.get('/support/faqs', asyncHandler(supportController.listFaqs));
+router.post('/support/faqs', asyncHandler(supportController.createFaq));
+router.put('/support/faqs/:faqId', asyncHandler(supportController.updateFaq));
+router.delete('/support/faqs/:faqId', asyncHandler(supportController.deleteFaq));
 
 // ============================================================================
 // Promotion Routes
 // ============================================================================
 
-router.get('/promotions', promotionController.listPromotions);
-router.get('/promotions/create', promotionController.createPromotionForm);
-router.post('/promotions', promotionController.createPromotion);
-router.get('/promotions/:promotionId', promotionController.viewPromotion);
-router.get('/promotions/:promotionId/edit', promotionController.editPromotionForm);
-router.post('/promotions/:promotionId', promotionController.updatePromotion); // Form POST
-router.put('/promotions/:promotionId', promotionController.updatePromotion); // API PUT
-router.delete('/promotions/:promotionId', promotionController.deletePromotion);
+router.get('/promotions', asyncHandler(promotionController.listPromotions));
+router.get('/promotions/create', asyncHandler(promotionController.createPromotionForm));
+router.post('/promotions', asyncHandler(promotionController.createPromotion));
+router.get('/promotions/:promotionId', asyncHandler(promotionController.viewPromotion));
+router.get('/promotions/:promotionId/edit', asyncHandler(promotionController.editPromotionForm));
+router.post('/promotions/:promotionId', asyncHandler(promotionController.updatePromotion)); // Form POST
+router.put('/promotions/:promotionId', asyncHandler(promotionController.updatePromotion)); // API PUT
+router.delete('/promotions/:promotionId', asyncHandler(promotionController.deletePromotion));
 
 // ============================================================================
 // Coupon Routes
 // ============================================================================
 
-router.get('/promotions/coupons', couponController.listCoupons);
-router.get('/promotions/coupons/create', couponController.createCouponForm);
-router.post('/promotions/coupons', couponController.createCoupon);
-router.get('/promotions/coupons/:couponId', couponController.viewCoupon);
-router.get('/promotions/coupons/:couponId/edit', couponController.editCouponForm);
-router.post('/promotions/coupons/:couponId', couponController.updateCoupon);
-router.delete('/promotions/coupons/:couponId', couponController.deleteCoupon);
-router.post('/promotions/coupons/validate', couponController.validateCoupon);
+router.get('/promotions/coupons', asyncHandler(couponController.listCoupons));
+router.get('/promotions/coupons/create', asyncHandler(couponController.createCouponForm));
+router.post('/promotions/coupons', asyncHandler(couponController.createCoupon));
+router.get('/promotions/coupons/:couponId', asyncHandler(couponController.viewCoupon));
+router.get('/promotions/coupons/:couponId/edit', asyncHandler(couponController.editCouponForm));
+router.post('/promotions/coupons/:couponId', asyncHandler(couponController.updateCoupon));
+router.delete('/promotions/coupons/:couponId', asyncHandler(couponController.deleteCoupon));
+router.post('/promotions/coupons/validate', asyncHandler(couponController.validateCoupon));
 
 // ============================================================================
 // Gift Card Routes
 // ============================================================================
 
-router.get('/promotions/gift-cards', giftCardController.listGiftCards);
-router.get('/promotions/gift-cards/create', giftCardController.createGiftCardForm);
-router.post('/promotions/gift-cards', giftCardController.createGiftCard);
-router.get('/promotions/gift-cards/:giftCardId', giftCardController.viewGiftCard);
-router.get('/promotions/gift-cards/:giftCardId/edit', giftCardController.editGiftCardForm);
-router.post('/promotions/gift-cards/:giftCardId/activate', giftCardController.activateGiftCardAction);
-router.post('/promotions/gift-cards/:giftCardId/assign', giftCardController.assignGiftCardAction);
-router.post('/promotions/gift-cards/:giftCardId/reload', giftCardController.reloadGiftCardAction);
-router.post('/promotions/gift-cards/:giftCardId/refund', giftCardController.refundToGiftCardAction);
-router.post('/promotions/gift-cards/:giftCardId/cancel', giftCardController.cancelGiftCardAction);
-router.get('/promotions/gift-cards/balance/:code', giftCardController.checkGiftCardBalance);
+router.get('/promotions/gift-cards', asyncHandler(giftCardController.listGiftCards));
+router.get('/promotions/gift-cards/create', asyncHandler(giftCardController.createGiftCardForm));
+router.post('/promotions/gift-cards', asyncHandler(giftCardController.createGiftCard));
+router.get('/promotions/gift-cards/:giftCardId', asyncHandler(giftCardController.viewGiftCard));
+router.get('/promotions/gift-cards/:giftCardId/edit', asyncHandler(giftCardController.editGiftCardForm));
+router.post('/promotions/gift-cards/:giftCardId/activate', asyncHandler(giftCardController.activateGiftCardAction));
+router.post('/promotions/gift-cards/:giftCardId/assign', asyncHandler(giftCardController.assignGiftCardAction));
+router.post('/promotions/gift-cards/:giftCardId/reload', asyncHandler(giftCardController.reloadGiftCardAction));
+router.post('/promotions/gift-cards/:giftCardId/refund', asyncHandler(giftCardController.refundToGiftCardAction));
+router.post('/promotions/gift-cards/:giftCardId/cancel', asyncHandler(giftCardController.cancelGiftCardAction));
+router.get('/promotions/gift-cards/balance/:code', asyncHandler(giftCardController.checkGiftCardBalance));
 
 // ============================================================================
 // Payment Routes
 // ============================================================================
 
-router.get('/payments', paymentController.listPaymentGateways);
-router.get('/payments/gateways', paymentController.listPaymentGateways);
-router.get('/payments/gateways/create', paymentController.createPaymentGatewayForm);
-router.post('/payments/gateways', paymentController.createPaymentGateway);
-router.get('/payments/gateways/:gatewayId', paymentController.viewPaymentGateway);
-router.get('/payments/gateways/:gatewayId/edit', paymentController.editPaymentGatewayForm);
-router.post('/payments/gateways/:gatewayId', paymentController.updatePaymentGateway);
-router.delete('/payments/gateways/:gatewayId', paymentController.deletePaymentGateway);
+router.get('/payments', asyncHandler(paymentController.listPaymentGateways));
+router.get('/payments/gateways', asyncHandler(paymentController.listPaymentGateways));
+router.get('/payments/gateways/create', asyncHandler(paymentController.createPaymentGatewayForm));
+router.post('/payments/gateways', asyncHandler(paymentController.createPaymentGateway));
+router.get('/payments/gateways/:gatewayId', asyncHandler(paymentController.viewPaymentGateway));
+router.get('/payments/gateways/:gatewayId/edit', asyncHandler(paymentController.editPaymentGatewayForm));
+router.post('/payments/gateways/:gatewayId', asyncHandler(paymentController.updatePaymentGateway));
+router.delete('/payments/gateways/:gatewayId', asyncHandler(paymentController.deletePaymentGateway));
 
-router.get('/payments/methods', paymentController.listPaymentMethods);
-router.get('/payments/transactions', paymentController.listPaymentTransactions);
+router.get('/payments/methods', asyncHandler(paymentController.listPaymentMethods));
+router.get('/payments/transactions', asyncHandler(paymentController.listPaymentTransactions));
 
 // Payment Disputes
-router.get('/payments/disputes', paymentController.listDisputes);
-router.get('/payments/disputes/:disputeId', paymentController.viewDispute);
-router.post('/payments/disputes/:disputeId/status', paymentController.updateDisputeStatus);
+router.get('/payments/disputes', asyncHandler(paymentController.listDisputes));
+router.get('/payments/disputes/:disputeId', asyncHandler(paymentController.viewDispute));
+router.post('/payments/disputes/:disputeId/status', asyncHandler(paymentController.updateDisputeStatus));
 
 // Payment Fees
-router.get('/payments/fees', paymentController.listPaymentFees);
+router.get('/payments/fees', asyncHandler(paymentController.listPaymentFees));
 
 // Payment Settings
-router.get('/payments/settings', paymentController.listPaymentSettings);
-router.post('/payments/settings/:organizationId', paymentController.updatePaymentSettings);
+router.get('/payments/settings', asyncHandler(paymentController.listPaymentSettings));
+router.post('/payments/settings/:organizationId', asyncHandler(paymentController.updatePaymentSettings));
 
 // Payment Balance
-router.get('/payments/balance', paymentController.viewPaymentBalance);
+router.get('/payments/balance', asyncHandler(paymentController.viewPaymentBalance));
 
 // Payment Reports
-router.get('/payments/reports', paymentController.listPaymentReports);
-router.get('/payments/reports/:reportId', paymentController.viewPaymentReport);
+router.get('/payments/reports', asyncHandler(paymentController.listPaymentReports));
+router.get('/payments/reports/:reportId', asyncHandler(paymentController.viewPaymentReport));
 
 // ============================================================================
 // Shipping Routes
 // ============================================================================
 
 // Shipping overview - redirect to methods
-router.get('/shipping', shippingController.listShippingMethods);
-router.get('/shipping/methods/create', shippingController.createShippingMethodForm);
-router.post('/shipping/methods', shippingController.createShippingMethod);
-router.get('/shipping/methods/:methodId', shippingController.viewShippingMethod);
-router.get('/shipping/methods/:methodId/edit', shippingController.editShippingMethodForm);
-router.post('/shipping/methods/:methodId', shippingController.updateShippingMethod);
-router.delete('/shipping/methods/:methodId', shippingController.deleteShippingMethod);
-router.post('/shipping/methods/:methodId/activate', shippingController.activateShippingMethod);
-router.post('/shipping/methods/:methodId/deactivate', shippingController.deactivateShippingMethod);
+router.get('/shipping', asyncHandler(shippingController.listShippingMethods));
+router.get('/shipping/methods/create', asyncHandler(shippingController.createShippingMethodForm));
+router.post('/shipping/methods', asyncHandler(shippingController.createShippingMethod));
+router.get('/shipping/methods/:methodId', asyncHandler(shippingController.viewShippingMethod));
+router.get('/shipping/methods/:methodId/edit', asyncHandler(shippingController.editShippingMethodForm));
+router.post('/shipping/methods/:methodId', asyncHandler(shippingController.updateShippingMethod));
+router.delete('/shipping/methods/:methodId', asyncHandler(shippingController.deleteShippingMethod));
+router.post('/shipping/methods/:methodId/activate', asyncHandler(shippingController.activateShippingMethod));
+router.post('/shipping/methods/:methodId/deactivate', asyncHandler(shippingController.deactivateShippingMethod));
 
 // ============================================================================
 // Shipping Zones Routes
 // ============================================================================
 
-router.get('/shipping/zones', shippingZoneController.listShippingZones);
-router.get('/shipping/zones/create', shippingZoneController.createShippingZoneForm);
-router.post('/shipping/zones', shippingZoneController.createShippingZone);
-router.get('/shipping/zones/:zoneId', shippingZoneController.viewShippingZone);
-router.get('/shipping/zones/:zoneId/edit', shippingZoneController.editShippingZoneForm);
-router.post('/shipping/zones/:zoneId', shippingZoneController.updateShippingZone);
-router.post('/shipping/zones/:zoneId/activate', shippingZoneController.activateShippingZone);
-router.post('/shipping/zones/:zoneId/deactivate', shippingZoneController.deactivateShippingZone);
-router.delete('/shipping/zones/:zoneId', shippingZoneController.deleteShippingZone);
+router.get('/shipping/zones', asyncHandler(shippingZoneController.listShippingZones));
+router.get('/shipping/zones/create', asyncHandler(shippingZoneController.createShippingZoneForm));
+router.post('/shipping/zones', asyncHandler(shippingZoneController.createShippingZone));
+router.get('/shipping/zones/:zoneId', asyncHandler(shippingZoneController.viewShippingZone));
+router.get('/shipping/zones/:zoneId/edit', asyncHandler(shippingZoneController.editShippingZoneForm));
+router.post('/shipping/zones/:zoneId', asyncHandler(shippingZoneController.updateShippingZone));
+router.post('/shipping/zones/:zoneId/activate', asyncHandler(shippingZoneController.activateShippingZone));
+router.post('/shipping/zones/:zoneId/deactivate', asyncHandler(shippingZoneController.deactivateShippingZone));
+router.delete('/shipping/zones/:zoneId', asyncHandler(shippingZoneController.deleteShippingZone));
 
 // ============================================================================
 // Shipping Rates Routes
 // ============================================================================
 
-router.get('/shipping/rates', shippingRateController.listShippingRates);
-router.get('/shipping/rates/create', shippingRateController.createShippingRateForm);
-router.post('/shipping/rates', shippingRateController.createShippingRate);
-router.get('/shipping/rates/:rateId', shippingRateController.viewShippingRate);
-router.get('/shipping/rates/:rateId/edit', shippingRateController.editShippingRateForm);
-router.post('/shipping/rates/:rateId', shippingRateController.updateShippingRate);
-router.post('/shipping/rates/:rateId/activate', shippingRateController.activateShippingRate);
-router.post('/shipping/rates/:rateId/deactivate', shippingRateController.deactivateShippingRate);
-router.delete('/shipping/rates/:rateId', shippingRateController.deleteShippingRate);
-router.post('/shipping/rates/calculate', shippingRateController.calculateShippingRate);
+router.get('/shipping/rates', asyncHandler(shippingRateController.listShippingRates));
+router.get('/shipping/rates/create', asyncHandler(shippingRateController.createShippingRateForm));
+router.post('/shipping/rates', asyncHandler(shippingRateController.createShippingRate));
+router.get('/shipping/rates/:rateId', asyncHandler(shippingRateController.viewShippingRate));
+router.get('/shipping/rates/:rateId/edit', asyncHandler(shippingRateController.editShippingRateForm));
+router.post('/shipping/rates/:rateId', asyncHandler(shippingRateController.updateShippingRate));
+router.post('/shipping/rates/:rateId/activate', asyncHandler(shippingRateController.activateShippingRate));
+router.post('/shipping/rates/:rateId/deactivate', asyncHandler(shippingRateController.deactivateShippingRate));
+router.delete('/shipping/rates/:rateId', asyncHandler(shippingRateController.deleteShippingRate));
+router.post('/shipping/rates/calculate', asyncHandler(shippingRateController.calculateShippingRate));
 
-router.get('/content/pages', contentController.listContentPages);
-router.get('/content/pages/create', contentController.createContentPageForm);
-router.post('/content/pages', contentController.createContentPage);
-router.get('/content/pages/:pageId', contentController.viewContentPage);
-router.get('/content/pages/:pageId/edit', contentController.editContentPageForm);
-router.post('/content/pages/:pageId', contentController.updateContentPage);
-router.post('/content/pages/:pageId/publish', contentController.publishContentPage);
-router.delete('/content/pages/:pageId', contentController.deleteContentPage);
+router.get('/content/pages', asyncHandler(contentController.listContentPages));
+router.get('/content/pages/create', asyncHandler(contentController.createContentPageForm));
+router.post('/content/pages', asyncHandler(contentController.createContentPage));
+router.get('/content/pages/:pageId', asyncHandler(contentController.viewContentPage));
+router.get('/content/pages/:pageId/edit', asyncHandler(contentController.editContentPageForm));
+router.post('/content/pages/:pageId', asyncHandler(contentController.updateContentPage));
+router.post('/content/pages/:pageId/publish', asyncHandler(contentController.publishContentPage));
+router.delete('/content/pages/:pageId', asyncHandler(contentController.deleteContentPage));
 
-router.get('/content/templates', contentController.listContentTemplates);
-router.get('/content/media', contentController.listContentMedia);
+router.get('/content/templates', asyncHandler(contentController.listContentTemplates));
+router.get('/content/media', asyncHandler(contentController.listContentMedia));
 
 // ============================================================================
 // SEO Routes
 // ============================================================================
 
-router.get('/marketing/seo', seoController.listSEOSettings);
-router.post('/marketing/seo', seoController.updateSEOSettings);
-router.get('/marketing/seo/robots.txt', seoController.generateRobotsTxt);
-router.get('/marketing/seo/sitemap.xml', seoController.generateSitemap);
+router.get('/marketing/seo', asyncHandler(seoController.listSEOSettings));
+router.post('/marketing/seo', asyncHandler(seoController.updateSEOSettings));
+router.get('/marketing/seo/robots.txt', asyncHandler(seoController.generateRobotsTxt));
+router.get('/marketing/seo/sitemap.xml', asyncHandler(seoController.generateSitemap));
 
 // ============================================================================
 // Notification Routes
 // ============================================================================
 
-router.get('/notifications/templates', notificationController.listNotificationTemplates);
-router.get('/notifications/templates/create', notificationController.createNotificationTemplateForm);
-router.post('/notifications/templates', notificationController.createNotificationTemplate);
-router.get('/notifications/templates/:templateId', notificationController.viewNotificationTemplate);
-router.get('/notifications/templates/:templateId/edit', notificationController.editNotificationTemplateForm);
-router.post('/notifications/templates/:templateId', notificationController.updateNotificationTemplate);
-router.post('/notifications/templates/:templateId/activate', notificationController.activateNotificationTemplate);
-router.post('/notifications/templates/:templateId/deactivate', notificationController.deactivateNotificationTemplate);
-router.delete('/notifications/templates/:templateId', notificationController.deleteNotificationTemplate);
-router.post('/notifications/templates/:templateId/clone', notificationController.cloneNotificationTemplate);
-router.post('/notifications/templates/:templateId/preview', notificationController.previewNotificationTemplate);
-router.get('/notifications/templates/:templateId/translations', notificationController.listTemplateTranslations);
-router.get('/notifications/batches', notificationController.listBatches);
-router.get('/notifications/batches/:batchId', notificationController.viewBatch);
-router.get('/notifications/webhooks', notificationController.listWebhooks);
-router.get('/notifications/webhooks/create', notificationController.createWebhookForm);
-router.post('/notifications/webhooks', notificationController.createWebhook);
-router.post('/notifications/webhooks/:webhookId/deactivate', notificationController.deactivateWebhook);
+router.get('/notifications/templates', asyncHandler(notificationController.listNotificationTemplates));
+router.get('/notifications/templates/create', asyncHandler(notificationController.createNotificationTemplateForm));
+router.post('/notifications/templates', asyncHandler(notificationController.createNotificationTemplate));
+router.get('/notifications/templates/:templateId', asyncHandler(notificationController.viewNotificationTemplate));
+router.get('/notifications/templates/:templateId/edit', asyncHandler(notificationController.editNotificationTemplateForm));
+router.post('/notifications/templates/:templateId', asyncHandler(notificationController.updateNotificationTemplate));
+router.post('/notifications/templates/:templateId/activate', asyncHandler(notificationController.activateNotificationTemplate));
+router.post('/notifications/templates/:templateId/deactivate', asyncHandler(notificationController.deactivateNotificationTemplate));
+router.delete('/notifications/templates/:templateId', asyncHandler(notificationController.deleteNotificationTemplate));
+router.post('/notifications/templates/:templateId/clone', asyncHandler(notificationController.cloneNotificationTemplate));
+router.post('/notifications/templates/:templateId/preview', asyncHandler(notificationController.previewNotificationTemplate));
+router.get('/notifications/templates/:templateId/translations', asyncHandler(notificationController.listTemplateTranslations));
+router.get('/notifications/batches', asyncHandler(notificationController.listBatches));
+router.get('/notifications/batches/:batchId', asyncHandler(notificationController.viewBatch));
+router.get('/notifications/webhooks', asyncHandler(notificationController.listWebhooks));
+router.get('/notifications/webhooks/create', asyncHandler(notificationController.createWebhookForm));
+router.post('/notifications/webhooks', asyncHandler(notificationController.createWebhook));
+router.post('/notifications/webhooks/:webhookId/deactivate', asyncHandler(notificationController.deactivateWebhook));
 
 // ============================================================================
 // Content Blocks Routes
 // ============================================================================
 
-router.get('/content/blocks', contentBlocksController.listContentBlocks);
-router.get('/content/blocks/create', contentBlocksController.createContentBlockForm);
-router.post('/content/blocks', contentBlocksController.createContentBlock);
-router.get('/content/blocks/:blockId/edit', contentBlocksController.editContentBlockForm);
-router.post('/content/blocks/:blockId', contentBlocksController.updateContentBlock);
-router.delete('/content/blocks/:blockId', contentBlocksController.deleteContentBlock);
-router.post('/content/pages/:pageId/reorder-blocks', contentBlocksController.reorderContentBlocks);
+router.get('/content/blocks', asyncHandler(contentBlocksController.listContentBlocks));
+router.get('/content/blocks/create', asyncHandler(contentBlocksController.createContentBlockForm));
+router.post('/content/blocks', asyncHandler(contentBlocksController.createContentBlock));
+router.get('/content/blocks/:blockId/edit', asyncHandler(contentBlocksController.editContentBlockForm));
+router.post('/content/blocks/:blockId', asyncHandler(contentBlocksController.updateContentBlock));
+router.delete('/content/blocks/:blockId', asyncHandler(contentBlocksController.deleteContentBlock));
+router.post('/content/pages/:pageId/reorder-blocks', asyncHandler(contentBlocksController.reorderContentBlocks));
 
 // ============================================================================
 // Operations Routes
 // ============================================================================
 
 // Warehouse Operations
-router.get('/warehouses', warehouseController.listWarehouses);
-router.get('/warehouses/create', warehouseController.createWarehouseForm);
-router.post('/warehouses', warehouseController.createWarehouse);
-router.get('/warehouses/:warehouseId', warehouseController.viewWarehouse);
-router.get('/warehouses/:warehouseId/edit', warehouseController.editWarehouseForm);
-router.post('/warehouses/:warehouseId', warehouseController.updateWarehouse);
-router.post('/warehouses/:warehouseId/activate', warehouseController.activateWarehouse);
-router.post('/warehouses/:warehouseId/deactivate', warehouseController.deactivateWarehouse);
-router.delete('/warehouses/:warehouseId', warehouseController.deleteWarehouse);
+router.get('/warehouses', asyncHandler(warehouseController.listWarehouses));
+router.get('/warehouses/create', asyncHandler(warehouseController.createWarehouseForm));
+router.post('/warehouses', asyncHandler(warehouseController.createWarehouse));
+router.get('/warehouses/:warehouseId', asyncHandler(warehouseController.viewWarehouse));
+router.get('/warehouses/:warehouseId/edit', asyncHandler(warehouseController.editWarehouseForm));
+router.post('/warehouses/:warehouseId', asyncHandler(warehouseController.updateWarehouse));
+router.post('/warehouses/:warehouseId/activate', asyncHandler(warehouseController.activateWarehouse));
+router.post('/warehouses/:warehouseId/deactivate', asyncHandler(warehouseController.deactivateWarehouse));
+router.delete('/warehouses/:warehouseId', asyncHandler(warehouseController.deleteWarehouse));
 
 // Order Fulfillments
-router.get('/fulfillments', fulfillmentController.listFulfillments);
-router.get('/fulfillments/:fulfillmentId', fulfillmentController.viewFulfillment);
-router.post('/fulfillments/:fulfillmentId/status', fulfillmentController.updateFulfillmentStatus);
-router.post('/fulfillments/:fulfillmentId/shipped', fulfillmentController.markAsShipped);
-router.post('/fulfillments/:fulfillmentId/delivered', fulfillmentController.markAsDelivered);
-router.post('/fulfillments/:fulfillmentId/cancel', fulfillmentController.cancelFulfillment);
-router.get('/fulfillments/stats', fulfillmentController.getFulfillmentStats);
+router.get('/fulfillments', asyncHandler(fulfillmentController.listFulfillments));
+router.get('/fulfillments/:fulfillmentId', asyncHandler(fulfillmentController.viewFulfillment));
+router.post('/fulfillments/:fulfillmentId/status', asyncHandler(fulfillmentController.updateFulfillmentStatus));
+router.post('/fulfillments/:fulfillmentId/shipped', asyncHandler(fulfillmentController.markAsShipped));
+router.post('/fulfillments/:fulfillmentId/delivered', asyncHandler(fulfillmentController.markAsDelivered));
+router.post('/fulfillments/:fulfillmentId/cancel', asyncHandler(fulfillmentController.cancelFulfillment));
+router.get('/fulfillments/stats', asyncHandler(fulfillmentController.getFulfillmentStats));
 
 // Supplier Management
-router.get('/suppliers', supplierController.listSuppliers);
-router.get('/suppliers/create', supplierController.createSupplierForm);
-router.post('/suppliers', supplierController.createSupplier);
-router.get('/suppliers/:supplierId', supplierController.viewSupplier);
-router.get('/suppliers/:supplierId/edit', supplierController.editSupplierForm);
-router.post('/suppliers/:supplierId', supplierController.updateSupplier);
-router.post('/suppliers/:supplierId/approve', supplierController.approveSupplier);
-router.post('/suppliers/:supplierId/suspend', supplierController.suspendSupplier);
-router.post('/suppliers/:supplierId/activate', supplierController.activateSupplier);
-router.post('/suppliers/:supplierId/deactivate', supplierController.deactivateSupplier);
-router.delete('/suppliers/:supplierId', supplierController.deleteSupplier);
+router.get('/suppliers', asyncHandler(supplierController.listSuppliers));
+router.get('/suppliers/create', asyncHandler(supplierController.createSupplierForm));
+router.post('/suppliers', asyncHandler(supplierController.createSupplier));
+router.get('/suppliers/:supplierId', asyncHandler(supplierController.viewSupplier));
+router.get('/suppliers/:supplierId/edit', asyncHandler(supplierController.editSupplierForm));
+router.post('/suppliers/:supplierId', asyncHandler(supplierController.updateSupplier));
+router.post('/suppliers/:supplierId/approve', asyncHandler(supplierController.approveSupplier));
+router.post('/suppliers/:supplierId/suspend', asyncHandler(supplierController.suspendSupplier));
+router.post('/suppliers/:supplierId/activate', asyncHandler(supplierController.activateSupplier));
+router.post('/suppliers/:supplierId/deactivate', asyncHandler(supplierController.deactivateSupplier));
+router.delete('/suppliers/:supplierId', asyncHandler(supplierController.deleteSupplier));
 
 // Cart Analytics
-router.get('/baskets/abandoned', basketController.listAbandonedCarts);
-router.get('/baskets/abandoned/:basketId', basketController.viewAbandonedCart);
-router.post('/baskets/abandoned/:basketId/recover', basketController.recoverAbandonedCart);
-router.post('/baskets/abandoned/:basketId/email', basketController.sendRecoveryEmail);
-router.post('/baskets/abandoned/:basketId/recovered', basketController.markCartRecovered);
-router.post('/baskets/cleanup-expired', basketController.cleanupExpiredBaskets);
-router.get('/baskets/analytics', basketController.basketAnalytics);
+router.get('/baskets/abandoned', asyncHandler(basketController.listAbandonedCarts));
+router.get('/baskets/abandoned/:basketId', asyncHandler(basketController.viewAbandonedCart));
+router.post('/baskets/abandoned/:basketId/recover', asyncHandler(basketController.recoverAbandonedCart));
+router.post('/baskets/abandoned/:basketId/email', asyncHandler(basketController.sendRecoveryEmail));
+router.post('/baskets/abandoned/:basketId/recovered', asyncHandler(basketController.markCartRecovered));
+router.post('/baskets/cleanup-expired', asyncHandler(basketController.cleanupExpiredBaskets));
+router.get('/baskets/analytics', asyncHandler(basketController.basketAnalytics));
 
 // Warehouse Dashboard
-router.get('/operations/dashboard', fulfillmentController.warehouseDashboard);
+router.get('/operations/dashboard', asyncHandler(fulfillmentController.warehouseDashboard));
 
 // ============================================================================
 // Customer Programs Routes
 // ============================================================================
 
 // Membership Plans
-router.get('/membership/plans', membershipController.listMembershipPlans);
-router.get('/membership/plans/create', membershipController.createMembershipPlanForm);
-router.post('/membership/plans', membershipController.createMembershipPlan);
-router.get('/membership/plans/:planId', membershipController.viewMembershipPlan);
-router.get('/membership/plans/:planId/edit', membershipController.editMembershipPlanForm);
-router.post('/membership/plans/:planId', membershipController.updateMembershipPlan);
-router.post('/membership/plans/:planId/activate', membershipController.activateMembershipPlan);
-router.post('/membership/plans/:planId/deactivate', membershipController.deactivateMembershipPlan);
-router.delete('/membership/plans/:planId', membershipController.deleteMembershipPlan);
+router.get('/membership/plans', asyncHandler(membershipController.listMembershipPlans));
+router.get('/membership/plans/create', asyncHandler(membershipController.createMembershipPlanForm));
+router.post('/membership/plans', asyncHandler(membershipController.createMembershipPlan));
+router.get('/membership/plans/:planId', asyncHandler(membershipController.viewMembershipPlan));
+router.get('/membership/plans/:planId/edit', asyncHandler(membershipController.editMembershipPlanForm));
+router.post('/membership/plans/:planId', asyncHandler(membershipController.updateMembershipPlan));
+router.post('/membership/plans/:planId/activate', asyncHandler(membershipController.activateMembershipPlan));
+router.post('/membership/plans/:planId/deactivate', asyncHandler(membershipController.deactivateMembershipPlan));
+router.delete('/membership/plans/:planId', asyncHandler(membershipController.deleteMembershipPlan));
 
 // Membership Benefits
-router.get('/membership/benefits', membershipController.listMembershipBenefits);
+router.get('/membership/benefits', asyncHandler(membershipController.listMembershipBenefits));
 
 // Memberships (User memberships)
-router.get('/membership/memberships', membershipController.listMemberships);
+router.get('/membership/memberships', asyncHandler(membershipController.listMemberships));
 
 // Membership Advanced Operations
-router.post('/membership/bulk-operations', membershipController.bulkMembershipOperations);
-router.post('/membership/memberships/:membershipId/change-tier', membershipController.membershipUpgradeDowngrade);
-router.get('/membership/analytics', membershipController.membershipAnalytics);
+router.post('/membership/bulk-operations', asyncHandler(membershipController.bulkMembershipOperations));
+router.post('/membership/memberships/:membershipId/change-tier', asyncHandler(membershipController.membershipUpgradeDowngrade));
+router.get('/membership/analytics', asyncHandler(membershipController.membershipAnalytics));
 
 // Subscription Plans
-router.get('/subscription/plans', subscriptionController.listSubscriptionPlans);
-router.get('/subscription/plans/create', subscriptionController.createSubscriptionPlanForm);
-router.post('/subscription/plans', subscriptionController.createSubscriptionPlan);
-router.get('/subscription/plans/:planId', subscriptionController.viewSubscriptionPlan);
-router.get('/subscription/plans/:planId/edit', subscriptionController.editSubscriptionPlanForm);
-router.post('/subscription/plans/:planId', subscriptionController.updateSubscriptionPlan);
-router.delete('/subscription/plans/:planId', subscriptionController.deleteSubscriptionPlan);
+router.get('/subscription/plans', asyncHandler(subscriptionController.listSubscriptionPlans));
+router.get('/subscription/plans/create', asyncHandler(subscriptionController.createSubscriptionPlanForm));
+router.post('/subscription/plans', asyncHandler(subscriptionController.createSubscriptionPlan));
+router.get('/subscription/plans/:planId', asyncHandler(subscriptionController.viewSubscriptionPlan));
+router.get('/subscription/plans/:planId/edit', asyncHandler(subscriptionController.editSubscriptionPlanForm));
+router.post('/subscription/plans/:planId', asyncHandler(subscriptionController.updateSubscriptionPlan));
+router.delete('/subscription/plans/:planId', asyncHandler(subscriptionController.deleteSubscriptionPlan));
 
 // Customer Subscriptions
-router.get('/subscription/subscriptions', subscriptionController.listCustomerSubscriptions);
-router.get('/subscription/subscriptions/:subscriptionId', subscriptionController.viewCustomerSubscription);
-router.post('/subscription/subscriptions/:subscriptionId/status', subscriptionController.updateSubscriptionStatus);
-router.post('/subscription/subscriptions/:subscriptionId/cancel', subscriptionController.cancelCustomerSubscription);
+router.get('/subscription/subscriptions', asyncHandler(subscriptionController.listCustomerSubscriptions));
+router.get('/subscription/subscriptions/:subscriptionId', asyncHandler(subscriptionController.viewCustomerSubscription));
+router.post('/subscription/subscriptions/:subscriptionId/status', asyncHandler(subscriptionController.updateSubscriptionStatus));
+router.post('/subscription/subscriptions/:subscriptionId/cancel', asyncHandler(subscriptionController.cancelCustomerSubscription));
 
 // Subscription Billing
-router.get('/subscription/billing', subscriptionController.subscriptionBilling);
-router.post('/subscription/billing/:subscriptionId/process', subscriptionController.processSubscriptionBilling);
-router.post('/subscription/billing/:subscriptionId/manage', subscriptionController.manageFailedPayments);
+router.get('/subscription/billing', asyncHandler(subscriptionController.subscriptionBilling));
+router.post('/subscription/billing/:subscriptionId/process', asyncHandler(subscriptionController.processSubscriptionBilling));
+router.post('/subscription/billing/:subscriptionId/manage', asyncHandler(subscriptionController.manageFailedPayments));
 
 // Loyalty Tiers
-router.get('/loyalty/tiers', loyaltyController.listLoyaltyTiers);
+router.get('/loyalty/tiers', asyncHandler(loyaltyController.listLoyaltyTiers));
 
 // Loyalty Rewards
-router.get('/loyalty/rewards', loyaltyController.listLoyaltyRewards);
-router.get('/loyalty/rewards/create', loyaltyController.createLoyaltyRewardForm);
-router.post('/loyalty/rewards', loyaltyController.createLoyaltyReward);
-router.get('/loyalty/rewards/:rewardId', loyaltyController.viewLoyaltyReward);
-router.get('/loyalty/rewards/:rewardId/edit', loyaltyController.editLoyaltyRewardForm);
-router.post('/loyalty/rewards/:rewardId', loyaltyController.updateLoyaltyReward);
-router.delete('/loyalty/rewards/:rewardId', loyaltyController.deleteLoyaltyReward);
+router.get('/loyalty/rewards', asyncHandler(loyaltyController.listLoyaltyRewards));
+router.get('/loyalty/rewards/create', asyncHandler(loyaltyController.createLoyaltyRewardForm));
+router.post('/loyalty/rewards', asyncHandler(loyaltyController.createLoyaltyReward));
+router.get('/loyalty/rewards/:rewardId', asyncHandler(loyaltyController.viewLoyaltyReward));
+router.get('/loyalty/rewards/:rewardId/edit', asyncHandler(loyaltyController.editLoyaltyRewardForm));
+router.post('/loyalty/rewards/:rewardId', asyncHandler(loyaltyController.updateLoyaltyReward));
+router.delete('/loyalty/rewards/:rewardId', asyncHandler(loyaltyController.deleteLoyaltyReward));
 
 // Customer Loyalty
-router.get('/loyalty/customers', loyaltyController.listCustomerLoyalty);
-router.get('/loyalty/customers/:customerId', loyaltyController.viewCustomerLoyalty);
+router.get('/loyalty/customers', asyncHandler(loyaltyController.listCustomerLoyalty));
+router.get('/loyalty/customers/:customerId', asyncHandler(loyaltyController.viewCustomerLoyalty));
 
 // Loyalty Analytics
-router.get('/loyalty/analytics', loyaltyController.loyaltyAnalytics);
+router.get('/loyalty/analytics', asyncHandler(loyaltyController.loyaltyAnalytics));
 
 // ============================================================================
 // Advanced Analytics & Intelligence (Phase 7)
 // ============================================================================
 
 // Analytics Dashboard
-router.get('/analytics', analyticsController.analyticsDashboard);
-router.get('/analytics/dashboard', analyticsController.analyticsDashboard);
-router.get('/analytics/store-sales', analyticsController.storeSalesDashboard);
+router.get('/analytics', asyncHandler(analyticsController.analyticsDashboard));
+router.get('/analytics/dashboard', asyncHandler(analyticsController.analyticsDashboard));
+router.get('/analytics/store-sales', asyncHandler(analyticsController.storeSalesDashboard));
 
 // Predictive Analytics
-router.get('/analytics/predictive', analyticsController.predictiveAnalytics);
+router.get('/analytics/predictive', asyncHandler(analyticsController.predictiveAnalytics));
 
 // Customer Analytics
-router.get('/analytics/customers', analyticsController.customerAnalytics);
-router.get('/analytics/customers/:segmentId', analyticsController.customerAnalytics);
+router.get('/analytics/customers', asyncHandler(analyticsController.customerAnalytics));
+router.get('/analytics/customers/:segmentId', asyncHandler(analyticsController.customerAnalytics));
 
 // AI Recommendations
-router.get('/analytics/ai-recommendations', analyticsController.aiRecommendations);
+router.get('/analytics/ai-recommendations', asyncHandler(analyticsController.aiRecommendations));
 
 // Executive Dashboard
-router.get('/analytics/executive', analyticsController.executiveDashboard);
+router.get('/analytics/executive', asyncHandler(analyticsController.executiveDashboard));
 
 // Real-time Metrics API
-router.get('/api/analytics/realtime', analyticsController.realTimeMetrics);
+router.get('/api/analytics/realtime', asyncHandler(analyticsController.realTimeMetrics));
 
 // Automated Reporting Management
-router.get('/analytics/reports', analyticsController.automatedReports);
-router.post('/analytics/reports/schedules', analyticsController.createReportSchedule);
-router.put('/analytics/reports/schedules/:scheduleId', analyticsController.updateReportSchedule);
-router.delete('/analytics/reports/schedules/:scheduleId', analyticsController.deleteReportSchedule);
-router.post('/analytics/reports/run-now', analyticsController.runReportNow);
+router.get('/analytics/reports', asyncHandler(analyticsController.automatedReports));
+router.post('/analytics/reports/schedules', asyncHandler(analyticsController.createReportSchedule));
+router.put('/analytics/reports/schedules/:scheduleId', asyncHandler(analyticsController.updateReportSchedule));
+router.delete('/analytics/reports/schedules/:scheduleId', asyncHandler(analyticsController.deleteReportSchedule));
+router.post('/analytics/reports/run-now', asyncHandler(analyticsController.runReportNow));
 
 // ============================================================================
 // Admin Users & Roles (Phase 8)
 // ============================================================================
 
 // Admin Users
-router.get('/users', usersController.listUsers);
-router.get('/users/create', usersController.createUserForm);
-router.post('/users', usersController.createUser);
-router.get('/users/:userId', usersController.viewUser);
-router.put('/users/:userId', usersController.updateUser);
-router.delete('/users/:userId', usersController.deleteUser);
+router.get('/users', asyncHandler(usersController.listUsers));
+router.get('/users/create', asyncHandler(usersController.createUserForm));
+router.post('/users', asyncHandler(usersController.createUser));
+router.get('/users/:userId', asyncHandler(usersController.viewUser));
+router.put('/users/:userId', asyncHandler(usersController.updateUser));
+router.delete('/users/:userId', asyncHandler(usersController.deleteUser));
 
 // Roles & Permissions
-router.get('/roles', usersController.listRoles);
-router.post('/roles', usersController.createRole);
-router.put('/roles/:roleId', usersController.updateRole);
-router.delete('/roles/:roleId', usersController.deleteRole);
+router.get('/roles', asyncHandler(usersController.listRoles));
+router.post('/roles', asyncHandler(usersController.createRole));
+router.put('/roles/:roleId', asyncHandler(usersController.updateRole));
+router.delete('/roles/:roleId', asyncHandler(usersController.deleteRole));
 
 // ============================================================================
 // Settings (Phase 8)
 // ============================================================================
 
 // Store Settings
-router.get('/settings/store', settingsController.storeSettings);
-router.post('/settings/store', settingsController.updateStoreSettings);
+router.get('/settings/store', asyncHandler(settingsController.storeSettings));
+router.post('/settings/store', asyncHandler(settingsController.updateStoreSettings));
 
 // Business Information
-router.get('/settings/business', settingsController.businessInfo);
-router.post('/settings/business', settingsController.updateBusinessInfo);
+router.get('/settings/business', asyncHandler(settingsController.businessInfo));
+router.post('/settings/business', asyncHandler(settingsController.updateBusinessInfo));
 
 // Localization
-router.get('/settings/localization', localizationController.localizationDashboard);
-router.get('/settings/localization/languages', localizationController.listLanguages);
-router.get('/settings/localization/languages/create', localizationController.createLanguageForm);
-router.post('/settings/localization/languages', localizationController.createLanguage);
-router.get('/settings/localization/languages/:languageId/edit', localizationController.editLanguageForm);
-router.post('/settings/localization/languages/:languageId', localizationController.updateLanguage);
-router.delete('/settings/localization/languages/:languageId', localizationController.deleteLanguage);
+router.get('/settings/localization', asyncHandler(localizationController.localizationDashboard));
+router.get('/settings/localization/languages', asyncHandler(localizationController.listLanguages));
+router.get('/settings/localization/languages/create', asyncHandler(localizationController.createLanguageForm));
+router.post('/settings/localization/languages', asyncHandler(localizationController.createLanguage));
+router.get('/settings/localization/languages/:languageId/edit', asyncHandler(localizationController.editLanguageForm));
+router.post('/settings/localization/languages/:languageId', asyncHandler(localizationController.updateLanguage));
+router.delete('/settings/localization/languages/:languageId', asyncHandler(localizationController.deleteLanguage));
 
-router.get('/settings/localization/currencies', localizationController.listCurrencies);
-router.get('/settings/localization/currencies/create', localizationController.createCurrencyForm);
-router.post('/settings/localization/currencies', localizationController.createCurrency);
-router.get('/settings/localization/currencies/:currencyId/edit', localizationController.editCurrencyForm);
-router.post('/settings/localization/currencies/:currencyId', localizationController.updateCurrency);
-router.delete('/settings/localization/currencies/:currencyId', localizationController.deleteCurrency);
+router.get('/settings/localization/currencies', asyncHandler(localizationController.listCurrencies));
+router.get('/settings/localization/currencies/create', asyncHandler(localizationController.createCurrencyForm));
+router.post('/settings/localization/currencies', asyncHandler(localizationController.createCurrency));
+router.get('/settings/localization/currencies/:currencyId/edit', asyncHandler(localizationController.editCurrencyForm));
+router.post('/settings/localization/currencies/:currencyId', asyncHandler(localizationController.updateCurrency));
+router.delete('/settings/localization/currencies/:currencyId', asyncHandler(localizationController.deleteCurrency));
 
-router.get('/settings/localization/regions', localizationController.listRegions);
-router.get('/settings/localization/regions/create', localizationController.createRegionForm);
-router.post('/settings/localization/regions', localizationController.createRegion);
-router.get('/settings/localization/regions/:regionId/edit', localizationController.editRegionForm);
-router.post('/settings/localization/regions/:regionId', localizationController.updateRegion);
-router.delete('/settings/localization/regions/:regionId', localizationController.deleteRegion);
+router.get('/settings/localization/regions', asyncHandler(localizationController.listRegions));
+router.get('/settings/localization/regions/create', asyncHandler(localizationController.createRegionForm));
+router.post('/settings/localization/regions', asyncHandler(localizationController.createRegion));
+router.get('/settings/localization/regions/:regionId/edit', asyncHandler(localizationController.editRegionForm));
+router.post('/settings/localization/regions/:regionId', asyncHandler(localizationController.updateRegion));
+router.delete('/settings/localization/regions/:regionId', asyncHandler(localizationController.deleteRegion));
 
 // Legacy settings routes (keep for backward compatibility)
-router.post('/settings/languages', settingsController.createLanguage);
-router.put('/settings/languages/:languageId', settingsController.updateLanguage);
-router.delete('/settings/languages/:languageId', settingsController.deleteLanguage);
-router.post('/settings/currencies', settingsController.createCurrency);
-router.put('/settings/currencies/:currencyId', settingsController.updateCurrency);
-router.delete('/settings/currencies/:currencyId', settingsController.deleteCurrency);
+router.post('/settings/languages', asyncHandler(settingsController.createLanguage));
+router.put('/settings/languages/:languageId', asyncHandler(settingsController.updateLanguage));
+router.delete('/settings/languages/:languageId', asyncHandler(settingsController.deleteLanguage));
+router.post('/settings/currencies', asyncHandler(settingsController.createCurrency));
+router.put('/settings/currencies/:currencyId', asyncHandler(settingsController.updateCurrency));
+router.delete('/settings/currencies/:currencyId', asyncHandler(settingsController.deleteCurrency));
 
 // ============================================================================
 // Checkout Settings Routes
 // ============================================================================
 
-router.get('/settings/checkout', checkoutController.checkoutSettings);
-router.post('/settings/checkout', checkoutController.updateCheckoutSettings);
-router.get('/settings/checkout/payment-methods', checkoutController.listPaymentMethods);
-router.post('/settings/checkout/payment-methods/order', checkoutController.updatePaymentMethodOrder);
-router.get('/settings/checkout/shipping-options', checkoutController.listShippingOptions);
-router.post('/settings/checkout/shipping-options/order', checkoutController.updateShippingOptionOrder);
+router.get('/settings/checkout', asyncHandler(checkoutController.checkoutSettings));
+router.post('/settings/checkout', asyncHandler(checkoutController.updateCheckoutSettings));
+router.get('/settings/checkout/payment-methods', asyncHandler(checkoutController.listPaymentMethods));
+router.post('/settings/checkout/payment-methods/order', asyncHandler(checkoutController.updatePaymentMethodOrder));
+router.get('/settings/checkout/shipping-options', asyncHandler(checkoutController.listShippingOptions));
+router.post('/settings/checkout/shipping-options/order', asyncHandler(checkoutController.updateShippingOptionOrder));
 
 // ============================================================================
 // Organizations Routes
 // ============================================================================
 
-router.get('/operations/organizations', organizationController.listOrganizations);
-router.get('/operations/organizations/create', organizationController.createOrganizationForm);
-router.post('/operations/organizations', organizationController.createOrganization);
+router.get('/operations/organizations', asyncHandler(organizationController.listOrganizations));
+router.get('/operations/organizations/create', asyncHandler(organizationController.createOrganizationForm));
+router.post('/operations/organizations', asyncHandler(organizationController.createOrganization));
 
-router.get('/operations/organizations/:organizationId', organizationController.viewOrganization);
-router.get('/operations/organizations/:organizationId/edit', organizationController.editOrganizationForm);
-router.post('/operations/organizations/:organizationId', organizationController.updateOrganization);
-router.put('/operations/organizations/:organizationId', organizationController.updateOrganization);
-router.delete('/operations/organizations/:organizationId', organizationController.deleteOrganization);
-router.post('/operations/organizations/:organizationId/approve', organizationController.approveOrganization);
-router.post('/operations/organizations/:organizationId/suspend', organizationController.suspendOrganization);
+router.get('/operations/organizations/:organizationId', asyncHandler(organizationController.viewOrganization));
+router.get('/operations/organizations/:organizationId/edit', asyncHandler(organizationController.editOrganizationForm));
+router.post('/operations/organizations/:organizationId', asyncHandler(organizationController.updateOrganization));
+router.put('/operations/organizations/:organizationId', asyncHandler(organizationController.updateOrganization));
+router.delete('/operations/organizations/:organizationId', asyncHandler(organizationController.deleteOrganization));
+router.post('/operations/organizations/:organizationId/approve', asyncHandler(organizationController.approveOrganization));
+router.post('/operations/organizations/:organizationId/suspend', asyncHandler(organizationController.suspendOrganization));
 
 // ============================================================================
 // Media Library Routes
 // ============================================================================
 
-router.get('/content/media', mediaController.listMedia);
-router.get('/content/media/upload', mediaController.uploadMediaForm);
-router.post('/content/media/upload', mediaController.uploadMedia);
-router.get('/content/media/:mediaId', mediaController.viewMedia);
-router.get('/content/media/:mediaId/edit', mediaController.editMediaForm);
-router.post('/content/media/:mediaId', mediaController.updateMedia);
-router.delete('/content/media/:mediaId', mediaController.deleteMedia);
-router.post('/content/media/bulk-delete', mediaController.bulkDeleteMedia);
-router.post('/content/media/folders', mediaController.createFolder);
+router.get('/content/media', asyncHandler(mediaController.listMedia));
+router.get('/content/media/upload', asyncHandler(mediaController.uploadMediaForm));
+router.post('/content/media/upload', asyncHandler(mediaController.uploadMedia));
+router.get('/content/media/:mediaId', asyncHandler(mediaController.viewMedia));
+router.get('/content/media/:mediaId/edit', asyncHandler(mediaController.editMediaForm));
+router.post('/content/media/:mediaId', asyncHandler(mediaController.updateMedia));
+router.delete('/content/media/:mediaId', asyncHandler(mediaController.deleteMedia));
+router.post('/content/media/bulk-delete', asyncHandler(mediaController.bulkDeleteMedia));
+router.post('/content/media/folders', asyncHandler(mediaController.createFolder));
+
+// ============================================================================
+// Automation Routes
+// ============================================================================
+
+router.get('/automation', asyncHandler(automationController.listAutomationRules));
+router.get('/automation/create', asyncHandler(automationController.createAutomationRuleForm));
+router.post('/automation', asyncHandler(automationController.createAutomationRule));
+router.get('/automation/:ruleId', asyncHandler(automationController.viewAutomationRule));
+router.get('/automation/:ruleId/edit', asyncHandler(automationController.editAutomationRuleForm));
+router.post('/automation/:ruleId', asyncHandler(automationController.updateAutomationRule));
+router.post('/automation/:ruleId/delete', asyncHandler(automationController.deleteAutomationRule));
+router.post('/automation/:ruleId/activate', asyncHandler(automationController.activateAutomationRule));
+router.post('/automation/:ruleId/deactivate', asyncHandler(automationController.deactivateAutomationRule));
+router.post('/automation/:ruleId/trigger', asyncHandler(automationController.triggerAutomationRule));
+
+// ============================================================================
+// Returns & Store Credit Routes
+// ============================================================================
+
+router.get('/returns', asyncHandler(returnsController.listReturns));
+router.get('/returns/create', asyncHandler(returnsController.createReturnForm));
+router.post('/returns', asyncHandler(returnsController.createReturn));
+router.get('/returns/store-credit', asyncHandler(returnsController.viewStoreCredit));
+router.get('/returns/:returnId', asyncHandler(returnsController.viewReturn));
+router.post('/returns/:returnId/approve', asyncHandler(returnsController.approveReturn));
+router.post('/returns/:returnId/deny', asyncHandler(returnsController.denyReturn));
+router.post('/returns/:returnId/in-transit', asyncHandler(returnsController.markInTransit));
+router.post('/returns/:returnId/received', asyncHandler(returnsController.markReceived));
+router.post('/returns/:returnId/inspect', asyncHandler(returnsController.completeInspection));
+router.post('/returns/:returnId/complete', asyncHandler(returnsController.completeReturn));
+router.post('/returns/:returnId/cancel', asyncHandler(returnsController.cancelReturn));
+
+// ============================================================================
+// Page Builder Routes
+// ============================================================================
+
+router.get('/page-builder', asyncHandler(pageBuilderController.listPageBuilderDrafts));
+router.get('/page-builder/create', asyncHandler(pageBuilderController.createDraftForm));
+router.post('/page-builder/create', asyncHandler(pageBuilderController.createDraft));
+router.get('/page-builder/:draftId', asyncHandler(pageBuilderController.pageBuilderEditor));
+router.get('/page-builder/:draftId/preview', asyncHandler(pageBuilderController.pageBuilderPreview));
+router.post('/page-builder/:draftId/publish', asyncHandler(pageBuilderController.publishDraft));
+router.delete('/page-builder/:draftId', asyncHandler(pageBuilderController.deleteDraft));
+
+// ============================================================================
+// Theme Management Routes
+// ============================================================================
+
+router.get('/themes', asyncHandler(themeController.listThemes));
+router.get('/themes/:themeId', asyncHandler(themeController.themeDetail));
+router.get('/themes/:themeId/preview', asyncHandler(themeController.themePreview));
+router.post('/themes/:themeId/assign', asyncHandler(themeController.assignTheme));
+router.post('/themes/:themeId/unassign', asyncHandler(themeController.unassignTheme));
+router.post('/themes/:themeId/override', asyncHandler(themeController.saveOverride));
+router.post('/themes/:themeId/activate', asyncHandler(themeController.activateTheme));
+router.post('/themes/:themeId/archive', asyncHandler(themeController.archiveTheme));
+router.post('/themes/:themeId/delete', asyncHandler(themeController.deleteTheme));
 
 export const adminRouter = router;

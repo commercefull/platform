@@ -4,6 +4,7 @@
  */
 
 import { Router } from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import {
   // Agents
@@ -49,53 +50,53 @@ router.use(isOrganizationLoggedIn);
 // Agent Routes
 // ============================================================================
 
-router.get('/support/agents', getAgents);
-router.get('/support/agents/:id', getAgent);
-router.post('/support/agents', createAgent);
-router.put('/support/agents/:id', updateAgent);
+router.get('/support/agents', asyncHandler(getAgents));
+router.get('/support/agents/:id', asyncHandler(getAgent));
+router.post('/support/agents', asyncHandler(createAgent));
+router.put('/support/agents/:id', asyncHandler(updateAgent));
 
 // ============================================================================
 // Ticket Routes
 // ============================================================================
 
-router.get('/support/tickets', getTickets);
-router.get('/support/tickets/:id', getTicket);
-router.put('/support/tickets/:id', updateTicket);
-router.post('/support/tickets/:id/assign', assignTicket);
-router.post('/support/tickets/:id/resolve', resolveTicket);
-router.post('/support/tickets/:id/close', closeTicket);
-router.post('/support/tickets/:id/escalate', escalateTicket);
-router.post('/support/tickets/:id/messages', addAgentMessage);
+router.get('/support/tickets', asyncHandler(getTickets));
+router.get('/support/tickets/:id', asyncHandler(getTicket));
+router.put('/support/tickets/:id', asyncHandler(updateTicket));
+router.post('/support/tickets/:id/assign', asyncHandler(assignTicket));
+router.post('/support/tickets/:id/resolve', asyncHandler(resolveTicket));
+router.post('/support/tickets/:id/close', asyncHandler(closeTicket));
+router.post('/support/tickets/:id/escalate', asyncHandler(escalateTicket));
+router.post('/support/tickets/:id/messages', asyncHandler(addAgentMessage));
 
 // ============================================================================
 // FAQ Category Routes
 // ============================================================================
 
-router.get('/support/faq/categories', getFaqCategories);
-router.get('/support/faq/categories/:id', getFaqCategory);
-router.post('/support/faq/categories', createFaqCategory);
-router.put('/support/faq/categories/:id', updateFaqCategory);
-router.delete('/support/faq/categories/:id', deleteFaqCategory);
+router.get('/support/faq/categories', asyncHandler(getFaqCategories));
+router.get('/support/faq/categories/:id', asyncHandler(getFaqCategory));
+router.post('/support/faq/categories', asyncHandler(createFaqCategory));
+router.put('/support/faq/categories/:id', asyncHandler(updateFaqCategory));
+router.delete('/support/faq/categories/:id', asyncHandler(deleteFaqCategory));
 
 // ============================================================================
 // FAQ Article Routes
 // ============================================================================
 
-router.get('/support/faq/articles', getFaqArticles);
-router.get('/support/faq/articles/:id', getFaqArticle);
-router.post('/support/faq/articles', createFaqArticle);
-router.put('/support/faq/articles/:id', updateFaqArticle);
-router.post('/support/faq/articles/:id/publish', publishFaqArticle);
-router.post('/support/faq/articles/:id/unpublish', unpublishFaqArticle);
-router.delete('/support/faq/articles/:id', deleteFaqArticle);
+router.get('/support/faq/articles', asyncHandler(getFaqArticles));
+router.get('/support/faq/articles/:id', asyncHandler(getFaqArticle));
+router.post('/support/faq/articles', asyncHandler(createFaqArticle));
+router.put('/support/faq/articles/:id', asyncHandler(updateFaqArticle));
+router.post('/support/faq/articles/:id/publish', asyncHandler(publishFaqArticle));
+router.post('/support/faq/articles/:id/unpublish', asyncHandler(unpublishFaqArticle));
+router.delete('/support/faq/articles/:id', asyncHandler(deleteFaqArticle));
 
 // ============================================================================
 // Alert Routes
 // ============================================================================
 
-router.get('/support/alerts/stock', getStockAlerts);
-router.get('/support/alerts/price', getPriceAlerts);
-router.post('/support/alerts/stock/notify', notifyStockAlerts);
-router.post('/support/alerts/price/notify', notifyPriceAlerts);
+router.get('/support/alerts/stock', asyncHandler(getStockAlerts));
+router.get('/support/alerts/price', asyncHandler(getPriceAlerts));
+router.post('/support/alerts/stock/notify', asyncHandler(notifyStockAlerts));
+router.post('/support/alerts/price/notify', asyncHandler(notifyPriceAlerts));
 
 export const supportBusinessRouter = router;

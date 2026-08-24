@@ -5,6 +5,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { GdprDataRequestRepository } from '../../domain/repositories/GdprRepository';
 import { GdprDataRequest, GdprRequestType } from '../../domain/entities/GdprDataRequest';
+import { CustomerIdRequiredError, GdprValidationError } from '../../domain/errors/GdprErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -44,10 +45,10 @@ export class CreateDataRequestUseCase {
   async execute(command: CreateDataRequestCommand): Promise<CreateDataRequestResponse> {
     // Validate
     if (!command.customerId?.trim()) {
-      throw new Error('Customer ID is required');
+      throw new CustomerIdRequiredError();
     }
     if (!command.requestType) {
-      throw new Error('Request type is required');
+      throw new GdprValidationError('Request type is required');
     }
 
     // Check for existing pending request of same type
@@ -57,7 +58,7 @@ export class CreateDataRequestUseCase {
     );
 
     if (hasPendingRequest) {
-      throw new Error(`You already have a pending ${command.requestType} request`);
+      throw new GdprValidationError(`You already have a pending ${command.requestType} request`);
     }
 
     // Create the request

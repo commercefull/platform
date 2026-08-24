@@ -4,6 +4,8 @@
 
 export type TransactionType = 'restock' | 'sale' | 'return' | 'adjustment' | 'transfer' | 'reservation' | 'release';
 
+import { InventoryValidationError, InvalidStockQuantityError, InsufficientStockError } from '../errors/InventoryErrors';
+
 export interface InventoryItemProps {
   inventoryId: string;
   productId: string;
@@ -122,7 +124,7 @@ export class InventoryItem {
 
   // Domain methods
   restock(quantity: number): void {
-    if (quantity <= 0) throw new Error('Restock quantity must be positive');
+    if (quantity <= 0) throw new InventoryValidationError('Restock quantity must be positive');
     this.props.quantity += quantity;
     this.props.lastRestockAt = new Date();
     this.touch();
@@ -130,22 +132,22 @@ export class InventoryItem {
 
   sell(quantity: number): void {
     if (quantity > this.availableQuantity) {
-      throw new Error('Insufficient available stock');
+      throw new InsufficientStockError(this.props.sku, quantity, this.availableQuantity);
     }
     this.props.quantity -= quantity;
     this.touch();
   }
 
   returnStock(quantity: number): void {
-    if (quantity <= 0) throw new Error('Return quantity must be positive');
+    if (quantity <= 0) throw new InventoryValidationError('Return quantity must be positive');
     this.props.quantity += quantity;
     this.touch();
   }
 
   adjust(newQuantity: number): void {
-    if (newQuantity < 0) throw new Error('Quantity cannot be negative');
+    if (newQuantity < 0) throw new InvalidStockQuantityError(newQuantity);
     if (newQuantity < this.props.reservedQuantity) {
-      throw new Error('Cannot adjust below reserved quantity');
+      throw new InventoryValidationError('Cannot adjust below reserved quantity');
     }
     this.props.quantity = newQuantity;
     this.touch();
@@ -153,7 +155,7 @@ export class InventoryItem {
 
   reserve(quantity: number): void {
     if (quantity > this.availableQuantity) {
-      throw new Error('Cannot reserve more than available');
+      throw new InsufficientStockError(this.props.sku, quantity, this.availableQuantity);
     }
     this.props.reservedQuantity += quantity;
     this.touch();

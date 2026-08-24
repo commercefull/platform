@@ -2,6 +2,8 @@
  * UpdateTicket Use Case
  */
 
+import { SupportTicketNotFoundError } from '../../domain/errors/SupportErrors';
+
 export interface UpdateTicketInput {
   ticketId: string;
   status?: 'open' | 'pending' | 'in_progress' | 'resolved' | 'closed';
@@ -39,7 +41,7 @@ export class UpdateTicketUseCase {
   async execute(input: UpdateTicketInput): Promise<UpdateTicketOutput> {
     const ticket = await this.supportRepository.findTicketById(input.ticketId);
     if (!ticket) {
-      throw new Error(`Ticket not found: ${input.ticketId}`);
+      throw new SupportTicketNotFoundError(input.ticketId);
     }
 
     const updates: Record<string, unknown> = {};

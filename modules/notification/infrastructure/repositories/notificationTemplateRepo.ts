@@ -1,5 +1,10 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import {
+  NotificationTemplateNotFoundError,
+  NotificationTemplateAlreadyExistsError,
+  FailedToCreateNotificationTemplateError,
+} from '../../domain/errors/NotificationErrors';
 
 export type NotificationType = string;
 
@@ -115,7 +120,7 @@ export class NotificationTemplateRepo {
     // Check if code already exists
     const existing = await this.findByCode(params.code);
     if (existing) {
-      throw new Error(`Template with code '${params.code}' already exists`);
+      throw new NotificationTemplateAlreadyExistsError(params.code);
     }
 
     const result = await queryOne<NotificationTemplate>(
@@ -151,7 +156,7 @@ export class NotificationTemplateRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create notification template');
+      throw new FailedToCreateNotificationTemplateError();
     }
 
     return result;
@@ -229,7 +234,7 @@ export class NotificationTemplateRepo {
     const original = await this.findById(notificationTemplateId);
 
     if (!original) {
-      throw new Error(`Template with ID '${notificationTemplateId}' not found`);
+      throw new NotificationTemplateNotFoundError(notificationTemplateId);
     }
 
     const cloneParams: NotificationTemplateCreateParams = {
@@ -315,7 +320,7 @@ export class NotificationTemplateRepo {
     const template = await this.findById(notificationTemplateId);
 
     if (!template) {
-      throw new Error(`Template with ID '${notificationTemplateId}' not found`);
+      throw new NotificationTemplateNotFoundError(notificationTemplateId);
     }
 
     const previewData = data || template.previewData || {};

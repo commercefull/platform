@@ -1,4 +1,6 @@
 import EventEmitter from 'events';
+import { logger } from '../logger';
+import { getCorrelationId } from '../correlationId';
 
 export type EventType =
   // Order events
@@ -57,6 +59,9 @@ export type EventType =
   | 'checkout.payment_captured'
   | 'checkout.payment_failed'
   | 'checkout.failed'
+  | 'checkout.config.created'
+  | 'checkout.config.updated'
+  | 'checkout.config.deleted'
   // Payment events
   | 'payment.received'
   | 'payment.failed'
@@ -67,6 +72,10 @@ export type EventType =
   | 'payment.captured'
   | 'payment.voided'
   | 'payment.method_saved'
+  | 'payment.psp_route.created'
+  | 'payment.psp_route.updated'
+  | 'payment.psp_route.deleted'
+  | 'payment.routed'
   // Inventory events
   | 'inventory.low'
   | 'inventory.out_of_stock'
@@ -112,6 +121,17 @@ export type EventType =
   | 'identity.organization.social_account_unlinked'
   | 'identity.token.blacklisted'
   | 'identity.tokens.cleanup'
+  // SSO events
+  | 'identity.sso.login'
+  | 'identity.sso.config_created'
+  | 'identity.sso.config_updated'
+  | 'identity.sso.config_deleted'
+  | 'identity.sso.provider_activated'
+  | 'identity.sso.provider_deactivated'
+  // SCIM events
+  | 'identity.scim.user_provisioned'
+  | 'identity.scim.user_deprovisioned'
+  | 'identity.scim.user_updated'
   // Extended identity events (use case support)
   | 'customer.login_failed'
   | 'customer.logged_in'
@@ -137,13 +157,6 @@ export type EventType =
   | 'admin.password_reset'
   | 'admin.session_created'
   | 'admin.session_invalidated'
-  // B2B user events
-  | 'b2b_user.login_failed'
-  | 'b2b_user.logged_in'
-  | 'b2b_user.logged_out'
-  | 'b2b_user.registered'
-  | 'b2b_user.invited'
-  | 'b2b_user.activated'
   // Supplier events
   | 'supplier.created'
   | 'supplier.approved'
@@ -161,37 +174,6 @@ export type EventType =
   | 'gdpr.data.deleted'
   | 'gdpr.consent.recorded'
   | 'gdpr.consent.updated'
-  // Marketing events
-  | 'campaign.created'
-  | 'campaign.scheduled'
-  | 'campaign.sent'
-  | 'campaign.email.opened'
-  | 'campaign.email.clicked'
-  | 'abandoned_cart.detected'
-  | 'abandoned_cart.email_sent'
-  | 'abandoned_cart.recovered'
-  | 'affiliate.applied'
-  | 'affiliate.approved'
-  | 'affiliate.commission.created'
-  | 'affiliate.commission.paid'
-  | 'referral.created'
-  | 'referral.converted'
-  | 'referral.rewarded'
-  // B2B events
-  | 'company.registered'
-  | 'company.approved'
-  | 'company.suspended'
-  | 'company.user.invited'
-  | 'company.user.accepted'
-  | 'quote.created'
-  | 'quote.sent'
-  | 'quote.viewed'
-  | 'quote.accepted'
-  | 'quote.rejected'
-  | 'quote.converted'
-  | 'approval.requested'
-  | 'approval.approved'
-  | 'approval.rejected'
   // Subscription events
   | 'subscription.created'
   | 'subscription.activated'
@@ -220,32 +202,6 @@ export type EventType =
   | 'alert.stock.triggered'
   | 'alert.price.created'
   | 'alert.price.triggered'
-  // Gift Card events
-  | 'giftcard.created'
-  | 'giftcard.activated'
-  | 'giftcard.redeemed'
-  | 'giftcard.reloaded'
-  | 'giftcard.expired'
-  // Bundle events
-  | 'bundle.created'
-  | 'bundle.purchased'
-  // Pre-Order events
-  | 'preorder.created'
-  | 'preorder.reserved'
-  | 'preorder.fulfilled'
-  | 'preorder.cancelled'
-  // Pickup events
-  | 'pickup.created'
-  | 'pickup.ready'
-  | 'pickup.notified'
-  | 'pickup.completed'
-  | 'pickup.expired'
-  // Fraud events
-  | 'fraud.check.created'
-  | 'fraud.check.flagged'
-  | 'fraud.check.blocked'
-  | 'fraud.check.reviewed'
-  | 'fraud.blacklist.added'
   // Content events
   | 'content.page.created'
   | 'content.page.updated'
@@ -293,6 +249,28 @@ export type EventType =
   | 'store.inventory_unlinked'
   | 'store.settings_updated'
   | 'store.pickup_configured'
+  // Theme events
+  | 'theme.created'
+  | 'theme.updated'
+  | 'theme.deleted'
+  | 'theme.activated'
+  | 'theme.archived'
+  | 'theme.assigned'
+  | 'theme.unassigned'
+  | 'theme.override.created'
+  | 'theme.override.updated'
+  | 'theme.override.deleted'
+  // Page builder events
+  | 'pagebuilder.draft.created'
+  | 'pagebuilder.draft.updated'
+  | 'pagebuilder.draft.deleted'
+  | 'pagebuilder.draft.published'
+  | 'pagebuilder.draft.unpublished'
+  | 'pagebuilder.block.added'
+  | 'pagebuilder.block.removed'
+  | 'pagebuilder.block.moved'
+  | 'pagebuilder.block.updated'
+  | 'pagebuilder.blocks.reordered'
   // Warehouse events
   | 'warehouse.created'
   | 'warehouse.updated'
@@ -366,18 +344,53 @@ export type EventType =
   | 'fulfillment.cancelled'
   | 'fulfillment.returned'
   | 'fulfillment.tracking_updated'
-  // Channel events
-  | 'channel.created'
-  | 'channel.updated'
-  | 'channel.activated'
-  | 'channel.deactivated'
-  | 'channel.products_assigned'
-  | 'channel.warehouse_assigned'
   // Tax events
   | 'tax.rate_created'
   | 'tax.rate_updated'
   | 'tax.exemption_applied'
+  // Notification events
+  | 'notification.failed'
+  | 'notification.read'
+  | 'notification.digest'
+  // Return events
+  | 'return.created'
+  | 'return.approved'
+  | 'return.denied'
+  | 'return.in_transit'
+  | 'return.received'
+  | 'return.inspected'
+  | 'return.completed'
+  | 'return.cancelled'
+  // Tracking events
+  | 'tracking.config.created'
+  | 'tracking.config.updated'
+  | 'tracking.config.activated'
+  | 'tracking.config.disabled'
+  | 'tracking.config.deleted'
+  | 'tracking.event.sent'
+  | 'tracking.event.skipped'
+  | 'tracking.event.failed'
   // B2B events
+  | 'company.registered'
+  | 'company.approved'
+  | 'company.suspended'
+  | 'company.user.invited'
+  | 'company.user.accepted'
+  | 'b2b_user.login_failed'
+  | 'b2b_user.logged_in'
+  | 'b2b_user.logged_out'
+  | 'b2b_user.registered'
+  | 'b2b_user.invited'
+  | 'b2b_user.activated'
+  | 'quote.created'
+  | 'quote.sent'
+  | 'quote.viewed'
+  | 'quote.accepted'
+  | 'quote.rejected'
+  | 'quote.converted'
+  | 'approval.requested'
+  | 'approval.approved'
+  | 'approval.rejected'
   | 'b2b.approval_submitted'
   | 'b2b.request_approved'
   | 'b2b.request_rejected'
@@ -388,20 +401,74 @@ export type EventType =
   | 'b2b.quote_sent'
   | 'b2b.credit_requested'
   | 'b2b.credit_approved'
-  // Supplier events
-  | 'supplier.created'
-  | 'supplier.approved'
-  | 'supplier.suspended'
-  | 'purchase_order.created'
-  | 'purchase_order.submitted'
-  | 'purchase_order.received'
-  | 'purchase_order.cancelled'
-  | 'receiving.completed'
-  // Notification events
-  | 'notification.sent'
-  | 'notification.failed'
-  | 'notification.read'
-  | 'notification.digest';
+  // Marketplace events
+  | 'marketplace.vendor.registered'
+  | 'marketplace.vendor.approved'
+  | 'marketplace.vendor.suspended'
+  | 'marketplace.vendor.terminated'
+  | 'marketplace.commission.created'
+  | 'marketplace.commission.updated'
+  | 'marketplace.payout.created'
+  | 'marketplace.payout.processing'
+  | 'marketplace.payout.completed'
+  | 'marketplace.payout.failed';
+
+/**
+ * Planned event types for modules not yet implemented.
+ * These are NOT emitted by any code today. When a module is built,
+ * move its events into `EventType` above.
+ * See docs/architecture/gap-analysis-and-roadmap.md for the roadmap.
+ */
+export type PlannedEventType =
+  // Marketing events (no marketing module)
+  | 'campaign.created'
+  | 'campaign.scheduled'
+  | 'campaign.sent'
+  | 'campaign.email.opened'
+  | 'campaign.email.clicked'
+  | 'abandoned_cart.detected'
+  | 'abandoned_cart.email_sent'
+  | 'abandoned_cart.recovered'
+  | 'affiliate.applied'
+  | 'affiliate.approved'
+  | 'affiliate.commission.created'
+  | 'affiliate.commission.paid'
+  | 'referral.created'
+  | 'referral.converted'
+  | 'referral.rewarded'
+  // Gift Card events (no giftcard module)
+  | 'giftcard.created'
+  | 'giftcard.activated'
+  | 'giftcard.redeemed'
+  | 'giftcard.reloaded'
+  | 'giftcard.expired'
+  // Bundle events (no bundle module)
+  | 'bundle.created'
+  | 'bundle.purchased'
+  // Pre-Order events (no preorder module)
+  | 'preorder.created'
+  | 'preorder.reserved'
+  | 'preorder.fulfilled'
+  | 'preorder.cancelled'
+  // Pickup events (no pickup module)
+  | 'pickup.created'
+  | 'pickup.ready'
+  | 'pickup.notified'
+  | 'pickup.completed'
+  | 'pickup.expired'
+  // Fraud events (no fraud module)
+  | 'fraud.check.created'
+  | 'fraud.check.flagged'
+  | 'fraud.check.blocked'
+  | 'fraud.check.reviewed'
+  | 'fraud.blacklist.added'
+  // Channel events (no channel module)
+  | 'channel.created'
+  | 'channel.updated'
+  | 'channel.activated'
+  | 'channel.deactivated'
+  | 'channel.products_assigned'
+  | 'channel.warehouse_assigned';
 
 export interface EventPayload {
   type: EventType;
@@ -418,10 +485,25 @@ export interface EventHandler {
 class EventBus {
   private emitter: EventEmitter;
   private handlers: Map<EventType, EventHandler[]> = new Map();
+  private outboxEnabled = false;
 
   constructor() {
     this.emitter = new EventEmitter();
     this.emitter.setMaxListeners(100);
+  }
+
+  /**
+   * Enable or disable outbox mode.
+   * When enabled, emit() writes to the eventOutbox table instead of
+   * dispatching directly. The OutboxDispatcher reads the table and
+   * calls dispatchFromOutbox() to actually run handlers.
+   */
+  setOutboxMode(enabled: boolean): void {
+    this.outboxEnabled = enabled;
+  }
+
+  isOutboxMode(): boolean {
+    return this.outboxEnabled;
   }
 
   /**
@@ -432,15 +514,11 @@ class EventBus {
       type,
       data,
       timestamp: new Date(),
-      correlationId,
+      correlationId: correlationId ?? getCorrelationId(),
       source,
     };
 
-    console.log(`[EVENT] ${type}`, {
-      correlationId,
-      source,
-      dataKeys: Object.keys(data || {}),
-    });
+    logger.debug('Event emitted', { type, correlationId, source });
 
     // Emit to specific event handlers
     this.emitter.emit(type, payload);
@@ -448,12 +526,61 @@ class EventBus {
     // Emit to wildcard handler
     this.emitter.emit('*', payload);
 
-    // Call registered handlers
+    // Call registered handlers with per-handler error boundaries
     const handlers = this.handlers.get(type) || [];
     for (const handler of handlers) {
       try {
         await handler(payload);
-      } catch {}
+      } catch (err: unknown) {
+        // Per-handler error boundary: log and continue so one failing
+        // handler cannot break the emitting request or other handlers.
+        logger.error('Event handler error (boundary caught)', {
+          type,
+          correlationId: payload.correlationId,
+          error: (err as Error).message,
+          stack: (err as Error).stack,
+        });
+      }
+    }
+  }
+
+  /**
+   * Dispatch an event payload from the outbox dispatcher.
+   *
+   * Unlike emit(), this method does NOT write to the outbox. It directly
+   * invokes registered handlers with error boundaries. If any handler
+   * throws, the error is re-thrown so the dispatcher can schedule a retry.
+   */
+  async dispatchFromOutbox(payload: EventPayload): Promise<void> {
+    const { type } = payload;
+
+    logger.debug('Dispatching outbox event', { type, correlationId: payload.correlationId });
+
+    // Emit to EventEmitter listeners (wildcard + specific)
+    this.emitter.emit(type, payload);
+    this.emitter.emit('*', payload);
+
+    // Call registered handlers. Collect errors instead of swallowing.
+    const handlers = this.handlers.get(type) || [];
+    const errors: Error[] = [];
+
+    for (const handler of handlers) {
+      try {
+        await handler(payload);
+      } catch (err: unknown) {
+        logger.error('Outbox event handler error (boundary caught)', {
+          type,
+          correlationId: payload.correlationId,
+          error: (err as Error).message,
+          stack: (err as Error).stack,
+        });
+        errors.push(err as Error);
+      }
+    }
+
+    // If any handler failed, re-throw so the dispatcher can retry
+    if (errors.length > 0) {
+      throw new Error(`Outbox dispatch failed for ${type}: ${errors.length} handler(s) failed. First error: ${errors[0].message}`);
     }
   }
 

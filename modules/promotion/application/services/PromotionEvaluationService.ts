@@ -10,7 +10,7 @@
  * - Line-item-level discounts for product/category-scoped promotions
  */
 
-import { promotionRepo, PromotionScope, RuleCondition, ActionType } from '../../infrastructure/repositories/promotionRepo';
+import promotionRuleRepository, { type PromotionScope, type RuleCondition, type ActionType } from '../../infrastructure/repositories/PromotionRuleRepository';
 import { logger } from '../../../../libs/logger';
 import type { Promotion as DbPromotion, PromotionRule as DbPromotionRule, PromotionAction as DbPromotionAction } from '../../../../libs/db/types';
 
@@ -96,7 +96,7 @@ export class PromotionEvaluationService {
 
     try {
       // Fetch active promotions for cart/global scope, ordered by priority DESC
-      const promotions = await promotionRepo.findActive(['cart', 'global'] as PromotionScope[]);
+      const promotions = await promotionRuleRepository.promotions.findActive(['cart', 'global'] as PromotionScope[]);
 
       if (promotions.length === 0) return result;
 
@@ -128,12 +128,12 @@ export class PromotionEvaluationService {
         if (promotion.minOrderAmount && context.subtotal < Number(promotion.minOrderAmount)) continue;
 
         // Evaluate rules
-        const rules = await promotionRepo.findRulesByPromotionId(promotion.promotionId);
+        const rules = await promotionRuleRepository.promotions.findRulesByPromotionId(promotion.promotionId);
         const rulesPassed = this.evaluateRules(rules, context);
         if (!rulesPassed) continue;
 
         // Get actions
-        const actions = await promotionRepo.findActionsByPromotionId(promotion.promotionId);
+        const actions = await promotionRuleRepository.promotions.findActionsByPromotionId(promotion.promotionId);
 
         // Apply actions
         const promoResult = this.applyActions(promotion, actions, context);
@@ -168,7 +168,7 @@ export class PromotionEvaluationService {
         result.totalDiscountAmount = context.subtotal;
       }
     } catch (error: unknown) {
-      logger.error(`PromotionEvaluationService error: ${(error as Error).message}`);
+      logger.warn(`PromotionEvaluationService error: ${(error as Error).message}`);
     }
 
     return result;

@@ -1,0 +1,72 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/returns" class="btn btn-secondary"><i class="ti ti-arrow-left"></i> <%= t('common.back') %></a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><%= pageName %></h3></div>
+      <div class="card-body">
+        <form method="POST" action="/admin/returns">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Order ID *</label>
+              <input type="text" name="orderId" class="form-control" value="<%= formData?.orderId || '' %>" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Customer ID</label>
+              <input type="text" name="customerId" class="form-control" value="<%= formData?.customerId || '' %>">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Return Type *</label>
+              <select name="returnType" class="form-select" required>
+                <option value="refund" <%= formData?.returnType === 'refund' ? 'selected' : '' %>>Refund</option>
+                <option value="exchange" <%= formData?.returnType === 'exchange' ? 'selected' : '' %>>Exchange</option>
+                <option value="storeCredit" <%= formData?.returnType === 'storeCredit' ? 'selected' : '' %>>Store Credit</option>
+                <option value="repair" <%= formData?.returnType === 'repair' ? 'selected' : '' %>>Repair</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Carrier</label>
+              <select name="returnCarrier" class="form-select">
+                <option value="custom" <%= formData?.returnCarrier === 'custom' ? 'selected' : '' %>>Custom</option>
+                <option value="ups" <%= formData?.returnCarrier === 'ups' ? 'selected' : '' %>>UPS</option>
+                <option value="fedex" <%= formData?.returnCarrier === 'fedex' ? 'selected' : '' %>>FedEx</option>
+                <option value="dhl" <%= formData?.returnCarrier === 'dhl' ? 'selected' : '' %>>DHL</option>
+                <option value="usps" <%= formData?.returnCarrier === 'usps' ? 'selected' : '' %>>USPS</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Requires Inspection</label>
+              <select name="requiresInspection" class="form-select">
+                <option value="true" selected>Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Return Reason</label>
+            <input type="text" name="returnReason" class="form-control" value="<%= formData?.returnReason || '' %>">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Customer Notes</label>
+            <textarea name="customerNotes" class="form-control" rows="2"><%= formData?.customerNotes || '' %></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Return Items (JSON array) *</label>
+            <textarea name="items" class="form-control" rows="5" placeholder='[{"orderItemId":"item-1","quantity":1,"returnReason":"damaged","condition":"new","restockItem":true,"refundAmount":50}]' required><%= formData?.items || '' %></textarea>
+            <small class="form-hint">Array of return item objects with orderItemId, quantity, returnReason, condition, restockItem, refundAmount.</small>
+          </div>
+          <button type="submit" class="btn btn-primary"><%= t('common.save') %></button>
+          <a href="/admin/returns" class="btn btn-secondary"><%= t('common.cancel') %></a>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

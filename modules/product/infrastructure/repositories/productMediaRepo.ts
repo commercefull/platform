@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export type MediaType = 'image' | 'video' | 'document' | '3d_model' | 'audio';
 
@@ -152,7 +153,7 @@ export class ProductMediaRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create product media');
+      throw new FailedToCreateProductError();
     }
 
     return result;

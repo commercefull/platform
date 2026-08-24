@@ -32,12 +32,26 @@ export default [
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
-      'no-console': globalThis.process?.env?.NODE_ENV === 'production' ? 'warn' : 'off',
+      'no-console': 'error',
       'no-debugger': globalThis.process?.env?.NODE_ENV === 'production' ? 'warn' : 'off',
       'no-undef': 'off',
       'no-unused-vars': 'off',
       'no-case-declarations': 'off',
       'no-empty': 'off',
+      'no-restricted-imports': ['error', {
+        patterns: [
+          {
+            group: ['**/modules/*/infrastructure/repositories/**'],
+            message: 'Do not import from modules/*/infrastructure/repositories/** — import from modules/<name> (root) or modules/<name>/infrastructure (barrel) instead.',
+          },
+        ],
+      }],
+    },
+  },
+  {
+    files: ['**/interface/jobs/**/*.ts', 'scripts/**/*.ts', 'tests/**/*.ts'],
+    rules: {
+      'no-console': 'off',
     },
   },
   {

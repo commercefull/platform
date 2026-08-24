@@ -1,6 +1,6 @@
 # CommerceFull Architecture Overview
 
-High-level architecture of the CommerceFull platform. Detailed standards and patterns live in [`docs/standards/`](./docs/standards/README.md).
+High-level architecture of the CommerceFull platform. Detailed standards and patterns live in [`docs/guidelines/`](./docs/guidelines/README.md).
 
 ## System Context
 
@@ -29,7 +29,7 @@ CommerceFull is an e-commerce platform. A single Express application serves two 
 │   admin (Tabler)  ·  storefront (Tailwind)                │
 ├──────────────────────────────────────────────────────────┤
 │                  modules/ (Business Logic)                │
-│   36 bounded contexts organized as DDD:                   │
+│   31 bounded contexts organized as DDD:                   │
 │   domain → application → infrastructure → interface       │
 ├──────────────────────────────────────────────────────────┤
 │                    libs/ (Shared)                         │
@@ -75,18 +75,26 @@ Routes are configured in `boot/routes.ts`:
 | `/business` | Business / merchant API  | `isOrganizationLoggedIn`              |
 | `/health`   | Health check             | None                                  |
 
-## Modules (36 bounded contexts)
+## Modules (31 bounded contexts)
 
 | Category    | Modules                                                                                                                            |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Catalog     | `product`, `assortment`, `brand`, `pricing`                                                                                        |
+| Catalog     | `product`, `pricing`                                                                                                               |
 | Sales       | `order`, `basket`, `checkout`, `payment`                                                                                           |
 | Fulfillment | `fulfillment`, `shipping`, `inventory`, `warehouse`                                                                                |
-| Marketing   | `promotion`, `coupon`, `segment`                                                                                                   |
+| Marketing   | `promotion`, `coupon`                                                                                                              |
 | Customer    | `customer`, `loyalty`, `membership`, `subscription`                                                                                |
 | Content     | `content`, `media`, `notification`                                                                                                 |
-| Commerce   | `merchant`, `supplier`, `business`                                                                                                 |
-| Platform    | `identity`, `configuration`, `localization`, `channel`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`             |
+| Commerce    | `supplier`                                                                                                                         |
+| Platform    | `identity`, `configuration`, `localization`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`, `reporting`, `webhook`, `tracking` |
+
+### Planned modules (not yet implemented)
+
+| Category    | Modules                                                                                                                            |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Catalog     | `assortment`, `brand`, `segment`                                                                                                   |
+| Commerce    | `merchant`, `business`, `channel`                                                                                                  |
+| Marketing   | `b2b`, `marketplace`, `referral`, `affiliate`, `fraud`, `preorder`                                                                 |
 
 ## Route Naming Convention
 
@@ -101,12 +109,13 @@ All business routes follow the `/business/{topic}/...` pattern. The topic prefix
 | fulfillment | `/business/fulfillments`, `/business/fulfillment/locations`, `/business/fulfillment/partners` |
 | configuration | `/business/configuration` |
 | coupon | `/business/coupons` |
-| identity | `/business/auth` (login, register, user-store management) |
+| identity | `/business/auth` (login, register, user-store management), `/business/sso` (SAML/OIDC SSO), `/business/scim/v2` (SCIM provisioning) |
 | inventory | `/business/inventory` |
 | content | `/business/content` |
 | webhook | `/business/webhooks` |
 | reporting | `/business/reports` |
 | basket | `/business/basket` |
+| tracking | `/business/tracking` |
 
 ## Technology Stack (at a glance)
 
@@ -120,7 +129,7 @@ All business routes follow the `/business/{topic}/...` pattern. The topic prefix
 ## Where to Go Next
 
 - **Working guide for AI agents / contributors** → [`AGENTS.md`](./AGENTS.md)
-- **Standards (database, migrations, DDD, web, security, …)** → [`docs/standards/`](./docs/standards/README.md)
+- **Standards (database, migrations, DDD, web, security, …)** → [`docs/guidelines/`](./docs/guidelines/README.md)
 - **Module specifications** → [`docs/modules/`](./docs/modules/)
-- **Platform migration guides (Shopify, WooCommerce, …)** → [`docs/migrations/`](./docs/migrations/)
+- **Migration guides** → **planned** — `docs/migrations/` does not exist yet. See `docs/architecture/gap-analysis-and-roadmap.md` Phase 5–6.
 - **Documentation website & autogeneration strategy** → [`docs/DOCUMENTATION-STRATEGY.md`](./docs/DOCUMENTATION-STRATEGY.md)

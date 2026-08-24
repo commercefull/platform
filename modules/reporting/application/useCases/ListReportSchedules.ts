@@ -1,4 +1,6 @@
-import * as reportingRepo from '../../infrastructure/repositories/reportingRepo';
+import reportingDataRepository from '../../infrastructure/repositories/ReportingDataRepository';
+
+const reportingRepo = reportingDataRepository.schedules;
 import type { ReportScheduleProps } from '../../domain/entities/ReportEntities';
 
 export class ListReportSchedulesUseCase {

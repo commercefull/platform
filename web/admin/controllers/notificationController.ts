@@ -6,71 +6,61 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import notificationTemplateRepo from '../../../modules/notification/infrastructure/repositories/notificationTemplateRepo';
-import notificationBatchRepo from '../../../modules/notification/infrastructure/repositories/notificationBatchRepo';
-import notificationWebhookRepo from '../../../modules/notification/infrastructure/repositories/notificationWebhookRepo';
-import notificationDeliveryLogRepo from '../../../modules/notification/infrastructure/repositories/notificationDeliveryLogRepo';
-import notificationTemplateTranslationRepo from '../../../modules/notification/infrastructure/repositories/notificationTemplateTranslationRepo';
+import { ManageNotificationTemplatesUseCase } from '../../../modules/notification/application/useCases/ManageNotificationTemplates';
+import { ManageNotificationBatchesUseCase } from '../../../modules/notification/application/useCases/ManageNotificationBatches';
+import { GetNotificationDeliveryLogsUseCase } from '../../../modules/notification/application/useCases/GetNotificationDeliveryLogs';
+import { ManageNotificationWebhooksAdminUseCase } from '../../../modules/notification/application/useCases/ManageNotificationWebhooksAdmin';
+import { GetTemplateTranslationsUseCase } from '../../../modules/notification/application/useCases/GetTemplateTranslations';
 import { adminRespond } from '../../respond';
+
+const manageTemplatesUseCase = new ManageNotificationTemplatesUseCase();
+const manageBatchesUseCase = new ManageNotificationBatchesUseCase();
+const getDeliveryLogsUseCase = new GetNotificationDeliveryLogsUseCase();
+const manageWebhooksUseCase = new ManageNotificationWebhooksAdminUseCase();
+const getTranslationsUseCase = new GetTemplateTranslationsUseCase();
 
 // ============================================================================
 // Notification Templates Management
 // ============================================================================
 
 export const listNotificationTemplates = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const activeOnly = req.query.activeOnly !== 'false'; // Default to true
-    const category = req.query.category as string;
-    const _limit = parseInt(req.query.limit as string) || 50;
-    const _offset = parseInt(req.query.offset as string) || 0;
+  const activeOnly = req.query.activeOnly !== 'false'; // Default to true
+  const category = req.query.category as string;
+  const _limit = parseInt(req.query.limit as string) || 50;
+  const _offset = parseInt(req.query.offset as string) || 0;
 
-    let templates;
-    if (category) {
-      templates = await notificationTemplateRepo.findByCategory(category, activeOnly);
-    } else {
-      templates = await notificationTemplateRepo.findAll(activeOnly);
-    }
-
-    // Get categories for filtering
-    const allTemplates = await notificationTemplateRepo.findAll(false);
-    const categories = [...new Set(allTemplates.map(t => t.categoryCode).filter(Boolean))];
-
-    // Get stats
-    const totalCount = await notificationTemplateRepo.count(false);
-    const activeCount = await notificationTemplateRepo.count(true);
-
-    adminRespond(req, res, 'notifications/templates/index', {
-      pageName: 'Notification Templates',
-      templates,
-      categories,
-      filters: { activeOnly, category },
-      stats: { total: totalCount, active: activeCount },
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load notification templates',
-    });
+  let templates;
+  if (category) {
+    templates = await manageTemplatesUseCase.findByCategory(category, activeOnly);
+  } else {
+    templates = await manageTemplatesUseCase.findAll(activeOnly);
   }
+
+  // Get categories for filtering
+  const allTemplates = await manageTemplatesUseCase.findAll(false);
+  const categories = [...new Set(allTemplates.map(t => t.categoryCode).filter(Boolean))];
+
+  // Get stats
+  const totalCount = await manageTemplatesUseCase.count(false);
+  const activeCount = await manageTemplatesUseCase.count(true);
+
+  adminRespond(req, res, 'notifications/templates/index', {
+    pageName: 'Notification Templates',
+    templates,
+    categories,
+    filters: { activeOnly, category },
+    stats: { total: totalCount, active: activeCount },
+
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createNotificationTemplateForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'notifications/templates/create', {
-      pageName: 'Create Notification Template',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'notifications/templates/create', {
+    pageName: 'Create Notification Template',
+  });
+  
 };
 
 export const createNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -92,7 +82,7 @@ export const createNotificationTemplate = async (req: TypedRequest, res: Respons
       categoryCode,
     } = body;
 
-    const template = await notificationTemplateRepo.create({
+    const template = await manageTemplatesUseCase.create({
       code,
       name,
       description: description || undefined,
@@ -112,7 +102,7 @@ export const createNotificationTemplate = async (req: TypedRequest, res: Respons
 
     res.redirect(`/hub/notifications/templates/${template.notificationTemplateId}?success=Notification template created successfully`);
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'notifications/templates/create', {
       pageName: 'Create Notification Template',
@@ -123,219 +113,159 @@ export const createNotificationTemplate = async (req: TypedRequest, res: Respons
 };
 
 export const viewNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { templateId } = req.params;
+  const { templateId } = req.params;
 
-    const template = await notificationTemplateRepo.findById(templateId);
+  const template = await manageTemplatesUseCase.findById(templateId);
 
-    if (!template) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Notification template not found',
-      });
-      return;
-    }
-
-    // Get preview data
-    const preview = await notificationTemplateRepo.getPreview(templateId);
-
-    adminRespond(req, res, 'notifications/templates/view', {
-      pageName: `Template: ${template.name}`,
-      template,
-      preview,
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!template) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load notification template',
+      pageName: 'Not Found',
+      error: 'Notification template not found',
     });
+    return;
   }
+
+  // Get preview data
+  const preview = await manageTemplatesUseCase.getPreview(templateId);
+
+  adminRespond(req, res, 'notifications/templates/view', {
+    pageName: `Template: ${template.name}`,
+    template,
+    preview,
+
+    success: req.query.success || null,
+  });
+  
 };
 
 export const editNotificationTemplateForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { templateId } = req.params;
+  const { templateId } = req.params;
 
-    const template = await notificationTemplateRepo.findById(templateId);
+  const template = await manageTemplatesUseCase.findById(templateId);
 
-    if (!template) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Notification template not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'notifications/templates/edit', {
-      pageName: `Edit: ${template.name}`,
-      template,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!template) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
+      pageName: 'Not Found',
+      error: 'Notification template not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'notifications/templates/edit', {
+    pageName: `Edit: ${template.name}`,
+    template,
+  });
+  
 };
 
 export const updateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { templateId } = req.params;
-    const updates: Record<string, unknown> = {};
+  const { templateId } = req.params;
+  const updates: Record<string, unknown> = {};
 
-    const body = req.body as RequestBody;
-    const {
-      name,
-      description,
-      supportedChannels,
-      defaultChannel,
-      subject,
-      htmlTemplate,
-      textTemplate,
-      pushTemplate,
-      smsTemplate,
-      parameters,
-      categoryCode,
-      isActive,
-    } = body;
+  const body = req.body as RequestBody;
+  const {
+    name,
+    description,
+    supportedChannels,
+    defaultChannel,
+    subject,
+    htmlTemplate,
+    textTemplate,
+    pushTemplate,
+    smsTemplate,
+    parameters,
+    categoryCode,
+    isActive,
+  } = body;
 
-    if (name !== undefined) updates.name = name;
-    if (description !== undefined) updates.description = description || undefined;
-    if (supportedChannels !== undefined) updates.supportedChannels = supportedChannels;
-    if (defaultChannel !== undefined) updates.defaultChannel = defaultChannel;
-    if (subject !== undefined) updates.subject = subject || undefined;
-    if (htmlTemplate !== undefined) updates.htmlTemplate = htmlTemplate || undefined;
-    if (textTemplate !== undefined) updates.textTemplate = textTemplate || undefined;
-    if (pushTemplate !== undefined) updates.pushTemplate = pushTemplate || undefined;
-    if (smsTemplate !== undefined) updates.smsTemplate = smsTemplate || undefined;
-    if (parameters !== undefined) updates.parameters = parameters ? JSON.parse(parameters) : undefined;
-    if (categoryCode !== undefined) updates.categoryCode = categoryCode || undefined;
-    if (isActive !== undefined) updates.isActive = isActive === 'true';
+  if (name !== undefined) updates.name = name;
+  if (description !== undefined) updates.description = description || undefined;
+  if (supportedChannels !== undefined) updates.supportedChannels = supportedChannels;
+  if (defaultChannel !== undefined) updates.defaultChannel = defaultChannel;
+  if (subject !== undefined) updates.subject = subject || undefined;
+  if (htmlTemplate !== undefined) updates.htmlTemplate = htmlTemplate || undefined;
+  if (textTemplate !== undefined) updates.textTemplate = textTemplate || undefined;
+  if (pushTemplate !== undefined) updates.pushTemplate = pushTemplate || undefined;
+  if (smsTemplate !== undefined) updates.smsTemplate = smsTemplate || undefined;
+  if (parameters !== undefined) updates.parameters = parameters ? JSON.parse(parameters) : undefined;
+  if (categoryCode !== undefined) updates.categoryCode = categoryCode || undefined;
+  if (isActive !== undefined) updates.isActive = isActive === 'true';
 
-    const template = await notificationTemplateRepo.update(templateId, updates);
+  const template = await manageTemplatesUseCase.update(templateId, updates);
 
-    if (!template) {
-      throw new Error('Notification template not found after update');
-    }
-
-    res.redirect(`/hub/notifications/templates/${templateId}?success=Notification template updated successfully`);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    try {
-      const template = await notificationTemplateRepo.findById(req.params.templateId);
-
-      adminRespond(req, res, 'notifications/templates/edit', {
-        pageName: `Edit: ${template?.name || 'Template'}`,
-        template,
-        error: (error as Error).message || 'Failed to update notification template',
-        formData: req.body as RequestBody,
-      });
-    } catch {
-      adminRespond(req, res, 'error', {
-        pageName: 'Error',
-        error: (error as Error).message || 'Failed to update notification template',
-      });
-    }
+  if (!template) {
+    throw new Error('Notification template not found after update');
   }
+
+  res.redirect(`/hub/notifications/templates/${templateId}?success=Notification template updated successfully`);
+  
 };
 
 export const activateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { templateId } = req.params;
+  const { templateId } = req.params;
 
-    const template = await notificationTemplateRepo.activate(templateId);
+  const template = await manageTemplatesUseCase.activate(templateId);
 
-    if (!template) {
-      throw new Error('Notification template not found');
-    }
-
-    res.json({ success: true, message: 'Notification template activated successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate notification template' });
+  if (!template) {
+    throw new Error('Notification template not found');
   }
+
+  res.json({ success: true, message: 'Notification template activated successfully' });
+  
 };
 
 export const deactivateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { templateId } = req.params;
+  const { templateId } = req.params;
 
-    const template = await notificationTemplateRepo.deactivate(templateId);
+  const template = await manageTemplatesUseCase.deactivate(templateId);
 
-    if (!template) {
-      throw new Error('Notification template not found');
-    }
-
-    res.json({ success: true, message: 'Notification template deactivated successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate notification template' });
+  if (!template) {
+    throw new Error('Notification template not found');
   }
+
+  res.json({ success: true, message: 'Notification template deactivated successfully' });
+  
 };
 
 export const deleteNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { templateId } = req.params;
+  const { templateId } = req.params;
 
-    const success = await notificationTemplateRepo.delete(templateId);
+  const success = await manageTemplatesUseCase.delete(templateId);
 
-    if (!success) {
-      throw new Error('Failed to delete notification template');
-    }
-
-    res.json({ success: true, message: 'Notification template deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete notification template' });
+  if (!success) {
+    throw new Error('Failed to delete notification template');
   }
+
+  res.json({ success: true, message: 'Notification template deleted successfully' });
+  
 };
 
 export const cloneNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { templateId } = req.params;
-    const body = req.body as RequestBody;
-    const { newCode, newName } = body;
+  const { templateId } = req.params;
+  const body = req.body as RequestBody;
+  const { newCode, newName } = body;
 
-    const clonedTemplate = await notificationTemplateRepo.clone(templateId, newCode, newName);
+  const clonedTemplate = await manageTemplatesUseCase.clone(templateId, newCode, newName);
 
-    res.json({
-      success: true,
-      message: 'Notification template cloned successfully',
-      template: clonedTemplate,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to clone notification template' });
-  }
+  res.json({
+    success: true,
+    message: 'Notification template cloned successfully',
+    template: clonedTemplate,
+  });
+  
 };
 
 export const previewNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { templateId } = req.params;
-    const previewData = (req.body as RequestBody).data ? JSON.parse((req.body as RequestBody).data) : undefined;
+  const { templateId } = req.params;
+  const previewData = (req.body as RequestBody).data ? JSON.parse((req.body as RequestBody).data) : undefined;
 
-    const preview = await notificationTemplateRepo.getPreview(templateId, previewData);
+  const preview = await manageTemplatesUseCase.getPreview(templateId, previewData);
 
-    res.json({
-      success: true,
-      preview,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to preview notification template' });
-  }
+  res.json({
+    success: true,
+    preview,
+  });
+  
 };
 
 // ============================================================================
@@ -343,48 +273,40 @@ export const previewNotificationTemplate = async (req: TypedRequest, res: Respon
 // ============================================================================
 
 export const listBatches = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const limit = parseInt(req.query.limit as string) || 50;
-    const offset = parseInt(req.query.offset as string) || 0;
+  const limit = parseInt(req.query.limit as string) || 50;
+  const offset = parseInt(req.query.offset as string) || 0;
 
-    const batches = await notificationBatchRepo.findAll(limit, offset);
-    const total = await notificationBatchRepo.count();
+  const batches = await manageBatchesUseCase.findAll(limit, offset);
+  const total = await manageBatchesUseCase.count();
 
-    adminRespond(req, res, 'notifications/batches/index', {
-      pageName: 'Notification Batches',
-      batches,
-      total,
-      limit,
-      offset,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load batches' });
-  }
+  adminRespond(req, res, 'notifications/batches/index', {
+    pageName: 'Notification Batches',
+    batches,
+    total,
+    limit,
+    offset,
+  });
+  
 };
 
 export const viewBatch = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { batchId } = req.params;
+  const { batchId } = req.params;
 
-    const batch = await notificationBatchRepo.findById(batchId);
+  const batch = await manageBatchesUseCase.findById(batchId);
 
-    if (!batch) {
-      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Batch not found' });
-      return;
-    }
-
-    const deliveryLogs = await notificationDeliveryLogRepo.findByBatchId(batchId, 100);
-
-    adminRespond(req, res, 'notifications/batches/detail', {
-      pageName: `Batch: ${batch.name}`,
-      batch,
-      deliveryLogs,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load batch' });
+  if (!batch) {
+    adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Batch not found' });
+    return;
   }
+
+  const deliveryLogs = await getDeliveryLogsUseCase.findByBatchId(batchId, 100);
+
+  adminRespond(req, res, 'notifications/batches/detail', {
+    pageName: `Batch: ${batch.name}`,
+    batch,
+    deliveryLogs,
+  });
+  
 };
 
 // ============================================================================
@@ -392,30 +314,22 @@ export const viewBatch = async (req: TypedRequest, res: Response): Promise<void>
 // ============================================================================
 
 export const listWebhooks = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const webhooks = await notificationWebhookRepo.findAll();
+  const webhooks = await manageWebhooksUseCase.findAll();
 
-    adminRespond(req, res, 'notifications/webhooks/index', {
-      pageName: 'Notification Webhooks',
-      webhooks,
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load webhooks' });
-  }
+  adminRespond(req, res, 'notifications/webhooks/index', {
+    pageName: 'Notification Webhooks',
+    webhooks,
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createWebhookForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'notifications/webhooks/form', {
-      pageName: 'Create Webhook',
-      webhook: null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load form' });
-  }
+  adminRespond(req, res, 'notifications/webhooks/form', {
+    pageName: 'Create Webhook',
+    webhook: null,
+  });
+  
 };
 
 export const createWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -424,7 +338,7 @@ export const createWebhook = async (req: TypedRequest, res: Response): Promise<v
     const { url, secret, events, organizationId } = body;
     const eventsArray = Array.isArray(events) ? events : events ? [events] : [];
 
-    await notificationWebhookRepo.create({
+    await manageWebhooksUseCase.create({
       url,
       secret: secret || undefined,
       events: eventsArray,
@@ -434,7 +348,7 @@ export const createWebhook = async (req: TypedRequest, res: Response): Promise<v
 
     res.redirect('/admin/notifications/webhooks?success=Webhook+created+successfully');
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
     adminRespond(req, res, 'notifications/webhooks/form', {
       pageName: 'Create Webhook',
       webhook: null,
@@ -447,10 +361,10 @@ export const createWebhook = async (req: TypedRequest, res: Response): Promise<v
 export const deactivateWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { webhookId } = req.params;
-    await notificationWebhookRepo.deactivate(webhookId);
+    await manageWebhooksUseCase.deactivate(webhookId);
     res.redirect('/admin/notifications/webhooks?success=Webhook+deactivated');
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
     res.redirect('/admin/notifications/webhooks?error=' + encodeURIComponent((error as Error).message || 'Failed to deactivate webhook'));
   }
 };
@@ -460,28 +374,24 @@ export const deactivateWebhook = async (req: TypedRequest, res: Response): Promi
 // ============================================================================
 
 export const listTemplateTranslations = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { templateId } = req.params;
+  const { templateId } = req.params;
 
-    const template = await notificationTemplateRepo.findById(templateId);
+  const template = await manageTemplatesUseCase.findById(templateId);
 
-    if (!template) {
-      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Notification template not found' });
-      return;
-    }
-
-    const translations = await notificationTemplateTranslationRepo.findByTemplate(templateId);
-    const preview = await notificationTemplateRepo.getPreview(templateId);
-
-    adminRespond(req, res, 'notifications/templates/view', {
-      pageName: `Template: ${template.name}`,
-      template,
-      preview,
-      translations,
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load template translations' });
+  if (!template) {
+    adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Notification template not found' });
+    return;
   }
+
+  const translations = await getTranslationsUseCase.findByTemplate(templateId);
+  const preview = await manageTemplatesUseCase.getPreview(templateId);
+
+  adminRespond(req, res, 'notifications/templates/view', {
+    pageName: `Template: ${template.name}`,
+    template,
+    preview,
+    translations,
+    success: req.query.success || null,
+  });
+  
 };

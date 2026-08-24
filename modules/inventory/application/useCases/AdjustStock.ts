@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 export type AdjustmentReason = 'correction' | 'count' | 'damage' | 'return' | 'shrinkage' | 'expired' | 'received' | 'manual' | 'other';
 
@@ -93,12 +94,12 @@ export class AdjustStockUseCase {
         adjustmentAmount = -(previousQuantity - newQuantity);
         break;
       default:
-        throw new Error(`Invalid adjustment type: ${input.adjustmentType}`);
+        throw new InventoryValidationError(`Invalid adjustment type: ${input.adjustmentType}`);
     }
 
     // Validate new quantity
     if (newQuantity < 0) {
-      throw new Error('Quantity cannot be negative');
+      throw new InventoryValidationError('Quantity cannot be negative');
     }
 
     // Update or create inventory record

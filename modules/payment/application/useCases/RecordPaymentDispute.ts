@@ -7,8 +7,14 @@
  * Validates: Requirements 1.2
  */
 
-import paymentDisputeRepo, { PaymentDispute } from '../../infrastructure/repositories/paymentDisputeRepo';
-import paymentRepo from '../../infrastructure/repositories/paymentRepo';
+import { PaymentBillingRepository, PaymentDispute } from '../../domain/repositories/PaymentBillingRepository';
+import { PaymentGatewayRepository } from '../../domain/repositories/PaymentGatewayRepository';
+import { FailedToCreatePaymentDisputeError } from '../../domain/errors/PaymentErrors';
+import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
+import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+
+const paymentBillingRepo = paymentBillingDataRepository.billing;
+const paymentRepo = paymentDataRepository.gateways;
 
 // ============================================================================
 // Command
@@ -51,12 +57,12 @@ export interface RecordPaymentDisputeResponse {
 
 export class RecordPaymentDisputeUseCase {
   constructor(
-    private readonly disputeRepo: typeof paymentDisputeRepo = paymentDisputeRepo,
-    private readonly txRepo: typeof paymentRepo = paymentRepo,
+    private readonly billingRepo: PaymentBillingRepository = paymentBillingRepo,
+    private readonly txRepo: PaymentGatewayRepository = paymentRepo,
   ) {}
 
   async execute(command: RecordPaymentDisputeCommand): Promise<RecordPaymentDisputeResponse> {
-    const dispute = await this.disputeRepo.create({
+    const dispute = await this.billingRepo.createDispute({
       paymentId: command.paymentId,
       organizationId: command.organizationId,
       externalDisputeId: command.externalDisputeId,
@@ -70,7 +76,7 @@ export class RecordPaymentDisputeUseCase {
     });
 
     if (!dispute) {
-      throw new Error('Failed to create payment dispute');
+      throw new FailedToCreatePaymentDisputeError();
     }
 
     // Update the transaction status to reflect the dispute

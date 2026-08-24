@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as categoryController from '../controllers/CategoryCustomerController';
 
 const router = express.Router();
@@ -13,18 +14,18 @@ const router = express.Router();
  * GET /customer/categories
  * Query params: ?featured=true | ?menu=true | ?root=true
  */
-router.get('/categories', categoryController.listCategories);
+router.get('/categories', asyncHandler(categoryController.listCategories));
 
 /**
  * Get subcategories of a parent category
  * GET /customer/categories/:categoryId/children
  */
-router.get('/categories/:categoryId/children', categoryController.getCategoryChildren);
+router.get('/categories/:categoryId/children', asyncHandler(categoryController.getCategoryChildren));
 
 /**
  * Get category by ID or slug
  * GET /customer/categories/:identifier
  */
-router.get('/categories/:identifier', categoryController.getCategory);
+router.get('/categories/:identifier', asyncHandler(categoryController.getCategory));
 
 export const categoryCustomerRouter = router;

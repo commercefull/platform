@@ -3,8 +3,9 @@
  * Creates a new content category with hierarchy support
  */
 
-import { ContentCategoryRepo } from '../../../infrastructure/repositories/contentCategoryRepo';
+import type { ContentCategoryRepo } from '../../../infrastructure/repositories/contentCategoryRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { CategoryNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class CreateCategoryCommand {
   constructor(
@@ -36,14 +37,14 @@ export class CreateCategoryUseCase {
 
   async execute(command: CreateCategoryCommand): Promise<CategoryResponse> {
     if (!command.name || !command.slug) {
-      throw new Error('Name and slug are required');
+      throw new ContentValidationError('Name and slug are required');
     }
 
     // Verify parent exists if provided
     if (command.parentId) {
       const parent = await this.categoryRepo.findCategoryById(command.parentId);
       if (!parent) {
-        throw new Error(`Parent category with ID ${command.parentId} not found`);
+        throw new CategoryNotFoundError(command.parentId);
       }
     }
 

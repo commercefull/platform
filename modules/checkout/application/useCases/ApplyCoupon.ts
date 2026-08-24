@@ -4,10 +4,10 @@
  */
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
-import { Money } from '../../../basket/domain/valueObjects/Money';
+import { DiscountQuotePort } from '../../application/ports/DiscountQuotePort';
+import { Money } from '../../../../libs/money';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { CouponRepository } from '../../../coupon/infrastructure/repositories/CouponRepository';
 import { BadRequestError, NotFoundError } from '../../../../libs/errors';
 
 // ============================================================================
@@ -26,7 +26,10 @@ export class ApplyCouponCommand {
 // ============================================================================
 
 export class ApplyCouponUseCase {
-  constructor(private readonly checkoutRepository: CheckoutRepository) {}
+  constructor(
+    private readonly checkoutRepository: CheckoutRepository,
+    private readonly discountQuotePort?: DiscountQuotePort,
+  ) {}
 
   async execute(command: ApplyCouponCommand): Promise<CheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
@@ -34,15 +37,17 @@ export class ApplyCouponUseCase {
       throw new NotFoundError('Checkout session not found');
     }
 
-    // Validate coupon code against coupon repository
-    const couponRepo = new CouponRepository();
-    const validation = await couponRepo.validateCouponCode(command.couponCode, session.subtotal.amount);
+    if (!this.discountQuotePort) {
+      throw new BadRequestError('Discount service unavailable');
+    }
 
-    if (!validation.valid || !validation.coupon) {
+    const validation = await this.discountQuotePort.validateDiscount(command.couponCode, session.subtotal.amount, session.subtotal.currency);
+
+    if (!validation.valid || !validation.discount) {
       throw new BadRequestError(validation.error || `Invalid coupon code: ${command.couponCode}`);
     }
 
-    const discountAmount = Money.create(validation.discountAmount || 0, session.subtotal.currency);
+    const discountAmount = Money.create(validation.discount.discountAmount, session.subtotal.currency);
 
     session.applyCoupon(command.couponCode, discountAmount);
     await this.checkoutRepository.save(session);

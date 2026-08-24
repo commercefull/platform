@@ -12,6 +12,13 @@ import {
   CustomerWishlistItem as DbCustomerWishlistItem,
   CustomerPasswordReset as DbCustomerPasswordReset,
 } from '../../../../libs/db/types';
+import {
+  FailedToCreateCustomerError,
+  CustomerNotFoundError,
+  CustomerAddressNotFoundError,
+  CustomerGroupNotFoundError,
+  CustomerWishlistNotFoundError,
+} from '../../domain/errors/CustomerErrors';
 
 // Re-export DB types for use in this feature
 export type Customer = DbCustomer;
@@ -129,7 +136,7 @@ export class CustomerRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create customer');
+      throw new FailedToCreateCustomerError();
     }
     return result;
   }
@@ -149,7 +156,7 @@ export class CustomerRepo {
 
     if (setClauses.length === 0) {
       const existing = await this.findCustomerById(customerId);
-      if (!existing) throw new Error(`Customer ${customerId} not found`);
+      if (!existing) throw new CustomerNotFoundError(customerId);
       return existing;
     }
 
@@ -162,7 +169,7 @@ export class CustomerRepo {
       values,
     );
 
-    if (!result) throw new Error(`Failed to update customer ${customerId}`);
+    if (!result) throw new FailedToCreateCustomerError(`Failed to update customer ${customerId}`);
     return result;
   }
 
@@ -172,7 +179,7 @@ export class CustomerRepo {
       'UPDATE "customer" SET "lastLoginAt" = $1, "updatedAt" = $1 WHERE "customerId" = $2 RETURNING *',
       [now, customerId],
     );
-    if (!result) throw new Error(`Failed to update login timestamp for ${customerId}`);
+    if (!result) throw new FailedToCreateCustomerError(`Failed to update login timestamp for ${customerId}`);
     return result;
   }
 
@@ -276,13 +283,13 @@ export class CustomerRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create customer address');
+    if (!result) throw new FailedToCreateCustomerError('Failed to create customer address');
     return result;
   }
 
   async updateCustomerAddress(addressId: string, updates: Partial<CustomerAddress>): Promise<CustomerAddress> {
     const existing = await this.findCustomerAddressById(addressId);
-    if (!existing) throw new Error(`Address ${addressId} not found`);
+    if (!existing) throw new CustomerAddressNotFoundError(addressId);
 
     if (updates.isDefault) {
       await query(
@@ -314,7 +321,7 @@ export class CustomerRepo {
       values,
     );
 
-    if (!result) throw new Error(`Failed to update address ${addressId}`);
+    if (!result) throw new FailedToCreateCustomerError(`Failed to update address ${addressId}`);
     return result;
   }
 
@@ -349,13 +356,13 @@ export class CustomerRepo {
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [group.name, group.description, group.discountPercent, group.isActive, code, now, now],
     );
-    if (!result) throw new Error('Failed to create customer group');
+    if (!result) throw new FailedToCreateCustomerError('Failed to create customer group');
     return result;
   }
 
   async updateCustomerGroup(groupId: string, updates: Partial<CustomerGroup>): Promise<CustomerGroup> {
     const existing = await this.findCustomerGroupById(groupId);
-    if (!existing) throw new Error(`Group ${groupId} not found`);
+    if (!existing) throw new CustomerGroupNotFoundError(groupId);
 
     const fields = ['name', 'description', 'discountPercent', 'isActive'];
     const setClauses: string[] = [];
@@ -380,7 +387,7 @@ export class CustomerRepo {
       values,
     );
 
-    if (!result) throw new Error(`Failed to update group ${groupId}`);
+    if (!result) throw new FailedToCreateCustomerError(`Failed to update group ${groupId}`);
     return result;
   }
 
@@ -422,7 +429,7 @@ export class CustomerRepo {
       `INSERT INTO "customerGroupMembership" ("customerId", "customerGroupId", "createdAt") VALUES ($1, $2, $3) RETURNING *`,
       [customerId, groupId, new Date()],
     );
-    if (!result) throw new Error(`Failed to add customer ${customerId} to group ${groupId}`);
+    if (!result) throw new FailedToCreateCustomerError(`Failed to add customer ${customerId} to group ${groupId}`);
     return result;
   }
 
@@ -455,13 +462,13 @@ export class CustomerRepo {
       `INSERT INTO "customerWishlist" ("customerId", "wishlistName", "isPublic", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [wishlist.customerId, wishlist.wishlistName, wishlist.isPublic, now, now],
     );
-    if (!result) throw new Error('Failed to create wishlist');
+    if (!result) throw new FailedToCreateCustomerError('Failed to create wishlist');
     return result;
   }
 
   async updateCustomerWishlist(wishlistId: string, updates: Partial<CustomerWishlist>): Promise<CustomerWishlist> {
     const existing = await this.findCustomerWishlistById(wishlistId);
-    if (!existing) throw new Error(`Wishlist ${wishlistId} not found`);
+    if (!existing) throw new CustomerWishlistNotFoundError(wishlistId);
 
     const fields = ['wishlistName', 'isPublic'];
     const setClauses: string[] = [];
@@ -486,7 +493,7 @@ export class CustomerRepo {
       values,
     );
 
-    if (!result) throw new Error(`Failed to update wishlist ${wishlistId}`);
+    if (!result) throw new FailedToCreateCustomerError(`Failed to update wishlist ${wishlistId}`);
     return result;
   }
 
@@ -532,7 +539,7 @@ export class CustomerRepo {
       `INSERT INTO "customerWishlistItem" ("customerWishlistId", "productId", "productVariantId", "note", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [item.customerWishlistId, item.productId, item.productVariantId, item.note, new Date(), new Date()],
     );
-    if (!result) throw new Error('Failed to add item to wishlist');
+    if (!result) throw new FailedToCreateCustomerError('Failed to add item to wishlist');
     return result;
   }
 
@@ -549,7 +556,7 @@ export class CustomerRepo {
       'UPDATE "customerWishlistItem" SET "note" = $1 WHERE "customerWishlistItemId" = $2 RETURNING *',
       [note, itemId],
     );
-    if (!result) throw new Error(`Failed to update wishlist item ${itemId}`);
+    if (!result) throw new FailedToCreateCustomerError(`Failed to update wishlist item ${itemId}`);
     return result;
   }
 

@@ -5,6 +5,7 @@
 
 import { queryOne, query } from '../../../../libs/db';
 import { ContentPageTranslation } from '../../../../libs/db/types';
+import { ContentValidationError, FailedToCreateContentError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Types
@@ -73,7 +74,7 @@ export class ContentPageTranslationRepo {
     // Check for existing translation for this page + locale
     const existing = await this.findTranslationByPageAndLocale(params.contentPageId, params.localeId);
     if (existing) {
-      throw new Error(`Translation for page "${params.contentPageId}" and locale "${params.localeId}" already exists`);
+      throw new ContentValidationError(`Translation for page "${params.contentPageId}" and locale "${params.localeId}" already exists`);
     }
 
     const result = await queryOne<ContentPageTranslation>(
@@ -105,7 +106,7 @@ export class ContentPageTranslationRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create page translation');
+      throw new FailedToCreateContentError('Failed to create page translation');
     }
 
     return result;
@@ -156,7 +157,7 @@ export class ContentPageTranslationRepo {
     );
 
     if (!result) {
-      throw new Error(`Failed to update translation with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update translation with ID ${id}`);
     }
 
     return result;

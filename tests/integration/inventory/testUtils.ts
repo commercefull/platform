@@ -2,9 +2,16 @@ import axios, { AxiosInstance } from 'axios';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
-// Sample test data
+// Seeded test data IDs
+// From seeds/20241220000023_seedStoreInventoryLocations.js
+export const SEEDED_INVENTORY_LOCATION_ID = '20000000-0000-7001-8000-000000000001';
+export const SEEDED_STORE_WAREHOUSE_ID = '20000000-0000-7000-8000-000000000001';
+// From seeds/20240805002001_seedIntegrationTestData.js
+export const SEEDED_PRODUCT_ID = '00000000-0000-0000-0000-000000000001';
+
+// Sample test data for creating new entities within individual tests
 export const testInventoryItem = {
-  productId: '00000000-0000-0000-0000-000000000001', // Will be replaced with actual product ID
+  productId: SEEDED_PRODUCT_ID,
   sku: 'TEST-SKU-001',
   quantity: 100,
   reservedQuantity: 0,
@@ -25,7 +32,7 @@ export const testInventoryLocation = {
   isActive: true,
 };
 
-// Setup helper function
+// Setup helper function — uses seeded data, only retrieves auth token
 export const setupInventoryTests = async () => {
   const client = axios.create({
     baseURL: API_URL,
@@ -35,10 +42,9 @@ export const setupInventoryTests = async () => {
       Accept: 'application/json',
       'Content-Type': 'application/json',
       'X-Test-Request': 'true',
-    }, // Don't throw HTTP errors
+    },
   });
 
-  // Get admin token (organization login for business routes)
   let adminToken = '';
   try {
     const adminLogin = await client.post('/business/auth/login', {
@@ -46,112 +52,21 @@ export const setupInventoryTests = async () => {
       password: 'password123',
     });
     adminToken = adminLogin.data?.accessToken || '';
-    if (!adminToken) {
-    }
-  } catch {}
-
-  // Create test product if needed
-  let testProductId = '';
-  let testLocationId = '';
-  let testInventoryItemId = '';
-
-  try {
-    const productResponse = await client.get('/business/products', {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-
-    if (productResponse.data?.data && productResponse.data.data.length > 0) {
-      testProductId = productResponse.data.data[0].id || productResponse.data.data[0].productId;
-    } else {
-      // Create a test product - include required fields
-      const newProduct = await client.post(
-        '/business/products',
-        {
-          name: 'Test Inventory Product',
-          sku: 'TEST-INVENTORY-SKU-' + Date.now(),
-          productTypeId: '00000000-0000-0000-0000-000000000001', // Default product type
-          basePrice: 29.99,
-          status: 'active',
-        },
-        {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        },
-      );
-      if (newProduct.data?.data?.id) {
-        testProductId = newProduct.data.data.id;
-      } else if (newProduct.data?.data?.productId) {
-        testProductId = newProduct.data.data.productId;
-      } else {
-      }
-    }
-
-    // Create a test inventory location
-    const locationResponse = await client.post('/business/inventory/locations', testInventoryLocation, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-    if (locationResponse.data?.data?.id) {
-      testLocationId = locationResponse.data.data.id;
-    } else {
-    }
-
-    // Create a test inventory item (only if we have both product and location)
-    if (testProductId && testLocationId) {
-      const inventoryItemData = {
-        ...testInventoryItem,
-        productId: testProductId,
-        locationId: testLocationId,
-      };
-
-      const itemResponse = await client.post('/business/inventory/items', inventoryItemData, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-      if (itemResponse.data?.data?.id) {
-        testInventoryItemId = itemResponse.data.data.id;
-      } else {
-      }
-    }
   } catch {}
 
   return {
     client,
     adminToken,
-    testProductId,
-    testLocationId,
-    testInventoryItemId,
+    testProductId: SEEDED_PRODUCT_ID,
+    testLocationId: SEEDED_STORE_WAREHOUSE_ID,
+    testInventoryItemId: SEEDED_INVENTORY_LOCATION_ID,
   };
 };
 
-// Cleanup helper function
+// Cleanup helper function — no-op for seeded data
 export const cleanupInventoryTests = async (
-  client: AxiosInstance | undefined,
-  adminToken: string | undefined,
-  testInventoryItemId?: string,
-  testLocationId?: string,
-) => {
-  // Skip cleanup if client or token not available
-  if (!client || !adminToken) {
-    return;
-  }
-
-  try {
-    // Delete test inventory item
-    if (testInventoryItemId) {
-      await client
-        .delete(`/business/inventory/items/${testInventoryItemId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        })
-        .catch(() => {});
-    }
-
-    // Delete test location
-    if (testLocationId) {
-      await client
-        .delete(`/business/inventory/locations/${testLocationId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        })
-        .catch(() => {});
-    }
-  } catch {
-    // Silently ignore cleanup errors
-  }
-};
+  _client: AxiosInstance | undefined,
+  _adminToken: string | undefined,
+  _testInventoryItemId?: string,
+  _testLocationId?: string,
+) => {};

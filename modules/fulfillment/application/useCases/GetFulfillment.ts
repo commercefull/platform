@@ -7,6 +7,7 @@
 import { Fulfillment } from '../../domain/entities/Fulfillment';
 import { FulfillmentItem } from '../../domain/entities/FulfillmentItem';
 import { IFulfillmentRepository } from '../../domain/repositories/FulfillmentRepository';
+import { FulfillmentValidationError } from '../../domain/errors/FulfillmentErrors';
 
 export interface GetFulfillmentInput {
   fulfillmentId?: string;
@@ -23,7 +24,7 @@ export class GetFulfillmentUseCase {
 
   async execute(input: GetFulfillmentInput): Promise<GetFulfillmentOutput> {
     if (!input.fulfillmentId && !input.trackingNumber) {
-      throw new Error('Either fulfillmentId or trackingNumber must be provided');
+      throw new FulfillmentValidationError('Either fulfillmentId or trackingNumber must be provided');
     }
 
     let fulfillment: Fulfillment | null = null;

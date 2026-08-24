@@ -3,11 +3,17 @@
  * PostgreSQL implementation using camelCase column names (matching migrations)
  */
 
-import { query, queryOne } from '../../../../libs/db';
+import { query, queryOne, withTransaction } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import {
   PaymentRepository as IPaymentRepository,
   PaymentFilters,
+  PaymentSettings,
+  PaymentSettingsUpsertParams,
+  PaymentWebhook,
+  PaymentWebhookCreateParams,
+  StoredPaymentMethod,
+  StoredPaymentMethodCreateParams,
 } from '../../domain/repositories/PaymentRepository';
 import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
@@ -127,52 +133,55 @@ export class PaymentRepo implements IPaymentRepository {
     } else {
       const orderPaymentId = generateUUID();
 
-      // Create orderPayment record first (FK constraint)
-      await query(
-        `INSERT INTO "orderPayment" (
-          "orderPaymentId", "orderId", "type", "provider",
-          amount, currency, status, "refundedAmount",
-          "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-        [
-          orderPaymentId,
-          transaction.orderId,
-          'creditCard',
-          'stripe',
-          transaction.amount,
-          transaction.currency,
-          'pending',
-          0,
-          now,
-          now,
-        ],
-      );
+      // Create orderPayment + paymentTransaction atomically
+      await withTransaction(async () => {
+        // Create orderPayment record first (FK constraint)
+        await query(
+          `INSERT INTO "orderPayment" (
+            "orderPaymentId", "orderId", "type", "provider",
+            amount, currency, status, "refundedAmount",
+            "createdAt", "updatedAt"
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+          [
+            orderPaymentId,
+            transaction.orderId,
+            'creditCard',
+            'stripe',
+            transaction.amount,
+            transaction.currency,
+            'pending',
+            0,
+            now,
+            now,
+          ],
+        );
 
-      await query(
-        `INSERT INTO "paymentTransaction" (
-          "paymentTransactionId", "orderPaymentId", "orderId", "type",
-          "customerId", "paymentMethodId", "paymentGatewayId",
-          amount, currency, status, "refundedAmount", "customerIp", metadata,
-          "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
-        [
-          transaction.transactionId,
-          orderPaymentId,
-          transaction.orderId,
-          'sale',
-          transaction.customerId,
-          null,
-          transaction.gatewayId,
-          transaction.amount,
-          transaction.currency,
-          transaction.status,
-          transaction.refundedAmount,
-          transaction.customerIp,
-          transaction.metadata ? JSON.stringify(transaction.metadata) : null,
-          now,
-          now,
-        ],
-      );
+        await query(
+          `INSERT INTO "paymentTransaction" (
+            "paymentTransactionId", "orderPaymentId", "orderId", "type",
+            "customerId", "paymentMethodId", "paymentGatewayId",
+            amount, currency, status, "refundedAmount", "customerIp", metadata,
+            "createdAt", "updatedAt"
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+          [
+            transaction.transactionId,
+            orderPaymentId,
+            transaction.orderId,
+            'sale',
+            transaction.customerId,
+            null,
+            transaction.gatewayId,
+            transaction.amount,
+            transaction.currency,
+            transaction.status,
+            transaction.refundedAmount,
+            transaction.customerIp,
+            transaction.metadata ? JSON.stringify(transaction.metadata) : null,
+            now,
+            now,
+          ],
+        );
+      });
     }
 
     return transaction;
@@ -398,6 +407,115 @@ export class PaymentRepo implements IPaymentRepository {
       createdAt: new Date(row.createdAt as string),
       updatedAt: new Date(row.updatedAt as string),
     });
+  }
+
+  // ==========================================================================
+  // Settings
+  // ==========================================================================
+
+  async findSettingsByMerchant(organizationId: string): Promise<PaymentSettings | null> {
+    return queryOne<PaymentSettings>(`SELECT * FROM "paymentSettings" WHERE "organizationId" = $1`, [organizationId]);
+  }
+
+  async upsertSettings(params: PaymentSettingsUpsertParams): Promise<PaymentSettings | null> {
+    const now = new Date();
+    return queryOne<PaymentSettings>(
+      `INSERT INTO "paymentSettings" ("organizationId", provider, "isEnabled", config, "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT ("organizationId") DO UPDATE SET provider = $2, "isEnabled" = $3, config = $4, "updatedAt" = $6
+       RETURNING *`,
+      [params.organizationId, params.provider, params.isEnabled, JSON.stringify(params.config), now, now],
+    );
+  }
+
+  async findAllSettings(): Promise<PaymentSettings[]> {
+    return (await query<PaymentSettings[]>(`SELECT * FROM "paymentSettings" ORDER BY "createdAt" DESC`)) || [];
+  }
+
+  // ==========================================================================
+  // Webhooks
+  // ==========================================================================
+
+  async findWebhookByExternalId(externalId: string): Promise<PaymentWebhook | null> {
+    return queryOne<PaymentWebhook>(`SELECT * FROM "paymentWebhook" WHERE "externalId" = $1`, [externalId]);
+  }
+
+  async createWebhook(params: PaymentWebhookCreateParams): Promise<PaymentWebhook | null> {
+    const now = new Date();
+    return queryOne<PaymentWebhook>(
+      `INSERT INTO "paymentWebhook" ("externalId", provider, "eventType", payload, "processedAt", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [params.externalId, params.provider, params.eventType, JSON.stringify(params.payload), params.processedAt || null, now, now],
+    );
+  }
+
+  async markWebhookProcessed(paymentWebhookId: string): Promise<PaymentWebhook | null> {
+    const now = new Date();
+    return queryOne<PaymentWebhook>(
+      `UPDATE "paymentWebhook" SET "processedAt" = $1, "updatedAt" = $1 WHERE "paymentWebhookId" = $2 RETURNING *`,
+      [now, paymentWebhookId],
+    );
+  }
+
+  // ==========================================================================
+  // Stored Payment Methods
+  // ==========================================================================
+
+  async findStoredMethodsByCustomer(customerId: string): Promise<StoredPaymentMethod[]> {
+    return (
+      (await query<StoredPaymentMethod[]>(
+        `SELECT * FROM "storedPaymentMethod" WHERE "customerId" = $1 AND "deletedAt" IS NULL ORDER BY "isDefault" DESC, "createdAt" DESC`,
+        [customerId],
+      )) || []
+    );
+  }
+
+  async findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
+    return queryOne<StoredPaymentMethod>(
+      `SELECT * FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 AND "deletedAt" IS NULL`,
+      [storedPaymentMethodId],
+    );
+  }
+
+  async createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {
+    const now = new Date();
+    return queryOne<StoredPaymentMethod>(
+      `INSERT INTO "storedPaymentMethod" ("customerId", "organizationId", type, provider, "providerToken", last4, brand, "expiryMonth", "expiryYear", "isDefault", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+      [
+        params.customerId,
+        params.organizationId,
+        params.type,
+        params.provider,
+        params.providerToken,
+        params.last4 || null,
+        params.brand || null,
+        params.expiryMonth || null,
+        params.expiryYear || null,
+        params.isDefault,
+        now,
+        now,
+      ],
+    );
+  }
+
+  async setDefaultStoredMethod(storedPaymentMethodId: string, customerId: string): Promise<StoredPaymentMethod | null> {
+    const now = new Date();
+    await query(
+      `UPDATE "storedPaymentMethod" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "deletedAt" IS NULL`,
+      [now, customerId],
+    );
+    return queryOne<StoredPaymentMethod>(
+      `UPDATE "storedPaymentMethod" SET "isDefault" = true, "updatedAt" = $1 WHERE "storedPaymentMethodId" = $2 RETURNING *`,
+      [now, storedPaymentMethodId],
+    );
+  }
+
+  async softDeleteStoredMethod(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
+    return queryOne<StoredPaymentMethod>(
+      `UPDATE "storedPaymentMethod" SET "deletedAt" = $1, "updatedAt" = $1 WHERE "storedPaymentMethodId" = $2 RETURNING *`,
+      [new Date(), storedPaymentMethodId],
+    );
   }
 
   private mapToRefund(row: Record<string, unknown>): PaymentRefund {

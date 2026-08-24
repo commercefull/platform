@@ -5,6 +5,7 @@
 
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { Basket } from '../../domain/entities/Basket';
+import { BasketNotFoundError, BasketItemNotFoundError } from '../../domain/errors/BasketErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BasketResponse } from './GetOrCreateBasket';
 
@@ -30,12 +31,12 @@ export class SetItemAsGiftUseCase {
   async execute(command: SetItemAsGiftCommand): Promise<BasketResponse> {
     const basket = await this.basketRepository.findById(command.basketId);
     if (!basket) {
-      throw new Error('Basket not found');
+      throw new BasketNotFoundError(command.basketId);
     }
 
     const item = basket.findItem(command.basketItemId);
     if (!item) {
-      throw new Error('Item not found in basket');
+      throw new BasketItemNotFoundError(command.basketItemId);
     }
 
     basket.setItemAsGift(command.basketItemId, command.giftMessage);

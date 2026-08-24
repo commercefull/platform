@@ -1,6 +1,4 @@
-import PriceListRepo from '../../infrastructure/repositories/pricingPriceListRepo';
-import ProductCurrencyPriceRepo from '../../infrastructure/repositories/productCurrencyPriceRepo';
-import productTierPriceRepo from '../../infrastructure/repositories/productTierPriceRepo';
+import pricingDataRepository from '../../infrastructure/repositories/PricingDataRepository';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CalculatePriceUseCase, CalculatePriceInput } from '../../application/useCases/CalculatePrice';
 import { CreatePriceListUseCase, CreatePriceListInput } from '../../application/useCases/CreatePriceList';
@@ -12,29 +10,29 @@ export const pricingResolvers = {
       requireBusinessAuth(context);
       const pricingRepository = {
         getPriceListItem: async (priceListId: string, productId: string, _variantId?: string) => {
-          const price = await ProductCurrencyPriceRepo.findByProductAndCurrency(productId, priceListId);
+          const price = await pricingDataRepository.productCurrencyPrices.findByProductAndCurrency(productId, priceListId);
           return price ? { price: parseFloat(price.price) } : null;
         },
         getVolumeDiscount: async (productId: string, quantity: number) => {
-          const tierPrices = await productTierPriceRepo.findForProduct(productId);
+          const tierPrices = await pricingDataRepository.tierPrices.findForProduct(productId);
           const applicable = tierPrices.find(tp => tp.quantityMin <= quantity);
           if (!applicable) return null;
           return { discountPercent: 0 };
         },
         getActiveSalePrice: async (productId: string, _variantId?: string) => {
-          const prices = await ProductCurrencyPriceRepo.findByProduct(productId);
+          const prices = await pricingDataRepository.productCurrencyPrices.findByProduct(productId);
           const salePrice = prices.find(p => p.compareAtPrice !== null);
           return salePrice ? parseFloat(salePrice.price) : null;
         },
       };
       const productRepository = {
         findById: async (id: string) => {
-          const prices = await ProductCurrencyPriceRepo.findByProduct(id);
+          const prices = await pricingDataRepository.productCurrencyPrices.findByProduct(id);
           if (prices.length === 0) return null;
           return { price: parseFloat(prices[0].price), currencyCode: undefined };
         },
         findVariantById: async (id: string) => {
-          const prices = await ProductCurrencyPriceRepo.findByVariant(id);
+          const prices = await pricingDataRepository.productCurrencyPrices.findByVariant(id);
           if (prices.length === 0) return null;
           return { price: parseFloat(prices[0].price) };
         },
@@ -60,7 +58,7 @@ export const pricingResolvers = {
           storeIds: string[];
           isActive: boolean;
         }) => {
-          const result = await PriceListRepo.create({
+          const result = await pricingDataRepository.priceLists.create({
             name: data.name,
             description: data.description,
             priority: 0,
@@ -100,13 +98,13 @@ export const pricingResolvers = {
           saleEndDate?: Date;
           currencyCode: string;
         }) => {
-          const existing = await ProductCurrencyPriceRepo.findByProductAndCurrency(
+          const existing = await pricingDataRepository.productCurrencyPrices.findByProductAndCurrency(
             data.productId,
             data.currencyCode,
             data.variantId,
           );
           if (existing) {
-            const updated = await ProductCurrencyPriceRepo.updatePrice(existing.productCurrencyPriceId, data.price);
+            const updated = await pricingDataRepository.productCurrencyPrices.updatePrice(existing.productCurrencyPriceId, data.price);
             return {
               productId: data.productId,
               variantId: data.variantId,
@@ -115,7 +113,7 @@ export const pricingResolvers = {
               updatedAt: updated ? new Date(updated.updatedAt) : new Date(),
             };
           }
-          const created = await ProductCurrencyPriceRepo.upsert({
+          const created = await pricingDataRepository.productCurrencyPrices.upsert({
             productId: data.productId,
             productVariantId: data.variantId ?? null,
             currencyId: data.currencyCode,

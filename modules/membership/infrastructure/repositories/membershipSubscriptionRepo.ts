@@ -3,6 +3,7 @@ import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
 import { MembershipSubscription as DbMembershipSubscription } from '../../../../libs/db/types';
+import { FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
 
 // Re-export DB type
 export type MembershipSubscription = DbMembershipSubscription;
@@ -136,7 +137,7 @@ export class MembershipSubscriptionRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create membership subscription');
+    if (!result) throw new FailedToCreateMembershipError('Failed to create membership subscription');
     return result;
   }
 

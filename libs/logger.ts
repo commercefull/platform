@@ -3,27 +3,8 @@ import winston, { format } from 'winston';
 import 'winston-daily-rotate-file';
 import expressWinston from 'express-winston';
 import path from 'path';
-
-interface ExtendedResponse extends Response {
-  responseTime?: number;
-}
-
-function stringify(obj: unknown) {
-  let cache: unknown[] = [];
-  let str = JSON.stringify(obj, function (key, value) {
-    if (typeof value === 'object' && value !== null) {
-      if (cache.indexOf(value) !== -1) {
-        // Circular reference found, discard key
-        return;
-      }
-      // Store value in our collection
-      cache.push(value);
-    }
-    return value;
-  });
-  cache = []; // reset the cache
-  return str;
-}
+import { stringify } from './strings';
+import { getCorrelationId } from './correlationId';
 
 // Custom TransformableInfo interface
 export interface TransformableInfo {
@@ -44,25 +25,45 @@ export interface TransformableInfo {
   pid?: number;
   application?: string;
   version?: string;
+  correlationId?: string;
   [key: `_${string}`]: unknown; // Allow for custom fields prefixed with underscore
 }
 
-// Define log level type for TypeScript
-type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'http';
+interface ExtendedResponse extends Response {
+  responseTime?: number;
+}
 
 const { combine, timestamp, printf, errors } = format;
 
+// Format that auto-injects correlationId from AsyncLocalStorage into every log entry
+const correlationFormat = format((info: TransformableInfo) => {
+  const correlationId = getCorrelationId();
+  if (correlationId) {
+    info.correlationId = correlationId;
+  }
+  return info;
+})();
+
 const logDir = './logs';
 const isDevelopment = process.env.NODE_ENV !== 'production';
+const isTestEnv = process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test';
 
-// Define log levels similar to Monolog
+// Define log levels similar to Monolog.
 const levels = {
   error: 0, // Error conditions
-  warning: 1, // Warning conditions
+  warning: 1, // Alias of `warn`
   info: 2, // Informational messages
   debug: 3, // Debug-level messages
   http: 4, // HTTP requests
-};
+} as const;
+
+// Derived from `levels` so the type can never claim a method Winston did not create.
+type LogLevel = keyof typeof levels;
+
+// Default level: `info` in production, `debug` in development.
+// Never default to `error` — that pushes developers to log everything at `error`
+// just to make it visible, which destroys the value of the error log.
+const defaultLevel: LogLevel = isDevelopment ? 'debug' : 'info';
 
 // Unified JSON formatter
 const jsonFormatter = printf(({ level, message, timestamp, stack, ...meta }: TransformableInfo) => {
@@ -89,29 +90,32 @@ const jsonFormatter = printf(({ level, message, timestamp, stack, ...meta }: Tra
 const transports: winston.transport[] = [
   // Console transport for all environments
   new winston.transports.Console({
-    level: process.env.LOG_LEVEL || 'error', // Configurable dev level, warning default
+    level: process.env.LOG_LEVEL || defaultLevel,
     format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), errors({ stack: true }), jsonFormatter),
   } as winston.transports.ConsoleTransportOptions),
 ];
 
 // Error file transport — always enabled (dev + prod) so errors are traceable
-transports.push(
-  new winston.transports.DailyRotateFile({
-    level: 'error',
-    filename: path.join(logDir, 'error-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles: '14d',
-    format: combine(timestamp(), errors({ stack: true }), jsonFormatter),
-  }),
-);
+// Skip in test environment to avoid file stream handles keeping workers alive
+if (!isTestEnv) {
+  transports.push(
+    new winston.transports.DailyRotateFile({
+      level: 'error',
+      filename: path.join(logDir, 'error-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxSize: '20m',
+      maxFiles: '14d',
+      format: combine(timestamp(), errors({ stack: true }), jsonFormatter),
+    }),
+  );
+}
 
 // Additional info-level file transport in production only
 if (!isDevelopment) {
   transports.push(
     new winston.transports.DailyRotateFile({
-      level: process.env.LOG_LEVEL || 'error',
+      level: process.env.LOG_LEVEL || defaultLevel,
       filename: path.join(logDir, 'app-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
@@ -125,9 +129,9 @@ if (!isDevelopment) {
 // Create the logger with proper type annotations
 const logger: winston.Logger & Record<LogLevel, winston.LeveledLogMethod> = winston.createLogger({
   levels,
-  level: process.env.LOG_LEVEL || 'error',
-  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), errors({ stack: true }), jsonFormatter),
-  defaultMeta: { service: 'clinic-organize' }, // Add service name to all logs
+  level: process.env.LOG_LEVEL || defaultLevel,
+  format: combine(correlationFormat, timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), errors({ stack: true }), jsonFormatter),
+  defaultMeta: { service: 'commercefull' }, // Add service name to all logs
   transports,
   exitOnError: false, // Do not exit on handled exceptions
 }) as winston.Logger & Record<LogLevel, winston.LeveledLogMethod>;
@@ -137,7 +141,7 @@ const httpAccessLogger = winston.createLogger({
   levels,
   level: 'http', // Accept all levels up to http
   format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), jsonFormatter),
-  defaultMeta: { service: 'clinic-organize' },
+  defaultMeta: { service: 'commercefull' },
   transports: [
     new winston.transports.Console({
       level: 'http',

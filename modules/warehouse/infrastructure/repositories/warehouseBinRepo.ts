@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
+import { FailedToCreateWarehouseEntityError } from '../../domain/errors/WarehouseErrors';
 
 export interface WarehouseBin {
   distributionWarehouseBinId: string;
@@ -75,7 +76,7 @@ export async function createBin(input: CreateBinInput): Promise<WarehouseBin> {
     now,
   ]);
 
-  if (!result) throw new Error('Failed to create warehouse bin');
+  if (!result) throw new FailedToCreateWarehouseEntityError('Failed to create warehouse bin');
   return result;
 }
 

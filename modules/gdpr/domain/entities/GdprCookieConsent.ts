@@ -3,6 +3,8 @@
  * Tracks cookie consent for both authenticated and anonymous users
  */
 
+import { GdprValidationError } from '../errors/GdprErrors';
+
 export interface GdprCookieConsentProps {
   gdprCookieConsentId: string;
   customerId?: string;
@@ -276,7 +278,7 @@ export class GdprCookieConsent {
    */
   linkToCustomer(customerId: string): void {
     if (this.props.customerId) {
-      throw new Error('Consent is already linked to a customer');
+      throw new GdprValidationError('Consent is already linked to a customer');
     }
     this.props.customerId = customerId;
     this.props.linkedAt = new Date();

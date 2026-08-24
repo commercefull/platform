@@ -3,6 +3,8 @@
  * Represents a customer's request for data export, deletion, or other GDPR rights
  */
 
+import { GdprValidationError } from '../errors/GdprErrors';
+
 export type GdprRequestType =
   | 'export' // Article 20 - Data portability
   | 'deletion' // Article 17 - Right to erasure
@@ -187,7 +189,7 @@ export class GdprDataRequest {
    */
   startProcessing(): void {
     if (this.props.status !== 'pending') {
-      throw new Error('Can only start processing pending requests');
+      throw new GdprValidationError('Can only start processing pending requests');
     }
     this.props.status = 'processing';
     this.props.updatedAt = new Date();
@@ -208,7 +210,7 @@ export class GdprDataRequest {
    */
   completeWithDownload(downloadUrl: string, format: 'json' | 'csv' | 'xml', adminId: string): void {
     if (this.props.status !== 'processing') {
-      throw new Error('Can only complete requests that are being processed');
+      throw new GdprValidationError('Can only complete requests that are being processed');
     }
 
     const expiresAt = new Date();
@@ -228,7 +230,7 @@ export class GdprDataRequest {
    */
   complete(adminId: string, notes?: string): void {
     if (this.props.status !== 'processing') {
-      throw new Error('Can only complete requests that are being processed');
+      throw new GdprValidationError('Can only complete requests that are being processed');
     }
     this.props.status = 'completed';
     this.props.processedAt = new Date();
@@ -242,7 +244,7 @@ export class GdprDataRequest {
    */
   reject(adminId: string, reason: string): void {
     if (!['pending', 'processing'].includes(this.props.status)) {
-      throw new Error('Can only reject pending or processing requests');
+      throw new GdprValidationError('Can only reject pending or processing requests');
     }
     this.props.status = 'rejected';
     this.props.rejectionReason = reason;
@@ -256,7 +258,7 @@ export class GdprDataRequest {
    */
   cancel(): void {
     if (!['pending', 'processing'].includes(this.props.status)) {
-      throw new Error('Can only cancel pending or processing requests');
+      throw new GdprValidationError('Can only cancel pending or processing requests');
     }
     this.props.status = 'cancelled';
     this.props.updatedAt = new Date();
@@ -267,7 +269,7 @@ export class GdprDataRequest {
    */
   requestExtension(reason: string): void {
     if (this.props.extensionRequested) {
-      throw new Error('Extension already requested');
+      throw new GdprValidationError('Extension already requested');
     }
 
     const extendedDeadline = new Date(this.props.deadlineAt);

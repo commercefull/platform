@@ -9,28 +9,21 @@ import { TypedRequest } from 'libs/types/express';
 import { adminRespond } from '../../respond';
 
 export const checkoutSettings = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/checkout/index', {
-      pageName: 'Checkout Settings',
-      settings: {},
-      paymentMethods: [],
-      shippingOptions: [],
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error loading checkout settings:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load checkout settings',
-    });
-  }
+  adminRespond(req, res, 'settings/checkout/index', {
+    pageName: 'Checkout Settings',
+    settings: {},
+    paymentMethods: [],
+    shippingOptions: [],
+    success: req.query.success || null,
+  });
+  
 };
 
 export const updateCheckoutSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/checkout?success=Checkout settings updated successfully');
   } catch (error: unknown) {
-    logger.error('Error updating checkout settings:', error);
+    logger.warn('Error updating checkout settings:', error);
     adminRespond(req, res, 'settings/checkout/index', {
       pageName: 'Checkout Settings',
       settings: {},
@@ -42,51 +35,29 @@ export const updateCheckoutSettings = async (req: TypedRequest, res: Response): 
 };
 
 export const listPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/checkout/payment-methods', {
-      pageName: 'Checkout Payment Methods',
-      paymentMethods: [],
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error listing payment methods:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load payment methods',
-    });
-  }
+  adminRespond(req, res, 'settings/checkout/payment-methods', {
+    pageName: 'Checkout Payment Methods',
+    paymentMethods: [],
+    success: req.query.success || null,
+  });
+  
 };
 
 export const updatePaymentMethodOrder = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    res.json({ success: true, message: 'Payment method order updated successfully' });
-  } catch (error: unknown) {
-    logger.error('Error updating payment method order:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to update order' });
-  }
+  res.json({ success: true, message: 'Payment method order updated successfully' });
+  
 };
 
 export const listShippingOptions = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'settings/checkout/shipping-options', {
-      pageName: 'Checkout Shipping Options',
-      shippingOptions: [],
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error listing shipping options:', error);
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load shipping options',
-    });
-  }
+  adminRespond(req, res, 'settings/checkout/shipping-options', {
+    pageName: 'Checkout Shipping Options',
+    shippingOptions: [],
+    success: req.query.success || null,
+  });
+  
 };
 
 export const updateShippingOptionOrder = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    res.json({ success: true, message: 'Shipping option order updated successfully' });
-  } catch (error: unknown) {
-    logger.error('Error updating shipping option order:', error);
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to update order' });
-  }
+  res.json({ success: true, message: 'Shipping option order updated successfully' });
+  
 };

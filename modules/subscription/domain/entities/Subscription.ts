@@ -5,6 +5,8 @@
  * managing billing cycles, plan details, and lifecycle state.
  */
 
+import { SubscriptionValidationError } from '../errors/SubscriptionErrors';
+
 export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'expired' | 'trial' | 'past_due';
 export type BillingInterval = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 
@@ -60,14 +62,14 @@ export class Subscription {
 
   pause(): void {
     if (this.props.status !== 'active') {
-      throw new Error('Can only pause active subscriptions');
+      throw new SubscriptionValidationError('Can only pause active subscriptions');
     }
     this.props.status = 'paused';
   }
 
   resume(): void {
     if (this.props.status !== 'paused') {
-      throw new Error('Can only resume paused subscriptions');
+      throw new SubscriptionValidationError('Can only resume paused subscriptions');
     }
     this.props.status = 'active';
   }

@@ -51,3 +51,51 @@ export class InvalidExpirationDaysError extends BasketError {
     super(`Days must be at least 1, got ${days}`);
   }
 }
+
+export class BasketValidationError extends BasketError {
+  readonly statusCode = 400;
+
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+export class BasketAlreadyAssignedError extends BasketError {
+  readonly statusCode = 400;
+
+  constructor() {
+    super('Basket is already assigned to a different customer');
+  }
+}
+
+export class CouponAlreadyAppliedError extends BasketError {
+  readonly statusCode = 400;
+
+  constructor() {
+    super('A coupon is already applied. Remove it first before applying a new one.');
+  }
+}
+
+export class NoCouponAppliedError extends BasketError {
+  readonly statusCode = 400;
+
+  constructor() {
+    super('No coupon applied to this basket');
+  }
+}
+
+export class BasketItemQuantityError extends BasketError {
+  readonly statusCode = 400;
+
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+export class BasketItemDiscountError extends BasketError {
+  readonly statusCode = 400;
+
+  constructor(message: string) {
+    super(message);
+  }
+}

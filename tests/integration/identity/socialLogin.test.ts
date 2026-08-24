@@ -183,7 +183,7 @@ describe('Social Login Feature Tests', () => {
       expect(response.data.success).toBe(false);
     });
 
-    // TODO: Organization social login has server-side issues
+    // TODO(phase-3.1): Fix — organization social login has server-side issues. Track in gap-analysis-and-roadmap.md Phase 3.1.
     it.skip('should authenticate organization with valid profile', async () => {
       const organizationProfile = {
         id: `google-organization-${Date.now()}`,
@@ -216,7 +216,7 @@ describe('Social Login Feature Tests', () => {
       expect(response.data.success).toBe(false);
     });
 
-    // TODO: Depends on social login token format
+    // TODO(phase-3.1): Fix — depends on social login token format. Track in gap-analysis-and-roadmap.md Phase 3.1.
     it.skip('should return linked accounts for authenticated customer', async () => {
       // First, login via social to get a token
       const loginResponse = await client.post('/customer/identity/google/customer', {

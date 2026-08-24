@@ -4,6 +4,8 @@
  * Encapsulates content page status with transition validation.
  */
 
+import { ContentValidationError } from '../errors/ContentErrors';
+
 export type PageStatusValue = 'draft' | 'published' | 'scheduled' | 'archived';
 
 export class PageStatus {
@@ -21,7 +23,7 @@ export class PageStatus {
   static from(value: string): PageStatus {
     const validStatuses: PageStatusValue[] = ['draft', 'published', 'scheduled', 'archived'];
     if (!validStatuses.includes(value as PageStatusValue)) {
-      throw new Error(`Invalid page status: ${value}`);
+      throw new ContentValidationError(`Invalid page status: ${value}`);
     }
     return new PageStatus(value as PageStatusValue);
   }

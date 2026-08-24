@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   createDataRequest,
   getMyDataRequests,
@@ -23,31 +24,31 @@ const router = express.Router();
 // ============================================================================
 
 // Record cookie consent
-router.post('/gdpr/cookies/consent', recordCookieConsent);
+router.post('/gdpr/cookies/consent', asyncHandler(recordCookieConsent));
 
 // Get current consent
-router.get('/gdpr/cookies/consent', getCookieConsent);
+router.get('/gdpr/cookies/consent', asyncHandler(getCookieConsent));
 
 // Accept all cookies
-router.post('/gdpr/cookies/accept-all', acceptAllCookies);
+router.post('/gdpr/cookies/accept-all', asyncHandler(acceptAllCookies));
 
 // Reject all optional cookies
-router.post('/gdpr/cookies/reject-all', rejectAllCookies);
+router.post('/gdpr/cookies/reject-all', asyncHandler(rejectAllCookies));
 
 // Update cookie preferences
-router.put('/gdpr/cookies/consent/:cookieConsentId', updateCookieConsent);
+router.put('/gdpr/cookies/consent/:cookieConsentId', asyncHandler(updateCookieConsent));
 
 // ============================================================================
 // GDPR Data Request Routes (Authenticated customers)
 // ============================================================================
 
 // Create a new data request
-router.post('/gdpr/requests', isCustomerLoggedIn, createDataRequest);
+router.post('/gdpr/requests', isCustomerLoggedIn, asyncHandler(createDataRequest));
 
 // Get my data requests
-router.get('/gdpr/requests', isCustomerLoggedIn, getMyDataRequests);
+router.get('/gdpr/requests', isCustomerLoggedIn, asyncHandler(getMyDataRequests));
 
 // Cancel a request
-router.post('/gdpr/requests/:gdprDataRequestId/cancel', isCustomerLoggedIn, cancelDataRequest);
+router.post('/gdpr/requests/:gdprDataRequestId/cancel', isCustomerLoggedIn, asyncHandler(cancelDataRequest));
 
 export const gdprCustomerRouter = router;

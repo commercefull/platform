@@ -1,5 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
+import { withTransaction } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import { FailedToCreatePromotionError, CouponNotFoundError, PromotionValidationError } from '../../domain/errors/PromotionErrors';
 
 // Table name constants
 const COUPON_TABLE = Table.PromotionCoupon;
@@ -160,7 +162,7 @@ export class CouponRepo {
     );
 
     if (!coupon) {
-      throw new Error('Failed to create coupon');
+      throw new FailedToCreatePromotionError('Failed to create coupon');
     }
 
     return coupon;
@@ -210,7 +212,7 @@ export class CouponRepo {
     params.push(new Date());
 
     if (updateFields.length === 1) {
-      throw new Error('No fields to update');
+      throw new PromotionValidationError('No fields to update');
     }
 
     const coupon = await queryOne<PromotionCoupon>(
@@ -222,7 +224,7 @@ export class CouponRepo {
     );
 
     if (!coupon) {
-      throw new Error(`Coupon with ID ${id} not found`);
+      throw new CouponNotFoundError(id);
     }
 
     return coupon;
@@ -348,12 +350,9 @@ export class CouponRepo {
   ): Promise<PromotionCouponUsage> {
     const now = new Date();
 
-    // Begin transaction
-    await query('BEGIN');
-
-    try {
+    return withTransaction(async (tx) => {
       // Insert usage record
-      const usage = await queryOne<PromotionCouponUsage>(
+      const usage = await tx.queryOne<PromotionCouponUsage>(
         `INSERT INTO "${COUPON_USAGE_TABLE}" (
           "promotionCouponId", "orderId", "customerId",
           "discountAmount", "currencyCode", "usedAt", "createdAt", "updatedAt"
@@ -363,24 +362,17 @@ export class CouponRepo {
       );
 
       if (!usage) {
-        throw new Error('Failed to record coupon usage');
+        throw new FailedToCreatePromotionError('Failed to record coupon usage');
       }
 
       // Increment usage count on coupon
-      await query(`UPDATE "${COUPON_TABLE}" SET "usageCount" = "usageCount" + 1, "updatedAt" = $2 WHERE "promotionCouponId" = $1`, [
+      await tx.query(`UPDATE "${COUPON_TABLE}" SET "usageCount" = "usageCount" + 1, "updatedAt" = $2 WHERE "promotionCouponId" = $1`, [
         couponId,
         now,
       ]);
 
-      // Commit transaction
-      await query('COMMIT');
-
       return usage;
-    } catch (error) {
-      // Rollback transaction on error
-      await query('ROLLBACK');
-      throw error;
-    }
+    });
   }
 
   /**

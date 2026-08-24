@@ -6,6 +6,7 @@
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
 import { PaginationOptions } from 'libs/types/shared';
 import { Order } from '../../domain/entities/Order';
+import { CustomerIdRequiredError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Command
@@ -55,7 +56,7 @@ export class GetCustomerOrdersUseCase {
 
   async execute(command: GetCustomerOrdersCommand): Promise<CustomerOrdersResponse> {
     if (!command.customerId) {
-      throw new Error('Customer ID is required');
+      throw new CustomerIdRequiredError();
     }
 
     const pagination: PaginationOptions = {

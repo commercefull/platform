@@ -3,6 +3,7 @@
  */
 
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
+import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
 
 export class RemoveCouponCommand {
   constructor(public readonly basketId: string) {}
@@ -14,7 +15,7 @@ export class RemoveCouponUseCase {
   async execute(command: RemoveCouponCommand): Promise<Record<string, unknown>> {
     const basket = await this.repository.findById(command.basketId);
     if (!basket) {
-      throw new Error('Basket not found');
+      throw new BasketNotFoundError(command.basketId);
     }
 
     basket.removeCoupon();

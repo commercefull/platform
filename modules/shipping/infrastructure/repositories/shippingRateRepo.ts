@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingRate } from '../../../../libs/db/types';
+import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 
 export { ShippingRate };
 
@@ -93,7 +94,7 @@ export async function create(input: CreateShippingRateInput): Promise<ShippingRa
     ],
   );
 
-  if (!result) throw new Error('Failed to create shipping rate');
+  if (!result) throw new FailedToCreateShippingEntityError('Failed to create shipping rate');
   return result;
 }
 

@@ -5,6 +5,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { Coupon } from '../../domain/entities/Coupon';
 import { CouponRepository } from '../../infrastructure/repositories/CouponRepository';
+import { CouponCodeAlreadyExistsError } from '../../domain/errors/CouponErrors';
 
 export class CreateCouponCommand {
   constructor(
@@ -38,7 +39,7 @@ export class CreateCouponUseCase {
     // Check if code already exists
     const existing = await this.couponRepository.findByCode(command.code);
     if (existing) {
-      throw new Error('Coupon code already exists');
+      throw new CouponCodeAlreadyExistsError(command.code);
     }
 
     const couponId = generateUUID();

@@ -1,5 +1,7 @@
 export type DispatchStatus = 'draft' | 'pending_approval' | 'approved' | 'dispatched' | 'in_transit' | 'received' | 'cancelled';
 
+import { InventoryValidationError } from '../errors/InventoryErrors';
+
 export interface StoreDispatchItemProps {
   dispatchItemId: string;
   dispatchId: string;
@@ -167,7 +169,7 @@ export class StoreDispatch {
 
   approve(approvedBy: string): void {
     if (!['draft', 'pending_approval'].includes(this.props.status)) {
-      throw new Error('Dispatch cannot be approved from the current status');
+      throw new InventoryValidationError('Dispatch cannot be approved from the current status');
     }
 
     this.props.status = 'approved';
@@ -178,7 +180,7 @@ export class StoreDispatch {
 
   markDispatched(dispatchedBy: string, dispatchedItems?: Array<{ dispatchItemId: string; dispatchedQuantity: number }>): void {
     if (this.props.status !== 'approved') {
-      throw new Error('Dispatch must be approved before it can be dispatched');
+      throw new InventoryValidationError('Dispatch must be approved before it can be dispatched');
     }
 
     if (dispatchedItems && dispatchedItems.length > 0) {
@@ -188,7 +190,7 @@ export class StoreDispatch {
           return item;
         }
         if (match.dispatchedQuantity < 0 || match.dispatchedQuantity > item.requestedQuantity) {
-          throw new Error('Dispatched quantity cannot exceed requested quantity');
+          throw new InventoryValidationError('Dispatched quantity cannot exceed requested quantity');
         }
         return { ...item, dispatchedQuantity: match.dispatchedQuantity };
       });
@@ -204,7 +206,7 @@ export class StoreDispatch {
 
   markInTransit(): void {
     if (this.props.status !== 'dispatched') {
-      throw new Error('Dispatch must be dispatched before it can be in transit');
+      throw new InventoryValidationError('Dispatch must be dispatched before it can be in transit');
     }
 
     this.props.status = 'in_transit';
@@ -213,7 +215,7 @@ export class StoreDispatch {
 
   markReceived(receivedBy: string, receivedItems: Array<{ dispatchItemId: string; receivedQuantity: number }>, notes?: string): void {
     if (!['dispatched', 'in_transit'].includes(this.props.status)) {
-      throw new Error('Dispatch must be dispatched or in transit before it can be received');
+      throw new InventoryValidationError('Dispatch must be dispatched or in transit before it can be received');
     }
 
     this.props.items = this.props.items.map(item => {
@@ -221,7 +223,7 @@ export class StoreDispatch {
       const receivedQuantity = match?.receivedQuantity ?? item.dispatchedQuantity;
 
       if (receivedQuantity < 0 || receivedQuantity > item.dispatchedQuantity) {
-        throw new Error('Received quantity cannot exceed dispatched quantity');
+        throw new InventoryValidationError('Received quantity cannot exceed dispatched quantity');
       }
 
       return {
@@ -241,7 +243,7 @@ export class StoreDispatch {
 
   cancel(reason?: string): void {
     if (['dispatched', 'in_transit', 'received', 'cancelled'].includes(this.props.status)) {
-      throw new Error('Dispatch cannot be cancelled from the current status');
+      throw new InventoryValidationError('Dispatch cannot be cancelled from the current status');
     }
 
     this.props.status = 'cancelled';

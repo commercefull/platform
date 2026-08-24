@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { ProductBundle as DbProductBundle, ProductBundleItem as DbProductBundleItem } from '../../../../libs/db/types';
+import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================
 // Types
@@ -349,7 +350,7 @@ export async function calculateBundlePrice(
   selectedItems?: { productId: string; productVariantId?: string; quantity: number }[],
 ): Promise<{ price: number; savings: number; savingsPercent: number }> {
   const bundle = await getBundle(productBundleId);
-  if (!bundle) throw new Error('Bundle not found');
+  if (!bundle) throw new ProductNotFoundError(productBundleId);
 
   const items = await getBundleItems(productBundleId);
 

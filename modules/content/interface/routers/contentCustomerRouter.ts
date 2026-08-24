@@ -1,4 +1,5 @@
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   getPublishedPages,
   getPublishedPageBySlug,
@@ -8,8 +9,8 @@ import {
 const router = express.Router();
 
 // Public content routes (no auth required, only published/active content)
-router.get('/content/pages', getPublishedPages);
-router.get('/content/pages/:slug', getPublishedPageBySlug);
-router.get('/content/types', getActiveContentTypes);
+router.get('/content/pages', asyncHandler(getPublishedPages));
+router.get('/content/pages/:slug', asyncHandler(getPublishedPageBySlug));
+router.get('/content/types', asyncHandler(getActiveContentTypes));
 
 export const contentCustomerRouter = router;

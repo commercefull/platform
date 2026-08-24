@@ -6,6 +6,7 @@
 
 import { eventBus } from '../../../../libs/events/eventBus';
 import { Coupon } from '../../domain/entities/Coupon';
+import { CouponNotFoundError } from '../../domain/errors/CouponErrors';
 
 export interface RedeemCouponRepositoryPort {
   findByCode(code: string): Promise<Coupon | null>;
@@ -40,7 +41,7 @@ export class RedeemCouponUseCase {
   async execute(input: RedeemCouponInput): Promise<RedeemCouponOutput> {
     const coupon = await this.couponRepository.findByCode(input.couponCode);
     if (!coupon) {
-      throw new Error('Coupon not found');
+      throw new CouponNotFoundError(input.couponCode);
     }
 
     const redemptionId = `rmp_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

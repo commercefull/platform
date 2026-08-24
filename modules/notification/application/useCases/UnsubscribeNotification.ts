@@ -7,8 +7,11 @@
  * Validates: Requirements 7.4
  */
 
-import * as notificationUnsubscribeRepo from '../../infrastructure/repositories/notificationUnsubscribeRepo';
-import * as notificationPreferenceRepo from '../../infrastructure/repositories/notificationPreferenceRepo';
+import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
+
+const notificationUnsubscribeRepo = notificationConfigRepository.unsubscribes;
+const notificationPreferenceRepo = notificationConfigRepository.preferences;
 
 // ============================================================================
 // Command
@@ -46,8 +49,8 @@ export class UnsubscribeNotificationUseCase {
   ) {}
 
   async execute(command: UnsubscribeNotificationCommand): Promise<UnsubscribeNotificationResponse> {
-    if (!command.userId) throw new Error('userId is required');
-    if (!command.channel) throw new Error('channel is required');
+    if (!command.userId) throw new NotificationValidationError('userId is required');
+    if (!command.channel) throw new NotificationValidationError('channel is required');
 
     await this.unsubscribeRepo.unsubscribe({
       userId: command.userId,

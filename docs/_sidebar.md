@@ -7,6 +7,7 @@
   - [Getting Started](guides/getting-started.md)
 
 - **Architecture**
+  - [Gap Analysis And Roadmap](architecture/gap-analysis-and-roadmap.md)
   - [Overview](architecture/overview.md)
 
 - **Engineering Standards**
@@ -15,11 +16,14 @@
   - [Code Style](guidelines/code-style.md)
   - [Database](guidelines/database.md)
   - [Do And Dont](guidelines/do-and-dont.md)
+  - [Errors And Logging](guidelines/errors-and-logging.md)
   - [Events](guidelines/events.md)
   - [I18n](guidelines/i18n.md)
   - [Infrastructure](guidelines/infrastructure.md)
   - [Libraries](guidelines/libraries.md)
   - [Migrations](guidelines/migrations.md)
+  - [Module Integration](guidelines/module-integration.md)
+  - [Module Stability Checklist](guidelines/module-stability-checklist.md)
   - [Modules Ddd](guidelines/modules-ddd.md)
   - [Security](guidelines/security.md)
   - [Seeds](guidelines/seeds.md)
@@ -52,6 +56,7 @@
   - [Supplier](modules/supplier.md)
   - [Support](modules/support.md)
   - [Tax](modules/tax.md)
+  - [Tracking](modules/tracking.md)
   - [Warehouse](modules/warehouse.md)
 
 - **Generated Reference**

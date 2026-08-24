@@ -7,6 +7,7 @@ import productCollectionRepo from '../../infrastructure/repositories/productColl
 import productCollectionMapRepo from '../../infrastructure/repositories/productCollectionMapRepo';
 import type { ProductCollection } from '../../infrastructure/repositories/productCollectionRepo';
 import type { ProductCollectionMap } from '../../infrastructure/repositories/productCollectionMapRepo';
+import { ProductCollectionNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================
 // Command
@@ -50,10 +51,10 @@ export interface ManageProductCollectionResponse {
 export class ManageProductCollectionUseCase {
   async execute(command: ManageProductCollectionCommand): Promise<ManageProductCollectionResponse> {
     if (!command.name?.trim()) {
-      throw new Error('Collection name is required');
+      throw new ProductValidationError('Collection name is required');
     }
     if (!command.slug?.trim()) {
-      throw new Error('Collection slug is required');
+      throw new ProductValidationError('Collection slug is required');
     }
 
     let collection: ProductCollection;
@@ -69,7 +70,7 @@ export class ManageProductCollectionUseCase {
         organizationId: command.organizationId,
       });
       if (!updated) {
-        throw new Error(`Collection not found: ${command.productCollectionId}`);
+        throw new ProductCollectionNotFoundError(command.productCollectionId);
       }
       collection = updated;
     } else {

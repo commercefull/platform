@@ -3,11 +3,12 @@
  * HTTP interface for customer operations
  */
 
-import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { CustomerAddress } from '../../../../libs/db/types';
-import CustomerRepo from '../../infrastructure/repositories/CustomerRepository';
+import customerDataRepository from '../../infrastructure/repositories/CustomerDataRepository';
+
+const CustomerRepo = customerDataRepository.customers;
 import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../application/useCases/RegisterCustomer';
 import { GetCustomerCommand, GetCustomerUseCase } from '../../application/useCases/GetCustomer';
 import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../application/useCases/UpdateCustomer';
@@ -41,112 +42,92 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
 // ============================================================================
 
 export const registerCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body as {
-      email: string;
-      firstName: string;
-      lastName: string;
-      password: string;
-      phone?: string;
-      dateOfBirth?: string;
-      preferredCurrency?: string;
-      preferredLanguage?: string;
-    };
+  const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body as {
+    email: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+    phone?: string;
+    dateOfBirth?: string;
+    preferredCurrency?: string;
+    preferredLanguage?: string;
+  };
 
-    const command = new RegisterCustomerCommand(
-      email,
-      firstName,
-      lastName,
-      password,
-      phone,
-      dateOfBirth ? new Date(dateOfBirth) : undefined,
-      preferredCurrency,
-      preferredLanguage,
-    );
+  const command = new RegisterCustomerCommand(
+    email,
+    firstName,
+    lastName,
+    password,
+    phone,
+    dateOfBirth ? new Date(dateOfBirth) : undefined,
+    preferredCurrency,
+    preferredLanguage,
+  );
 
-    const useCase = new RegisterCustomerUseCase(CustomerRepo);
-    const result = await useCase.execute(command);
+  const useCase = new RegisterCustomerUseCase(CustomerRepo);
+  const result = await useCase.execute(command);
 
-    respond(req, res, result, 201);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to register', (error as Error).message.includes('exists') ? 409 : 500);
-  }
+  respond(req, res, result, 201);
+  
 };
 
 export const getCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const command = new GetCustomerCommand(customerId);
-    const useCase = new GetCustomerUseCase(CustomerRepo);
-    const customer = await useCase.execute(command);
+  const { customerId } = req.params;
+  const command = new GetCustomerCommand(customerId);
+  const useCase = new GetCustomerUseCase(CustomerRepo);
+  const customer = await useCase.execute(command);
 
-    if (!customer) {
-      respondError(req, res, 'Customer not found', 404);
-      return;
-    }
-
-    respond(req, res, customer);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get customer', 500);
+  if (!customer) {
+    respondError(req, res, 'Customer not found', 404);
+    return;
   }
+
+  respond(req, res, customer);
+  
 };
 
 export const getMyProfile = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    const command = new GetCustomerCommand(customerId);
-    const useCase = new GetCustomerUseCase(CustomerRepo);
-    const customer = await useCase.execute(command);
-
-    if (!customer) {
-      respondError(req, res, 'Customer not found', 404);
-      return;
-    }
-
-    respond(req, res, customer);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get profile', 500);
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id;
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const command = new GetCustomerCommand(customerId);
+  const useCase = new GetCustomerUseCase(CustomerRepo);
+  const customer = await useCase.execute(command);
+
+  if (!customer) {
+    respondError(req, res, 'Customer not found', 404);
+    return;
+  }
+
+  respond(req, res, customer);
+  
 };
 
 export const updateMyProfile = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    const command = new UpdateCustomerCommand(customerId, req.body as {
-      firstName?: string;
-      lastName?: string;
-      phone?: string;
-      dateOfBirth?: Date;
-      preferredCurrency?: string;
-      preferredLanguage?: string;
-      notes?: string;
-      metadata?: Record<string, unknown>;
-    });
-    const useCase = new UpdateCustomerUseCase(CustomerRepo);
-    const result = await useCase.execute(command);
-
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to update profile', 500);
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id;
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const command = new UpdateCustomerCommand(customerId, req.body as {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    dateOfBirth?: Date;
+    preferredCurrency?: string;
+    preferredLanguage?: string;
+    notes?: string;
+    metadata?: Record<string, unknown>;
+  });
+  const useCase = new UpdateCustomerUseCase(CustomerRepo);
+  const result = await useCase.execute(command);
+
+  respond(req, res, result);
+  
 };
 
 // ============================================================================
@@ -154,160 +135,135 @@ export const updateMyProfile = async (req: TypedRequest, res: Response): Promise
 // ============================================================================
 
 export const getAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    const useCase = new ManageAddressesUseCase(CustomerRepo);
-    const addresses = await useCase.getAddresses(customerId);
-
-    respond(req, res, { addresses });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get addresses', 500);
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id;
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const addresses = await useCase.getAddresses(customerId);
+
+  respond(req, res, { addresses });
+  
 };
 
 export const addAddress = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    const {
-      addressLine1,
-      addressLine2,
-      city,
-      state,
-      postalCode,
-      country,
-      countryCode,
-      addressType,
-      phone,
-      firstName,
-      lastName,
-      company,
-      isDefault,
-    } = req.body as {
-      addressLine1: string;
-      addressLine2?: string;
-      city: string;
-      state: string;
-      postalCode: string;
-      country: string;
-      countryCode?: string;
-      addressType: 'billing' | 'shipping';
-      phone?: string;
-      firstName?: string;
-      lastName?: string;
-      company?: string;
-      isDefault?: boolean;
-    };
-
-    const command = new AddAddressCommand(
-      customerId,
-      addressLine1,
-      city,
-      state,
-      postalCode,
-      country,
-      countryCode || country,
-      addressType,
-      addressLine2,
-      phone,
-      firstName,
-      lastName,
-      company,
-      isDefault,
-    );
-
-    const useCase = new ManageAddressesUseCase(CustomerRepo);
-    const address = await useCase.addAddress(command);
-
-    respond(req, res, address, 201);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to add address', 500);
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id;
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const {
+    addressLine1,
+    addressLine2,
+    city,
+    state,
+    postalCode,
+    country,
+    countryCode,
+    addressType,
+    phone,
+    firstName,
+    lastName,
+    company,
+    isDefault,
+  } = req.body as {
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    countryCode?: string;
+    addressType: 'billing' | 'shipping';
+    phone?: string;
+    firstName?: string;
+    lastName?: string;
+    company?: string;
+    isDefault?: boolean;
+  };
+
+  const command = new AddAddressCommand(
+    customerId,
+    addressLine1,
+    city,
+    state,
+    postalCode,
+    country,
+    countryCode || country,
+    addressType,
+    addressLine2,
+    phone,
+    firstName,
+    lastName,
+    company,
+    isDefault,
+  );
+
+  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const address = await useCase.addAddress(command);
+
+  respond(req, res, address, 201);
+  
 };
 
 export const updateAddress = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
-    const { addressId } = req.params;
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id;
+  const { addressId } = req.params;
 
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    const command = new UpdateAddressCommand(customerId, addressId, req.body as Partial<Omit<CustomerAddress, 'customerAddressId' | 'customerId' | 'createdAt' | 'updatedAt'>>);
-    const useCase = new ManageAddressesUseCase(CustomerRepo);
-    const address = await useCase.updateAddress(command);
-
-    respond(req, res, address);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to update address', 500);
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const command = new UpdateAddressCommand(customerId, addressId, req.body as Partial<Omit<CustomerAddress, 'customerAddressId' | 'customerId' | 'createdAt' | 'updatedAt'>>);
+  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const address = await useCase.updateAddress(command);
+
+  respond(req, res, address);
+  
 };
 
 export const deleteAddress = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
-    const { addressId } = req.params;
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id;
+  const { addressId } = req.params;
 
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    const command = new DeleteAddressCommand(customerId, addressId);
-    const useCase = new ManageAddressesUseCase(CustomerRepo);
-    await useCase.deleteAddress(command);
-
-    respond(req, res, { deleted: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to delete address', 500);
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const command = new DeleteAddressCommand(customerId, addressId);
+  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  await useCase.deleteAddress(command);
+
+  respond(req, res, { deleted: true });
+  
 };
 
 export const setDefaultAddress = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
-    const { addressId } = req.params;
-    const { addressType } = req.body as { addressType: 'billing' | 'shipping' };
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id;
+  const { addressId } = req.params;
+  const { addressType } = req.body as { addressType: 'billing' | 'shipping' };
 
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    if (!['billing', 'shipping'].includes(addressType)) {
-      respondError(req, res, 'Invalid address type', 400);
-      return;
-    }
-
-    const command = new SetDefaultAddressCommand(customerId, addressId, addressType);
-    const useCase = new ManageAddressesUseCase(CustomerRepo);
-    await useCase.setDefaultAddress(command);
-
-    respond(req, res, { success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to set default address', 500);
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  if (!['billing', 'shipping'].includes(addressType)) {
+    respondError(req, res, 'Invalid address type', 400);
+    return;
+  }
+
+  const command = new SetDefaultAddressCommand(customerId, addressId, addressType);
+  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  await useCase.setDefaultAddress(command);
+
+  respond(req, res, { success: true });
+  
 };
 
 // ============================================================================
@@ -315,172 +271,132 @@ export const setDefaultAddress = async (req: TypedRequest, res: Response): Promi
 // ============================================================================
 
 export const listCustomers = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { limit = 20, offset = 0, search, status, isVerified } = req.query;
+  const { limit = 20, offset = 0, search, status, isVerified } = req.query;
 
-    const filters: { search?: string; status?: 'active' | 'inactive' | 'suspended'; isVerified?: boolean } = {};
-    if (search) filters.search = search as string;
-    if (status) filters.status = status as 'active' | 'inactive' | 'suspended';
-    if (isVerified !== undefined) filters.isVerified = isVerified === 'true';
+  const filters: { search?: string; status?: 'active' | 'inactive' | 'suspended'; isVerified?: boolean } = {};
+  if (search) filters.search = search as string;
+  if (status) filters.status = status as 'active' | 'inactive' | 'suspended';
+  if (isVerified !== undefined) filters.isVerified = isVerified === 'true';
 
-    const customers = await CustomerRepo.findAll(filters, {
-      limit: Number(limit),
-      offset: Number(offset),
-    });
+  const customers = await CustomerRepo.findAll(filters, {
+    limit: Number(limit),
+    offset: Number(offset),
+  });
 
-    respond(req, res, customers);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to list customers', 500);
-  }
+  respond(req, res, customers);
+  
 };
 
 export const createCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body as {
-      email: string;
-      firstName: string;
-      lastName: string;
-      password: string;
-      phone?: string;
-      dateOfBirth?: string;
-      preferredCurrency?: string;
-      preferredLanguage?: string;
-    };
+  const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body as {
+    email: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+    phone?: string;
+    dateOfBirth?: string;
+    preferredCurrency?: string;
+    preferredLanguage?: string;
+  };
 
-    const command = new RegisterCustomerCommand(
-      email,
-      firstName,
-      lastName,
-      password,
-      phone,
-      dateOfBirth ? new Date(dateOfBirth) : undefined,
-      preferredCurrency,
-      preferredLanguage,
-    );
+  const command = new RegisterCustomerCommand(
+    email,
+    firstName,
+    lastName,
+    password,
+    phone,
+    dateOfBirth ? new Date(dateOfBirth) : undefined,
+    preferredCurrency,
+    preferredLanguage,
+  );
 
-    const useCase = new RegisterCustomerUseCase(CustomerRepo);
-    const result = await useCase.execute(command);
+  const useCase = new RegisterCustomerUseCase(CustomerRepo);
+  const result = await useCase.execute(command);
 
-    respond(req, res, result, 201);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to create customer', (error as Error).message?.includes('exists') ? 409 : 500);
-  }
+  respond(req, res, result, 201);
+  
 };
 
 export const updateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const command = new UpdateCustomerCommand(customerId, req.body as {
-      firstName?: string;
-      lastName?: string;
-      phone?: string;
-      dateOfBirth?: Date;
-      preferredCurrency?: string;
-      preferredLanguage?: string;
-      notes?: string;
-      metadata?: Record<string, unknown>;
-    });
-    const useCase = new UpdateCustomerUseCase(CustomerRepo);
-    const result = await useCase.execute(command);
+  const { customerId } = req.params;
+  const command = new UpdateCustomerCommand(customerId, req.body as {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    dateOfBirth?: Date;
+    preferredCurrency?: string;
+    preferredLanguage?: string;
+    notes?: string;
+    metadata?: Record<string, unknown>;
+  });
+  const useCase = new UpdateCustomerUseCase(CustomerRepo);
+  const result = await useCase.execute(command);
 
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to update customer', 500);
-  }
+  respond(req, res, result);
+  
 };
 
 export const deleteCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const { reason } = (req.body || {}) as { reason?: string };
+  const { customerId } = req.params;
+  const { reason } = (req.body || {}) as { reason?: string };
 
-    const command = new DeleteCustomerCommand(customerId, reason);
-    const useCase = new DeleteCustomerUseCase(CustomerRepo);
-    const result = await useCase.execute(command);
+  const command = new DeleteCustomerCommand(customerId, reason);
+  const useCase = new DeleteCustomerUseCase(CustomerRepo);
+  const result = await useCase.execute(command);
 
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to delete customer', (error as Error).message?.includes('not found') ? 404 : 500);
-  }
+  respond(req, res, result);
+  
 };
 
 export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const { verificationType = 'email' } = req.body as { verificationType?: 'email' | 'phone' };
+  const { customerId } = req.params;
+  const { verificationType = 'email' } = req.body as { verificationType?: 'email' | 'phone' };
 
-    const command = new VerifyCustomerCommand(customerId, verificationType);
-    const useCase = new VerifyCustomerUseCase(CustomerRepo);
-    const result = await useCase.execute(command);
+  const command = new VerifyCustomerCommand(customerId, verificationType);
+  const useCase = new VerifyCustomerUseCase(CustomerRepo);
+  const result = await useCase.execute(command);
 
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to verify customer', (error as Error).message?.includes('not found') ? 404 : 500);
-  }
+  respond(req, res, result);
+  
 };
 
 export const deactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const { reason } = (req.body || {}) as { reason?: string };
+  const { customerId } = req.params;
+  const { reason } = (req.body || {}) as { reason?: string };
 
-    const command = new DeactivateCustomerCommand(customerId, reason);
-    const useCase = new DeactivateCustomerUseCase(CustomerRepo);
-    const result = await useCase.execute(command);
+  const command = new DeactivateCustomerCommand(customerId, reason);
+  const useCase = new DeactivateCustomerUseCase(CustomerRepo);
+  const result = await useCase.execute(command);
 
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to deactivate customer', (error as Error).message?.includes('not found') ? 404 : 500);
-  }
+  respond(req, res, result);
+  
 };
 
 export const reactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
+  const { customerId } = req.params;
 
-    const command = new ReactivateCustomerCommand(customerId);
-    const useCase = new ReactivateCustomerUseCase(CustomerRepo);
-    const result = await useCase.execute(command);
+  const command = new ReactivateCustomerCommand(customerId);
+  const useCase = new ReactivateCustomerUseCase(CustomerRepo);
+  const result = await useCase.execute(command);
 
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to reactivate customer', (error as Error).message?.includes('not found') ? 404 : 500);
-  }
+  respond(req, res, result);
+  
 };
 
 export const changePassword = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id;
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
-    const command = new ChangePasswordCommand(customerId, currentPassword, newPassword);
-    const useCase = new ChangePasswordUseCase(CustomerRepo);
-    const result = await useCase.execute(command);
-
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to change password', (error as Error).message?.includes('incorrect') ? 401 : 500);
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id;
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
+  const command = new ChangePasswordCommand(customerId, currentPassword, newPassword);
+  const useCase = new ChangePasswordUseCase(CustomerRepo);
+  const result = await useCase.execute(command);
+
+  respond(req, res, result);
+  
 };
 
 // ============================================================================
@@ -488,76 +404,66 @@ export const changePassword = async (req: TypedRequest, res: Response): Promise<
 // ============================================================================
 
 export const getCustomerAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const useCase = new ManageAddressesUseCase(CustomerRepo);
-    const addresses = await useCase.getAddresses(customerId);
+  const { customerId } = req.params;
+  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const addresses = await useCase.getAddresses(customerId);
 
-    respond(req, res, { addresses });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get addresses', 500);
-  }
+  respond(req, res, { addresses });
+  
 };
 
 export const addCustomerAddress = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const {
-      addressLine1,
-      addressLine2,
-      city,
-      state,
-      postalCode,
-      country,
-      countryCode,
-      addressType,
-      phone,
-      firstName,
-      lastName,
-      company,
-      isDefault,
-    } = req.body as {
-      addressLine1: string;
-      addressLine2?: string;
-      city: string;
-      state: string;
-      postalCode: string;
-      country: string;
-      countryCode?: string;
-      addressType: 'billing' | 'shipping';
-      phone?: string;
-      firstName?: string;
-      lastName?: string;
-      company?: string;
-      isDefault?: boolean;
-    };
+  const { customerId } = req.params;
+  const {
+    addressLine1,
+    addressLine2,
+    city,
+    state,
+    postalCode,
+    country,
+    countryCode,
+    addressType,
+    phone,
+    firstName,
+    lastName,
+    company,
+    isDefault,
+  } = req.body as {
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    countryCode?: string;
+    addressType: 'billing' | 'shipping';
+    phone?: string;
+    firstName?: string;
+    lastName?: string;
+    company?: string;
+    isDefault?: boolean;
+  };
 
-    const command = new AddAddressCommand(
-      customerId,
-      addressLine1,
-      city,
-      state,
-      postalCode,
-      country,
-      countryCode || country,
-      addressType,
-      addressLine2,
-      phone,
-      firstName,
-      lastName,
-      company,
-      isDefault,
-    );
+  const command = new AddAddressCommand(
+    customerId,
+    addressLine1,
+    city,
+    state,
+    postalCode,
+    country,
+    countryCode || country,
+    addressType,
+    addressLine2,
+    phone,
+    firstName,
+    lastName,
+    company,
+    isDefault,
+  );
 
-    const useCase = new ManageAddressesUseCase(CustomerRepo);
-    const address = await useCase.addAddress(command);
+  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const address = await useCase.addAddress(command);
 
-    respond(req, res, address, 201);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to add address', 500);
-  }
+  respond(req, res, address, 201);
+  
 };

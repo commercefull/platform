@@ -4,6 +4,7 @@
 
 import { generateUUID } from '../../../../libs/uuid';
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import { CustomerNotFoundError } from '../../domain/errors/CustomerErrors';
 import { CustomerAddress } from '../../../../libs/db/types';
 
 // ============================================================================
@@ -83,7 +84,7 @@ export class ManageAddressesUseCase {
   async addAddress(command: AddAddressCommand): Promise<AddressResponse> {
     const customer = await this.customerRepository.findById(command.customerId);
     if (!customer) {
-      throw new Error('Customer not found');
+      throw new CustomerNotFoundError(command.customerId);
     }
 
     const address: CustomerAddress = {
@@ -123,7 +124,7 @@ export class ManageAddressesUseCase {
   async updateAddress(command: UpdateAddressCommand): Promise<AddressResponse> {
     const customer = await this.customerRepository.findById(command.customerId);
     if (!customer) {
-      throw new Error('Customer not found');
+      throw new CustomerNotFoundError(command.customerId);
     }
 
     const updated = await this.customerRepository.updateAddress(command.addressId, command.updates as Partial<CustomerAddress>);
@@ -133,7 +134,7 @@ export class ManageAddressesUseCase {
   async deleteAddress(command: DeleteAddressCommand): Promise<void> {
     const customer = await this.customerRepository.findById(command.customerId);
     if (!customer) {
-      throw new Error('Customer not found');
+      throw new CustomerNotFoundError(command.customerId);
     }
 
     await this.customerRepository.deleteAddress(command.addressId);
@@ -142,7 +143,7 @@ export class ManageAddressesUseCase {
   async setDefaultAddress(command: SetDefaultAddressCommand): Promise<void> {
     const customer = await this.customerRepository.findById(command.customerId);
     if (!customer) {
-      throw new Error('Customer not found');
+      throw new CustomerNotFoundError(command.customerId);
     }
 
     await this.customerRepository.setDefaultAddress(command.customerId, command.addressId, command.addressType);
@@ -151,7 +152,7 @@ export class ManageAddressesUseCase {
   async getAddresses(customerId: string): Promise<AddressResponse[]> {
     const customer = await this.customerRepository.findById(customerId);
     if (!customer) {
-      throw new Error('Customer not found');
+      throw new CustomerNotFoundError(customerId);
     }
 
     const addresses = await this.customerRepository.getAddresses(customerId);

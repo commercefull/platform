@@ -1,6 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table, CurrencyExchangeRate } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
+import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 
 export type CurrencyExchangeRateCreateParams = Omit<
   CurrencyExchangeRate,
@@ -131,7 +132,7 @@ export class CurrencyExchangeRateRepo {
 
     // Prevent same currency exchange
     if (params.sourceCurrencyId === params.targetCurrencyId) {
-      throw new Error('Source and target currencies must be different');
+      throw new PricingValidationError('Source and target currencies must be different');
     }
 
     // Calculate inverse rate - convert string to number for calculation
@@ -164,7 +165,7 @@ export class CurrencyExchangeRateRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create currency exchange rate');
+      throw new FailedToCreatePricingError('Failed to create currency exchange rate');
     }
 
     return result;

@@ -3,6 +3,7 @@
  */
 
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as giftCardController from '../controllers/giftCardCustomerController';
 
 const router = express.Router();
@@ -16,9 +17,9 @@ router.get('/active', (_req, res) => {
 });
 
 // Gift Card routes
-router.get('/gift-cards/balance/:code', giftCardController.checkGiftCardBalance);
-router.post('/gift-cards/redeem', giftCardController.redeemGiftCard);
-router.get('/gift-cards/mine', giftCardController.getMyGiftCards);
-router.post('/gift-cards/reload', giftCardController.reloadGiftCard);
+router.get('/gift-cards/balance/:code', asyncHandler(giftCardController.checkGiftCardBalance));
+router.post('/gift-cards/redeem', asyncHandler(giftCardController.redeemGiftCard));
+router.get('/gift-cards/mine', asyncHandler(giftCardController.getMyGiftCards));
+router.post('/gift-cards/reload', asyncHandler(giftCardController.reloadGiftCard));
 
 export const promotionCustomerRouter = router;

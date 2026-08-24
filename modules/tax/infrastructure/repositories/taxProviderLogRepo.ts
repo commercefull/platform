@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 
 
 export type TaxProvider = 'internal' | 'avalara' | 'taxjar' | 'external';
@@ -74,7 +75,7 @@ export class TaxProviderLogRepo {
         now,
       ],
     );
-    if (!result) throw new Error('Failed to create tax provider log');
+    if (!result) throw new FailedToCreateTaxError('Failed to create tax provider log');
     return result;
   }
 

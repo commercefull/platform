@@ -7,19 +7,36 @@
 
 import { eventBus } from './eventBus';
 import { WebhookDispatchService } from '../../modules/webhook/application/services/WebhookDispatchService';
-import WebhookRepo from '../../modules/webhook/infrastructure/repositories/WebhookRepository';
-import OrderRepo from '../../modules/order/infrastructure/repositories/OrderRepository';
-import * as inventoryReservationRepo from '../../modules/inventory/infrastructure/repositories/inventoryReservationRepo';
-import InventoryRepo from '../../modules/inventory/infrastructure/repositories/inventoryRepo';
-import WarehouseRepo from '../../modules/warehouse/infrastructure/repositories/warehouseRepo';
-import fulfillmentRepository from '../../modules/fulfillment/infrastructure/repositories/FulfillmentRepository';
+import { WebhookRepository as WebhookRepo } from '../../modules/webhook/infrastructure';
+import { OrderDataRepository as OrderDataRepo } from '../../modules/order/infrastructure';
+
+const OrderRepo = OrderDataRepo.commands;
+import { InventoryDataRepository as InventoryDataRepo } from '../../modules/inventory/infrastructure';
+import { WarehouseDataRepository as WarehouseDataRepo } from '../../modules/warehouse/infrastructure';
+import { FulfillmentDataRepository as FulfillmentDataRepo } from '../../modules/fulfillment/infrastructure';
+
+const inventoryReservationRepo = InventoryDataRepo.reservations;
+const InventoryRepo = InventoryDataRepo.stock;
+const WarehouseRepo = WarehouseDataRepo.warehouses;
+const fulfillmentRepository = FulfillmentDataRepo.fulfillments;
 import { CreateFulfillmentUseCase } from '../../modules/fulfillment/application/useCases/CreateFulfillment';
 import { OrderRouter } from '../../modules/order/domain/services/OrderRouter';
-import StoreRepo from '../../modules/store/infrastructure/repositories/StoreRepo';
+import { StoreDataRepository as StoreDataRepo } from '../../modules/store/infrastructure';
+
+const StoreRepo = StoreDataRepo.stores;
 import { JobScheduler } from '../jobs/cronScheduler';
-import LoyaltyRepo from '../../modules/loyalty/infrastructure/repositories/loyaltyRepo';
+import { LoyaltyDataRepository as LoyaltyDataRepo } from '../../modules/loyalty/infrastructure';
+
+const LoyaltyRepo = LoyaltyDataRepo.points;
 import { query } from '../db';
 import { logger } from '../logger';
+import { stopOutboxDispatcher } from './outboxDispatcher';
+import { registerCheckoutEventHandlers } from '../../modules/checkout/application/eventHandlers';
+import CheckoutRepo from '../../modules/checkout/infrastructure/repositories/CheckoutRepository';
+import { registerOrderPaymentEventHandlers } from '../../modules/order/application/eventHandlers';
+import { registerTrackingEventHandlers, setConsentRepository } from '../../modules/tracking/application/eventHandlers/trackingEventHandlers';
+import { moduleRegistry } from '../../boot/moduleManifests';
+import { GdprDataRepository } from '../../modules/gdpr/infrastructure';
 
 // Track registration state
 let isRegistered = false;
@@ -39,49 +56,94 @@ export function registerAllEventHandlers(): void {
 
   try {
     // Order-related handlers (notifications, fulfillment trigger)
-    registerOrderEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('order')) {
+      registerOrderEventHandlers();
+    }
+
+    // Order payment event handlers (Published Language: reacts to payment events)
+    if (moduleRegistry.shouldRegisterEvents('order')) {
+      registerOrderPaymentEventHandlers();
+    }
 
     // Inventory handlers (stock alerts, reorder triggers)
-    registerInventoryEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('inventory')) {
+      registerInventoryEventHandlers();
+    }
 
     // Fulfillment handlers (shipping integration, tracking updates)
-    registerFulfillmentEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('fulfillment')) {
+      registerFulfillmentEventHandlers();
+    }
 
     // Loyalty handlers (points calculation, tier updates)
-    registerLoyaltyEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('loyalty')) {
+      registerLoyaltyEventHandlers();
+    }
 
     // Store handlers (inventory sync, pickup notifications)
-    registerStoreEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('store')) {
+      registerStoreEventHandlers();
+    }
 
     // Merchant handlers (settlement updates)
-    registerMerchantEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('organization')) {
+      registerMerchantEventHandlers();
+    }
 
     // Analytics handlers (tracking, reporting)
-    registerAnalyticsEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('analytics')) {
+      registerAnalyticsEventHandlers();
+    }
 
     // Basket handlers (cart recovery)
-    registerBasketEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('basket')) {
+      registerBasketEventHandlers();
+    }
+
+    // Checkout handlers (Published Language: reacts to payment events)
+    if (moduleRegistry.shouldRegisterEvents('checkout')) {
+      registerCheckoutEventHandlers(CheckoutRepo);
+    }
 
     // Payment handlers (order status, notifications)
-    registerPaymentEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('payment')) {
+      registerPaymentEventHandlers();
+    }
 
     // Customer handlers (welcome email)
-    registerCustomerEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('customer')) {
+      registerCustomerEventHandlers();
+    }
 
     // Product handlers (search index, cache invalidation)
-    registerProductEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('product')) {
+      registerProductEventHandlers();
+    }
 
     // Subscription handlers (notifications, analytics)
-    registerSubscriptionEventHandlers();
+    if (moduleRegistry.shouldRegisterEvents('subscription')) {
+      registerSubscriptionEventHandlers();
+    }
 
     // Webhook dispatch (forwards eventBus events to registered webhook endpoints)
-    registerWebhookDispatch();
+    if (moduleRegistry.shouldRegisterEvents('webhook')) {
+      registerWebhookDispatch();
+    }
+
+    // Tracking handlers (server-side GTM + Meta CAPI, consent-gated)
+    if (moduleRegistry.shouldRegisterEvents('tracking')) {
+      // Wire consent repository from GDPR module for consent gating
+      if (moduleRegistry.isEnabled('gdpr')) {
+        setConsentRepository(GdprDataRepository.cookieConsent);
+      }
+      registerTrackingEventHandlers();
+    }
 
     isRegistered = true;
 
-    console.log(`[EVENTS] Total registered event types: ${eventBus.getRegisteredTypes().length}`);
+    logger.info('Event handlers registered', { registeredTypes: eventBus.getRegisteredTypes().length });
   } catch (error) {
-    console.error('[EVENTS] Failed to register event handlers:', error);
+    logger.error('Failed to register event handlers', { error });
     throw error;
   }
 }
@@ -89,11 +151,13 @@ export function registerAllEventHandlers(): void {
 /**
  * Unregister all handlers (for testing/shutdown)
  */
-export function unregisterAllEventHandlers(): void {
+export async function unregisterAllEventHandlers(): Promise<void> {
   if (webhookDispatchService) {
     webhookDispatchService.stop();
     webhookDispatchService = null;
   }
+  // Stop the outbox dispatcher
+  await stopOutboxDispatcher();
   isRegistered = false;
   // EventBus doesn't have a clearAll method, so handlers persist
   // This is mainly for tracking registration state
@@ -160,7 +224,7 @@ function registerOrderEventHandlers(): void {
             });
           }
         } catch (itemErr: unknown) {
-          logger.warn(`inventory reservation failed for item ${item.productId}: ${(itemErr as Error).message}`);
+          logger.warning(`inventory reservation failed for item ${item.productId}: ${(itemErr as Error).message}`);
           eventBus.emit('inventory.reservation_failed', {
             orderId,
             productId: item.productId,
@@ -184,7 +248,7 @@ function registerOrderEventHandlers(): void {
     try {
       const order = await OrderRepo.findById(orderId);
       if (!order) {
-        logger.warn(`order.paid: order ${orderId} not found`);
+        logger.warning(`order.paid: order ${orderId} not found`);
         return;
       }
 
@@ -256,7 +320,7 @@ function registerOrderEventHandlers(): void {
       // Try intelligent routing via OrderRouter first, fall back to default warehouse
       const sa = order.shippingAddress;
       if (!sa) {
-        logger.warn(`order.paid: order ${orderId} has no shipping address, skipping fulfillment`);
+        logger.warning(`order.paid: order ${orderId} has no shipping address, skipping fulfillment`);
         return;
       }
 
@@ -336,7 +400,7 @@ function registerOrderEventHandlers(): void {
         logger.info(`order.paid: OrderRouter fallback to warehouse for order ${orderId}: ${(routeErr as Error).message}`);
         const warehouse = await WarehouseRepo.findDefault();
         if (!warehouse) {
-          logger.warn(`order.paid: no default warehouse found for order ${orderId}, fulfillment must be created manually`);
+          logger.warning(`order.paid: no default warehouse found for order ${orderId}, fulfillment must be created manually`);
           return;
         }
         fulfillmentSourceId = warehouse.distributionWarehouseId;

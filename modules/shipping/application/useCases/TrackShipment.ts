@@ -4,7 +4,7 @@
  * Retrieves tracking information for a shipment.
  */
 
-import shippingLabelRepo from '../../infrastructure/repositories/shippingLabelRepo';
+import shippingLabelRepo from '../../infrastructure/repositories/ShippingLabelAggregateRepository';
 
 export interface TrackShipmentInput {
   trackingNumber?: string;

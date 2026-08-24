@@ -3,6 +3,8 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { logger } from '../../../../../libs/logger';
+import { OrganizationRegistrationFieldsRequiredError, InvalidEmailFormatError, PasswordTooShortError, EmailAlreadyRegisteredError } from '../../../domain/errors/IdentityErrors';
 
 export interface RegisterOrganizationInput {
   email: string;
@@ -61,24 +63,24 @@ export class RegisterOrganizationUseCase {
 
   async execute(input: RegisterOrganizationInput): Promise<RegisterOrganizationOutput> {
     if (!input.email || !input.password || !input.businessName) {
-      throw new Error('Email, password, and business name are required');
+      throw new OrganizationRegistrationFieldsRequiredError();
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(input.email)) {
-      throw new Error('Invalid email format');
+      throw new InvalidEmailFormatError();
     }
 
     // Validate password strength
     if (input.password.length < 8) {
-      throw new Error('Password must be at least 8 characters');
+      throw new PasswordTooShortError();
     }
 
     // Check if email already exists
     const existingOrganization = await this.organizationRepo.findByEmail(input.email);
     if (existingOrganization) {
-      throw new Error('Email already registered');
+      throw new EmailAlreadyRegisteredError();
     }
 
     // Hash password
@@ -108,7 +110,9 @@ export class RegisterOrganizationUseCase {
         businessName: input.businessName,
         firstName: input.firstName,
       });
-    } catch {}
+    } catch (err) {
+      logger.warn('Failed to send organization welcome email', { error: err });
+    }
 
     // Emit event
     eventBus.emit('organization.registered', {

@@ -6,54 +6,40 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import warehouseRepo from '../../../modules/warehouse/infrastructure/repositories/warehouseRepo';
+import { ManageWarehouseAdminUseCaseV2 } from '../../../modules/warehouse/application/useCases/ManageWarehouseAdminV2';
 import { adminRespond } from '../../respond';
+
+const manageWarehouseUseCase = new ManageWarehouseAdminUseCaseV2();
 
 // ============================================================================
 // Warehouse Management
 // ============================================================================
 
 export const listWarehouses = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const activeOnly = req.query.activeOnly !== 'false';
-    const limit = parseInt(req.query.limit as string) || 50;
-    const offset = parseInt(req.query.offset as string) || 0;
+  const activeOnly = req.query.activeOnly !== 'false';
+  const limit = parseInt(req.query.limit as string) || 50;
+  const offset = parseInt(req.query.offset as string) || 0;
 
-    const warehouses = await warehouseRepo.findAll(activeOnly);
-    const stats = await warehouseRepo.getStatistics();
+  const warehouses = await manageWarehouseUseCase.findAll(activeOnly);
+  const stats = await manageWarehouseUseCase.getStatistics();
 
-    adminRespond(req, res, 'operations/warehouses/index', {
-      pageName: 'Warehouses',
-      warehouses,
-      stats,
-      filters: { activeOnly },
-      pagination: { limit, offset },
+  adminRespond(req, res, 'operations/warehouses/index', {
+    pageName: 'Warehouses',
+    warehouses,
+    stats,
+    filters: { activeOnly },
+    pagination: { limit, offset },
 
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load warehouses',
-    });
-  }
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createWarehouseForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'operations/warehouses/create', {
-      pageName: 'Create Warehouse',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'operations/warehouses/create', {
+    pageName: 'Create Warehouse',
+  });
+  
 };
 
 export const createWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -84,7 +70,7 @@ export const createWarehouse = async (req: TypedRequest, res: Response): Promise
       processingTime,
     } = body;
 
-    const warehouse = await warehouseRepo.create({
+    const warehouse = await manageWarehouseUseCase.create({
       name,
       code,
       description: description || undefined,
@@ -111,7 +97,7 @@ export const createWarehouse = async (req: TypedRequest, res: Response): Promise
 
     res.redirect(`/hub/warehouses/${warehouse.distributionWarehouseId}?success=Warehouse created successfully`);
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'operations/warehouses/create', {
       pageName: 'Create Warehouse',
@@ -122,193 +108,143 @@ export const createWarehouse = async (req: TypedRequest, res: Response): Promise
 };
 
 export const viewWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { warehouseId } = req.params;
+  const { warehouseId } = req.params;
 
-    const warehouse = await warehouseRepo.findById(warehouseId);
+  const warehouse = await manageWarehouseUseCase.findById(warehouseId);
 
-    if (!warehouse) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Warehouse not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'operations/warehouses/view', {
-      pageName: `Warehouse: ${warehouse.name}`,
-      warehouse,
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!warehouse) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load warehouse',
+      pageName: 'Not Found',
+      error: 'Warehouse not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'operations/warehouses/view', {
+    pageName: `Warehouse: ${warehouse.name}`,
+    warehouse,
+
+    success: req.query.success || null,
+  });
+  
 };
 
 export const editWarehouseForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { warehouseId } = req.params;
+  const { warehouseId } = req.params;
 
-    const warehouse = await warehouseRepo.findById(warehouseId);
+  const warehouse = await manageWarehouseUseCase.findById(warehouseId);
 
-    if (!warehouse) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Warehouse not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'operations/warehouses/edit', {
-      pageName: `Edit: ${warehouse.name}`,
-      warehouse,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!warehouse) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
+      pageName: 'Not Found',
+      error: 'Warehouse not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'operations/warehouses/edit', {
+    pageName: `Edit: ${warehouse.name}`,
+    warehouse,
+  });
+  
 };
 
 export const updateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { warehouseId } = req.params;
-    const updates: Record<string, unknown> = {};
+  const { warehouseId } = req.params;
+  const updates: Record<string, unknown> = {};
 
-    const body = req.body as RequestBody;
-    const {
-      name,
-      description,
-      isActive,
-      isDefault,
-      isFulfillmentCenter,
-      isReturnCenter,
-      isVirtual,
-      addressLine1,
-      addressLine2,
-      city,
-      state,
-      postalCode,
-      country,
-      latitude,
-      longitude,
-      email,
-      phone,
-      contactName,
-      timezone,
-      cutoffTime,
-      processingTime,
-    } = body;
+  const body = req.body as RequestBody;
+  const {
+    name,
+    description,
+    isActive,
+    isDefault,
+    isFulfillmentCenter,
+    isReturnCenter,
+    isVirtual,
+    addressLine1,
+    addressLine2,
+    city,
+    state,
+    postalCode,
+    country,
+    latitude,
+    longitude,
+    email,
+    phone,
+    contactName,
+    timezone,
+    cutoffTime,
+    processingTime,
+  } = body;
 
-    if (name !== undefined) updates.name = name;
-    if (description !== undefined) updates.description = description || undefined;
-    if (isActive !== undefined) updates.isActive = isActive === 'true';
-    if (isDefault !== undefined) updates.isDefault = isDefault === 'true';
-    if (isFulfillmentCenter !== undefined) updates.isFulfillmentCenter = isFulfillmentCenter === 'true';
-    if (isReturnCenter !== undefined) updates.isReturnCenter = isReturnCenter === 'true';
-    if (isVirtual !== undefined) updates.isVirtual = isVirtual === 'true';
-    if (addressLine1 !== undefined) updates.addressLine1 = addressLine1;
-    if (addressLine2 !== undefined) updates.addressLine2 = addressLine2 || undefined;
-    if (city !== undefined) updates.city = city;
-    if (state !== undefined) updates.state = state;
-    if (postalCode !== undefined) updates.postalCode = postalCode;
-    if (country !== undefined) updates.country = country;
-    if (latitude !== undefined) updates.latitude = latitude ? parseFloat(latitude) : undefined;
-    if (longitude !== undefined) updates.longitude = longitude ? parseFloat(longitude) : undefined;
-    if (email !== undefined) updates.email = email || undefined;
-    if (phone !== undefined) updates.phone = phone || undefined;
-    if (contactName !== undefined) updates.contactName = contactName || undefined;
-    if (timezone !== undefined) updates.timezone = timezone;
-    if (cutoffTime !== undefined) updates.cutoffTime = cutoffTime || undefined;
-    if (processingTime !== undefined) updates.processingTime = processingTime ? parseInt(processingTime) : undefined;
+  if (name !== undefined) updates.name = name;
+  if (description !== undefined) updates.description = description || undefined;
+  if (isActive !== undefined) updates.isActive = isActive === 'true';
+  if (isDefault !== undefined) updates.isDefault = isDefault === 'true';
+  if (isFulfillmentCenter !== undefined) updates.isFulfillmentCenter = isFulfillmentCenter === 'true';
+  if (isReturnCenter !== undefined) updates.isReturnCenter = isReturnCenter === 'true';
+  if (isVirtual !== undefined) updates.isVirtual = isVirtual === 'true';
+  if (addressLine1 !== undefined) updates.addressLine1 = addressLine1;
+  if (addressLine2 !== undefined) updates.addressLine2 = addressLine2 || undefined;
+  if (city !== undefined) updates.city = city;
+  if (state !== undefined) updates.state = state;
+  if (postalCode !== undefined) updates.postalCode = postalCode;
+  if (country !== undefined) updates.country = country;
+  if (latitude !== undefined) updates.latitude = latitude ? parseFloat(latitude) : undefined;
+  if (longitude !== undefined) updates.longitude = longitude ? parseFloat(longitude) : undefined;
+  if (email !== undefined) updates.email = email || undefined;
+  if (phone !== undefined) updates.phone = phone || undefined;
+  if (contactName !== undefined) updates.contactName = contactName || undefined;
+  if (timezone !== undefined) updates.timezone = timezone;
+  if (cutoffTime !== undefined) updates.cutoffTime = cutoffTime || undefined;
+  if (processingTime !== undefined) updates.processingTime = processingTime ? parseInt(processingTime) : undefined;
 
-    const warehouse = await warehouseRepo.update(warehouseId, updates);
+  const warehouse = await manageWarehouseUseCase.update(warehouseId, updates);
 
-    if (!warehouse) {
-      throw new Error('Warehouse not found after update');
-    }
-
-    res.redirect(`/hub/warehouses/${warehouseId}?success=Warehouse updated successfully`);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    try {
-      const warehouse = await warehouseRepo.findById(req.params.warehouseId);
-
-      adminRespond(req, res, 'operations/warehouses/edit', {
-        pageName: `Edit: ${warehouse?.name || 'Warehouse'}`,
-        warehouse,
-        error: (error as Error).message || 'Failed to update warehouse',
-        formData: req.body as RequestBody,
-      });
-    } catch {
-      adminRespond(req, res, 'error', {
-        pageName: 'Error',
-        error: (error as Error).message || 'Failed to update warehouse',
-      });
-    }
+  if (!warehouse) {
+    throw new Error('Warehouse not found after update');
   }
+
+  res.redirect(`/hub/warehouses/${warehouseId}?success=Warehouse updated successfully`);
+  
 };
 
 export const activateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { warehouseId } = req.params;
+  const { warehouseId } = req.params;
 
-    const warehouse = await warehouseRepo.activate(warehouseId);
+  const warehouse = await manageWarehouseUseCase.activate(warehouseId);
 
-    if (!warehouse) {
-      throw new Error('Warehouse not found');
-    }
-
-    res.json({ success: true, message: 'Warehouse activated successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate warehouse' });
+  if (!warehouse) {
+    throw new Error('Warehouse not found');
   }
+
+  res.json({ success: true, message: 'Warehouse activated successfully' });
+  
 };
 
 export const deactivateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { warehouseId } = req.params;
+  const { warehouseId } = req.params;
 
-    const warehouse = await warehouseRepo.deactivate(warehouseId);
+  const warehouse = await manageWarehouseUseCase.deactivate(warehouseId);
 
-    if (!warehouse) {
-      throw new Error('Warehouse not found');
-    }
-
-    res.json({ success: true, message: 'Warehouse deactivated successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate warehouse' });
+  if (!warehouse) {
+    throw new Error('Warehouse not found');
   }
+
+  res.json({ success: true, message: 'Warehouse deactivated successfully' });
+  
 };
 
 export const deleteWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { warehouseId } = req.params;
+  const { warehouseId } = req.params;
 
-    const success = await warehouseRepo.delete(warehouseId);
+  const success = await manageWarehouseUseCase.delete(warehouseId);
 
-    if (!success) {
-      throw new Error('Failed to delete warehouse');
-    }
-
-    res.json({ success: true, message: 'Warehouse deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete warehouse' });
+  if (!success) {
+    throw new Error('Failed to delete warehouse');
   }
+
+  res.json({ success: true, message: 'Warehouse deleted successfully' });
+  
 };

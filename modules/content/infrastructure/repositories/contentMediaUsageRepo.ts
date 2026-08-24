@@ -5,6 +5,7 @@
 
 import { queryOne, query } from '../../../../libs/db';
 import { ContentMediaUsage } from '../../../../libs/db/types';
+import { FailedToCreateContentError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Types
@@ -59,7 +60,7 @@ export class ContentMediaUsageRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create media usage');
+      throw new FailedToCreateContentError('Failed to create media usage');
     }
 
     return result;

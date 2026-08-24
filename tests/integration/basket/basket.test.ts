@@ -39,8 +39,6 @@ describe('Basket Feature Tests', () => {
   let createdBasketItemId: string;
 
   // Test product data from constants
-  const _testProduct1 = { ...TEST_PRODUCT_1, id: TEST_PRODUCT_1_ID };
-  const _testProduct2 = { ...TEST_PRODUCT_2, id: TEST_PRODUCT_2_ID };
   const basketItem1 = { productId: TEST_PRODUCT_1_ID, quantity: 2, price: TEST_PRODUCT_1.price };
   const basketItem2 = { productId: TEST_PRODUCT_2_ID, quantity: 1, price: TEST_PRODUCT_2.price };
 
@@ -59,27 +57,9 @@ describe('Basket Feature Tests', () => {
       customerId = customerLoginResponse.data.customer?.id;
     } catch {}
 
-    // Use pre-seeded basket or create one
-    const basketResponse = await client.get(`/customer/basket/${TEST_GUEST_BASKET_ID}`);
-    if (basketResponse.status === 200 && basketResponse.data?.data?.basketId) {
-      guestBasketId = TEST_GUEST_BASKET_ID;
-      customerBasketId = TEST_CUSTOMER_BASKET_ID;
-    } else {
-      // Create basket dynamically if seeded data doesn't exist
-      const newBasketResponse = await client.post('/customer/basket', { sessionId: 'test-guest-session-' + Date.now() });
-      if (newBasketResponse.status === 200 && newBasketResponse.data?.data?.basketId) {
-        guestBasketId = newBasketResponse.data.data.basketId;
-      } else {
-        console.log(
-          'Warning: Could not create test basket. Status:',
-          newBasketResponse.status,
-          'Response:',
-          JSON.stringify(newBasketResponse.data),
-        );
-        // Use a placeholder - individual tests will handle missing basketId
-        guestBasketId = 'test-basket-unavailable';
-      }
-    }
+    // Use seeded basket IDs
+    guestBasketId = TEST_GUEST_BASKET_ID;
+    customerBasketId = TEST_CUSTOMER_BASKET_ID;
   });
 
   // ============================================================================
@@ -149,7 +129,7 @@ describe('Basket Feature Tests', () => {
 
   describe('Basket Retrieval API', () => {
     it('should get a basket by ID with camelCase properties', async () => {
-      if (!customerToken || guestBasketId === 'test-basket-unavailable') {
+      if (!customerToken) {
         return;
       }
 
@@ -175,7 +155,7 @@ describe('Basket Feature Tests', () => {
     });
 
     it('should get basket summary', async () => {
-      if (!customerToken || guestBasketId === 'test-basket-unavailable') {
+      if (!customerToken) {
         return;
       }
 
@@ -543,7 +523,7 @@ describe('Basket Feature Tests', () => {
       });
 
       it('should reject adding item without required fields', async () => {
-        if (!customerToken || guestBasketId === 'test-basket-unavailable') {
+        if (!customerToken) {
           return;
         }
 

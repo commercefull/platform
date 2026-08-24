@@ -6,6 +6,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { InventoryValidationError, InventoryItemNotFoundError } from '../../domain/errors/InventoryErrors';
 
 export interface SetLowStockThresholdInput {
   productId: string;
@@ -45,7 +46,7 @@ export class SetLowStockThresholdUseCase {
 
   async execute(input: SetLowStockThresholdInput): Promise<SetLowStockThresholdOutput> {
     if (input.reorderPoint < 0) {
-      throw new Error('Reorder point must be >= 0');
+      throw new InventoryValidationError('Reorder point must be >= 0');
     }
 
     const inventory = await this.inventoryRepository.findByProduct(
@@ -55,7 +56,7 @@ export class SetLowStockThresholdUseCase {
     );
 
     if (!inventory) {
-      throw new Error('Inventory item not found for the given product and location');
+      throw new InventoryItemNotFoundError(`${input.productId}:${input.locationId}`);
     }
 
     await this.inventoryRepository.updateReorderPoint(

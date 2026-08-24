@@ -6,37 +6,31 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import * as adminGdprRepo from '../../../modules/gdpr/infrastructure/repositories/adminGdprRepo';
+import { ManageAdminGdprUseCase } from '../../../modules/gdpr/application/useCases/ManageGdpr';
 import { adminRespond } from '../../respond';
+
+const manageAdminGdprUseCase = new ManageAdminGdprUseCase();
 
 // ============================================================================
 // GDPR Dashboard
 // ============================================================================
 
 export const gdprDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const stats = await adminGdprRepo.getGdprStats();
-    const consent = await adminGdprRepo.getConsentStats();
-    const requests = await adminGdprRepo.findRecentRequests(20);
+  const stats = await manageAdminGdprUseCase.getGdprStats();
+  const consent = await manageAdminGdprUseCase.getConsentStats();
+  const requests = await manageAdminGdprUseCase.findRecentRequests(20);
 
-    adminRespond(req, res, 'gdpr/index', {
-      pageName: 'GDPR Compliance',
-      stats: {
-        pendingRequests: stats.pendingRequests,
-        completedRequests: stats.completedRequests,
-        avgProcessingDays: stats.avgProcessingDays,
-        consentRate: consent.marketingConsentRate,
-      },
-      requests,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load GDPR dashboard',
-    });
-  }
+  adminRespond(req, res, 'gdpr/index', {
+    pageName: 'GDPR Compliance',
+    stats: {
+      pendingRequests: stats.pendingRequests,
+      completedRequests: stats.completedRequests,
+      avgProcessingDays: stats.avgProcessingDays,
+      consentRate: consent.marketingConsentRate,
+    },
+    requests,
+  });
+  
 };
 
 // ============================================================================
@@ -48,9 +42,9 @@ export const createGdprRequest = async (req: TypedRequest, res: Response): Promi
     const body = req.body as RequestBody;
     const { requestType, customerEmail, customerName, description } = body;
 
-    const customerId = await adminGdprRepo.findCustomerIdByEmail(customerEmail);
+    const customerId = await manageAdminGdprUseCase.findCustomerIdByEmail(customerEmail);
 
-    await adminGdprRepo.createRequest({
+    await manageAdminGdprUseCase.createRequest({
       customerId: customerId || null,
       requestType,
       description: description || undefined,
@@ -61,68 +55,50 @@ export const createGdprRequest = async (req: TypedRequest, res: Response): Promi
 
     res.redirect('/hub/gdpr?success=GDPR request created');
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     res.redirect('/hub/gdpr?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
 export const viewGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { requestId } = req.params;
+  const { requestId } = req.params;
 
-    const request = await adminGdprRepo.findRequestById(requestId);
+  const request = await manageAdminGdprUseCase.findRequestById(requestId);
 
-    if (!request) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'GDPR request not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'gdpr/view', {
-      pageName: `GDPR Request: ${(request as Record<string, unknown>).requestType}`,
-      request,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!request) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load GDPR request',
+      pageName: 'Not Found',
+      error: 'GDPR request not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'gdpr/view', {
+    pageName: `GDPR Request: ${(request as Record<string, unknown>).requestType}`,
+    request,
+  });
+  
 };
 
 export const processGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { requestId } = req.params;
+  const { requestId } = req.params;
 
-    await adminGdprRepo.updateStatus(requestId, 'processing');
+  await manageAdminGdprUseCase.updateStatus(requestId, 'processing');
 
-    res.json({ success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
-  }
+  res.json({ success: true });
+  
 };
 
 export const completeGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { requestId } = req.params;
-    const body = req.body as RequestBody;
-    const { notes } = body;
+  const { requestId } = req.params;
+  const body = req.body as RequestBody;
+  const { notes } = body;
 
-    await adminGdprRepo.completeRequest(requestId, notes);
+  await manageAdminGdprUseCase.completeRequest(requestId, notes);
 
-    res.json({ success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
-  }
+  res.json({ success: true });
+  
 };
 
 // ============================================================================
@@ -130,24 +106,16 @@ export const completeGdprRequest = async (req: TypedRequest, res: Response): Pro
 // ============================================================================
 
 export const consentManagement = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const consentSettings = {
-      cookieConsentRequired: true,
-      marketingConsentRequired: true,
-      analyticsConsentRequired: true,
-      consentRetentionDays: 365,
-    };
+  const consentSettings = {
+    cookieConsentRequired: true,
+    marketingConsentRequired: true,
+    analyticsConsentRequired: true,
+    consentRetentionDays: 365,
+  };
 
-    adminRespond(req, res, 'gdpr/consent', {
-      pageName: 'Consent Management',
-      consentSettings,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load consent management',
-    });
-  }
+  adminRespond(req, res, 'gdpr/consent', {
+    pageName: 'Consent Management',
+    consentSettings,
+  });
+  
 };

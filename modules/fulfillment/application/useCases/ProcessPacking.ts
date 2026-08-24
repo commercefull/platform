@@ -4,6 +4,7 @@
 
 import { Fulfillment } from '../../domain/entities/Fulfillment';
 import { IFulfillmentRepository } from '../../domain/repositories/FulfillmentRepository';
+import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 export class ProcessPackingCommand {
@@ -21,7 +22,7 @@ export class ProcessPackingUseCase {
   async execute(command: ProcessPackingCommand): Promise<{ fulfillment: Fulfillment }> {
     const fulfillment = await this.repository.findById(command.fulfillmentId);
     if (!fulfillment) {
-      throw new Error(`Fulfillment ${command.fulfillmentId} not found`);
+      throw new FulfillmentNotFoundError(command.fulfillmentId);
     }
 
     // Start packing if not already in packing/packed state

@@ -4,6 +4,7 @@
  */
 
 import { GdprDataRequestRepository, GdprService } from '../../domain/repositories/GdprRepository';
+import { DataRequestNotFoundError, GdprValidationError, DataRequestProcessingError } from '../../domain/errors/GdprErrors';
 
 // ============================================================================
 // Commands
@@ -68,7 +69,7 @@ export class ProcessDataRequestUseCase {
   async verifyIdentity(command: VerifyIdentityCommand): Promise<ProcessDataRequestResponse> {
     const request = await this.gdprRepository.findById(command.gdprDataRequestId);
     if (!request) {
-      throw new Error('GDPR request not found');
+      throw new DataRequestNotFoundError(command.gdprDataRequestId);
     }
 
     request.verifyIdentity(command.verificationMethod);
@@ -87,15 +88,15 @@ export class ProcessDataRequestUseCase {
   async processExport(command: ProcessExportRequestCommand): Promise<ProcessDataRequestResponse> {
     const request = await this.gdprRepository.findById(command.gdprDataRequestId);
     if (!request) {
-      throw new Error('GDPR request not found');
+      throw new DataRequestNotFoundError(command.gdprDataRequestId);
     }
 
     if (request.requestType !== 'export' && request.requestType !== 'access') {
-      throw new Error('This request is not an export request');
+      throw new GdprValidationError('This request is not an export request');
     }
 
     if (!request.identityVerified) {
-      throw new Error('Customer identity must be verified before processing');
+      throw new GdprValidationError('Customer identity must be verified before processing');
     }
 
     // Start processing
@@ -127,7 +128,7 @@ export class ProcessDataRequestUseCase {
       };
     } catch (error) {
       // Handle failure
-      throw new Error(`Failed to export data: ${error}`, { cause: error });
+      throw new DataRequestProcessingError(`Failed to export data: ${error}`);
     }
   }
 
@@ -137,15 +138,15 @@ export class ProcessDataRequestUseCase {
   async processDeletion(command: ProcessDeletionRequestCommand): Promise<ProcessDataRequestResponse> {
     const request = await this.gdprRepository.findById(command.gdprDataRequestId);
     if (!request) {
-      throw new Error('GDPR request not found');
+      throw new DataRequestNotFoundError(command.gdprDataRequestId);
     }
 
     if (request.requestType !== 'deletion') {
-      throw new Error('This request is not a deletion request');
+      throw new GdprValidationError('This request is not a deletion request');
     }
 
     if (!request.identityVerified) {
-      throw new Error('Customer identity must be verified before processing');
+      throw new GdprValidationError('Customer identity must be verified before processing');
     }
 
     // Start processing
@@ -167,7 +168,7 @@ export class ProcessDataRequestUseCase {
         message: 'Data deletion completed successfully',
       };
     } catch (error) {
-      throw new Error(`Failed to delete data: ${error}`, { cause: error });
+      throw new DataRequestProcessingError(`Failed to delete data: ${error}`);
     }
   }
 
@@ -177,11 +178,11 @@ export class ProcessDataRequestUseCase {
   async reject(command: RejectRequestCommand): Promise<ProcessDataRequestResponse> {
     const request = await this.gdprRepository.findById(command.gdprDataRequestId);
     if (!request) {
-      throw new Error('GDPR request not found');
+      throw new DataRequestNotFoundError(command.gdprDataRequestId);
     }
 
     if (!command.reason?.trim()) {
-      throw new Error('Rejection reason is required');
+      throw new GdprValidationError('Rejection reason is required');
     }
 
     request.reject(command.adminId, command.reason);

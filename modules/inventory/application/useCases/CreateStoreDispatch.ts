@@ -3,6 +3,7 @@ import { generateUUID } from '../../../../libs/uuid';
 import { StoreDispatch } from '../../domain/entities/StoreDispatch';
 import { StoreDispatchRepository } from '../../domain/repositories/StoreDispatchRepository';
 import { InventoryLocation, Inventory } from '../../domain/entities/Inventory';
+import { InventoryLocationNotFoundError, InsufficientStockError, InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 export interface CreateStoreDispatchInput {
   fromStoreId: string;
@@ -32,28 +33,28 @@ export class CreateStoreDispatchUseCase {
 
   async execute(input: CreateStoreDispatchInput): Promise<Record<string, unknown>> {
     if (input.fromStoreId === input.toStoreId) {
-      throw new Error('Source and destination stores must be different');
+      throw new InventoryValidationError('Source and destination stores must be different');
     }
 
     if (!input.items || input.items.length === 0) {
-      throw new Error('At least one dispatch item is required');
+      throw new InventoryValidationError('At least one dispatch item is required');
     }
 
     const sourceLocation = await this.inventoryRepository.getLocationByStoreId(input.fromStoreId);
     const destinationLocation = await this.inventoryRepository.getLocationByStoreId(input.toStoreId);
 
     if (!sourceLocation) {
-      throw new Error('Source store inventory location not found');
+      throw new InventoryLocationNotFoundError(input.fromStoreId);
     }
 
     if (!destinationLocation) {
-      throw new Error('Destination store inventory location not found');
+      throw new InventoryLocationNotFoundError(input.toStoreId);
     }
 
     for (const item of input.items) {
       const inventory = await this.inventoryRepository.findByProductAndLocation(item.productId, sourceLocation.locationId, item.variantId);
       if (!inventory || inventory.availableQuantity < item.quantity) {
-        throw new Error(`Insufficient stock for product ${item.productId}`);
+        throw new InsufficientStockError(item.productId, item.quantity, inventory?.availableQuantity ?? 0);
       }
     }
 

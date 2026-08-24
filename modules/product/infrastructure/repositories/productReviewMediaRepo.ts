@@ -1,4 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductReviewMedia {
   productReviewMediaId: string;
@@ -28,7 +29,7 @@ export class ProductReviewMediaRepo {
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [params.productReviewId, params.url, params.type, now, now],
     );
-    if (!result) throw new Error('Failed to create productReviewMedia');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 

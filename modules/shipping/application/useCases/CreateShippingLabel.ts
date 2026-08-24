@@ -5,8 +5,12 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import shippingLabelRepo, { CreateShippingLabelInput, ShippingLabel } from '../../infrastructure/repositories/shippingLabelRepo';
-import shippingCarrierRepo from '../../infrastructure/repositories/shippingCarrierRepo';
+import shippingLabelRepo from '../../infrastructure/repositories/ShippingLabelAggregateRepository';
+import shippingConfigRepository from '../../infrastructure/repositories/ShippingConfigRepository';
+import type { CreateShippingLabelInput, ShippingLabel } from '../../infrastructure/repositories/shippingLabelRepo';
+import { ShippingCarrierNotFoundError, ShippingValidationError } from '../../domain/errors/ShippingErrors';
+
+const shippingCarrierRepo = shippingConfigRepository.carriers;
 
 export interface CreateLabelInput {
   shippingCarrierId: string;
@@ -32,11 +36,11 @@ export class CreateShippingLabelUseCase {
   async execute(input: CreateLabelInput): Promise<ShippingLabel> {
     const carrier = await shippingCarrierRepo.findById(input.shippingCarrierId);
     if (!carrier) {
-      throw new Error('Carrier not found');
+      throw new ShippingCarrierNotFoundError('Carrier not found');
     }
 
     if (!carrier.isActive) {
-      throw new Error('Carrier is not active');
+      throw new ShippingValidationError('Carrier is not active');
     }
 
     const labelInput: CreateShippingLabelInput = {

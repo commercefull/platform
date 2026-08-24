@@ -1,16 +1,21 @@
 import PG from 'pg';
 import { getTestDbName } from './testDbContext';
+import { incrementQueryCounter } from './queryCounter';
 
-export const pool = new PG.Pool({
-  port: parseInt(process.env.POSTGRES_PORT || '', 10),
-  host: process.env.POSTGRES_HOST,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
-  max: 20, // maximum number of connections in the pool
-  idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
-  connectionTimeoutMillis: 2000, // how long to wait for a connection to be established
-});
+const isTestEnv = process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test';
+
+export const pool = isTestEnv
+  ? (null as unknown as PG.Pool)
+  : new PG.Pool({
+      port: parseInt(process.env.POSTGRES_PORT || '', 10),
+      host: process.env.POSTGRES_HOST,
+      user: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+      max: 20, // maximum number of connections in the pool
+      idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
+      connectionTimeoutMillis: 2000, // how long to wait for a connection to be established
+    });
 
 // Cache of per-database pools for test isolation
 const testPools = new Map<string, PG.Pool>();
@@ -38,7 +43,7 @@ const getTestPool = (database: string): PG.Pool => {
   return p;
 };
 
-const getActivePool = (): PG.Pool => {
+export const getActivePool = (): PG.Pool => {
   const testDb = getTestDbName();
   if (testDb) {
     return getTestPool(testDb);
@@ -67,6 +72,7 @@ export const query = async <T>(text: string, params?: Array<unknown>): Promise<T
 
   try {
     const activePool = getActivePool();
+    incrementQueryCounter(text);
     if (params !== undefined) {
       res = await activePool.query(text, params);
     } else {
@@ -88,6 +94,7 @@ export const queryOne = async <T>(text: string, params: Array<unknown>): Promise
 
   try {
     const activePool = getActivePool();
+    incrementQueryCounter(text);
     res = await activePool.query(text, params);
   } catch (e: unknown) {
     throw new Error(`Query failed: ${(e as Error).message}`, { cause: e });

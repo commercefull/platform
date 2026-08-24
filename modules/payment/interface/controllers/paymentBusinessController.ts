@@ -4,12 +4,12 @@
  */
 
 import { Request, Response } from 'express';
-import { logger } from '../../../../libs/logger';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import paymentDisputeRepo from '../../infrastructure/repositories/paymentDisputeRepo';
-import paymentFeeRepo from '../../infrastructure/repositories/paymentFeeRepo';
-import paymentSettingsRepo from '../../infrastructure/repositories/paymentSettingsRepo';
-import paymentReportRepo from '../../infrastructure/repositories/paymentReportRepo';
+import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
+import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+
+const paymentBillingRepo = paymentBillingDataRepository.billing;
+const PaymentRepo = paymentDataRepository.payments;
 import { GetPaymentBalanceCommand, GetPaymentBalanceUseCase } from '../../application/useCases/GetPaymentBalance';
 
 // ============================================================================
@@ -17,49 +17,34 @@ import { GetPaymentBalanceCommand, GetPaymentBalanceUseCase } from '../../applic
 // ============================================================================
 
 export const listDisputes = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { paymentId } = req.query;
-    const disputes = paymentId ? await paymentDisputeRepo.findByPayment(paymentId as string) : [];
-    successResponse(res, { disputes });
-  } catch (error: unknown) {
-    logger.error('listDisputes error:', error);
-    errorResponse(res, (error as Error).message || 'Failed to list disputes');
-  }
+  const { paymentId } = req.query;
+  const disputes = paymentId ? await paymentBillingRepo.findDisputesByPayment(paymentId as string) : [];
+  successResponse(res, { disputes });
 };
 
 export const getDispute = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { disputeId } = req.params;
-    const dispute = await paymentDisputeRepo.findById(String(disputeId));
-    if (!dispute) {
-      errorResponse(res, 'Dispute not found', 404);
-      return;
-    }
-    successResponse(res, { dispute });
-  } catch (error: unknown) {
-    logger.error('getDispute error:', error);
-    errorResponse(res, (error as Error).message || 'Failed to get dispute');
+  const { disputeId } = req.params;
+  const dispute = await paymentBillingRepo.findDisputeById(String(disputeId));
+  if (!dispute) {
+    errorResponse(res, 'Dispute not found', 404);
+    return;
   }
+  successResponse(res, { dispute });
 };
 
 export const updateDisputeStatus = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { disputeId } = req.params;
-    const { status, resolvedAt } = req.body;
-    if (!status) {
-      errorResponse(res, 'status is required', 400);
-      return;
-    }
-    const dispute = await paymentDisputeRepo.updateStatus(String(disputeId), status, resolvedAt ? new Date(resolvedAt) : undefined);
-    if (!dispute) {
-      errorResponse(res, 'Dispute not found', 404);
-      return;
-    }
-    successResponse(res, { dispute });
-  } catch (error: unknown) {
-    logger.error('updateDisputeStatus error:', error);
-    errorResponse(res, (error as Error).message || 'Failed to update dispute status');
+  const { disputeId } = req.params;
+  const { status, resolvedAt } = req.body;
+  if (!status) {
+    errorResponse(res, 'status is required', 400);
+    return;
   }
+  const dispute = await paymentBillingRepo.updateDisputeStatus(String(disputeId), status, resolvedAt ? new Date(resolvedAt) : undefined);
+  if (!dispute) {
+    errorResponse(res, 'Dispute not found', 404);
+    return;
+  }
+  successResponse(res, { dispute });
 };
 
 // ============================================================================
@@ -67,18 +52,13 @@ export const updateDisputeStatus = async (req: Request, res: Response): Promise<
 // ============================================================================
 
 export const listFees = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { transactionId } = req.query;
-    if (!transactionId) {
-      errorResponse(res, 'transactionId query parameter is required', 400);
-      return;
-    }
-    const fees = await paymentFeeRepo.findByTransaction(transactionId as string);
-    successResponse(res, { fees });
-  } catch (error: unknown) {
-    logger.error('listFees error:', error);
-    errorResponse(res, (error as Error).message || 'Failed to list fees');
+  const { transactionId } = req.query;
+  if (!transactionId) {
+    errorResponse(res, 'transactionId query parameter is required', 400);
+    return;
   }
+  const fees = await paymentBillingRepo.findFeesByTransaction(transactionId as string);
+  successResponse(res, { fees });
 };
 
 // ============================================================================
@@ -86,43 +66,33 @@ export const listFees = async (req: Request, res: Response): Promise<void> => {
 // ============================================================================
 
 export const getSettings = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
-    if (!organizationId) {
-      errorResponse(res, 'Authentication required', 401);
-      return;
-    }
-    const settings = await paymentSettingsRepo.findByMerchant(organizationId);
-    successResponse(res, { settings });
-  } catch (error: unknown) {
-    logger.error('getSettings error:', error);
-    errorResponse(res, (error as Error).message || 'Failed to get settings');
+  const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
+  if (!organizationId) {
+    errorResponse(res, 'Authentication required', 401);
+    return;
   }
+  const settings = await PaymentRepo.findSettingsByMerchant(organizationId);
+  successResponse(res, { settings });
 };
 
 export const updateSettings = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
-    if (!organizationId) {
-      errorResponse(res, 'Authentication required', 401);
-      return;
-    }
-    const { provider, isEnabled, config } = req.body;
-    if (!provider) {
-      errorResponse(res, 'provider is required', 400);
-      return;
-    }
-    const settings = await paymentSettingsRepo.upsert({
-      organizationId,
-      provider,
-      isEnabled: isEnabled ?? true,
-      config: config || {},
-    });
-    successResponse(res, { settings });
-  } catch (error: unknown) {
-    logger.error('updateSettings error:', error);
-    errorResponse(res, (error as Error).message || 'Failed to update settings');
+  const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
+  if (!organizationId) {
+    errorResponse(res, 'Authentication required', 401);
+    return;
   }
+  const { provider, isEnabled, config } = req.body;
+  if (!provider) {
+    errorResponse(res, 'provider is required', 400);
+    return;
+  }
+  const settings = await PaymentRepo.upsertSettings({
+    organizationId,
+    provider,
+    isEnabled: isEnabled ?? true,
+    config: config || {},
+  });
+  successResponse(res, { settings });
 };
 
 // ============================================================================
@@ -130,20 +100,15 @@ export const updateSettings = async (req: Request, res: Response): Promise<void>
 // ============================================================================
 
 export const getBalance = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
-    if (!organizationId) {
-      errorResponse(res, 'Authentication required', 401);
-      return;
-    }
-    const { currency } = req.query;
-    const useCase = new GetPaymentBalanceUseCase();
-    const result = await useCase.execute(new GetPaymentBalanceCommand(organizationId, currency as string | undefined));
-    successResponse(res, result);
-  } catch (error: unknown) {
-    logger.error('getBalance error:', error);
-    errorResponse(res, (error as Error).message || 'Failed to get balance');
+  const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
+  if (!organizationId) {
+    errorResponse(res, 'Authentication required', 401);
+    return;
   }
+  const { currency } = req.query;
+  const useCase = new GetPaymentBalanceUseCase();
+  const result = await useCase.execute(new GetPaymentBalanceCommand(organizationId, currency as string | undefined));
+  successResponse(res, result);
 };
 
 // ============================================================================
@@ -151,36 +116,26 @@ export const getBalance = async (req: Request, res: Response): Promise<void> => 
 // ============================================================================
 
 export const listReports = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
-    if (!organizationId) {
-      errorResponse(res, 'Authentication required', 401);
-      return;
-    }
-    const reports = await paymentReportRepo.findByMerchant(organizationId);
-    successResponse(res, { reports });
-  } catch (error: unknown) {
-    logger.error('listReports error:', error);
-    errorResponse(res, (error as Error).message || 'Failed to list reports');
+  const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
+  if (!organizationId) {
+    errorResponse(res, 'Authentication required', 401);
+    return;
   }
+  const reports = await paymentBillingRepo.findReportsByMerchant(organizationId);
+  successResponse(res, { reports });
 };
 
 export const getReport = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
-    if (!organizationId) {
-      errorResponse(res, 'Authentication required', 401);
-      return;
-    }
-    const { from, to } = req.query;
-    if (!from || !to) {
-      errorResponse(res, 'from and to query parameters are required', 400);
-      return;
-    }
-    const reports = await paymentReportRepo.findByDateRange(organizationId, new Date(from as string), new Date(to as string));
-    successResponse(res, { reports });
-  } catch (error: unknown) {
-    logger.error('getReport error:', error);
-    errorResponse(res, (error as Error).message || 'Failed to get report');
+  const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
+  if (!organizationId) {
+    errorResponse(res, 'Authentication required', 401);
+    return;
   }
+  const { from, to } = req.query;
+  if (!from || !to) {
+    errorResponse(res, 'from and to query parameters are required', 400);
+    return;
+  }
+  const reports = await paymentBillingRepo.findReportsByDateRange(organizationId, new Date(from as string), new Date(to as string));
+  successResponse(res, { reports });
 };

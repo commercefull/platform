@@ -1,22 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { SessionService } from './session';
+import { requirePermission as rbacRequirePermission, requireStoreAccess as rbacRequireStoreAccess } from './rbac/middleware';
+import type { Resource, Action } from './rbac/types';
 
 const isJsonRequest = (req: Request): boolean => {
   return Boolean(req.xhr || req.headers.accept?.indexOf('json') !== -1);
 };
 
-const hasPermission = (user: Express.User | undefined, permission?: string): boolean => {
+const _hasPermission = (user: Express.User | undefined, permission?: string): boolean => {
   if (!permission) return true;
   const permissions = user?.permissions || [];
   return permissions.includes('*') || permissions.includes(permission);
 };
 
-// Environment variables should be properly loaded in your application
-const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'organization-secret-key-should-be-in-env';
-const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
-const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET || 'admin-secret-key-should-be-in-env';
-const B2B_JWT_SECRET = process.env.B2B_JWT_SECRET || 'b2b-secret-key-should-be-in-env';
+// JWT secrets — validated via libs/secrets (fail-fast in production)
+import { getSecret } from './secrets';
+
+const ORGANIZATION_JWT_SECRET = getSecret('ORGANIZATION_JWT_SECRET');
+const CUSTOMER_JWT_SECRET = getSecret('CUSTOMER_JWT_SECRET');
+const ADMIN_JWT_SECRET = getSecret('ADMIN_JWT_SECRET');
+const B2B_JWT_SECRET = getSecret('B2B_JWT_SECRET');
 
 // Session cookie name
 const SESSION_COOKIE_NAME = 'cf_session';
@@ -183,65 +187,32 @@ export const isCustomerNotLoggedIn = (req: Request, res: Response, next: NextFun
   next(); // Continue if not authenticated
 };
 
-export const requirePermission = (permission: string) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (hasPermission(req.user, permission)) {
-      return next();
-    }
+/**
+ * Require permission middleware — delegates to the RBAC policy engine.
+ *
+ * Accepts either:
+ * - New format: requirePermission('product', 'create')
+ * - Legacy format: requirePermission('product.create') (split on first dot)
+ */
+export function requirePermission(resourceOrLegacy: Resource, action?: Action) {
+  if (action !== undefined) {
+    return rbacRequirePermission(resourceOrLegacy, action);
+  }
+  // Legacy format: split 'product.create' into resource + action
+  const dotIdx = resourceOrLegacy.indexOf('.');
+  if (dotIdx > 0) {
+    const resource = resourceOrLegacy.slice(0, dotIdx) as Resource;
+    const act = resourceOrLegacy.slice(dotIdx + 1) as Action;
+    return rbacRequirePermission(resource, act);
+  }
+  // Single word — treat as resource with '*' action
+  return rbacRequirePermission(resourceOrLegacy, '*');
+}
 
-    if (isJsonRequest(req)) {
-      return res.status(403).json({ success: false, message: 'Insufficient permissions' });
-    }
-
-    return res.status(403).send('Forbidden');
-  };
-};
-
-export const requireStoreAccess = (requiredPermission?: string) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
-
-    if (!user) {
-      if (isJsonRequest(req)) {
-        return res.status(401).json({ success: false, message: 'Authentication required' });
-      }
-
-      return res.redirect('/admin/login');
-    }
-
-    if (user.role === 'ADMIN' || user.storeRole === 'manager') {
-      if (hasPermission(user, requiredPermission)) {
-        return next();
-      }
-
-      if (isJsonRequest(req)) {
-        return res.status(403).json({ success: false, message: 'Insufficient permissions' });
-      }
-
-      return res.status(403).send('Forbidden');
-    }
-
-    const targetStoreId =
-      (req.params as Record<string, string | undefined>)?.storeId ||
-      ((req.body as Record<string, unknown> | undefined)?.storeId as string | undefined) ||
-      (req.query as Record<string, string | undefined>)?.storeId;
-
-    if (targetStoreId && user.storeId && targetStoreId !== user.storeId) {
-      if (isJsonRequest(req)) {
-        return res.status(403).json({ success: false, message: 'Access denied to this store' });
-      }
-
-      return res.status(403).send('Forbidden');
-    }
-
-    if (!hasPermission(user, requiredPermission)) {
-      if (isJsonRequest(req)) {
-        return res.status(403).json({ success: false, message: 'Insufficient permissions' });
-      }
-
-      return res.status(403).send('Forbidden');
-    }
-
-    return next();
-  };
-};
+/**
+ * Require store access middleware — delegates to the RBAC policy engine.
+ * Combines permission check with store ownership verification.
+ */
+export function requireStoreAccess(resource?: Resource, action?: Action) {
+  return rbacRequireStoreAccess(resource, action);
+}

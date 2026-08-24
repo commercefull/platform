@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductDownload {
   productDownloadId: string;
@@ -77,7 +78,7 @@ export class ProductDownloadRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create product download');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 

@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { CustomerIdAndTokenRequiredError } from '../../../domain/errors/IdentityErrors';
 
 export interface LogoutCustomerInput {
   customerId: string;
@@ -33,7 +34,7 @@ export class LogoutCustomerUseCase {
 
   async execute(input: LogoutCustomerInput): Promise<LogoutCustomerOutput> {
     if (!input.customerId || !input.accessToken) {
-      throw new Error('Customer ID and access token are required');
+      throw new CustomerIdAndTokenRequiredError();
     }
 
     // Blacklist the current access token

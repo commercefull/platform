@@ -1,6 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ProductCurrencyPrice } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
+import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 
 export type ProductCurrencyPriceCreateParams = Omit<ProductCurrencyPrice, 'productCurrencyPriceId' | 'createdAt' | 'updatedAt'>;
 export type ProductCurrencyPriceUpdateParams = Partial<Pick<ProductCurrencyPrice, 'price' | 'compareAtPrice' | 'isManual' | 'updatedBy'>>;
@@ -122,7 +123,7 @@ export class ProductCurrencyPriceRepo {
     const existing = await this.findByProductAndCurrency(params.productId, params.currencyId, params.productVariantId ?? undefined);
 
     if (existing) {
-      throw new Error('Price already exists for this product/variant and currency combination');
+      throw new PricingValidationError('Price already exists for this product/variant and currency combination');
     }
 
     const result = await queryOne<ProductCurrencyPrice>(
@@ -145,7 +146,7 @@ export class ProductCurrencyPriceRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create product currency price');
+      throw new FailedToCreatePricingError('Failed to create product currency price');
     }
 
     return result;
@@ -166,7 +167,7 @@ export class ProductCurrencyPriceRepo {
       });
 
       if (!updated) {
-        throw new Error('Failed to update existing price');
+        throw new FailedToCreatePricingError('Failed to update existing price');
       }
 
       return updated;

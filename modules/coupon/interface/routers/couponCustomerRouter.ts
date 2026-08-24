@@ -5,13 +5,14 @@
  */
 
 import { Router } from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import { validateCoupon, applyCoupon } from '../controllers/CouponController';
 
 const router = Router();
 
-router.post('/coupons/validate', validateCoupon);
-router.get('/coupons/validate/:code', validateCoupon);
-router.post('/coupons/apply', applyCoupon);
+router.post('/coupons/validate', asyncHandler(validateCoupon));
+router.get('/coupons/validate/:code', asyncHandler(validateCoupon));
+router.post('/coupons/apply', asyncHandler(applyCoupon));
 
 export const couponCustomerRouter = router;
 export default router;

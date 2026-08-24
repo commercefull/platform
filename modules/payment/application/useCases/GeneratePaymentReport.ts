@@ -6,7 +6,11 @@
  * Validates: Requirements 1.8
  */
 
-import paymentReportRepo, { PaymentReport } from '../../infrastructure/repositories/paymentReportRepo';
+import { PaymentBillingRepository, PaymentReport } from '../../domain/repositories/PaymentBillingRepository';
+import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
+
+const paymentBillingRepo = paymentBillingDataRepository.billing;
+import { PeriodEndMustBeAfterStartError, FailedToGenerateReportError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
 // Command
@@ -46,14 +50,14 @@ export interface GeneratePaymentReportResponse {
 // ============================================================================
 
 export class GeneratePaymentReportUseCase {
-  constructor(private readonly repo: typeof paymentReportRepo = paymentReportRepo) {}
+  constructor(private readonly repo: PaymentBillingRepository = paymentBillingRepo) {}
 
   async execute(command: GeneratePaymentReportCommand): Promise<GeneratePaymentReportResponse> {
     if (command.periodEnd <= command.periodStart) {
-      throw new Error('periodEnd must be after periodStart');
+      throw new PeriodEndMustBeAfterStartError();
     }
 
-    const report = await this.repo.create({
+    const report = await this.repo.createReport({
       organizationId: command.organizationId,
       type: command.type,
       currency: command.currency,
@@ -65,7 +69,7 @@ export class GeneratePaymentReportUseCase {
     });
 
     if (!report) {
-      throw new Error('Failed to generate payment report');
+      throw new FailedToGenerateReportError();
     }
 
     return this.mapToResponse(report);

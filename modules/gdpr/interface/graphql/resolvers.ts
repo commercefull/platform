@@ -1,11 +1,11 @@
-import { GdprDataRequestRepo, GdprCookieConsentRepo } from '../../infrastructure/repositories/GdprRepository';
+import gdprDataRepository from '../../infrastructure/repositories/GdprDataRepository';
 import { requireCustomerAuth, requireAdminAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CreateDataRequestUseCase, CreateDataRequestCommand } from '../../application/useCases/CreateDataRequest';
 import { ProcessDataRequestUseCase, ProcessExportRequestCommand, ProcessDeletionRequestCommand, RejectRequestCommand } from '../../application/useCases/ProcessDataRequest';
 import { ManageCookieConsentUseCase, RecordCookieConsentCommand } from '../../application/useCases/ManageCookieConsent';
 
-const dataRequestRepo = new GdprDataRequestRepo();
-const cookieConsentRepo = new GdprCookieConsentRepo();
+const dataRequestRepo = gdprDataRepository.dataRequests;
+const cookieConsentRepo = gdprDataRepository.cookieConsent;
 
 export const gdprResolvers = {
   Mutation: {

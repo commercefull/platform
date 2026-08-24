@@ -11,25 +11,28 @@
 
 ## Standards Index
 
-All engineering standards are under [`docs/standards/`](./docs/standards/README.md):
+All engineering standards are under [`docs/guidelines/`](./docs/guidelines/README.md):
 
 | Topic                             | Document                                                          |
 | --------------------------------- | ----------------------------------------------------------------- |
-| Database (naming, SQL helpers)    | [standards/database.md](./docs/standards/database.md)             |
-| Migrations (Knex, file format)    | [standards/migrations.md](./docs/standards/migrations.md)         |
-| Seeds                             | [standards/seeds.md](./docs/standards/seeds.md)                   |
-| Module structure (DDD)            | [standards/modules-ddd.md](./docs/standards/modules-ddd.md)       |
-| Web layer (EJS portals)           | [standards/web-layer.md](./docs/standards/web-layer.md)           |
-| API response patterns             | [standards/api-responses.md](./docs/standards/api-responses.md)   |
-| Authentication & authorization    | [standards/authentication.md](./docs/standards/authentication.md) |
-| Event system                      | [standards/events.md](./docs/standards/events.md)                 |
-| Testing                           | [standards/testing.md](./docs/standards/testing.md)               |
-| Code style & formatting           | [standards/code-style.md](./docs/standards/code-style.md)         |
-| Security                          | [standards/security.md](./docs/standards/security.md)             |
-| Internationalization (i18n)       | [standards/i18n.md](./docs/standards/i18n.md)                     |
-| Shared libraries (`libs/`)        | [standards/libraries.md](./docs/standards/libraries.md)           |
-| Infrastructure & deployment       | [standards/infrastructure.md](./docs/standards/infrastructure.md) |
-| Do's and Don'ts (quick reference) | [standards/do-and-dont.md](./docs/standards/do-and-dont.md)       |
+| Database (naming, SQL helpers)    | [guidelines/database.md](./docs/guidelines/database.md)             |
+| Migrations (Knex, file format)    | [guidelines/migrations.md](./docs/guidelines/migrations.md)         |
+| Seeds                             | [guidelines/seeds.md](./docs/guidelines/seeds.md)                   |
+| Module structure (DDD)            | [guidelines/modules-ddd.md](./docs/guidelines/modules-ddd.md)       |
+| Module integration (ACL patterns) | [guidelines/module-integration.md](./docs/guidelines/module-integration.md) |
+| Module stability checklist        | [guidelines/module-stability-checklist.md](./docs/guidelines/module-stability-checklist.md) |
+| Errors & logging                  | [guidelines/errors-and-logging.md](./docs/guidelines/errors-and-logging.md) |
+| Web layer (EJS portals)           | [guidelines/web-layer.md](./docs/guidelines/web-layer.md)           |
+| API response patterns             | [guidelines/api-responses.md](./docs/guidelines/api-responses.md)   |
+| Authentication & authorization    | [guidelines/authentication.md](./docs/guidelines/authentication.md) |
+| Event system                      | [guidelines/events.md](./docs/guidelines/events.md)                 |
+| Testing                           | [guidelines/testing.md](./docs/guidelines/testing.md)               |
+| Code style & formatting           | [guidelines/code-style.md](./docs/guidelines/code-style.md)         |
+| Security                          | [guidelines/security.md](./docs/guidelines/security.md)             |
+| Internationalization (i18n)       | [guidelines/i18n.md](./docs/guidelines/i18n.md)                     |
+| Shared libraries (`libs/`)        | [guidelines/libraries.md](./docs/guidelines/libraries.md)           |
+| Infrastructure & deployment       | [guidelines/infrastructure.md](./docs/guidelines/infrastructure.md) |
+| Do's and Don'ts (quick reference) | [guidelines/do-and-dont.md](./docs/guidelines/do-and-dont.md)       |
 
 ## Mission
 
@@ -74,9 +77,9 @@ yarn db:seed                # Run all seed files
 yarn db:types               # Generate Knex types from DB schema
 
 # Testing
-yarn test                   # Full Jest suite with coverage
+yarn test                   # Unit tests (with coverage)
 yarn test:unit              # Unit tests
-yarn test:int               # Integration tests
+yarn test:int               # Integration tests (requires PostgreSQL)
 
 # Code Quality
 yarn lint                   # TypeScript check + ESLint
@@ -95,8 +98,9 @@ yarn css:watch              # Watch mode for Tailwind CSS
 # Jobs
 yarn job:new:admin          # Create a new admin user
 yarn job:new:organization   # Create a new organization
-yarn job:new:business       # Create a new business
 ```
+
+> **Note**: `job:new:business` is currently unavailable — the `modules/business/` directory does not exist. Use `job:new:organization` to create a business entity.
 
 ## Working Principles for Agents
 
@@ -114,7 +118,7 @@ yarn job:new:business       # Create a new business
 ## Module & Migration Documentation
 
 - Module specs: [`docs/modules/`](./docs/modules/)
-- Migration guides (Shopify, WooCommerce, Magento 2, PrestaShop, BigCommerce, Squarespace, Wix, custom, quick-start): [`docs/migrations/`](./docs/migrations/)
+- Migration guides: **planned** — `docs/migrations/` does not exist yet. See `docs/architecture/gap-analysis-and-roadmap.md` Phase 5–6.
 
 ---
 

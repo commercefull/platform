@@ -4,9 +4,7 @@
  */
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
-import { OrderRepository } from '../../../order/domain/repositories/OrderRepository';
-import { OrderStatus } from '../../../order/domain/valueObjects/OrderStatus';
-import { PaymentStatus } from '../../../order/domain/valueObjects/PaymentStatus';
+import { OrderPlacementPort } from '../../application/ports/OrderPlacementPort';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BadRequestError, NotFoundError } from '../../../../libs/errors';
 
@@ -37,7 +35,7 @@ export interface CompleteCheckoutResponse {
 export class CompleteCheckoutUseCase {
   constructor(
     private readonly checkoutRepository: CheckoutRepository,
-    private readonly orderRepository?: OrderRepository,
+    private readonly orderPlacementPort?: OrderPlacementPort,
   ) {}
 
   async execute(command: CompleteCheckoutCommand): Promise<CompleteCheckoutResponse> {
@@ -62,12 +60,12 @@ export class CompleteCheckoutUseCase {
     }
 
     // Verify linked order is in the right state
-    if (this.orderRepository && session.orderId) {
-      const order = await this.orderRepository.findById(session.orderId);
+    if (this.orderPlacementPort && session.orderId) {
+      const order = await this.orderPlacementPort.findOrder(session.orderId);
       if (!order) {
         throw new NotFoundError('Linked order not found');
       }
-      if (order.status !== OrderStatus.PROCESSING || order.paymentStatus !== PaymentStatus.PAID) {
+      if (order.status !== 'processing' || order.paymentStatus !== 'paid') {
         throw new BadRequestError('Cannot complete checkout: payment has not been confirmed yet');
       }
     }

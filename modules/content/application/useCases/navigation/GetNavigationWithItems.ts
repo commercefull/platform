@@ -3,8 +3,9 @@
  * Retrieves a navigation menu with all its items in tree structure
  */
 
-import { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
+import type { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
 import { ContentNavigationItem } from '../../../../../libs/db/types';
+import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class GetNavigationWithItemsQuery {
   constructor(
@@ -53,7 +54,7 @@ export class GetNavigationWithItemsUseCase {
     } else if (query.location) {
       navigation = await this.navigationRepo.findNavigationByLocation(query.location);
     } else {
-      throw new Error('Navigation ID, slug, or location is required');
+      throw new ContentValidationError('Navigation ID, slug, or location is required');
     }
 
     if (!navigation) {

@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 
 export interface PriceList {
   priceListId: string;
@@ -56,7 +57,7 @@ export class PriceListRepo {
         now,
       ],
     );
-    if (!result) throw new Error('Failed to create price list');
+    if (!result) throw new FailedToCreatePricingError('Failed to create price list');
     return result;
   }
 

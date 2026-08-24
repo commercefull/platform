@@ -3,7 +3,7 @@
  * Calculates tax for an order based on items, shipping address, and customer exemptions
  */
 
-import taxQueryRepo from '../../infrastructure/repositories/taxQueryRepo';
+import taxQueryRepository from '../../infrastructure/repositories/TaxQueryRepository';
 
 // ============================================================================
 // Command
@@ -93,7 +93,7 @@ export class CalculateOrderTaxUseCase {
       }
 
       // Get the tax rate for the shipping address
-      const taxRate = await taxQueryRepo.getTaxRateForAddress({
+      const taxRate = await taxQueryRepository.query.getTaxRateForAddress({
         country: command.shippingAddress.country,
         region: command.shippingAddress.region || command.shippingAddress.state,
         postalCode: command.shippingAddress.postalCode,
@@ -103,7 +103,7 @@ export class CalculateOrderTaxUseCase {
       // Check for customer tax exemptions if customerId is provided
       let isExempt = false;
       if (command.customerId) {
-        const exemptions = await taxQueryRepo.findCustomerTaxExemptions(command.customerId, 'active');
+        const exemptions = await taxQueryRepository.query.findCustomerTaxExemptions(command.customerId, 'active');
         isExempt = exemptions.length > 0;
       }
 

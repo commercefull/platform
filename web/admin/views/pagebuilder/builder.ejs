@@ -1,0 +1,356 @@
+<%- include('../../layout') %>
+
+<% content %>
+<style>
+  .pb-layout { display: flex; height: calc(100vh - 120px); gap: 0; }
+  .pb-sidebar-left { width: 260px; min-width: 260px; border-right: 1px solid #e9ecef; overflow-y: auto; background: #f8f9fa; }
+  .pb-canvas { flex: 1; overflow-y: auto; background: #e9ecef; padding: 24px; }
+  .pb-sidebar-right { width: 320px; min-width: 320px; border-left: 1px solid #e9ecef; overflow-y: auto; background: #fff; }
+  .pb-block-palette { padding: 12px; }
+  .pb-block-item { cursor: grab; padding: 10px 12px; border: 1px solid #dee2e6; border-radius: 6px; margin-bottom: 8px; background: #fff; transition: all 0.15s; }
+  .pb-block-item:hover { border-color: #007bff; box-shadow: 0 2px 8px rgba(0,123,255,0.15); }
+  .pb-block-item .icon { font-size: 20px; vertical-align: middle; }
+  .pb-block-item .name { font-weight: 600; font-size: 13px; }
+  .pb-block-item .desc { font-size: 11px; color: #6c757d; }
+  .pb-category-header { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; margin: 12px 0 6px; font-weight: 700; }
+  .pb-canvas-frame { background: #fff; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); max-width: 1200px; margin: 0 auto; min-height: 600px; }
+  .pb-region { min-height: 80px; border: 2px dashed transparent; transition: border-color 0.2s; padding: 12px; }
+  .pb-region.drag-over { border-color: #007bff; background: rgba(0,123,255,0.05); }
+  .pb-region-header { font-size: 10px; text-transform: uppercase; color: #adb5bd; margin-bottom: 4px; }
+  .pb-placed-block { position: relative; border: 1px solid #e9ecef; border-radius: 4px; margin-bottom: 8px; padding: 12px; cursor: pointer; transition: all 0.15s; }
+  .pb-placed-block:hover { border-color: #007bff; }
+  .pb-placed-block.selected { border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.25); }
+  .pb-placed-block .pb-block-actions { position: absolute; top: 4px; right: 4px; display: none; }
+  .pb-placed-block:hover .pb-block-actions { display: flex; gap: 4px; }
+  .pb-placed-block .pb-block-actions button { padding: 2px 6px; font-size: 11px; }
+  .pb-empty-region { text-align: center; color: #adb5bd; padding: 24px; font-size: 13px; }
+  .pb-toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #fff; border-bottom: 1px solid #e9ecef; }
+  .pb-field-group { margin-bottom: 16px; }
+  .pb-field-group h6 { font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 8px; }
+  .pb-field { margin-bottom: 10px; }
+  .pb-field label { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+  .pb-field input, .pb-field select, .pb-field textarea { font-size: 13px; }
+  .pb-theme-vars { font-size: 10px; color: #6c757d; }
+</style>
+
+<div class="content-wrapper" style="padding: 0;">
+  <!-- Toolbar -->
+  <div class="pb-toolbar">
+    <h5 class="mb-0"><%= draft.title %></h5>
+    <span class="badge badge-<%= draft.status === 'published' ? 'success' : 'secondary' %> ml-2"><%= draft.status %></span>
+    <span class="badge badge-light ml-1">v<%= draft.version %></span>
+    <span class="badge badge-light"><%= draft.blocks.length %> blocks</span>
+    <div class="ml-auto">
+      <a href="/admin/page-builder/<%= draft.draftId %>/preview" target="_blank" class="btn btn-sm btn-outline-info">
+        <i class="fas fa-eye"></i> Preview
+      </a>
+      <button class="btn btn-sm btn-success" onclick="publishDraft()">
+        <i class="fas fa-paper-plane"></i> Publish
+      </button>
+      <a href="/admin/page-builder" class="btn btn-sm btn-secondary">Back</a>
+    </div>
+  </div>
+
+  <!-- Builder Layout -->
+  <div class="pb-layout">
+    <!-- Left Sidebar: Block Palette -->
+    <div class="pb-sidebar-left">
+      <div class="pb-block-palette">
+        <h6 class="text-muted mb-2">Blocks</h6>
+        <% Object.entries(blockTypesByCategory).forEach(([cat, types]) => { %>
+          <% if (types.length > 0) { %>
+            <div class="pb-category-header"><%= cat %></div>
+            <% types.forEach(bt => { %>
+              <div class="pb-block-item" draggable="true" data-type-id="<%= bt.typeId %>"
+                   ondragstart="onBlockDragStart(event)" ondragend="onBlockDragEnd(event)">
+                <i class="<%= bt.icon %> icon mr-1"></i>
+                <span class="name"><%= bt.name %></span>
+                <div class="desc"><%= bt.description %></div>
+              </div>
+            <% }); %>
+          <% } %>
+        <% }); %>
+      </div>
+    </div>
+
+    <!-- Center: Canvas -->
+    <div class="pb-canvas">
+      <div class="pb-canvas-frame" id="pb-canvas-frame">
+        <div class="pb-region" data-region="header">
+          <div class="pb-region-header">Header</div>
+          <div id="region-header" class="pb-region-content" ondragover="onRegionDragOver(event)" ondragleave="onRegionDragLeave(event)" ondrop="onRegionDrop(event, 'header')"></div>
+        </div>
+        <div class="pb-region" data-region="main">
+          <div class="pb-region-header">Main Content</div>
+          <div id="region-main" class="pb-region-content" ondragover="onRegionDragOver(event)" ondragleave="onRegionDragLeave(event)" ondrop="onRegionDrop(event, 'main')"></div>
+        </div>
+        <div class="pb-region" data-region="sidebar">
+          <div class="pb-region-header">Sidebar</div>
+          <div id="region-sidebar" class="pb-region-content" ondragover="onRegionDragOver(event)" ondragleave="onRegionDragLeave(event)" ondrop="onRegionDrop(event, 'sidebar')"></div>
+        </div>
+        <div class="pb-region" data-region="footer">
+          <div class="pb-region-header">Footer</div>
+          <div id="region-footer" class="pb-region-content" ondragover="onRegionDragOver(event)" ondragleave="onRegionDragLeave(event)" ondrop="onRegionDrop(event, 'footer')"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Block Settings -->
+    <div class="pb-sidebar-right">
+      <div id="pb-settings-panel" style="padding: 16px;">
+        <p class="text-muted text-center mt-4">Select a block to edit its settings</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DRAFT_ID = '<%= draft.draftId %>';
+const BLOCK_TYPES = <%- blockTypesJson %>;
+const DRAFT = <%- draftJson %>;
+const PREVIEW = <%- previewJson %>;
+
+// State
+let selectedBlockId = null;
+let draftBlocks = DRAFT.blocks || [];
+
+// ── Render ──────────────────────────────────────────────────
+
+function renderBlocks() {
+  ['header', 'main', 'sidebar', 'footer'].forEach(region => {
+    const container = document.getElementById(`region-${region}`);
+    const blocks = draftBlocks.filter(b => b.region === region && !b.parentBlockId).sort((a,b) => a.order - b.order);
+    if (blocks.length === 0) {
+      container.innerHTML = '<div class="pb-empty-region">Drag blocks here</div>';
+    } else {
+      container.innerHTML = blocks.map(b => renderPlacedBlock(b)).join('');
+    }
+  });
+}
+
+function renderPlacedBlock(block) {
+  const def = BLOCK_TYPES.find(t => t.typeId === block.typeId);
+  const name = def ? def.name : block.typeId;
+  const icon = def ? def.icon : 'ti ti-box';
+  const isSelected = block.blockId === selectedBlockId;
+
+  let preview = '';
+  if (block.typeId === 'heading') {
+    const level = block.content.level || 'h2';
+    preview = `<${level} style="margin:0;font-size:14px;">${block.content.text || 'Untitled'}</${level}>`;
+  } else if (block.typeId === 'text') {
+    preview = `<p style="margin:0;font-size:12px;color:#6c757d;">${(block.content.text || '').substring(0,80)}</p>`;
+  } else if (block.typeId === 'image') {
+    preview = block.content.src ? `<img src="${block.content.src}" style="max-width:100%;max-height:60px;border-radius:4px;">` : '<i class="ti ti-photo" style="font-size:24px;color:#adb5bd;"></i>';
+  } else if (block.typeId === 'hero-banner') {
+    preview = `<div style="background:${block.content.backgroundImage ? 'url(' + block.content.backgroundImage + ')' : '#e9ecef'};background-size:cover;height:60px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;"><strong>${block.content.headline || 'Hero Banner'}</strong></div>`;
+  } else if (block.typeId === 'spacer') {
+    preview = `<div style="height:${block.content.height || 32}px;"></div>`;
+  } else if (block.typeId === 'divider') {
+    preview = '<hr style="margin:0;">';
+  } else if (block.typeId === 'product-grid') {
+    preview = `<div style="display:flex;gap:4px;">${Array.from({length: Math.min(parseInt(block.content.columns)||4, 6)}, () => '<div style="flex:1;height:40px;background:#f1f3f5;border-radius:4px;"></div>').join('')}</div>`;
+  } else {
+    preview = `<span style="font-size:11px;color:#adb5bd;">${name}</span>`;
+  }
+
+  return `
+    <div class="pb-placed-block ${isSelected ? 'selected' : ''}" data-block-id="${block.blockId}" onclick="selectBlock('${block.blockId}')">
+      <div class="pb-block-actions">
+        <button class="btn btn-outline-danger" onclick="event.stopPropagation();removeBlock('${block.blockId}')" title="Delete"><i class="fas fa-trash"></i></button>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <i class="${icon}" style="font-size:14px;"></i>
+        <span style="font-size:11px;font-weight:600;">${name}</span>
+      </div>
+      ${preview}
+    </div>
+  `;
+}
+
+// ── Block Settings Panel ────────────────────────────────────
+
+function renderSettingsPanel(block) {
+  const def = BLOCK_TYPES.find(t => t.typeId === block.typeId);
+  if (!def) return '<p class="text-danger">Unknown block type</p>';
+
+  const groups = {};
+  def.fields.forEach(f => {
+    const g = f.group || 'Content';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(f);
+  });
+
+  let html = `<h6 style="font-weight:700;margin-bottom:12px;"><i class="${def.icon}"></i> ${def.name}</h6>`;
+  html += `<p class="text-muted" style="font-size:11px;margin-bottom:12px;">${def.description}</p>`;
+
+  Object.entries(groups).forEach(([groupName, fields]) => {
+    html += `<div class="pb-field-group"><h6>${groupName}</h6>`;
+    fields.forEach(f => {
+      const val = block.content[f.key] !== undefined ? block.content[f.key] : (f.defaultValue || '');
+      html += `<div class="pb-field"><label>${f.label}${f.required ? ' <span class="text-danger">*</span>' : ''}</label>`;
+      if (f.type === 'textarea' || f.type === 'richtext') {
+        html += `<textarea class="form-control form-control-sm" data-field="${f.key}" onchange="updateBlockField('${block.blockId}','${f.key}',this.value)">${val}</textarea>`;
+      } else if (f.type === 'select') {
+        html += `<select class="form-control form-control-sm" data-field="${f.key}" onchange="updateBlockField('${block.blockId}','${f.key}',this.value)">`;
+        (f.options || []).forEach(o => {
+          html += `<option value="${o.value}" ${val === o.value ? 'selected' : ''}>${o.label}</option>`;
+        });
+        html += `</select>`;
+      } else if (f.type === 'checkbox') {
+        html += `<input type="checkbox" data-field="${f.key}" ${val === true || val === 'true' ? 'checked' : ''} onchange="updateBlockField('${block.blockId}','${f.key}',this.checked)">`;
+      } else if (f.type === 'number') {
+        html += `<input type="number" class="form-control form-control-sm" value="${val}" ${f.min !== undefined ? 'min='+f.min : ''} ${f.max !== undefined ? 'max='+f.max : ''} ${f.step ? 'step='+f.step : ''} onchange="updateBlockField('${block.blockId}','${f.key}',this.value)">`;
+      } else if (f.type === 'color') {
+        html += `<input type="color" class="form-control form-control-sm" value="${val || '#000000'}" onchange="updateBlockField('${block.blockId}','${f.key}',this.value)">`;
+      } else if (f.type === 'image') {
+        html += `<input type="text" class="form-control form-control-sm" value="${val || ''}" placeholder="Image URL..." onchange="updateBlockField('${block.blockId}','${f.key}',this.value)">`;
+      } else {
+        html += `<input type="text" class="form-control form-control-sm" value="${val || ''}" placeholder="${f.placeholder || ''}" onchange="updateBlockField('${block.blockId}','${f.key}',this.value)">`;
+      }
+      if (f.helpText) html += `<small class="text-muted" style="font-size:10px;">${f.helpText}</small>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+
+  // Style fields
+  if (def.styleFields && def.styleFields.length > 0) {
+    html += `<div class="pb-field-group"><h6>Spacing</h6>`;
+    def.styleFields.forEach(f => {
+      const val = block.settings[f.key] !== undefined ? block.settings[f.key] : (f.defaultValue || 0);
+      html += `<div class="pb-field"><label>${f.label}</label>`;
+      html += `<input type="number" class="form-control form-control-sm" value="${val}" ${f.min !== undefined ? 'min='+f.min : ''} ${f.max !== undefined ? 'max='+f.max : ''} onchange="updateBlockSetting('${block.blockId}','${f.key}',this.value)">`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+  }
+
+  return html;
+}
+
+// ── Interactions ────────────────────────────────────────────
+
+function selectBlock(blockId) {
+  selectedBlockId = blockId;
+  const block = draftBlocks.find(b => b.blockId === blockId);
+  if (block) {
+    document.getElementById('pb-settings-panel').innerHTML = renderSettingsPanel(block);
+  }
+  renderBlocks();
+}
+
+function onBlockDragStart(e) {
+  e.dataTransfer.setData('blockTypeId', e.currentTarget.dataset.typeId);
+}
+
+function onBlockDragEnd(e) {
+  // cleanup
+}
+
+function onRegionDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+
+function onRegionDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onRegionDrop(e, region) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const typeId = e.dataTransfer.getData('blockTypeId');
+  if (!typeId) return;
+  addBlock(typeId, region);
+}
+
+async function addBlock(typeId, region) {
+  try {
+    const res = await fetch(`/business/page-builder/drafts/${DRAFT_ID}/blocks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ typeId, region }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      draftBlocks = data.data.blocks;
+      renderBlocks();
+    } else {
+      alert(data.message || 'Failed to add block');
+    }
+  } catch (err) {
+    alert('Error adding block');
+  }
+}
+
+async function removeBlock(blockId) {
+  try {
+    const res = await fetch(`/business/page-builder/drafts/${DRAFT_ID}/blocks/${blockId}`, {
+      method: 'DELETE',
+    });
+    const data = await res.json();
+    if (data.success) {
+      draftBlocks = data.data.blocks;
+      if (selectedBlockId === blockId) {
+        selectedBlockId = null;
+        document.getElementById('pb-settings-panel').innerHTML = '<p class="text-muted text-center mt-4">Select a block to edit its settings</p>';
+      }
+      renderBlocks();
+    }
+  } catch (err) {
+    alert('Error removing block');
+  }
+}
+
+async function updateBlockField(blockId, field, value) {
+  const block = draftBlocks.find(b => b.blockId === blockId);
+  if (!block) return;
+  block.content[field] = value;
+  try {
+    await fetch(`/business/page-builder/drafts/${DRAFT_ID}/blocks/${blockId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: block.content }),
+    });
+    renderBlocks();
+  } catch (err) {
+    console.error('Error updating block:', err);
+  }
+}
+
+async function updateBlockSetting(blockId, field, value) {
+  const block = draftBlocks.find(b => b.blockId === blockId);
+  if (!block) return;
+  block.settings[field] = parseInt(value) || 0;
+  try {
+    await fetch(`/business/page-builder/drafts/${DRAFT_ID}/blocks/${blockId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ settings: block.settings }),
+    });
+  } catch (err) {
+    console.error('Error updating block settings:', err);
+  }
+}
+
+async function publishDraft() {
+  if (!confirm('Publish this page? It will be visible on the storefront.')) return;
+  try {
+    const res = await fetch(`/admin/page-builder/${DRAFT_ID}/publish`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      alert('Page published successfully!');
+      location.reload();
+    } else {
+      alert(data.message || 'Failed to publish');
+    }
+  } catch (err) {
+    alert('Error publishing draft');
+  }
+}
+
+// ── Init ────────────────────────────────────────────────────
+renderBlocks();
+</script>
+<% endcontent %>

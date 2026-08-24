@@ -55,7 +55,7 @@ describe('Basket Admin/Business API Tests', () => {
   };
 
   // Helper to add an item to a basket
-  const addItemToBasket = async (basketId: string): Promise<void> => {
+  const _addItemToBasket = async (basketId: string): Promise<void> => {
     await client.post(
       `/customer/basket/${basketId}/items`,
       {
@@ -157,10 +157,7 @@ describe('Basket Admin/Business API Tests', () => {
 
   describe('Basket Coupon Management', () => {
     beforeAll(async () => {
-      testBasketId = (await createTestBasket()) || '';
-      if (testBasketId) {
-        await addItemToBasket(testBasketId);
-      }
+      testBasketId = TEST_GUEST_BASKET_ID;
     });
 
     it('should apply a coupon to a basket (admin override)', async () => {

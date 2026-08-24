@@ -1,5 +1,5 @@
-import taxQueryRepo from '../../infrastructure/repositories/taxQueryRepo';
-import { TaxCommandRepo } from '../../infrastructure/repositories/taxCommandRepo';
+import taxQueryRepository from '../../infrastructure/repositories/TaxQueryRepository';
+import taxCommandRepository from '../../infrastructure/repositories/TaxCommandRepository';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CalculateOrderTaxUseCase, CalculateOrderTaxCommand, OrderLineItem, TaxAddress } from '../../application/useCases/CalculateOrderTax';
 import { CreateTaxRateUseCase, CreateTaxRateInput } from '../../application/useCases/CreateTaxRate';
@@ -15,16 +15,16 @@ const taxRepoAdapter = {
     postalCode?: string;
     taxCategory?: string;
   }) {
-    const zone = await taxQueryRepo.findTaxZoneForAddress(params.country, params.state, params.postalCode, params.city);
+    const zone = await taxQueryRepository.query.findTaxZoneForAddress(params.country, params.state, params.postalCode, params.city);
     if (!zone) return [];
 
     const defaultCategory = params.taxCategory
-      ? await taxQueryRepo.findTaxCategoryByCode(params.taxCategory)
-      : await taxQueryRepo.findDefaultTaxCategory();
+      ? await taxQueryRepository.query.findTaxCategoryByCode(params.taxCategory)
+      : await taxQueryRepository.query.findDefaultTaxCategory();
 
     if (!defaultCategory) return [];
 
-    const rates = await taxQueryRepo.findTaxRatesByCategoryAndZone(defaultCategory.id, zone.id, true);
+    const rates = await taxQueryRepository.query.findTaxRatesByCategoryAndZone(defaultCategory.id, zone.id, true);
     return rates.map(r => ({
       taxRateId: r.id,
       name: r.name,
@@ -39,7 +39,7 @@ const taxRepoAdapter = {
 // Adapter for customer tax exemption lookups
 const customerRepoAdapter = {
   async getTaxExemption(customerId: string) {
-    const exemptions = await taxQueryRepo.findCustomerTaxExemptions(customerId);
+    const exemptions = await taxQueryRepository.query.findCustomerTaxExemptions(customerId);
     if (exemptions.length === 0) return null;
     return { isActive: true, reason: exemptions[0].type };
   },
@@ -48,7 +48,7 @@ const customerRepoAdapter = {
 // Adapter that bridges TaxCommandRepo to the CreateTaxRate port interface
 const taxCommandAdapter = {
   async createTaxRate(data: Record<string, unknown>) {
-    const commandRepo = new TaxCommandRepo();
+    const commandRepo = taxCommandRepository.commands;
     const result = await commandRepo.createTaxRate({
       taxCategoryId: data.taxCategory as string || '',
       taxZoneId: '',

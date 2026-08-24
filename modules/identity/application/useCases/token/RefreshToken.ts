@@ -2,6 +2,8 @@
  * RefreshToken Use Case
  */
 
+import { RefreshTokenRequiredError, InvalidRefreshTokenError, RefreshTokenRevokedError, RefreshTokenExpiredError, AccountNotActiveError, InvalidTokenRecordError } from '../../../domain/errors/IdentityErrors';
+
 export interface RefreshTokenInput {
   refreshToken: string;
 }
@@ -61,21 +63,21 @@ export class RefreshTokenUseCase {
 
   async execute(input: RefreshTokenInput): Promise<RefreshTokenOutput> {
     if (!input.refreshToken) {
-      throw new Error('Refresh token is required');
+      throw new RefreshTokenRequiredError();
     }
 
     // Validate refresh token
     const tokenRecord = await this.refreshTokenRepo.findByToken(input.refreshToken);
     if (!tokenRecord) {
-      throw new Error('Invalid refresh token');
+      throw new InvalidRefreshTokenError();
     }
 
     if (tokenRecord.revoked) {
-      throw new Error('Refresh token has been revoked');
+      throw new RefreshTokenRevokedError();
     }
 
     if (new Date() > new Date(tokenRecord.expiresAt)) {
-      throw new Error('Refresh token has expired');
+      throw new RefreshTokenExpiredError();
     }
 
     let payload: Record<string, unknown>;
@@ -85,7 +87,7 @@ export class RefreshTokenUseCase {
       // Customer token
       const customer = await this.customerRepo.findById(tokenRecord.customerId);
       if (!customer || customer.status !== 'active') {
-        throw new Error('Account is not active');
+        throw new AccountNotActiveError();
       }
       payload = {
         customerId: customer.customerId,
@@ -97,7 +99,7 @@ export class RefreshTokenUseCase {
       // Merchant token
       const merchant = await this.organizationRepo.findById(tokenRecord.organizationId);
       if (!merchant || (merchant.status !== 'active' && merchant.status !== 'approved')) {
-        throw new Error('Account is not active');
+        throw new AccountNotActiveError();
       }
       payload = {
         organizationId: merchant.organizationId,
@@ -107,7 +109,7 @@ export class RefreshTokenUseCase {
       };
       expiresIn = 8 * 60 * 60; // 8 hours
     } else {
-      throw new Error('Invalid token record');
+      throw new InvalidTokenRecordError();
     }
 
     // Generate new tokens

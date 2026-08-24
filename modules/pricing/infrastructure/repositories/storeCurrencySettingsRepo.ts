@@ -1,6 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table, StoreCurrencySettings } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
+import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 
 export type RoundingMethod = 'up' | 'down' | 'ceiling' | 'floor' | 'half_up' | 'half_down' | 'half_even';
 export type PriceDisplayFormat = 'symbol' | 'code' | 'symbol_code' | 'name';
@@ -72,7 +73,7 @@ export class StoreCurrencySettingsRepo {
     // Check if settings already exist for this store currency
     const existing = await this.findByStoreCurrency(params.storeCurrencyId);
     if (existing) {
-      throw new Error(`Settings already exist for store currency ID '${params.storeCurrencyId}'`);
+      throw new PricingValidationError(`Settings already exist for store currency ID '${params.storeCurrencyId}'`);
     }
 
     const result = await queryOne<StoreCurrencySettings>(
@@ -105,7 +106,7 @@ export class StoreCurrencySettingsRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create store currency settings');
+      throw new FailedToCreatePricingError('Failed to create store currency settings');
     }
 
     return result;
@@ -223,7 +224,7 @@ export class StoreCurrencySettingsRepo {
    */
   async updateMarkup(storeCurrencySettingsId: string, markupPercentage: number): Promise<StoreCurrencySettings | null> {
     if (markupPercentage < 0 || markupPercentage > 100) {
-      throw new Error('Markup percentage must be between 0 and 100');
+      throw new PricingValidationError('Markup percentage must be between 0 and 100');
     }
 
     return this.update(storeCurrencySettingsId, { markupPercentage: markupPercentage.toString() });

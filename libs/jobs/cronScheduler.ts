@@ -44,7 +44,7 @@ class CronScheduler {
    */
   registerJob(id: string, name: string, handler: () => Promise<void>, intervalMs: number, startImmediately: boolean = false): void {
     if (this.jobs.has(id)) {
-      console.warn(`Job ${id} already exists. Use updateJob() to modify.`);
+      logger.warning('Job already exists', { id, hint: 'Use updateJob() to modify' });
       return;
     }
 
@@ -69,7 +69,7 @@ class CronScheduler {
 
     this.intervals.set(id, interval);
 
-    console.log(`Registered job: ${name} (${id}) - runs every ${intervalMs / 1000}s`);
+    logger.info('Registered job', { name, id, intervalSeconds: intervalMs / 1000 });
 
     // Run immediately if requested
     if (startImmediately) {
@@ -129,7 +129,7 @@ class CronScheduler {
     }
 
     if (job.isRunning) {
-      console.warn(`Job ${id} is already running`);
+      logger.warning('Job already running', { id });
       return null;
     }
 
@@ -249,7 +249,7 @@ export const initializeScheduledJobs = (): void => {
       const { releaseExpired } = await import('../../modules/inventory/infrastructure/repositories/inventoryReservationRepo.js');
       const count = await releaseExpired();
       if (count > 0) {
-        console.log(`[cron] Released ${count} expired inventory reservations`);
+        logger.info('Released expired inventory reservations', { count });
       }
     },
     5 * MINUTES,
@@ -282,7 +282,7 @@ export const initializeScheduledJobs = (): void => {
         }
         logger.info(`[cron] inventory-sync: synced ${synced} products`);
       } catch (err: unknown) {
-        console.error(`[cron] inventory-sync error: ${(err as Error).message}`);
+        logger.error('inventory-sync error', { error: (err as Error).message });
       }
     },
     6 * HOURS,
@@ -331,7 +331,7 @@ export const initializeScheduledJobs = (): void => {
 
         logger.info(`[cron] low-stock-check: ${lowStockItems?.length || 0} low stock, ${outOfStockItems?.length || 0} out of stock`);
       } catch (err: unknown) {
-        console.error(`[cron] low-stock-check error: ${(err as Error).message}`);
+        logger.error('low-stock-check error', { error: (err as Error).message });
       }
     },
     1 * HOURS,
@@ -360,7 +360,7 @@ export const initializeScheduledJobs = (): void => {
           logger.info(`[cron] session-cleanup: removed ${count} expired sessions`);
         }
       } catch (err: unknown) {
-        console.error(`[cron] session-cleanup error: ${(err as Error).message}`);
+        logger.error('session-cleanup error', { error: (err as Error).message });
       }
     },
     30 * MINUTES,
@@ -397,7 +397,7 @@ export const initializeScheduledJobs = (): void => {
           );
         }
       } catch (err: unknown) {
-        console.error(`[cron] daily-sales-report error: ${(err as Error).message}`);
+        logger.error('daily-sales-report error', { error: (err as Error).message });
       }
     },
     24 * HOURS,
@@ -429,7 +429,7 @@ export const initializeScheduledJobs = (): void => {
           logger.info(`[cron] cleanup-job-history: removed ${total} old records`);
         }
       } catch (err: unknown) {
-        console.error(`[cron] cleanup-job-history error: ${(err as Error).message}`);
+        logger.error('cleanup-job-history error', { error: (err as Error).message });
       }
     },
     24 * HOURS,
@@ -470,7 +470,7 @@ export const initializeScheduledJobs = (): void => {
 
         logger.info(`[cron] cart-abandonment: found ${abandonedBaskets?.length || 0} abandoned baskets`);
       } catch (err: unknown) {
-        console.error(`[cron] cart-abandonment error: ${(err as Error).message}`);
+        logger.error('cart-abandonment error', { error: (err as Error).message });
       }
     },
     1 * HOURS,
@@ -675,7 +675,7 @@ class AsyncJobQueue {
       this.activeJobs++;
       job
         .handler()
-        .catch(err => console.error(`Job ${job.id} failed:`, err))
+        .catch(err => logger.error('Job failed', { id: job.id, error: err }))
         .finally(() => {
           this.activeJobs--;
           this.process();

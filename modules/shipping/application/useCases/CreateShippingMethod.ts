@@ -4,6 +4,7 @@
 
 import { ShippingMethod, ShippingMethodType, CarrierType } from '../../domain/entities/ShippingMethod';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { ShippingValidationError } from '../../domain/errors/ShippingErrors';
 
 export interface CreateShippingMethodInput {
   name: string;
@@ -47,7 +48,7 @@ export class CreateShippingMethodUseCase {
     // Check code uniqueness
     const existing = await this.shippingRepository.findMethodByCode(input.code);
     if (existing) {
-      throw new Error(`Shipping method with code '${input.code}' already exists`);
+      throw new ShippingValidationError(`Shipping method with code '${input.code}' already exists`);
     }
 
     const shippingMethod = ShippingMethod.create({

@@ -6,64 +6,50 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import supplierRepo from '../../../modules/supplier/infrastructure/repositories/supplierRepo';
+import { ManageSuppliersAdminUseCase } from '../../../modules/supplier/application/useCases/ManageSuppliersAdmin';
 import { adminRespond } from '../../respond';
+
+const manageSuppliersUseCase = new ManageSuppliersAdminUseCase();
 
 // ============================================================================
 // Supplier Management
 // ============================================================================
 
 export const listSuppliers = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const status = req.query.status as string;
-    const isActive = req.query.isActive !== 'false';
-    const isApproved = req.query.isApproved !== 'false';
-    const limit = parseInt(req.query.limit as string) || 50;
-    const offset = parseInt(req.query.offset as string) || 0;
+  const status = req.query.status as string;
+  const isActive = req.query.isActive !== 'false';
+  const isApproved = req.query.isApproved !== 'false';
+  const limit = parseInt(req.query.limit as string) || 50;
+  const offset = parseInt(req.query.offset as string) || 0;
 
-    let suppliers: unknown[] = [];
+  let suppliers: unknown[];
 
-    if (status) {
-      suppliers = await supplierRepo.findByStatus(status as 'active' | 'inactive' | 'pending' | 'suspended' | 'blacklisted');
-    } else {
-      suppliers = await supplierRepo.findAll(isActive, isApproved);
-    }
-
-    // Get statistics
-    const stats = await supplierRepo.getStatistics();
-
-    adminRespond(req, res, 'operations/suppliers/index', {
-      pageName: 'Suppliers',
-      suppliers,
-      stats,
-      filters: { status, isActive, isApproved },
-      pagination: { limit, offset },
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load suppliers',
-    });
+  if (status) {
+    suppliers = await manageSuppliersUseCase.findByStatus(status as 'active' | 'inactive' | 'pending' | 'suspended' | 'blacklisted');
+  } else {
+    suppliers = await manageSuppliersUseCase.findAll(isActive, isApproved);
   }
+
+  // Get statistics
+  const stats = await manageSuppliersUseCase.getStatistics();
+
+  adminRespond(req, res, 'operations/suppliers/index', {
+    pageName: 'Suppliers',
+    suppliers,
+    stats,
+    filters: { status, isActive, isApproved },
+    pagination: { limit, offset },
+
+    success: req.query.success || null,
+  });
+  
 };
 
 export const createSupplierForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    adminRespond(req, res, 'operations/suppliers/create', {
-      pageName: 'Create Supplier',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
-    });
-  }
+  adminRespond(req, res, 'operations/suppliers/create', {
+    pageName: 'Create Supplier',
+  });
+  
 };
 
 export const createSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -88,7 +74,7 @@ export const createSupplier = async (req: TypedRequest, res: Response): Promise<
       tags,
     } = body;
 
-    const supplier = await supplierRepo.create({
+    const supplier = await manageSuppliersUseCase.create({
       name,
       code,
       description: description || undefined,
@@ -111,7 +97,7 @@ export const createSupplier = async (req: TypedRequest, res: Response): Promise<
 
     res.redirect(`/hub/suppliers/${supplier.supplierId}?success=Supplier created successfully`);
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'operations/suppliers/create', {
       pageName: 'Create Supplier',
@@ -122,219 +108,159 @@ export const createSupplier = async (req: TypedRequest, res: Response): Promise<
 };
 
 export const viewSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { supplierId } = req.params;
+  const { supplierId } = req.params;
 
-    const supplier = await supplierRepo.findById(supplierId);
+  const supplier = await manageSuppliersUseCase.findById(supplierId);
 
-    if (!supplier) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Supplier not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'operations/suppliers/view', {
-      pageName: `Supplier: ${supplier.name}`,
-      supplier,
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!supplier) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load supplier',
+      pageName: 'Not Found',
+      error: 'Supplier not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'operations/suppliers/view', {
+    pageName: `Supplier: ${supplier.name}`,
+    supplier,
+
+    success: req.query.success || null,
+  });
+  
 };
 
 export const editSupplierForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { supplierId } = req.params;
+  const { supplierId } = req.params;
 
-    const supplier = await supplierRepo.findById(supplierId);
+  const supplier = await manageSuppliersUseCase.findById(supplierId);
 
-    if (!supplier) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Supplier not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'operations/suppliers/edit', {
-      pageName: `Edit: ${supplier.name}`,
-      supplier,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!supplier) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
+      pageName: 'Not Found',
+      error: 'Supplier not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'operations/suppliers/edit', {
+    pageName: `Edit: ${supplier.name}`,
+    supplier,
+  });
+  
 };
 
 export const updateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { supplierId } = req.params;
-    const updates: Record<string, unknown> = {};
+  const { supplierId } = req.params;
+  const updates: Record<string, unknown> = {};
 
-    const body = req.body as RequestBody;
-    const {
-      name,
-      description,
-      website,
-      email,
-      phone,
-      status,
-      currency,
-      minOrderValue,
-      leadTime,
-      paymentTerms,
-      paymentMethod,
-      taxId,
-      notes,
-      categories,
-      tags,
-      rating,
-    } = body;
+  const body = req.body as RequestBody;
+  const {
+    name,
+    description,
+    website,
+    email,
+    phone,
+    status,
+    currency,
+    minOrderValue,
+    leadTime,
+    paymentTerms,
+    paymentMethod,
+    taxId,
+    notes,
+    categories,
+    tags,
+    rating,
+  } = body;
 
-    if (name !== undefined) updates.name = name;
-    if (description !== undefined) updates.description = description || undefined;
-    if (website !== undefined) updates.website = website || undefined;
-    if (email !== undefined) updates.email = email || undefined;
-    if (phone !== undefined) updates.phone = phone || undefined;
-    if (status !== undefined) updates.status = status;
-    if (currency !== undefined) updates.currency = currency;
-    if (minOrderValue !== undefined) updates.minOrderValue = minOrderValue ? parseFloat(minOrderValue) : undefined;
-    if (leadTime !== undefined) updates.leadTime = leadTime ? parseInt(leadTime) : undefined;
-    if (paymentTerms !== undefined) updates.paymentTerms = paymentTerms || undefined;
-    if (paymentMethod !== undefined) updates.paymentMethod = paymentMethod || undefined;
-    if (taxId !== undefined) updates.taxId = taxId || undefined;
-    if (notes !== undefined) updates.notes = notes || undefined;
-    if (categories !== undefined) updates.categories = categories ? categories.split(',').map((c: string) => c.trim()) : undefined;
-    if (tags !== undefined) updates.tags = tags ? tags.split(',').map((t: string) => t.trim()) : undefined;
-    if (rating !== undefined) updates.rating = rating ? parseFloat(rating) : undefined;
+  if (name !== undefined) updates.name = name;
+  if (description !== undefined) updates.description = description || undefined;
+  if (website !== undefined) updates.website = website || undefined;
+  if (email !== undefined) updates.email = email || undefined;
+  if (phone !== undefined) updates.phone = phone || undefined;
+  if (status !== undefined) updates.status = status;
+  if (currency !== undefined) updates.currency = currency;
+  if (minOrderValue !== undefined) updates.minOrderValue = minOrderValue ? parseFloat(minOrderValue) : undefined;
+  if (leadTime !== undefined) updates.leadTime = leadTime ? parseInt(leadTime) : undefined;
+  if (paymentTerms !== undefined) updates.paymentTerms = paymentTerms || undefined;
+  if (paymentMethod !== undefined) updates.paymentMethod = paymentMethod || undefined;
+  if (taxId !== undefined) updates.taxId = taxId || undefined;
+  if (notes !== undefined) updates.notes = notes || undefined;
+  if (categories !== undefined) updates.categories = categories ? categories.split(',').map((c: string) => c.trim()) : undefined;
+  if (tags !== undefined) updates.tags = tags ? tags.split(',').map((t: string) => t.trim()) : undefined;
+  if (rating !== undefined) updates.rating = rating ? parseFloat(rating) : undefined;
 
-    const supplier = await supplierRepo.update(supplierId, updates);
+  const supplier = await manageSuppliersUseCase.update(supplierId, updates);
 
-    if (!supplier) {
-      throw new Error('Supplier not found after update');
-    }
-
-    res.redirect(`/hub/suppliers/${supplierId}?success=Supplier updated successfully`);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    try {
-      const supplier = await supplierRepo.findById(req.params.supplierId);
-
-      adminRespond(req, res, 'operations/suppliers/edit', {
-        pageName: `Edit: ${supplier?.name || 'Supplier'}`,
-        supplier,
-        error: (error as Error).message || 'Failed to update supplier',
-        formData: req.body as RequestBody,
-      });
-    } catch {
-      adminRespond(req, res, 'error', {
-        pageName: 'Error',
-        error: (error as Error).message || 'Failed to update supplier',
-      });
-    }
+  if (!supplier) {
+    throw new Error('Supplier not found after update');
   }
+
+  res.redirect(`/hub/suppliers/${supplierId}?success=Supplier updated successfully`);
+  
 };
 
 export const approveSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { supplierId } = req.params;
+  const { supplierId } = req.params;
 
-    const supplier = await supplierRepo.approve(supplierId);
+  const supplier = await manageSuppliersUseCase.approve(supplierId);
 
-    if (!supplier) {
-      throw new Error('Supplier not found');
-    }
-
-    res.json({ success: true, message: 'Supplier approved successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to approve supplier' });
+  if (!supplier) {
+    throw new Error('Supplier not found');
   }
+
+  res.json({ success: true, message: 'Supplier approved successfully' });
+  
 };
 
 export const suspendSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { supplierId } = req.params;
+  const { supplierId } = req.params;
 
-    const supplier = await supplierRepo.suspend(supplierId);
+  const supplier = await manageSuppliersUseCase.suspend(supplierId);
 
-    if (!supplier) {
-      throw new Error('Supplier not found');
-    }
-
-    res.json({ success: true, message: 'Supplier suspended successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to suspend supplier' });
+  if (!supplier) {
+    throw new Error('Supplier not found');
   }
+
+  res.json({ success: true, message: 'Supplier suspended successfully' });
+  
 };
 
 export const activateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { supplierId } = req.params;
+  const { supplierId } = req.params;
 
-    const supplier = await supplierRepo.activate(supplierId);
+  const supplier = await manageSuppliersUseCase.activate(supplierId);
 
-    if (!supplier) {
-      throw new Error('Supplier not found');
-    }
-
-    res.json({ success: true, message: 'Supplier activated successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to activate supplier' });
+  if (!supplier) {
+    throw new Error('Supplier not found');
   }
+
+  res.json({ success: true, message: 'Supplier activated successfully' });
+  
 };
 
 export const deactivateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { supplierId } = req.params;
+  const { supplierId } = req.params;
 
-    const supplier = await supplierRepo.deactivate(supplierId);
+  const supplier = await manageSuppliersUseCase.deactivate(supplierId);
 
-    if (!supplier) {
-      throw new Error('Supplier not found');
-    }
-
-    res.json({ success: true, message: 'Supplier deactivated successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate supplier' });
+  if (!supplier) {
+    throw new Error('Supplier not found');
   }
+
+  res.json({ success: true, message: 'Supplier deactivated successfully' });
+  
 };
 
 export const deleteSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { supplierId } = req.params;
+  const { supplierId } = req.params;
 
-    const success = await supplierRepo.delete(supplierId);
+  const success = await manageSuppliersUseCase.delete(supplierId);
 
-    if (!success) {
-      throw new Error('Failed to delete supplier');
-    }
-
-    res.json({ success: true, message: 'Supplier deleted successfully' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to delete supplier' });
+  if (!success) {
+    throw new Error('Failed to delete supplier');
   }
+
+  res.json({ success: true, message: 'Supplier deleted successfully' });
+  
 };

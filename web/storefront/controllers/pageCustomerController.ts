@@ -2,33 +2,23 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
-import { ListProductsCommand, ListProductsUseCase } from '../../../modules/product/application/useCases/ListProducts';
+import { listProductsUseCase } from '../../../modules/product/application/useCases/wired';
+import { ListProductsCommand } from '../../../modules/product/application/useCases/ListProducts';
 
 // GET: home page
 export const getHomePage = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    // Get featured/latest products
-    const productCommand = new ListProductsCommand({ isFeatured: true }, 9, 0);
-    const productUseCase = new ListProductsUseCase(ProductRepo);
-    const productResult = await productUseCase.execute(productCommand);
+  // Get featured/latest products
+  const productCommand = new ListProductsCommand({ isFeatured: true }, 9, 0);
+  const productResult = await listProductsUseCase.execute(productCommand);
 
-    storefrontRespond(req, res, 'page/home', {
-      pageName: 'Home',
-      products: productResult.products,
-      // Categories are not yet available via product module. Pass empty for now.
-      categories: [],
-      user: req.user,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load home page',
-      user: req.user,
-    });
-  }
+  storefrontRespond(req, res, 'page/home', {
+    pageName: 'Home',
+    products: productResult.products,
+    // Categories are not yet available via product module. Pass empty for now.
+    categories: [],
+    user: req.user,
+  });
+  
 };
 
 // GET: display about us page
@@ -130,14 +120,7 @@ export const submitContactFormAdvanced = (req: TypedRequest, res: Response): voi
 
   // TODO: Add email sending logic here using nodemailer
   // For now, we'll just log the form data and show success
-  console.log('Advanced contact form submission:', {
-    name: (name as string).trim(),
-    email: (email as string).trim(),
-    phone: (phone as string)?.trim() || null,
-    subject,
-    message: (message as string).trim(),
-    submittedAt: new Date(),
-  });
+  logger.info('Advanced contact form submission', { name: (name as string).trim(), email: (email as string).trim(), phone: (phone as string)?.trim() || null, subject, message: (message as string).trim(), submittedAt: new Date() });
 
   req.flash('success', "Thank you for your message! We've received your inquiry and will get back to you within 24 hours.");
   res.redirect('/contact-form');

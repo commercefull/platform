@@ -9,7 +9,7 @@ import { generateUUID } from '../../../../libs/uuid';
 import { CheckoutRepository, ShippingMethodData, PaymentMethodData } from '../../domain/repositories/CheckoutRepository';
 import { CheckoutSession, CheckoutStatus, PaymentStatus, FulfillmentType } from '../../domain/entities/CheckoutSession';
 import { Address } from '../../domain/valueObjects/Address';
-import { Money } from '../../../basket/domain/valueObjects/Money';
+import { Money } from '../../../../libs/money';
 import { calculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
 
 export class CheckoutRepo implements CheckoutRepository {

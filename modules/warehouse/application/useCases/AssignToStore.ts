@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { WarehouseNotFoundError, WarehouseValidationError } from '../../domain/errors/WarehouseErrors';
 
 export interface AssignToStoreInput {
   warehouseId: string;
@@ -56,12 +57,12 @@ export class AssignToStoreUseCase {
   async execute(input: AssignToStoreInput): Promise<AssignToStoreOutput> {
     const warehouse = await this.warehouseRepository.findById(input.warehouseId);
     if (!warehouse) {
-      throw new Error(`Warehouse not found: ${input.warehouseId}`);
+      throw new WarehouseNotFoundError(input.warehouseId);
     }
 
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) {
-      throw new Error(`Store not found: ${input.storeId}`);
+      throw new WarehouseValidationError(`Store not found: ${input.storeId}`);
     }
 
     // If setting as default, unset other default warehouses for this store

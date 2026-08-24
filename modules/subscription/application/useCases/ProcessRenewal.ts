@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { SubscriptionNotFoundError, SubscriptionValidationError, FailedToProcessRenewalError } from '../../domain/errors/SubscriptionErrors';
 
 export interface ProcessRenewalInput {
   subscriptionId: string;
@@ -54,23 +55,23 @@ export class ProcessRenewalUseCase {
 
   async execute(input: ProcessRenewalInput): Promise<ProcessRenewalOutput> {
     if (!input.subscriptionId) {
-      throw new Error('Subscription ID is required');
+      throw new SubscriptionValidationError('Subscription ID is required');
     }
 
     const subscription = await this.subscriptionRepo.findById(input.subscriptionId);
     if (!subscription) {
-      throw new Error('Subscription not found');
+      throw new SubscriptionNotFoundError(input.subscriptionId);
     }
 
     if (subscription.status !== 'active') {
-      throw new Error('Only active subscriptions can be renewed');
+      throw new SubscriptionValidationError('Only active subscriptions can be renewed');
     }
 
     // Check if renewal is due
     const now = new Date();
     const nextBillingDate = new Date(subscription.nextBillingDate);
     if (now < nextBillingDate) {
-      throw new Error('Subscription is not yet due for renewal');
+      throw new SubscriptionValidationError('Subscription is not yet due for renewal');
     }
 
     // Create invoice
@@ -92,7 +93,7 @@ export class ProcessRenewalUseCase {
         invoiceId: invoice.invoiceId,
       });
       paymentSuccess = true; // eslint-disable-line @typescript-eslint/no-unused-vars
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       // Payment failed - enter dunning
       await this.subscriptionRepo.update(input.subscriptionId, {
         status: 'past_due',
@@ -105,7 +106,7 @@ export class ProcessRenewalUseCase {
         amount: subscription.price,
       });
 
-      throw new Error('Payment failed for subscription renewal', { cause: error });
+      throw new FailedToProcessRenewalError();
     }
 
     // Calculate new period

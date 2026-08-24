@@ -4,9 +4,9 @@
  * This module provides hook functions to integrate pricing calculations
  * with basket and checkout processes.
  */
-import { PricingService } from '../services/pricingService';
+import { PricingService } from '../application/pricingService';
 import { Basket } from '../../basket/domain/entities/Basket';
-import { Order } from '../../order/infrastructure/repositories/orderRepo';
+import { Order } from '../../../libs/db/types';
 
 const pricingService = new PricingService();
 

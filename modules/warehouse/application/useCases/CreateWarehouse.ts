@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { WarehouseCodeAlreadyExistsError } from '../../domain/errors/WarehouseErrors';
 
 export type WarehouseType = 'warehouse' | 'store' | 'fulfillment_center' | 'distribution_center';
 
@@ -80,7 +81,7 @@ export class CreateWarehouseUseCase {
     // Check if code already exists
     const existingWarehouse = await this.warehouseRepository.findByCode(input.code);
     if (existingWarehouse) {
-      throw new Error(`Warehouse with code '${input.code}' already exists`);
+      throw new WarehouseCodeAlreadyExistsError(input.code);
     }
 
     // If setting as default, unset current default

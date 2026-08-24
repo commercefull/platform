@@ -2,6 +2,8 @@
  * CreateSupplier Use Case
  */
 
+import { SupplierValidationError } from '../../domain/errors/SupplierErrors';
+
 export interface CreateSupplierInput {
   name: string;
   email: string;
@@ -48,7 +50,7 @@ export class CreateSupplierUseCase {
   async execute(input: CreateSupplierInput): Promise<CreateSupplierOutput> {
     const existing = await this.supplierRepository.findByEmail(input.email);
     if (existing) {
-      throw new Error(`Supplier with email '${input.email}' already exists`);
+      throw new SupplierValidationError(`Supplier with email '${input.email}' already exists`);
     }
 
     const supplierId = `sup_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

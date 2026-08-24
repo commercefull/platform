@@ -5,6 +5,15 @@
 
 import { BasketItem } from './BasketItem';
 import { Money } from '../valueObjects/Money';
+import {
+  BasketItemNotFoundError,
+  BasketNotActiveError,
+  BasketExpiredError,
+  BasketValidationError,
+  BasketAlreadyAssignedError,
+  CouponAlreadyAppliedError,
+  NoCouponAppliedError,
+} from '../errors/BasketErrors';
 
 export type BasketStatus = 'active' | 'merged' | 'converted' | 'abandoned' | 'completed';
 
@@ -169,7 +178,7 @@ export class Basket {
 
     const item = this.findItem(basketItemId);
     if (!item) {
-      throw new Error(`Item ${basketItemId} not found in basket`);
+      throw new BasketItemNotFoundError(basketItemId);
     }
 
     item.updateQuantity(quantity);
@@ -181,7 +190,7 @@ export class Basket {
 
     const index = this.props.items.findIndex(i => i.basketItemId === basketItemId);
     if (index === -1) {
-      throw new Error(`Item ${basketItemId} not found in basket`);
+      throw new BasketItemNotFoundError(basketItemId);
     }
 
     this.props.items.splice(index, 1);
@@ -206,7 +215,7 @@ export class Basket {
     this.ensureActive();
     const item = this.findItem(basketItemId);
     if (!item) {
-      throw new Error(`Item ${basketItemId} not found in basket`);
+      throw new BasketItemNotFoundError(basketItemId);
     }
     item.setAsGift(message);
     this.touch();
@@ -214,7 +223,7 @@ export class Basket {
 
   assignToCustomer(customerId: string): void {
     if (this.props.customerId && this.props.customerId !== customerId) {
-      throw new Error('Basket is already assigned to a different customer');
+      throw new BasketAlreadyAssignedError();
     }
     this.props.customerId = customerId;
     this.props.sessionId = undefined; // Clear session when assigned to customer
@@ -255,10 +264,10 @@ export class Basket {
   applyCoupon(couponCode: string, discountType: 'percentage' | 'fixed', discountValue: number): void {
     this.ensureActive();
     if (this.props.coupon) {
-      throw new Error('A coupon is already applied. Remove it first before applying a new one.');
+      throw new CouponAlreadyAppliedError();
     }
     if (discountValue <= 0) {
-      throw new Error('Discount value must be positive');
+      throw new BasketValidationError('Discount value must be positive');
     }
 
     this.props.coupon = {
@@ -282,7 +291,7 @@ export class Basket {
   removeCoupon(): void {
     this.ensureActive();
     if (!this.props.coupon) {
-      throw new Error('No coupon applied to this basket');
+      throw new NoCouponAppliedError();
     }
     this.props.coupon = undefined;
     this.props.discountAmount = 0;
@@ -296,10 +305,10 @@ export class Basket {
 
   private ensureActive(): void {
     if (!this.isActive) {
-      throw new Error(`Cannot modify basket: status is ${this.props.status}`);
+      throw new BasketNotActiveError(this.props.basketId);
     }
     if (this.isExpired) {
-      throw new Error('Cannot modify basket: basket has expired');
+      throw new BasketExpiredError(this.props.basketId);
     }
   }
 

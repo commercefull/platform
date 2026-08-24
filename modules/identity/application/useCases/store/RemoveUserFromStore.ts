@@ -1,4 +1,5 @@
 import { StoreUserRepository } from '../../../domain/repositories/StoreUserRepository';
+import { UserStoreAssignmentNotFoundError } from '../../../domain/errors/IdentityErrors';
 
 export class RemoveUserFromStoreUseCase {
   constructor(private readonly userStoreRepository: StoreUserRepository) {}
@@ -6,7 +7,7 @@ export class RemoveUserFromStoreUseCase {
   async execute(userId: string, storeId: string): Promise<void> {
     const assignment = await this.userStoreRepository.findByUserAndStore(userId, storeId);
     if (!assignment) {
-      throw new Error('User store assignment not found');
+      throw new UserStoreAssignmentNotFoundError();
     }
 
     await this.userStoreRepository.delete(assignment.userStoreId);

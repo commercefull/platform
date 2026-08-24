@@ -8,3 +8,6 @@ export { GenerateSalesReportUseCase, GenerateSalesReportCommand, GenerateSalesRe
 export * from './GetDashboardMetrics';
 export * from './GetSalesAnalytics';
 export * from './GetProductPerformance';
+export * from './GenerateReport';
+export * from './ManageReportSchedules';
+export * from './PredictiveAnalytics';

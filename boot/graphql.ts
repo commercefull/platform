@@ -6,6 +6,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import jwt from 'jsonwebtoken';
 import { SessionService } from '../libs/session';
 import { logger } from '../libs/logger';
+import { AppError } from '../libs/errors';
 
 import { productTypeDefs } from '../modules/product/interface/graphql/typeDefs';
 import { productResolvers } from '../modules/product/interface/graphql/resolvers';
@@ -69,9 +70,14 @@ import { warehouseTypeDefs } from '../modules/warehouse/interface/graphql/typeDe
 import { warehouseResolvers } from '../modules/warehouse/interface/graphql/resolvers';
 import { webhookTypeDefs } from '../modules/webhook/interface/graphql/typeDefs';
 import { webhookResolvers } from '../modules/webhook/interface/graphql/resolvers';
+import { moduleRegistry } from './moduleManifests';
+import { getGraphQLValidationRules } from '../libs/graphqlSecurity';
+import { persistedQueryStore, initPersistedQueries } from '../libs/persistedQueries';
 
-const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
-const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
+import { getSecret } from '../libs/secrets';
+
+const CUSTOMER_JWT_SECRET = getSecret('CUSTOMER_JWT_SECRET');
+const ORGANIZATION_JWT_SECRET = getSecret('ORGANIZATION_JWT_SECRET');
 const SESSION_COOKIE_NAME = 'cf_session';
 
 import { GraphQLAuthContext as GraphQLContext } from '../libs/graphqlAuth';
@@ -128,80 +134,135 @@ async function buildContext({ req }: ExpressContextFunctionArgument): Promise<Gr
 }
 
 export function configureGraphQL(app: Express): void {
-  const typeDefs = mergeTypeDefs([
-    productTypeDefs,
-    orderTypeDefs,
-    customerTypeDefs,
-    basketTypeDefs,
-    checkoutTypeDefs,
-    paymentTypeDefs,
-    inventoryTypeDefs,
-    fulfillmentTypeDefs,
-    shippingTypeDefs,
-    promotionTypeDefs,
-    loyaltyTypeDefs,
-    membershipTypeDefs,
-    subscriptionTypeDefs,
-    couponTypeDefs,
-    notificationTypeDefs,
-    storeTypeDefs,
-    taxTypeDefs,
-    pricingTypeDefs,
-    analyticsTypeDefs,
-    contentTypeDefs,
-    mediaTypeDefs,
-    localizationTypeDefs,
-    configurationTypeDefs,
-    organizationTypeDefs,
-    supplierTypeDefs,
-    gdprTypeDefs,
-    identityTypeDefs,
-    reportingTypeDefs,
-    supportTypeDefs,
-    warehouseTypeDefs,
-    webhookTypeDefs,
-  ]);
+  // Build arrays of typeDefs and resolvers, filtered by module enabled state
+  const allTypeDefs: { module: string; defs: string }[] = [
+    { module: 'product', defs: productTypeDefs },
+    { module: 'order', defs: orderTypeDefs },
+    { module: 'customer', defs: customerTypeDefs },
+    { module: 'basket', defs: basketTypeDefs },
+    { module: 'checkout', defs: checkoutTypeDefs },
+    { module: 'payment', defs: paymentTypeDefs },
+    { module: 'inventory', defs: inventoryTypeDefs },
+    { module: 'fulfillment', defs: fulfillmentTypeDefs },
+    { module: 'shipping', defs: shippingTypeDefs },
+    { module: 'promotion', defs: promotionTypeDefs },
+    { module: 'loyalty', defs: loyaltyTypeDefs },
+    { module: 'membership', defs: membershipTypeDefs },
+    { module: 'subscription', defs: subscriptionTypeDefs },
+    { module: 'coupon', defs: couponTypeDefs },
+    { module: 'notification', defs: notificationTypeDefs },
+    { module: 'store', defs: storeTypeDefs },
+    { module: 'tax', defs: taxTypeDefs },
+    { module: 'pricing', defs: pricingTypeDefs },
+    { module: 'analytics', defs: analyticsTypeDefs },
+    { module: 'content', defs: contentTypeDefs },
+    { module: 'media', defs: mediaTypeDefs },
+    { module: 'localization', defs: localizationTypeDefs },
+    { module: 'configuration', defs: configurationTypeDefs },
+    { module: 'organization', defs: organizationTypeDefs },
+    { module: 'supplier', defs: supplierTypeDefs },
+    { module: 'gdpr', defs: gdprTypeDefs },
+    { module: 'identity', defs: identityTypeDefs },
+    { module: 'reporting', defs: reportingTypeDefs },
+    { module: 'support', defs: supportTypeDefs },
+    { module: 'warehouse', defs: warehouseTypeDefs },
+    { module: 'webhook', defs: webhookTypeDefs },
+  ];
 
-  const resolvers = mergeResolvers([
-    productResolvers,
-    orderResolvers,
-    customerResolvers,
-    basketResolvers,
-    checkoutResolvers,
-    paymentResolvers,
-    inventoryResolvers,
-    fulfillmentResolvers,
-    shippingResolvers,
-    promotionResolvers,
-    loyaltyResolvers,
-    membershipResolvers,
-    subscriptionResolvers,
-    couponResolvers,
-    notificationResolvers,
-    storeResolvers,
-    taxResolvers,
-    pricingResolvers,
-    analyticsResolvers,
-    contentResolvers,
-    mediaResolvers,
-    localizationResolvers,
-    configurationResolvers,
-    organizationResolvers,
-    supplierResolvers,
-    gdprResolvers,
-    identityResolvers,
-    reportingResolvers,
-    supportResolvers,
-    warehouseResolvers,
-    webhookResolvers,
-  ]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const allResolvers: { module: string; res: any }[] = [
+    { module: 'product', res: productResolvers },
+    { module: 'order', res: orderResolvers },
+    { module: 'customer', res: customerResolvers },
+    { module: 'basket', res: basketResolvers },
+    { module: 'checkout', res: checkoutResolvers },
+    { module: 'payment', res: paymentResolvers },
+    { module: 'inventory', res: inventoryResolvers },
+    { module: 'fulfillment', res: fulfillmentResolvers },
+    { module: 'shipping', res: shippingResolvers },
+    { module: 'promotion', res: promotionResolvers },
+    { module: 'loyalty', res: loyaltyResolvers },
+    { module: 'membership', res: membershipResolvers },
+    { module: 'subscription', res: subscriptionResolvers },
+    { module: 'coupon', res: couponResolvers },
+    { module: 'notification', res: notificationResolvers },
+    { module: 'store', res: storeResolvers },
+    { module: 'tax', res: taxResolvers },
+    { module: 'pricing', res: pricingResolvers },
+    { module: 'analytics', res: analyticsResolvers },
+    { module: 'content', res: contentResolvers },
+    { module: 'media', res: mediaResolvers },
+    { module: 'localization', res: localizationResolvers },
+    { module: 'configuration', res: configurationResolvers },
+    { module: 'organization', res: organizationResolvers },
+    { module: 'supplier', res: supplierResolvers },
+    { module: 'gdpr', res: gdprResolvers },
+    { module: 'identity', res: identityResolvers },
+    { module: 'reporting', res: reportingResolvers },
+    { module: 'support', res: supportResolvers },
+    { module: 'warehouse', res: warehouseResolvers },
+    { module: 'webhook', res: webhookResolvers },
+  ];
+
+  const enabledTypeDefs = allTypeDefs
+    .filter(t => moduleRegistry.shouldIncludeGraphQL(t.module))
+    .map(t => t.defs);
+  const enabledResolvers = allResolvers
+    .filter(r => moduleRegistry.shouldIncludeGraphQL(r.module))
+    .map(r => r.res);
+
+  const typeDefs = mergeTypeDefs(enabledTypeDefs);
+  const resolvers = mergeResolvers(enabledResolvers);
 
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 
   const apolloServer = new ApolloServer<GraphQLContext>({
     schema,
     introspection: process.env.NODE_ENV !== 'production',
+    validationRules: getGraphQLValidationRules(
+      parseInt(process.env.GRAPHQL_MAX_DEPTH ?? '10', 10),
+      parseInt(process.env.GRAPHQL_MAX_COMPLEXITY ?? '1000', 10),
+    ),
+    formatError: (formattedError, error) => {
+      const isProduction = process.env.NODE_ENV === 'production';
+      const original = (error as Record<string, unknown>)?.originalError;
+
+      // If it's an AppError, enrich the GraphQL error with our code/status
+      if (original instanceof AppError) {
+        return {
+          message: isProduction && !original.isExpected ? 'An internal error occurred' : original.message,
+          extensions: {
+            code: original.code,
+            statusCode: original.statusCode,
+            isExpected: original.isExpected,
+            ...(original.details ? { details: original.details } : {}),
+          },
+        };
+      }
+
+      // Log unexpected errors
+      if (formattedError.extensions?.code !== 'BAD_USER_INPUT' && formattedError.extensions?.code !== 'UNAUTHENTICATED' && formattedError.extensions?.code !== 'FORBIDDEN') {
+        logger.error('GraphQL error', {
+          message: formattedError.message,
+          path: formattedError.path,
+          code: formattedError.extensions?.code,
+        });
+      }
+
+      // Hide internal details in production
+      if (isProduction) {
+        return {
+          message: 'An internal error occurred',
+          extensions: { code: 'INTERNAL_SERVER_ERROR' },
+        };
+      }
+
+      return formattedError;
+    },
   });
+
+  // Initialize persisted queries (if enabled via env)
+  initPersistedQueries();
 
   // Register /graphql synchronously before storefront routes catch it.
   // The actual Apollo middleware is swapped in once the server has started.
@@ -211,6 +272,16 @@ export function configureGraphQL(app: Express): void {
   app.use(
     '/graphql',
     (req, res, next) => {
+      // Persisted query enforcement: reject queries not in the allowlist
+      if (persistedQueryStore.isEnabled() && req.method === 'POST' && req.body?.query) {
+        if (!persistedQueryStore.isQueryAllowed(req.body.query)) {
+          res.status(403).json({
+            errors: [{ message: 'Query not in persisted query allowlist' }],
+          });
+          return;
+        }
+      }
+
       // Serve GraphiQL UI for browser GET requests in non-production
       if (req.method === 'GET' && process.env.NODE_ENV !== 'production') {
         const accept = req.headers.accept || '';

@@ -3,9 +3,10 @@
  * Creates a new content page
  */
 
-import { ContentRepo } from '../../infrastructure/repositories/contentRepo';
+import type { ContentRepo } from '../../infrastructure/repositories/contentRepo';
 import type { ContentPage } from '../../../../libs/db/types';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { ContentTypeNotFoundError, ContentTemplateNotFoundError, ContentValidationError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Command
@@ -61,24 +62,24 @@ export class CreatePageUseCase {
   async execute(command: CreatePageCommand): Promise<PageResponse> {
     // Validate command
     if (!command.title || !command.slug) {
-      throw new Error('Title and slug are required');
+      throw new ContentValidationError('Title and slug are required');
     }
 
     if (!command.contentTypeId) {
-      throw new Error('Content type ID is required');
+      throw new ContentValidationError('Content type ID is required');
     }
 
     // Verify content type exists
     const contentType = await this.contentRepo.findContentTypeById(command.contentTypeId);
     if (!contentType) {
-      throw new Error(`Content type with ID ${command.contentTypeId} not found`);
+      throw new ContentTypeNotFoundError(command.contentTypeId);
     }
 
     // Verify template exists if provided
     if (command.templateId) {
       const template = await this.contentRepo.findTemplateById(command.templateId);
       if (!template) {
-        throw new Error(`Template with ID ${command.templateId} not found`);
+        throw new ContentTemplateNotFoundError(command.templateId);
       }
     }
 

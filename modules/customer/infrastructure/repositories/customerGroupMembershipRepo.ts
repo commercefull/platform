@@ -3,6 +3,7 @@ import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
 import { CustomerGroupMembership as DbCustomerGroupMembership } from '../../../../libs/db/types';
+import { CustomerValidationError, FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
 export type CustomerGroupMembership = DbCustomerGroupMembership;
@@ -59,7 +60,7 @@ export class CustomerGroupMembershipRepo {
     // Check if already exists
     const existing = await this.findByCustomerAndGroup(params.customerId, params.customerGroupId);
     if (existing) {
-      throw new Error('Customer is already a member of this group');
+      throw new CustomerValidationError('Customer is already a member of this group');
     }
 
     const result = await queryOne<CustomerGroupMembership>(
@@ -69,7 +70,7 @@ export class CustomerGroupMembershipRepo {
       [params.customerId, params.customerGroupId, params.isActive ?? true, params.expiresAt || null, params.addedBy || null, now, now],
     );
 
-    if (!result) throw new Error('Failed to create customer group membership');
+    if (!result) throw new FailedToCreateCustomerError('Failed to create customer group membership');
     return result;
   }
 

@@ -1,10 +1,13 @@
-import DashboardQueryRepo from '../../infrastructure/repositories/DashboardQueryRepository';
+import analyticsDataRepository from '../../infrastructure/repositories/AnalyticsDataRepository';
+
+const DashboardQueryRepo = analyticsDataRepository.dashboard;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetDashboardMetricsUseCase, GetDashboardMetricsInput } from '../../application/useCases/GetDashboardMetrics';
 import { GetSalesAnalyticsUseCase, GetSalesAnalyticsInput } from '../../application/useCases/GetSalesAnalytics';
 import { GetProductPerformanceUseCase, GetProductPerformanceInput } from '../../application/useCases/GetProductPerformance';
 import { TrackPageViewUseCase, TrackPageViewCommand } from '../../application/useCases/TrackPageView';
-import { GenerateSalesReportUseCase, GenerateSalesReportCommand } from '../../application/useCases/GenerateSalesReport';
+import { GenerateSalesReportCommand, GenerateSalesReportUseCase } from '../../application/useCases/GenerateSalesReport';
+import { generateSalesReportUseCase } from '../../application/wired';
 
 export const analyticsResolvers = {
   Query: {
@@ -51,7 +54,7 @@ export const analyticsResolvers = {
 
     generateSalesReport: async (_parent: unknown, args: { input: GenerateSalesReportCommand }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new GenerateSalesReportUseCase();
+      const useCase = generateSalesReportUseCase;
       const command: GenerateSalesReportCommand = {
         ...args.input,
         startDate: new Date(args.input.startDate),

@@ -7,6 +7,7 @@
 import { Fulfillment } from '../../domain/entities/Fulfillment';
 import { FulfillmentItem } from '../../domain/entities/FulfillmentItem';
 import { IFulfillmentRepository } from '../../domain/repositories/FulfillmentRepository';
+import { FulfillmentNotFoundError, FulfillmentItemNotFoundError, FulfillmentValidationError } from '../../domain/errors/FulfillmentErrors';
 import { emitFulfillmentPickingStarted } from '../../domain/events/FulfillmentEvents';
 
 export interface PickItemInput {
@@ -34,13 +35,13 @@ export class ProcessPickingUseCase {
     // Get fulfillment
     const fulfillment = await this.fulfillmentRepository.findById(input.fulfillmentId);
     if (!fulfillment) {
-      throw new Error(`Fulfillment not found: ${input.fulfillmentId}`);
+      throw new FulfillmentNotFoundError(input.fulfillmentId);
     }
 
     // Get items
     const items = await this.fulfillmentRepository.findItemsByFulfillmentId(input.fulfillmentId);
     if (items.length === 0) {
-      throw new Error(`No items found for fulfillment: ${input.fulfillmentId}`);
+      throw new FulfillmentValidationError(`No items found for fulfillment: ${input.fulfillmentId}`);
     }
 
     // Start picking if not already started
@@ -59,7 +60,7 @@ export class ProcessPickingUseCase {
     for (const pickInput of input.items) {
       const item = items.find(i => i.fulfillmentItemId === pickInput.fulfillmentItemId);
       if (!item) {
-        throw new Error(`Fulfillment item not found: ${pickInput.fulfillmentItemId}`);
+        throw new FulfillmentItemNotFoundError(pickInput.fulfillmentItemId);
       }
 
       item.pick(pickInput.quantityPicked, pickInput.serialNumbers, pickInput.lotNumbers);

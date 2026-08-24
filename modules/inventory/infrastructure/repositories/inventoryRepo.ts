@@ -11,6 +11,7 @@ import {
   InventoryLevel as DbInventoryLevel,
   InventoryTransactionType as DbInventoryTransactionType,
 } from '../../../../libs/db/types';
+import { InventoryLocationNotFoundError, FailedToCreateInventoryError, InsufficientStockError } from '../../domain/errors/InventoryErrors';
 
 // ============================================================================
 // Re-export types for external use
@@ -207,7 +208,7 @@ export class InventoryRepo {
     ]);
 
     if (!result) {
-      throw new Error('Failed to create inventory location');
+      throw new FailedToCreateInventoryError('Failed to create inventory location');
     }
 
     return result;
@@ -271,7 +272,7 @@ export class InventoryRepo {
 
     const result = await queryOne<InventoryLocation>(sql, params);
     if (!result) {
-      throw new Error(`Inventory location ${inventoryLocationId} not found`);
+      throw new InventoryLocationNotFoundError(inventoryLocationId);
     }
 
     return result;
@@ -291,7 +292,7 @@ export class InventoryRepo {
     const result = await queryOne<InventoryLocation>(sql, [inventoryLocationId, quantityChange, new Date()]);
 
     if (!result) {
-      throw new Error(`Inventory location ${inventoryLocationId} not found`);
+      throw new InventoryLocationNotFoundError(inventoryLocationId);
     }
 
     return result;
@@ -311,7 +312,7 @@ export class InventoryRepo {
     const result = await queryOne<InventoryLocation>(sql, [inventoryLocationId, quantity, new Date()]);
 
     if (!result) {
-      throw new Error('Insufficient available quantity or location not found');
+      throw new InsufficientStockError(inventoryLocationId, quantity, 0);
     }
 
     return result;
@@ -331,7 +332,7 @@ export class InventoryRepo {
     const result = await queryOne<InventoryLocation>(sql, [inventoryLocationId, quantity, new Date()]);
 
     if (!result) {
-      throw new Error(`Inventory location ${inventoryLocationId} not found`);
+      throw new InventoryLocationNotFoundError(inventoryLocationId);
     }
 
     return result;
@@ -410,7 +411,7 @@ export class InventoryRepo {
     ]);
 
     if (!result) {
-      throw new Error('Failed to create inventory transaction');
+      throw new FailedToCreateInventoryError('Failed to create inventory transaction');
     }
 
     return result;

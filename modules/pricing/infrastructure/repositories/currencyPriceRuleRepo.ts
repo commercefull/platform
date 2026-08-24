@@ -9,6 +9,7 @@ import {
   PricingRuleType,
 } from '../../domain/pricingRule';
 import pricingRuleRepo from './pricingRuleRepo';
+import { PricingRuleNotFoundError, PricingValidationError } from '../../domain/errors/PricingErrors';
 
 export class CurrencyPriceRuleRepo {
   /**
@@ -81,7 +82,7 @@ export class CurrencyPriceRuleRepo {
     // First, get the existing rule to merge the metadata properly
     const existingRule = await pricingRuleRepo.findById(id);
     if (!existingRule) {
-      throw new Error(`Currency price rule with ID ${id} not found`);
+      throw new PricingRuleNotFoundError(id);
     }
 
     // Create updated metadata
@@ -138,7 +139,7 @@ export class CurrencyPriceRuleRepo {
     const updatedRule = await pricingRuleRepo.updateStatus(id, isActive);
 
     if (updatedRule.type !== PricingRuleType.CURRENCY_CONVERSION) {
-      throw new Error(`Rule with ID ${id} is not a currency price rule`);
+      throw new PricingValidationError(`Rule with ID ${id} is not a currency price rule`);
     }
 
     return this.transformToCurrencyPriceRule(updatedRule);

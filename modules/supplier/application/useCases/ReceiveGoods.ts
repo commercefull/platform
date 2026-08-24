@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { PurchaseOrderNotFoundError, SupplierValidationError } from '../../domain/errors/SupplierErrors';
 
 export interface ReceivedItem {
   productId: string;
@@ -70,11 +71,11 @@ export class ReceiveGoodsUseCase {
   async execute(input: ReceiveGoodsInput): Promise<ReceiveGoodsOutput> {
     const po = await this.purchaseOrderRepository.findById(input.purchaseOrderId);
     if (!po) {
-      throw new Error(`Purchase order not found: ${input.purchaseOrderId}`);
+      throw new PurchaseOrderNotFoundError(input.purchaseOrderId);
     }
 
     if (!['submitted', 'partial_received'].includes(po.status)) {
-      throw new Error(`Cannot receive goods for PO with status: ${po.status}`);
+      throw new SupplierValidationError(`Cannot receive goods for PO with status: ${po.status}`);
     }
 
     const receivingId = `rcv_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

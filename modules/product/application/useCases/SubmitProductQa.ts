@@ -6,6 +6,7 @@
 import productRepo from '../../infrastructure/repositories/productRepo';
 import productQaRepo from '../../infrastructure/repositories/productQaRepo';
 import type { ProductQa } from '../../infrastructure/repositories/productQaRepo';
+import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================
 // Command
@@ -43,16 +44,16 @@ export interface SubmitProductQaResponse {
 export class SubmitProductQaUseCase {
   async execute(command: SubmitProductQaCommand): Promise<SubmitProductQaResponse> {
     if (!command.productId) {
-      throw new Error('productId is required');
+      throw new ProductValidationError('productId is required');
     }
     if (!command.question?.trim()) {
-      throw new Error('question is required');
+      throw new ProductValidationError('question is required');
     }
 
     // Validate product exists
     const product = await productRepo.findById(command.productId);
     if (!product) {
-      throw new Error(`Product not found: ${command.productId}`);
+      throw new ProductNotFoundError(command.productId);
     }
 
     const qa: ProductQa = await productQaRepo.create({

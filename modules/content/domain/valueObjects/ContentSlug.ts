@@ -4,6 +4,8 @@
  * Immutable representation of a URL-safe slug for content pages.
  */
 
+import { ContentValidationError } from '../errors/ContentErrors';
+
 export class ContentSlug {
   private readonly _value: string;
 
@@ -14,7 +16,7 @@ export class ContentSlug {
   static create(value: string): ContentSlug {
     const slug = ContentSlug.slugify(value);
     if (!slug) {
-      throw new Error('Slug cannot be empty');
+      throw new ContentValidationError('Slug cannot be empty');
     }
     return new ContentSlug(slug);
   }

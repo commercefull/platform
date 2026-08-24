@@ -13,8 +13,12 @@ import { ConfigureStorePickupUseCase, type ConfigureStorePickupInput } from '../
 import { SetLocalDeliveryZoneUseCase, type SetLocalDeliveryZoneInput } from '../../application/useCases/SetLocalDeliveryZone';
 import { CreateStoreHierarchyUseCase, type CreateStoreHierarchyInput } from '../../application/useCases/CreateStoreHierarchy';
 import { ListStoresUseCase, ListStoresQuery } from '../../application/useCases/ListStores';
-import { StoreRepo } from '../../infrastructure/repositories/StoreRepo';
+import storeDataRepository from '../../infrastructure/repositories/StoreDataRepository';
+
+const StoreRepo = storeDataRepository.stores;
 import { SystemConfigurationRepo } from '../../../configuration/infrastructure/repositories/SystemConfigurationRepo';
+import { OrganizationLookupAdapter } from '../../infrastructure/acl/OrganizationLookupAdapter';
+import { SystemConfigAdapter } from '../../infrastructure/acl/SystemConfigAdapter';
 
 export class StoreController {
   private createStoreUseCase: CreateStoreUseCase;
@@ -25,9 +29,9 @@ export class StoreController {
   private listStoresUseCase: ListStoresUseCase;
 
   constructor() {
-    const storeRepository = new StoreRepo();
-    const systemConfigRepository = new SystemConfigurationRepo();
-    this.createStoreUseCase = new CreateStoreUseCase(storeRepository, systemConfigRepository);
+    const storeRepository = StoreRepo;
+    const systemConfigPort = new SystemConfigAdapter(new SystemConfigurationRepo());
+    this.createStoreUseCase = new CreateStoreUseCase(storeRepository, systemConfigPort, new OrganizationLookupAdapter());
     this.updateStoreUseCase = new UpdateStoreUseCase(storeRepository);
     this.configurePickupUseCase = new ConfigureStorePickupUseCase(storeRepository);
     this.setLocalDeliveryUseCase = new SetLocalDeliveryZoneUseCase(storeRepository);
@@ -101,7 +105,7 @@ export class StoreController {
    */
   async getStore(req: TypedRequest, res: Response) {
     try {
-      const storeRepository = new StoreRepo();
+      const storeRepository = StoreRepo;
       const store = await storeRepository.findById(req.params.storeId);
 
       if (!store) {
@@ -134,7 +138,7 @@ export class StoreController {
    */
   async getStoreBySlug(req: TypedRequest, res: Response) {
     try {
-      const storeRepository = new StoreRepo();
+      const storeRepository = StoreRepo;
       const store = await storeRepository.findBySlug(req.params.slug);
 
       if (!store) {
@@ -167,7 +171,7 @@ export class StoreController {
    */
   async getStoresByBusiness(req: TypedRequest, res: Response) {
     try {
-      const storeRepository = new StoreRepo();
+      const storeRepository = StoreRepo;
       const stores = await storeRepository.findByBusiness(req.params.organizationId);
 
       res.json({
@@ -194,7 +198,7 @@ export class StoreController {
    */
   async getActiveStores(req: TypedRequest, res: Response) {
     try {
-      const storeRepository = new StoreRepo();
+      const storeRepository = StoreRepo;
       const stores = await storeRepository.findActive();
 
       res.json({
@@ -247,7 +251,7 @@ export class StoreController {
    */
   async deleteStore(req: TypedRequest, res: Response) {
     try {
-      const storeRepository = new StoreRepo();
+      const storeRepository = StoreRepo;
       await storeRepository.delete(req.params.storeId);
 
       eventBus.emit('store.deleted', {

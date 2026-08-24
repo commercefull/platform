@@ -6,8 +6,10 @@
 import { logger } from '../../../libs/logger';
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import CategoryRepo from '../../../modules/product/infrastructure/repositories/categoryRepo';
+import { ManageCategoriesUseCase } from '../../../modules/product/application/useCases/ManageCategories';
 import { storefrontRespond } from '../../respond';
+
+const manageCategoriesUseCase = new ManageCategoriesUseCase();
 
 // ============================================================================
 // Load Categories for Navigation
@@ -15,11 +17,10 @@ import { storefrontRespond } from '../../respond';
 
 export const loadCategoriesForNavigation = async (req: TypedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const categories = await CategoryRepo.findForMenu();
+    const categories = await manageCategoriesUseCase.findForMenu();
     res.locals.categories = categories;
   } catch (error) {
-    logger.error('Error:', error);
-    console.warn('Failed to load categories for navigation:', error);
+    logger.warning('Failed to load categories for navigation', { error });
     res.locals.categories = [];
   }
   next();
@@ -30,20 +31,12 @@ export const loadCategoriesForNavigation = async (req: TypedRequest, res: Respon
 // ============================================================================
 
 export const getCategoriesForNavigation = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const categories = await CategoryRepo.findForMenu();
-    res.json({
-      success: true,
-      categories,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({
-      success: false,
-      message: (error as Error).message || 'Failed to load categories',
-    });
-  }
+  const categories = await manageCategoriesUseCase.findForMenu();
+  res.json({
+    success: true,
+    categories,
+  });
+  
 };
 
 // ============================================================================
@@ -51,20 +44,12 @@ export const getCategoriesForNavigation = async (req: TypedRequest, res: Respons
 // ============================================================================
 
 export const getAllCategories = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const categories = await CategoryRepo.findActive();
-    res.json({
-      success: true,
-      categories,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({
-      success: false,
-      message: (error as Error).message || 'Failed to load categories',
-    });
-  }
+  const categories = await manageCategoriesUseCase.findActive();
+  res.json({
+    success: true,
+    categories,
+  });
+  
 };
 
 // ============================================================================
@@ -72,34 +57,26 @@ export const getAllCategories = async (req: TypedRequest, res: Response): Promis
 // ============================================================================
 
 export const getCategoryDetails = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { categoryId } = req.params;
+  const { categoryId } = req.params;
 
-    const category = await CategoryRepo.findOne(categoryId);
-    if (!category) {
-      res.status(404).json({
-        success: false,
-        message: 'Category not found',
-      });
-      return;
-    }
-
-    // Get subcategories if this is a parent category
-    const subcategories = await CategoryRepo.findChildren(categoryId);
-
-    res.json({
-      success: true,
-      category,
-      subcategories,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({
+  const category = await manageCategoriesUseCase.findOne(categoryId);
+  if (!category) {
+    res.status(404).json({
       success: false,
-      message: (error as Error).message || 'Failed to load category details',
+      message: 'Category not found',
     });
+    return;
   }
+
+  // Get subcategories if this is a parent category
+  const subcategories = await manageCategoriesUseCase.findChildren(categoryId);
+
+  res.json({
+    success: true,
+    category,
+    subcategories,
+  });
+  
 };
 
 // ============================================================================
@@ -107,34 +84,26 @@ export const getCategoryDetails = async (req: TypedRequest, res: Response): Prom
 // ============================================================================
 
 export const getCategoryPage = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { categorySlug } = req.params;
+  const { categorySlug } = req.params;
 
-    const category = await CategoryRepo.findBySlug(categorySlug);
-    if (!category) {
-      return storefrontRespond(req, res, '404', {
-        pageName: 'Category Not Found',
-      });
-    }
-
-    // Get subcategories
-    const subcategories = await CategoryRepo.findChildren(category.productCategoryId);
-
-    // Get featured products in this category (placeholder - would need product filtering)
-    const featuredProducts: unknown[] = [];
-
-    storefrontRespond(req, res, 'category/category', {
-      pageName: category.name,
-      category,
-      subcategories,
-      featuredProducts,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load category',
+  const category = await manageCategoriesUseCase.findBySlug(categorySlug);
+  if (!category) {
+    return storefrontRespond(req, res, '404', {
+      pageName: 'Category Not Found',
     });
   }
+
+  // Get subcategories
+  const subcategories = await manageCategoriesUseCase.findChildren(category.productCategoryId);
+
+  // Get featured products in this category (placeholder - would need product filtering)
+  const featuredProducts: unknown[] = [];
+
+  storefrontRespond(req, res, 'category/category', {
+    pageName: category.name,
+    category,
+    subcategories,
+    featuredProducts,
+  });
+  
 };

@@ -1,6 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table, Locale } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
+import { LocaleCodeAlreadyExistsError, FailedToCreateLocaleError } from '../../domain/errors/LocalizationErrors';
 
 // Use Locale type directly from libs/db/types.ts
 export type { Locale };
@@ -144,7 +145,7 @@ export class LocaleRepo {
     // Check if code already exists
     const existing = await this.findByCode(params.code);
     if (existing) {
-      throw new Error(`Locale with code '${params.code}' already exists`);
+      throw new LocaleCodeAlreadyExistsError(params.code);
     }
 
     // If setting as default, unset other defaults
@@ -177,7 +178,7 @@ export class LocaleRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create locale');
+      throw new FailedToCreateLocaleError();
     }
 
     return result;

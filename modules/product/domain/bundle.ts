@@ -3,6 +3,8 @@
  * Defines the domain model for product bundles
  */
 
+import { ProductValidationError } from './errors/ProductErrors';
+
 export type BundleType = 'fixed' | 'customizable' | 'mix_and_match';
 export type PricingType = 'fixed' | 'calculated' | 'percentage_discount';
 
@@ -168,11 +170,11 @@ export class Bundle {
     if (!this.props.allowDuplicates) {
       const exists = this.props.items.find(i => i.productId === item.productId && i.productVariantId === item.productVariantId);
       if (exists) {
-        throw new Error('Duplicate items not allowed in this bundle');
+        throw new ProductValidationError('Duplicate items not allowed in this bundle');
       }
     }
     if (this.props.maxItems && this.props.items.length >= this.props.maxItems) {
-      throw new Error(`Bundle cannot exceed ${this.props.maxItems} items`);
+      throw new ProductValidationError(`Bundle cannot exceed ${this.props.maxItems} items`);
     }
     this.props.items.push(item);
     this.touch();
@@ -180,10 +182,10 @@ export class Bundle {
 
   removeItem(bundleItemId: string): void {
     const index = this.props.items.findIndex(i => i.bundleItemId === bundleItemId);
-    if (index === -1) throw new Error('Bundle item not found');
+    if (index === -1) throw new ProductValidationError('Bundle item not found');
     const item = this.props.items[index];
     if (item.isRequired && this.props.requireAllItems) {
-      throw new Error('Cannot remove a required item from this bundle');
+      throw new ProductValidationError('Cannot remove a required item from this bundle');
     }
     this.props.items.splice(index, 1);
     this.touch();

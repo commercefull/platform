@@ -5,6 +5,7 @@
  */
 
 import type { StoreRepository } from '../../domain/repositories/StoreRepository';
+import { StoreNotFoundError, StoreValidationError } from '../../domain/errors/StoreErrors';
 
 export interface SetLocalDeliveryZoneInput {
   storeId: string;
@@ -38,11 +39,11 @@ export class SetLocalDeliveryZoneUseCase {
   async execute(input: SetLocalDeliveryZoneInput): Promise<SetLocalDeliveryZoneOutput> {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) {
-      throw new Error(`Store not found: ${input.storeId}`);
+      throw new StoreNotFoundError(input.storeId);
     }
 
     if (input.enabled && !input.radiusKm && !input.postalCodes?.length) {
-      throw new Error('Either radius or postal codes must be specified for local delivery');
+      throw new StoreValidationError('Either radius or postal codes must be specified for local delivery');
     }
 
     const localDeliverySettings = {

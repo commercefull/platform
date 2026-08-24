@@ -293,7 +293,7 @@ export const registerInventoryEventHandlers = () => {
   eventBus.registerHandler('inventory.low', async (payload: EventPayload) => {
     const { productId, sku, currentStock, reorderPoint } = payload.data as InventoryLowPayload;
 
-    console.log(`Low inventory alert: ${sku} (${currentStock} remaining, reorder at ${reorderPoint})`);
+    logger.warning('Low inventory alert', { sku, currentStock, reorderPoint });
 
     // Send low stock notification to merchants who carry this product
     const merchants = await query<Array<{ organizationId: string }>>(
@@ -339,7 +339,7 @@ export const registerInventoryEventHandlers = () => {
   eventBus.registerHandler('inventory.released', async (payload: EventPayload) => {
     const { productId, quantity, reason } = payload.data as InventoryReleasedPayload;
 
-    console.log(`Inventory released: ${quantity} units of ${productId} (${reason})`);
+    logger.debug('Inventory released', { productId, quantity, reason });
   });
 };
 

@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductType {
   productTypeId: string;
@@ -54,7 +55,7 @@ export class ProductTypeRepository {
     const result = await queryOne<ProductType>(sql, [input.name, slug]);
 
     if (!result) {
-      throw new Error('Failed to create product type');
+      throw new FailedToCreateProductError();
     }
 
     return result;

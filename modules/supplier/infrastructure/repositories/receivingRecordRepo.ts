@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierErrors';
 
 // ============================================================================
 // Table Constants
@@ -143,7 +144,7 @@ export class SupplierReceivingRecordRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create receiving record');
+    if (!result) throw new FailedToCreateSupplierEntityError('Failed to create receiving record');
     return result;
   }
 

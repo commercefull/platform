@@ -10,6 +10,7 @@ import {
   CustomerFilters,
 } from '../../domain/repositories/CustomerRepository';
 import { Customer, CustomerAddress } from '../../../../libs/db/types';
+import { CustomerAddressNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 
 export class CustomerRepo implements ICustomerRepository {
@@ -184,7 +185,7 @@ export class CustomerRepo implements ICustomerRepository {
       return this.saveAddressForCustomer(existing.customerId, address);
     }
 
-    throw new Error('Cannot save new address without customerId. Use addAddress method instead.');
+    throw new CustomerValidationError('Cannot save new address without customerId. Use addAddress method instead.');
   }
 
   private async saveAddressForCustomer(customerId: string, address: CustomerAddress): Promise<CustomerAddress> {
@@ -262,7 +263,7 @@ export class CustomerRepo implements ICustomerRepository {
 
   async updateAddress(addressId: string, updates: Partial<CustomerAddress>): Promise<CustomerAddress> {
     const existing = await queryOne<CustomerAddress>('SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1', [addressId]);
-    if (!existing) throw new Error('Address not found');
+    if (!existing) throw new CustomerAddressNotFoundError(addressId);
 
     const merged = { ...existing, ...updates };
     return this.saveAddressForCustomer(existing.customerId, merged);

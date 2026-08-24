@@ -3,6 +3,8 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { logger } from '../../../../../libs/logger';
+import { VerificationTokenRequiredError, InvalidVerificationTokenError, VerificationTokenAlreadyUsedError, VerificationTokenExpiredError, EmailRequiredOnlyError, EmailAlreadyVerifiedError } from '../../../domain/errors/IdentityErrors';
 
 export interface VerifyEmailInput {
   token: string;
@@ -66,21 +68,21 @@ export class VerifyCustomerEmailUseCase {
 
   async verify(input: VerifyEmailInput): Promise<VerifyEmailOutput> {
     if (!input.token) {
-      throw new Error('Verification token is required');
+      throw new VerificationTokenRequiredError();
     }
 
     // Find verification record
     const verification = await this.emailVerificationRepo.findByToken(input.token);
     if (!verification) {
-      throw new Error('Invalid verification token');
+      throw new InvalidVerificationTokenError();
     }
 
     if (verification.used) {
-      throw new Error('Token has already been used');
+      throw new VerificationTokenAlreadyUsedError();
     }
 
     if (new Date() > new Date(verification.expiresAt)) {
-      throw new Error('Verification token has expired');
+      throw new VerificationTokenExpiredError();
     }
 
     // Update customer
@@ -106,7 +108,7 @@ export class VerifyCustomerEmailUseCase {
 
   async resendVerification(input: ResendVerificationInput): Promise<ResendVerificationOutput> {
     if (!input.email) {
-      throw new Error('Email is required');
+      throw new EmailRequiredOnlyError();
     }
 
     // Find customer
@@ -119,7 +121,7 @@ export class VerifyCustomerEmailUseCase {
     }
 
     if (customer.emailVerified) {
-      throw new Error('Email is already verified');
+      throw new EmailAlreadyVerifiedError();
     }
 
     // Generate new verification token
@@ -141,7 +143,9 @@ export class VerifyCustomerEmailUseCase {
         token,
         firstName: customer.firstName,
       });
-    } catch {}
+    } catch (err) {
+      logger.warn('Failed to send customer welcome email', { error: err });
+    }
 
     return {
       success: true,

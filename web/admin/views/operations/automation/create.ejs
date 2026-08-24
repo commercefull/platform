@@ -1,0 +1,81 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/automation" class="btn btn-secondary"><i class="ti ti-arrow-left"></i> <%= t('common.back') %></a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><%= pageName %></h3></div>
+      <div class="card-body">
+        <form method="POST" action="/admin/automation">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label"><%= t('common.name') %> *</label>
+              <input type="text" name="name" class="form-control" value="<%= formData?.name || '' %>" required>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Trigger Type *</label>
+              <select name="triggerType" class="form-select" required>
+                <option value="event" <%= formData?.triggerType === 'event' ? 'selected' : '' %>>Event</option>
+                <option value="schedule" <%= formData?.triggerType === 'schedule' ? 'selected' : '' %>>Schedule</option>
+                <option value="manual" <%= formData?.triggerType === 'manual' ? 'selected' : '' %>>Manual</option>
+                <option value="segment_membership_added" <%= formData?.triggerType === 'segment_membership_added' ? 'selected' : '' %>>Segment Added</option>
+                <option value="segment_membership_removed" <%= formData?.triggerType === 'segment_membership_removed' ? 'selected' : '' %>>Segment Removed</option>
+              </select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label"><%= t('common.priority') %></label>
+              <input type="number" name="priority" class="form-control" value="<%= formData?.priority || '0' %>">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Event Name (for event trigger)</label>
+              <input type="text" name="eventName" class="form-control" value="<%= formData?.eventName || '' %>" placeholder="e.g. order.created">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Cron Expression (for schedule trigger)</label>
+              <input type="text" name="cronExpression" class="form-control" value="<%= formData?.cronExpression || '' %>" placeholder="e.g. 0 9 * * *">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label"><%= t('common.description') %></label>
+            <textarea name="description" class="form-control" rows="2"><%= formData?.description || '' %></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Condition Match Mode</label>
+              <select name="conditionMatchMode" class="form-select">
+                <option value="all" <%= formData?.conditionMatchMode === 'all' ? 'selected' : '' %>>All (AND)</option>
+                <option value="any" <%= formData?.conditionMatchMode === 'any' ? 'selected' : '' %>>Any (OR)</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Action Execution Mode</label>
+              <select name="actionExecutionMode" class="form-select">
+                <option value="sequential" <%= formData?.actionExecutionMode === 'sequential' ? 'selected' : '' %>>Sequential</option>
+                <option value="parallel" <%= formData?.actionExecutionMode === 'parallel' ? 'selected' : '' %>>Parallel</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Conditions (JSON array)</label>
+            <textarea name="conditions" class="form-control" rows="4" placeholder='[{"field":"order.totalAmount","operator":"gt","value":100}]'><%= formData?.conditions || '' %></textarea>
+            <small class="form-hint">Array of condition objects with field, operator, and value.</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Actions (JSON array) *</label>
+            <textarea name="actions" class="form-control" rows="4" placeholder='[{"type":"send_notification","config":{"channel":"email","template":"welcome"}}]' required><%= formData?.actions || '' %></textarea>
+            <small class="form-hint">Array of action objects with type, config, and optional delayMs.</small>
+          </div>
+          <button type="submit" class="btn btn-primary"><%= t('common.save') %></button>
+          <a href="/admin/automation" class="btn btn-secondary"><%= t('common.cancel') %></a>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

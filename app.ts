@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import flash from 'connect-flash';
@@ -13,15 +13,56 @@ import cors from 'cors';
 import hpp from 'hpp';
 import { pool } from './libs/db/pool';
 import { runWithTestDb } from './libs/db/testDbContext';
+import { startQueryCounterContext } from './libs/db/queryCounter';
 import passport from 'passport';
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from './libs/form';
 import { createSessionStore } from './libs/session/sessionStoreFactory';
 import { initializeAnalyticsHandlers } from './boot/analyticsEventHandler';
 import { configureRoutes } from './boot/routes';
 import { expressHttpLogger, logger } from './libs/logger';
+import { errorMiddleware } from './libs/errorMiddleware';
+import { correlationIdMiddleware } from './libs/correlationId';
+import { registerAllEventHandlers } from './libs/events/registerEventHandlers';
+import { startOutboxDispatcher, stopOutboxDispatcher } from './libs/events/outboxDispatcher';
+import { initializeScheduledJobs } from './libs/jobs/cronScheduler';
+import { loadOrgRolePolicies } from './libs/rbac/rolePolicyRepository';
+import { registerModuleManifestsSync } from './boot/moduleManifests';
+import { themeRegistry } from './modules/theme/domain/services/ThemeRegistry';
+import { blockSchemaRegistry } from './modules/pagebuilder/domain/services/BlockSchemaRegistry';
+import { validateAllSecrets, validateCorsOrigins, getSecret } from './libs/secrets';
 
-// Initialize analytics event handlers
+// Register module manifests and initialize registry (sync, env-var based)
+registerModuleManifestsSync();
+
+// Register built-in themes in the in-memory theme registry
+themeRegistry.registerBuiltInThemes();
+
+// Register built-in block types in the block schema registry
+blockSchemaRegistry.registerBuiltIns();
+
+// Validate all required secrets — fail fast in production before any service starts
+validateAllSecrets();
+
+// Initialize event handlers and outbox dispatcher
+registerAllEventHandlers();
 initializeAnalyticsHandlers();
+
+// Start the durable outbox dispatcher (claim-based, multi-node safe)
+if (process.env.OUTBOX_DISABLED !== '1') {
+  startOutboxDispatcher();
+}
+
+// Start scheduled jobs (cron)
+if (process.env.CRON_DISABLED !== '1') {
+  initializeScheduledJobs();
+}
+
+// Load per-organization role policies into RBAC cache
+if (process.env.POSTGRES_HOST) {
+  loadOrgRolePolicies().catch(() => {
+    // Non-fatal — system defaults will be used
+  });
+}
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -133,11 +174,9 @@ app.use(
   }),
 );
 
-// CORS configuration
+// CORS configuration — validated origins (fail-fast in production)
 const corsOptions: cors.CorsOptions = {
-  origin: isProduction
-    ? process.env.ALLOWED_ORIGINS?.split(',') || ['https://yourdomain.com']
-    : ['http://localhost:3000', 'http://localhost:10000', 'http://127.0.0.1:3000'],
+  origin: validateCorsOrigins(),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
@@ -234,6 +273,9 @@ app.locals.t = function (key: string) {
   return i18next.t(key);
 };
 
+// Correlation ID — must be early so all downstream middleware/logs have it
+app.use(correlationIdMiddleware);
+
 app.use(expressHttpLogger);
 // Skip JSON parsing for webhook route — needs raw Buffer for signature verification
 app.use((req, res, next) => {
@@ -246,14 +288,8 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
-// Session configuration with secure defaults
-const sessionSecret = process.env.SESSION_SECRET;
-if (!sessionSecret || sessionSecret.length < 32) {
-  if (isProduction) {
-    throw new Error('SESSION_SECRET must be set and at least 32 characters in production');
-  }
-  console.warn('WARNING: SESSION_SECRET is not set or too short. Using insecure default for development.');
-}
+// Session configuration — secret validated via libs/secrets (fail-fast in production)
+const sessionSecret = getSecret('SESSION_SECRET');
 
 // Create session store - uses Redis if REDIS_URL/REDIS_HOST is set, otherwise PostgreSQL
 const sessionStoreResult = createSessionStore({
@@ -307,47 +343,27 @@ app.use((req, res, next) => {
   next();
 });
 
+// Query-count middleware — wraps each request in a query counter context.
+// In dev/test mode, patches res.end to inject the X-Query-Count response header
+// so integration tests can assert per-endpoint query budgets (N+1 detection).
+app.use((req, res, next) => {
+  const state = startQueryCounterContext(() => next());
+
+  if (isProduction === false) {
+    const originalEnd = res.end.bind(res);
+    res.end = ((...args: Parameters<typeof res.end>) => {
+      res.setHeader('X-Query-Count', String(state.count));
+      return originalEnd(...args);
+    }) as typeof res.end;
+  }
+});
+
 // Configure all routes
 configureRoutes(app);
 
-// Global error handler - never expose stack traces in production
-app.use(function (err: unknown, req: Request, res: Response, _next: NextFunction) {
-  const error = err instanceof Error ? err : new Error(String(err));
-  // Log error for debugging (use proper logging in production)
-  console.error('Error:', {
-    message: error.message,
-    stack: isProduction ? undefined : error.stack,
-    path: req.path,
-    method: req.method,
-  });
-
-  // Don't leak error details in production
-  res.locals.message = isProduction ? 'An error occurred' : error.message;
-  res.locals.error = isProduction ? {} : error;
-
-  const status = (error as unknown as Record<string, number>).status || 500;
-  res.status(status);
-
-  // Return JSON for API requests
-  if (req.xhr || req.headers.accept?.includes('application/json')) {
-    res.json({
-      success: false,
-      message: isProduction ? 'Internal server error' : error.message,
-      ...(isProduction ? {} : { stack: error.stack }),
-    });
-  } else {
-    res.render('storefront/views/error', {
-      pageName: 'Error',
-      message: res.locals.message,
-      error: res.locals.error,
-      user: req.user,
-      session: req.session,
-      successMsg: res.locals.successMsg,
-      errorMsg: res.locals.errorMsg,
-      categories: [],
-    });
-  }
-});
+// Global error handler — central error middleware
+// Maps AppError.statusCode, logs at declared severity, emits RFC 7807 problem+json
+app.use(errorMiddleware);
 
 app.locals.formText = formText;
 app.locals.formInput = formInput;
@@ -370,11 +386,28 @@ server.on('error', (err: Error) => {
 });
 
 process.on('SIGTERM', () => {
-  server.close(() => process.exit(0));
+  stopOutboxDispatcher().finally(() => {
+    server.close(() => process.exit(0));
+  });
 });
 
 process.on('SIGINT', () => {
-  server.close(() => process.exit(0));
+  stopOutboxDispatcher().finally(() => {
+    server.close(() => process.exit(0));
+  });
+});
+
+process.on('uncaughtException', (err: Error) => {
+  logger.error('Uncaught exception', { message: err.message, stack: err.stack });
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason: unknown) => {
+  logger.error('Unhandled promise rejection', {
+    reason: reason instanceof Error ? reason.message : String(reason),
+    stack: reason instanceof Error ? reason.stack : undefined,
+  });
+  process.exit(1);
 });
 
 export default app;

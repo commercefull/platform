@@ -3,7 +3,9 @@
  * Records coupon usage after successful order
  */
 
-import couponRepo, { PromotionCouponUsage } from '../../infrastructure/repositories/couponRepo';
+import couponDiscountRepository, { type PromotionCouponUsage } from '../../infrastructure/repositories/CouponDiscountRepository';
+
+const couponRepo = couponDiscountRepository.coupons;
 import { ValidateCouponUseCase, ValidateCouponCommand } from './ValidateCoupon';
 
 // ============================================================================

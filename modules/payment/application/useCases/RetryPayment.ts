@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { TransactionNotFoundError, CannotRetryTransactionError, MaxRetryAttemptsReachedError } from '../../domain/errors/PaymentErrors';
 
 export interface RetryPaymentInput {
   transactionId: string;
@@ -46,18 +47,18 @@ export class RetryPaymentUseCase {
     // Get original transaction
     const originalTransaction = await this.paymentRepository.findById(input.transactionId);
     if (!originalTransaction) {
-      throw new Error(`Transaction not found: ${input.transactionId}`);
+      throw new TransactionNotFoundError(input.transactionId);
     }
 
     // Only failed transactions can be retried
     if (originalTransaction.status !== 'failed') {
-      throw new Error(`Cannot retry transaction with status: ${originalTransaction.status}`);
+      throw new CannotRetryTransactionError(originalTransaction.status);
     }
 
     // Check retry limit
     const retryCount = await this.paymentRepository.countRetries(input.transactionId);
     if (retryCount >= 3) {
-      throw new Error('Maximum retry attempts reached');
+      throw new MaxRetryAttemptsReachedError();
     }
 
     const newTransactionId = `txn_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

@@ -6,7 +6,11 @@
  * Validates: Requirements 1.3
  */
 
-import paymentFeeRepo, { PaymentFee } from '../../infrastructure/repositories/paymentFeeRepo';
+import { PaymentBillingRepository, PaymentFee } from '../../domain/repositories/PaymentBillingRepository';
+import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
+
+const paymentBillingRepo = paymentBillingDataRepository.billing;
+import { FailedToCreatePaymentFeeError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
 // Command
@@ -43,10 +47,10 @@ export interface RecordPaymentFeeResponse {
 // ============================================================================
 
 export class RecordPaymentFeeUseCase {
-  constructor(private readonly repo: typeof paymentFeeRepo = paymentFeeRepo) {}
+  constructor(private readonly repo: PaymentBillingRepository = paymentBillingRepo) {}
 
   async execute(command: RecordPaymentFeeCommand): Promise<RecordPaymentFeeResponse> {
-    const fee = await this.repo.create({
+    const fee = await this.repo.createFee({
       transactionId: command.transactionId,
       organizationId: command.organizationId,
       type: command.type,
@@ -56,7 +60,7 @@ export class RecordPaymentFeeUseCase {
     });
 
     if (!fee) {
-      throw new Error('Failed to create payment fee');
+      throw new FailedToCreatePaymentFeeError();
     }
 
     return this.mapToResponse(fee);

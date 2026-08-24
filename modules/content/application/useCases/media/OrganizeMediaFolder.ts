@@ -3,7 +3,8 @@
  * Creates and manages media folders for organization
  */
 
-import { ContentMediaRepo } from '../../../infrastructure/repositories/contentMediaRepo';
+import type { ContentMediaRepo } from '../../../infrastructure/repositories/contentMediaRepo';
+import { MediaFolderNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class CreateFolderCommand {
   constructor(
@@ -50,7 +51,7 @@ export class OrganizeMediaFolderUseCase {
 
   async createFolder(command: CreateFolderCommand): Promise<FolderResponse> {
     if (!command.name) {
-      throw new Error('Folder name is required');
+      throw new ContentValidationError('Folder name is required');
     }
 
     // Calculate depth and path
@@ -60,7 +61,7 @@ export class OrganizeMediaFolderUseCase {
     if (command.parentId) {
       const parent = await this.mediaRepo.findFolderById(command.parentId);
       if (!parent) {
-        throw new Error(`Parent folder with ID ${command.parentId} not found`);
+        throw new MediaFolderNotFoundError(command.parentId);
       }
       depth = parent.depth + 1;
       path = parent.path ? `${parent.path}/${command.name}` : command.name;
@@ -94,7 +95,7 @@ export class OrganizeMediaFolderUseCase {
   async moveFolder(command: MoveFolderCommand): Promise<FolderResponse> {
     const folder = await this.mediaRepo.findFolderById(command.folderId);
     if (!folder) {
-      throw new Error(`Folder with ID ${command.folderId} not found`);
+      throw new MediaFolderNotFoundError(command.folderId);
     }
 
     // Calculate new depth and path
@@ -104,12 +105,12 @@ export class OrganizeMediaFolderUseCase {
     if (command.newParentId) {
       const newParent = await this.mediaRepo.findFolderById(command.newParentId);
       if (!newParent) {
-        throw new Error(`Parent folder with ID ${command.newParentId} not found`);
+        throw new MediaFolderNotFoundError(command.newParentId);
       }
 
       // Prevent circular reference
       if (command.newParentId === command.folderId) {
-        throw new Error('Cannot move folder to itself');
+        throw new ContentValidationError('Cannot move folder to itself');
       }
 
       depth = newParent.depth + 1;
@@ -134,14 +135,14 @@ export class OrganizeMediaFolderUseCase {
 
   async moveMediaToFolder(command: MoveMediaToFolderCommand): Promise<{ movedCount: number }> {
     if (!command.mediaIds || command.mediaIds.length === 0) {
-      throw new Error('At least one media ID is required');
+      throw new ContentValidationError('At least one media ID is required');
     }
 
     // Verify folder exists if provided
     if (command.folderId) {
       const folder = await this.mediaRepo.findFolderById(command.folderId);
       if (!folder) {
-        throw new Error(`Folder with ID ${command.folderId} not found`);
+        throw new MediaFolderNotFoundError(command.folderId);
       }
     }
 

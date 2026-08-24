@@ -3,8 +3,9 @@
  * Handles media file upload and registration
  */
 
-import { ContentMediaRepo } from '../../../infrastructure/repositories/contentMediaRepo';
+import type { ContentMediaRepo } from '../../../infrastructure/repositories/contentMediaRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { MediaFolderNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class UploadMediaCommand {
   constructor(
@@ -50,21 +51,21 @@ export class UploadMediaUseCase {
 
   async execute(command: UploadMediaCommand): Promise<MediaResponse> {
     if (!command.title || !command.fileName || !command.url) {
-      throw new Error('Title, fileName, and URL are required');
+      throw new ContentValidationError('Title, fileName, and URL are required');
     }
 
     // Validate file type
     const allowedTypes = ['image', 'video', 'audio', 'document', 'application'];
     const typeCategory = command.fileType.split('/')[0];
     if (!allowedTypes.includes(typeCategory) && !command.fileType.startsWith('application/')) {
-      throw new Error(`File type ${command.fileType} is not allowed`);
+      throw new ContentValidationError(`File type ${command.fileType} is not allowed`);
     }
 
     // Verify folder exists if provided
     if (command.folderId) {
       const folder = await this.mediaRepo.findFolderById(command.folderId);
       if (!folder) {
-        throw new Error(`Folder with ID ${command.folderId} not found`);
+        throw new MediaFolderNotFoundError(command.folderId);
       }
     }
 

@@ -7,38 +7,32 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../respond';
-import * as adminSupportRepo from '../../../modules/support/infrastructure/repositories/adminSupportRepo';
-import * as faqRepo from '../../../modules/support/infrastructure/repositories/faqRepo';
+import { ManageSupportTicketsUseCase, ManageFaqUseCase } from '../../../modules/support/application/useCases/ManageSupport';
+
+const manageSupportTicketsUseCase = new ManageSupportTicketsUseCase();
+const manageFaqUseCase = new ManageFaqUseCase();
 
 // ============================================================================
 // Support Dashboard
 // ============================================================================
 
 export const supportDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const stats = await adminSupportRepo.getSupportStats();
-    const tickets = await adminSupportRepo.listRecentTickets(20);
-    const { data: faqArticles } = await faqRepo.getArticles({ isPublished: true });
+  const stats = await manageSupportTicketsUseCase.getSupportStats();
+  const tickets = await manageSupportTicketsUseCase.listRecentTickets(20);
+  const { data: faqArticles } = await manageFaqUseCase.getArticles({ isPublished: true });
 
-    adminRespond(req, res, 'support/index', {
-      pageName: 'Support Center',
-      stats: {
-        openTickets: stats.openTickets,
-        resolvedToday: stats.resolvedToday,
-        avgResponseTime: stats.avgResponseTime,
-        customerSatisfaction: 85,
-      },
-      tickets,
-      faqs: faqArticles,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load support dashboard',
-    });
-  }
+  adminRespond(req, res, 'support/index', {
+    pageName: 'Support Center',
+    stats: {
+      openTickets: stats.openTickets,
+      resolvedToday: stats.resolvedToday,
+      avgResponseTime: stats.avgResponseTime,
+      customerSatisfaction: 85,
+    },
+    tickets,
+    faqs: faqArticles,
+  });
+  
 };
 
 // ============================================================================
@@ -46,82 +40,61 @@ export const supportDashboard = async (req: TypedRequest, res: Response): Promis
 // ============================================================================
 
 export const listSupportTickets = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { status, priority, search, limit, offset } = req.query;
+  const { status, priority, search, limit, offset } = req.query;
 
-    const tickets = await adminSupportRepo.listTickets({
-      status: status as string | undefined,
-      priority: priority as string | undefined,
-      search: search as string | undefined,
-      limit: parseInt(limit as string) || 50,
-      offset: parseInt(offset as string) || 0,
-    });
+  const tickets = await manageSupportTicketsUseCase.listTickets({
+    status: status as string | undefined,
+    priority: priority as string | undefined,
+    search: search as string | undefined,
+    limit: parseInt(limit as string) || 50,
+    offset: parseInt(offset as string) || 0,
+  });
 
-    adminRespond(req, res, 'support/tickets', {
-      pageName: 'Support Tickets',
-      tickets,
-      filters: { status, priority, search },
-      pagination: { limit: parseInt(limit as string) || 50, offset: parseInt(offset as string) || 0 },
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load support tickets',
-    });
-  }
+  adminRespond(req, res, 'support/tickets', {
+    pageName: 'Support Tickets',
+    tickets,
+    filters: { status, priority, search },
+    pagination: { limit: parseInt(limit as string) || 50, offset: parseInt(offset as string) || 0 },
+  });
+  
 };
 
 export const viewSupportTicket = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { ticketId } = req.params;
+  const { ticketId } = req.params;
 
-    const ticket = await adminSupportRepo.findTicketById(ticketId);
+  const ticket = await manageSupportTicketsUseCase.findTicketById(ticketId);
 
-    if (!ticket) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Support ticket not found',
-      });
-      return;
-    }
-
-    const messages = await adminSupportRepo.listTicketMessages(ticketId);
-
-    adminRespond(req, res, 'support/view-ticket', {
-      pageName: `Ticket: ${ticket.ticketNumber}`,
-      ticket,
-      messages,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!ticket) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load support ticket',
+      pageName: 'Not Found',
+      error: 'Support ticket not found',
     });
+    return;
   }
+
+  const messages = await manageSupportTicketsUseCase.listTicketMessages(ticketId);
+
+  adminRespond(req, res, 'support/view-ticket', {
+    pageName: `Ticket: ${ticket.ticketNumber}`,
+    ticket,
+    messages,
+  });
+  
 };
 
 export const updateTicketStatus = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { ticketId } = req.params;
-    const body = req.body as RequestBody;
-    const { status, response } = body;
+  const { ticketId } = req.params;
+  const body = req.body as RequestBody;
+  const { status, response } = body;
 
-    await adminSupportRepo.updateTicketStatus(ticketId, status);
+  await manageSupportTicketsUseCase.updateTicketStatus(ticketId, status);
 
-    if (response) {
-      await adminSupportRepo.addTicketMessage(ticketId, response, req.user?.id || '');
-    }
-
-    res.json({ success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
+  if (response) {
+    await manageSupportTicketsUseCase.addTicketMessage(ticketId, response, req.user?.id || '');
   }
+
+  res.json({ success: true });
+  
 };
 
 // ============================================================================
@@ -129,21 +102,13 @@ export const updateTicketStatus = async (req: TypedRequest, res: Response): Prom
 // ============================================================================
 
 export const listFaqs = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { data: faqs } = await faqRepo.getArticles(undefined, { limit: 100 });
+  const { data: faqs } = await manageFaqUseCase.getArticles(undefined, { limit: 100 });
 
-    adminRespond(req, res, 'support/faqs', {
-      pageName: 'FAQ Management',
-      faqs,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load FAQs',
-    });
-  }
+  adminRespond(req, res, 'support/faqs', {
+    pageName: 'FAQ Management',
+    faqs,
+  });
+  
 };
 
 export const createFaq = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -151,7 +116,7 @@ export const createFaq = async (req: TypedRequest, res: Response): Promise<void>
     const body = req.body as RequestBody;
     const { question, answer, _category, sortOrder, isPublished } = body;
 
-    await faqRepo.saveArticle({
+    await manageFaqUseCase.saveArticle({
       title: question,
       content: answer,
       isPublished: isPublished === 'true',
@@ -160,7 +125,7 @@ export const createFaq = async (req: TypedRequest, res: Response): Promise<void>
 
     res.redirect('/hub/support?success=FAQ created');
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     res.redirect('/hub/support?error=' + encodeURIComponent((error as Error).message));
   }
@@ -172,7 +137,7 @@ export const updateFaq = async (req: TypedRequest, res: Response): Promise<void>
     const body = req.body as RequestBody;
     const { question, answer, _category, sortOrder, isPublished } = body;
 
-    await faqRepo.saveArticle({
+    await manageFaqUseCase.saveArticle({
       faqArticleId: faqId,
       title: question,
       content: answer,
@@ -182,20 +147,15 @@ export const updateFaq = async (req: TypedRequest, res: Response): Promise<void>
 
     res.redirect('/hub/support?success=FAQ updated');
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     res.redirect('/hub/support?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
 export const deleteFaq = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { faqId } = req.params;
-    await faqRepo.deleteArticle(faqId);
-    res.json({ success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message });
-  }
+  const { faqId } = req.params;
+  await manageFaqUseCase.deleteArticle(faqId);
+  res.json({ success: true });
+  
 };

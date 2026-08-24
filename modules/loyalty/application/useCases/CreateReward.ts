@@ -4,6 +4,8 @@
  * Creates a new reward that can be redeemed with loyalty points.
  */
 
+import { LoyaltyValidationError } from '../../domain/errors/LoyaltyErrors';
+
 export interface CreateRewardInput {
   programId?: string;
   name: string;
@@ -70,15 +72,15 @@ export class CreateRewardUseCase {
 
     // Validate input
     if (pointsCost <= 0) {
-      throw new Error('Points cost must be greater than 0');
+      throw new LoyaltyValidationError('Points cost must be greater than 0');
     }
 
     if (type === 'discount' && (!value || !valueType)) {
-      throw new Error('Discount rewards require value and valueType');
+      throw new LoyaltyValidationError('Discount rewards require value and valueType');
     }
 
     if (type === 'free_product' && !productId) {
-      throw new Error('Free product rewards require a productId');
+      throw new LoyaltyValidationError('Free product rewards require a productId');
     }
 
     // Create reward

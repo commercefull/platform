@@ -123,3 +123,88 @@ POST /orders/:orderId/cancel |
 GET /orders/number/:orderNumber |
 
 <!-- GENERATED:ENDPOINTS:END -->
+
+---
+
+## Domain Errors
+
+All errors extend `AppError` and are defined in `modules/order/domain/errors/OrderErrors.ts`.
+
+### Order Not Found / Permission Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `OrderNotFoundError` | `order.not_found` | 404 | Order not found |
+| `OrderPermissionError` | `order.permission_denied` | 403 | No permission to view this order |
+| `CancelOrderPermissionError` | `order.cancel_permission_denied` | 403 | No permission to cancel this order |
+
+### Order State Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `OrderCannotBeCancelledError` | `order.cannot_be_cancelled` | 400 | Order cannot be cancelled in current status |
+| `OrderCannotBeRefundedError` | `order.cannot_be_refunded` | 400 | Order cannot be refunded in current status |
+| `OrderCannotBeModifiedError` | `order.cannot_be_modified` | 400 | Order cannot be modified in current status |
+| `InvalidOrderTransitionError` | `order.invalid_transition` | 400 | Invalid order status transition |
+| `InvalidPaymentTransitionError` | `order.invalid_payment_transition` | 400 | Invalid payment status transition |
+| `InvalidFulfillmentTransitionError` | `order.invalid_fulfillment_transition` | 400 | Invalid fulfillment status transition |
+
+### Validation Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `OrderMustContainItemsError` | `order.must_contain_items` | 400 | Order must contain at least one item |
+| `CustomerEmailRequiredError` | `order.customer_email_required` | 400 | Customer email is required |
+| `ShippingAddressRequiredError` | `order.shipping_address_required` | 400 | Shipping address is required |
+| `NoteContentEmptyError` | `order.note_content_empty` | 400 | Note content cannot be empty |
+| `CustomerIdRequiredError` | `order.customer_id_required` | 400 | Customer ID is required |
+| `OrderIdOrNumberRequiredError` | `order.id_or_number_required` | 400 | Either orderId or orderNumber must be provided |
+
+### Refund Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `OrderPaymentNotFoundError` | `order.payment_not_found` | 404 | Order payment not found |
+| `RefundAmountMustBePositiveError` | `order.refund_amount_must_be_positive` | 400 | Refund amount must be greater than zero |
+| `RefundExceedsOrderTotalError` | `order.refund_exceeds_total` | 400 | Refund amount cannot exceed order total |
+| `RefundExceedsRefundableBalanceError` | `order.refund_exceeds_refundable_balance` | 400 | Refund amount exceeds refundable balance |
+
+### Domain Entity Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `OrderItemNotFoundError` | `order.item_not_found` | 404 | Order item not found by ID |
+| `QuantityMustBeAtLeastOneError` | `order.quantity_must_be_at_least_one` | 400 | Quantity must be at least 1 |
+| `FulfillmentPackageNotFoundError` | `order.fulfillment_package_not_found` | 404 | Fulfillment package not found |
+
+### Order Router Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `NoEligibleStoresError` | `order.no_eligible_stores` | 400 | No eligible stores found for order fulfillment |
+| `NoStoresWithInventoryError` | `order.no_stores_with_inventory` | 400 | No stores have sufficient inventory |
+| `NoPickupStoresError` | `order.no_pickup_stores` | 400 | No pickup-enabled stores available |
+| `NoFulfillmentStoresError` | `order.no_fulfillment_stores` | 400 | No fulfillment-enabled stores available |
+| `NoStoresWithInventoryForFulfillmentError` | `order.no_stores_with_inventory_for_fulfillment` | 400 | No stores have inventory for fulfillment |
+
+### Infrastructure Errors
+
+| Error Class | Code | HTTP | Description |
+|---|---|---|---|
+| `FailedToCreateFulfillmentStatusHistoryError` | `order.fulfillment_status_history_creation_failed` | 500 | Failed to create fulfillment status history |
+| `FailedToCreateOrderAddressError` | `order.address_creation_failed` | 500 | Failed to create order address |
+| `FailedToCreateOrderAllocationError` | `order.allocation_creation_failed` | 500 | Failed to create order allocation |
+| `FailedToCreateOrderDiscountError` | `order.discount_creation_failed` | 500 | Failed to create order discount |
+| `FailedToCreateOrderFulfillmentItemError` | `order.fulfillment_item_creation_failed` | 500 | Failed to create order fulfillment item |
+| `FailedToCreateOrderFulfillmentPackageError` | `order.fulfillment_package_creation_failed` | 500 | Failed to create order fulfillment package |
+| `FailedToCreateOrderFulfillmentError` | `order.fulfillment_creation_failed` | 500 | Failed to create order fulfillment |
+| `FailedToCreateOrderItemError` | `order.item_creation_failed` | 500 | Failed to create order item |
+| `FailedToCreateOrderNoteError` | `order.note_creation_failed` | 500 | Failed to create order note |
+| `FailedToCreateOrderPaymentRefundError` | `order.payment_refund_creation_failed` | 500 | Failed to create order payment refund |
+| `FailedToCreateOrderPaymentError` | `order.payment_creation_failed` | 500 | Failed to create order payment |
+| `FailedToCreateOrderError` | `order.creation_failed` | 500 | Failed to create order |
+| `FailedToCreateOrderReturnItemError` | `order.return_item_creation_failed` | 500 | Failed to create order return item |
+| `FailedToCreateOrderReturnError` | `order.return_creation_failed` | 500 | Failed to create order return |
+| `FailedToCreateOrderShippingRateError` | `order.shipping_rate_creation_failed` | 500 | Failed to create order shipping rate |
+| `FailedToCreateOrderShippingError` | `order.shipping_creation_failed` | 500 | Failed to create order shipping |
+| `FailedToCreateOrderTaxError` | `order.tax_creation_failed` | 500 | Failed to create order tax |

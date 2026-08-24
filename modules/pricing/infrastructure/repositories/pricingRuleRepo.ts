@@ -1,6 +1,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { PricingRule, PricingRuleCreateProps, PricingRuleStatus, PricingRuleUpdateProps } from '../../domain/pricingRule';
+import { FailedToCreatePricingError, PricingRuleNotFoundError } from '../../domain/errors/PricingErrors';
 
 /**
  * Pricing Rule Repository
@@ -300,7 +301,7 @@ export class PricingRuleRepo {
     const result = await queryOne<PricingRule>(sql, values);
 
     if (!result) {
-      throw new Error('Failed to create pricing rule');
+      throw new FailedToCreatePricingError('Failed to create pricing rule');
     }
 
     return result;
@@ -356,7 +357,7 @@ export class PricingRuleRepo {
     const result = await queryOne<PricingRule>(sql, values);
 
     if (!result) {
-      throw new Error('Pricing rule not found or update failed');
+      throw new PricingRuleNotFoundError(id);
     }
 
     return result;

@@ -5,6 +5,7 @@
 
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { Basket } from '../../domain/entities/Basket';
+import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BasketResponse } from './GetOrCreateBasket';
 
@@ -26,7 +27,7 @@ export class ClearBasketUseCase {
   async execute(command: ClearBasketCommand): Promise<BasketResponse> {
     const basket = await this.basketRepository.findById(command.basketId);
     if (!basket) {
-      throw new Error('Basket not found');
+      throw new BasketNotFoundError(command.basketId);
     }
 
     const itemCount = basket.itemCount;

@@ -1,3 +1,5 @@
+import type { Resource, Action } from './rbac/types';
+
 export type Roles = 'ADMIN' | 'MANAGER' | 'CASHIER' | 'VIEWER' | 'USER';
 
 export const roles = {
@@ -8,6 +10,13 @@ export const roles = {
   USER: 'USER',
 } as const;
 
+/**
+ * Legacy permission constants — kept for backward compatibility.
+ * New code should use the RBAC policy engine (libs/rbac) with
+ * resource + action pairs instead of flat string permissions.
+ *
+ * @deprecated Use libs/rbac checkPermission() / requirePermission() instead.
+ */
 export const STORE_PERMISSIONS = {
   ORDER_CREATE: 'order.create',
   ORDER_VIEW: 'order.view',
@@ -23,3 +32,6 @@ export const STORE_PERMISSIONS = {
   ANALYTICS_VIEW: 'analytics.view',
   ALL: '*',
 } as const;
+
+// Re-export RBAC types for convenience
+export type { Resource, Action };

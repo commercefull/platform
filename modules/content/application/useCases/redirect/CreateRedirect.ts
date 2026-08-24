@@ -3,8 +3,9 @@
  * Creates a new URL redirect rule
  */
 
-import { ContentRedirectRepo } from '../../../infrastructure/repositories/contentRedirectRepo';
+import type { ContentRedirectRepo } from '../../../infrastructure/repositories/contentRedirectRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class CreateRedirectCommand {
   constructor(
@@ -34,12 +35,12 @@ export class CreateRedirectUseCase {
 
   async execute(command: CreateRedirectCommand): Promise<RedirectResponse> {
     if (!command.sourceUrl || !command.targetUrl) {
-      throw new Error('Source URL and target URL are required');
+      throw new ContentValidationError('Source URL and target URL are required');
     }
 
     // Validate URLs
     if (command.sourceUrl === command.targetUrl) {
-      throw new Error('Source and target URLs cannot be the same');
+      throw new ContentValidationError('Source and target URLs cannot be the same');
     }
 
     // Validate regex if specified
@@ -47,7 +48,7 @@ export class CreateRedirectUseCase {
       try {
         new RegExp(command.sourceUrl);
       } catch {
-        throw new Error('Invalid regex pattern in source URL');
+        throw new ContentValidationError('Invalid regex pattern in source URL');
       }
     }
 

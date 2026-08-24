@@ -1,8 +1,15 @@
 import axios, { AxiosInstance } from 'axios';
 
-// Test data
+// Seeded test IDs from seeds/20240805002001_seedIntegrationTestData.js
+export const SEEDED_CUSTOMER_ID = '00000000-0000-0000-0000-000000001001';
+export const SEEDED_CUSTOMER_EMAIL = 'testcustomer@example.com';
+export const SEEDED_CUSTOMER_ADDRESS_ID = '00000000-0000-0000-0000-000000006001';
+export const SEEDED_CUSTOMER_GROUP_ID = '00000000-0000-0000-0000-000000006002';
+export const SEEDED_CUSTOMER_WISHLIST_ID = '00000000-0000-0000-0000-000000006004';
+
+// Test data for creating new entities within individual tests
 export const testCustomer = {
-  email: `test-customer-${Math.floor(Math.random() * 10000)}@example.com`,
+  email: 'testcustomer@example.com',
   firstName: 'Test',
   lastName: 'Customer',
   password: 'TestPassword123!',
@@ -26,7 +33,7 @@ export const testCustomerAddress = {
 };
 
 export const testCustomerGroup = {
-  name: `Test Group ${Math.floor(Math.random() * 10000)}`,
+  name: 'Test VIP Group',
   description: 'Test customer group for integration tests',
   discountPercent: 10,
   isActive: true,
@@ -37,17 +44,17 @@ export const testCustomerWishlist = {
   isPublic: false,
 };
 
-// Test credentials - IMPORTANT: Make sure these match working credentials in the system
+// Test credentials
 const adminCredentials = {
-  email: 'merchant@example.com', // Replace with valid admin credentials
-  password: 'password123', // Replace with valid admin password
+  email: 'merchant@example.com',
+  password: 'password123',
 };
 
 /**
  * Setup function for customer integration tests
+ * Uses seeded data — only retrieves auth token
  */
 export async function setupCustomerTests() {
-  // Create client
   const client = axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3000',
     validateStatus: () => true,
@@ -55,98 +62,23 @@ export async function setupCustomerTests() {
       Accept: 'application/json',
       'Content-Type': 'application/json',
       'X-Test-Request': 'true',
-    }, // Don't throw HTTP errors
+    },
   });
 
   let adminToken = '';
-  let testCustomerId = '';
-  let testCustomerAddressId = '';
-  let testCustomerGroupId: string | null = null;
-  let testWishlistId: string | null = null;
 
   try {
-    // Get admin token - Use the same authentication endpoint as the distribution tests
     const loginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
     adminToken = loginResponse.data?.accessToken || '';
-
-    if (!adminToken) {
-      return { client, adminToken, testCustomerId, testCustomerAddressId, testCustomerGroupId, testWishlistId };
-    }
-  } catch {
-    return { client, adminToken, testCustomerId, testCustomerAddressId, testCustomerGroupId, testWishlistId };
-  }
-
-  try {
-    // Create test data
-    // 1. Create Customer
-    const customerResponse = await client.post('/business/customers', testCustomer, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-
-    if (customerResponse.data?.success && customerResponse.data?.data) {
-      testCustomerId = customerResponse.data.data.customerId || customerResponse.data.data.id || '';
-    } else {
-    }
-
-    // 2. Create Customer Address (only if customer was created)
-    if (testCustomerId) {
-      const addressResponse = await client.post(`/business/customers/${testCustomerId}/addresses`, testCustomerAddress, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      if (addressResponse.data?.success && addressResponse.data?.data) {
-        testCustomerAddressId =
-          addressResponse.data.data.customerAddressId || addressResponse.data.data.addressId || addressResponse.data.data.id || '';
-      } else {
-      }
-
-      // 3. Create Customer Group (optional - endpoint may not exist)
-      try {
-        const groupResponse = await client.post('/business/customer-groups', testCustomerGroup, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-
-        if (groupResponse.data?.success && groupResponse.data?.data) {
-          testCustomerGroupId = groupResponse.data.data.customerGroupId || groupResponse.data.data.id;
-
-          // 4. Add Customer to Group
-          await client.post(
-            `/business/customers/${testCustomerId}/groups/${testCustomerGroupId}`,
-            {},
-            {
-              headers: { Authorization: `Bearer ${adminToken}` },
-            },
-          );
-        }
-      } catch {}
-
-      // 5. Create Wishlist (optional - endpoint may not exist)
-      try {
-        const wishlistResponse = await client.post(
-          `/business/customers/${testCustomerId}/wishlists`,
-          {
-            ...testCustomerWishlist,
-          },
-          {
-            headers: { Authorization: `Bearer ${adminToken}` },
-          },
-        );
-
-        if (wishlistResponse.data?.success && wishlistResponse.data?.data) {
-          testWishlistId = wishlistResponse.data.data.customerWishlistId || wishlistResponse.data.data.id;
-        }
-      } catch {}
-    }
   } catch {}
 
-  // Return all test data and helper objects
   return {
     client,
     adminToken,
-    testCustomerId,
-    testCustomerAddressId,
-    testCustomerGroupId,
-    testWishlistId,
+    testCustomerId: SEEDED_CUSTOMER_ID,
+    testCustomerAddressId: SEEDED_CUSTOMER_ADDRESS_ID,
+    testCustomerGroupId: SEEDED_CUSTOMER_GROUP_ID,
+    testWishlistId: SEEDED_CUSTOMER_WISHLIST_ID,
   };
 }
 

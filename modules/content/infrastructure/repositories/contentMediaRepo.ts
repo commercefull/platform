@@ -6,6 +6,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { ContentMedia, ContentMediaFolder } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateContentError, ContentValidationError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Types
@@ -103,7 +104,7 @@ export class ContentMediaRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create media');
+      throw new FailedToCreateContentError('Failed to create media');
     }
 
     return result;
@@ -154,7 +155,7 @@ export class ContentMediaRepo {
     );
 
     if (!result) {
-      throw new Error(`Failed to update media with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update media with ID ${id}`);
     }
 
     return result;
@@ -211,7 +212,7 @@ export class ContentMediaRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create folder');
+      throw new FailedToCreateContentError('Failed to create folder');
     }
 
     return result;
@@ -246,7 +247,7 @@ export class ContentMediaRepo {
     );
 
     if (!result) {
-      throw new Error(`Failed to update folder with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update folder with ID ${id}`);
     }
 
     return result;
@@ -260,7 +261,7 @@ export class ContentMediaRepo {
     );
 
     if (mediaCount && mediaCount.length > 0 && parseInt(mediaCount[0].count) > 0) {
-      throw new Error(`Cannot delete folder as it contains ${mediaCount[0].count} media items`);
+      throw new ContentValidationError(`Cannot delete folder as it contains ${mediaCount[0].count} media items`);
     }
 
     // Check if folder has subfolders
@@ -270,7 +271,7 @@ export class ContentMediaRepo {
     );
 
     if (subfolderCount && subfolderCount.length > 0 && parseInt(subfolderCount[0].count) > 0) {
-      throw new Error(`Cannot delete folder as it contains ${subfolderCount[0].count} subfolders`);
+      throw new ContentValidationError(`Cannot delete folder as it contains ${subfolderCount[0].count} subfolders`);
     }
 
     const result = await queryOne<{ id: string }>(

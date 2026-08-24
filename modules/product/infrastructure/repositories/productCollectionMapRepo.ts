@@ -1,4 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductCollectionMap {
   productCollectionMapId: string;
@@ -27,7 +28,7 @@ export class ProductCollectionMapRepo {
        VALUES ($1, $2, $3, $4) RETURNING *`,
       [params.productCollectionId, params.productId, params.position ?? 0, now],
     );
-    if (!result) throw new Error('Failed to create productCollectionMap');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 

@@ -4,12 +4,14 @@
  */
 
 import { generateUUID } from '../../../../libs/uuid';
+import { withTransaction } from '../../../../libs/db';
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
 import { Order } from '../../domain/entities/Order';
 import { OrderItem } from '../../domain/entities/OrderItem';
 import { OrderAddress } from '../../domain/entities/OrderAddress';
 import { Money } from '../../domain/valueObjects/Money';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { OrderMustContainItemsError, CustomerEmailRequiredError, ShippingAddressRequiredError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Command
@@ -110,15 +112,15 @@ export class CreateOrderUseCase {
   async execute(command: CreateOrderCommand): Promise<OrderResponse> {
     // Validate command
     if (!command.items || command.items.length === 0) {
-      throw new Error('Order must contain at least one item');
+      throw new OrderMustContainItemsError();
     }
 
     if (!command.customerEmail) {
-      throw new Error('Customer email is required');
+      throw new CustomerEmailRequiredError();
     }
 
     if (!command.shippingAddress) {
-      throw new Error('Shipping address is required');
+      throw new ShippingAddressRequiredError();
     }
 
     const orderId = generateUUID();
@@ -192,13 +194,16 @@ export class CreateOrderUseCase {
     });
     order.setBillingAddress(billingAddress);
 
-    // Save order
-    const savedOrder = await this.orderRepository.save(order);
+    // Save order and record initial status history in a single transaction
+    const savedOrder = await withTransaction(async () => {
+      const saved = await this.orderRepository.save(order);
 
-    // Record initial status history
-    await this.orderRepository.recordStatusChange(savedOrder.orderId, savedOrder.status, 'Initial status', 'pending');
-    await this.orderRepository.recordPaymentStatusChange(savedOrder.orderId, savedOrder.paymentStatus);
-    await this.orderRepository.recordFulfillmentStatusChange(savedOrder.orderId, savedOrder.fulfillmentStatus);
+      await this.orderRepository.recordStatusChange(saved.orderId, saved.status, 'Initial status', 'pending');
+      await this.orderRepository.recordPaymentStatusChange(saved.orderId, saved.paymentStatus);
+      await this.orderRepository.recordFulfillmentStatusChange(saved.orderId, saved.fulfillmentStatus);
+
+      return saved;
+    });
 
     // Emit event
     eventBus.emit('order.created', {

@@ -3,8 +3,9 @@
  * Creates a new content template for page layouts
  */
 
-import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { ContentTypeNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class CreateTemplateCommand {
   constructor(
@@ -40,7 +41,7 @@ export class CreateTemplateUseCase {
 
   async execute(command: CreateTemplateCommand): Promise<TemplateResponse> {
     if (!command.name || !command.slug) {
-      throw new Error('Name and slug are required');
+      throw new ContentValidationError('Name and slug are required');
     }
 
     // Validate compatible content types if provided
@@ -48,7 +49,7 @@ export class CreateTemplateUseCase {
       for (const typeId of command.compatibleContentTypes) {
         const contentType = await this.contentRepo.findContentTypeById(typeId);
         if (!contentType) {
-          throw new Error(`Content type with ID ${typeId} not found`);
+          throw new ContentTypeNotFoundError(typeId);
         }
       }
     }

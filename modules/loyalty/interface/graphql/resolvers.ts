@@ -1,4 +1,6 @@
-import LoyaltyRepo from '../../infrastructure/repositories/loyaltyRepo';
+import loyaltyDataRepository from '../../infrastructure/repositories/LoyaltyDataRepository';
+
+const LoyaltyRepo = loyaltyDataRepository.points;
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CheckPointsBalanceUseCase, CheckPointsBalanceInput } from '../../application/useCases/CheckPointsBalance';
 import { EarnPointsUseCase, EarnPointsInput } from '../../application/useCases/EarnPoints';

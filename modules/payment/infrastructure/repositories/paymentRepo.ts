@@ -5,6 +5,20 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { PaymentGateway, PaymentMethodConfig, PaymentTransaction, PaymentRefund } from '../../../../libs/db/types';
+import {
+  FailedToCreatePaymentGatewayError,
+  PaymentGatewayNotFoundError,
+  FailedToUpdatePaymentGatewayError,
+  FailedToCreatePaymentMethodConfigError,
+  PaymentMethodConfigNotFoundError,
+  FailedToUpdatePaymentMethodConfigError,
+  FailedToCreatePaymentTransactionError,
+  PaymentTransactionNotFoundError,
+  FailedToUpdatePaymentTransactionError,
+  FailedToCreatePaymentRefundError,
+  PaymentRefundNotFoundError,
+  FailedToUpdatePaymentRefundError,
+} from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
 // Types
@@ -97,7 +111,7 @@ export class PaymentRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create payment gateway');
+    if (!result) throw new FailedToCreatePaymentGatewayError();
 
     // If this is the default gateway, ensure it's the only default
     if (params.isDefault) {
@@ -127,7 +141,7 @@ export class PaymentRepo {
 
     if (updates.length === 0) {
       const existing = await this.findGatewayById(id);
-      if (!existing) throw new Error('Payment gateway not found');
+      if (!existing) throw new PaymentGatewayNotFoundError();
       return existing;
     }
 
@@ -143,7 +157,7 @@ export class PaymentRepo {
       values,
     );
 
-    if (!result) throw new Error('Failed to update payment gateway');
+    if (!result) throw new FailedToUpdatePaymentGatewayError();
 
     // If this is now the default gateway, ensure it's the only default
     if (params.isDefault) {
@@ -236,7 +250,7 @@ export class PaymentRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create payment method configuration');
+    if (!result) throw new FailedToCreatePaymentMethodConfigError();
     return result;
   }
 
@@ -255,7 +269,7 @@ export class PaymentRepo {
 
     if (updates.length === 0) {
       const existing = await this.findMethodConfigById(id);
-      if (!existing) throw new Error('Payment method configuration not found');
+      if (!existing) throw new PaymentMethodConfigNotFoundError();
       return existing;
     }
 
@@ -271,7 +285,7 @@ export class PaymentRepo {
       values,
     );
 
-    if (!result) throw new Error('Failed to update payment method configuration');
+    if (!result) throw new FailedToUpdatePaymentMethodConfigError();
     return result;
   }
 
@@ -355,7 +369,7 @@ export class PaymentRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create payment transaction');
+    if (!result) throw new FailedToCreatePaymentTransactionError();
     return result;
   }
 
@@ -374,7 +388,7 @@ export class PaymentRepo {
 
     if (updates.length === 0) {
       const existing = await this.findTransactionById(id);
-      if (!existing) throw new Error('Payment transaction not found');
+      if (!existing) throw new PaymentTransactionNotFoundError();
       return existing;
     }
 
@@ -390,7 +404,7 @@ export class PaymentRepo {
       values,
     );
 
-    if (!result) throw new Error('Failed to update payment transaction');
+    if (!result) throw new FailedToUpdatePaymentTransactionError();
     return result;
   }
 
@@ -445,7 +459,7 @@ export class PaymentRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create payment refund');
+    if (!result) throw new FailedToCreatePaymentRefundError();
 
     // Update the transaction's refunded amount
     await query(
@@ -478,7 +492,7 @@ export class PaymentRepo {
 
     if (updates.length === 0) {
       const existing = await this.findRefundById(id);
-      if (!existing) throw new Error('Payment refund not found');
+      if (!existing) throw new PaymentRefundNotFoundError();
       return existing;
     }
 
@@ -494,7 +508,7 @@ export class PaymentRepo {
       values,
     );
 
-    if (!result) throw new Error('Failed to update payment refund');
+    if (!result) throw new FailedToUpdatePaymentRefundError();
     return result;
   }
 

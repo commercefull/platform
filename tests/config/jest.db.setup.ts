@@ -1,6 +1,13 @@
 import path from 'node:path';
+import http from 'node:http';
+import https from 'node:https';
 import axios from 'axios';
 import dotenv from 'dotenv';
+
+// Prevent MaxListenersExceededWarning when many test files create axios clients
+// that share the global HTTP agent's sockets
+http.globalAgent.setMaxListeners(50);
+https.globalAgent.setMaxListeners(50);
 import {
   createDatabase,
   dropDatabase,

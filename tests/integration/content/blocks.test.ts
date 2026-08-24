@@ -5,10 +5,6 @@ import {
   TEST_CONTENT_BLOCK_ID,
   TEST_CONTENT_TEMPLATE_ID,
   TEST_BLOCK_TYPE_ID,
-  TEST_CONTENT_TYPE,
-  TEST_CONTENT_PAGE,
-  TEST_CONTENT_BLOCK,
-  TEST_CONTENT_TEMPLATE,
   ADMIN_CREDENTIALS,
 } from '../testConstants';
 
@@ -25,10 +21,10 @@ const createClient = () =>
 describe('Content Blocks API', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testContentTypeId: string;
+  let _testContentTypeId: string;
   let testContentPageId: string;
   let testContentBlockId: string;
-  let testContentTemplateId: string;
+  let _testContentTemplateId: string;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
@@ -39,100 +35,16 @@ describe('Content Blocks API', () => {
         headers: { 'X-Test-Request': 'true' },
       });
       adminToken = loginResponse.data?.accessToken || '';
-      if (!adminToken) return;
     } catch {
       adminToken = '';
       return;
     }
 
-    // Ensure content type exists
-    const typeResp = await client.get(`/business/content/types/${TEST_CONTENT_TYPE_ID}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-    if (typeResp.status === 200) {
-      testContentTypeId = TEST_CONTENT_TYPE_ID;
-    } else {
-      const createTypeResp = await client.post(
-        '/business/content/types',
-        {
-          name: TEST_CONTENT_TYPE.name,
-          slug: TEST_CONTENT_TYPE.slug + '-' + Date.now(),
-          description: TEST_CONTENT_TYPE.description,
-          status: 'active',
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      testContentTypeId = createTypeResp.data?.data?.contentTypeId || createTypeResp.data?.data?.id;
-    }
-
-    // Ensure template exists
-    const templateResp = await client.get(`/business/content/templates/${TEST_CONTENT_TEMPLATE_ID}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-    if (templateResp.status === 200) {
-      testContentTemplateId = TEST_CONTENT_TEMPLATE_ID;
-    } else {
-      const createTemplateResp = await client.post(
-        '/business/content/templates',
-        {
-          name: TEST_CONTENT_TEMPLATE.name + '-' + Date.now(),
-          slug: 'test-template-' + Date.now(),
-          description: TEST_CONTENT_TEMPLATE.description,
-          status: 'active',
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      testContentTemplateId =
-        createTemplateResp.data?.data?.contentTemplateId || createTemplateResp.data?.data?.id;
-    }
-
-    // Ensure page exists
-    const pageResp = await client.get(`/business/content/pages/${TEST_CONTENT_PAGE_ID}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-    if (pageResp.status === 200) {
-      testContentPageId = TEST_CONTENT_PAGE_ID;
-    } else if (testContentTypeId) {
-      const createPageResp = await client.post(
-        '/business/content/pages',
-        {
-          title: TEST_CONTENT_PAGE.title,
-          slug: TEST_CONTENT_PAGE.slug + '-' + Date.now(),
-          contentTypeId: testContentTypeId,
-          templateId: testContentTemplateId,
-          status: 'published',
-          visibility: 'public',
-          summary: TEST_CONTENT_PAGE.summary,
-          isHomePage: false,
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      testContentPageId =
-        createPageResp.data?.data?.contentPageId || createPageResp.data?.data?.id;
-    }
-
-    // Ensure block exists
-    const blockResp = await client.get(`/business/content/blocks/${TEST_CONTENT_BLOCK_ID}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-    if (blockResp.status === 200) {
-      testContentBlockId = TEST_CONTENT_BLOCK_ID;
-    } else if (testContentPageId && testContentTypeId) {
-      const createBlockResp = await client.post(
-        '/business/content/blocks',
-        {
-          contentPageId: testContentPageId,
-          blockTypeId: TEST_BLOCK_TYPE_ID,
-          title: TEST_CONTENT_BLOCK.title,
-          sortOrder: 0,
-          content: TEST_CONTENT_BLOCK.content,
-          isVisible: true,
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      testContentBlockId =
-        createBlockResp.data?.data?.contentBlockId || createBlockResp.data?.data?.id;
-    }
+    // Use seeded content IDs
+    _testContentTypeId = TEST_CONTENT_TYPE_ID;
+    _testContentTemplateId = TEST_CONTENT_TEMPLATE_ID;
+    testContentPageId = TEST_CONTENT_PAGE_ID;
+    testContentBlockId = TEST_CONTENT_BLOCK_ID;
   });
 
   describe('Block CRUD', () => {

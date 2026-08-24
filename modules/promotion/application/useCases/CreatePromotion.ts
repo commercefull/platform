@@ -3,8 +3,9 @@
  * Creates a new promotion
  */
 
-import { PromotionRepo } from '../../infrastructure/repositories/promotionRepo';
+import promotionRuleRepository from '../../infrastructure/repositories/PromotionRuleRepository';
 import { Promotion } from '../../../../libs/db/types';
+import { PromotionCodeAlreadyExistsError, PromotionValidationError } from '../../domain/errors/PromotionErrors';
 
 // Command
 export class CreatePromotionCommand {
@@ -35,25 +36,25 @@ export interface CreatePromotionResponse {
 
 // Use Case
 export class CreatePromotionUseCase {
-  constructor(private readonly promotionRepo: PromotionRepo) {}
+  constructor(private readonly promotionRepo: typeof promotionRuleRepository.promotions) {}
 
   async execute(command: CreatePromotionCommand): Promise<CreatePromotionResponse> {
     // Validate command
     if (!command.name?.trim()) {
-      throw new Error('Promotion name is required');
+      throw new PromotionValidationError('Promotion name is required');
     }
     if (!command.type) {
-      throw new Error('Promotion type is required');
+      throw new PromotionValidationError('Promotion type is required');
     }
     if (command.value === undefined || command.value < 0) {
-      throw new Error('Valid promotion value is required');
+      throw new PromotionValidationError('Valid promotion value is required');
     }
 
     // Check for duplicate code if provided
     if (command.code) {
       const existing = await this.promotionRepo.findById(command.code);
       if (existing) {
-        throw new Error(`Promotion with code "${command.code}" already exists`);
+        throw new PromotionCodeAlreadyExistsError(command.code);
       }
     }
 

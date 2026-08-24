@@ -5,10 +5,11 @@
  * Validates: Requirements 2.11
  */
 
-import orderFulfillmentPackageRepo, {
-  OrderFulfillmentPackage,
-  OrderFulfillmentPackageCreateParams,
-} from '../../infrastructure/repositories/orderFulfillmentPackageRepo';
+import { OrderFulfillmentPackageRepository, OrderFulfillmentPackage, OrderFulfillmentPackageCreateParams } from '../../domain/repositories/OrderFulfillmentPackageRepository';
+import orderFulfillmentDataRepository from '../../infrastructure/repositories/OrderFulfillmentDataRepository';
+
+const orderFulfillmentRepo = orderFulfillmentDataRepository.fulfillments;
+import { FulfillmentPackageNotFoundError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Command
@@ -54,7 +55,7 @@ export interface TrackFulfillmentPackageResponse {
 // ============================================================================
 
 export class TrackFulfillmentPackageUseCase {
-  constructor(private readonly packageRepo: typeof orderFulfillmentPackageRepo = orderFulfillmentPackageRepo) {}
+  constructor(private readonly packageRepo: OrderFulfillmentPackageRepository = orderFulfillmentRepo) {}
 
   async execute(command: TrackFulfillmentPackageCommand): Promise<TrackFulfillmentPackageResponse> {
     let pkg: OrderFulfillmentPackage;
@@ -68,7 +69,7 @@ export class TrackFulfillmentPackageUseCase {
       });
 
       if (!updated) {
-        throw new Error('Fulfillment package not found');
+        throw new FulfillmentPackageNotFoundError();
       }
       pkg = updated;
     } else {
@@ -85,7 +86,7 @@ export class TrackFulfillmentPackageUseCase {
         customsInfo: command.customsInfo,
       };
 
-      pkg = await this.packageRepo.create(createParams);
+      pkg = await this.packageRepo.createPackage(createParams);
     }
 
     return {

@@ -3,9 +3,11 @@
  */
 
 import { generateUUID } from '../../../../libs/uuid';
+import { withTransaction } from '../../../../libs/db';
 import { PaymentRepository } from '../../domain/repositories/PaymentRepository';
 import { PaymentRefund } from '../../domain/entities/PaymentRefund';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { TransactionNotFoundError, TransactionCannotBeRefundedError, RefundAmountExceedsRefundableError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
 // Command
@@ -44,15 +46,15 @@ export class ProcessPaymentRefundUseCase {
     const transaction = await this.paymentRepository.findTransactionById(command.transactionId);
 
     if (!transaction) {
-      throw new Error('Transaction not found');
+      throw new TransactionNotFoundError(command.transactionId);
     }
 
     if (!transaction.canBeRefunded) {
-      throw new Error(`Transaction cannot be refunded. Status: ${transaction.status}`);
+      throw new TransactionCannotBeRefundedError(transaction.status);
     }
 
     if (command.amount > transaction.refundableAmount) {
-      throw new Error(`Refund amount ($${command.amount}) exceeds refundable amount ($${transaction.refundableAmount})`);
+      throw new RefundAmountExceedsRefundableError(command.amount, transaction.refundableAmount);
     }
 
     const refundId = generateUUID();
@@ -66,11 +68,13 @@ export class ProcessPaymentRefundUseCase {
       metadata: command.metadata,
     });
 
-    await this.paymentRepository.saveRefund(refund);
+    await withTransaction(async () => {
+      await this.paymentRepository.saveRefund(refund);
 
-    // Update transaction
-    transaction.recordRefund(command.amount);
-    await this.paymentRepository.saveTransaction(transaction);
+      // Update transaction
+      transaction.recordRefund(command.amount);
+      await this.paymentRepository.saveTransaction(transaction);
+    });
 
     // Emit event
     eventBus.emit('payment.failed', {

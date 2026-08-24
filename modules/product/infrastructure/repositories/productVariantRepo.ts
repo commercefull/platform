@@ -1,6 +1,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { generateUUID } from '../../../../libs/uuid';
+import { ProductVariantNotFoundError, ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export type ProductVariant = {
   id: string;
@@ -208,7 +209,7 @@ export class ProductVariantRepo {
     const result = await queryOne<ProductVariant>(sql, values);
 
     if (!result) {
-      throw new Error('Failed to create product variant');
+      throw new FailedToCreateProductError();
     }
 
     // If this is the default variant, ensure no other variants are set as default
@@ -239,7 +240,7 @@ export class ProductVariantRepo {
       // Only updatedAt
       const existingVariant = await this.findById(id);
       if (!existingVariant) {
-        throw new Error('Variant not found');
+        throw new ProductVariantNotFoundError(id);
       }
       return existingVariant;
     }
@@ -265,7 +266,7 @@ export class ProductVariantRepo {
     const result = await queryOne<ProductVariant>(sql, values);
 
     if (!result) {
-      throw new Error('Failed to update product variant');
+      throw new ProductValidationError('Failed to update product variant');
     }
 
     // If this variant is now set as default, update other variants
@@ -293,7 +294,7 @@ export class ProductVariantRepo {
 
     // Prevent deletion of the master variant
     if (variant.isDefault) {
-      throw new Error('Cannot delete the master variant of a product. The master variant is required.');
+      throw new ProductValidationError('Cannot delete the master variant of a product. The master variant is required.');
     }
 
 
@@ -363,7 +364,7 @@ export class ProductVariantRepo {
     const variant = await this.findById(id);
 
     if (!variant) {
-      throw new Error('Variant not found');
+      throw new ProductVariantNotFoundError(id);
     }
 
     const now = new Date();
@@ -390,7 +391,7 @@ export class ProductVariantRepo {
     const result = await queryOne<ProductVariant>(sql, [now, id]);
 
     if (!result) {
-      throw new Error('Failed to set default variant');
+      throw new ProductValidationError('Failed to set default variant');
     }
 
     return parseVariantRow(result) as ProductVariant;
@@ -417,7 +418,7 @@ export class ProductVariantRepo {
     const result = await queryOne<ProductVariant>(sql, [inventory, now, id]);
 
     if (!result) {
-      throw new Error('Failed to update inventory');
+      throw new ProductValidationError('Failed to update inventory');
     }
 
     return parseVariantRow(result) as ProductVariant;
@@ -430,7 +431,7 @@ export class ProductVariantRepo {
     const variant = await this.findById(id);
 
     if (!variant) {
-      throw new Error('Variant not found');
+      throw new ProductVariantNotFoundError(id);
     }
 
     const newInventory = Math.max(0, variant.inventory + adjustmentValue);

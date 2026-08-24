@@ -5,6 +5,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { UserRepository } from '../../domain/repositories/UserRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { InvalidCredentialsError, AccountLockedError, AccountNotActiveError, InvalidRefreshTokenError } from '../../domain/errors/IdentityErrors';
 
 // ============================================================================
 // Commands
@@ -50,14 +51,14 @@ export class LoginUseCase {
     const user = await this.userRepository.validateCredentials(command.email, command.password);
 
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
     if (!user.canLogin) {
       if (user.isLocked) {
-        throw new Error('Account is temporarily locked. Please try again later.');
+        throw new AccountLockedError();
       }
-      throw new Error('Account is not active');
+      throw new AccountNotActiveError();
     }
 
     user.recordLogin(command.ip);
@@ -94,7 +95,7 @@ export class RefreshTokenUseCase {
     const user = await this.userRepository.findByRefreshToken(command.refreshToken);
 
     if (!user || !user.canLogin) {
-      throw new Error('Invalid refresh token');
+      throw new InvalidRefreshTokenError();
     }
 
     const accessToken = generateUUID();

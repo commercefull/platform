@@ -3,7 +3,7 @@
  * Generates a sales report for a given date range
  */
 
-import * as analyticsRepo from '../../infrastructure/repositories/analyticsRepo';
+import type { AnalyticsDataPort } from '../../domain/repositories/AnalyticsDataPort';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface GenerateSalesReportCommand {
@@ -30,15 +30,19 @@ export interface GenerateSalesReportResponse {
 }
 
 export class GenerateSalesReportUseCase {
+  constructor(private readonly port: AnalyticsDataPort) {}
+
   async execute(command: GenerateSalesReportCommand): Promise<GenerateSalesReportResponse> {
     try {
-      // Validate date range
       if (command.startDate >= command.endDate) {
         return { success: false, error: 'Start date must be before end date' };
       }
 
-      // Get sales summary from analytics repo
-      const summary = await analyticsRepo.getSalesSummary(command.startDate, command.endDate, command.organizationId);
+      const summary = await this.port.getSalesSummary(command.startDate, command.endDate, command.organizationId) as {
+        totalOrders: number;
+        totalRevenue: number;
+        averageOrderValue: number;
+      };
 
       const reportId = `report_${Date.now()}`;
 

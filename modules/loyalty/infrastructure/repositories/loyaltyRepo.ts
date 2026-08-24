@@ -13,6 +13,17 @@ import {
   LoyaltyReward as DbLoyaltyReward,
   LoyaltyRedemption as DbLoyaltyRedemption,
 } from '../../../../libs/db/types';
+import {
+  LoyaltyTierNotFoundError,
+  LoyaltyRewardNotFoundError,
+  RedemptionNotFoundError,
+  InsufficientPointsError,
+  FailedToCreateLoyaltyError,
+  NoDefaultTierError,
+  RewardNotActiveError,
+  LoyaltyAccountNotFoundError,
+  FailedToAdjustPointsError,
+} from '../../domain/errors/LoyaltyErrors';
 
 // ============================================================================
 // Re-export types
@@ -163,7 +174,7 @@ export class LoyaltyRepo {
       now,
       now,
     ]);
-    if (!result) throw new Error('Failed to create loyalty tier');
+    if (!result) throw new FailedToCreateLoyaltyError('Failed to create loyalty tier');
     return result;
   }
 
@@ -212,7 +223,7 @@ export class LoyaltyRepo {
       RETURNING *
     `;
     const result = await queryOne<LoyaltyTier>(sql, params);
-    if (!result) throw new Error(`Loyalty tier ${tierId} not found`);
+    if (!result) throw new LoyaltyTierNotFoundError(tierId);
     return result;
   }
 
@@ -257,7 +268,7 @@ export class LoyaltyRepo {
       RETURNING *
     `;
     const result = await queryOne<LoyaltyPoints>(sql, [customerId, tierId, 0, 0, now, now, now]);
-    if (!result) throw new Error('Failed to initialize customer points');
+    if (!result) throw new FailedToCreateLoyaltyError('Failed to initialize customer points');
     return result;
   }
 
@@ -276,7 +287,7 @@ export class LoyaltyRepo {
     if (!customerPoints) {
       // Get default tier
       const defaultTier = await this.findTierByPointsThreshold(0);
-      if (!defaultTier) throw new Error('No default tier found');
+      if (!defaultTier) throw new NoDefaultTierError();
       customerPoints = await this.initializeCustomerPoints(customerId, defaultTier.tierId);
     }
 
@@ -305,7 +316,7 @@ export class LoyaltyRepo {
     // Check for tier upgrade
     await this.checkAndUpdateTier(customerId, newLifetimePoints);
 
-    if (!updatedPoints) throw new Error('Failed to update customer points');
+    if (!updatedPoints) throw new FailedToAdjustPointsError();
     return updatedPoints;
   }
 
@@ -362,13 +373,9 @@ export class LoyaltyRepo {
       now,
       now,
     ]);
-    if (!result) throw new Error('Failed to create loyalty transaction');
+    if (!result) throw new FailedToCreateLoyaltyError('Failed to create loyalty transaction');
     return result;
   }
-
-  // ==========================================================================
-  // Reward Management
-  // ==========================================================================
 
   async findRewardById(rewardId: string): Promise<LoyaltyReward | null> {
     const sql = `SELECT * FROM "loyaltyReward" WHERE "rewardId" = $1`;
@@ -415,7 +422,7 @@ export class LoyaltyRepo {
       now,
       now,
     ]);
-    if (!result) throw new Error('Failed to create loyalty reward');
+    if (!result) throw new FailedToCreateLoyaltyError('Failed to create loyalty reward');
     return result;
   }
 
@@ -452,7 +459,7 @@ export class LoyaltyRepo {
       RETURNING *
     `;
     const result = await queryOne<LoyaltyReward>(sql, params);
-    if (!result) throw new Error(`Loyalty reward ${rewardId} not found`);
+    if (!result) throw new LoyaltyRewardNotFoundError(rewardId);
     return result;
   }
 
@@ -490,14 +497,14 @@ export class LoyaltyRepo {
   async redeemReward(customerId: string, rewardId: string): Promise<LoyaltyRedemption> {
     // Get reward
     const reward = await this.findRewardById(rewardId);
-    if (!reward) throw new Error('Reward not found');
-    if (!reward.isActive) throw new Error('Reward is not active');
+    if (!reward) throw new LoyaltyRewardNotFoundError(rewardId);
+    if (!reward.isActive) throw new RewardNotActiveError(rewardId);
 
     // Get customer points
     const customerPoints = await this.findCustomerPoints(customerId);
-    if (!customerPoints) throw new Error('Customer has no loyalty account');
+    if (!customerPoints) throw new LoyaltyAccountNotFoundError(customerId);
     if (customerPoints.currentPoints < reward.pointsCost) {
-      throw new Error('Insufficient points for redemption');
+      throw new InsufficientPointsError(reward.pointsCost, customerPoints.currentPoints);
     }
 
     // Generate redemption code
@@ -524,7 +531,7 @@ export class LoyaltyRepo {
       now,
     ]);
 
-    if (!redemption) throw new Error('Failed to create redemption');
+    if (!redemption) throw new FailedToCreateLoyaltyError('Failed to create redemption');
 
     // Deduct points
     await this.adjustCustomerPoints(
@@ -553,7 +560,7 @@ export class LoyaltyRepo {
       RETURNING *
     `;
     const result = await queryOne<LoyaltyRedemption>(sql, [loyaltyRedemptionId, status, usedAt, now]);
-    if (!result) throw new Error(`Redemption ${loyaltyRedemptionId} not found`);
+    if (!result) throw new RedemptionNotFoundError(loyaltyRedemptionId);
     return result;
   }
 

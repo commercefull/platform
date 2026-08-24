@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 
 
 export type TaxReportType = 'sales' | 'filing' | 'jurisdiction' | 'summary' | 'exemption' | 'audit';
@@ -94,7 +95,7 @@ export class TaxReportRepo {
         now,
       ],
     );
-    if (!result) throw new Error('Failed to create tax report');
+    if (!result) throw new FailedToCreateTaxError('Failed to create tax report');
     return result;
   }
 

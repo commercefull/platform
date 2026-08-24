@@ -1,4 +1,5 @@
 import jwt, { SignOptions, JwtPayload } from 'jsonwebtoken';
+import { randomUUID } from 'crypto';
 
 /**
  * Time unit multipliers for converting human-readable durations to milliseconds
@@ -48,6 +49,7 @@ export function generateAccessToken(
     id: userId,
     email: userEmail,
     role: userRole,
+    jti: randomUUID(),
   };
 
   return jwt.sign(payload, jwtSecret, { expiresIn } as SignOptions);

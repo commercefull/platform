@@ -5,6 +5,7 @@
  */
 
 import type { StoreRepository } from '../../domain/repositories/StoreRepository';
+import { StoreNotFoundError } from '../../domain/errors/StoreErrors';
 
 export interface ConfigureStorePickupInput {
   storeId: string;
@@ -35,7 +36,7 @@ export class ConfigureStorePickupUseCase {
   async execute(input: ConfigureStorePickupInput): Promise<ConfigureStorePickupOutput> {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) {
-      throw new Error(`Store not found: ${input.storeId}`);
+      throw new StoreNotFoundError(input.storeId);
     }
 
     const pickupSettings = {

@@ -2,6 +2,8 @@
  * DeleteMedia Use Case
  */
 
+import { MediaAssetNotFoundError, MediaValidationError } from '../../domain/errors/MediaErrors';
+
 export interface DeleteMediaInput {
   mediaId: string;
   deletedBy?: string;
@@ -34,14 +36,14 @@ export class DeleteMediaUseCase {
   async execute(input: DeleteMediaInput): Promise<DeleteMediaOutput> {
     const media = await this.mediaRepository.findById(input.mediaId);
     if (!media) {
-      throw new Error(`Media not found: ${input.mediaId}`);
+      throw new MediaAssetNotFoundError(input.mediaId);
     }
 
     // Check for existing usages
     if (!input.force) {
       const usages = await this.mediaRepository.findUsages(input.mediaId);
       if (usages && usages.length > 0) {
-        throw new Error(`Media is in use by ${usages.length} entities. Use force=true to delete anyway.`);
+        throw new MediaValidationError(`Media is in use by ${usages.length} entities. Use force=true to delete anyway.`);
       }
     }
 

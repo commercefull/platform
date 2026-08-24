@@ -1,12 +1,16 @@
-import * as supportRepo from '../../infrastructure/repositories/supportRepo';
-import * as faqRepo from '../../infrastructure/repositories/faqRepo';
+import supportDataRepository from '../../infrastructure/repositories/SupportDataRepository';
+import supportInfoRepository from '../../infrastructure/repositories/SupportInfoRepository';
+import type { TicketPriority, TicketCategory, SenderType, SupportTicket } from '../../infrastructure/repositories/SupportDataRepository';
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CreateTicketUseCase, CreateTicketInput } from '../../application/useCases/CreateTicket';
 import { UpdateTicketUseCase, UpdateTicketInput } from '../../application/useCases/UpdateTicket';
 import { GetCustomerTicketsUseCase, GetCustomerTicketsInput } from '../../application/useCases/GetCustomerTickets';
 import { AddTicketCommentUseCase, AddTicketCommentInput } from '../../application/useCases/AddTicketComment';
 import { SearchFAQUseCase, SearchFAQInput } from '../../application/useCases/SearchFAQ';
-import type { FaqArticle } from '../../infrastructure/repositories/faqRepo';
+import type { FaqArticle } from '../../infrastructure/repositories/SupportInfoRepository';
+
+const supportRepo = supportDataRepository.tickets;
+const faqRepo = supportInfoRepository.faq;
 
 // Adapters that bridge the supportRepo functions to the port interfaces expected by use cases
 const ticketQueryAdapter = {
@@ -84,8 +88,8 @@ const ticketCommandAdapter = {
       email: '',
       subject: data.subject,
       description: data.description,
-      priority: data.priority as supportRepo.TicketPriority,
-      category: data.type as supportRepo.TicketCategory,
+      priority: data.priority as TicketPriority,
+      category: data.type as TicketCategory,
     });
     return {
       ticketId: ticket.supportTicketId,
@@ -98,7 +102,7 @@ const ticketCommandAdapter = {
     };
   },
   async updateTicket(ticketId: string, data: Record<string, unknown>) {
-    const ticket = await supportRepo.updateTicket(ticketId, data as Partial<supportRepo.SupportTicket>);
+    const ticket = await supportRepo.updateTicket(ticketId, data as Partial<SupportTicket>);
     return {
       ticketId: ticket.supportTicketId,
       status: ticket.status as string,
@@ -119,7 +123,7 @@ const ticketCommandAdapter = {
     const message = await supportRepo.addMessage({
       supportTicketId: data.ticketId,
       senderId: data.authorId,
-      senderType: data.authorType as supportRepo.SenderType,
+      senderType: data.authorType as SenderType,
       message: data.content,
       isInternal: data.isInternal,
     });

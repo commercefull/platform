@@ -3,9 +3,10 @@
  * Adds a new item to a navigation menu
  */
 
-import { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
-import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
+import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { NavigationMenuNotFoundError, ContentPageNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class AddNavigationItemCommand {
   constructor(
@@ -47,13 +48,13 @@ export class AddNavigationItemUseCase {
 
   async execute(command: AddNavigationItemCommand): Promise<NavigationItemResponse> {
     if (!command.navigationId || !command.title || !command.type) {
-      throw new Error('Navigation ID, title, and type are required');
+      throw new ContentValidationError('Navigation ID, title, and type are required');
     }
 
     // Verify navigation exists
     const navigation = await this.navigationRepo.findNavigationById(command.navigationId);
     if (!navigation) {
-      throw new Error(`Navigation with ID ${command.navigationId} not found`);
+      throw new NavigationMenuNotFoundError(command.navigationId);
     }
 
     // Verify parent item exists if provided
@@ -61,20 +62,20 @@ export class AddNavigationItemUseCase {
     if (command.parentId) {
       const parentItem = await this.navigationRepo.findNavigationItemById(command.parentId);
       if (!parentItem) {
-        throw new Error(`Parent navigation item with ID ${command.parentId} not found`);
+        throw new ContentValidationError(`Parent navigation item with ID ${command.parentId} not found`);
       }
       depth = parentItem.depth + 1;
     }
 
     // Validate based on type
     if (command.type === 'url' && !command.url) {
-      throw new Error('URL is required for URL type navigation items');
+      throw new ContentValidationError('URL is required for URL type navigation items');
     }
 
     if (command.type === 'page' && command.contentPageId) {
       const page = await this.contentRepo.findPageById(command.contentPageId);
       if (!page) {
-        throw new Error(`Content page with ID ${command.contentPageId} not found`);
+        throw new ContentPageNotFoundError(command.contentPageId);
       }
     }
 

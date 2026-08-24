@@ -4,6 +4,7 @@
 
 import { Customer, CustomerAddress } from '../../../../libs/db/types';
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import { CustomerValidationError } from '../../domain/errors/CustomerErrors';
 
 // ============================================================================
 // Command
@@ -15,7 +16,7 @@ export class GetCustomerCommand {
     public readonly email?: string,
   ) {
     if (!customerId && !email) {
-      throw new Error('Either customerId or email must be provided');
+      throw new CustomerValidationError('Either customerId or email must be provided');
     }
   }
 }

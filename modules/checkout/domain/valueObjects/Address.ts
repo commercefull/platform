@@ -3,6 +3,8 @@
  * Immutable representation of a postal address
  */
 
+import { CheckoutValidationError } from '../errors/CheckoutErrors';
+
 export interface AddressProps {
   firstName: string;
   lastName: string;
@@ -25,19 +27,19 @@ export class Address {
 
   static create(props: AddressProps): Address {
     if (!props.firstName || !props.lastName) {
-      throw new Error('First name and last name are required');
+      throw new CheckoutValidationError('First name and last name are required');
     }
     if (!props.addressLine1) {
-      throw new Error('Address line 1 is required');
+      throw new CheckoutValidationError('Address line 1 is required');
     }
     if (!props.city) {
-      throw new Error('City is required');
+      throw new CheckoutValidationError('City is required');
     }
     if (!props.postalCode) {
-      throw new Error('Postal code is required');
+      throw new CheckoutValidationError('Postal code is required');
     }
     if (!props.country) {
-      throw new Error('Country is required');
+      throw new CheckoutValidationError('Country is required');
     }
 
     return new Address(props);

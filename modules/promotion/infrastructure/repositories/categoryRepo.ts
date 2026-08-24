@@ -1,5 +1,6 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, PromotionCategory } from '../../../../libs/db/types';
+import { FailedToCreatePromotionError, PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
 
 // Use PromotionCategory type directly from libs/db/types.ts
 export type { PromotionCategory };
@@ -37,7 +38,7 @@ export class PromotionCategoryRepo {
     );
 
     if (!row) {
-      throw new Error('Category promotion not saved');
+      throw new FailedToCreatePromotionError('Category promotion not saved');
     }
     return row;
   }
@@ -65,7 +66,7 @@ export class PromotionCategoryRepo {
     );
 
     if (!row) {
-      throw new Error('Category promotion not found');
+      throw new PromotionNotFoundError(id);
     }
     return row;
   }

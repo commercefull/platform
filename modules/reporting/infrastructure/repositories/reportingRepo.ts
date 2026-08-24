@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { ReportingReportSchedule, ReportingReportExecution } from '../../../../libs/db/types';
+import { FailedToCreateScheduleError, FailedToCreateExecutionError } from '../../domain/errors/ReportingErrors';
 import type {
   ReportScheduleProps,
   ReportExecutionProps,
@@ -59,7 +60,7 @@ export async function createSchedule(params: CreateReportScheduleParams): Promis
     now,
   ]);
   if (!row) {
-    throw new Error('Failed to create report schedule');
+    throw new FailedToCreateScheduleError();
   }
   return mapScheduleRow(row);
 }
@@ -135,7 +136,7 @@ export async function createExecution(scheduleId: string): Promise<ReportExecuti
     [scheduleId, new Date()],
   );
   if (!row) {
-    throw new Error('Failed to create report execution');
+    throw new FailedToCreateExecutionError();
   }
   return mapExecutionRow(row);
 }

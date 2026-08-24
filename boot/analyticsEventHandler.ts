@@ -4,8 +4,10 @@
  */
 
 import { eventBus } from '../libs/events/eventBus';
-import * as reportingRepo from '../modules/analytics/infrastructure/repositories/reportingRepo';
-import * as analyticsRepo from '../modules/analytics/infrastructure/repositories/analyticsRepo';
+import { AnalyticsDataRepository } from '../modules/analytics/infrastructure';
+
+const reportingRepo = AnalyticsDataRepository.reporting;
+const analyticsRepo = AnalyticsDataRepository.analytics;
 
 // ============================================================================
 // Event Payload Interfaces

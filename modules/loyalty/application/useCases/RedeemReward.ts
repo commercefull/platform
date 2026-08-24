@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { LoyaltyRewardNotFoundError, RewardNotAvailableError, InsufficientPointsError, LoyaltyMemberNotFoundError, LoyaltyValidationError } from '../../domain/errors/LoyaltyErrors';
 
 export interface RedeemRewardInput {
   customerId: string;
@@ -72,43 +73,43 @@ export class RedeemRewardUseCase {
     // Get reward details
     const reward = await this.loyaltyRepository.getRewardById(rewardId);
     if (!reward) {
-      throw new Error('Reward not found');
+      throw new LoyaltyRewardNotFoundError(rewardId);
     }
 
     if (!reward.isActive) {
-      throw new Error('Reward is not active');
+      throw new RewardNotAvailableError(rewardId);
     }
 
     // Check validity period
     const now = new Date();
     if (reward.validTo && new Date(reward.validTo) < now) {
-      throw new Error('Reward has expired');
+      throw new LoyaltyValidationError('Reward has expired');
     }
 
     if (reward.validFrom && new Date(reward.validFrom) > now) {
-      throw new Error('Reward is not yet available');
+      throw new LoyaltyValidationError('Reward is not yet available');
     }
 
     // Check quantity
     if (reward.totalQuantity !== null && reward.remainingQuantity <= 0) {
-      throw new Error('Reward is out of stock');
+      throw new LoyaltyValidationError('Reward is out of stock');
     }
 
     // Get customer's points balance
     const customer = await this.loyaltyRepository.getCustomerLoyalty(customerId);
     if (!customer) {
-      throw new Error('Customer not found in loyalty program');
+      throw new LoyaltyMemberNotFoundError(customerId);
     }
 
     if (customer.pointsBalance < reward.pointsCost) {
-      throw new Error(`Insufficient points. Required: ${reward.pointsCost}, Available: ${customer.pointsBalance}`);
+      throw new InsufficientPointsError(reward.pointsCost, customer.pointsBalance);
     }
 
     // Check per-customer usage limit
     if (reward.maxUsagePerCustomer) {
       const usageCount = await this.loyaltyRepository.getRewardUsageCount(customerId, rewardId);
       if (usageCount >= reward.maxUsagePerCustomer) {
-        throw new Error('You have reached the maximum redemptions for this reward');
+        throw new LoyaltyValidationError('You have reached the maximum redemptions for this reward');
       }
     }
 

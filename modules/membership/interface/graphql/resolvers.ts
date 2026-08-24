@@ -1,12 +1,12 @@
-import { MembershipRepo } from '../../infrastructure/repositories/membershipRepo';
+import membershipSubscriptionDataRepository from '../../infrastructure/repositories/MembershipSubscriptionDataRepository';
+
+const membershipRepo = membershipSubscriptionDataRepository.memberships;
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { AssignMembershipUseCase, AssignMembershipInput } from '../../application/useCases/AssignMembership';
 import { GetMembershipBenefitsUseCase, GetMembershipBenefitsInput } from '../../application/useCases/GetMembershipBenefits';
 import { CancelMembershipUseCase, CancelMembershipInput } from '../../application/useCases/CancelMembership';
 import { UpgradeMembershipUseCase, UpgradeMembershipInput } from '../../application/useCases/UpgradeMembership';
 import { RenewMembershipUseCase, RenewMembershipInput } from '../../application/useCases/RenewMembership';
-
-const membershipRepo = new MembershipRepo();
 
 export const membershipResolvers = {
   Query: {

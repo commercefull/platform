@@ -3,8 +3,9 @@
  * Creates a new navigation menu
  */
 
-import { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
+import type { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class CreateNavigationCommand {
   constructor(
@@ -32,7 +33,7 @@ export class CreateNavigationUseCase {
 
   async execute(command: CreateNavigationCommand): Promise<NavigationResponse> {
     if (!command.name || !command.slug) {
-      throw new Error('Name and slug are required');
+      throw new ContentValidationError('Name and slug are required');
     }
 
     const navigation = await this.navigationRepo.createNavigation({

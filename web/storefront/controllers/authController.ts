@@ -7,15 +7,20 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';
 import {
   AuthenticateCustomerCommand,
-  AuthenticateCustomerUseCase,
 } from '../../../modules/customer/application/useCases/AuthenticateCustomer';
-import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../../modules/customer/application/useCases/RegisterCustomer';
-import { GetCustomerCommand, GetCustomerUseCase } from '../../../modules/customer/application/useCases/GetCustomer';
-import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../../modules/customer/application/useCases/UpdateCustomer';
-import { ChangePasswordCommand, ChangePasswordUseCase } from '../../../modules/customer/application/useCases/ChangePassword';
+import { RegisterCustomerCommand } from '../../../modules/customer/application/useCases/RegisterCustomer';
+import {
+  getCustomerUseCase,
+  updateCustomerUseCase,
+  authenticateCustomerUseCase,
+  registerCustomerUseCase,
+  changePasswordUseCase,
+} from '../../../modules/customer/application/useCases/wired';
+import { GetCustomerCommand } from '../../../modules/customer/application/useCases/GetCustomer';
+import { UpdateCustomerCommand } from '../../../modules/customer/application/useCases/UpdateCustomer';
+import { ChangePasswordCommand } from '../../../modules/customer/application/useCases/ChangePassword';
 
 // ============================================================================
 // Sign In Form
@@ -65,8 +70,7 @@ export const signIn = async (req: TypedRequest, res: Response): Promise<void> =>
     }
 
     const command = new AuthenticateCustomerCommand(email as string, password as string);
-    const useCase = new AuthenticateCustomerUseCase(CustomerRepo);
-    const customer = await useCase.execute(command);
+    const customer = await authenticateCustomerUseCase.execute(command);
 
     if (!customer) {
       req.flash('error', 'Invalid email or password');
@@ -84,7 +88,7 @@ export const signIn = async (req: TypedRequest, res: Response): Promise<void> =>
     req.flash('success', `Welcome back, ${customer.firstName}!`);
     res.redirect(redirectTo as string);
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to sign in');
     res.redirect('/signin');
@@ -118,8 +122,7 @@ export const signUp = async (req: TypedRequest, res: Response): Promise<void> =>
 
     const command = new RegisterCustomerCommand(email as string, firstName as string, lastName as string, password as string);
 
-    const useCase = new RegisterCustomerUseCase(CustomerRepo);
-    const customer = await useCase.execute(command);
+    const customer = await registerCustomerUseCase.execute(command);
 
     // Auto-login after registration
     (req as unknown as Record<string, unknown>).user = {
@@ -132,7 +135,7 @@ export const signUp = async (req: TypedRequest, res: Response): Promise<void> =>
     req.flash('success', `Welcome to our store, ${customer.firstName}!`);
     res.redirect('/profile');
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to create account');
     res.redirect('/signup');
@@ -144,33 +147,24 @@ export const signUp = async (req: TypedRequest, res: Response): Promise<void> =>
 // ============================================================================
 
 export const profile = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    if (!req.user) {
-      return res.redirect('/signin?redirect=/profile');
-    }
-
-    const command = new GetCustomerCommand(req.user.customerId);
-    const useCase = new GetCustomerUseCase(CustomerRepo);
-    const customer = await useCase.execute(command);
-
-    if (!customer) {
-      // Clear invalid session
-      req.user = undefined;
-      return res.redirect('/signin');
-    }
-
-    storefrontRespond(req, res, 'user/profile', {
-      pageName: 'My Profile',
-      customer,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load profile',
-    });
+  if (!req.user) {
+    return res.redirect('/signin?redirect=/profile');
   }
+
+  const command = new GetCustomerCommand(req.user.customerId);
+  const customer = await getCustomerUseCase.execute(command);
+
+  if (!customer) {
+    // Clear invalid session
+    req.user = undefined;
+    return res.redirect('/signin');
+  }
+
+  storefrontRespond(req, res, 'user/profile', {
+    pageName: 'My Profile',
+    customer,
+  });
+  
 };
 
 // ============================================================================
@@ -192,13 +186,12 @@ export const updateProfile = async (req: TypedRequest, res: Response): Promise<v
       phone: phone as string | undefined,
     });
 
-    const useCase = new UpdateCustomerUseCase(CustomerRepo);
-    await useCase.execute(command);
+    await updateCustomerUseCase.execute(command);
 
     req.flash('success', 'Profile updated successfully');
     res.redirect('/profile');
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to update profile');
     res.redirect('/profile');
@@ -220,7 +213,7 @@ export const signOut = async (req: TypedRequest, res: Response): Promise<void> =
     req.flash('success', 'You have been signed out successfully');
     res.redirect('/');
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     res.redirect('/');
   }
@@ -257,13 +250,12 @@ export const changePassword = async (req: TypedRequest, res: Response): Promise<
     // Use ChangePassword use case
     const changeCommand = new ChangePasswordCommand(req.user.customerId as string, currentPassword as string, newPassword as string);
 
-    const changeUseCase = new ChangePasswordUseCase(CustomerRepo);
-    await changeUseCase.execute(changeCommand);
+    await changePasswordUseCase.execute(changeCommand);
 
     req.flash('success', 'Password changed successfully');
     res.redirect('/profile');
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to change password');
     res.redirect('/profile');

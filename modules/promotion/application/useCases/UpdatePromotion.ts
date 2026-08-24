@@ -3,8 +3,9 @@
  * Updates an existing promotion
  */
 
-import { PromotionRepo, UpdatePromotionInput } from '../../infrastructure/repositories/promotionRepo';
+import promotionRuleRepository, { type UpdatePromotionInput } from '../../infrastructure/repositories/PromotionRuleRepository';
 import { Promotion } from '../../../../libs/db/types';
+import { PromotionNotFoundError, PromotionValidationError } from '../../domain/errors/PromotionErrors';
 
 // Command
 export class UpdatePromotionCommand {
@@ -36,18 +37,18 @@ export interface UpdatePromotionResponse {
 
 // Use Case
 export class UpdatePromotionUseCase {
-  constructor(private readonly promotionRepo: PromotionRepo) {}
+  constructor(private readonly promotionRepo: typeof promotionRuleRepository.promotions) {}
 
   async execute(command: UpdatePromotionCommand): Promise<UpdatePromotionResponse> {
     // Find existing promotion
     const existingPromotion = await this.promotionRepo.findById(command.promotionId);
     if (!existingPromotion) {
-      throw new Error('Promotion not found');
+      throw new PromotionNotFoundError(command.promotionId);
     }
 
     // Validate updates
     if (command.updates.value !== undefined && command.updates.value < 0) {
-      throw new Error('Promotion value cannot be negative');
+      throw new PromotionValidationError('Promotion value cannot be negative');
     }
 
     // Prepare update input for repository

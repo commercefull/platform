@@ -2,6 +2,8 @@
  * GetInventoryItem Use Case
  */
 
+import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
+
 export interface GetInventoryItemInput {
   inventoryItemId?: string;
   sku?: string;
@@ -69,7 +71,7 @@ export class GetInventoryItemUseCase {
     } else if (input.productId && input.warehouseId) {
       item = await this.inventoryRepository.findByProductAndWarehouse(input.productId, input.warehouseId, input.variantId);
     } else {
-      throw new Error('Must provide inventoryItemId, sku+warehouseId, or productId+warehouseId');
+      throw new InventoryValidationError('Must provide inventoryItemId, sku+warehouseId, or productId+warehouseId');
     }
 
     if (!item) {

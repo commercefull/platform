@@ -5,6 +5,7 @@
 
 import { SystemConfigurationRepository } from '../../domain/repositories/SystemConfigurationRepository';
 import { SystemConfigurationProps } from '../../domain/entities/SystemConfiguration';
+import { ConfigurationNotFoundError } from '../../domain/errors/ConfigurationErrors';
 
 export class UpdateSystemConfigurationCommand {
   constructor(
@@ -42,7 +43,7 @@ export class UpdateSystemConfigurationUseCase {
     // Find existing configuration
     const existingConfig = await this.systemConfigRepository.findById(command.configId);
     if (!existingConfig) {
-      throw new Error('System configuration not found');
+      throw new ConfigurationNotFoundError(command.configId);
     }
 
     // Apply updates

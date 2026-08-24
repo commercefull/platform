@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { MembershipNotFoundError, MembershipPlanNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
 export interface RenewMembershipInput {
   membershipId: string;
@@ -54,12 +55,12 @@ export class RenewMembershipUseCase {
     // Get current membership
     const membership = await this.membershipRepository.getMembershipById(membershipId);
     if (!membership) {
-      throw new Error('Membership not found');
+      throw new MembershipNotFoundError(membershipId);
     }
 
     const validStatuses = ['active', 'expired', 'pending_cancellation'];
     if (!validStatuses.includes(membership.status)) {
-      throw new Error(`Cannot renew membership with status: ${membership.status}`);
+      throw new MembershipValidationError(`Cannot renew membership with status: ${membership.status}`);
     }
 
     // If pending cancellation, reactivate
@@ -74,7 +75,7 @@ export class RenewMembershipUseCase {
     // Get tier details for pricing
     const tier = await this.membershipRepository.getTierById(membership.tierId);
     if (!tier) {
-      throw new Error('Membership tier not found');
+      throw new MembershipPlanNotFoundError(membership.tierId);
     }
 
     const now = new Date();
@@ -164,7 +165,7 @@ export class RenewMembershipUseCase {
     // This would integrate with the payment module
     // For now, return a mock successful payment
     if (!paymentMethodId) {
-      throw new Error('No payment method available');
+      throw new MembershipValidationError('No payment method available');
     }
 
     // In real implementation, call payment service

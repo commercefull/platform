@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { MembershipPlanBenefitAlreadyExistsError, FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
 
 export interface MembershipPlanBenefit {
   membershipPlanBenefitId: string;
@@ -52,7 +53,7 @@ export class MembershipPlanBenefitRepo {
     // Check if already exists
     const existing = await this.findByPlanAndBenefit(params.planId, params.benefitId);
     if (existing) {
-      throw new Error('Benefit already assigned to this plan');
+      throw new MembershipPlanBenefitAlreadyExistsError();
     }
 
     const result = await queryOne<MembershipPlanBenefit>(
@@ -73,7 +74,7 @@ export class MembershipPlanBenefitRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create plan benefit');
+    if (!result) throw new FailedToCreateMembershipError('Failed to create plan benefit');
     return result;
   }
 

@@ -3,6 +3,7 @@
  */
 
 import { Router } from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   createFulfillment,
   getFulfillment,
@@ -24,40 +25,40 @@ const router = Router();
 router.use(isOrganizationLoggedIn);
 
 // List all fulfillments (with filters/pagination)
-router.get('/fulfillments', listFulfillments);
+router.get('/fulfillments', asyncHandler(listFulfillments));
 
 // Create fulfillment
-router.post('/fulfillments', createFulfillment);
+router.post('/fulfillments', asyncHandler(createFulfillment));
 
 // List by order
-router.get('/fulfillments/order/:orderId', listFulfillmentsByOrder);
+router.get('/fulfillments/order/:orderId', asyncHandler(listFulfillmentsByOrder));
 
 // Get fulfillment by ID
-router.get('/fulfillments/:fulfillmentId', getFulfillment);
+router.get('/fulfillments/:fulfillmentId', asyncHandler(getFulfillment));
 
 // Process picking
-router.post('/fulfillments/:fulfillmentId/pick', processPicking);
+router.post('/fulfillments/:fulfillmentId/pick', asyncHandler(processPicking));
 
 // Process packing
-router.post('/fulfillments/:fulfillmentId/pack', processPacking);
+router.post('/fulfillments/:fulfillmentId/pack', asyncHandler(processPacking));
 
 // Ship order
-router.post('/fulfillments/:fulfillmentId/ship', shipOrder);
+router.post('/fulfillments/:fulfillmentId/ship', asyncHandler(shipOrder));
 
 // Mark delivered
-router.post('/fulfillments/:fulfillmentId/deliver', markDelivered);
+router.post('/fulfillments/:fulfillmentId/deliver', asyncHandler(markDelivered));
 
 // Cancel fulfillment
-router.post('/fulfillments/:fulfillmentId/cancel', cancelFulfillment);
+router.post('/fulfillments/:fulfillmentId/cancel', asyncHandler(cancelFulfillment));
 
 // Update tracking info
-router.put('/fulfillments/:fulfillmentId/tracking', updateTracking);
+router.put('/fulfillments/:fulfillmentId/tracking', asyncHandler(updateTracking));
 
 // Initiate return
-router.post('/fulfillments/:fulfillmentId/return', initiateReturn);
+router.post('/fulfillments/:fulfillmentId/return', asyncHandler(initiateReturn));
 
 // Assign fulfillment
-router.post('/fulfillments/:fulfillmentId/assign', assignFulfillment);
+router.post('/fulfillments/:fulfillmentId/assign', asyncHandler(assignFulfillment));
 
 export const fulfillmentBusinessRouter = router;
 export default router;

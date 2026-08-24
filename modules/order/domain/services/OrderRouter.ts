@@ -4,6 +4,8 @@
  * Routes orders to appropriate store/warehouse for fulfillment.
  */
 
+import { NoEligibleStoresError, NoStoresWithInventoryError, NoPickupStoresError, NoFulfillmentStoresError, NoStoresWithInventoryForFulfillmentError } from '../errors/OrderErrors';
+
 export interface Store {
   storeId: string;
   name: string;
@@ -77,14 +79,14 @@ export class OrderRouter {
     const eligibleStores = this.filterEligibleStores(order, availableStores);
 
     if (eligibleStores.length === 0) {
-      throw new Error('No eligible stores found for order fulfillment');
+      throw new NoEligibleStoresError();
     }
 
     // Check inventory at each store
     const storesWithInventory = await this.checkInventoryAtStores(order, eligibleStores);
 
     if (storesWithInventory.length === 0) {
-      throw new Error('No stores have sufficient inventory');
+      throw new NoStoresWithInventoryError();
     }
 
     // Sort by best match
@@ -105,7 +107,7 @@ export class OrderRouter {
     const pickupStores = availableStores.filter(s => s.canPickupInStore);
 
     if (pickupStores.length === 0) {
-      throw new Error('No pickup-enabled stores available');
+      throw new NoPickupStoresError();
     }
 
     // Sort by distance to customer
@@ -145,7 +147,7 @@ export class OrderRouter {
     const fulfillmentStores = availableStores.filter(s => s.canFulfillOnline);
 
     if (fulfillmentStores.length === 0) {
-      throw new Error('No fulfillment-enabled stores available');
+      throw new NoFulfillmentStoresError();
     }
 
     // Check inventory and rank stores
@@ -163,7 +165,7 @@ export class OrderRouter {
     }
 
     if (storesWithInventory.length === 0) {
-      throw new Error('No stores have inventory for fulfillment');
+      throw new NoStoresWithInventoryForFulfillmentError();
     }
 
     // Sort by inventory score (higher is better), then by distance

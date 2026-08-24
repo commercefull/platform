@@ -1,4 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductToCategory {
   productToCategoryId: string;
@@ -36,7 +37,7 @@ export class ProductToCategoryRepo {
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [params.productId, params.productCategoryId, params.position ?? 0, params.isPrimary ?? false, now],
     );
-    if (!result) throw new Error('Failed to create productToCategory');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 

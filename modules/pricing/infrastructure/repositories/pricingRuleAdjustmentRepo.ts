@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 
 export type RuleAdjustmentType = 'percentage' | 'fixed';
 
@@ -39,7 +40,7 @@ export class RuleAdjustmentRepo {
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [params.pricingRuleId, params.type, params.value, now, now],
     );
-    if (!result) throw new Error('Failed to create rule adjustment');
+    if (!result) throw new FailedToCreatePricingError('Failed to create rule adjustment');
     return result;
   }
 

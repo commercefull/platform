@@ -1,5 +1,7 @@
 # Infrastructure & Deployment
 
+> For environment promotion strategy, seed strategy per environment, and AWS dual-hosting parity, see [environment-pipelines.md](./environment-pipelines.md).
+
 ## `infra/` Directory
 
 | Directory       | Strategy                       | Use Case                      |

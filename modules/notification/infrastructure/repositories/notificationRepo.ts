@@ -2,6 +2,7 @@ import { queryOne, query } from '../../../../libs/db';
 
 // Import types from generated DB types - single source of truth
 import { Notification as DbNotification } from '../../../../libs/db/types';
+import { FailedToCreateNotificationError } from '../../domain/errors/NotificationErrors';
 
 // Re-export DB type
 export type Notification = DbNotification;
@@ -83,7 +84,7 @@ export class NotificationRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create notification');
+      throw new FailedToCreateNotificationError();
     }
 
     return result;

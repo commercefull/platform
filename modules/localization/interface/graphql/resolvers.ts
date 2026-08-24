@@ -1,5 +1,7 @@
-import * as CurrencyRepo from '../../infrastructure/repositories/currencyRepo';
-import LocaleRepo from '../../infrastructure/repositories/localeRepo';
+import localizationDataRepository from '../../infrastructure/repositories/LocalizationDataRepository';
+
+const CurrencyRepo = localizationDataRepository.currencies;
+const LocaleRepo = localizationDataRepository.locales;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { ConvertCurrencyUseCase, ConvertCurrencyInput } from '../../application/useCases/ConvertCurrency';
 import { CreateCurrencyUseCase, CreateCurrencyInput } from '../../application/useCases/CreateCurrency';

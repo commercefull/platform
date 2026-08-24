@@ -3,6 +3,7 @@
  */
 
 import { generateUUID } from '../../../../libs/uuid';
+import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 export interface CreateInventoryItemInput {
   productId: string;
@@ -63,13 +64,13 @@ export class CreateInventoryItemUseCase {
 
   async execute(input: CreateInventoryItemInput): Promise<CreateInventoryItemOutput> {
     if (!input.productId || !input.warehouseId || !input.sku) {
-      throw new Error('Product ID, warehouse ID, and SKU are required');
+      throw new InventoryValidationError('Product ID, warehouse ID, and SKU are required');
     }
 
     // Check for duplicate SKU in same warehouse
     const existing = await this.inventoryRepository.findBySkuAndWarehouse(input.sku, input.warehouseId);
     if (existing) {
-      throw new Error(`Inventory item with SKU ${input.sku} already exists in this warehouse`);
+      throw new InventoryValidationError(`Inventory item with SKU ${input.sku} already exists in this warehouse`);
     }
 
     const inventoryItemId = generateUUID();

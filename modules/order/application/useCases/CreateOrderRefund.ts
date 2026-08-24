@@ -5,11 +5,11 @@
  * Validates: Requirements 2.11
  */
 
-import orderPaymentRepo from '../../infrastructure/repositories/orderPaymentRepo';
-import orderPaymentRefundRepo, {
-  OrderPaymentRefund,
-  OrderPaymentRefundStatus,
-} from '../../infrastructure/repositories/orderPaymentRefundRepo';
+import { OrderQueryRepository, OrderPaymentRefund, OrderPaymentRefundStatus } from '../../domain/repositories/OrderQueryRepository';
+import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
+
+const orderQueryRepo = orderDataRepository.queries;
+import { OrderPaymentNotFoundError, RefundAmountMustBePositiveError, RefundExceedsRefundableBalanceError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Command
@@ -49,26 +49,25 @@ export interface CreateOrderRefundResponse {
 
 export class CreateOrderRefundUseCase {
   constructor(
-    private readonly paymentRepo: typeof orderPaymentRepo = orderPaymentRepo,
-    private readonly refundRepo: typeof orderPaymentRefundRepo = orderPaymentRefundRepo,
+    private readonly queryRepo: OrderQueryRepository = orderQueryRepo,
   ) {}
 
   async execute(command: CreateOrderRefundCommand): Promise<CreateOrderRefundResponse> {
-    const payment = await this.paymentRepo.findById(command.orderPaymentId);
+    const payment = await this.queryRepo.findPaymentById(command.orderPaymentId);
     if (!payment) {
-      throw new Error('Order payment not found');
+      throw new OrderPaymentNotFoundError();
     }
 
     if (command.amount <= 0) {
-      throw new Error('Refund amount must be greater than zero');
+      throw new RefundAmountMustBePositiveError();
     }
 
     const maxRefundable = payment.amount - payment.refundedAmount;
     if (command.amount > maxRefundable) {
-      throw new Error(`Refund amount exceeds refundable balance of ${maxRefundable}`);
+      throw new RefundExceedsRefundableBalanceError(maxRefundable);
     }
 
-    const refund: OrderPaymentRefund = await this.refundRepo.create({
+    const refund: OrderPaymentRefund = await this.queryRepo.createRefund({
       orderPaymentId: command.orderPaymentId,
       amount: command.amount,
       reason: command.reason,

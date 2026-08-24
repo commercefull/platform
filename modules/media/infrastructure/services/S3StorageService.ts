@@ -6,6 +6,7 @@
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { StorageService, UploadResult } from '../../domain/services/StorageService';
+import { MediaFileNotFoundError } from '../../domain/errors/MediaErrors';
 import path from 'path';
 
 export class S3StorageService implements StorageService {
@@ -81,7 +82,7 @@ export class S3StorageService implements StorageService {
 
     const response = await this.s3Client.send(command);
     if (!response.Body) {
-      throw new Error(`File not found: ${key}`);
+      throw new MediaFileNotFoundError(key);
     }
 
     // Convert stream to buffer

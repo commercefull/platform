@@ -4,14 +4,12 @@
  */
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
-import { BasketRepository } from '../../../basket/domain/repositories/BasketRepository';
-import { OrderRepository } from '../../../order/domain/repositories/OrderRepository';
-import { PaymentRepository } from '../../../payment/domain/repositories/PaymentRepository';
-import { CreateOrderUseCase, CreateOrderCommand } from '../../../order/application/useCases/CreateOrder';
-import { InitiatePaymentUseCase, InitiatePaymentCommand } from '../../../payment/application/useCases/InitiatePayment';
-import { OrderStatus } from '../../../order/domain/valueObjects/OrderStatus';
+import { BasketSnapshotPort } from '../../application/ports/BasketSnapshotPort';
+import { OrderPlacementPort, CheckoutOutcome } from '../../application/ports/OrderPlacementPort';
+import { PaymentAuthorizationPort } from '../../application/ports/PaymentAuthorizationPort';
+import { CheckoutSessionNotFoundError, CheckoutValidationError } from '../../domain/errors/CheckoutErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { logger } from '../../../../libs/logger';
+
 
 // ============================================================================
 // Command
@@ -40,28 +38,22 @@ export interface CreatePaymentIntentResponse {
 // ============================================================================
 
 export class CreatePaymentIntentUseCase {
-  private readonly createOrderUseCase: CreateOrderUseCase;
-  private readonly initiatePaymentUseCase: InitiatePaymentUseCase;
-
   constructor(
     private readonly checkoutRepository: CheckoutRepository,
-    private readonly basketRepository: BasketRepository,
-    private readonly orderRepository: OrderRepository,
-    private readonly paymentRepository: PaymentRepository,
-  ) {
-    this.createOrderUseCase = new CreateOrderUseCase(orderRepository);
-    this.initiatePaymentUseCase = new InitiatePaymentUseCase(paymentRepository);
-  }
+    private readonly basketSnapshotPort: BasketSnapshotPort,
+    private readonly orderPlacementPort: OrderPlacementPort,
+    private readonly paymentAuthorizationPort: PaymentAuthorizationPort,
+  ) {}
 
   async execute(command: CreatePaymentIntentCommand): Promise<CreatePaymentIntentResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
     if (!session) {
-      throw new Error('Checkout session not found');
+      throw new CheckoutSessionNotFoundError(command.checkoutId);
     }
 
     // Idempotency: already in pending_payment with a payment intent
     if (session.status === 'pending_payment' && session.paymentIntentId && session.orderId) {
-      const existingOrder = await this.orderRepository.findById(session.orderId);
+      const existingOrder = await this.orderPlacementPort.findOrder(session.orderId);
       return {
         orderId: session.orderId,
         orderNumber: existingOrder?.orderNumber || '',
@@ -71,16 +63,16 @@ export class CreatePaymentIntentUseCase {
     }
 
     if (!session.isReadyForPayment) {
-      throw new Error('Session is not ready for payment. Please set shipping address, shipping method, and payment method.');
+      throw new CheckoutValidationError('Session is not ready for payment. Please set shipping address, shipping method, and payment method.');
     }
 
     // Load basket items
-    const basket = await this.basketRepository.findById(session.basketId);
+    const basket = await this.basketSnapshotPort.getSnapshot(session.basketId);
     if (!basket) {
-      throw new Error('Basket not found');
+      throw new CheckoutValidationError('Basket not found');
     }
 
-    const basketItems = await this.basketRepository.getItems(session.basketId);
+    const basketItems = basket.items;
 
     // Determine customer email
     let customerEmail = session.guestEmail || '';
@@ -95,7 +87,7 @@ export class CreatePaymentIntentUseCase {
     const sa = session.shippingAddress;
 
     if (!sa && !isPickup) {
-      throw new Error('Shipping address is required');
+      throw new CheckoutValidationError('Shipping address is required');
     }
 
     interface PickupAddressData {
@@ -182,56 +174,37 @@ export class CreatePaymentIntentUseCase {
     }));
 
     // Create order in PAYMENT_PENDING status
-    const createOrderCommand = new CreateOrderCommand(
-      session.customerId,
+    const orderResponse = await this.orderPlacementPort.createOrder({
+      customerId: session.customerId,
       customerEmail,
-      orderItems,
-      shippingAddressInput,
-      billingAddressInput,
-      session.basketId,
-      undefined, // storeId
-      undefined, // channelId
-      undefined, // createdByUserId
-      'checkout',
-      session.total.currency,
-      undefined, // customerPhone
-      undefined, // customerName
-      session.notes,
-      session.shippingAmount.amount,
-      undefined, // hasGiftWrapping
-      undefined, // giftMessage
-      undefined, // isGift
-      undefined, // ipAddress
-      undefined, // userAgent
-      undefined, // referralSource
-      session.metadata, // pass checkout metadata (fulfillmentType, pickupLocationId, etc.)
-    );
-
-    const orderResponse = await this.createOrderUseCase.execute(createOrderCommand);
+      items: orderItems,
+      shippingAddress: shippingAddressInput,
+      billingAddress: billingAddressInput,
+      basketId: session.basketId,
+      source: 'checkout',
+      currency: session.total.currency,
+      notes: session.notes,
+      shippingAmount: session.shippingAmount.amount,
+      metadata: session.metadata,
+    });
 
     // Transition order to PAYMENT_PENDING
-    const order = await this.orderRepository.findById(orderResponse.orderId);
-    if (order) {
-      order.updateStatus(OrderStatus.PAYMENT_PENDING);
-      await this.orderRepository.save(order);
-    }
+    await this.orderPlacementPort.updateOrderStatus(orderResponse.orderId, 'pending_payment' as CheckoutOutcome);
 
     // Initiate payment transaction
     const paymentMethodId = session.paymentMethodId || 'default';
-    const initiatePaymentCommand = new InitiatePaymentCommand(
-      orderResponse.orderId,
-      session.total.amount,
-      session.total.currency,
-      paymentMethodId,
-      session.customerId,
-    );
 
     let transactionId: string;
     try {
-      const paymentResponse = await this.initiatePaymentUseCase.execute(initiatePaymentCommand);
+      const paymentResponse = await this.paymentAuthorizationPort.initiatePayment({
+        orderId: orderResponse.orderId,
+        amount: session.total.amount,
+        currency: session.total.currency,
+        paymentMethodId,
+        customerId: session.customerId,
+      });
       transactionId = paymentResponse.transactionId;
     } catch (err: unknown) {
-      logger.error('Failed to initiate payment:', err);
       const cause = err instanceof Error ? err : new Error(String(err));
       throw Object.assign(new Error((err as Error).message || 'No payment gateway configured'), { cause });
     }

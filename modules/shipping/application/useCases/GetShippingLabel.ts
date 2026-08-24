@@ -4,7 +4,8 @@
  * Retrieves a shipping label by ID or tracking number.
  */
 
-import shippingLabelRepo, { ShippingLabel } from '../../infrastructure/repositories/shippingLabelRepo';
+import shippingLabelRepo from '../../infrastructure/repositories/ShippingLabelAggregateRepository';
+import type { ShippingLabel } from '../../infrastructure/repositories/shippingLabelRepo';
 
 export interface GetLabelInput {
   shippingLabelId?: string;

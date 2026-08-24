@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { SubscriptionNotFoundError, SubscriptionValidationError } from '../../domain/errors/SubscriptionErrors';
 
 export interface PauseSubscriptionInput {
   subscriptionId: string;
@@ -32,16 +33,16 @@ export class PauseSubscriptionUseCase {
 
   async execute(input: PauseSubscriptionInput): Promise<PauseSubscriptionOutput> {
     if (!input.subscriptionId) {
-      throw new Error('Subscription ID is required');
+      throw new SubscriptionValidationError('Subscription ID is required');
     }
 
     const subscription = await this.subscriptionRepo.findById(input.subscriptionId);
     if (!subscription) {
-      throw new Error('Subscription not found');
+      throw new SubscriptionNotFoundError(input.subscriptionId);
     }
 
     if (subscription.status !== 'active') {
-      throw new Error('Only active subscriptions can be paused');
+      throw new SubscriptionValidationError('Only active subscriptions can be paused');
     }
 
     const pausedAt = new Date();

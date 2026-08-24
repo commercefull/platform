@@ -6,6 +6,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { FulfillmentLocation } from '../../../../libs/db/types';
+import { FailedToCreateFulfillmentLocationError } from '../../domain/errors/FulfillmentErrors';
 
 import { generateUUID } from '../../../../libs/uuid';
 
@@ -71,7 +72,7 @@ export async function create(params: CreateFulfillmentLocationParams): Promise<F
   ]);
 
   if (!result || result.length === 0) {
-    throw new Error('Failed to create fulfillment location');
+    throw new FailedToCreateFulfillmentLocationError();
   }
   return result[0];
 }

@@ -1,4 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductTag {
   productTagId: string;
@@ -31,7 +32,7 @@ export class ProductTagRepo {
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [params.name, params.slug, params.description || null, now, now],
     );
-    if (!result) throw new Error('Failed to create productTag');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 

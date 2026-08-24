@@ -4,6 +4,7 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { AdminFieldsRequiredError, PasswordTooShortError, OnlySuperAdminCanCreateError, EmailAlreadyRegisteredError } from '../../../domain/errors/IdentityErrors';
 
 export interface RegisterAdminInput {
   email: string;
@@ -51,24 +52,24 @@ export class RegisterAdminUseCase {
   async execute(input: RegisterAdminInput): Promise<RegisterAdminOutput> {
     // Validate input
     if (!input.email || !input.password || !input.name || !input.role) {
-      throw new Error('Email, password, name, and role are required');
+      throw new AdminFieldsRequiredError();
     }
 
     // Validate password strength
     if (input.password.length < 8) {
-      throw new Error('Password must be at least 8 characters long');
+      throw new PasswordTooShortError();
     }
 
     // Check if creating admin has permission (must be super_admin)
     const creator = await this.adminRepo.findById(input.createdBy);
     if (!creator || creator.role !== 'super_admin') {
-      throw new Error('Only super admins can create admin accounts');
+      throw new OnlySuperAdminCanCreateError();
     }
 
     // Check if email already exists
     const existingAdmin = await this.adminRepo.findByEmail(input.email);
     if (existingAdmin) {
-      throw new Error('Email already registered');
+      throw new EmailAlreadyRegisteredError();
     }
 
     // Hash password

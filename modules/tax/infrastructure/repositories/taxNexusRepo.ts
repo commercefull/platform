@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 
 
 export interface TaxNexus {
@@ -95,7 +96,7 @@ export class TaxNexusRepo {
         now,
       ],
     );
-    if (!result) throw new Error('Failed to create tax nexus');
+    if (!result) throw new FailedToCreateTaxError('Failed to create tax nexus');
     return result;
   }
 

@@ -3,6 +3,7 @@ import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
 import { CustomerAddress as DbCustomerAddress } from '../../../../libs/db/types';
+import { FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
 export type CustomerAddress = DbCustomerAddress;
@@ -96,7 +97,7 @@ export class CustomerAddressRepo {
       ],
     );
 
-    if (!result) throw new Error('Failed to create customer address');
+    if (!result) throw new FailedToCreateCustomerError('Failed to create customer address');
     return result;
   }
 

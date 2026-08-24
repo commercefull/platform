@@ -5,6 +5,14 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import {
+  GiftCardNotFoundError,
+  GiftCardNotActiveError,
+  GiftCardInsufficientBalanceError,
+  GiftCardExpiredError,
+  GiftCardNotReloadableError,
+  PromotionValidationError,
+} from '../../domain/errors/PromotionErrors';
 
 // Table name constants
 const GIFT_CARD_TABLE = Table.PromotionGiftCard;
@@ -205,11 +213,11 @@ export async function redeemGiftCard(
   performedBy?: string,
 ): Promise<PromotionGiftCardTransaction> {
   const giftCard = await getGiftCard(giftCardId);
-  if (!giftCard) throw new Error('Gift card not found');
-  if (giftCard.status !== 'active') throw new Error('Gift card is not active');
-  if (giftCard.currentBalance < amount) throw new Error('Insufficient balance');
+  if (!giftCard) throw new GiftCardNotFoundError(giftCardId);
+  if (giftCard.status !== 'active') throw new GiftCardNotActiveError(giftCardId);
+  if (giftCard.currentBalance < amount) throw new GiftCardInsufficientBalanceError(giftCard.currentBalance);
   if (giftCard.expiresAt && new Date(giftCard.expiresAt) < new Date()) {
-    throw new Error('Gift card has expired');
+    throw new GiftCardExpiredError(giftCardId);
   }
 
   const now = new Date().toISOString();
@@ -245,18 +253,18 @@ export async function reloadGiftCard(
   performedBy?: string,
 ): Promise<PromotionGiftCardTransaction> {
   const giftCard = await getGiftCard(giftCardId);
-  if (!giftCard) throw new Error('Gift card not found');
-  if (!giftCard.isReloadable) throw new Error('Gift card is not reloadable');
+  if (!giftCard) throw new GiftCardNotFoundError(giftCardId);
+  if (!giftCard.isReloadable) throw new GiftCardNotReloadableError(giftCardId);
   if (giftCard.minReloadAmount && amount < giftCard.minReloadAmount) {
-    throw new Error(`Minimum reload amount is ${giftCard.minReloadAmount}`);
+    throw new PromotionValidationError(`Minimum reload amount is ${giftCard.minReloadAmount}`);
   }
   if (giftCard.maxReloadAmount && amount > giftCard.maxReloadAmount) {
-    throw new Error(`Maximum reload amount is ${giftCard.maxReloadAmount}`);
+    throw new PromotionValidationError(`Maximum reload amount is ${giftCard.maxReloadAmount}`);
   }
 
   const newBalance = giftCard.currentBalance + amount;
   if (giftCard.maxBalance && newBalance > giftCard.maxBalance) {
-    throw new Error(`Maximum balance is ${giftCard.maxBalance}`);
+    throw new PromotionValidationError(`Maximum balance is ${giftCard.maxBalance}`);
   }
 
   const now = new Date().toISOString();
@@ -289,7 +297,7 @@ export async function refundToGiftCard(
   notes?: string,
 ): Promise<PromotionGiftCardTransaction> {
   const giftCard = await getGiftCard(giftCardId);
-  if (!giftCard) throw new Error('Gift card not found');
+  if (!giftCard) throw new GiftCardNotFoundError(giftCardId);
 
   const now = new Date().toISOString();
   const newBalance = giftCard.currentBalance + amount;

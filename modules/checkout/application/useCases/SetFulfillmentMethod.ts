@@ -5,6 +5,7 @@
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
 import { FulfillmentType } from '../../domain/entities/CheckoutSession';
+import { CheckoutSessionNotFoundError, CheckoutValidationError } from '../../domain/errors/CheckoutErrors';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { eventBus } from '../../../../libs/events/eventBus';
 
@@ -21,12 +22,12 @@ export class SetFulfillmentMethodUseCase {
   async execute(command: SetFulfillmentMethodCommand): Promise<CheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
     if (!session) {
-      throw new Error('Checkout session not found');
+      throw new CheckoutSessionNotFoundError(command.checkoutId);
     }
 
     const validTypes: FulfillmentType[] = ['shipping', 'pickup', 'local_delivery', 'digital'];
     if (!validTypes.includes(command.fulfillmentType)) {
-      throw new Error(`Invalid fulfillment type: ${command.fulfillmentType}`);
+      throw new CheckoutValidationError(`Invalid fulfillment type: ${command.fulfillmentType}`);
     }
 
     session.setFulfillmentType(command.fulfillmentType);

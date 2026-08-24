@@ -4,6 +4,8 @@
  * Saves a customer's payment method for future use.
  */
 
+import { CustomerIdAndProviderMethodIdRequiredError, PaymentMethodAlreadySavedError } from '../../domain/errors/PaymentErrors';
+
 export interface SavePaymentMethodInput {
   customerId: string;
   type: 'card' | 'bank_account' | 'wallet' | 'buy_now_pay_later';
@@ -54,13 +56,13 @@ export class SavePaymentMethodUseCase {
 
   async execute(input: SavePaymentMethodInput): Promise<SavePaymentMethodOutput> {
     if (!input.customerId || !input.providerPaymentMethodId) {
-      throw new Error('Customer ID and provider payment method ID are required');
+      throw new CustomerIdAndProviderMethodIdRequiredError();
     }
 
     // Check if payment method already exists
     const existing = await this.paymentRepository.findPaymentMethodByProviderId(input.customerId, input.providerPaymentMethodId);
     if (existing) {
-      throw new Error('Payment method already saved');
+      throw new PaymentMethodAlreadySavedError();
     }
 
     const paymentMethodId = `pm_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

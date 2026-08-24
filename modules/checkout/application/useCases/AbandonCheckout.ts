@@ -4,8 +4,7 @@
  */
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
-import { OrderRepository } from '../../../order/domain/repositories/OrderRepository';
-import { CancelOrderUseCase, CancelOrderCommand } from '../../../order/application/useCases/CancelOrder';
+import { OrderPlacementPort } from '../../application/ports/OrderPlacementPort';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { logger } from '../../../../libs/logger';
 import { NotFoundError } from '../../../../libs/errors';
@@ -34,7 +33,7 @@ export interface AbandonCheckoutResponse {
 export class AbandonCheckoutUseCase {
   constructor(
     private readonly checkoutRepository: CheckoutRepository,
-    private readonly orderRepository?: OrderRepository,
+    private readonly orderPlacementPort?: OrderPlacementPort,
   ) {}
 
   async execute(command: AbandonCheckoutCommand): Promise<AbandonCheckoutResponse> {
@@ -42,13 +41,12 @@ export class AbandonCheckoutUseCase {
 
     if (session) {
       // Cancel linked PAYMENT_PENDING order if present
-      if (session.status === 'pending_payment' && session.orderId && this.orderRepository) {
+      if (session.status === 'pending_payment' && session.orderId && this.orderPlacementPort) {
         try {
-          const cancelUseCase = new CancelOrderUseCase(this.orderRepository);
-          await cancelUseCase.execute(new CancelOrderCommand(session.orderId, 'Checkout abandoned by customer'));
+          await this.orderPlacementPort.cancelOrder(session.orderId, 'Checkout abandoned by customer');
         } catch (err: unknown) {
           // Log but don't fail — order may already be cancelled
-          logger.warn(`AbandonCheckout: could not cancel order ${session.orderId}: ${(err as Error).message}`);
+          logger.warning(`AbandonCheckout: could not cancel order ${session.orderId}: ${(err as Error).message}`);
         }
       }
 

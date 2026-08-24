@@ -8,6 +8,13 @@ import {
   OrganizationPaymentInfo as DbOrganizationPaymentInfo,
   OrganizationPasswordReset as DbOrganizationPasswordReset,
 } from '../../../../libs/db/types';
+import {
+  OrganizationNotFoundError,
+  FailedToCreateOrganizationError,
+  FailedToUpdateOrganizationError,
+  FailedToCreateOrganizationAddressError,
+  FailedToCreateOrganizationPaymentInfoError,
+} from '../../domain/errors/OrganizationErrors';
 
 export type Organization = DbOrganization;
 export type OrganizationAddress = DbOrganizationAddress;
@@ -94,7 +101,7 @@ export class OrganizationRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create organization');
+      throw new FailedToCreateOrganizationError();
     }
 
     return result;
@@ -129,7 +136,7 @@ export class OrganizationRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create organization');
+      throw new FailedToCreateOrganizationError();
     }
 
     return result;
@@ -140,7 +147,7 @@ export class OrganizationRepo {
     const current = await this.findById(organizationId);
 
     if (!current) {
-      throw new Error(`Organization with ID ${organizationId} not found`);
+      throw new OrganizationNotFoundError(organizationId);
     }
 
     const updateFields: string[] = [];
@@ -167,7 +174,7 @@ export class OrganizationRepo {
     );
 
     if (!result) {
-      throw new Error(`Failed to update organization with ID ${organizationId}`);
+      throw new FailedToUpdateOrganizationError(organizationId);
     }
 
     return result;
@@ -240,7 +247,7 @@ export class OrganizationRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create organization address');
+      throw new FailedToCreateOrganizationAddressError();
     }
 
     return result;
@@ -300,7 +307,7 @@ export class OrganizationRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create organization payment info');
+      throw new FailedToCreateOrganizationPaymentInfoError();
     }
 
     return result;

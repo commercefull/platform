@@ -1,15 +1,8 @@
-import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { ContentRepo } from '../../infrastructure/repositories/contentRepo';
-import { ContentCategoryRepo } from '../../infrastructure/repositories/contentCategoryRepo';
-import { ContentNavigationRepo } from '../../infrastructure/repositories/contentNavigationRepo';
-import { ContentMediaRepo } from '../../infrastructure/repositories/contentMediaRepo';
-import { ContentRedirectRepo } from '../../infrastructure/repositories/contentRedirectRepo';
-import { ContentPageVersionRepo } from '../../infrastructure/repositories/contentPageVersionRepo';
-import { ContentPageTranslationRepo } from '../../infrastructure/repositories/contentPageTranslationRepo';
-import { ContentCategorizationRepo } from '../../infrastructure/repositories/contentCategorizationRepo';
-import { ContentMediaUsageRepo } from '../../infrastructure/repositories/contentMediaUsageRepo';
+import contentDataRepository from '../../infrastructure/repositories/ContentDataRepository';
+import contentStructureRepository from '../../infrastructure/repositories/ContentStructureRepository';
+import contentMediaDataRepository from '../../infrastructure/repositories/ContentMediaDataRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -321,27 +314,17 @@ interface TrackMediaUsageBody {
 }
 
 export class ContentController {
-  private contentRepo: ContentRepo;
-  private categoryRepo: ContentCategoryRepo;
-  private navigationRepo: ContentNavigationRepo;
-  private mediaRepo: ContentMediaRepo;
-  private redirectRepo: ContentRedirectRepo;
-  private pageVersionRepo: ContentPageVersionRepo;
-  private pageTranslationRepo: ContentPageTranslationRepo;
-  private categorizationRepo: ContentCategorizationRepo;
-  private mediaUsageRepo: ContentMediaUsageRepo;
+  private contentRepo = contentDataRepository.pages;
+  private categoryRepo = contentStructureRepository.categories;
+  private navigationRepo = contentStructureRepository.navigation;
+  private mediaRepo = contentMediaDataRepository.media;
+  private redirectRepo = contentStructureRepository.redirects;
+  private pageVersionRepo = contentDataRepository.versions;
+  private pageTranslationRepo = contentDataRepository.translations;
+  private categorizationRepo = contentStructureRepository.categorization;
+  private mediaUsageRepo = contentMediaDataRepository.usage;
 
-  constructor() {
-    this.contentRepo = new ContentRepo();
-    this.categoryRepo = new ContentCategoryRepo();
-    this.navigationRepo = new ContentNavigationRepo();
-    this.mediaRepo = new ContentMediaRepo();
-    this.redirectRepo = new ContentRedirectRepo();
-    this.pageVersionRepo = new ContentPageVersionRepo();
-    this.pageTranslationRepo = new ContentPageTranslationRepo();
-    this.categorizationRepo = new ContentCategorizationRepo();
-    this.mediaUsageRepo = new ContentMediaUsageRepo();
-  }
+  constructor() {}
 
   // Content Type Handlers
 
@@ -349,231 +332,171 @@ export class ContentController {
    * Get all content types with optional filtering
    */
   getContentTypes = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const limit = parseInt(req.query.limit as string) || 50;
-      const offset = parseInt(req.query.offset as string) || 0;
-      const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
 
-      const contentTypes = await this.contentRepo.findAllContentTypes(isActive, limit, offset);
+    const contentTypes = await this.contentRepo.findAllContentTypes(isActive, limit, offset);
 
-      res.status(200).json({
-        success: true,
-        data: contentTypes,
-        pagination: {
-          limit,
-          offset,
-          total: contentTypes.length, // This should ideally be the total count from DB
-        },
-      });
-    } catch (error) {
-      logger.error('Error:', error);
-
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch content types',
-        error: (error as Error).message,
-      });
-    }
+    res.status(200).json({
+      success: true,
+      data: contentTypes,
+      pagination: {
+        limit,
+        offset,
+        total: contentTypes.length, // This should ideally be the total count from DB
+      },
+    });
+    
   };
 
   /**
    * Get content type by ID
    */
   getContentTypeById = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const contentType = await this.contentRepo.findContentTypeById(id);
+    const { id } = req.params;
+    const contentType = await this.contentRepo.findContentTypeById(id);
 
-      if (!contentType) {
-        res.status(404).json({
-          success: false,
-          message: `Content type with ID ${id} not found`,
-        });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        data: contentType,
-      });
-    } catch (error) {
-      logger.error('Error:', error);
-
-      res.status(500).json({
+    if (!contentType) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch content type',
-        error: (error as Error).message,
+        message: `Content type with ID ${id} not found`,
       });
+      return;
     }
+
+    res.status(200).json({
+      success: true,
+      data: contentType,
+    });
+    
   };
 
   /**
    * Get content type by slug
    */
   getContentTypeBySlug = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { slug } = req.params;
-      const contentType = await this.contentRepo.findContentTypeBySlug(slug);
+    const { slug } = req.params;
+    const contentType = await this.contentRepo.findContentTypeBySlug(slug);
 
-      if (!contentType) {
-        res.status(404).json({
-          success: false,
-          message: `Content type with slug ${slug} not found`,
-        });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        data: contentType,
-      });
-    } catch (error) {
-      logger.error('Error:', error);
-
-      res.status(500).json({
+    if (!contentType) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch content type',
-        error: (error as Error).message,
+        message: `Content type with slug ${slug} not found`,
       });
+      return;
     }
+
+    res.status(200).json({
+      success: true,
+      data: contentType,
+    });
+    
   };
 
   /**
    * Create a new content type
    */
   createContentType = async (req: TypedRequest<Record<string, string>, unknown, CreateContentTypeBody>, res: Response): Promise<void> => {
-    try {
-      const {
-        name,
-        slug,
-        description,
-        icon,
-        allowedBlocks,
-        defaultTemplate,
-        requiredFields,
-        metaFields,
-        isSystem = false,
-        isActive = true,
-      } = req.body;
+    const {
+      name,
+      slug,
+      description,
+      icon,
+      allowedBlocks,
+      defaultTemplate,
+      requiredFields,
+      metaFields,
+      isSystem = false,
+      isActive = true,
+    } = req.body;
 
-      // Basic validation
-      if (!name || !slug) {
-        res.status(400).json({
-          success: false,
-          message: 'Name and slug are required',
-        });
-        return;
-      }
-
-      const contentType = await this.contentRepo.createContentType({
-        name,
-        slug,
-        description: description ?? null,
-        icon: icon ?? null,
-        allowedBlocks: allowedBlocks ?? null,
-        defaultTemplate: defaultTemplate ?? null,
-        requiredFields: requiredFields ?? null,
-        metaFields: metaFields ?? null,
-        isSystem,
-        isActive,
-      });
-
-      res.status(201).json({
-        success: true,
-        data: contentType,
-        message: 'Content type created successfully',
-      });
-    } catch (error: unknown) {
-      res.status((error as Error).message.includes('already exists') ? 409 : 500).json({
+    // Basic validation
+    if (!name || !slug) {
+      res.status(400).json({
         success: false,
-        message: 'Failed to create content type',
-        error: (error as Error).message,
+        message: 'Name and slug are required',
       });
+      return;
     }
+
+    const contentType = await this.contentRepo.createContentType({
+      name,
+      slug,
+      description: description ?? null,
+      icon: icon ?? null,
+      allowedBlocks: allowedBlocks ?? null,
+      defaultTemplate: defaultTemplate ?? null,
+      requiredFields: requiredFields ?? null,
+      metaFields: metaFields ?? null,
+      isSystem,
+      isActive,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: contentType,
+      message: 'Content type created successfully',
+    });
   };
 
   /**
    * Update a content type
    */
   updateContentType = async (req: TypedRequest<Record<string, string>, unknown, UpdateContentTypeBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { name, slug, description, icon, requiredFields, metaFields, isActive } = req.body;
+    const { id } = req.params;
+    const { name, slug, description, icon, requiredFields, metaFields, isActive } = req.body;
 
-      // Check if content type exists
-      const existingContentType = await this.contentRepo.findContentTypeById(id);
-      if (!existingContentType) {
-        res.status(404).json({
-          success: false,
-          message: `Content type with ID ${id} not found`,
-        });
-        return;
-      }
-
-      const updatedContentType = await this.contentRepo.updateContentType(id, {
-        name,
-        slug,
-        description,
-        icon,
-        requiredFields,
-        metaFields,
-        isActive,
-      });
-
-      res.status(200).json({
-        success: true,
-        data: updatedContentType,
-        message: 'Content type updated successfully',
-      });
-    } catch (error: unknown) {
-      res.status((error as Error).message.includes('already exists') ? 409 : 500).json({
+    // Check if content type exists
+    const existingContentType = await this.contentRepo.findContentTypeById(id);
+    if (!existingContentType) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to update content type',
-        error: (error as Error).message,
+        message: `Content type with ID ${id} not found`,
       });
+      return;
     }
+
+    const updatedContentType = await this.contentRepo.updateContentType(id, {
+      name,
+      slug,
+      description,
+      icon,
+      requiredFields,
+      metaFields,
+      isActive,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: updatedContentType,
+      message: 'Content type updated successfully',
+    });
   };
 
   /**
    * Delete a content type
    */
   deleteContentType = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
 
-      // Check if content type exists
-      const existingContentType = await this.contentRepo.findContentTypeById(id);
-      if (!existingContentType) {
-        res.status(404).json({
-          success: false,
-          message: `Content type with ID ${id} not found`,
-        });
-        return;
-      }
-
-      await this.contentRepo.deleteContentType(id);
-
-      res.status(200).json({
-        success: true,
-        message: 'Content type deleted successfully',
-      });
-    } catch (error: unknown) {
-      // Handle case where content type is in use
-      if ((error as Error).message.includes('being used')) {
-        res.status(409).json({
-          success: false,
-          message: (error as Error).message,
-          error: 'Content type is in use',
-        });
-        return;
-      }
-
-      res.status(500).json({
+    // Check if content type exists
+    const existingContentType = await this.contentRepo.findContentTypeById(id);
+    if (!existingContentType) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to delete content type',
-        error: (error as Error).message,
+        message: `Content type with ID ${id} not found`,
       });
+      return;
     }
+
+    await this.contentRepo.deleteContentType(id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Content type deleted successfully',
+    });
+    
   };
 
   // Content Page Handlers
@@ -582,274 +505,222 @@ export class ContentController {
    * Get all content pages with optional filtering
    */
   getPages = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const limit = parseInt(req.query.limit as string) || 50;
-      const offset = parseInt(req.query.offset as string) || 0;
-      const status = req.query.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined;
-      const contentTypeId = req.query.contentTypeId as string | undefined;
-      const search = req.query.search as string | undefined;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const status = req.query.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined;
+    const contentTypeId = req.query.contentTypeId as string | undefined;
+    const search = req.query.search as string | undefined;
 
-      const pages = await this.contentRepo.findAllPages(status, contentTypeId, limit, offset, search);
+    const pages = await this.contentRepo.findAllPages(status, contentTypeId, limit, offset, search);
 
-      res.status(200).json({
-        success: true,
-        data: pages,
-        pagination: {
-          limit,
-          offset,
-          total: pages.length, // This should ideally be the total count from DB
-        },
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch pages',
-        error: (error as Error).message,
-      });
-    }
+    res.status(200).json({
+      success: true,
+      data: pages,
+      pagination: {
+        limit,
+        offset,
+        total: pages.length, // This should ideally be the total count from DB
+      },
+    });
+    
   };
 
   /**
    * Get page by ID
    */
   getPageById = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const page = await this.contentRepo.findPageById(id);
+    const { id } = req.params;
+    const page = await this.contentRepo.findPageById(id);
 
-      if (!page) {
-        res.status(404).json({
-          success: false,
-          message: `Page with ID ${id} not found`,
-        });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        data: page,
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
+    if (!page) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch page',
-        error: (error as Error).message,
+        message: `Page with ID ${id} not found`,
       });
+      return;
     }
+
+    res.status(200).json({
+      success: true,
+      data: page,
+    });
+    
   };
 
   /**
    * Get page with full content by ID
    */
   getFullPageById = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
 
-      // Fetch the basic page data
-      const page = await this.contentRepo.findPageById(id);
-      if (!page) {
-        res.status(404).json({
-          success: false,
-          message: `Page with ID ${id} not found`,
-        });
-        return;
-      }
-
-      // Fetch all content blocks for this page
-      const blocks = await this.contentRepo.findBlocksByPageId(id);
-
-      // If the page has a template, fetch it as well
-      let template = null;
-      if (page.templateId) {
-        template = await this.contentRepo.findTemplateById(page.templateId);
-      }
-
-      // Fetch content type if specified
-      let contentType = null;
-      if (page.contentTypeId) {
-        contentType = await this.contentRepo.findContentTypeById(page.contentTypeId);
-      }
-
-      // Construct the full page data
-      const fullPage = {
-        page,
-        blocks,
-        template,
-        contentType,
-      };
-
-      res.status(200).json({
-        success: true,
-        data: fullPage,
-      });
-    } catch (error: unknown) {
-      if ((error as Error).message.includes('not found')) {
-        res.status(404).json({
-          success: false,
-          message: (error as Error).message,
-        });
-        return;
-      }
-
-      res.status(500).json({
+    // Fetch the basic page data
+    const page = await this.contentRepo.findPageById(id);
+    if (!page) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch page with content',
-        error: (error as Error).message,
+        message: `Page with ID ${id} not found`,
       });
+      return;
     }
+
+    // Fetch all content blocks for this page
+    const blocks = await this.contentRepo.findBlocksByPageId(id);
+
+    // If the page has a template, fetch it as well
+    let template = null;
+    if (page.templateId) {
+      template = await this.contentRepo.findTemplateById(page.templateId);
+    }
+
+    // Fetch content type if specified
+    let contentType = null;
+    if (page.contentTypeId) {
+      contentType = await this.contentRepo.findContentTypeById(page.contentTypeId);
+    }
+
+    // Construct the full page data
+    const fullPage = {
+      page,
+      blocks,
+      template,
+      contentType,
+    };
+
+    res.status(200).json({
+      success: true,
+      data: fullPage,
+    });
+    
   };
 
   /**
    * Create a new page
    */
   createPage = async (req: TypedRequest<Record<string, string>, unknown, CreatePageBody>, res: Response): Promise<void> => {
-    try {
-      const {
-        title,
-        slug,
-        description,
-        metaTitle,
-        metaDescription,
-        status = 'draft',
-        publishedAt,
-        layout,
-        contentTypeId,
-        visibility = 'public', // Default to public visibility
-      } = req.body;
+    const {
+      title,
+      slug,
+      description,
+      metaTitle,
+      metaDescription,
+      status = 'draft',
+      publishedAt,
+      layout,
+      contentTypeId,
+      visibility = 'public', // Default to public visibility
+    } = req.body;
 
-      // Basic validation
-      if (!title || !slug || !contentTypeId) {
+    // Basic validation
+    if (!title || !slug || !contentTypeId) {
+      res.status(400).json({
+        success: false,
+        message: 'Title, slug, and contentTypeId are required',
+      });
+      return;
+    }
+
+    // Validate layout if provided
+    if (layout) {
+      const template = await this.contentRepo.findTemplateById(layout);
+      if (!template) {
         res.status(400).json({
           success: false,
-          message: 'Title, slug, and contentTypeId are required',
+          message: 'Invalid layout template specified',
         });
         return;
       }
-
-      // Validate layout if provided
-      if (layout) {
-        const template = await this.contentRepo.findTemplateById(layout);
-        if (!template) {
-          res.status(400).json({
-            success: false,
-            message: 'Invalid layout template specified',
-          });
-          return;
-        }
-      }
-
-      const page = await this.contentRepo.createPage({
-        title,
-        slug,
-        summary: description ?? null, // Using description value but assigning to the correct field name 'summary'
-        metaTitle: metaTitle ?? null,
-        metaDescription: metaDescription ?? null,
-        status,
-        publishedAt: publishedAt ? new Date(publishedAt) : null,
-        templateId: layout ?? null, // Layout corresponds to templateId
-        contentTypeId,
-        visibility,
-      });
-
-      res.status(201).json({
-        success: true,
-        data: page,
-        message: 'Page created successfully',
-      });
-    } catch (error: unknown) {
-      res.status((error as Error).message.includes('already exists') ? 409 : 500).json({
-        success: false,
-        message: 'Failed to create page',
-        error: (error as Error).message,
-      });
     }
+
+    const page = await this.contentRepo.createPage({
+      title,
+      slug,
+      summary: description ?? null, // Using description value but assigning to the correct field name 'summary'
+      metaTitle: metaTitle ?? null,
+      metaDescription: metaDescription ?? null,
+      status,
+      publishedAt: publishedAt ? new Date(publishedAt) : null,
+      templateId: layout ?? null, // Layout corresponds to templateId
+      contentTypeId,
+      visibility,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: page,
+      message: 'Page created successfully',
+    });
   };
 
   /**
    * Update a page
    */
   updatePage = async (req: TypedRequest<Record<string, string>, unknown, UpdatePageBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { title, slug, description, metaTitle, metaDescription, status, publishedAt, layout } = req.body;
+    const { id } = req.params;
+    const { title, slug, description, metaTitle, metaDescription, status, publishedAt, layout } = req.body;
 
-      // Check if page exists
-      const existingPage = await this.contentRepo.findPageById(id);
-      if (!existingPage) {
-        res.status(404).json({
+    // Check if page exists
+    const existingPage = await this.contentRepo.findPageById(id);
+    if (!existingPage) {
+      res.status(404).json({
+        success: false,
+        message: `Page with ID ${id} not found`,
+      });
+      return;
+    }
+
+    // Validate layout if provided
+    if (layout) {
+      const template = await this.contentRepo.findTemplateById(layout);
+      if (!template) {
+        res.status(400).json({
           success: false,
-          message: `Page with ID ${id} not found`,
+          message: 'Invalid layout template specified',
         });
         return;
       }
-
-      // Validate layout if provided
-      if (layout) {
-        const template = await this.contentRepo.findTemplateById(layout);
-        if (!template) {
-          res.status(400).json({
-            success: false,
-            message: 'Invalid layout template specified',
-          });
-          return;
-        }
-      }
-
-      const updatedPage = await this.contentRepo.updatePage(id, {
-        title,
-        slug,
-        summary: description, // Using description value but mapping to 'summary' field
-        metaTitle,
-        metaDescription,
-        status,
-        publishedAt: publishedAt ? new Date(publishedAt) : undefined,
-        templateId: layout, // Layout corresponds to templateId
-      });
-
-      res.status(200).json({
-        success: true,
-        data: updatedPage,
-        message: 'Page updated successfully',
-      });
-    } catch (error: unknown) {
-      res.status((error as Error).message.includes('already exists') ? 409 : 500).json({
-        success: false,
-        message: 'Failed to update page',
-        error: (error as Error).message,
-      });
     }
+
+    const updatedPage = await this.contentRepo.updatePage(id, {
+      title,
+      slug,
+      summary: description, // Using description value but mapping to 'summary' field
+      metaTitle,
+      metaDescription,
+      status,
+      publishedAt: publishedAt ? new Date(publishedAt) : undefined,
+      templateId: layout, // Layout corresponds to templateId
+    });
+
+    res.status(200).json({
+      success: true,
+      data: updatedPage,
+      message: 'Page updated successfully',
+    });
   };
 
   /**
    * Delete a page
    */
   deletePage = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
 
-      // Check if page exists
-      const existingPage = await this.contentRepo.findPageById(id);
-      if (!existingPage) {
-        res.status(404).json({
-          success: false,
-          message: `Page with ID ${id} not found`,
-        });
-        return;
-      }
-
-      await this.contentRepo.deletePage(id);
-
-      res.status(200).json({
-        success: true,
-        message: 'Page deleted successfully',
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
+    // Check if page exists
+    const existingPage = await this.contentRepo.findPageById(id);
+    if (!existingPage) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to delete page',
-        error: (error as Error).message,
+        message: `Page with ID ${id} not found`,
       });
+      return;
     }
+
+    await this.contentRepo.deletePage(id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Page deleted successfully',
+    });
+    
   };
 
   // Content Block Handlers
@@ -858,96 +729,150 @@ export class ContentController {
    * Get blocks for a page
    */
   getPageBlocks = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { pageId } = req.params;
+    const { pageId } = req.params;
 
-      // Check if page exists
-      const page = await this.contentRepo.findPageById(pageId);
-      if (!page) {
-        res.status(404).json({
-          success: false,
-          message: `Page with ID ${pageId} not found`,
-        });
-        return;
-      }
-
-      const blocks = await this.contentRepo.findBlocksByPageId(pageId);
-
-      res.status(200).json({
-        success: true,
-        data: blocks,
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
+    // Check if page exists
+    const page = await this.contentRepo.findPageById(pageId);
+    if (!page) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch page blocks',
-        error: (error as Error).message,
+        message: `Page with ID ${pageId} not found`,
       });
+      return;
     }
+
+    const blocks = await this.contentRepo.findBlocksByPageId(pageId);
+
+    res.status(200).json({
+      success: true,
+      data: blocks,
+    });
+    
   };
 
   /**
    * Get block by ID
    */
   getBlockById = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const block = await this.contentRepo.findBlockById(id);
+    const { id } = req.params;
+    const block = await this.contentRepo.findBlockById(id);
 
-      if (!block) {
-        res.status(404).json({
-          success: false,
-          message: `Content block with ID ${id} not found`,
-        });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        data: block,
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
+    if (!block) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch content block',
-        error: (error as Error).message,
+        message: `Content block with ID ${id} not found`,
       });
+      return;
     }
+
+    res.status(200).json({
+      success: true,
+      data: block,
+    });
+    
   };
 
   /**
    * Create a new content block
    */
   createBlock = async (req: TypedRequest<Record<string, string>, unknown, CreateBlockBody>, res: Response): Promise<void> => {
-    try {
-      const { contentPageId, blockTypeId, title, area: _area, sortOrder, content, isVisible = true } = req.body;
+    const { contentPageId, blockTypeId, title, area: _area, sortOrder, content, isVisible = true } = req.body;
 
-      // Basic validation
-      if (!contentPageId || !blockTypeId || sortOrder === undefined || !content) {
+    // Basic validation
+    if (!contentPageId || !blockTypeId || sortOrder === undefined || !content) {
+      res.status(400).json({
+        success: false,
+        message: 'contentPageId, blockTypeId, sortOrder, and content are required',
+      });
+      return;
+    }
+
+    // Validate block type exists
+    const blockType = await this.contentRepo.findBlockTypeById(blockTypeId);
+    if (!blockType) {
+      res.status(404).json({
+        success: false,
+        message: `Block type with ID ${blockTypeId} not found`,
+      });
+      return;
+    }
+
+    // Check schema required fields if defined on the block type
+    if (blockType.schema && typeof blockType.schema === 'object') {
+      const schema = blockType.schema as Record<string, unknown>;
+      const missingFields: string[] = [];
+      for (const [field, config] of Object.entries(schema)) {
+        if (config && typeof config === 'object' && (config as Record<string, unknown>).required === true) {
+          if (content[field] === undefined || content[field] === null || content[field] === '') {
+            missingFields.push(field);
+          }
+        }
+      }
+      if (missingFields.length > 0) {
         res.status(400).json({
           success: false,
-          message: 'contentPageId, blockTypeId, sortOrder, and content are required',
+          message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
         });
         return;
       }
+    }
 
-      // Validate block type exists
-      const blockType = await this.contentRepo.findBlockTypeById(blockTypeId);
+    const block = await this.contentRepo.createBlock({
+      contentPageId,
+      blockTypeId,
+      title: title || null,
+      sortOrder,
+      content,
+      isVisible,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: block,
+      message: 'Content block created successfully',
+    });
+    
+  };
+
+  /**
+   * Update a content block
+   */
+  updateBlock = async (req: TypedRequest<Record<string, string>, unknown, UpdateBlockBody>, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const { blockTypeId, title, area, sortOrder, content, isVisible } = req.body;
+
+    // Check if block exists
+    const existingBlock = await this.contentRepo.findBlockById(id);
+    if (!existingBlock) {
+      res.status(404).json({
+        success: false,
+        message: `Content block with ID ${id} not found`,
+      });
+      return;
+    }
+
+    // Validate against content type if blockTypeId or content is being updated
+    const effectiveBlockTypeId = blockTypeId || existingBlock.blockTypeId;
+    const _effectiveTitle = title || existingBlock.title;
+    const effectiveContent = content || existingBlock.content;
+
+    if (blockTypeId || content) {
+      const blockType = await this.contentRepo.findBlockTypeById(effectiveBlockTypeId);
       if (!blockType) {
         res.status(404).json({
           success: false,
-          message: `Block type with ID ${blockTypeId} not found`,
+          message: `Block type with ID ${effectiveBlockTypeId} not found`,
         });
         return;
       }
 
-      // Check schema required fields if defined on the block type
-      if (blockType.schema && typeof blockType.schema === 'object') {
+      // Check schema required fields
+      if (blockType.schema && typeof blockType.schema === 'object' && effectiveContent) {
         const schema = blockType.schema as Record<string, unknown>;
         const missingFields: string[] = [];
         for (const [field, config] of Object.entries(schema)) {
           if (config && typeof config === 'object' && (config as Record<string, unknown>).required === true) {
-            if (content[field] === undefined || content[field] === null || content[field] === '') {
+            if (effectiveContent[field] === undefined || effectiveContent[field] === null || effectiveContent[field] === '') {
               missingFields.push(field);
             }
           }
@@ -960,455 +885,285 @@ export class ContentController {
           return;
         }
       }
-
-      const block = await this.contentRepo.createBlock({
-        contentPageId,
-        blockTypeId,
-        title: title || null,
-        sortOrder,
-        content,
-        isVisible,
-      });
-
-      res.status(201).json({
-        success: true,
-        data: block,
-        message: 'Content block created successfully',
-      });
-    } catch (error: unknown) {
-      if ((error as Error).message.includes('not found')) {
-        res.status(404).json({
-          success: false,
-          message: (error as Error).message,
-        });
-        return;
-      }
-
-      res.status(500).json({
-        success: false,
-        message: 'Failed to create content block',
-        error: (error as Error).message,
-      });
     }
-  };
 
-  /**
-   * Update a content block
-   */
-  updateBlock = async (req: TypedRequest<Record<string, string>, unknown, UpdateBlockBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { blockTypeId, title, area, sortOrder, content, isVisible } = req.body;
+    const updatedBlock = await this.contentRepo.updateBlock(id, {
+      blockTypeId,
+      title,
+      area,
+      sortOrder,
+      content,
+      isVisible,
+    });
 
-      // Check if block exists
-      const existingBlock = await this.contentRepo.findBlockById(id);
-      if (!existingBlock) {
-        res.status(404).json({
-          success: false,
-          message: `Content block with ID ${id} not found`,
-        });
-        return;
-      }
-
-      // Validate against content type if blockTypeId or content is being updated
-      const effectiveBlockTypeId = blockTypeId || existingBlock.blockTypeId;
-      const _effectiveTitle = title || existingBlock.title;
-      const effectiveContent = content || existingBlock.content;
-
-      if (blockTypeId || content) {
-        const blockType = await this.contentRepo.findBlockTypeById(effectiveBlockTypeId);
-        if (!blockType) {
-          res.status(404).json({
-            success: false,
-            message: `Block type with ID ${effectiveBlockTypeId} not found`,
-          });
-          return;
-        }
-
-        // Check schema required fields
-        if (blockType.schema && typeof blockType.schema === 'object' && effectiveContent) {
-          const schema = blockType.schema as Record<string, unknown>;
-          const missingFields: string[] = [];
-          for (const [field, config] of Object.entries(schema)) {
-            if (config && typeof config === 'object' && (config as Record<string, unknown>).required === true) {
-              if (effectiveContent[field] === undefined || effectiveContent[field] === null || effectiveContent[field] === '') {
-                missingFields.push(field);
-              }
-            }
-          }
-          if (missingFields.length > 0) {
-            res.status(400).json({
-              success: false,
-              message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
-            });
-            return;
-          }
-        }
-      }
-
-      const updatedBlock = await this.contentRepo.updateBlock(id, {
-        blockTypeId,
-        title,
-        area,
-        sortOrder,
-        content,
-        isVisible,
-      });
-
-      res.status(200).json({
-        success: true,
-        data: updatedBlock,
-        message: 'Content block updated successfully',
-      });
-    } catch (error: unknown) {
-      if ((error as Error).message.includes('not found')) {
-        res.status(404).json({
-          success: false,
-          message: (error as Error).message,
-        });
-        return;
-      }
-
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update content block',
-        error: (error as Error).message,
-      });
-    }
+    res.status(200).json({
+      success: true,
+      data: updatedBlock,
+      message: 'Content block updated successfully',
+    });
+    
   };
 
   /**
    * Delete a content block
    */
   deleteBlock = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
 
-      // Check if block exists
-      const existingBlock = await this.contentRepo.findBlockById(id);
-      if (!existingBlock) {
-        res.status(404).json({
-          success: false,
-          message: `Content block with ID ${id} not found`,
-        });
-        return;
-      }
-
-      await this.contentRepo.deleteBlock(id);
-
-      res.status(200).json({
-        success: true,
-        message: 'Content block deleted successfully',
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
+    // Check if block exists
+    const existingBlock = await this.contentRepo.findBlockById(id);
+    if (!existingBlock) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to delete content block',
-        error: (error as Error).message,
+        message: `Content block with ID ${id} not found`,
       });
+      return;
     }
+
+    await this.contentRepo.deleteBlock(id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Content block deleted successfully',
+    });
+    
   };
 
   /**
    * Reorder content blocks
    */
   reorderBlocks = async (req: TypedRequest<Record<string, string>, unknown, ReorderBlocksBody>, res: Response): Promise<void> => {
-    try {
-      const { pageId } = req.params;
-      const { blockOrders } = req.body;
+    const { pageId } = req.params;
+    const { blockOrders } = req.body;
 
-      // Validate input
-      if (!Array.isArray(blockOrders) || blockOrders.length === 0) {
+    // Validate input
+    if (!Array.isArray(blockOrders) || blockOrders.length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'Block orders must be a non-empty array',
+      });
+      return;
+    }
+
+    for (const order of blockOrders) {
+      if (!order.id || order.order === undefined) {
         res.status(400).json({
           success: false,
-          message: 'Block orders must be a non-empty array',
+          message: 'Each block order must have id and order properties',
         });
         return;
       }
-
-      for (const order of blockOrders) {
-        if (!order.id || order.order === undefined) {
-          res.status(400).json({
-            success: false,
-            message: 'Each block order must have id and order properties',
-          });
-          return;
-        }
-      }
-
-      // Check if page exists
-      const page = await this.contentRepo.findPageById(pageId);
-      if (!page) {
-        res.status(404).json({
-          success: false,
-          message: `Page with ID ${pageId} not found`,
-        });
-        return;
-      }
-
-      await this.contentRepo.reorderBlocks(pageId, blockOrders);
-
-      res.status(200).json({
-        success: true,
-        message: 'Content blocks reordered successfully',
-      });
-    } catch (error: unknown) {
-      if ((error as Error).message.includes('not found')) {
-        res.status(404).json({
-          success: false,
-          message: (error as Error).message,
-        });
-        return;
-      }
-
-      res.status(500).json({
-        success: false,
-        message: 'Failed to reorder content blocks',
-        error: (error as Error).message,
-      });
     }
+
+    // Check if page exists
+    const page = await this.contentRepo.findPageById(pageId);
+    if (!page) {
+      res.status(404).json({
+        success: false,
+        message: `Page with ID ${pageId} not found`,
+      });
+      return;
+    }
+
+    await this.contentRepo.reorderBlocks(pageId, blockOrders);
+
+    res.status(200).json({
+      success: true,
+      message: 'Content blocks reordered successfully',
+    });
+    
   };
 
   /**
    * Get all templates with optional filtering
    */
   getTemplates = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const limit = parseInt(req.query.limit as string) || 50;
-      const offset = parseInt(req.query.offset as string) || 0;
-      const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
 
-      const templates = await this.contentRepo.findAllTemplates(isActive, limit, offset);
+    const templates = await this.contentRepo.findAllTemplates(isActive, limit, offset);
 
-      res.status(200).json({
-        success: true,
-        data: templates,
-        pagination: {
-          limit,
-          offset,
-          total: templates.length, // This should ideally be the total count from DB
-        },
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch templates',
-        error: (error as Error).message,
-      });
-    }
+    res.status(200).json({
+      success: true,
+      data: templates,
+      pagination: {
+        limit,
+        offset,
+        total: templates.length, // This should ideally be the total count from DB
+      },
+    });
+    
   };
 
   /**
    * Get template by ID
    */
   getTemplateById = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const template = await this.contentRepo.findTemplateById(id);
+    const { id } = req.params;
+    const template = await this.contentRepo.findTemplateById(id);
 
-      if (!template) {
-        res.status(404).json({
-          success: false,
-          message: `Template with ID ${id} not found`,
-        });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        data: template,
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
+    if (!template) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch template',
-        error: (error as Error).message,
+        message: `Template with ID ${id} not found`,
       });
+      return;
     }
+
+    res.status(200).json({
+      success: true,
+      data: template,
+    });
+    
   };
 
   /**
    * Create a new template
    */
   createTemplate = async (req: TypedRequest<Record<string, string>, unknown, CreateTemplateBody>, res: Response): Promise<void> => {
-    try {
-      const {
-        name,
-        slug,
-        description,
-        thumbnail,
-        htmlStructure,
-        cssStyles,
-        jsScripts,
-        areas,
-        defaultBlocks,
-        compatibleContentTypes,
-        isSystem = false,
-        isActive = true,
-      } = req.body;
+    const {
+      name,
+      slug,
+      description,
+      thumbnail,
+      htmlStructure,
+      cssStyles,
+      jsScripts,
+      areas,
+      defaultBlocks,
+      compatibleContentTypes,
+      isSystem = false,
+      isActive = true,
+    } = req.body;
 
-      // Basic validation
-      if (!name || !slug) {
-        res.status(400).json({
-          success: false,
-          message: 'Name and slug are required',
-        });
-        return;
-      }
-
-      const template = await this.contentRepo.createTemplate({
-        name,
-        slug,
-        description: description ?? null,
-        thumbnail: thumbnail ?? null,
-        htmlStructure: htmlStructure ?? null,
-        cssStyles: cssStyles ?? null,
-        jsScripts: jsScripts ?? null,
-        areas: areas ?? null,
-        defaultBlocks: defaultBlocks ?? null,
-        compatibleContentTypes: compatibleContentTypes ?? null,
-        isSystem,
-        isActive,
-      });
-
-      res.status(201).json({
-        success: true,
-        data: template,
-        message: 'Template created successfully',
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
+    // Basic validation
+    if (!name || !slug) {
+      res.status(400).json({
         success: false,
-        message: 'Failed to create template',
-        error: (error as Error).message,
+        message: 'Name and slug are required',
       });
+      return;
     }
+
+    const template = await this.contentRepo.createTemplate({
+      name,
+      slug,
+      description: description ?? null,
+      thumbnail: thumbnail ?? null,
+      htmlStructure: htmlStructure ?? null,
+      cssStyles: cssStyles ?? null,
+      jsScripts: jsScripts ?? null,
+      areas: areas ?? null,
+      defaultBlocks: defaultBlocks ?? null,
+      compatibleContentTypes: compatibleContentTypes ?? null,
+      isSystem,
+      isActive,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: template,
+      message: 'Template created successfully',
+    });
+    
   };
 
   /**
    * Update a template
    */
   updateTemplate = async (req: TypedRequest<Record<string, string>, unknown, UpdateTemplateBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { name, slug, description, htmlStructure, areas, isActive } = req.body;
+    const { id } = req.params;
+    const { name, slug, description, htmlStructure, areas, isActive } = req.body;
 
-      // Check if template exists
-      const existingTemplate = await this.contentRepo.findTemplateById(id);
-      if (!existingTemplate) {
-        res.status(404).json({
-          success: false,
-          message: `Template with ID ${id} not found`,
-        });
-        return;
-      }
-
-      const updatedTemplate = await this.contentRepo.updateTemplate(id, {
-        name,
-        slug,
-        description,
-        htmlStructure,
-        areas,
-        isActive,
-      });
-
-      res.status(200).json({
-        success: true,
-        data: updatedTemplate,
-        message: 'Template updated successfully',
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
+    // Check if template exists
+    const existingTemplate = await this.contentRepo.findTemplateById(id);
+    if (!existingTemplate) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to update template',
-        error: (error as Error).message,
+        message: `Template with ID ${id} not found`,
       });
+      return;
     }
+
+    const updatedTemplate = await this.contentRepo.updateTemplate(id, {
+      name,
+      slug,
+      description,
+      htmlStructure,
+      areas,
+      isActive,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: updatedTemplate,
+      message: 'Template updated successfully',
+    });
+    
   };
 
   /**
    * Delete a template
    */
   deleteTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
 
-      // Check if template exists
-      const existingTemplate = await this.contentRepo.findTemplateById(id);
-      if (!existingTemplate) {
-        res.status(404).json({
-          success: false,
-          message: `Template with ID ${id} not found`,
-        });
-        return;
-      }
-
-      await this.contentRepo.deleteTemplate(id);
-
-      res.status(200).json({
-        success: true,
-        message: 'Template deleted successfully',
-      });
-    } catch (error: unknown) {
-      // Handle case where template is in use
-      if ((error as Error).message.includes('being used')) {
-        res.status(409).json({
-          success: false,
-          message: (error as Error).message,
-          error: 'Template is in use',
-        });
-        return;
-      }
-
-      res.status(500).json({
+    // Check if template exists
+    const existingTemplate = await this.contentRepo.findTemplateById(id);
+    if (!existingTemplate) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to delete template',
-        error: (error as Error).message,
+        message: `Template with ID ${id} not found`,
       });
+      return;
     }
+
+    await this.contentRepo.deleteTemplate(id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Template deleted successfully',
+    });
+    
   };
 
   /**
    * Duplicate a template
    */
   duplicateTemplate = async (req: TypedRequest<Record<string, string>, unknown, DuplicateTemplateBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { name, slug } = req.body;
+    const { id } = req.params;
+    const { name, slug } = req.body;
 
-      if (!name || !slug) {
-        res.status(400).json({ success: false, message: 'Name and slug are required' });
-        return;
-      }
-
-      const original = await this.contentRepo.findTemplateById(id);
-      if (!original) {
-        res.status(404).json({ success: false, message: `Template with ID ${id} not found` });
-        return;
-      }
-
-      const duplicate = await this.contentRepo.createTemplate({
-        name,
-        slug,
-        description: original.description,
-        thumbnail: original.thumbnail,
-        htmlStructure: original.htmlStructure,
-        cssStyles: original.cssStyles,
-        jsScripts: original.jsScripts,
-        areas: original.areas,
-        defaultBlocks: original.defaultBlocks,
-        compatibleContentTypes: original.compatibleContentTypes,
-        isSystem: false,
-        isActive: true,
-      });
-
-      eventBus.emit('content.template.created', { templateId: duplicate.contentTemplateId, name: duplicate.name, slug: duplicate.slug });
-      res.status(201).json({ success: true, data: duplicate, message: 'Template duplicated successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to duplicate template', error: (error as Error).message });
+    if (!name || !slug) {
+      res.status(400).json({ success: false, message: 'Name and slug are required' });
+      return;
     }
+
+    const original = await this.contentRepo.findTemplateById(id);
+    if (!original) {
+      res.status(404).json({ success: false, message: `Template with ID ${id} not found` });
+      return;
+    }
+
+    const duplicate = await this.contentRepo.createTemplate({
+      name,
+      slug,
+      description: original.description,
+      thumbnail: original.thumbnail,
+      htmlStructure: original.htmlStructure,
+      cssStyles: original.cssStyles,
+      jsScripts: original.jsScripts,
+      areas: original.areas,
+      defaultBlocks: original.defaultBlocks,
+      compatibleContentTypes: original.compatibleContentTypes,
+      isSystem: false,
+      isActive: true,
+    });
+
+    eventBus.emit('content.template.created', { templateId: duplicate.contentTemplateId, name: duplicate.name, slug: duplicate.slug });
+    res.status(201).json({ success: true, data: duplicate, message: 'Template duplicated successfully' });
+    
   };
 
   // Page Action Handlers
@@ -1417,1284 +1172,1019 @@ export class ContentController {
    * Publish a page
    */
   publishPage = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const page = await this.contentRepo.findPageById(id);
-      if (!page) {
-        res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
-        return;
-      }
-
-      const updatedPage = await this.contentRepo.updatePage(id, {
-        status: 'published',
-        publishedAt: new Date(),
-      });
-
-      eventBus.emit('content.page.published', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
-      res.status(200).json({ success: true, data: updatedPage, message: 'Page published successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to publish page', error: (error as Error).message });
+    const { id } = req.params;
+    const page = await this.contentRepo.findPageById(id);
+    if (!page) {
+      res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
+      return;
     }
+
+    const updatedPage = await this.contentRepo.updatePage(id, {
+      status: 'published',
+      publishedAt: new Date(),
+    });
+
+    eventBus.emit('content.page.published', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
+    res.status(200).json({ success: true, data: updatedPage, message: 'Page published successfully' });
+    
   };
 
   /**
    * Unpublish a page
    */
   unpublishPage = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const page = await this.contentRepo.findPageById(id);
-      if (!page) {
-        res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
-        return;
-      }
-
-      const updatedPage = await this.contentRepo.updatePage(id, { status: 'draft' });
-      eventBus.emit('content.page.unpublished', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
-      res.status(200).json({ success: true, data: updatedPage, message: 'Page unpublished successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to unpublish page', error: (error as Error).message });
+    const { id } = req.params;
+    const page = await this.contentRepo.findPageById(id);
+    if (!page) {
+      res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
+      return;
     }
+
+    const updatedPage = await this.contentRepo.updatePage(id, { status: 'draft' });
+    eventBus.emit('content.page.unpublished', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
+    res.status(200).json({ success: true, data: updatedPage, message: 'Page unpublished successfully' });
+    
   };
 
   /**
    * Schedule a page for future publication
    */
   schedulePage = async (req: TypedRequest<Record<string, string>, unknown, SchedulePageBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { scheduledAt } = req.body;
+    const { id } = req.params;
+    const { scheduledAt } = req.body;
 
-      if (!scheduledAt) {
-        res.status(400).json({ success: false, message: 'Scheduled date is required' });
-        return;
-      }
-
-      const page = await this.contentRepo.findPageById(id);
-      if (!page) {
-        res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
-        return;
-      }
-
-      const updatedPage = await this.contentRepo.updatePage(id, { status: 'scheduled', scheduledAt: new Date(scheduledAt) });
-      res.status(200).json({ success: true, data: updatedPage, message: 'Page scheduled successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to schedule page', error: (error as Error).message });
+    if (!scheduledAt) {
+      res.status(400).json({ success: false, message: 'Scheduled date is required' });
+      return;
     }
+
+    const page = await this.contentRepo.findPageById(id);
+    if (!page) {
+      res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
+      return;
+    }
+
+    const updatedPage = await this.contentRepo.updatePage(id, { status: 'scheduled', scheduledAt: new Date(scheduledAt) });
+    res.status(200).json({ success: true, data: updatedPage, message: 'Page scheduled successfully' });
+    
   };
 
   /**
    * Duplicate a page with all its blocks
    */
   duplicatePage = async (req: TypedRequest<Record<string, string>, unknown, DuplicatePageBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { title, slug } = req.body;
+    const { id } = req.params;
+    const { title, slug } = req.body;
 
-      if (!title || !slug) {
-        res.status(400).json({ success: false, message: 'Title and slug are required' });
-        return;
-      }
-
-      const original = await this.contentRepo.findPageById(id);
-      if (!original) {
-        res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
-        return;
-      }
-
-      const duplicatePage = await this.contentRepo.createPage({
-        title,
-        slug,
-        contentTypeId: original.contentTypeId,
-        templateId: original.templateId,
-        status: 'draft',
-        visibility: original.visibility,
-        summary: original.summary,
-        featuredImage: original.featuredImage,
-        metaTitle: original.metaTitle,
-        metaDescription: original.metaDescription,
-        metaKeywords: original.metaKeywords,
-        customFields: original.customFields,
-        // isHomePage defaults to false in DB, don't pass explicitly
-      });
-
-      // Duplicate blocks
-      const blocks = await this.contentRepo.findBlocksByPageId(id);
-      for (const block of blocks) {
-        await this.contentRepo.createBlock({
-          contentPageId: duplicatePage.contentPageId,
-          blockTypeId: block.blockTypeId,
-          title: block.title,
-          sortOrder: block.sortOrder,
-          content: block.content,
-          isVisible: block.isVisible,
-        });
-      }
-
-      eventBus.emit('content.page.created', { pageId: duplicatePage.contentPageId, title: duplicatePage.title, slug: duplicatePage.slug });
-      res.status(201).json({ success: true, data: duplicatePage, message: 'Page duplicated successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to duplicate page', error: (error as Error).message });
+    if (!title || !slug) {
+      res.status(400).json({ success: false, message: 'Title and slug are required' });
+      return;
     }
+
+    const original = await this.contentRepo.findPageById(id);
+    if (!original) {
+      res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
+      return;
+    }
+
+    const duplicatePage = await this.contentRepo.createPage({
+      title,
+      slug,
+      contentTypeId: original.contentTypeId,
+      templateId: original.templateId,
+      status: 'draft',
+      visibility: original.visibility,
+      summary: original.summary,
+      featuredImage: original.featuredImage,
+      metaTitle: original.metaTitle,
+      metaDescription: original.metaDescription,
+      metaKeywords: original.metaKeywords,
+      customFields: original.customFields,
+      // isHomePage defaults to false in DB, don't pass explicitly
+    });
+
+    // Duplicate blocks
+    const blocks = await this.contentRepo.findBlocksByPageId(id);
+    for (const block of blocks) {
+      await this.contentRepo.createBlock({
+        contentPageId: duplicatePage.contentPageId,
+        blockTypeId: block.blockTypeId,
+        title: block.title,
+        sortOrder: block.sortOrder,
+        content: block.content,
+        isVisible: block.isVisible,
+      });
+    }
+
+    eventBus.emit('content.page.created', { pageId: duplicatePage.contentPageId, title: duplicatePage.title, slug: duplicatePage.slug });
+    res.status(201).json({ success: true, data: duplicatePage, message: 'Page duplicated successfully' });
+    
   };
 
   // Category Handlers
 
   getCategories = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const limit = parseInt(req.query.limit as string) || 100;
-      const offset = parseInt(req.query.offset as string) || 0;
-      const parentId = req.query.parentId as string | undefined;
-      const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
+    const limit = parseInt(req.query.limit as string) || 100;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const parentId = req.query.parentId as string | undefined;
+    const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
 
-      const categories = await this.categoryRepo.findAllCategories(parentId, isActive, limit, offset);
-      res.status(200).json({ success: true, data: categories });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch categories', error: (error as Error).message });
-    }
+    const categories = await this.categoryRepo.findAllCategories(parentId, isActive, limit, offset);
+    res.status(200).json({ success: true, data: categories });
+    
   };
 
   getCategoryTree = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
-      const categories = await this.categoryRepo.getCategoryTree(isActive);
-      res.status(200).json({ success: true, data: categories });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch category tree', error: (error as Error).message });
-    }
+    const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
+    const categories = await this.categoryRepo.getCategoryTree(isActive);
+    res.status(200).json({ success: true, data: categories });
+    
   };
 
   createCategory = async (req: TypedRequest<Record<string, string>, unknown, CreateCategoryBody>, res: Response): Promise<void> => {
-    try {
-      const { name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
+    const { name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
 
-      if (!name || !slug) {
-        res.status(400).json({ success: false, message: 'Name and slug are required' });
-        return;
-      }
-
-      const category = await this.categoryRepo.createCategory({
-        name,
-        slug,
-        parentId: parentId ?? null,
-        description: description ?? null,
-        featuredImage: featuredImage ?? null,
-        metaTitle: metaTitle ?? null,
-        metaDescription: metaDescription ?? null,
-        sortOrder: sortOrder || 0,
-        isActive: isActive !== undefined ? isActive : true,
-        path: null,
-        depth: 0,
-      });
-
-      eventBus.emit('content.category.created', {
-        categoryId: category.contentCategoryId,
-        name: category.name,
-        slug: category.slug,
-        parentId: category.parentId,
-      });
-      res.status(201).json({ success: true, data: category, message: 'Category created successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to create category', error: (error as Error).message });
+    if (!name || !slug) {
+      res.status(400).json({ success: false, message: 'Name and slug are required' });
+      return;
     }
+
+    const category = await this.categoryRepo.createCategory({
+      name,
+      slug,
+      parentId: parentId ?? null,
+      description: description ?? null,
+      featuredImage: featuredImage ?? null,
+      metaTitle: metaTitle ?? null,
+      metaDescription: metaDescription ?? null,
+      sortOrder: sortOrder || 0,
+      isActive: isActive !== undefined ? isActive : true,
+      path: null,
+      depth: 0,
+    });
+
+    eventBus.emit('content.category.created', {
+      categoryId: category.contentCategoryId,
+      name: category.name,
+      slug: category.slug,
+      parentId: category.parentId,
+    });
+    res.status(201).json({ success: true, data: category, message: 'Category created successfully' });
+    
   };
 
   getCategoryById = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const category = await this.categoryRepo.findCategoryById(id);
-      if (!category) {
-        res.status(404).json({ success: false, message: `Category with ID ${id} not found` });
-        return;
-      }
-      res.status(200).json({ success: true, data: category });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch category', error: (error as Error).message });
+    const { id } = req.params;
+    const category = await this.categoryRepo.findCategoryById(id);
+    if (!category) {
+      res.status(404).json({ success: false, message: `Category with ID ${id} not found` });
+      return;
     }
+    res.status(200).json({ success: true, data: category });
+    
   };
 
   updateCategory = async (req: TypedRequest<Record<string, string>, unknown, UpdateCategoryBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
+    const { id } = req.params;
+    const { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
 
-      const existing = await this.categoryRepo.findCategoryById(id);
-      if (!existing) {
-        res.status(404).json({ success: false, message: `Category with ID ${id} not found` });
-        return;
-      }
-
-      const updated = await this.categoryRepo.updateCategory(id, {
-        name,
-        slug,
-        description,
-        featuredImage,
-        metaTitle,
-        metaDescription,
-        sortOrder,
-        isActive,
-      });
-      eventBus.emit('content.category.updated', { categoryId: id, name: updated.name, slug: updated.slug });
-      res.status(200).json({ success: true, data: updated, message: 'Category updated successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to update category', error: (error as Error).message });
+    const existing = await this.categoryRepo.findCategoryById(id);
+    if (!existing) {
+      res.status(404).json({ success: false, message: `Category with ID ${id} not found` });
+      return;
     }
+
+    const updated = await this.categoryRepo.updateCategory(id, {
+      name,
+      slug,
+      description,
+      featuredImage,
+      metaTitle,
+      metaDescription,
+      sortOrder,
+      isActive,
+    });
+    eventBus.emit('content.category.updated', { categoryId: id, name: updated.name, slug: updated.slug });
+    res.status(200).json({ success: true, data: updated, message: 'Category updated successfully' });
+    
   };
 
   deleteCategory = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const existing = await this.categoryRepo.findCategoryById(id);
-      if (!existing) {
-        res.status(404).json({ success: false, message: `Category with ID ${id} not found` });
-        return;
-      }
-
-      await this.categoryRepo.deleteCategory(id);
-      eventBus.emit('content.category.deleted', { categoryId: id, name: existing.name });
-      res.status(200).json({ success: true, message: 'Category deleted successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to delete category', error: (error as Error).message });
+    const { id } = req.params;
+    const existing = await this.categoryRepo.findCategoryById(id);
+    if (!existing) {
+      res.status(404).json({ success: false, message: `Category with ID ${id} not found` });
+      return;
     }
+
+    await this.categoryRepo.deleteCategory(id);
+    eventBus.emit('content.category.deleted', { categoryId: id, name: existing.name });
+    res.status(200).json({ success: true, message: 'Category deleted successfully' });
+    
   };
 
   moveCategory = async (req: TypedRequest<Record<string, string>, unknown, MoveCategoryBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { newParentId } = req.body;
+    const { id } = req.params;
+    const { newParentId } = req.body;
 
-      const updated = await this.categoryRepo.moveCategory(id, newParentId);
-      res.status(200).json({ success: true, data: updated, message: 'Category moved successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to move category', error: (error as Error).message });
-    }
+    const updated = await this.categoryRepo.moveCategory(id, newParentId);
+    res.status(200).json({ success: true, data: updated, message: 'Category moved successfully' });
+    
   };
 
   // Navigation Handlers
 
   getNavigations = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
-      const navigations = await this.navigationRepo.findAllNavigations(isActive);
-      res.status(200).json({ success: true, data: navigations });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch navigations', error: (error as Error).message });
-    }
+    const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
+    const navigations = await this.navigationRepo.findAllNavigations(isActive);
+    res.status(200).json({ success: true, data: navigations });
+    
   };
 
   createNavigation = async (req: TypedRequest<Record<string, string>, unknown, CreateNavigationBody>, res: Response): Promise<void> => {
-    try {
-      const { name, slug, description, location, isActive } = req.body;
+    const { name, slug, description, location, isActive } = req.body;
 
-      if (!name || !slug) {
-        res.status(400).json({ success: false, message: 'Name and slug are required' });
-        return;
-      }
-
-      const navigation = await this.navigationRepo.createNavigation({
-        name,
-        slug,
-        description: description ?? null,
-        location: location ?? null,
-        isActive: isActive !== undefined ? isActive : true,
-        createdBy: null,
-        updatedBy: null,
-      });
-      eventBus.emit('content.navigation.created', {
-        navigationId: navigation.contentNavigationId,
-        name: navigation.name,
-        slug: navigation.slug,
-        location: navigation.location,
-      });
-      res.status(201).json({ success: true, data: navigation, message: 'Navigation created successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to create navigation', error: (error as Error).message });
+    if (!name || !slug) {
+      res.status(400).json({ success: false, message: 'Name and slug are required' });
+      return;
     }
+
+    const navigation = await this.navigationRepo.createNavigation({
+      name,
+      slug,
+      description: description ?? null,
+      location: location ?? null,
+      isActive: isActive !== undefined ? isActive : true,
+      createdBy: null,
+      updatedBy: null,
+    });
+    eventBus.emit('content.navigation.created', {
+      navigationId: navigation.contentNavigationId,
+      name: navigation.name,
+      slug: navigation.slug,
+      location: navigation.location,
+    });
+    res.status(201).json({ success: true, data: navigation, message: 'Navigation created successfully' });
+    
   };
 
   getNavigationById = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const navigation = await this.navigationRepo.findNavigationById(id);
-      if (!navigation) {
-        res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
-        return;
-      }
-      res.status(200).json({ success: true, data: navigation });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch navigation', error: (error as Error).message });
+    const { id } = req.params;
+    const navigation = await this.navigationRepo.findNavigationById(id);
+    if (!navigation) {
+      res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
+      return;
     }
+    res.status(200).json({ success: true, data: navigation });
+    
   };
 
   getNavigationWithItems = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const navigation = await this.navigationRepo.findNavigationById(id);
-      if (!navigation) {
-        res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
-        return;
-      }
-
-      const items = await this.navigationRepo.findAllNavigationItems(id);
-      res.status(200).json({ success: true, data: { navigation, items } });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch navigation with items', error: (error as Error).message });
+    const { id } = req.params;
+    const navigation = await this.navigationRepo.findNavigationById(id);
+    if (!navigation) {
+      res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
+      return;
     }
+
+    const items = await this.navigationRepo.findAllNavigationItems(id);
+    res.status(200).json({ success: true, data: { navigation, items } });
+    
   };
 
   updateNavigation = async (req: TypedRequest<Record<string, string>, unknown, UpdateNavigationBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { name, slug, description, location, isActive } = req.body;
+    const { id } = req.params;
+    const { name, slug, description, location, isActive } = req.body;
 
-      const existing = await this.navigationRepo.findNavigationById(id);
-      if (!existing) {
-        res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
-        return;
-      }
-
-      const updated = await this.navigationRepo.updateNavigation(id, { name, slug, description, location, isActive });
-      eventBus.emit('content.navigation.updated', { navigationId: id, name: updated.name });
-      res.status(200).json({ success: true, data: updated, message: 'Navigation updated successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to update navigation', error: (error as Error).message });
+    const existing = await this.navigationRepo.findNavigationById(id);
+    if (!existing) {
+      res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
+      return;
     }
+
+    const updated = await this.navigationRepo.updateNavigation(id, { name, slug, description, location, isActive });
+    eventBus.emit('content.navigation.updated', { navigationId: id, name: updated.name });
+    res.status(200).json({ success: true, data: updated, message: 'Navigation updated successfully' });
+    
   };
 
   deleteNavigation = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      await this.navigationRepo.deleteNavigation(id);
-      res.status(200).json({ success: true, message: 'Navigation deleted successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to delete navigation', error: (error as Error).message });
-    }
+    const { id } = req.params;
+    await this.navigationRepo.deleteNavigation(id);
+    res.status(200).json({ success: true, message: 'Navigation deleted successfully' });
+    
   };
 
   addNavigationItem = async (req: TypedRequest<Record<string, string>, unknown, AddNavigationItemBody>, res: Response): Promise<void> => {
-    try {
-      const { navigationId } = req.params;
-      const {
-        parentId,
-        title,
-        type,
-        url,
-        contentPageId,
-        targetId,
-        targetSlug,
-        icon,
-        cssClasses,
-        openInNewTab,
-        isActive,
-        sortOrder,
-        conditions,
-      } = req.body;
+    const { navigationId } = req.params;
+    const {
+      parentId,
+      title,
+      type,
+      url,
+      contentPageId,
+      targetId,
+      targetSlug,
+      icon,
+      cssClasses,
+      openInNewTab,
+      isActive,
+      sortOrder,
+      conditions,
+    } = req.body;
 
-      if (!title || !type) {
-        res.status(400).json({ success: false, message: 'Title and type are required' });
-        return;
-      }
-
-      const item = await this.navigationRepo.createNavigationItem({
-        navigationId,
-        parentId: parentId ?? null,
-        title,
-        type,
-        url: url ?? null,
-        contentPageId: contentPageId ?? null,
-        targetId: targetId ?? null,
-        targetSlug: targetSlug ?? null,
-        icon: icon ?? null,
-        cssClasses: cssClasses ?? null,
-        openInNewTab: openInNewTab || false,
-        isActive: isActive !== undefined ? isActive : true,
-        sortOrder: sortOrder || 0,
-        conditions: conditions ?? null,
-        depth: 0,
-      });
-
-      eventBus.emit('content.navigation.item_added', {
-        navigationId,
-        itemId: item.contentNavigationItemId,
-        title: item.title,
-        type: item.type,
-      });
-      res.status(201).json({ success: true, data: item, message: 'Navigation item added successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to add navigation item', error: (error as Error).message });
+    if (!title || !type) {
+      res.status(400).json({ success: false, message: 'Title and type are required' });
+      return;
     }
+
+    const item = await this.navigationRepo.createNavigationItem({
+      navigationId,
+      parentId: parentId ?? null,
+      title,
+      type,
+      url: url ?? null,
+      contentPageId: contentPageId ?? null,
+      targetId: targetId ?? null,
+      targetSlug: targetSlug ?? null,
+      icon: icon ?? null,
+      cssClasses: cssClasses ?? null,
+      openInNewTab: openInNewTab || false,
+      isActive: isActive !== undefined ? isActive : true,
+      sortOrder: sortOrder || 0,
+      conditions: conditions ?? null,
+      depth: 0,
+    });
+
+    eventBus.emit('content.navigation.item_added', {
+      navigationId,
+      itemId: item.contentNavigationItemId,
+      title: item.title,
+      type: item.type,
+    });
+    res.status(201).json({ success: true, data: item, message: 'Navigation item added successfully' });
+    
   };
 
   updateNavigationItem = async (req: TypedRequest<Record<string, string>, unknown, UpdateNavigationItemBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { title, type, url, contentPageId, icon, openInNewTab, isActive, sortOrder } = req.body;
+    const { id } = req.params;
+    const { title, type, url, contentPageId, icon, openInNewTab, isActive, sortOrder } = req.body;
 
-      const updated = await this.navigationRepo.updateNavigationItem(id, {
-        title,
-        type,
-        url,
-        contentPageId,
-        icon,
-        openInNewTab,
-        isActive,
-        sortOrder,
-      });
-      res.status(200).json({ success: true, data: updated, message: 'Navigation item updated successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to update navigation item', error: (error as Error).message });
-    }
+    const updated = await this.navigationRepo.updateNavigationItem(id, {
+      title,
+      type,
+      url,
+      contentPageId,
+      icon,
+      openInNewTab,
+      isActive,
+      sortOrder,
+    });
+    res.status(200).json({ success: true, data: updated, message: 'Navigation item updated successfully' });
+    
   };
 
   deleteNavigationItem = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      await this.navigationRepo.deleteNavigationItem(id);
-      res.status(200).json({ success: true, message: 'Navigation item deleted successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to delete navigation item', error: (error as Error).message });
-    }
+    const { id } = req.params;
+    await this.navigationRepo.deleteNavigationItem(id);
+    res.status(200).json({ success: true, message: 'Navigation item deleted successfully' });
+    
   };
 
   reorderNavigationItems = async (req: TypedRequest<Record<string, string>, unknown, ReorderNavigationItemsBody>, res: Response): Promise<void> => {
-    try {
-      const { navigationId } = req.params;
-      const { itemOrders } = req.body;
+    const { navigationId } = req.params;
+    const { itemOrders } = req.body;
 
-      if (!itemOrders || !Array.isArray(itemOrders)) {
-        res.status(400).json({ success: false, message: 'Item orders array is required' });
-        return;
-      }
-
-      await this.navigationRepo.reorderNavigationItems(navigationId, itemOrders);
-      res.status(200).json({ success: true, message: 'Navigation items reordered successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to reorder navigation items', error: (error as Error).message });
+    if (!itemOrders || !Array.isArray(itemOrders)) {
+      res.status(400).json({ success: false, message: 'Item orders array is required' });
+      return;
     }
+
+    await this.navigationRepo.reorderNavigationItems(navigationId, itemOrders);
+    res.status(200).json({ success: true, message: 'Navigation items reordered successfully' });
+    
   };
 
   // Media Handlers
 
   getMedia = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const limit = parseInt(req.query.limit as string) || 50;
-      const offset = parseInt(req.query.offset as string) || 0;
-      const folderId = req.query.folderId as string | undefined;
-      const fileType = req.query.fileType as string | undefined;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const folderId = req.query.folderId as string | undefined;
+    const fileType = req.query.fileType as string | undefined;
 
-      const media = await this.mediaRepo.findAllMedia(folderId, fileType, limit, offset);
-      res.status(200).json({ success: true, data: media });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch media', error: (error as Error).message });
-    }
+    const media = await this.mediaRepo.findAllMedia(folderId, fileType, limit, offset);
+    res.status(200).json({ success: true, data: media });
+    
   };
 
   uploadMedia = async (req: TypedRequest<Record<string, string>, unknown, UploadMediaBody>, res: Response): Promise<void> => {
-    try {
-      const {
-        title,
-        fileName,
-        filePath,
-        fileType,
-        fileSize,
-        url,
-        width,
-        height,
-        duration,
-        altText,
-        caption,
-        description,
-        folderId,
-        thumbnailUrl,
-        tags,
-        isExternal,
-        externalService,
-        externalId,
-      } = req.body;
+    const {
+      title,
+      fileName,
+      filePath,
+      fileType,
+      fileSize,
+      url,
+      width,
+      height,
+      duration,
+      altText,
+      caption,
+      description,
+      folderId,
+      thumbnailUrl,
+      tags,
+      isExternal,
+      externalService,
+      externalId,
+    } = req.body;
 
-      if (!title || !fileName || !url) {
-        res.status(400).json({ success: false, message: 'Title, fileName, and URL are required' });
-        return;
-      }
-
-      const media = await this.mediaRepo.createMedia({
-        title,
-        fileName,
-        filePath: filePath || '',
-        fileType: fileType || 'application/octet-stream',
-        fileSize: fileSize || 0,
-        url,
-        width: width ?? null,
-        height: height ?? null,
-        duration: duration ?? null,
-        altText: altText ?? null,
-        caption: caption ?? null,
-        description: description ?? null,
-        contentMediaFolderId: folderId || null,
-        thumbnailUrl: thumbnailUrl ?? null,
-        sortOrder: 0,
-        tags: tags ?? null,
-        isExternal: isExternal || false,
-        externalService: externalService ?? null,
-        externalId: externalId ?? null,
-        createdBy: null,
-        updatedBy: null,
-      });
-
-      eventBus.emit('content.media.uploaded', {
-        mediaId: media.contentMediaId,
-        title: media.title,
-        fileName: media.fileName,
-        fileType: media.fileType,
-        fileSize: media.fileSize,
-      });
-      res.status(201).json({ success: true, data: media, message: 'Media uploaded successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to upload media', error: (error as Error).message });
+    if (!title || !fileName || !url) {
+      res.status(400).json({ success: false, message: 'Title, fileName, and URL are required' });
+      return;
     }
+
+    const media = await this.mediaRepo.createMedia({
+      title,
+      fileName,
+      filePath: filePath || '',
+      fileType: fileType || 'application/octet-stream',
+      fileSize: fileSize || 0,
+      url,
+      width: width ?? null,
+      height: height ?? null,
+      duration: duration ?? null,
+      altText: altText ?? null,
+      caption: caption ?? null,
+      description: description ?? null,
+      contentMediaFolderId: folderId || null,
+      thumbnailUrl: thumbnailUrl ?? null,
+      sortOrder: 0,
+      tags: tags ?? null,
+      isExternal: isExternal || false,
+      externalService: externalService ?? null,
+      externalId: externalId ?? null,
+      createdBy: null,
+      updatedBy: null,
+    });
+
+    eventBus.emit('content.media.uploaded', {
+      mediaId: media.contentMediaId,
+      title: media.title,
+      fileName: media.fileName,
+      fileType: media.fileType,
+      fileSize: media.fileSize,
+    });
+    res.status(201).json({ success: true, data: media, message: 'Media uploaded successfully' });
+    
   };
 
   getMediaById = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const media = await this.mediaRepo.findMediaById(id);
-      if (!media) {
-        res.status(404).json({ success: false, message: `Media with ID ${id} not found` });
-        return;
-      }
-      res.status(200).json({ success: true, data: media });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch media', error: (error as Error).message });
+    const { id } = req.params;
+    const media = await this.mediaRepo.findMediaById(id);
+    if (!media) {
+      res.status(404).json({ success: false, message: `Media with ID ${id} not found` });
+      return;
     }
+    res.status(200).json({ success: true, data: media });
+    
   };
 
   updateMedia = async (req: TypedRequest<Record<string, string>, unknown, UpdateMediaBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { title, altText, caption, description, folderId, tags, sortOrder } = req.body;
+    const { id } = req.params;
+    const { title, altText, caption, description, folderId, tags, sortOrder } = req.body;
 
-      const updated = await this.mediaRepo.updateMedia(id, {
-        title,
-        altText,
-        caption,
-        description,
-        contentMediaFolderId: folderId,
-        tags,
-        sortOrder,
-      });
-      res.status(200).json({ success: true, data: updated, message: 'Media updated successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to update media', error: (error as Error).message });
-    }
+    const updated = await this.mediaRepo.updateMedia(id, {
+      title,
+      altText,
+      caption,
+      description,
+      contentMediaFolderId: folderId,
+      tags,
+      sortOrder,
+    });
+    res.status(200).json({ success: true, data: updated, message: 'Media updated successfully' });
+    
   };
 
   deleteMedia = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const media = await this.mediaRepo.findMediaById(id);
-      if (!media) {
-        res.status(404).json({ success: false, message: `Media with ID ${id} not found` });
-        return;
-      }
-
-      await this.mediaRepo.deleteMedia(id);
-      eventBus.emit('content.media.deleted', { mediaId: id, fileName: media.fileName });
-      res.status(200).json({ success: true, message: 'Media deleted successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to delete media', error: (error as Error).message });
+    const { id } = req.params;
+    const media = await this.mediaRepo.findMediaById(id);
+    if (!media) {
+      res.status(404).json({ success: false, message: `Media with ID ${id} not found` });
+      return;
     }
+
+    await this.mediaRepo.deleteMedia(id);
+    eventBus.emit('content.media.deleted', { mediaId: id, fileName: media.fileName });
+    res.status(200).json({ success: true, message: 'Media deleted successfully' });
+    
   };
 
   moveMediaToFolder = async (req: TypedRequest<Record<string, string>, unknown, MoveMediaToFolderBody>, res: Response): Promise<void> => {
-    try {
-      const { mediaIds, folderId } = req.body;
+    const { mediaIds, folderId } = req.body;
 
-      if (!mediaIds || !Array.isArray(mediaIds)) {
-        res.status(400).json({ success: false, message: 'Media IDs array is required' });
-        return;
-      }
-
-      let movedCount = 0;
-      for (const mediaId of mediaIds) {
-        try {
-          await this.mediaRepo.updateMedia(mediaId, { contentMediaFolderId: folderId || undefined });
-          movedCount++;
-        } catch {
-          /* skip */
-        }
-      }
-
-      res.status(200).json({ success: true, data: { movedCount }, message: `${movedCount} media items moved successfully` });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to move media', error: (error as Error).message });
+    if (!mediaIds || !Array.isArray(mediaIds)) {
+      res.status(400).json({ success: false, message: 'Media IDs array is required' });
+      return;
     }
+
+    let movedCount = 0;
+    for (const mediaId of mediaIds) {
+      try {
+        await this.mediaRepo.updateMedia(mediaId, { contentMediaFolderId: folderId || undefined });
+        movedCount++;
+      } catch {
+        /* skip */
+      }
+    }
+
+    res.status(200).json({ success: true, data: { movedCount }, message: `${movedCount} media items moved successfully` });
+    
   };
 
   // Media Folder Handlers
 
   getMediaFolders = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const parentId = req.query.parentId as string | undefined;
-      const folders = await this.mediaRepo.findAllFolders(parentId);
-      res.status(200).json({ success: true, data: folders });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch media folders', error: (error as Error).message });
-    }
+    const parentId = req.query.parentId as string | undefined;
+    const folders = await this.mediaRepo.findAllFolders(parentId);
+    res.status(200).json({ success: true, data: folders });
+    
   };
 
   getMediaFolderTree = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const folders = await this.mediaRepo.findAllFolders();
-      res.status(200).json({ success: true, data: folders });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch media folder tree', error: (error as Error).message });
-    }
+    const folders = await this.mediaRepo.findAllFolders();
+    res.status(200).json({ success: true, data: folders });
+    
   };
 
   createMediaFolder = async (req: TypedRequest<Record<string, string>, unknown, CreateMediaFolderBody>, res: Response): Promise<void> => {
-    try {
-      const { name, parentId } = req.body;
+    const { name, parentId } = req.body;
 
-      if (!name) {
-        res.status(400).json({ success: false, message: 'Folder name is required' });
-        return;
-      }
-
-      const folder = await this.mediaRepo.createFolder({
-        name,
-        parentId: parentId ?? null,
-        path: null,
-        depth: 0,
-        sortOrder: 0,
-        createdBy: null,
-        updatedBy: null,
-      });
-      res.status(201).json({ success: true, data: folder, message: 'Folder created successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to create media folder', error: (error as Error).message });
+    if (!name) {
+      res.status(400).json({ success: false, message: 'Folder name is required' });
+      return;
     }
+
+    const folder = await this.mediaRepo.createFolder({
+      name,
+      parentId: parentId ?? null,
+      path: null,
+      depth: 0,
+      sortOrder: 0,
+      createdBy: null,
+      updatedBy: null,
+    });
+    res.status(201).json({ success: true, data: folder, message: 'Folder created successfully' });
+    
   };
 
   updateMediaFolder = async (req: TypedRequest<Record<string, string>, unknown, UpdateMediaFolderBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { name, parentId, sortOrder } = req.body;
+    const { id } = req.params;
+    const { name, parentId, sortOrder } = req.body;
 
-      const updated = await this.mediaRepo.updateFolder(id, { name, parentId, sortOrder });
-      res.status(200).json({ success: true, data: updated, message: 'Folder updated successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to update media folder', error: (error as Error).message });
-    }
+    const updated = await this.mediaRepo.updateFolder(id, { name, parentId, sortOrder });
+    res.status(200).json({ success: true, data: updated, message: 'Folder updated successfully' });
+    
   };
 
   deleteMediaFolder = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      await this.mediaRepo.deleteFolder(id);
-      res.status(200).json({ success: true, message: 'Folder deleted successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to delete media folder', error: (error as Error).message });
-    }
+    const { id } = req.params;
+    await this.mediaRepo.deleteFolder(id);
+    res.status(200).json({ success: true, message: 'Folder deleted successfully' });
+    
   };
 
   // Redirect Handlers
 
   getRedirects = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const limit = parseInt(req.query.limit as string) || 100;
-      const offset = parseInt(req.query.offset as string) || 0;
-      const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
+    const limit = parseInt(req.query.limit as string) || 100;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
 
-      const redirects = await this.redirectRepo.findAllRedirects(isActive, limit, offset);
-      res.status(200).json({ success: true, data: redirects });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch redirects', error: (error as Error).message });
-    }
+    const redirects = await this.redirectRepo.findAllRedirects(isActive, limit, offset);
+    res.status(200).json({ success: true, data: redirects });
+    
   };
 
   createRedirect = async (req: TypedRequest<Record<string, string>, unknown, CreateRedirectBody>, res: Response): Promise<void> => {
-    try {
-      const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
+    const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
 
-      if (!sourceUrl || !targetUrl) {
-        res.status(400).json({ success: false, message: 'Source URL and target URL are required' });
-        return;
-      }
-
-      const redirect = await this.redirectRepo.createRedirect({
-        sourceUrl,
-        targetUrl,
-        statusCode: String(statusCode || '301'),
-        isRegex: isRegex || false,
-        isActive: isActive !== undefined ? isActive : true,
-        notes: notes ?? null,
-        createdBy: null,
-        updatedBy: null,
-      });
-
-      eventBus.emit('content.redirect.created', {
-        redirectId: redirect.contentRedirectId,
-        sourceUrl: redirect.sourceUrl,
-        targetUrl: redirect.targetUrl,
-        statusCode: redirect.statusCode,
-      });
-      res.status(201).json({ success: true, data: redirect, message: 'Redirect created successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to create redirect', error: (error as Error).message });
+    if (!sourceUrl || !targetUrl) {
+      res.status(400).json({ success: false, message: 'Source URL and target URL are required' });
+      return;
     }
+
+    const redirect = await this.redirectRepo.createRedirect({
+      sourceUrl,
+      targetUrl,
+      statusCode: String(statusCode || '301'),
+      isRegex: isRegex || false,
+      isActive: isActive !== undefined ? isActive : true,
+      notes: notes ?? null,
+      createdBy: null,
+      updatedBy: null,
+    });
+
+    eventBus.emit('content.redirect.created', {
+      redirectId: redirect.contentRedirectId,
+      sourceUrl: redirect.sourceUrl,
+      targetUrl: redirect.targetUrl,
+      statusCode: redirect.statusCode,
+    });
+    res.status(201).json({ success: true, data: redirect, message: 'Redirect created successfully' });
+    
   };
 
   getRedirectById = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const redirect = await this.redirectRepo.findRedirectById(id);
-      if (!redirect) {
-        res.status(404).json({ success: false, message: `Redirect with ID ${id} not found` });
-        return;
-      }
-      res.status(200).json({ success: true, data: redirect });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to fetch redirect', error: (error as Error).message });
+    const { id } = req.params;
+    const redirect = await this.redirectRepo.findRedirectById(id);
+    if (!redirect) {
+      res.status(404).json({ success: false, message: `Redirect with ID ${id} not found` });
+      return;
     }
+    res.status(200).json({ success: true, data: redirect });
+    
   };
 
   updateRedirect = async (req: TypedRequest<Record<string, string>, unknown, UpdateRedirectBody>, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
+    const { id } = req.params;
+    const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
 
-      const updated = await this.redirectRepo.updateRedirect(id, { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes });
-      eventBus.emit('content.redirect.updated', { redirectId: id, sourceUrl: updated.sourceUrl, targetUrl: updated.targetUrl });
-      res.status(200).json({ success: true, data: updated, message: 'Redirect updated successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to update redirect', error: (error as Error).message });
-    }
+    const updated = await this.redirectRepo.updateRedirect(id, { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes });
+    eventBus.emit('content.redirect.updated', { redirectId: id, sourceUrl: updated.sourceUrl, targetUrl: updated.targetUrl });
+    res.status(200).json({ success: true, data: updated, message: 'Redirect updated successfully' });
+    
   };
 
   deleteRedirect = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const redirect = await this.redirectRepo.findRedirectById(id);
-      if (!redirect) {
-        res.status(404).json({ success: false, message: `Redirect with ID ${id} not found` });
-        return;
-      }
-
-      await this.redirectRepo.deleteRedirect(id);
-      eventBus.emit('content.redirect.deleted', { redirectId: id, sourceUrl: redirect.sourceUrl });
-      res.status(200).json({ success: true, message: 'Redirect deleted successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-
-      res.status(500).json({ success: false, message: 'Failed to delete redirect', error: (error as Error).message });
+    const { id } = req.params;
+    const redirect = await this.redirectRepo.findRedirectById(id);
+    if (!redirect) {
+      res.status(404).json({ success: false, message: `Redirect with ID ${id} not found` });
+      return;
     }
+
+    await this.redirectRepo.deleteRedirect(id);
+    eventBus.emit('content.redirect.deleted', { redirectId: id, sourceUrl: redirect.sourceUrl });
+    res.status(200).json({ success: true, message: 'Redirect deleted successfully' });
+    
   };
 
   // Page Version Handlers
 
   getPageVersions = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { pageId } = req.params;
-      const limit = parseInt(req.query.limit as string) || 50;
-      const offset = parseInt(req.query.offset as string) || 0;
+    const { pageId } = req.params;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
 
-      const page = await this.contentRepo.findPageById(pageId);
-      if (!page) {
-        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-        return;
-      }
-
-      const versions = await this.pageVersionRepo.findVersionsByPageId(pageId, limit, offset);
-      res.status(200).json({ success: true, data: versions });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch page versions', error: (error as Error).message });
+    const page = await this.contentRepo.findPageById(pageId);
+    if (!page) {
+      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+      return;
     }
+
+    const versions = await this.pageVersionRepo.findVersionsByPageId(pageId, limit, offset);
+    res.status(200).json({ success: true, data: versions });
+    
   };
 
   createPageVersion = async (req: TypedRequest<Record<string, string>, unknown, CreatePageVersionBody>, res: Response): Promise<void> => {
-    try {
-      const { pageId } = req.params;
-      const { comment } = req.body;
+    const { pageId } = req.params;
+    const { comment } = req.body;
 
-      const page = await this.contentRepo.findPageById(pageId);
-      if (!page) {
-        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-        return;
-      }
-
-      const version = await this.pageVersionRepo.createVersion({
-        contentPageId: pageId,
-        title: page.title,
-        status: page.status,
-        summary: page.summary || undefined,
-        content: (page.customFields as Record<string, unknown>) || undefined,
-        customFields: (page.customFields as Record<string, unknown>) || undefined,
-        comment: comment || `Version snapshot of "${page.title}"`,
-        createdBy: null,
-      });
-
-      eventBus.emit('content.page.version_created', { pageId, versionId: version.contentPageVersionId, version: version.version });
-      res.status(201).json({ success: true, data: version, message: 'Page version created successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to create page version', error: (error as Error).message });
+    const page = await this.contentRepo.findPageById(pageId);
+    if (!page) {
+      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+      return;
     }
+
+    const version = await this.pageVersionRepo.createVersion({
+      contentPageId: pageId,
+      title: page.title,
+      status: page.status,
+      summary: page.summary || undefined,
+      content: (page.customFields as Record<string, unknown>) || undefined,
+      customFields: (page.customFields as Record<string, unknown>) || undefined,
+      comment: comment || `Version snapshot of "${page.title}"`,
+      createdBy: null,
+    });
+
+    eventBus.emit('content.page.version_created', { pageId, versionId: version.contentPageVersionId, version: version.version });
+    res.status(201).json({ success: true, data: version, message: 'Page version created successfully' });
+    
   };
 
   restorePageVersion = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { pageId, versionId } = req.params;
+    const { pageId, versionId } = req.params;
 
-      const page = await this.contentRepo.findPageById(pageId);
-      if (!page) {
-        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-        return;
-      }
-
-      const version = await this.pageVersionRepo.findVersionById(versionId);
-      if (!version || version.contentPageId !== pageId) {
-        res.status(404).json({ success: false, message: `Version with ID ${versionId} not found for page ${pageId}` });
-        return;
-      }
-
-      const restoredPage = await this.contentRepo.updatePage(pageId, {
-        title: version.title,
-        status: version.status,
-        summary: version.summary ?? undefined,
-        customFields: (version.customFields as Record<string, unknown>) || undefined,
-      });
-
-      eventBus.emit('content.page.version_restored', { pageId, versionId, version: version.version });
-      res.status(200).json({ success: true, data: restoredPage, message: `Page restored to version ${version.version}` });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to restore page version', error: (error as Error).message });
+    const page = await this.contentRepo.findPageById(pageId);
+    if (!page) {
+      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+      return;
     }
+
+    const version = await this.pageVersionRepo.findVersionById(versionId);
+    if (!version || version.contentPageId !== pageId) {
+      res.status(404).json({ success: false, message: `Version with ID ${versionId} not found for page ${pageId}` });
+      return;
+    }
+
+    const restoredPage = await this.contentRepo.updatePage(pageId, {
+      title: version.title,
+      status: version.status,
+      summary: version.summary ?? undefined,
+      customFields: (version.customFields as Record<string, unknown>) || undefined,
+    });
+
+    eventBus.emit('content.page.version_restored', { pageId, versionId, version: version.version });
+    res.status(200).json({ success: true, data: restoredPage, message: `Page restored to version ${version.version}` });
+    
   };
 
   deletePageVersion = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { versionId } = req.params;
+    const { versionId } = req.params;
 
-      const version = await this.pageVersionRepo.findVersionById(versionId);
-      if (!version) {
-        res.status(404).json({ success: false, message: `Version with ID ${versionId} not found` });
-        return;
-      }
-
-      await this.pageVersionRepo.deleteVersion(versionId);
-      res.status(200).json({ success: true, message: 'Page version deleted successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to delete page version', error: (error as Error).message });
+    const version = await this.pageVersionRepo.findVersionById(versionId);
+    if (!version) {
+      res.status(404).json({ success: false, message: `Version with ID ${versionId} not found` });
+      return;
     }
+
+    await this.pageVersionRepo.deleteVersion(versionId);
+    res.status(200).json({ success: true, message: 'Page version deleted successfully' });
+    
   };
 
   // Page Translation Handlers
 
   getPageTranslations = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { pageId } = req.params;
+    const { pageId } = req.params;
 
-      const page = await this.contentRepo.findPageById(pageId);
-      if (!page) {
-        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-        return;
-      }
-
-      const translations = await this.pageTranslationRepo.findTranslationsByPageId(pageId);
-      res.status(200).json({ success: true, data: translations });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch page translations', error: (error as Error).message });
+    const page = await this.contentRepo.findPageById(pageId);
+    if (!page) {
+      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+      return;
     }
+
+    const translations = await this.pageTranslationRepo.findTranslationsByPageId(pageId);
+    res.status(200).json({ success: true, data: translations });
+    
   };
 
   getPageTranslationByLocale = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { pageId, localeId } = req.params;
+    const { pageId, localeId } = req.params;
 
-      const translation = await this.pageTranslationRepo.findTranslationByPageAndLocale(pageId, localeId);
-      if (!translation) {
-        res.status(404).json({ success: false, message: `Translation for locale ${localeId} not found` });
-        return;
-      }
-
-      res.status(200).json({ success: true, data: translation });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch page translation', error: (error as Error).message });
+    const translation = await this.pageTranslationRepo.findTranslationByPageAndLocale(pageId, localeId);
+    if (!translation) {
+      res.status(404).json({ success: false, message: `Translation for locale ${localeId} not found` });
+      return;
     }
+
+    res.status(200).json({ success: true, data: translation });
+    
   };
 
   createPageTranslation = async (req: TypedRequest<Record<string, string>, unknown, CreatePageTranslationBody>, res: Response): Promise<void> => {
-    try {
-      const { pageId } = req.params;
-      const { localeId, title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
-              openGraphTitle, openGraphDescription, featuredImage, isAutoTranslated,
-              translationSource, isApproved, isPublished } = req.body;
+    const { pageId } = req.params;
+    const { localeId, title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
+            openGraphTitle, openGraphDescription, featuredImage, isAutoTranslated,
+            translationSource, isApproved, isPublished } = req.body;
 
-      if (!localeId || !title) {
-        res.status(400).json({ success: false, message: 'Locale ID and title are required' });
-        return;
-      }
-
-      const page = await this.contentRepo.findPageById(pageId);
-      if (!page) {
-        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-        return;
-      }
-
-      const translation = await this.pageTranslationRepo.createTranslation({
-        contentPageId: pageId,
-        localeId,
-        title,
-        slug,
-        summary,
-        content,
-        metaTitle,
-        metaDescription,
-        metaKeywords,
-        openGraphTitle,
-        openGraphDescription,
-        featuredImage,
-        isAutoTranslated,
-        translationSource,
-        isApproved,
-        isPublished,
-      });
-
-      eventBus.emit('content.page.translation_created', { pageId, translationId: translation.contentPageTranslationId, localeId });
-      res.status(201).json({ success: true, data: translation, message: 'Page translation created successfully' });
-    } catch (error: unknown) {
-      if ((error as Error).message.includes('already exists')) {
-        res.status(409).json({ success: false, message: (error as Error).message });
-        return;
-      }
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to create page translation', error: (error as Error).message });
+    if (!localeId || !title) {
+      res.status(400).json({ success: false, message: 'Locale ID and title are required' });
+      return;
     }
+
+    const page = await this.contentRepo.findPageById(pageId);
+    if (!page) {
+      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+      return;
+    }
+
+    const translation = await this.pageTranslationRepo.createTranslation({
+      contentPageId: pageId,
+      localeId,
+      title,
+      slug,
+      summary,
+      content,
+      metaTitle,
+      metaDescription,
+      metaKeywords,
+      openGraphTitle,
+      openGraphDescription,
+      featuredImage,
+      isAutoTranslated,
+      translationSource,
+      isApproved,
+      isPublished,
+    });
+
+    eventBus.emit('content.page.translation_created', { pageId, translationId: translation.contentPageTranslationId, localeId });
+    res.status(201).json({ success: true, data: translation, message: 'Page translation created successfully' });
+    
   };
 
   updatePageTranslation = async (req: TypedRequest<Record<string, string>, unknown, UpdatePageTranslationBody>, res: Response): Promise<void> => {
-    try {
-      const { translationId } = req.params;
-      const { title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
-              openGraphTitle, openGraphDescription, featuredImage, isAutoTranslated,
-              translationSource, isApproved, isPublished, publishedAt } = req.body;
+    const { translationId } = req.params;
+    const { title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
+            openGraphTitle, openGraphDescription, featuredImage, isAutoTranslated,
+            translationSource, isApproved, isPublished, publishedAt } = req.body;
 
-      const existing = await this.pageTranslationRepo.findTranslationById(translationId);
-      if (!existing) {
-        res.status(404).json({ success: false, message: `Translation with ID ${translationId} not found` });
-        return;
-      }
-
-      const updated = await this.pageTranslationRepo.updateTranslation(translationId, {
-        title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
-        openGraphTitle, openGraphDescription, featuredImage, isAutoTranslated,
-        translationSource, isApproved, isPublished, publishedAt: publishedAt ? new Date(publishedAt) : undefined,
-      });
-
-      eventBus.emit('content.page.translation_updated', { translationId, pageId: existing.contentPageId });
-      res.status(200).json({ success: true, data: updated, message: 'Page translation updated successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to update page translation', error: (error as Error).message });
+    const existing = await this.pageTranslationRepo.findTranslationById(translationId);
+    if (!existing) {
+      res.status(404).json({ success: false, message: `Translation with ID ${translationId} not found` });
+      return;
     }
+
+    const updated = await this.pageTranslationRepo.updateTranslation(translationId, {
+      title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
+      openGraphTitle, openGraphDescription, featuredImage, isAutoTranslated,
+      translationSource, isApproved, isPublished, publishedAt: publishedAt ? new Date(publishedAt) : undefined,
+    });
+
+    eventBus.emit('content.page.translation_updated', { translationId, pageId: existing.contentPageId });
+    res.status(200).json({ success: true, data: updated, message: 'Page translation updated successfully' });
+    
   };
 
   deletePageTranslation = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { translationId } = req.params;
+    const { translationId } = req.params;
 
-      const existing = await this.pageTranslationRepo.findTranslationById(translationId);
-      if (!existing) {
-        res.status(404).json({ success: false, message: `Translation with ID ${translationId} not found` });
-        return;
-      }
-
-      await this.pageTranslationRepo.deleteTranslation(translationId);
-      eventBus.emit('content.page.translation_deleted', { translationId, pageId: existing.contentPageId });
-      res.status(200).json({ success: true, message: 'Page translation deleted successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to delete page translation', error: (error as Error).message });
+    const existing = await this.pageTranslationRepo.findTranslationById(translationId);
+    if (!existing) {
+      res.status(404).json({ success: false, message: `Translation with ID ${translationId} not found` });
+      return;
     }
+
+    await this.pageTranslationRepo.deleteTranslation(translationId);
+    eventBus.emit('content.page.translation_deleted', { translationId, pageId: existing.contentPageId });
+    res.status(200).json({ success: true, message: 'Page translation deleted successfully' });
+    
   };
 
   // Categorization Handlers
 
   getPageCategories = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { pageId } = req.params;
+    const { pageId } = req.params;
 
-      const page = await this.contentRepo.findPageById(pageId);
-      if (!page) {
-        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-        return;
-      }
-
-      const categorizations = await this.categorizationRepo.findCategorizationsByPageId(pageId);
-      res.status(200).json({ success: true, data: categorizations });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch page categories', error: (error as Error).message });
+    const page = await this.contentRepo.findPageById(pageId);
+    if (!page) {
+      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+      return;
     }
+
+    const categorizations = await this.categorizationRepo.findCategorizationsByPageId(pageId);
+    res.status(200).json({ success: true, data: categorizations });
+    
   };
 
   assignPageToCategory = async (req: TypedRequest<Record<string, string>, unknown, AssignCategoryBody>, res: Response): Promise<void> => {
-    try {
-      const { pageId } = req.params;
-      const { categoryId, isPrimary } = req.body;
+    const { pageId } = req.params;
+    const { categoryId, isPrimary } = req.body;
 
-      if (!categoryId) {
-        res.status(400).json({ success: false, message: 'Category ID is required' });
-        return;
-      }
-
-      const page = await this.contentRepo.findPageById(pageId);
-      if (!page) {
-        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-        return;
-      }
-
-      const category = await this.categoryRepo.findCategoryById(categoryId);
-      if (!category) {
-        res.status(404).json({ success: false, message: `Category with ID ${categoryId} not found` });
-        return;
-      }
-
-      const categorization = await this.categorizationRepo.createCategorization({
-        contentPageId: pageId,
-        categoryId,
-        isPrimary: isPrimary || false,
-      });
-
-      eventBus.emit('content.page.categorized', { pageId, categoryId, isPrimary: categorization.isPrimary });
-      res.status(201).json({ success: true, data: categorization, message: 'Page assigned to category successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to assign page to category', error: (error as Error).message });
+    if (!categoryId) {
+      res.status(400).json({ success: false, message: 'Category ID is required' });
+      return;
     }
+
+    const page = await this.contentRepo.findPageById(pageId);
+    if (!page) {
+      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+      return;
+    }
+
+    const category = await this.categoryRepo.findCategoryById(categoryId);
+    if (!category) {
+      res.status(404).json({ success: false, message: `Category with ID ${categoryId} not found` });
+      return;
+    }
+
+    const categorization = await this.categorizationRepo.createCategorization({
+      contentPageId: pageId,
+      categoryId,
+      isPrimary: isPrimary || false,
+    });
+
+    eventBus.emit('content.page.categorized', { pageId, categoryId, isPrimary: categorization.isPrimary });
+    res.status(201).json({ success: true, data: categorization, message: 'Page assigned to category successfully' });
+    
   };
 
   removePageFromCategory = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { pageId, categoryId } = req.params;
+    const { pageId, categoryId } = req.params;
 
-      const deleted = await this.categorizationRepo.deleteCategorizationByPageAndCategory(pageId, categoryId);
-      if (!deleted) {
-        res.status(404).json({ success: false, message: 'Categorization not found' });
-        return;
-      }
-
-      eventBus.emit('content.page.uncategorized', { pageId, categoryId });
-      res.status(200).json({ success: true, message: 'Page removed from category successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to remove page from category', error: (error as Error).message });
+    const deleted = await this.categorizationRepo.deleteCategorizationByPageAndCategory(pageId, categoryId);
+    if (!deleted) {
+      res.status(404).json({ success: false, message: 'Categorization not found' });
+      return;
     }
+
+    eventBus.emit('content.page.uncategorized', { pageId, categoryId });
+    res.status(200).json({ success: true, message: 'Page removed from category successfully' });
+    
   };
 
   setPrimaryCategory = async (req: TypedRequest<Record<string, string>, unknown, SetPrimaryCategoryBody>, res: Response): Promise<void> => {
-    try {
-      const { pageId } = req.params;
-      const { categorizationId } = req.body;
+    const { pageId } = req.params;
+    const { categorizationId } = req.body;
 
-      if (!categorizationId) {
-        res.status(400).json({ success: false, message: 'Categorization ID is required' });
-        return;
-      }
-
-      const updated = await this.categorizationRepo.setPrimaryCategory(pageId, categorizationId);
-      eventBus.emit('content.page.primary_category_set', { pageId, categorizationId });
-      res.status(200).json({ success: true, data: updated, message: 'Primary category set successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to set primary category', error: (error as Error).message });
+    if (!categorizationId) {
+      res.status(400).json({ success: false, message: 'Categorization ID is required' });
+      return;
     }
+
+    const updated = await this.categorizationRepo.setPrimaryCategory(pageId, categorizationId);
+    eventBus.emit('content.page.primary_category_set', { pageId, categorizationId });
+    res.status(200).json({ success: true, data: updated, message: 'Primary category set successfully' });
+    
   };
 
   getPagesByCategory = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { categoryId } = req.params;
-      const limit = parseInt(req.query.limit as string) || 50;
-      const offset = parseInt(req.query.offset as string) || 0;
+    const { categoryId } = req.params;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
 
-      const categorizations = await this.categorizationRepo.findCategorizationsByCategoryId(categoryId, limit, offset);
+    const categorizations = await this.categorizationRepo.findCategorizationsByCategoryId(categoryId, limit, offset);
 
-      // Fetch the actual pages
-      const pages = await Promise.all(
-        categorizations.map(async (cat) => {
-          const page = await this.contentRepo.findPageById(cat.contentPageId);
-          return page ? { ...page, isPrimary: cat.isPrimary } : null;
-        }),
-      );
+    // Fetch the actual pages
+    const pages = await Promise.all(
+      categorizations.map(async (cat) => {
+        const page = await this.contentRepo.findPageById(cat.contentPageId);
+        return page ? { ...page, isPrimary: cat.isPrimary } : null;
+      }),
+    );
 
-      const validPages = pages.filter(p => p !== null);
-      res.status(200).json({ success: true, data: validPages });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch pages by category', error: (error as Error).message });
-    }
+    const validPages = pages.filter(p => p !== null);
+    res.status(200).json({ success: true, data: validPages });
+    
   };
 
   // Media Usage Handlers
 
   getMediaUsage = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { mediaId } = req.params;
+    const { mediaId } = req.params;
 
-      const media = await this.mediaRepo.findMediaById(mediaId);
-      if (!media) {
-        res.status(404).json({ success: false, message: `Media with ID ${mediaId} not found` });
-        return;
-      }
-
-      const usages = await this.mediaUsageRepo.findUsageByMediaId(mediaId);
-      res.status(200).json({ success: true, data: usages });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch media usage', error: (error as Error).message });
+    const media = await this.mediaRepo.findMediaById(mediaId);
+    if (!media) {
+      res.status(404).json({ success: false, message: `Media with ID ${mediaId} not found` });
+      return;
     }
+
+    const usages = await this.mediaUsageRepo.findUsageByMediaId(mediaId);
+    res.status(200).json({ success: true, data: usages });
+    
   };
 
   getMediaUsageByEntity = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { entityType, entityId } = req.params;
+    const { entityType, entityId } = req.params;
 
-      const usages = await this.mediaUsageRepo.findUsageByEntity(entityType, entityId);
-      res.status(200).json({ success: true, data: usages });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch media usage by entity', error: (error as Error).message });
-    }
+    const usages = await this.mediaUsageRepo.findUsageByEntity(entityType, entityId);
+    res.status(200).json({ success: true, data: usages });
+    
   };
 
   trackMediaUsage = async (req: TypedRequest<Record<string, string>, unknown, TrackMediaUsageBody>, res: Response): Promise<void> => {
-    try {
-      const { mediaId, entityType, entityId, field, sortOrder } = req.body;
+    const { mediaId, entityType, entityId, field, sortOrder } = req.body;
 
-      if (!mediaId || !entityType || !entityId) {
-        res.status(400).json({ success: false, message: 'Media ID, entity type, and entity ID are required' });
-        return;
-      }
-
-      const usage = await this.mediaUsageRepo.createUsage({
-        mediaId,
-        entityType,
-        entityId,
-        field,
-        sortOrder,
-      });
-
-      eventBus.emit('content.media.usage_tracked', { mediaId, entityType, entityId });
-      res.status(201).json({ success: true, data: usage, message: 'Media usage tracked successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to track media usage', error: (error as Error).message });
+    if (!mediaId || !entityType || !entityId) {
+      res.status(400).json({ success: false, message: 'Media ID, entity type, and entity ID are required' });
+      return;
     }
+
+    const usage = await this.mediaUsageRepo.createUsage({
+      mediaId,
+      entityType,
+      entityId,
+      field,
+      sortOrder,
+    });
+
+    eventBus.emit('content.media.usage_tracked', { mediaId, entityType, entityId });
+    res.status(201).json({ success: true, data: usage, message: 'Media usage tracked successfully' });
+    
   };
 
   untrackMediaUsage = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { usageId } = req.params;
+    const { usageId } = req.params;
 
-      const deleted = await this.mediaUsageRepo.deleteUsage(usageId);
-      if (!deleted) {
-        res.status(404).json({ success: false, message: `Media usage with ID ${usageId} not found` });
-        return;
-      }
-
-      res.status(200).json({ success: true, message: 'Media usage untracked successfully' });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to untrack media usage', error: (error as Error).message });
+    const deleted = await this.mediaUsageRepo.deleteUsage(usageId);
+    if (!deleted) {
+      res.status(404).json({ success: false, message: `Media usage with ID ${usageId} not found` });
+      return;
     }
+
+    res.status(200).json({ success: true, message: 'Media usage untracked successfully' });
+    
   };
 
   getMediaUsageCount = async (req: TypedRequest, res: Response): Promise<void> => {
-    try {
-      const { mediaId } = req.params;
+    const { mediaId } = req.params;
 
-      const count = await this.mediaUsageRepo.getUsageCount(mediaId);
-      res.status(200).json({ success: true, data: { mediaId, usageCount: count } });
-    } catch (error: unknown) {
-      logger.error('Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch media usage count', error: (error as Error).message });
-    }
+    const count = await this.mediaUsageRepo.getUsageCount(mediaId);
+    res.status(200).json({ success: true, data: { mediaId, usageCount: count } });
+    
   };
 }

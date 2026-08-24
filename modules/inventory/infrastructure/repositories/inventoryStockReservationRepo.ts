@@ -3,6 +3,7 @@ import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
 import { InventoryStockReservation as DbStockReservation } from '../../../../libs/db/types';
+import { FailedToCreateInventoryError } from '../../domain/errors/InventoryErrors';
 
 // Re-export DB type
 export type StockReservation = DbStockReservation;
@@ -69,7 +70,7 @@ export class StockReservationRepo {
         now,
       ],
     );
-    if (!result) throw new Error('Failed to create stock reservation');
+    if (!result) throw new FailedToCreateInventoryError('Failed to create stock reservation');
     return result;
   }
 

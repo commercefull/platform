@@ -1,5 +1,6 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ProductAttributeOption } from '../../../../libs/db/types';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 // Use ProductAttributeOption type directly from libs/db/types.ts
 export type { ProductAttributeOption };
@@ -39,7 +40,7 @@ export class AttributeOptionRepo {
     );
 
     if (!row) {
-      throw new Error('Attribute option not saved');
+      throw new FailedToCreateProductError();
     }
     return row;
   }

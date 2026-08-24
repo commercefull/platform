@@ -5,13 +5,12 @@
  * Validates: Requirements 2.11
  */
 
-import orderRepo from '../../infrastructure/repositories/orderRepo';
-import orderShippingRepo, { OrderShipping } from '../../infrastructure/repositories/orderShippingRepo';
-import orderShippingRateRepo, { OrderShippingRate } from '../../infrastructure/repositories/orderShippingRateRepo';
-import orderTaxRepo, { OrderTax } from '../../infrastructure/repositories/orderTaxRepo';
-import orderDiscountRepo, { OrderDiscount } from '../../infrastructure/repositories/orderDiscountRepo';
-import orderPaymentRepo, { OrderPayment } from '../../infrastructure/repositories/orderPaymentRepo';
-import orderPaymentRefundRepo, { OrderPaymentRefund } from '../../infrastructure/repositories/orderPaymentRefundRepo';
+import { OrderRepository } from '../../domain/repositories/OrderRepository';
+import { OrderQueryRepository, OrderShipping, OrderShippingRate, OrderTax, OrderDiscount, OrderPayment, OrderPaymentRefund } from '../../domain/repositories/OrderQueryRepository';
+import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
+
+const orderRepo = orderDataRepository.commands;
+const orderQueryRepo = orderDataRepository.queries;
 
 // ============================================================================
 // Command
@@ -54,13 +53,8 @@ export interface OrderDetailsResponse {
 
 export class GetOrderDetailsUseCase {
   constructor(
-    private readonly orders: typeof orderRepo = orderRepo,
-    private readonly shippingRepo: typeof orderShippingRepo = orderShippingRepo,
-    private readonly shippingRateRepo: typeof orderShippingRateRepo = orderShippingRateRepo,
-    private readonly taxRepo: typeof orderTaxRepo = orderTaxRepo,
-    private readonly discountRepo: typeof orderDiscountRepo = orderDiscountRepo,
-    private readonly paymentRepo: typeof orderPaymentRepo = orderPaymentRepo,
-    private readonly refundRepo: typeof orderPaymentRefundRepo = orderPaymentRefundRepo,
+    private readonly orders: OrderRepository = orderRepo,
+    private readonly queryRepo: OrderQueryRepository = orderQueryRepo,
   ) {}
 
   async execute(command: GetOrderDetailsCommand): Promise<OrderDetailsResponse | null> {
@@ -68,12 +62,12 @@ export class GetOrderDetailsUseCase {
     if (!order) return null;
 
     const [shipping, shippingRates, taxes, discounts, payments, refunds] = await Promise.all([
-      this.shippingRepo.findByOrder(command.orderId),
-      this.shippingRateRepo.findByOrder(command.orderId),
-      this.taxRepo.findByOrder(command.orderId),
-      this.discountRepo.findByOrder(command.orderId),
-      this.paymentRepo.findByOrder(command.orderId),
-      this.refundRepo.findByOrder(command.orderId),
+      this.queryRepo.findShippingByOrder(command.orderId),
+      this.queryRepo.findShippingRatesByOrder(command.orderId),
+      this.queryRepo.findTaxesByOrder(command.orderId),
+      this.queryRepo.findDiscountsByOrder(command.orderId),
+      this.queryRepo.findPaymentsByOrder(command.orderId),
+      this.queryRepo.findRefundsByOrder(command.orderId),
     ]);
 
     return {

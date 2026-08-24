@@ -37,4 +37,17 @@ export interface WebhookRepositoryInterface {
   ): Promise<{ data: WebhookDeliveryProps[]; total: number }>;
   updateDelivery(id: string, updates: Partial<WebhookDeliveryProps>): Promise<WebhookDeliveryProps | null>;
   findPendingRetries(): Promise<WebhookDeliveryProps[]>;
+
+  /**
+   * Claim pending retry deliveries using FOR UPDATE SKIP LOCKED.
+   * Multi-node safe — prevents double-processing across workers.
+   * Marks claimed rows with lockedBy/lockedAt.
+   */
+  claimPendingRetries(nodeId: string, batchSize: number): Promise<WebhookDeliveryProps[]>;
+
+  /**
+   * Release the lock on a delivery (clear lockedBy/lockedAt).
+   * Called after processing completes (success or failure).
+   */
+  releaseDeliveryLock(id: string): Promise<void>;
 }

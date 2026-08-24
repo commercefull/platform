@@ -4,14 +4,13 @@
  */
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
-import { BasketRepository } from '../../../basket/domain/repositories/BasketRepository';
+import { BasketSnapshotPort } from '../../application/ports/BasketSnapshotPort';
+import { TaxQuotePort } from '../../application/ports/TaxQuotePort';
+import { PromotionQuotePort } from '../../application/ports/PromotionQuotePort';
 import { Address } from '../../domain/valueObjects/Address';
-import { Money } from '../../../basket/domain/valueObjects/Money';
+import { Money } from '../../../../libs/money';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { calculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
-import { promotionEvaluationService } from '../../../promotion/application/services/PromotionEvaluationService';
-import taxSettingsRepo from '../../../tax/infrastructure/repositories/taxSettingsRepo';
 import { BadRequestError, NotFoundError } from '../../../../libs/errors';
 
 // ============================================================================
@@ -41,7 +40,9 @@ export class SetShippingAddressCommand {
 export class SetShippingAddressUseCase {
   constructor(
     private readonly checkoutRepository: CheckoutRepository,
-    private readonly basketRepository?: BasketRepository,
+    private readonly basketSnapshotPort?: BasketSnapshotPort,
+    private readonly taxQuotePort?: TaxQuotePort,
+    private readonly promotionQuotePort?: PromotionQuotePort,
   ) {}
 
   async execute(command: SetShippingAddressCommand): Promise<CheckoutResponse> {
@@ -80,18 +81,16 @@ export class SetShippingAddressUseCase {
 
     let taxAmount: number;
     try {
-      // Load tax settings to determine if discount should be applied before tax
       let taxableShipping = session.shippingAmount.amount;
       let applyDiscountBeforeTax = false;
       try {
-        const allSettings = await taxSettingsRepo.findByMerchant('default');
-        if (allSettings) {
-          applyDiscountBeforeTax = allSettings.applyDiscountBeforeTax;
-          if (applyDiscountBeforeTax && session.discountAmount.amount > 0) {
-            // Discount is applied before tax — items will be adjusted below
-          }
-          if (!allSettings.applyTaxToShipping) {
-            taxableShipping = 0;
+        if (this.taxQuotePort) {
+          const settings = await this.taxQuotePort.getTaxSettings('default');
+          if (settings) {
+            applyDiscountBeforeTax = settings.applyDiscountBeforeTax;
+            if (!settings.applyTaxToShipping) {
+              taxableShipping = 0;
+            }
           }
         }
       } catch {
@@ -99,23 +98,27 @@ export class SetShippingAddressUseCase {
       }
 
       const items = await this.getTaxLineItems(session);
-      const taxResult = await calculateOrderTaxUseCase.execute({
-        items: items.map(item => ({
-          ...item,
-          unitPrice: applyDiscountBeforeTax && session.discountAmount.amount > 0
-            ? Math.max(0, item.unitPrice - (session.discountAmount.amount / items.length))
-            : item.unitPrice,
-        })),
-        shippingAddress: {
-          country: command.country,
-          region: command.region,
-          postalCode: command.postalCode,
-          city: command.city,
-        },
-        shippingAmount: taxableShipping,
-        customerId: session.customerId,
-      });
-      taxAmount = taxResult.success ? taxResult.taxAmount : 0;
+      if (this.taxQuotePort) {
+        const taxResult = await this.taxQuotePort.calculateTax({
+          items: items.map(item => ({
+            ...item,
+            unitPrice: applyDiscountBeforeTax && session.discountAmount.amount > 0
+              ? Math.max(0, item.unitPrice - (session.discountAmount.amount / items.length))
+              : item.unitPrice,
+          })),
+          shippingAddress: {
+            country: command.country,
+            region: command.region,
+            postalCode: command.postalCode,
+            city: command.city,
+          },
+          shippingAmount: taxableShipping,
+          customerId: session.customerId,
+        });
+        taxAmount = taxResult.success ? taxResult.taxAmount : 0;
+      } else {
+        taxAmount = 0;
+      }
     } catch {
       taxAmount = await this.checkoutRepository.calculateTax(session.subtotal.amount, session.shippingAmount.amount, {
         country: command.country,
@@ -141,16 +144,15 @@ export class SetShippingAddressUseCase {
   }
 
   private async getTaxLineItems(session: CheckoutSessionLike): Promise<Array<{ productId: string; name: string; quantity: number; unitPrice: number; taxCategoryId?: string; taxable?: boolean }>> {
-    if (!this.basketRepository) {
+    if (!this.basketSnapshotPort) {
       return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPrice: session.subtotal.amount }];
     }
     try {
-      const basket = await this.basketRepository.findById(session.basketId);
+      const basket = await this.basketSnapshotPort.getSnapshot(session.basketId);
       if (!basket) {
         return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPrice: session.subtotal.amount }];
       }
-      const items = await this.basketRepository.getItems(session.basketId);
-      return items.map(item => ({
+      return basket.items.map(item => ({
         productId: item.productId,
         name: item.name,
         quantity: item.quantity,
@@ -162,19 +164,18 @@ export class SetShippingAddressUseCase {
   }
 
   private async evaluatePromotions(session: CheckoutSessionLike): Promise<void> {
-    if (!this.basketRepository) return;
+    if (!this.basketSnapshotPort || !this.promotionQuotePort) return;
     try {
-      const basket = await this.basketRepository.findById(session.basketId);
+      const basket = await this.basketSnapshotPort.getSnapshot(session.basketId);
       if (!basket) return;
-      const items = await this.basketRepository.getItems(session.basketId);
-      const promoResult = await promotionEvaluationService.evaluate({
-        items: items.map(item => ({
+      const promoResult = await this.promotionQuotePort.evaluatePromotions({
+        items: basket.items.map(item => ({
           productId: item.productId,
           productVariantId: item.productVariantId,
           name: item.name,
           quantity: item.quantity,
           unitPrice: item.unitPrice?.amount ?? 0,
-          isDigital: item.itemType === 'digital',
+          isDigital: item.isDigital,
         })),
         subtotal: session.subtotal.amount,
         shippingAmount: session.shippingAmount?.amount ?? 0,
@@ -182,7 +183,6 @@ export class SetShippingAddressUseCase {
         currency: session.subtotal.currency ?? 'USD',
         couponCode: session.couponCode,
       });
-      // Apply auto-applied discount if no manual coupon is set
       if (!session.couponCode && promoResult.totalDiscountAmount > 0) {
         session.applyCoupon('AUTO_PROMOTION', Money.create(promoResult.totalDiscountAmount, session.subtotal.currency ?? 'USD'));
       }

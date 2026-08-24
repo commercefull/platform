@@ -2,6 +2,8 @@
  * CreateTaxRate Use Case
  */
 
+import { InvalidTaxRateError, TaxValidationError } from '../../domain/errors/TaxErrors';
+
 export interface CreateTaxRateInput {
   name: string;
   rate: number; // Percentage as decimal (e.g., 0.20 for 20%)
@@ -58,11 +60,11 @@ export class CreateTaxRateUseCase {
 
   async execute(input: CreateTaxRateInput): Promise<CreateTaxRateOutput> {
     if (!input.name || input.rate === undefined || !input.country) {
-      throw new Error('Name, rate, and country are required');
+      throw new TaxValidationError('Name, rate, and country are required');
     }
 
     if (input.rate < 0 || input.rate > 1) {
-      throw new Error('Rate must be between 0 and 1 (e.g., 0.20 for 20%)');
+      throw new InvalidTaxRateError(input.rate);
     }
 
     const taxRateId = `txr_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;

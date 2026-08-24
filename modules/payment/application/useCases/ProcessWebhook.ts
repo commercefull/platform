@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { InvalidWebhookSignatureError } from '../../domain/errors/PaymentErrors';
 
 export interface ProcessWebhookInput {
   provider: 'stripe' | 'paypal' | 'adyen' | 'braintree';
@@ -60,7 +61,7 @@ export class ProcessWebhookUseCase {
     if (input.signature) {
       const isValid = await this.verifySignature(input);
       if (!isValid) {
-        throw new Error('Invalid webhook signature');
+        throw new InvalidWebhookSignatureError();
       }
     }
 

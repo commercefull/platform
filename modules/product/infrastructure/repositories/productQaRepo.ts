@@ -1,4 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export type ProductQaStatus = 'pending' | 'answered' | 'closed';
 
@@ -50,7 +51,7 @@ export class ProductQaRepo {
         now,
       ],
     );
-    if (!result) throw new Error('Failed to create productQa');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 

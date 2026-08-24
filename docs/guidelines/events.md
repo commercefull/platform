@@ -33,6 +33,9 @@ Events follow `domain.action`.
 | `review`     | created, approved, rejected                                              |
 | `membership` | subscribed, renewed, cancelled, upgraded, downgraded                     |
 | `loyalty`    | points_earned, points_redeemed, tier_changed                             |
+| `identity` (SSO) | sso.login, sso.config_created, sso.config_updated, sso.config_deleted, sso.provider_activated, sso.provider_deactivated |
+| `identity` (SCIM) | scim.user_provisioned, scim.user_deprovisioned, scim.user_updated |
+| `tracking`  | config.created, config.updated, config.activated, config.disabled, event.processed, event.failed, event.consent_blocked, event.unmapped |
 
 ## Analytics Handlers
 

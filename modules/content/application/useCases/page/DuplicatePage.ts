@@ -3,8 +3,9 @@
  * Creates a complete copy of a page including all its blocks
  */
 
-import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { ContentPageNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class DuplicatePageCommand {
   constructor(
@@ -29,13 +30,13 @@ export class DuplicatePageUseCase {
 
   async execute(command: DuplicatePageCommand): Promise<DuplicatePageResponse> {
     if (!command.pageId || !command.newTitle || !command.newSlug) {
-      throw new Error('Page ID, new title, and new slug are required');
+      throw new ContentValidationError('Page ID, new title, and new slug are required');
     }
 
     // Get original page
     const original = await this.contentRepo.findPageById(command.pageId);
     if (!original) {
-      throw new Error(`Page with ID ${command.pageId} not found`);
+      throw new ContentPageNotFoundError(command.pageId);
     }
 
     // Create duplicate page

@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { TransactionNotFoundError, TransactionCannotBeCapturedError, CaptureAmountExceedsAuthorizedError, CaptureFailedError } from '../../domain/errors/PaymentErrors';
 
 export interface CapturePaymentInput {
   transactionId: string;
@@ -56,18 +57,18 @@ export class CapturePaymentUseCase {
     // Get the transaction
     const transaction = await this.paymentRepository.findTransactionById(input.transactionId);
     if (!transaction) {
-      throw new Error(`Transaction not found: ${input.transactionId}`);
+      throw new TransactionNotFoundError(input.transactionId);
     }
 
     // Validate transaction is authorized
     if (transaction.status !== 'authorized') {
-      throw new Error(`Transaction cannot be captured. Current status: ${transaction.status}`);
+      throw new TransactionCannotBeCapturedError(transaction.status);
     }
 
     // Determine capture amount
     const captureAmount = input.amount ?? transaction.amount;
     if (captureAmount > transaction.amount) {
-      throw new Error('Capture amount cannot exceed authorized amount');
+      throw new CaptureAmountExceedsAuthorizedError();
     }
 
     // Call payment gateway to capture
@@ -84,7 +85,7 @@ export class CapturePaymentUseCase {
       transaction.gatewayResponse = gatewayResult.error;
       await this.paymentRepository.updateTransaction(transaction);
 
-      throw new Error(`Capture failed: ${gatewayResult.error}`);
+      throw new CaptureFailedError(gatewayResult.error ?? 'Unknown gateway error');
     }
 
     // Update transaction

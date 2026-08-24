@@ -3,6 +3,7 @@
  */
 
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import { CustomerNotFoundError, CustomerValidationError, CustomerAlreadyVerifiedError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -36,16 +37,16 @@ export class VerifyCustomerUseCase {
 
   async execute(command: VerifyCustomerCommand): Promise<VerifyCustomerResponse> {
     if (!command.customerId) {
-      throw new Error('Customer ID is required');
+      throw new CustomerValidationError('Customer ID is required');
     }
 
     const customer = await this.customerRepository.findById(command.customerId);
     if (!customer) {
-      throw new Error('Customer not found');
+      throw new CustomerNotFoundError(command.customerId);
     }
 
     if (customer.isVerified) {
-      throw new Error('Customer is already verified');
+      throw new CustomerAlreadyVerifiedError();
     }
 
     // Verify based on type

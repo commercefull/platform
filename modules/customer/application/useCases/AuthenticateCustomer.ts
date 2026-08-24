@@ -3,6 +3,7 @@
  */
 
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import { EmailRequiredError, PasswordRequiredError } from '../../domain/errors/CustomerErrors';
 
 // ============================================================================
 // Command
@@ -36,10 +37,10 @@ export class AuthenticateCustomerUseCase {
 
   async execute(command: AuthenticateCustomerCommand): Promise<AuthenticateCustomerResponse | null> {
     if (!command.email?.trim()) {
-      throw new Error('Email is required');
+      throw new EmailRequiredError();
     }
     if (!command.password) {
-      throw new Error('Password is required');
+      throw new PasswordRequiredError();
     }
 
     const customer = await this.customerRepository.findByEmail(command.email);

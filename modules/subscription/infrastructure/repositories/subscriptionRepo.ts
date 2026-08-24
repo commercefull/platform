@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { SubscriptionNotFoundError, SubscriptionPlanNotFoundError } from '../../domain/errors/SubscriptionErrors';
 
 // ============================================================================
 // Table Constants
@@ -524,7 +525,7 @@ export async function createCustomerSubscription(subscription: {
 }): Promise<CustomerSubscription> {
   const now = new Date();
   const plan = await getSubscriptionPlan(subscription.subscriptionPlanId);
-  if (!plan) throw new Error('Subscription plan not found');
+  if (!plan) throw new SubscriptionPlanNotFoundError(subscription.subscriptionPlanId);
 
   const subscriptionNumber = await generateSubscriptionNumber();
   const quantity = subscription.quantity || 1;
@@ -677,7 +678,7 @@ export async function pauseSubscription(
 export async function resumeSubscription(customerSubscriptionId: string, resumedBy?: string): Promise<void> {
   const now = new Date();
   const subscription = await getCustomerSubscription(customerSubscriptionId);
-  if (!subscription) throw new Error('Subscription not found');
+  if (!subscription) throw new SubscriptionNotFoundError(customerSubscriptionId);
 
   // Calculate new billing period
   const _plan = await getSubscriptionPlan(subscription.subscriptionPlanId);
@@ -703,7 +704,7 @@ export async function resumeSubscription(customerSubscriptionId: string, resumed
 export async function advanceBillingCycle(customerSubscriptionId: string): Promise<void> {
   const now = new Date();
   const subscription = await getCustomerSubscription(customerSubscriptionId);
-  if (!subscription) throw new Error('Subscription not found');
+  if (!subscription) throw new SubscriptionNotFoundError(customerSubscriptionId);
 
   const newPeriodStart = subscription.currentPeriodEnd || now;
   const newPeriodEnd = calculateNextBillingDate(newPeriodStart, subscription.billingInterval, subscription.billingIntervalCount);
@@ -849,7 +850,7 @@ export async function createDunningAttempt(attempt: {
   const now = new Date().toISOString();
 
   const result = await queryOne<Record<string, unknown>>(
-    `INSERT INTO "dunningAttempt" (
+    `INSERT INTO "subscriptionDunningAttempt" (
       "customerSubscriptionId", "subscriptionOrderId", "attemptNumber",
       "status", "amount", "currency", "scheduledAt", "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, 'pending', $4, $5, $6, $7, $8)
@@ -871,7 +872,7 @@ export async function createDunningAttempt(attempt: {
 
 export async function getDunningAttempts(customerSubscriptionId: string): Promise<DunningAttempt[]> {
   const rows = await query<Record<string, unknown>[]>(
-    'SELECT * FROM "dunningAttempt" WHERE "customerSubscriptionId" = $1 ORDER BY "attemptNumber" ASC',
+    'SELECT * FROM "subscriptionDunningAttempt" WHERE "customerSubscriptionId" = $1 ORDER BY "attemptNumber" ASC',
     [customerSubscriptionId],
   );
   return (rows || []).map(mapToDunningAttempt);
@@ -879,7 +880,7 @@ export async function getDunningAttempts(customerSubscriptionId: string): Promis
 
 export async function getPendingDunningAttempts(beforeDate: Date): Promise<DunningAttempt[]> {
   const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "dunningAttempt" 
+    `SELECT * FROM "subscriptionDunningAttempt" 
      WHERE "status" = 'pending' AND "scheduledAt" <= $1 
      ORDER BY "scheduledAt" ASC`,
     [beforeDate.toISOString()],
@@ -915,7 +916,7 @@ export async function updateDunningAttempt(
   }
 
   params.push(dunningAttemptId);
-  await query(`UPDATE "dunningAttempt" SET ${setClause} WHERE "dunningAttemptId" = $${paramIndex}`, params);
+  await query(`UPDATE "subscriptionDunningAttempt" SET ${setClause} WHERE "dunningAttemptId" = $${paramIndex}`, params);
 }
 
 // ============================================================================
@@ -1147,4 +1148,65 @@ function mapToDunningAttempt(row: Record<string, any>): DunningAttempt {
     createdAt: new Date(row.createdAt),
     updatedAt: new Date(row.updatedAt),
   };
+}
+
+// ============================================================================
+// Storefront Queries (merged from storefrontSubscriptionRepo)
+// ============================================================================
+
+export async function findActivePlansWithProduct(): Promise<unknown[]> {
+  const results = await query<unknown[]>(
+    `SELECT sp.*, sprod."name" as "productName", sprod."description" as "productDescription"
+     FROM "subscriptionPlan" sp
+     LEFT JOIN "subscriptionProduct" sprod ON sp."subscriptionProductId" = sprod."subscriptionProductId"
+     WHERE sp."isActive" = true
+     ORDER BY sp."sortOrder", sp."price" ASC`,
+    [],
+  );
+  return results || [];
+}
+
+export async function findByCustomerIdWithPlan(customerId: string): Promise<unknown[]> {
+  const results = await query<unknown[]>(
+    `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."price", sp."currency"
+     FROM "customerSubscription" cs
+     LEFT JOIN "subscriptionPlan" sp ON cs."subscriptionPlanId" = sp."subscriptionPlanId"
+     WHERE cs."customerId" = $1
+     ORDER BY cs."createdAt" DESC`,
+    [customerId],
+  );
+  return results || [];
+}
+
+export async function findByIdWithPlan(subscriptionId: string, customerId: string): Promise<unknown | null> {
+  return await queryOne<unknown>(
+    `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."price", sp."currency",
+            sp."features", sp."description" as "planDescription"
+     FROM "customerSubscription" cs
+     LEFT JOIN "subscriptionPlan" sp ON cs."subscriptionPlanId" = sp."subscriptionPlanId"
+     WHERE cs."customerSubscriptionId" = $1 AND cs."customerId" = $2`,
+    [subscriptionId, customerId],
+  );
+}
+
+export async function findActiveByCustomerId(subscriptionId: string, customerId: string): Promise<unknown | null> {
+  return await queryOne<unknown>(
+    `SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1 AND "customerId" = $2 AND "status" = 'active'`,
+    [subscriptionId, customerId],
+  );
+}
+
+export async function cancelSubscriptionStorefront(subscriptionId: string, reason: string): Promise<void> {
+  await query(
+    `UPDATE "customerSubscription" SET "status" = 'cancelled', "cancelledAt" = NOW(), "cancellationReason" = $1, "updatedAt" = NOW() WHERE "customerSubscriptionId" = $2`,
+    [reason || '', subscriptionId],
+  );
+}
+
+export async function findBillingHistory(subscriptionId: string): Promise<unknown[]> {
+  const results = await query<unknown[]>(
+    `SELECT * FROM "subscriptionBilling" WHERE "customerSubscriptionId" = $1 ORDER BY "billingDate" DESC LIMIT 12`,
+    [subscriptionId],
+  );
+  return results || [];
 }

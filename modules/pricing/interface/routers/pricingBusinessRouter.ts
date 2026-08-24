@@ -1,4 +1,5 @@
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 // Import pricing controller functions for existing pricing endpoints
 import {
   getPricingRules,
@@ -51,61 +52,61 @@ router.use('/pricing', isOrganizationLoggedIn);
 /**
  * Pricing Rules Routes
  */
-router.get('/pricing/rules', getPricingRules);
-router.get('/pricing/rules/:id', getPricingRule);
-router.post('/pricing/rules', createPricingRule);
-router.put('/pricing/rules/:id', updatePricingRule);
-router.delete('/pricing/rules/:id', deletePricingRule);
+router.get('/pricing/rules', asyncHandler(getPricingRules));
+router.get('/pricing/rules/:id', asyncHandler(getPricingRule));
+router.post('/pricing/rules', asyncHandler(createPricingRule));
+router.put('/pricing/rules/:id', asyncHandler(updatePricingRule));
+router.delete('/pricing/rules/:id', asyncHandler(deletePricingRule));
 
 /**
  * Tier Pricing Routes
  */
-router.get('/pricing/tier-prices', getTierPrices);
-router.get('/pricing/tier-prices/:id', getTierPrice);
-router.post('/pricing/tier-prices', createTierPrice);
-router.put('/pricing/tier-prices/:id', updateTierPrice);
-router.delete('/pricing/tier-prices/:id', deleteTierPrice);
+router.get('/pricing/tier-prices', asyncHandler(getTierPrices));
+router.get('/pricing/tier-prices/:id', asyncHandler(getTierPrice));
+router.post('/pricing/tier-prices', asyncHandler(createTierPrice));
+router.put('/pricing/tier-prices/:id', asyncHandler(updateTierPrice));
+router.delete('/pricing/tier-prices/:id', asyncHandler(deleteTierPrice));
 
 /**
  * Customer Price List Routes
  */
-router.get('/pricing/price-lists', getPriceLists);
-router.get('/pricing/price-lists/:id', getPriceList);
-router.post('/pricing/price-lists', createPriceList);
-router.put('/pricing/price-lists/:id', updatePriceList);
-router.delete('/pricing/price-lists/:id', deletePriceList);
+router.get('/pricing/price-lists', asyncHandler(getPriceLists));
+router.get('/pricing/price-lists/:id', asyncHandler(getPriceList));
+router.post('/pricing/price-lists', asyncHandler(createPriceList));
+router.put('/pricing/price-lists/:id', asyncHandler(updatePriceList));
+router.delete('/pricing/price-lists/:id', asyncHandler(deletePriceList));
 
 /**
  * Customer Prices Routes
  */
-router.post('/pricing/price-lists/:priceListId/prices', addPriceToList);
+router.post('/pricing/price-lists/:priceListId/prices', asyncHandler(addPriceToList));
 
 /**
  * Currency Management Routes
  */
-router.get('/pricing/currencies', getAllCurrencies);
-router.get('/pricing/currencies/default', getDefaultCurrency);
-router.get('/pricing/currencies/:code', getCurrencyByCode);
-router.post('/pricing/currencies', saveCurrency);
-router.delete('/pricing/currencies/:code', deleteCurrency);
-router.post('/pricing/currencies/update-exchange-rates', updateExchangeRates);
+router.get('/pricing/currencies', asyncHandler(getAllCurrencies));
+router.get('/pricing/currencies/default', asyncHandler(getDefaultCurrency));
+router.get('/pricing/currencies/:code', asyncHandler(getCurrencyByCode));
+router.post('/pricing/currencies', asyncHandler(saveCurrency));
+router.delete('/pricing/currencies/:code', asyncHandler(deleteCurrency));
+router.post('/pricing/currencies/update-exchange-rates', asyncHandler(updateExchangeRates));
 
 /**
  * Currency Region Routes
  */
-router.get('/pricing/currency-regions', getAllCurrencyRegions);
-router.get('/pricing/currency-regions/:id', getCurrencyRegionById);
-router.post('/pricing/currency-regions', createCurrencyRegion);
-router.put('/pricing/currency-regions/:id', updateCurrencyRegion);
-router.delete('/pricing/currency-regions/:id', deleteCurrencyRegion);
+router.get('/pricing/currency-regions', asyncHandler(getAllCurrencyRegions));
+router.get('/pricing/currency-regions/:id', asyncHandler(getCurrencyRegionById));
+router.post('/pricing/currency-regions', asyncHandler(createCurrencyRegion));
+router.put('/pricing/currency-regions/:id', asyncHandler(updateCurrencyRegion));
+router.delete('/pricing/currency-regions/:id', asyncHandler(deleteCurrencyRegion));
 
 /**
  * Currency Price Rule Routes
  */
-router.get('/pricing/currency-price-rules', getAllPriceRules);
-router.get('/pricing/currency-price-rules/:id', getPriceRuleById);
-router.post('/pricing/currency-price-rules', createPriceRule);
-router.put('/pricing/currency-price-rules/:id', updatePriceRule);
-router.delete('/pricing/currency-price-rules/:id', deletePriceRule);
+router.get('/pricing/currency-price-rules', asyncHandler(getAllPriceRules));
+router.get('/pricing/currency-price-rules/:id', asyncHandler(getPriceRuleById));
+router.post('/pricing/currency-price-rules', asyncHandler(createPriceRule));
+router.put('/pricing/currency-price-rules/:id', asyncHandler(updatePriceRule));
+router.delete('/pricing/currency-price-rules/:id', asyncHandler(deletePriceRule));
 
 export const pricingMerchantRouter = router;

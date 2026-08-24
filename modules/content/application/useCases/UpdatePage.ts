@@ -3,8 +3,9 @@
  * Updates an existing content page
  */
 
-import { ContentRepo } from '../../infrastructure/repositories/contentRepo';
+import type { ContentRepo } from '../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { ContentPageNotFoundError, ContentValidationError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Command
@@ -53,13 +54,13 @@ export class UpdatePageUseCase {
   async execute(command: UpdatePageCommand): Promise<UpdatePageResponse> {
     // Validate command
     if (!command.pageId) {
-      throw new Error('Page ID is required');
+      throw new ContentValidationError('Page ID is required');
     }
 
     // Get existing page
     const existingPage = await this.contentRepo.findPageById(command.pageId);
     if (!existingPage) {
-      throw new Error(`Page with ID ${command.pageId} not found`);
+      throw new ContentPageNotFoundError(command.pageId);
     }
 
     // Track changes for event

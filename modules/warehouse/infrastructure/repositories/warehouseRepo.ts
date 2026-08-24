@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 
 import { unixTimestamp } from '../../../../libs/date';
+import { WarehouseCodeAlreadyExistsError, FailedToCreateWarehouseError } from '../../domain/errors/WarehouseErrors';
 
 // ============================================================================
 // Table Constants
@@ -189,7 +190,7 @@ export class WarehouseRepo {
     // Check if code already exists
     const existing = await this.findByCode(params.code);
     if (existing) {
-      throw new Error(`Warehouse with code '${params.code}' already exists`);
+      throw new WarehouseCodeAlreadyExistsError(params.code);
     }
 
     // If setting as default, unset other defaults
@@ -245,7 +246,7 @@ export class WarehouseRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create warehouse');
+      throw new FailedToCreateWarehouseError();
     }
 
     return result;

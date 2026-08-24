@@ -4,6 +4,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
+import { FailedToCreateWarehouseEntityError } from '../../domain/errors/WarehouseErrors';
 
 export interface WarehousePickPack {
   warehousePickPackId: string;
@@ -52,7 +53,7 @@ export async function create(input: CreatePickPackInput): Promise<WarehousePickP
     input.assignedTo || null, input.notes || null, now, now,
   ]);
 
-  if (!result) throw new Error('Failed to create pick/pack record');
+  if (!result) throw new FailedToCreateWarehouseEntityError('Failed to create pick/pack record');
   return result;
 }
 

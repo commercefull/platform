@@ -3,8 +3,10 @@
  */
 
 import { generateUUID } from '../../../../libs/uuid';
+import { withTransaction } from '../../../../libs/db';
 import { InventoryRepository } from '../../domain/repositories/InventoryRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { InventoryItemNotFoundError, InsufficientStockError } from '../../domain/errors/InventoryErrors';
 
 // ============================================================================
 // Commands
@@ -68,19 +70,21 @@ export class RestockUseCase {
 
   async execute(command: RestockCommand): Promise<StockOperationResponse> {
     const item = await this.inventoryRepository.findById(command.inventoryId);
-    if (!item) throw new Error('Inventory item not found');
+    if (!item) throw new InventoryItemNotFoundError(command.inventoryId);
 
     const previousQuantity = item.quantity;
     item.restock(command.quantity);
 
-    await this.inventoryRepository.save(item);
-    await this.inventoryRepository.recordTransaction({
-      inventoryId: command.inventoryId,
-      type: 'restock',
-      quantity: command.quantity,
-      reference: command.reference,
-      notes: command.notes,
-      createdBy: command.createdBy,
+    await withTransaction(async () => {
+      await this.inventoryRepository.save(item);
+      await this.inventoryRepository.recordTransaction({
+        inventoryId: command.inventoryId,
+        type: 'restock',
+        quantity: command.quantity,
+        reference: command.reference,
+        notes: command.notes,
+        createdBy: command.createdBy,
+      });
     });
 
     return {
@@ -99,19 +103,21 @@ export class AdjustStockUseCase {
 
   async execute(command: AdjustStockCommand): Promise<StockOperationResponse> {
     const item = await this.inventoryRepository.findById(command.inventoryId);
-    if (!item) throw new Error('Inventory item not found');
+    if (!item) throw new InventoryItemNotFoundError(command.inventoryId);
 
     const previousQuantity = item.quantity;
     const difference = command.newQuantity - previousQuantity;
     item.adjust(command.newQuantity);
 
-    await this.inventoryRepository.save(item);
-    await this.inventoryRepository.recordTransaction({
-      inventoryId: command.inventoryId,
-      type: 'adjustment',
-      quantity: difference,
-      notes: command.reason,
-      createdBy: command.createdBy,
+    await withTransaction(async () => {
+      await this.inventoryRepository.save(item);
+      await this.inventoryRepository.recordTransaction({
+        inventoryId: command.inventoryId,
+        type: 'adjustment',
+        quantity: difference,
+        notes: command.reason,
+        createdBy: command.createdBy,
+      });
     });
 
     return {
@@ -130,25 +136,28 @@ export class ReserveStockUseCase {
 
   async execute(command: ReserveStockCommand): Promise<ReserveStockResponse> {
     const item = await this.inventoryRepository.findById(command.inventoryId);
-    if (!item) throw new Error('Inventory item not found');
+    if (!item) throw new InventoryItemNotFoundError(command.inventoryId);
 
     if (command.quantity > item.availableQuantity) {
-      throw new Error('Insufficient stock available');
+      throw new InsufficientStockError(item.sku || item.productId, command.quantity, item.availableQuantity);
     }
 
     const reservationId = generateUUID();
     const expiresAt = new Date(Date.now() + command.expiresInMinutes * 60 * 1000);
 
     item.reserve(command.quantity);
-    await this.inventoryRepository.save(item);
 
-    await this.inventoryRepository.createReservation({
-      reservationId,
-      inventoryId: command.inventoryId,
-      quantity: command.quantity,
-      orderId: command.orderId,
-      basketId: command.basketId,
-      expiresAt,
+    await withTransaction(async () => {
+      await this.inventoryRepository.save(item);
+
+      await this.inventoryRepository.createReservation({
+        reservationId,
+        inventoryId: command.inventoryId,
+        quantity: command.quantity,
+        orderId: command.orderId,
+        basketId: command.basketId,
+        expiresAt,
+      });
     });
 
     eventBus.emit('inventory.reserved', {

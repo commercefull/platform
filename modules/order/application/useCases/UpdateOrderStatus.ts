@@ -6,6 +6,8 @@
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { withTransaction } from '../../../../libs/db';
+import { OrderNotFoundError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Command
@@ -43,7 +45,7 @@ export class UpdateOrderStatusUseCase {
     const order = await this.orderRepository.findById(command.orderId);
 
     if (!order) {
-      throw new Error('Order not found');
+      throw new OrderNotFoundError();
     }
 
     const previousStatus = order.status;
@@ -51,11 +53,11 @@ export class UpdateOrderStatusUseCase {
     // Use domain logic to update status (validates transition)
     order.updateStatus(command.newStatus, command.reason);
 
-    // Save updated order
-    await this.orderRepository.save(order);
-
-    // Record status change in history
-    await this.orderRepository.recordStatusChange(command.orderId, command.newStatus, command.reason, previousStatus);
+    // Save updated order and record status change in a single transaction
+    await withTransaction(async () => {
+      await this.orderRepository.save(order);
+      await this.orderRepository.recordStatusChange(command.orderId, command.newStatus, command.reason, previousStatus);
+    });
 
     // Emit event
     eventBus.emit('order.status_changed', {

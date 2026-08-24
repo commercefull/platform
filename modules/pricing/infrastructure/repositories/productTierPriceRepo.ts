@@ -1,6 +1,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { TierPrice } from '../../domain/pricingRule';
+import { FailedToCreatePricingError, PriceNotFoundError } from '../../domain/errors/PricingErrors';
 
 interface FindAllOptions {
   page?: number;
@@ -106,7 +107,7 @@ export class TierPriceRepo {
     const result = await queryOne<TierPrice>(sql, values);
 
     if (!result) {
-      throw new Error('Failed to create tier price');
+      throw new FailedToCreatePricingError('Failed to create tier price');
     }
 
     return result;
@@ -139,7 +140,7 @@ export class TierPriceRepo {
     const result = await queryOne<TierPrice>(sql, values);
 
     if (!result) {
-      throw new Error('Tier price not found or update failed');
+      throw new PriceNotFoundError(id);
     }
 
     return result;

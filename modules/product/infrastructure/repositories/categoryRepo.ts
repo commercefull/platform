@@ -1,5 +1,6 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface Category {
   productCategoryId: string;
@@ -151,7 +152,7 @@ export class CategoryRepo {
     const result = await queryOne<Category>(sql, values);
 
     if (!result) {
-      throw new Error('Failed to create category');
+      throw new FailedToCreateProductError();
     }
 
     return result;

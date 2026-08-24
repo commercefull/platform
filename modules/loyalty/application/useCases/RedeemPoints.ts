@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { LoyaltyMemberNotFoundError, LoyaltyRewardNotFoundError, RewardNotAvailableError, InsufficientPointsError, LoyaltyValidationError } from '../../domain/errors/LoyaltyErrors';
 
 export interface RedeemPointsInput {
   customerId: string;
@@ -51,11 +52,11 @@ export class RedeemPointsUseCase {
   async execute(input: RedeemPointsInput): Promise<RedeemPointsOutput> {
     const member = await this.loyaltyRepository.findMemberByCustomerId(input.customerId);
     if (!member) {
-      throw new Error('Customer is not a loyalty member');
+      throw new LoyaltyMemberNotFoundError(input.customerId);
     }
 
     if (member.availablePoints < input.points) {
-      throw new Error(`Insufficient points. Available: ${member.availablePoints}, Requested: ${input.points}`);
+      throw new InsufficientPointsError(input.points, member.availablePoints);
     }
 
     let discountValue: number | undefined;
@@ -65,13 +66,13 @@ export class RedeemPointsUseCase {
     if (input.rewardId) {
       const reward = await this.rewardRepository.findById(input.rewardId);
       if (!reward) {
-        throw new Error(`Reward not found: ${input.rewardId}`);
+        throw new LoyaltyRewardNotFoundError(input.rewardId);
       }
       if (!reward.isActive) {
-        throw new Error('Reward is not active');
+        throw new RewardNotAvailableError(input.rewardId);
       }
       if (reward.pointsCost > input.points) {
-        throw new Error(`Reward requires ${reward.pointsCost} points`);
+        throw new LoyaltyValidationError(`Reward requires ${reward.pointsCost} points`);
       }
 
       discountValue = reward.discountValue;

@@ -18,6 +18,7 @@ import membershipBenefitRepo from './membershipBenefitRepo';
 import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
 import membershipSubscriptionRepo from './membershipSubscriptionRepo';
 import { MembershipBenefit as DbMembershipBenefit, MembershipSubscription as DbMembershipSubscription } from '../../../../libs/db/types';
+import { MembershipPlanNotFoundError, MembershipBenefitNotFoundError, UserMembershipNotFoundError } from '../../domain/errors/MembershipErrors';
 
 // Re-export types
 export { MembershipPlan, BillingCycle } from './membershipPlanRepo';
@@ -136,7 +137,7 @@ export class MembershipRepo {
     if (params.isActive !== undefined) updateData.isActive = params.isActive;
 
     const plan = await planRepo.update(id, updateData);
-    if (!plan) throw new Error(`Membership tier with ID ${id} not found`);
+    if (!plan) throw new MembershipPlanNotFoundError(id);
     return this.planToTier(plan);
   }
 
@@ -241,7 +242,7 @@ export class MembershipRepo {
     }
 
     const benefit = await membershipBenefitRepo.update(id, updateData);
-    if (!benefit) throw new Error(`Membership benefit with ID ${id} not found`);
+    if (!benefit) throw new MembershipBenefitNotFoundError(id);
     return this.benefitToLegacy(benefit);
   }
 
@@ -338,13 +339,13 @@ export class MembershipRepo {
     if (params.paymentMethod !== undefined) updateData.paymentMethodId = params.paymentMethod;
 
     const sub = await membershipSubscriptionRepo.update(id, updateData);
-    if (!sub) throw new Error(`User membership with ID ${id} not found`);
+    if (!sub) throw new UserMembershipNotFoundError(id);
     return this.subscriptionToUserMembership(sub);
   }
 
   async cancelUserMembership(id: string): Promise<UserMembership> {
     const sub = await membershipSubscriptionRepo.cancel(id);
-    if (!sub) throw new Error(`User membership with ID ${id} not found`);
+    if (!sub) throw new UserMembershipNotFoundError(id);
     return this.subscriptionToUserMembership(sub);
   }
 

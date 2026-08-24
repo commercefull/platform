@@ -1,5 +1,6 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import { ProductNotFoundError, FailedToCreateProductError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
 // Product status and visibility enums to match database schema
 export enum ProductStatus {
@@ -472,7 +473,7 @@ export class ProductRepo {
     const result = await queryOne<Product>(sql, values);
 
     if (!result) {
-      throw new Error('Failed to create product');
+      throw new FailedToCreateProductError();
     }
 
     return result;
@@ -564,7 +565,7 @@ export class ProductRepo {
       // Only updatedAt, nothing else to update
       const existing = await this.findById(id);
       if (!existing) {
-        throw new Error('Product not found');
+        throw new ProductNotFoundError(id);
       }
       return existing;
     }
@@ -579,7 +580,7 @@ export class ProductRepo {
     const result = await queryOne<Product>(sql, values);
 
     if (!result) {
-      throw new Error('Product not found or update failed');
+      throw new ProductValidationError('Product not found or update failed');
     }
 
     return result;
@@ -735,7 +736,7 @@ export class ProductRepo {
     const result = await queryOne<Product>(sql, [productId, averageRating, reviewCount]);
 
     if (!result) {
-      throw new Error('Product not found');
+      throw new ProductNotFoundError(productId);
     }
 
     return result;
@@ -755,7 +756,7 @@ export class ProductRepo {
     const result = await queryOne<Product>(sql, [id, ProductStatus.ACTIVE]);
 
     if (!result) {
-      throw new Error('Product not found');
+      throw new ProductNotFoundError(id);
     }
 
     return result;

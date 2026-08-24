@@ -5,6 +5,7 @@
 
 import { queryOne, query } from '../../../../libs/db';
 import { ContentPageVersion } from '../../../../libs/db/types';
+import { FailedToCreateContentError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Types
@@ -69,7 +70,7 @@ export class ContentPageVersionRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create page version');
+      throw new FailedToCreateContentError('Failed to create page version');
     }
 
     return result;

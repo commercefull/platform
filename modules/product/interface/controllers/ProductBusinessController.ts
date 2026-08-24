@@ -3,10 +3,11 @@
  * HTTP interface for business/admin product operations
  */
 
-import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import ProductRepo from '../../infrastructure/repositories/ProductRepository';
+import productCatalogRepository from '../../infrastructure/repositories/ProductCatalogRepository';
+import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
+import productEngagementRepository from '../../infrastructure/repositories/ProductEngagementRepository';
 import { CreateProductCommand, CreateProductUseCase } from '../../application/useCases/CreateProduct';
 import { GetProductCommand, GetProductUseCase } from '../../application/useCases/GetProduct';
 import { GetProductStoreAvailabilityUseCase } from '../../application/useCases/GetProductStoreAvailability';
@@ -14,22 +15,24 @@ import { ListProductsCommand, ListProductsUseCase } from '../../application/useC
 import { UpdateProductCommand, UpdateProductUseCase } from '../../application/useCases/UpdateProduct';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
-import productVariantRepo from '../../infrastructure/repositories/productVariantRepo';
 import type { ProductVariantCreateProps, ProductVariantUpdateProps } from '../../infrastructure/repositories/productVariantRepo';
-import productImageRepo from '../../infrastructure/repositories/productImageRepo';
-import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
-import productQaRepo from '../../infrastructure/repositories/productQaRepo';
-import productReviewMediaRepo from '../../infrastructure/repositories/productReviewMediaRepo';
-import productCollectionRepo from '../../infrastructure/repositories/productCollectionRepo';
-import productDownloadRepo from '../../infrastructure/repositories/productDownloadRepo';
-import productRelationshipRepo from '../../infrastructure/repositories/productRelationshipRepo';
-import { ProductAttributeSetRepository } from '../../infrastructure/repositories/ProductAttributeSetRepository';
-import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 import { ManageProductCollectionCommand, ManageProductCollectionUseCase } from '../../application/useCases/ManageProductCollection';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import type { ProductQaStatus } from '../../infrastructure/repositories/productQaRepo';
-import type { RelationType } from '../../infrastructure/repositories/productRelationshipRepo';
-import type { ReviewFilters } from '../../infrastructure/repositories/productReviewRepo';
+import type { ProductQaStatus } from '../../infrastructure/repositories/ProductEngagementRepository';
+import type { RelationType } from '../../infrastructure/repositories/ProductEngagementRepository';
+import type { ReviewFilters } from '../../infrastructure/repositories/ProductEngagementRepository';
+
+const ProductRepo = productCatalogRepository.productRepository;
+const productVariantRepo = productCatalogRepository.variants;
+const productImageRepo = productEngagementRepository.images;
+const productReviewRepo = productEngagementRepository.reviews;
+const productQaRepo = productEngagementRepository.qa;
+const productReviewMediaRepo = productEngagementRepository.reviewMedia;
+const productCollectionRepo = productEngagementRepository.collections;
+const productDownloadRepo = productCatalogRepository.downloads;
+const productRelationshipRepo = productEngagementRepository.relationships;
+const ProductAttributeSetRepository = productAttributeRepository.sets;
+const DynamicAttributeRepository = productAttributeRepository.dynamic;
 
 // ============================================================================
 // Request Body Interfaces
@@ -188,22 +191,12 @@ interface AttributeSetBody {
 // Content Negotiation Helpers
 // ============================================================================
 
-function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200, htmlTemplate?: string): void {
-  const acceptHeader = req.get('Accept') || 'application/json';
-  if (acceptHeader.includes('text/html') && htmlTemplate) {
-    res.status(statusCode).render(htmlTemplate, { data, success: true });
-  } else {
-    res.status(statusCode).json({ success: true, data });
-  }
+function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
+  res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
-  const acceptHeader = req.get('Accept') || 'application/json';
-  if (acceptHeader.includes('text/html') && htmlTemplate) {
-    res.status(statusCode).render(htmlTemplate, { error: message, success: false });
-  } else {
-    res.status(statusCode).json({ success: false, error: message });
-  }
+function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
+  res.status(statusCode).json({ success: false, error: message });
 }
 
 // ============================================================================
@@ -215,39 +208,34 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  * GET /products
  */
 export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { status, visibility, categoryId, organizationId, search, limit, offset, orderBy, orderDirection } = req.query;
+  const { status, visibility, categoryId, organizationId, search, limit, offset, orderBy, orderDirection } = req.query;
 
-    const filters: {
-      status?: ProductStatus;
-      visibility?: ProductVisibility;
-      categoryId?: string;
-      organizationId?: string;
-      search?: string;
-    } = {};
-    if (status) filters.status = status as ProductStatus;
-    if (visibility) filters.visibility = visibility as ProductVisibility;
-    if (categoryId) filters.categoryId = categoryId as string;
-    if (organizationId) filters.organizationId = organizationId as string;
-    if (search) filters.search = search as string;
+  const filters: {
+    status?: ProductStatus;
+    visibility?: ProductVisibility;
+    categoryId?: string;
+    organizationId?: string;
+    search?: string;
+  } = {};
+  if (status) filters.status = status as ProductStatus;
+  if (visibility) filters.visibility = visibility as ProductVisibility;
+  if (categoryId) filters.categoryId = categoryId as string;
+  if (organizationId) filters.organizationId = organizationId as string;
+  if (search) filters.search = search as string;
 
-    const command = new ListProductsCommand(
-      Object.keys(filters).length > 0 ? filters : undefined,
-      parseInt(limit as string) || 50,
-      parseInt(offset as string) || 0,
-      (orderBy as string) || 'createdAt',
-      (orderDirection as 'asc' | 'desc') || 'desc',
-    );
+  const command = new ListProductsCommand(
+    Object.keys(filters).length > 0 ? filters : undefined,
+    parseInt(limit as string) || 50,
+    parseInt(offset as string) || 0,
+    (orderBy as string) || 'createdAt',
+    (orderDirection as 'asc' | 'desc') || 'desc',
+  );
 
-    const useCase = new ListProductsUseCase(ProductRepo);
-    const result = await useCase.execute(command);
+  const useCase = new ListProductsUseCase(ProductRepo);
+  const result = await useCase.execute(command);
 
-    respond(req, res, result, 200, 'admin/product/list');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to list products', 500, 'admin/product/error');
-  }
+  respond(req, res, result, 200);
+  
 };
 
 /**
@@ -255,48 +243,38 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
  * GET /products/:productId
  */
 export const getProduct = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
+  const { productId } = req.params;
 
-    // Guard: reject obviously non-UUID values that would cause a DB error
-    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidPattern.test(productId)) {
-      respondError(req, res, 'Product not found', 404, 'admin/product/error');
-      return;
-    }
-
-    const command = new GetProductCommand(productId, undefined, undefined, true, true);
-    const useCase = new GetProductUseCase(ProductRepo);
-    const product = await useCase.execute(command);
-
-    if (!product) {
-      respondError(req, res, 'Product not found', 404, 'admin/product/error');
-      return;
-    }
-
-    respond(req, res, product, 200, 'admin/product/detail');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get product', 500, 'admin/product/error');
+  // Guard: reject obviously non-UUID values that would cause a DB error
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidPattern.test(productId)) {
+    respondError(req, res, 'Product not found', 404);
+    return;
   }
+
+  const command = new GetProductCommand(productId, undefined, undefined, true, true);
+  const useCase = new GetProductUseCase(ProductRepo);
+  const product = await useCase.execute(command);
+
+  if (!product) {
+    respondError(req, res, 'Product not found', 404);
+    return;
+  }
+
+  respond(req, res, product, 200);
+  
 };
 
 export const getProductStoreAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const useCase = new GetProductStoreAvailabilityUseCase(ProductRepo);
-    const result = await useCase.execute({
-      productId: req.params.productId,
-      variantId: req.query.variantId as string | undefined,
-      storeId: req.query.storeId as string | undefined,
-    });
+  const useCase = new GetProductStoreAvailabilityUseCase(ProductRepo);
+  const result = await useCase.execute({
+    productId: req.params.productId,
+    variantId: req.query.variantId as string | undefined,
+    storeId: req.query.storeId as string | undefined,
+  });
 
-    respond(req, res, result, 200, 'admin/product/detail');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    const status = (error as Error).message.includes('not found') ? 404 : 500;
-    respondError(req, res, (error as Error).message || 'Failed to get product store availability', status, 'admin/product/error');
-  }
+  respond(req, res, result, 200);
+  
 };
 
 /**
@@ -304,98 +282,88 @@ export const getProductStoreAvailability = async (req: TypedRequest, res: Respon
  * POST /products
  */
 export const createProduct = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?.id;
-    const body = req.body as CreateProductBody;
-    const {
-      name,
-      description,
-      productTypeId,
-      type,
-      sku,
-      slug,
-      shortDescription,
-      categoryId,
-      basePrice,
-      salePrice,
-      cost,
-      currencyCode,
-      weight,
-      weightUnit,
-      length,
-      width,
-      height,
-      dimensionUnit,
-      isFeatured,
-      isVirtual,
-      isDownloadable,
-      isSubscription,
-      isTaxable,
-      taxClass,
-      metaTitle,
-      metaDescription,
-      metaKeywords,
-      tags,
-      metadata,
-    } = body;
+  const organizationId = req.user?.organizationId || req.user?.id;
+  const body = req.body as CreateProductBody;
+  const {
+    name,
+    description,
+    productTypeId,
+    type,
+    sku,
+    slug,
+    shortDescription,
+    categoryId,
+    basePrice,
+    salePrice,
+    cost,
+    currencyCode,
+    weight,
+    weightUnit,
+    length,
+    width,
+    height,
+    dimensionUnit,
+    isFeatured,
+    isVirtual,
+    isDownloadable,
+    isSubscription,
+    isTaxable,
+    taxClass,
+    metaTitle,
+    metaDescription,
+    metaKeywords,
+    tags,
+    metadata,
+  } = body;
 
-    if (!name?.trim()) {
-      respondError(req, res, 'Product name is required', 400, 'admin/product/error');
-      return;
-    }
-
-    // Accept either productTypeId or type (for backward compatibility)
-    const resolvedProductTypeId = productTypeId || type;
-    if (!resolvedProductTypeId) {
-      respondError(req, res, 'Product type is required', 400, 'admin/product/error');
-      return;
-    }
-
-    const command = new CreateProductCommand(
-      name,
-      description || '',
-      resolvedProductTypeId,
-      sku,
-      slug,
-      shortDescription,
-      categoryId,
-      organizationId,
-      basePrice,
-      salePrice,
-      cost,
-      currencyCode,
-      weight,
-      weightUnit,
-      length,
-      width,
-      height,
-      dimensionUnit,
-      isFeatured,
-      isVirtual,
-      isDownloadable,
-      isSubscription,
-      isTaxable,
-      taxClass,
-      metaTitle,
-      metaDescription,
-      metaKeywords,
-      tags,
-      metadata,
-    );
-
-    const useCase = new CreateProductUseCase(ProductRepo);
-    const product = await useCase.execute(command);
-
-    respond(req, res, product, 201, 'admin/product/created');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    const domainErrors = ['required', 'already exists', 'must be owned', 'negative', 'greater than', 'cannot be'];
-    if (domainErrors.some(e => (error as Error).message.toLowerCase().includes(e))) {
-      respondError(req, res, (error as Error).message, 400, 'admin/product/error');
-      return;
-    }
-    respondError(req, res, (error as Error).message || 'Failed to create product', 500, 'admin/product/error');
+  if (!name?.trim()) {
+    respondError(req, res, 'Product name is required', 400);
+    return;
   }
+
+  // Accept either productTypeId or type (for backward compatibility)
+  const resolvedProductTypeId = productTypeId || type;
+  if (!resolvedProductTypeId) {
+    respondError(req, res, 'Product type is required', 400);
+    return;
+  }
+
+  const command = new CreateProductCommand(
+    name,
+    description || '',
+    resolvedProductTypeId,
+    sku,
+    slug,
+    shortDescription,
+    categoryId,
+    organizationId,
+    basePrice,
+    salePrice,
+    cost,
+    currencyCode,
+    weight,
+    weightUnit,
+    length,
+    width,
+    height,
+    dimensionUnit,
+    isFeatured,
+    isVirtual,
+    isDownloadable,
+    isSubscription,
+    isTaxable,
+    taxClass,
+    metaTitle,
+    metaDescription,
+    metaKeywords,
+    tags,
+    metadata,
+  );
+
+  const useCase = new CreateProductUseCase(ProductRepo);
+  const product = await useCase.execute(command);
+
+  respond(req, res, product, 201);
 };
 
 /**
@@ -403,35 +371,19 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
  * PUT /products/:productId
  */
 export const updateProduct = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const updates = req.body as UpdateProductBody;
+  const { productId } = req.params;
+  const updates = req.body as UpdateProductBody;
 
-    const command = new UpdateProductCommand(productId, updates);
-    const useCase = new UpdateProductUseCase(ProductRepo);
-    await useCase.execute(command);
+  const command = new UpdateProductCommand(productId, updates);
+  const useCase = new UpdateProductUseCase(ProductRepo);
+  await useCase.execute(command);
 
-    // Fetch the full updated product to return complete data
-    const command2 = new GetProductCommand(productId, undefined, undefined, false, false);
-    const useCase2 = new GetProductUseCase(ProductRepo);
-    const result = await useCase2.execute(command2);
+  // Fetch the full updated product to return complete data
+  const command2 = new GetProductCommand(productId, undefined, undefined, false, false);
+  const useCase2 = new GetProductUseCase(ProductRepo);
+  const result = await useCase2.execute(command2);
 
-    respond(req, res, result, 200, 'admin/product/updated');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    if ((error as Error).message.includes('not found')) {
-      respondError(req, res, (error as Error).message, 404, 'admin/product/error');
-      return;
-    }
-    // Domain validation errors (price, status transitions) → 400
-    const domainErrors = ['negative', 'greater than', 'cannot be', 'required', 'already exists'];
-    if (domainErrors.some(e => (error as Error).message.toLowerCase().includes(e))) {
-      respondError(req, res, (error as Error).message, 400, 'admin/product/error');
-      return;
-    }
-    respondError(req, res, (error as Error).message || 'Failed to update product', 500, 'admin/product/error');
-  }
+  respond(req, res, result, 200);
 };
 
 /**
@@ -439,31 +391,26 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
  * PUT /products/:productId/status
  */
 export const updateProductStatus = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { status } = req.body as StatusBody;
+  const { productId } = req.params;
+  const { status } = req.body as StatusBody;
 
-    const validStatuses = Object.values(ProductStatus) as string[];
-    if (!status || !validStatuses.includes(status)) {
-      respondError(req, res, `Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400, 'admin/product/error');
-      return;
-    }
-
-    const product = await ProductRepo.findById(productId);
-    if (!product) {
-      respondError(req, res, 'Product not found', 404, 'admin/product/error');
-      return;
-    }
-
-    product.updateStatus(status as ProductStatus);
-    await ProductRepo.save(product);
-
-    respond(req, res, { productId, status: product.status, updatedAt: product.updatedAt.toISOString() }, 200, 'admin/product/updated');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to update product status', 500, 'admin/product/error');
+  const validStatuses = Object.values(ProductStatus) as string[];
+  if (!status || !validStatuses.includes(status)) {
+    respondError(req, res, `Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400);
+    return;
   }
+
+  const product = await ProductRepo.findById(productId);
+  if (!product) {
+    respondError(req, res, 'Product not found', 404);
+    return;
+  }
+
+  product.updateStatus(status as ProductStatus);
+  await ProductRepo.save(product);
+
+  respond(req, res, { productId, status: product.status, updatedAt: product.updatedAt.toISOString() }, 200);
+  
 };
 
 /**
@@ -471,37 +418,26 @@ export const updateProductStatus = async (req: TypedRequest, res: Response): Pro
  * PUT /products/:productId/visibility
  */
 export const updateProductVisibility = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { visibility } = req.body as VisibilityBody;
+  const { productId } = req.params;
+  const { visibility } = req.body as VisibilityBody;
 
-    const validVisibilities = Object.values(ProductVisibility) as string[];
-    if (!visibility || !validVisibilities.includes(visibility)) {
-      respondError(req, res, `Invalid visibility. Must be one of: ${validVisibilities.join(', ')}`, 400, 'admin/product/error');
-      return;
-    }
-
-    const product = await ProductRepo.findById(productId);
-    if (!product) {
-      respondError(req, res, 'Product not found', 404, 'admin/product/error');
-      return;
-    }
-
-    product.updateVisibility(visibility as ProductVisibility);
-    await ProductRepo.save(product);
-
-    respond(
-      req,
-      res,
-      { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() },
-      200,
-      'admin/product/updated',
-    );
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to update product visibility', 500, 'admin/product/error');
+  const validVisibilities = Object.values(ProductVisibility) as string[];
+  if (!visibility || !validVisibilities.includes(visibility)) {
+    respondError(req, res, `Invalid visibility. Must be one of: ${validVisibilities.join(', ')}`, 400);
+    return;
   }
+
+  const product = await ProductRepo.findById(productId);
+  if (!product) {
+    respondError(req, res, 'Product not found', 404);
+    return;
+  }
+
+  product.updateVisibility(visibility as ProductVisibility);
+  await ProductRepo.save(product);
+
+  respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
+  
 };
 
 /**
@@ -509,28 +445,23 @@ export const updateProductVisibility = async (req: TypedRequest, res: Response):
  * DELETE /products/:productId
  */
 export const deleteProduct = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { permanent } = req.query;
+  const { productId } = req.params;
+  const { permanent } = req.query;
 
-    const product = await ProductRepo.findById(productId);
-    if (!product) {
-      respondError(req, res, 'Product not found', 404, 'admin/product/error');
-      return;
-    }
-
-    if (permanent === 'true') {
-      await ProductRepo.hardDelete(productId);
-    } else {
-      await ProductRepo.delete(productId);
-    }
-
-    respond(req, res, { productId, deleted: true, permanent: permanent === 'true' }, 200, 'admin/product/deleted');
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to delete product', 500, 'admin/product/error');
+  const product = await ProductRepo.findById(productId);
+  if (!product) {
+    respondError(req, res, 'Product not found', 404);
+    return;
   }
+
+  if (permanent === 'true') {
+    await ProductRepo.hardDelete(productId);
+  } else {
+    await ProductRepo.delete(productId);
+  }
+
+  respond(req, res, { productId, deleted: true, permanent: permanent === 'true' }, 200);
+  
 };
 
 /**
@@ -538,30 +469,19 @@ export const deleteProduct = async (req: TypedRequest, res: Response): Promise<v
  * POST /products/:productId/publish
  */
 export const publishProduct = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
+  const { productId } = req.params;
 
-    const product = await ProductRepo.findById(productId);
-    if (!product) {
-      respondError(req, res, 'Product not found', 404, 'admin/product/error');
-      return;
-    }
-
-    product.publish();
-    await ProductRepo.save(product);
-
-    respond(
-      req,
-      res,
-      { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() },
-      200,
-      'admin/product/published',
-    );
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to publish product', 500, 'admin/product/error');
+  const product = await ProductRepo.findById(productId);
+  if (!product) {
+    respondError(req, res, 'Product not found', 404);
+    return;
   }
+
+  product.publish();
+  await ProductRepo.save(product);
+
+  respond(req, res, { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() }, 200);
+  
 };
 
 /**
@@ -569,30 +489,19 @@ export const publishProduct = async (req: TypedRequest, res: Response): Promise<
  * POST /products/:productId/unpublish
  */
 export const unpublishProduct = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
+  const { productId } = req.params;
 
-    const product = await ProductRepo.findById(productId);
-    if (!product) {
-      respondError(req, res, 'Product not found', 404, 'admin/product/error');
-      return;
-    }
-
-    product.unpublish();
-    await ProductRepo.save(product);
-
-    respond(
-      req,
-      res,
-      { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() },
-      200,
-      'admin/product/unpublished',
-    );
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to unpublish product', 500, 'admin/product/error');
+  const product = await ProductRepo.findById(productId);
+  if (!product) {
+    respondError(req, res, 'Product not found', 404);
+    return;
   }
+
+  product.unpublish();
+  await ProductRepo.save(product);
+
+  respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
+  
 };
 
 // ============================================================================
@@ -604,25 +513,21 @@ export const unpublishProduct = async (req: TypedRequest, res: Response): Promis
  * GET /products/barcode/:barcode
  */
 export const findByBarcode = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { barcode } = req.params;
+  const { barcode } = req.params;
 
-    if (!barcode?.trim()) {
-      respondError(req, res, 'Barcode is required', 400);
-      return;
-    }
-
-    const result = await ProductRepo.findByBarcode(barcode);
-    if (!result) {
-      respondError(req, res, 'No product found for this barcode', 404);
-      return;
-    }
-
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to find product by barcode');
+  if (!barcode?.trim()) {
+    respondError(req, res, 'Barcode is required', 400);
+    return;
   }
+
+  const result = await ProductRepo.findByBarcode(barcode);
+  if (!result) {
+    respondError(req, res, 'No product found for this barcode', 404);
+    return;
+  }
+
+  respond(req, res, result);
+  
 };
 
 // ============================================================================
@@ -630,84 +535,60 @@ export const findByBarcode = async (req: TypedRequest, res: Response): Promise<v
 // ============================================================================
 
 export const getProductVariants = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const variants = await productVariantRepo.findByProductId(req.params.productId);
-    respond(req, res, variants);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to get variants');
-  }
+  const variants = await productVariantRepo.findByProductId(req.params.productId);
+  respond(req, res, variants);
+  
 };
 
 export const getProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const variant = await productVariantRepo.findById(req.params.variantId);
-    if (!variant) {
-      respondError(req, res, 'Variant not found', 404);
-      return;
-    }
-    respond(req, res, variant);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to get variant');
+  const variant = await productVariantRepo.findById(req.params.variantId);
+  if (!variant) {
+    respondError(req, res, 'Variant not found', 404);
+    return;
   }
+  respond(req, res, variant);
+  
 };
 
 export const createProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const body = req.body as VariantBody;
-    const variant = await productVariantRepo.create({
-      productId: req.params.productId,
-      ...body,
-    } as ProductVariantCreateProps);
-    respond(req, res, variant, 201);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to create variant', 400);
-  }
+  const body = req.body as VariantBody;
+  const variant = await productVariantRepo.create({
+    productId: req.params.productId,
+    ...body,
+  } as ProductVariantCreateProps);
+  respond(req, res, variant, 201);
+  
 };
 
 export const updateProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const body = req.body as ProductVariantUpdateProps;
-    const variant = await productVariantRepo.update(req.params.variantId, body);
-    respond(req, res, variant);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to update variant', 400);
-  }
+  const body = req.body as ProductVariantUpdateProps;
+  const variant = await productVariantRepo.update(req.params.variantId, body);
+  respond(req, res, variant);
+  
 };
 
 export const updateVariantInventory = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { variantId } = req.params;
-    const { inventory } = req.body as InventoryBody;
-    if (inventory === undefined || inventory === null) {
-      respondError(req, res, 'inventory is required', 400);
-      return;
-    }
-    const variant = await productVariantRepo.findById(variantId);
-    if (!variant) {
-      respondError(req, res, 'Variant not found', 404);
-      return;
-    }
-    // Return variant with the requested inventory value
-    // (inventory is managed by the inventory module, not stored on the variant)
-    respond(req, res, { ...variant, inventory: parseInt(String(inventory)) });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to update variant inventory', 400);
+  const { variantId } = req.params;
+  const { inventory } = req.body as InventoryBody;
+  if (inventory === undefined || inventory === null) {
+    respondError(req, res, 'inventory is required', 400);
+    return;
   }
+  const variant = await productVariantRepo.findById(variantId);
+  if (!variant) {
+    respondError(req, res, 'Variant not found', 404);
+    return;
+  }
+  // Return variant with the requested inventory value
+  // (inventory is managed by the inventory module, not stored on the variant)
+  respond(req, res, { ...variant, inventory: parseInt(String(inventory)) });
+  
 };
 
 export const deleteProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    await productVariantRepo.delete(req.params.variantId);
-    respond(req, res, { deleted: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to delete variant');
-  }
+  await productVariantRepo.delete(req.params.variantId);
+  respond(req, res, { deleted: true });
+  
 };
 
 // ============================================================================
@@ -715,73 +596,53 @@ export const deleteProductVariant = async (req: TypedRequest, res: Response): Pr
 // ============================================================================
 
 export const getProductImages = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const images = await productImageRepo.findByProductId(req.params.productId);
-    respond(req, res, images);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to get images');
-  }
+  const images = await productImageRepo.findByProductId(req.params.productId);
+  respond(req, res, images);
+  
 };
 
 export const addProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const body = req.body as { url: string; position?: number; isPrimary?: boolean; productVariantId?: string; alt?: string; title?: string; width?: number; height?: number; size?: number; type?: string; isVisible?: boolean };
-    const image = await productImageRepo.create({
-      productId: req.params.productId,
-      url: body.url,
-      position: body.position ?? 0,
-      isPrimary: body.isPrimary ?? false,
-      productVariantId: body.productVariantId,
-      alt: body.alt,
-      title: body.title,
-      width: body.width,
-      height: body.height,
-      size: body.size,
-      type: body.type,
-      isVisible: body.isVisible,
-    });
-    respond(req, res, image, 201);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to add image', 400);
-  }
+  const body = req.body as { url: string; position?: number; isPrimary?: boolean; productVariantId?: string; alt?: string; title?: string; width?: number; height?: number; size?: number; type?: string; isVisible?: boolean };
+  const image = await productImageRepo.create({
+    productId: req.params.productId,
+    url: body.url,
+    position: body.position ?? 0,
+    isPrimary: body.isPrimary ?? false,
+    productVariantId: body.productVariantId,
+    alt: body.alt,
+    title: body.title,
+    width: body.width,
+    height: body.height,
+    size: body.size,
+    type: body.type,
+    isVisible: body.isVisible,
+  });
+  respond(req, res, image, 201);
+  
 };
 
 export const updateProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const body = req.body as { url?: string; position?: number; isPrimary?: boolean; alt?: string; altText?: string; title?: string; width?: number; height?: number; size?: number; type?: string; isVisible?: boolean };
-    const image = await productImageRepo.update(req.params.imageId, body);
-    respond(req, res, image);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to update image', 400);
-  }
+  const body = req.body as { url?: string; position?: number; isPrimary?: boolean; alt?: string; altText?: string; title?: string; width?: number; height?: number; size?: number; type?: string; isVisible?: boolean };
+  const image = await productImageRepo.update(req.params.imageId, body);
+  respond(req, res, image);
+  
 };
 
 export const deleteProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    await productImageRepo.delete(req.params.imageId);
-    respond(req, res, { deleted: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to delete image');
-  }
+  await productImageRepo.delete(req.params.imageId);
+  respond(req, res, { deleted: true });
+  
 };
 
 export const reorderProductImages = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { imageIds } = req.body as ImageReorderBody;
-    if (!Array.isArray(imageIds)) {
-      respondError(req, res, 'imageIds must be an array', 400);
-      return;
-    }
-    await productImageRepo.reorder(req.params.productId, imageIds);
-    respond(req, res, { reordered: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to reorder images');
+  const { imageIds } = req.body as ImageReorderBody;
+  if (!Array.isArray(imageIds)) {
+    respondError(req, res, 'imageIds must be an array', 400);
+    return;
   }
+  await productImageRepo.reorder(req.params.productId, imageIds);
+  respond(req, res, { reordered: true });
+  
 };
 
 // ============================================================================
@@ -789,88 +650,64 @@ export const reorderProductImages = async (req: TypedRequest, res: Response): Pr
 // ============================================================================
 
 export const listReviews = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId, status, limit, offset } = req.query;
-    const filters: ReviewFilters = {};
-    if (productId) filters.productId = productId as string;
-    if (status) filters.status = status as ReviewFilters['status'];
-    const reviews = await productReviewRepo.findWithFilters(filters, parseInt(limit as string) || 50, parseInt(offset as string) || 0);
-    respond(req, res, reviews);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to list reviews');
-  }
+  const { productId, status, limit, offset } = req.query;
+  const filters: ReviewFilters = {};
+  if (productId) filters.productId = productId as string;
+  if (status) filters.status = status as ReviewFilters['status'];
+  const reviews = await productReviewRepo.findWithFilters(filters, parseInt(limit as string) || 50, parseInt(offset as string) || 0);
+  respond(req, res, reviews);
+  
 };
 
 export const getReview = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const review = await productReviewRepo.findById(req.params.reviewId);
-    if (!review) {
-      respondError(req, res, 'Review not found', 404);
-      return;
-    }
-    respond(req, res, review);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to get review');
+  const review = await productReviewRepo.findById(req.params.reviewId);
+  if (!review) {
+    respondError(req, res, 'Review not found', 404);
+    return;
   }
+  respond(req, res, review);
+  
 };
 
 export const approveReview = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const review = await productReviewRepo.approve(req.params.reviewId);
-    if (!review) {
-      respondError(req, res, 'Review not found', 404);
-      return;
-    }
-    respond(req, res, review);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to approve review');
+  const review = await productReviewRepo.approve(req.params.reviewId);
+  if (!review) {
+    respondError(req, res, 'Review not found', 404);
+    return;
   }
+  respond(req, res, review);
+  
 };
 
 export const rejectReview = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const review = await productReviewRepo.reject(req.params.reviewId);
-    if (!review) {
-      respondError(req, res, 'Review not found', 404);
-      return;
-    }
-    respond(req, res, review);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to reject review');
+  const review = await productReviewRepo.reject(req.params.reviewId);
+  if (!review) {
+    respondError(req, res, 'Review not found', 404);
+    return;
   }
+  respond(req, res, review);
+  
 };
 
 export const respondToReview = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { response } = req.body as ReviewResponseBody;
-    if (!response?.trim()) {
-      respondError(req, res, 'Response text is required', 400);
-      return;
-    }
-    const review = await productReviewRepo.addAdminResponse(req.params.reviewId, response);
-    if (!review) {
-      respondError(req, res, 'Review not found', 404);
-      return;
-    }
-    respond(req, res, review);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to respond to review');
+  const { response } = req.body as ReviewResponseBody;
+  if (!response?.trim()) {
+    respondError(req, res, 'Response text is required', 400);
+    return;
   }
+  const review = await productReviewRepo.addAdminResponse(req.params.reviewId, response);
+  if (!review) {
+    respondError(req, res, 'Review not found', 404);
+    return;
+  }
+  respond(req, res, review);
+  
 };
 
 export const deleteReview = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    await productReviewRepo.delete(req.params.reviewId);
-    respond(req, res, { deleted: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    respondError(req, res, (error as Error).message || 'Failed to delete review');
-  }
+  await productReviewRepo.delete(req.params.reviewId);
+  respond(req, res, { deleted: true });
+  
 };
 
 // ============================================================================
@@ -882,15 +719,10 @@ export const deleteReview = async (req: TypedRequest, res: Response): Promise<vo
  * GET /products/:productId/qa
  */
 export const listProductQa = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { status } = req.query;
-    const qa = await productQaRepo.findByProduct(productId, status as ProductQaStatus | undefined);
-    successResponse(res, qa);
-  } catch (error: unknown) {
-    logger.error('Error listing product Q&A:', error);
-    errorResponse(res, (error as Error).message || 'Failed to list product Q&A');
-  }
+  const { productId } = req.params;
+  const { status } = req.query;
+  const qa = await productQaRepo.findByProduct(productId, status as ProductQaStatus | undefined);
+  successResponse(res, qa);
 };
 
 /**
@@ -898,23 +730,18 @@ export const listProductQa = async (req: TypedRequest, res: Response): Promise<v
  * PATCH /products/:productId/qa/:qaId/status
  */
 export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { qaId } = req.params;
-    const { status } = req.body as StatusBody;
-    if (!status) {
-      errorResponse(res, 'status is required', 400);
-      return;
-    }
-    const qa = await productQaRepo.updateStatus(qaId, status as ProductQaStatus);
-    if (!qa) {
-      errorResponse(res, 'Q&A not found', 404);
-      return;
-    }
-    successResponse(res, qa);
-  } catch (error: unknown) {
-    logger.error('Error updating Q&A status:', error);
-    errorResponse(res, (error as Error).message || 'Failed to update Q&A status');
+  const { qaId } = req.params;
+  const { status } = req.body as StatusBody;
+  if (!status) {
+    errorResponse(res, 'status is required', 400);
+    return;
   }
+  const qa = await productQaRepo.updateStatus(qaId, status as ProductQaStatus);
+  if (!qa) {
+    errorResponse(res, 'Q&A not found', 404);
+    return;
+  }
+  successResponse(res, qa);
 };
 
 // ============================================================================
@@ -926,18 +753,13 @@ export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<
  * GET /products/:productId/reviews/media
  */
 export const listReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { reviewId } = req.query;
-    if (!reviewId) {
-      errorResponse(res, 'reviewId query param is required', 400);
-      return;
-    }
-    const media = await productReviewMediaRepo.findByReview(reviewId as string);
-    successResponse(res, media);
-  } catch (error: unknown) {
-    logger.error('Error listing review media:', error);
-    errorResponse(res, (error as Error).message || 'Failed to list review media');
+  const { reviewId } = req.query;
+  if (!reviewId) {
+    errorResponse(res, 'reviewId query param is required', 400);
+    return;
   }
+  const media = await productReviewMediaRepo.findByReview(reviewId as string);
+  successResponse(res, media);
 };
 
 /**
@@ -945,18 +767,13 @@ export const listReviewMedia = async (req: TypedRequest, res: Response): Promise
  * DELETE /products/:productId/reviews/media/:mediaId
  */
 export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { mediaId } = req.params;
-    const deleted = await productReviewMediaRepo.delete(mediaId);
-    if (!deleted) {
-      errorResponse(res, 'Review media not found', 404);
-      return;
-    }
-    successResponse(res, { deleted: true });
-  } catch (error: unknown) {
-    logger.error('Error deleting review media:', error);
-    errorResponse(res, (error as Error).message || 'Failed to delete review media');
+  const { mediaId } = req.params;
+  const deleted = await productReviewMediaRepo.delete(mediaId);
+  if (!deleted) {
+    errorResponse(res, 'Review media not found', 404);
+    return;
   }
+  successResponse(res, { deleted: true });
 };
 
 // ============================================================================
@@ -968,13 +785,8 @@ export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promi
  * GET /collections
  */
 export const listCollections = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const collections = await productCollectionRepo.findAll();
-    successResponse(res, collections);
-  } catch (error: unknown) {
-    logger.error('Error listing collections:', error);
-    errorResponse(res, (error as Error).message || 'Failed to list collections');
-  }
+  const collections = await productCollectionRepo.findAll();
+  successResponse(res, collections);
 };
 
 /**
@@ -982,35 +794,30 @@ export const listCollections = async (req: TypedRequest, res: Response): Promise
  * POST /collections
  */
 export const createCollection = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?.id;
-    const { name, slug, description, imageUrl, isActive, position, addProducts } = req.body as CollectionBody;
-    if (!name?.trim()) {
-      errorResponse(res, 'name is required', 400);
-      return;
-    }
-    if (!slug?.trim()) {
-      errorResponse(res, 'slug is required', 400);
-      return;
-    }
-    const command = new ManageProductCollectionCommand(
-      name,
-      slug,
-      undefined,
-      description,
-      imageUrl,
-      isActive,
-      position,
-      organizationId,
-      addProducts,
-    );
-    const useCase = new ManageProductCollectionUseCase();
-    const result = await useCase.execute(command);
-    successResponse(res, result, 201);
-  } catch (error: unknown) {
-    logger.error('Error creating collection:', error);
-    errorResponse(res, (error as Error).message || 'Failed to create collection', 400);
+  const organizationId = req.user?.organizationId || req.user?.id;
+  const { name, slug, description, imageUrl, isActive, position, addProducts } = req.body as CollectionBody;
+  if (!name?.trim()) {
+    errorResponse(res, 'name is required', 400);
+    return;
   }
+  if (!slug?.trim()) {
+    errorResponse(res, 'slug is required', 400);
+    return;
+  }
+  const command = new ManageProductCollectionCommand(
+    name,
+    slug,
+    undefined,
+    description,
+    imageUrl,
+    isActive,
+    position,
+    organizationId,
+    addProducts,
+  );
+  const useCase = new ManageProductCollectionUseCase();
+  const result = await useCase.execute(command);
+  successResponse(res, result, 201);
 };
 
 /**
@@ -1018,38 +825,32 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
  * PUT /collections/:collectionId
  */
 export const updateCollection = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { collectionId } = req.params;
-    const organizationId = req.user?.organizationId || req.user?.id;
-    const { name, slug, description, imageUrl, isActive, position, addProducts, removeMapIds } = req.body as CollectionBody;
-    if (!name?.trim()) {
-      errorResponse(res, 'name is required', 400);
-      return;
-    }
-    if (!slug?.trim()) {
-      errorResponse(res, 'slug is required', 400);
-      return;
-    }
-    const command = new ManageProductCollectionCommand(
-      name,
-      slug,
-      collectionId,
-      description,
-      imageUrl,
-      isActive,
-      position,
-      organizationId,
-      addProducts,
-      removeMapIds,
-    );
-    const useCase = new ManageProductCollectionUseCase();
-    const result = await useCase.execute(command);
-    successResponse(res, result);
-  } catch (error: unknown) {
-    logger.error('Error updating collection:', error);
-    const status = (error as Error).message.includes('not found') ? 404 : 400;
-    errorResponse(res, (error as Error).message || 'Failed to update collection', status);
+  const { collectionId } = req.params;
+  const organizationId = req.user?.organizationId || req.user?.id;
+  const { name, slug, description, imageUrl, isActive, position, addProducts, removeMapIds } = req.body as CollectionBody;
+  if (!name?.trim()) {
+    errorResponse(res, 'name is required', 400);
+    return;
   }
+  if (!slug?.trim()) {
+    errorResponse(res, 'slug is required', 400);
+    return;
+  }
+  const command = new ManageProductCollectionCommand(
+    name,
+    slug,
+    collectionId,
+    description,
+    imageUrl,
+    isActive,
+    position,
+    organizationId,
+    addProducts,
+    removeMapIds,
+  );
+  const useCase = new ManageProductCollectionUseCase();
+  const result = await useCase.execute(command);
+  successResponse(res, result);
 };
 
 /**
@@ -1057,18 +858,13 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
  * DELETE /collections/:collectionId
  */
 export const deleteCollection = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { collectionId } = req.params;
-    const deleted = await productCollectionRepo.softDelete(collectionId);
-    if (!deleted) {
-      errorResponse(res, 'Collection not found', 404);
-      return;
-    }
-    successResponse(res, { deleted: true });
-  } catch (error: unknown) {
-    logger.error('Error deleting collection:', error);
-    errorResponse(res, (error as Error).message || 'Failed to delete collection');
+  const { collectionId } = req.params;
+  const deleted = await productCollectionRepo.softDelete(collectionId);
+  if (!deleted) {
+    errorResponse(res, 'Collection not found', 404);
+    return;
   }
+  successResponse(res, { deleted: true });
 };
 
 // ============================================================================
@@ -1076,79 +872,59 @@ export const deleteCollection = async (req: TypedRequest, res: Response): Promis
 // ============================================================================
 
 export const listDownloads = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { activeOnly } = req.query;
-    const downloads = await productDownloadRepo.findByProductId(productId, undefined, activeOnly === 'true');
-    successResponse(res, downloads);
-  } catch (error: unknown) {
-    logger.error('Error listing downloads:', error);
-    errorResponse(res, (error as Error).message || 'Failed to list downloads');
-  }
+  const { productId } = req.params;
+  const { activeOnly } = req.query;
+  const downloads = await productDownloadRepo.findByProductId(productId, undefined, activeOnly === 'true');
+  successResponse(res, downloads);
 };
 
 export const createDownload = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { name, fileUrl, filePath, fileSize, mimeType, maxDownloads, daysValid, isActive, sampleUrl, sortOrder, productVariantId } = req.body as DownloadBody;
-    if (!name?.trim()) {
-      errorResponse(res, 'name is required', 400);
-      return;
-    }
-    if (!fileUrl?.trim()) {
-      errorResponse(res, 'fileUrl is required', 400);
-      return;
-    }
-    const download = await productDownloadRepo.create({
-      productId,
-      productVariantId,
-      name,
-      fileUrl,
-      filePath,
-      fileSize,
-      mimeType,
-      maxDownloads,
-      daysValid,
-      isActive: isActive !== false,
-      sampleUrl,
-      sortOrder: sortOrder || 0,
-    });
-    successResponse(res, download, 201);
-  } catch (error: unknown) {
-    logger.error('Error creating download:', error);
-    errorResponse(res, (error as Error).message || 'Failed to create download', 400);
+  const { productId } = req.params;
+  const { name, fileUrl, filePath, fileSize, mimeType, maxDownloads, daysValid, isActive, sampleUrl, sortOrder, productVariantId } = req.body as DownloadBody;
+  if (!name?.trim()) {
+    errorResponse(res, 'name is required', 400);
+    return;
   }
+  if (!fileUrl?.trim()) {
+    errorResponse(res, 'fileUrl is required', 400);
+    return;
+  }
+  const download = await productDownloadRepo.create({
+    productId,
+    productVariantId,
+    name,
+    fileUrl,
+    filePath,
+    fileSize,
+    mimeType,
+    maxDownloads,
+    daysValid,
+    isActive: isActive !== false,
+    sampleUrl,
+    sortOrder: sortOrder || 0,
+  });
+  successResponse(res, download, 201);
 };
 
 export const updateDownload = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { downloadId } = req.params;
-    const body = req.body as DownloadBody;
-    const updated = await productDownloadRepo.update(downloadId, body);
-    if (!updated) {
-      errorResponse(res, 'Download not found', 404);
-      return;
-    }
-    successResponse(res, updated);
-  } catch (error: unknown) {
-    logger.error('Error updating download:', error);
-    errorResponse(res, (error as Error).message || 'Failed to update download');
+  const { downloadId } = req.params;
+  const body = req.body as DownloadBody;
+  const updated = await productDownloadRepo.update(downloadId, body);
+  if (!updated) {
+    errorResponse(res, 'Download not found', 404);
+    return;
   }
+  successResponse(res, updated);
 };
 
 export const deleteDownload = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { downloadId } = req.params;
-    const deleted = await productDownloadRepo.delete(downloadId);
-    if (!deleted) {
-      errorResponse(res, 'Download not found', 404);
-      return;
-    }
-    successResponse(res, { deleted: true });
-  } catch (error: unknown) {
-    logger.error('Error deleting download:', error);
-    errorResponse(res, (error as Error).message || 'Failed to delete download');
+  const { downloadId } = req.params;
+  const deleted = await productDownloadRepo.delete(downloadId);
+  if (!deleted) {
+    errorResponse(res, 'Download not found', 404);
+    return;
   }
+  successResponse(res, { deleted: true });
 };
 
 // ============================================================================
@@ -1156,56 +932,41 @@ export const deleteDownload = async (req: TypedRequest, res: Response): Promise<
 // ============================================================================
 
 export const listRelationships = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { type } = req.query;
-    const relationships = await productRelationshipRepo.findByProductId(productId, type as RelationType | undefined);
-    successResponse(res, relationships);
-  } catch (error: unknown) {
-    logger.error('Error listing relationships:', error);
-    errorResponse(res, (error as Error).message || 'Failed to list relationships');
-  }
+  const { productId } = req.params;
+  const { type } = req.query;
+  const relationships = await productRelationshipRepo.findByProductId(productId, type as RelationType | undefined);
+  successResponse(res, relationships);
 };
 
 export const createRelationship = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { relatedProductId, type, position, isAutomated } = req.body as RelationshipBody;
-    if (!relatedProductId) {
-      errorResponse(res, 'relatedProductId is required', 400);
-      return;
-    }
-    if (!type) {
-      errorResponse(res, 'type is required (related, accessory, cross_sell, up_sell, grouped)', 400);
-      return;
-    }
-    const relationship = await productRelationshipRepo.create({
-      productId,
-      relatedProductId,
-      type: type as RelationType,
-      position: position || 0,
-      isAutomated: isAutomated || false,
-    });
-    successResponse(res, relationship, 201);
-  } catch (error: unknown) {
-    logger.error('Error creating relationship:', error);
-    errorResponse(res, (error as Error).message || 'Failed to create relationship', 400);
+  const { productId } = req.params;
+  const { relatedProductId, type, position, isAutomated } = req.body as RelationshipBody;
+  if (!relatedProductId) {
+    errorResponse(res, 'relatedProductId is required', 400);
+    return;
   }
+  if (!type) {
+    errorResponse(res, 'type is required (related, accessory, cross_sell, up_sell, grouped)', 400);
+    return;
+  }
+  const relationship = await productRelationshipRepo.create({
+    productId,
+    relatedProductId,
+    type: type as RelationType,
+    position: position || 0,
+    isAutomated: isAutomated || false,
+  });
+  successResponse(res, relationship, 201);
 };
 
 export const deleteRelationship = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { relationshipId } = req.params;
-    const deleted = await productRelationshipRepo.delete(relationshipId);
-    if (!deleted) {
-      errorResponse(res, 'Relationship not found', 404);
-      return;
-    }
-    successResponse(res, { deleted: true });
-  } catch (error: unknown) {
-    logger.error('Error deleting relationship:', error);
-    errorResponse(res, (error as Error).message || 'Failed to delete relationship');
+  const { relationshipId } = req.params;
+  const deleted = await productRelationshipRepo.delete(relationshipId);
+  if (!deleted) {
+    errorResponse(res, 'Relationship not found', 404);
+    return;
   }
+  successResponse(res, { deleted: true });
 };
 
 // ============================================================================
@@ -1213,59 +974,49 @@ export const deleteRelationship = async (req: TypedRequest, res: Response): Prom
 // ============================================================================
 
 export const getVariantMatrix = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const variants = await productVariantRepo.findByProductId(productId);
-    const product = await ProductRepo.findById(productId);
-    if (!product) {
-      errorResponse(res, 'Product not found', 404);
-      return;
-    }
-    const matrix = variants.map(v => ({
-      variantId: v.id,
-      sku: v.sku,
-      name: v.name,
-      price: v.price,
-      compareAtPrice: v.compareAtPrice,
-      inventory: v.inventory,
-      isDefault: v.isDefault,
-      position: v.position,
-      options: v.options,
-      isActive: v.isActive,
-    }));
-    const optionAxes = matrix.length > 0
-      ? [...new Set(matrix.flatMap(v => v.options.map(o => o.name)))]
-      : [];
-    successResponse(res, { productId, productName: product.name, hasVariants: product.hasVariants, optionAxes, variants: matrix });
-  } catch (error: unknown) {
-    logger.error('Error getting variant matrix:', error);
-    errorResponse(res, (error as Error).message || 'Failed to get variant matrix');
+  const { productId } = req.params;
+  const variants = await productVariantRepo.findByProductId(productId);
+  const product = await ProductRepo.findById(productId);
+  if (!product) {
+    errorResponse(res, 'Product not found', 404);
+    return;
   }
+  const matrix = variants.map(v => ({
+    variantId: v.id,
+    sku: v.sku,
+    name: v.name,
+    price: v.price,
+    compareAtPrice: v.compareAtPrice,
+    inventory: v.inventory,
+    isDefault: v.isDefault,
+    position: v.position,
+    options: v.options,
+    isActive: v.isActive,
+  }));
+  const optionAxes = matrix.length > 0
+    ? [...new Set(matrix.flatMap(v => v.options.map(o => o.name)))]
+    : [];
+  successResponse(res, { productId, productName: product.name, hasVariants: product.hasVariants, optionAxes, variants: matrix });
 };
 
 export const configureVariant = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { options } = req.body as OptionsBody;
-    if (!options || !Array.isArray(options) || options.length === 0) {
-      errorResponse(res, 'options array is required', 400);
-      return;
-    }
-    const variants = await productVariantRepo.findByProductId(productId);
-    const match = variants.find(v =>
-      options.every((reqOpt: { name: string; value: string }) =>
-        v.options.some((vOpt: { name: string; value: string }) => vOpt.name === reqOpt.name && vOpt.value === reqOpt.value),
-      ),
-    );
-    if (!match) {
-      errorResponse(res, 'No matching variant found for the given options', 404);
-      return;
-    }
-    successResponse(res, match);
-  } catch (error: unknown) {
-    logger.error('Error configuring variant:', error);
-    errorResponse(res, (error as Error).message || 'Failed to configure variant');
+  const { productId } = req.params;
+  const { options } = req.body as OptionsBody;
+  if (!options || !Array.isArray(options) || options.length === 0) {
+    errorResponse(res, 'options array is required', 400);
+    return;
   }
+  const variants = await productVariantRepo.findByProductId(productId);
+  const match = variants.find(v =>
+    options.every((reqOpt: { name: string; value: string }) =>
+      v.options.some((vOpt: { name: string; value: string }) => vOpt.name === reqOpt.name && vOpt.value === reqOpt.value),
+    ),
+  );
+  if (!match) {
+    errorResponse(res, 'No matching variant found for the given options', 404);
+    return;
+  }
+  successResponse(res, match);
 };
 
 // ============================================================================
@@ -1273,20 +1024,15 @@ export const configureVariant = async (req: TypedRequest, res: Response): Promis
 // ============================================================================
 
 export const listGroupedChildren = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const relationships = await productRelationshipRepo.findByProductId(productId, 'grouped' as RelationType);
-    const childIds = relationships.map(r => r.relatedProductId);
-    const children: unknown[] = [];
-    for (const id of childIds) {
-      const p = await ProductRepo.findById(id);
-      if (p) children.push(p.toJSON());
-    }
-    successResponse(res, children);
-  } catch (error: unknown) {
-    logger.error('Error listing grouped children:', error);
-    errorResponse(res, (error as Error).message || 'Failed to list grouped children');
+  const { productId } = req.params;
+  const relationships = await productRelationshipRepo.findByProductId(productId, 'grouped' as RelationType);
+  const childIds = relationships.map(r => r.relatedProductId);
+  const children: unknown[] = [];
+  for (const id of childIds) {
+    const p = await ProductRepo.findById(id);
+    if (p) children.push(p.toJSON());
   }
+  successResponse(res, children);
 };
 
 // ============================================================================
@@ -1294,40 +1040,33 @@ export const listGroupedChildren = async (req: TypedRequest, res: Response): Pro
 // ============================================================================
 
 export const applyAttributeSet = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { attributeSetId } = req.body as AttributeSetBody;
-    if (!attributeSetId) {
-      errorResponse(res, 'attributeSetId is required', 400);
-      return;
-    }
-
-    const product = await ProductRepo.findById(productId);
-    if (!product) {
-      errorResponse(res, 'Product not found', 404);
-      return;
-    }
-
-    const attributeSetRepo = new ProductAttributeSetRepository();
-    const setWithAttrs = await attributeSetRepo.findByIdWithAttributes(attributeSetId);
-    if (!setWithAttrs) {
-      errorResponse(res, 'Attribute set not found', 404);
-      return;
-    }
-
-    const dynamicAttrRepo = new DynamicAttributeRepository();
-    const attrsToSet = setWithAttrs.attributes.map(attr => ({
-      attributeId: attr.productAttributeId,
-      value: attr.defaultValue || '',
-    }));
-
-    if (attrsToSet.length > 0) {
-      await dynamicAttrRepo.setProductAttributes(productId, attrsToSet);
-    }
-
-    successResponse(res, { applied: true, attributeSetId, attributesAssigned: attrsToSet.length });
-  } catch (error: unknown) {
-    logger.error('Error applying attribute set:', error);
-    errorResponse(res, (error as Error).message || 'Failed to apply attribute set');
+  const { productId } = req.params;
+  const { attributeSetId } = req.body as AttributeSetBody;
+  if (!attributeSetId) {
+    errorResponse(res, 'attributeSetId is required', 400);
+    return;
   }
+
+  const product = await ProductRepo.findById(productId);
+  if (!product) {
+    errorResponse(res, 'Product not found', 404);
+    return;
+  }
+
+  const setWithAttrs = await ProductAttributeSetRepository.findByIdWithAttributes(attributeSetId);
+  if (!setWithAttrs) {
+    errorResponse(res, 'Attribute set not found', 404);
+    return;
+  }
+
+  const attrsToSet = setWithAttrs.attributes.map(attr => ({
+    attributeId: attr.productAttributeId,
+    value: attr.defaultValue || '',
+  }));
+
+  if (attrsToSet.length > 0) {
+    await DynamicAttributeRepository.setProductAttributes(productId, attrsToSet);
+  }
+
+  successResponse(res, { applied: true, attributeSetId, attributesAssigned: attrsToSet.length });
 };

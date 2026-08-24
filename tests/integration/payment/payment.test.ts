@@ -6,7 +6,9 @@
 import axios, { AxiosInstance } from 'axios';
 import * as crypto from 'crypto';
 import { InitiatePaymentUseCase, InitiatePaymentCommand } from '../../../modules/payment/application/useCases/InitiatePayment';
-import PaymentRepo from '../../../modules/payment/infrastructure/repositories/PaymentRepository';
+import { PaymentDataRepository } from '../../../modules/payment/infrastructure';
+
+const PaymentRepo = PaymentDataRepository.payments;
 import { eventBus, EventPayload } from '../../../libs/events/eventBus';
 import { PaymentTransaction } from '../../../modules/payment/domain/entities/PaymentTransaction';
 import { generateUUID } from '../../../libs/uuid';

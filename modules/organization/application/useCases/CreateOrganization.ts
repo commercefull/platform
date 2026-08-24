@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { OrganizationEmailAlreadyExistsError } from '../../domain/errors/OrganizationErrors';
 
 export interface CreateOrganizationInput {
   name: string;
@@ -34,7 +35,7 @@ export class CreateOrganizationUseCase {
   async execute(input: CreateOrganizationInput): Promise<CreateOrganizationOutput> {
     const existing = await this.repository.findByEmail(input.email);
     if (existing) {
-      throw new Error(`Organization with email '${input.email}' already exists`);
+      throw new OrganizationEmailAlreadyExistsError(input.email);
     }
 
     const org = await this.repository.create({

@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { SupportTicketNotFoundError } from '../../domain/errors/SupportErrors';
 
 // ============================================================================
 // Table Constants
@@ -393,7 +394,7 @@ export async function createTicket(ticket: {
 export async function updateTicket(supportTicketId: string, updates: Partial<SupportTicket>): Promise<SupportTicket> {
   const now = new Date().toISOString();
   const ticket = await getTicket(supportTicketId);
-  if (!ticket) throw new Error('Ticket not found');
+  if (!ticket) throw new SupportTicketNotFoundError(supportTicketId);
 
   // Handle agent reassignment
   if (updates.assignedAgentId && updates.assignedAgentId !== ticket.assignedAgentId) {
@@ -421,7 +422,7 @@ export async function updateTicket(supportTicketId: string, updates: Partial<Sup
 export async function resolveTicket(supportTicketId: string, resolutionType: string, resolutionNotes?: string): Promise<void> {
   const now = new Date();
   const ticket = await getTicket(supportTicketId);
-  if (!ticket) throw new Error('Ticket not found');
+  if (!ticket) throw new SupportTicketNotFoundError(supportTicketId);
 
   const resolutionTimeMinutes = Math.floor((now.getTime() - ticket.createdAt.getTime()) / (1000 * 60));
 
@@ -527,7 +528,7 @@ export async function addMessage(message: {
 }): Promise<SupportMessage> {
   const now = new Date();
   const ticket = await getTicket(message.supportTicketId);
-  if (!ticket) throw new Error('Ticket not found');
+  if (!ticket) throw new SupportTicketNotFoundError(message.supportTicketId);
 
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "supportMessage" (

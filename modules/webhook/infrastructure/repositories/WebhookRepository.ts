@@ -8,6 +8,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { WebhookEndpointProps } from '../../domain/entities/WebhookEndpoint';
 import { WebhookDeliveryProps } from '../../domain/entities/WebhookDelivery';
+import { FailedToCreateWebhookEndpointError, FailedToCreateWebhookDeliveryError } from '../../domain/errors/WebhookErrors';
 import {
   WebhookRepositoryInterface,
   WebhookEndpointFilters,
@@ -40,7 +41,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
       JSON.stringify(props.retryPolicy),
     ];
     const result = await queryOne<WebhookEndpointProps>(sql, values);
-    if (!result) throw new Error('Failed to create webhook endpoint');
+    if (!result) throw new FailedToCreateWebhookEndpointError();
     return this.parseEndpoint(result);
   }
 
@@ -179,7 +180,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
       props.duration,
     ];
     const result = await queryOne<WebhookDeliveryProps>(sql, values);
-    if (!result) throw new Error('Failed to create webhook delivery');
+    if (!result) throw new FailedToCreateWebhookDeliveryError();
     return result;
   }
 
@@ -273,6 +274,38 @@ class WebhookRepository implements WebhookRepositoryInterface {
       LIMIT 100
     `;
     return (await query<WebhookDeliveryProps[]>(sql)) || [];
+  }
+
+  async claimPendingRetries(nodeId: string, batchSize: number): Promise<WebhookDeliveryProps[]> {
+    const sql = `
+      UPDATE "${Table.WebhookDelivery}"
+      SET "lockedBy" = $1,
+          "lockedAt" = now(),
+          "updatedAt" = now()
+      WHERE "webhookDeliveryId" IN (
+        SELECT "webhookDeliveryId" FROM "${Table.WebhookDelivery}"
+        WHERE "status" = 'retrying'
+          AND "nextRetryAt" <= now()
+          AND "lockedBy" IS NULL
+        ORDER BY "nextRetryAt" ASC
+        LIMIT $2
+        FOR UPDATE SKIP LOCKED
+      )
+      RETURNING *
+    `;
+    const results = await query<WebhookDeliveryProps[]>(sql, [nodeId, batchSize]);
+    return results || [];
+  }
+
+  async releaseDeliveryLock(id: string): Promise<void> {
+    const sql = `
+      UPDATE "${Table.WebhookDelivery}"
+      SET "lockedBy" = NULL,
+          "lockedAt" = NULL,
+          "updatedAt" = now()
+      WHERE "webhookDeliveryId" = $1
+    `;
+    await query(sql, [id]);
   }
 
   // =========================================================================

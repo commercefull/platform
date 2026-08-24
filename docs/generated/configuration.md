@@ -37,10 +37,17 @@
 | `MJ_APIKEY_PUBLIC` | `pubkey-1234567890` | Mailjet |
 | `MJ_APIKEY_PRIVATE` | `privkey-1234567890` | — |
 | `CUSTOMER_JWT_SECRET` | `your-secret-key-should-be-in-env` | — |
-| `MERCHANT_JWT_SECRET` | `your-secret-key-should-be-in-env` | — |
+| `ORGANIZATION_JWT_SECRET` | `your-secret-key-should-be-in-env` | — |
 | `SESSION_SECRET` | `—` | — |
 | `COOKIE_SECRET` | `—` | — |
 | `COOKIE_DOMAIN` | `—` | — |
 | `ALLOWED_ORIGINS` | `—` | — |
 | `PAYMENT_WEBHOOK_SECRET` | `test-secret-key` | — |
+
+## SSO / SCIM
+
+| Variable | Default | Description |
+|---|---|---|
+| `SCIM_BEARER_TOKEN` | `generate-a-secure-random-string-for-scim-api` | Bearer token for SCIM 2.0 API authentication |
+| `JWT_EXPIRES_IN` | `7d` | JWT token expiration duration |
 

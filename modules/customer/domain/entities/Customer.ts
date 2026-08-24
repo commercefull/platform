@@ -3,6 +3,8 @@
  * The main entity that manages customer lifecycle and business logic
  */
 
+import { CustomerAddressNotFoundError } from '../errors/CustomerErrors';
+
 export type CustomerStatus = 'active' | 'inactive' | 'suspended' | 'deleted';
 
 export interface CustomerAddress {
@@ -270,7 +272,7 @@ export class Customer {
   setDefaultAddress(addressId: string, type: 'billing' | 'shipping'): void {
     const address = this.props.addresses.find(a => a.addressId === addressId);
     if (!address) {
-      throw new Error('Address not found');
+      throw new CustomerAddressNotFoundError(addressId);
     }
 
     // Update isDefault flag on addresses

@@ -1,6 +1,10 @@
 import { AxiosInstance } from 'axios';
 import axios from 'axios';
-import { cleanupCustomerTests, testCustomer, testCustomerAddress, testCustomerGroup, testCustomerWishlist } from './testUtils';
+import {
+  SEEDED_CUSTOMER_ID,
+  SEEDED_CUSTOMER_ADDRESS_ID,
+  SEEDED_CUSTOMER_GROUP_ID,
+} from './testUtils';
 
 const createClient = () =>
   axios.create({
@@ -16,10 +20,9 @@ const createClient = () =>
 describe('Customer Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testCustomerId: string;
-  let testCustomerAddressId: string;
-  let testCustomerGroupId: string | null;
-  let testWishlistId: string | null;
+  const testCustomerId = SEEDED_CUSTOMER_ID;
+  const testCustomerAddressId = SEEDED_CUSTOMER_ADDRESS_ID;
+  const testCustomerGroupId = SEEDED_CUSTOMER_GROUP_ID;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
@@ -38,84 +41,6 @@ describe('Customer Feature Tests', () => {
       adminToken = loginResponse.data?.accessToken || '';
     } catch (error) {
       console.log('Warning: Login failed for customer tests:', error instanceof Error ? (error as Error).message : String(error));
-    }
-
-    // Create test customer and related entities
-    try {
-      if (adminToken) {
-        // Create Customer
-        const customerResponse = await client.post('/business/customers', testCustomer, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-
-        if (customerResponse.data?.success && customerResponse.data?.data) {
-          testCustomerId = customerResponse.data.data.customerId || customerResponse.data.data.id || '';
-
-          // Create Customer Address
-          if (testCustomerId) {
-            const addressResponse = await client.post(`/business/customers/${testCustomerId}/addresses`, testCustomerAddress, {
-              headers: { Authorization: `Bearer ${adminToken}` },
-            });
-
-            if (addressResponse.data?.success && addressResponse.data?.data) {
-              testCustomerAddressId =
-                addressResponse.data.data.customerAddressId || addressResponse.data.data.addressId || addressResponse.data.data.id || '';
-            }
-
-            // Create Customer Group (optional)
-            try {
-              const groupResponse = await client.post('/business/customer-groups', testCustomerGroup, {
-                headers: { Authorization: `Bearer ${adminToken}` },
-              });
-
-              if (groupResponse.data?.success && groupResponse.data?.data) {
-                testCustomerGroupId = groupResponse.data.data.customerGroupId || groupResponse.data.data.id;
-
-                // Add Customer to Group
-                await client.post(
-                  `/business/customers/${testCustomerId}/groups/${testCustomerGroupId}`,
-                  {},
-                  {
-                    headers: { Authorization: `Bearer ${adminToken}` },
-                  },
-                );
-              }
-            } catch {
-              testCustomerGroupId = null;
-            }
-
-            // Create Wishlist (optional)
-            try {
-              const wishlistResponse = await client.post(
-                `/business/customers/${testCustomerId}/wishlists`,
-                {
-                  ...testCustomerWishlist,
-                },
-                {
-                  headers: { Authorization: `Bearer ${adminToken}` },
-                },
-              );
-
-              if (wishlistResponse.data?.success && wishlistResponse.data?.data) {
-                testWishlistId = wishlistResponse.data.data.customerWishlistId || wishlistResponse.data.data.id;
-              }
-            } catch {
-              testWishlistId = null;
-            }
-          }
-        }
-      }
-    } catch {}
-  });
-
-  afterAll(async () => {
-    if (adminToken && testCustomerId) {
-      await cleanupCustomerTests(client, adminToken, {
-        testCustomerId,
-        testCustomerAddressId,
-        testCustomerGroupId,
-        testWishlistId,
-      });
     }
   });
 
@@ -283,10 +208,10 @@ describe('Customer Feature Tests', () => {
       expect(response.data.data.customerGroupId || response.data.data.id).toBe(testCustomerGroupId);
 
       // Verify properties from TypeScript interface are in camelCase
-      expect(response.data.data).toHaveProperty('name', testCustomerGroup.name);
-      expect(response.data.data).toHaveProperty('description', testCustomerGroup.description);
-      expect(response.data.data).toHaveProperty('discountPercent', testCustomerGroup.discountPercent);
-      expect(response.data.data).toHaveProperty('isActive', testCustomerGroup.isActive);
+      expect(response.data.data).toHaveProperty('name');
+      expect(response.data.data).toHaveProperty('description');
+      expect(response.data.data).toHaveProperty('discountPercent');
+      expect(response.data.data).toHaveProperty('isActive');
 
       // Make sure no snake_case properties leaked through
       expect(response.data.data).not.toHaveProperty('discount_percentage');

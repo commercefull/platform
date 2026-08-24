@@ -7,7 +7,11 @@
  * Validates: Requirements 1.9
  */
 
-import storedPaymentMethodRepo, { StoredPaymentMethod } from '../../infrastructure/repositories/storedPaymentMethodRepo';
+import { PaymentRepository, StoredPaymentMethod } from '../../domain/repositories/PaymentRepository';
+import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+
+const PaymentRepo = paymentDataRepository.payments;
+import { FailedToCreateStoredPaymentMethodError, FailedToRetrieveSavedPaymentMethodError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
 // Command
@@ -51,10 +55,10 @@ export interface SaveStoredPaymentMethodResponse {
 // ============================================================================
 
 export class SaveStoredPaymentMethodUseCase {
-  constructor(private readonly repo: typeof storedPaymentMethodRepo = storedPaymentMethodRepo) {}
+  constructor(private readonly repo: PaymentRepository = PaymentRepo) {}
 
   async execute(command: SaveStoredPaymentMethodCommand): Promise<SaveStoredPaymentMethodResponse> {
-    const method = await this.repo.create({
+    const method = await this.repo.createStoredMethod({
       customerId: command.customerId,
       organizationId: command.organizationId,
       type: command.type,
@@ -68,17 +72,17 @@ export class SaveStoredPaymentMethodUseCase {
     });
 
     if (!method) {
-      throw new Error('Failed to create stored payment method');
+      throw new FailedToCreateStoredPaymentMethodError();
     }
 
     // Enforce single-default invariant: if this method is default, unset all others
     if (command.isDefault) {
-      await this.repo.setDefault(method.storedPaymentMethodId, command.customerId);
+      await this.repo.setDefaultStoredMethod(method.storedPaymentMethodId, command.customerId);
     }
 
-    const saved = await this.repo.findById(method.storedPaymentMethodId);
+    const saved = await this.repo.findStoredMethodById(method.storedPaymentMethodId);
     if (!saved) {
-      throw new Error('Failed to retrieve saved payment method');
+      throw new FailedToRetrieveSavedPaymentMethodError();
     }
 
     return this.mapToResponse(saved);

@@ -3,8 +3,9 @@
  * Creates a copy of an existing template
  */
 
-import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
+import { ContentTemplateNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class DuplicateTemplateCommand {
   constructor(
@@ -28,13 +29,13 @@ export class DuplicateTemplateUseCase {
 
   async execute(command: DuplicateTemplateCommand): Promise<DuplicateTemplateResponse> {
     if (!command.templateId || !command.newName || !command.newSlug) {
-      throw new Error('Template ID, new name, and new slug are required');
+      throw new ContentValidationError('Template ID, new name, and new slug are required');
     }
 
     // Get original template
     const original = await this.contentRepo.findTemplateById(command.templateId);
     if (!original) {
-      throw new Error(`Template with ID ${command.templateId} not found`);
+      throw new ContentTemplateNotFoundError(command.templateId);
     }
 
     // Create duplicate

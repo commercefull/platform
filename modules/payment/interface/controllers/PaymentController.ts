@@ -2,10 +2,11 @@
  * Payment Controller
  */
 
-import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import PaymentRepo from '../../infrastructure/repositories/PaymentRepository';
+import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+
+const PaymentRepo = paymentDataRepository.payments;
 import { InitiatePaymentCommand, InitiatePaymentUseCase } from '../../application/useCases/InitiatePayment';
 import { ProcessPaymentRefundCommand, ProcessPaymentRefundUseCase } from '../../application/useCases/ProcessRefund';
 import {
@@ -30,49 +31,34 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
 // ============================================================================
 
 export const getMyTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
-    if (!customerId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    const { limit, offset } = req.query;
-    const result = await PaymentRepo.findTransactionsByCustomerId(customerId, {
-      limit: parseInt(limit as string) || 20,
-      offset: parseInt(offset as string) || 0,
-    });
-
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get transactions', 500);
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
+  if (!customerId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const { limit, offset } = req.query;
+  const result = await PaymentRepo.findTransactionsByCustomerId(customerId, {
+    limit: parseInt(limit as string) || 20,
+    offset: parseInt(offset as string) || 0,
+  });
+
+  respond(req, res, result);
+  
 };
 
 export const getTransactionByOrder = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { orderId } = req.params;
-    const transactions = await PaymentRepo.findTransactionsByOrderId(orderId);
-    respond(req, res, { transactions: transactions.map(t => t.toJSON()) });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get transactions', 500);
-  }
+  const { orderId } = req.params;
+  const transactions = await PaymentRepo.findTransactionsByOrderId(orderId);
+  respond(req, res, { transactions: transactions.map(t => t.toJSON()) });
+  
 };
 
 export const getPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { currency } = req.query;
-    const methods = await PaymentRepo.getEnabledPaymentMethods('default', currency as string);
-    respond(req, res, { paymentMethods: methods });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get payment methods', 500);
-  }
+  const { currency } = req.query;
+  const methods = await PaymentRepo.getEnabledPaymentMethods('default', currency as string);
+  respond(req, res, { paymentMethods: methods });
+  
 };
 
 // ============================================================================
@@ -80,138 +66,99 @@ export const getPaymentMethods = async (req: TypedRequest, res: Response): Promi
 // ============================================================================
 
 export const listTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { orderId, customerId, status, gatewayId, startDate, endDate, limit, offset, orderBy, orderDirection } = req.query;
+  const { orderId, customerId, status, gatewayId, startDate, endDate, limit, offset, orderBy, orderDirection } = req.query;
 
-    const filters: {
-      orderId?: string;
-      customerId?: string;
-      status?: TransactionStatus;
-      gatewayId?: string;
-      startDate?: Date;
-      endDate?: Date;
-    } = {};
-    if (orderId) filters.orderId = orderId as string;
-    if (customerId) filters.customerId = customerId as string;
-    if (status) filters.status = status as TransactionStatus;
-    if (gatewayId) filters.gatewayId = gatewayId as string;
-    if (startDate) filters.startDate = new Date(startDate as string);
-    if (endDate) filters.endDate = new Date(endDate as string);
+  const filters: {
+    orderId?: string;
+    customerId?: string;
+    status?: TransactionStatus;
+    gatewayId?: string;
+    startDate?: Date;
+    endDate?: Date;
+  } = {};
+  if (orderId) filters.orderId = orderId as string;
+  if (customerId) filters.customerId = customerId as string;
+  if (status) filters.status = status as TransactionStatus;
+  if (gatewayId) filters.gatewayId = gatewayId as string;
+  if (startDate) filters.startDate = new Date(startDate as string);
+  if (endDate) filters.endDate = new Date(endDate as string);
 
-    const command = new ListTransactionsCommand(
-      Object.keys(filters).length > 0 ? filters : undefined,
-      parseInt(limit as string) || 50,
-      parseInt(offset as string) || 0,
-      (orderBy as string) || 'createdAt',
-      (orderDirection as 'asc' | 'desc') || 'desc',
-    );
+  const command = new ListTransactionsCommand(
+    Object.keys(filters).length > 0 ? filters : undefined,
+    parseInt(limit as string) || 50,
+    parseInt(offset as string) || 0,
+    (orderBy as string) || 'createdAt',
+    (orderDirection as 'asc' | 'desc') || 'desc',
+  );
 
-    const useCase = new ListTransactionsUseCase(PaymentRepo);
-    const result = await useCase.execute(command);
+  const useCase = new ListTransactionsUseCase(PaymentRepo);
+  const result = await useCase.execute(command);
 
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to list transactions', 500);
-  }
+  respond(req, res, result);
+  
 };
 
 export const getTransaction = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { transactionId } = req.params;
-    const command = new GetTransactionCommand(transactionId);
-    const useCase = new GetTransactionUseCase(PaymentRepo);
-    const transaction = await useCase.execute(command);
+  const { transactionId } = req.params;
+  const command = new GetTransactionCommand(transactionId);
+  const useCase = new GetTransactionUseCase(PaymentRepo);
+  const transaction = await useCase.execute(command);
 
-    if (!transaction) {
-      respondError(req, res, 'Transaction not found', 404);
-      return;
-    }
-
-    respond(req, res, transaction);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get transaction', 500);
+  if (!transaction) {
+    respondError(req, res, 'Transaction not found', 404);
+    return;
   }
+
+  respond(req, res, transaction);
+  
 };
 
 export const initiatePayment = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const body = req.body as { orderId?: string; amount?: number; currency?: string; paymentMethodConfigId?: string; customerId?: string };
-    const { orderId, amount, currency, paymentMethodConfigId, customerId } = body;
+  const body = req.body as { orderId?: string; amount?: number; currency?: string; paymentMethodConfigId?: string; customerId?: string };
+  const { orderId, amount, currency, paymentMethodConfigId, customerId } = body;
 
-    if (!orderId || !amount || !currency || !paymentMethodConfigId) {
-      respondError(req, res, 'Missing required fields', 400);
-      return;
-    }
-
-    const command = new InitiatePaymentCommand(orderId, amount, currency, paymentMethodConfigId, customerId, req.ip);
-
-    const useCase = new InitiatePaymentUseCase(PaymentRepo);
-    const result = await useCase.execute(command);
-
-    respond(req, res, result, 201);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to initiate payment', 500);
+  if (!orderId || !amount || !currency || !paymentMethodConfigId) {
+    respondError(req, res, 'Missing required fields', 400);
+    return;
   }
+
+  const command = new InitiatePaymentCommand(orderId, amount, currency, paymentMethodConfigId, customerId, req.ip);
+
+  const useCase = new InitiatePaymentUseCase(PaymentRepo);
+  const result = await useCase.execute(command);
+
+  respond(req, res, result, 201);
+  
 };
 
 export const processRefund = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { transactionId } = req.params;
-    const body = req.body as { amount?: number; reason?: string };
-    const { amount, reason } = body;
+  const { transactionId } = req.params;
+  const body = req.body as { amount?: number; reason?: string };
+  const { amount, reason } = body;
 
-    if (!amount || amount <= 0) {
-      respondError(req, res, 'Amount must be greater than zero', 400);
-      return;
-    }
-
-    const command = new ProcessPaymentRefundCommand(transactionId, amount, reason);
-    const useCase = new ProcessPaymentRefundUseCase(PaymentRepo);
-    const result = await useCase.execute(command);
-
-    respond(req, res, result, 201);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    if ((error as Error).message.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
-      respondError(req, res, 'Transaction not found', 404);
-      return;
-    }
-    if ((error as Error).message.includes('cannot be refunded') || (error as Error).message.includes('exceeds')) {
-      respondError(req, res, (error as Error).message, 400);
-      return;
-    }
-    respondError(req, res, (error as Error).message || 'Failed to process refund', 500);
+  if (!amount || amount <= 0) {
+    respondError(req, res, 'Amount must be greater than zero', 400);
+    return;
   }
+
+  const command = new ProcessPaymentRefundCommand(transactionId, amount, reason);
+  const useCase = new ProcessPaymentRefundUseCase(PaymentRepo);
+  const result = await useCase.execute(command);
+
+  respond(req, res, result, 201);
 };
 
 export const getRefunds = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { transactionId } = req.params;
+  const { transactionId } = req.params;
 
-    const transaction = await PaymentRepo.findTransactionById(transactionId);
-    if (!transaction) {
-      respondError(req, res, 'Transaction not found', 404);
-      return;
-    }
-
-    const refunds = await PaymentRepo.findRefundsByTransactionId(transactionId);
-    respond(req, res, { refunds: refunds.map(r => r.toJSON()) });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    if ((error as Error).message?.includes('not found') || (error as Error).message?.includes('invalid input syntax for type uuid')) {
-      respondError(req, res, 'Transaction not found', 404);
-      return;
-    }
-    respondError(req, res, (error as Error).message || 'Failed to get refunds', 500);
+  const transaction = await PaymentRepo.findTransactionById(transactionId);
+  if (!transaction) {
+    respondError(req, res, 'Transaction not found', 404);
+    return;
   }
+
+  const refunds = await PaymentRepo.findRefundsByTransactionId(transactionId);
+  respond(req, res, { refunds: refunds.map(r => r.toJSON()) });
 };
 
 // ============================================================================
@@ -219,185 +166,160 @@ export const getRefunds = async (req: TypedRequest, res: Response): Promise<void
 // ============================================================================
 
 export const listGateways = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
-    if (!organizationId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "paymentGateway" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "name" ASC',
-      [organizationId],
-    );
-    respond(req, res, rows || []);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to list gateways', 500);
+  const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
+  if (!organizationId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const rows = await query<Record<string, unknown>[]>(
+    'SELECT * FROM "paymentGateway" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "name" ASC',
+    [organizationId],
+  );
+  respond(req, res, rows || []);
+  
 };
 
 export const getGateway = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { gatewayId } = req.params;
-    const gateway = await queryOne<Record<string, unknown>>(
-      'SELECT * FROM "paymentGateway" WHERE "paymentGatewayId" = $1 AND "deletedAt" IS NULL',
-      [gatewayId],
-    );
+  const { gatewayId } = req.params;
+  const gateway = await queryOne<Record<string, unknown>>(
+    'SELECT * FROM "paymentGateway" WHERE "paymentGatewayId" = $1 AND "deletedAt" IS NULL',
+    [gatewayId],
+  );
 
-    if (!gateway) {
-      respondError(req, res, 'Gateway not found', 404);
-      return;
-    }
-    respond(req, res, gateway);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get gateway', 500);
+  if (!gateway) {
+    respondError(req, res, 'Gateway not found', 404);
+    return;
   }
+  respond(req, res, gateway);
+  
 };
 
 export const createGateway = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
-    if (!organizationId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
+  const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
+  if (!organizationId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
+  }
 
-    const body = req.body as {
-      name?: string;
-      provider?: string;
-      isActive?: boolean;
-      isDefault?: boolean;
-      isTestMode?: boolean;
-      apiKey?: string;
-      apiSecret?: string;
-      publicKey?: string;
-      webhookSecret?: string;
-      apiEndpoint?: string;
-      supportedPaymentMethods?: string;
-    };
+  const body = req.body as {
+    name?: string;
+    provider?: string;
+    isActive?: boolean;
+    isDefault?: boolean;
+    isTestMode?: boolean;
+    apiKey?: string;
+    apiSecret?: string;
+    publicKey?: string;
+    webhookSecret?: string;
+    apiEndpoint?: string;
+    supportedPaymentMethods?: string;
+  };
 
-    const {
+  const {
+    name,
+    provider,
+    isActive,
+    isDefault,
+    isTestMode,
+    apiKey,
+    apiSecret,
+    publicKey,
+    webhookSecret,
+    apiEndpoint,
+    supportedPaymentMethods,
+  } = body;
+
+  if (!name || !provider) {
+    respondError(req, res, 'Name and provider are required', 400);
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  const result = await queryOne<Record<string, unknown>>(
+    `INSERT INTO "paymentGateway" (
+      "organizationId", name, provider, "isActive", "isDefault", "isTestMode",
+      "apiKey", "apiSecret", "publicKey", "webhookSecret", "apiEndpoint", "supportedPaymentMethods",
+      "createdAt", "updatedAt"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+    RETURNING *`,
+    [
+      organizationId,
       name,
       provider,
-      isActive,
-      isDefault,
-      isTestMode,
+      isActive ?? true,
+      isDefault ?? false,
+      isTestMode ?? false,
       apiKey,
       apiSecret,
       publicKey,
       webhookSecret,
       apiEndpoint,
-      supportedPaymentMethods,
-    } = body;
+      supportedPaymentMethods || 'creditCard',
+      now,
+      now,
+    ],
+  );
 
-    if (!name || !provider) {
-      respondError(req, res, 'Name and provider are required', 400);
-      return;
-    }
-
-    const now = new Date().toISOString();
-
-    const result = await queryOne<Record<string, unknown>>(
-      `INSERT INTO "paymentGateway" (
-        "organizationId", name, provider, "isActive", "isDefault", "isTestMode",
-        "apiKey", "apiSecret", "publicKey", "webhookSecret", "apiEndpoint", "supportedPaymentMethods",
-        "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-      RETURNING *`,
-      [
-        organizationId,
-        name,
-        provider,
-        isActive ?? true,
-        isDefault ?? false,
-        isTestMode ?? false,
-        apiKey,
-        apiSecret,
-        publicKey,
-        webhookSecret,
-        apiEndpoint,
-        supportedPaymentMethods || 'creditCard',
-        now,
-        now,
-      ],
-    );
-
-    respond(req, res, result, 201);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to create gateway', 500);
-  }
+  respond(req, res, result, 201);
+  
 };
 
 export const updateGateway = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { gatewayId } = req.params;
-    const updates = req.body as Record<string, unknown>;
+  const { gatewayId } = req.params;
+  const updates = req.body as Record<string, unknown>;
 
-    const now = new Date().toISOString();
+  const now = new Date().toISOString();
 
-    // Build dynamic update
-    const allowedFields = [
-      'name',
-      'provider',
-      'isActive',
-      'isDefault',
-      'isTestMode',
-      'apiKey',
-      'apiSecret',
-      'publicKey',
-      'webhookSecret',
-      'apiEndpoint',
-      'supportedPaymentMethods',
-    ];
-    const setStatements: string[] = ['"updatedAt" = $1'];
-    const values: unknown[] = [now];
-    let paramIndex = 2;
+  // Build dynamic update
+  const allowedFields = [
+    'name',
+    'provider',
+    'isActive',
+    'isDefault',
+    'isTestMode',
+    'apiKey',
+    'apiSecret',
+    'publicKey',
+    'webhookSecret',
+    'apiEndpoint',
+    'supportedPaymentMethods',
+  ];
+  const setStatements: string[] = ['"updatedAt" = $1'];
+  const values: unknown[] = [now];
+  let paramIndex = 2;
 
-    for (const field of allowedFields) {
-      if (updates[field] !== undefined) {
-        setStatements.push(`"${field}" = $${paramIndex++}`);
-        values.push(updates[field]);
-      }
+  for (const field of allowedFields) {
+    if (updates[field] !== undefined) {
+      setStatements.push(`"${field}" = $${paramIndex++}`);
+      values.push(updates[field]);
     }
-
-    values.push(gatewayId);
-
-    const result = await queryOne<Record<string, unknown>>(
-      `UPDATE "paymentGateway" SET ${setStatements.join(', ')} WHERE "paymentGatewayId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
-      values,
-    );
-
-    if (!result) {
-      respondError(req, res, 'Gateway not found', 404);
-      return;
-    }
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to update gateway', 500);
   }
+
+  values.push(gatewayId);
+
+  const result = await queryOne<Record<string, unknown>>(
+    `UPDATE "paymentGateway" SET ${setStatements.join(', ')} WHERE "paymentGatewayId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
+    values,
+  );
+
+  if (!result) {
+    respondError(req, res, 'Gateway not found', 404);
+    return;
+  }
+  respond(req, res, result);
+  
 };
 
 export const deleteGateway = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { gatewayId } = req.params;
-    const now = new Date().toISOString();
+  const { gatewayId } = req.params;
+  const now = new Date().toISOString();
 
-    await query('UPDATE "paymentGateway" SET "deletedAt" = $1 WHERE "paymentGatewayId" = $2', [now, gatewayId]);
+  await query('UPDATE "paymentGateway" SET "deletedAt" = $1 WHERE "paymentGatewayId" = $2', [now, gatewayId]);
 
-    respond(req, res, { success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to delete gateway', 500);
-  }
+  respond(req, res, { success: true });
+  
 };
 
 // ============================================================================
@@ -405,206 +327,176 @@ export const deleteGateway = async (req: TypedRequest, res: Response): Promise<v
 // ============================================================================
 
 export const listMethodConfigs = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
-    if (!organizationId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
-
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "paymentMethodConfig" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "displayOrder" ASC',
-      [organizationId],
-    );
-    respond(req, res, rows || []);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to list method configs', 500);
+  const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
+  if (!organizationId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
   }
+
+  const rows = await query<Record<string, unknown>[]>(
+    'SELECT * FROM "paymentMethodConfig" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "displayOrder" ASC',
+    [organizationId],
+  );
+  respond(req, res, rows || []);
+  
 };
 
 export const getMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { methodConfigId } = req.params;
-    const config = await queryOne<Record<string, unknown>>(
-      'SELECT * FROM "paymentMethodConfig" WHERE "paymentMethodConfigId" = $1 AND "deletedAt" IS NULL',
-      [methodConfigId],
-    );
+  const { methodConfigId } = req.params;
+  const config = await queryOne<Record<string, unknown>>(
+    'SELECT * FROM "paymentMethodConfig" WHERE "paymentMethodConfigId" = $1 AND "deletedAt" IS NULL',
+    [methodConfigId],
+  );
 
-    if (!config) {
-      respondError(req, res, 'Method config not found', 404);
-      return;
-    }
-    respond(req, res, config);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to get method config', 500);
+  if (!config) {
+    respondError(req, res, 'Method config not found', 404);
+    return;
   }
+  respond(req, res, config);
+  
 };
 
 export const createMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
-    if (!organizationId) {
-      respondError(req, res, 'Authentication required', 401);
-      return;
-    }
+  const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
+  if (!organizationId) {
+    respondError(req, res, 'Authentication required', 401);
+    return;
+  }
 
-    const body = req.body as {
-      paymentMethod?: string;
-      isEnabled?: boolean;
-      displayName?: string;
-      description?: string;
-      processingFee?: string;
-      minimumAmount?: string;
-      maximumAmount?: string;
-      displayOrder?: number;
-      icon?: string;
-      supportedCurrencies?: string[];
-      countries?: string[];
-      gatewayId?: string;
-      configuration?: Record<string, unknown>;
-    };
+  const body = req.body as {
+    paymentMethod?: string;
+    isEnabled?: boolean;
+    displayName?: string;
+    description?: string;
+    processingFee?: string;
+    minimumAmount?: string;
+    maximumAmount?: string;
+    displayOrder?: number;
+    icon?: string;
+    supportedCurrencies?: string[];
+    countries?: string[];
+    gatewayId?: string;
+    configuration?: Record<string, unknown>;
+  };
 
-    const {
+  const {
+    paymentMethod,
+    isEnabled,
+    displayName,
+    description,
+    processingFee,
+    minimumAmount,
+    maximumAmount,
+    displayOrder,
+    icon,
+    supportedCurrencies,
+    countries,
+    gatewayId,
+    configuration,
+  } = body;
+
+  if (!paymentMethod) {
+    respondError(req, res, 'Payment method is required', 400);
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  const result = await queryOne<Record<string, unknown>>(
+    `INSERT INTO "paymentMethodConfig" (
+      "organizationId", "paymentMethod", "isEnabled", "displayName", description, "processingFee",
+      "minimumAmount", "maximumAmount", "displayOrder", icon, "supportedCurrencies", countries,
+      "gatewayId", configuration, "createdAt", "updatedAt"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+    RETURNING *`,
+    [
+      organizationId,
       paymentMethod,
-      isEnabled,
+      isEnabled ?? true,
       displayName,
       description,
       processingFee,
       minimumAmount,
       maximumAmount,
-      displayOrder,
+      displayOrder ?? 0,
       icon,
-      supportedCurrencies,
+      supportedCurrencies || ['USD'],
       countries,
       gatewayId,
-      configuration,
-    } = body;
+      configuration ? JSON.stringify(configuration) : null,
+      now,
+      now,
+    ],
+  );
 
-    if (!paymentMethod) {
-      respondError(req, res, 'Payment method is required', 400);
-      return;
-    }
-
-    const now = new Date().toISOString();
-
-    const result = await queryOne<Record<string, unknown>>(
-      `INSERT INTO "paymentMethodConfig" (
-        "organizationId", "paymentMethod", "isEnabled", "displayName", description, "processingFee",
-        "minimumAmount", "maximumAmount", "displayOrder", icon, "supportedCurrencies", countries,
-        "gatewayId", configuration, "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-      RETURNING *`,
-      [
-        organizationId,
-        paymentMethod,
-        isEnabled ?? true,
-        displayName,
-        description,
-        processingFee,
-        minimumAmount,
-        maximumAmount,
-        displayOrder ?? 0,
-        icon,
-        supportedCurrencies || ['USD'],
-        countries,
-        gatewayId,
-        configuration ? JSON.stringify(configuration) : null,
-        now,
-        now,
-      ],
-    );
-
-    respond(req, res, result, 201);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to create method config', 500);
-  }
+  respond(req, res, result, 201);
+  
 };
 
 export const updateMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { methodConfigId } = req.params;
-    const updates = req.body as Record<string, unknown>;
+  const { methodConfigId } = req.params;
+  const updates = req.body as Record<string, unknown>;
 
-    const now = new Date().toISOString();
+  const now = new Date().toISOString();
 
-    // Build dynamic update
-    const allowedFields = [
-      'paymentMethod',
-      'isEnabled',
-      'displayName',
-      'description',
-      'processingFee',
-      'minimumAmount',
-      'maximumAmount',
-      'displayOrder',
-      'icon',
-      'supportedCurrencies',
-      'countries',
-      'gatewayId',
-      'configuration',
-    ];
-    const setStatements: string[] = ['"updatedAt" = $1'];
-    const values: unknown[] = [now];
-    let paramIndex = 2;
+  // Build dynamic update
+  const allowedFields = [
+    'paymentMethod',
+    'isEnabled',
+    'displayName',
+    'description',
+    'processingFee',
+    'minimumAmount',
+    'maximumAmount',
+    'displayOrder',
+    'icon',
+    'supportedCurrencies',
+    'countries',
+    'gatewayId',
+    'configuration',
+  ];
+  const setStatements: string[] = ['"updatedAt" = $1'];
+  const values: unknown[] = [now];
+  let paramIndex = 2;
 
-    for (const field of allowedFields) {
-      if (updates[field] !== undefined) {
-        setStatements.push(`"${field}" = $${paramIndex++}`);
-        values.push(field === 'configuration' ? JSON.stringify(updates[field]) : updates[field]);
-      }
+  for (const field of allowedFields) {
+    if (updates[field] !== undefined) {
+      setStatements.push(`"${field}" = $${paramIndex++}`);
+      values.push(field === 'configuration' ? JSON.stringify(updates[field]) : updates[field]);
     }
-
-    values.push(methodConfigId);
-
-    const result = await queryOne<Record<string, unknown>>(
-      `UPDATE "paymentMethodConfig" SET ${setStatements.join(', ')} WHERE "paymentMethodConfigId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
-      values,
-    );
-
-    if (!result) {
-      respondError(req, res, 'Method config not found', 404);
-      return;
-    }
-    respond(req, res, result);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to update method config', 500);
   }
+
+  values.push(methodConfigId);
+
+  const result = await queryOne<Record<string, unknown>>(
+    `UPDATE "paymentMethodConfig" SET ${setStatements.join(', ')} WHERE "paymentMethodConfigId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
+    values,
+  );
+
+  if (!result) {
+    respondError(req, res, 'Method config not found', 404);
+    return;
+  }
+  respond(req, res, result);
+  
 };
 
 export const deleteMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { methodConfigId } = req.params;
-    const now = new Date().toISOString();
+  const { methodConfigId } = req.params;
+  const now = new Date().toISOString();
 
-    await query('UPDATE "paymentMethodConfig" SET "deletedAt" = $1 WHERE "paymentMethodConfigId" = $2', [now, methodConfigId]);
+  await query('UPDATE "paymentMethodConfig" SET "deletedAt" = $1 WHERE "paymentMethodConfigId" = $2', [now, methodConfigId]);
 
-    respond(req, res, { success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to delete method config', 500);
-  }
+  respond(req, res, { success: true });
+  
 };
 
 export const deleteTransaction = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { transactionId } = req.params;
-    const now = new Date().toISOString();
+  const { transactionId } = req.params;
+  const now = new Date().toISOString();
 
-    await query('UPDATE "paymentTransaction" SET "deletedAt" = $1 WHERE "paymentTransactionId" = $2', [now, transactionId]);
+  await query('UPDATE "paymentTransaction" SET "deletedAt" = $1 WHERE "paymentTransactionId" = $2', [now, transactionId]);
 
-    respond(req, res, { success: true });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    respondError(req, res, (error as Error).message || 'Failed to delete transaction', 500);
-  }
+  respond(req, res, { success: true });
+  
 };

@@ -1,4 +1,6 @@
-import PaymentRepo from '../../infrastructure/repositories/PaymentRepository';
+import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+
+const PaymentRepo = paymentDataRepository.payments;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { InitiatePaymentUseCase, InitiatePaymentCommand } from '../../application/useCases/InitiatePayment';
 import { GetTransactionUseCase, GetTransactionCommand, ListTransactionsUseCase, ListTransactionsCommand } from '../../application/useCases/GetTransactions';

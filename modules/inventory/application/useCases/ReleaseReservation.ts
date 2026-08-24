@@ -6,6 +6,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 export interface ReleaseReservationInput {
   reservationId?: string;
@@ -53,7 +54,7 @@ export class ReleaseReservationUseCase {
 
   async execute(input: ReleaseReservationInput): Promise<ReleaseReservationOutput> {
     if (!input.reservationId && !input.orderId) {
-      throw new Error('Either reservationId or orderId must be provided');
+      throw new InventoryValidationError('Either reservationId or orderId must be provided');
     }
 
     // Find reservations to release

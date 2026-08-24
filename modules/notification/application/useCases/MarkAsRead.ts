@@ -2,6 +2,8 @@
  * MarkAsRead Use Case
  */
 
+import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
+
 export interface MarkAsReadInput {
   notificationIds: string[];
   recipientId: string;
@@ -22,7 +24,7 @@ export class MarkAsReadUseCase {
 
   async execute(input: MarkAsReadInput): Promise<MarkAsReadOutput> {
     if (!input.notificationIds || input.notificationIds.length === 0) {
-      throw new Error('At least one notification ID is required');
+      throw new NotificationValidationError('At least one notification ID is required');
     }
 
     const now = new Date();

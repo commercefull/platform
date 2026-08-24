@@ -8,6 +8,7 @@ import productToCategoryRepo from '../../infrastructure/repositories/productToCa
 import productCategoryRepo from '../../infrastructure/repositories/productCategoryRepo';
 import productTagRepo from '../../infrastructure/repositories/productTagRepo';
 import productQaRepo from '../../infrastructure/repositories/productQaRepo';
+import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 import type { ProductQaStatus } from '../../infrastructure/repositories/productQaRepo';
 import productQaAnswerRepo from '../../infrastructure/repositories/productQaAnswerRepo';
 import type { Product } from '../../infrastructure/repositories/productRepo';
@@ -50,12 +51,12 @@ export interface ProductCatalogEnrichmentResponse {
 export class GetProductCatalogEnrichmentUseCase {
   async execute(command: GetProductCatalogEnrichmentCommand): Promise<ProductCatalogEnrichmentResponse> {
     if (!command.productId) {
-      throw new Error('productId is required');
+      throw new ProductValidationError('productId is required');
     }
 
     const product = await productRepo.findById(command.productId);
     if (!product) {
-      throw new Error(`Product not found: ${command.productId}`);
+      throw new ProductNotFoundError(command.productId);
     }
 
     // Fetch category mappings and resolve full category objects

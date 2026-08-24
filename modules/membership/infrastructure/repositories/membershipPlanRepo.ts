@@ -7,6 +7,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import { MembershipPlanAlreadyExistsError, FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
 
 // ============================================================================
 // Types
@@ -106,7 +107,7 @@ export async function create(input: CreateMembershipPlanInput): Promise<Membersh
   // Check for duplicate code
   const existing = await findByCode(input.code);
   if (existing) {
-    throw new Error(`Plan with code '${input.code}' already exists`);
+    throw new MembershipPlanAlreadyExistsError(input.code);
   }
 
   // If this is the default plan, unset other defaults
@@ -158,7 +159,7 @@ export async function create(input: CreateMembershipPlanInput): Promise<Membersh
   );
 
   if (!result) {
-    throw new Error('Failed to create membership plan');
+    throw new FailedToCreateMembershipError('Failed to create membership plan');
   }
 
   return result;

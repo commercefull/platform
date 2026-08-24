@@ -6,6 +6,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { ContentRedirect } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
+import { ContentValidationError, FailedToCreateContentError } from '../../domain/errors/ContentErrors';
 
 // ============================================================================
 // Types
@@ -78,7 +79,7 @@ export class ContentRedirectRepo {
     // Check for duplicate source URL
     const existing = await queryOne<ContentRedirect>('SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1', [params.sourceUrl]);
     if (existing) {
-      throw new Error(`Redirect for source URL "${params.sourceUrl}" already exists`);
+      throw new ContentValidationError(`Redirect for source URL "${params.sourceUrl}" already exists`);
     }
 
     // Validate regex if isRegex is true
@@ -86,7 +87,7 @@ export class ContentRedirectRepo {
       try {
         new RegExp(params.sourceUrl);
       } catch {
-        throw new Error('Invalid regex pattern in source URL');
+        throw new ContentValidationError('Invalid regex pattern in source URL');
       }
     }
 
@@ -112,7 +113,7 @@ export class ContentRedirectRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create redirect');
+      throw new FailedToCreateContentError('Failed to create redirect');
     }
 
     return result;
@@ -159,7 +160,7 @@ export class ContentRedirectRepo {
     );
 
     if (!result) {
-      throw new Error(`Failed to update redirect with ID ${id}`);
+      throw new FailedToCreateContentError(`Failed to update redirect with ID ${id}`);
     }
 
     return result;

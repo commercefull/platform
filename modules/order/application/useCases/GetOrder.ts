@@ -5,6 +5,7 @@
 
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
 import { Order } from '../../domain/entities/Order';
+import { OrderIdOrNumberRequiredError, OrderPermissionError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Command
@@ -17,7 +18,7 @@ export class GetOrderCommand {
     public readonly customerId?: string, // For authorization check
   ) {
     if (!orderId && !orderNumber) {
-      throw new Error('Either orderId or orderNumber must be provided');
+      throw new OrderIdOrNumberRequiredError();
     }
   }
 }
@@ -130,7 +131,7 @@ export class GetOrderUseCase {
 
     // Authorization check - if customerId is provided, ensure order belongs to customer
     if (command.customerId && order.customerId !== command.customerId) {
-      throw new Error('You do not have permission to view this order');
+      throw new OrderPermissionError();
     }
 
     return this.mapToResponse(order);

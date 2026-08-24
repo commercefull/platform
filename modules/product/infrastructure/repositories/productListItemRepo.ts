@@ -1,4 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductListItem {
   productListItemId: string;
@@ -28,7 +29,7 @@ export class ProductListItemRepo {
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [params.productListId, params.productId, params.position ?? 0, now, now],
     );
-    if (!result) throw new Error('Failed to create productListItem');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 

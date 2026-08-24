@@ -1,4 +1,6 @@
-import ContentRepo from '../../infrastructure/repositories/contentRepo';
+import contentDataRepository from '../../infrastructure/repositories/ContentDataRepository';
+
+const ContentRepo = contentDataRepository.pages;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CreatePageUseCase, CreatePageCommand } from '../../application/useCases/CreatePage';
 import { UpdatePageUseCase, UpdatePageCommand } from '../../application/useCases/UpdatePage';

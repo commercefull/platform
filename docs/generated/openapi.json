@@ -1808,7 +1808,7 @@
     },
     "/configuration/active": {
       "get": {
-        "summary": "Get active system configuration",
+        "summary": "Get active system configuration (must be before /:configId to avoid matching \"active\" as an ID)",
         "operationId": "bind_configuration",
         "tags": [
           "configuration"

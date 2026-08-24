@@ -3,6 +3,7 @@
  */
 
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import { CustomerNotFoundError, CustomerValidationError, InvalidCredentialsError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -36,30 +37,30 @@ export class ChangePasswordUseCase {
 
   async execute(command: ChangePasswordCommand): Promise<ChangePasswordResponse> {
     if (!command.customerId) {
-      throw new Error('Customer ID is required');
+      throw new CustomerValidationError('Customer ID is required');
     }
     if (!command.currentPassword) {
-      throw new Error('Current password is required');
+      throw new CustomerValidationError('Current password is required');
     }
     if (!command.newPassword || command.newPassword.length < 8) {
-      throw new Error('New password must be at least 8 characters');
+      throw new CustomerValidationError('New password must be at least 8 characters');
     }
 
     const customer = await this.customerRepository.findById(command.customerId);
     if (!customer) {
-      throw new Error('Customer not found');
+      throw new CustomerNotFoundError(command.customerId);
     }
 
     // Verify current password
     const bcrypt = await import('bcryptjs');
     const currentHash = await this.customerRepository.getPasswordHash(command.customerId);
     if (!currentHash) {
-      throw new Error('Password not set');
+      throw new CustomerValidationError('Password not set');
     }
 
     const isValid = await bcrypt.compare(command.currentPassword, currentHash);
     if (!isValid) {
-      throw new Error('Current password is incorrect');
+      throw new InvalidCredentialsError();
     }
 
     // Hash and update new password

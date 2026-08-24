@@ -6,6 +6,7 @@ import { generateUUID } from '../../../../libs/uuid';
 import { PaymentRepository } from '../../domain/repositories/PaymentRepository';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { AmountMustBePositiveError, NoPaymentGatewayConfiguredError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
 // Command
@@ -45,13 +46,13 @@ export class InitiatePaymentUseCase {
 
   async execute(command: InitiatePaymentCommand): Promise<InitiatePaymentResponse> {
     if (command.amount <= 0) {
-      throw new Error('Amount must be greater than zero');
+      throw new AmountMustBePositiveError();
     }
 
     // Get default gateway
     const gateway = await this.paymentRepository.getDefaultGateway('default');
     if (!gateway) {
-      throw new Error('No payment gateway configured');
+      throw new NoPaymentGatewayConfiguredError();
     }
 
     const transactionId = generateUUID();

@@ -6,7 +6,10 @@
  * Validates: Requirements 7.5
  */
 
-import * as notificationEventLogRepo from '../../infrastructure/repositories/notificationEventLogRepo';
+import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
+import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
+
+const notificationEventLogRepo = notificationDataRepository.eventLogs;
 
 // ============================================================================
 // Command
@@ -41,7 +44,7 @@ export class LogNotificationEventUseCase {
   constructor(private readonly eventLogRepo: typeof notificationEventLogRepo = notificationEventLogRepo) {}
 
   async execute(command: LogNotificationEventCommand): Promise<LogNotificationEventResponse> {
-    if (!command.eventType) throw new Error('eventType is required');
+    if (!command.eventType) throw new NotificationValidationError('eventType is required');
 
     const entry = await this.eventLogRepo.create({
       eventType: command.eventType,
@@ -50,7 +53,7 @@ export class LogNotificationEventUseCase {
       payload: command.payload,
     });
 
-    if (!entry) throw new Error('Failed to create notification event log entry');
+    if (!entry) throw new NotificationValidationError('Failed to create notification event log entry');
 
     return {
       notificationEventLogId: entry.notificationEventLogId,

@@ -3,71 +3,68 @@
  * Uses customer use cases directly from modules - no HTTP API calls
  */
 
-import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';
-import { GetCustomerUseCase } from '../../../modules/customer/application/useCases/GetCustomer';
-import { UpdateCustomerUseCase } from '../../../modules/customer/application/useCases/UpdateCustomer';
-import { DeactivateCustomerUseCase } from '../../../modules/customer/application/useCases/DeactivateCustomer';
-import { ReactivateCustomerUseCase } from '../../../modules/customer/application/useCases/ReactivateCustomer';
-import { VerifyCustomerCommand, VerifyCustomerUseCase } from '../../../modules/customer/application/useCases/VerifyCustomer';
-import { AddAddressCommand, ManageAddressesUseCase } from '../../../modules/customer/application/useCases/ManageAddresses';
+import { VerifyCustomerCommand } from '../../../modules/customer/application/useCases/VerifyCustomer';
+import { AddAddressCommand } from '../../../modules/customer/application/useCases/ManageAddresses';
+import {
+  getCustomerUseCase,
+  updateCustomerUseCase,
+  deactivateCustomerUseCase,
+  reactivateCustomerUseCase,
+  verifyCustomerUseCase,
+  manageAddressesUseCase,
+} from '../../../modules/customer/application/useCases/wired';
+import { ManageCustomersUseCase } from '../../../modules/customer/application/useCases/ManageCustomer';
 import { adminRespond } from '../../respond';
+
+const manageCustomersUseCase = new ManageCustomersUseCase();
 
 // ============================================================================
 // List Customers
 // ============================================================================
 
 export const listCustomers = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { search, status, limit, offset, orderBy, orderDirection } = req.query;
+  const { search, status, limit, offset, orderBy, orderDirection } = req.query;
 
-    // For now, using direct repo query until we create ListCustomersUseCase
-    // TODO: Create ListCustomersUseCase in modules/customer/useCases
-    const queryOptions = {
-      limit: parseInt(limit as string) || 50,
-      offset: parseInt(offset as string) || 0,
-      orderBy: (orderBy as string) || 'createdAt',
-      orderDirection: (orderDirection as 'asc' | 'desc') || 'desc',
-      search: search as string | undefined,
-      status: status as 'active' | 'inactive' | 'suspended' | undefined,
-    };
+  // For now, using direct repo query until we create ListCustomersUseCase
+  // TODO: Create ListCustomersUseCase in modules/customer/useCases
+  const queryOptions = {
+    limit: parseInt(limit as string) || 50,
+    offset: parseInt(offset as string) || 0,
+    orderBy: (orderBy as string) || 'createdAt',
+    orderDirection: (orderDirection as 'asc' | 'desc') || 'desc',
+    search: search as string | undefined,
+    status: status as 'active' | 'inactive' | 'suspended' | undefined,
+  };
 
-    const result = await CustomerRepo.findAll(queryOptions);
+  const result = await manageCustomersUseCase.findAll(undefined, queryOptions);
 
-    // Calculate pagination info
-    const page = Math.floor(queryOptions.offset / queryOptions.limit) + 1;
-    const pages = Math.ceil((result.total || 0) / queryOptions.limit);
+  // Calculate pagination info
+  const page = Math.floor(queryOptions.offset / queryOptions.limit) + 1;
+  const pages = Math.ceil((result.total || 0) / queryOptions.limit);
 
-    adminRespond(req, res, 'customers/index', {
-      pageName: 'Customers',
-      customers: result.data || result,
-      pagination: {
-        total: result.total || (result.data ? result.data.length : 0),
-        limit: queryOptions.limit,
-        offset: queryOptions.offset,
-        page,
-        pages,
-        hasMore: (result.total || 0) > queryOptions.offset + queryOptions.limit,
-      },
-      filters: {
-        search: search || '',
-        status: status || '',
-        orderBy: orderBy || 'createdAt',
-        orderDirection: orderDirection || 'desc',
-      },
+  adminRespond(req, res, 'customers/index', {
+    pageName: 'Customers',
+    customers: result.data || result,
+    pagination: {
+      total: result.total || (result.data ? result.data.length : 0),
+      limit: queryOptions.limit,
+      offset: queryOptions.offset,
+      page,
+      pages,
+      hasMore: (result.total || 0) > queryOptions.offset + queryOptions.limit,
+    },
+    filters: {
+      search: search || '',
+      status: status || '',
+      orderBy: orderBy || 'createdAt',
+      orderDirection: orderDirection || 'desc',
+    },
 
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load customers',
-    });
-  }
+    success: req.query.success || null,
+  });
+  
 };
 
 // ============================================================================
@@ -75,39 +72,29 @@ export const listCustomers = async (req: TypedRequest, res: Response): Promise<v
 // ============================================================================
 
 export const viewCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
+  const { customerId } = req.params;
 
-    const useCase = new GetCustomerUseCase(CustomerRepo);
-    const customer = await useCase.execute({ customerId });
+  const customer = await getCustomerUseCase.execute({ customerId });
 
-    if (!customer) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Customer not found',
-      });
-      return;
-    }
-
-    // Get customer addresses
-    const addressUseCase = new ManageAddressesUseCase(CustomerRepo);
-    const addresses = await addressUseCase.getAddresses(customerId);
-
-    adminRespond(req, res, 'customers/view', {
-      pageName: `Customer: ${customer.firstName} ${customer.lastName}`,
-      customer,
-      addresses,
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!customer) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load customer',
+      pageName: 'Not Found',
+      error: 'Customer not found',
     });
+    return;
   }
+
+  // Get customer addresses
+  const addresses = await manageAddressesUseCase.getAddresses(customerId);
+
+  adminRespond(req, res, 'customers/view', {
+    pageName: `Customer: ${customer.firstName} ${customer.lastName}`,
+    customer,
+    addresses,
+
+    success: req.query.success || null,
+  });
+  
 };
 
 // ============================================================================
@@ -115,32 +102,23 @@ export const viewCustomer = async (req: TypedRequest, res: Response): Promise<vo
 // ============================================================================
 
 export const editCustomerForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
+  const { customerId } = req.params;
 
-    const useCase = new GetCustomerUseCase(CustomerRepo);
-    const customer = await useCase.execute({ customerId });
+  const customer = await getCustomerUseCase.execute({ customerId });
 
-    if (!customer) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Customer not found',
-      });
-      return;
-    }
-
-    adminRespond(req, res, 'customers/edit', {
-      pageName: `Edit: ${customer.firstName} ${customer.lastName}`,
-      customer,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!customer) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load form',
+      pageName: 'Not Found',
+      error: 'Customer not found',
     });
+    return;
   }
+
+  adminRespond(req, res, 'customers/edit', {
+    pageName: `Edit: ${customer.firstName} ${customer.lastName}`,
+    customer,
+  });
+  
 };
 
 // ============================================================================
@@ -148,35 +126,13 @@ export const editCustomerForm = async (req: TypedRequest, res: Response): Promis
 // ============================================================================
 
 export const updateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const updates = req.body as RequestBody;
+  const { customerId } = req.params;
+  const updates = req.body as RequestBody;
 
-    const useCase = new UpdateCustomerUseCase(CustomerRepo);
-    await useCase.execute({ customerId, updates });
+  await updateCustomerUseCase.execute({ customerId, updates });
 
-    res.redirect(`/hub/customers/${customerId}?success=Customer updated successfully`);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    // Reload form with error
-    try {
-      const getUseCase = new GetCustomerUseCase(CustomerRepo);
-      const customer = await getUseCase.execute({ customerId: req.params.customerId });
-
-      adminRespond(req, res, 'customers/edit', {
-        pageName: `Edit: ${customer?.firstName || ''} ${customer?.lastName || ''}`,
-        customer,
-        error: (error as Error).message || 'Failed to update customer',
-        formData: req.body as RequestBody,
-      });
-    } catch {
-      adminRespond(req, res, 'error', {
-        pageName: 'Error',
-        error: (error as Error).message || 'Failed to update customer',
-      });
-    }
-  }
+  res.redirect(`/hub/customers/${customerId}?success=Customer updated successfully`);
+  
 };
 
 // ============================================================================
@@ -184,20 +140,14 @@ export const updateCustomer = async (req: TypedRequest, res: Response): Promise<
 // ============================================================================
 
 export const deactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const body = req.body as RequestBody;
-    const { reason } = body;
+  const { customerId } = req.params;
+  const body = req.body as RequestBody;
+  const { reason } = body;
 
-    const useCase = new DeactivateCustomerUseCase(CustomerRepo);
-    await useCase.execute({ customerId, reason });
+  await deactivateCustomerUseCase.execute({ customerId, reason });
 
-    res.json({ success: true, message: 'Customer deactivated' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to deactivate customer' });
-  }
+  res.json({ success: true, message: 'Customer deactivated' });
+  
 };
 
 // ============================================================================
@@ -205,18 +155,12 @@ export const deactivateCustomer = async (req: TypedRequest, res: Response): Prom
 // ============================================================================
 
 export const reactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
+  const { customerId } = req.params;
 
-    const useCase = new ReactivateCustomerUseCase(CustomerRepo);
-    await useCase.execute({ customerId });
+  await reactivateCustomerUseCase.execute({ customerId });
 
-    res.json({ success: true, message: 'Customer reactivated' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to reactivate customer' });
-  }
+  res.json({ success: true, message: 'Customer reactivated' });
+  
 };
 
 // ============================================================================
@@ -224,20 +168,14 @@ export const reactivateCustomer = async (req: TypedRequest, res: Response): Prom
 // ============================================================================
 
 export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const verificationType = ((req.body as RequestBody).verificationType as 'email' | 'phone') || 'email';
+  const { customerId } = req.params;
+  const verificationType = ((req.body as RequestBody).verificationType as 'email' | 'phone') || 'email';
 
-    const command = new VerifyCustomerCommand(customerId, verificationType);
-    const useCase = new VerifyCustomerUseCase(CustomerRepo);
-    await useCase.execute(command);
+  const command = new VerifyCustomerCommand(customerId, verificationType);
+  await verifyCustomerUseCase.execute(command);
 
-    res.json({ success: true, message: 'Customer verified' });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    res.status(500).json({ success: false, message: (error as Error).message || 'Failed to verify customer' });
-  }
+  res.json({ success: true, message: 'Customer verified' });
+  
 };
 
 // ============================================================================
@@ -245,38 +183,28 @@ export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<
 // ============================================================================
 
 export const customerAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
+  const { customerId } = req.params;
 
-    const getUseCase = new GetCustomerUseCase(CustomerRepo);
-    const customer = await getUseCase.execute({ customerId });
+  const customer = await getCustomerUseCase.execute({ customerId });
 
-    if (!customer) {
-      adminRespond(req, res, 'error', {
-        pageName: 'Not Found',
-        error: 'Customer not found',
-      });
-      return;
-    }
-
-    const addressUseCase = new ManageAddressesUseCase(CustomerRepo);
-    const addresses = await addressUseCase.getAddresses(customerId);
-
-    adminRespond(req, res, 'customers/addresses', {
-      pageName: `Addresses: ${customer.firstName} ${customer.lastName}`,
-      customer,
-      addresses,
-
-      success: req.query.success || null,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
+  if (!customer) {
     adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load addresses',
+      pageName: 'Not Found',
+      error: 'Customer not found',
     });
+    return;
   }
+
+  const addresses = await manageAddressesUseCase.getAddresses(customerId);
+
+  adminRespond(req, res, 'customers/addresses', {
+    pageName: `Addresses: ${customer.firstName} ${customer.lastName}`,
+    customer,
+    addresses,
+
+    success: req.query.success || null,
+  });
+  
 };
 
 // ============================================================================
@@ -284,41 +212,31 @@ export const customerAddresses = async (req: TypedRequest, res: Response): Promi
 // ============================================================================
 
 export const addCustomerAddress = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { customerId } = req.params;
-    const addressData = req.body as RequestBody;
+  const { customerId } = req.params;
+  const addressData = req.body as RequestBody;
 
-    const useCase = new ManageAddressesUseCase(CustomerRepo);
-    const addCommand = new AddAddressCommand(
-      customerId,
-      addressData.addressLine1,
-      addressData.city,
-      addressData.state,
-      addressData.postalCode,
-      addressData.country,
-      addressData.countryCode || 'US',
-      addressData.addressType || 'shipping',
-      addressData.addressLine2,
-      addressData.phone,
-      addressData.firstName,
-      addressData.lastName,
-      addressData.company,
-      addressData.isDefault === 'true' || addressData.isDefault === true,
-    );
-    await useCase.addAddress(addCommand);
+  const addCommand = new AddAddressCommand(
+    customerId,
+    addressData.addressLine1,
+    addressData.city,
+    addressData.state,
+    addressData.postalCode,
+    addressData.country,
+    addressData.countryCode || 'US',
+    addressData.addressType || 'shipping',
+    addressData.addressLine2,
+    addressData.phone,
+    addressData.firstName,
+    addressData.lastName,
+    addressData.company,
+    addressData.isDefault === 'true' || addressData.isDefault === true,
+  );
+  await manageAddressesUseCase.addAddress(addCommand);
 
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.json({ success: true, message: 'Address added' });
-    } else {
-      res.redirect(`/hub/customers/${customerId}/addresses?success=Address added`);
-    }
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: (error as Error).message || 'Failed to add address' });
-    } else {
-      res.redirect(`/hub/customers/${req.params.customerId}/addresses?error=${encodeURIComponent((error as Error).message)}`);
-    }
+  if (req.xhr || req.headers.accept?.includes('application/json')) {
+    res.json({ success: true, message: 'Address added' });
+  } else {
+    res.redirect(`/hub/customers/${customerId}/addresses?success=Address added`);
   }
+  
 };

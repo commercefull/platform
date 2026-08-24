@@ -7,7 +7,9 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import * as supportRepo from '../../../modules/support/infrastructure/repositories/supportRepo';
+import { ManageStorefrontSupportUseCase, type TicketStatus, type TicketPriority, type TicketCategory } from '../../../modules/support/application/useCases/ManageStorefrontSupport';
+
+const manageSupportUseCase = new ManageStorefrontSupportUseCase();
 
 interface CustomerUser {
   customerId: string;
@@ -20,92 +22,71 @@ interface CustomerUser {
  * GET: List customer's support tickets
  */
 export const listTickets = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const user = req.user as CustomerUser;
-    if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/support/tickets');
-    }
-
-    const status = req.query.status as string | undefined;
-    const result = await supportRepo.getTickets(
-      { customerId: user.customerId, status: status as supportRepo.TicketStatus | undefined },
-      { limit: 50, offset: 0 },
-    );
-
-    storefrontRespond(req, res, 'support/tickets', {
-      pageName: 'My Support Tickets',
-      tickets: result.data,
-      total: result.total,
-      currentStatus: status || 'all',
-    });
-  } catch (error: unknown) {
-    logger.error('Error loading support tickets:', error);
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: 'Failed to load support tickets',
-    });
+  const user = req.user as CustomerUser;
+  if (!user?.customerId) {
+    return res.redirect('/signin?redirect=/support/tickets');
   }
+
+  const status = req.query.status as string | undefined;
+  const result = await manageSupportUseCase.getTickets(
+    { customerId: user.customerId, status: status as TicketStatus | undefined },
+    { limit: 50, offset: 0 },
+  );
+
+  storefrontRespond(req, res, 'support/tickets', {
+    pageName: 'My Support Tickets',
+    tickets: result.data,
+    total: result.total,
+    currentStatus: status || 'all',
+  });
+  
 };
 
 /**
  * GET: View a single ticket with messages
  */
 export const viewTicket = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const user = req.user as CustomerUser;
-    if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/support/tickets');
-    }
+  const user = req.user as CustomerUser;
+  if (!user?.customerId) {
+    return res.redirect('/signin?redirect=/support/tickets');
+  }
 
-    const ticket = await supportRepo.getTicket(req.params.ticketId);
-    if (!ticket || ticket.customerId !== user.customerId) {
-      return storefrontRespond(req, res, '404', {
-        pageName: 'Ticket Not Found',
-      });
-    }
-
-    const messages = await supportRepo.getMessages(req.params.ticketId, false);
-    const attachments = await supportRepo.getAttachments(req.params.ticketId);
-
-    await supportRepo.markMessagesRead(req.params.ticketId, user.customerId);
-
-    storefrontRespond(req, res, 'support/ticket-detail', {
-      pageName: `Ticket #${ticket.ticketNumber}`,
-      ticket,
-      messages,
-      attachments,
-    });
-  } catch (error: unknown) {
-    logger.error('Error loading ticket:', error);
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: 'Failed to load ticket',
+  const ticket = await manageSupportUseCase.getTicket(req.params.ticketId);
+  if (!ticket || ticket.customerId !== user.customerId) {
+    return storefrontRespond(req, res, '404', {
+      pageName: 'Ticket Not Found',
     });
   }
+
+  const messages = await manageSupportUseCase.getMessages(req.params.ticketId, false);
+  const attachments = await manageSupportUseCase.getAttachments(req.params.ticketId);
+
+  await manageSupportUseCase.markMessagesRead(req.params.ticketId, user.customerId);
+
+  storefrontRespond(req, res, 'support/ticket-detail', {
+    pageName: `Ticket #${ticket.ticketNumber}`,
+    ticket,
+    messages,
+    attachments,
+  });
+  
 };
 
 /**
  * GET: Create ticket form
  */
 export const createTicketForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const user = req.user as CustomerUser;
-    if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/support/tickets/new');
-    }
-
-    storefrontRespond(req, res, 'support/create-ticket', {
-      pageName: 'New Support Ticket',
-      formData: {},
-      orderId: req.query.orderId as string | undefined,
-    });
-  } catch (error: unknown) {
-    logger.error('Error loading create ticket form:', error);
-    storefrontRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: 'Failed to load form',
-    });
+  const user = req.user as CustomerUser;
+  if (!user?.customerId) {
+    return res.redirect('/signin?redirect=/support/tickets/new');
   }
+
+  storefrontRespond(req, res, 'support/create-ticket', {
+    pageName: 'New Support Ticket',
+    formData: {},
+    orderId: req.query.orderId as string | undefined,
+  });
+  
 };
 
 /**
@@ -130,7 +111,7 @@ export const createTicketSubmit = async (req: TypedRequest, res: Response): Prom
       });
     }
 
-    const ticket = await supportRepo.createTicket({
+    const ticket = await manageSupportUseCase.createTicket({
       customerId: user.customerId,
       orderId: orderId as string | undefined,
       email: (email as string) || user.email,
@@ -138,13 +119,13 @@ export const createTicketSubmit = async (req: TypedRequest, res: Response): Prom
       phone: phone as string | undefined,
       subject: subject as string,
       description: description as string,
-      priority: priority as supportRepo.TicketPriority | undefined,
-      category: category as supportRepo.TicketCategory | undefined,
+      priority: priority as TicketPriority | undefined,
+      category: category as TicketCategory | undefined,
       channel: 'web',
     });
 
     if (description) {
-      await supportRepo.addMessage({
+      await manageSupportUseCase.addMessage({
         supportTicketId: ticket.supportTicketId,
         senderId: user.customerId,
         senderType: 'customer',
@@ -156,7 +137,7 @@ export const createTicketSubmit = async (req: TypedRequest, res: Response): Prom
 
     res.redirect(`/support/tickets/${ticket.supportTicketId}?success=Ticket created successfully`);
   } catch (error: unknown) {
-    logger.error('Error creating ticket:', error);
+    logger.warn('Error creating ticket:', error);
     storefrontRespond(req, res, 'support/create-ticket', {
       pageName: 'New Support Ticket',
       error: (error as Error).message || 'Failed to create ticket',
@@ -176,7 +157,7 @@ export const addTicketMessage = async (req: TypedRequest, res: Response): Promis
       return res.redirect('/signin?redirect=/support/tickets');
     }
 
-    const ticket = await supportRepo.getTicket(req.params.ticketId);
+    const ticket = await manageSupportUseCase.getTicket(req.params.ticketId);
     if (!ticket || ticket.customerId !== user.customerId) {
       return storefrontRespond(req, res, '404', {
         pageName: 'Ticket Not Found',
@@ -196,7 +177,7 @@ export const addTicketMessage = async (req: TypedRequest, res: Response): Promis
       return res.redirect(`/support/tickets/${req.params.ticketId}`);
     }
 
-    await supportRepo.addMessage({
+    await manageSupportUseCase.addMessage({
       supportTicketId: req.params.ticketId,
       senderId: user.customerId,
       senderType: 'customer',
@@ -207,7 +188,7 @@ export const addTicketMessage = async (req: TypedRequest, res: Response): Promis
 
     res.redirect(`/support/tickets/${req.params.ticketId}?success=Message sent`);
   } catch (error: unknown) {
-    logger.error('Error adding message:', error);
+    logger.warn('Error adding message:', error);
     req.flash('error', 'Failed to send message');
     res.redirect(`/support/tickets/${req.params.ticketId}`);
   }
@@ -223,7 +204,7 @@ export const submitTicketFeedback = async (req: TypedRequest, res: Response): Pr
       return res.redirect('/signin?redirect=/support/tickets');
     }
 
-    const ticket = await supportRepo.getTicket(req.params.ticketId);
+    const ticket = await manageSupportUseCase.getTicket(req.params.ticketId);
     if (!ticket || ticket.customerId !== user.customerId) {
       return storefrontRespond(req, res, '404', {
         pageName: 'Ticket Not Found',
@@ -244,11 +225,11 @@ export const submitTicketFeedback = async (req: TypedRequest, res: Response): Pr
       return res.redirect(`/support/tickets/${req.params.ticketId}`);
     }
 
-    await supportRepo.submitFeedback(req.params.ticketId, satisfaction, feedback);
+    await manageSupportUseCase.submitFeedback(req.params.ticketId, satisfaction, feedback);
     req.flash('success', 'Thank you for your feedback!');
     res.redirect(`/support/tickets/${req.params.ticketId}`);
   } catch (error: unknown) {
-    logger.error('Error submitting feedback:', error);
+    logger.warn('Error submitting feedback:', error);
     req.flash('error', 'Failed to submit feedback');
     res.redirect(`/support/tickets/${req.params.ticketId}`);
   }

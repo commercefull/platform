@@ -1,7 +1,5 @@
 import CheckoutRepo from '../../infrastructure/repositories/CheckoutRepository';
-import BasketRepo from '../../../basket/infrastructure/repositories/BasketRepository';
-import OrderRepo from '../../../order/infrastructure/repositories/OrderRepository';
-import PaymentRepo from '../../../payment/infrastructure/repositories/PaymentRepository';
+import { getCheckoutPorts } from '../../../../boot/container';
 import { requireAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { InitiateCheckoutUseCase, InitiateCheckoutCommand, mapCheckoutToResponse } from '../../application/useCases/InitiateCheckout';
 import { SetShippingAddressUseCase, SetShippingAddressCommand } from '../../application/useCases/SetShippingAddress';
@@ -31,7 +29,8 @@ export const checkoutResolvers = {
       guestEmail?: string;
     }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const useCase = new InitiateCheckoutUseCase(CheckoutRepo, BasketRepo);
+      const ports = getCheckoutPorts();
+      const useCase = new InitiateCheckoutUseCase(CheckoutRepo, ports.basketSnapshot);
       const command = new InitiateCheckoutCommand(args.basketId, args.customerId, args.guestEmail);
       return useCase.execute(command);
     },
@@ -45,7 +44,8 @@ export const checkoutResolvers = {
       };
     }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const useCase = new SetShippingAddressUseCase(CheckoutRepo);
+      const ports = getCheckoutPorts();
+      const useCase = new SetShippingAddressUseCase(CheckoutRepo, ports.basketSnapshot, ports.taxQuote, ports.promotionQuote);
       const a = args.address;
       const command = new SetShippingAddressCommand(
         args.checkoutId, a.firstName, a.lastName, a.addressLine1, a.city,
@@ -79,7 +79,8 @@ export const checkoutResolvers = {
       shippingMethodId: string;
     }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const useCase = new SetShippingMethodUseCase(CheckoutRepo);
+      const ports = getCheckoutPorts();
+      const useCase = new SetShippingMethodUseCase(CheckoutRepo, ports.shippingQuote);
       const command = new SetShippingMethodCommand(args.checkoutId, args.shippingMethodId);
       return useCase.execute(command);
     },
@@ -99,7 +100,8 @@ export const checkoutResolvers = {
       couponCode: string;
     }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const useCase = new ApplyCouponUseCase(CheckoutRepo);
+      const ports = getCheckoutPorts();
+      const useCase = new ApplyCouponUseCase(CheckoutRepo, ports.discountQuote);
       const command = new ApplyCouponCommand(args.checkoutId, args.couponCode);
       return useCase.execute(command);
     },
@@ -116,21 +118,29 @@ export const checkoutResolvers = {
       customerId?: string;
     }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, BasketRepo, OrderRepo, PaymentRepo);
+      const ports = getCheckoutPorts();
+      const useCase = new CreatePaymentIntentUseCase(
+        CheckoutRepo,
+        ports.basketSnapshot,
+        ports.orderPlacement,
+        ports.paymentAuthorization,
+      );
       const command = new CreatePaymentIntentCommand(args.checkoutId, args.customerId);
       return useCase.execute(command);
     },
 
     completeCheckout: async (_parent: unknown, args: { checkoutId: string }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const useCase = new CompleteCheckoutUseCase(CheckoutRepo, OrderRepo);
+      const ports = getCheckoutPorts();
+      const useCase = new CompleteCheckoutUseCase(CheckoutRepo, ports.orderPlacement);
       const command = new CompleteCheckoutCommand(args.checkoutId);
       return useCase.execute(command);
     },
 
     abandonCheckout: async (_parent: unknown, args: { checkoutId: string }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const useCase = new AbandonCheckoutUseCase(CheckoutRepo, OrderRepo);
+      const ports = getCheckoutPorts();
+      const useCase = new AbandonCheckoutUseCase(CheckoutRepo, ports.orderPlacement);
       const command = new AbandonCheckoutCommand(args.checkoutId);
       return useCase.execute(command);
     },

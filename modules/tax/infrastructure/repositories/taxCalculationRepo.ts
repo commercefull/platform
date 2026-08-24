@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 
 
 export type TaxCalculationMethod = 'unitBased' | 'itemBased';
@@ -110,7 +111,7 @@ export class TaxCalculationRepo {
         now,
       ],
     );
-    if (!result) throw new Error('Failed to create tax calculation');
+    if (!result) throw new FailedToCreateTaxError('Failed to create tax calculation');
     return result;
   }
 

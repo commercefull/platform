@@ -2,6 +2,8 @@
  * SetProductPrice Use Case
  */
 
+import { InvalidPriceError, PriceMustBePositiveError, PricingValidationError } from '../../domain/errors/PricingErrors';
+
 export interface SetProductPriceInput {
   productId: string;
   variantId?: string;
@@ -39,15 +41,15 @@ export class SetProductPriceUseCase {
 
   async execute(input: SetProductPriceInput): Promise<SetProductPriceOutput> {
     if (!input.productId || input.price === undefined) {
-      throw new Error('Product ID and price are required');
+      throw new PricingValidationError('Product ID and price are required');
     }
 
     if (input.price < 0) {
-      throw new Error('Price cannot be negative');
+      throw new PriceMustBePositiveError();
     }
 
     if (input.salePrice !== undefined && input.salePrice >= input.price) {
-      throw new Error('Sale price must be less than regular price');
+      throw new InvalidPriceError('Sale price must be less than regular price');
     }
 
     const priceRecord = await this.pricingRepository.setPrice({

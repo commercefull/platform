@@ -1,5 +1,7 @@
 import productRepo from '../infrastructure/repositories/productRepo';
 import productVariantRepo from '../infrastructure/repositories/productVariantRepo';
+import { logger } from '../../../libs/logger';
+import { FailedToEnsureMasterVariantsError } from '../domain/errors/ProductErrors';
 
 /**
  * Utility to ensure all products have a master variant
@@ -88,7 +90,7 @@ export async function ensureAllProductsHaveMasterVariants(): Promise<{
 
     return result;
   } catch (error) {
-    throw new Error(`Failed to ensure master variants: ${(error as Error).message}`, { cause: error });
+    throw new FailedToEnsureMasterVariantsError((error as Error).message);
   }
 }
 
@@ -101,7 +103,7 @@ if (require.main === module) {
     try {
       const result = await ensureAllProductsHaveMasterVariants();
 
-      console.log(`Products fixed (master variant created): ${result.fixed}`);
+      logger.info('Products fixed (master variant created)', { fixed: result.fixed });
 
       if (result.failed > 0) {
         result.details.filter(detail => detail.status.startsWith('ERROR') || detail.status === 'FAILED').forEach(_detail => {});

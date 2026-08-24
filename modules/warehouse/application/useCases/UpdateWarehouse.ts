@@ -3,6 +3,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { WarehouseNotFoundError } from '../../domain/errors/WarehouseErrors';
 
 export interface UpdateWarehouseInput {
   warehouseId: string;
@@ -51,7 +52,7 @@ export class UpdateWarehouseUseCase {
   async execute(input: UpdateWarehouseInput): Promise<UpdateWarehouseOutput> {
     const warehouse = await this.warehouseRepository.findById(input.warehouseId);
     if (!warehouse) {
-      throw new Error(`Warehouse not found: ${input.warehouseId}`);
+      throw new WarehouseNotFoundError(input.warehouseId);
     }
 
     const updates: Record<string, unknown> = {};

@@ -1,5 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
+import { withTransaction } from '../../../../libs/db';
 import { Table, Promotion, PromotionRule, PromotionAction } from '../../../../libs/db/types';
+import { FailedToCreatePromotionError, PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
 
 // Table name constants
 const PROMOTION_TABLE = Table.Promotion;
@@ -227,11 +229,8 @@ export class PromotionRepo {
   async create(input: CreatePromotionInput): Promise<Promotion> {
     const now = new Date();
 
-    // Begin transaction
-    await query('BEGIN');
-
-    try {
-      const promotion = await queryOne<Promotion>(
+    return withTransaction(async (tx) => {
+      const promotion = await tx.queryOne<Promotion>(
         `INSERT INTO "${PROMOTION_TABLE}" (
           "name", "description", "status", "scope", "priority",
           "startDate", "endDate", "isActive", "isExclusive", "maxUsage",
@@ -266,29 +265,44 @@ export class PromotionRepo {
       );
 
       if (!promotion) {
-        throw new Error('Failed to create promotion');
+        throw new FailedToCreatePromotionError();
       }
 
       // Insert rules if provided
       if (input.rules && input.rules.length > 0) {
         for (const rule of input.rules) {
-          await this.createRule(promotion.promotionId, rule);
+          await tx.queryOne<PromotionRule>(
+            `INSERT INTO "${PROMOTION_RULE_TABLE}" (
+              "promotionId", "name", "condition", "operator", "value", "isActive", "createdAt", "updatedAt"
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+            [promotion.promotionId, rule.name || null, rule.condition, rule.operator, JSON.stringify(rule.value), rule.isActive !== false, now, now],
+          );
         }
       }
 
       // Insert actions if provided
       if (input.actions && input.actions.length > 0) {
         for (const action of input.actions) {
-          await this.createAction(promotion.promotionId, action);
+          await tx.queryOne<PromotionAction>(
+            `INSERT INTO "${PROMOTION_ACTION_TABLE}" (
+              "promotionId", "type", "value", "targetType", "targetId", "metadata", "createdAt", "updatedAt"
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+            [
+              promotion.promotionId,
+              action.type,
+              action.value,
+              action.targetType || null,
+              action.targetId || null,
+              action.metadata ? JSON.stringify(action.metadata) : null,
+              now,
+              now,
+            ],
+          );
         }
       }
 
-      await query('COMMIT');
       return promotion;
-    } catch (error) {
-      await query('ROLLBACK');
-      throw error;
-    }
+    });
   }
 
   /**
@@ -337,7 +351,7 @@ export class PromotionRepo {
     if (updateFields.length === 1) {
       const promotion = await this.findById(id);
       if (!promotion) {
-        throw new Error(`Promotion with id ${id} not found`);
+        throw new PromotionNotFoundError(id);
       }
       return promotion;
     }
@@ -349,7 +363,7 @@ export class PromotionRepo {
     );
 
     if (!promotion) {
-      throw new Error(`Promotion with id ${id} not found`);
+      throw new PromotionNotFoundError(id);
     }
 
     return promotion;
@@ -359,24 +373,18 @@ export class PromotionRepo {
    * Delete a promotion
    */
   async delete(id: string): Promise<boolean> {
-    await query('BEGIN');
+    return withTransaction(async (tx) => {
+      await tx.query(`DELETE FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionId" = $1`, [id]);
+      await tx.query(`DELETE FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionId" = $1`, [id]);
+      await tx.query(`DELETE FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1`, [id]);
 
-    try {
-      await query(`DELETE FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionId" = $1`, [id]);
-      await query(`DELETE FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionId" = $1`, [id]);
-      await query(`DELETE FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1`, [id]);
-
-      const result = await queryOne<{ promotionId: string }>(
+      const result = await tx.queryOne<{ promotionId: string }>(
         `DELETE FROM "${PROMOTION_TABLE}" WHERE "promotionId" = $1 RETURNING "promotionId"`,
         [id],
       );
 
-      await query('COMMIT');
       return !!result;
-    } catch (error) {
-      await query('ROLLBACK');
-      throw error;
-    }
+    });
   }
 
   // RULE METHODS
@@ -395,7 +403,7 @@ export class PromotionRepo {
     );
 
     if (!rule) {
-      throw new Error('Failed to create promotion rule');
+      throw new FailedToCreatePromotionError('Failed to create promotion rule');
     }
 
     return rule;
@@ -444,7 +452,7 @@ export class PromotionRepo {
     );
 
     if (!action) {
-      throw new Error('Failed to create promotion action');
+      throw new FailedToCreatePromotionError('Failed to create promotion action');
     }
 
     return action;
@@ -482,10 +490,8 @@ export class PromotionRepo {
   ): Promise<PromotionUsage> {
     const now = new Date();
 
-    await query('BEGIN');
-
-    try {
-      const usage = await queryOne<PromotionUsage>(
+    return withTransaction(async (tx) => {
+      const usage = await tx.queryOne<PromotionUsage>(
         `INSERT INTO "${PROMOTION_USAGE_TABLE}" (
           "promotionId", "orderId", "customerId", "discountAmount", "currencyCode", "usedAt", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
@@ -493,20 +499,16 @@ export class PromotionRepo {
       );
 
       if (!usage) {
-        throw new Error('Failed to record promotion usage');
+        throw new FailedToCreatePromotionError('Failed to record promotion usage');
       }
 
-      await query(`UPDATE "${PROMOTION_TABLE}" SET "usageCount" = "usageCount" + 1, "updatedAt" = $2 WHERE "promotionId" = $1`, [
+      await tx.query(`UPDATE "${PROMOTION_TABLE}" SET "usageCount" = "usageCount" + 1, "updatedAt" = $2 WHERE "promotionId" = $1`, [
         promotionId,
         now,
       ]);
 
-      await query('COMMIT');
       return usage;
-    } catch (error) {
-      await query('ROLLBACK');
-      throw error;
-    }
+    });
   }
 
   /**

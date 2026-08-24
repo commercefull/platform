@@ -8,33 +8,33 @@ import { CheckGiftCardBalanceQuery, CheckGiftCardBalanceUseCase } from './CheckG
 import { ApplyProductDiscountCommand, ApplyProductDiscountUseCase } from './ApplyProductDiscount';
 
 // Mock the repositories
-jest.mock('../../repos/couponRepo', () => ({
+jest.mock('../../infrastructure/repositories/CouponDiscountRepository', () => ({
   __esModule: true,
   default: {
-    findByCode: jest.fn(),
-    getCustomerUsageCount: jest.fn(),
-    calculateDiscount: jest.fn(),
-    recordUsage: jest.fn(),
+    coupons: {
+      findByCode: jest.fn(),
+      getCustomerUsageCount: jest.fn(),
+      calculateDiscount: jest.fn(),
+      recordUsage: jest.fn(),
+    },
+    discounts: {
+      findDiscountsForProduct: jest.fn(),
+      calculateDiscount: jest.fn(),
+    },
   },
 }));
 
-jest.mock('../../repos/giftCardRepo', () => ({
+jest.mock('../../infrastructure/repositories/giftCardRepo', () => ({
   getGiftCardByCode: jest.fn(),
   getGiftCard: jest.fn(),
   redeemGiftCard: jest.fn(),
 }));
 
-jest.mock('../../repos/discountRepo', () => ({
-  __esModule: true,
-  default: {
-    findDiscountsForProduct: jest.fn(),
-    calculateDiscount: jest.fn(),
-  },
-}));
+import couponDiscountRepository from '../../infrastructure/repositories/CouponDiscountRepository';
+import * as giftCardRepo from '../../infrastructure/repositories/GiftCardRepository';
 
-import couponRepo from '../../infrastructure/repositories/couponRepo';
-import * as giftCardRepo from '../../infrastructure/repositories/giftCardRepo';
-import discountRepo from '../../infrastructure/repositories/discountRepo';
+const couponRepo = couponDiscountRepository.coupons;
+const discountRepo = couponDiscountRepository.discounts;
 
 describe('ValidateCouponUseCase', () => {
   const useCase = new ValidateCouponUseCase();

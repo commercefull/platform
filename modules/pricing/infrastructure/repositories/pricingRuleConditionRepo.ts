@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 
 export interface RuleCondition {
   ruleConditionId: string;
@@ -37,7 +38,7 @@ export class RuleConditionRepo {
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [params.pricingRuleId, params.type, JSON.stringify(params.parameters), now, now],
     );
-    if (!result) throw new Error('Failed to create rule condition');
+    if (!result) throw new FailedToCreatePricingError('Failed to create rule condition');
     return result;
   }
 

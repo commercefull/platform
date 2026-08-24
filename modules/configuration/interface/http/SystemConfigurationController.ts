@@ -3,12 +3,14 @@
  * Handles system configuration-related HTTP requests
  */
 
+import { randomUUID } from 'crypto';
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { UpdateSystemConfigurationUseCase, UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
 import { SystemConfigurationRepo } from '../../infrastructure/repositories/SystemConfigurationRepo';
+import { isUuid } from 'libs/uuid';
 
 interface CreateConfigBody {
   configId?: string;
@@ -53,7 +55,7 @@ export class SystemConfigurationController {
     try {
       const body = req.body;
       const config = SystemConfiguration.create({
-        configId: body.configId || `config_${Date.now()}`,
+        configId: body.configId || randomUUID(),
         platformName: body.platformName,
         platformDomain: body.platformDomain,
         supportEmail: body.supportEmail,
@@ -87,6 +89,12 @@ export class SystemConfigurationController {
    */
   async updateSystemConfiguration(req: TypedRequest<Record<string, string>, unknown, UpdateConfigBody>, res: Response) {
     try {
+      if (!isUuid(req.params.configId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid configuration ID format',
+        });
+      }
       const body = req.body;
       const command = new UpdateSystemConfigurationCommand(req.params.configId, {
         platformName: body.platformName,
@@ -129,6 +137,12 @@ export class SystemConfigurationController {
    */
   async getSystemConfiguration(req: TypedRequest, res: Response) {
     try {
+      if (!isUuid(req.params.configId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid configuration ID format',
+        });
+      }
       const systemConfigRepository = new SystemConfigurationRepo();
       const config = await systemConfigRepository.findById(req.params.configId);
 

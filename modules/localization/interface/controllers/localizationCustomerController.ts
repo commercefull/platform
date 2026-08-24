@@ -3,11 +3,12 @@
  * Public endpoints for customers to get locale and country information
  */
 
-import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import localeRepo from '../../infrastructure/repositories/localeRepo';
-import countryRepo from '../../infrastructure/repositories/countryRepo';
+import localizationDataRepository from '../../infrastructure/repositories/LocalizationDataRepository';
+
+const localeRepo = localizationDataRepository.locales;
+const countryRepo = localizationDataRepository.countries;
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { Locale, Country } from '../../../../libs/db/types';
 
@@ -16,28 +17,22 @@ import { Locale, Country } from '../../../../libs/db/types';
  * GET /locales
  */
 export const getActiveLocales = async (_req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const locales = await localeRepo.findAll(true); // Only active locales
+  const locales = await localeRepo.findAll(true); // Only active locales
 
-    // Map to public-facing data (exclude internal fields)
-    const publicLocales = locales.map((locale: Locale) => ({
-      code: locale.code,
-      name: locale.name,
-      language: locale.language,
-      countryCode: locale.countryCode,
-      isDefault: locale.isDefault,
-      textDirection: locale.textDirection,
-      dateFormat: locale.dateFormat,
-      timeFormat: locale.timeFormat,
-      timeZone: locale.timeZone,
-    }));
+  // Map to public-facing data (exclude internal fields)
+  const publicLocales = locales.map((locale: Locale) => ({
+    code: locale.code,
+    name: locale.name,
+    language: locale.language,
+    countryCode: locale.countryCode,
+    isDefault: locale.isDefault,
+    textDirection: locale.textDirection,
+    dateFormat: locale.dateFormat,
+    timeFormat: locale.timeFormat,
+    timeZone: locale.timeZone,
+  }));
 
-    successResponse(res, publicLocales);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    errorResponse(res, 'Failed to fetch locales');
-  }
+  successResponse(res, publicLocales);
 };
 
 /**
@@ -45,24 +40,18 @@ export const getActiveLocales = async (_req: TypedRequest, res: Response): Promi
  * GET /countries
  */
 export const getActiveCountries = async (_req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const countries = await countryRepo.findAll(true); // Only active countries
+  const countries = await countryRepo.findAll(true); // Only active countries
 
-    // Map to public-facing data
-    const publicCountries = countries.map((country: Country) => ({
-      code: country.code,
-      name: country.name,
-      alpha3Code: country.alpha3Code,
-      flagIcon: country.flagIcon,
-      region: country.region,
-    }));
+  // Map to public-facing data
+  const publicCountries = countries.map((country: Country) => ({
+    code: country.code,
+    name: country.name,
+    alpha3Code: country.alpha3Code,
+    flagIcon: country.flagIcon,
+    region: country.region,
+  }));
 
-    successResponse(res, publicCountries);
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    errorResponse(res, 'Failed to fetch countries');
-  }
+  successResponse(res, publicCountries);
 };
 
 /**
@@ -70,73 +59,67 @@ export const getActiveCountries = async (_req: TypedRequest, res: Response): Pro
  * GET /detect
  */
 export const detectLocale = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    // Get Accept-Language header
-    const acceptLanguage = req.headers['accept-language'] || '';
+  // Get Accept-Language header
+  const acceptLanguage = req.headers['accept-language'] || '';
 
-    // Parse the Accept-Language header to get preferred language codes
-    const preferredLanguages = parseAcceptLanguage(acceptLanguage);
+  // Parse the Accept-Language header to get preferred language codes
+  const preferredLanguages = parseAcceptLanguage(acceptLanguage);
 
-    // Try to find a matching active locale
-    let matchedLocale = null;
+  // Try to find a matching active locale
+  let matchedLocale = null;
 
-    for (const lang of preferredLanguages) {
-      // Try exact match first (e.g., "en-US")
-      const exactMatch = await localeRepo.findByCode(lang.code);
-      if (exactMatch && exactMatch.isActive) {
-        matchedLocale = exactMatch;
+  for (const lang of preferredLanguages) {
+    // Try exact match first (e.g., "en-US")
+    const exactMatch = await localeRepo.findByCode(lang.code);
+    if (exactMatch && exactMatch.isActive) {
+      matchedLocale = exactMatch;
+      break;
+    }
+
+    // Try language-only match (e.g., "en" from "en-US")
+    if (lang.language) {
+      const langMatch = await findLocaleByLanguage(lang.language);
+      if (langMatch) {
+        matchedLocale = langMatch;
         break;
       }
-
-      // Try language-only match (e.g., "en" from "en-US")
-      if (lang.language) {
-        const langMatch = await findLocaleByLanguage(lang.language);
-        if (langMatch) {
-          matchedLocale = langMatch;
-          break;
-        }
-      }
     }
-
-    // Fallback to default locale
-    if (!matchedLocale) {
-      matchedLocale = await localeRepo.findDefault();
-    }
-
-    if (!matchedLocale) {
-      // Return a basic fallback if no locale is configured
-      successResponse(res, {
-        detected: false,
-        locale: {
-          code: 'en-US',
-          name: 'English (US)',
-          language: 'en',
-          textDirection: 'ltr',
-        },
-        source: 'fallback',
-      });
-      return;
-    }
-
-    successResponse(res, {
-      detected: true,
-      locale: {
-        code: matchedLocale.code,
-        name: matchedLocale.name,
-        language: matchedLocale.language,
-        countryCode: matchedLocale.countryCode,
-        textDirection: matchedLocale.textDirection,
-        dateFormat: matchedLocale.dateFormat,
-        timeFormat: matchedLocale.timeFormat,
-        timeZone: matchedLocale.timeZone,
-      },
-      source: preferredLanguages.length > 0 ? 'accept-language' : 'default',
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    errorResponse(res, 'Failed to detect locale');
   }
+
+  // Fallback to default locale
+  if (!matchedLocale) {
+    matchedLocale = await localeRepo.findDefault();
+  }
+
+  if (!matchedLocale) {
+    // Return a basic fallback if no locale is configured
+    successResponse(res, {
+      detected: false,
+      locale: {
+        code: 'en-US',
+        name: 'English (US)',
+        language: 'en',
+        textDirection: 'ltr',
+      },
+      source: 'fallback',
+    });
+    return;
+  }
+
+  successResponse(res, {
+    detected: true,
+    locale: {
+      code: matchedLocale.code,
+      name: matchedLocale.name,
+      language: matchedLocale.language,
+      countryCode: matchedLocale.countryCode,
+      textDirection: matchedLocale.textDirection,
+      dateFormat: matchedLocale.dateFormat,
+      timeFormat: matchedLocale.timeFormat,
+      timeZone: matchedLocale.timeZone,
+    },
+    source: preferredLanguages.length > 0 ? 'accept-language' : 'default',
+  });
 };
 
 /**
@@ -144,37 +127,31 @@ export const detectLocale = async (req: TypedRequest, res: Response): Promise<vo
  * GET /locales/:code
  */
 export const getLocaleByCode = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { code } = req.params;
+  const { code } = req.params;
 
-    if (!code) {
-      errorResponse(res, 'Locale code is required', 400);
-      return;
-    }
-
-    const locale = await localeRepo.findByCode(code);
-
-    if (!locale || !locale.isActive) {
-      errorResponse(res, 'Locale not found', 404);
-      return;
-    }
-
-    successResponse(res, {
-      code: locale.code,
-      name: locale.name,
-      language: locale.language,
-      countryCode: locale.countryCode,
-      isDefault: locale.isDefault,
-      textDirection: locale.textDirection,
-      dateFormat: locale.dateFormat,
-      timeFormat: locale.timeFormat,
-      timeZone: locale.timeZone,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    errorResponse(res, 'Failed to fetch locale');
+  if (!code) {
+    errorResponse(res, 'Locale code is required', 400);
+    return;
   }
+
+  const locale = await localeRepo.findByCode(code);
+
+  if (!locale || !locale.isActive) {
+    errorResponse(res, 'Locale not found', 404);
+    return;
+  }
+
+  successResponse(res, {
+    code: locale.code,
+    name: locale.name,
+    language: locale.language,
+    countryCode: locale.countryCode,
+    isDefault: locale.isDefault,
+    textDirection: locale.textDirection,
+    dateFormat: locale.dateFormat,
+    timeFormat: locale.timeFormat,
+    timeZone: locale.timeZone,
+  });
 };
 
 /**
@@ -182,34 +159,28 @@ export const getLocaleByCode = async (req: TypedRequest, res: Response): Promise
  * GET /countries/:code
  */
 export const getCountryByCode = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const { code } = req.params;
+  const { code } = req.params;
 
-    if (!code) {
-      errorResponse(res, 'Country code is required', 400);
-      return;
-    }
-
-    const country = await countryRepo.findByCode(code);
-
-    if (!country || !country.isActive) {
-      errorResponse(res, 'Country not found', 404);
-      return;
-    }
-
-    successResponse(res, {
-      code: country.code,
-      name: country.name,
-      alpha3Code: country.alpha3Code,
-      numericCode: country.numericCode,
-      flagIcon: country.flagIcon,
-      region: country.region,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    errorResponse(res, 'Failed to fetch country');
+  if (!code) {
+    errorResponse(res, 'Country code is required', 400);
+    return;
   }
+
+  const country = await countryRepo.findByCode(code);
+
+  if (!country || !country.isActive) {
+    errorResponse(res, 'Country not found', 404);
+    return;
+  }
+
+  successResponse(res, {
+    code: country.code,
+    name: country.name,
+    alpha3Code: country.alpha3Code,
+    numericCode: country.numericCode,
+    flagIcon: country.flagIcon,
+    region: country.region,
+  });
 };
 
 // ============================================================================

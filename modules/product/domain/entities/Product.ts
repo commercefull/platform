@@ -7,6 +7,7 @@ import { ProductStatus, canTransitionProductTo } from '../valueObjects/ProductSt
 import { ProductVisibility } from '../valueObjects/ProductVisibility';
 import { Price } from '../valueObjects/Price';
 import { Dimensions } from '../valueObjects/Dimensions';
+import { InvalidProductStatusError, ProductImageNotFoundError, ProductValidationError } from '../errors/ProductErrors';
 
 export interface ProductImage {
   imageId: string;
@@ -31,7 +32,7 @@ export interface ProductProps {
   name: string;
   description: string;
   shortDescription?: string;
-  sku?: string;
+  sku: string;
   slug: string;
   productTypeId: string;
   categoryId?: string;
@@ -116,13 +117,14 @@ export class Product {
   }): Product {
     const now = new Date();
     const slug = props.slug || Product.generateSlug(props.name);
+    const sku = props.sku || Product.generateSku(props.name);
 
     return new Product({
       productId: props.productId,
       name: props.name,
       description: props.description,
       shortDescription: props.shortDescription,
-      sku: props.sku,
+      sku,
       slug,
       productTypeId: props.productTypeId,
       categoryId: props.categoryId,
@@ -180,7 +182,7 @@ export class Product {
   get shortDescription(): string | undefined {
     return this.props.shortDescription;
   }
-  get sku(): string | undefined {
+  get sku(): string {
     return this.props.sku;
   }
   get slug(): string {
@@ -353,7 +355,7 @@ export class Product {
 
   updateStatus(newStatus: ProductStatus): void {
     if (!canTransitionProductTo(this.props.status, newStatus)) {
-      throw new Error(`Cannot transition product from ${this.props.status} to ${newStatus}`);
+      throw new InvalidProductStatusError(String(this.props.status), String(newStatus));
     }
     this.props.status = newStatus;
     this.touch();
@@ -366,7 +368,7 @@ export class Product {
 
   publish(): void {
     if (this.props.status !== ProductStatus.ACTIVE) {
-      throw new Error('Product must be active to publish');
+      throw new ProductValidationError('Product must be active to publish');
     }
     this.props.publishedAt = new Date();
     this.props.visibility = ProductVisibility.VISIBLE;
@@ -434,7 +436,7 @@ export class Product {
   setPrimaryImage(imageId: string): void {
     const image = this.props.images.find(img => img.imageId === imageId);
     if (!image) {
-      throw new Error('Image not found');
+      throw new ProductImageNotFoundError(imageId);
     }
     this.props.images.forEach(img => {
       img.isPrimary = img.imageId === imageId;
@@ -522,6 +524,16 @@ export class Product {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
       .substring(0, 200);
+  }
+
+  static generateSku(name: string): string {
+    const base = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .substring(0, 50);
+    const suffix = Math.random().toString(36).substring(2, 8);
+    return `${base || 'product'}-${suffix}`;
   }
 
   toJSON(): Record<string, unknown> {

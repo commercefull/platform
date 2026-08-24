@@ -3,6 +3,8 @@
  * Unified store concept that works for both marketplace and multi-store scenarios
  */
 
+import { StoreValidationError } from '../errors/StoreErrors';
+
 export type StoreType = 'merchant_store' | 'organization_store';
 
 export interface StoreProps {
@@ -146,10 +148,10 @@ export class Store {
 
     // Validate ownership
     if (props.storeType === 'merchant_store' && !props.organizationId) {
-      throw new Error('Merchant stores must have a organizationId');
+      throw new StoreValidationError('Merchant stores must have a organizationId');
     }
     if (props.storeType === 'organization_store' && !props.organizationId) {
-      throw new Error('Organization stores must have a organizationId');
+      throw new StoreValidationError('Organization stores must have a organizationId');
     }
 
     return new Store({

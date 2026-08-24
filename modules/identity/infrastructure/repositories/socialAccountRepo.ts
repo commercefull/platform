@@ -8,6 +8,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import { IdentitySocialAccount } from '../../../../libs/db/types';
 import { SocialAccount, SocialProvider, UserType } from '../../domain/entities/SocialAccount';
+import { FailedToCreateSocialAccountError } from '../../domain/errors/IdentityErrors';
 
 // ============================================================================
 // Types
@@ -113,7 +114,7 @@ export class SocialAccountRepo {
     ]);
 
     if (!record) {
-      throw new Error('Failed to create social account');
+      throw new FailedToCreateSocialAccountError();
     }
 
     return this.toEntity(record);

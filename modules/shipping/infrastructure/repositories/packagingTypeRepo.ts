@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingPackagingType } from '../../../../libs/db/types';
+import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 
 export { ShippingPackagingType };
 
@@ -74,7 +75,7 @@ export async function create(input: CreateShippingPackagingTypeInput): Promise<S
     ],
   );
 
-  if (!result) throw new Error('Failed to create packaging type');
+  if (!result) throw new FailedToCreateShippingEntityError('Failed to create packaging type');
   return result;
 }
 

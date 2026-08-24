@@ -2,6 +2,8 @@
  * ConvertCurrency Use Case
  */
 
+import { CurrencyNotFoundError, LocalizationValidationError } from '../../domain/errors/LocalizationErrors';
+
 export interface ConvertCurrencyInput {
   amount: number;
   fromCurrency: string;
@@ -32,7 +34,7 @@ export class ConvertCurrencyUseCase {
 
   async execute(input: ConvertCurrencyInput): Promise<ConvertCurrencyOutput> {
     if (input.amount === undefined || !input.fromCurrency || !input.toCurrency) {
-      throw new Error('Amount, fromCurrency, and toCurrency are required');
+      throw new LocalizationValidationError('Amount, fromCurrency, and toCurrency are required');
     }
 
     if (input.fromCurrency === input.toCurrency) {
@@ -48,12 +50,12 @@ export class ConvertCurrencyUseCase {
 
     const fromCurrency = await this.localizationRepository.findCurrencyByCode(input.fromCurrency);
     if (!fromCurrency) {
-      throw new Error(`Currency not found: ${input.fromCurrency}`);
+      throw new CurrencyNotFoundError(input.fromCurrency);
     }
 
     const toCurrency = await this.localizationRepository.findCurrencyByCode(input.toCurrency);
     if (!toCurrency) {
-      throw new Error(`Currency not found: ${input.toCurrency}`);
+      throw new CurrencyNotFoundError(input.toCurrency);
     }
 
     // Convert to base currency then to target

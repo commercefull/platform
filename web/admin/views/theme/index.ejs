@@ -1,0 +1,152 @@
+<%- include('../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Themes</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+            <li class="breadcrumb-item active">Themes</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Built-in Themes -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <h3 class="mb-3">Built-in Themes</h3>
+        </div>
+        <% builtInThemes.forEach(theme => { %>
+          <div class="col-md-4 mb-4">
+            <div class="card theme-card" style="cursor:pointer;" onclick="location.href='/admin/themes/<%= theme.themeId %>'">
+              <div class="theme-screenshot" style="height:200px;background:linear-gradient(135deg, <%= theme.defaultSettings.primaryColor %>, <%= theme.defaultSettings.secondaryColor %>);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;">
+                <span style="color:#fff;font-size:24px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,0.3);"><%= theme.name %></span>
+              </div>
+              <div class="card-body">
+                <h5 class="card-title"><%= theme.name %></h5>
+                <p class="card-text text-muted small"><%= theme.description %></p>
+                <div class="d-flex align-items-center mb-2">
+                  <span class="badge badge-success mr-2">Built-in</span>
+                  <span class="badge badge-<%= theme.status === 'active' ? 'success' : 'secondary' %>"><%= theme.status %></span>
+                  <% if (theme.isCustomizable) { %>
+                    <span class="badge badge-info ml-2">Customizable</span>
+                  <% } %>
+                </div>
+                <div class="theme-tags">
+                  <% theme.tags.forEach(tag => { %>
+                    <span class="badge badge-light mr-1"><%= tag %></span>
+                  <% }); %>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                  <a href="/admin/themes/<%= theme.themeId %>" class="btn btn-sm btn-primary">
+                    <i class="fas fa-palette"></i> Customize
+                  </a>
+                  <a href="/admin/themes/<%= theme.themeId %>/preview" target="_blank" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye"></i> Preview
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+
+      <!-- Custom Themes -->
+      <% if (themes && themes.length > 0) { %>
+        <div class="row mb-4">
+          <div class="col-12">
+            <h3 class="mb-3">Custom Themes</h3>
+          </div>
+          <% themes.forEach(theme => { %>
+            <% if (theme.type !== 'built_in') { %>
+              <div class="col-md-4 mb-4">
+                <div class="card theme-card" style="cursor:pointer;" onclick="location.href='/admin/themes/<%= theme.themeId %>'">
+                  <div class="theme-screenshot" style="height:200px;background:linear-gradient(135deg, <%= theme.defaultSettings?.primaryColor || '#007bff' %>, <%= theme.defaultSettings?.secondaryColor || '#6c757d' %>);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;">
+                    <span style="color:#fff;font-size:24px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,0.3);"><%= theme.name %></span>
+                  </div>
+                  <div class="card-body">
+                    <h5 class="card-title"><%= theme.name %></h5>
+                    <p class="card-text text-muted small"><%= theme.description || 'No description' %></p>
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="badge badge-<%= theme.status === 'active' ? 'success' : 'secondary' %> mr-2"><%= theme.status %></span>
+                      <span class="badge badge-warning">Custom</span>
+                    </div>
+                    <div class="mt-3 d-flex gap-2">
+                      <a href="/admin/themes/<%= theme.themeId %>" class="btn btn-sm btn-primary">
+                        <i class="fas fa-palette"></i> Customize
+                      </a>
+                      <a href="/admin/themes/<%= theme.themeId %>/preview" target="_blank" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-eye"></i> Preview
+                      </a>
+                      <button class="btn btn-sm btn-outline-danger" onclick="deleteTheme('<%= theme.themeId %>', '<%= theme.name %>')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <!-- Info Banner -->
+      <div class="callout callout-info">
+        <h5><i class="fas fa-info"></i> How theming works</h5>
+        <ul class="mb-0">
+          <li><strong>Built-in themes</strong> ship with the platform and can be customized per-store via overrides.</li>
+          <li><strong>Overrides</strong> let you change colors, fonts, layout, and add custom CSS, logo, and favicon for a specific store.</li>
+          <li><strong>Assignment</strong> — assign a theme to a store to activate it. The page builder preview uses the assigned theme.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Theme</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Delete "<strong id="deleteThemeName"></strong>"? This cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function deleteTheme(themeId, name) {
+  document.getElementById('deleteThemeName').textContent = name;
+  document.getElementById('confirmDeleteBtn').onclick = function() {
+    fetch(`/admin/themes/${themeId}/delete`, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => { if (data.success) location.reload(); else alert(data.message); })
+      .catch(() => alert('Error deleting theme'));
+  };
+  $('#deleteModal').modal('show');
+}
+</script>
+<% endcontent %>

@@ -6,10 +6,10 @@
 import { ProductRepository, ProductFilters } from '../../domain/repositories/ProductRepository';
 import { PaginationOptions } from 'libs/types/shared';
 import { Product } from '../../domain/entities/Product';
-import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
-import { StoreRepository } from '../../../store/domain/repositories/StoreRepository';
-import { SystemConfigurationRepository } from '../../../configuration/domain/repositories/SystemConfigurationRepository';
-import { SystemConfiguration } from '../../../configuration/domain/entities/SystemConfiguration';
+import { OrganizationLookupPort } from '../../application/ports/OrganizationLookupPort';
+import { StoreLookupPort } from '../../application/ports/StoreLookupPort';
+import { ProductValidationError } from '../../domain/errors/ProductErrors';
+import { SystemConfigPort } from '../../application/ports/SystemConfigPort';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import { ProductListItemResponse, ListProductsResponse } from './ListProducts';
@@ -46,13 +46,14 @@ export class ListProductsForContextCommand {
 export class ListProductsForContextUseCase {
   constructor(
     private readonly productRepository: ProductRepository,
-    private readonly storeRepository: StoreRepository,
-    private readonly systemConfigRepository: SystemConfigurationRepository,
+    private readonly storeLookupPort: StoreLookupPort,
+    private readonly systemConfigPort: SystemConfigPort,
+    private readonly organizationLookupPort?: OrganizationLookupPort,
   ) {}
 
   async execute(command: ListProductsForContextCommand): Promise<ListProductsResponse> {
     // Get system configuration to understand the operating mode
-    const systemConfig = await this.systemConfigRepository.findActive();
+    const systemConfig = await this.systemConfigPort.findActive();
 
     // Build context-aware filters
     const filters = await this.buildContextFilters(command, systemConfig);
@@ -75,7 +76,7 @@ export class ListProductsForContextUseCase {
     };
   }
 
-  private async buildContextFilters(command: ListProductsForContextCommand, systemConfig: SystemConfiguration | null): Promise<ProductFilters> {
+  private async buildContextFilters(command: ListProductsForContextCommand, systemConfig: { isMarketplace: boolean; isMultiStore: boolean; isSingleStore: boolean } | null): Promise<ProductFilters> {
     const filters: ProductFilters = {
       status: command.includeInactive ? undefined : ProductStatus.ACTIVE,
       visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED],
@@ -94,17 +95,20 @@ export class ListProductsForContextUseCase {
         filters.organizationId = command.context.organizationId;
       } else if (command.context.storeId) {
         // If storeId is provided, find the organization for that store
-        const store = await this.storeRepository.findById(command.context.storeId);
+        const store = await this.storeLookupPort.findById(command.context.storeId);
         if (store?.organizationId) {
           filters.organizationId = store.organizationId;
         }
       }
     } else {
       // Single store mode: products belong to the default organization
-      const organizations = await organizationRepo.findAll();
+      if (!this.organizationLookupPort) {
+        throw new ProductValidationError('Organization lookup port is required for single-store mode.');
+      }
+      const organizations = await this.organizationLookupPort.findAll();
       const defaultOrg = organizations[0];
       if (defaultOrg) {
-        filters.organizationId = defaultOrg.organizationId;
+        filters.organizationId = defaultOrg.id;
       }
     }
 

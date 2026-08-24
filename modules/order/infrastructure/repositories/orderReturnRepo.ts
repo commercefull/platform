@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateOrderReturnError } from '../../domain/errors/OrderErrors';
 
 export type OrderReturnStatus = 'requested' | 'approved' | 'denied' | 'inTransit' | 'received' | 'inspected' | 'completed' | 'cancelled';
 export type OrderReturnType = 'refund' | 'exchange' | 'storeCredit' | 'repair';
@@ -212,7 +213,7 @@ export class OrderReturnRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create order return');
+      throw new FailedToCreateOrderReturnError();
     }
 
     return result;

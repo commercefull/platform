@@ -1,5 +1,6 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ProductImage } from '../../../../libs/db/types';
+import { ProductImageNotFoundError, ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 // Use ProductImage type directly from libs/db/types.ts
 export type { ProductImage };
@@ -65,7 +66,7 @@ export class ProductImageRepo {
     );
 
     if (!row) {
-      throw new Error('Failed to create product image');
+      throw new FailedToCreateProductError();
     }
 
     if (props.isPrimary) {
@@ -105,7 +106,7 @@ export class ProductImageRepo {
     );
 
     if (!row) {
-      throw new Error('Failed to update product image');
+      throw new ProductValidationError('Failed to update product image');
     }
 
     if (props.isPrimary === true) {
@@ -131,7 +132,7 @@ export class ProductImageRepo {
   async setPrimary(id: string): Promise<ProductImage> {
     const image = await this.findById(id);
     if (!image) {
-      throw new Error('Image not found');
+      throw new ProductImageNotFoundError(id);
     }
 
     const now = new Date();
@@ -143,7 +144,7 @@ export class ProductImageRepo {
     );
 
     if (!row) {
-      throw new Error('Failed to set primary image');
+      throw new ProductValidationError('Failed to set primary image');
     }
     return row;
   }

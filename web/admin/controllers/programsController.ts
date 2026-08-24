@@ -3,36 +3,29 @@
  * Dashboard views for Membership, Subscription, Loyalty, and B2B programs
  */
 
-import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import * as adminProgramsRepo from '../../../modules/membership/infrastructure/repositories/adminProgramsRepo';
+import { ManageMembershipProgramsUseCase } from '../../../modules/membership/application/useCases/ManageMembershipPrograms';
 import { adminRespond } from '../../respond';
+
+const manageMembershipProgramsUseCase = new ManageMembershipProgramsUseCase();
 
 // ============================================================================
 // Membership Dashboard
 // ============================================================================
 
 export const membershipDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const stats = await adminProgramsRepo.getMembershipStats();
-    const tiers = await adminProgramsRepo.findMembershipTiersWithCounts();
-    const members = await adminProgramsRepo.findRecentMemberships(20);
+  const stats = await manageMembershipProgramsUseCase.getMembershipStats();
+  const tiers = await manageMembershipProgramsUseCase.findMembershipTiersWithCounts();
+  const members = await manageMembershipProgramsUseCase.findRecentMemberships(20);
 
-    adminRespond(req, res, 'programs/membership/index', {
-      pageName: 'Membership Program',
-      stats,
-      tiers,
-      members,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load membership dashboard',
-    });
-  }
+  adminRespond(req, res, 'programs/membership/index', {
+    pageName: 'Membership Program',
+    stats,
+    tiers,
+    members,
+  });
+  
 };
 
 // ============================================================================
@@ -40,30 +33,22 @@ export const membershipDashboard = async (req: TypedRequest, res: Response): Pro
 // ============================================================================
 
 export const subscriptionDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const stats = await adminProgramsRepo.getSubscriptionStats();
-    const plans = await adminProgramsRepo.findSubscriptionPlansWithCounts();
-    const subscriptions = await adminProgramsRepo.findRecentSubscriptions(20);
+  const stats = await manageMembershipProgramsUseCase.getSubscriptionStats();
+  const plans = await manageMembershipProgramsUseCase.findSubscriptionPlansWithCounts();
+  const subscriptions = await manageMembershipProgramsUseCase.findRecentSubscriptions(20);
 
-    adminRespond(req, res, 'programs/subscription/index', {
-      pageName: 'Subscription Management',
-      stats: {
-        totalSubscriptions: stats.totalSubscriptions,
-        activeSubscriptions: stats.activeSubscriptions,
-        mrr: stats.mrr,
-        churnRate: 0,
-      },
-      plans,
-      subscriptions,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load subscription dashboard',
-    });
-  }
+  adminRespond(req, res, 'programs/subscription/index', {
+    pageName: 'Subscription Management',
+    stats: {
+      totalSubscriptions: stats.totalSubscriptions,
+      activeSubscriptions: stats.activeSubscriptions,
+      mrr: stats.mrr,
+      churnRate: 0,
+    },
+    plans,
+    subscriptions,
+  });
+  
 };
 
 // ============================================================================
@@ -71,30 +56,22 @@ export const subscriptionDashboard = async (req: TypedRequest, res: Response): P
 // ============================================================================
 
 export const loyaltyDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const stats = await adminProgramsRepo.getLoyaltyStats();
-    const rewards = await adminProgramsRepo.findLoyaltyRewardsWithCounts();
-    const transactions = await adminProgramsRepo.findRecentLoyaltyTransactions(20);
+  const stats = await manageMembershipProgramsUseCase.getLoyaltyStats();
+  const rewards = await manageMembershipProgramsUseCase.findLoyaltyRewardsWithCounts();
+  const transactions = await manageMembershipProgramsUseCase.findRecentLoyaltyTransactions(20);
 
-    const settings = {
-      pointsPerDollar: 1,
-      pointValue: 0.01,
-      minRedemption: 100,
-    };
+  const settings = {
+    pointsPerDollar: 1,
+    pointValue: 0.01,
+    minRedemption: 100,
+  };
 
-    adminRespond(req, res, 'programs/loyalty/index', {
-      pageName: 'Loyalty Program',
-      stats,
-      rewards,
-      transactions,
-      settings,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-
-    adminRespond(req, res, 'error', {
-      pageName: 'Error',
-      error: (error as Error).message || 'Failed to load loyalty dashboard',
-    });
-  }
+  adminRespond(req, res, 'programs/loyalty/index', {
+    pageName: 'Loyalty Program',
+    stats,
+    rewards,
+    transactions,
+    settings,
+  });
+  
 };

@@ -2,99 +2,73 @@ import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { logger } from '../../../libs/logger';
 import { adminRespond } from '../../respond';
-import StoreRepo from '../../../modules/store/infrastructure/repositories/StoreRepo';
-import organizationRepo from '../../../modules/organization/infrastructure/repositories/organizationRepo';
-import SystemConfigurationRepo from '../../../modules/configuration/infrastructure/repositories/SystemConfigurationRepo';
-import userStoreRepository from '../../../modules/identity/infrastructure/repositories/StoreUserRepository';
-import { ListStoresQuery, ListStoresUseCase } from '../../../modules/store/application/useCases/ListStores';
-import { GetStoreQuery, GetStoreUseCase } from '../../../modules/store/application/useCases/GetStore';
-import { CreateStoreCommand, CreateStoreUseCase } from '../../../modules/store/application/useCases/CreateStore';
-import { UpdateStoreCommand, UpdateStoreUseCase } from '../../../modules/store/application/useCases/UpdateStore';
-import { ListStoreUsersUseCase } from '../../../modules/identity/application/useCases/store/ListStoreUsers';
-import { AssignUserToStoreUseCase } from '../../../modules/identity/application/useCases/store/AssignUserToStore';
-import { RemoveUserFromStoreUseCase } from '../../../modules/identity/application/useCases/store/RemoveUserFromStore';
-import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
-import storeDispatchRepository from '../../../modules/inventory/infrastructure/repositories/StoreDispatchRepository';
+import { listStoresUseCase, getStoreUseCase, createStoreUseCase, updateStoreUseCase, organizationLookupAdapter, FindActiveStoresUseCase } from '../../../modules/store/application/useCases/wired';
+import { listStoreUsersUseCase, assignUserToStoreUseCase, removeUserFromStoreUseCase } from '../../../modules/identity/application/useCases/store/wired';
+import { GetOrdersByStoreUseCase } from '../../../modules/order/application/useCases/GetOrdersByStore';
+import { GetDispatchesByStoreUseCase } from '../../../modules/inventory/application/useCases/GetDispatchesByStore';
+import { ListStoresQuery } from '../../../modules/store/application/useCases/ListStores';
+import { GetStoreQuery } from '../../../modules/store/application/useCases/GetStore';
+import { CreateStoreCommand } from '../../../modules/store/application/useCases/CreateStore';
+import { UpdateStoreCommand } from '../../../modules/store/application/useCases/UpdateStore';
 
-const listStoresUseCase = new ListStoresUseCase(StoreRepo);
-const getStoreUseCase = new GetStoreUseCase(StoreRepo);
-const createStoreUseCase = new CreateStoreUseCase(StoreRepo, SystemConfigurationRepo);
-const updateStoreUseCase = new UpdateStoreUseCase(StoreRepo);
-const listStoreUsersUseCase = new ListStoreUsersUseCase(userStoreRepository);
-const assignUserToStoreUseCase = new AssignUserToStoreUseCase(
-  userStoreRepository,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  { findById: async (userId: string) => ({ userId }) } as any,
-  StoreRepo,
-);
-const removeUserFromStoreUseCase = new RemoveUserFromStoreUseCase(userStoreRepository);
+const findActiveStoresUseCase = new FindActiveStoresUseCase();
+const getOrdersByStoreUseCase = new GetOrdersByStoreUseCase();
+const getDispatchesByStoreUseCase = new GetDispatchesByStoreUseCase();
 
 export const listStores = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const page = parseInt((req.query.page as string) || '1', 10);
-    const result = await listStoresUseCase.execute(
-      new ListStoresQuery(
-        {
-          isActive: req.query.status ? req.query.status === 'active' : undefined,
-          isHeadquarters: req.query.type ? req.query.type === 'hq' : undefined,
-        },
-        { page, limit: 20 },
-        { field: 'createdAt', direction: 'desc' },
-      ),
-    );
+  const page = parseInt((req.query.page as string) || '1', 10);
+  const result = await listStoresUseCase.execute(
+    new ListStoresQuery(
+      {
+        isActive: req.query.status ? req.query.status === 'active' : undefined,
+        isHeadquarters: req.query.type ? req.query.type === 'hq' : undefined,
+      },
+      { page, limit: 20 },
+      { field: 'createdAt', direction: 'desc' },
+    ),
+  );
 
-    adminRespond(req, res, 'stores/index', {
-      pageName: 'Stores',
-      stores: result.stores,
-      pagination: { total: result.total, page: result.page, pages: result.totalPages, limit: result.limit },
-      filters: { status: req.query.status || '', type: req.query.type || '' },
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load stores' });
-  }
+  adminRespond(req, res, 'stores/index', {
+    pageName: 'Stores',
+    stores: result.stores,
+    pagination: { total: result.total, page: result.page, pages: result.totalPages, limit: result.limit },
+    filters: { status: req.query.status || '', type: req.query.type || '' },
+  });
+  
 };
 
 export const viewStore = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
-    if (!storeResult.store) {
-      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Store not found' });
-      return;
-    }
-
-    const [users, orders, dispatches] = await Promise.all([
-      listStoreUsersUseCase.execute(req.params.storeId).catch(() => []),
-      OrderRepo.findAll({ storeId: req.params.storeId }, { limit: 10, offset: 0, orderBy: 'createdAt', orderDirection: 'desc' }).catch(
-        () => ({ data: [] }) as Record<string, unknown>,
-      ),
-      storeDispatchRepository.findAll({ fromStoreId: req.params.storeId }, { limit: 10, offset: 0 }).catch(() => ({ data: [] }) as Record<string, unknown>),
-    ]);
-
-    adminRespond(req, res, 'stores/view', {
-      pageName: storeResult.store.name,
-      store: storeResult.store,
-      users,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      recentOrders: (orders as any).data || [],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      recentDispatches: (dispatches as any).data ? (dispatches as any).data.map((dispatch: { toJSON: () => unknown }) => dispatch.toJSON()) : [],
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load store' });
+  const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
+  if (!storeResult.store) {
+    adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Store not found' });
+    return;
   }
+
+  const [users, orders, dispatches] = await Promise.all([
+    listStoreUsersUseCase.execute(req.params.storeId).catch(() => []),
+    getOrdersByStoreUseCase.execute(req.params.storeId, 10, 0).catch(
+      () => ({ data: [] }) as Record<string, unknown>,
+    ),
+    getDispatchesByStoreUseCase.execute(req.params.storeId, 10, 0).catch(() => ({ data: [] }) as Record<string, unknown>),
+  ]);
+
+  adminRespond(req, res, 'stores/view', {
+    pageName: storeResult.store.name,
+    store: storeResult.store,
+    users,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recentOrders: (orders as any).data || [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recentDispatches: (dispatches as any).data ? (dispatches as any).data.map((dispatch: { toJSON: () => unknown }) => dispatch.toJSON()) : [],
+  });
+  
 };
 
 export const createStoreForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const organizations = await organizationRepo.findAll();
-    const stores = await StoreRepo.findActive();
-    adminRespond(req, res, 'stores/create', { pageName: 'Create Store', organizations, stores, formData: {} });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load store form' });
-  }
+  const organizations = await organizationLookupAdapter.findAll();
+  const stores = await findActiveStoresUseCase.execute();
+  adminRespond(req, res, 'stores/create', { pageName: 'Create Store', organizations, stores, formData: {} });
+  
 };
 
 export const createStore = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -124,9 +98,9 @@ export const createStore = async (req: TypedRequest, res: Response): Promise<voi
     );
     res.redirect(`/admin/stores/${result.storeId}?success=Store created successfully`);
   } catch (error: unknown) {
-    logger.error('Error:', error);
-    const organizations = await organizationRepo.findAll().catch(() => []);
-    const stores = await StoreRepo.findActive().catch(() => []);
+    logger.warn('Error:', error);
+    const organizations = await organizationLookupAdapter.findAll().catch(() => []);
+    const stores = await findActiveStoresUseCase.execute().catch(() => []);
     adminRespond(req, res, 'stores/create', {
       pageName: 'Create Store',
       error: (error as Error).message || 'Failed to create store',
@@ -138,21 +112,17 @@ export const createStore = async (req: TypedRequest, res: Response): Promise<voi
 };
 
 export const editStoreForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
-    const organizations = await organizationRepo.findAll();
-    const stores = await StoreRepo.findActive();
-    adminRespond(req, res, 'stores/edit', {
-      pageName: 'Edit Store',
-      store: storeResult.store,
-      organizations,
-      stores,
-      formData: storeResult.store,
-    });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load store form' });
-  }
+  const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
+  const organizations = await organizationLookupAdapter.findAll();
+  const stores = await findActiveStoresUseCase.execute();
+  adminRespond(req, res, 'stores/edit', {
+    pageName: 'Edit Store',
+    store: storeResult.store,
+    organizations,
+    stores,
+    formData: storeResult.store,
+  });
+  
 };
 
 export const updateStore = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -177,9 +147,9 @@ export const updateStore = async (req: TypedRequest, res: Response): Promise<voi
     );
     res.redirect(`/admin/stores/${req.params.storeId}?success=Store updated successfully`);
   } catch (error: unknown) {
-    logger.error('Error:', error);
-    const organizations = await organizationRepo.findAll().catch(() => []);
-    const stores = await StoreRepo.findActive().catch(() => []);
+    logger.warn('Error:', error);
+    const organizations = await organizationLookupAdapter.findAll().catch(() => []);
+    const stores = await findActiveStoresUseCase.execute().catch(() => []);
     adminRespond(req, res, 'stores/edit', {
       pageName: 'Edit Store',
       error: (error as Error).message || 'Failed to update store',
@@ -192,14 +162,10 @@ export const updateStore = async (req: TypedRequest, res: Response): Promise<voi
 };
 
 export const manageStoreUsers = async (req: TypedRequest, res: Response): Promise<void> => {
-  try {
-    const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
-    const users = await listStoreUsersUseCase.execute(req.params.storeId);
-    adminRespond(req, res, 'stores/users', { pageName: 'Store Users', store: storeResult.store, users });
-  } catch (error: unknown) {
-    logger.error('Error:', error);
-    adminRespond(req, res, 'error', { pageName: 'Error', error: (error as Error).message || 'Failed to load store users' });
-  }
+  const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
+  const users = await listStoreUsersUseCase.execute(req.params.storeId);
+  adminRespond(req, res, 'stores/users', { pageName: 'Store Users', store: storeResult.store, users });
+  
 };
 
 export const assignUserToStore = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -218,7 +184,7 @@ export const assignUserToStore = async (req: TypedRequest, res: Response): Promi
     });
     res.redirect(`/admin/stores/${req.params.storeId}/users?success=User assigned successfully`);
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
     res.redirect(`/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to assign user')}`);
   }
 };
@@ -228,7 +194,7 @@ export const removeUserFromStore = async (req: TypedRequest, res: Response): Pro
     await removeUserFromStoreUseCase.execute(req.params.userId, req.params.storeId);
     res.redirect(`/admin/stores/${req.params.storeId}/users?success=User removed successfully`);
   } catch (error: unknown) {
-    logger.error('Error:', error);
+    logger.warn('Error:', error);
     res.redirect(`/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to remove user')}`);
   }
 };

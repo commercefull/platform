@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 
 // ============================================================================
 // Table Constants
@@ -100,7 +101,7 @@ export class TaxRateRepo {
         now,
       ],
     );
-    if (!result) throw new Error('Failed to create tax rate');
+    if (!result) throw new FailedToCreateTaxError('Failed to create tax rate');
     return result;
   }
 

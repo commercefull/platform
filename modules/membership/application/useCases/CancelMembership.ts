@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { MembershipNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
 export interface CancelMembershipInput {
   membershipId: string;
@@ -53,11 +54,11 @@ export class CancelMembershipUseCase {
     // Get current membership
     const membership = await this.membershipRepository.getMembershipById(membershipId);
     if (!membership) {
-      throw new Error('Membership not found');
+      throw new MembershipNotFoundError(membershipId);
     }
 
     if (membership.status === 'cancelled') {
-      throw new Error('Membership is already cancelled');
+      throw new MembershipValidationError('Membership is already cancelled');
     }
 
     const now = new Date();

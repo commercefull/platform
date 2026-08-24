@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
+import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 
 export interface ShippingLabel {
   shippingLabelId: string;
@@ -95,7 +96,7 @@ export async function create(input: CreateShippingLabelInput): Promise<ShippingL
   ]);
 
   if (!result || result.length === 0) {
-    throw new Error('Failed to create shipping label');
+    throw new FailedToCreateShippingEntityError('Failed to create shipping label');
   }
   return result[0];
 }

@@ -1,4 +1,6 @@
-import fulfillmentRepository from '../../infrastructure/repositories/FulfillmentRepository';
+import fulfillmentDataRepository from '../../infrastructure/repositories/FulfillmentDataRepository';
+
+const fulfillmentRepository = fulfillmentDataRepository.fulfillments;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetFulfillmentUseCase, GetFulfillmentInput } from '../../application/useCases/GetFulfillment';
 import { CreateFulfillmentUseCase, CreateFulfillmentInput } from '../../application/useCases/CreateFulfillment';

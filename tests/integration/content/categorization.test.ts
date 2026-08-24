@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import {
   TEST_CONTENT_PAGE_ID,
+  TEST_CONTENT_CATEGORY_ID,
   ADMIN_CREDENTIALS,
 } from '../testConstants';
 
@@ -37,24 +38,7 @@ describe('Content Categorization API', () => {
     }
 
     testContentPageId = TEST_CONTENT_PAGE_ID;
-
-    // Create a test category
-    const catResp = await client.post(
-      '/business/content/categories',
-      {
-        name: 'Test Category ' + Date.now(),
-        slug: 'test-cat-' + Date.now(),
-        description: 'Test category for integration tests',
-        sortOrder: 0,
-        isActive: true,
-      },
-      { headers: { Authorization: `Bearer ${adminToken}` } },
-    );
-
-    if (catResp.status === 201) {
-      testCategoryId =
-        catResp.data?.data?.contentCategoryId || catResp.data?.data?.id;
-    }
+    testCategoryId = TEST_CONTENT_CATEGORY_ID;
   });
 
   it('should assign a page to a category', async () => {
@@ -138,11 +122,12 @@ describe('Content Categorization API', () => {
   });
 
   afterAll(async () => {
-    // Clean up test category
-    if (testCategoryId && adminToken) {
-      await client.delete(`/business/content/categories/${testCategoryId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
+    // Remove categorization if created during tests
+    if (testContentPageId && testCategoryId && adminToken) {
+      await client.delete(
+        `/business/content/pages/${testContentPageId}/categories/${testCategoryId}`,
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      ).catch(() => {});
     }
   });
 });

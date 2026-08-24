@@ -1,4 +1,6 @@
-import InventoryRepo from '../../infrastructure/repositories/InventoryRepository';
+import inventoryDataRepository from '../../infrastructure/repositories/InventoryDataRepository';
+
+const InventoryRepo = inventoryDataRepository.items;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetInventoryItemUseCase, GetInventoryItemInput } from '../../application/useCases/GetInventoryItem';
 import { ListInventoryItemsUseCase, ListInventoryItemsInput } from '../../application/useCases/ListInventoryItems';

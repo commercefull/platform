@@ -5,6 +5,7 @@
 
 import { StoreRepository } from '../../domain/repositories/StoreRepository';
 import { type StoreProps } from '../../domain/entities/Store';
+import { StoreNotFoundError, StoreSlugAlreadyExistsError, StoreValidationError } from '../../domain/errors/StoreErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -69,14 +70,14 @@ export class UpdateStoreUseCase {
     // Find existing store
     const store = await this.storeRepository.findById(command.storeId);
     if (!store) {
-      throw new Error(`Store not found: ${command.storeId}`);
+      throw new StoreNotFoundError(command.storeId);
     }
 
     // Check slug uniqueness if being updated
     if (command.updates.slug && command.updates.slug !== store.slug) {
       const existingStore = await this.storeRepository.findBySlug(command.updates.slug);
       if (existingStore && existingStore.storeId !== command.storeId) {
-        throw new Error(`Store with slug '${command.updates.slug}' already exists.`);
+        throw new StoreSlugAlreadyExistsError(command.updates.slug);
       }
     }
 
@@ -84,7 +85,7 @@ export class UpdateStoreUseCase {
     if (command.updates.storeUrl && command.updates.storeUrl !== store.storeUrl) {
       const existingStore = await this.storeRepository.findByUrl(command.updates.storeUrl);
       if (existingStore && existingStore.storeId !== command.storeId) {
-        throw new Error(`Store with URL '${command.updates.storeUrl}' already exists.`);
+        throw new StoreValidationError(`Store with URL '${command.updates.storeUrl}' already exists.`);
       }
     }
 

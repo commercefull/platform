@@ -3,6 +3,8 @@
  * Represents a content type that defines the structure of content pages
  */
 
+import { ContentValidationError } from '../errors/ContentErrors';
+
 export interface ContentTypeProps {
   contentTypeId: string;
   name: string;
@@ -93,7 +95,7 @@ export class ContentType {
 
   deactivate(): void {
     if (this.props.isSystem) {
-      throw new Error('Cannot deactivate a system content type');
+      throw new ContentValidationError('Cannot deactivate a system content type');
     }
     this.props.isActive = false;
     this.props.updatedAt = new Date();
@@ -101,7 +103,7 @@ export class ContentType {
 
   updateName(name: string): void {
     if (!name || name.trim().length === 0) {
-      throw new Error('Name cannot be empty');
+      throw new ContentValidationError('Name cannot be empty');
     }
     this.props.name = name.trim();
     this.props.updatedAt = new Date();

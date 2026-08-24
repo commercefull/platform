@@ -3,7 +3,8 @@
  */
 
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
-import { CouponRepository } from '../../../coupon/infrastructure/repositories/CouponRepository';
+import { DiscountQuotePort } from '../../application/ports/DiscountQuotePort';
+import { BasketNotFoundError, BasketValidationError } from '../../domain/errors/BasketErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 export class ApplyCouponCommand {
@@ -14,24 +15,34 @@ export class ApplyCouponCommand {
 }
 
 export class ApplyCouponUseCase {
-  constructor(private readonly repository: BasketRepository) {}
+  constructor(
+    private readonly repository: BasketRepository,
+    private readonly discountQuotePort?: DiscountQuotePort,
+  ) {}
 
   async execute(command: ApplyCouponCommand): Promise<Record<string, unknown>> {
     const basket = await this.repository.findById(command.basketId);
     if (!basket) {
-      throw new Error('Basket not found');
+      throw new BasketNotFoundError(command.basketId);
     }
 
-    const couponRepo = new CouponRepository();
-    const validation = await couponRepo.validateCouponCode(command.couponCode, basket.subtotal.amount, basket.customerId);
-
-    if (!validation.valid || !validation.coupon) {
-      throw new Error(validation.error || `Invalid coupon code: ${command.couponCode}`);
+    if (!this.discountQuotePort) {
+      throw new BasketValidationError('Discount quote port is required to apply coupons');
     }
 
-    const coupon = validation.coupon;
-    const discountType = coupon.type === 'fixed_amount' ? 'fixed' : 'percentage';
-    const discountValue = coupon.value;
+    const validation = await this.discountQuotePort.validateDiscount(
+      command.couponCode,
+      basket.subtotal.amount,
+      basket.customerId,
+    );
+
+    if (!validation.valid || !validation.discount) {
+      throw new BasketValidationError(validation.error || `Invalid coupon code: ${command.couponCode}`);
+    }
+
+    const discount = validation.discount;
+    const discountType = discount.type === 'fixed_amount' ? 'fixed' : 'percentage';
+    const discountValue = discount.value;
 
     basket.applyCoupon(command.couponCode, discountType, discountValue);
     await this.repository.save(basket);
@@ -41,7 +52,7 @@ export class ApplyCouponUseCase {
       couponCode: command.couponCode,
       discountType,
       discountValue,
-      discountAmount: validation.discountAmount,
+      discountAmount: discount.discountAmount,
     });
 
     return basket.toJSON();

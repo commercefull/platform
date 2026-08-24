@@ -3,6 +3,7 @@ import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
 import { CustomerCurrencyPreference as DbCustomerCurrencyPreference } from '../../../../libs/db/types';
+import { CustomerValidationError, FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
 export type CustomerCurrencyPreference = DbCustomerCurrencyPreference;
@@ -47,7 +48,7 @@ export class CustomerCurrencyPreferenceRepo {
     // Check if preference already exists
     const existing = await this.findByCustomerId(params.customerId);
     if (existing) {
-      throw new Error('Currency preference already exists for this customer');
+      throw new CustomerValidationError('Currency preference already exists for this customer');
     }
 
     const result = await queryOne<CustomerCurrencyPreference>(
@@ -57,7 +58,7 @@ export class CustomerCurrencyPreferenceRepo {
       [params.customerId, params.currencyId, params.automaticDetection ?? true, now, now],
     );
 
-    if (!result) throw new Error('Failed to create currency preference');
+    if (!result) throw new FailedToCreateCustomerError('Failed to create currency preference');
     return result;
   }
 
@@ -69,7 +70,7 @@ export class CustomerCurrencyPreferenceRepo {
         currencyId: params.currencyId,
         automaticDetection: params.automaticDetection,
       });
-      if (!updated) throw new Error('Failed to update preference');
+      if (!updated) throw new FailedToCreateCustomerError('Failed to update currency preference');
       return updated;
     }
 

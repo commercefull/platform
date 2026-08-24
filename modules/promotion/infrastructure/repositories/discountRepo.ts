@@ -1,10 +1,12 @@
 import { query, queryOne } from '../../../../libs/db';
+import { withTransaction } from '../../../../libs/db';
 import {
   Table,
   PromotionProductDiscount,
   PromotionProductDiscountItem,
   PromotionProductDiscountCustomerGroup,
 } from '../../../../libs/db/types';
+import { FailedToCreatePromotionError, DiscountNotFoundError } from '../../domain/errors/PromotionErrors';
 
 // Table name constants
 const DISCOUNT_TABLE = Table.PromotionProductDiscount;
@@ -112,7 +114,7 @@ export class DiscountRepo {
     );
 
     if (!discount) {
-      throw new Error('Failed to create product discount');
+      throw new FailedToCreatePromotionError('Failed to create product discount');
     }
 
     return discount;
@@ -168,7 +170,7 @@ export class DiscountRepo {
     if (updateFields.length === 1) {
       const discount = await this.findById(id);
       if (!discount) {
-        throw new Error(`Product discount with id ${id} not found`);
+        throw new DiscountNotFoundError(id);
       }
       return discount;
     }
@@ -180,7 +182,7 @@ export class DiscountRepo {
     );
 
     if (!discount) {
-      throw new Error(`Product discount with id ${id} not found`);
+      throw new DiscountNotFoundError(id);
     }
 
     return discount;
@@ -285,24 +287,18 @@ export class DiscountRepo {
    * Delete a product discount
    */
   async delete(id: string): Promise<boolean> {
-    await query('BEGIN');
-
-    try {
+    return withTransaction(async (tx) => {
       // Delete related items first
-      await query(`DELETE FROM "${DISCOUNT_ITEM_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);
-      await query(`DELETE FROM "${DISCOUNT_CUSTOMER_GROUP_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);
+      await tx.query(`DELETE FROM "${DISCOUNT_ITEM_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);
+      await tx.query(`DELETE FROM "${DISCOUNT_CUSTOMER_GROUP_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);
 
-      const result = await queryOne<{ promotionProductDiscountId: string }>(
+      const result = await tx.queryOne<{ promotionProductDiscountId: string }>(
         `DELETE FROM "${DISCOUNT_TABLE}" WHERE "promotionProductDiscountId" = $1 RETURNING "promotionProductDiscountId"`,
         [id],
       );
 
-      await query('COMMIT');
       return !!result;
-    } catch (error) {
-      await query('ROLLBACK');
-      throw error;
-    }
+    });
   }
 
   // DISCOUNT ITEM METHODS
@@ -330,7 +326,7 @@ export class DiscountRepo {
     );
 
     if (!item) {
-      throw new Error('Failed to add discount item');
+      throw new FailedToCreatePromotionError('Failed to add discount item');
     }
 
     return item;
@@ -374,7 +370,7 @@ export class DiscountRepo {
     );
 
     if (!group) {
-      throw new Error('Failed to add customer group to discount');
+      throw new FailedToCreatePromotionError('Failed to add customer group to discount');
     }
 
     return group;

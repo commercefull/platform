@@ -3,6 +3,7 @@
  */
 
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import { CustomerNotFoundError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -49,7 +50,7 @@ export class UpdateCustomerUseCase {
     const customer = await this.customerRepository.findById(command.customerId);
 
     if (!customer) {
-      throw new Error('Customer not found');
+      throw new CustomerNotFoundError(command.customerId);
     }
 
     const updatedFields: string[] = [];

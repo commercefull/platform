@@ -6,40 +6,33 @@ import { CalculateShippingRatesCommand, CalculateShippingRatesUseCase } from './
 import { GetShippingMethodsQuery, GetShippingMethodsUseCase } from './GetShippingMethods';
 
 // Mock the repositories
-jest.mock('../../repos/shippingZoneRepo', () => ({
+jest.mock('../../infrastructure/repositories/ShippingConfigRepository', () => ({
   __esModule: true,
   default: {
-    findByLocation: jest.fn(),
+    zones: {
+      findByLocation: jest.fn(),
+    },
+    methods: {
+      findAll: jest.fn(),
+      findByCarrier: jest.fn(),
+    },
+    rates: {
+      findByZoneAndMethod: jest.fn(),
+      calculateRate: jest.fn(),
+    },
+    carriers: {
+      findById: jest.fn(),
+    },
+    packaging: {},
   },
 }));
 
-jest.mock('../../repos/shippingMethodRepo', () => ({
-  __esModule: true,
-  default: {
-    findAll: jest.fn(),
-    findByCarrier: jest.fn(),
-  },
-}));
+import shippingConfigRepository from '../../infrastructure/repositories/ShippingConfigRepository';
 
-jest.mock('../../repos/shippingRateRepo', () => ({
-  __esModule: true,
-  default: {
-    findByZoneAndMethod: jest.fn(),
-    calculateRate: jest.fn(),
-  },
-}));
-
-jest.mock('../../repos/shippingCarrierRepo', () => ({
-  __esModule: true,
-  default: {
-    findById: jest.fn(),
-  },
-}));
-
-import shippingZoneRepo from '../../infrastructure/repositories/shippingZoneRepo';
-import shippingMethodRepo from '../../infrastructure/repositories/shippingMethodRepo';
-import shippingRateRepo from '../../infrastructure/repositories/shippingRateRepo';
-import shippingCarrierRepo from '../../infrastructure/repositories/shippingCarrierRepo';
+const shippingZoneRepo = shippingConfigRepository.zones;
+const shippingMethodRepo = shippingConfigRepository.methods;
+const shippingRateRepo = shippingConfigRepository.rates;
+const shippingCarrierRepo = shippingConfigRepository.carriers;
 
 describe('CalculateShippingRatesUseCase', () => {
   const useCase = new CalculateShippingRatesUseCase();

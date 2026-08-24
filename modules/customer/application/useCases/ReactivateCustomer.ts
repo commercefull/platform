@@ -3,6 +3,7 @@
  */
 
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import { CustomerNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -32,16 +33,16 @@ export class ReactivateCustomerUseCase {
 
   async execute(command: ReactivateCustomerCommand): Promise<ReactivateCustomerResponse> {
     if (!command.customerId) {
-      throw new Error('Customer ID is required');
+      throw new CustomerValidationError('Customer ID is required');
     }
 
     const customer = await this.customerRepository.findById(command.customerId);
     if (!customer) {
-      throw new Error('Customer not found');
+      throw new CustomerNotFoundError(command.customerId);
     }
 
     if (customer.isActive) {
-      throw new Error('Customer is already active');
+      throw new CustomerValidationError('Customer is already active');
     }
 
     // Reactivate customer

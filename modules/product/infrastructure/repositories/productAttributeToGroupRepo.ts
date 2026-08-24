@@ -1,4 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
+import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 export interface ProductAttributeToGroup {
   productAttributeToGroupId: string;
@@ -27,7 +28,7 @@ export class ProductAttributeToGroupRepo {
        VALUES ($1, $2, $3, $4) RETURNING *`,
       [params.attributeGroupId, params.attributeId, params.position ?? 0, now],
     );
-    if (!result) throw new Error('Failed to create productAttributeToGroup');
+    if (!result) throw new FailedToCreateProductError();
     return result;
   }
 

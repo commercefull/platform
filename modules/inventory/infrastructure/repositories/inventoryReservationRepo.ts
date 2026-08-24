@@ -9,6 +9,7 @@ import { pool } from '../../../../libs/db/pool';
 import { InventoryReservation } from '../../../../libs/db/types';
 import { logger } from '../../../../libs/logger';
 import crypto from 'crypto';
+import { FailedToCreateInventoryError } from '../../domain/errors/InventoryErrors';
 
 export interface CreateReservationParams {
   orderId: string;
@@ -49,7 +50,7 @@ export async function create(params: CreateReservationParams): Promise<Inventory
   ]);
 
   if (!result) {
-    throw new Error('Failed to create inventory reservation');
+    throw new FailedToCreateInventoryError('Failed to create inventory reservation');
   }
 
   return result;
@@ -103,7 +104,7 @@ export async function createAtomic(params: CreateReservationParams): Promise<Inv
     return insertResult.rows[0] as InventoryReservation;
   } catch (err: unknown) {
     await client.query('ROLLBACK');
-    logger.error(`createAtomic failed: ${(err as Error).message}`);
+    logger.warn(`createAtomic failed: ${(err as Error).message}`);
     throw err;
   } finally {
     client.release();
@@ -179,7 +180,7 @@ export async function release(inventoryReservationId: string): Promise<boolean> 
     return true;
   } catch (err: unknown) {
     await client.query('ROLLBACK');
-    logger.error(`release failed for ${inventoryReservationId}: ${(err as Error).message}`);
+    logger.warn(`release failed for ${inventoryReservationId}: ${(err as Error).message}`);
     return false;
   } finally {
     client.release();
@@ -225,7 +226,7 @@ export async function releaseByOrder(orderId: string): Promise<number> {
     return count;
   } catch (err: unknown) {
     await client.query('ROLLBACK');
-    logger.error(`releaseByOrder failed for order ${orderId}: ${(err as Error).message}`);
+    logger.warn(`releaseByOrder failed for order ${orderId}: ${(err as Error).message}`);
     return count;
   } finally {
     client.release();
@@ -274,7 +275,7 @@ export async function releaseExpired(): Promise<number> {
     return count;
   } catch (err: unknown) {
     await client.query('ROLLBACK');
-    logger.error(`releaseExpired failed: ${(err as Error).message}`);
+    logger.warn(`releaseExpired failed: ${(err as Error).message}`);
     return count;
   } finally {
     client.release();

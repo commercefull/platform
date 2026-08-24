@@ -7,6 +7,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { WebhookEndpointEntity } from '../../domain/entities/WebhookEndpoint';
 import { WebhookRepositoryInterface } from '../../domain/repositories/WebhookRepository';
+import { WebhookValidationError } from '../../domain/errors/WebhookErrors';
 
 export interface RegisterWebhookInput {
   name: string;
@@ -30,15 +31,15 @@ export class RegisterWebhookUseCase {
     endpoint: Record<string, unknown>;
   }> {
     if (!input.url || !input.url.startsWith('http')) {
-      throw new Error('A valid HTTPS URL is required for webhook endpoints');
+      throw new WebhookValidationError('A valid HTTPS URL is required for webhook endpoints');
     }
 
     if (!input.events || input.events.length === 0) {
-      throw new Error('At least one event type must be specified');
+      throw new WebhookValidationError('At least one event type must be specified');
     }
 
     if (!input.name) {
-      throw new Error('Webhook name is required');
+      throw new WebhookValidationError('Webhook name is required');
     }
 
     const entity = WebhookEndpointEntity.create({

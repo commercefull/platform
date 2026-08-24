@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   getActiveLocales,
   getActiveCountries,
@@ -15,10 +16,10 @@ import {
 const router = express.Router();
 
 // Public routes (no auth required)
-router.get('/localization/locales', getActiveLocales);
-router.get('/localization/locales/:code', getLocaleByCode);
-router.get('/localization/countries', getActiveCountries);
-router.get('/localization/countries/:code', getCountryByCode);
-router.get('/localization/detect', detectLocale);
+router.get('/localization/locales', asyncHandler(getActiveLocales));
+router.get('/localization/locales/:code', asyncHandler(getLocaleByCode));
+router.get('/localization/countries', asyncHandler(getActiveCountries));
+router.get('/localization/countries/:code', asyncHandler(getCountryByCode));
+router.get('/localization/detect', asyncHandler(detectLocale));
 
 export const localizationCustomerRouter = router;

@@ -1,6 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table, Country } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
+import { CountryCodeAlreadyExistsError, FailedToCreateCountryError } from '../../domain/errors/LocalizationErrors';
 
 // Use Country type directly from libs/db/types.ts
 export type { Country };
@@ -114,7 +115,7 @@ export class CountryRepo {
     // Check if code already exists
     const existing = await this.findByCode(params.code);
     if (existing) {
-      throw new Error(`Country with code '${params.code}' already exists`);
+      throw new CountryCodeAlreadyExistsError(params.code);
     }
 
     const result = await queryOne<Country>(
@@ -139,7 +140,7 @@ export class CountryRepo {
     );
 
     if (!result) {
-      throw new Error('Failed to create country');
+      throw new FailedToCreateCountryError();
     }
 
     return result;
