@@ -121,7 +121,7 @@ describe('ApprovalWorkflow Entity', () => {
           { approverId: 'a2', approverEmail: 'a2@b.com' },
         ],
       });
-      expect(() => wf.approve('a2')).toThrow('Approver a2 is not the current step approver');
+      expect(() => wf.approve('a2')).toThrow('is not the current approver');
     });
   });
 
@@ -212,7 +212,7 @@ describe('ApprovalWorkflow Entity', () => {
         approvers: [{ approverId: 'a1', approverEmail: 'a1@b.com' }],
       });
       wf.approve('a1');
-      expect(() => wf.cancel()).toThrow('Cannot cancel workflow in status: approved');
+      expect(() => wf.cancel()).toThrow('in status: approved');
     });
   });
 

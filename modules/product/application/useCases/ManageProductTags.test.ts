@@ -17,7 +17,7 @@ describe('ManageProductTagsUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductTagsUseCase();
+    useCase = new ManageProductTagsUseCase(productTagRepo);
   });
 
   it('should find all tags', async () => {

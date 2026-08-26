@@ -47,7 +47,7 @@ describe('VendorPayout Entity', () => {
       });
       p.startProcessing();
       expect(() => p.addLineItem({ orderId: 'o-1', orderNumber: 'O', productId: 'p', productName: 'N', grossRevenue: 1, commissionAmount: 0, netAmount: 1 }))
-        .toThrow('Cannot add line items to payout in status: processing');
+        .toThrow('in status: processing');
     });
   });
 

@@ -8,15 +8,22 @@ import { TypedRequest } from 'libs/types/express';
 import productCatalogRepository from '../../infrastructure/repositories/ProductCatalogRepository';
 import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
 import productEngagementRepository from '../../infrastructure/repositories/ProductEngagementRepository';
-import { CreateProductCommand, CreateProductUseCase } from '../../application/useCases/CreateProduct';
-import { GetProductCommand, GetProductUseCase } from '../../application/useCases/GetProduct';
-import { GetProductStoreAvailabilityUseCase } from '../../application/useCases/GetProductStoreAvailability';
-import { ListProductsCommand, ListProductsUseCase } from '../../application/useCases/ListProducts';
-import { UpdateProductCommand, UpdateProductUseCase } from '../../application/useCases/UpdateProduct';
+import { CreateProductCommand } from '../../application/useCases/CreateProduct';
+import { GetProductCommand } from '../../application/useCases/GetProduct';
+import { ListProductsCommand } from '../../application/useCases/ListProducts';
+import { UpdateProductCommand } from '../../application/useCases/UpdateProduct';
+import { ManageProductCollectionCommand } from '../../application/useCases/ManageProductCollection';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import type { ProductVariantCreateProps, ProductVariantUpdateProps } from '../../infrastructure/repositories/productVariantRepo';
-import { ManageProductCollectionCommand, ManageProductCollectionUseCase } from '../../application/useCases/ManageProductCollection';
+import { GetProductStoreAvailabilityUseCase } from '../../application/useCases/GetProductStoreAvailability';
+import {
+  listProductsUseCase,
+  getProductUseCase,
+  createProductUseCase,
+  updateProductUseCase,
+  manageProductCollectionUseCase,
+} from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import type { ProductQaStatus } from '../../infrastructure/repositories/ProductEngagementRepository';
 import type { RelationType } from '../../infrastructure/repositories/ProductEngagementRepository';
@@ -231,7 +238,7 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
     (orderDirection as 'asc' | 'desc') || 'desc',
   );
 
-  const useCase = new ListProductsUseCase(ProductRepo);
+  const useCase = listProductsUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -253,7 +260,7 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
   }
 
   const command = new GetProductCommand(productId, undefined, undefined, true, true);
-  const useCase = new GetProductUseCase(ProductRepo);
+  const useCase = getProductUseCase;
   const product = await useCase.execute(command);
 
   if (!product) {
@@ -360,7 +367,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     metadata,
   );
 
-  const useCase = new CreateProductUseCase(ProductRepo);
+  const useCase = createProductUseCase;
   const product = await useCase.execute(command);
 
   respond(req, res, product, 201);
@@ -375,12 +382,12 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
   const updates = req.body as UpdateProductBody;
 
   const command = new UpdateProductCommand(productId, updates);
-  const useCase = new UpdateProductUseCase(ProductRepo);
+  const useCase = updateProductUseCase;
   await useCase.execute(command);
 
   // Fetch the full updated product to return complete data
   const command2 = new GetProductCommand(productId, undefined, undefined, false, false);
-  const useCase2 = new GetProductUseCase(ProductRepo);
+  const useCase2 = getProductUseCase;
   const result = await useCase2.execute(command2);
 
   respond(req, res, result, 200);
@@ -815,7 +822,7 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
     organizationId,
     addProducts,
   );
-  const useCase = new ManageProductCollectionUseCase();
+  const useCase = manageProductCollectionUseCase;
   const result = await useCase.execute(command);
   successResponse(res, result, 201);
 };
@@ -848,7 +855,7 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
     addProducts,
     removeMapIds,
   );
-  const useCase = new ManageProductCollectionUseCase();
+  const useCase = manageProductCollectionUseCase;
   const result = await useCase.execute(command);
   successResponse(res, result);
 };

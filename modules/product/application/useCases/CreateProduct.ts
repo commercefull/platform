@@ -7,9 +7,8 @@ import { generateUUID } from '../../../../libs/uuid';
 import { ProductRepository } from '../../domain/repositories/ProductRepository';
 import { Product } from '../../domain/entities/Product';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { ProductAttributeSetRepository } from '../../infrastructure/repositories/ProductAttributeSetRepository';
+import type { ProductAttributeSetPort, DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductSkuAlreadyExistsError, ProductSlugAlreadyExistsError, ProductValidationError } from '../../domain/errors/ProductErrors';
-import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 
 // ============================================================================
 // Command
@@ -70,7 +69,11 @@ export interface CreateProductResponse {
 // ============================================================================
 
 export class CreateProductUseCase {
-  constructor(private readonly productRepository: ProductRepository) {}
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly attributeSetRepo: ProductAttributeSetPort,
+    private readonly dynamicAttrRepo: DynamicAttributePort,
+  ) {}
 
   async execute(command: CreateProductCommand): Promise<CreateProductResponse> {
     // Validate command
@@ -137,10 +140,7 @@ export class CreateProductUseCase {
 
     // Auto-assign attributes from the product type's attribute sets
     try {
-      const attributeSetRepo = new ProductAttributeSetRepository();
-      const dynamicAttrRepo = new DynamicAttributeRepository();
-
-      const attributes = await attributeSetRepo.getAttributesForProductType(command.productTypeId);
+      const attributes = await this.attributeSetRepo.getAttributesForProductType(command.productTypeId);
       if (attributes.length > 0) {
         const attrsToSet = attributes
           .filter(attr => attr.isRequired)
@@ -149,7 +149,7 @@ export class CreateProductUseCase {
             value: attr.defaultValue || '',
           }));
         if (attrsToSet.length > 0) {
-          await dynamicAttrRepo.setProductAttributes(savedProduct.productId, attrsToSet);
+          await this.dynamicAttrRepo.setProductAttributes(savedProduct.productId, attrsToSet);
         }
       }
     } catch {

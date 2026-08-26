@@ -83,6 +83,8 @@ import { b2bBusinessRouter } from '../modules/b2b/interface/routers/b2bRouter';
 import { marketplaceBusinessRouter } from '../modules/marketplace/interface/routers/marketplaceRouter';
 import { ssoRouter } from '../modules/identity/interface/routers/ssoRouter';
 import { scimRouter } from '../modules/identity/interface/routers/scimRouter';
+import { migrationBusinessRouter } from '../modules/migration/interface/routers/migrationRouter';
+import { integrationBusinessRouter } from '../modules/integration/interface/routers/integrationRouter';
 import * as gatewayWebhookController from '../modules/payment/interface/controllers/webhookController';
 import { configureGraphQL } from './graphql';
 import { moduleRegistry } from './moduleManifests';
@@ -185,6 +187,8 @@ export function configureRoutes(app: Express): void {
     { module: 'marketplace', router: marketplaceBusinessRouter },
     { module: 'identity', router: ssoRouter },
     { module: 'identity', router: scimRouter },
+    { module: 'migration', router: migrationBusinessRouter },
+    { module: 'integration', router: integrationBusinessRouter },
   ];
   const enabledBusinessRouters = businessRouters
     .filter(r => moduleRegistry.shouldMountRoutes(r.module))

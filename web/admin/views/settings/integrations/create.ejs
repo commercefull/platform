@@ -1,0 +1,57 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title"><%= t('integrations:addNew') %></h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/integrations" class="btn btn-outline-secondary"><%= t('shared:back') %></a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../partials/alerts") %>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-body">
+            <form method="post" action="/admin/integrations">
+              <div class="mb-3">
+                <label class="form-label"><%= t('integrations:name') %></label>
+                <input type="text" name="name" class="form-control" required placeholder="e.g. Mailchimp - Main Store">
+              </div>
+              <div class="mb-3">
+                <label class="form-label"><%= t('integrations:provider') %></label>
+                <select name="provider" class="form-select" required>
+                  <option value="" selected disabled><%= t('integrations:selectProvider') %></option>
+                  <% providers.forEach(function(p) { %>
+                    <option value="<%= p.value %>"><%= p.label %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label"><%= t('integrations:description') %></label>
+                <textarea name="description" class="form-control" rows="2" placeholder="<%= t('integrations:descriptionPlaceholder') %>"></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label"><%= t('integrations:webhookUrl') %></label>
+                <input type="url" name="webhookUrl" class="form-control" placeholder="https://api.example.com/webhook">
+                <small class="form-hint text-muted"><%= t('integrations:webhookUrlHint') %></small>
+              </div>
+              <div class="mb-3">
+                <label class="form-label"><%= t('integrations:config') %> (JSON)</label>
+                <textarea name="config" class="form-control" rows="3" placeholder='{"listId": "abc123"}'></textarea>
+                <small class="form-hint text-muted"><%= t('integrations:configHint') %></small>
+              </div>
+              <div class="d-flex">
+                <button type="submit" class="btn btn-primary ms-auto"><%= t('shared:create') %></button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

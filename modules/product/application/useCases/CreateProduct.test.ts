@@ -78,7 +78,7 @@ function createMockProductRepo(product: Product | null = null): jest.Mocked<Prod
 describe('CreateProductUseCase', () => {
   it('should create a product successfully', async () => {
     const repo = createMockProductRepo();
-    const useCase = new CreateProductUseCase(repo);
+    const useCase = new CreateProductUseCase(repo, { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never, { setProductAttributes: jest.fn() } as never);
 
     const result = await useCase.execute(
       new CreateProductCommand('Test Product', 'A test product', 'pt-1'),
@@ -92,7 +92,7 @@ describe('CreateProductUseCase', () => {
 
   it('should throw ProductValidationError when name is empty', async () => {
     const repo = createMockProductRepo();
-    const useCase = new CreateProductUseCase(repo);
+    const useCase = new CreateProductUseCase(repo, { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never, { setProductAttributes: jest.fn() } as never);
 
     await expect(
       useCase.execute(new CreateProductCommand('', 'desc', 'pt-1')),
@@ -101,7 +101,7 @@ describe('CreateProductUseCase', () => {
 
   it('should throw ProductValidationError when productTypeId is empty', async () => {
     const repo = createMockProductRepo();
-    const useCase = new CreateProductUseCase(repo);
+    const useCase = new CreateProductUseCase(repo, { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never, { setProductAttributes: jest.fn() } as never);
 
     await expect(
       useCase.execute(new CreateProductCommand('Test', 'desc', '')),
@@ -112,7 +112,7 @@ describe('CreateProductUseCase', () => {
     const existingProduct = createProduct();
     const repo = createMockProductRepo();
     repo.findBySku = jest.fn().mockResolvedValue(existingProduct);
-    const useCase = new CreateProductUseCase(repo);
+    const useCase = new CreateProductUseCase(repo, { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never, { setProductAttributes: jest.fn() } as never);
 
     await expect(
       useCase.execute(new CreateProductCommand('Test', 'desc', 'pt-1', 'SKU-1')),
@@ -123,7 +123,7 @@ describe('CreateProductUseCase', () => {
     const existingProduct = createProduct();
     const repo = createMockProductRepo();
     repo.findBySlug = jest.fn().mockResolvedValue(existingProduct);
-    const useCase = new CreateProductUseCase(repo);
+    const useCase = new CreateProductUseCase(repo, { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never, { setProductAttributes: jest.fn() } as never);
 
     await expect(
       useCase.execute(new CreateProductCommand('Test', 'desc', 'pt-1', undefined, 'test-slug')),

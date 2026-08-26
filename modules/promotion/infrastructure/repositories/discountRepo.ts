@@ -499,5 +499,4 @@ export class DiscountRepo {
 }
 
 // Export singleton instance
-export const discountRepo = new DiscountRepo();
-export default discountRepo;
+export default new DiscountRepo();

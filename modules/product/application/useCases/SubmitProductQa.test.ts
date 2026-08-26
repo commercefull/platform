@@ -18,6 +18,7 @@ jest.mock('../../infrastructure/repositories/productQaRepo', () => ({
 import { SubmitProductQaUseCase, SubmitProductQaCommand } from './SubmitProductQa';
 import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 import productRepo from '../../infrastructure/repositories/productRepo';
+import productQaRepo from '../../infrastructure/repositories/productQaRepo';
 
 const mockProductRepo = productRepo as unknown as Record<string, jest.Mock>;
 
@@ -26,7 +27,7 @@ describe('SubmitProductQaUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new SubmitProductQaUseCase();
+    useCase = new SubmitProductQaUseCase(productRepo, productQaRepo);
   });
 
   it('should submit Q&A (happy path)', async () => {

@@ -1,11 +1,12 @@
-import productQaRepo from '../../infrastructure/repositories/productQaRepo';
-import type { ProductQa, ProductQaStatus } from '../../infrastructure/repositories/productQaRepo';
+import type { ProductQa, ProductQaStatus, ProductQaPort } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageProductQaUseCase {
+  constructor(private readonly productQaRepo: ProductQaPort) {}
+
   async findByProduct(productId: string, status?: ProductQaStatus): Promise<ProductQa[]> {
-    return productQaRepo.findByProduct(productId, status);
+    return this.productQaRepo.findByProduct(productId, status);
   }
   async updateStatus(qaId: string, status: ProductQaStatus): Promise<ProductQa | null> {
-    return productQaRepo.updateStatus(qaId, status);
+    return this.productQaRepo.updateStatus(qaId, status);
   }
 }

@@ -535,5 +535,4 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 }
 
-export const fulfillmentRepository = new FulfillmentRepository();
-export default fulfillmentRepository;
+export default new FulfillmentRepository();

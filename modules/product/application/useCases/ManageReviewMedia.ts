@@ -1,16 +1,18 @@
-import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
-import productReviewMediaRepo from '../../infrastructure/repositories/productReviewMediaRepo';
-import type { ProductReview } from '../../infrastructure/repositories/productReviewRepo';
-import type { ProductReviewMedia } from '../../infrastructure/repositories/productReviewMediaRepo';
+import type { ProductReview, ProductReviewMedia, ProductReviewPort, ProductReviewMediaPort } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageReviewMediaUseCase {
+  constructor(
+    private readonly productReviewRepo: ProductReviewPort,
+    private readonly productReviewMediaRepo: ProductReviewMediaPort,
+  ) {}
+
   async findReviewsByProduct(productId: string): Promise<ProductReview[]> {
-    return productReviewRepo.findByProductId(productId);
+    return this.productReviewRepo.findByProductId(productId);
   }
   async findMediaByReview(reviewId: string): Promise<ProductReviewMedia[]> {
-    return productReviewMediaRepo.findByReview(reviewId);
+    return this.productReviewMediaRepo.findByReview(reviewId);
   }
   async deleteMedia(mediaId: string): Promise<boolean> {
-    return productReviewMediaRepo.delete(mediaId);
+    return this.productReviewMediaRepo.delete(mediaId);
   }
 }

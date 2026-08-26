@@ -239,5 +239,4 @@ class DashboardQueryRepositoryClass {
   }
 }
 
-export const DashboardQueryRepository = new DashboardQueryRepositoryClass();
-export default DashboardQueryRepository;
+export default new DashboardQueryRepositoryClass();

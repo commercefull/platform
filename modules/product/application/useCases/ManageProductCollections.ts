@@ -1,20 +1,21 @@
-import productCollectionRepo from '../../infrastructure/repositories/productCollectionRepo';
-import type { ProductCollection, ProductCollectionCreateParams, ProductCollectionUpdateParams } from '../../infrastructure/repositories/productCollectionRepo';
+import type { ProductCollection, ProductCollectionCreateParams, ProductCollectionUpdateParams, ProductCollectionPort } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageProductCollectionsUseCase {
+  constructor(private readonly productCollectionRepo: ProductCollectionPort) {}
+
   async findAll(): Promise<ProductCollection[]> {
-    return productCollectionRepo.findAll();
+    return this.productCollectionRepo.findAll();
   }
   async findById(id: string): Promise<ProductCollection | null> {
-    return productCollectionRepo.findById(id);
+    return this.productCollectionRepo.findById(id);
   }
   async create(params: ProductCollectionCreateParams): Promise<ProductCollection> {
-    return productCollectionRepo.create(params);
+    return this.productCollectionRepo.create(params);
   }
   async update(id: string, params: ProductCollectionUpdateParams): Promise<ProductCollection | null> {
-    return productCollectionRepo.update(id, params);
+    return this.productCollectionRepo.update(id, params);
   }
   async softDelete(id: string): Promise<boolean> {
-    return productCollectionRepo.softDelete(id);
+    return this.productCollectionRepo.softDelete(id);
   }
 }

@@ -1,0 +1,288 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title"><%= integration.name %></h2>
+      <p class="text-muted"><%= integration.provider %> · <span class="badge bg-<%= integration.status === 'active' ? 'success' : integration.status === 'error' ? 'danger' : integration.status === 'pending' ? 'warning' : 'secondary' %>"><%= integration.status %></span></p>
+    </div>
+    <div class="col-auto ms-auto d-flex gap-2">
+      <% if (integration.status === 'active') { %>
+        <form method="post" action="/admin/integrations/<%= integration.integrationId %>/deactivate" class="d-inline">
+          <button type="submit" class="btn btn-outline-warning btn-sm"><%= t('integrations:deactivate') %></button>
+        </form>
+      <% } else { %>
+        <form method="post" action="/admin/integrations/<%= integration.integrationId %>/activate" class="d-inline">
+          <button type="submit" class="btn btn-outline-success btn-sm"><%= t('integrations:activate') %></button>
+        </form>
+      <% } %>
+      <a href="/admin/integrations" class="btn btn-outline-secondary btn-sm"><%= t('shared:back') %></a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../partials/alerts") %>
+
+    <% if (integration.lastError) { %>
+      <div class="alert alert-danger">
+        <strong><%= t('integrations:lastError') %>:</strong> <%= integration.lastError %>
+      </div>
+    <% } %>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#tab-settings"><%= t('integrations:settings') %></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-credentials"><%= t('integrations:credentials') %> (<%= credentials.length %>)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-subscriptions"><%= t('integrations:eventSubscriptions') %> (<%= subscriptions.length %>)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-logs"><%= t('integrations:logs') %> (<%= logTotal %>)</a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Settings Tab -->
+      <div class="tab-pane active" id="tab-settings">
+        <div class="card">
+          <div class="card-body">
+            <form method="post" action="/admin/integrations/<%= integration.integrationId %>">
+              <div class="mb-3">
+                <label class="form-label"><%= t('integrations:name') %></label>
+                <input type="text" name="name" class="form-control" value="<%= integration.name %>" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label"><%= t('integrations:description') %></label>
+                <textarea name="description" class="form-control" rows="2"><%= integration.description || '' %></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label"><%= t('integrations:webhookUrl') %></label>
+                <input type="url" name="webhookUrl" class="form-control" value="<%= integration.webhookUrl || '' %>" placeholder="https://api.example.com/webhook">
+              </div>
+              <div class="d-flex">
+                <button type="submit" class="btn btn-primary ms-auto"><%= t('shared:save') %></button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Credentials Tab -->
+      <div class="tab-pane" id="tab-credentials">
+        <div class="card mb-3">
+          <div class="card-header">
+            <h3 class="card-title"><%= t('integrations:addCredential') %></h3>
+          </div>
+          <div class="card-body">
+            <form method="post" action="/admin/integrations/<%= integration.integrationId %>/credentials">
+              <div class="row">
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label"><%= t('integrations:credentialType') %></label>
+                  <select name="type" class="form-select" required>
+                    <option value="api_key">API Key</option>
+                    <option value="oauth_token">OAuth Token</option>
+                    <option value="basic_auth">Basic Auth</option>
+                    <option value="webhook_secret">Webhook Secret</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label"><%= t('integrations:credentialLabel') %></label>
+                  <input type="text" name="label" class="form-control" required placeholder="Production API Key">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label">API Key / Token</label>
+                  <input type="password" name="apiKey" class="form-control" placeholder="Enter API key or token">
+                </div>
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label"><%= t('integrations:expiresAt') %></label>
+                  <input type="date" name="expiresAt" class="form-control">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label">Username (Basic Auth)</label>
+                  <input type="text" name="username" class="form-control" placeholder="Optional">
+                </div>
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label">Password (Basic Auth)</label>
+                  <input type="password" name="password" class="form-control" placeholder="Optional">
+                </div>
+              </div>
+              <div class="d-flex">
+                <button type="submit" class="btn btn-primary ms-auto"><%= t('integrations:addCredential') %></button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <% if (credentials.length > 0) { %>
+          <div class="card">
+            <div class="table-responsive">
+              <table class="table table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th><%= t('integrations:credentialLabel') %></th>
+                    <th><%= t('integrations:credentialType') %></th>
+                    <th><%= t('integrations:expiresAt') %></th>
+                    <th><%= t('shared:status') %></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% credentials.forEach(function(cred) { %>
+                    <tr>
+                      <td><%= cred.label %></td>
+                      <td><span class="badge bg-blue"><%= cred.type %></span></td>
+                      <td><%= cred.expiresAt ? new Date(cred.expiresAt).toLocaleDateString() : '—' %></td>
+                      <td>
+                        <% if (cred.isActive) { %>
+                          <span class="badge bg-success"><%= t('shared:active') %></span>
+                        <% } else { %>
+                          <span class="badge bg-secondary"><%= t('shared:inactive') %></span>
+                        <% } %>
+                      </td>
+                      <td class="text-end">
+                        <form method="post" action="/admin/integrations/<%= integration.integrationId %>/credentials/<%= cred.credentialId %>/delete" class="d-inline" onsubmit="return confirm('<%= t('shared:confirmDelete') %>')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger"><%= t('shared:delete') %></button>
+                        </form>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Event Subscriptions Tab -->
+      <div class="tab-pane" id="tab-subscriptions">
+        <div class="card mb-3">
+          <div class="card-header">
+            <h3 class="card-title"><%= t('integrations:addSubscription') %></h3>
+          </div>
+          <div class="card-body">
+            <form method="post" action="/admin/integrations/<%= integration.integrationId %>/subscriptions">
+              <div class="row">
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label"><%= t('integrations:eventType') %></label>
+                  <select name="eventType" class="form-select" required>
+                    <option value="" selected disabled><%= t('integrations:selectEvent') %></option>
+                    <optgroup label="<%= t('integrations:commonEvents') %>">
+                      <% platformEvents.forEach(function(evt) { %>
+                        <option value="<%= evt %>"><%= evt %></option>
+                      <% }) %>
+                    </optgroup>
+                    <option value="*"><%= t('integrations:allEvents') %></option>
+                  </select>
+                </div>
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label"><%= t('integrations:targetAction') %></label>
+                  <input type="text" name="targetAction" class="form-control" required placeholder="e.g. add_subscriber, create_contact">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label"><%= t('integrations:description') %></label>
+                <input type="text" name="description" class="form-control" placeholder="<%= t('integrations:subscriptionDescPlaceholder') %>">
+              </div>
+              <div class="mb-3">
+                <label class="form-label"><%= t('integrations:payloadMapping') %> (JSON)</label>
+                <textarea name="payloadMapping" class="form-control" rows="3" placeholder='{"email": "customer.email", "firstName": "customer.firstName"}'></textarea>
+                <small class="form-hint text-muted"><%= t('integrations:payloadMappingHint') %></small>
+              </div>
+              <div class="d-flex">
+                <button type="submit" class="btn btn-primary ms-auto"><%= t('integrations:addSubscription') %></button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <% if (subscriptions.length > 0) { %>
+          <div class="card">
+            <div class="table-responsive">
+              <table class="table table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th><%= t('integrations:eventType') %></th>
+                    <th><%= t('integrations:targetAction') %></th>
+                    <th><%= t('shared:status') %></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% subscriptions.forEach(function(sub) { %>
+                    <tr>
+                      <td><code><%= sub.eventType %></code></td>
+                      <td><%= sub.targetAction %></td>
+                      <td>
+                        <form method="post" action="/admin/integrations/<%= integration.integrationId %>/subscriptions/<%= sub.subscriptionId %>" class="d-inline">
+                          <input type="hidden" name="isActive" value="<%= sub.isActive ? 'false' : 'true' %>">
+                          <input type="hidden" name="targetAction" value="<%= sub.targetAction %>">
+                          <button type="submit" class="btn btn-sm btn-outline-<%= sub.isActive ? 'warning' : 'success' %>">
+                            <%= sub.isActive ? t('shared:deactivate') : t('shared:activate') %>
+                          </button>
+                        </form>
+                      </td>
+                      <td class="text-end">
+                        <form method="post" action="/admin/integrations/<%= integration.integrationId %>/subscriptions/<%= sub.subscriptionId %>/delete" class="d-inline" onsubmit="return confirm('<%= t('shared:confirmDelete') %>')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger"><%= t('shared:delete') %></button>
+                        </form>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Logs Tab -->
+      <div class="tab-pane" id="tab-logs">
+        <% if (logs.length > 0) { %>
+          <div class="card">
+            <div class="table-responsive">
+              <table class="table table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th><%= t('integrations:eventType') %></th>
+                    <th><%= t('integrations:targetAction') %></th>
+                    <th><%= t('shared:status') %></th>
+                    <th><%= t('integrations:responseStatus') %></th>
+                    <th><%= t('integrations:duration') %></th>
+                    <th><%= t('shared:date') %></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% logs.forEach(function(log) { %>
+                    <tr>
+                      <td><code><%= log.eventType %></code></td>
+                      <td><%= log.targetAction %></td>
+                      <td>
+                        <span class="badge bg-<%= log.status === 'success' ? 'success' : log.status === 'failed' ? 'danger' : 'warning' %>"><%= log.status %></span>
+                      </td>
+                      <td><%= log.responseStatus || '—' %></td>
+                      <td><%= log.durationMs ? log.durationMs + 'ms' : '—' %></td>
+                      <td class="text-muted small"><%= new Date(log.createdAt).toLocaleString() %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="empty">
+            <p class="empty-title text-muted"><%= t('integrations:noLogs') %></p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>

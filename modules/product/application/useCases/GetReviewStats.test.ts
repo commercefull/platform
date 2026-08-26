@@ -15,7 +15,7 @@ describe('GetReviewStatsUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new GetReviewStatsUseCase();
+    useCase = new GetReviewStatsUseCase(productReviewRepo);
   });
 
   it('should get review stats (happy path)', async () => {

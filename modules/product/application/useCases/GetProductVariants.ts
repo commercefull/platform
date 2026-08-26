@@ -2,7 +2,7 @@
  * Get Product Variants Use Case
  */
 
-import { ProductVariantRepository, ProductVariantFilters } from '../../infrastructure/repositories/ProductVariantRepository';
+import type { ProductVariantFilters, ProductVariantPort, ProductVariantRow } from '../../domain/repositories/ProductCatalogPorts';
 
 export class GetProductVariantsCommand {
   constructor(
@@ -48,7 +48,7 @@ export interface ProductVariantResponse {
 }
 
 export class GetProductVariantsUseCase {
-  constructor(private readonly variantRepository: ProductVariantRepository) {}
+  constructor(private readonly variantRepository: ProductVariantPort) {}
 
   async execute(command: GetProductVariantsCommand): Promise<ProductVariantResponse[]> {
     const filters: ProductVariantFilters = {
@@ -65,7 +65,7 @@ export class GetProductVariantsUseCase {
       orderDirection: 'asc',
     });
 
-    return result.data.map(variant => ({
+    return result.data.map((variant: ProductVariantRow) => ({
       variantId: variant.variantId,
       productId: variant.productId,
       sku: variant.sku,

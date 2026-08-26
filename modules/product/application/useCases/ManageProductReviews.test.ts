@@ -21,13 +21,14 @@ jest.mock('../../infrastructure/repositories/productReviewRepo', () => ({
 }));
 
 import { ManageProductReviewsUseCase } from './ManageProductReviews';
+import { ProductReviewRepo } from '../../infrastructure/repositories/productReviewRepo';
 
 describe('ManageProductReviewsUseCase', () => {
   let useCase: ManageProductReviewsUseCase;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductReviewsUseCase();
+    useCase = new ManageProductReviewsUseCase(new ProductReviewRepo() as never);
   });
 
   it('should find by ID', async () => {

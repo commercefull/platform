@@ -4,7 +4,7 @@
  * Uses ON CONFLICT DO NOTHING, then checks if record was created
  */
 
-import productReviewVoteRepo from '../../infrastructure/repositories/productReviewVoteRepo';
+import type { ProductReviewVotePort } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductValidationError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================
@@ -40,6 +40,8 @@ export interface VoteOnReviewResponse {
 // ============================================================================
 
 export class VoteOnReviewUseCase {
+  constructor(private readonly productReviewVoteRepo: ProductReviewVotePort) {}
+
   async execute(command: VoteOnReviewCommand): Promise<VoteOnReviewResponse> {
     if (!command.productReviewId) {
       throw new ProductValidationError('productReviewId is required');
@@ -49,7 +51,7 @@ export class VoteOnReviewUseCase {
     }
 
     // Attempt insert — ON CONFLICT DO NOTHING enforces one-vote-per-customer
-    const vote = await productReviewVoteRepo.create({
+    const vote = await this.productReviewVoteRepo.create({
       productReviewId: command.productReviewId,
       customerId: command.customerId,
       isHelpful: command.isHelpful,
@@ -58,7 +60,7 @@ export class VoteOnReviewUseCase {
     // If vote is null, the customer already voted (conflict was silenced)
     const voted = vote !== null;
 
-    const counts = await productReviewVoteRepo.countByReview(command.productReviewId);
+    const counts = await this.productReviewVoteRepo.countByReview(command.productReviewId);
 
     return {
       voted,

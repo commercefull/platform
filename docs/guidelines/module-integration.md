@@ -61,11 +61,10 @@ To promote a type to `libs/`:
 
 **Do NOT promote**: `OrderStatus`, `PaymentStatus` — these are `order`'s domain concepts and belong behind an ACL.
 
-## 4. Dependency Register & Coupling Budget
+## 4. Coupling Budget
 
-- Create `docs/architecture/dependency-register.md`: one row per cross-module edge — consumer, provider, pattern, port name, owner, contract test path.
 - **A new cross-module edge requires a register entry in the same PR.** No entry, no merge.
-- **Coupling budget**: no module may exceed **5 outbound ACL ports**. `checkout` will legitimately be near the ceiling; anything else approaching it signals a misplaced responsibility.
+- **Coupling budget**: no module may exceed **5 outbound ACL ports**. `checkout` is near the ceiling; anything else approaching it signals a misplaced responsibility.
 - Generate a module dependency graph in CI and **fail the build on a new edge** that is not in the register.
 - Flag cycles as hard errors.
 

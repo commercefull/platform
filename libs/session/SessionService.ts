@@ -196,4 +196,3 @@ class SessionServiceClass {
 }
 
 export const SessionService = new SessionServiceClass();
-export default SessionService;

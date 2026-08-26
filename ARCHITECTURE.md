@@ -131,5 +131,5 @@ All business routes follow the `/business/{topic}/...` pattern. The topic prefix
 - **Working guide for AI agents / contributors** → [`AGENTS.md`](./AGENTS.md)
 - **Standards (database, migrations, DDD, web, security, …)** → [`docs/guidelines/`](./docs/guidelines/README.md)
 - **Module specifications** → [`docs/modules/`](./docs/modules/)
-- **Migration guides** → **planned** — `docs/migrations/` does not exist yet. See `docs/architecture/gap-analysis-and-roadmap.md` Phase 5–6.
+- **Migration guides** → [`docs/migrations/`](./docs/migrations/) — external migration tool being built separately; `modules/migration` provides in-platform import infrastructure.
 - **Documentation website & autogeneration strategy** → [`docs/DOCUMENTATION-STRATEGY.md`](./docs/DOCUMENTATION-STRATEGY.md)

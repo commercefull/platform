@@ -411,7 +411,29 @@ export type EventType =
   | 'marketplace.payout.created'
   | 'marketplace.payout.processing'
   | 'marketplace.payout.completed'
-  | 'marketplace.payout.failed';
+  | 'marketplace.payout.failed'
+  // Migration events
+  | 'migration.job.created'
+  | 'migration.job.started'
+  | 'migration.job.completed'
+  | 'migration.job.failed'
+  | 'migration.job.cancelled'
+  | 'migration.record.imported'
+  | 'migration.record.skipped'
+  | 'migration.record.error'
+  // Integration events
+  | 'integration.created'
+  | 'integration.updated'
+  | 'integration.activated'
+  | 'integration.deactivated'
+  | 'integration.deleted'
+  | 'integration.credential.added'
+  | 'integration.credential.updated'
+  | 'integration.credential.expired'
+  | 'integration.subscription.created'
+  | 'integration.subscription.updated'
+  | 'integration.dispatch.success'
+  | 'integration.dispatch.failed';
 
 /**
  * Planned event types for modules not yet implemented.

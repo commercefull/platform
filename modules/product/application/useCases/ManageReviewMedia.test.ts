@@ -14,6 +14,7 @@ jest.mock('../../infrastructure/repositories/productReviewMediaRepo', () => ({
 }));
 
 import { ManageReviewMediaUseCase } from './ManageReviewMedia';
+import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
 import productReviewMediaRepo from '../../infrastructure/repositories/productReviewMediaRepo';
 
 const mockMediaRepo = productReviewMediaRepo as unknown as Record<string, jest.Mock>;
@@ -23,7 +24,7 @@ describe('ManageReviewMediaUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageReviewMediaUseCase();
+    useCase = new ManageReviewMediaUseCase(productReviewRepo, productReviewMediaRepo);
   });
 
   it('should find reviews by product', async () => {

@@ -17,7 +17,7 @@ describe('VoteOnReviewUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new VoteOnReviewUseCase();
+    useCase = new VoteOnReviewUseCase(productReviewVoteRepo);
   });
 
   it('should vote on review (happy path)', async () => {

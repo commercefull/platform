@@ -118,7 +118,7 @@ yarn job:new:organization   # Create a new organization
 ## Module & Migration Documentation
 
 - Module specs: [`docs/modules/`](./docs/modules/)
-- Migration guides: **planned** — `docs/migrations/` does not exist yet. See `docs/architecture/gap-analysis-and-roadmap.md` Phase 5–6.
+- Migration guides: [`docs/migrations/`](./docs/migrations/) — external migration tool being built separately; `modules/migration` provides in-platform import infrastructure.
 
 ---
 

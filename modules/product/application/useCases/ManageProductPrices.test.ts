@@ -17,7 +17,7 @@ describe('ManageProductPricesUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductPricesUseCase();
+    useCase = new ManageProductPricesUseCase(productPriceRepo);
   });
 
   it('should find by product', async () => {

@@ -538,6 +538,34 @@ const manifests: ModuleManifest[] = [
     tables: { names: ['auditLog', 'keyRotationPolicy', 'ccpaDsr'] },
     featureFlagKey: 'module.compliance.enabled',
   },
+  {
+    name: 'migration',
+    description: 'External platform migration — import jobs, source-to-platform ID mappings, error tracking',
+    requirement: 'optional',
+    dependsOn: ['identity', 'organization'],
+    routes: [{ path: '/business/migration', auth: 'organization' }],
+    graphql: { enabled: false },
+    events: {
+      subscribes: [],
+      publishes: ['migration.job.created', 'migration.job.started', 'migration.job.completed', 'migration.job.failed', 'migration.job.cancelled', 'migration.record.imported', 'migration.record.skipped', 'migration.record.error'],
+    },
+    tables: { names: ['importJob', 'importMapping', 'importError'] },
+    featureFlagKey: 'module.migration.enabled',
+  },
+  {
+    name: 'integration',
+    description: 'Third-party integrations — marketing automation, email, accounting, custom webhooks with encrypted credentials and event subscriptions',
+    requirement: 'optional',
+    dependsOn: ['identity', 'organization'],
+    routes: [{ path: '/business/integration', auth: 'organization' }],
+    graphql: { enabled: false },
+    events: {
+      subscribes: [],
+      publishes: ['integration.created', 'integration.updated', 'integration.activated', 'integration.deactivated', 'integration.deleted', 'integration.credential.added', 'integration.credential.updated', 'integration.credential.expired', 'integration.subscription.created', 'integration.subscription.updated', 'integration.dispatch.success', 'integration.dispatch.failed'],
+    },
+    tables: { names: ['integration', 'integrationCredential', 'integrationSubscription', 'integrationLog'] },
+    featureFlagKey: 'module.integration.enabled',
+  },
 ];
 
 /**

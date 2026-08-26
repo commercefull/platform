@@ -18,6 +18,7 @@ jest.mock('../../infrastructure/repositories/productCollectionMapRepo', () => ({
 import { ManageProductCollectionUseCase, ManageProductCollectionCommand } from './ManageProductCollection';
 import { ProductValidationError, ProductCollectionNotFoundError } from '../../domain/errors/ProductErrors';
 import productCollectionRepo from '../../infrastructure/repositories/productCollectionRepo';
+import productCollectionMapRepo from '../../infrastructure/repositories/productCollectionMapRepo';
 
 const mockRepo = productCollectionRepo as unknown as Record<string, jest.Mock>;
 
@@ -26,7 +27,7 @@ describe('ManageProductCollectionUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductCollectionUseCase();
+    useCase = new ManageProductCollectionUseCase(productCollectionRepo, productCollectionMapRepo);
   });
 
   it('should create new collection (happy path)', async () => {

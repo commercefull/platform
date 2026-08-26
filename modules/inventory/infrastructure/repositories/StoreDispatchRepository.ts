@@ -270,5 +270,4 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
   }
 }
 
-export const storeDispatchRepository = new StoreDispatchRepository();
-export default storeDispatchRepository;
+export default new StoreDispatchRepository();

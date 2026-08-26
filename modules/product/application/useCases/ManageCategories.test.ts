@@ -23,7 +23,7 @@ describe('ManageCategoriesUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageCategoriesUseCase();
+    useCase = new ManageCategoriesUseCase(categoryRepo);
   });
 
   it('should find one', async () => {

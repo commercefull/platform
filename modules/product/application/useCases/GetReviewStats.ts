@@ -1,7 +1,9 @@
-import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
+import type { ProductReviewPort } from '../../domain/repositories/ProductCatalogPorts';
 
 export class GetReviewStatsUseCase {
+  constructor(private readonly productReviewRepo: ProductReviewPort) {}
+
   async execute(productId: string) {
-    return productReviewRepo.getProductStatistics(productId);
+    return this.productReviewRepo.getProductStatistics(productId);
   }
 }

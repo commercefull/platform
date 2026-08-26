@@ -29,15 +29,6 @@ import { eventBus } from '../../../../libs/events/eventBus';
 // Ports
 const pickupLocationPort: PickupLocationPort = new StorePickupLocationAdapter();
 
-// Type for listInventoryItems use case port compatibility
-interface _ListInventoryItemsRepositoryPort {
-  findAll(
-    filters: Record<string, unknown>,
-    pagination: { limit: number; offset: number; orderBy: string; orderDirection: 'asc' | 'desc' },
-  ): Promise<{ data: Array<{ inventoryId: string; productId: string; variantId?: string; locationId: string; sku: string; quantity: number; reservedQuantity: number; reorderPoint: number }>; total: number }>;
-  getStats(filters: Record<string, unknown>): Promise<{ totalItems: number; lowStockCount: number; outOfStockCount: number; totalValue?: number }>;
-}
-
 // ============================================================================
 // Request Body Interfaces
 // ============================================================================
@@ -485,11 +476,6 @@ export const getTransactionTypes = async (req: TypedRequest, res: Response): Pro
   respond(res, types);
   
 };
-
-// Legacy exports for backward compatibility
-export const getInventory = getInventoryLocation;
-export const listInventory = listInventoryLocations;
-export const restockInventory = adjustStock;
 
 // ============================================================================
 // Product Availability (by productId)

@@ -1,20 +1,21 @@
-import productCategoryRepo from '../../infrastructure/repositories/productCategoryRepo';
-import type { ProductCategory, ProductCategoryCreateParams, ProductCategoryUpdateParams } from '../../infrastructure/repositories/productCategoryRepo';
+import type { ProductCategoryRow, ProductCategoryCreateParams, ProductCategoryUpdateParams, ProductCategoryPort } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageProductCategoriesUseCase {
-  async findAll(): Promise<ProductCategory[]> {
-    return productCategoryRepo.findAll();
+  constructor(private readonly productCategoryRepo: ProductCategoryPort) {}
+
+  async findAll(): Promise<ProductCategoryRow[]> {
+    return this.productCategoryRepo.findAll();
   }
-  async findById(id: string): Promise<ProductCategory | null> {
-    return productCategoryRepo.findById(id);
+  async findById(id: string): Promise<ProductCategoryRow | null> {
+    return this.productCategoryRepo.findById(id);
   }
-  async create(params: ProductCategoryCreateParams): Promise<ProductCategory> {
-    return productCategoryRepo.create(params);
+  async create(params: ProductCategoryCreateParams): Promise<ProductCategoryRow> {
+    return this.productCategoryRepo.create(params);
   }
-  async update(id: string, params: ProductCategoryUpdateParams): Promise<ProductCategory | null> {
-    return productCategoryRepo.update(id, params);
+  async update(id: string, params: ProductCategoryUpdateParams): Promise<ProductCategoryRow | null> {
+    return this.productCategoryRepo.update(id, params);
   }
   async softDelete(id: string): Promise<boolean> {
-    return productCategoryRepo.softDelete(id);
+    return this.productCategoryRepo.softDelete(id);
   }
 }

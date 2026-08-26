@@ -110,7 +110,7 @@ describe('Quote Entity', () => {
       quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
       quote.send();
       expect(() => quote.addLineItem({ productId: 'p-2', sku: 'SKU-002', name: 'Gadget', quantity: 1, unitPrice: 20 }))
-        .toThrow('Cannot add line items to a quote in status: sent');
+        .toThrow('in status: sent');
     });
   });
 
@@ -166,14 +166,14 @@ describe('Quote Entity', () => {
 
     it('should not accept a draft quote', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
-      expect(() => quote.accept()).toThrow('Cannot accept quote in status: draft');
+      expect(() => quote.accept()).toThrow('in status: draft');
     });
 
     it('should not convert a non-accepted quote', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
       quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
       quote.send();
-      expect(() => quote.convert('order-1')).toThrow('Cannot convert quote in status: sent');
+      expect(() => quote.convert('order-1')).toThrow('in status: sent');
     });
   });
 

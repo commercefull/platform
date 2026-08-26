@@ -593,5 +593,4 @@ export class PromotionRepo {
 }
 
 // Export singleton instance
-export const promotionRepo = new PromotionRepo();
-export default promotionRepo;
+export default new PromotionRepo();

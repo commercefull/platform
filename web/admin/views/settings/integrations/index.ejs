@@ -1,0 +1,68 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title"><%= t('integrations:title') %></h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/integrations/create" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M12 5l0 14"/><path d="M5 12l14 0"/></svg>
+        <%= t('integrations:addNew') %>
+      </a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../partials/alerts") %>
+
+    <% if (integrations.length === 0) { %>
+      <div class="empty">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2l4 -4"/><path d="M4 13a8 8 0 0 1 7 7a4 4 0 0 0 -4 -4a8 8 0 0 1 -7 -7"/><path d="M4.9 19.9c1.6 .4 3.1 -1.1 2.7 -2.7c-.4 -1.6 .9 -3.1 2.5 -2.7"/></svg>
+        </div>
+        <p class="empty-title"><%= t('integrations:noIntegrations') %></p>
+        <p class="empty-subtitle text-muted"><%= t('integrations:noIntegrationsDesc') %></p>
+        <div class="empty-action">
+          <a href="/admin/integrations/create" class="btn btn-primary"><%= t('integrations:addNew') %></a>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="row row-cards">
+        <% integrations.forEach(function(integration) { %>
+          <div class="col-sm-6 col-lg-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="me-3">
+                    <span class="badge bg-<%= integration.status === 'active' ? 'success' : integration.status === 'error' ? 'danger' : integration.status === 'pending' ? 'warning' : 'secondary' %>">
+                      <%= integration.status %>
+                    </span>
+                  </div>
+                  <div>
+                    <h3 class="card-title mb-1"><%= integration.name %></h3>
+                    <p class="text-muted mb-0"><%= integration.provider %></p>
+                  </div>
+                </div>
+                <% if (integration.description) { %>
+                  <p class="text-muted"><%= integration.description %></p>
+                <% } %>
+                <% if (integration.lastError) { %>
+                  <div class="alert alert-danger alert-sm mb-2"><%= integration.lastError %></div>
+                <% } %>
+                <% if (integration.lastSyncAt) { %>
+                  <p class="text-muted small mb-0"><%= t('integrations:lastSync') %>: <%= new Date(integration.lastSyncAt).toLocaleString() %></p>
+                <% } %>
+              </div>
+              <div class="card-footer">
+                <div class="d-flex">
+                  <a href="/admin/integrations/<%= integration.integrationId %>" class="btn btn-sm btn-outline-secondary ms-auto"><%= t('shared:manage') %></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>

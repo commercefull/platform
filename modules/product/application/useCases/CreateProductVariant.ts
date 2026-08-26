@@ -4,7 +4,7 @@
 
 import { generateUUID } from '../../../../libs/uuid';
 import { ProductVariant } from '../../domain/entities/ProductVariant';
-import { ProductVariantRepository } from '../../infrastructure/repositories/ProductVariantRepository';
+import type { ProductVariantPort } from '../../domain/repositories/ProductCatalogPorts';
 
 export class CreateProductVariantCommand {
   constructor(
@@ -31,7 +31,7 @@ export class CreateProductVariantCommand {
 }
 
 export class CreateProductVariantUseCase {
-  constructor(private readonly variantRepository: ProductVariantRepository) {}
+  constructor(private readonly variantRepository: ProductVariantPort) {}
 
   async execute(command: CreateProductVariantCommand): Promise<ProductVariant> {
     const variantId = generateUUID();
@@ -63,6 +63,6 @@ export class CreateProductVariantUseCase {
       metadata: command.metadata,
     });
 
-    return await this.variantRepository.save(variant);
+    return await this.variantRepository.save(variant) as ProductVariant;
   }
 }

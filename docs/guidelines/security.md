@@ -51,6 +51,25 @@ See [authentication.md](./authentication.md) for session cookie settings.
 - [ ] File uploads go through secure handling (Sharp for images, S3 for storage)
 - [ ] Error responses don't leak stack traces in production
 
+## Credential Encryption
+
+Integration credentials (API keys, tokens, secrets) are encrypted at rest using **AES-256-GCM** via `libs/secrets`.
+
+```typescript
+import { encrypt, decrypt } from '../../libs/secrets';
+
+// Encrypt before storing
+const ciphertext = encrypt(apiKey); // → { encrypted, iv, tag }
+
+// Decrypt when needed
+const plaintext = decrypt(ciphertext);
+```
+
+- **Key**: `INTEGRATION_ENCRYPTION_KEY` env var (hex-encoded 256-bit key)
+- **Algorithm**: AES-256-GCM (authenticated encryption)
+- **Never** store plaintext credentials in the database
+- **Never** log decrypted credential values
+
 ## Route Protection Audit
 
 Every business router mounted under `/business` must apply `isOrganizationLoggedIn` middleware. The only exception is `identityBusinessRouter`, which exposes public auth endpoints (login, register, token refresh, password reset) before the middleware is applied.
@@ -92,3 +111,16 @@ Every business router mounted under `/business` must apply `isOrganizationLogged
 | `systemConfigurationRouter` | `isOrganizationLoggedIn` |
 | `couponBusinessRouter` | `isOrganizationLoggedIn` |
 | `userStoreRouter` | Protected via parent `identityBusinessRouter` |
+| `auditAdminRouter` | `isOrganizationLoggedIn` |
+| `integrationRouter` | `isOrganizationLoggedIn` |
+| `automationRouter` | `isOrganizationLoggedIn` |
+| `returnRouter` | `isOrganizationLoggedIn` |
+| `themeRouter` | `isOrganizationLoggedIn` |
+| `pageBuilderRouter` | `isOrganizationLoggedIn` |
+| `segmentRouter` | `isOrganizationLoggedIn` |
+| `marketplaceRouter` | `isOrganizationLoggedIn` |
+| `trackingRouter` | `isOrganizationLoggedIn` |
+| `ssoRouter` | `isOrganizationLoggedIn` (after public SSO login endpoints) |
+| `scimRouter` | Bearer token auth (`SCIM_BEARER_TOKEN`) |
+| `b2bBusinessRouter` | `isOrganizationLoggedIn` |
+| `complianceRouter` | `isOrganizationLoggedIn` |

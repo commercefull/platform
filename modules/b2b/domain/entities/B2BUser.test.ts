@@ -65,7 +65,7 @@ describe('B2BUser Entity', () => {
     it('should not activate a non-invited user', () => {
       const user = B2BUser.create({ companyId: 'comp-1', organizationId: 'org-1', email: 'a@b.com' });
       user.activate();
-      expect(() => user.activate()).toThrow('Cannot activate user in status: active');
+      expect(() => user.activate()).toThrow('in status: active');
     });
 
     it('should suspend and reactivate', () => {
@@ -81,7 +81,7 @@ describe('B2BUser Entity', () => {
       const user = B2BUser.create({ companyId: 'comp-1', organizationId: 'org-1', email: 'a@b.com' });
       user.activate();
       user.remove();
-      expect(() => user.suspend()).toThrow('Cannot suspend a removed user');
+      expect(() => user.suspend()).toThrow('in status: removed');
     });
   });
 

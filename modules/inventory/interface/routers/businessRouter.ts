@@ -83,10 +83,10 @@ router.put('/inventory/products/:productId/threshold', asyncHandler(inventoryCon
 // Legacy Routes (for backward compatibility)
 // ============================================================================
 
-router.get('/inventory', asyncHandler(inventoryController.listInventory));
+router.get('/inventory', asyncHandler(inventoryController.listInventoryLocations));
 router.get('/inventory/low-stock', asyncHandler(inventoryController.getLowStock));
-router.get('/inventory/:inventoryId', asyncHandler(inventoryController.getInventory));
-router.post('/inventory/:inventoryId/restock', asyncHandler(inventoryController.restockInventory));
+router.get('/inventory/:inventoryId', asyncHandler(inventoryController.getInventoryLocation));
+router.post('/inventory/:inventoryId/restock', asyncHandler(inventoryController.adjustStock));
 router.post('/inventory/:inventoryId/adjust', asyncHandler(inventoryController.adjustStock));
 router.post('/inventory/:inventoryId/reserve', asyncHandler(inventoryController.reserveStock));
 router.use(storeDispatchRouter);

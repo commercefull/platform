@@ -3,10 +3,7 @@
  * Creates or updates a collection and manages its collection map items
  */
 
-import productCollectionRepo from '../../infrastructure/repositories/productCollectionRepo';
-import productCollectionMapRepo from '../../infrastructure/repositories/productCollectionMapRepo';
-import type { ProductCollection } from '../../infrastructure/repositories/productCollectionRepo';
-import type { ProductCollectionMap } from '../../infrastructure/repositories/productCollectionMapRepo';
+import type { ProductCollection, ProductCollectionMap, ProductCollectionPort, ProductCollectionMapPort } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductCollectionNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================
@@ -49,6 +46,11 @@ export interface ManageProductCollectionResponse {
 // ============================================================================
 
 export class ManageProductCollectionUseCase {
+  constructor(
+    private readonly productCollectionRepo: ProductCollectionPort,
+    private readonly productCollectionMapRepo: ProductCollectionMapPort,
+  ) {}
+
   async execute(command: ManageProductCollectionCommand): Promise<ManageProductCollectionResponse> {
     if (!command.name?.trim()) {
       throw new ProductValidationError('Collection name is required');
@@ -61,7 +63,7 @@ export class ManageProductCollectionUseCase {
 
     if (command.productCollectionId) {
       // Update existing collection
-      const updated = await productCollectionRepo.update(command.productCollectionId, {
+      const updated = await this.productCollectionRepo.update(command.productCollectionId, {
         name: command.name,
         slug: command.slug,
         description: command.description,
@@ -75,7 +77,7 @@ export class ManageProductCollectionUseCase {
       collection = updated;
     } else {
       // Create new collection
-      collection = await productCollectionRepo.create({
+      collection = await this.productCollectionRepo.create({
         name: command.name,
         slug: command.slug,
         description: command.description,
@@ -88,14 +90,14 @@ export class ManageProductCollectionUseCase {
     // Remove map items
     if (command.removeMapIds?.length) {
       for (const mapId of command.removeMapIds) {
-        await productCollectionMapRepo.delete(mapId);
+        await this.productCollectionMapRepo.delete(mapId);
       }
     }
 
     // Add new map items
     if (command.addProducts?.length) {
       for (const item of command.addProducts) {
-        await productCollectionMapRepo.create({
+        await this.productCollectionMapRepo.create({
           productCollectionId: collection.productCollectionId,
           productId: item.productId,
           position: item.position ?? 0,
@@ -103,7 +105,7 @@ export class ManageProductCollectionUseCase {
       }
     }
 
-    const mapItems = await productCollectionMapRepo.findByCollection(collection.productCollectionId);
+    const mapItems = await this.productCollectionMapRepo.findByCollection(collection.productCollectionId);
 
     return { collection, mapItems };
   }

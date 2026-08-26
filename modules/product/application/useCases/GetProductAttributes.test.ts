@@ -7,13 +7,14 @@ jest.mock('../../infrastructure/repositories/DynamicAttributeRepository', () => 
 }));
 
 import { GetProductAttributesUseCase } from './GetProductAttributes';
+import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 
 describe('GetProductAttributesUseCase', () => {
   let useCase: GetProductAttributesUseCase;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new GetProductAttributesUseCase();
+    useCase = new GetProductAttributesUseCase(new DynamicAttributeRepository() as never);
   });
 
   it('should get product attributes', async () => {

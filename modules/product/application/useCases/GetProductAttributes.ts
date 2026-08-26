@@ -1,7 +1,7 @@
-import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
+import type { DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
 
 export class GetProductAttributesUseCase {
-  private readonly dynamicAttributeRepo = new DynamicAttributeRepository();
+  constructor(private readonly dynamicAttributeRepo: DynamicAttributePort) {}
 
   async getProductAttributes(productId: string) {
     return this.dynamicAttributeRepo.getProductAttributes(productId);

@@ -19,7 +19,7 @@ describe('ManageProductCategoriesUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductCategoriesUseCase();
+    useCase = new ManageProductCategoriesUseCase(productCategoryRepo);
   });
 
   it('should find all', async () => {

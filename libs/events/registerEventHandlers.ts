@@ -32,11 +32,13 @@ import { query } from '../db';
 import { logger } from '../logger';
 import { stopOutboxDispatcher } from './outboxDispatcher';
 import { registerCheckoutEventHandlers } from '../../modules/checkout/application/eventHandlers';
-import CheckoutRepo from '../../modules/checkout/infrastructure/repositories/CheckoutRepository';
+import { CheckoutRepository as CheckoutRepo } from '../../modules/checkout/infrastructure';
 import { registerOrderPaymentEventHandlers } from '../../modules/order/application/eventHandlers';
 import { registerTrackingEventHandlers, setConsentRepository } from '../../modules/tracking/application/eventHandlers/trackingEventHandlers';
 import { moduleRegistry } from '../../boot/moduleManifests';
 import { GdprDataRepository } from '../../modules/gdpr/infrastructure';
+import { integrationRepo, credentialRepo, subscriptionRepo, logRepo } from '../../modules/integration/application/useCases/wired';
+import { IntegrationEventDispatcher } from '../../modules/integration/application/services/IntegrationEventDispatcher';
 
 // Track registration state
 let isRegistered = false;
@@ -137,6 +139,11 @@ export function registerAllEventHandlers(): void {
         setConsentRepository(GdprDataRepository.cookieConsent);
       }
       registerTrackingEventHandlers();
+    }
+
+    // Integration dispatcher (forwards events to third-party integrations)
+    if (moduleRegistry.shouldRegisterEvents('integration')) {
+      registerIntegrationDispatcher();
     }
 
     isRegistered = true;
@@ -1090,4 +1097,16 @@ function registerSubscriptionEventHandlers(): void {
 function registerWebhookDispatch(): void {
   webhookDispatchService = new WebhookDispatchService(WebhookRepo);
   webhookDispatchService.start();
+}
+
+function registerIntegrationDispatcher(): void {
+  const dispatcher = new IntegrationEventDispatcher(
+    eventBus,
+    integrationRepo,
+    credentialRepo,
+    subscriptionRepo,
+    logRepo,
+  );
+  dispatcher.register();
+  logger.info('Integration event dispatcher registered');
 }

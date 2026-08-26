@@ -6,7 +6,7 @@ import { GetDashboardMetricsUseCase, GetDashboardMetricsInput } from '../../appl
 import { GetSalesAnalyticsUseCase, GetSalesAnalyticsInput } from '../../application/useCases/GetSalesAnalytics';
 import { GetProductPerformanceUseCase, GetProductPerformanceInput } from '../../application/useCases/GetProductPerformance';
 import { TrackPageViewUseCase, TrackPageViewCommand } from '../../application/useCases/TrackPageView';
-import { GenerateSalesReportCommand, GenerateSalesReportUseCase } from '../../application/useCases/GenerateSalesReport';
+import { GenerateSalesReportCommand } from '../../application/useCases/GenerateSalesReport';
 import { generateSalesReportUseCase } from '../../application/wired';
 
 export const analyticsResolvers = {

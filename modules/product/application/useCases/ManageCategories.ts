@@ -1,37 +1,38 @@
-import categoryRepo from '../../infrastructure/repositories/categoryRepo';
-import type { Category, CategoryCreateProps, CategoryUpdateProps } from '../../infrastructure/repositories/categoryRepo';
+import type { CategoryRow, CategoryCreateProps, CategoryUpdateProps, CategoryPort } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageCategoriesUseCase {
-  async findOne(id: string): Promise<Category | null> {
-    return categoryRepo.findOne(id);
+  constructor(private readonly categoryRepo: CategoryPort) {}
+
+  async findOne(id: string): Promise<CategoryRow | null> {
+    return this.categoryRepo.findOne(id);
   }
-  async findBySlug(slug: string): Promise<Category | null> {
-    return categoryRepo.findBySlug(slug);
+  async findBySlug(slug: string): Promise<CategoryRow | null> {
+    return this.categoryRepo.findBySlug(slug);
   }
-  async findAll(): Promise<Category[]> {
-    return categoryRepo.findAll();
+  async findAll(): Promise<CategoryRow[]> {
+    return this.categoryRepo.findAll();
   }
-  async findActive(): Promise<Category[]> {
-    return categoryRepo.findActive();
+  async findActive(): Promise<CategoryRow[]> {
+    return this.categoryRepo.findActive();
   }
-  async findChildren(parentId: string): Promise<Category[]> {
-    return categoryRepo.findChildren(parentId);
+  async findChildren(parentId: string): Promise<CategoryRow[]> {
+    return this.categoryRepo.findChildren(parentId);
   }
-  async findForMenu(): Promise<Category[]> {
-    return categoryRepo.findForMenu();
+  async findForMenu(): Promise<CategoryRow[]> {
+    return this.categoryRepo.findForMenu();
   }
-  async create(props: CategoryCreateProps): Promise<Category> {
-    return categoryRepo.create(props);
+  async create(props: CategoryCreateProps): Promise<CategoryRow> {
+    return this.categoryRepo.create(props);
   }
-  async update(id: string, props: CategoryUpdateProps): Promise<Category | null> {
-    return categoryRepo.update(id, props);
+  async update(id: string, props: CategoryUpdateProps): Promise<CategoryRow | null> {
+    return this.categoryRepo.update(id, props);
   }
   async delete(id: string): Promise<void> {
-    await categoryRepo.delete(id);
+    await this.categoryRepo.delete(id);
   }
   async reorder(categories: Array<{ categoryId: string; position: number }>): Promise<void> {
     for (const cat of categories) {
-      await categoryRepo.update(cat.categoryId, { position: cat.position });
+      await this.categoryRepo.update(cat.categoryId, { position: cat.position });
     }
   }
 }

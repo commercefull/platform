@@ -497,5 +497,4 @@ export class CouponRepo {
 }
 
 // Export singleton instance
-export const couponRepo = new CouponRepo();
-export default couponRepo;
+export default new CouponRepo();

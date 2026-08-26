@@ -43,6 +43,11 @@ jest.mock('../../infrastructure/repositories/productQaAnswerRepo', () => ({
 import { GetProductCatalogEnrichmentUseCase, GetProductCatalogEnrichmentCommand } from './GetProductCatalogEnrichment';
 import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 import productRepo from '../../infrastructure/repositories/productRepo';
+import productToCategoryRepo from '../../infrastructure/repositories/productToCategoryRepo';
+import productCategoryRepo from '../../infrastructure/repositories/productCategoryRepo';
+import productTagRepo from '../../infrastructure/repositories/productTagRepo';
+import productQaRepo from '../../infrastructure/repositories/productQaRepo';
+import productQaAnswerRepo from '../../infrastructure/repositories/productQaAnswerRepo';
 
 const mockProductRepo = productRepo as unknown as { findById: jest.Mock };
 
@@ -51,7 +56,14 @@ describe('GetProductCatalogEnrichmentUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new GetProductCatalogEnrichmentUseCase();
+    useCase = new GetProductCatalogEnrichmentUseCase(
+      productRepo,
+      productToCategoryRepo,
+      productCategoryRepo,
+      productTagRepo,
+      productQaRepo,
+      productQaAnswerRepo,
+    );
   });
 
   it('should return enriched product (happy path)', async () => {

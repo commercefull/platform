@@ -63,7 +63,7 @@ describe('Company Entity', () => {
     it('should not approve a non-pending company', () => {
       const company = Company.create({ organizationId: 'org-1', name: 'Acme' });
       company.approve();
-      expect(() => company.approve()).toThrow('Cannot approve company in status: approved');
+      expect(() => company.approve()).toThrow('in status: approved');
     });
 
     it('should suspend and reactivate', () => {
@@ -78,12 +78,12 @@ describe('Company Entity', () => {
     it('should not suspend a terminated company', () => {
       const company = Company.create({ organizationId: 'org-1', name: 'Acme' });
       company.terminate();
-      expect(() => company.suspend()).toThrow('Cannot suspend a terminated company');
+      expect(() => company.suspend()).toThrow('in status: terminated');
     });
 
     it('should not reactivate a non-suspended company', () => {
       const company = Company.create({ organizationId: 'org-1', name: 'Acme' });
-      expect(() => company.reactivate()).toThrow('Cannot reactivate company in status: pending');
+      expect(() => company.reactivate()).toThrow('in status: pending');
     });
   });
 

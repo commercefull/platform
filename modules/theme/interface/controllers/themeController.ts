@@ -6,7 +6,7 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { logger } from '../../../../libs/logger';
-import { AppError, getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { ThemeRepositoryImpl } from '../../infrastructure/repositories/ThemeRepositoryImpl';
 import {
   ManageThemesUseCase,

@@ -48,7 +48,7 @@ describe('Vendor Entity', () => {
     it('should not suspend a terminated vendor', () => {
       const v = Vendor.create({ organizationId: 'org-1', name: 'A', email: 'a@b.com' });
       v.terminate();
-      expect(() => v.suspend()).toThrow('Cannot suspend a terminated vendor');
+      expect(() => v.suspend()).toThrow('in status: terminated');
     });
   });
 

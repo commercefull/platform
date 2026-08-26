@@ -1,9 +1,9 @@
-import { ProductTypeRepository, ProductType } from '../../infrastructure/repositories/ProductTypeRepository';
+import type { ProductTypeRow, ProductTypePort } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ListProductTypesUseCase {
-  constructor(private readonly productTypeRepository: ProductTypeRepository) {}
+  constructor(private readonly productTypeRepository: ProductTypePort) {}
 
-  async execute(): Promise<ProductType[]> {
+  async execute(): Promise<ProductTypeRow[]> {
     return this.productTypeRepository.findAll();
   }
 }

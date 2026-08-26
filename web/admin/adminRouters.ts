@@ -46,6 +46,7 @@ import * as storeController from './controllers/storeController';
 import * as reportingController from './controllers/reportingController';
 import * as automationController from './controllers/automationController';
 import * as returnsController from './controllers/returnsController';
+import * as integrationController from './controllers/integrationController';
 
 const router = express.Router();
 
@@ -801,5 +802,23 @@ router.post('/themes/:themeId/override', asyncHandler(themeController.saveOverri
 router.post('/themes/:themeId/activate', asyncHandler(themeController.activateTheme));
 router.post('/themes/:themeId/archive', asyncHandler(themeController.archiveTheme));
 router.post('/themes/:themeId/delete', asyncHandler(themeController.deleteTheme));
+
+// ============================================================================
+// Integrations Routes
+// ============================================================================
+
+router.get('/integrations', asyncHandler(integrationController.listIntegrations));
+router.get('/integrations/create', asyncHandler(integrationController.createIntegrationForm));
+router.post('/integrations', asyncHandler(integrationController.createIntegration));
+router.get('/integrations/:integrationId', asyncHandler(integrationController.viewIntegration));
+router.post('/integrations/:integrationId', asyncHandler(integrationController.updateIntegration));
+router.post('/integrations/:integrationId/activate', asyncHandler(integrationController.activateIntegration));
+router.post('/integrations/:integrationId/deactivate', asyncHandler(integrationController.deactivateIntegration));
+router.post('/integrations/:integrationId/delete', asyncHandler(integrationController.deleteIntegration));
+router.post('/integrations/:integrationId/credentials', asyncHandler(integrationController.addCredential));
+router.post('/integrations/:integrationId/credentials/:credentialId/delete', asyncHandler(integrationController.deleteCredential));
+router.post('/integrations/:integrationId/subscriptions', asyncHandler(integrationController.createSubscription));
+router.post('/integrations/:integrationId/subscriptions/:subscriptionId', asyncHandler(integrationController.updateSubscription));
+router.post('/integrations/:integrationId/subscriptions/:subscriptionId/delete', asyncHandler(integrationController.deleteSubscription));
 
 export const adminRouter = router;

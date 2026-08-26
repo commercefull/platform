@@ -60,6 +60,7 @@ export interface ProductProps {
   returnPolicy?: string;
   warranty?: string;
   externalId?: string;
+  brandId?: string;
   tags: string[];
   metadata?: Record<string, unknown>;
   publishedAt?: Date;
@@ -112,6 +113,7 @@ export class Product {
     returnPolicy?: string;
     warranty?: string;
     externalId?: string;
+    brandId?: string;
     tags?: string[];
     metadata?: Record<string, unknown>;
   }): Product {
@@ -158,6 +160,7 @@ export class Product {
       returnPolicy: props.returnPolicy,
       warranty: props.warranty,
       externalId: props.externalId,
+      brandId: props.brandId,
       tags: props.tags || [],
       metadata: props.metadata,
       createdAt: now,
@@ -274,6 +277,9 @@ export class Product {
   }
   get externalId(): string | undefined {
     return this.props.externalId;
+  }
+  get brandId(): string | undefined {
+    return this.props.brandId;
   }
   get tags(): string[] {
     return [...this.props.tags];
@@ -573,6 +579,7 @@ export class Product {
       returnPolicy: this.props.returnPolicy,
       warranty: this.props.warranty,
       externalId: this.props.externalId,
+      brandId: this.props.brandId,
       tags: this.props.tags,
       metadata: this.props.metadata,
       publishedAt: this.props.publishedAt?.toISOString(),

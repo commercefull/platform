@@ -1,9 +1,7 @@
-import productCatalogRepository from '../../infrastructure/repositories/ProductCatalogRepository';
-import { GetProductUseCase, GetProductCommand } from '../../application/useCases/GetProduct';
-import { ListProductsUseCase, ListProductsCommand } from '../../application/useCases/ListProducts';
-import { SearchProductsUseCase, SearchProductsCommand } from '../../application/useCases/SearchProducts';
-
-const ProductRepo = productCatalogRepository.productRepository;
+import { GetProductCommand } from '../../application/useCases/GetProduct';
+import { ListProductsCommand } from '../../application/useCases/ListProducts';
+import { SearchProductsCommand } from '../../application/useCases/SearchProducts';
+import { getProductUseCase, listProductsUseCase, searchProductsUseCase } from '../../application/useCases/wired';
 
 export const productResolvers = {
   Query: {
@@ -14,7 +12,7 @@ export const productResolvers = {
       includeVariants?: boolean;
       includeImages?: boolean;
     }) => {
-      const useCase = new GetProductUseCase(ProductRepo);
+      const useCase = getProductUseCase;
       const command = new GetProductCommand(
         args.productId,
         args.slug,
@@ -32,7 +30,7 @@ export const productResolvers = {
       orderBy?: string;
       orderDirection?: 'asc' | 'desc';
     }) => {
-      const useCase = new ListProductsUseCase(ProductRepo);
+      const useCase = listProductsUseCase;
       const command = new ListProductsCommand(
         args.filters,
         args.limit ?? 20,
@@ -50,7 +48,7 @@ export const productResolvers = {
       offset?: number;
       orderBy?: string;
     }) => {
-      const useCase = new SearchProductsUseCase(ProductRepo);
+      const useCase = searchProductsUseCase;
       const command = new SearchProductsCommand(
         args.query,
         args.filters,

@@ -7,14 +7,21 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import productCatalogRepository from '../../infrastructure/repositories/ProductCatalogRepository';
 import productEngagementRepository from '../../infrastructure/repositories/ProductEngagementRepository';
-import { GetProductCommand, GetProductUseCase } from '../../application/useCases/GetProduct';
-import { ListProductsCommand, ListProductsUseCase } from '../../application/useCases/ListProducts';
-import { SearchProductsCommand, SearchProductsUseCase } from '../../application/useCases/SearchProducts';
+import { GetProductCommand } from '../../application/useCases/GetProduct';
+import { ListProductsCommand } from '../../application/useCases/ListProducts';
+import { SearchProductsCommand } from '../../application/useCases/SearchProducts';
+import { SubmitProductQaCommand } from '../../application/useCases/SubmitProductQa';
+import { VoteOnReviewCommand } from '../../application/useCases/VoteOnReview';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import type { ReviewRating } from '../../infrastructure/repositories/ProductEngagementRepository';
-import { SubmitProductQaCommand, SubmitProductQaUseCase } from '../../application/useCases/SubmitProductQa';
-import { VoteOnReviewCommand, VoteOnReviewUseCase } from '../../application/useCases/VoteOnReview';
+import {
+  listProductsUseCase,
+  getProductUseCase,
+  searchProductsUseCase,
+  submitProductQaUseCase,
+  voteOnReviewUseCase,
+} from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { InventoryStockAvailabilityAdapter } from '../../infrastructure/acl/InventoryStockAvailabilityAdapter';
 
@@ -73,7 +80,7 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
     (orderDirection as 'asc' | 'desc') || 'desc',
   );
 
-  const useCase = new ListProductsUseCase(ProductRepo);
+  const useCase = listProductsUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -92,7 +99,7 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
 
   const command = new GetProductCommand(isUuid ? identifier : undefined, isUuid ? undefined : identifier, undefined, true, true);
 
-  const useCase = new GetProductUseCase(ProductRepo);
+  const useCase = getProductUseCase;
   const product = await useCase.execute(command);
 
   if (!product) {
@@ -139,7 +146,7 @@ export const searchProducts = async (req: TypedRequest, res: Response): Promise<
     (orderBy as 'relevance' | 'price_asc' | 'price_desc' | 'newest' | 'name') || 'relevance',
   );
 
-  const useCase = new SearchProductsUseCase(ProductRepo);
+  const useCase = searchProductsUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -193,7 +200,7 @@ export const getFeaturedProducts = async (req: TypedRequest, res: Response): Pro
     'desc',
   );
 
-  const useCase = new ListProductsUseCase(ProductRepo);
+  const useCase = listProductsUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -220,7 +227,7 @@ export const getProductsByCategory = async (req: TypedRequest, res: Response): P
     (orderDirection as 'asc' | 'desc') || 'desc',
   );
 
-  const useCase = new ListProductsUseCase(ProductRepo);
+  const useCase = listProductsUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -339,7 +346,7 @@ export const submitProductQa = async (req: TypedRequest, res: Response): Promise
   }
 
   const command = new SubmitProductQaCommand(productId, question, customerId, askerName, askerEmail);
-  const useCase = new SubmitProductQaUseCase();
+  const useCase = submitProductQaUseCase;
   const result = await useCase.execute(command);
   successResponse(res, result, 201);
 };
@@ -363,7 +370,7 @@ export const voteOnReview = async (req: TypedRequest, res: Response): Promise<vo
   }
 
   const command = new VoteOnReviewCommand(reviewId, customerId, isHelpful);
-  const useCase = new VoteOnReviewUseCase();
+  const useCase = voteOnReviewUseCase;
   const result = await useCase.execute(command);
   successResponse(res, result);
 };

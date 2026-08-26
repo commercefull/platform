@@ -10,9 +10,6 @@ import { ListProductsCommand } from '../../../modules/product/application/useCas
 import { CreateProductCommand } from '../../../modules/product/application/useCases/CreateProduct';
 import { GetProductCommand } from '../../../modules/product/application/useCases/GetProduct';
 import { UpdateProductCommand } from '../../../modules/product/application/useCases/UpdateProduct';
-import { ManageCategoriesUseCase } from '../../../modules/product/application/useCases/ManageCategories';
-import { GetProductAttributesUseCase } from '../../../modules/product/application/useCases/GetProductAttributes';
-import { GetReviewStatsUseCase } from '../../../modules/product/application/useCases/GetReviewStats';
 import { ProductStatus } from '../../../modules/product/domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../../modules/product/domain/valueObjects/ProductVisibility';
 import {
@@ -23,28 +20,21 @@ import {
   createProductUseCase,
   getProductUseCase,
   updateProductUseCase,
+  manageProductCategoriesUseCase,
+  manageProductTagsUseCase,
+  manageProductCollectionsUseCase,
+  manageProductQaUseCase,
+  manageReviewMediaUseCase,
+  manageProductPricesUseCase,
+  manageCategoriesUseCase,
+  getProductAttributesUseCase,
+  getReviewStatsUseCase,
 } from '../../../modules/product/application/useCases/wired';
 import { adminRespond } from '../../respond';
 
 // ============================================================================
-// Additional use cases for secondary handlers
+// Additional use cases imported from wired.ts
 // ============================================================================
-import { ManageProductCategoriesUseCase } from '../../../modules/product/application/useCases/ManageProductCategories';
-import { ManageProductTagsUseCase } from '../../../modules/product/application/useCases/ManageProductTags';
-import { ManageProductCollectionsUseCase } from '../../../modules/product/application/useCases/ManageProductCollections';
-import { ManageProductQaUseCase } from '../../../modules/product/application/useCases/ManageProductQa';
-import { ManageReviewMediaUseCase } from '../../../modules/product/application/useCases/ManageReviewMedia';
-import { ManageProductPricesUseCase } from '../../../modules/product/application/useCases/ManageProductPrices';
-
-const manageProductCategoriesUseCase = new ManageProductCategoriesUseCase();
-const manageProductTagsUseCase = new ManageProductTagsUseCase();
-const manageProductCollectionsUseCase = new ManageProductCollectionsUseCase();
-const manageProductQaUseCase = new ManageProductQaUseCase();
-const manageReviewMediaUseCase = new ManageReviewMediaUseCase();
-const manageProductPricesUseCase = new ManageProductPricesUseCase();
-const manageCategoriesUseCase = new ManageCategoriesUseCase();
-const getProductAttributesUseCase = new GetProductAttributesUseCase();
-const getReviewStatsUseCase = new GetReviewStatsUseCase();
 
 // ============================================================================
 // List Products

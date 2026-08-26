@@ -6,10 +6,8 @@
 import { logger } from '../../../libs/logger';
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { ManageCategoriesUseCase } from '../../../modules/product/application/useCases/ManageCategories';
+import { manageCategoriesUseCase } from '../../../modules/product/application/useCases/wired';
 import { storefrontRespond } from '../../respond';
-
-const manageCategoriesUseCase = new ManageCategoriesUseCase();
 
 // ============================================================================
 // Load Categories for Navigation

@@ -3,9 +3,7 @@
  * Creates a Q&A question for a product, validates product exists
  */
 
-import productRepo from '../../infrastructure/repositories/productRepo';
-import productQaRepo from '../../infrastructure/repositories/productQaRepo';
-import type { ProductQa } from '../../infrastructure/repositories/productQaRepo';
+import type { ProductQa, ProductQaPort, ProductLookupPort } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================
@@ -42,6 +40,11 @@ export interface SubmitProductQaResponse {
 // ============================================================================
 
 export class SubmitProductQaUseCase {
+  constructor(
+    private readonly productRepo: ProductLookupPort,
+    private readonly productQaRepo: ProductQaPort,
+  ) {}
+
   async execute(command: SubmitProductQaCommand): Promise<SubmitProductQaResponse> {
     if (!command.productId) {
       throw new ProductValidationError('productId is required');
@@ -51,12 +54,12 @@ export class SubmitProductQaUseCase {
     }
 
     // Validate product exists
-    const product = await productRepo.findById(command.productId);
+    const product = await this.productRepo.findById(command.productId);
     if (!product) {
       throw new ProductNotFoundError(command.productId);
     }
 
-    const qa: ProductQa = await productQaRepo.create({
+    const qa: ProductQa = await this.productQaRepo.create({
       productId: command.productId,
       question: command.question.trim(),
       status: 'pending',

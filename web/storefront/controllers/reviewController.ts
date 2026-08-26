@@ -5,9 +5,7 @@
 
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import { ManageProductReviewsUseCase } from '../../../modules/product/application/useCases/ManageProductReviews';
-
-const manageProductReviewsUseCase = new ManageProductReviewsUseCase();
+import { manageProductReviewsUseCase } from '../../../modules/product/application/useCases/wired';
 
 interface CustomerUser {
   id: string;

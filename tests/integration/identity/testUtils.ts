@@ -18,11 +18,6 @@ export const TEST_MERCHANT = {
   businessName: 'Test Store',
 };
 
-// Legacy exports for backward compatibility
-export const testCustomer = TEST_CUSTOMER;
-export const testOrganization = TEST_MERCHANT;
-export const testAdmin = TEST_MERCHANT; // Use organization as admin for now
-
 // ============================================================================
 // Setup Functions
 // ============================================================================

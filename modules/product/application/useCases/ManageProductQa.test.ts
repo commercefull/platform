@@ -16,7 +16,7 @@ describe('ManageProductQaUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductQaUseCase();
+    useCase = new ManageProductQaUseCase(productQaRepo);
   });
 
   it('should find by product', async () => {

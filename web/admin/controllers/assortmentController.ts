@@ -10,10 +10,8 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import { ManageCategoriesUseCase } from '../../../modules/product/application/useCases/ManageCategories';
+import { manageCategoriesUseCase } from '../../../modules/product/application/useCases/wired';
 import { adminRespond } from '../../respond';
-
-const manageCategoriesUseCase = new ManageCategoriesUseCase();
 
 // ============================================================================
 // Categories

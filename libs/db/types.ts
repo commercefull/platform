@@ -267,6 +267,14 @@ export enum Table {
   WarehouseReceiving = "warehouseReceiving",
   WebhookDelivery = "webhookDelivery",
   WebhookEndpoint = "webhookEndpoint",
+  Brand = "brand",
+  ImportJob = "importJob",
+  ImportMapping = "importMapping",
+  ImportError = "importError",
+  Integration = "integration",
+  IntegrationCredential = "integrationCredential",
+  IntegrationSubscription = "integrationSubscription",
+  IntegrationLog = "integrationLog",
 }
 
 export type Tables = {
@@ -535,6 +543,10 @@ export type Tables = {
   "warehouseReceiving": WarehouseReceiving,
   "webhookDelivery": WebhookDelivery,
   "webhookEndpoint": WebhookEndpoint,
+  "brand": Brand,
+  "importJob": ImportJob,
+  "importMapping": ImportMapping,
+  "importError": ImportError,
 };
 
 export type AnalyticsCustomer = {
@@ -5668,5 +5680,67 @@ export type WebhookEndpoint = {
   retryPolicy: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
+};
+
+export type Brand = {
+  brandId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+  organizationId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  logoUrl: string | null;
+  website: string | null;
+  countryOfOrigin: string | null;
+  status: string;
+  metadata: unknown | null;
+  externalId: string | null;
+};
+
+export type ImportJob = {
+  importJobId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  organizationId: string;
+  jobType: string;
+  source: string;
+  status: string;
+  sourceStoreUrl: string | null;
+  sourceApiKey: string | null;
+  sourceConfig: unknown | null;
+  stats: unknown;
+  startedAt: Date | null;
+  completedAt: Date | null;
+  errorMessage: string | null;
+  dryRun: boolean;
+  autoActivate: boolean;
+  metadata: unknown | null;
+};
+
+export type ImportMapping = {
+  importMappingId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  importJobId: string;
+  entityType: string;
+  sourceId: string;
+  platformId: string;
+  sourceData: unknown | null;
+  metadata: unknown | null;
+};
+
+export type ImportError = {
+  importErrorId: string;
+  createdAt: Date;
+  importJobId: string;
+  entityType: string;
+  sourceId: string | null;
+  severity: string;
+  message: string;
+  stackTrace: string | null;
+  rawData: unknown | null;
+  resolvedAt: Date | null;
 };
 
