@@ -27,8 +27,6 @@ describe('Order Tests', () => {
   let adminToken: string;
   let customerToken: string;
   let testOrderId: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let testOrderItemId: string;
 
   beforeAll(async () => {
     const setup = await setupOrderTests();
@@ -36,7 +34,6 @@ describe('Order Tests', () => {
     adminToken = setup.adminToken;
     customerToken = setup.customerToken;
     testOrderId = setup.testOrderId;
-    testOrderItemId = setup.testOrderItemId;
   });
 
   afterAll(async () => {

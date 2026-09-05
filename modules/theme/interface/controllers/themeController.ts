@@ -25,7 +25,7 @@ const manageOverridesUseCase = new ManageThemeOverridesUseCase(themeRepository);
 const assignThemeUseCase = new AssignThemeToStoreUseCase(themeRepository);
 const resolveThemeUseCase = new ResolveStoreThemeUseCase(themeRepository);
 
-export class ThemeController {
+class ThemeController {
   // ── Theme CRUD ──────────────────────────────────────────────
 
   async listThemes(req: TypedRequest, res: Response) {

@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Delete Notification Use Case
  *
@@ -35,4 +37,4 @@ export class DeleteNotificationUseCase {
   }
 }
 
-export const deleteNotificationUseCase = new DeleteNotificationUseCase();
+const deleteNotificationUseCase = new DeleteNotificationUseCase();

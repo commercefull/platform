@@ -35,4 +35,3 @@ export function initSearchAdapter(): void {
   }
 }
 
-export { getSearchAdapter, isSearchAdapterConfigured } from './types';

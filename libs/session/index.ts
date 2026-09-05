@@ -2,4 +2,4 @@
  * Session Module - Barrel Export
  */
 
-export { SessionService, SessionData, CreateSessionInput } from './SessionService';
+export { SessionService } from './SessionService';

@@ -91,7 +91,7 @@ export interface SetProductAttributesResponse {
   error?: string;
 }
 
-export class SetProductAttributesUseCase {
+class SetProductAttributesUseCase {
   async execute(command: SetProductAttributesCommand): Promise<SetProductAttributesResponse> {
     try {
       // Clear existing attributes if requested
@@ -173,7 +173,7 @@ export interface GetProductAttributesResponse {
   error?: string;
 }
 
-export class GetProductAttributesUseCase {
+class GetProductAttributesUseCase {
   async execute(query: GetProductAttributesQuery): Promise<GetProductAttributesResponse> {
     try {
       const attributes = await dynamicAttributeRepository.getProductAttributes(query.productId);
@@ -214,7 +214,7 @@ export interface RemoveProductAttributeResponse {
   error?: string;
 }
 
-export class RemoveProductAttributeUseCase {
+class RemoveProductAttributeUseCase {
   async execute(command: RemoveProductAttributeCommand): Promise<RemoveProductAttributeResponse> {
     try {
       let attributeId = command.attributeId;

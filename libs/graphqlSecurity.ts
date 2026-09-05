@@ -61,7 +61,7 @@ export function createDepthLimitRule(maxDepth: number = DEFAULT_MAX_DEPTH) {
  * Walks the query AST and sums field costs. List fields multiply by their
  * cost factor. Rejects queries that exceed maxComplexity.
  */
-export function createComplexityRule(
+function createComplexityRule(
   maxComplexity: number = DEFAULT_MAX_COMPLEXITY,
   fieldCosts: Record<string, FieldCost> = defaultFieldCosts,
 ) {

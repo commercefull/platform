@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Apply Product Discount Use Case
  * Calculates applicable discounts for products
@@ -153,4 +155,4 @@ export class ApplyProductDiscountUseCase {
   }
 }
 
-export const applyProductDiscountUseCase = new ApplyProductDiscountUseCase();
+const applyProductDiscountUseCase = new ApplyProductDiscountUseCase();

@@ -5,7 +5,7 @@ import type { ProductAttributeSetUpdateInput } from '../../infrastructure/reposi
 
 const attributeSetRepo = productAttributeRepository.sets;
 
-export class AttributeSetController {
+class AttributeSetController {
   async listAttributeSets(req: TypedRequest, res: Response): Promise<void> {
     const sets = await attributeSetRepo.findAll();
     res.json({ success: true, data: sets });

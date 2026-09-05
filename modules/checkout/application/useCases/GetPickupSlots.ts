@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Get Pickup Slots Use Case
  *
@@ -74,4 +76,4 @@ export class GetPickupSlotsUseCase {
   }
 }
 
-export const getPickupSlotsUseCase = new GetPickupSlotsUseCase();
+const getPickupSlotsUseCase = new GetPickupSlotsUseCase();

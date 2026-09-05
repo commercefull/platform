@@ -109,5 +109,3 @@ export class ValidateCouponUseCase {
     };
   }
 }
-
-export const validateCouponUseCase = new ValidateCouponUseCase();

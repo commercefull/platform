@@ -9,7 +9,7 @@ import {
 import type { SearchProductsQuery } from '../../application/useCases/attribute/SearchProducts';
 import type { AttributeFilter } from '../../application/services/ProductSearchService';
 
-export class ProductSearchController {
+class ProductSearchController {
   /**
    * GET /products/search
    * Search products with filters and facets

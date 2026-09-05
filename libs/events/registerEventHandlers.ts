@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Event Handler Registration
  *
@@ -158,7 +159,7 @@ export function registerAllEventHandlers(): void {
 /**
  * Unregister all handlers (for testing/shutdown)
  */
-export async function unregisterAllEventHandlers(): Promise<void> {
+async function unregisterAllEventHandlers(): Promise<void> {
   if (webhookDispatchService) {
     webhookDispatchService.stop();
     webhookDispatchService = null;
@@ -173,7 +174,7 @@ export async function unregisterAllEventHandlers(): Promise<void> {
 /**
  * Check if handlers are registered
  */
-export function areHandlersRegistered(): boolean {
+function areHandlersRegistered(): boolean {
   return isRegistered;
 }
 

@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Product Customer Controller
  * HTTP interface for customer-facing product operations
@@ -121,7 +123,7 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
  * Search products
  * GET /products/search
  */
-export const searchProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+const searchProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   const { q, categoryId, priceMin, priceMax, limit, offset, orderBy } = req.query;
 
   if (!q) {

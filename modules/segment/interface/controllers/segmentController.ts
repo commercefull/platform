@@ -16,7 +16,7 @@ import {
 } from '../../application/useCases/wired';
 import { SegmentNotFoundError, SegmentAlreadyExistsError, InvalidSegmentConditionsError } from '../../domain/errors/SegmentErrors';
 
-export class SegmentController {
+class SegmentController {
   // ── Segment CRUD ──────────────────────────────────────────────
 
   async listSegments(req: TypedRequest, res: Response): Promise<void> {

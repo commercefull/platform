@@ -32,8 +32,6 @@ describe('Notification Template Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let customerToken: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let testUserId: string;
   let testNotificationId: string;
   let testTemplateId: string;
   let testPreferenceId: string;
@@ -43,7 +41,6 @@ describe('Notification Template Tests', () => {
     client = setup.client;
     adminToken = setup.adminToken;
     customerToken = setup.customerToken;
-    testUserId = setup.testUserId;
     testNotificationId = setup.testNotificationId;
     testTemplateId = setup.testTemplateId;
     testPreferenceId = setup.testPreferenceId;

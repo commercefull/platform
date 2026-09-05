@@ -85,7 +85,7 @@ export interface RemoveAttributeValueResponse {
   error?: string;
 }
 
-export class RemoveAttributeValueUseCase {
+class RemoveAttributeValueUseCase {
   async execute(command: RemoveAttributeValueCommand): Promise<RemoveAttributeValueResponse> {
     try {
       const deleted = await dynamicAttributeRepository.deleteAttributeValue(command.attributeValueId);
@@ -119,7 +119,7 @@ export interface GetAttributeValuesResponse {
   error?: string;
 }
 
-export class GetAttributeValuesUseCase {
+class GetAttributeValuesUseCase {
   async execute(query: GetAttributeValuesQuery): Promise<GetAttributeValuesResponse> {
     try {
       const values = await dynamicAttributeRepository.findAttributeValues(query.attributeId);

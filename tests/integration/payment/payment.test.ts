@@ -25,7 +25,7 @@ const loginCustomer = async (client: AxiosInstance, email = 'testcustomer@exampl
   return r.data?.accessToken || '';
 };
 
-const loginOrganization = async (client: AxiosInstance): Promise<string> => {
+const _loginOrganization = async (client: AxiosInstance): Promise<string> => {
   const r = await client.post(
     '/business/auth/login',
     { email: 'merchant@example.com', password: 'password123' },
@@ -43,13 +43,10 @@ const WEBHOOK_SECRET = process.env.PAYMENT_WEBHOOK_SECRET || 'test-secret-key';
 describe('Payment Integration Tests', () => {
   let client: AxiosInstance;
   let customerToken: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let adminToken: string;
 
   beforeAll(async () => {
     client = createClient();
     customerToken = await loginCustomer(client);
-    adminToken = await loginOrganization(client);
   });
 
   // ============================================================================

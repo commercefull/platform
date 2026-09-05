@@ -16,7 +16,7 @@ import {
   listProvidersUseCase,
 } from '../../application/wired';
 
-export class SsoController {
+class SsoController {
   // ── List Providers ────────────────────────────────────────────
 
   async listProviders(req: TypedRequest, res: Response) {

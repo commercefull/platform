@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Request, Response } from 'express';
 import winston, { format } from 'winston';
 import 'winston-daily-rotate-file';
@@ -177,4 +178,4 @@ const logRequest = (req: Request) => {
 };
 
 // Export the logger and httpLogger
-export { logger, expressHttpLogger, logRequest };
+export { logger, expressHttpLogger };

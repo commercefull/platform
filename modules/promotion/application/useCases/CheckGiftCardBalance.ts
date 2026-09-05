@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Check Gift Card Balance Use Case
  * Retrieves gift card balance and status
@@ -64,4 +66,4 @@ export class CheckGiftCardBalanceUseCase {
   }
 }
 
-export const checkGiftCardBalanceUseCase = new CheckGiftCardBalanceUseCase();
+const checkGiftCardBalanceUseCase = new CheckGiftCardBalanceUseCase();

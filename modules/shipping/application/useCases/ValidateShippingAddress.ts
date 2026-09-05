@@ -36,5 +36,3 @@ export class ValidateShippingAddressUseCase {
     };
   }
 }
-
-export const validateShippingAddressUseCase = new ValidateShippingAddressUseCase();

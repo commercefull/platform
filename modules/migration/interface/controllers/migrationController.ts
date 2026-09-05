@@ -3,7 +3,7 @@ import { TypedRequest } from '../../../../libs/types/express';
 import { manageImportJobs, manageImportMappings, manageImportErrors } from '../../application/useCases/wired';
 import type { ImportJobType, ImportSource, ImportJobStatus } from '../../domain/entities/ImportJob';
 
-export class MigrationController {
+class MigrationController {
   async createJob(req: TypedRequest, res: Response): Promise<void> {
     const { organizationId } = req.user!;
     if (!organizationId) {

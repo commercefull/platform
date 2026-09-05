@@ -10,7 +10,7 @@ function mapOption(option: ProductAttributeOption): Record<string, unknown> {
   return { ...option, sortOrder: option.position };
 }
 
-export class AttributeOptionController {
+class AttributeOptionController {
   /**
    * GET /attribute-options/:id
    * Get a single attribute option by ID

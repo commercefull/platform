@@ -14,8 +14,6 @@ describe('Customer: Reviews & Q&A', () => {
   let client: AxiosInstance;
   let customerToken: string;
   let createdReviewId: string | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let createdQaId: string | null = null;
 
   beforeAll(async () => {
     client = createTestClient();
@@ -141,7 +139,6 @@ describe('Customer: Reviews & Q&A', () => {
       });
       expect(res.status).toBe(201);
       expect(res.data.data.status).toBe('pending');
-      createdQaId = res.data.data?.productQaId || res.data.data?.qaId || res.data.data?.id;
     });
   });
 

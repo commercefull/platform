@@ -4,7 +4,6 @@
  */
 
 export {
-  ProductSearchService,
   ProductSearchFilters,
   AttributeFilter,
   ProductSearchResult,

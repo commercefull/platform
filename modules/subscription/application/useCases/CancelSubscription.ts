@@ -118,5 +118,3 @@ export class CancelSubscriptionUseCase {
     }
   }
 }
-
-export const cancelSubscriptionUseCase = new CancelSubscriptionUseCase();

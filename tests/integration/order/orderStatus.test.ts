@@ -34,7 +34,6 @@ describe('Order Status Tests', () => {
   let adminToken: string;
   let customerToken: string;
   let testOrderId: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testOrderItemId: string;
 
   beforeAll(async () => {

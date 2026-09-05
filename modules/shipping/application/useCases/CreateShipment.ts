@@ -172,5 +172,3 @@ export class CreateShipmentUseCase {
     return labels;
   }
 }
-
-export const createShipmentUseCase = new CreateShipmentUseCase();

@@ -27,7 +27,7 @@ const publishDraftUseCase = new PublishDraftUseCase(draftRepo);
 const previewDraftUseCase = new PreviewDraftUseCase(draftRepo, themeRepo);
 const getBlockTypesUseCase = new GetBlockTypesUseCase();
 
-export class PageBuilderController {
+class PageBuilderController {
   // ── Block Types ──────────────────────────────────────────────
 
   listBlockTypes = async (req: TypedRequest, res: Response): Promise<void> => {

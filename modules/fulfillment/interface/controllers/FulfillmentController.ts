@@ -286,19 +286,3 @@ export const assignFulfillment = async (req: TypedRequest, res: Response): Promi
   const saved = await fulfillmentRepository.save(fulfillment);
   res.json({ success: true, data: saved });
 };
-
-export default {
-  createFulfillment,
-  getFulfillment,
-  processPicking,
-  processPacking,
-  shipOrder,
-  markDelivered,
-  cancelFulfillment,
-  updateTracking,
-  initiateReturn,
-  getTrackingInfo,
-  listFulfillmentsByOrder,
-  listFulfillments,
-  assignFulfillment,
-};

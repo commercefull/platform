@@ -179,5 +179,3 @@ export function getAllowedFields(
   return result.allowedFields ?? ['*'];
 }
 
-// Re-export ForbiddenError for convenience
-export { ForbiddenError } from '../errors';

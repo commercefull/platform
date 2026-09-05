@@ -91,7 +91,7 @@ export interface AttributeFacet {
   }>;
 }
 
-export class ProductSearchService {
+class ProductSearchService {
   private readonly productTable = Table.Product;
   private readonly categoryMapTable = Table.ProductCategoryMap;
   private readonly attributeValueMapTable = Table.ProductAttributeValueMap;

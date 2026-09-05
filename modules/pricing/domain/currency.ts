@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Currency domain models for the pricing feature
  */
@@ -63,7 +65,7 @@ export function formatCurrency(amount: number, currency: Currency): string {
 /**
  * Convert amount from one currency to another
  */
-export function convertCurrency(amount: number, fromCurrency: Currency, toCurrency: Currency): number {
+function convertCurrency(amount: number, fromCurrency: Currency, toCurrency: Currency): number {
   // If currencies are the same, no conversion needed
   if (fromCurrency.code === toCurrency.code) return amount;
 

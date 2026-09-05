@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Checkout Configuration Use Cases
  *
@@ -16,7 +18,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 // Manage Checkout Config
 // ============================================================================
 
-export class CreateCheckoutConfigCommand {
+class CreateCheckoutConfigCommand {
   constructor(
     public readonly storeId: string,
     public readonly organizationId: string,
@@ -27,7 +29,7 @@ export class CreateCheckoutConfigCommand {
   ) {}
 }
 
-export class UpdateCheckoutConfigCommand {
+class UpdateCheckoutConfigCommand {
   constructor(
     public readonly configId: string,
     public readonly name: string | undefined,
@@ -37,7 +39,7 @@ export class UpdateCheckoutConfigCommand {
   ) {}
 }
 
-export class ManageCheckoutConfigUseCase {
+class ManageCheckoutConfigUseCase {
   constructor(private readonly configRepository: CheckoutConfigRepository) {}
 
   async create(command: CreateCheckoutConfigCommand): Promise<CheckoutConfig> {

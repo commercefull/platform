@@ -29,7 +29,7 @@ import {
 } from './merchandising';
 import type { SearchQuery } from './types';
 
-export class SearchController {
+class SearchController {
   /**
    * GET /customer/search
    * Full-text search with filters, facets, and merchandising

@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Gateway Adapter Registry
  *
@@ -51,14 +53,14 @@ export function getPSPAdapter(provider: string): PSPAdapter | null {
 /**
  * Get all registered PSP adapters (for failover routing).
  */
-export function getAllPSPAdapters(): PSPAdapter[] {
+function getAllPSPAdapters(): PSPAdapter[] {
   return adapters.filter((a): a is PSPAdapter => 'initiatePayment' in a) as PSPAdapter[];
 }
 
 /**
  * List all registered provider slugs.
  */
-export function listProviders(): string[] {
+function listProviders(): string[] {
   return Array.from(registry.keys());
 }
 

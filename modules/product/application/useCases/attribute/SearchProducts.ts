@@ -97,7 +97,7 @@ export interface GetSearchSuggestionsResponse {
   error?: string;
 }
 
-export class GetSearchSuggestionsUseCase {
+class GetSearchSuggestionsUseCase {
   async execute(query: GetSearchSuggestionsQuery): Promise<GetSearchSuggestionsResponse> {
     try {
       if (!query.query || query.query.length < 2) {
@@ -135,7 +135,7 @@ export interface FindSimilarProductsResponse {
   error?: string;
 }
 
-export class FindSimilarProductsUseCase {
+class FindSimilarProductsUseCase {
   async execute(query: FindSimilarProductsQuery): Promise<FindSimilarProductsResponse> {
     try {
       const products = await productSearchService.findSimilar(query.productId, query.limit || 10);
@@ -166,7 +166,7 @@ export interface FindByAttributeResponse {
   error?: string;
 }
 
-export class FindByAttributeUseCase {
+class FindByAttributeUseCase {
   async execute(query: FindByAttributeQuery): Promise<FindByAttributeResponse> {
     try {
       const products = await productSearchService.findByAttribute(query.attributeCode, query.value);

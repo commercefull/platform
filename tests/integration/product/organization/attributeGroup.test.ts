@@ -9,8 +9,6 @@ describe('Attribute Group Tests', () => {
   let testProductId: string | null;
   let testCategoryId: string | null;
   let testAttributeGroupId: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let testAttributeId: string | null;
   let createdGroupId: string;
 
   beforeAll(async () => {
@@ -20,7 +18,6 @@ describe('Attribute Group Tests', () => {
     testProductId = setup.testProductId;
     testCategoryId = setup.testCategoryId;
     testAttributeGroupId = setup.testAttributeGroupId;
-    testAttributeId = setup.testAttributeId;
   });
 
   describe('Attribute Group CRUD Operations', () => {

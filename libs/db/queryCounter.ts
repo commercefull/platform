@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 interface QueryCounterState {
@@ -25,7 +26,7 @@ export const startQueryCounterContext = (fn: () => void): QueryCounterState => {
  * Start a query counter context. All `query` / `queryOne` / `withTransaction`
  * calls within `fn` will increment the counter. Returns the final state.
  */
-export const runWithQueryCounter = <T>(fn: () => T): { result: T; count: number; queries: string[] } => {
+const runWithQueryCounter = <T>(fn: () => T): { result: T; count: number; queries: string[] } => {
   const state: QueryCounterState = { count: 0, queries: [] };
   const result = queryCounterStorage.run(state, fn);
   return { result, count: state.count, queries: state.queries };
@@ -34,7 +35,7 @@ export const runWithQueryCounter = <T>(fn: () => T): { result: T; count: number;
 /**
  * Async variant — awaits `fn` and returns the final state.
  */
-export const runWithQueryCounterAsync = async <T>(fn: () => Promise<T>): Promise<{ result: T; count: number; queries: string[] }> => {
+const runWithQueryCounterAsync = async <T>(fn: () => Promise<T>): Promise<{ result: T; count: number; queries: string[] }> => {
   const state: QueryCounterState = { count: 0, queries: [] };
   const result = await queryCounterStorage.run(state, fn);
   return { result, count: state.count, queries: state.queries };
@@ -56,6 +57,6 @@ export const incrementQueryCounter = (sqlText: string): void => {
 /**
  * Get the current query count, or 0 if no counter context is active.
  */
-export const getQueryCount = (): number => {
+const getQueryCount = (): number => {
   return queryCounterStorage.getStore()?.count ?? 0;
 };

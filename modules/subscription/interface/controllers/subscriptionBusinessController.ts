@@ -5,7 +5,7 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
+import { SubscriptionPlan, SubscriptionProduct, SubscriptionStatus, advanceBillingCycle, cancelSubscription, createSubscriptionOrder, deleteSubscriptionPlan as deleteSubscriptionPlanRepo, deleteSubscriptionProduct as deleteSubscriptionProductRepo, getCustomerSubscription as getCustomerSubscriptionRepo, getCustomerSubscriptions as getCustomerSubscriptionsRepo, getDunningAttempts as getDunningAttemptsRepo, getPendingDunningAttempts, getSubscriptionOrders as getSubscriptionOrdersRepo, getSubscriptionPlan as getSubscriptionPlanRepo, getSubscriptionPlans as getSubscriptionPlansRepo, getSubscriptionProduct as getSubscriptionProductRepo, getSubscriptionProducts as getSubscriptionProductsRepo, getSubscriptionsDueBilling as getSubscriptionsDueBillingRepo, pauseSubscription, resumeSubscription, saveSubscriptionPlan, saveSubscriptionProduct, updateSubscriptionOrderStatus, updateSubscriptionStatus as updateSubscriptionStatusRepo } from '../../infrastructure/repositories/subscriptionRepo';
 
 type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
 
@@ -15,42 +15,42 @@ type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => P
 
 export const getSubscriptionProducts: AsyncHandler = async (req, res, _next) => {
   const { activeOnly } = req.query;
-  const products = await subscriptionRepo.getSubscriptionProducts(activeOnly !== 'false');
+  const products = await getSubscriptionProductsRepo(activeOnly !== 'false');
   res.json({ success: true, data: products });
   
 };
 
 export const getSubscriptionProduct: AsyncHandler = async (req, res, _next) => {
-  const product = await subscriptionRepo.getSubscriptionProduct(req.params.id);
+  const product = await getSubscriptionProductRepo(req.params.id);
   if (!product) {
     res.status(404).json({ success: false, message: 'Subscription product not found' });
     return;
   }
 
-  const plans = await subscriptionRepo.getSubscriptionPlans(req.params.id);
+  const plans = await getSubscriptionPlansRepo(req.params.id);
   res.json({ success: true, data: { ...product, plans } });
   
 };
 
 export const createSubscriptionProduct: AsyncHandler = async (req, res, _next) => {
-  const body = req.body as Partial<subscriptionRepo.SubscriptionProduct> & { productId: string };
-  const product = await subscriptionRepo.saveSubscriptionProduct(body);
+  const body = req.body as Partial<SubscriptionProduct> & { productId: string };
+  const product = await saveSubscriptionProduct(body);
   res.status(201).json({ success: true, data: product });
   
 };
 
 export const updateSubscriptionProduct: AsyncHandler = async (req, res, _next) => {
-  const body = req.body as Partial<subscriptionRepo.SubscriptionProduct>;
-  const product = await subscriptionRepo.saveSubscriptionProduct({
+  const body = req.body as Partial<SubscriptionProduct>;
+  const product = await saveSubscriptionProduct({
     subscriptionProductId: req.params.id,
     ...body,
-  } as Partial<subscriptionRepo.SubscriptionProduct> & { productId: string });
+  } as Partial<SubscriptionProduct> & { productId: string });
   res.json({ success: true, data: product });
   
 };
 
 export const deleteSubscriptionProduct: AsyncHandler = async (req, res, _next) => {
-  await subscriptionRepo.deleteSubscriptionProduct(req.params.id);
+  await deleteSubscriptionProductRepo(req.params.id);
   res.json({ success: true, message: 'Subscription product deactivated' });
   
 };
@@ -61,13 +61,13 @@ export const deleteSubscriptionProduct: AsyncHandler = async (req, res, _next) =
 
 export const getSubscriptionPlans: AsyncHandler = async (req, res, _next) => {
   const { activeOnly } = req.query;
-  const plans = await subscriptionRepo.getSubscriptionPlans(req.params.productId, activeOnly !== 'false');
+  const plans = await getSubscriptionPlansRepo(req.params.productId, activeOnly !== 'false');
   res.json({ success: true, data: plans });
   
 };
 
 export const getSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
-  const plan = await subscriptionRepo.getSubscriptionPlan(req.params.planId);
+  const plan = await getSubscriptionPlanRepo(req.params.planId);
   if (!plan) {
     res.status(404).json({ success: false, message: 'Subscription plan not found' });
     return;
@@ -77,8 +77,8 @@ export const getSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
 };
 
 export const createSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
-  const body = req.body as Partial<subscriptionRepo.SubscriptionPlan> & { name: string; price: number };
-  const plan = await subscriptionRepo.saveSubscriptionPlan({
+  const body = req.body as Partial<SubscriptionPlan> & { name: string; price: number };
+  const plan = await saveSubscriptionPlan({
     subscriptionProductId: req.params.productId,
     ...body,
   });
@@ -87,8 +87,8 @@ export const createSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
 };
 
 export const updateSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
-  const body = req.body as Partial<subscriptionRepo.SubscriptionPlan> & { name: string; price: number };
-  const plan = await subscriptionRepo.saveSubscriptionPlan({
+  const body = req.body as Partial<SubscriptionPlan> & { name: string; price: number };
+  const plan = await saveSubscriptionPlan({
     subscriptionPlanId: req.params.planId,
     subscriptionProductId: req.params.productId,
     ...body,
@@ -98,7 +98,7 @@ export const updateSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
 };
 
 export const deleteSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
-  await subscriptionRepo.deleteSubscriptionPlan(req.params.planId);
+  await deleteSubscriptionPlanRepo(req.params.planId);
   res.json({ success: true, message: 'Subscription plan deactivated' });
   
 };
@@ -109,8 +109,8 @@ export const deleteSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
 
 export const getCustomerSubscriptions: AsyncHandler = async (req, res, _next) => {
   const { customerId, status, limit, offset } = req.query;
-  const result = await subscriptionRepo.getCustomerSubscriptions(
-    { customerId: customerId as string, status: status as subscriptionRepo.SubscriptionStatus | undefined },
+  const result = await getCustomerSubscriptionsRepo(
+    { customerId: customerId as string, status: status as SubscriptionStatus | undefined },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
@@ -118,14 +118,14 @@ export const getCustomerSubscriptions: AsyncHandler = async (req, res, _next) =>
 };
 
 export const getCustomerSubscription: AsyncHandler = async (req, res, _next) => {
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
+  const subscription = await getCustomerSubscriptionRepo(req.params.id);
   if (!subscription) {
     res.status(404).json({ success: false, message: 'Subscription not found' });
     return;
   }
 
-  const orders = await subscriptionRepo.getSubscriptionOrders(req.params.id);
-  const dunningAttempts = await subscriptionRepo.getDunningAttempts(req.params.id);
+  const orders = await getSubscriptionOrdersRepo(req.params.id);
+  const dunningAttempts = await getDunningAttemptsRepo(req.params.id);
 
   res.json({ success: true, data: { ...subscription, orders, dunningAttempts } });
   
@@ -135,7 +135,7 @@ export const cancelSubscriptionAdmin: AsyncHandler = async (req, res, _next) => 
   const { reason, cancelAtPeriodEnd } = req.body as { reason?: string; cancelAtPeriodEnd?: boolean };
   const adminId = req.user?.userId || req.user?.organizationId;
 
-  await subscriptionRepo.cancelSubscription(req.params.id, reason, `admin:${adminId}`, cancelAtPeriodEnd !== false);
+  await cancelSubscription(req.params.id, reason, `admin:${adminId}`, cancelAtPeriodEnd !== false);
 
   res.json({ success: true, message: 'Subscription cancelled' });
   
@@ -145,7 +145,7 @@ export const pauseSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
   const { resumeAt, reason } = req.body as { resumeAt?: string; reason?: string };
   const adminId = req.user?.userId || req.user?.organizationId;
 
-  const pause = await subscriptionRepo.pauseSubscription(
+  const pause = await pauseSubscription(
     req.params.id,
     resumeAt ? new Date(resumeAt) : undefined,
     reason,
@@ -158,14 +158,14 @@ export const pauseSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
 
 export const resumeSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
   const adminId = req.user?.userId || req.user?.organizationId;
-  await subscriptionRepo.resumeSubscription(req.params.id, `admin:${adminId}`);
+  await resumeSubscription(req.params.id, `admin:${adminId}`);
   res.json({ success: true, message: 'Subscription resumed' });
   
 };
 
 export const updateSubscriptionStatus: AsyncHandler = async (req, res, _next) => {
-  const { status } = req.body as { status: subscriptionRepo.SubscriptionStatus };
-  await subscriptionRepo.updateSubscriptionStatus(req.params.id, status);
+  const { status } = req.body as { status: SubscriptionStatus };
+  await updateSubscriptionStatusRepo(req.params.id, status);
   res.json({ success: true, message: 'Subscription status updated' });
   
 };
@@ -175,20 +175,20 @@ export const updateSubscriptionStatus: AsyncHandler = async (req, res, _next) =>
 // ============================================================================
 
 export const getSubscriptionOrders: AsyncHandler = async (req, res, _next) => {
-  const orders = await subscriptionRepo.getSubscriptionOrders(req.params.subscriptionId);
+  const orders = await getSubscriptionOrdersRepo(req.params.subscriptionId);
   res.json({ success: true, data: orders });
   
 };
 
 export const retrySubscriptionOrder: AsyncHandler = async (req, res, _next) => {
   // Mark order for retry
-  await subscriptionRepo.updateSubscriptionOrderStatus(req.params.orderId, 'pending');
+  await updateSubscriptionOrderStatus(req.params.orderId, 'pending');
   res.json({ success: true, message: 'Order marked for retry' });
   
 };
 
 export const skipSubscriptionOrder: AsyncHandler = async (req, res, _next) => {
-  await subscriptionRepo.updateSubscriptionOrderStatus(req.params.orderId, 'skipped');
+  await updateSubscriptionOrderStatus(req.params.orderId, 'skipped');
   res.json({ success: true, message: 'Order skipped' });
   
 };
@@ -198,13 +198,13 @@ export const skipSubscriptionOrder: AsyncHandler = async (req, res, _next) => {
 // ============================================================================
 
 export const getDunningAttempts: AsyncHandler = async (req, res, _next) => {
-  const attempts = await subscriptionRepo.getDunningAttempts(req.params.subscriptionId);
+  const attempts = await getDunningAttemptsRepo(req.params.subscriptionId);
   res.json({ success: true, data: attempts });
   
 };
 
 export const getPendingDunning: AsyncHandler = async (req, res, _next) => {
-  const attempts = await subscriptionRepo.getPendingDunningAttempts(new Date());
+  const attempts = await getPendingDunningAttempts(new Date());
   res.json({ success: true, data: attempts });
   
 };
@@ -216,20 +216,20 @@ export const getPendingDunning: AsyncHandler = async (req, res, _next) => {
 export const getSubscriptionsDueBilling: AsyncHandler = async (req, res, _next) => {
   const { beforeDate } = req.query;
   const date = beforeDate ? new Date(beforeDate as string) : new Date();
-  const subscriptions = await subscriptionRepo.getSubscriptionsDueBilling(date);
+  const subscriptions = await getSubscriptionsDueBillingRepo(date);
   res.json({ success: true, data: subscriptions });
   
 };
 
 export const processBillingCycle: AsyncHandler = async (req, res, _next) => {
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
+  const subscription = await getCustomerSubscriptionRepo(req.params.id);
   if (!subscription) {
     res.status(404).json({ success: false, message: 'Subscription not found' });
     return;
   }
 
   // Create subscription order
-  const order = await subscriptionRepo.createSubscriptionOrder({
+  const order = await createSubscriptionOrder({
     customerSubscriptionId: subscription.customerSubscriptionId,
     billingCycleNumber: subscription.billingCycleCount + 1,
     periodStart: subscription.currentPeriodEnd || new Date(),
@@ -240,7 +240,7 @@ export const processBillingCycle: AsyncHandler = async (req, res, _next) => {
   });
 
   // Advance billing cycle
-  await subscriptionRepo.advanceBillingCycle(subscription.customerSubscriptionId);
+  await advanceBillingCycle(subscription.customerSubscriptionId);
 
   res.json({ success: true, data: order });
   

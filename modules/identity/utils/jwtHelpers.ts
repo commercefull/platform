@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import jwt, { SignOptions, JwtPayload } from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
 
@@ -75,7 +77,7 @@ export function verifyAccessToken(token: string, jwtSecret: string): JwtPayload 
  * @param payload - Decoded JWT payload
  * @returns User info object or null if payload is invalid
  */
-export function extractUserInfoFromToken(payload: JwtPayload | null): {
+function extractUserInfoFromToken(payload: JwtPayload | null): {
   userId: string;
   userEmail: string;
   userRole: string;

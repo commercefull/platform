@@ -6,7 +6,7 @@ import productAttributeRepository from '../../infrastructure/repositories/Produc
 const productTypeRepository = productCatalogRepository.types;
 const productAttributeSetRepository = productAttributeRepository.sets;
 
-export class ProductTypeController {
+class ProductTypeController {
   /**
    * GET /product-types
    * List all product types

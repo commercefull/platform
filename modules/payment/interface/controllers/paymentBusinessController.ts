@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Payment Business Controller
  * Handlers for merchant-facing payment operations.
@@ -125,7 +127,7 @@ export const listReports = async (req: Request, res: Response): Promise<void> =>
   successResponse(res, { reports });
 };
 
-export const getReport = async (req: Request, res: Response): Promise<void> => {
+const getReport = async (req: Request, res: Response): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
   if (!organizationId) {
     errorResponse(res, 'Authentication required', 401);

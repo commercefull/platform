@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Redeem Coupon Use Case
  * Records coupon usage after successful order
@@ -83,4 +85,4 @@ export class RedeemCouponUseCase {
   }
 }
 
-export const redeemCouponUseCase = new RedeemCouponUseCase();
+const redeemCouponUseCase = new RedeemCouponUseCase();

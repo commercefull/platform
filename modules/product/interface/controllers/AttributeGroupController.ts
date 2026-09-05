@@ -4,7 +4,7 @@ import productAttributeRepository from '../../infrastructure/repositories/Produc
 
 const attributeGroupRepo = productAttributeRepository.groups;
 
-export class AttributeGroupController {
+class AttributeGroupController {
   /**
    * GET /attribute-groups
    * List all attribute groups

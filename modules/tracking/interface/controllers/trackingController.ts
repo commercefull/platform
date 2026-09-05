@@ -20,7 +20,7 @@ const manageConfigUseCase = new ManageTrackingConfigUseCase(repo);
 const processEventUseCase = new ProcessTrackingEventUseCase(repo);
 const getStatusUseCase = new GetTrackingStatusUseCase(repo);
 
-export class TrackingController {
+class TrackingController {
   // ── Config CRUD ─────────────────────────────────────────────
 
   async getConfig(req: TypedRequest, res: Response) {

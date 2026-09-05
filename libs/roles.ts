@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Resource, Action } from './rbac/types';
 
 export type Roles = 'ADMIN' | 'MANAGER' | 'CASHIER' | 'VIEWER' | 'USER';
 
-export const roles = {
+const roles = {
   ADMIN: 'ADMIN',
   MANAGER: 'MANAGER',
   CASHIER: 'CASHIER',
@@ -17,7 +18,7 @@ export const roles = {
  *
  * @deprecated Use libs/rbac checkPermission() / requirePermission() instead.
  */
-export const STORE_PERMISSIONS = {
+const STORE_PERMISSIONS = {
   ORDER_CREATE: 'order.create',
   ORDER_VIEW: 'order.view',
   ORDER_MANAGE: 'order.manage',

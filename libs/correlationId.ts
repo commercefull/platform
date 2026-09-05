@@ -17,14 +17,6 @@ export function getCorrelationId(): string | undefined {
 }
 
 /**
- * Run a function within a correlation ID context.
- * Used for propagating correlation IDs into event handlers and background jobs.
- */
-export function runWithCorrelationId<T>(correlationId: string, fn: () => T): T {
-  return correlationStorage.run({ correlationId }, fn);
-}
-
-/**
  * Express middleware that sets a correlation ID for each request.
  *
  * - Reads `X-Correlation-Id` header if present (for distributed tracing)

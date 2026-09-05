@@ -5,7 +5,7 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import * as giftCardRepo from '../../infrastructure/repositories/GiftCardRepository';
+import { getGiftCardByCode, getGiftCards, redeemGiftCard as redeemGiftCardRepo, reloadGiftCard as reloadGiftCardRepo } from '../../infrastructure/repositories/GiftCardRepository';
 
 interface RedeemOrReloadBody {
   code: string;
@@ -17,7 +17,7 @@ type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => P
 
 export const checkGiftCardBalance: AsyncHandler = async (req, res, _next) => {
   const { code } = req.params;
-  const giftCard = await giftCardRepo.getGiftCardByCode(code);
+  const giftCard = await getGiftCardByCode(code);
 
   if (!giftCard) {
     res.status(404).json({ success: false, message: 'Gift card not found' });
@@ -50,13 +50,13 @@ export const redeemGiftCard: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { code, amount, orderId } = req.body as RedeemOrReloadBody;
 
-  const giftCard = await giftCardRepo.getGiftCardByCode(code);
+  const giftCard = await getGiftCardByCode(code);
   if (!giftCard) {
     res.status(404).json({ success: false, message: 'Gift card not found' });
     return;
   }
 
-  const transaction = await giftCardRepo.redeemGiftCard(giftCard.promotionGiftCardId, amount, orderId, customerId);
+  const transaction = await redeemGiftCardRepo(giftCard.promotionGiftCardId, amount, orderId, customerId);
 
   res.json({ success: true, data: transaction });
   
@@ -66,7 +66,7 @@ export const getMyGiftCards: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { limit, offset } = req.query;
 
-  const result = await giftCardRepo.getGiftCards(
+  const result = await getGiftCards(
     { assignedTo: customerId },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
@@ -79,7 +79,7 @@ export const reloadGiftCard: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { code, amount, orderId } = req.body as RedeemOrReloadBody;
 
-  const giftCard = await giftCardRepo.getGiftCardByCode(code);
+  const giftCard = await getGiftCardByCode(code);
   if (!giftCard) {
     res.status(404).json({ success: false, message: 'Gift card not found' });
     return;
@@ -90,7 +90,7 @@ export const reloadGiftCard: AsyncHandler = async (req, res, _next) => {
     return;
   }
 
-  const transaction = await giftCardRepo.reloadGiftCard(giftCard.promotionGiftCardId, amount, orderId, customerId);
+  const transaction = await reloadGiftCardRepo(giftCard.promotionGiftCardId, amount, orderId, customerId);
 
   res.json({ success: true, data: transaction });
   

@@ -17,7 +17,7 @@ import {
 } from '../../application/useCases/wired';
 import { ReturnNotFoundError, InvalidReturnRequestError, InsufficientStoreCreditError } from '../../domain/errors/ReturnErrors';
 
-export class ReturnController {
+class ReturnController {
   async listReturns(req: TypedRequest, res: Response): Promise<void> {
     const status = req.query.status as string | undefined;
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;

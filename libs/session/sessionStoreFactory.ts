@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import session from 'express-session';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
@@ -138,7 +139,7 @@ function createPostgresStore(config?: SessionStoreConfig['postgres']): SessionSt
 /**
  * Gracefully close the session store connection
  */
-export async function closeSessionStore(result: SessionStoreResult): Promise<void> {
+async function closeSessionStore(result: SessionStoreResult): Promise<void> {
   if (result.type === 'redis' && result.client) {
     await result.client.quit();
   }

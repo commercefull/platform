@@ -20,7 +20,7 @@ import {
 } from '../../application/useCases/attribute/AssignProductAttributes';
 import type { SetProductAttributeCommand } from '../../application/useCases/attribute/AssignProductAttributes';
 
-export class AttributeController {
+class AttributeController {
   // ==================== ATTRIBUTE CRUD ====================
 
   /**

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import PG from 'pg';
 import { getTestDbName } from './testDbContext';
 import { incrementQueryCounter } from './queryCounter';
@@ -59,7 +60,7 @@ export const closeAllTestPools = async (): Promise<void> => {
   }
 };
 
-export const closeTestPool = async (database: string): Promise<void> => {
+const closeTestPool = async (database: string): Promise<void> => {
   const p = testPools.get(database);
   if (p) {
     testPools.delete(database);

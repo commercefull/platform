@@ -180,5 +180,3 @@ export class CreateSubscriptionUseCase {
     return end;
   }
 }
-
-export const createSubscriptionUseCase = new CreateSubscriptionUseCase();

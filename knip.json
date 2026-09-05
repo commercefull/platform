@@ -1,0 +1,36 @@
+{
+  "$schema": "https://unpkg.com/knip@6.32.0/schema.json",
+  "exclude": ["nsExports", "nsTypes"],
+  "entry": [
+    "app.ts",
+    "boot/**/*.ts",
+    "modules/*/interface/routers/**/*.ts",
+    "modules/*/application/wired.ts",
+    "modules/*/infrastructure/repositories/*DataRepository.ts",
+    "modules/*/infrastructure/repositories/*Repository.ts",
+    "web/**/*.ts"
+  ],
+  "project": [
+    "modules/**/*.ts",
+    "libs/**/*.ts",
+    "boot/**/*.ts",
+    "web/**/*.ts"
+  ],
+  "ignore": [
+    "tests/integration/**/*Utils.ts",
+    "tests/integration/**/testUtils.ts",
+    "tests/integration/**/testConstants.ts",
+    "tests/integration/**/testSetup.ts"
+  ],
+  "ignoreIssues": {
+    "libs/db/types.ts": ["exports", "types"],
+    "modules/*/domain/events/**": ["exports", "types"],
+    "modules/*/domain/errors/**": ["exports", "types"],
+    "modules/*/infrastructure/repositories/*Repo.ts": ["exports", "types"],
+    "modules/*/infrastructure/repositories/*Repository.ts": ["exports", "types"],
+    "modules/*/infrastructure/index.ts": ["exports", "types"],
+    "modules/*/application/useCases/index.ts": ["exports", "types"],
+    "modules/*/application/useCases/wired.ts": ["exports", "types"],
+    "modules/*/application/services/index.ts": ["exports", "types"]
+  }
+}

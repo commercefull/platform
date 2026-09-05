@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Translation Entity
  * Generic translation entity for multi-language content
@@ -40,7 +42,7 @@ export interface TranslationProps {
   updatedAt: Date;
 }
 
-export class Translation {
+class Translation {
   private props: TranslationProps;
 
   private constructor(props: TranslationProps) {

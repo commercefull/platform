@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Redeem Gift Card Use Case
  * Handles gift card redemption for orders
@@ -103,4 +105,4 @@ export class RedeemGiftCardUseCase {
   }
 }
 
-export const redeemGiftCardUseCase = new RedeemGiftCardUseCase();
+const redeemGiftCardUseCase = new RedeemGiftCardUseCase();

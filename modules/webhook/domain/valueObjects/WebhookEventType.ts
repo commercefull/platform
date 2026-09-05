@@ -5,7 +5,7 @@
  * These map to the platform's EventType from the eventBus.
  */
 
-export const WebhookEventCategory = {
+const WebhookEventCategory = {
   PRODUCT: 'product',
   ORDER: 'order',
   INVENTORY: 'inventory',
@@ -14,7 +14,7 @@ export const WebhookEventCategory = {
   FULFILLMENT: 'fulfillment',
 } as const;
 
-export type WebhookEventCategoryType = (typeof WebhookEventCategory)[keyof typeof WebhookEventCategory];
+type WebhookEventCategoryType = (typeof WebhookEventCategory)[keyof typeof WebhookEventCategory];
 
 /**
  * Events relevant for POS / external system sync
@@ -57,12 +57,12 @@ export const SYNC_RELEVANT_EVENTS = [
   'fulfillment.cancelled',
 ] as const;
 
-export type SyncRelevantEvent = (typeof SYNC_RELEVANT_EVENTS)[number];
+type _SyncRelevantEvent = (typeof SYNC_RELEVANT_EVENTS)[number];
 
 /**
  * Get the category of an event type
  */
-export function getEventCategory(eventType: string): WebhookEventCategoryType | null {
+function _getEventCategory(eventType: string): WebhookEventCategoryType | null {
   const prefix = eventType.split('.')[0];
   const map: Record<string, WebhookEventCategoryType> = {
     product: WebhookEventCategory.PRODUCT,

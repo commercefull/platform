@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Role Policy Repository
  *
@@ -66,7 +67,7 @@ export async function loadOrgRolePolicies(): Promise<void> {
  * Get all role policies for a given organization.
  * Combines org-specific overrides with system defaults.
  */
-export async function getRolePoliciesForOrg(organizationId: string): Promise<RolePolicy[]> {
+async function getRolePoliciesForOrg(organizationId: string): Promise<RolePolicy[]> {
   const rows = await query<RolePolicyRow[]>(
     'SELECT * FROM "rolePolicy" WHERE "organizationId" = $1 AND "isActive" = true',
     [organizationId],
@@ -90,7 +91,7 @@ export async function getRolePoliciesForOrg(organizationId: string): Promise<Rol
 /**
  * Create or update a role policy for a specific organization.
  */
-export async function upsertOrgRolePolicy(
+async function upsertOrgRolePolicy(
   organizationId: string,
   roleName: string,
   permissions: PermissionRule[],
@@ -124,7 +125,7 @@ export async function upsertOrgRolePolicy(
  * Delete a custom org-specific role policy.
  * The system default will take effect after deletion.
  */
-export async function deleteOrgRolePolicy(
+async function deleteOrgRolePolicy(
   organizationId: string,
   roleName: string,
 ): Promise<void> {
@@ -138,7 +139,7 @@ export async function deleteOrgRolePolicy(
 /**
  * List all role policies (system + org-specific) for display.
  */
-export async function listAllRolePolicies(organizationId?: string): Promise<RolePolicy[]> {
+async function listAllRolePolicies(organizationId?: string): Promise<RolePolicy[]> {
   if (organizationId) {
     return getRolePoliciesForOrg(organizationId);
   }

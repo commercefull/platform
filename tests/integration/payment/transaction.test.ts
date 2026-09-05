@@ -4,8 +4,6 @@ import { setupPaymentTests, cleanupPaymentTests } from './testUtils';
 describe('Payment Transaction Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let customerToken: string;
   let testGatewayId: string;
   let testMethodConfigId: string;
   let testOrderId: string;
@@ -14,7 +12,6 @@ describe('Payment Transaction Tests', () => {
     const setup = await setupPaymentTests();
     client = setup.client;
     adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
     testGatewayId = setup.testGatewayId;
     testMethodConfigId = setup.testMethodConfigId;
     testOrderId = setup.testOrderId;

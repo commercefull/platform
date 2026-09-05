@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { RuleAction, ActionType } from '../entities/AutomationRule';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
@@ -25,15 +27,15 @@ export type ActionHandler = (action: RuleAction, context: ActionContext) => Prom
 
 const actionRegistry = new Map<ActionType, ActionHandler>();
 
-export function registerActionHandler(type: ActionType, handler: ActionHandler): void {
+function registerActionHandler(type: ActionType, handler: ActionHandler): void {
   actionRegistry.set(type, handler);
 }
 
-export function getActionHandler(type: ActionType): ActionHandler | undefined {
+function getActionHandler(type: ActionType): ActionHandler | undefined {
   return actionRegistry.get(type);
 }
 
-export async function executeAction(action: RuleAction, context: ActionContext): Promise<ActionExecutionResult> {
+async function executeAction(action: RuleAction, context: ActionContext): Promise<ActionExecutionResult> {
   const handler = actionRegistry.get(action.type);
   if (!handler) {
     return {

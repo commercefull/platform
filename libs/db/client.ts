@@ -1,6 +1,6 @@
 import PG from 'pg';
 
-export const client = new PG.Client({
+const client = new PG.Client({
   port: parseInt(process.env.POSTGRES_PORT || '', 10),
   host: process.env.POSTGRES_HOST,
   user: process.env.POSTGRES_USER,

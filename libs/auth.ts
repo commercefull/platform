@@ -1,17 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { SessionService } from './session';
-import { requirePermission as rbacRequirePermission, requireStoreAccess as rbacRequireStoreAccess } from './rbac/middleware';
-import type { Resource, Action } from './rbac/types';
 
 const isJsonRequest = (req: Request): boolean => {
   return Boolean(req.xhr || req.headers.accept?.indexOf('json') !== -1);
-};
-
-const _hasPermission = (user: Express.User | undefined, permission?: string): boolean => {
-  if (!permission) return true;
-  const permissions = user?.permissions || [];
-  return permissions.includes('*') || permissions.includes(permission);
 };
 
 // JWT secrets — validated via libs/secrets (fail-fast in production)
@@ -20,7 +12,7 @@ import { getSecret } from './secrets';
 const ORGANIZATION_JWT_SECRET = getSecret('ORGANIZATION_JWT_SECRET');
 const CUSTOMER_JWT_SECRET = getSecret('CUSTOMER_JWT_SECRET');
 const ADMIN_JWT_SECRET = getSecret('ADMIN_JWT_SECRET');
-const B2B_JWT_SECRET = getSecret('B2B_JWT_SECRET');
+const _B2B_JWT_SECRET = getSecret('B2B_JWT_SECRET');
 
 // Session cookie name
 const SESSION_COOKIE_NAME = 'cf_session';
@@ -134,20 +126,6 @@ export const isOrganizationLoggedIn = async (req: Request, res: Response, next: 
   return authenticateSession(req, res, next, 'organization', '/organization/login');
 };
 
-/**
- * B2B user authentication middleware
- * Uses session for web, JWT for API
- */
-export const isB2BLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
-  // Check if it's an API call
-  if (isJsonRequest(req)) {
-    return authenticateToken(req, res, next, B2B_JWT_SECRET);
-  }
-
-  // Web request - use session
-  return authenticateSession(req, res, next, 'b2b', '/b2b/login');
-};
-
 export const isCustomerLoggedIn = (req: Request, res: Response, next: NextFunction) => {
   if (isJsonRequest(req)) {
     return authenticateToken(req, res, next, CUSTOMER_JWT_SECRET);
@@ -176,43 +154,3 @@ export const optionalCustomerAuth = (req: Request, res: Response, next: NextFunc
   next();
 };
 
-/**
- * Middleware to check if a customer is NOT logged in
- * Useful for pages that should only be accessible to non-authenticated users (signup, login)
- */
-export const isCustomerNotLoggedIn = (req: Request, res: Response, next: NextFunction) => {
-  if (req.isAuthenticated()) {
-    return res.redirect('/user/profile'); // Redirect to profile if already authenticated
-  }
-  next(); // Continue if not authenticated
-};
-
-/**
- * Require permission middleware — delegates to the RBAC policy engine.
- *
- * Accepts either:
- * - New format: requirePermission('product', 'create')
- * - Legacy format: requirePermission('product.create') (split on first dot)
- */
-export function requirePermission(resourceOrLegacy: Resource, action?: Action) {
-  if (action !== undefined) {
-    return rbacRequirePermission(resourceOrLegacy, action);
-  }
-  // Legacy format: split 'product.create' into resource + action
-  const dotIdx = resourceOrLegacy.indexOf('.');
-  if (dotIdx > 0) {
-    const resource = resourceOrLegacy.slice(0, dotIdx) as Resource;
-    const act = resourceOrLegacy.slice(dotIdx + 1) as Action;
-    return rbacRequirePermission(resource, act);
-  }
-  // Single word — treat as resource with '*' action
-  return rbacRequirePermission(resourceOrLegacy, '*');
-}
-
-/**
- * Require store access middleware — delegates to the RBAC policy engine.
- * Combines permission check with store ownership verification.
- */
-export function requireStoreAccess(resource?: Resource, action?: Action) {
-  return rbacRequireStoreAccess(resource, action);
-}

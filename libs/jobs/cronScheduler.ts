@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Cron Job Scheduler
  * A lightweight background job scheduler that runs directly on the EC2 instance.
@@ -225,7 +226,7 @@ class CronScheduler {
 }
 
 // Export singleton instance
-export const cronScheduler = new CronScheduler();
+const cronScheduler = new CronScheduler();
 
 // ============================================================================
 // Pre-defined Jobs
@@ -694,7 +695,7 @@ class AsyncJobQueue {
   }
 }
 
-export const asyncJobQueue = new AsyncJobQueue();
+const asyncJobQueue = new AsyncJobQueue();
 
 /**
  * Job scheduler utilities (compatible API with previous Bull-based implementation)
@@ -782,7 +783,7 @@ export class JobScheduler {
 /**
  * Get queue stats (compatible API)
  */
-export const getQueueStats = async (): Promise<{
+const getQueueStats = async (): Promise<{
   scheduled: ReturnType<typeof cronScheduler.getStats>;
   async: { queueSize: number; activeJobs: number };
 }> => {

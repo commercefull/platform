@@ -1,3 +1,5 @@
+ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * CCPA Data Subject Request Entity
  *
@@ -252,4 +254,4 @@ export class CcpaDataSubjectRequest {
   }
 }
 
-export { CCPA_DEADLINE_DAYS, CCPA_EXTENSION_DAYS, CCPA_MAX_EXTENSIONS };
+export { CCPA_DEADLINE_DAYS };

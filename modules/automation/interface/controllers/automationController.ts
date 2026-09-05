@@ -11,7 +11,7 @@ import {
 import { ExecutionLogRepositoryImpl } from '../../infrastructure';
 import { AutomationRuleNotFoundError, InvalidAutomationRuleError } from '../../domain/errors/AutomationErrors';
 
-export class AutomationController {
+class AutomationController {
   async listRules(req: TypedRequest, res: Response): Promise<void> {
     const activeOnly = req.query.activeOnly === 'true';
     const rules = await listAutomationRulesUseCase.execute(activeOnly);

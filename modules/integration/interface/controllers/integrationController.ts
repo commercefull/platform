@@ -4,7 +4,7 @@ import { manageIntegrations, manageSubscriptions, manageIntegrationLogs } from '
 import type { IntegrationProvider } from '../../domain/entities/Integration';
 import type { CredentialType } from '../../domain/entities/IntegrationCredential';
 
-export class IntegrationController {
+class IntegrationController {
   async createIntegration(req: TypedRequest, res: Response): Promise<void> {
     const { organizationId } = req.user!;
     if (!organizationId) {

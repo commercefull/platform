@@ -233,7 +233,7 @@ export const deletePromotion = async (req: TypedRequest, res: Response): Promise
 /**
  * Apply a promotion to a cart
  */
-export const applyPromotionToCart = async (req: TypedRequest<Record<string, string>, unknown, ApplyPromotionBody>, res: Response): Promise<void> => {
+const _applyPromotionToCart = async (req: TypedRequest<Record<string, string>, unknown, ApplyPromotionBody>, res: Response): Promise<void> => {
   const { cartId, promotionId } = req.body;
 
   // Validation
@@ -279,7 +279,7 @@ export const applyPromotionToCart = async (req: TypedRequest<Record<string, stri
 /**
  * Remove a promotion from a cart
  */
-export const removePromotionFromCart = async (req: TypedRequest, res: Response): Promise<void> => {
+const _removePromotionFromCart = async (req: TypedRequest, res: Response): Promise<void> => {
   const { cartId, promotionId } = req.params;
 
   // Validation
@@ -311,7 +311,7 @@ export const removePromotionFromCart = async (req: TypedRequest, res: Response):
 /**
  * Validate a promotion for a cart
  */
-export const validatePromotionForCart = async (req: TypedRequest<Record<string, string>, unknown, ValidatePromotionBody>, res: Response): Promise<void> => {
+const _validatePromotionForCart = async (req: TypedRequest<Record<string, string>, unknown, ValidatePromotionBody>, res: Response): Promise<void> => {
   const { promotionId, cartTotal, customerId, items: _items } = req.body;
 
   // Validation

@@ -32,5 +32,3 @@ export class GetCarrierCapabilitiesUseCase {
     }
   }
 }
-
-export const getCarrierCapabilitiesUseCase = new GetCarrierCapabilitiesUseCase();

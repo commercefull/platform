@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 interface ErrorWithCapture {
   captureStackTrace?: (target: object, constructorOpt?: (...args: unknown[]) => unknown) => void;
 }
@@ -92,7 +93,7 @@ export class ForbiddenError extends AppError {
   }
 }
 
-export class InternalServerError extends AppError {
+class InternalServerError extends AppError {
   constructor(message = 'Internal Server Error', details?: unknown) {
     super(message, 500, { details });
   }

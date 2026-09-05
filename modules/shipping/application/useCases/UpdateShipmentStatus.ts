@@ -30,5 +30,3 @@ export class UpdateShipmentStatusUseCase {
     }
   }
 }
-
-export const updateShipmentStatusUseCase = new UpdateShipmentStatusUseCase();

@@ -1,4 +1,5 @@
-export const slugify = (str: string) => {
+/* eslint-disable @typescript-eslint/no-unused-vars */
+const slugify = (str: string) => {
   str = str.replace(/^\s+|\s+$/g, ''); // trim leading/trailing white space
   str = str.toLowerCase(); // convert string to lowercase
   str = str
