@@ -1,33 +1,26 @@
-jest.mock('../../infrastructure/repositories/InventoryDataRepository', () => ({
-  __esModule: true,
-  default: {
-    admin: {
-      findInventoryLevels: jest.fn().mockResolvedValue([{ levelId: 'l1' }]),
-      countInventoryLevels: jest.fn().mockResolvedValue(1),
-      getInventoryStats: jest.fn().mockResolvedValue({ totalProducts: 100, inStock: 80, lowStock: 20 }),
-      findAllLocations: jest.fn().mockResolvedValue([{ locationId: 'loc1' }]),
-      findLowStockItems: jest.fn().mockResolvedValue([{ itemId: 'i1' }]),
-      findLowStockReport: jest.fn().mockResolvedValue({ lowStockCount: 5 }),
-      findInventoryLevelById: jest.fn().mockResolvedValue({ levelId: 'l1' }),
-      adjustStockLevel: jest.fn().mockResolvedValue(undefined),
-      findTransactionsByLevelId: jest.fn().mockResolvedValue([{ transactionId: 't1' }]),
-      countTransactionsByLevelId: jest.fn().mockResolvedValue(3),
-      findLocationsWithStats: jest.fn().mockResolvedValue([{ locationId: 'loc1', itemCount: 50 }]),
-    },
-  },
-}));
-
 import { ManageAdminInventoryUseCase } from './ManageAdminInventory';
-import inventoryDataRepository from '../../infrastructure/repositories/InventoryDataRepository';
+import { AdminInventoryRepository } from '../../domain/repositories/AdminInventoryRepository';
 
-const mockRepo = inventoryDataRepository as unknown as { admin: Record<string, jest.Mock> };
+const mockRepo: AdminInventoryRepository = {
+  findInventoryLevels: jest.fn().mockResolvedValue([{ levelId: 'l1' }]),
+  countInventoryLevels: jest.fn().mockResolvedValue(1),
+  getInventoryStats: jest.fn().mockResolvedValue({ totalProducts: 100, inStock: 80, lowStock: 20, outOfStock: 0 }),
+  findAllLocations: jest.fn().mockResolvedValue([{ locationId: 'loc1' }]),
+  findLowStockItems: jest.fn().mockResolvedValue([{ itemId: 'i1' }]),
+  findLowStockReport: jest.fn().mockResolvedValue({ lowStockCount: 5 }),
+  findInventoryLevelById: jest.fn().mockResolvedValue({ levelId: 'l1' }),
+  adjustStockLevel: jest.fn().mockResolvedValue(undefined),
+  findTransactionsByLevelId: jest.fn().mockResolvedValue([{ transactionId: 't1' }]),
+  countTransactionsByLevelId: jest.fn().mockResolvedValue(3),
+  findLocationsWithStats: jest.fn().mockResolvedValue([{ locationId: 'loc1', itemCount: 50 }]),
+};
 
 describe('ManageAdminInventoryUseCase', () => {
   let useCase: ManageAdminInventoryUseCase;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageAdminInventoryUseCase();
+    useCase = new ManageAdminInventoryUseCase(mockRepo);
   });
 
   it('should find inventory levels', async () => {
@@ -48,12 +41,12 @@ describe('ManageAdminInventoryUseCase', () => {
   it('should find low stock items', async () => {
     const result = await useCase.findLowStockItems(5);
     expect(result).toHaveLength(1);
-    expect(mockRepo.admin.findLowStockItems).toHaveBeenCalledWith(5);
+    expect(mockRepo.findLowStockItems).toHaveBeenCalledWith(5);
   });
 
   it('should adjust stock level', async () => {
     await useCase.adjustStockLevel('l1', 50, 40, 'p1', 'loc1', 'increase', 10, 'Restock', null, 'admin');
-    expect(mockRepo.admin.adjustStockLevel).toHaveBeenCalledWith('l1', 50, 40, 'p1', 'loc1', 'increase', 10, 'Restock', null, 'admin');
+    expect(mockRepo.adjustStockLevel).toHaveBeenCalledWith('l1', 50, 40, 'p1', 'loc1', 'increase', 10, 'Restock', null, 'admin');
   });
 
   it('should find transactions by level ID', async () => {

@@ -1,21 +1,20 @@
-jest.mock('../../infrastructure/repositories/StoreDispatchAggregateRepository', () => ({
-  __esModule: true,
-  default: {
-    findAll: jest.fn().mockResolvedValue({ data: [{ dispatchId: 'd1' }], total: 1 }),
-  },
-}));
-
 import { GetDispatchesByStoreUseCase } from './GetDispatchesByStore';
-import storeDispatchRepository from '../../infrastructure/repositories/StoreDispatchAggregateRepository';
+import { StoreDispatchRepository } from '../../domain/repositories/StoreDispatchRepository';
 
-const mockRepo = storeDispatchRepository as unknown as Record<string, jest.Mock>;
+const mockRepo: StoreDispatchRepository = {
+  findById: jest.fn(),
+  findByNumber: jest.fn(),
+  findAll: jest.fn().mockResolvedValue({ data: [{ dispatchId: 'd1' }], total: 1 }),
+  save: jest.fn(),
+  delete: jest.fn(),
+};
 
 describe('GetDispatchesByStoreUseCase', () => {
   let useCase: GetDispatchesByStoreUseCase;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new GetDispatchesByStoreUseCase();
+    useCase = new GetDispatchesByStoreUseCase(mockRepo);
   });
 
   it('should get dispatches by store (happy path)', async () => {

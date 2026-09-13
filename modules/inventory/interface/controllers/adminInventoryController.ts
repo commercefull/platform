@@ -7,7 +7,6 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { ManageAdminInventoryUseCase } from '../../application/useCases/ManageAdminInventory';
 import { FindActiveStoresUseCase } from '../../../store/application/useCases/wired';
 import {
   listStoreDispatchesUseCase,
@@ -17,9 +16,9 @@ import {
   dispatchFromStoreUseCase,
   receiveStoreDispatchUseCase,
   cancelStoreDispatchUseCase,
+  manageAdminInventoryUseCase,
 } from '../../application/useCases/wired';
 
-const manageAdminInventoryUseCase = new ManageAdminInventoryUseCase();
 const findActiveStoresUseCase = new FindActiveStoresUseCase();
 
 // ============================================================================

@@ -22,6 +22,7 @@ jest.mock('../../infrastructure/repositories/GdprDataRepository', () => ({
 
 import { ManageAdminGdprUseCase, ManageGdprRequestsUseCase } from './ManageGdpr';
 import gdprDataRepository from '../../infrastructure/repositories/GdprDataRepository';
+import { AdminGdprRepository, GdprDataRequestRepository } from '../../domain/repositories/GdprRepository';
 
 const mockAdmin = gdprDataRepository as unknown as { admin: Record<string, jest.Mock> };
 const mockRequests = gdprDataRepository as unknown as { dataRequests: Record<string, jest.Mock> };
@@ -31,7 +32,7 @@ describe('ManageAdminGdprUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageAdminGdprUseCase();
+    useCase = new ManageAdminGdprUseCase(mockAdmin.admin as unknown as AdminGdprRepository);
   });
 
   it('should get gdpr stats', async () => {
@@ -70,7 +71,7 @@ describe('ManageGdprRequestsUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageGdprRequestsUseCase();
+    useCase = new ManageGdprRequestsUseCase(mockRequests.dataRequests as unknown as GdprDataRequestRepository);
   });
 
   it('should find by ID', async () => {

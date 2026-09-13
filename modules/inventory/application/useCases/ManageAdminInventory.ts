@@ -1,39 +1,39 @@
-import inventoryDataRepository from '../../infrastructure/repositories/InventoryDataRepository';
-
-const adminInventoryRepo = inventoryDataRepository.admin;
+import { AdminInventoryRepository } from '../../domain/repositories/AdminInventoryRepository';
 
 export class ManageAdminInventoryUseCase {
-  async findInventoryLevels(params: Parameters<typeof adminInventoryRepo.findInventoryLevels>[0]) {
-    return adminInventoryRepo.findInventoryLevels(params);
+  constructor(private readonly adminInventoryRepo: AdminInventoryRepository) {}
+
+  async findInventoryLevels(params: Parameters<AdminInventoryRepository['findInventoryLevels']>[0]) {
+    return this.adminInventoryRepo.findInventoryLevels(params);
   }
-  async countInventoryLevels(params: Parameters<typeof adminInventoryRepo.countInventoryLevels>[0]) {
-    return adminInventoryRepo.countInventoryLevels(params);
+  async countInventoryLevels(params: Parameters<AdminInventoryRepository['countInventoryLevels']>[0]) {
+    return this.adminInventoryRepo.countInventoryLevels(params);
   }
   async getInventoryStats() {
-    return adminInventoryRepo.getInventoryStats();
+    return this.adminInventoryRepo.getInventoryStats();
   }
   async findAllLocations() {
-    return adminInventoryRepo.findAllLocations();
+    return this.adminInventoryRepo.findAllLocations();
   }
   async findLowStockItems(limit: number = 10) {
-    return adminInventoryRepo.findLowStockItems(limit);
+    return this.adminInventoryRepo.findLowStockItems(limit);
   }
   async findLowStockReport() {
-    return adminInventoryRepo.findLowStockReport();
+    return this.adminInventoryRepo.findLowStockReport();
   }
   async findInventoryLevelById(id: string) {
-    return adminInventoryRepo.findInventoryLevelById(id);
+    return this.adminInventoryRepo.findInventoryLevelById(id);
   }
-  async adjustStockLevel(...args: Parameters<typeof adminInventoryRepo.adjustStockLevel>) {
-    return adminInventoryRepo.adjustStockLevel(...args);
+  async adjustStockLevel(...args: Parameters<AdminInventoryRepository['adjustStockLevel']>) {
+    return this.adminInventoryRepo.adjustStockLevel(...args);
   }
   async findTransactionsByLevelId(levelId: string, limit: number, offset: number) {
-    return adminInventoryRepo.findTransactionsByLevelId(levelId, limit, offset);
+    return this.adminInventoryRepo.findTransactionsByLevelId(levelId, limit, offset);
   }
   async countTransactionsByLevelId(levelId: string) {
-    return adminInventoryRepo.countTransactionsByLevelId(levelId);
+    return this.adminInventoryRepo.countTransactionsByLevelId(levelId);
   }
   async findLocationsWithStats() {
-    return adminInventoryRepo.findLocationsWithStats();
+    return this.adminInventoryRepo.findLocationsWithStats();
   }
 }

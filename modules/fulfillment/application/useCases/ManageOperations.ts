@@ -1,6 +1,7 @@
-import fulfillmentDataRepository from '../../infrastructure/repositories/FulfillmentDataRepository';
+import type { IAdminOperationsRepository } from '../../domain/repositories/AdminOperationsRepository';
+import { fulfillmentDataRepository } from '../wired';
 
-const adminOperationsRepo = fulfillmentDataRepository.admin;
+const adminOperationsRepo: IAdminOperationsRepository = fulfillmentDataRepository.admin;
 
 export class ManageOperationsUseCase {
   async getOperationsStats() {

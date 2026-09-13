@@ -1,6 +1,7 @@
-import supplierDataRepository from '../../infrastructure/repositories/SupplierDataRepository';
+import type { SupplierRepository } from '../../domain/repositories/SupplierRepository';
+import { supplierDataRepository } from '../wired';
 
-const supplierRepo = supplierDataRepository.suppliers;
+const supplierRepo = supplierDataRepository.suppliers as unknown as SupplierRepository;
 
 export class ManageSuppliersAdminUseCase {
   async findAll(activeOnly?: boolean, approvedOnly?: boolean) {

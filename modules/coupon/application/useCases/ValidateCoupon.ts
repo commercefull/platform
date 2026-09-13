@@ -2,7 +2,7 @@
  * Validate Coupon Use Case
  */
 
-import { CouponRepository } from '../../infrastructure/repositories/CouponRepository';
+import { CouponRepository } from '../../domain/repositories/CouponRepository';
 
 export class ValidateCouponCommand {
   constructor(

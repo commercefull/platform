@@ -84,3 +84,24 @@ export interface LocalizationRepository {
   getTranslationStatistics(): Promise<{ entityType: string; total: number; approved: number; autoTranslated: number; pending: number }[]>;
   bulkApproveTranslations(entityType: TranslatableEntityType, translationIds: string[], reviewerId: string): Promise<number>;
 }
+
+export interface LanguageRepositoryPort {
+  listLanguages(): Promise<Language[]>;
+  findLanguageById(languageId: string): Promise<Language | null>;
+  createLanguage(params: { code: string; name: string; nativeName?: string; isDefault?: boolean; isActive?: boolean }): Promise<string>;
+  updateLanguage(languageId: string, updates: { name?: string; nativeName?: string; isDefault?: boolean; isActive?: boolean }): Promise<void>;
+  deleteLanguage(languageId: string): Promise<void>;
+}
+
+export interface CurrencyRepositoryPort {
+  listCurrencies(): Promise<Currency[]>;
+  listActiveCurrencyCodes(): Promise<{ code: string; name: string }[]>;
+  findCurrencyById(currencyId: string): Promise<Currency | null>;
+  createCurrency(params: { code: string; name: string; symbol?: string; exchangeRate?: number; isDefault?: boolean; isActive?: boolean }): Promise<string>;
+  updateCurrency(currencyId: string, updates: { name?: string; symbol?: string; exchangeRate?: number; isDefault?: boolean; isActive?: boolean }): Promise<void>;
+  deleteCurrency(currencyId: string): Promise<void>;
+}
+
+export interface CountryRepositoryPort {
+  findAll(activeOnly?: boolean): Promise<Country[]>;
+}

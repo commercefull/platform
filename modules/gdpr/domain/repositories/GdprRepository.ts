@@ -104,3 +104,40 @@ export interface GdprService {
   anonymizeCustomerData(customerId: string): Promise<void>;
   deleteCustomerData(customerId: string): Promise<void>;
 }
+
+// ============================================================================
+// Admin GDPR Repository
+// ============================================================================
+
+export interface AdminGdprStats {
+  pendingRequests: number;
+  completedRequests: number;
+  avgProcessingDays: number;
+}
+
+export interface AdminConsentStats {
+  marketingConsent: number;
+  marketingConsentRate: number;
+  analyticsConsent: number;
+  analyticsConsentRate: number;
+}
+
+export interface AdminGdprCreateRequestParams {
+  customerId?: string | null;
+  requestType: string;
+  description?: string;
+  customerEmail: string;
+  customerName?: string;
+  dueDate: Date;
+}
+
+export interface AdminGdprRepository {
+  getGdprStats(): Promise<AdminGdprStats>;
+  getConsentStats(): Promise<AdminConsentStats>;
+  findRecentRequests(limit?: number): Promise<unknown[]>;
+  findRequestById(requestId: string): Promise<unknown | null>;
+  findCustomerIdByEmail(email: string): Promise<string | null>;
+  createRequest(params: AdminGdprCreateRequestParams): Promise<void>;
+  updateStatus(requestId: string, status: string): Promise<void>;
+  completeRequest(requestId: string, notes?: string): Promise<void>;
+}

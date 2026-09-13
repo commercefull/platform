@@ -7,8 +7,9 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { ManageStoresAdminUseCase } from '../../application/useCases/ManageStoresAdmin';
+import { storeDataRepository } from '../../application/wired';
 
-const manageStoresUseCase = new ManageStoresAdminUseCase();
+const manageStoresUseCase = new ManageStoresAdminUseCase(storeDataRepository.stores);
 
 export const getStoreLocator = async (req: TypedRequest, res: Response): Promise<void> => {
   const stores = await manageStoresUseCase.findActive();

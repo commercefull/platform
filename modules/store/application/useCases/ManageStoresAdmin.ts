@@ -1,36 +1,37 @@
-import storeDataRepository from '../../infrastructure/repositories/StoreDataRepository';
-
-const storeRepo = storeDataRepository.stores;
+import { StoreRepository, StoreFilters } from '../../domain/repositories/StoreRepository';
+import { Store } from '../../domain/entities/Store';
 
 export class ManageStoresAdminUseCase {
+  constructor(private readonly storeRepository: StoreRepository) {}
+
   async findById(id: string) {
-    return storeRepo.findById(id);
+    return this.storeRepository.findById(id);
   }
   async findBySlug(slug: string) {
-    return storeRepo.findBySlug(slug);
+    return this.storeRepository.findBySlug(slug);
   }
-  async findAll(filters?: Parameters<typeof storeRepo.findAll>[0]) {
-    return storeRepo.findAll(filters);
+  async findAll(filters?: StoreFilters) {
+    return this.storeRepository.findAll(filters);
   }
-  async save(store: Parameters<typeof storeRepo.save>[0]) {
-    return storeRepo.save(store);
+  async save(store: Store) {
+    return this.storeRepository.save(store);
   }
   async delete(id: string) {
-    return storeRepo.delete(id);
+    return this.storeRepository.delete(id);
   }
-  async count(filters?: Parameters<typeof storeRepo.count>[0]) {
-    return storeRepo.count(filters);
+  async count(filters?: StoreFilters) {
+    return this.storeRepository.count(filters);
   }
   async findByBusiness(organizationId: string) {
-    return storeRepo.findByBusiness(organizationId);
+    return this.storeRepository.findByBusiness(organizationId);
   }
   async findActive() {
-    return storeRepo.findActive();
+    return this.storeRepository.findActive();
   }
   async findFeatured() {
-    return storeRepo.findFeatured();
+    return this.storeRepository.findFeatured();
   }
   async findByType(storeType: string) {
-    return storeRepo.findByType(storeType);
+    return this.storeRepository.findByType(storeType);
   }
 }

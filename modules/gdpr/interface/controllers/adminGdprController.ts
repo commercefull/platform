@@ -6,10 +6,8 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import { ManageAdminGdprUseCase } from '../../application/useCases/ManageGdpr';
+import { manageAdminGdprUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const manageAdminGdprUseCase = new ManageAdminGdprUseCase();
 
 // ============================================================================
 // GDPR Dashboard

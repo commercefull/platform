@@ -1,8 +1,9 @@
-import localizationDataRepository from '../../infrastructure/repositories/LocalizationDataRepository';
+import type { LanguageRepositoryPort, CurrencyRepositoryPort, CountryRepositoryPort } from '../../domain/repositories/LocalizationRepository';
+import { localizationDataRepository } from '../wired';
 
-const languageRepo = localizationDataRepository.languages;
-const currencyRepo = localizationDataRepository.currencies;
-const countryRepo = localizationDataRepository.countries;
+const languageRepo: LanguageRepositoryPort = localizationDataRepository.languages;
+const currencyRepo: CurrencyRepositoryPort = localizationDataRepository.currencies;
+const countryRepo: CountryRepositoryPort = localizationDataRepository.countries;
 
 export class ManageLanguagesUseCase {
   async listLanguages() {

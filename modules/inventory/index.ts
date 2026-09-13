@@ -6,6 +6,7 @@
 export * from './application/useCases';
 export * from './domain/repositories/InventoryRepository';
 export * from './domain/repositories/StoreDispatchRepository';
+export * from './domain/repositories/AdminInventoryRepository';
 export * from './domain/errors/InventoryErrors';
 
 // Interface exports (routers, GraphQL)

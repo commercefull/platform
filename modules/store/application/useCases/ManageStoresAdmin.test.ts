@@ -1,29 +1,33 @@
-jest.mock('../../infrastructure/repositories/StoreDataRepository', () => ({
-  __esModule: true,
-  default: {
-    stores: {
-      findById: jest.fn().mockResolvedValue({ storeId: 's1' }),
-      findBySlug: jest.fn().mockResolvedValue({ storeId: 's1', slug: 'main' }),
-      findAll: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
-      save: jest.fn().mockResolvedValue({ storeId: 's2' }),
-      delete: jest.fn().mockResolvedValue(true),
-      count: jest.fn().mockResolvedValue(1),
-      findByBusiness: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
-      findActive: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
-      findFeatured: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
-      findByType: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
-    },
-  },
-}));
-
 import { ManageStoresAdminUseCase } from './ManageStoresAdmin';
+import type { StoreRepository } from '../../domain/repositories/StoreRepository';
+
+const mockStoreRepository: StoreRepository = {
+  findById: jest.fn().mockResolvedValue({ storeId: 's1' }),
+  findBySlug: jest.fn().mockResolvedValue({ storeId: 's1', slug: 'main' }),
+  findByUrl: jest.fn().mockResolvedValue(null),
+  findAll: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
+  save: jest.fn().mockResolvedValue({ storeId: 's2' }),
+  delete: jest.fn().mockResolvedValue(true),
+  count: jest.fn().mockResolvedValue(1),
+  findByMerchant: jest.fn().mockResolvedValue([]),
+  findByBusiness: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
+  findHeadquarters: jest.fn().mockResolvedValue(null),
+  findOutlets: jest.fn().mockResolvedValue([]),
+  findActive: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
+  findFeatured: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
+  findByType: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
+  updateStats: jest.fn().mockResolvedValue(undefined),
+  updatePickupSettings: jest.fn().mockResolvedValue({ storeId: 's1' }),
+  updateLocalDeliverySettings: jest.fn().mockResolvedValue({ storeId: 's1' }),
+  createHierarchy: jest.fn().mockResolvedValue({ hierarchyId: 'h1' }),
+};
 
 describe('ManageStoresAdminUseCase', () => {
   let useCase: ManageStoresAdminUseCase;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageStoresAdminUseCase();
+    useCase = new ManageStoresAdminUseCase(mockStoreRepository);
   });
 
   it('should find by ID', async () => {

@@ -1,7 +1,8 @@
-import loyaltyDataRepository from '../../infrastructure/repositories/LoyaltyDataRepository';
+import { loyaltyDataRepository } from '../wired';
+import type { LoyaltyRepository } from '../../domain/repositories/LoyaltyRepository';
 
-const loyaltyRepo = loyaltyDataRepository.points;
-const storefrontLoyaltyRepo = loyaltyDataRepository.storefront;
+const loyaltyRepo = loyaltyDataRepository.points as LoyaltyRepository;
+const storefrontLoyaltyRepo = loyaltyDataRepository.storefront as LoyaltyRepository;
 
 export class ManageLoyaltyAdminUseCase {
   async findAllTiers(includeInactive?: boolean) {

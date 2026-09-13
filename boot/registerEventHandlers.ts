@@ -36,6 +36,7 @@ import { registerCheckoutEventHandlers } from '../modules/checkout/application/e
 import { CheckoutRepository as CheckoutRepo } from '../modules/checkout/infrastructure';
 import { registerOrderPaymentEventHandlers } from '../modules/order/application/eventHandlers';
 import { registerTrackingEventHandlers, setConsentRepository } from '../modules/tracking/application/eventHandlers/trackingEventHandlers';
+import { TrackingConfigRepositoryImpl } from '../modules/tracking/infrastructure';
 import { moduleRegistry } from './moduleManifests';
 import { GdprDataRepository } from '../modules/gdpr/infrastructure';
 import { integrationRepo, credentialRepo, subscriptionRepo, logRepo } from '../modules/integration/application/useCases/wired';
@@ -139,7 +140,7 @@ export function registerAllEventHandlers(): void {
       if (moduleRegistry.isEnabled('gdpr')) {
         setConsentRepository(GdprDataRepository.cookieConsent);
       }
-      registerTrackingEventHandlers();
+      registerTrackingEventHandlers(new TrackingConfigRepositoryImpl());
     }
 
     // Integration dispatcher (forwards events to third-party integrations)

@@ -4,7 +4,7 @@
 
 import { generateUUID } from '../../../../libs/uuid';
 import { Coupon } from '../../domain/entities/Coupon';
-import { CouponRepository } from '../../infrastructure/repositories/CouponRepository';
+import { CouponRepository } from '../../domain/repositories/CouponRepository';
 import { CouponCodeAlreadyExistsError } from '../../domain/errors/CouponErrors';
 
 export class CreateCouponCommand {

@@ -107,7 +107,7 @@ export interface LoyaltyRepository {
 
   // Transactions
   findTransactionById(loyaltyTransactionId: string): Promise<LoyaltyTransaction | null>;
-  findCustomerTransactions(customerId: string, limit?: number): Promise<LoyaltyTransaction[]>;
+  findCustomerTransactions(customerId: string, limit?: number, offset?: number): Promise<LoyaltyTransaction[]>;
   createTransaction(input: CreateLoyaltyTransactionInput): Promise<LoyaltyTransaction>;
 
   // Rewards
@@ -145,6 +145,7 @@ export interface LoyaltyRepository {
   findMemberByCustomerId(customerId: string): Promise<unknown | null>;
   findStorefrontAvailableRewards(pointsBalance: number): Promise<unknown[]>;
   findStorefrontRewardById(rewardId: string): Promise<unknown | null>;
+  countCustomerTransactions(customerId: string): Promise<number>;
   deductPoints(customerId: string, points: number): Promise<void>;
   createRedeemTransaction(customerId: string, points: number, description: string): Promise<void>;
 }

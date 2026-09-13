@@ -1,4 +1,4 @@
-import warehouseDataRepository from '../../infrastructure/repositories/WarehouseDataRepository';
+import { warehouseDataRepository } from '../wired';
 
 const warehouseRepo = warehouseDataRepository.warehouses;
 

@@ -9,14 +9,11 @@
 
 import { eventBus, EventPayload, EventType } from '../../../../libs/events/eventBus';
 import { logger } from '../../../../libs/logger';
-import { TrackingConfigRepositoryImpl } from '../../infrastructure/repositories/TrackingConfigRepositoryImpl';
+import { TrackingConfigRepository } from '../../domain/repositories/TrackingConfigRepository';
 import { ProcessTrackingEventUseCase } from '../../application/useCases/Tracking';
 import { TrackingEcommerceData } from '../../domain/entities/TrackingEvent';
 import { getDefaultEventMappings } from '../../domain/services/defaultEventMappings';
 import { GdprCookieConsentRepository } from '../../../gdpr/domain/repositories/GdprRepository';
-
-const trackingRepo = new TrackingConfigRepositoryImpl();
-const processEventUseCase = new ProcessTrackingEventUseCase(trackingRepo);
 
 // We need consent checking — use the GDPR cookie consent repository
 // This is injected lazily to avoid circular dependencies
@@ -71,7 +68,8 @@ function extractTrackingData(payload: EventPayload): {
 /**
  * Register all tracking event handlers on the event bus
  */
-export function registerTrackingEventHandlers(): void {
+export function registerTrackingEventHandlers(trackingRepo: TrackingConfigRepository): void {
+  const processEventUseCase = new ProcessTrackingEventUseCase(trackingRepo);
   const trackedEvents = getDefaultEventMappings().map(m => m.sourceEvent);
 
   for (const eventType of trackedEvents) {

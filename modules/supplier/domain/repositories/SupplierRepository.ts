@@ -76,7 +76,8 @@ export interface SupplierRepository {
   // Suppliers
   findById(supplierId: string): Promise<Supplier | null>;
   findByCode(code: string): Promise<Supplier | null>;
-  findAll(filters?: SupplierFilters): Promise<Supplier[]>;
+  findAll(activeOnly?: boolean, approvedOnly?: boolean): Promise<Supplier[]>;
+  findByStatus(status: SupplierStatus): Promise<Supplier[]>;
   create(params: SupplierCreateParams): Promise<Supplier>;
   update(supplierId: string, params: SupplierUpdateParams): Promise<Supplier | null>;
   delete(supplierId: string): Promise<boolean>;
@@ -84,6 +85,8 @@ export interface SupplierRepository {
   setVisibility(supplierId: string, isActive: boolean): Promise<Supplier | null>;
   approve(supplierId: string): Promise<Supplier | null>;
   suspend(supplierId: string): Promise<Supplier | null>;
+  activate(supplierId: string): Promise<Supplier | null>;
+  deactivate(supplierId: string): Promise<Supplier | null>;
   getStatistics(): Promise<Record<string, unknown>>;
 
   // Addresses
