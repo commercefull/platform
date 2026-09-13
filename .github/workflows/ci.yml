@@ -88,4 +88,4 @@ jobs:
           node-version: '22'
           cache: 'yarn'
       - run: yarn install --frozen-lockfile
-      - run: yarn deps:check -- --ignore-known
+      - run: yarn deps:check
