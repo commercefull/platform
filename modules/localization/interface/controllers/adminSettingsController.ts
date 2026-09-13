@@ -7,11 +7,7 @@
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../../../libs/adminRespond';
-import {
-  ManageLanguagesUseCase,
-  ManageCurrenciesUseCase,
-  ManageCountriesUseCase,
-} from '../../application/useCases/ManageLocalization';
+import { ManageLanguagesUseCase, ManageCurrenciesUseCase, ManageCountriesUseCase } from '../../application/useCases/ManageLocalization';
 
 const manageLanguagesUseCase = new ManageLanguagesUseCase();
 const manageCurrenciesUseCase = new ManageCurrenciesUseCase();

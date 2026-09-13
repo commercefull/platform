@@ -71,10 +71,7 @@ export const editB2BCompanyForm = async (req: TypedRequest, res: Response): Prom
 export const updateB2BCompany = async (req: TypedRequest, res: Response): Promise<void> => {
   const { companyId } = req.params;
   const body = req.body as RequestBody;
-  await manageCompanyUseCase.updateProfile(
-    companyId,
-    body as Parameters<typeof manageCompanyUseCase.updateProfile>[1],
-  );
+  await manageCompanyUseCase.updateProfile(companyId, body as Parameters<typeof manageCompanyUseCase.updateProfile>[1]);
   res.redirect(`/admin/b2b/companies/${companyId}?success=Company updated successfully`);
 };
 

@@ -1,15 +1,145 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --color-ink-50: #f8f8f8;
+  --color-ink-100: #e5e5e5;
+  --color-ink-200: #d4d4d4;
+  --color-ink-300: #a3a3a3;
+  --color-ink-400: #737373;
+  --color-ink-500: #525252;
+  --color-ink-600: #404040;
+  --color-ink-700: #2a2a2a;
+  --color-ink-800: #1a1a1a;
+  --color-ink-900: #0a0a0a;
+
+  --color-gold-400: #d4af37;
+  --color-gold-500: #c89b3c;
+  --color-gold-600: #b8860b;
+
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+
+  --text-display: 3.5rem;
+  --text-display--line-height: 1.1;
+  --text-display--font-weight: 700;
+  --text-heading: 2.5rem;
+  --text-heading--line-height: 1.2;
+  --text-heading--font-weight: 600;
+
+  --max-width-8xl: 90rem;
+
+  --animate-fade-in: fadeIn 0.3s ease-in-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+  --animate-slide-in-right: slideInRight 0.3s ease-out;
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  @keyframes slideUp {
+    0% {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes slideInRight {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+}
 
 @layer base {
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+  }
+}
+
+@layer components {
+  /* Fashion storefront design tokens */
+  :root {
+    --color-primary: #1a1a1a;
+    --color-secondary: #6b7280;
+    --color-accent: #c89b3c;
+    --color-background: #fafafa;
+    --color-surface: #ffffff;
+    --color-text: #1a1a1a;
+    --color-muted: #6b7280;
+    --color-success: #16a34a;
+    --color-error: #dc2626;
+    --color-sale: #dc2626;
+    --font-heading: 'Playfair Display', Georgia, serif;
+    --font-body: 'Inter', sans-serif;
+    --font-size-base: 16px;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-ink-900 text-white px-6 py-3 font-medium rounded-none hover:bg-ink-800 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply border border-ink-900 text-ink-900 px-6 py-3 font-medium rounded-none hover:bg-ink-900 hover:text-white transition-colors;
+  }
+
+  .btn-accent {
+    @apply bg-gold-500 text-white px-6 py-3 font-medium rounded-none hover:bg-gold-600 transition-colors;
+  }
+
+  /* Product card */
+  .product-card {
+    @apply bg-white rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-lg;
+  }
+
+  /* Line clamp utility */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 
 @layer utilities {
   .hero-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide scrollbar for horizontal scroll containers */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }

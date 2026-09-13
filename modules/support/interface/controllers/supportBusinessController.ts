@@ -7,7 +7,16 @@ import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import { supportDataRepository, supportInfoRepository } from '../../application/wired';
-import { AlertStatus, TicketStatus, TicketPriority, TicketCategory, SupportAgent, SupportTicket, FaqCategory, FaqArticle } from '../../application/wired';
+import {
+  AlertStatus,
+  TicketStatus,
+  TicketPriority,
+  TicketCategory,
+  SupportAgent,
+  SupportTicket,
+  FaqCategory,
+  FaqArticle,
+} from '../../application/wired';
 
 const supportRepo = supportDataRepository.tickets;
 const faqRepo = supportInfoRepository.faq;

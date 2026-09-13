@@ -1,4 +1,3 @@
-
 const DashboardQueryRepo = analyticsDataRepository.dashboard;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetDashboardMetricsUseCase, GetDashboardMetricsInput } from '../../application/useCases/GetDashboardMetrics';

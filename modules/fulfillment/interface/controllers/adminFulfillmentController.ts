@@ -5,10 +5,7 @@
 
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import {
-  ManageOrderFulfillmentsUseCase,
-  GetOrderForFulfillmentUseCase,
-} from '../../../order/application/useCases/ManageOrderFulfillments';
+import { ManageOrderFulfillmentsUseCase, GetOrderForFulfillmentUseCase } from '../../../order/application/useCases/ManageOrderFulfillments';
 import { ManageWarehouseAdminUseCase } from '../../../warehouse/application/useCases/ManageWarehouseAdmin';
 import { adminRespond } from '../../../../libs/adminRespond';
 

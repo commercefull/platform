@@ -6,12 +6,7 @@
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../../../libs/adminRespond';
-import {
-  manageThemesUseCase,
-  manageOverridesUseCase,
-  assignThemeUseCase,
-  resolveThemeUseCase,
-} from '../../application/wired';
+import { manageThemesUseCase, manageOverridesUseCase, assignThemeUseCase, resolveThemeUseCase } from '../../application/wired';
 import { CreateThemeOverrideCommand } from '../../application/useCases/Theme';
 import { themeRegistry } from '../../domain/services/ThemeRegistry';
 

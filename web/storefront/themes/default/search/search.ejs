@@ -1,0 +1,171 @@
+<%- include("../partials/header") %>
+
+<%
+  const formatPrice = (amt) => {
+    try { return new Intl.NumberFormat(locale || 'en-US', { style: 'currency', currency: (currency || 'USD').toUpperCase() }).format(amt); }
+    catch { return (currency || 'USD') + ' ' + (amt || 0).toFixed(2); }
+  };
+  const searchQuery = (typeof searchQuery !== 'undefined' ? searchQuery : '') || '';
+  const total = (typeof totalProducts !== 'undefined' ? totalProducts : (products ? products.length : 0)) || 0;
+  const currentSort = (typeof filters !== 'undefined' && filters && filters.sort) ? filters.sort : 'relevance';
+  const buildSortUrl = (sort) => {
+    return '/search?q=' + encodeURIComponent(searchQuery) + '&sort=' + sort;
+  };
+%>
+
+<main class="min-h-screen bg-gray-50">
+  <!-- Search Header -->
+  <section class="bg-white border-b border-gray-200">
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <%- include("../partials/breadcrumb", { items: [
+        { label: 'Home', url: '/' },
+        { label: 'Search' }
+      ] }) %>
+
+      <!-- Search Bar -->
+      <div class="mt-6 max-w-2xl">
+        <form action="/search" method="GET" class="relative">
+          <input
+            type="search"
+            name="q"
+            value="<%= searchQuery %>"
+            placeholder="Search for products, brands, categories..."
+            class="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-none text-lg focus:ring-1 focus:ring-ink-900 focus:border-ink-900"
+            data-search-input
+            autofocus
+          >
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 btn-primary py-2 px-4 text-sm">Search</button>
+        </form>
+
+        <!-- Autocomplete Results (handled by header/ui.js) -->
+        <div id="autocomplete-results" data-search-autocomplete class="hidden absolute bg-white border border-gray-200 shadow-lg rounded-none mt-1 w-full max-w-2xl z-50 max-h-96 overflow-y-auto"></div>
+      </div>
+
+      <!-- Result count -->
+      <% if (searchQuery) { %>
+      <p class="mt-4 text-gray-500">
+        <% if (total > 0) { %>
+        Found <strong class="text-ink-900"><%= total %></strong> <%= total === 1 ? 'result' : 'results' %> for "<strong class="text-ink-900"><%= searchQuery %></strong>"
+        <% } else { %>
+        No results found for "<strong class="text-ink-900"><%= searchQuery %></strong>"
+        <% } %>
+      </p>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- Search Results -->
+  <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <% if (searchQuery && products && products.length > 0) { %>
+      <!-- Sort toolbar -->
+      <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-500">Sort by:</span>
+          <select id="sort-select" data-action="sort-change" class="border border-gray-300 rounded-none px-3 py-2 text-sm focus:ring-1 focus:ring-ink-900">
+            <option value="relevance" data-url="<%= buildSortUrl('relevance') %>" <%= currentSort === 'relevance' ? 'selected' : '' %>>Relevance</option>
+            <option value="newest" data-url="<%= buildSortUrl('newest') %>" <%= currentSort === 'newest' ? 'selected' : '' %>>Newest</option>
+            <option value="price-asc" data-url="<%= buildSortUrl('price-asc') %>" <%= currentSort === 'price-asc' ? 'selected' : '' %>>Price: Low to High</option>
+            <option value="price-desc" data-url="<%= buildSortUrl('price-desc') %>" <%= currentSort === 'price-desc' ? 'selected' : '' %>>Price: High to Low</option>
+            <option value="popular" data-url="<%= buildSortUrl('popular') %>" <%= currentSort === 'popular' ? 'selected' : '' %>>Most Popular</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+        <% products.forEach(function(product) { %>
+        <%- include("../partials/product-card", { product: product }) %>
+        <% }) %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (typeof pagination !== 'undefined' && pagination) { %>
+      <%- include("../partials/pagination", { pagination: pagination, filters: { search: searchQuery } }) %>
+      <% } %>
+
+    <% } else if (searchQuery) { %>
+      <!-- No Results -->
+      <%- include("../partials/empty-state", {
+        title: 'No results found',
+        message: 'We couldn\'t find any products matching "' + searchQuery + '". Try different keywords or browse our categories.',
+        icon: 'search',
+        actionUrl: '/products',
+        actionLabel: 'Browse All Products'
+      }) %>
+
+      <!-- Did you mean? -->
+      <div class="mt-8 max-w-2xl mx-auto text-center">
+        <h3 class="text-lg font-medium text-ink-900 mb-4">Did you mean?</h3>
+        <div class="flex flex-wrap justify-center gap-2">
+          <% const query = searchQuery.toLowerCase(); %>
+          <% const suggestions = []; %>
+          <% if (query.includes('shrt') || query.includes('shrit')) suggestions.push({ label: 'Shirts', url: '/search?q=shirt' }); %>
+          <% if (query.includes('jean')) suggestions.push({ label: 'Jeans', url: '/search?q=jeans' }); %>
+          <% if (query.includes('dress')) suggestions.push({ label: 'Dresses', url: '/search?q=dress' }); %>
+          <% if (query.includes('sneaker') || query.includes('shoe')) suggestions.push({ label: 'Sneakers', url: '/search?q=sneakers' }); %>
+          <% if (query.includes('bag')) suggestions.push({ label: 'Bags', url: '/search?q=bag' }); %>
+          <% if (query.includes('jacket') || query.includes('coat')) suggestions.push({ label: 'Jackets', url: '/search?q=jacket' }); %>
+          <% if (query.includes('knit') || query.includes('sweater')) suggestions.push({ label: 'Knitwear', url: '/search?q=knitwear' }); %>
+          <% if (suggestions.length > 0) { %>
+            <% suggestions.forEach(function(s) { %>
+            <a href="<%= s.url %>" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm text-ink-700 hover:border-gold-500 hover:text-gold-600 transition-colors"><%= s.label %></a>
+            <% }); %>
+          <% } else { %>
+            <p class="text-sm text-gray-400">No suggestions available. Try a broader term.</p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Popular searches -->
+      <div class="mt-12 max-w-2xl mx-auto text-center">
+        <h3 class="text-lg font-medium text-ink-900 mb-4">Popular Searches</h3>
+        <div class="flex flex-wrap justify-center gap-2">
+          <a href="/search?q=shirt" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm text-gray-700 hover:border-ink-900 hover:text-ink-900 transition-colors">Shirts</a>
+          <a href="/search?q=jeans" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm text-gray-700 hover:border-ink-900 hover:text-ink-900 transition-colors">Jeans</a>
+          <a href="/search?q=dress" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm text-gray-700 hover:border-ink-900 hover:text-ink-900 transition-colors">Dresses</a>
+          <a href="/search?q=sneakers" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm text-gray-700 hover:border-ink-900 hover:text-ink-900 transition-colors">Sneakers</a>
+          <a href="/search?q=bag" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm text-gray-700 hover:border-ink-900 hover:text-ink-900 transition-colors">Bags</a>
+          <a href="/search?q=jacket" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm text-gray-700 hover:border-ink-900 hover:text-ink-900 transition-colors">Jackets</a>
+          <a href="/search?q=knitwear" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm text-gray-700 hover:border-ink-900 hover:text-ink-900 transition-colors">Knitwear</a>
+          <a href="/search?q=sale" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm text-red-600 hover:border-red-600 transition-colors">Sale</a>
+        </div>
+      </div>
+
+    <% } else { %>
+      <!-- Initial state — no search yet -->
+      <div class="text-center py-20">
+        <svg class="w-24 h-24 mx-auto text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <h2 class="mt-6 text-2xl font-medium text-ink-900" style="font-family: 'Playfair Display', serif;">Search Our Collection</h2>
+        <p class="mt-2 text-gray-500 max-w-md mx-auto">Find products by name, brand, category, or keyword. Start typing to see suggestions.</p>
+
+        <!-- Recent searches (populated by JS from localStorage) -->
+        <div id="recent-searches" class="mt-8 max-w-2xl mx-auto hidden">
+          <h3 class="text-sm font-semibold text-ink-900 uppercase tracking-wide mb-4">Recent Searches</h3>
+          <div id="recent-searches-list" class="flex flex-wrap justify-center gap-2"></div>
+        </div>
+
+        <!-- Trending searches -->
+        <div class="mt-12 max-w-2xl mx-auto">
+          <h3 class="text-sm font-semibold text-ink-900 uppercase tracking-wide mb-4">Trending Now</h3>
+          <div class="flex flex-wrap justify-center gap-3">
+            <a href="/search?q=oxford" class="px-6 py-3 bg-white border border-gray-200 rounded-lg text-sm text-ink-700 hover:border-gold-500 hover:shadow-sm transition-all" data-search-suggestion="oxford">Oxford Shirts</a>
+            <a href="/search?q=selvedge" class="px-6 py-3 bg-white border border-gray-200 rounded-lg text-sm text-ink-700 hover:border-gold-500 hover:shadow-sm transition-all" data-search-suggestion="selvedge">Selvedge Denim</a>
+            <a href="/search?q=cashmere" class="px-6 py-3 bg-white border border-gray-200 rounded-lg text-sm text-ink-700 hover:border-gold-500 hover:shadow-sm transition-all" data-search-suggestion="cashmere">Cashmere</a>
+            <a href="/search?q=linen" class="px-6 py-3 bg-white border border-gray-200 rounded-lg text-sm text-ink-700 hover:border-gold-500 hover:shadow-sm transition-all" data-search-suggestion="linen">Linen</a>
+            <a href="/search?q=sneakers" class="px-6 py-3 bg-white border border-gray-200 rounded-lg text-sm text-ink-700 hover:border-gold-500 hover:shadow-sm transition-all" data-search-suggestion="sneakers">Sneakers</a>
+            <a href="/search?q=leather" class="px-6 py-3 bg-white border border-gray-200 rounded-lg text-sm text-ink-700 hover:border-gold-500 hover:shadow-sm transition-all" data-search-suggestion="leather">Leather Goods</a>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

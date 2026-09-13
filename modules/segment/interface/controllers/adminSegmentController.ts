@@ -72,10 +72,7 @@ export const editSegmentForm = async (req: TypedRequest, res: Response): Promise
 export const updateSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   const { segmentId } = req.params;
   const body = req.body as RequestBody;
-  await updateSegmentUseCase.execute(
-    segmentId,
-    body as Parameters<typeof updateSegmentUseCase.execute>[1],
-  );
+  await updateSegmentUseCase.execute(segmentId, body as Parameters<typeof updateSegmentUseCase.execute>[1]);
   res.redirect(`/admin/segments/${segmentId}?success=Segment updated successfully`);
 };
 

@@ -200,9 +200,9 @@ export * from './application/useCases';
 export * from './domain/repositories/ProductRepository';
 export * from './domain/events/ProductEvents';
 export * from './domain/errors/ProductErrors';
-export * from './domain/entities/ProductType';      // ← domain entity
-export * from './domain/entities/ProductAttribute';  // ← domain entity
-export * from './domain/entities/Brand';              // ← domain entity
+export * from './domain/entities/ProductType'; // ← domain entity
+export * from './domain/entities/ProductAttribute'; // ← domain entity
+export * from './domain/entities/Brand'; // ← domain entity
 ```
 
 ## Value Object Pattern

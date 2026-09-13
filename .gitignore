@@ -33,6 +33,8 @@ Thumbs.db
 app.js
 app.mjs
 *.tsbuildinfo
+public/javascripts/storefront/bundle.min.js
+public/javascripts/storefront/bundle.min.js.map
 
 # Logs
 logs
@@ -92,7 +94,6 @@ dist
 
 # Gatsby files
 .cache/
-public
 
 # Storybook build outputs
 .out

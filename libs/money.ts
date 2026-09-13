@@ -160,3 +160,41 @@ export class Money {
     }
   }
 }
+
+// ============================================================================
+// Standalone formatting helpers (for use in EJS views and controllers)
+// ============================================================================
+
+/**
+ * Format a numeric amount with currency using Intl.NumberFormat.
+ *
+ * @example
+ *   formatPrice(49.99, 'GBP', 'en-GB')  → "£49.99"
+ *   formatPrice(49.99, 'USD', 'en-US')  → "$49.99"
+ */
+export function formatPrice(amount: number, currency: string = 'USD', locale: string = 'en-US'): string {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+  }).format(amount);
+}
+
+/**
+ * Format a price with optional tax-inclusive suffix.
+ *
+ * @example
+ *   formatPriceWithTax(49.99, 'GBP', 'en-GB', 'inclusive_tax')  → "£49.99 (incl. VAT)"
+ *   formatPrice(49.99, 'USD', 'en-US', 'exclusive_tax')         → "$49.99"
+ */
+export function formatPriceWithTax(
+  amount: number,
+  currency: string,
+  locale: string,
+  priceDisplayMode: 'inclusive_tax' | 'exclusive_tax' = 'exclusive_tax',
+): string {
+  const formatted = formatPrice(amount, currency, locale);
+  if (priceDisplayMode === 'inclusive_tax') {
+    return `${formatted} (incl. VAT)`;
+  }
+  return formatted;
+}

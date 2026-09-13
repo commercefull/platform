@@ -15,6 +15,7 @@ import productCollectionRepo from '../../infrastructure/repositories/productColl
 import productCollectionMapRepo from '../../infrastructure/repositories/productCollectionMapRepo';
 import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 import { ProductAttributeSetRepository } from '../../infrastructure/repositories/ProductAttributeSetRepository';
+import brandRepo from '../../infrastructure/repositories/brandRepo';
 
 import { ListProductsUseCase } from './ListProducts';
 import { CreateProductUseCase } from './CreateProduct';
@@ -75,3 +76,4 @@ export const getProductCatalogEnrichmentUseCase = new GetProductCatalogEnrichmen
 );
 export const getProductAttributesUseCase = new GetProductAttributesUseCase(dynamicAttributeRepo);
 export const searchProductsUseCase = new SearchProductsUseCase(productRepo);
+export { brandRepo };

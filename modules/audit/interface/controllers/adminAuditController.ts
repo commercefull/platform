@@ -22,10 +22,7 @@ export const listAuditLogs = async (req: TypedRequest, res: Response): Promise<v
   };
 
   const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v));
-  const result = await auditRepository.findAll(
-    Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined,
-    pagination,
-  );
+  const result = await auditRepository.findAll(Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined, pagination);
 
   adminRespond(req, res, 'audit/index', {
     pageName: 'Audit Logs',
@@ -53,10 +50,7 @@ export const viewAuditLog = async (req: TypedRequest, res: Response): Promise<vo
 };
 
 export const auditStats = async (req: TypedRequest, res: Response): Promise<void> => {
-  const [byAction, byActor] = await Promise.all([
-    auditRepository.countByAction(),
-    auditRepository.countByActor(),
-  ]);
+  const [byAction, byActor] = await Promise.all([auditRepository.countByAction(), auditRepository.countByActor()]);
 
   adminRespond(req, res, 'audit/stats', {
     pageName: 'Audit Statistics',

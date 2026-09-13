@@ -119,7 +119,7 @@ Every module's `index.ts` must export its domain entities alongside its use case
 export * from './application/useCases';
 export * from './domain/repositories/SupportRepository';
 export * from './domain/errors/SupportErrors';
-export * from './domain/entities/SupportTicket';  // ← domain entity export
+export * from './domain/entities/SupportTicket'; // ← domain entity export
 ```
 
 ### Planned modules (not yet implemented)

@@ -5,7 +5,20 @@ exports.up = function (knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
     t.uuid('taxZoneId').references('taxZoneId').inTable('taxZone').onDelete('SET NULL');
-    t.enum('type', ['business', 'individual']).notNullable();
+    t.enum('type', [
+      'business',
+      'individual',
+      'resale',
+      'diplomatic',
+      'nonprofit',
+      'vatReverseCharge',
+      'agricultural',
+      'manufacturing',
+      'government',
+      'educational',
+      'medical',
+      'export',
+    ]).notNullable();
     t.enum('status', ['pending', 'approved', 'rejected']).notNullable().defaultTo('pending');
     t.string('name', 100).notNullable();
     t.string('exemptionNumber', 100).notNullable();
@@ -18,6 +31,10 @@ exports.up = function (knex) {
     t.uuid('verifiedBy').references('organizationId').inTable('organization');
     t.timestamp('verifiedAt');
     t.text('notes');
+    t.jsonb('applicableTaxCategoryIds');
+    t.decimal('minOrderAmount', 15, 2);
+    t.decimal('maxOrderAmount', 15, 2);
+    t.decimal('exemptionPercent', 5, 2).notNullable().defaultTo(100);
 
     t.index('customerId');
     t.index('taxZoneId');

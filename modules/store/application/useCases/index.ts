@@ -11,3 +11,4 @@ export * from './ListStores';
 export * from './CreateStoreHierarchy';
 export * from './ConfigureStorePickup';
 export * from './SetLocalDeliveryZone';
+export * from './wired';

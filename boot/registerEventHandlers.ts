@@ -35,10 +35,7 @@ import { stopOutboxDispatcher } from '../libs/events/outboxDispatcher';
 import { registerCheckoutEventHandlers } from '../modules/checkout/application/eventHandlers';
 import { CheckoutRepository as CheckoutRepo } from '../modules/checkout/infrastructure';
 import { registerOrderPaymentEventHandlers } from '../modules/order/application/eventHandlers';
-import {
-  registerTrackingEventHandlers,
-  setConsentRepository,
-} from '../modules/tracking/application/eventHandlers/trackingEventHandlers';
+import { registerTrackingEventHandlers, setConsentRepository } from '../modules/tracking/application/eventHandlers/trackingEventHandlers';
 import { moduleRegistry } from './moduleManifests';
 import { GdprDataRepository } from '../modules/gdpr/infrastructure';
 import { integrationRepo, credentialRepo, subscriptionRepo, logRepo } from '../modules/integration/application/useCases/wired';

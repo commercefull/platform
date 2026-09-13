@@ -7,7 +7,6 @@ import { OrganizationRepo } from '../../application/wired';
  * yarn job:new:organization --email=org@example.com --pass=password123 --name="My Organization"
  */
 
-
 async function run() {
   const args = process.argv.slice(2);
 

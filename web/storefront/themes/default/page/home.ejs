@@ -1,252 +1,266 @@
 <%- include("../partials/header") %>
 
 <main class="min-h-screen">
-  <!-- Hero Section -->
-  <section class="hero-gradient text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div class="space-y-8">
+  <!-- Hero Carousel -->
+  <section class="hero-gradient text-white relative overflow-hidden" data-hero-carousel>
+    <!-- Slide 1 -->
+    <div class="hero-slide transition-opacity duration-700" data-hero-slide>
+      <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="space-y-6 animate-fade-in">
+            <div>
+              <p class="text-gold-500 text-sm font-medium uppercase tracking-widest mb-4">Autumn / Winter 2026</p>
+              <h1 class="text-4xl lg:text-6xl font-bold leading-tight" style="font-family: 'Playfair Display', serif;">
+                Timeless Fashion<br>
+                <span class="text-gold-500">For Every Occasion</span>
+              </h1>
+              <p class="text-lg text-gray-300 mt-6 max-w-lg">
+                Discover premium brands and curated collections. From tailored essentials to statement pieces, find your perfect style.
+              </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a href="/products" class="btn-accent inline-flex items-center justify-center">
+                Shop Collection
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
+              </a>
+              <a href="/brands" class="btn-secondary inline-flex items-center justify-center">
+                Explore Brands
+              </a>
+            </div>
+          </div>
+          <div class="hidden lg:block">
+            <div class="aspect-[4/5] bg-gray-800 rounded-lg overflow-hidden">
+              <div class="w-full h-full flex items-center justify-center text-gray-600">
+                <svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="hero-slide transition-opacity duration-700 opacity-0 absolute inset-0" data-hero-slide>
+      <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="space-y-6">
+            <div>
+              <p class="text-gold-500 text-sm font-medium uppercase tracking-widest mb-4">New Season</p>
+              <h1 class="text-4xl lg:text-6xl font-bold leading-tight" style="font-family: 'Playfair Display', serif;">
+                Premium Denim<br>
+                <span class="text-gold-500">Crafted to Last</span>
+              </h1>
+              <p class="text-lg text-gray-300 mt-6 max-w-lg">
+                Selvedge and raw denim from specialist brands. Built to wear in, not out.
+              </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a href="/products/category/jeans" class="btn-accent inline-flex items-center justify-center">Shop Denim</a>
+              <a href="/brands" class="btn-secondary inline-flex items-center justify-center">View Brands</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="hero-slide transition-opacity duration-700 opacity-0 absolute inset-0" data-hero-slide>
+      <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="space-y-6">
+            <div>
+              <p class="text-gold-500 text-sm font-medium uppercase tracking-widest mb-4">Limited Time</p>
+              <h1 class="text-4xl lg:text-6xl font-bold leading-tight" style="font-family: 'Playfair Display', serif;">
+                Mid-Season Sale<br>
+                <span class="text-gold-500">Up to 50% Off</span>
+              </h1>
+              <p class="text-lg text-gray-300 mt-6 max-w-lg">
+                Selected styles across men's, women's, and accessories. Limited stock available.
+              </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a href="/search?q=sale" class="btn-accent inline-flex items-center justify-center">Shop Sale</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carousel Controls -->
+    <button type="button" data-action="hero-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors" aria-label="Previous slide">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    </button>
+    <button type="button" data-action="hero-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors" aria-label="Next slide">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </button>
+
+    <!-- Dots -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+      <button type="button" data-action="hero-dot" data-hero-dot="0" class="w-2 h-2 rounded-full bg-ink-900 transition-colors" aria-label="Go to slide 1"></button>
+      <button type="button" data-action="hero-dot" data-hero-dot="1" class="w-2 h-2 rounded-full bg-gray-300 transition-colors" aria-label="Go to slide 2"></button>
+      <button type="button" data-action="hero-dot" data-hero-dot="2" class="w-2 h-2 rounded-full bg-gray-300 transition-colors" aria-label="Go to slide 3"></button>
+    </div>
+  </section>
+
+  <!-- Trust Indicators -->
+  <section class="bg-white border-b border-gray-200">
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div class="flex items-center gap-3">
+          <svg class="w-8 h-8 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+          </svg>
           <div>
-            <h1 class="text-4xl lg:text-6xl font-bold leading-tight">
-              <%= t('storefront:premiumBagsFor') %>
-              <span class="text-yellow-300"><%= t('storefront:everyOccasion') %></span>
-            </h1>
-            <p class="text-xl text-gray-200 mt-4 max-w-lg">
-              <%= t('storefront:heroDesc') %>
-            </p>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-4">
-            <a href="/products" class="bg-white text-gray-900 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center">
-              <%= t('storefront:shopCollection') %>
-              <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-              </svg>
-            </a>
-            <a href="/pages/about-us" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-colors inline-flex items-center justify-center">
-              <%= t('storefront:learnMore') %>
-            </a>
-          </div>
-
-          <!-- Trust indicators -->
-          <div class="flex items-center space-x-8 pt-8">
-            <div class="text-center">
-              <div class="text-2xl font-bold">10K+</div>
-              <div class="text-gray-300 text-sm"><%= t('storefront:happyCustomers') %></div>
-            </div>
-            <div class="text-center">
-              <div class="text-2xl font-bold">500+</div>
-              <div class="text-gray-300 text-sm"><%= t('shared:common.products') %></div>
-            </div>
-            <div class="text-center">
-              <div class="text-2xl font-bold">4.9★</div>
-              <div class="text-gray-300 text-sm"><%= t('shared:common.rating') %></div>
-            </div>
+            <p class="text-sm font-medium text-ink-900">Secure Payment</p>
+            <p class="text-xs text-gray-500">256-bit SSL encryption</p>
           </div>
         </div>
-
-        <div class="relative">
-          <div class="relative z-10">
-            <img
-              src="/images/storefront/hero-bag.jpg"
-              alt="Premium handbag collection"
-              class="w-full h-auto rounded-2xl shadow-2xl"
-              onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMTkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2YjcyODAiPk5vIEltYWdlPC90ZXh0PgogIDx0ZXh0IHg9IjIwMCIgeT0iMjIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2YjcyODAiPkF2YWlsYWJsZTwvdGV4dD4KPC9zdmc+'"
-            >
-          </div>
-          <!-- Floating elements -->
-          <div class="absolute -top-4 -left-4 bg-yellow-400 text-gray-900 px-4 py-2 rounded-lg font-semibold shadow-lg z-20">
-            <%= t('storefront:newArrivals') %>
-          </div>
-          <div class="absolute -bottom-4 -right-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow-lg z-20">
-            <%= t('storefront:freeShipping') %>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Categories Section -->
-  <% if (categories && categories.length > 0) { %>
-  <section class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold text-gray-900 mb-4"><%= t('storefront:shopByCategory') %></h2>
-        <p class="text-gray-600 max-w-2xl mx-auto">
-          <%= t('storefront:exploreCategoriesDesc') %>
-        </p>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <% for(let i = 0; i < Math.min(8, categories.length); i++) { %>
-        <a href="/products/category/<%= categories[i].slug %>" class="group">
-          <div class="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-colors hover:shadow-lg">
-            <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-              </svg>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 text-center group-hover:text-blue-600 transition-colors">
-              <%= categories[i].name %>
-            </h3>
-          </div>
-        </a>
-        <% } %>
-      </div>
-
-      <div class="text-center mt-8">
-        <a href="/products" class="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium">
-          <%= t('storefront:viewAllProducts') %>
-          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        <div class="flex items-center gap-3">
+          <svg class="w-8 h-8 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
           </svg>
-        </a>
+          <div>
+            <p class="text-sm font-medium text-ink-900">Free Returns</p>
+            <p class="text-xs text-gray-500">Within 30 days</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <svg class="w-8 h-8 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-ink-900">Premium Brands</p>
+            <p class="text-xs text-gray-500">Curated selection</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <svg class="w-8 h-8 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-ink-900">Fast Delivery</p>
+            <p class="text-xs text-gray-500">Next day available</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
-  <% } %>
 
-  <!-- Featured Products Section -->
-  <% if (products && products.length > 0) { %>
-  <section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center mb-12">
+  <!-- Category Tiles -->
+  <section class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-ink-900 mb-2" style="font-family: 'Playfair Display', serif;">Shop by Category</h2>
+      <p class="text-gray-500">Find exactly what you're looking for</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <a href="/products/category/mens-shirts" class="group relative aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-t from-ink-900/60 to-transparent z-10"></div>
+        <div class="w-full h-full flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform duration-500">
+          <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        </div>
+        <div class="absolute bottom-4 left-4 z-20">
+          <h3 class="text-white text-lg font-semibold" style="font-family: 'Playfair Display', serif;">Men</h3>
+          <p class="text-gray-200 text-xs">Shop now →</p>
+        </div>
+      </a>
+      <a href="/products/category/womens-dresses" class="group relative aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-t from-ink-900/60 to-transparent z-10"></div>
+        <div class="w-full h-full flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform duration-500">
+          <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        </div>
+        <div class="absolute bottom-4 left-4 z-20">
+          <h3 class="text-white text-lg font-semibold" style="font-family: 'Playfair Display', serif;">Women</h3>
+          <p class="text-gray-200 text-xs">Shop now →</p>
+        </div>
+      </a>
+      <a href="/products/category/bags" class="group relative aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-t from-ink-900/60 to-transparent z-10"></div>
+        <div class="w-full h-full flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform duration-500">
+          <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        </div>
+        <div class="absolute bottom-4 left-4 z-20">
+          <h3 class="text-white text-lg font-semibold" style="font-family: 'Playfair Display', serif;">Accessories</h3>
+          <p class="text-gray-200 text-xs">Shop now →</p>
+        </div>
+      </a>
+      <a href="/products/category/sneakers" class="group relative aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-t from-ink-900/60 to-transparent z-10"></div>
+        <div class="w-full h-full flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform duration-500">
+          <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        </div>
+        <div class="absolute bottom-4 left-4 z-20">
+          <h3 class="text-white text-lg font-semibold" style="font-family: 'Playfair Display', serif;">Footwear</h3>
+          <p class="text-gray-200 text-xs">Shop now →</p>
+        </div>
+      </a>
+      <a href="/brands" class="group relative aspect-[3/4] bg-gold-500 rounded-lg overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-t from-gold-600/80 to-transparent z-10"></div>
+        <div class="absolute bottom-4 left-4 z-20">
+          <h3 class="text-white text-lg font-semibold" style="font-family: 'Playfair Display', serif;">All Brands</h3>
+          <p class="text-gray-100 text-xs">Discover →</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- New Arrivals Carousel -->
+  <section class="bg-gray-100 py-16" data-product-carousel>
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-10">
         <div>
-          <h2 class="text-3xl font-bold text-gray-900 mb-2"><%= t('storefront:featuredProducts') %></h2>
-          <p class="text-gray-600"><%= t('storefront:discoverPopular') %></p>
+          <h2 class="text-3xl font-bold text-ink-900" style="font-family: 'Playfair Display', serif;">New Arrivals</h2>
+          <p class="text-gray-500 mt-1">Fresh styles just landed</p>
         </div>
-        <a href="/products" class="hidden md:flex items-center text-blue-600 hover:text-blue-700 font-medium">
-          <%= t('shared:common.viewAll') %>
-          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </a>
+        <div class="flex items-center gap-2">
+          <button type="button" data-action="carousel-prev" class="p-2 border border-gray-300 rounded-none bg-white text-ink-900 hover:bg-gray-50 transition-colors" aria-label="Previous products">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          </button>
+          <button type="button" data-action="carousel-next" class="p-2 border border-gray-300 rounded-none bg-white text-ink-900 hover:bg-gray-50 transition-colors" aria-label="Next products">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+          <a href="/products" class="ml-4 text-ink-700 hover:text-gold-600 font-medium text-sm">View All →</a>
+        </div>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        <% for(let i = 0; i < Math.min(8, products.length); i++) { %>
-        <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group">
-          <!-- Product Image -->
-          <div class="relative overflow-hidden">
-            <a href="/products/<%= products[i].categorySlug || 'general' %>/<%= products[i].productId %>">
-              <img
-                src="<%= products[i].images && products[i].images.length > 0 ? products[i].images[0] : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMTkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2YjcyODAiPk5vIEltYWdlPC90ZXh0PgogIDx0ZXh0IHg9IjIwMCIgeT0iMjIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2YjcyODAiPkF2YWlsYWJsZTwvdGV4dD4KPC9zdmc+' %>"
-                alt="<%= products[i].name %>"
-                class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-              >
-            </a>
-
-            <!-- Status Badge -->
-            <% if (!products[i].isActive || products[i].stock <= 0) { %>
-            <div class="absolute top-3 left-3">
-              <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                <%= products[i].stock > 0 ? t('storefront:comingSoon') : t('storefront:soldOut') %>
-              </span>
+      <div class="flex gap-6 overflow-x-auto scroll-smooth pb-2" data-carousel-track>
+        <% if (products && products.length > 0) { %>
+          <% products.slice(0, 8).forEach(function(product) { %>
+            <div class="flex-shrink-0 w-64">
+              <%- include("../partials/product-card", { product: product }) %>
             </div>
-            <% } else { %>
-            <div class="absolute top-3 left-3">
-              <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                <%= t('shared:common.inStock') %>
-              </span>
-            </div>
-            <% } %>
-
-            <!-- Quick Actions -->
-            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div class="flex flex-col space-y-2">
-                <button class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50">
-                  <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Product Info -->
-          <div class="p-6">
-            <a href="/products/<%= products[i].categorySlug || 'general' %>/<%= products[i].productId %>">
-              <h3 class="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors line-clamp-2">
-                <%= products[i].name %>
-              </h3>
-            </a>
-
-            <div class="flex items-center justify-between mb-4">
-              <div class="text-2xl font-bold text-gray-900">
-                $<%= products[i].price ? parseFloat(products[i].price).toFixed(2) : '0.00' %>
-              </div>
-              <div class="flex items-center">
-                <div class="flex text-yellow-400">
-                  <% for(let star = 1; star <= 5; star++) { %>
-                    <svg class="w-4 h-4 <%= star <= 4 ? 'fill-current' : 'text-gray-300' %>" viewBox="0 0 24 24">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                  <% } %>
-                </div>
-                <span class="text-sm text-gray-500 ml-1">(4.5)</span>
-              </div>
-            </div>
-
-            <!-- Add to Cart Button -->
-            <% if (products[i].isActive && products[i].stock > 0) { %>
-            <a
-              href="/basket/add/<%= products[i].productId %>"
-              class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center justify-center"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
-              </svg>
-              <%= t('shared:common.addToCart') %>
-            </a>
-            <% } else { %>
-            <button
-              disabled
-              class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-medium cursor-not-allowed inline-flex items-center justify-center"
-            >
-              <%= products[i].stock > 0 ? t('storefront:comingSoon') : t('storefront:soldOut') %>
-            </button>
-            <% } %>
-          </div>
-        </div>
+          <% }); %>
+        <% } else { %>
+          <div class="w-full text-center py-12 text-gray-400">Products will appear here once seeded.</div>
         <% } %>
-      </div>
-
-      <!-- Mobile View All Button -->
-      <div class="text-center mt-8 md:hidden">
-        <a href="/products" class="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium">
-          <%= t('storefront:viewAllProducts') %>
-          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </a>
       </div>
     </div>
   </section>
-  <% } %>
 
-  <!-- Newsletter Section -->
-  <section class="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl font-bold mb-4"><%= t('storefront:stayInStyle') %></h2>
-      <p class="text-xl mb-8 text-blue-100">
-        <%= t('storefront:stayInStyleDesc') %>
-      </p>
+  <!-- Brands Strip -->
+  <section class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-bold text-ink-900 mb-2" style="font-family: 'Playfair Display', serif;">Our Brands</h2>
+      <p class="text-gray-500">Premium fashion from the world's finest brands</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
+      <% const brandNames = ['Northwind', 'Coastline', 'Atlas', 'Verona', 'Meridian', 'Foxglove', 'Stride', 'Lumina']; %>
+      <% brandNames.forEach(function(name) { %>
+      <a href="/brands" class="flex items-center justify-center h-20 bg-gray-50 border border-gray-200 rounded-lg hover:border-gold-500 hover:bg-white transition-all">
+        <span class="text-lg font-semibold text-gray-400 hover:text-gold-600 transition-colors" style="font-family: 'Playfair Display', serif;"><%= name %></span>
+      </a>
+      <% }); %>
+    </div>
+  </section>
 
-      <div class="max-w-md mx-auto">
-        <div class="flex">
-          <input
-            type="email"
-            placeholder="<%= t('storefront:enterEmailAddress') %>"
-            class="flex-1 px-4 py-3 rounded-l-lg text-gray-900 focus:ring-2 focus:ring-blue-300 focus:outline-none"
-          >
-          <button class="px-6 py-3 bg-white text-blue-600 rounded-r-lg font-semibold hover:bg-gray-100 transition-colors">
-            <%= t('storefront:subscribe') %>
-          </button>
-        </div>
-        <p class="text-sm text-blue-100 mt-2">
-          <%= t('storefront:privacyUnsubscribe') %>
-        </p>
-      </div>
+  <!-- CTA Banner -->
+  <section class="bg-ink-900 text-white">
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+      <h2 class="text-4xl font-bold mb-4" style="font-family: 'Playfair Display', serif;">Join the CommerceFull Family</h2>
+      <p class="text-gray-400 max-w-2xl mx-auto mb-8">Sign up today and enjoy exclusive member benefits, early access to new collections, and special offers.</p>
+      <a href="/signup" class="btn-accent inline-block">Create Account</a>
     </div>
   </section>
 </main>

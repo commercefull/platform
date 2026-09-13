@@ -111,9 +111,7 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
 
   // Parse addresses
   const shippingAddress = JSON.parse(shippingAddressStr as string) as Record<string, unknown>;
-  const billingAddress = billingAddressStr
-    ? (JSON.parse(billingAddressStr as string) as Record<string, unknown>)
-    : shippingAddress;
+  const billingAddress = billingAddressStr ? (JSON.parse(billingAddressStr as string) as Record<string, unknown>) : shippingAddress;
 
   // Get shipping method details
   const getShippingMethodUseCase = new GetShippingMethodDetailsUseCase();

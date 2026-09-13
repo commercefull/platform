@@ -1,0 +1,25 @@
+<%
+  /**
+   * Breadcrumb Partial — Reusable breadcrumb navigation
+   *
+   * Usage:
+   *   <%- include("../partials/breadcrumb", { items: [{ label: 'Home', url: '/' }, { label: 'Products' }] }) %>
+   *
+   * Props:
+   *   items: Array<{ label: string, url?: string }>
+   */
+%>
+<nav class="flex text-sm text-gray-500 flex-wrap items-center" aria-label="Breadcrumb">
+  <% items.forEach(function(item, i) { %>
+  <% if (i > 0) { %>
+  <svg class="w-4 h-4 mx-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+  </svg>
+  <% } %>
+  <% if (item.url && i < items.length - 1) { %>
+  <a href="<%= item.url %>" class="hover:text-gold-600 transition-colors"><%= item.label %></a>
+  <% } else { %>
+  <span class="text-ink-900 font-medium"><%= item.label %></span>
+  <% } %>
+  <% }); %>
+</nav>

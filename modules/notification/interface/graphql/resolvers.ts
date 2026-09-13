@@ -1,4 +1,3 @@
-
 const NotificationRepo = notificationDataRepository.notifications;
 import { requireAuth, requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetNotificationsUseCase, GetNotificationsInput } from '../../application/useCases/GetNotifications';

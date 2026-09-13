@@ -12,6 +12,7 @@ exports.up = function (knex) {
     t.timestamp('endDate');
     t.boolean('isActive').notNullable().defaultTo(true);
     t.boolean('isExclusive').notNullable().defaultTo(false);
+    t.enu('stackability', ['none', 'stackable', 'exclusive']).notNullable().defaultTo('stackable');
     t.integer('maxUsage');
     t.integer('usageCount').notNullable().defaultTo(0);
     t.integer('maxUsagePerCustomer');
@@ -28,6 +29,7 @@ exports.up = function (knex) {
     t.index('endDate');
     t.index('isActive');
     t.index('isExclusive');
+    t.index('stackability');
     t.index('priority');
     t.index('organizationId');
     t.index('isGlobal');

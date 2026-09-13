@@ -17,7 +17,18 @@ import { getShippingLabelUseCase } from '../../application/useCases/GetShippingL
 import { voidShippingLabelUseCase } from '../../application/useCases/VoidShippingLabel';
 import { trackShipmentUseCase } from '../../application/useCases/TrackShipment';
 import { shippingConfigRepository, shippingLabelRepo } from '../../application/wired';
-import { CreateShippingCarrierInput, UpdateShippingCarrierInput, CreateShippingMethodInput, UpdateShippingMethodInput, CreateShippingZoneInput, UpdateShippingZoneInput, CreateShippingRateInput, UpdateShippingRateInput, CreateShippingPackagingTypeInput, UpdateShippingPackagingTypeInput } from '../../application/wired';
+import {
+  CreateShippingCarrierInput,
+  UpdateShippingCarrierInput,
+  CreateShippingMethodInput,
+  UpdateShippingMethodInput,
+  CreateShippingZoneInput,
+  UpdateShippingZoneInput,
+  CreateShippingRateInput,
+  UpdateShippingRateInput,
+  CreateShippingPackagingTypeInput,
+  UpdateShippingPackagingTypeInput,
+} from '../../application/wired';
 import type { CreateShippingSurchargeInput, UpdateShippingSurchargeInput } from '../../application/wired';
 
 const shippingCarrierRepo = shippingConfigRepository.carriers;

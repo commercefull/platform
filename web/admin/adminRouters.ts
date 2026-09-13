@@ -1,47 +1,637 @@
 import express from 'express';
 import { asyncHandler } from '../../libs/asyncHandler';
 import { isAdminLoggedIn } from '../../libs/auth';
-import { getAdminDashboard, getAdminLogin, getAdminProfile, postAdminLogin, postAdminLogout, createRole, createUser, createUserForm, deleteRole, deleteUser, listRoles, listUsers, updateRole, updateUser, viewUser } from '../../modules/identity';
-import { createProduct, createProductCategory, createProductCategoryForm, createProductCollection, createProductCollectionForm, createProductForm, createProductTag, deleteProduct, deleteProductCategory, deleteProductCollection, deleteProductTag, deleteReviewMedia, editProductCategoryForm, editProductCollectionForm, editProductForm, listProductCategories, listProductCollections, listProductPrices, listProductQa, listProductTags, listProducts, listReviewMedia, publishProduct, unpublishProduct, updateProduct, updateProductCategory, updateProductCollection, updateProductStatus, updateQaStatus, upsertProductPrice, viewProduct, createCategory, createCategoryForm, createCollection, createCollectionForm, deleteCategory, deleteCollection, editCategoryForm, editCollectionForm, listCategories, listCollections, reorderCategories, updateCategory, updateCollection, viewCategory, viewCollection } from '../../modules/product';
-import { addOrderNote, cancelOrder, deleteOrderNote, listFulfillmentPackages, listOrderNotes, listOrderRefunds, listOrders, processRefund, refundForm, updateOrderStatus, updatePackageTracking, viewOrder } from '../../modules/order';
-import { addCustomerAddress, customerAddresses, deactivateCustomer, editCustomerForm, listCustomers, reactivateCustomer, updateCustomer, verifyCustomer, viewCustomer } from '../../modules/customer';
-import { createPromotion, createPromotionForm, deletePromotion, editPromotionForm, listPromotions, previewPromotion, updatePromotion, viewPromotion, createCoupon, createCouponForm, deleteCoupon, editCouponForm, listCoupons, updateCoupon, validateCoupon, viewCoupon, activateGiftCardAction, assignGiftCardAction, cancelGiftCardAction, checkGiftCardBalance, createGiftCard, createGiftCardForm, editGiftCardForm, listGiftCards, refundToGiftCardAction, reloadGiftCardAction, viewGiftCard } from '../../modules/promotion';
-import { createPaymentGateway, createPaymentGatewayForm, deletePaymentGateway, editPaymentGatewayForm, listDisputes, listPaymentFees, listPaymentGateways, listPaymentMethods, listPaymentReports, listPaymentSettings, listPaymentTransactions, updateDisputeStatus, updatePaymentGateway, updatePaymentSettings, viewDispute, viewPaymentBalance, viewPaymentGateway, viewPaymentReport, createFraudRule, deleteFraudRule, listFraudRules, simulateFraudScreening, updateFraudRule } from '../../modules/payment';
-import { activateShippingMethod, createShippingMethod, createShippingMethodForm, deactivateShippingMethod, deleteShippingMethod, editShippingMethodForm, listShippingMethods, updateShippingMethod, viewShippingMethod, activateShippingZone, createShippingZone, createShippingZoneForm, deactivateShippingZone, deleteShippingZone, editShippingZoneForm, listShippingZones, updateShippingZone, viewShippingZone, activateShippingRate, calculateShippingRate, createShippingRate, createShippingRateForm, deactivateShippingRate, deleteShippingRate, editShippingRateForm, listShippingRates, updateShippingRate, viewShippingRate, listShippingSurcharges, createShippingSurchargeForm, createShippingSurcharge, viewShippingSurcharge, editShippingSurchargeForm, updateShippingSurcharge, deleteShippingSurcharge } from '../../modules/shipping';
-import { createContentPage, createContentPageForm, deleteContentPage, editContentPageForm, listContentMedia, listContentPages, listContentTemplates, publishContentPage, updateContentPage, viewContentPage, generateRobotsTxt, generateSitemap, listSEOSettings, updateSEOSettings, createContentBlock, createContentBlockForm, deleteContentBlock, editContentBlockForm, listContentBlocks, reorderContentBlocks, updateContentBlock } from '../../modules/content';
-import { activateNotificationTemplate, cloneNotificationTemplate, createNotificationTemplate, createNotificationTemplateForm, createWebhook, createWebhookForm, deactivateNotificationTemplate, deactivateWebhook, deleteNotificationTemplate, editNotificationTemplateForm, listBatches, listNotificationTemplates, listTemplateTranslations, listWebhooks, previewNotificationTemplate, updateNotificationTemplate, viewBatch, viewNotificationTemplate } from '../../modules/notification';
-import { createDraft, createDraftForm, deleteDraft, listPageBuilderDrafts, pageBuilderEditor, pageBuilderPreview, publishDraft } from '../../modules/pagebuilder';
-import { activateTheme, archiveTheme, assignTheme, deleteTheme, listThemes, saveOverride, themeDetail, themePreview, unassignTheme } from '../../modules/theme';
-import { activateWarehouse, createWarehouse, createWarehouseForm, deactivateWarehouse, deleteWarehouse, editWarehouseForm, listWarehouses, updateWarehouse, viewWarehouse } from '../../modules/warehouse';
-import { basketAnalytics, cleanupExpiredBaskets, listAbandonedCarts, markCartRecovered, recoverAbandonedCart, sendRecoveryEmail, viewAbandonedCart } from '../../modules/basket';
-import { cancelFulfillment, getFulfillmentStats, listFulfillments, markAsDelivered, markAsShipped, updateFulfillmentStatus, viewFulfillment, warehouseDashboard, operationsDashboard } from '../../modules/fulfillment';
-import { activateSupplier, approveSupplier, createSupplier, createSupplierForm, deactivateSupplier, deleteSupplier, editSupplierForm, listSuppliers, suspendSupplier, updateSupplier, viewSupplier } from '../../modules/supplier';
-import { activateMembershipPlan, bulkMembershipOperations, createMembershipPlan, createMembershipPlanForm, deactivateMembershipPlan, deleteMembershipPlan, editMembershipPlanForm, listMembershipBenefits, listMembershipPlans, listMemberships, membershipAnalytics, membershipUpgradeDowngrade, updateMembershipPlan, viewMembershipPlan, loyaltyDashboard, membershipDashboard, subscriptionDashboard } from '../../modules/membership';
-import { cancelCustomerSubscription, createSubscriptionPlan, createSubscriptionPlanForm, deleteSubscriptionPlan, editSubscriptionPlanForm, listCustomerSubscriptions, listSubscriptionPlans, manageFailedPayments, processSubscriptionBilling, subscriptionBilling, updateSubscriptionPlan, updateSubscriptionStatus, viewCustomerSubscription, viewSubscriptionPlan } from '../../modules/subscription';
-import { createLoyaltyReward, createLoyaltyRewardForm, deleteLoyaltyReward, editLoyaltyRewardForm, listCustomerLoyalty, listLoyaltyRewards, listLoyaltyTiers, loyaltyAnalytics, updateLoyaltyReward, viewCustomerLoyalty, viewLoyaltyReward } from '../../modules/loyalty';
-import { aiRecommendations, analyticsDashboard, automatedReports, createReportSchedule, customerAnalytics, deleteReportSchedule, executiveDashboard, predictiveAnalytics, realTimeMetrics, runReportNow, storeSalesDashboard, updateReportSchedule } from '../../modules/analytics';
-import { businessInfo, storeSettings, updateBusinessInfo, updateStoreSettings, createCurrencySetting as createCurrency, createLanguageSetting as createLanguage, deleteCurrencySetting as deleteCurrency, deleteLanguageSetting as deleteLanguage, updateCurrencySetting as updateCurrency, updateLanguageSetting as updateLanguage, createCurrency as createCurrencyLocalization, createCurrencyForm, createLanguage as createLanguageLocalization, createLanguageForm, createRegion, createRegionForm, deleteCurrency as deleteCurrencyLocalization, deleteLanguage as deleteLanguageLocalization, deleteRegion, editCurrencyForm, editLanguageForm, editRegionForm, listCurrencies, listLanguages, listRegions, localizationDashboard, updateCurrency as updateCurrencyLocalization, updateLanguage as updateLanguageLocalization, updateRegion } from '../../modules/localization';
-import { adjustStock, approveDispatch, cancelDispatch, createDispatch, createDispatchForm, listDispatches, listInventory, listLocations, lowStockReport, markDispatched, receiveDispatch, viewDispatch, viewInventoryHistory, createAllocationRule, deleteAllocationRule, listAllocationRules } from '../../modules/inventory';
-import { approveTaxExemption, createTaxClass, createTaxRate, createTaxZone, deleteTaxClass, deleteTaxRate, deleteTaxZone, listTaxExemptions, listTaxSettings, rejectTaxExemption, updateTaxClass, updateTaxRate, updateTaxZone } from '../../modules/tax';
-import { completeGdprRequest, consentManagement, createGdprRequest, gdprDashboard, processGdprRequest, viewGdprRequest } from '../../modules/gdpr';
-import { createFaq, deleteFaq, listFaqs, listSupportTickets, supportDashboard, updateFaq, updateTicketStatus, viewSupportTicket } from '../../modules/support';
-import { createPriceList, createPriceListForm, createPriceRule, createPriceRuleForm, deletePriceList, deletePriceRule, editPriceListForm, editPriceRuleForm, listPriceLists, listPriceRules, updatePriceList, updatePriceRule, viewPriceList, viewPriceRule } from '../../modules/pricing';
-import { approveOrganization, createOrganization, createOrganizationForm, deleteOrganization, editOrganizationForm, listOrganizations, suspendOrganization, updateOrganization, viewOrganization } from '../../modules/organization';
-import { bulkDeleteMedia, createFolder, deleteMedia, editMediaForm, listMedia, updateMedia, uploadMedia, uploadMediaForm, viewMedia } from '../../modules/media';
-import { checkoutSettings, listPaymentMethods as listPaymentMethodsCheckout, listShippingOptions, updateCheckoutSettings, updatePaymentMethodOrder, updateShippingOptionOrder } from '../../modules/checkout';
-import { assignUserToStore, createStore, createStoreForm, editStoreForm, listStores, manageStoreUsers, removeUserFromStore, updateStore, viewStore } from '../../modules/store';
-import { createSchedule, createScheduleForm, deleteSchedule, editScheduleForm, generateReport, listSchedules, reportingDashboard, updateSchedule, viewSchedule } from '../../modules/reporting';
-import { activateAutomationRule, createAutomationRule, createAutomationRuleForm, deactivateAutomationRule, deleteAutomationRule, editAutomationRuleForm, listAutomationRules, triggerAutomationRule, updateAutomationRule, viewAutomationRule } from '../../modules/automation';
-import { approveReturn, cancelReturn, completeInspection, completeReturn, createReturn, createReturnForm, denyReturn, listReturns, markInTransit, markReceived, viewReturn, viewStoreCredit, createReturnRule, deleteReturnRule, listReturnRules } from '../../modules/returns';
-import { activateIntegration, addCredential, createIntegration, createIntegrationForm, createSubscription, deactivateIntegration, deleteCredential, deleteIntegration, deleteSubscription, listIntegrations, updateIntegration, updateSubscription, viewIntegration } from '../../modules/integration';
+import {
+  getAdminDashboard,
+  getAdminLogin,
+  getAdminProfile,
+  postAdminLogin,
+  postAdminLogout,
+  createRole,
+  createUser,
+  createUserForm,
+  deleteRole,
+  deleteUser,
+  listRoles,
+  listUsers,
+  updateRole,
+  updateUser,
+  viewUser,
+} from '../../modules/identity';
+import {
+  createProduct,
+  createProductCategory,
+  createProductCategoryForm,
+  createProductCollection,
+  createProductCollectionForm,
+  createProductForm,
+  createProductTag,
+  deleteProduct,
+  deleteProductCategory,
+  deleteProductCollection,
+  deleteProductTag,
+  deleteReviewMedia,
+  editProductCategoryForm,
+  editProductCollectionForm,
+  editProductForm,
+  listProductCategories,
+  listProductCollections,
+  listProductPrices,
+  listProductQa,
+  listProductTags,
+  listProducts,
+  listReviewMedia,
+  publishProduct,
+  unpublishProduct,
+  updateProduct,
+  updateProductCategory,
+  updateProductCollection,
+  updateProductStatus,
+  updateQaStatus,
+  upsertProductPrice,
+  viewProduct,
+  createCategory,
+  createCategoryForm,
+  createCollection,
+  createCollectionForm,
+  deleteCategory,
+  deleteCollection,
+  editCategoryForm,
+  editCollectionForm,
+  listCategories,
+  listCollections,
+  reorderCategories,
+  updateCategory,
+  updateCollection,
+  viewCategory,
+  viewCollection,
+  listAdminBrands,
+  viewBrand,
+  createBrandForm,
+  createBrand,
+  editBrandForm,
+  updateBrand,
+  deleteBrand,
+} from '../../modules/product';
+import {
+  addOrderNote,
+  cancelOrder,
+  deleteOrderNote,
+  listFulfillmentPackages,
+  listOrderNotes,
+  listOrderRefunds,
+  listOrders,
+  processRefund,
+  refundForm,
+  updateOrderStatus,
+  updatePackageTracking,
+  viewOrder,
+} from '../../modules/order';
+import {
+  addCustomerAddress,
+  customerAddresses,
+  deactivateCustomer,
+  editCustomerForm,
+  listCustomers,
+  reactivateCustomer,
+  updateCustomer,
+  verifyCustomer,
+  viewCustomer,
+} from '../../modules/customer';
+import {
+  createPromotion,
+  createPromotionForm,
+  deletePromotion,
+  editPromotionForm,
+  listPromotions,
+  previewPromotion,
+  updatePromotion,
+  viewPromotion,
+  createCoupon,
+  createCouponForm,
+  deleteCoupon,
+  editCouponForm,
+  listCoupons,
+  updateCoupon,
+  validateCoupon,
+  viewCoupon,
+  activateGiftCardAction,
+  assignGiftCardAction,
+  cancelGiftCardAction,
+  checkGiftCardBalance,
+  createGiftCard,
+  createGiftCardForm,
+  editGiftCardForm,
+  listGiftCards,
+  refundToGiftCardAction,
+  reloadGiftCardAction,
+  viewGiftCard,
+} from '../../modules/promotion';
+import {
+  createPaymentGateway,
+  createPaymentGatewayForm,
+  deletePaymentGateway,
+  editPaymentGatewayForm,
+  listDisputes,
+  listPaymentFees,
+  listPaymentGateways,
+  listPaymentMethods,
+  listPaymentReports,
+  listPaymentSettings,
+  listPaymentTransactions,
+  updateDisputeStatus,
+  updatePaymentGateway,
+  updatePaymentSettings,
+  viewDispute,
+  viewPaymentBalance,
+  viewPaymentGateway,
+  viewPaymentReport,
+  createFraudRule,
+  deleteFraudRule,
+  listFraudRules,
+  simulateFraudScreening,
+  updateFraudRule,
+} from '../../modules/payment';
+import {
+  activateShippingMethod,
+  createShippingMethod,
+  createShippingMethodForm,
+  deactivateShippingMethod,
+  deleteShippingMethod,
+  editShippingMethodForm,
+  listShippingMethods,
+  updateShippingMethod,
+  viewShippingMethod,
+  activateShippingZone,
+  createShippingZone,
+  createShippingZoneForm,
+  deactivateShippingZone,
+  deleteShippingZone,
+  editShippingZoneForm,
+  listShippingZones,
+  updateShippingZone,
+  viewShippingZone,
+  activateShippingRate,
+  calculateShippingRate,
+  createShippingRate,
+  createShippingRateForm,
+  deactivateShippingRate,
+  deleteShippingRate,
+  editShippingRateForm,
+  listShippingRates,
+  updateShippingRate,
+  viewShippingRate,
+  listShippingSurcharges,
+  createShippingSurchargeForm,
+  createShippingSurcharge,
+  viewShippingSurcharge,
+  editShippingSurchargeForm,
+  updateShippingSurcharge,
+  deleteShippingSurcharge,
+} from '../../modules/shipping';
+import {
+  createContentPage,
+  createContentPageForm,
+  deleteContentPage,
+  editContentPageForm,
+  listContentMedia,
+  listContentPages,
+  listContentTemplates,
+  publishContentPage,
+  updateContentPage,
+  viewContentPage,
+  generateRobotsTxt,
+  generateSitemap,
+  listSEOSettings,
+  updateSEOSettings,
+  createContentBlock,
+  createContentBlockForm,
+  deleteContentBlock,
+  editContentBlockForm,
+  listContentBlocks,
+  reorderContentBlocks,
+  updateContentBlock,
+} from '../../modules/content';
+import {
+  activateNotificationTemplate,
+  cloneNotificationTemplate,
+  createNotificationTemplate,
+  createNotificationTemplateForm,
+  createWebhook,
+  createWebhookForm,
+  deactivateNotificationTemplate,
+  deactivateWebhook,
+  deleteNotificationTemplate,
+  editNotificationTemplateForm,
+  listBatches,
+  listNotificationTemplates,
+  listTemplateTranslations,
+  listWebhooks,
+  previewNotificationTemplate,
+  updateNotificationTemplate,
+  viewBatch,
+  viewNotificationTemplate,
+} from '../../modules/notification';
+import {
+  createDraft,
+  createDraftForm,
+  deleteDraft,
+  listPageBuilderDrafts,
+  pageBuilderEditor,
+  pageBuilderPreview,
+  publishDraft,
+} from '../../modules/pagebuilder';
+import {
+  activateTheme,
+  archiveTheme,
+  assignTheme,
+  deleteTheme,
+  listThemes,
+  saveOverride,
+  themeDetail,
+  themePreview,
+  unassignTheme,
+} from '../../modules/theme';
+import {
+  activateWarehouse,
+  createWarehouse,
+  createWarehouseForm,
+  deactivateWarehouse,
+  deleteWarehouse,
+  editWarehouseForm,
+  listWarehouses,
+  updateWarehouse,
+  viewWarehouse,
+} from '../../modules/warehouse';
+import {
+  basketAnalytics,
+  cleanupExpiredBaskets,
+  listAbandonedCarts,
+  markCartRecovered,
+  recoverAbandonedCart,
+  sendRecoveryEmail,
+  viewAbandonedCart,
+} from '../../modules/basket';
+import {
+  cancelFulfillment,
+  getFulfillmentStats,
+  listFulfillments,
+  markAsDelivered,
+  markAsShipped,
+  updateFulfillmentStatus,
+  viewFulfillment,
+  warehouseDashboard,
+  operationsDashboard,
+} from '../../modules/fulfillment';
+import {
+  activateSupplier,
+  approveSupplier,
+  createSupplier,
+  createSupplierForm,
+  deactivateSupplier,
+  deleteSupplier,
+  editSupplierForm,
+  listSuppliers,
+  suspendSupplier,
+  updateSupplier,
+  viewSupplier,
+} from '../../modules/supplier';
+import {
+  activateMembershipPlan,
+  bulkMembershipOperations,
+  createMembershipPlan,
+  createMembershipPlanForm,
+  deactivateMembershipPlan,
+  deleteMembershipPlan,
+  editMembershipPlanForm,
+  listMembershipBenefits,
+  listMembershipPlans,
+  listMemberships,
+  membershipAnalytics,
+  membershipUpgradeDowngrade,
+  updateMembershipPlan,
+  viewMembershipPlan,
+  loyaltyDashboard,
+  membershipDashboard,
+  subscriptionDashboard,
+} from '../../modules/membership';
+import {
+  cancelCustomerSubscription,
+  createSubscriptionPlan,
+  createSubscriptionPlanForm,
+  deleteSubscriptionPlan,
+  editSubscriptionPlanForm,
+  listCustomerSubscriptions,
+  listSubscriptionPlans,
+  manageFailedPayments,
+  processSubscriptionBilling,
+  subscriptionBilling,
+  updateSubscriptionPlan,
+  updateSubscriptionStatus,
+  viewCustomerSubscription,
+  viewSubscriptionPlan,
+} from '../../modules/subscription';
+import {
+  createLoyaltyReward,
+  createLoyaltyRewardForm,
+  deleteLoyaltyReward,
+  editLoyaltyRewardForm,
+  listCustomerLoyalty,
+  listLoyaltyRewards,
+  listLoyaltyTiers,
+  loyaltyAnalytics,
+  updateLoyaltyReward,
+  viewCustomerLoyalty,
+  viewLoyaltyReward,
+} from '../../modules/loyalty';
+import {
+  aiRecommendations,
+  analyticsDashboard,
+  automatedReports,
+  createReportSchedule,
+  customerAnalytics,
+  deleteReportSchedule,
+  executiveDashboard,
+  predictiveAnalytics,
+  realTimeMetrics,
+  runReportNow,
+  storeSalesDashboard,
+  updateReportSchedule,
+} from '../../modules/analytics';
+import {
+  businessInfo,
+  storeSettings,
+  updateBusinessInfo,
+  updateStoreSettings,
+  createCurrencySetting as createCurrency,
+  createLanguageSetting as createLanguage,
+  deleteCurrencySetting as deleteCurrency,
+  deleteLanguageSetting as deleteLanguage,
+  updateCurrencySetting as updateCurrency,
+  updateLanguageSetting as updateLanguage,
+  createCurrency as createCurrencyLocalization,
+  createCurrencyForm,
+  createLanguage as createLanguageLocalization,
+  createLanguageForm,
+  createRegion,
+  createRegionForm,
+  deleteCurrency as deleteCurrencyLocalization,
+  deleteLanguage as deleteLanguageLocalization,
+  deleteRegion,
+  editCurrencyForm,
+  editLanguageForm,
+  editRegionForm,
+  listCurrencies,
+  listLanguages,
+  listRegions,
+  localizationDashboard,
+  updateCurrency as updateCurrencyLocalization,
+  updateLanguage as updateLanguageLocalization,
+  updateRegion,
+} from '../../modules/localization';
+import {
+  adjustStock,
+  approveDispatch,
+  cancelDispatch,
+  createDispatch,
+  createDispatchForm,
+  listDispatches,
+  listInventory,
+  listLocations,
+  lowStockReport,
+  markDispatched,
+  receiveDispatch,
+  viewDispatch,
+  viewInventoryHistory,
+  createAllocationRule,
+  deleteAllocationRule,
+  listAllocationRules,
+} from '../../modules/inventory';
+import {
+  approveTaxExemption,
+  createTaxClass,
+  createTaxRate,
+  createTaxZone,
+  deleteTaxClass,
+  deleteTaxRate,
+  deleteTaxZone,
+  listTaxExemptions,
+  listTaxSettings,
+  rejectTaxExemption,
+  updateTaxClass,
+  updateTaxRate,
+  updateTaxZone,
+} from '../../modules/tax';
+import {
+  completeGdprRequest,
+  consentManagement,
+  createGdprRequest,
+  gdprDashboard,
+  processGdprRequest,
+  viewGdprRequest,
+} from '../../modules/gdpr';
+import {
+  createFaq,
+  deleteFaq,
+  listFaqs,
+  listSupportTickets,
+  supportDashboard,
+  updateFaq,
+  updateTicketStatus,
+  viewSupportTicket,
+} from '../../modules/support';
+import {
+  createPriceList,
+  createPriceListForm,
+  createPriceRule,
+  createPriceRuleForm,
+  deletePriceList,
+  deletePriceRule,
+  editPriceListForm,
+  editPriceRuleForm,
+  listPriceLists,
+  listPriceRules,
+  updatePriceList,
+  updatePriceRule,
+  viewPriceList,
+  viewPriceRule,
+} from '../../modules/pricing';
+import {
+  approveOrganization,
+  createOrganization,
+  createOrganizationForm,
+  deleteOrganization,
+  editOrganizationForm,
+  listOrganizations,
+  suspendOrganization,
+  updateOrganization,
+  viewOrganization,
+} from '../../modules/organization';
+import {
+  bulkDeleteMedia,
+  createFolder,
+  deleteMedia,
+  editMediaForm,
+  listMedia,
+  updateMedia,
+  uploadMedia,
+  uploadMediaForm,
+  viewMedia,
+} from '../../modules/media';
+import {
+  checkoutSettings,
+  listPaymentMethods as listPaymentMethodsCheckout,
+  listShippingOptions,
+  updateCheckoutSettings,
+  updatePaymentMethodOrder,
+  updateShippingOptionOrder,
+} from '../../modules/checkout';
+import {
+  assignUserToStore,
+  createStore,
+  createStoreForm,
+  editStoreForm,
+  listStores,
+  manageStoreUsers,
+  removeUserFromStore,
+  updateStore,
+  viewStore,
+} from '../../modules/store';
+import {
+  createSchedule,
+  createScheduleForm,
+  deleteSchedule,
+  editScheduleForm,
+  generateReport,
+  listSchedules,
+  reportingDashboard,
+  updateSchedule,
+  viewSchedule,
+} from '../../modules/reporting';
+import {
+  activateAutomationRule,
+  createAutomationRule,
+  createAutomationRuleForm,
+  deactivateAutomationRule,
+  deleteAutomationRule,
+  editAutomationRuleForm,
+  listAutomationRules,
+  triggerAutomationRule,
+  updateAutomationRule,
+  viewAutomationRule,
+} from '../../modules/automation';
+import {
+  approveReturn,
+  cancelReturn,
+  completeInspection,
+  completeReturn,
+  createReturn,
+  createReturnForm,
+  denyReturn,
+  listReturns,
+  markInTransit,
+  markReceived,
+  viewReturn,
+  viewStoreCredit,
+  createReturnRule,
+  deleteReturnRule,
+  listReturnRules,
+} from '../../modules/returns';
+import {
+  activateIntegration,
+  addCredential,
+  createIntegration,
+  createIntegrationForm,
+  createSubscription,
+  deactivateIntegration,
+  deleteCredential,
+  deleteIntegration,
+  deleteSubscription,
+  listIntegrations,
+  updateIntegration,
+  updateSubscription,
+  viewIntegration,
+} from '../../modules/integration';
 import { listAuditLogs, viewAuditLog, auditStats, verifyChain } from '../../modules/audit';
-import { listB2BCompanies, viewB2BCompany, createB2BCompanyForm, createB2BCompany, editB2BCompanyForm, updateB2BCompany, approveB2BCompany, suspendB2BCompany, reactivateB2BCompany, listB2BQuotes, viewB2BQuote } from '../../modules/b2b';
-import { listSystemConfigurations, viewSystemConfiguration, createSystemConfigurationForm, createSystemConfiguration, editSystemConfigurationForm, updateSystemConfiguration } from '../../modules/configuration';
-import { listVendors, viewVendor, createVendorForm, createVendor, editVendorForm, updateVendor, approveVendor, suspendVendor, listCommissionRules, viewCommissionRule, listPayouts, viewPayout } from '../../modules/marketplace';
-import { listSegments, viewSegment, createSegmentForm, createSegment, editSegmentForm, updateSegment, deleteSegment, evaluateSegment, viewSegmentMembers } from '../../modules/segment';
-import { listTrackingConfigs, viewTrackingConfig, createTrackingConfigForm, createTrackingConfig, editTrackingConfigForm, activateTrackingConfig, disableTrackingConfig, deleteTrackingConfig } from '../../modules/tracking';
-import { listWebhookEndpoints, viewWebhookEndpoint, createWebhookForm as createWebhookEndpointForm, createWebhook as createWebhookEndpoint, editWebhookForm as editWebhookEndpointForm, updateWebhook, deleteWebhook as deleteWebhookEndpoint, viewWebhookDeliveries } from '../../modules/webhook';
-import { listImportJobs, viewImportJob, createImportJobForm, createImportJob, startImportJob, pauseImportJob, cancelImportJob, deleteImportJob, viewImportMappings, viewImportErrors, resolveImportError } from '../../modules/migration';
+import {
+  listB2BCompanies,
+  viewB2BCompany,
+  createB2BCompanyForm,
+  createB2BCompany,
+  editB2BCompanyForm,
+  updateB2BCompany,
+  approveB2BCompany,
+  suspendB2BCompany,
+  reactivateB2BCompany,
+  listB2BQuotes,
+  viewB2BQuote,
+} from '../../modules/b2b';
+import {
+  listSystemConfigurations,
+  viewSystemConfiguration,
+  createSystemConfigurationForm,
+  createSystemConfiguration,
+  editSystemConfigurationForm,
+  updateSystemConfiguration,
+} from '../../modules/configuration';
+import {
+  listVendors,
+  viewVendor,
+  createVendorForm,
+  createVendor,
+  editVendorForm,
+  updateVendor,
+  approveVendor,
+  suspendVendor,
+  listCommissionRules,
+  viewCommissionRule,
+  listPayouts,
+  viewPayout,
+} from '../../modules/marketplace';
+import {
+  listSegments,
+  viewSegment,
+  createSegmentForm,
+  createSegment,
+  editSegmentForm,
+  updateSegment,
+  deleteSegment,
+  evaluateSegment,
+  viewSegmentMembers,
+} from '../../modules/segment';
+import {
+  listTrackingConfigs,
+  viewTrackingConfig,
+  createTrackingConfigForm,
+  createTrackingConfig,
+  editTrackingConfigForm,
+  activateTrackingConfig,
+  disableTrackingConfig,
+  deleteTrackingConfig,
+} from '../../modules/tracking';
+import {
+  listWebhookEndpoints,
+  viewWebhookEndpoint,
+  createWebhookForm as createWebhookEndpointForm,
+  createWebhook as createWebhookEndpoint,
+  editWebhookForm as editWebhookEndpointForm,
+  updateWebhook,
+  deleteWebhook as deleteWebhookEndpoint,
+  viewWebhookDeliveries,
+} from '../../modules/webhook';
+import {
+  listImportJobs,
+  viewImportJob,
+  createImportJobForm,
+  createImportJob,
+  startImportJob,
+  pauseImportJob,
+  cancelImportJob,
+  deleteImportJob,
+  viewImportMappings,
+  viewImportErrors,
+  resolveImportError,
+} from '../../modules/migration';
 
 const router = express.Router();
 
@@ -119,6 +709,18 @@ router.get('/catalog/pricing/rules/:ruleId/edit', asyncHandler(editPriceRuleForm
 router.post('/catalog/pricing/rules/:ruleId', asyncHandler(updatePriceRule));
 router.put('/catalog/pricing/rules/:ruleId', asyncHandler(updatePriceRule));
 router.delete('/catalog/pricing/rules/:ruleId', asyncHandler(deletePriceRule));
+
+// ============================================================================
+// Brand Routes
+// ============================================================================
+
+router.get('/catalog/brands', asyncHandler(listAdminBrands));
+router.get('/catalog/brands/new', asyncHandler(createBrandForm));
+router.post('/catalog/brands', asyncHandler(createBrand));
+router.get('/catalog/brands/:brandId', asyncHandler(viewBrand));
+router.get('/catalog/brands/:brandId/edit', asyncHandler(editBrandForm));
+router.post('/catalog/brands/:brandId', asyncHandler(updateBrand));
+router.delete('/catalog/brands/:brandId', asyncHandler(deleteBrand));
 
 // ============================================================================
 // Product Routes

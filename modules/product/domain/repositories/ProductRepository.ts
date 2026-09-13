@@ -16,6 +16,8 @@ export interface ProductFilters {
   categoryId?: string;
   organizationId?: string;
   storeId?: string;
+  brandId?: string;
+  brandIds?: string[];
   isFeatured?: boolean;
   isVirtual?: boolean;
   hasVariants?: boolean;

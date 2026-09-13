@@ -1,4 +1,3 @@
-
 const fulfillmentRepository = fulfillmentDataRepository.fulfillments;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetFulfillmentUseCase, GetFulfillmentInput } from '../../application/useCases/GetFulfillment';

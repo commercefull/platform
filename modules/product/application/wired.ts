@@ -6,7 +6,29 @@ import type { ProductVariantCreateProps, ProductVariantUpdateProps } from '../in
 import type { BundleType, ProductBundle, BundleItem } from '../infrastructure/repositories/bundleRepo';
 import type { ProductAttributeSetUpdateInput } from '../infrastructure/repositories/ProductAttributeSetRepository';
 import type { ProductAttributeOption } from '../infrastructure/repositories/ProductAttributeRepository';
-import type { ReviewRating, ProductQaStatus, RelationType, ReviewFilters } from '../infrastructure/repositories/ProductEngagementRepository';
+import type {
+  ReviewRating,
+  ProductQaStatus,
+  RelationType,
+  ReviewFilters,
+} from '../infrastructure/repositories/ProductEngagementRepository';
 import type { CategoryUpdateProps } from '../infrastructure/repositories/ProductCatalogRepository';
 
-export { productCatalogRepository, productAttributeRepository, productEngagementRepository, InventoryStockAvailabilityAdapter, ReviewRating, ProductQaStatus, RelationType, ReviewFilters, ProductVariantCreateProps, ProductVariantUpdateProps, CategoryUpdateProps, BundleType, ProductBundle, BundleItem, ProductAttributeSetUpdateInput, ProductAttributeOption };
+export {
+  productCatalogRepository,
+  productAttributeRepository,
+  productEngagementRepository,
+  InventoryStockAvailabilityAdapter,
+  ReviewRating,
+  ProductQaStatus,
+  RelationType,
+  ReviewFilters,
+  ProductVariantCreateProps,
+  ProductVariantUpdateProps,
+  CategoryUpdateProps,
+  BundleType,
+  ProductBundle,
+  BundleItem,
+  ProductAttributeSetUpdateInput,
+  ProductAttributeOption,
+};

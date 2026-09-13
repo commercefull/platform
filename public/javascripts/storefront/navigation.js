@@ -1,46 +1,26 @@
-// Navigation dropdown functionality for CSP compliance
-document.addEventListener('DOMContentLoaded', function () {
-  // Shop dropdown functionality
-  const shopBtn = document.getElementById('shop-dropdown-btn');
-  const shopMenu = document.getElementById('shop-dropdown-menu');
+/**
+ * Navigation module — handles mobile menu toggle and dropdown behavior.
+ * Vanilla ES module, no framework.
+ */
 
-  if (shopBtn && shopMenu) {
-    shopBtn.addEventListener('click', function (event) {
-      event.stopPropagation();
-      shopMenu.classList.toggle('hidden');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function (event) {
-      if (!shopBtn.contains(event.target) && !shopMenu.contains(event.target)) {
-        shopMenu.classList.add('hidden');
-      }
-    });
+/**
+ * Initialize the mobile menu toggle.
+ */
+export function initNavigation() {
+  const toggle = document.getElementById('mobile-menu-toggle');
+  const menu = document.getElementById('mobile-menu');
+  if (!toggle || !menu) {
+    return;
   }
 
-  // User menu dropdown functionality
-  const userBtn = document.getElementById('user-menu-btn');
-  const userMenu = document.getElementById('user-menu-dropdown');
+  toggle.addEventListener('click', () => {
+    menu.classList.toggle('hidden');
+  });
 
-  if (userBtn && userMenu) {
-    userBtn.addEventListener('click', function (event) {
-      event.stopPropagation();
-      userMenu.classList.toggle('hidden');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function (event) {
-      if (!userBtn.contains(event.target) && !userMenu.contains(event.target)) {
-        userMenu.classList.add('hidden');
-      }
-    });
-  }
-
-  // Mobile menu button (if needed in future)
-  const mobileBtn = document.querySelector('button.md\\:hidden');
-  if (mobileBtn) {
-    mobileBtn.addEventListener('click', function () {
-      // Mobile menu functionality can be added here if needed
-    });
-  }
-});
+  // Close menu when clicking outside
+  document.addEventListener('click', event => {
+    if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+}

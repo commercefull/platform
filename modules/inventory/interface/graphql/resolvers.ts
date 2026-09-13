@@ -1,4 +1,3 @@
-
 const InventoryRepo = inventoryDataRepository.items;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetInventoryItemUseCase, GetInventoryItemInput } from '../../application/useCases/GetInventoryItem';

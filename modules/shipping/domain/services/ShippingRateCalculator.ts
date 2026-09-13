@@ -62,9 +62,7 @@ export class ShippingRateCalculator {
     }
 
     // 3. Load and apply surcharges
-    const rawSurcharges = this.surchargePort
-      ? await this.surchargePort.findActiveByRateId(input.rate.shippingRateId)
-      : [];
+    const rawSurcharges = this.surchargePort ? await this.surchargePort.findActiveByRateId(input.rate.shippingRateId) : [];
     const surchargeContext: SurchargeContext = {
       baseRate: baseAmount,
       weight: input.totalWeight,

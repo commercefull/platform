@@ -1,4 +1,3 @@
-
 const CustomerRepo = customerDataRepository.customers;
 import { GetCustomerUseCase, GetCustomerCommand } from '../../application/useCases/GetCustomer';
 import { RegisterCustomerUseCase, RegisterCustomerCommand } from '../../application/useCases/RegisterCustomer';

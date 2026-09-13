@@ -292,12 +292,12 @@ export const receiveDispatch = async (req: TypedRequest, res: Response): Promise
       dispatchId: req.params.dispatchId,
       receivedBy: req.user?.userId || 'admin',
       notes: (req.body as RequestBody).notes || undefined,
-      items: ((dispatch.items as { dispatchItemId: string; dispatchedQuantity: number; requestedQuantity: number }[] | undefined) || []).map(
-        (item: { dispatchItemId: string; dispatchedQuantity: number; requestedQuantity: number }) => ({
-          dispatchItemId: item.dispatchItemId,
-          receivedQuantity: item.dispatchedQuantity || item.requestedQuantity,
-        }),
-      ),
+      items: (
+        (dispatch.items as { dispatchItemId: string; dispatchedQuantity: number; requestedQuantity: number }[] | undefined) || []
+      ).map((item: { dispatchItemId: string; dispatchedQuantity: number; requestedQuantity: number }) => ({
+        dispatchItemId: item.dispatchItemId,
+        receivedQuantity: item.dispatchedQuantity || item.requestedQuantity,
+      })),
     });
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch received successfully`);
   } catch (error: unknown) {

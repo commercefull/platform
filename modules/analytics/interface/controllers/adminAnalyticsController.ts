@@ -146,7 +146,11 @@ export const predictiveAnalytics = async (req: TypedRequest, res: Response): Pro
 
       const analysis = await predictiveAnalyticsUseCase.predictCustomerChurn(
         customerId,
-        (history as Array<{ date: Date; orders: number; revenue: number }>).map(h => ({ date: h.date, orders: parseInt(String(h.orders)), revenue: parseFloat(String(h.revenue)) })),
+        (history as Array<{ date: Date; orders: number; revenue: number }>).map(h => ({
+          date: h.date,
+          orders: parseInt(String(h.orders)),
+          revenue: parseFloat(String(h.revenue)),
+        })),
       );
 
       return {

@@ -1,0 +1,109 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50">
+  <!-- Breadcrumb -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <nav class="flex text-sm text-gray-500">
+      <a href="/" class="hover:text-blue-600">Home</a>
+      <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+      <a href="/brands" class="hover:text-blue-600">Brands</a>
+      <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+      <span class="text-gray-900"><%= brand.name %></span>
+    </nav>
+  </div>
+
+  <!-- Brand Hero -->
+  <section class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+        <!-- Brand Logo -->
+        <div class="lg:col-span-1">
+          <div class="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center overflow-hidden shadow-lg">
+            <% if (brand.logoUrl) { %>
+            <img src="<%= brand.logoUrl %>" alt="<%= brand.name %>" class="w-full h-full object-cover">
+            <% } else { %>
+            <div class="text-6xl font-bold text-gray-400"><%= brand.name.charAt(0) %></div>
+            <% } %>
+          </div>
+        </div>
+        <!-- Brand Info -->
+        <div class="lg:col-span-2 space-y-4">
+          <h1 class="text-4xl font-bold text-gray-900"><%= brand.name %></h1>
+          <% if (brand.countryOfOrigin) { %>
+          <div class="flex items-center gap-2 text-gray-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            <span>Origin: <%= brand.countryOfOrigin %></span>
+          </div>
+          <% } %>
+          <% if (brand.description) { %>
+          <p class="text-lg text-gray-600 leading-relaxed"><%= brand.description %></p>
+          <% } %>
+          <% if (brand.website) { %>
+          <a href="<%= brand.website %>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium">
+            Visit Brand Website
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+          </a>
+          <% } %>
+          <div class="pt-4">
+            <a href="/brands/<%= brand.slug %>/products" class="inline-flex items-center px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors">
+              View All Products
+              <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-bold text-gray-900">Featured Products</h2>
+      <a href="/brands/<%= brand.slug %>/products" class="text-blue-600 hover:text-blue-700 font-medium text-sm">View All →</a>
+    </div>
+
+    <% if (products && products.length > 0) { %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <% products.forEach(function(product) { %>
+      <a href="/products/<%= product.slug %>/<%= product.productId %>" class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
+        <div class="aspect-square bg-gray-100 overflow-hidden">
+          <% if (product.primaryImageUrl) { %>
+          <img src="<%= product.primaryImageUrl %>" alt="<%= product.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+          <% } else { %>
+          <div class="w-full h-full flex items-center justify-center text-gray-300">
+            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <% } %>
+        </div>
+        <div class="p-4">
+          <h3 class="font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1"><%= product.name %></h3>
+          <%- include("../partials/price", { price: product.effectivePrice, compareAtPrice: product.isOnSale ? product.basePrice : null }) %>
+        </div>
+      </a>
+      <% }); %>
+    </div>
+    <% } else { %>
+    <div class="text-center py-16">
+      <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">No products yet</h3>
+      <p class="mt-2 text-gray-500">Products from this brand will appear here soon.</p>
+    </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

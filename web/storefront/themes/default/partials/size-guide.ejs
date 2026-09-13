@@ -1,0 +1,138 @@
+<%
+  /**
+   * Size Guide partial — modal content for clothing size charts.
+   *
+   * Usage:
+   *   <%- include("../partials/size-guide") %>
+   *
+   * Renders a hidden modal that can be opened via data-size-guide-open.
+   */
+%>
+<div data-size-guide-modal class="hidden fixed inset-0 bg-black/50 z-[100] items-center justify-center p-4">
+  <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-ink-900" style="font-family: 'Playfair Display', serif;">Size Guide</h2>
+      <button type="button" data-size-guide-close class="text-gray-400 hover:text-ink-900 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 space-y-6">
+      <!-- Tops / Shirts / Knitwear -->
+      <div>
+        <h3 class="text-sm font-semibold text-ink-900 uppercase tracking-wide mb-3">Tops, Shirts & Knitwear</h3>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-2 font-medium text-gray-500">Size</th>
+              <th class="text-left py-2 font-medium text-gray-500">Chest (in)</th>
+              <th class="text-left py-2 font-medium text-gray-500">Chest (cm)</th>
+              <th class="text-left py-2 font-medium text-gray-500">Waist (in)</th>
+              <th class="text-left py-2 font-medium text-gray-500">Waist (cm)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% const tops = [
+              { size: 'XS', chest: 32, chestCm: 81, waist: 26, waistCm: 66 },
+              { size: 'S', chest: 34, chestCm: 86, waist: 28, waistCm: 71 },
+              { size: 'M', chest: 38, chestCm: 97, waist: 32, waistCm: 81 },
+              { size: 'L', chest: 42, chestCm: 107, waist: 36, waistCm: 91 },
+              { size: 'XL', chest: 46, chestCm: 117, waist: 40, waistCm: 102 },
+              { size: 'XXL', chest: 50, chestCm: 127, waist: 44, waistCm: 112 },
+            ]; %>
+            <% tops.forEach(function(row) { %>
+            <tr class="border-b border-gray-100">
+              <td class="py-2 font-medium text-ink-900"><%= row.size %></td>
+              <td class="py-2 text-gray-600"><%= row.chest %>"</td>
+              <td class="py-2 text-gray-600"><%= row.chestCm %> cm</td>
+              <td class="py-2 text-gray-600"><%= row.waist %>"</td>
+              <td class="py-2 text-gray-600"><%= row.waistCm %> cm</td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Trousers / Jeans -->
+      <div>
+        <h3 class="text-sm font-semibold text-ink-900 uppercase tracking-wide mb-3">Trousers & Jeans</h3>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-2 font-medium text-gray-500">Size</th>
+              <th class="text-left py-2 font-medium text-gray-500">Waist (in)</th>
+              <th class="text-left py-2 font-medium text-gray-500">Hip (in)</th>
+              <th class="text-left py-2 font-medium text-gray-500">Inseam (in)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% const bottoms = [
+              { size: '28', waist: 28, hip: 34, inseam: 30 },
+              { size: '30', waist: 30, hip: 36, inseam: 30 },
+              { size: '32', waist: 32, hip: 38, inseam: 32 },
+              { size: '34', waist: 34, hip: 40, inseam: 32 },
+              { size: '36', waist: 36, hip: 42, inseam: 34 },
+              { size: '38', waist: 38, hip: 44, inseam: 34 },
+            ]; %>
+            <% bottoms.forEach(function(row) { %>
+            <tr class="border-b border-gray-100">
+              <td class="py-2 font-medium text-ink-900"><%= row.size %></td>
+              <td class="py-2 text-gray-600"><%= row.waist %>"</td>
+              <td class="py-2 text-gray-600"><%= row.hip %>"</td>
+              <td class="py-2 text-gray-600"><%= row.inseam %>"</td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footwear -->
+      <div>
+        <h3 class="text-sm font-semibold text-ink-900 uppercase tracking-wide mb-3">Footwear</h3>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-2 font-medium text-gray-500">UK</th>
+              <th class="text-left py-2 font-medium text-gray-500">US (M)</th>
+              <th class="text-left py-2 font-medium text-gray-500">US (W)</th>
+              <th class="text-left py-2 font-medium text-gray-500">EU</th>
+              <th class="text-left py-2 font-medium text-gray-500">CM</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% const shoes = [
+              { uk: 6, usM: 7, usW: 8, eu: 40, cm: 25 },
+              { uk: 7, usM: 8, usW: 9, eu: 41, cm: 26 },
+              { uk: 8, usM: 9, usW: 10, eu: 42, cm: 27 },
+              { uk: 9, usM: 10, usW: 11, eu: 43, cm: 28 },
+              { uk: 10, usM: 11, usW: 12, eu: 44, cm: 29 },
+              { uk: 11, usM: 12, usW: 13, eu: 45, cm: 30 },
+            ]; %>
+            <% shoes.forEach(function(row) { %>
+            <tr class="border-b border-gray-100">
+              <td class="py-2 font-medium text-ink-900"><%= row.uk %></td>
+              <td class="py-2 text-gray-600"><%= row.usM %></td>
+              <td class="py-2 text-gray-600"><%= row.usW %></td>
+              <td class="py-2 text-gray-600"><%= row.eu %></td>
+              <td class="py-2 text-gray-600"><%= row.cm %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- How to measure -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="text-sm font-semibold text-ink-900 mb-2">How to Measure</h3>
+        <ul class="text-sm text-gray-600 space-y-1">
+          <li><strong>Chest:</strong> Measure around the fullest part, keeping the tape level under the arms.</li>
+          <li><strong>Waist:</strong> Measure around the natural waistline, keeping the tape comfortably loose.</li>
+          <li><strong>Hip:</strong> Measure around the fullest part of the hips with feet together.</li>
+          <li><strong>Inseam:</strong> Measure from the crotch to the desired hem length.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

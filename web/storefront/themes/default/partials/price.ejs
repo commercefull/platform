@@ -1,0 +1,35 @@
+<%
+  /**
+   * Price Partial — Reusable price display component
+   *
+   * Usage:
+   *   <%- include("../partials/price", { price: 49.99, compareAtPrice: 69.99 }) %>
+   *
+   * Reads currency, locale, and priceDisplayMode from res.locals (set by
+   * storeResolutionMiddleware).
+   *
+   * Props:
+   *   price: number — current price
+   *   compareAtPrice?: number — original price (for sale items, shown with strikethrough)
+   *   showTaxSuffix?: boolean — whether to show "(incl. VAT)" suffix (default: true)
+   */
+%>
+<%
+  const currency = (typeof currency !== 'undefined' ? currency : 'USD') || 'USD';
+  const locale = (typeof locale !== 'undefined' ? locale : 'en-US') || 'en-US';
+  const priceDisplayMode = (typeof priceDisplayMode !== 'undefined' ? priceDisplayMode : 'exclusive_tax') || 'exclusive_tax';
+  const showTaxSuffix = typeof showTaxSuffix !== 'undefined' ? showTaxSuffix : true;
+  const formatPrice = (amt, cur, loc) => new Intl.NumberFormat(loc, { style: 'currency', currency: cur.toUpperCase() }).format(amt);
+  const isOnSale = typeof compareAtPrice !== 'undefined' && compareAtPrice !== null && compareAtPrice > price;
+%>
+<div class="flex items-baseline gap-2">
+  <% if (isOnSale) { %>
+    <span class="text-lg font-semibold text-red-600"><%= formatPrice(price, currency, locale) %></span>
+    <span class="text-sm text-gray-400 line-through"><%= formatPrice(compareAtPrice, currency, locale) %></span>
+  <% } else { %>
+    <span class="text-lg font-semibold text-gray-900"><%= formatPrice(price, currency, locale) %></span>
+  <% } %>
+  <% if (showTaxSuffix && priceDisplayMode === 'inclusive_tax') { %>
+    <span class="text-xs text-gray-500">(incl. VAT)</span>
+  <% } %>
+</div>

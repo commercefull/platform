@@ -55,7 +55,14 @@ export interface ProductListItemResponse {
   hasVariants: boolean;
   primaryImageUrl?: string;
   categoryId?: string;
+  categorySlug?: string;
+  categoryName?: string;
+  brandId?: string;
+  brandName?: string;
+  brandSlug?: string;
+  priceFormatted?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface ListProductsResponse {
@@ -110,6 +117,7 @@ export class ListProductsUseCase {
       hasVariants: product.hasVariants,
       primaryImageUrl: product.primaryImage?.url,
       categoryId: product.categoryId,
+      brandId: product.brandId,
       createdAt: product.createdAt.toISOString(),
     };
   }

@@ -1,0 +1,81 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-tags me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admin/catalog/brands">Brands</a></li>
+            <li class="breadcrumb-item active">Edit</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (errorMsg) { %>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-exclamation-circle me-2"></i><%= errorMsg %>
+      </div>
+      <% } %>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Edit Brand</h3>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="/admin/catalog/brands/<%= brand.brandId %>">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name" value="<%= brand.name %>" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Slug</label>
+                <input type="text" class="form-control" name="slug" value="<%= brand.slug %>" readonly>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" name="description" rows="3"><%= brand.description || '' %></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Logo URL</label>
+                <input type="url" class="form-control" name="logoUrl" value="<%= brand.logoUrl || '' %>" placeholder="https://...">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Website</label>
+                <input type="url" class="form-control" name="website" value="<%= brand.website || '' %>" placeholder="https://...">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Country of Origin</label>
+                <input type="text" class="form-control" name="countryOfOrigin" value="<%= brand.countryOfOrigin || '' %>" placeholder="e.g. GB, US, IT" maxlength="2">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                  <option value="active" <%= brand.status === 'active' ? 'selected' : '' %>>Active</option>
+                  <option value="inactive" <%= brand.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                  <option value="archived" <%= brand.status === 'archived' ? 'selected' : '' %>>Archived</option>
+                </select>
+              </div>
+            </div>
+            <div class="mt-4">
+              <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Update Brand</button>
+              <a href="/admin/catalog/brands" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include('../../partials/footer') %>

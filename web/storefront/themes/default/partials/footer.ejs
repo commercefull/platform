@@ -1,100 +1,118 @@
-    </div>
-
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white mt-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <!-- Company Info -->
-          <div class="col-span-1 md:col-span-2">
-            <div class="flex items-center space-x-2 mb-4">
-              <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                </svg>
-              </div>
-              <span class="text-xl font-bold"><%= t('storefront:brandName') %></span>
+    <footer class="bg-ink-900 text-gray-300 mt-20">
+      <!-- Newsletter -->
+      <div class="border-b border-gray-700">
+        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h2 class="text-2xl text-white mb-2" style="font-family: 'Playfair Display', serif;">Stay in the loop</h2>
+              <p class="text-gray-400 text-sm">Subscribe for new arrivals, exclusive offers, and styling tips.</p>
             </div>
-            <p class="text-gray-400 mb-4 max-w-md">
-              <%= t('storefront:footerDesc') %>
-            </p>
+            <form class="flex gap-2">
+              <input type="email" name="email" placeholder="Your email address" class="flex-1 px-4 py-3 bg-ink-800 border border-gray-700 text-white rounded-none focus:ring-1 focus:ring-gold-500 focus:border-gold-500 text-sm">
+              <button type="submit" class="btn-accent text-sm whitespace-nowrap">Subscribe</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+          <!-- Shop -->
+          <div>
+            <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Shop</h3>
+            <ul class="space-y-2 text-sm">
+              <li><a href="/products" class="hover:text-gold-500 transition-colors">All Products</a></li>
+              <li><a href="/products/category/mens-shirts" class="hover:text-gold-500 transition-colors">Men</a></li>
+              <li><a href="/products/category/womens-dresses" class="hover:text-gold-500 transition-colors">Women</a></li>
+              <li><a href="/products/category/bags" class="hover:text-gold-500 transition-colors">Accessories</a></li>
+              <li><a href="/products/category/sneakers" class="hover:text-gold-500 transition-colors">Footwear</a></li>
+              <li><a href="/brands" class="hover:text-gold-500 transition-colors">Brands</a></li>
+              <li><a href="/search?q=sale" class="hover:text-gold-500 transition-colors">Sale</a></li>
+            </ul>
+          </div>
+          <!-- Help -->
+          <div>
+            <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Help</h3>
+            <ul class="space-y-2 text-sm">
+              <li><a href="/support" class="hover:text-gold-500 transition-colors">Support Center</a></li>
+              <li><a href="/track" class="hover:text-gold-500 transition-colors">Track Order</a></li>
+              <li><a href="/returns" class="hover:text-gold-500 transition-colors">Returns & Exchanges</a></li>
+              <li><a href="/pages/shipping-policy" class="hover:text-gold-500 transition-colors">Shipping Info</a></li>
+              <li><a href="/faq" class="hover:text-gold-500 transition-colors">FAQ</a></li>
+              <li><a href="/pages/contact-us" class="hover:text-gold-500 transition-colors">Contact Us</a></li>
+            </ul>
+          </div>
+          <!-- About -->
+          <div>
+            <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">About</h3>
+            <ul class="space-y-2 text-sm">
+              <li><a href="/pages/about-us" class="hover:text-gold-500 transition-colors">Our Story</a></li>
+              <li><a href="/pages/careers" class="hover:text-gold-500 transition-colors">Careers</a></li>
+              <li><a href="/stores" class="hover:text-gold-500 transition-colors">Store Locator</a></li>
+              <li><a href="/promotions" class="hover:text-gold-500 transition-colors">Promotions</a></li>
+            </ul>
+          </div>
+          <!-- Legal -->
+          <div>
+            <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Legal</h3>
+            <ul class="space-y-2 text-sm">
+              <li><a href="/pages/privacy-policy" class="hover:text-gold-500 transition-colors">Privacy Policy</a></li>
+              <li><a href="/pages/terms" class="hover:text-gold-500 transition-colors">Terms of Service</a></li>
+              <li><a href="/gdpr/requests" class="hover:text-gold-500 transition-colors">Data Requests</a></li>
+            </ul>
+          </div>
+          <!-- Social -->
+          <div>
+            <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Follow Us</h3>
             <div class="flex space-x-4">
-              <a href="https://facebook.com/" target="_blank" class="text-gray-400 hover:text-white transition-colors">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
+              <a href="#" class="text-gray-400 hover:text-gold-500 transition-colors" aria-label="Instagram">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
               </a>
-              <a href="https://instagram.com/" target="_blank" class="text-gray-400 hover:text-white transition-colors">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12.017 0C8.396 0 7.991.014 6.76.067 5.53.12 4.649.244 3.892.467c-.825.234-1.528.547-2.236 1.255C.95 2.431.637 3.134.403 3.959.244 4.716.12 5.597.067 6.826.014 7.991 0 8.396 0 12.017s.014 4.026.067 5.191c.053 1.229.177 2.11.336 2.867.234.825.547 1.528 1.255 2.236.708.708 1.411 1.021 2.236 1.255.657.187 1.538.311 2.767.364 1.229.053 1.634.067 5.191.067s4.026-.014 5.191-.067c1.229-.053 2.11-.177 2.867-.336.825-.234 1.528-.547 2.236-1.255.708-.708 1.021-1.411 1.255-2.236.187-.657.311-1.538.364-2.767.053-1.229.067-1.634.067-5.191s-.014-4.026-.067-5.191c-.053-1.229-.177-2.11-.336-2.867-.234-.825-.547-1.528-1.255-2.236C21.569.95 20.866.637 20.041.403c-.657-.187-1.538-.311-2.767-.364C15.99.014 15.585 0 12.017 0zm0 1.802c3.562 0 3.984.014 5.191.067 1.166.053 1.866.234 2.295.467.666.375 1.14.864 1.514 1.53.233.429.414 1.129.467 2.295.053 1.207.067 1.629.067 5.191s-.014 3.984-.067 5.191c-.053 1.166-.234 1.866-.467 2.295-.375.666-.864 1.14-1.53 1.514-.429.233-1.129.414-2.295.467-1.207.053-1.629.067-5.191.067s-3.984-.014-5.191-.067c-1.166-.053-1.866-.234-2.295-.467-.666-.375-1.14-.864-1.514-1.53-.233-.429-.414-1.129-.467-2.295C1.802 15.984 1.788 15.562 1.802 12.017s.014-3.984.067-5.191c.053-1.166.234-1.866.467-2.295.375-.666.864-1.14 1.53-1.514.429-.233 1.129-.414 2.295-.467 1.207-.053 1.629-.067 5.191-.067zm0 3.393c-3.672 0-6.622 2.95-6.622 6.622s2.95 6.622 6.622 6.622 6.622-2.95 6.622-6.622S15.689 5.595 12.017 5.595zm0 10.867c-2.355 0-4.262-1.907-4.262-4.262s1.907-4.262 4.262-4.262 4.262 1.907 4.262 4.262-1.907 4.262-4.262 4.262zm8.27-11.205c-.858 0-1.553-.695-1.553-1.553s.695-1.553 1.553-1.553 1.553.695 1.553 1.553-.695 1.553-1.553 1.553z"/>
-                </svg>
+              <a href="#" class="text-gray-400 hover:text-gold-500 transition-colors" aria-label="Facebook">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
               </a>
-              <a href="https://twitter.com/" target="_blank" class="text-gray-400 hover:text-white transition-colors">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                </svg>
+              <a href="#" class="text-gray-400 hover:text-gold-500 transition-colors" aria-label="Twitter">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-gold-500 transition-colors" aria-label="Pinterest">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.372-12 12 0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.065-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.403 2.965 7.403 6.925 0 4.136-2.607 7.464-6.225 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146 1.124.347 2.317.535 3.554.535 6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
               </a>
             </div>
-          </div>
-
-          <!-- Quick Links -->
-          <div>
-            <h3 class="text-lg font-semibold mb-4"><%= t('storefront:quickLinks') %></h3>
-            <ul class="space-y-2">
-              <li><a href="/pages/about-us" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:aboutOurStore') %></a></li>
-              <li><a href="/pages/contact-us" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:contactUs') %></a></li>
-              <li><a href="/pages/shipping-policy" class="text-gray-400 hover:text-white transition-colors"><%= t('shared:common.shippingPolicy') %></a></li>
-              <li><a href="/pages/careers" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:careers') %></a></li>
-            </ul>
-          </div>
-
-          <!-- Customer Service -->
-          <div>
-            <h3 class="text-lg font-semibold mb-4"><%= t('storefront:customerService') %></h3>
-            <ul class="space-y-2">
-              <li><a href="/orders" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:trackOrder') %></a></li>
-              <li><a href="/returns" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:returnsExchanges') %></a></li>
-              <li><a href="/faq" class="text-gray-400 hover:text-white transition-colors"><%= t('storefront:faq') %></a></li>
-              <li><a href="/support" class="text-gray-400 hover:text-white transition-colors"><%= t('shared:common.support') %></a></li>
-            </ul>
           </div>
         </div>
+      </div>
 
-        <!-- Newsletter Signup -->
-        <div class="border-t border-gray-800 mt-8 pt-8">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <!-- Text Section -->
-            <div class="flex-1">
-              <h3 class="text-lg font-semibold mb-2"><%= t('storefront:stayUpdated') %></h3>
-              <p class="text-gray-400 mb-4 md:mb-0"><%= t('storefront:subscribeDesc') %></p>
+      <!-- Bottom Bar -->
+      <div class="border-t border-gray-700">
+        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-sm text-gray-400">
+              © <%= new Date().getFullYear() %> CommerceFull. All rights reserved.
+              <% if (typeof storeSlug !== 'undefined' && storeSlug) { %>
+              <span class="ml-2">| <span class="uppercase"><%= storeSlug %></span> Store</span>
+              <% } %>
             </div>
-
-            <!-- Input Section -->
-            <div class="flex-shrink-0">
-              <div class="flex max-w-sm">
-                <input
-                  type="email"
-                  placeholder="<%= t('storefront:emailAddress') %>"
-                  class="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
-                >
-                <button class="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-r-lg transition-colors font-medium whitespace-nowrap">
-                  <%= t('storefront:subscribe') %>
-                </button>
+            <div class="flex items-center space-x-4">
+              <!-- Payment icons -->
+              <span class="text-xs text-gray-500">We accept:</span>
+              <div class="flex space-x-2">
+                <div class="bg-white rounded px-2 py-1 text-xs font-bold text-ink-900">VISA</div>
+                <div class="bg-white rounded px-2 py-1 text-xs font-bold text-ink-900">MC</div>
+                <div class="bg-white rounded px-2 py-1 text-xs font-bold text-ink-900">AMEX</div>
+                <div class="bg-white rounded px-2 py-1 text-xs font-bold text-ink-900">PayPal</div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Bottom Footer -->
-        <div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p class="text-gray-400 text-sm">
-            © <%= new Date().getFullYear() %> Commercefull. <%= t('shared:common.allRightsReserved') %>
-          </p>
-          <p class="text-gray-500 text-xs mt-2 md:mt-0">
-            **<%= t('storefront:fakeSiteDisclaimer') %>
-          </p>
         </div>
       </div>
     </footer>
-    <script type="text/javascript" src="/javascripts/storefront/navigation.js"></script>
+
+    <!-- Storefront JS -->
+    <script src="/javascripts/storefront/main.js" type="module"></script>
+
+    <!-- Cart Drawer -->
+    <%- include("cart-drawer") %>
   </body>
 </html>

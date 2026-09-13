@@ -17,10 +17,7 @@ import {
   deletePromotionUseCase,
 } from '../../application/useCases/wired';
 import { ManagePromotionsUseCase } from '../../application/useCases/ManagePromotions';
-import {
-  promotionEvaluationService,
-  type PromotionEvaluationContext,
-} from '../../application/services/PromotionEvaluationService';
+import { promotionEvaluationService, type PromotionEvaluationContext } from '../../application/services/PromotionEvaluationService';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 const managePromotionsUseCase = new ManagePromotionsUseCase();

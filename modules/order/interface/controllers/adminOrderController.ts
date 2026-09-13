@@ -20,10 +20,7 @@ import {
   processRefundUseCase,
   addOrderNoteUseCase,
 } from '../../application/useCases/wired';
-import {
-  TrackFulfillmentPackageCommand,
-  TrackFulfillmentPackageUseCase,
-} from '../../application/useCases/TrackFulfillmentPackage';
+import { TrackFulfillmentPackageCommand, TrackFulfillmentPackageUseCase } from '../../application/useCases/TrackFulfillmentPackage';
 import { ManageOrderNotesUseCase } from '../../application/useCases/ManageOrderNotes';
 import { GetOrderRefundsUseCase } from '../../application/useCases/GetOrderRefunds';
 import { GetFulfillmentPackagesUseCase } from '../../application/useCases/GetFulfillmentPackages';

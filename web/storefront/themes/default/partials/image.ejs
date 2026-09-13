@@ -1,0 +1,50 @@
+<%
+  /**
+   * Responsive Image partial — renders an <img> with lazy loading and srcset.
+   *
+   * Usage:
+   *   <%- include("../partials/image", { src: url, alt: name, widths: [400, 800, 1200], sizes: "(max-width: 768px) 100vw, 50vw", className: "w-full h-full object-cover", eager: false }) %>
+   *
+   * Expects:
+   *   src: string — base image URL
+   *   alt: string — alt text
+   *   widths: number[] (optional) — widths for srcset (default: [400, 800, 1200])
+   *   sizes: string (optional) — sizes attribute
+   *   className: string (optional) — additional classes
+   *   eager: boolean (optional) — if true, load eagerly (default: false = lazy)
+   *   ratio: string (optional) — aspect ratio class (e.g. "aspect-square")
+   */
+%>
+<%
+  const widths = locals.widths || [400, 800, 1200];
+  const sizes = locals.sizes || '(max-width: 768px) 100vw, 50vw';
+  const cls = locals.className || '';
+  const loading = locals.eager ? 'eager' : 'lazy';
+  const ratio = locals.ratio || '';
+  const hasExt = src && (src.endsWith('.jpg') || src.endsWith('.jpeg') || src.endsWith('.png') || src.endsWith('.webp'));
+  const isDataUri = src && src.startsWith('data:');
+  const canSrcset = hasExt && !isDataUri;
+%>
+<% if (canSrcset) { %>
+<div class="<%= ratio %> overflow-hidden">
+  <img
+    src="<%= src %>"
+    srcset="<%= widths.map(function(w) { return src.replace(/(\.\w+)$/, '-' + w + 'w$1'); }).join(', ') %>"
+    sizes="<%= sizes %>"
+    alt="<%= alt %>"
+    loading="<%= loading %>"
+    decoding="async"
+    class="<%= cls %>"
+  >
+</div>
+<% } else { %>
+<div class="<%= ratio %> overflow-hidden">
+  <img
+    src="<%= src %>"
+    alt="<%= alt %>"
+    loading="<%= loading %>"
+    decoding="async"
+    class="<%= cls %>"
+  >
+</div>
+<% } %>

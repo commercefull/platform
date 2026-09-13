@@ -11,7 +11,12 @@ const approvalRepo = new ApprovalWorkflowRepositoryImpl();
 
 export const b2bController = new B2BController(companyRepo, userRepo, quoteRepo, approvalRepo);
 
-import { ManageCompanyUseCase, ManageB2BUserUseCase, ManageQuoteUseCase, ManageApprovalWorkflowUseCase } from '../../application/useCases/B2B';
+import {
+  ManageCompanyUseCase,
+  ManageB2BUserUseCase,
+  ManageQuoteUseCase,
+  ManageApprovalWorkflowUseCase,
+} from '../../application/useCases/B2B';
 
 export const manageCompanyUseCase = new ManageCompanyUseCase(companyRepo);
 export const manageB2BUserUseCase = new ManageB2BUserUseCase(userRepo, companyRepo);

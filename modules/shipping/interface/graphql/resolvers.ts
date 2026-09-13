@@ -37,30 +37,18 @@ export const shippingResolvers = {
       return useCase.execute(query);
     },
 
-    shippingSurcharges: async (
-      _parent: unknown,
-      args: { rateId: string; activeOnly?: boolean },
-      context: GraphQLAuthContext,
-    ) => {
+    shippingSurcharges: async (_parent: unknown, args: { rateId: string; activeOnly?: boolean }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
       return surchargeRepo.findByRateId(args.rateId, args.activeOnly ?? true);
     },
 
-    shippingSurcharge: async (
-      _parent: unknown,
-      args: { id: string },
-      context: GraphQLAuthContext,
-    ) => {
+    shippingSurcharge: async (_parent: unknown, args: { id: string }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
       return surchargeRepo.findById(args.id);
     },
   },
   Mutation: {
-    createShippingSurcharge: async (
-      _parent: unknown,
-      args: { input: CreateShippingSurchargeInput },
-      context: GraphQLAuthContext,
-    ) => {
+    createShippingSurcharge: async (_parent: unknown, args: { input: CreateShippingSurchargeInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
       return surchargeRepo.create(args.input);
     },
@@ -74,11 +62,7 @@ export const shippingResolvers = {
       return surchargeRepo.update(args.id, args.input);
     },
 
-    deleteShippingSurcharge: async (
-      _parent: unknown,
-      args: { id: string },
-      context: GraphQLAuthContext,
-    ) => {
+    deleteShippingSurcharge: async (_parent: unknown, args: { id: string }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
       return surchargeRepo.delete(args.id);
     },

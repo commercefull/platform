@@ -441,13 +441,18 @@ export class ProductRepo implements IProductRepository {
       conditions.push(`"organizationId" = $${paramIndex++}`);
       params.push(filters.organizationId);
     }
-    if (filters?.organizationId) {
-      conditions.push(`"organizationId" = $${paramIndex++}`);
-      params.push(filters.organizationId);
-    }
     if (filters?.storeId) {
       conditions.push(`"storeId" = $${paramIndex++}`);
       params.push(filters.storeId);
+    }
+    if (filters?.brandId) {
+      conditions.push(`"brandId" = $${paramIndex++}`);
+      params.push(filters.brandId);
+    }
+    if (filters?.brandIds && filters.brandIds.length > 0) {
+      const placeholders = filters.brandIds.map(() => `$${paramIndex++}`).join(', ');
+      conditions.push(`"brandId" IN (${placeholders})`);
+      params.push(...filters.brandIds);
     }
     if (filters?.isFeatured !== undefined) {
       conditions.push(`"isFeatured" = $${paramIndex++}`);

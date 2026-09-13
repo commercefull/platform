@@ -1,204 +1,375 @@
 <%- include("../partials/header") %>
 
-<main class="min-h-screen bg-gray-50">
-  <!-- Flash Messages -->
-  <% if (successMsg || errorMsg) { %>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-    <% if (successMsg) { %>
-    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-      <div class="flex items-center">
-        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-        </svg>
-        <%= successMsg %>
-      </div>
-    </div>
-    <% } %>
+<%
+  // Helper: format price with store currency/locale
+  const formatPrice = (amt) => {
+    try { return new Intl.NumberFormat(locale || 'en-US', { style: 'currency', currency: (currency || 'USD').toUpperCase() }).format(amt); }
+    catch { return (currency || 'USD') + ' ' + (amt || 0).toFixed(2); }
+  };
 
-    <% if (errorMsg) { %>
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
-      <div class="flex items-center">
-        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-        </svg>
-        <%= errorMsg %>
-      </div>
-    </div>
-    <% } %>
-  </div>
+  // Store context
+  const storeCtx = (typeof storeContext !== 'undefined' ? storeContext : null) || {};
+  const isTaxInclusive = storeCtx.priceDisplayMode === 'inclusive_tax';
+  const cur = currency || 'USD';
+  const loc = locale || 'en-US';
+
+  // Product data helpers
+  const images = product.images || [];
+  const variants = product.variants || [];
+  const hasVariants = variants.length > 0;
+  const isOnSale = product.salePrice !== null && product.salePrice !== undefined && product.basePrice > product.salePrice;
+  const displayPrice = product.salePrice || product.basePrice || product.price || 0;
+  const compareAt = isOnSale ? product.basePrice : null;
+
+  // Extract unique sizes and colours from variants
+  const sizes = [...new Set(variants.map(v => v.attributes?.find(a => a.name === 'size')?.value).filter(Boolean))];
+  const colours = [...new Set(variants.map(v => v.attributes?.find(a => a.name === 'color' || a.name === 'colour')?.value).filter(Boolean))];
+
+  // Colour swatch map
+  const colourMap = {
+    black: { label: 'Black', hex: '#000000' },
+    white: { label: 'White', hex: '#ffffff' },
+    navy: { label: 'Navy', hex: '#1a2a4a' },
+    grey: { label: 'Grey', hex: '#808080' },
+    charcoal: { label: 'Charcoal', hex: '#36454f' },
+    cream: { label: 'Cream', hex: '#f5f5dc' },
+    brown: { label: 'Brown', hex: '#8b4513' },
+    olive: { label: 'Olive', hex: '#556b2f' },
+    burgundy: { label: 'Burgundy', hex: '#800020' },
+    sand: { label: 'Sand', hex: '#c2b280' },
+    'forest-green': { label: 'Forest Green', hex: '#228b22' },
+    red: { label: 'Red', hex: '#dc2626' },
+    blue: { label: 'Blue', hex: '#2563eb' },
+  };
+%>
+
+<!-- SEO: Open Graph + JSON-LD -->
+<meta property="og:title" content="<%= product.name %>">
+<meta property="og:description" content="<%= product.shortDescription || product.description || '' %>">
+<meta property="og:type" content="product">
+<meta property="og:url" content="<%= typeof canonicalUrl !== 'undefined' ? canonicalUrl : '' %>">
+<% if (images.length > 0) { %>
+<meta property="og:image" content="<%= images[0] %>">
+<% } %>
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<%= product.name %>">
+<meta name="twitter:description" content="<%= product.shortDescription || product.description || '' %>">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "<%= product.name %>",
+  "description": "<%= (product.shortDescription || product.description || '').replace(/"/g, '\\"') %>",
+  "sku": "<%= product.sku || product.productId %>",
+  <% if (product.brandId) { %>
+  "brand": { "@type": "Brand", "name": "<%= product.brandName || 'CommerceFull' %>" },
   <% } %>
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "<%= cur.toUpperCase() %>",
+    "price": "<%= displayPrice %>",
+    "availability": "<%= product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' %>"
+  }
+}
+</script>
 
+<%- include("../partials/json-ld", { schemas: [
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "/" },
+      { "@type": "ListItem", "position": 2, "name": "Products", "item": "/products" },
+      ...(product.categoryName ? [{ "@type": "ListItem", "position": 3, "name": product.categoryName, "item": "/products/category/" + (product.categorySlug || "") }] : []),
+      { "@type": "ListItem", "position": product.categoryName ? 4 : 3, "name": product.name, "item": typeof canonicalUrl !== "undefined" ? canonicalUrl : "" }
+    ]
+  }
+] }) %>
+
+<main class="min-h-screen bg-gray-50">
   <!-- Breadcrumb -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-    <nav class="flex text-sm text-gray-500">
-      <a href="/" class="hover:text-blue-600"><%= t('storefront:home') %></a>
-      <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-      </svg>
-      <a href="/products" class="hover:text-blue-600"><%= t('shared:common.products') %></a>
-      <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-      </svg>
-      <span class="text-gray-900"><%= product.name %></span>
-    </nav>
-  </div>
+  <section class="bg-white border-b border-gray-200">
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <%- include("../partials/breadcrumb", { items: [
+        { label: 'Home', url: '/' },
+        { label: 'Products', url: '/products' },
+        ...(product.categoryName ? [{ label: product.categoryName, url: '/products/category/' + (product.categorySlug || '') }] : []),
+        { label: product.name }
+      ] }) %>
+    </div>
+  </section>
 
   <!-- Product Details -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+  <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-      <!-- Product Images -->
+      <!-- Image Gallery -->
       <div class="space-y-4">
-        <div class="aspect-square bg-white rounded-xl overflow-hidden shadow-lg">
-          <img
-            src="<%= product.images && product.images.length > 0 ? product.images[0] : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMTkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2YjcyODAiPk5vIEltYWdlPC90ZXh0PgogIDx0ZXh0IHg9IjIwMCIgeT0iMjIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2YjcyODAiPkF2YWlsYWJsZTwvdGV4dD4KPC9zdmc+' %>"
-            alt="<%= product.name %>"
-            class="w-full h-full object-cover"
-          >
+        <!-- Badges overlay -->
+        <div class="relative">
+          <%- include("../partials/image-gallery", { images: images, productName: product.name }) %>
+          <div class="absolute top-4 left-4 flex flex-col gap-1 z-10">
+            <% if (isOnSale) { %>
+            <span class="bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded">SALE</span>
+            <% } %>
+            <% if (product.isFeatured) { %>
+            <span class="bg-ink-900 text-white text-xs font-semibold px-3 py-1 rounded">FEATURED</span>
+            <% } %>
+          </div>
         </div>
-        <!-- Thumbnail Gallery (if multiple images) -->
-        <% if (product.images && product.images.length > 1) { %>
-        <div class="grid grid-cols-4 gap-4">
-          <% product.images.slice(0, 4).forEach((image, index) => { %>
-          <button class="aspect-square bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow border-2 border-transparent hover:border-blue-500">
-            <img src="<%= image %>" alt="<%= product.name %> - View <%= index + 1 %>" class="w-full h-full object-cover">
-          </button>
-          <% }) %>
-        </div>
-        <% } %>
       </div>
 
-      <!-- Product Information -->
+      <!-- Product Info -->
       <div class="space-y-6">
+        <!-- Brand + Title -->
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= product.name %></h1>
-          <div class="flex items-center space-x-4 mb-4">
-            <div class="flex items-center">
-              <% for(let star = 1; star <= 5; star++) { %>
-                <svg class="w-5 h-5 <%= star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300' %>" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              <% } %>
-              <span class="text-sm text-gray-600 ml-2">(4.5 • 127 reviews)</span>
-            </div>
-          </div>
-          <div class="text-3xl font-bold text-gray-900 mb-4">
-            $<%= product.price ? parseFloat(product.price).toFixed(2) : '0.00' %>
-          </div>
+          <% if (product.brandName) { %>
+          <a href="/brands/<%= product.brandSlug || '' %>" class="text-sm text-gold-600 hover:text-gold-500 font-medium uppercase tracking-wide"><%= product.brandName %></a>
+          <% } %>
+          <h1 class="text-3xl lg:text-4xl font-bold text-ink-900 mt-2" style="font-family: 'Playfair Display', serif;"><%= product.name %></h1>
+          <% if (product.shortDescription) { %>
+          <p class="text-gray-500 mt-3"><%= product.shortDescription %></p>
+          <% } %>
         </div>
 
-        <!-- Product Description -->
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= t('shared:common.description') %></h3>
-          <p class="text-gray-600 leading-relaxed">
-            <%= product.description || t('storefront:noDescriptionAvailable') %>
-          </p>
+        <!-- Rating -->
+        <div class="flex items-center gap-3">
+          <%- include("../partials/rating-stars", { rating: product.averageRating || 0, count: product.reviewCount || 0 }) %>
+          <a href="#reviews" class="text-sm text-gray-500 hover:text-gold-600 transition-colors">Read reviews</a>
         </div>
 
-        <!-- Product Details -->
-        <div class="grid grid-cols-2 gap-4 py-4 border-t border-b border-gray-200">
-          <div>
-            <span class="text-sm text-gray-500"><%= t('shared:common.category') %></span>
-            <p class="font-medium text-gray-900"><%= product.categoryName || t('storefront:general') %></p>
-          </div>
-          <div>
-            <span class="text-sm text-gray-500"><%= t('storefront:brand') %></span>
-            <p class="font-medium text-gray-900"><%= product.manufacturer || t('storefront:notAvailable') %></p>
-          </div>
-          <div>
-            <span class="text-sm text-gray-500"><%= t('shared:common.sku') %></span>
-            <p class="font-medium text-gray-900"><%= product.sku || product.productId %></p>
-          </div>
-          <div>
-            <span class="text-sm text-gray-500"><%= t('storefront:availabilityLabel') %></span>
-            <p class="font-medium <%= product.isActive && product.stock > 0 ? 'text-green-600' : 'text-red-600' %>">
-              <%= product.isActive && product.stock > 0 ? t('storefront:inStockQty', { count: product.stock }) : (product.stock > 0 ? t('storefront:comingSoon') : t('storefront:soldOut')) %>
-            </p>
-          </div>
+        <!-- Price -->
+        <div class="flex items-baseline gap-3">
+          <span class="text-3xl font-bold <%= isOnSale ? 'text-red-600' : 'text-ink-900' %>"><%= formatPrice(displayPrice) %></span>
+          <% if (compareAt) { %>
+          <span class="text-xl text-gray-400 line-through"><%= formatPrice(compareAt) %></span>
+          <% } %>
         </div>
+        <!-- Tax display -->
+        <p class="text-xs text-gray-500">
+          <%= isTaxInclusive ? 'Includes VAT' : 'Excludes sales tax' %>
+          <% if (storeCtx.region) { %> · <%= storeCtx.region === 'GB' ? 'UK' : 'US' %> store<% } %>
+        </p>
 
-        <!-- Add to Cart Section -->
-        <% if (product.isActive && product.stock > 0) { %>
+        <!-- Variant Selectors -->
+        <% if (hasVariants) { %>
         <div class="space-y-4">
-          <div class="flex items-center space-x-4">
-            <div class="flex items-center border border-gray-300 rounded-lg">
-              <button class="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-                </svg>
+          <!-- Colour -->
+          <% if (colours.length > 0) { %>
+          <div>
+            <label class="block text-sm font-medium text-ink-900 mb-2">Colour: <span id="selected-colour" class="text-gray-500 font-normal">Select</span></label>
+            <div class="flex flex-wrap gap-2">
+              <% colours.forEach(function(colour) { %>
+              <% const swatch = colourMap[colour] || { label: colour, hex: '#ccc' }; %>
+              <button type="button" class="w-10 h-10 rounded-full border-2 border-gray-300 hover:border-ink-900 transition-all relative" style="background-color: <%= swatch.hex %>;" title="<%= swatch.label %>" data-action="select-colour" data-colour="<%= colour %>" data-colour-label="<%= swatch.label %>">
               </button>
-              <span class="px-4 py-3 text-gray-900 font-medium">1</span>
-              <button class="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-              </button>
+              <% }) %>
             </div>
-            <span class="text-sm text-gray-600"><%= product.stock %> available</span>
           </div>
+          <% } %>
 
-          <div class="flex space-x-4">
-            <a
-              href="/basket/add/<%= product.productId %>"
-              class="flex-1 bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center"
-            >
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
-              </svg>
-              <%= t('shared:common.addToCart') %>
-            </a>
-            <button class="p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-              </svg>
-            </button>
+          <!-- Size -->
+          <% if (sizes.length > 0) { %>
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-medium text-ink-900">Size: <span id="selected-size" class="text-gray-500 font-normal">Select</span></label>
+              <a href="#" data-action="open-size-guide" class="text-xs text-gold-600 hover:text-gold-500">Size Guide</a>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <% sizes.forEach(function(size) { %>
+              <button type="button" class="min-w-[3rem] px-3 py-2 border border-gray-300 rounded-none text-sm font-medium text-ink-900 hover:border-ink-900 transition-colors" data-action="select-size" data-size="<%= size %>"><%= size.toUpperCase() %></button>
+              <% }) %>
+            </div>
           </div>
-        </div>
-        <% } else { %>
-        <div class="bg-gray-100 border border-gray-300 rounded-lg p-6 text-center">
-          <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-          </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">
-            <%= product.stock > 0 ? t('storefront:comingSoon') : t('storefront:currentlyUnavailable') %>
-          </h3>
-          <p class="text-gray-600"><%= t('storefront:productNotAvailable') %></p>
-          <% if (product.stock > 0) { %>
-          <button class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            <%= t('storefront:notifyWhenAvailable') %>
-          </button>
           <% } %>
         </div>
         <% } %>
 
-        <!-- Additional Information -->
-        <div class="border-t border-gray-200 pt-6">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-            <div class="flex flex-col items-center">
-              <svg class="w-8 h-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <span class="text-sm font-medium text-gray-900"><%= t('storefront:freeShipping') %></span>
-              <span class="text-xs text-gray-600"><%= t('storefront:onOrdersOverFifty') %></span>
+        <!-- Quantity + Add to Cart -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-4">
+            <div class="flex items-center border border-gray-300 rounded-none">
+              <button type="button" class="p-3 text-gray-600 hover:text-ink-900 hover:bg-gray-50 transition-colors" data-action="qty-decrease" aria-label="Decrease quantity">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+              </button>
+              <input type="number" id="qty-input" data-qty-input value="1" min="1" class="w-16 text-center border-0 focus:ring-0 text-ink-900 font-medium">
+              <button type="button" class="p-3 text-gray-600 hover:text-ink-900 hover:bg-gray-50 transition-colors" data-action="qty-increase" aria-label="Increase quantity">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              </button>
             </div>
-            <div class="flex flex-col items-center">
-              <svg class="w-8 h-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <span class="text-sm font-medium text-gray-900"><%= t('storefront:thirtyDayReturnsLabel') %></span>
-              <span class="text-xs text-gray-600"><%= t('storefront:easyReturnPolicy') %></span>
+            <div class="text-sm text-gray-500">
+              <span id="stock-status" data-variant-stock>
+                <% if (product.stock > 10) { %>
+                <span class="text-green-600 font-medium">In Stock</span> — Ready to ship
+                <% } else if (product.stock > 0) { %>
+                <span class="text-amber-600 font-medium">Only <%= product.stock %> left</span> — Order soon
+                <% } else if (product.allowBackorder) { %>
+                <span class="text-blue-600 font-medium">Backorder</span> — Ships in 3-5 days
+                <% } else { %>
+                <span class="text-red-600 font-medium">Out of Stock</span>
+                <% } %>
+              </span>
             </div>
-            <div class="flex flex-col items-center">
-              <svg class="w-8 h-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <span class="text-sm font-medium text-gray-900"><%= t('storefront:premiumQuality') %></span>
-              <span class="text-xs text-gray-600"><%= t('storefront:handcraftedExcellence') %></span>
-            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button type="button" class="flex-1 btn-primary text-base" data-action="add-to-cart" data-product-id="<%= product.productId %>" data-add-to-cart-btn <%= product.stock === 0 && !product.allowBackorder ? 'disabled' : '' %>>
+              <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path></svg>
+              <%= product.stock === 0 && !product.allowBackorder ? 'Out of Stock' : 'Add to Cart' %>
+            </button>
+            <button type="button" class="p-4 border border-gray-300 rounded-none hover:bg-gray-50 transition-colors" data-action="wishlist-add" data-product-id="<%= product.productId %>" title="Add to Wishlist" aria-label="Add to wishlist">
+              <svg class="w-5 h-5 text-ink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+            </button>
+          </div>
+
+          <!-- Notify me when back in stock (out-of-stock only) -->
+          <% if (product.stock === 0 && !product.allowBackorder) { %>
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <p class="text-sm font-medium text-ink-900 mb-2">Notify me when this is back in stock</p>
+            <form data-notify-me-form data-product-id="<%= product.productId %>" class="flex gap-2">
+              <input type="email" name="email" placeholder="Your email address" required class="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-ink-900">
+              <button type="submit" class="px-4 py-2 bg-ink-900 text-white text-sm font-medium rounded hover:bg-ink-800 transition-colors">Notify Me</button>
+            </form>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Share Controls -->
+        <%- include("../partials/share-buttons", { url: typeof canonicalUrl !== 'undefined' ? canonicalUrl : '', title: product.name, image: images.length > 0 ? images[0] : '' }) %>
+
+        <!-- Trust Indicators -->
+        <div class="grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
+          <div class="text-center">
+            <svg class="w-8 h-8 mx-auto text-gold-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <span class="text-xs font-medium text-ink-900 block">Free Shipping</span>
+            <span class="text-xs text-gray-500">On orders over <%= storeCtx.region === 'GB' ? '£50' : '$75' %></span>
+          </div>
+          <div class="text-center">
+            <svg class="w-8 h-8 mx-auto text-gold-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-xs font-medium text-ink-900 block">30-Day Returns</span>
+            <span class="text-xs text-gray-500">Easy & free</span>
+          </div>
+          <div class="text-center">
+            <svg class="w-8 h-8 mx-auto text-gold-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            <span class="text-xs font-medium text-ink-900 block">Secure Payment</span>
+            <span class="text-xs text-gray-500">SSL encrypted</span>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Product Details Tabs/Accordion -->
+    <div class="mt-12 max-w-4xl mx-auto">
+      <div class="space-y-2">
+        <!-- Description -->
+        <details class="bg-white border border-gray-200 rounded-lg overflow-hidden" open>
+          <summary class="px-6 py-4 cursor-pointer font-semibold text-ink-900 flex items-center justify-between">
+            <span>Description</span>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </summary>
+          <div class="px-6 pb-4 text-gray-600 leading-relaxed">
+            <%= product.description || 'No description available.' %>
+          </div>
+        </details>
+
+        <!-- Materials & Care -->
+        <details class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <summary class="px-6 py-4 cursor-pointer font-semibold text-ink-900 flex items-center justify-between">
+            <span>Materials & Care</span>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </summary>
+          <div class="px-6 pb-4 text-gray-600 space-y-2">
+            <% if (product.material) { %><p><strong>Material:</strong> <%= product.material %></p><% } %>
+            <p><strong>Care:</strong> Machine wash cold. Do not bleach. Tumble dry low. Iron on low heat if needed.</p>
+          </div>
+        </details>
+
+        <!-- Shipping & Returns -->
+        <details class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <summary class="px-6 py-4 cursor-pointer font-semibold text-ink-900 flex items-center justify-between">
+            <span>Shipping & Returns</span>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </summary>
+          <div class="px-6 pb-4 text-gray-600 space-y-2">
+            <p><strong>Shipping:</strong> Free standard shipping on orders over <%= storeCtx.region === 'GB' ? '£50' : '$75' %>. Express delivery available at checkout.</p>
+            <p><strong>Returns:</strong> 30-day free returns. Items must be unworn with tags attached.</p>
+          </div>
+        </details>
+
+        <!-- Product Details -->
+        <details class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <summary class="px-6 py-4 cursor-pointer font-semibold text-ink-900 flex items-center justify-between">
+            <span>Product Details</span>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </summary>
+          <div class="px-6 pb-4">
+            <table class="w-full text-sm">
+              <tr><th class="text-left text-gray-500 py-1 w-1/3">SKU</th><td class="text-ink-900"><%= product.sku || product.productId %></td></tr>
+              <% if (product.brandName) { %><tr><th class="text-left text-gray-500 py-1">Brand</th><td class="text-ink-900"><%= product.brandName %></td></tr><% } %>
+              <% if (product.categoryName) { %><tr><th class="text-left text-gray-500 py-1">Category</th><td class="text-ink-900"><%= product.categoryName %></td></tr><% } %>
+              <% if (product.weight) { %><tr><th class="text-left text-gray-500 py-1">Weight</th><td class="text-ink-900"><%= product.weight %>g</td></tr><% } %>
+            </table>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- Related Products -->
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+    <section class="mt-16">
+      <h2 class="text-2xl font-bold text-ink-900 mb-6" style="font-family: 'Playfair Display', serif;">You May Also Like</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <% relatedProducts.forEach(function(product) { %>
+        <%- include("../partials/product-card", { product: product }) %>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- Complete the look (complementary accessories) -->
+    <% if (typeof complementaryProducts !== 'undefined' && complementaryProducts && complementaryProducts.length > 0) { %>
+    <section class="mt-16">
+      <h2 class="text-2xl font-bold text-ink-900 mb-6" style="font-family: 'Playfair Display', serif;">Complete the Look</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <% complementaryProducts.forEach(function(product) { %>
+        <%- include("../partials/product-card", { product: product }) %>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- Recently viewed (populated client-side from localStorage) -->
+    <section class="mt-16" data-recently-viewed-section style="display: none;">
+      <h2 class="text-2xl font-bold text-ink-900 mb-6" style="font-family: 'Playfair Display', serif;">Recently Viewed</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6" data-recently-viewed-grid></div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section id="reviews" class="mt-16 max-w-4xl mx-auto">
+      <h2 class="text-2xl font-bold text-ink-900 mb-6" style="font-family: 'Playfair Display', serif;">Customer Reviews</h2>
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <div class="flex items-center gap-6 mb-6 pb-6 border-b border-gray-200">
+          <div class="text-center">
+            <p class="text-4xl font-bold text-ink-900"><%= (product.averageRating || 0).toFixed(1) %></p>
+            <%- include("../partials/rating-stars", { rating: product.averageRating || 0, size: 'md' }) %>
+            <p class="text-sm text-gray-500 mt-1"><%= product.reviewCount || 0 %> reviews</p>
+          </div>
+          <div class="flex-1">
+            <a href="/reviews/<%= product.productId %>" class="btn-secondary text-sm">Write a Review</a>
+          </div>
+        </div>
+        <div class="text-center py-8 text-gray-400">
+          <p class="text-sm">Be the first to review this product.</p>
+        </div>
+      </div>
+    </section>
   </div>
 </main>
+
+<!-- Size Guide Modal -->
+<%- include("../partials/size-guide") %>
+
+<!-- Product ID for recently viewed tracking -->
+<span data-product-id="<%= product.productId %>" hidden></span>
 
 <%- include("../partials/footer") %>

@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
+import { formatPrice, formatPriceWithTax } from './money';
 
 type ResponseData = Record<string, unknown>;
 
@@ -16,10 +17,35 @@ export async function storefrontRespond(req: TypedRequest, res: Response, view: 
   const errorMsg = req.flash ? req.flash('error')[0] : null;
 
   const themeName = res.locals.theme || DEFAULT_THEME;
+
+  // Build canonical URL from the request
+  const protocol = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
+  const canonicalUrl = `${protocol}://${host}${req.originalUrl || req.url || ''}`;
+
   const viewData = {
     user: req.user,
     session: req.session,
     categories: res.locals.categories || [],
+    // Store context (set by storeResolutionMiddleware)
+    store: res.locals.store || null,
+    storeId: res.locals.storeId || '',
+    storeSlug: res.locals.storeSlug || 'us',
+    currency: res.locals.currency || 'USD',
+    locale: res.locals.locale || 'en-US',
+    region: res.locals.region || 'US',
+    // Theme settings (set by themeMiddleware)
+    themeSettings: res.locals.themeSettings || {},
+    themeCssVariables: res.locals.themeCssVariables || {},
+    themeCustomLogoUrl: res.locals.themeCustomLogoUrl || null,
+    themeCustomFaviconUrl: res.locals.themeCustomFaviconUrl || null,
+    // SEO defaults (controllers can override via data)
+    canonicalUrl,
+    ogType: 'website',
+    twitterCard: 'summary_large_image',
+    // Price formatting helpers (from libs/money)
+    formatPrice,
+    formatPriceWithTax,
     successMsg,
     errorMsg,
     ...data,

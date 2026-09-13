@@ -1,34 +1,110 @@
 import express from 'express';
 import { asyncHandler } from '../../libs/asyncHandler';
 import { resolveTheme } from './themeMiddleware';
+import { resolveStore } from './storeResolutionMiddleware';
 import {
   userContactUsValidationRules,
   validateContactUs,
   userContactFormValidationRules,
   validateContactForm,
 } from '../../modules/content';
-import {
-  getActiveContentTypes,
-  getPublishedPageBySlug,
-  getPublishedPages,
-} from '../../modules/content';
+import { getActiveContentTypes, getPublishedPageBySlug, getPublishedPages } from '../../modules/content';
 import { isCustomerLoggedIn } from '../../libs/auth';
-import { getHomePage, getAboutUsPage, getShippingPolicyPage, getCareersPage, getContactUsPage, submitContactForm, getContactFormPage, submitContactFormAdvanced, getFaqPage, getReturnsPage, getSupportPage } from '../../modules/content';
-import { getCategoryProducts, getStorefrontProduct as getProduct, listStorefrontProducts as listProducts, searchProducts, getAllCategories, getCategoriesForNavigation, getCategoryDetails, getCategoryPage, loadCategoriesForNavigation, getProductReviews, markReviewHelpful, submitReview } from '../../modules/product';
+import {
+  getHomePage,
+  getAboutUsPage,
+  getShippingPolicyPage,
+  getCareersPage,
+  getContactUsPage,
+  submitContactForm,
+  getContactFormPage,
+  submitContactFormAdvanced,
+  getFaqPage,
+  getReturnsPage,
+  getSupportPage,
+} from '../../modules/content';
+import {
+  getCategoryProducts,
+  getStorefrontProduct as getProduct,
+  listStorefrontProducts as listProducts,
+  searchProducts,
+  searchAutocomplete,
+  generateSitemap,
+  getAllCategories,
+  getCategoriesForNavigation,
+  getCategoryDetails,
+  getCategoryPage,
+  loadCategoriesForNavigation,
+  getProductReviews,
+  markReviewHelpful,
+  submitReview,
+  listBrands,
+  getBrand,
+  getBrandProducts,
+} from '../../modules/product';
 import { addToBasket, clearBasket, removeFromBasket, updateBasketItem, viewBasket } from '../../modules/basket';
-import { changePassword, profile, signIn, signInForm, signOut, signUp, signUpForm, updateProfile, addToWishlist, removeFromWishlist, viewWishlist, addAddress, addAddressForm, deleteAddress, editAddressForm, listAddresses, updateAddress } from '../../modules/customer';
+import {
+  changePassword,
+  profile,
+  signIn,
+  signInForm,
+  signOut,
+  signUp,
+  signUpForm,
+  updateProfile,
+  addToWishlist,
+  removeFromWishlist,
+  viewWishlist,
+  addAddress,
+  addAddressForm,
+  deleteAddress,
+  editAddressForm,
+  listAddresses,
+  updateAddress,
+} from '../../modules/customer';
 import { checkout, orderConfirmation, processCheckout } from '../../modules/checkout';
-import { orderDetails, orderHistory, orderTracking, listReturns, returnRequestForm, submitReturnRequest, viewReturn } from '../../modules/order';
+import {
+  orderDetails,
+  orderHistory,
+  orderTracking,
+  listReturns,
+  returnRequestForm,
+  submitReturnRequest,
+  viewReturn,
+} from '../../modules/order';
 import { loyaltyDashboard, pointsHistory, redeemReward } from '../../modules/loyalty';
 import { cancelSubscription, listPlans, mySubscriptions, viewSubscription } from '../../modules/subscription';
 import { joinPlan, listPlans as listMembershipPlans, myMembership, viewPlan } from '../../modules/membership';
-import { deleteDevice, getDevices, getPreferences, listNotifications, markAllAsRead, markAsRead, registerDevice, updatePreferences } from '../../modules/notification';
-import { addTicketMessage, createTicketForm, createTicketSubmit, listTickets, submitTicketFeedback, viewTicket } from '../../modules/support';
+import {
+  deleteDevice,
+  getDevices,
+  getPreferences,
+  listNotifications,
+  markAllAsRead,
+  markAsRead,
+  registerDevice,
+  updatePreferences,
+} from '../../modules/notification';
+import {
+  addTicketMessage,
+  createTicketForm,
+  createTicketSubmit,
+  listTickets,
+  submitTicketFeedback,
+  viewTicket,
+} from '../../modules/support';
 import { cancelRequest, createRequestForm, createRequestSubmit, listRequests, viewRequest } from '../../modules/gdpr';
 import { getStoreLocator } from '../../modules/store';
 import { getPromotionsPage } from '../../modules/promotion';
 
 const router = express.Router();
+
+// ============================================================================
+// Store Resolution Middleware
+// ============================================================================
+
+// Resolve the active store (UK/US) for every request before theme resolution
+router.use(resolveStore);
 
 // ============================================================================
 // Theme Resolution Middleware
@@ -101,6 +177,26 @@ router.get('/products/:categorySlug/:productId', asyncHandler(getProduct));
 
 // GET: search products
 router.get('/search', asyncHandler(searchProducts));
+router.get('/search/autocomplete', asyncHandler(searchAutocomplete));
+
+// ============================================================================
+// Sitemap
+// ============================================================================
+
+router.get('/sitemap.xml', asyncHandler(generateSitemap));
+
+// ============================================================================
+// Brand Routes
+// ============================================================================
+
+// GET: all brands listing
+router.get('/brands', asyncHandler(listBrands));
+
+// GET: brand products (PLP filtered by brand)
+router.get('/brands/:slug/products', asyncHandler(getBrandProducts));
+
+// GET: brand landing page
+router.get('/brands/:slug', asyncHandler(getBrand));
 
 // ============================================================================
 // Category Routes

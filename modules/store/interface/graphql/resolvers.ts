@@ -1,4 +1,3 @@
-
 const StoreRepo = storeDataRepository.stores;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetStoreUseCase, GetStoreQuery } from '../../application/useCases/GetStore';

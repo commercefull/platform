@@ -1,0 +1,68 @@
+<%
+  /**
+   * Image Gallery partial — reusable product image gallery with main image, thumbnails, and lightbox.
+   *
+   * Usage:
+   *   <%- include("../partials/image-gallery", { images: product.images, productName: product.name }) %>
+   *
+   * Expects:
+   *   images: string[] — array of image URLs
+   *   productName: string — for alt text
+   */
+%>
+<% if (images && images.length > 0) { %>
+<div class="product-gallery" data-gallery>
+  <!-- Main Image -->
+  <div class="aspect-square bg-white rounded-lg overflow-hidden border border-gray-200 relative group cursor-zoom-in" data-gallery-main-wrap>
+    <img
+      data-gallery-main
+      src="<%= images[0] %>"
+      alt="<%= productName %>"
+      class="w-full h-full object-cover transition-transform duration-300"
+      loading="eager"
+    >
+    <!-- Zoom hint -->
+    <div class="absolute bottom-4 right-4 bg-white/80 px-3 py-1 rounded text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+      <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      Click to zoom
+    </div>
+    <!-- Lightbox trigger -->
+    <button type="button" data-gallery-lightbox-open class="absolute inset-0 w-full h-full" aria-label="Open fullscreen gallery"></button>
+  </div>
+
+  <!-- Thumbnails -->
+  <% if (images.length > 1) { %>
+  <div class="grid grid-cols-5 gap-2 mt-4" data-gallery-thumbs>
+    <% images.forEach(function(image, index) { %>
+    <button
+      type="button"
+      class="aspect-square bg-white rounded border-2 <%= index === 0 ? 'border-ink-900' : 'border-gray-200 hover:border-ink-400' %> transition-colors overflow-hidden"
+      data-gallery-thumb="<%= image %>"
+      data-gallery-index="<%= index %>"
+    >
+      <img src="<%= image %>" alt="<%= productName %> - View <%= index + 1 %>" class="w-full h-full object-cover" loading="lazy">
+    </button>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <!-- Lightbox Modal -->
+  <div data-gallery-lightbox class="hidden fixed inset-0 bg-black/90 z-[100] items-center justify-center p-4">
+    <button type="button" data-gallery-lightbox-close class="absolute top-4 right-4 text-white hover:text-gray-300 z-10" aria-label="Close gallery">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+    <button type="button" data-gallery-lightbox-prev class="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10" aria-label="Previous image">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    </button>
+    <button type="button" data-gallery-lightbox-next class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10" aria-label="Next image">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </button>
+    <img data-gallery-lightbox-img src="<%= images[0] %>" alt="<%= productName %>" class="max-w-full max-h-full object-contain">
+    <p data-gallery-lightbox-counter class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm">1 / <%= images.length %></p>
+  </div>
+</div>
+<% } else { %>
+<div class="aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+  <svg class="w-24 h-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+</div>
+<% } %>

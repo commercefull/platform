@@ -22,7 +22,13 @@ import {
 } from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { productCatalogRepository, productAttributeRepository, productEngagementRepository } from '../../application/wired';
-import { ProductVariantCreateProps, ProductVariantUpdateProps, ProductQaStatus, RelationType, ReviewFilters } from '../../application/wired';
+import {
+  ProductVariantCreateProps,
+  ProductVariantUpdateProps,
+  ProductQaStatus,
+  RelationType,
+  ReviewFilters,
+} from '../../application/wired';
 
 const ProductRepo = productCatalogRepository.productRepository;
 const productVariantRepo = productCatalogRepository.variants;

@@ -8,12 +8,7 @@ import { TypedRequest, RequestBody } from 'libs/types/express';
 import { CreatePageCommand } from '../../application/useCases/CreatePage';
 import { UpdatePageCommand } from '../../application/useCases/UpdatePage';
 import { PublishPageCommand } from '../../application/useCases/PublishPage';
-import {
-  createPageUseCase,
-  updatePageUseCase,
-  publishPageUseCase,
-  manageContentUseCase,
-} from '../../application/useCases/wired';
+import { createPageUseCase, updatePageUseCase, publishPageUseCase, manageContentUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 // ============================================================================

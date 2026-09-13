@@ -1,4 +1,3 @@
-
 const WarehouseRepo = warehouseDataRepository.warehouses;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetWarehouseUseCase, GetWarehouseInput } from '../../application/useCases/GetWarehouse';

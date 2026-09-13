@@ -14,6 +14,16 @@ const swcTransform = {
       },
     },
   ],
+  '^.+\\.js$': [
+    '@swc/jest',
+    {
+      jsc: {
+        target: 'es2022',
+        parser: { syntax: 'ecmascript' },
+        transform: {},
+      },
+    },
+  ],
 };
 
 const moduleFileExtensions = ['ts', 'tsx', 'js', 'jsx', 'json', 'node'];
@@ -54,6 +64,17 @@ module.exports = {
       collectCoverage: false,
       globalSetup: '<rootDir>/tests/config/jest.db.global.setup.ts',
       setupFilesAfterEnv: ['<rootDir>/tests/config/jest.db.setup.ts'],
+    },
+    {
+      displayName: 'storefront',
+      testEnvironment: 'node',
+      roots: ['<rootDir>/public/javascripts/storefront'],
+      testMatch: ['**/*.test.js'],
+      transform: swcTransform,
+      moduleFileExtensions,
+      testTimeout: 10000,
+      collectCoverage: false,
+      verbose: true,
     },
   ],
 };

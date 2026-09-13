@@ -22,9 +22,8 @@ import { resolveThemeUseCase } from '../../modules/theme';
  */
 export async function resolveTheme(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const storeId =
-      (req.session as unknown as Record<string, unknown> | undefined)?.storeId as string | undefined ||
-      (req.params?.storeId as string | undefined);
+    // Use the storeId resolved by storeResolutionMiddleware (already in res.locals)
+    const storeId = (res.locals.storeId as string | undefined) || undefined;
 
     let themeSlug = 'default';
     let themeSettings: Record<string, string | number | boolean> = {};

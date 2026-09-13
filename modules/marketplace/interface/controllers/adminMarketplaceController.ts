@@ -8,8 +8,7 @@ import { TypedRequest, RequestBody } from 'libs/types/express';
 import { manageVendorUseCase, manageCommissionRuleUseCase, managePayoutUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-const getOrgId = (req: TypedRequest): string =>
-  (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+const getOrgId = (req: TypedRequest): string => (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
 
 export const listVendors = async (req: TypedRequest, res: Response): Promise<void> => {
   const organizationId = getOrgId(req);
@@ -75,10 +74,7 @@ export const editVendorForm = async (req: TypedRequest, res: Response): Promise<
 export const updateVendor = async (req: TypedRequest, res: Response): Promise<void> => {
   const { vendorId } = req.params;
   const body = req.body as RequestBody;
-  await manageVendorUseCase.updateProfile(
-    vendorId,
-    body as Parameters<typeof manageVendorUseCase.updateProfile>[1],
-  );
+  await manageVendorUseCase.updateProfile(vendorId, body as Parameters<typeof manageVendorUseCase.updateProfile>[1]);
   res.redirect(`/admin/marketplace/vendors/${vendorId}?success=Vendor updated successfully`);
 };
 

@@ -4,7 +4,14 @@
  * Domain interface for support data access (tickets, messages, agents, admin operations).
  */
 
-import type { SupportTicketProps, TicketStatus, TicketPriority, TicketCategory, TicketChannel, SenderType } from '../entities/SupportTicket';
+import type {
+  SupportTicketProps,
+  TicketStatus,
+  TicketPriority,
+  TicketCategory,
+  TicketChannel,
+  SenderType,
+} from '../entities/SupportTicket';
 import type { SupportMessage } from 'libs/db/types';
 
 export type { TicketStatus, TicketPriority, TicketCategory, TicketChannel, SenderType };

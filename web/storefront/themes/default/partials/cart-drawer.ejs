@@ -1,0 +1,44 @@
+<%
+  /**
+   * Cart Drawer Partial — Slide-out cart drawer for AJAX add-to-cart feedback
+   *
+   * Usage:
+   *   <%- include("../partials/cart-drawer") %>
+   *
+   * Reads cart data from session/res.locals.
+   * Controlled by storefront JS (cart-drawer.js module).
+   */
+%>
+<!-- Cart Drawer Overlay -->
+<div id="cart-drawer-overlay" class="fixed inset-0 bg-black/50 z-50 opacity-0 invisible transition-opacity duration-300"></div>
+
+<!-- Cart Drawer -->
+<aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 transform translate-x-full transition-transform duration-300 overflow-y-auto">
+  <div class="p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-semibold text-ink-900" style="font-family: 'Playfair Display', serif;">Your Cart</h2>
+      <button type="button" id="cart-drawer-close" data-action="close-cart-drawer" class="text-gray-400 hover:text-ink-900 transition-colors" aria-label="Close cart">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <!-- Cart Items (populated by JS) -->
+    <div id="cart-drawer-items" class="space-y-4">
+      <div class="text-center py-12 text-gray-400">
+        <svg class="w-16 h-16 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path></svg>
+        <p class="text-sm">Your cart is empty</p>
+      </div>
+    </div>
+
+    <!-- Footer (shown when items exist) -->
+    <div id="cart-drawer-footer" class="hidden mt-6 pt-6 border-t border-gray-200">
+      <div class="flex justify-between items-baseline mb-4">
+        <span class="text-lg font-semibold text-ink-900">Subtotal</span>
+        <span id="cart-drawer-subtotal" class="text-xl font-bold text-ink-900">$0.00</span>
+      </div>
+      <a href="/basket" class="btn-secondary w-full text-center block mb-2 text-sm">View Cart</a>
+      <a href="/checkout" class="btn-primary w-full text-center block text-sm">Checkout</a>
+    </div>
+  </div>
+</aside>
