@@ -15,6 +15,7 @@
   - [Getting Started](guides/getting-started.md)
   - [Migrating From Shopify](guides/migrating-from-shopify.md)
   - [Module Registry](guides/module-registry.md)
+  - [Repository Dependency Injection](guides/repository-dependency-injection.md)
   - [Search And Merchandising](guides/search-and-merchandising.md)
 
 - **Architecture**

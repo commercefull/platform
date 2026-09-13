@@ -179,9 +179,10 @@ export class Product {
 
 - Domain defines the **interface** (`domain/repositories/*.ts`).
 - Infrastructure provides the **implementation** with raw SQL (`infrastructure/repositories/*.ts`).
+- Application use cases depend on the **interface only** — concrete implementations are injected at the composition root (`wired.ts`).
 
 ```typescript
-// Domain — contract
+// domain/repositories/ProductRepository.ts — interface (port)
 export interface IProductRepository {
   findById(productId: string): Promise<Product | null>;
   findAll(filters: ProductFilters): Promise<Product[]>;
@@ -189,6 +190,34 @@ export interface IProductRepository {
   delete(productId: string): Promise<void>;
 }
 ```
+
+```typescript
+// application/useCases/GetProduct.ts — depends on interface ONLY
+import { IProductRepository } from '../../domain/repositories/ProductRepository';
+
+export class GetProductUseCase {
+  constructor(private readonly productRepo: IProductRepository) {}
+  //                     ^^^^^^^^^^^^^^^^^ interface type, not concrete
+}
+```
+
+```typescript
+// application/wired.ts — composition root, imports concrete and injects
+import ProductRepo from '../infrastructure/repositories/ProductRepository';
+import { GetProductUseCase } from './useCases/GetProduct';
+
+export const getProduct = new GetProductUseCase(ProductRepo);
+//                                           ^^^^^^^^^^^ concrete injected
+```
+
+### Dependency Injection Rules
+
+1. **UseCase files** (`application/useCases/*.ts`, excluding `wired.ts`) — may ONLY import repository types from `domain/repositories/`
+2. **`wired.ts` files** (`application/wired.ts`, `application/useCases/wired.ts`) — MAY import from `infrastructure/repositories/` (composition root)
+3. **Test files** — import from `domain/repositories/` and create mock implementations; never import from `infrastructure/repositories/`
+4. **Enforced by** the dependency-cruiser rule `application-no-infra-repos`
+
+> See [Repository Dependency Injection Migration Plan](../guides/repository-dependency-injection.md) for the full migration guide.
 
 ## Module Barrel Exports (`index.ts`)
 

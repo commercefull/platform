@@ -35,21 +35,46 @@ module.exports = {
       },
     },
     // Application must not depend on infrastructure or interface (directly)
+    // Exception: wired.ts files are composition roots — they import concrete
+    // implementations and inject them into use cases. See:
+    // docs/guides/repository-dependency-injection.md
     {
       name: 'application-no-infra-interface',
       severity: 'error',
-      comment: 'Application layer must not import from infrastructure or interface directly — use ports',
-      from: { path: 'modules/[^/]+/application/' },
+      comment: 'Application layer must not import from infrastructure or interface directly — use ports. wired.ts composition roots are exempt.',
+      from: {
+        path: 'modules/[^/]+/application/',
+        pathNot: [
+          'modules/[^/]+/application/wired\\.ts$',
+          'modules/[^/]+/application/useCases/wired\\.ts$',
+        ],
+      },
       to: {
         path: 'modules/[^/]+/(infrastructure|interface)/',
         pathNot: [
           'modules/[^/]+/infrastructure/index(?:\\.ts|\\.js)?$',
-          'modules/[^/]+/infrastructure/repositories/',
           'modules/[^/]+/infrastructure/acl/',
           'modules/[^/]+/infrastructure/services/',
           'modules/[^/]+/infrastructure/compositionRoot',
           'modules/[^/]+/interface/controllers/',
         ],
+      },
+    },
+    // Application (except wired.ts) must not import from infrastructure/repositories
+    // Uses baseline during migration — see docs/guides/repository-dependency-injection.md
+    {
+      name: 'application-no-infra-repos',
+      severity: 'error',
+      comment: 'Application layer must not import from infrastructure/repositories — use domain/repositories interfaces. wired.ts composition roots are exempt.',
+      from: {
+        path: 'modules/[^/]+/application/',
+        pathNot: [
+          'modules/[^/]+/application/wired\\.ts$',
+          'modules/[^/]+/application/useCases/wired\\.ts$',
+        ],
+      },
+      to: {
+        path: 'modules/[^/]+/infrastructure/repositories/',
       },
     },
     // Interface must not depend on infrastructure (directly)
