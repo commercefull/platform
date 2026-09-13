@@ -1,7 +1,7 @@
 import { identityDataRepository } from '../wired';
+import { dashboardQueryRepository } from '../../../analytics/application/wired';
 
 const identityRepo = identityDataRepository.users;
-import dashboardQueryRepository from '../../../analytics/infrastructure/repositories/DashboardQueryRepository';
 
 export class AdminAuthUseCase {
   async findByEmail(email: string) {

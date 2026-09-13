@@ -1,5 +1,5 @@
 import { identityDataRepository } from '../../wired';
-import storeDataRepository from '../../../../store/infrastructure/repositories/StoreDataRepository';
+import { storeDataRepository } from '../../../../store/application/wired';
 
 const identityRepo = identityDataRepository.users;
 const storeRepo = storeDataRepository.stores;

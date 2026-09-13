@@ -12,7 +12,6 @@ export * from './domain/repositories/ContentRedirectRepository';
 export * from './domain/events/ContentEvents';
 export * from './domain/errors/ContentErrors';
 export * from './domain/entities/ContentPage';
-export * from './domain/entities/ContentBlock';
 export * from './domain/entities/ContentType';
 
 // Interface exports (routers, GraphQL)
