@@ -16,12 +16,13 @@ describe('SOC2 Control Catalogue', () => {
     });
 
     it('should have all controls with required fields', () => {
+      const validFrequencies = new Set(['continuous', 'daily', 'monthly', 'quarterly', 'annually']);
       for (const control of SOC2_CONTROLS) {
         expect(control.control_id).toBeTruthy();
         expect(control.category).toBeTruthy();
         expect(control.description).toBeTruthy();
         expect(control.evidenceActions.length).toBeGreaterThan(0);
-        expect(['continuous', 'daily', 'monthly', 'quarterly', 'annually']).toContain(control.frequency);
+        expect(validFrequencies.has(control.frequency)).toBe(true);
       }
     });
 

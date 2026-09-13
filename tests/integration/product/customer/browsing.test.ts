@@ -31,9 +31,10 @@ describe('Customer: Product Browsing', () => {
     it('should only return ACTIVE + VISIBLE/FEATURED products', async () => {
       const res = await client.get('/customer/products');
       expect(res.status).toBe(200);
+      const validVisibility = new Set(['visible', 'featured']);
       res.data.data.products.forEach((p: Record<string, unknown>) => {
         expect(p.status).toBe('active');
-        expect(['visible', 'featured']).toContain(p.visibility);
+        expect(validVisibility.has(p.visibility as string)).toBe(true);
       });
     });
 

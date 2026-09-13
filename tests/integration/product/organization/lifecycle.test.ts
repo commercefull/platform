@@ -58,7 +58,7 @@ describe('Organization: Product Lifecycle', () => {
       );
       expect(res.status).toBe(201);
       expect(res.data.data.status).toBe('draft');
-      expect(['hidden', 'not_visible']).toContain(res.data.data.visibility);
+      expect(res.data.data.visibility).toBe('not_visible');
       createdProductId = res.data.data.productId;
     });
 
@@ -258,7 +258,7 @@ describe('Organization: Product Lifecycle', () => {
         },
       );
       expect(res.status).toBe(200);
-      expect(['hidden', 'not_visible']).toContain(res.data.data.visibility);
+      expect(res.data.data.visibility).toBe('not_visible');
     });
   });
 
