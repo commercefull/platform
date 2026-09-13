@@ -101,7 +101,7 @@ export const createSnapshot = async (config: DbConfig, dumpDirPath: string): Pro
     await execPromise('docker', ['inspect', containerName]);
     useDocker = true;
   } catch {
-    useDocker = false;
+    // Container not found — fall back to host pg_dump
   }
 
   if (useDocker) {
@@ -169,7 +169,7 @@ export const restoreSnapshot = async (config: DbConfig, dumpFilePath: string): P
     await execPromise('docker', ['inspect', containerName]);
     useDocker = true;
   } catch {
-    useDocker = false;
+    // Container not found — fall back to host pg_restore
   }
 
   if (useDocker) {
