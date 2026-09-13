@@ -119,23 +119,57 @@ export class CommissionRule {
     return new CommissionRule(props);
   }
 
-  get ruleId(): string { return this._ruleId; }
-  get organizationId(): string { return this._organizationId; }
-  get name(): string { return this._name; }
-  get type(): CommissionType { return this._type; }
-  get scope(): CommissionScope { return this._scope; }
-  get rate(): number { return this._rate; }
-  get fixedAmount(): number | undefined { return this._fixedAmount; }
-  get tiers(): CommissionTier[] | undefined { return this._tiers; }
-  get categoryId(): string | undefined { return this._categoryId; }
-  get vendorId(): string | undefined { return this._vendorId; }
-  get productId(): string | undefined { return this._productId; }
-  get priority(): number { return this._priority; }
-  get active(): boolean { return this._active; }
-  get startsAt(): Date | undefined { return this._startsAt; }
-  get endsAt(): Date | undefined { return this._endsAt; }
-  get createdAt(): Date { return this._createdAt; }
-  get updatedAt(): Date { return this._updatedAt; }
+  get ruleId(): string {
+    return this._ruleId;
+  }
+  get organizationId(): string {
+    return this._organizationId;
+  }
+  get name(): string {
+    return this._name;
+  }
+  get type(): CommissionType {
+    return this._type;
+  }
+  get scope(): CommissionScope {
+    return this._scope;
+  }
+  get rate(): number {
+    return this._rate;
+  }
+  get fixedAmount(): number | undefined {
+    return this._fixedAmount;
+  }
+  get tiers(): CommissionTier[] | undefined {
+    return this._tiers;
+  }
+  get categoryId(): string | undefined {
+    return this._categoryId;
+  }
+  get vendorId(): string | undefined {
+    return this._vendorId;
+  }
+  get productId(): string | undefined {
+    return this._productId;
+  }
+  get priority(): number {
+    return this._priority;
+  }
+  get active(): boolean {
+    return this._active;
+  }
+  get startsAt(): Date | undefined {
+    return this._startsAt;
+  }
+  get endsAt(): Date | undefined {
+    return this._endsAt;
+  }
+  get createdAt(): Date {
+    return this._createdAt;
+  }
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
 
   get isActive(): boolean {
     if (!this._active) return false;

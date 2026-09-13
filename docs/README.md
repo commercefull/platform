@@ -29,14 +29,14 @@ CommerceFull is a modular e-commerce platform built with Express 5, TypeScript, 
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Runtime | Node.js 20+, TypeScript 5.x |
-| Framework | Express 5 |
-| Database | PostgreSQL 18, Knex migrations, raw SQL via `pg` |
-| Event Bus | Transactional outbox with `FOR UPDATE SKIP LOCKED` dispatcher |
-| Admin UI | EJS + Tabler |
-| Storefront UI | EJS + Tailwind CSS |
-| Payments | Stripe |
-| Testing | Jest, k6 |
-| Docs | Docsify + OpenAPI/Swagger UI |
+| Layer         | Technology                                                    |
+| ------------- | ------------------------------------------------------------- |
+| Runtime       | Node.js 20+, TypeScript 5.x                                   |
+| Framework     | Express 5                                                     |
+| Database      | PostgreSQL 18, Knex migrations, raw SQL via `pg`              |
+| Event Bus     | Transactional outbox with `FOR UPDATE SKIP LOCKED` dispatcher |
+| Admin UI      | EJS + Tabler                                                  |
+| Storefront UI | EJS + Tailwind CSS                                            |
+| Payments      | Stripe                                                        |
+| Testing       | Jest, k6                                                      |
+| Docs          | Docsify + OpenAPI/Swagger UI                                  |

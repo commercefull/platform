@@ -4,9 +4,19 @@
 
 import { FailoverRoutingEngine } from './FailoverRoutingEngine';
 import {
-  PSPAdapter, PSPCapabilities, PSPConfig, WebhookEvent,
-  PaymentRequest, PaymentResponse, CaptureRequest, CaptureResponse,
-  VoidRequest, VoidResponse, RefundRequest, RefundResponse, HealthCheckResult,
+  PSPAdapter,
+  PSPCapabilities,
+  PSPConfig,
+  WebhookEvent,
+  PaymentRequest,
+  PaymentResponse,
+  CaptureRequest,
+  CaptureResponse,
+  VoidRequest,
+  VoidResponse,
+  RefundRequest,
+  RefundResponse,
+  HealthCheckResult,
 } from './GatewayAdapter';
 
 class MockPSPAdapter implements PSPAdapter {
@@ -33,8 +43,12 @@ class MockPSPAdapter implements PSPAdapter {
     };
   }
 
-  verifySignature(): boolean { return true; }
-  normalize(): WebhookEvent | null { return null; }
+  verifySignature(): boolean {
+    return true;
+  }
+  normalize(): WebhookEvent | null {
+    return null;
+  }
 
   async initiatePayment(request: PaymentRequest, _config: PSPConfig): Promise<PaymentResponse> {
     if (this.shouldThrow) throw new Error(`${this.provider} network error`);
@@ -248,9 +262,7 @@ describe('FailoverRoutingEngine', () => {
 
   it('should run health checks and update circuit breaker state', async () => {
     primary.healthResult = { healthy: false };
-    engine.registerRoutes([
-      { provider: 'primary', adapter: primary, config: mockConfig, priority: 1 },
-    ]);
+    engine.registerRoutes([{ provider: 'primary', adapter: primary, config: mockConfig, priority: 1 }]);
 
     await engine.runHealthChecks();
 

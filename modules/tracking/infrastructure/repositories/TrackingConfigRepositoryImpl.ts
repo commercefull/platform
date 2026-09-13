@@ -4,18 +4,12 @@ import { TrackingConfigRepository } from '../../domain/repositories/TrackingConf
 
 export class TrackingConfigRepositoryImpl implements TrackingConfigRepository {
   async findById(configId: string): Promise<TrackingConfig | null> {
-    const row = await queryOne<Record<string, unknown>>(
-      'SELECT * FROM "trackingConfig" WHERE "configId" = $1',
-      [configId],
-    );
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "trackingConfig" WHERE "configId" = $1', [configId]);
     return row ? this.mapToEntity(row) : null;
   }
 
   async findByStoreId(storeId: string): Promise<TrackingConfig | null> {
-    const row = await queryOne<Record<string, unknown>>(
-      'SELECT * FROM "trackingConfig" WHERE "storeId" = $1',
-      [storeId],
-    );
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "trackingConfig" WHERE "storeId" = $1', [storeId]);
     return row ? this.mapToEntity(row) : null;
   }
 
@@ -30,10 +24,9 @@ export class TrackingConfigRepositoryImpl implements TrackingConfigRepository {
   async save(config: TrackingConfig): Promise<TrackingConfig> {
     const props = this.getProps(config);
 
-    const existing = await queryOne<Record<string, unknown>>(
-      'SELECT "configId" FROM "trackingConfig" WHERE "configId" = $1',
-      [props.configId],
-    );
+    const existing = await queryOne<Record<string, unknown>>('SELECT "configId" FROM "trackingConfig" WHERE "configId" = $1', [
+      props.configId,
+    ]);
 
     if (existing) {
       await query(

@@ -1,5 +1,5 @@
-import { ProcessDataRequestUseCase, VerifyIdentityCommand, RejectRequestCommand} from './ProcessDataRequest';
-import { DataRequestNotFoundError} from '../../domain/errors/GdprErrors';
+import { ProcessDataRequestUseCase, VerifyIdentityCommand, RejectRequestCommand } from './ProcessDataRequest';
+import { DataRequestNotFoundError } from '../../domain/errors/GdprErrors';
 
 describe('ProcessDataRequestUseCase', () => {
   let useCase: ProcessDataRequestUseCase;
@@ -9,8 +9,12 @@ describe('ProcessDataRequestUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findById: jest.fn().mockResolvedValue({
-        gdprDataRequestId: 'r1', status: 'pending', requestType: 'access',
-        verifyIdentity: jest.fn(), reject: jest.fn(), save: jest.fn(),
+        gdprDataRequestId: 'r1',
+        status: 'pending',
+        requestType: 'access',
+        verifyIdentity: jest.fn(),
+        reject: jest.fn(),
+        save: jest.fn(),
       }),
       save: jest.fn().mockResolvedValue(undefined),
     };

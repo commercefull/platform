@@ -5,10 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
-import {
-  CustomerRepository as ICustomerRepository,
-  CustomerFilters,
-} from '../../domain/repositories/CustomerRepository';
+import { CustomerRepository as ICustomerRepository, CustomerFilters } from '../../domain/repositories/CustomerRepository';
 import { Customer, CustomerAddress } from '../../../../libs/db/types';
 import { CustomerAddressNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
@@ -329,9 +326,10 @@ export class CustomerRepo implements ICustomerRepository {
 
   // Group methods
   async getCustomerGroupIds(customerId: string): Promise<string[]> {
-    const rows = await query<{ customerGroupId: string }[]>('SELECT "customerGroupId" FROM "customerGroupMembership" WHERE "customerId" = $1', [
-      customerId,
-    ]);
+    const rows = await query<{ customerGroupId: string }[]>(
+      'SELECT "customerGroupId" FROM "customerGroupMembership" WHERE "customerId" = $1',
+      [customerId],
+    );
     return (rows || []).map(row => row.customerGroupId);
   }
 

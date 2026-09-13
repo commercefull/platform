@@ -4,9 +4,7 @@ import paymentDataRepository from '../../infrastructure/repositories/PaymentData
 const paymentRepo = paymentDataRepository.gateways;
 
 export class ManagePaymentGatewaysUseCase {
-  constructor(
-    private readonly gatewayRepo: PaymentGatewayRepository = paymentRepo,
-  ) {}
+  constructor(private readonly gatewayRepo: PaymentGatewayRepository = paymentRepo) {}
 
   async findAll(organizationId: string) {
     return this.gatewayRepo.findAllGateways(organizationId);

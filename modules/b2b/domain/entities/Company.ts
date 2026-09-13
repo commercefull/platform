@@ -85,23 +85,57 @@ export class Company {
     return new Company(props);
   }
 
-  get companyId(): string { return this.props.companyId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get name(): string { return this.props.name; }
-  get legalName(): string | undefined { return this.props.legalName; }
-  get taxId(): string | undefined { return this.props.taxId; }
-  get status(): CompanyStatus { return this.props.status; }
-  get paymentTerms(): PaymentTerms { return this.props.paymentTerms; }
-  get creditLimit(): number | undefined { return this.props.creditLimit; }
-  get outstandingBalance(): number { return this.props.outstandingBalance; }
-  get billingAddress(): CompanyProps['billingAddress'] { return this.props.billingAddress; }
-  get shippingAddress(): CompanyProps['shippingAddress'] { return this.props.shippingAddress; }
-  get contactEmail(): string | undefined { return this.props.contactEmail; }
-  get contactPhone(): string | undefined { return this.props.contactPhone; }
-  get website(): string | undefined { return this.props.website; }
-  get parentId(): string | undefined { return this.props.parentId; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get companyId(): string {
+    return this.props.companyId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get legalName(): string | undefined {
+    return this.props.legalName;
+  }
+  get taxId(): string | undefined {
+    return this.props.taxId;
+  }
+  get status(): CompanyStatus {
+    return this.props.status;
+  }
+  get paymentTerms(): PaymentTerms {
+    return this.props.paymentTerms;
+  }
+  get creditLimit(): number | undefined {
+    return this.props.creditLimit;
+  }
+  get outstandingBalance(): number {
+    return this.props.outstandingBalance;
+  }
+  get billingAddress(): CompanyProps['billingAddress'] {
+    return this.props.billingAddress;
+  }
+  get shippingAddress(): CompanyProps['shippingAddress'] {
+    return this.props.shippingAddress;
+  }
+  get contactEmail(): string | undefined {
+    return this.props.contactEmail;
+  }
+  get contactPhone(): string | undefined {
+    return this.props.contactPhone;
+  }
+  get website(): string | undefined {
+    return this.props.website;
+  }
+  get parentId(): string | undefined {
+    return this.props.parentId;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   approve(): void {
     if (this.props.status !== 'pending') {

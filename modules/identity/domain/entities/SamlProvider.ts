@@ -120,24 +120,60 @@ export class SamlProvider {
   }
 
   // Getters
-  get providerId(): string { return this.props.providerId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get name(): string { return this.props.name; }
-  get entityId(): string { return this.props.entityId; }
-  get ssoUrl(): string { return this.props.ssoUrl; }
-  get sloUrl(): string | undefined { return this.props.sloUrl; }
-  get certificate(): string { return this.props.certificate; }
-  get spEntityId(): string { return this.props.spEntityId; }
-  get acsUrl(): string { return this.props.acsUrl; }
-  get binding(): SamlBinding { return this.props.binding; }
-  get nameIdFormat(): SamlNameIdFormat { return this.props.nameIdFormat; }
-  get signAuthnRequest(): boolean { return this.props.signAuthnRequest; }
-  get spPrivateKey(): string | undefined { return this.props.spPrivateKey; }
-  get spCertificate(): string | undefined { return this.props.spCertificate; }
-  get attributeMapping(): SamlAttributeMapping { return this.props.attributeMapping; }
-  get isActive(): boolean { return this.props.isActive; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get providerId(): string {
+    return this.props.providerId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get entityId(): string {
+    return this.props.entityId;
+  }
+  get ssoUrl(): string {
+    return this.props.ssoUrl;
+  }
+  get sloUrl(): string | undefined {
+    return this.props.sloUrl;
+  }
+  get certificate(): string {
+    return this.props.certificate;
+  }
+  get spEntityId(): string {
+    return this.props.spEntityId;
+  }
+  get acsUrl(): string {
+    return this.props.acsUrl;
+  }
+  get binding(): SamlBinding {
+    return this.props.binding;
+  }
+  get nameIdFormat(): SamlNameIdFormat {
+    return this.props.nameIdFormat;
+  }
+  get signAuthnRequest(): boolean {
+    return this.props.signAuthnRequest;
+  }
+  get spPrivateKey(): string | undefined {
+    return this.props.spPrivateKey;
+  }
+  get spCertificate(): string | undefined {
+    return this.props.spCertificate;
+  }
+  get attributeMapping(): SamlAttributeMapping {
+    return this.props.attributeMapping;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Domain methods
   activate(): void {

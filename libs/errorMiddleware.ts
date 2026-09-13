@@ -17,12 +17,10 @@ import { getCorrelationId } from './correlationId';
 export function errorMiddleware(err: unknown, req: Request, res: Response, _next: NextFunction): void {
   const isProduction = process.env.NODE_ENV === 'production';
 
-  const appError = err instanceof AppError
-    ? err
-    : new AppError(
-        err instanceof Error ? err.message : 'Internal Server Error',
-        (err as Record<string, number>)?.status ?? 500,
-      );
+  const appError =
+    err instanceof AppError
+      ? err
+      : new AppError(err instanceof Error ? err.message : 'Internal Server Error', (err as Record<string, number>)?.status ?? 500);
 
   const logMeta = {
     code: appError.code,
@@ -47,7 +45,8 @@ export function errorMiddleware(err: unknown, req: Request, res: Response, _next
   res.status(appError.statusCode);
 
   // API requests → RFC 7807 problem+json (alongside legacy shape for deprecation window)
-  const isApiRequest = req.xhr || req.headers.accept?.includes('application/json') || req.path.startsWith('/customer/') || req.path.startsWith('/business/');
+  const isApiRequest =
+    req.xhr || req.headers.accept?.includes('application/json') || req.path.startsWith('/customer/') || req.path.startsWith('/business/');
 
   if (isApiRequest) {
     // RFC 7807 problem details shape

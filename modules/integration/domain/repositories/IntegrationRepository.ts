@@ -38,7 +38,10 @@ export interface IntegrationSubscriptionRepository {
 export interface IntegrationLogRepository {
   create(log: IntegrationLog): Promise<IntegrationLog>;
   findById(logId: string): Promise<IntegrationLog | null>;
-  findByIntegration(integrationId: string, filters?: { status?: LogStatus; limit?: number; offset?: number }): Promise<{ data: IntegrationLog[]; total: number }>;
+  findByIntegration(
+    integrationId: string,
+    filters?: { status?: LogStatus; limit?: number; offset?: number },
+  ): Promise<{ data: IntegrationLog[]; total: number }>;
   findBySubscription(subscriptionId: string, limit?: number): Promise<IntegrationLog[]>;
   deleteByIntegration(integrationId: string): Promise<boolean>;
 }

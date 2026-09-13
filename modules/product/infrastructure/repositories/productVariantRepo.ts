@@ -119,9 +119,7 @@ export class ProductVariantRepo {
    */
   async findById(id: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
-    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productVariantId" = $1`, [
-      id,
-    ]);
+    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productVariantId" = $1`, [id]);
   }
 
   /**
@@ -129,10 +127,7 @@ export class ProductVariantRepo {
    */
   async findBySku(sku: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
-    return await queryOne<ProductVariant>(
-      `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "sku" = $1`,
-      [sku],
-    );
+    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "sku" = $1`, [sku]);
   }
 
   async findByProductId(productId: string): Promise<ProductVariant[]> {
@@ -297,7 +292,6 @@ export class ProductVariantRepo {
       throw new ProductValidationError('Cannot delete the master variant of a product. The master variant is required.');
     }
 
-
     await query(`DELETE FROM "${Table.ProductVariant}" WHERE "productVariantId" = $1`, [id]);
 
     return true;
@@ -375,10 +369,10 @@ export class ProductVariantRepo {
       .join(', ');
 
     // First, unset default on all variants for this product
-    await query(
-      `UPDATE "${Table.ProductVariant}" SET "isDefault" = false, "updatedAt" = $1 WHERE "productId" = $2`,
-      [now, variant.productId],
-    );
+    await query(`UPDATE "${Table.ProductVariant}" SET "isDefault" = false, "updatedAt" = $1 WHERE "productId" = $2`, [
+      now,
+      variant.productId,
+    ]);
 
     // Then set this variant as default
     const sql = `

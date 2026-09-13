@@ -5,7 +5,10 @@
 
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import { ManageOrderFulfillmentsUseCase, GetOrderForFulfillmentUseCase } from '../../../modules/order/application/useCases/ManageOrderFulfillments';
+import {
+  ManageOrderFulfillmentsUseCase,
+  GetOrderForFulfillmentUseCase,
+} from '../../../modules/order/application/useCases/ManageOrderFulfillments';
 import { ManageWarehouseAdminUseCase } from '../../../modules/warehouse/application/useCases/ManageWarehouseAdmin';
 import { adminRespond } from '../../respond';
 
@@ -49,7 +52,6 @@ export const listFulfillments = async (req: TypedRequest, res: Response): Promis
 
     success: req.query.success || null,
   });
-  
 };
 
 export const viewFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -75,7 +77,6 @@ export const viewFulfillment = async (req: TypedRequest, res: Response): Promise
 
     success: req.query.success || null,
   });
-  
 };
 
 export const updateFulfillmentStatus = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -105,7 +106,6 @@ export const updateFulfillmentStatus = async (req: TypedRequest, res: Response):
     message: `Fulfillment status updated to ${status}`,
     fulfillment,
   });
-  
 };
 
 export const markAsShipped = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -130,7 +130,6 @@ export const markAsShipped = async (req: TypedRequest, res: Response): Promise<v
     message: 'Fulfillment marked as shipped',
     fulfillment,
   });
-  
 };
 
 export const markAsDelivered = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -147,7 +146,6 @@ export const markAsDelivered = async (req: TypedRequest, res: Response): Promise
     message: 'Fulfillment marked as delivered',
     fulfillment,
   });
-  
 };
 
 export const cancelFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -166,7 +164,6 @@ export const cancelFulfillment = async (req: TypedRequest, res: Response): Promi
     message: 'Fulfillment cancelled',
     fulfillment,
   });
-  
 };
 
 export const getFulfillmentStats = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -180,7 +177,6 @@ export const getFulfillmentStats = async (req: TypedRequest, res: Response): Pro
     overdueCount: overdue.length,
     shippedTodayCount: shippedToday.length,
   });
-  
 };
 
 // ============================================================================
@@ -214,5 +210,4 @@ export const warehouseDashboard = async (req: TypedRequest, res: Response): Prom
     pendingFulfillments,
     selectedWarehouse: warehouseId,
   });
-  
 };

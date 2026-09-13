@@ -16,10 +16,10 @@ const faqRepo = supportInfoRepository.faq;
 const ticketQueryAdapter = {
   async findTickets(filters: Record<string, unknown>, pagination: { page: number; limit: number }) {
     const offset = (pagination.page - 1) * pagination.limit;
-    const result = await supportRepo.getTickets(
-      filters as Parameters<typeof supportRepo.getTickets>[0],
-      { limit: pagination.limit, offset },
-    );
+    const result = await supportRepo.getTickets(filters as Parameters<typeof supportRepo.getTickets>[0], {
+      limit: pagination.limit,
+      offset,
+    });
     return result.data.map(t => ({
       ticketId: t.supportTicketId,
       ticketNumber: t.ticketNumber,
@@ -33,10 +33,7 @@ const ticketQueryAdapter = {
     }));
   },
   async countTickets(filters: Record<string, unknown>) {
-    const result = await supportRepo.getTickets(
-      filters as Parameters<typeof supportRepo.getTickets>[0],
-      { limit: 0, offset: 0 },
-    );
+    const result = await supportRepo.getTickets(filters as Parameters<typeof supportRepo.getTickets>[0], { limit: 0, offset: 0 });
     return result.total;
   },
 };

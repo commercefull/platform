@@ -4,18 +4,12 @@ import type { VendorPayoutRepository } from '../../domain/repositories/Marketpla
 
 export class VendorPayoutRepositoryImpl implements VendorPayoutRepository {
   async findById(payoutId: string): Promise<VendorPayout | null> {
-    const row = await queryOne<VendorPayoutProps>(
-      `SELECT * FROM "marketplaceVendorPayout" WHERE "payoutId" = $1`,
-      [payoutId],
-    );
+    const row = await queryOne<VendorPayoutProps>(`SELECT * FROM "marketplaceVendorPayout" WHERE "payoutId" = $1`, [payoutId]);
     return row ? VendorPayout.reconstitute(row) : null;
   }
 
   async findByPayoutNumber(payoutNumber: string): Promise<VendorPayout | null> {
-    const row = await queryOne<VendorPayoutProps>(
-      `SELECT * FROM "marketplaceVendorPayout" WHERE "payoutNumber" = $1`,
-      [payoutNumber],
-    );
+    const row = await queryOne<VendorPayoutProps>(`SELECT * FROM "marketplaceVendorPayout" WHERE "payoutNumber" = $1`, [payoutNumber]);
     return row ? VendorPayout.reconstitute(row) : null;
   }
 
@@ -74,12 +68,25 @@ export class VendorPayoutRepositoryImpl implements VendorPayoutRepository {
         "updatedAt" = EXCLUDED."updatedAt"
       `,
       [
-        json.payoutId, json.vendorId, json.organizationId, json.payoutNumber,
-        json.status, json.method, json.periodStart, json.periodEnd,
-        JSON.stringify(json.lineItems), json.grossAmount, json.commissionAmount,
-        json.netAmount, json.currency, json.transactionRef ?? null,
-        json.failureReason ?? null, json.processedAt ?? null, json.completedAt ?? null,
-        json.createdAt, json.updatedAt,
+        json.payoutId,
+        json.vendorId,
+        json.organizationId,
+        json.payoutNumber,
+        json.status,
+        json.method,
+        json.periodStart,
+        json.periodEnd,
+        JSON.stringify(json.lineItems),
+        json.grossAmount,
+        json.commissionAmount,
+        json.netAmount,
+        json.currency,
+        json.transactionRef ?? null,
+        json.failureReason ?? null,
+        json.processedAt ?? null,
+        json.completedAt ?? null,
+        json.createdAt,
+        json.updatedAt,
       ],
     );
   }

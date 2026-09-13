@@ -4,7 +4,12 @@
 
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { logger } from '../../../../../libs/logger';
-import { OrganizationRegistrationFieldsRequiredError, InvalidEmailFormatError, PasswordTooShortError, EmailAlreadyRegisteredError } from '../../../domain/errors/IdentityErrors';
+import {
+  OrganizationRegistrationFieldsRequiredError,
+  InvalidEmailFormatError,
+  PasswordTooShortError,
+  EmailAlreadyRegisteredError,
+} from '../../../domain/errors/IdentityErrors';
 
 export interface RegisterOrganizationInput {
   email: string;

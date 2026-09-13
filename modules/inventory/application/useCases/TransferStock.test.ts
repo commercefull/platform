@@ -23,8 +23,22 @@ describe('TransferStockUseCase', () => {
   it('should transfer stock between locations', async () => {
     mockRepo.findLocationById.mockResolvedValue({ locationId: 'loc-1', name: 'Warehouse A' });
     mockRepo.findByProduct
-      .mockResolvedValueOnce({ inventoryId: 'inv-1', productId: 'prod-1', locationId: 'loc-1', sku: 'SKU-1', quantity: 100, reservedQuantity: 10 })
-      .mockResolvedValueOnce({ inventoryId: 'inv-2', productId: 'prod-1', locationId: 'loc-2', sku: 'SKU-1', quantity: 20, reservedQuantity: 0 });
+      .mockResolvedValueOnce({
+        inventoryId: 'inv-1',
+        productId: 'prod-1',
+        locationId: 'loc-1',
+        sku: 'SKU-1',
+        quantity: 100,
+        reservedQuantity: 10,
+      })
+      .mockResolvedValueOnce({
+        inventoryId: 'inv-2',
+        productId: 'prod-1',
+        locationId: 'loc-2',
+        sku: 'SKU-1',
+        quantity: 20,
+        reservedQuantity: 0,
+      });
 
     const result = await useCase.execute({
       sourceLocationId: 'loc-1',
@@ -37,17 +51,17 @@ describe('TransferStockUseCase', () => {
     expect(result.results[0].sourceRemainingQuantity).toBe(70);
     expect(result.results[0].destinationNewQuantity).toBe(50);
     expect(mockRepo.updateQuantity).toHaveBeenCalledTimes(2);
-    expect(mockRepo.recordTransaction).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'transfer',
-      fromLocationId: 'loc-1',
-      toLocationId: 'loc-2',
-    }));
+    expect(mockRepo.recordTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'transfer',
+        fromLocationId: 'loc-1',
+        toLocationId: 'loc-2',
+      }),
+    );
   });
 
   it('should throw when source location not found', async () => {
-    mockRepo.findLocationById
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ locationId: 'loc-2', name: 'Warehouse B' });
+    mockRepo.findLocationById.mockResolvedValueOnce(null).mockResolvedValueOnce({ locationId: 'loc-2', name: 'Warehouse B' });
 
     await expect(
       useCase.execute({
@@ -59,9 +73,7 @@ describe('TransferStockUseCase', () => {
   });
 
   it('should throw when destination location not found', async () => {
-    mockRepo.findLocationById
-      .mockResolvedValueOnce({ locationId: 'loc-1', name: 'Warehouse A' })
-      .mockResolvedValueOnce(null);
+    mockRepo.findLocationById.mockResolvedValueOnce({ locationId: 'loc-1', name: 'Warehouse A' }).mockResolvedValueOnce(null);
 
     await expect(
       useCase.execute({
@@ -90,7 +102,14 @@ describe('TransferStockUseCase', () => {
   it('should partially transfer when available is less than requested', async () => {
     mockRepo.findLocationById.mockResolvedValue({ locationId: 'loc-1', name: 'Warehouse A' });
     mockRepo.findByProduct
-      .mockResolvedValueOnce({ inventoryId: 'inv-1', productId: 'prod-1', locationId: 'loc-1', sku: 'SKU-1', quantity: 20, reservedQuantity: 15 })
+      .mockResolvedValueOnce({
+        inventoryId: 'inv-1',
+        productId: 'prod-1',
+        locationId: 'loc-1',
+        sku: 'SKU-1',
+        quantity: 20,
+        reservedQuantity: 15,
+      })
       .mockResolvedValueOnce(null);
 
     const result = await useCase.execute({
@@ -107,7 +126,14 @@ describe('TransferStockUseCase', () => {
   it('should create inventory at destination when none exists', async () => {
     mockRepo.findLocationById.mockResolvedValue({ locationId: 'loc-1', name: 'Warehouse A' });
     mockRepo.findByProduct
-      .mockResolvedValueOnce({ inventoryId: 'inv-1', productId: 'prod-1', locationId: 'loc-1', sku: 'SKU-1', quantity: 100, reservedQuantity: 0 })
+      .mockResolvedValueOnce({
+        inventoryId: 'inv-1',
+        productId: 'prod-1',
+        locationId: 'loc-1',
+        sku: 'SKU-1',
+        quantity: 100,
+        reservedQuantity: 0,
+      })
       .mockResolvedValueOnce(null);
 
     const result = await useCase.execute({
@@ -117,10 +143,12 @@ describe('TransferStockUseCase', () => {
     });
 
     expect(result.results[0].destinationNewQuantity).toBe(30);
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      productId: 'prod-1',
-      warehouseId: 'loc-2',
-      quantity: 30,
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        productId: 'prod-1',
+        warehouseId: 'loc-2',
+        quantity: 30,
+      }),
+    );
   });
 });

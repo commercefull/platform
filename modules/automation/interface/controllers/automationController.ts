@@ -31,19 +31,26 @@ class AutomationController {
     }
   }
 
-  async createRule(req: TypedRequest<Record<string, never>, Record<string, never>, {
-    name: string;
-    description?: string;
-    triggerType: string;
-    triggerConfig: Record<string, unknown>;
-    conditions?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[]; dataPath?: string }>;
-    conditionMatchMode?: 'all' | 'any';
-    actions: Array<{ type: string; config: Record<string, unknown>; delayMs?: number }>;
-    actionExecutionMode?: 'sequential' | 'parallel';
-    priority?: number;
-    organizationId?: string;
-    createdBy?: string;
-  }>, res: Response): Promise<void> {
+  async createRule(
+    req: TypedRequest<
+      Record<string, never>,
+      Record<string, never>,
+      {
+        name: string;
+        description?: string;
+        triggerType: string;
+        triggerConfig: Record<string, unknown>;
+        conditions?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[]; dataPath?: string }>;
+        conditionMatchMode?: 'all' | 'any';
+        actions: Array<{ type: string; config: Record<string, unknown>; delayMs?: number }>;
+        actionExecutionMode?: 'sequential' | 'parallel';
+        priority?: number;
+        organizationId?: string;
+        createdBy?: string;
+      }
+    >,
+    res: Response,
+  ): Promise<void> {
     try {
       const rule = await createAutomationRuleUseCase.execute(req.body as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
       res.status(201).json({ success: true, data: rule.toJSON() });
@@ -56,19 +63,29 @@ class AutomationController {
     }
   }
 
-  async updateRule(req: TypedRequest<{ ruleId: string }, Record<string, never>, {
-    name?: string;
-    description?: string;
-    triggerConfig?: Record<string, unknown>;
-    conditions?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[]; dataPath?: string }>;
-    conditionMatchMode?: 'all' | 'any';
-    actions?: Array<{ type: string; config: Record<string, unknown>; delayMs?: number }>;
-    actionExecutionMode?: 'sequential' | 'parallel';
-    isActive?: boolean;
-    priority?: number;
-  }>, res: Response): Promise<void> {
+  async updateRule(
+    req: TypedRequest<
+      { ruleId: string },
+      Record<string, never>,
+      {
+        name?: string;
+        description?: string;
+        triggerConfig?: Record<string, unknown>;
+        conditions?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[]; dataPath?: string }>;
+        conditionMatchMode?: 'all' | 'any';
+        actions?: Array<{ type: string; config: Record<string, unknown>; delayMs?: number }>;
+        actionExecutionMode?: 'sequential' | 'parallel';
+        isActive?: boolean;
+        priority?: number;
+      }
+    >,
+    res: Response,
+  ): Promise<void> {
     try {
-      const rule = await updateAutomationRuleUseCase.execute(req.params.ruleId, req.body as Parameters<typeof updateAutomationRuleUseCase.execute>[1]);
+      const rule = await updateAutomationRuleUseCase.execute(
+        req.params.ruleId,
+        req.body as Parameters<typeof updateAutomationRuleUseCase.execute>[1],
+      );
       res.json({ success: true, data: rule.toJSON() });
     } catch (error) {
       if (error instanceof AutomationRuleNotFoundError) {
@@ -92,7 +109,10 @@ class AutomationController {
     }
   }
 
-  async triggerRule(req: TypedRequest<{ ruleId: string }, Record<string, never>, { context?: Record<string, unknown> }>, res: Response): Promise<void> {
+  async triggerRule(
+    req: TypedRequest<{ ruleId: string }, Record<string, never>, { context?: Record<string, unknown> }>,
+    res: Response,
+  ): Promise<void> {
     try {
       const result = await executionEngine.triggerManual(req.params.ruleId, req.body?.context);
       res.json({ success: true, data: result });

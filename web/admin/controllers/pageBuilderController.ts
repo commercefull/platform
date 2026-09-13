@@ -6,12 +6,7 @@
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../respond';
-import {
-  manageDraftsUseCase,
-  publishDraftUseCase,
-  previewDraftUseCase,
-  getBlockTypesUseCase,
-} from '../../../modules/pagebuilder';
+import { manageDraftsUseCase, publishDraftUseCase, previewDraftUseCase, getBlockTypesUseCase } from '../../../modules/pagebuilder';
 
 // ── Draft List ─────────────────────────────────────────────────
 

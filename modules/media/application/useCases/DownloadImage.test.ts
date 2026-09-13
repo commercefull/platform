@@ -67,10 +67,7 @@ describe('DownloadImageUseCase', () => {
         altText: 'Product photo',
       });
 
-      expect(fetchSpy).toHaveBeenCalledWith(
-        'https://example.com/product.png',
-        expect.objectContaining({ redirect: 'follow' }),
-      );
+      expect(fetchSpy).toHaveBeenCalledWith('https://example.com/product.png', expect.objectContaining({ redirect: 'follow' }));
       expect(mockProcessImageUseCase.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           file: expect.objectContaining({

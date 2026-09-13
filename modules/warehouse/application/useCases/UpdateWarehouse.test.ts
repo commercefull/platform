@@ -42,6 +42,9 @@ describe('UpdateWarehouseUseCase', () => {
   it('should pass all provided fields to update', async () => {
     await useCase.execute({ warehouseId: 'wh-1', name: 'New', code: 'WH02', capacity: 5000, priorityScore: 10 });
 
-    expect(mockRepo.update).toHaveBeenCalledWith('wh-1', expect.objectContaining({ name: 'New', code: 'WH02', capacity: 5000, priorityScore: 10 }));
+    expect(mockRepo.update).toHaveBeenCalledWith(
+      'wh-1',
+      expect.objectContaining({ name: 'New', code: 'WH02', capacity: 5000, priorityScore: 10 }),
+    );
   });
 });

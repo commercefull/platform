@@ -41,10 +41,7 @@ const T_CALL_REGEX = /\bt\(\s*['"]([^'"]{1,120})['"]/g;
 
 function collectReferencedKeys() {
   const referenced = new Set();
-  const files = [
-    ...findFiles(path.join(ROOT, 'web'), ['.ejs', '.ts']),
-    ...findFiles(path.join(ROOT, 'modules'), ['.ts']),
-  ];
+  const files = [...findFiles(path.join(ROOT, 'web'), ['.ejs', '.ts']), ...findFiles(path.join(ROOT, 'modules'), ['.ts'])];
 
   // Also scan app.ts at root
   const appTsPath = path.join(ROOT, 'app.ts');
@@ -126,7 +123,8 @@ function main() {
   console.log(`Referenced keys found in source: ${referenced.size}`);
 
   // Get all locale directories
-  const localeDirs = fs.readdirSync(LOCALES_DIR, { withFileTypes: true })
+  const localeDirs = fs
+    .readdirSync(LOCALES_DIR, { withFileTypes: true })
     .filter(e => e.isDirectory())
     .map(e => e.name);
 

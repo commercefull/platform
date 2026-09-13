@@ -3,11 +3,17 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { ProcessRenewalUseCase} from './ProcessRenewal';
-import { SubscriptionNotFoundError, SubscriptionValidationError, FailedToProcessRenewalError } from '../../domain/errors/SubscriptionErrors';
+import { ProcessRenewalUseCase } from './ProcessRenewal';
+import {
+  SubscriptionNotFoundError,
+  SubscriptionValidationError,
+  FailedToProcessRenewalError,
+} from '../../domain/errors/SubscriptionErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ProcessRenewalUseCase', () => {
   let useCase: ProcessRenewalUseCase;
@@ -19,8 +25,14 @@ describe('ProcessRenewalUseCase', () => {
     const pastDate = new Date(Date.now() - 86400000).toISOString();
     mockSubRepo = {
       findById: jest.fn().mockResolvedValue({
-        status: 'active', customerId: 'c1', nextBillingDate: pastDate, price: 29.99,
-        planName: 'Pro', paymentMethodId: 'pm-1', billingInterval: 'monthly', renewalCount: 0,
+        status: 'active',
+        customerId: 'c1',
+        nextBillingDate: pastDate,
+        price: 29.99,
+        planName: 'Pro',
+        paymentMethodId: 'pm-1',
+        billingInterval: 'monthly',
+        renewalCount: 0,
       }),
       update: jest.fn().mockResolvedValue(undefined),
     };
@@ -49,14 +61,30 @@ describe('ProcessRenewalUseCase', () => {
   });
 
   it('should throw SubscriptionValidationError when subscription is not active', async () => {
-    mockSubRepo.findById.mockResolvedValue({ status: 'paused', customerId: 'c1', nextBillingDate: new Date(Date.now() - 86400000).toISOString(), price: 10, planName: 'P', paymentMethodId: 'pm', billingInterval: 'monthly' });
+    mockSubRepo.findById.mockResolvedValue({
+      status: 'paused',
+      customerId: 'c1',
+      nextBillingDate: new Date(Date.now() - 86400000).toISOString(),
+      price: 10,
+      planName: 'P',
+      paymentMethodId: 'pm',
+      billingInterval: 'monthly',
+    });
 
     await expect(useCase.execute({ subscriptionId: 'sub-1' })).rejects.toThrow(SubscriptionValidationError);
   });
 
   it('should throw SubscriptionValidationError when not yet due for renewal', async () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString();
-    mockSubRepo.findById.mockResolvedValue({ status: 'active', customerId: 'c1', nextBillingDate: futureDate, price: 10, planName: 'P', paymentMethodId: 'pm', billingInterval: 'monthly' });
+    mockSubRepo.findById.mockResolvedValue({
+      status: 'active',
+      customerId: 'c1',
+      nextBillingDate: futureDate,
+      price: 10,
+      planName: 'P',
+      paymentMethodId: 'pm',
+      billingInterval: 'monthly',
+    });
 
     await expect(useCase.execute({ subscriptionId: 'sub-1' })).rejects.toThrow(SubscriptionValidationError);
   });

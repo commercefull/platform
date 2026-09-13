@@ -63,11 +63,7 @@ describe('Order Expanded Tests', () => {
 
       if (resp.data.data?.length > 0) {
         const orderId = resp.data.data[0].orderId;
-        const updateResp = await client.patch(
-          `/business/orders/${orderId}/status`,
-          { status: 'processing' },
-          { headers: authHeaders() },
-        );
+        const updateResp = await client.patch(`/business/orders/${orderId}/status`, { status: 'processing' }, { headers: authHeaders() });
 
         expectStatus(updateResp, 200);
       }

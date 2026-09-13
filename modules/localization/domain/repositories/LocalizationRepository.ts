@@ -45,15 +45,28 @@ export interface LocalizationRepository {
   // Currencies
   listCurrencies(): Promise<Currency[]>;
   findCurrencyById(currencyId: string): Promise<Currency | null>;
-  createCurrency(params: { code: string; name: string; symbol?: string; exchangeRate?: number; isDefault?: boolean; isActive?: boolean }): Promise<string>;
-  updateCurrency(currencyId: string, updates: { name?: string; symbol?: string; exchangeRate?: number; isDefault?: boolean; isActive?: boolean }): Promise<void>;
+  createCurrency(params: {
+    code: string;
+    name: string;
+    symbol?: string;
+    exchangeRate?: number;
+    isDefault?: boolean;
+    isActive?: boolean;
+  }): Promise<string>;
+  updateCurrency(
+    currencyId: string,
+    updates: { name?: string; symbol?: string; exchangeRate?: number; isDefault?: boolean; isActive?: boolean },
+  ): Promise<void>;
   deleteCurrency(currencyId: string): Promise<void>;
 
   // Languages
   listLanguages(): Promise<Language[]>;
   findLanguageById(languageId: string): Promise<Language | null>;
   createLanguage(params: { code: string; name: string; nativeName?: string; isDefault?: boolean; isActive?: boolean }): Promise<string>;
-  updateLanguage(languageId: string, updates: { name?: string; nativeName?: string; isDefault?: boolean; isActive?: boolean }): Promise<void>;
+  updateLanguage(
+    languageId: string,
+    updates: { name?: string; nativeName?: string; isDefault?: boolean; isActive?: boolean },
+  ): Promise<void>;
   deleteLanguage(languageId: string): Promise<void>;
 
   // Translations

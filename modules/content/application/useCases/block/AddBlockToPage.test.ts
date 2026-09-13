@@ -7,7 +7,9 @@ import { AddBlockToPageUseCase, AddBlockToPageCommand } from './AddBlockToPage';
 import { ContentPageNotFoundError, ContentTypeNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('AddBlockToPageUseCase', () => {
   let useCase: AddBlockToPageUseCase;
@@ -19,8 +21,14 @@ describe('AddBlockToPageUseCase', () => {
       findBlockTypeById: jest.fn().mockResolvedValue({ contentBlockTypeId: 'bt-1', name: 'Text', slug: 'text' }),
       findBlocksByPageId: jest.fn().mockResolvedValue([]),
       createBlock: jest.fn().mockResolvedValue({
-        contentBlockId: 'b1', contentPageId: 'p1', blockTypeId: 'bt-1', title: 'Hero',
-        sortOrder: 0, content: { text: 'Hello' }, isVisible: true, createdAt: new Date(),
+        contentBlockId: 'b1',
+        contentPageId: 'p1',
+        blockTypeId: 'bt-1',
+        title: 'Hero',
+        sortOrder: 0,
+        content: { text: 'Hello' },
+        isVisible: true,
+        createdAt: new Date(),
       }),
     };
     useCase = new AddBlockToPageUseCase(mockRepo as never);
@@ -36,8 +44,14 @@ describe('AddBlockToPageUseCase', () => {
   it('should auto-assign sort order when not provided', async () => {
     mockRepo.findBlocksByPageId.mockResolvedValue([{ contentBlockId: 'b1' }, { contentBlockId: 'b2' }]);
     mockRepo.createBlock.mockResolvedValue({
-      contentBlockId: 'b3', contentPageId: 'p1', blockTypeId: 'bt-1', title: 'Third',
-      sortOrder: 2, content: {}, isVisible: true, createdAt: new Date(),
+      contentBlockId: 'b3',
+      contentPageId: 'p1',
+      blockTypeId: 'bt-1',
+      title: 'Third',
+      sortOrder: 2,
+      content: {},
+      isVisible: true,
+      createdAt: new Date(),
     });
 
     const result = await useCase.execute(new AddBlockToPageCommand('p1', 'bt-1', 'Third', {}));

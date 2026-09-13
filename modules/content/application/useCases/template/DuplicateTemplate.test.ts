@@ -7,7 +7,9 @@ import { DuplicateTemplateUseCase, DuplicateTemplateCommand } from './DuplicateT
 import { ContentTemplateNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('DuplicateTemplateUseCase', () => {
   let useCase: DuplicateTemplateUseCase;
@@ -16,9 +18,17 @@ describe('DuplicateTemplateUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findTemplateById: jest.fn().mockResolvedValue({
-        contentTemplateId: 't1', name: 'Original', slug: 'original', description: 'Original template',
-        thumbnail: null, htmlStructure: '<div></div>', cssStyles: null, jsScripts: null,
-        areas: null, defaultBlocks: null, compatibleContentTypes: null,
+        contentTemplateId: 't1',
+        name: 'Original',
+        slug: 'original',
+        description: 'Original template',
+        thumbnail: null,
+        htmlStructure: '<div></div>',
+        cssStyles: null,
+        jsScripts: null,
+        areas: null,
+        defaultBlocks: null,
+        compatibleContentTypes: null,
       }),
       createTemplate: jest.fn().mockResolvedValue({ contentTemplateId: 't2', name: 'Copy', slug: 'copy', createdAt: new Date() }),
     };

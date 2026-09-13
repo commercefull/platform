@@ -16,9 +16,9 @@ import { StoreStoreFulfillmentAdapter } from './StoreStoreFulfillmentAdapter';
 
 describe('StoreStoreFulfillmentAdapter', () => {
   let adapter: StoreStoreFulfillmentAdapter;
-   
+
   let StoreRepo: any;
-   
+
   let pickupLocationRepo: any;
 
   beforeEach(() => {

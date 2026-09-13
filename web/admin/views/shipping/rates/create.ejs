@@ -29,9 +29,107 @@
             <label class="form-label"><%= t('common.description') %></label>
             <textarea name="description" class="form-control" rows="3"><%= item?.description || '' %></textarea>
           </div>
-          <button type="submit" class="btn btn-primary"><%= t('common.save') %></button>
+
+          <!-- Condition Builder (Epic F) -->
+          <h5 class="mt-4 mb-3">Rate Conditions</h5>
+          <p class="text-muted small">Define conditions that must match for this rate to apply.</p>
+          <%- include("../../partials/condition-builder", {
+            fieldName: 'conditions',
+            conditions: item?.conditions || [],
+            attributes: [
+              { value: 'subtotal', label: 'Order Subtotal' },
+              { value: 'itemCount', label: 'Item Count' },
+              { value: 'totalWeight', label: 'Total Weight' },
+              { value: 'country', label: 'Destination Country' },
+              { value: 'state', label: 'Destination State' },
+              { value: 'postalCode', label: 'Postal Code' }
+            ]
+          }) %>
+
+          <!-- Shipping Surcharge Sub-form (Epic F + Epic D) -->
+          <h5 class="mt-4 mb-3">Shipping Surcharge</h5>
+          <p class="text-muted small">Optional surcharge applied on top of the base rate (e.g. oversize, fuel, remote area).</p>
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Surcharge Type</label>
+              <select name="surchargeType" class="form-select">
+                <option value="none" <%= !item?.surchargeType || item?.surchargeType === 'none' ? 'selected' : '' %>>None</option>
+                <option value="flat" <%= item?.surchargeType === 'flat' ? 'selected' : '' %>>Flat Amount</option>
+                <option value="percentage" <%= item?.surchargeType === 'percentage' ? 'selected' : '' %>>Percentage of Base</option>
+                <option value="perItem" <%= item?.surchargeType === 'perItem' ? 'selected' : '' %>>Per Item</option>
+                <option value="perWeightUnit" <%= item?.surchargeType === 'perWeightUnit' ? 'selected' : '' %>>Per Weight Unit</option>
+              </select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Surcharge Amount</label>
+              <input type="number" name="surchargeAmount" class="form-control" value="<%= item?.surchargeAmount || 0 %>" step="0.01" min="0">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Surcharge Label</label>
+              <input type="text" name="surchargeLabel" class="form-control" value="<%= item?.surchargeLabel || '' %>" placeholder="e.g. Oversize Surcharge">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Min Weight (for perWeightUnit)</label>
+              <input type="number" name="surchargeMinWeight" class="form-control" value="<%= item?.surchargeMinWeight || 0 %>" step="0.01" min="0">
+            </div>
+          </div>
+
+          <!-- Rate Matrix (Epic F) -->
+          <h5 class="mt-4 mb-3">Rate Matrix (optional)</h5>
+          <p class="text-muted small">Define tiered rates based on weight or subtotal ranges.</p>
+          <div class="table-responsive">
+            <table class="table table-sm" id="rateMatrixTable">
+              <thead>
+                <tr>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Rate</th>
+                  <th width="50"></th>
+                </tr>
+              </thead>
+              <tbody id="rateMatrixBody">
+                <% if (item?.rateMatrix && item.rateMatrix.length > 0) { %>
+                  <% item.rateMatrix.forEach(function(tier, idx) { %>
+                  <tr>
+                    <td><input type="number" name="rateMatrix[<%= idx %>][from]" class="form-control form-control-sm" value="<%= tier.from || 0 %>" step="0.01"></td>
+                    <td><input type="number" name="rateMatrix[<%= idx %>][to]" class="form-control form-control-sm" value="<%= tier.to || '' %>" step="0.01"></td>
+                    <td><input type="number" name="rateMatrix[<%= idx %>][rate]" class="form-control form-control-sm" value="<%= tier.rate || 0 %>" step="0.01"></td>
+                    <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('tr').remove()"><i class="fas fa-times"></i></button></td>
+                  </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td><input type="number" name="rateMatrix[0][from]" class="form-control form-control-sm" value="0" step="0.01"></td>
+                    <td><input type="number" name="rateMatrix[0][to]" class="form-control form-control-sm" value="" step="0.01" placeholder="∞"></td>
+                    <td><input type="number" name="rateMatrix[0][rate]" class="form-control form-control-sm" value="0" step="0.01"></td>
+                    <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('tr').remove()"><i class="fas fa-times"></i></button></td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addRateMatrixRow()">
+              <i class="fas fa-plus me-1"></i>Add Tier
+            </button>
+          </div>
+
+          <button type="submit" class="btn btn-primary mt-3"><%= t('common.save') %></button>
         </form>
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  function addRateMatrixRow() {
+    const tbody = document.getElementById('rateMatrixBody');
+    const idx = tbody.children.length;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="number" name="rateMatrix[${idx}][from]" class="form-control form-control-sm" value="0" step="0.01"></td>
+      <td><input type="number" name="rateMatrix[${idx}][to]" class="form-control form-control-sm" value="" step="0.01" placeholder="∞"></td>
+      <td><input type="number" name="rateMatrix[${idx}][rate]" class="form-control form-control-sm" value="0" step="0.01"></td>
+      <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('tr').remove()"><i class="fas fa-times"></i></button></td>
+    `;
+    tbody.appendChild(tr);
+  }
+</script>

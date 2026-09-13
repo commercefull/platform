@@ -98,10 +98,7 @@ class SearchController {
     };
 
     // Load merchandising rules for this search context
-    const merchandising = await getMerchandisingRules(
-      searchQuery.query,
-      searchQuery.categoryId,
-    );
+    const merchandising = await getMerchandisingRules(searchQuery.query, searchQuery.categoryId);
     if (Object.keys(merchandising).length > 0) {
       searchQuery.merchandising = merchandising;
     }
@@ -160,14 +157,21 @@ class SearchController {
     res.json({ success: true, data: rules });
   }
 
-  async createMerchandisingRule(req: TypedRequest<Record<string, never>, Record<string, never>, {
-    ruleType: 'boost' | 'bury' | 'pin';
-    productId: string;
-    position?: number;
-    searchTerm?: string;
-    categoryId?: string;
-    isActive?: boolean;
-  }>, res: Response): Promise<void> {
+  async createMerchandisingRule(
+    req: TypedRequest<
+      Record<string, never>,
+      Record<string, never>,
+      {
+        ruleType: 'boost' | 'bury' | 'pin';
+        productId: string;
+        position?: number;
+        searchTerm?: string;
+        categoryId?: string;
+        isActive?: boolean;
+      }
+    >,
+    res: Response,
+  ): Promise<void> {
     const { ruleType, productId, position, searchTerm, categoryId, isActive } = req.body;
     const rule = await createMerchandisingRule({
       ruleType,
@@ -180,14 +184,21 @@ class SearchController {
     res.status(201).json({ success: true, data: rule });
   }
 
-  async updateMerchandisingRule(req: TypedRequest<{ ruleId: string }, Record<string, never>, Partial<{
-    ruleType: 'boost' | 'bury' | 'pin';
-    productId: string;
-    position: number;
-    searchTerm: string;
-    categoryId: string;
-    isActive: boolean;
-  }>>, res: Response): Promise<void> {
+  async updateMerchandisingRule(
+    req: TypedRequest<
+      { ruleId: string },
+      Record<string, never>,
+      Partial<{
+        ruleType: 'boost' | 'bury' | 'pin';
+        productId: string;
+        position: number;
+        searchTerm: string;
+        categoryId: string;
+        isActive: boolean;
+      }>
+    >,
+    res: Response,
+  ): Promise<void> {
     const { ruleId } = req.params;
     const rule = await updateMerchandisingRule(ruleId, req.body);
     if (!rule) {
@@ -213,7 +224,10 @@ class SearchController {
     res.json({ success: true, data: orders });
   }
 
-  async setCategoryManualOrder(req: TypedRequest<{ categoryId: string }, Record<string, never>, { productIds: string[] }>, res: Response): Promise<void> {
+  async setCategoryManualOrder(
+    req: TypedRequest<{ categoryId: string }, Record<string, never>, { productIds: string[] }>,
+    res: Response,
+  ): Promise<void> {
     const { categoryId } = req.params;
     const { productIds } = req.body;
     await setCategoryManualOrder(categoryId, productIds);

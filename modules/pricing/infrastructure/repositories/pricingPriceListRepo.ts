@@ -93,9 +93,10 @@ export class PriceListRepo {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await queryOne<{ priceListId: string }>(`DELETE FROM "pricingPriceList" WHERE "priceListId" = $1 RETURNING "priceListId"`, [
-      id,
-    ]);
+    const result = await queryOne<{ priceListId: string }>(
+      `DELETE FROM "pricingPriceList" WHERE "priceListId" = $1 RETURNING "priceListId"`,
+      [id],
+    );
     return !!result;
   }
 

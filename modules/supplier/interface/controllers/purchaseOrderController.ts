@@ -29,11 +29,7 @@ export const getPurchaseOrders = async (req: TypedRequest, res: Response): Promi
       parseInt(offset as string),
     );
   } else if (supplierId) {
-    purchaseOrders = await purchaseOrderRepo.findBySupplierId(
-      supplierId as string,
-      parseInt(limit as string),
-      parseInt(offset as string),
-    );
+    purchaseOrders = await purchaseOrderRepo.findBySupplierId(supplierId as string, parseInt(limit as string), parseInt(offset as string));
   } else if (warehouseId) {
     purchaseOrders = await purchaseOrderRepo.findByWarehouseId(
       warehouseId as string,
@@ -144,7 +140,7 @@ export const createPurchaseOrder = async (req: TypedRequest, res: Response): Pro
   for (const item of items) {
     const itemParams: SupplierPurchaseOrderItemCreateParams = {
       ...item,
-      total: item.total ?? (item.quantity * item.unitCost),
+      total: item.total ?? item.quantity * item.unitCost,
       supplierPurchaseOrderId: purchaseOrder.supplierPurchaseOrderId,
     };
     const createdItem = await purchaseOrderRepo.createItem(itemParams);
@@ -237,7 +233,7 @@ export const addPurchaseOrderItem = async (req: TypedRequest, res: Response): Pr
   const itemParams: SupplierPurchaseOrderItemCreateParams = {
     supplierPurchaseOrderId: id,
     ...body,
-    total: body.total ?? (body.quantity * body.unitCost),
+    total: body.total ?? body.quantity * body.unitCost,
   };
 
   // Validate required fields

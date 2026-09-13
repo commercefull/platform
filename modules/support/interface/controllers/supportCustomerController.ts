@@ -59,7 +59,6 @@ export const createTicket: AsyncHandler = async (req, res, _next) => {
   }
 
   res.status(201).json({ success: true, data: ticket });
-  
 };
 
 export const getMyTickets: AsyncHandler = async (req, res, _next) => {
@@ -71,7 +70,6 @@ export const getMyTickets: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const getMyTicket: AsyncHandler = async (req, res, _next) => {
@@ -90,7 +88,6 @@ export const getMyTicket: AsyncHandler = async (req, res, _next) => {
   await supportRepo.markMessagesRead(req.params.id, customerId || '');
 
   res.json({ success: true, data: { ...ticket, messages, attachments } });
-  
 };
 
 export const addCustomerMessage: AsyncHandler = async (req, res, _next) => {
@@ -118,7 +115,6 @@ export const addCustomerMessage: AsyncHandler = async (req, res, _next) => {
   });
 
   res.status(201).json({ success: true, data: message });
-  
 };
 
 export const submitTicketFeedback: AsyncHandler = async (req, res, _next) => {
@@ -143,7 +139,6 @@ export const submitTicketFeedback: AsyncHandler = async (req, res, _next) => {
 
   await supportRepo.submitFeedback(req.params.id, satisfaction, feedback);
   res.json({ success: true, message: 'Feedback submitted' });
-  
 };
 
 // ============================================================================
@@ -153,13 +148,11 @@ export const submitTicketFeedback: AsyncHandler = async (req, res, _next) => {
 export const getFaqCategories: AsyncHandler = async (req, res, _next) => {
   const categories = await faqRepo.getCategories(true);
   res.json({ success: true, data: categories });
-  
 };
 
 export const getFeaturedFaqCategories: AsyncHandler = async (req, res, _next) => {
   const categories = await faqRepo.getFeaturedCategories();
   res.json({ success: true, data: categories });
-  
 };
 
 export const getFaqCategoryBySlug: AsyncHandler = async (req, res, _next) => {
@@ -172,7 +165,6 @@ export const getFaqCategoryBySlug: AsyncHandler = async (req, res, _next) => {
   const articles = await faqRepo.getArticles({ faqCategoryId: category.faqCategoryId, isPublished: true }, { limit: 100, offset: 0 });
 
   res.json({ success: true, data: { ...category, articles: articles.data } });
-  
 };
 
 export const getFaqArticleBySlug: AsyncHandler = async (req, res, _next) => {
@@ -195,7 +187,6 @@ export const getFaqArticleBySlug: AsyncHandler = async (req, res, _next) => {
   const relatedArticles = await faqRepo.getRelatedArticles(article.faqArticleId);
 
   res.json({ success: true, data: { ...article, relatedArticles } });
-  
 };
 
 export const searchFaq: AsyncHandler = async (req, res, _next) => {
@@ -207,21 +198,18 @@ export const searchFaq: AsyncHandler = async (req, res, _next) => {
 
   const articles = await faqRepo.searchArticles(q as string, parseInt(limit as string) || 10);
   res.json({ success: true, data: articles });
-  
 };
 
 export const getPopularFaqArticles: AsyncHandler = async (req, res, _next) => {
   const { limit } = req.query;
   const articles = await faqRepo.getPopularArticles(parseInt(limit as string) || 10);
   res.json({ success: true, data: articles });
-  
 };
 
 export const submitFaqFeedback: AsyncHandler = async (req, res, _next) => {
   const { isHelpful } = req.body as { isHelpful: boolean };
   await faqRepo.submitHelpfulVote(req.params.id, isHelpful);
   res.json({ success: true, message: 'Feedback submitted' });
-  
 };
 
 // ============================================================================
@@ -256,7 +244,6 @@ export const createStockAlert: AsyncHandler = async (req, res, _next) => {
   });
 
   res.status(201).json({ success: true, data: alert });
-  
 };
 
 export const getMyStockAlerts: AsyncHandler = async (req, res, _next) => {
@@ -268,7 +255,6 @@ export const getMyStockAlerts: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const cancelMyStockAlert: AsyncHandler = async (req, res, _next) => {
@@ -282,7 +268,6 @@ export const cancelMyStockAlert: AsyncHandler = async (req, res, _next) => {
 
   await alertRepo.cancelStockAlert(req.params.id);
   res.json({ success: true, message: 'Alert cancelled' });
-  
 };
 
 // ============================================================================
@@ -327,7 +312,6 @@ export const createPriceAlert: AsyncHandler = async (req, res, _next) => {
   });
 
   res.status(201).json({ success: true, data: alert });
-  
 };
 
 export const getMyPriceAlerts: AsyncHandler = async (req, res, _next) => {
@@ -339,7 +323,6 @@ export const getMyPriceAlerts: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const cancelMyPriceAlert: AsyncHandler = async (req, res, _next) => {
@@ -353,5 +336,4 @@ export const cancelMyPriceAlert: AsyncHandler = async (req, res, _next) => {
 
   await alertRepo.cancelPriceAlert(req.params.id);
   res.json({ success: true, message: 'Alert cancelled' });
-  
 };

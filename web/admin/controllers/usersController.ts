@@ -38,7 +38,6 @@ export const listUsers = async (req: TypedRequest, res: Response): Promise<void>
     totalPages: Math.ceil(total / limit),
     filters: { status },
   });
-  
 };
 
 export const viewUser = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -65,7 +64,6 @@ export const viewUser = async (req: TypedRequest, res: Response): Promise<void> 
     permissions,
     roles,
   });
-  
 };
 
 export const createUserForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -75,7 +73,6 @@ export const createUserForm = async (req: TypedRequest, res: Response): Promise<
     pageName: 'Create Admin User',
     roles,
   });
-  
 };
 
 export const createUser = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -104,7 +101,6 @@ export const createUser = async (req: TypedRequest, res: Response): Promise<void
   });
 
   res.json({ success: true, userId });
-  
 };
 
 export const updateUser = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -115,7 +111,6 @@ export const updateUser = async (req: TypedRequest, res: Response): Promise<void
   await manageAdminUsersUseCase.update(userId, { firstName, lastName, status, roleId });
 
   res.json({ success: true });
-  
 };
 
 export const deleteUser = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -129,7 +124,6 @@ export const deleteUser = async (req: TypedRequest, res: Response): Promise<void
   await manageAdminUsersUseCase.delete(userId);
 
   res.json({ success: true });
-  
 };
 
 // ============================================================================
@@ -144,7 +138,6 @@ export const listRoles = async (req: TypedRequest, res: Response): Promise<void>
     roles,
     availablePermissions: AVAILABLE_PERMISSIONS,
   });
-  
 };
 
 export const createRole = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -159,7 +152,6 @@ export const createRole = async (req: TypedRequest, res: Response): Promise<void
   const roleId = await manageRolesUseCase.create({ name, description, permissions });
 
   res.json({ success: true, roleId });
-  
 };
 
 export const updateRole = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -177,7 +169,6 @@ export const updateRole = async (req: TypedRequest, res: Response): Promise<void
   await manageRolesUseCase.update(roleId, { name, description, permissions });
 
   res.json({ success: true });
-  
 };
 
 export const deleteRole = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -200,7 +191,6 @@ export const deleteRole = async (req: TypedRequest, res: Response): Promise<void
   await manageRolesUseCase.delete(roleId);
 
   res.json({ success: true });
-  
 };
 
 // ============================================================================

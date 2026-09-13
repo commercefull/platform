@@ -27,7 +27,11 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
     filters.search = search as string;
   }
 
-  const command = new ListProductsCommand(filters as Record<string, unknown>, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
+  const command = new ListProductsCommand(
+    filters as Record<string, unknown>,
+    parseInt(limit as string),
+    (parseInt(page as string) - 1) * parseInt(limit as string),
+  );
 
   const useCase = listProductsUseCase;
   const result = await useCase.execute(command);
@@ -48,7 +52,6 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
     },
     filters: { category, search, sort, order },
   });
-  
 };
 
 // ============================================================================
@@ -75,14 +78,13 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
   const relatedUseCase = listProductsUseCase;
   const relatedResult = await relatedUseCase.execute(relatedCommand);
   // Filter out the current product
-  const relatedProducts = (relatedResult.products || []).filter((p) => p.productId !== product.productId).slice(0, 4);
+  const relatedProducts = (relatedResult.products || []).filter(p => p.productId !== product.productId).slice(0, 4);
 
   storefrontRespond(req, res, 'product/pdp', {
     pageName: product.name,
     product,
     relatedProducts,
   });
-  
 };
 
 // ============================================================================
@@ -118,7 +120,6 @@ export const getCategoryProducts = async (req: TypedRequest, res: Response): Pro
     },
     filters: { category: categorySlug, sort, order },
   });
-  
 };
 
 // ============================================================================
@@ -156,5 +157,4 @@ export const searchProducts = async (req: TypedRequest, res: Response): Promise<
     filters: { search, sort: 'relevance' },
     searchQuery: search,
   });
-  
 };

@@ -299,7 +299,7 @@ export class ProductReviewRepo {
   async addAdminResponse(productReviewId: string, response: string): Promise<ProductReview | null> {
     return this.update(productReviewId, {
       adminResponse: response,
-      adminResponseDate: unixTimestamp(),
+      adminResponseDate: String(unixTimestamp()),
     });
   }
 
@@ -445,10 +445,10 @@ export class ProductReviewRepo {
   }
 
   async findByCustomerAndProduct(customerId: string, productId: string): Promise<ProductReview | null> {
-    return await queryOne<ProductReview>(
-      `SELECT "productReviewId" FROM "productReview" WHERE "customerId" = $1 AND "productId" = $2`,
-      [customerId, productId],
-    );
+    return await queryOne<ProductReview>(`SELECT "productReviewId" FROM "productReview" WHERE "customerId" = $1 AND "productId" = $2`, [
+      customerId,
+      productId,
+    ]);
   }
 
   async checkCustomerPurchase(customerId: string, productId: string): Promise<boolean> {

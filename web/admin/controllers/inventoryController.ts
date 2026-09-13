@@ -63,7 +63,6 @@ export const listInventory = async (req: TypedRequest, res: Response): Promise<v
     },
     filters: { search, stockStatus, locationId },
   });
-  
 };
 
 // ============================================================================
@@ -120,7 +119,6 @@ export const adjustStock = async (req: TypedRequest, res: Response): Promise<voi
   );
 
   res.json({ success: true, message: 'Stock adjusted successfully', newQuantity });
-  
 };
 
 // ============================================================================
@@ -157,7 +155,6 @@ export const viewInventoryHistory = async (req: TypedRequest, res: Response): Pr
       pages: Math.ceil(total / limit),
     },
   });
-  
 };
 
 // ============================================================================
@@ -171,7 +168,6 @@ export const listLocations = async (req: TypedRequest, res: Response): Promise<v
     pageName: 'Inventory Locations',
     locations,
   });
-  
 };
 
 // ============================================================================
@@ -185,7 +181,6 @@ export const lowStockReport = async (req: TypedRequest, res: Response): Promise<
     pageName: 'Low Stock Report',
     items: lowStockItems,
   });
-  
 };
 
 export const listDispatches = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -211,13 +206,11 @@ export const listDispatches = async (req: TypedRequest, res: Response): Promise<
     stores,
     filters: req.query,
   });
-  
 };
 
 export const createDispatchForm = async (req: TypedRequest, res: Response): Promise<void> => {
   const stores = await findActiveStoresUseCase.execute();
   adminRespond(req, res, 'inventory/dispatches/create', { pageName: 'Create Dispatch', stores, formData: {} });
-  
 };
 
 export const createDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -263,7 +256,6 @@ export const viewDispatch = async (req: TypedRequest, res: Response): Promise<vo
     return;
   }
   adminRespond(req, res, 'inventory/dispatches/view', { pageName: dispatch.dispatchNumber, dispatch });
-  
 };
 
 export const approveDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -272,7 +264,9 @@ export const approveDispatch = async (req: TypedRequest, res: Response): Promise
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch approved successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve dispatch')}`);
+    res.redirect(
+      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve dispatch')}`,
+    );
   }
 };
 
@@ -282,7 +276,9 @@ export const markDispatched = async (req: TypedRequest, res: Response): Promise<
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch marked as shipped`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to ship dispatch')}`);
+    res.redirect(
+      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to ship dispatch')}`,
+    );
   }
 };
 
@@ -296,16 +292,19 @@ export const receiveDispatch = async (req: TypedRequest, res: Response): Promise
       dispatchId: req.params.dispatchId,
       receivedBy: req.user?.userId || 'admin',
       notes: (req.body as RequestBody).notes || undefined,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      items: ((dispatch as any).items || []).map((item: { dispatchItemId: string; dispatchedQuantity: number; requestedQuantity: number }) => ({
-        dispatchItemId: item.dispatchItemId,
-        receivedQuantity: item.dispatchedQuantity || item.requestedQuantity,
-      })),
+      items: ((dispatch.items as { dispatchItemId: string; dispatchedQuantity: number; requestedQuantity: number }[] | undefined) || []).map(
+        (item: { dispatchItemId: string; dispatchedQuantity: number; requestedQuantity: number }) => ({
+          dispatchItemId: item.dispatchItemId,
+          receivedQuantity: item.dispatchedQuantity || item.requestedQuantity,
+        }),
+      ),
     });
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch received successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to receive dispatch')}`);
+    res.redirect(
+      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to receive dispatch')}`,
+    );
   }
 };
 
@@ -315,6 +314,8 @@ export const cancelDispatch = async (req: TypedRequest, res: Response): Promise<
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch cancelled successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to cancel dispatch')}`);
+    res.redirect(
+      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to cancel dispatch')}`,
+    );
   }
 };

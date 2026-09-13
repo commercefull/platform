@@ -11,8 +11,6 @@
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../../testUtils';
 
-;
-
 describe('Category Management', () => {
   let client: AxiosInstance;
   let adminToken: string;
@@ -27,9 +25,7 @@ describe('Category Management', () => {
   afterAll(async () => {
     for (const id of [childCategoryId, rootCategoryId]) {
       if (id) {
-        await client
-          .delete(`/business/categories/${id}`, { headers: { Authorization: `Bearer ${adminToken}` } })
-          .catch(() => {});
+        await client.delete(`/business/categories/${id}`, { headers: { Authorization: `Bearer ${adminToken}` } }).catch(() => {});
       }
     }
   });
@@ -51,10 +47,7 @@ describe('Category Management', () => {
       );
       expect(res.status).toBe(201);
       expect(res.data.success).toBe(true);
-      rootCategoryId =
-        res.data.data?.productCategoryId ||
-        res.data.data?.categoryId ||
-        res.data.data?.id;
+      rootCategoryId = res.data.data?.productCategoryId || res.data.data?.categoryId || res.data.data?.id;
       expect(rootCategoryId).toBeTruthy();
     });
 
@@ -71,10 +64,7 @@ describe('Category Management', () => {
       );
       expect(res.status).toBe(201);
       expect(res.data.success).toBe(true);
-      childCategoryId =
-        res.data.data?.productCategoryId ||
-        res.data.data?.categoryId ||
-        res.data.data?.id;
+      childCategoryId = res.data.data?.productCategoryId || res.data.data?.categoryId || res.data.data?.id;
       // depth should be > 0 for a child
       expect(res.data.data.depth).toBeGreaterThan(0);
     });

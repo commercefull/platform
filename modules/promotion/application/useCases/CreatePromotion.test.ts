@@ -19,7 +19,11 @@ describe('CreatePromotionUseCase', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPromotions.create = jest.fn().mockResolvedValue({
-      promotionId: 'promo-1', code: 'SAVE10', name: 'Save 10%', status: 'active', createdAt: new Date(),
+      promotionId: 'promo-1',
+      code: 'SAVE10',
+      name: 'Save 10%',
+      status: 'active',
+      createdAt: new Date(),
     });
     useCase = new CreatePromotionUseCase(mockPromotions as never);
   });
@@ -42,6 +46,8 @@ describe('CreatePromotionUseCase', () => {
   it('should throw PromotionCodeAlreadyExistsError when code already exists', async () => {
     mockPromotions.findById = jest.fn().mockResolvedValue({ promotionId: 'existing' });
 
-    await expect(useCase.execute(new CreatePromotionCommand('Test', 'percentage', 10, 'DUP'))).rejects.toThrow(PromotionCodeAlreadyExistsError);
+    await expect(useCase.execute(new CreatePromotionCommand('Test', 'percentage', 10, 'DUP'))).rejects.toThrow(
+      PromotionCodeAlreadyExistsError,
+    );
   });
 });

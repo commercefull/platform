@@ -65,58 +65,58 @@ Overall project dependency direction: `web → modules → libs`.
 
 Routes are configured in `boot/routes.ts`:
 
-| Prefix      | Purpose                  | Auth                                  |
-| ----------- | ------------------------ | ------------------------------------- |
-| `/`         | Storefront (public)      | None / `isCustomerLoggedIn` if needed |
-| `/admin`    | Admin panel (EJS)        | `isAdminLoggedIn`                     |
-| `/customer` | Customer-facing API      | `isCustomerLoggedIn` where needed     |
-| `/business` | Business / merchant API  | `isOrganizationLoggedIn`              |
-| `/health`   | Health check             | None                                  |
-| `/docs`     | Documentation site       | None                                  |
+| Prefix      | Purpose                 | Auth                                  |
+| ----------- | ----------------------- | ------------------------------------- |
+| `/`         | Storefront (public)     | None / `isCustomerLoggedIn` if needed |
+| `/admin`    | Admin panel (EJS)       | `isAdminLoggedIn`                     |
+| `/customer` | Customer-facing API     | `isCustomerLoggedIn` where needed     |
+| `/business` | Business / merchant API | `isOrganizationLoggedIn`              |
+| `/health`   | Health check            | None                                  |
+| `/docs`     | Documentation site      | None                                  |
 
 ## Modules (42 bounded contexts)
 
-| Category    | Modules                                                                                                                            |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Catalog     | `product`, `pricing`                                                                                                               |
-| Sales       | `order`, `basket`, `checkout`, `payment`, `returns`                                                                               |
-| Fulfillment | `fulfillment`, `shipping`, `inventory`, `warehouse`                                                                               |
-| Marketing   | `promotion`, `coupon`, `segment`, `automation`                                                                                     |
-| Customer    | `customer`, `loyalty`, `membership`, `subscription`                                                                               |
-| Content     | `content`, `media`, `notification`, `pagebuilder`, `theme`                                                                        |
-| Commerce    | `marketplace`, `supplier`, `organization`                                                                                          |
+| Category    | Modules                                                                                                                                                                                   |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Catalog     | `product`, `pricing`                                                                                                                                                                      |
+| Sales       | `order`, `basket`, `checkout`, `payment`, `returns`                                                                                                                                       |
+| Fulfillment | `fulfillment`, `shipping`, `inventory`, `warehouse`                                                                                                                                       |
+| Marketing   | `promotion`, `coupon`, `segment`, `automation`                                                                                                                                            |
+| Customer    | `customer`, `loyalty`, `membership`, `subscription`                                                                                                                                       |
+| Content     | `content`, `media`, `notification`, `pagebuilder`, `theme`                                                                                                                                |
+| Commerce    | `marketplace`, `supplier`, `organization`                                                                                                                                                 |
 | Platform    | `identity`, `configuration`, `localization`, `store`, `analytics`, `gdpr`, `support`, `tax`, `tracking`, `audit`, `integration`, `webhook`, `reporting`, `migration`, `compliance`, `b2b` |
 
 ## Route Naming Convention
 
 All business routes follow the `/business/{topic}/...` pattern. The topic prefix must match the module name.
 
-| Module | Path prefix |
-| ------ | ----------- |
-| product | `/business/products`, `/business/categories` |
-| order | `/business/orders` |
-| store | `/business/stores` |
-| media | `/business/media` |
-| fulfillment | `/business/fulfillments`, `/business/fulfillment/locations`, `/business/fulfillment/partners` |
-| configuration | `/business/configuration` |
-| coupon | `/business/coupons` |
-| identity | `/business/auth` (login, register, user-store management), `/business/sso` (SAML/OIDC SSO), `/business/scim/v2` (SCIM provisioning) |
-| inventory | `/business/inventory` |
-| content | `/business/content` |
-| webhook | `/business/webhooks` |
-| reporting | `/business/reports` |
-| basket | `/business/basket` |
-| tracking | `/business/tracking` |
-| audit | `/business/audit` |
-| integration | `/business/integration` |
-| automation | `/business/automation` |
-| returns | `/business/returns` |
-| theme | `/business/themes` |
-| page builder | `/business/page-builder` |
-| segment | `/business/segment` |
-| marketplace | `/business/vendors`, `/business/commission-rules`, `/business/payouts` |
-| b2b | `/business/b2b` |
-| compliance | `/business/compliance` |
+| Module        | Path prefix                                                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| product       | `/business/products`, `/business/categories`                                                                                        |
+| order         | `/business/orders`                                                                                                                  |
+| store         | `/business/stores`                                                                                                                  |
+| media         | `/business/media`                                                                                                                   |
+| fulfillment   | `/business/fulfillments`, `/business/fulfillment/locations`, `/business/fulfillment/partners`                                       |
+| configuration | `/business/configuration`                                                                                                           |
+| coupon        | `/business/coupons`                                                                                                                 |
+| identity      | `/business/auth` (login, register, user-store management), `/business/sso` (SAML/OIDC SSO), `/business/scim/v2` (SCIM provisioning) |
+| inventory     | `/business/inventory`                                                                                                               |
+| content       | `/business/content`                                                                                                                 |
+| webhook       | `/business/webhooks`                                                                                                                |
+| reporting     | `/business/reports`                                                                                                                 |
+| basket        | `/business/basket`                                                                                                                  |
+| tracking      | `/business/tracking`                                                                                                                |
+| audit         | `/business/audit`                                                                                                                   |
+| integration   | `/business/integration`                                                                                                             |
+| automation    | `/business/automation`                                                                                                              |
+| returns       | `/business/returns`                                                                                                                 |
+| theme         | `/business/themes`                                                                                                                  |
+| page builder  | `/business/page-builder`                                                                                                            |
+| segment       | `/business/segment`                                                                                                                 |
+| marketplace   | `/business/vendors`, `/business/commission-rules`, `/business/payouts`                                                              |
+| b2b           | `/business/b2b`                                                                                                                     |
+| compliance    | `/business/compliance`                                                                                                              |
 
 ## Technology Stack
 

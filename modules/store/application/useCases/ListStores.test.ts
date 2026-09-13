@@ -5,8 +5,28 @@ describe('ListStoresUseCase', () => {
   let mockRepo: Record<string, jest.Mock>;
 
   const makeStores = () => [
-    { storeId: 's1', name: 'Store 1', slug: 'store-1', storeType: 'merchant_store', isHeadquarters: true, isActive: true, isVerified: true, isFeatured: false, createdAt: new Date() },
-    { storeId: 's2', name: 'Store 2', slug: 'store-2', storeType: 'organization_store', isHeadquarters: false, isActive: false, isVerified: false, isFeatured: true, createdAt: new Date() },
+    {
+      storeId: 's1',
+      name: 'Store 1',
+      slug: 'store-1',
+      storeType: 'merchant_store',
+      isHeadquarters: true,
+      isActive: true,
+      isVerified: true,
+      isFeatured: false,
+      createdAt: new Date(),
+    },
+    {
+      storeId: 's2',
+      name: 'Store 2',
+      slug: 'store-2',
+      storeType: 'organization_store',
+      isHeadquarters: false,
+      isActive: false,
+      isVerified: false,
+      isFeatured: true,
+      createdAt: new Date(),
+    },
   ];
 
   beforeEach(() => {

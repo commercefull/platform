@@ -82,4 +82,3 @@
   - [Api Reference](generated/api-reference.md)
   - [Configuration](generated/configuration.md)
   - [Route Index](generated/route-index.md)
-

@@ -59,22 +59,14 @@ describe('Store CRUD Tests', () => {
 
   describe('POST /business/stores', () => {
     it('should reject store creation with missing name', async () => {
-      const response = await client.post(
-        '/business/stores',
-        { slug: `test-${Date.now()}` },
-        { headers: authHeaders() },
-      );
+      const response = await client.post('/business/stores', { slug: `test-${Date.now()}` }, { headers: authHeaders() });
 
       expectStatus(response, 404);
       expect(response.data.success).toBe(false);
     });
 
     it('should reject store creation with missing slug', async () => {
-      const response = await client.post(
-        '/business/stores',
-        { name: 'Test Store' },
-        { headers: authHeaders() },
-      );
+      const response = await client.post('/business/stores', { name: 'Test Store' }, { headers: authHeaders() });
 
       expectStatus(response, 404);
       expect(response.data.success).toBe(false);
@@ -218,11 +210,7 @@ describe('Store CRUD Tests', () => {
     });
 
     it('should return error for non-existent store update', async () => {
-      const response = await client.put(
-        `/business/stores/${randomUUID()}`,
-        { description: 'No such store' },
-        { headers: authHeaders() },
-      );
+      const response = await client.put(`/business/stores/${randomUUID()}`, { description: 'No such store' }, { headers: authHeaders() });
 
       expectStatus(response, 404);
     });
@@ -253,11 +241,7 @@ describe('Store CRUD Tests', () => {
     });
 
     it('should return error for pickup config on non-existent store', async () => {
-      const response = await client.put(
-        `/business/stores/${randomUUID()}/pickup`,
-        { enabled: true },
-        { headers: authHeaders() },
-      );
+      const response = await client.put(`/business/stores/${randomUUID()}/pickup`, { enabled: true }, { headers: authHeaders() });
 
       expectStatus(response, 404);
     });

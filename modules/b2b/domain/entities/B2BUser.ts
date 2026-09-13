@@ -77,22 +77,54 @@ export class B2BUser {
     return new B2BUser(props);
   }
 
-  get userId(): string { return this.props.userId; }
-  get companyId(): string { return this.props.companyId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get email(): string { return this.props.email; }
-  get firstName(): string | undefined { return this.props.firstName; }
-  get lastName(): string | undefined { return this.props.lastName; }
-  get role(): B2BUserRole { return this.props.role; }
-  get status(): B2BUserStatus { return this.props.status; }
-  get spendingLimits(): SpendingLimit { return this.props.spendingLimits; }
-  get department(): string | undefined { return this.props.department; }
-  get costCenter(): string | undefined { return this.props.costCenter; }
-  get invitedAt(): Date { return this.props.invitedAt; }
-  get activatedAt(): Date | undefined { return this.props.activatedAt; }
-  get lastLoginAt(): Date | undefined { return this.props.lastLoginAt; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get userId(): string {
+    return this.props.userId;
+  }
+  get companyId(): string {
+    return this.props.companyId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get email(): string {
+    return this.props.email;
+  }
+  get firstName(): string | undefined {
+    return this.props.firstName;
+  }
+  get lastName(): string | undefined {
+    return this.props.lastName;
+  }
+  get role(): B2BUserRole {
+    return this.props.role;
+  }
+  get status(): B2BUserStatus {
+    return this.props.status;
+  }
+  get spendingLimits(): SpendingLimit {
+    return this.props.spendingLimits;
+  }
+  get department(): string | undefined {
+    return this.props.department;
+  }
+  get costCenter(): string | undefined {
+    return this.props.costCenter;
+  }
+  get invitedAt(): Date {
+    return this.props.invitedAt;
+  }
+  get activatedAt(): Date | undefined {
+    return this.props.activatedAt;
+  }
+  get lastLoginAt(): Date | undefined {
+    return this.props.lastLoginAt;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   activate(): void {
     if (this.props.status !== 'invited') {
@@ -146,12 +178,7 @@ export class B2BUser {
     return currentPeriodSpent + amount <= limit;
   }
 
-  updateProfile(input: {
-    firstName?: string;
-    lastName?: string;
-    department?: string;
-    costCenter?: string;
-  }): void {
+  updateProfile(input: { firstName?: string; lastName?: string; department?: string; costCenter?: string }): void {
     if (input.firstName !== undefined) this.props.firstName = input.firstName;
     if (input.lastName !== undefined) this.props.lastName = input.lastName;
     if (input.department !== undefined) this.props.department = input.department;

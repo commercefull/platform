@@ -19,15 +19,27 @@ describe('DispatchFromStoreUseCase', () => {
   beforeEach(() => {
     mockDispatchRepo = {
       findById: jest.fn().mockResolvedValue({
-        dispatchId: 'd1', fromStoreId: 's1', status: 'approved', dispatchNumber: 'DSP-001',
+        dispatchId: 'd1',
+        fromStoreId: 's1',
+        status: 'approved',
+        dispatchNumber: 'DSP-001',
         items: [{ productId: 'p1', variantId: undefined, dispatchedQuantity: 10 }],
-        markDispatched: jest.fn(), approve: jest.fn(), toJSON: () => ({ dispatchId: 'd1', status: 'dispatched' }),
+        markDispatched: jest.fn(),
+        approve: jest.fn(),
+        toJSON: () => ({ dispatchId: 'd1', status: 'dispatched' }),
       }),
       save: jest.fn().mockImplementation(async (d: unknown) => d),
     };
     mockInventoryRepo = {
       getLocationByStoreId: jest.fn().mockResolvedValue({ locationId: 'loc1' }),
-      findByProductAndLocation: jest.fn().mockResolvedValue({ inventoryId: 'i1', productId: 'p1', variantId: undefined, locationId: 'loc1', quantity: 100, fulfillReservation: jest.fn() }),
+      findByProductAndLocation: jest.fn().mockResolvedValue({
+        inventoryId: 'i1',
+        productId: 'p1',
+        variantId: undefined,
+        locationId: 'loc1',
+        quantity: 100,
+        fulfillReservation: jest.fn(),
+      }),
       save: jest.fn().mockImplementation(async (i: unknown) => i),
       recordMovement: jest.fn().mockResolvedValue(undefined),
     };

@@ -15,9 +15,7 @@ export class ManageReportSchedulesUseCase {
     return [];
   }
 
-  async scheduleReport(
-    schedule: Omit<ReportSchedule, 'reportScheduleId' | 'createdAt' | 'updatedAt'>,
-  ): Promise<ReportSchedule> {
+  async scheduleReport(schedule: Omit<ReportSchedule, 'reportScheduleId' | 'createdAt' | 'updatedAt'>): Promise<ReportSchedule> {
     const now = new Date();
     return {
       ...schedule,

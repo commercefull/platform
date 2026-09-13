@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Product Customer Controller
@@ -86,7 +85,6 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
-  
 };
 
 /**
@@ -116,7 +114,6 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
   }
 
   respond(req, res, product, 200);
-  
 };
 
 /**
@@ -152,7 +149,6 @@ const searchProducts = async (req: TypedRequest, res: Response): Promise<void> =
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
-  
 };
 
 /**
@@ -180,7 +176,6 @@ export const findByBarcode = async (req: TypedRequest, res: Response): Promise<v
   }
 
   respond(req, res, result, 200);
-  
 };
 
 /**
@@ -206,7 +201,6 @@ export const getFeaturedProducts = async (req: TypedRequest, res: Response): Pro
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
-  
 };
 
 /**
@@ -233,7 +227,6 @@ export const getProductsByCategory = async (req: TypedRequest, res: Response): P
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
-  
 };
 
 /**
@@ -247,7 +240,6 @@ export const getRelatedProducts = async (req: TypedRequest, res: Response): Prom
   const products = await ProductRepo.findRelated(productId, parseInt(limit as string) || 8);
 
   respond(req, res, { products }, 200);
-  
 };
 
 // ============================================================================
@@ -267,13 +259,18 @@ export const getProductReviews = async (req: TypedRequest, res: Response): Promi
   const ratingDistribution = await productReviewRepo.getRatingDistribution(productId);
   const totalCount = await productReviewRepo.countByProductId(productId, 'approved');
   respond(req, res, { reviews, averageRating, ratingDistribution, totalCount });
-  
 };
 
 export const createReview = async (req: TypedRequest, res: Response): Promise<void> => {
   const { productId } = req.params;
   const customerId = req.user?.customerId || req.user?.id;
-  const { rating, title, content, reviewerName, reviewerEmail } = req.body as { rating?: number; title?: string; content?: string; reviewerName?: string; reviewerEmail?: string };
+  const { rating, title, content, reviewerName, reviewerEmail } = req.body as {
+    rating?: number;
+    title?: string;
+    content?: string;
+    reviewerName?: string;
+    reviewerEmail?: string;
+  };
 
   if (!rating || rating < 1 || rating > 5) {
     respondError(req, res, 'Rating must be between 1 and 5', 400);
@@ -296,7 +293,6 @@ export const createReview = async (req: TypedRequest, res: Response): Promise<vo
     status: 'pending',
   });
   respond(req, res, review, 201);
-  
 };
 
 export const markReviewHelpful = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -306,7 +302,6 @@ export const markReviewHelpful = async (req: TypedRequest, res: Response): Promi
     return;
   }
   respond(req, res, review);
-  
 };
 
 export const reportReview = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -316,7 +311,6 @@ export const reportReview = async (req: TypedRequest, res: Response): Promise<vo
     return;
   }
   respond(req, res, { reported: true });
-  
 };
 
 // ============================================================================
@@ -429,15 +423,19 @@ export const getProductAvailability = async (req: TypedRequest, res: Response): 
 
   const totalStock = await stockPort.getTotalStock(productId);
 
-  respond(req, res, {
-    productId,
-    variantId: variantId ? String(variantId) : undefined,
-    available: availability.available,
-    totalAvailable: availability.totalAvailable,
-    requestedQuantity: requiredQty,
-    inStock: availability.totalAvailable > 0,
-    totalStockAcrossLocations: totalStock,
-    locationCount: availability.locationCount,
-  }, 200);
-  
+  respond(
+    req,
+    res,
+    {
+      productId,
+      variantId: variantId ? String(variantId) : undefined,
+      available: availability.available,
+      totalAvailable: availability.totalAvailable,
+      requestedQuantity: requiredQty,
+      inStock: availability.totalAvailable > 0,
+      totalStockAcrossLocations: totalStock,
+      locationCount: availability.locationCount,
+    },
+    200,
+  );
 };

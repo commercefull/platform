@@ -1,9 +1,4 @@
-export type TriggerType =
-  | 'event'
-  | 'schedule'
-  | 'manual'
-  | 'segment_membership_added'
-  | 'segment_membership_removed';
+export type TriggerType = 'event' | 'schedule' | 'manual' | 'segment_membership_added' | 'segment_membership_removed';
 
 export type ConditionOperator =
   | 'eq'
@@ -152,39 +147,83 @@ export class AutomationRule {
     return new AutomationRule(props);
   }
 
-  get automationRuleId(): string { return this.props.automationRuleId; }
-  get name(): string { return this.props.name; }
-  get description(): string | null { return this.props.description; }
-  get triggerType(): TriggerType { return this.props.triggerType; }
-  get triggerConfig(): TriggerConfig { return this.props.triggerConfig; }
-  get conditions(): RuleCondition[] { return this.props.conditions; }
-  get conditionMatchMode(): ConditionMatchMode { return this.props.conditionMatchMode; }
-  get actions(): RuleAction[] { return this.props.actions; }
-  get actionExecutionMode(): ActionExecutionMode { return this.props.actionExecutionMode; }
-  get isActive(): boolean { return this.props.isActive; }
-  get priority(): number { return this.props.priority; }
-  get executionCount(): number { return this.props.executionCount; }
-  get successCount(): number { return this.props.successCount; }
-  get failureCount(): number { return this.props.failureCount; }
-  get lastTriggeredAt(): Date | null { return this.props.lastTriggeredAt; }
-  get lastExecutedAt(): Date | null { return this.props.lastExecutedAt; }
-  get organizationId(): string | null { return this.props.organizationId; }
-  get createdBy(): string | null { return this.props.createdBy; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
-  get deletedAt(): Date | null { return this.props.deletedAt; }
+  get automationRuleId(): string {
+    return this.props.automationRuleId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get description(): string | null {
+    return this.props.description;
+  }
+  get triggerType(): TriggerType {
+    return this.props.triggerType;
+  }
+  get triggerConfig(): TriggerConfig {
+    return this.props.triggerConfig;
+  }
+  get conditions(): RuleCondition[] {
+    return this.props.conditions;
+  }
+  get conditionMatchMode(): ConditionMatchMode {
+    return this.props.conditionMatchMode;
+  }
+  get actions(): RuleAction[] {
+    return this.props.actions;
+  }
+  get actionExecutionMode(): ActionExecutionMode {
+    return this.props.actionExecutionMode;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get priority(): number {
+    return this.props.priority;
+  }
+  get executionCount(): number {
+    return this.props.executionCount;
+  }
+  get successCount(): number {
+    return this.props.successCount;
+  }
+  get failureCount(): number {
+    return this.props.failureCount;
+  }
+  get lastTriggeredAt(): Date | null {
+    return this.props.lastTriggeredAt;
+  }
+  get lastExecutedAt(): Date | null {
+    return this.props.lastExecutedAt;
+  }
+  get organizationId(): string | null {
+    return this.props.organizationId;
+  }
+  get createdBy(): string | null {
+    return this.props.createdBy;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+  get deletedAt(): Date | null {
+    return this.props.deletedAt;
+  }
 
-  update(params: Partial<{
-    name: string;
-    description: string;
-    triggerConfig: TriggerConfig;
-    conditions: RuleCondition[];
-    conditionMatchMode: ConditionMatchMode;
-    actions: RuleAction[];
-    actionExecutionMode: ActionExecutionMode;
-    isActive: boolean;
-    priority: number;
-  }>): void {
+  update(
+    params: Partial<{
+      name: string;
+      description: string;
+      triggerConfig: TriggerConfig;
+      conditions: RuleCondition[];
+      conditionMatchMode: ConditionMatchMode;
+      actions: RuleAction[];
+      actionExecutionMode: ActionExecutionMode;
+      isActive: boolean;
+      priority: number;
+    }>,
+  ): void {
     if (params.name !== undefined) this.props.name = params.name;
     if (params.description !== undefined) this.props.description = params.description;
     if (params.triggerConfig !== undefined) this.props.triggerConfig = params.triggerConfig;
@@ -206,8 +245,14 @@ export class AutomationRule {
     this.props.updatedAt = new Date();
   }
 
-  activate(): void { this.props.isActive = true; this.props.updatedAt = new Date(); }
-  deactivate(): void { this.props.isActive = false; this.props.updatedAt = new Date(); }
+  activate(): void {
+    this.props.isActive = true;
+    this.props.updatedAt = new Date();
+  }
+  deactivate(): void {
+    this.props.isActive = false;
+    this.props.updatedAt = new Date();
+  }
 
   matchesTrigger(triggerType: TriggerType, triggerData?: unknown): boolean {
     if (this.props.triggerType !== triggerType) return false;

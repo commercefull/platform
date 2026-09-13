@@ -58,7 +58,10 @@ export interface OrderShipping {
 }
 export type OrderShippingCreateParams = Omit<OrderShipping, 'orderShippingId' | 'createdAt' | 'updatedAt'>;
 export type OrderShippingUpdateParams = Partial<
-  Pick<OrderShipping, 'shippingMethod' | 'carrier' | 'service' | 'amount' | 'taxAmount' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'>
+  Pick<
+    OrderShipping,
+    'shippingMethod' | 'carrier' | 'service' | 'amount' | 'taxAmount' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'
+  >
 >;
 
 export type ShippingCarrier = 'ups' | 'usps' | 'fedex' | 'dhl' | 'custom';
@@ -99,15 +102,7 @@ export interface OrderTax {
 export type OrderTaxCreateParams = Omit<OrderTax, 'orderTaxId' | 'createdAt' | 'updatedAt'>;
 
 export type OrderPaymentType =
-  | 'creditCard'
-  | 'debitCard'
-  | 'paypal'
-  | 'applePay'
-  | 'googlePay'
-  | 'bankTransfer'
-  | 'crypto'
-  | 'giftCard'
-  | 'storeCredit';
+  'creditCard' | 'debitCard' | 'paypal' | 'applePay' | 'googlePay' | 'bankTransfer' | 'crypto' | 'giftCard' | 'storeCredit';
 export type OrderPaymentStatus = 'pending' | 'authorized' | 'captured' | 'refunded' | 'partiallyRefunded' | 'voided' | 'failed';
 export interface OrderPayment {
   orderPaymentId: string;
@@ -278,7 +273,9 @@ class OrderQueryRepo {
   // --- Order Shipping Rates ---
 
   async findShippingRatesByOrder(orderId: string): Promise<OrderShippingRate[]> {
-    const results = await query<OrderShippingRate[]>(`SELECT * FROM "orderShippingRate" WHERE "orderId" = $1 ORDER BY "rate" ASC`, [orderId]);
+    const results = await query<OrderShippingRate[]>(`SELECT * FROM "orderShippingRate" WHERE "orderId" = $1 ORDER BY "rate" ASC`, [
+      orderId,
+    ]);
     return results || [];
   }
 

@@ -9,11 +9,7 @@ import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { TrackingConfigRepositoryImpl } from '../../infrastructure/repositories/TrackingConfigRepositoryImpl';
 import { GTMConfig, MetaCAPIConfig, EventMapping } from '../../domain/entities/TrackingConfig';
-import {
-  ManageTrackingConfigUseCase,
-  ProcessTrackingEventUseCase,
-  GetTrackingStatusUseCase,
-} from '../../application/useCases/Tracking';
+import { ManageTrackingConfigUseCase, ProcessTrackingEventUseCase, GetTrackingStatusUseCase } from '../../application/useCases/Tracking';
 
 const repo = new TrackingConfigRepositoryImpl();
 const manageConfigUseCase = new ManageTrackingConfigUseCase(repo);

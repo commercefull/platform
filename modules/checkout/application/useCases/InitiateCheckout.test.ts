@@ -78,9 +78,7 @@ describe('InitiateCheckoutUseCase', () => {
     const repo = createMockCheckoutRepo(null);
     const useCase = new InitiateCheckoutUseCase(repo, basketPort);
 
-    await expect(
-      useCase.execute(new InitiateCheckoutCommand('nonexistent')),
-    ).rejects.toThrow(CheckoutValidationError);
+    await expect(useCase.execute(new InitiateCheckoutCommand('nonexistent'))).rejects.toThrow(CheckoutValidationError);
   });
 
   it('should throw CheckoutValidationError when basket is empty', async () => {
@@ -89,9 +87,7 @@ describe('InitiateCheckoutUseCase', () => {
     const repo = createMockCheckoutRepo(null);
     const useCase = new InitiateCheckoutUseCase(repo, basketPort);
 
-    await expect(
-      useCase.execute(new InitiateCheckoutCommand('b-1')),
-    ).rejects.toThrow(CheckoutValidationError);
+    await expect(useCase.execute(new InitiateCheckoutCommand('b-1'))).rejects.toThrow(CheckoutValidationError);
   });
 
   it('should extend expiration when an active session already exists', async () => {

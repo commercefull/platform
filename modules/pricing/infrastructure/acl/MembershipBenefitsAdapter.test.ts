@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 const mockMembershipRepoInstance = {
   getUserMembershipBenefits: jest.fn(),
 };
@@ -13,7 +11,7 @@ import { MembershipBenefitsAdapter } from './MembershipBenefitsAdapter';
 
 describe('MembershipBenefitsAdapter', () => {
   let adapter: MembershipBenefitsAdapter;
-  let mockMembershipRepo: any;
+  let mockMembershipRepo: { getUserMembershipBenefits: jest.Mock };
 
   beforeEach(() => {
     mockMembershipRepo = mockMembershipRepoInstance;

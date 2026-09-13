@@ -50,7 +50,7 @@ export default function () {
         email: TEST_EMAIL,
         password: TEST_PASSWORD,
       }),
-      { headers: { 'Content-Type': 'application/json', Accept: 'application/json' } }
+      { headers: { 'Content-Type': 'application/json', Accept: 'application/json' } },
     );
 
     if (res.status === 200) {

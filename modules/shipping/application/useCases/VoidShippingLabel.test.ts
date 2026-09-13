@@ -2,7 +2,9 @@ jest.mock('../../infrastructure/repositories/ShippingLabelAggregateRepository', 
   __esModule: true,
   default: {
     voidLabel: jest.fn().mockResolvedValue({
-      shippingLabelId: 'l1', trackingNumber: 'TRK123', status: 'voided',
+      shippingLabelId: 'l1',
+      trackingNumber: 'TRK123',
+      status: 'voided',
     }),
   },
 }));
@@ -30,10 +32,13 @@ describe('VoidShippingLabelUseCase', () => {
 
     expect(result.voided).toBe(true);
     expect(result.label?.shippingLabelId).toBe('l1');
-    expect(eventBus.emit).toHaveBeenCalledWith('shipping.label.voided', expect.objectContaining({
-      shippingLabelId: 'l1',
-      reason: 'damaged',
-    }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'shipping.label.voided',
+      expect.objectContaining({
+        shippingLabelId: 'l1',
+        reason: 'damaged',
+      }),
+    );
   });
 
   it('should return voided=false when label not found', async () => {

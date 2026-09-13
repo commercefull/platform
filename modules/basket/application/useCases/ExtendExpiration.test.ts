@@ -7,17 +7,27 @@ import { ExtendExpirationUseCase, ExtendExpirationCommand } from './ExtendExpira
 import { BasketNotFoundError, InvalidExpirationDaysError } from '../../domain/errors/BasketErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ExtendExpirationUseCase', () => {
   let useCase: ExtendExpirationUseCase;
   let mockRepo: Record<string, jest.Mock>;
 
   const makeBasket = () => ({
-    basketId: 'b1', customerId: 'c1', sessionId: 's1', status: 'active', currency: 'USD',
-    items: [], itemCount: 0, subtotal: { amount: 0 },
-    createdAt: new Date(), updatedAt: new Date(),
-    expiresAt: new Date(), extendExpiration: jest.fn(),
+    basketId: 'b1',
+    customerId: 'c1',
+    sessionId: 's1',
+    status: 'active',
+    currency: 'USD',
+    items: [],
+    itemCount: 0,
+    subtotal: { amount: 0 },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    expiresAt: new Date(),
+    extendExpiration: jest.fn(),
   });
 
   beforeEach(() => {

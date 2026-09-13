@@ -1,5 +1,10 @@
 import { randomUUID } from 'crypto';
-import type { IntegrationRepository, IntegrationCredentialRepository, IntegrationSubscriptionRepository, IntegrationLogRepository } from '../../domain/repositories/IntegrationRepository';
+import type {
+  IntegrationRepository,
+  IntegrationCredentialRepository,
+  IntegrationSubscriptionRepository,
+  IntegrationLogRepository,
+} from '../../domain/repositories/IntegrationRepository';
 import { Integration, type IntegrationProvider } from '../../domain/entities/Integration';
 import { IntegrationCredential, type CredentialType } from '../../domain/entities/IntegrationCredential';
 import { IntegrationEventSubscription } from '../../domain/entities/IntegrationEventSubscription';
@@ -43,12 +48,15 @@ export class ManageIntegrationsUseCase {
     return this.integrationRepo.findByOrganization(organizationId, filters as never);
   }
 
-  async updateIntegration(integrationId: string, updates: {
-    name?: string;
-    description?: string | null;
-    webhookUrl?: string | null;
-    config?: Record<string, unknown>;
-  }): Promise<Integration> {
+  async updateIntegration(
+    integrationId: string,
+    updates: {
+      name?: string;
+      description?: string | null;
+      webhookUrl?: string | null;
+      config?: Record<string, unknown>;
+    },
+  ): Promise<Integration> {
     const integration = await this.getIntegration(integrationId);
     if (updates.name !== undefined) integration.updateName(updates.name);
     if (updates.description !== undefined) integration.updateDescription(updates.description);
@@ -162,12 +170,15 @@ export class ManageSubscriptionsUseCase {
     return this.subscriptionRepo.findByIntegration(integrationId);
   }
 
-  async updateSubscription(subscriptionId: string, updates: {
-    targetAction?: string;
-    payloadMapping?: Record<string, unknown>;
-    headers?: Record<string, string> | null;
-    isActive?: boolean;
-  }): Promise<IntegrationEventSubscription> {
+  async updateSubscription(
+    subscriptionId: string,
+    updates: {
+      targetAction?: string;
+      payloadMapping?: Record<string, unknown>;
+      headers?: Record<string, string> | null;
+      isActive?: boolean;
+    },
+  ): Promise<IntegrationEventSubscription> {
     const sub = await this.getSubscription(subscriptionId);
     if (updates.targetAction !== undefined) sub.updateTargetAction(updates.targetAction);
     if (updates.payloadMapping !== undefined) sub.updatePayloadMapping(updates.payloadMapping);
@@ -189,7 +200,10 @@ export class ManageSubscriptionsUseCase {
 export class ManageIntegrationLogsUseCase {
   constructor(private logRepo: IntegrationLogRepository) {}
 
-  async listLogs(integrationId: string, filters?: { status?: string; limit?: number; offset?: number }): Promise<{ data: IntegrationLog[]; total: number }> {
+  async listLogs(
+    integrationId: string,
+    filters?: { status?: string; limit?: number; offset?: number },
+  ): Promise<{ data: IntegrationLog[]; total: number }> {
     return this.logRepo.findByIntegration(integrationId, filters as never);
   }
 

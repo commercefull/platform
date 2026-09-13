@@ -4,10 +4,17 @@ jest.mock('../../../../../libs/events/eventBus', () => ({
 }));
 
 import { RegisterCustomerUseCase } from './RegisterCustomer';
-import { EmailAndPasswordRequiredError, InvalidEmailFormatError, PasswordTooShortError, EmailAlreadyRegisteredError } from '../../../domain/errors/IdentityErrors';
+import {
+  EmailAndPasswordRequiredError,
+  InvalidEmailFormatError,
+  PasswordTooShortError,
+  EmailAlreadyRegisteredError,
+} from '../../../domain/errors/IdentityErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('RegisterCustomerUseCase', () => {
   let useCase: RegisterCustomerUseCase;
@@ -17,7 +24,10 @@ describe('RegisterCustomerUseCase', () => {
 
   beforeEach(() => {
     mockCustomerRepo = { findByEmail: jest.fn().mockResolvedValue(null), create: jest.fn().mockResolvedValue(undefined) };
-    mockAuth = { hashPassword: jest.fn().mockResolvedValue('hashed'), generateVerificationToken: jest.fn().mockResolvedValue('verify-token') };
+    mockAuth = {
+      hashPassword: jest.fn().mockResolvedValue('hashed'),
+      generateVerificationToken: jest.fn().mockResolvedValue('verify-token'),
+    };
     mockEmail = { sendVerificationEmail: jest.fn().mockResolvedValue(undefined) };
     useCase = new RegisterCustomerUseCase(mockCustomerRepo as never, mockAuth as never, mockEmail as never);
   });

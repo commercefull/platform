@@ -72,11 +72,7 @@ describe('Inventory Pool & Transfer Tests', () => {
     });
 
     it('should reject missing required fields', async () => {
-      const response = await client.post(
-        '/business/inventory/items',
-        { sku: 'TEST-MISSING-FIELDS' },
-        { headers: authHeaders() },
-      );
+      const response = await client.post('/business/inventory/items', { sku: 'TEST-MISSING-FIELDS' }, { headers: authHeaders() });
 
       expect(response.status).toBe(400);
       expect(response.data.success).toBe(false);
@@ -145,11 +141,7 @@ describe('Inventory Pool & Transfer Tests', () => {
 
   describe('POST /business/inventory/transfer', () => {
     it('should reject transfer with missing fields', async () => {
-      const response = await client.post(
-        '/business/inventory/transfer',
-        { sourceLocationId: 'test-source' },
-        { headers: authHeaders() },
-      );
+      const response = await client.post('/business/inventory/transfer', { sourceLocationId: 'test-source' }, { headers: authHeaders() });
 
       expect(response.status).toBe(400);
       expect(response.data.success).toBe(false);
@@ -237,11 +229,7 @@ describe('Inventory Pool & Transfer Tests', () => {
     });
 
     it('should reject pool creation with missing required fields', async () => {
-      const response = await client.post(
-        '/business/inventory/pools',
-        { name: 'Missing Fields Pool' },
-        { headers: authHeaders() },
-      );
+      const response = await client.post('/business/inventory/pools', { name: 'Missing Fields Pool' }, { headers: authHeaders() });
 
       expect(response.status).toBe(400);
       expect(response.data.success).toBe(false);

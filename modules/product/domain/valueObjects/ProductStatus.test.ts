@@ -1,4 +1,10 @@
-import { ProductStatus, ProductStatusTransitions, canTransitionProductTo, getProductStatusLabel, isProductPurchasable } from './ProductStatus';
+import {
+  ProductStatus,
+  ProductStatusTransitions,
+  canTransitionProductTo,
+  getProductStatusLabel,
+  isProductPurchasable,
+} from './ProductStatus';
 
 describe('ProductStatus', () => {
   it('should have correct enum values', () => {

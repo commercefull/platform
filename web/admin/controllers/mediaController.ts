@@ -16,7 +16,6 @@ export const listMedia = async (req: TypedRequest, res: Response): Promise<void>
     pagination: { total: 0, page: 1, pages: 1 },
     success: req.query.success || null,
   });
-  
 };
 
 export const uploadMediaForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -24,7 +23,6 @@ export const uploadMediaForm = async (req: TypedRequest, res: Response): Promise
     pageName: 'Upload Media',
     folders: [],
   });
-  
 };
 
 export const uploadMedia = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -46,7 +44,6 @@ export const viewMedia = async (req: TypedRequest, res: Response): Promise<void>
     media: null,
     success: req.query.success || null,
   });
-  
 };
 
 export const editMediaForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -54,7 +51,6 @@ export const editMediaForm = async (req: TypedRequest, res: Response): Promise<v
     pageName: 'Edit Media',
     media: null,
   });
-  
 };
 
 export const updateMedia = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -74,15 +70,12 @@ export const updateMedia = async (req: TypedRequest, res: Response): Promise<voi
 
 export const deleteMedia = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Media deleted successfully' });
-  
 };
 
 export const bulkDeleteMedia = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Media items deleted successfully' });
-  
 };
 
 export const createFolder = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Folder created successfully' });
-  
 };

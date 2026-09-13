@@ -4,10 +4,7 @@ import type { CommissionRuleRepository } from '../../domain/repositories/Marketp
 
 export class CommissionRuleRepositoryImpl implements CommissionRuleRepository {
   async findById(ruleId: string): Promise<CommissionRule | null> {
-    const row = await queryOne<CommissionRuleProps>(
-      `SELECT * FROM "marketplaceCommissionRule" WHERE "ruleId" = $1`,
-      [ruleId],
-    );
+    const row = await queryOne<CommissionRuleProps>(`SELECT * FROM "marketplaceCommissionRule" WHERE "ruleId" = $1`, [ruleId]);
     return row ? CommissionRule.reconstitute(row) : null;
   }
 
@@ -67,11 +64,23 @@ export class CommissionRuleRepositoryImpl implements CommissionRuleRepository {
         "updatedAt" = EXCLUDED."updatedAt"
       `,
       [
-        json.ruleId, json.organizationId, json.name, json.type, json.scope,
-        json.rate, json.fixedAmount ?? null, JSON.stringify(json.tiers ?? null),
-        json.categoryId ?? null, json.vendorId ?? null, json.productId ?? null,
-        json.priority, json.active, json.startsAt ?? null, json.endsAt ?? null,
-        json.createdAt, json.updatedAt,
+        json.ruleId,
+        json.organizationId,
+        json.name,
+        json.type,
+        json.scope,
+        json.rate,
+        json.fixedAmount ?? null,
+        JSON.stringify(json.tiers ?? null),
+        json.categoryId ?? null,
+        json.vendorId ?? null,
+        json.productId ?? null,
+        json.priority,
+        json.active,
+        json.startsAt ?? null,
+        json.endsAt ?? null,
+        json.createdAt,
+        json.updatedAt,
       ],
     );
   }

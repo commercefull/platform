@@ -51,11 +51,9 @@ export default function () {
       JSON.stringify({
         code: couponCode,
         orderValue: 99.99,
-        items: [
-          { productId: `perf-test-product-${__VU}`, quantity: 1, price: 99.99 },
-        ],
+        items: [{ productId: `perf-test-product-${__VU}`, quantity: 1, price: 99.99 }],
       }),
-      jsonHeaders
+      jsonHeaders,
     );
 
     // 200 (valid) or 400/404 (invalid/not found) are both acceptable
@@ -74,10 +72,9 @@ export default function () {
 
   // ─── 2. Validate coupon by code (GET /customer/coupons/validate/:code) ──
   group('Validate Coupon By Code', function () {
-    const res = http.get(
-      `${BASE_URL}/customer/coupons/validate/${encodeURIComponent(couponCode)}`,
-      { headers: { Accept: 'application/json' } }
-    );
+    const res = http.get(`${BASE_URL}/customer/coupons/validate/${encodeURIComponent(couponCode)}`, {
+      headers: { Accept: 'application/json' },
+    });
 
     if (res.status === 200 || res.status === 400 || res.status === 404) {
       couponErrors.add(false);
@@ -118,7 +115,7 @@ export default function () {
         quantity: 2,
         unitPrice: 49.99,
       }),
-      jsonHeaders
+      jsonHeaders,
     );
     couponErrors.add(!checkResponse(res, 200, 'add-item-for-coupon'));
   });
@@ -127,11 +124,7 @@ export default function () {
 
   // Apply coupon to basket
   group('Apply Coupon To Basket', function () {
-    const res = http.post(
-      `${BASE_URL}/customer/basket/${basketId}/coupon`,
-      JSON.stringify({ couponCode }),
-      jsonHeaders
-    );
+    const res = http.post(`${BASE_URL}/customer/basket/${basketId}/coupon`, JSON.stringify({ couponCode }), jsonHeaders);
     // 200 (applied) or 400 (invalid/expired) are both acceptable
     if (res.status === 200) {
       couponsApplied.add(1);
@@ -148,11 +141,7 @@ export default function () {
 
   // Remove coupon from basket
   group('Remove Coupon From Basket', function () {
-    const res = http.del(
-      `${BASE_URL}/customer/basket/${basketId}/coupon`,
-      null,
-      { headers: { Accept: 'application/json' } }
-    );
+    const res = http.del(`${BASE_URL}/customer/basket/${basketId}/coupon`, null, { headers: { Accept: 'application/json' } });
     // 200 (removed) or 400 (no coupon applied) are both acceptable
     couponErrors.add(!(res.status === 200 || res.status === 400));
   });
@@ -168,11 +157,9 @@ export default function () {
         couponCode,
         basketId,
         orderTotal: 99.98,
-        items: [
-          { productId: `perf-test-product-${__VU}`, quantity: 2, price: 49.99 },
-        ],
+        items: [{ productId: `perf-test-product-${__VU}`, quantity: 2, price: 49.99 }],
       }),
-      jsonHeaders
+      jsonHeaders,
     );
 
     if (res.status === 200) {

@@ -20,7 +20,11 @@ export class CompanyAlreadyExistsError extends AppError {
 
 export class CompanyStatusError extends AppError {
   constructor(companyId: string, action: string, currentStatus: string) {
-    super(`Cannot ${action} company ${companyId} in status: ${currentStatus}`, 409, { code: 'b2b.company_status_error', severity: 'warn', details: { companyId, action, currentStatus } });
+    super(`Cannot ${action} company ${companyId} in status: ${currentStatus}`, 409, {
+      code: 'b2b.company_status_error',
+      severity: 'warn',
+      details: { companyId, action, currentStatus },
+    });
   }
 }
 
@@ -38,13 +42,21 @@ export class B2BUserAlreadyExistsError extends AppError {
 
 export class B2BUserStatusError extends AppError {
   constructor(userId: string, action: string, currentStatus: string) {
-    super(`Cannot ${action} user ${userId} in status: ${currentStatus}`, 409, { code: 'b2b.user_status_error', severity: 'warn', details: { userId, action, currentStatus } });
+    super(`Cannot ${action} user ${userId} in status: ${currentStatus}`, 409, {
+      code: 'b2b.user_status_error',
+      severity: 'warn',
+      details: { userId, action, currentStatus },
+    });
   }
 }
 
 export class SpendingLimitExceededError extends AppError {
   constructor(userId: string, amount: number, limit: number) {
-    super(`Spending limit exceeded for user ${userId}: ${amount} exceeds limit ${limit}`, 403, { code: 'b2b.spending_limit_exceeded', severity: 'warn', details: { userId, amount, limit } });
+    super(`Spending limit exceeded for user ${userId}: ${amount} exceeds limit ${limit}`, 403, {
+      code: 'b2b.spending_limit_exceeded',
+      severity: 'warn',
+      details: { userId, amount, limit },
+    });
   }
 }
 
@@ -56,7 +68,11 @@ export class QuoteNotFoundError extends AppError {
 
 export class QuoteStatusError extends AppError {
   constructor(quoteId: string, action: string, currentStatus: string) {
-    super(`Cannot ${action} quote ${quoteId} in status: ${currentStatus}`, 409, { code: 'b2b.quote_status_error', severity: 'warn', details: { quoteId, action, currentStatus } });
+    super(`Cannot ${action} quote ${quoteId} in status: ${currentStatus}`, 409, {
+      code: 'b2b.quote_status_error',
+      severity: 'warn',
+      details: { quoteId, action, currentStatus },
+    });
   }
 }
 
@@ -74,18 +90,30 @@ export class ApprovalWorkflowNotFoundError extends AppError {
 
 export class ApprovalStatusError extends AppError {
   constructor(workflowId: string, action: string, currentStatus: string) {
-    super(`Cannot ${action} approval workflow ${workflowId} in status: ${currentStatus}`, 409, { code: 'b2b.approval_status_error', severity: 'warn', details: { workflowId, action, currentStatus } });
+    super(`Cannot ${action} approval workflow ${workflowId} in status: ${currentStatus}`, 409, {
+      code: 'b2b.approval_status_error',
+      severity: 'warn',
+      details: { workflowId, action, currentStatus },
+    });
   }
 }
 
 export class UnauthorizedApproverError extends AppError {
   constructor(workflowId: string, approverId: string) {
-    super(`User ${approverId} is not the current approver for workflow ${workflowId}`, 403, { code: 'b2b.unauthorized_approver', severity: 'warn', details: { workflowId, approverId } });
+    super(`User ${approverId} is not the current approver for workflow ${workflowId}`, 403, {
+      code: 'b2b.unauthorized_approver',
+      severity: 'warn',
+      details: { workflowId, approverId },
+    });
   }
 }
 
 export class CreditLimitExceededError extends AppError {
   constructor(companyId: string, amount: number, available: number) {
-    super(`Credit limit exceeded for company ${companyId}: requested ${amount}, available ${available}`, 403, { code: 'b2b.credit_limit_exceeded', severity: 'warn', details: { companyId, amount, available } });
+    super(`Credit limit exceeded for company ${companyId}: requested ${amount}, available ${available}`, 403, {
+      code: 'b2b.credit_limit_exceeded',
+      severity: 'warn',
+      details: { companyId, amount, available },
+    });
   }
 }

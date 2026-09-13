@@ -54,72 +54,56 @@ describe('CreateStoreUseCase', () => {
   });
 
   it('should throw StoreValidationError when name is missing', async () => {
-    await expect(
-      useCase.execute(new CreateStoreCommand(createStoreData({ name: '' }))),
-    ).rejects.toThrow(StoreValidationError);
+    await expect(useCase.execute(new CreateStoreCommand(createStoreData({ name: '' })))).rejects.toThrow(StoreValidationError);
   });
 
   it('should throw StoreValidationError when slug is missing', async () => {
-    await expect(
-      useCase.execute(new CreateStoreCommand(createStoreData({ slug: '' }))),
-    ).rejects.toThrow(StoreValidationError);
+    await expect(useCase.execute(new CreateStoreCommand(createStoreData({ slug: '' })))).rejects.toThrow(StoreValidationError);
   });
 
   it('should throw StoreValidationError when system config not found', async () => {
     mockSystemConfig.findActive.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute(new CreateStoreCommand(createStoreData())),
-    ).rejects.toThrow(StoreValidationError);
+    await expect(useCase.execute(new CreateStoreCommand(createStoreData()))).rejects.toThrow(StoreValidationError);
   });
 
   it('should throw StoreSlugAlreadyExistsError when slug is taken', async () => {
     mockRepo.findBySlug.mockResolvedValue({ storeId: 'existing-1' });
 
-    await expect(
-      useCase.execute(new CreateStoreCommand(createStoreData())),
-    ).rejects.toThrow(StoreSlugAlreadyExistsError);
+    await expect(useCase.execute(new CreateStoreCommand(createStoreData()))).rejects.toThrow(StoreSlugAlreadyExistsError);
   });
 
   it('should throw StoreValidationError when storeUrl is taken', async () => {
     mockRepo.findByUrl.mockResolvedValue({ storeId: 'existing-1' });
 
-    await expect(
-      useCase.execute(new CreateStoreCommand(createStoreData({ storeUrl: 'https://example.com' }))),
-    ).rejects.toThrow(StoreValidationError);
+    await expect(useCase.execute(new CreateStoreCommand(createStoreData({ storeUrl: 'https://example.com' })))).rejects.toThrow(
+      StoreValidationError,
+    );
   });
 
   it('should throw StoreValidationError when merchant_store has no organizationId', async () => {
     await expect(
-      useCase.execute(
-        new CreateStoreCommand(createStoreData({ storeType: 'merchant_store', organizationId: undefined })),
-      ),
+      useCase.execute(new CreateStoreCommand(createStoreData({ storeType: 'merchant_store', organizationId: undefined }))),
     ).rejects.toThrow(StoreValidationError);
   });
 
   it('should throw StoreValidationError when organization not found', async () => {
     mockOrgLookup.findById.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute(new CreateStoreCommand(createStoreData())),
-    ).rejects.toThrow(StoreValidationError);
+    await expect(useCase.execute(new CreateStoreCommand(createStoreData()))).rejects.toThrow(StoreValidationError);
   });
 
   it('should throw StoreValidationError when headquarters has parent store', async () => {
     await expect(
-      useCase.execute(
-        new CreateStoreCommand(createStoreData({ isHeadquarters: true, parentStoreId: 'parent-1' })),
-      ),
+      useCase.execute(new CreateStoreCommand(createStoreData({ isHeadquarters: true, parentStoreId: 'parent-1' }))),
     ).rejects.toThrow(StoreValidationError);
   });
 
   it('should throw StoreNotFoundError when parent store does not exist', async () => {
     mockRepo.findById.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute(
-        new CreateStoreCommand(createStoreData({ parentStoreId: 'parent-x' })),
-      ),
-    ).rejects.toThrow(StoreNotFoundError);
+    await expect(useCase.execute(new CreateStoreCommand(createStoreData({ parentStoreId: 'parent-x' })))).rejects.toThrow(
+      StoreNotFoundError,
+    );
   });
 });

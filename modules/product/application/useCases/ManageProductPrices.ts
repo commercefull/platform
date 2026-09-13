@@ -1,4 +1,9 @@
-import type { ProductPrice, ProductPriceCreateParams, ProductPriceUpdateParams, ProductPricePort } from '../../domain/repositories/ProductCatalogPorts';
+import type {
+  ProductPrice,
+  ProductPriceCreateParams,
+  ProductPriceUpdateParams,
+  ProductPricePort,
+} from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageProductPricesUseCase {
   constructor(private readonly productPriceRepo: ProductPricePort) {}

@@ -4,34 +4,24 @@ import type { QuoteRepository } from '../../domain/repositories/B2BRepository';
 
 export class QuoteRepositoryImpl implements QuoteRepository {
   async findById(quoteId: string): Promise<Quote | null> {
-    const row = await queryOne<QuoteProps>(
-      `SELECT * FROM "b2bQuote" WHERE "quoteId" = $1`,
-      [quoteId],
-    );
+    const row = await queryOne<QuoteProps>(`SELECT * FROM "b2bQuote" WHERE "quoteId" = $1`, [quoteId]);
     return row ? Quote.reconstitute(row) : null;
   }
 
   async findByQuoteNumber(quoteNumber: string): Promise<Quote | null> {
-    const row = await queryOne<QuoteProps>(
-      `SELECT * FROM "b2bQuote" WHERE "quoteNumber" = $1`,
-      [quoteNumber],
-    );
+    const row = await queryOne<QuoteProps>(`SELECT * FROM "b2bQuote" WHERE "quoteNumber" = $1`, [quoteNumber]);
     return row ? Quote.reconstitute(row) : null;
   }
 
   async findByCompanyId(companyId: string): Promise<Quote[]> {
-    const rows = await query<QuoteProps[]>(
-      `SELECT * FROM "b2bQuote" WHERE "companyId" = $1 ORDER BY "createdAt" DESC`,
-      [companyId],
-    );
+    const rows = await query<QuoteProps[]>(`SELECT * FROM "b2bQuote" WHERE "companyId" = $1 ORDER BY "createdAt" DESC`, [companyId]);
     return (rows ?? []).map(r => Quote.reconstitute(r));
   }
 
   async findByOrganizationId(organizationId: string): Promise<Quote[]> {
-    const rows = await query<QuoteProps[]>(
-      `SELECT * FROM "b2bQuote" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`,
-      [organizationId],
-    );
+    const rows = await query<QuoteProps[]>(`SELECT * FROM "b2bQuote" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`, [
+      organizationId,
+    ]);
     return (rows ?? []).map(r => Quote.reconstitute(r));
   }
 
@@ -70,13 +60,28 @@ export class QuoteRepositoryImpl implements QuoteRepository {
         "updatedAt" = EXCLUDED."updatedAt"
       `,
       [
-        json.quoteId, json.companyId, json.organizationId, json.quoteNumber,
-        json.status, json.requestedBy, JSON.stringify(json.lineItems),
-        json.subtotal, json.discountTotal, json.taxTotal, json.total,
-        json.currency, json.notes ?? null, json.internalNotes ?? null,
-        json.validUntil, json.sentAt ?? null, json.viewedAt ?? null,
-        json.acceptedAt ?? null, json.rejectedAt ?? null,
-        json.convertedOrderId ?? null, json.createdAt, json.updatedAt,
+        json.quoteId,
+        json.companyId,
+        json.organizationId,
+        json.quoteNumber,
+        json.status,
+        json.requestedBy,
+        JSON.stringify(json.lineItems),
+        json.subtotal,
+        json.discountTotal,
+        json.taxTotal,
+        json.total,
+        json.currency,
+        json.notes ?? null,
+        json.internalNotes ?? null,
+        json.validUntil,
+        json.sentAt ?? null,
+        json.viewedAt ?? null,
+        json.acceptedAt ?? null,
+        json.rejectedAt ?? null,
+        json.convertedOrderId ?? null,
+        json.createdAt,
+        json.updatedAt,
       ],
     );
   }

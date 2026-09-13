@@ -4,7 +4,10 @@ import { RefundStatus } from '../valueObjects/PaymentStatus';
 describe('PaymentRefund', () => {
   it('should create a refund (happy path)', () => {
     const refund = PaymentRefund.create({
-      refundId: 'r1', transactionId: 't1', amount: 50, currency: 'usd',
+      refundId: 'r1',
+      transactionId: 't1',
+      amount: 50,
+      currency: 'usd',
     });
     expect(refund.refundId).toBe('r1');
     expect(refund.amount).toBe(50);

@@ -63,6 +63,6 @@ export class CreateProductVariantUseCase {
       metadata: command.metadata,
     });
 
-    return await this.variantRepository.save(variant) as ProductVariant;
+    return (await this.variantRepository.save(variant)) as ProductVariant;
   }
 }

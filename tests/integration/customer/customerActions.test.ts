@@ -1,10 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import {
-  SEEDED_CUSTOMER_ID,
-  SEEDED_CUSTOMER_ADDRESS_ID,
-  SEEDED_CUSTOMER_GROUP_ID,
-  testCustomer,
-} from './testUtils';
+import { SEEDED_CUSTOMER_ID, SEEDED_CUSTOMER_ADDRESS_ID, SEEDED_CUSTOMER_GROUP_ID, testCustomer } from './testUtils';
 
 const createClient = () =>
   axios.create({
@@ -230,9 +225,11 @@ describe('Customer Actions API', () => {
 
       // Cleanup - use customer route to delete address
       if (response.data.data?.addressId) {
-        await client.delete(`/business/customers/${testCustomerId}/addresses/${response.data.data.addressId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        }).catch(() => {});
+        await client
+          .delete(`/business/customers/${testCustomerId}/addresses/${response.data.data.addressId}`, {
+            headers: { Authorization: `Bearer ${adminToken}` },
+          })
+          .catch(() => {});
       }
     });
   });

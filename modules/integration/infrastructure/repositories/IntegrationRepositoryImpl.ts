@@ -28,19 +28,25 @@ export class IntegrationRepositoryImpl implements IntegrationRepository {
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
-        props.integrationId, props.organizationId, props.name, props.provider, props.status,
-        props.description, props.webhookUrl, JSON.stringify(props.config),
-        props.lastSyncAt, props.lastError, props.createdAt, props.updatedAt,
+        props.integrationId,
+        props.organizationId,
+        props.name,
+        props.provider,
+        props.status,
+        props.description,
+        props.webhookUrl,
+        JSON.stringify(props.config),
+        props.lastSyncAt,
+        props.lastError,
+        props.createdAt,
+        props.updatedAt,
       ],
     );
     return integration;
   }
 
   async findById(integrationId: string): Promise<Integration | null> {
-    const row = await queryOne<IntegrationDbRow>(
-      `SELECT * FROM "${Table.Integration}" WHERE "integrationId" = $1`,
-      [integrationId],
-    );
+    const row = await queryOne<IntegrationDbRow>(`SELECT * FROM "${Table.Integration}" WHERE "integrationId" = $1`, [integrationId]);
     if (!row) return null;
     return Integration.reconstitute(this.mapRowToProps(row));
   }
@@ -58,7 +64,7 @@ export class IntegrationRepositoryImpl implements IntegrationRepository {
     }
     sql += ` ORDER BY "createdAt" DESC`;
     const rows = await query<IntegrationDbRow[]>(sql, params as unknown[]);
-    return (rows ?? []).map((r) => Integration.reconstitute(this.mapRowToProps(r)));
+    return (rows ?? []).map(r => Integration.reconstitute(this.mapRowToProps(r)));
   }
 
   async update(integration: Integration): Promise<Integration> {
@@ -69,8 +75,15 @@ export class IntegrationRepositoryImpl implements IntegrationRepository {
         "config" = $6, "lastSyncAt" = $7, "lastError" = $8, "updatedAt" = $9
       WHERE "integrationId" = $1`,
       [
-        props.integrationId, props.name, props.status, props.description, props.webhookUrl,
-        JSON.stringify(props.config), props.lastSyncAt, props.lastError, props.updatedAt,
+        props.integrationId,
+        props.name,
+        props.status,
+        props.description,
+        props.webhookUrl,
+        JSON.stringify(props.config),
+        props.lastSyncAt,
+        props.lastError,
+        props.updatedAt,
       ],
     );
     return integration;

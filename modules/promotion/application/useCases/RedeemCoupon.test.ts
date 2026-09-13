@@ -21,8 +21,14 @@ describe('RedeemCouponUseCase', () => {
     jest.clearAllMocks();
     mockCouponRepo = couponDiscountRepository.coupons as unknown as Record<string, jest.Mock>;
     mockCouponRepo.findByCode.mockResolvedValue({
-      promotionCouponId: 'c1', code: 'SAVE10', isActive: true, usageCount: 0,
-      maxUsage: 100, minOrderAmount: 50, startDate: null, endDate: null,
+      promotionCouponId: 'c1',
+      code: 'SAVE10',
+      isActive: true,
+      usageCount: 0,
+      maxUsage: 100,
+      minOrderAmount: 50,
+      startDate: null,
+      endDate: null,
     });
     useCase = new RedeemCouponUseCase();
   });

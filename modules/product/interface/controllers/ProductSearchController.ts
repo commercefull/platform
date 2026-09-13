@@ -76,7 +76,6 @@ class ProductSearchController {
     }
 
     res.json(result);
-    
   }
 
   /**
@@ -92,7 +91,6 @@ class ProductSearchController {
     }
 
     res.json(result);
-    
   }
 
   /**
@@ -113,7 +111,6 @@ class ProductSearchController {
     }
 
     res.json(result);
-    
   }
 
   /**
@@ -135,7 +132,6 @@ class ProductSearchController {
     }
 
     res.json(result);
-    
   }
 
   /**
@@ -156,7 +152,6 @@ class ProductSearchController {
     }
 
     res.json(result);
-    
   }
 }
 

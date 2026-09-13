@@ -87,7 +87,7 @@ export default function () {
         quantity: quantity,
         unitPrice: 19.99,
       }),
-      { headers: { 'Content-Type': 'application/json', Accept: 'application/json' } }
+      { headers: { 'Content-Type': 'application/json', Accept: 'application/json' } },
     );
     // Accept 200 (added) as success; item may fail domain validation (still measures latency)
     basketErrors.add(!checkResponse(res, 200, 'add-item'));

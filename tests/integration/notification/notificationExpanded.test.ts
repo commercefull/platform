@@ -79,11 +79,7 @@ describe('Notification Expanded Tests', () => {
 
       if (listResp.data.data?.length > 0) {
         const notifId = listResp.data.data[0].notificationId;
-        const resp = await client.patch(
-          `/customer/notifications/${notifId}/read`,
-          {},
-          { headers: authHeaders() },
-        );
+        const resp = await client.patch(`/customer/notifications/${notifId}/read`, {}, { headers: authHeaders() });
 
         expectStatus(resp, 200);
       }
@@ -92,11 +88,7 @@ describe('Notification Expanded Tests', () => {
     it('should mark all notifications as read', async () => {
       if (!customerToken) return;
 
-      const resp = await client.post(
-        '/customer/notifications/read',
-        {},
-        { headers: authHeaders() },
-      );
+      const resp = await client.post('/customer/notifications/read', {}, { headers: authHeaders() });
 
       expectStatus(resp, 200);
     });

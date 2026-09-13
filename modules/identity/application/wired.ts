@@ -5,12 +5,7 @@
  * Infrastructure dependencies are resolved here — controllers import from this file only.
  */
 
-import {
-  ManageSamlProviderUseCase,
-  ManageOidcProviderUseCase,
-  SsoLoginUseCase,
-  ListSsoProvidersUseCase,
-} from './useCases/Sso';
+import { ManageSamlProviderUseCase, ManageOidcProviderUseCase, SsoLoginUseCase, ListSsoProvidersUseCase } from './useCases/Sso';
 import { SamlProviderRepositoryImpl } from '../infrastructure/repositories/SamlProviderRepositoryImpl';
 import { OidcProviderRepositoryImpl } from '../infrastructure/repositories/OidcProviderRepositoryImpl';
 import { OrganizationCredentialSubjectAdapter } from '../infrastructure/acl/OrganizationCredentialSubjectAdapter';

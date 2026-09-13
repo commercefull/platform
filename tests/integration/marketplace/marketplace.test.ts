@@ -97,11 +97,7 @@ describe('Marketplace Module Integration Tests', () => {
   describe('Vendor lifecycle', () => {
     it('POST /business/vendors/:vendorId/approve approves vendor', async () => {
       if (!orgToken || !vendorId) return;
-      const resp = await client.post(
-        `/business/vendors/${vendorId}/approve`,
-        {},
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.post(`/business/vendors/${vendorId}/approve`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       expect([200, 400]).toContain(resp.status);
     });
 
@@ -143,7 +139,7 @@ describe('Marketplace Module Integration Tests', () => {
         '/business/commission-rules',
         {
           name: 'Default Commission',
-          rate: 0.10,
+          rate: 0.1,
           priority: 1,
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
@@ -243,11 +239,7 @@ describe('Marketplace Module Integration Tests', () => {
 
     it('POST /business/payouts/:payoutId/process processes payout', async () => {
       if (!orgToken || !payoutId) return;
-      const resp = await client.post(
-        `/business/payouts/${payoutId}/process`,
-        {},
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.post(`/business/payouts/${payoutId}/process`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       expect([200, 400]).toContain(resp.status);
     });
 

@@ -31,9 +31,14 @@ describe('CancelSubscriptionUseCase', () => {
   });
 
   it('should cancel an active subscription immediately', async () => {
-    jest.mocked(subscriptionRepo.getCustomerSubscription)
+    jest
+      .mocked(subscriptionRepo.getCustomerSubscription)
       .mockResolvedValueOnce({ customerSubscriptionId: 'sub-1', customerId: 'cust-1', status: 'active' } as never as CustomerSubscription)
-      .mockResolvedValueOnce({ customerSubscriptionId: 'sub-1', customerId: 'cust-1', status: 'cancelled' } as never as CustomerSubscription);
+      .mockResolvedValueOnce({
+        customerSubscriptionId: 'sub-1',
+        customerId: 'cust-1',
+        status: 'cancelled',
+      } as never as CustomerSubscription);
     jest.mocked(subscriptionRepo.cancelSubscription).mockResolvedValue(undefined);
 
     const result = await useCase.execute(
@@ -48,14 +53,18 @@ describe('CancelSubscriptionUseCase', () => {
     expect(result.success).toBe(true);
     expect(result.subscription?.status).toBe('cancelled');
     expect(subscriptionRepo.cancelSubscription).toHaveBeenCalledWith('sub-1', 'Not needed', 'customer', false);
-    expect(eventBus.emit).toHaveBeenCalledWith('subscription.cancelled', expect.objectContaining({
-      customerSubscriptionId: 'sub-1',
-      reason: 'Not needed',
-    }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'subscription.cancelled',
+      expect.objectContaining({
+        customerSubscriptionId: 'sub-1',
+        reason: 'Not needed',
+      }),
+    );
   });
 
   it('should cancel at period end when cancelImmediately is false', async () => {
-    jest.mocked(subscriptionRepo.getCustomerSubscription)
+    jest
+      .mocked(subscriptionRepo.getCustomerSubscription)
       .mockResolvedValueOnce({ customerSubscriptionId: 'sub-1', customerId: 'cust-1', status: 'active' } as never as CustomerSubscription)
       .mockResolvedValueOnce({ customerSubscriptionId: 'sub-1', customerId: 'cust-1', status: 'active' } as never as CustomerSubscription);
     jest.mocked(subscriptionRepo.cancelSubscription).mockResolvedValue(undefined);
@@ -74,9 +83,7 @@ describe('CancelSubscriptionUseCase', () => {
   });
 
   it('should return error when subscription ID is missing', async () => {
-    const result = await useCase.execute(
-      new CancelSubscriptionCommand({ customerSubscriptionId: '', cancelledBy: 'customer' }),
-    );
+    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: '', cancelledBy: 'customer' }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('subscription_id_required');
@@ -85,9 +92,7 @@ describe('CancelSubscriptionUseCase', () => {
   it('should return error when subscription not found', async () => {
     jest.mocked(subscriptionRepo.getCustomerSubscription).mockResolvedValue(null);
 
-    const result = await useCase.execute(
-      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-x', cancelledBy: 'admin' }),
-    );
+    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-x', cancelledBy: 'admin' }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('subscription_not_found');
@@ -99,9 +104,7 @@ describe('CancelSubscriptionUseCase', () => {
       status: 'cancelled',
     } as never as CustomerSubscription);
 
-    const result = await useCase.execute(
-      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }),
-    );
+    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('already_cancelled');
@@ -118,9 +121,7 @@ describe('CancelSubscriptionUseCase', () => {
       allowEarlyCancel: false,
     } as never as SubscriptionProduct);
 
-    const result = await useCase.execute(
-      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }),
-    );
+    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('early_cancel_not_allowed');
@@ -129,9 +130,7 @@ describe('CancelSubscriptionUseCase', () => {
   it('should handle errors gracefully', async () => {
     jest.mocked(subscriptionRepo.getCustomerSubscription).mockRejectedValue(new Error('DB error'));
 
-    const result = await useCase.execute(
-      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }),
-    );
+    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }));
 
     expect(result.success).toBe(false);
     expect(result.message).toContain('DB error');

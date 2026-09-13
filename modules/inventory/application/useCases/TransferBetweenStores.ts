@@ -41,7 +41,13 @@ interface TransferResult {
 
 interface TransferBetweenStoresRepositoryPort {
   getAvailableQuantity(storeId: string, productId: string, variantId?: string): Promise<number>;
-  reserveForTransfer(storeId: string, productId: string, variantId: string | undefined, quantity: number, transferId: string): Promise<void>;
+  reserveForTransfer(
+    storeId: string,
+    productId: string,
+    variantId: string | undefined,
+    quantity: number,
+    transferId: string,
+  ): Promise<void>;
   createTransfer(input: {
     transferId: string;
     sourceStoreId: string;

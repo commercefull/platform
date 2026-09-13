@@ -3,19 +3,8 @@
  * Covers SocialLogin, LinkSocialAccount, UnlinkSocialAccount, GetLinkedAccounts.
  */
 
-import {
-  SocialLoginUseCase,
-  LinkSocialAccountUseCase,
-  UnlinkSocialAccountUseCase,
-  GetLinkedAccountsUseCase,
-} from './SocialLogin';
-import {
-  SocialAccount,
-  SocialProvider,
-  UserType,
-  SocialProfileData,
-  SocialAccountProps,
-} from '../../domain/entities/SocialAccount';
+import { SocialLoginUseCase, LinkSocialAccountUseCase, UnlinkSocialAccountUseCase, GetLinkedAccountsUseCase } from './SocialLogin';
+import { SocialAccount, SocialProvider, UserType, SocialProfileData, SocialAccountProps } from '../../domain/entities/SocialAccount';
 import {
   EmailRequiredError,
   SocialAccountAlreadyLinkedError,

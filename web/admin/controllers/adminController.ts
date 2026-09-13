@@ -31,7 +31,6 @@ export const getAdminDashboard = async (req: TypedRequest, res: Response) => {
   };
 
   adminRespond(req, res, 'dashboard', dashboardData);
-  
 };
 
 // GET: admin login page
@@ -170,5 +169,4 @@ export const getAdminProfile = async (req: TypedRequest, res: Response) => {
   adminRespond(req, res, 'profile', {
     pageName: 'Admin Profile',
   });
-  
 };

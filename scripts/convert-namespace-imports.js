@@ -25,7 +25,33 @@ for (const d of ['modules', 'web', 'libs', 'boot']) {
   findFiles(path.join(ROOT, d), files);
 }
 
-const BUILTINS = new Set(['crypto', 'fs', 'path', 'util', 'stream', 'http', 'https', 'url', 'zlib', 'os', 'net', 'dns', 'child_process', 'cluster', 'events', 'assert', 'querystring', 'readline', 'repl', 'tls', 'dgram', 'vm', 'worker_threads', 'console', 'process']);
+const BUILTINS = new Set([
+  'crypto',
+  'fs',
+  'path',
+  'util',
+  'stream',
+  'http',
+  'https',
+  'url',
+  'zlib',
+  'os',
+  'net',
+  'dns',
+  'child_process',
+  'cluster',
+  'events',
+  'assert',
+  'querystring',
+  'readline',
+  'repl',
+  'tls',
+  'dgram',
+  'vm',
+  'worker_threads',
+  'console',
+  'process',
+]);
 
 let totalConverted = 0;
 let totalSkipped = 0;

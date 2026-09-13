@@ -23,11 +23,15 @@ export const checkoutResolvers = {
   },
 
   Mutation: {
-    initiateCheckout: async (_parent: unknown, args: {
-      basketId: string;
-      customerId?: string;
-      guestEmail?: string;
-    }, context: GraphQLAuthContext) => {
+    initiateCheckout: async (
+      _parent: unknown,
+      args: {
+        basketId: string;
+        customerId?: string;
+        guestEmail?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const ports = getCheckoutPorts();
       const useCase = new InitiateCheckoutUseCase(CheckoutRepo, ports.basketSnapshot);
@@ -35,49 +39,93 @@ export const checkoutResolvers = {
       return useCase.execute(command);
     },
 
-    setShippingAddress: async (_parent: unknown, args: {
-      checkoutId: string;
-      address: {
-        firstName: string; lastName: string; addressLine1: string; city: string;
-        postalCode: string; country: string; company?: string; addressLine2?: string;
-        region?: string; phone?: string;
-      };
-    }, context: GraphQLAuthContext) => {
+    setShippingAddress: async (
+      _parent: unknown,
+      args: {
+        checkoutId: string;
+        address: {
+          firstName: string;
+          lastName: string;
+          addressLine1: string;
+          city: string;
+          postalCode: string;
+          country: string;
+          company?: string;
+          addressLine2?: string;
+          region?: string;
+          phone?: string;
+        };
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const ports = getCheckoutPorts();
       const useCase = new SetShippingAddressUseCase(CheckoutRepo, ports.basketSnapshot, ports.taxQuote, ports.promotionQuote);
       const a = args.address;
       const command = new SetShippingAddressCommand(
-        args.checkoutId, a.firstName, a.lastName, a.addressLine1, a.city,
-        a.postalCode, a.country, a.company, a.addressLine2, a.region, a.phone,
+        args.checkoutId,
+        a.firstName,
+        a.lastName,
+        a.addressLine1,
+        a.city,
+        a.postalCode,
+        a.country,
+        a.company,
+        a.addressLine2,
+        a.region,
+        a.phone,
       );
       return useCase.execute(command);
     },
 
-    setBillingAddress: async (_parent: unknown, args: {
-      checkoutId: string;
-      address: {
-        firstName: string; lastName: string; addressLine1: string; city: string;
-        postalCode: string; country: string; company?: string; addressLine2?: string;
-        region?: string; phone?: string;
-      };
-      sameAsShipping?: boolean;
-    }, context: GraphQLAuthContext) => {
+    setBillingAddress: async (
+      _parent: unknown,
+      args: {
+        checkoutId: string;
+        address: {
+          firstName: string;
+          lastName: string;
+          addressLine1: string;
+          city: string;
+          postalCode: string;
+          country: string;
+          company?: string;
+          addressLine2?: string;
+          region?: string;
+          phone?: string;
+        };
+        sameAsShipping?: boolean;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const useCase = new SetBillingAddressUseCase(CheckoutRepo);
       const a = args.address;
       const command = new SetBillingAddressCommand(
-        args.checkoutId, a.firstName, a.lastName, a.addressLine1, a.city,
-        a.postalCode, a.country, a.company, a.addressLine2, a.region, a.phone,
+        args.checkoutId,
+        a.firstName,
+        a.lastName,
+        a.addressLine1,
+        a.city,
+        a.postalCode,
+        a.country,
+        a.company,
+        a.addressLine2,
+        a.region,
+        a.phone,
         args.sameAsShipping ?? false,
       );
       return useCase.execute(command);
     },
 
-    setShippingMethod: async (_parent: unknown, args: {
-      checkoutId: string;
-      shippingMethodId: string;
-    }, context: GraphQLAuthContext) => {
+    setShippingMethod: async (
+      _parent: unknown,
+      args: {
+        checkoutId: string;
+        shippingMethodId: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const ports = getCheckoutPorts();
       const useCase = new SetShippingMethodUseCase(CheckoutRepo, ports.shippingQuote);
@@ -85,20 +133,28 @@ export const checkoutResolvers = {
       return useCase.execute(command);
     },
 
-    setPaymentMethod: async (_parent: unknown, args: {
-      checkoutId: string;
-      paymentMethodId: string;
-    }, context: GraphQLAuthContext) => {
+    setPaymentMethod: async (
+      _parent: unknown,
+      args: {
+        checkoutId: string;
+        paymentMethodId: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const useCase = new SetPaymentMethodUseCase(CheckoutRepo);
       const command = new SetPaymentMethodCommand(args.checkoutId, args.paymentMethodId);
       return useCase.execute(command);
     },
 
-    applyCoupon: async (_parent: unknown, args: {
-      checkoutId: string;
-      couponCode: string;
-    }, context: GraphQLAuthContext) => {
+    applyCoupon: async (
+      _parent: unknown,
+      args: {
+        checkoutId: string;
+        couponCode: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const ports = getCheckoutPorts();
       const useCase = new ApplyCouponUseCase(CheckoutRepo, ports.discountQuote);
@@ -113,18 +169,17 @@ export const checkoutResolvers = {
       return useCase.execute(command);
     },
 
-    createPaymentIntent: async (_parent: unknown, args: {
-      checkoutId: string;
-      customerId?: string;
-    }, context: GraphQLAuthContext) => {
+    createPaymentIntent: async (
+      _parent: unknown,
+      args: {
+        checkoutId: string;
+        customerId?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const ports = getCheckoutPorts();
-      const useCase = new CreatePaymentIntentUseCase(
-        CheckoutRepo,
-        ports.basketSnapshot,
-        ports.orderPlacement,
-        ports.paymentAuthorization,
-      );
+      const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, ports.basketSnapshot, ports.orderPlacement, ports.paymentAuthorization);
       const command = new CreatePaymentIntentCommand(args.checkoutId, args.customerId);
       return useCase.execute(command);
     },

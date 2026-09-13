@@ -1,4 +1,4 @@
-import { CreateCurrencyUseCase} from './CreateCurrency';
+import { CreateCurrencyUseCase } from './CreateCurrency';
 import { CurrencyCodeAlreadyExistsError, LocalizationValidationError } from '../../domain/errors/LocalizationErrors';
 
 describe('CreateCurrencyUseCase', () => {
@@ -9,8 +9,13 @@ describe('CreateCurrencyUseCase', () => {
     mockRepo = {
       findCurrencyByCode: jest.fn().mockResolvedValue(null),
       createCurrency: jest.fn().mockResolvedValue({
-        currencyId: 'cur1', code: 'USD', name: 'US Dollar', symbol: '$',
-        exchangeRate: 1, isDefault: true, createdAt: new Date(),
+        currencyId: 'cur1',
+        code: 'USD',
+        name: 'US Dollar',
+        symbol: '$',
+        exchangeRate: 1,
+        isDefault: true,
+        createdAt: new Date(),
       }),
     };
     useCase = new CreateCurrencyUseCase(mockRepo as never);

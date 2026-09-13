@@ -15,7 +15,9 @@ export async function listCurrencies(): Promise<CurrencyRecord[]> {
 }
 
 export async function listActiveCurrencyCodes(): Promise<{ code: string; name: string }[]> {
-  const rows = await query<{ code: string; name: string }[]>(`SELECT "code", "name" FROM "currency" WHERE "isActive" = true ORDER BY "name"`);
+  const rows = await query<{ code: string; name: string }[]>(
+    `SELECT "code", "name" FROM "currency" WHERE "isActive" = true ORDER BY "name"`,
+  );
   return rows || [];
 }
 
@@ -23,7 +25,14 @@ export async function findCurrencyById(currencyId: string): Promise<CurrencyReco
   return queryOne<CurrencyRecord>(`SELECT * FROM "currency" WHERE "currencyId" = $1`, [currencyId]);
 }
 
-export async function createCurrency(params: { code: string; name: string; symbol?: string; exchangeRate?: number; isDefault?: boolean; isActive?: boolean }): Promise<string> {
+export async function createCurrency(params: {
+  code: string;
+  name: string;
+  symbol?: string;
+  exchangeRate?: number;
+  isDefault?: boolean;
+  isActive?: boolean;
+}): Promise<string> {
   const currencyId = uuidv4();
   const now = new Date();
 
@@ -34,13 +43,26 @@ export async function createCurrency(params: { code: string; name: string; symbo
   await query(
     `INSERT INTO "currency" ("currencyId", "code", "name", "symbol", "exchangeRate", "isDefault", "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-    [currencyId, params.code.toUpperCase(), params.name, params.symbol || params.code, params.exchangeRate || 1, params.isDefault || false, params.isActive !== false, now, now],
+    [
+      currencyId,
+      params.code.toUpperCase(),
+      params.name,
+      params.symbol || params.code,
+      params.exchangeRate || 1,
+      params.isDefault || false,
+      params.isActive !== false,
+      now,
+      now,
+    ],
   );
 
   return currencyId;
 }
 
-export async function updateCurrency(currencyId: string, updates: { name?: string; symbol?: string; exchangeRate?: number; isDefault?: boolean; isActive?: boolean }): Promise<void> {
+export async function updateCurrency(
+  currencyId: string,
+  updates: { name?: string; symbol?: string; exchangeRate?: number; isDefault?: boolean; isActive?: boolean },
+): Promise<void> {
   const now = new Date();
 
   if (updates.isDefault) {

@@ -5,12 +5,12 @@
 
 ## 1. Log Level Severity Policy
 
-| Level | Meaning | Alert? | Examples |
-|---|---|---|---|
-| `error` | **The system failed to keep a promise.** Unexpected, actionable, someone must look | **Yes** | DB connection lost, unhandled exception, PSP returned 5xx, event handler crashed, data-integrity violation, migration failure |
-| `warn` | Recoverable degradation, fallback taken, or a condition that will become an error if it persists | Threshold/rate-based | Retry succeeded on attempt 3, no default warehouse so fulfilment deferred, cache miss storm, deprecated endpoint used, ACL provider unavailable and fallback applied |
-| `info` | Significant business milestones and state transitions | No | Order placed, refund issued, subscription cancelled, config changed, admin action (also audited) |
-| `debug` | Developer detail for local/verbose diagnosis | No | Query shapes, computed pricing steps, event payloads |
+| Level   | Meaning                                                                                          | Alert?               | Examples                                                                                                                                                             |
+| ------- | ------------------------------------------------------------------------------------------------ | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `error` | **The system failed to keep a promise.** Unexpected, actionable, someone must look               | **Yes**              | DB connection lost, unhandled exception, PSP returned 5xx, event handler crashed, data-integrity violation, migration failure                                        |
+| `warn`  | Recoverable degradation, fallback taken, or a condition that will become an error if it persists | Threshold/rate-based | Retry succeeded on attempt 3, no default warehouse so fulfilment deferred, cache miss storm, deprecated endpoint used, ACL provider unavailable and fallback applied |
+| `info`  | Significant business milestones and state transitions                                            | No                   | Order placed, refund issued, subscription cancelled, config changed, admin action (also audited)                                                                     |
+| `debug` | Developer detail for local/verbose diagnosis                                                     | No                   | Query shapes, computed pricing steps, event payloads                                                                                                                 |
 
 ### Explicitly NOT `error`
 

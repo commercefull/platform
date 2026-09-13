@@ -3,12 +3,7 @@ jest.mock('./logger', () => ({
 }));
 
 import { parse, validate, buildSchema } from 'graphql';
-import {
-  createDepthLimitRule,
-  getGraphQLValidationRules,
-  DEFAULT_MAX_DEPTH,
-  DEFAULT_MAX_COMPLEXITY,
-} from './graphqlSecurity';
+import { createDepthLimitRule, getGraphQLValidationRules, DEFAULT_MAX_DEPTH, DEFAULT_MAX_COMPLEXITY } from './graphqlSecurity';
 
 const schema = buildSchema(`
   type Product {

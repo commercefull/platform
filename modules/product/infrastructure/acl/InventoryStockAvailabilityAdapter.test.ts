@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
-
 jest.mock('../../../inventory/infrastructure/repositories/inventoryRepo', () => ({
   __esModule: true,
   default: {
@@ -8,15 +6,16 @@ jest.mock('../../../inventory/infrastructure/repositories/inventoryRepo', () => 
   },
 }));
 
+import inventoryRepo from '../../../inventory/infrastructure/repositories/inventoryRepo';
 import { InventoryStockAvailabilityAdapter } from './InventoryStockAvailabilityAdapter';
 
 describe('InventoryStockAvailabilityAdapter', () => {
   let adapter: InventoryStockAvailabilityAdapter;
-   
-  let InventoryRepo: any;
+
+  let InventoryRepo: { checkProductAvailability: jest.Mock; getTotalStockForProduct: jest.Mock };
 
   beforeEach(() => {
-    InventoryRepo = require('../../../inventory/infrastructure/repositories/inventoryRepo').default;
+    InventoryRepo = inventoryRepo as unknown as { checkProductAvailability: jest.Mock; getTotalStockForProduct: jest.Mock };
     adapter = new InventoryStockAvailabilityAdapter();
   });
 

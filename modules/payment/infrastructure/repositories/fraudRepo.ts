@@ -495,7 +495,7 @@ export async function expireBlacklistEntries(): Promise<number> {
      WHERE "isActive" = true AND "expiresAt" < NOW()`,
     [new Date().toISOString()],
   );
-  return ((result as { rowCount?: number })?.rowCount) || 0;
+  return (result as { rowCount?: number })?.rowCount || 0;
 }
 
 // ============================================================================
@@ -522,8 +522,13 @@ function evaluateRule(rule: FraudRule, check: FraudCheck): boolean {
       return false;
 
     case 'pattern':
-      if (conditions.firstOrderHighValue && check.isFirstOrder && (check.orderAmount || 0) > ((conditions.threshold as number) || 500)) return true;
-      if (conditions.guestCheckoutHighValue && check.isGuestCheckout && (check.orderAmount || 0) > ((conditions.threshold as number) || 300))
+      if (conditions.firstOrderHighValue && check.isFirstOrder && (check.orderAmount || 0) > ((conditions.threshold as number) || 500))
+        return true;
+      if (
+        conditions.guestCheckoutHighValue &&
+        check.isGuestCheckout &&
+        (check.orderAmount || 0) > ((conditions.threshold as number) || 300)
+      )
         return true;
       return false;
 

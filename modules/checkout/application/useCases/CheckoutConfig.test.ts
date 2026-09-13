@@ -135,7 +135,7 @@ describe('ValidateCheckoutStepUseCase', () => {
   });
 
   it('should run custom field validators', async () => {
-    validationHookRegistry.registerFieldValidator('customEmailCheck', (ctx) => ({
+    validationHookRegistry.registerFieldValidator('customEmailCheck', ctx => ({
       valid: ctx.value !== 'blocked@example.com',
       message: ctx.value === 'blocked@example.com' ? 'This email is blocked' : undefined,
     }));
@@ -166,7 +166,7 @@ describe('ValidateCheckoutStepUseCase', () => {
   });
 
   it('should run step-level validation hooks', async () => {
-    validationHookRegistry.registerStepValidator('customStepCheck', (ctx) => ({
+    validationHookRegistry.registerStepValidator('customStepCheck', ctx => ({
       valid: ctx.fieldValues['email'] !== 'blocked@example.com',
       message: ctx.fieldValues['email'] === 'blocked@example.com' ? 'Email is blocked by step validator' : undefined,
     }));
@@ -196,6 +196,6 @@ describe('ValidateCheckoutStepUseCase', () => {
 
   it('should throw when step not found', async () => {
     const cmd = new ValidateCheckoutStepCommand('store_1', 'nonexistent_step', {});
-    await expect(useCase.execute(cmd)).rejects.toThrow('Step \'nonexistent_step\' not found');
+    await expect(useCase.execute(cmd)).rejects.toThrow("Step 'nonexistent_step' not found");
   });
 });

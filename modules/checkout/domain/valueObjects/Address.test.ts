@@ -3,8 +3,12 @@ import { CheckoutValidationError } from '../errors/CheckoutErrors';
 
 describe('Address', () => {
   const validProps = {
-    firstName: 'John', lastName: 'Doe', addressLine1: '123 Main St',
-    city: 'NYC', postalCode: '10001', country: 'USA',
+    firstName: 'John',
+    lastName: 'Doe',
+    addressLine1: '123 Main St',
+    city: 'NYC',
+    postalCode: '10001',
+    country: 'USA',
   };
 
   it('should create an address (happy path)', () => {

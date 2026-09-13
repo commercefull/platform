@@ -11,10 +11,14 @@ import { UpdateTrackingUseCase, UpdateTrackingCommand } from '../../application/
 
 export const fulfillmentResolvers = {
   Query: {
-    fulfillment: async (_parent: unknown, args: {
-      fulfillmentId?: string;
-      trackingNumber?: string;
-    }, context: GraphQLAuthContext) => {
+    fulfillment: async (
+      _parent: unknown,
+      args: {
+        fulfillmentId?: string;
+        trackingNumber?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new GetFulfillmentUseCase(fulfillmentRepository);
       const input: GetFulfillmentInput = {
@@ -32,14 +36,18 @@ export const fulfillmentResolvers = {
       return useCase.execute(args.input);
     },
 
-    shipOrder: async (_parent: unknown, args: {
-      fulfillmentId: string;
-      trackingNumber: string;
-      trackingUrl?: string;
-      carrierId?: string;
-      carrierName?: string;
-      shippingCost?: number;
-    }, context: GraphQLAuthContext) => {
+    shipOrder: async (
+      _parent: unknown,
+      args: {
+        fulfillmentId: string;
+        trackingNumber: string;
+        trackingUrl?: string;
+        carrierId?: string;
+        carrierName?: string;
+        shippingCost?: number;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new ShipOrderUseCase(fulfillmentRepository);
       const input: ShipOrderInput = {
@@ -60,26 +68,32 @@ export const fulfillmentResolvers = {
       return useCase.execute(input);
     },
 
-    cancelFulfillment: async (_parent: unknown, args: {
-      fulfillmentId: string;
-      reason?: string;
-    }, context: GraphQLAuthContext) => {
+    cancelFulfillment: async (
+      _parent: unknown,
+      args: {
+        fulfillmentId: string;
+        reason?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new CancelFulfillmentUseCase(fulfillmentRepository);
       const command = new CancelFulfillmentCommand(args.fulfillmentId, args.reason);
       return useCase.execute(command);
     },
 
-    updateTracking: async (_parent: unknown, args: {
-      fulfillmentId: string;
-      trackingNumber: string;
-      trackingUrl?: string;
-    }, context: GraphQLAuthContext) => {
+    updateTracking: async (
+      _parent: unknown,
+      args: {
+        fulfillmentId: string;
+        trackingNumber: string;
+        trackingUrl?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new UpdateTrackingUseCase(fulfillmentRepository);
-      const command = new UpdateTrackingCommand(
-        args.fulfillmentId, args.trackingNumber, args.trackingUrl,
-      );
+      const command = new UpdateTrackingCommand(args.fulfillmentId, args.trackingNumber, args.trackingUrl);
       return useCase.execute(command);
     },
   },

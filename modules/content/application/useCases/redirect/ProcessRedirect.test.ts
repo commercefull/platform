@@ -14,7 +14,11 @@ describe('ProcessRedirectUseCase', () => {
 
   it('should return redirect when match found', async () => {
     mockRepo.findMatchingRedirect.mockResolvedValue({
-      contentRedirectId: 'r1', sourceUrl: '/old', targetUrl: '/new', statusCode: '301', isRegex: false,
+      contentRedirectId: 'r1',
+      sourceUrl: '/old',
+      targetUrl: '/new',
+      statusCode: '301',
+      isRegex: false,
     });
 
     const result = await useCase.execute(new ProcessRedirectQuery('/old'));
@@ -38,7 +42,11 @@ describe('ProcessRedirectUseCase', () => {
 
   it('should handle regex redirects with replacement', async () => {
     mockRepo.findMatchingRedirect.mockResolvedValue({
-      contentRedirectId: 'r1', sourceUrl: '/old/(.*)', targetUrl: '/new/$1', statusCode: '301', isRegex: true,
+      contentRedirectId: 'r1',
+      sourceUrl: '/old/(.*)',
+      targetUrl: '/new/$1',
+      statusCode: '301',
+      isRegex: true,
     });
 
     const result = await useCase.execute(new ProcessRedirectQuery('/old/page'));

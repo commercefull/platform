@@ -10,13 +10,40 @@ export type PaymentMethodConfigUpdateParams = Partial<PaymentMethodConfigCreateP
 
 export type PaymentTransactionCreateParams = MakeOptional<
   Omit<PaymentTransaction, 'paymentTransactionId' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
-  'transactionId' | 'authorizationCode' | 'responseCode' | 'responseMessage' | 'errorCode' | 'errorMessage' | 'gatewayResponse' | 'customerId' | 'paymentMethodId' | 'paymentGatewayId' | 'externalTransactionId' | 'currency' | 'paymentMethodDetails' | 'refundedAmount' | 'metadata' | 'customerIp' | 'authorizedAt' | 'capturedAt'
+  | 'transactionId'
+  | 'authorizationCode'
+  | 'responseCode'
+  | 'responseMessage'
+  | 'errorCode'
+  | 'errorMessage'
+  | 'gatewayResponse'
+  | 'customerId'
+  | 'paymentMethodId'
+  | 'paymentGatewayId'
+  | 'externalTransactionId'
+  | 'currency'
+  | 'paymentMethodDetails'
+  | 'refundedAmount'
+  | 'metadata'
+  | 'customerIp'
+  | 'authorizedAt'
+  | 'capturedAt'
 >;
 export type PaymentTransactionUpdateParams = Partial<PaymentTransactionCreateParams>;
 
 export type PaymentRefundCreateParams = MakeOptional<
   Omit<PaymentRefund, 'paymentRefundId' | 'createdAt' | 'updatedAt'>,
-  'transactionId' | 'reason' | 'refundId' | 'paymentTransactionId' | 'externalRefundId' | 'currency' | 'gatewayResponse' | 'errorCode' | 'errorMessage' | 'processedAt' | 'metadata'
+  | 'transactionId'
+  | 'reason'
+  | 'refundId'
+  | 'paymentTransactionId'
+  | 'externalRefundId'
+  | 'currency'
+  | 'gatewayResponse'
+  | 'errorCode'
+  | 'errorMessage'
+  | 'processedAt'
+  | 'metadata'
 >;
 export type PaymentRefundUpdateParams = Partial<PaymentRefundCreateParams>;
 

@@ -69,7 +69,7 @@ export default function () {
           quantity: 1,
           unitPrice: 19.99,
         }),
-        jsonHeaders
+        jsonHeaders,
       );
     }
   });
@@ -90,7 +90,7 @@ export default function () {
       JSON.stringify({
         basketId: basketId,
       }),
-      jsonHeaders
+      jsonHeaders,
     );
 
     if (res.status === 200) {

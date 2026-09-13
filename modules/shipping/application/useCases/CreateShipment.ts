@@ -85,9 +85,10 @@ export class CreateShipmentUseCase {
     const trackingNumber = this.generateTrackingNumber(input.carrierCode);
     const cost = this.calculateShipmentCost(method, input.packages, input.fromAddress, input.toAddress);
 
-    const estimatedDays = typeof method.estimatedDeliveryDays === 'object' && method.estimatedDeliveryDays !== null
-      ? (method.estimatedDeliveryDays as { min?: number }).min ?? method.handlingDays ?? 3
-      : method.handlingDays ?? 3;
+    const estimatedDays =
+      typeof method.estimatedDeliveryDays === 'object' && method.estimatedDeliveryDays !== null
+        ? ((method.estimatedDeliveryDays as { min?: number }).min ?? method.handlingDays ?? 3)
+        : (method.handlingDays ?? 3);
 
     const shipment: Shipment = {
       shipmentId: generateUUID(),

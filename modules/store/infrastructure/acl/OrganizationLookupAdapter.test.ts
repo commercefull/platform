@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 jest.mock('../../../organization/infrastructure/repositories/organizationRepo', () => ({
   __esModule: true,
   default: {
@@ -11,12 +9,14 @@ jest.mock('../../../organization/infrastructure/repositories/organizationRepo', 
 import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
 import { OrganizationLookupAdapter } from './OrganizationLookupAdapter';
 
+type Organization = NonNullable<Awaited<ReturnType<typeof organizationRepo.findById>>>;
+
 describe('store/OrganizationLookupAdapter', () => {
   let adapter: OrganizationLookupAdapter;
-  let mockOrgRepo: any;
+  let mockOrgRepo: jest.Mocked<typeof organizationRepo>;
 
   beforeEach(() => {
-    mockOrgRepo = organizationRepo;
+    mockOrgRepo = organizationRepo as unknown as jest.Mocked<typeof organizationRepo>;
     jest.mocked(mockOrgRepo.findById).mockClear();
     jest.mocked(mockOrgRepo.findAll).mockClear();
     adapter = new OrganizationLookupAdapter();
@@ -32,7 +32,7 @@ describe('store/OrganizationLookupAdapter', () => {
       organizationId: 'org-1',
       name: 'Test Org',
       status: 'active',
-    });
+    } as unknown as Organization);
 
     const result = await adapter.findById('org-1');
 
@@ -55,7 +55,7 @@ describe('store/OrganizationLookupAdapter', () => {
       organizationId: 'org-1',
       name: 'Test Org',
       status: null,
-    });
+    } as unknown as Organization);
 
     const result = await adapter.findById('org-1');
 
@@ -66,7 +66,7 @@ describe('store/OrganizationLookupAdapter', () => {
     mockOrgRepo.findAll.mockResolvedValue([
       { organizationId: 'org-1', name: 'Org One', status: 'active' },
       { organizationId: 'org-2', name: 'Org Two', status: 'pending' },
-    ]);
+    ] as unknown as Organization[]);
 
     const results = await adapter.findAll();
 

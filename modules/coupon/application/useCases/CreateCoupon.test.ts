@@ -19,9 +19,7 @@ describe('CreateCouponUseCase', () => {
   });
 
   it('should create coupon (happy path)', async () => {
-    const result = await useCase.execute(new CreateCouponCommand(
-      'SAVE10', '10% Off', 'percentage', 10, 'admin-1',
-    ));
+    const result = await useCase.execute(new CreateCouponCommand('SAVE10', '10% Off', 'percentage', 10, 'admin-1'));
 
     expect(result.code).toBe('SAVE10');
     expect(mockRepo.save).toHaveBeenCalled();
@@ -30,8 +28,8 @@ describe('CreateCouponUseCase', () => {
   it('should throw CouponCodeAlreadyExistsError when code exists', async () => {
     mockRepo.findByCode.mockResolvedValue({ couponId: 'existing' });
 
-    await expect(useCase.execute(new CreateCouponCommand(
-      'SAVE10', '10% Off', 'percentage', 10, 'admin-1',
-    ))).rejects.toThrow(CouponCodeAlreadyExistsError);
+    await expect(useCase.execute(new CreateCouponCommand('SAVE10', '10% Off', 'percentage', 10, 'admin-1'))).rejects.toThrow(
+      CouponCodeAlreadyExistsError,
+    );
   });
 });

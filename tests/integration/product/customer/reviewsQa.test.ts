@@ -7,9 +7,6 @@ import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestUser, expectStatus } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID } from '../testUtils';
 
-;
-;
-
 describe('Customer: Reviews & Q&A', () => {
   let client: AxiosInstance;
   let customerToken: string;
@@ -25,14 +22,16 @@ describe('Customer: Reviews & Q&A', () => {
   describe('Submit review', () => {
     it('should reject rating below 1', async () => {
       const res = await client.post(`/customer/products/${SEEDED_PRODUCT_1_ID}/reviews`, {
-        rating: 0, reviewerName: 'Tester',
+        rating: 0,
+        reviewerName: 'Tester',
       });
       expect(res.status).toBe(400);
     });
 
     it('should reject rating above 5', async () => {
       const res = await client.post(`/customer/products/${SEEDED_PRODUCT_1_ID}/reviews`, {
-        rating: 6, reviewerName: 'Tester',
+        rating: 6,
+        reviewerName: 'Tester',
       });
       expect(res.status).toBe(400);
     });
@@ -89,10 +88,7 @@ describe('Customer: Reviews & Q&A', () => {
   describe('Vote on review', () => {
     it('should reject vote without authentication', async () => {
       if (!createdReviewId) return;
-      const res = await client.post(
-        `/customer/products/${SEEDED_PRODUCT_1_ID}/reviews/${createdReviewId}/vote`,
-        { isHelpful: true },
-      );
+      const res = await client.post(`/customer/products/${SEEDED_PRODUCT_1_ID}/reviews/${createdReviewId}/vote`, { isHelpful: true });
       expect(res.status).toBe(401);
     });
 

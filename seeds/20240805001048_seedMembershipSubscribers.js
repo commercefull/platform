@@ -29,7 +29,6 @@ exports.up = async function (knex) {
       payment_method: 'credit_card',
       transactionId: 'txn_123456789',
     });
-
   }
 };
 

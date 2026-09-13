@@ -6,7 +6,9 @@ describe('RemoveCouponUseCase', () => {
   let mockRepo: Record<string, jest.Mock>;
 
   const makeBasket = () => ({
-    basketId: 'b1', removeCoupon: jest.fn(), toJSON: jest.fn().mockReturnValue({ basketId: 'b1', couponCode: null }),
+    basketId: 'b1',
+    removeCoupon: jest.fn(),
+    toJSON: jest.fn().mockReturnValue({ basketId: 'b1', couponCode: null }),
   });
 
   beforeEach(() => {

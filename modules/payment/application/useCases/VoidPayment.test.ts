@@ -3,11 +3,7 @@
  */
 
 import { VoidPaymentUseCase } from './VoidPayment';
-import {
-  TransactionNotFoundError,
-  TransactionCannotBeVoidedError,
-  VoidFailedError,
-} from '../../domain/errors/PaymentErrors';
+import { TransactionNotFoundError, TransactionCannotBeVoidedError, VoidFailedError } from '../../domain/errors/PaymentErrors';
 
 jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
@@ -59,9 +55,7 @@ describe('VoidPaymentUseCase', () => {
     const gateway = createMockGateway(true);
     const useCase = new VoidPaymentUseCase(repo, gateway);
 
-    await expect(
-      useCase.execute({ transactionId: 'nonexistent' }),
-    ).rejects.toThrow(TransactionNotFoundError);
+    await expect(useCase.execute({ transactionId: 'nonexistent' })).rejects.toThrow(TransactionNotFoundError);
   });
 
   it('should throw TransactionCannotBeVoidedError when status is not authorized', async () => {
@@ -70,9 +64,7 @@ describe('VoidPaymentUseCase', () => {
     const gateway = createMockGateway(true);
     const useCase = new VoidPaymentUseCase(repo, gateway);
 
-    await expect(
-      useCase.execute({ transactionId: 'tx-1' }),
-    ).rejects.toThrow(TransactionCannotBeVoidedError);
+    await expect(useCase.execute({ transactionId: 'tx-1' })).rejects.toThrow(TransactionCannotBeVoidedError);
   });
 
   it('should throw VoidFailedError when gateway returns failure', async () => {
@@ -81,9 +73,7 @@ describe('VoidPaymentUseCase', () => {
     const gateway = createMockGateway(false, undefined, 'Gateway error');
     const useCase = new VoidPaymentUseCase(repo, gateway);
 
-    await expect(
-      useCase.execute({ transactionId: 'tx-1' }),
-    ).rejects.toThrow(VoidFailedError);
+    await expect(useCase.execute({ transactionId: 'tx-1' })).rejects.toThrow(VoidFailedError);
 
     expect(repo.updateTransaction).toHaveBeenCalled();
   });

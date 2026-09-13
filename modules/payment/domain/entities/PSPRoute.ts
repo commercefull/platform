@@ -81,15 +81,33 @@ export class PSPRoute {
     return new PSPRoute(props);
   }
 
-  get routeId(): string { return this.props.routeId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get provider(): string { return this.props.provider; }
-  get priority(): number { return this.props.priority; }
-  get isActive(): boolean { return this.props.isActive; }
-  get config(): PSPRouteConfig['config'] { return this.props.config; }
-  get capabilities(): PSPRouteConfig['capabilities'] { return this.props.capabilities; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get routeId(): string {
+    return this.props.routeId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get provider(): string {
+    return this.props.provider;
+  }
+  get priority(): number {
+    return this.props.priority;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get config(): PSPRouteConfig['config'] {
+    return this.props.config;
+  }
+  get capabilities(): PSPRouteConfig['capabilities'] {
+    return this.props.capabilities;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   activate(): void {
     this.props.isActive = true;

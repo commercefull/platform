@@ -4,15 +4,24 @@
  * Evaluates active promotions against a basket/checkout context.
  * Supports:
  * - All 10 rule condition types (cartTotal, itemQuantity, productCategory, customerGroup, firstOrder, dateRange, timeOfDay, dayOfWeek, shippingMethod, paymentMethod)
- * - All 4 action types (discountByPercentage, discountByAmount, discountShipping, freeItem)
- * - Stackable vs exclusive promotions with priority ordering
+ * - All 6 action types (discountByPercentage, discountByAmount, discountShipping, freeItem, discountByTier, freeGift)
+ * - Stackable vs exclusive promotions with priority ordering via `libs/rules/stacking`
  * - BOGO (buy_x_get_y), free_shipping, bundle promotion types
  * - Line-item-level discounts for product/category-scoped promotions
  */
 
-import promotionRuleRepository, { type PromotionScope, type RuleCondition, type ActionType } from '../../infrastructure/repositories/PromotionRuleRepository';
+import promotionRuleRepository, {
+  type PromotionScope,
+  type RuleCondition,
+  type ActionType,
+} from '../../infrastructure/repositories/PromotionRuleRepository';
 import { logger } from '../../../../libs/logger';
-import type { Promotion as DbPromotion, PromotionRule as DbPromotionRule, PromotionAction as DbPromotionAction } from '../../../../libs/db/types';
+import type {
+  Promotion as DbPromotion,
+  PromotionRule as DbPromotionRule,
+  PromotionAction as DbPromotionAction,
+} from '../../../../libs/db/types';
+import { resolveStackable, sortByPriority, type Stackability } from '../../../../libs/rules/stacking';
 
 // ============================================================================
 // Context
@@ -103,7 +112,9 @@ export class PromotionEvaluationService {
       // Also check for coupon-code-based promotions
       let couponPromotions: typeof promotions = [];
       if (context.couponCode) {
-        couponPromotions = promotions.filter(p => (p as unknown as { code?: string }).code?.toUpperCase() === context.couponCode?.toUpperCase());
+        couponPromotions = promotions.filter(
+          p => (p as unknown as { code?: string }).code?.toUpperCase() === context.couponCode?.toUpperCase(),
+        );
       }
 
       // Auto-applied promotions (no code required)
@@ -112,15 +123,10 @@ export class PromotionEvaluationService {
       // Combine: coupon promotions first, then auto-applied
       const candidates = [...couponPromotions, ...autoPromotions];
 
-      // Sort by priority DESC (higher priority first)
-      candidates.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-
-      let exclusiveApplied = false;
+      // Phase 1: filter by validity and rule evaluation
+      const matched: Array<{ promotion: DbPromotion; rules: DbPromotionRule[]; actions: DbPromotionAction[] }> = [];
 
       for (const promotion of candidates) {
-        // Skip if an exclusive promotion was already applied
-        if (exclusiveApplied) break;
-
         // Check basic validity
         if (!promotion.isActive) continue;
         if (promotion.status !== 'active') continue;
@@ -135,7 +141,29 @@ export class PromotionEvaluationService {
         // Get actions
         const actions = await promotionRuleRepository.promotions.findActionsByPromotionId(promotion.promotionId);
 
-        // Apply actions
+        matched.push({ promotion, rules, actions });
+      }
+
+      if (matched.length === 0) return result;
+
+      // Phase 2: resolve stacking — determine which matched promotions co-apply.
+      // Decorate with stackability (fall back to isExclusive for backward compat).
+      const stackable = sortByPriority(
+        matched.map(m => ({
+          ...m,
+          stackability:
+            (m.promotion as unknown as { stackability?: Stackability }).stackability ??
+            (m.promotion.isExclusive ? 'exclusive' : 'stackable'),
+          priority: m.promotion.priority ?? 0,
+        })),
+      );
+      const resolved = resolveStackable(stackable);
+
+      // Phase 3: apply actions for resolved promotions
+      for (const entry of resolved) {
+        const promotion = entry.promotion;
+        const actions = entry.actions;
+
         const promoResult = this.applyActions(promotion, actions, context);
 
         if (promoResult.discountAmount > 0 || promoResult.freeShipping || promoResult.freeItems.length > 0) {
@@ -150,11 +178,6 @@ export class PromotionEvaluationService {
             type: promotion.scope,
             discountAmount: promoResult.discountAmount,
           });
-
-          // Check exclusivity
-          if (promotion.isExclusive) {
-            exclusiveApplied = true;
-          }
 
           // Check max discount cap
           if (promotion.maxDiscountAmount && result.totalDiscountAmount > Number(promotion.maxDiscountAmount)) {
@@ -177,10 +200,7 @@ export class PromotionEvaluationService {
   /**
    * Evaluate all rules for a promotion. All rules must pass (AND logic).
    */
-  private evaluateRules(
-    rules: DbPromotionRule[],
-    context: PromotionEvaluationContext,
-  ): boolean {
+  private evaluateRules(rules: DbPromotionRule[], context: PromotionEvaluationContext): boolean {
     const activeRules = rules.filter(r => r.condition && r.operator);
     if (activeRules.length === 0) return true; // No rules = always applicable
 
@@ -344,6 +364,71 @@ export class PromotionEvaluationService {
           freeItems.push({
             productId,
             quantity,
+            promotionId: promotion.promotionId,
+            promotionName: promotion.name,
+          });
+          break;
+        }
+
+        case 'discountByTier': {
+          const tiers = action.value as Array<{ min: number; max?: number; percentage?: number; amount?: number }>;
+          if (!Array.isArray(tiers) || tiers.length === 0) break;
+
+          // Determine the metric: total quantity by default, or cart total if
+          // the first tier's `min` looks like a monetary threshold (> 100 heuristic
+          // is avoided — instead we check which tier the subtotal falls into).
+          // Tiers are evaluated by quantity first; if no quantity tier matches,
+          // fall back to subtotal-based tiering.
+          const totalQty = context.items.reduce((sum, item) => sum + item.quantity, 0);
+
+          // Try quantity-based tiering first
+          let tier = tiers.find(t => totalQty >= t.min && (t.max === undefined || totalQty <= t.max));
+
+          // Fall back to subtotal-based tiering if no quantity tier matched
+          if (!tier) {
+            tier = tiers.find(t => context.subtotal >= t.min && (t.max === undefined || context.subtotal <= t.max));
+          }
+
+          if (!tier) break;
+
+          const targetIds = action.targetIds as string[] | null;
+          if (tier.percentage !== undefined) {
+            if (targetIds && targetIds.length > 0) {
+              for (const item of context.items) {
+                if (targetIds.includes(item.productId)) {
+                  const itemDiscount = Math.round(item.unitPrice * item.quantity * (tier.percentage! / 100) * 100) / 100;
+                  lineItemDiscounts.push({
+                    productId: item.productId,
+                    discountAmount: itemDiscount,
+                    promotionId: promotion.promotionId,
+                    promotionName: promotion.name,
+                  });
+                  discountAmount += itemDiscount;
+                }
+              }
+            } else {
+              discountAmount += Math.round(context.subtotal * (tier.percentage / 100) * 100) / 100;
+            }
+          } else if (tier.amount !== undefined) {
+            discountAmount += Math.min(tier.amount, context.subtotal);
+          }
+          break;
+        }
+
+        case 'freeGift': {
+          // freeGift is distinct from freeItem: it supports eligibility conditions
+          // on the gift itself (e.g. "free gift only if cart has > 5 items").
+          const giftConfig = action.value as { productId: string; quantity?: number; minCartTotal?: number; minQuantity?: number };
+          if (!giftConfig || !giftConfig.productId) break;
+
+          // Check gift eligibility conditions
+          const totalQty = context.items.reduce((sum, item) => sum + item.quantity, 0);
+          if (giftConfig.minCartTotal !== undefined && context.subtotal < giftConfig.minCartTotal) break;
+          if (giftConfig.minQuantity !== undefined && totalQty < giftConfig.minQuantity) break;
+
+          freeItems.push({
+            productId: giftConfig.productId,
+            quantity: giftConfig.quantity ?? 1,
             promotionId: promotion.promotionId,
             promotionName: promotion.name,
           });

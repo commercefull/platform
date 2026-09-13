@@ -49,7 +49,7 @@ export type RuleCondition =
 /**
  * Action types
  */
-export type ActionType = 'discountByPercentage' | 'discountByAmount' | 'discountShipping' | 'freeItem';
+export type ActionType = 'discountByPercentage' | 'discountByAmount' | 'discountShipping' | 'freeItem' | 'discountByTier' | 'freeGift';
 
 /**
  * Input for creating a new promotion
@@ -64,6 +64,7 @@ export interface CreatePromotionInput {
   endDate?: Date;
   isActive?: boolean;
   isExclusive?: boolean;
+  stackability?: 'none' | 'stackable' | 'exclusive';
   maxUsage?: number;
   maxUsagePerCustomer?: number;
   minOrderAmount?: number;
@@ -229,16 +230,16 @@ export class PromotionRepo {
   async create(input: CreatePromotionInput): Promise<Promotion> {
     const now = new Date();
 
-    return withTransaction(async (tx) => {
+    return withTransaction(async tx => {
       const promotion = await tx.queryOne<Promotion>(
         `INSERT INTO "${PROMOTION_TABLE}" (
           "name", "description", "status", "scope", "priority",
-          "startDate", "endDate", "isActive", "isExclusive", "maxUsage",
+          "startDate", "endDate", "isActive", "isExclusive", "stackability", "maxUsage",
           "usageCount", "maxUsagePerCustomer", "minOrderAmount", "maxDiscountAmount",
           "organizationId", "isGlobal", "eligibleCustomerGroups", "excludedCustomerGroups",
           "createdAt", "updatedAt"
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
         ) RETURNING *`,
         [
           input.name,
@@ -250,6 +251,7 @@ export class PromotionRepo {
           input.endDate || null,
           input.isActive !== false,
           input.isExclusive || false,
+          input.stackability || (input.isExclusive ? 'exclusive' : 'stackable'),
           input.maxUsage || null,
           0, // Initial usage count
           input.maxUsagePerCustomer || null,
@@ -275,7 +277,16 @@ export class PromotionRepo {
             `INSERT INTO "${PROMOTION_RULE_TABLE}" (
               "promotionId", "name", "condition", "operator", "value", "isActive", "createdAt", "updatedAt"
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-            [promotion.promotionId, rule.name || null, rule.condition, rule.operator, JSON.stringify(rule.value), rule.isActive !== false, now, now],
+            [
+              promotion.promotionId,
+              rule.name || null,
+              rule.condition,
+              rule.operator,
+              JSON.stringify(rule.value),
+              rule.isActive !== false,
+              now,
+              now,
+            ],
           );
         }
       }
@@ -323,6 +334,7 @@ export class PromotionRepo {
       'endDate',
       'isActive',
       'isExclusive',
+      'stackability',
       'maxUsage',
       'maxUsagePerCustomer',
       'minOrderAmount',
@@ -373,7 +385,7 @@ export class PromotionRepo {
    * Delete a promotion
    */
   async delete(id: string): Promise<boolean> {
-    return withTransaction(async (tx) => {
+    return withTransaction(async tx => {
       await tx.query(`DELETE FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionId" = $1`, [id]);
       await tx.query(`DELETE FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionId" = $1`, [id]);
       await tx.query(`DELETE FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1`, [id]);
@@ -490,7 +502,7 @@ export class PromotionRepo {
   ): Promise<PromotionUsage> {
     const now = new Date();
 
-    return withTransaction(async (tx) => {
+    return withTransaction(async tx => {
       const usage = await tx.queryOne<PromotionUsage>(
         `INSERT INTO "${PROMOTION_USAGE_TABLE}" (
           "promotionId", "orderId", "customerId", "discountAmount", "currencyCode", "usedAt", "createdAt", "updatedAt"

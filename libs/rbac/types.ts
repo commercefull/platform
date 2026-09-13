@@ -46,19 +46,7 @@ export type Resource =
 
 /** Action on a resource. */
 export type Action =
-  | '*'
-  | 'view'
-  | 'create'
-  | 'update'
-  | 'delete'
-  | 'manage'
-  | 'export'
-  | 'import'
-  | 'approve'
-  | 'refund'
-  | 'adjust'
-  | 'publish'
-  | string;
+  '*' | 'view' | 'create' | 'update' | 'delete' | 'manage' | 'export' | 'import' | 'approve' | 'refund' | 'adjust' | 'publish' | string;
 
 /**
  * A single permission rule within a role policy.

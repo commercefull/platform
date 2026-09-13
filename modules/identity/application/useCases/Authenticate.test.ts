@@ -81,9 +81,7 @@ describe('LoginUseCase', () => {
     repo.validateCredentials = jest.fn().mockResolvedValue(null);
     const useCase = new LoginUseCase(repo);
 
-    await expect(
-      useCase.execute(new LoginCommand('wrong@example.com', 'wrongpass')),
-    ).rejects.toThrow(InvalidCredentialsError);
+    await expect(useCase.execute(new LoginCommand('wrong@example.com', 'wrongpass'))).rejects.toThrow(InvalidCredentialsError);
   });
 
   it('should throw AccountLockedError when user is locked', async () => {
@@ -91,9 +89,7 @@ describe('LoginUseCase', () => {
     const repo = createMockUserRepo(user);
     const useCase = new LoginUseCase(repo);
 
-    await expect(
-      useCase.execute(new LoginCommand('test@example.com', 'password')),
-    ).rejects.toThrow(AccountLockedError);
+    await expect(useCase.execute(new LoginCommand('test@example.com', 'password'))).rejects.toThrow(AccountLockedError);
   });
 
   it('should throw AccountNotActiveError when user is not active', async () => {
@@ -106,9 +102,7 @@ describe('LoginUseCase', () => {
     const repo = createMockUserRepo(user);
     const useCase = new LoginUseCase(repo);
 
-    await expect(
-      useCase.execute(new LoginCommand('inactive@example.com', 'password')),
-    ).rejects.toThrow(AccountNotActiveError);
+    await expect(useCase.execute(new LoginCommand('inactive@example.com', 'password'))).rejects.toThrow(AccountNotActiveError);
   });
 });
 
@@ -133,9 +127,7 @@ describe('RefreshTokenUseCase', () => {
     repo.findByRefreshToken = jest.fn().mockResolvedValue(null);
     const useCase = new RefreshTokenUseCase(repo);
 
-    await expect(
-      useCase.execute(new RefreshTokenCommand('invalid-token')),
-    ).rejects.toThrow(InvalidRefreshTokenError);
+    await expect(useCase.execute(new RefreshTokenCommand('invalid-token'))).rejects.toThrow(InvalidRefreshTokenError);
   });
 
   it('should throw InvalidRefreshTokenError when user cannot login', async () => {
@@ -148,9 +140,7 @@ describe('RefreshTokenUseCase', () => {
     const repo = createMockUserRepo(user);
     const useCase = new RefreshTokenUseCase(repo);
 
-    await expect(
-      useCase.execute(new RefreshTokenCommand('some-token')),
-    ).rejects.toThrow(InvalidRefreshTokenError);
+    await expect(useCase.execute(new RefreshTokenCommand('some-token'))).rejects.toThrow(InvalidRefreshTokenError);
   });
 });
 

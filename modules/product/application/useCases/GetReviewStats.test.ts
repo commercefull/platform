@@ -19,7 +19,7 @@ describe('GetReviewStatsUseCase', () => {
   });
 
   it('should get review stats (happy path)', async () => {
-    const result = await useCase.execute('p1') as unknown as Record<string, unknown>;
+    const result = (await useCase.execute('p1')) as unknown as Record<string, unknown>;
 
     expect(result.totalReviews).toBe(10);
     expect(mockRepo.getProductStatistics).toHaveBeenCalledWith('p1');

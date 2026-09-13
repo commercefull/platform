@@ -2,7 +2,7 @@ jest.mock('../../domain/events/FulfillmentEvents', () => ({
   emitFulfillmentPickingStarted: jest.fn(),
 }));
 
-import { ProcessPickingUseCase} from './ProcessPicking';
+import { ProcessPickingUseCase } from './ProcessPicking';
 import { FulfillmentNotFoundError, FulfillmentItemNotFoundError, FulfillmentValidationError } from '../../domain/errors/FulfillmentErrors';
 import { emitFulfillmentPickingStarted } from '../../domain/events/FulfillmentEvents';
 
@@ -15,12 +15,13 @@ describe('ProcessPickingUseCase', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFulfillment = {
-      fulfillmentId: 'f1', orderId: 'o1', status: 'pending',
-      startPicking: jest.fn(), completePicking: jest.fn(),
+      fulfillmentId: 'f1',
+      orderId: 'o1',
+      status: 'pending',
+      startPicking: jest.fn(),
+      completePicking: jest.fn(),
     };
-    mockItems = [
-      { fulfillmentItemId: 'i1', isPicked: false, pick: jest.fn() },
-    ];
+    mockItems = [{ fulfillmentItemId: 'i1', isPicked: false, pick: jest.fn() }];
     mockRepo = {
       findById: jest.fn().mockResolvedValue(mockFulfillment),
       findItemsByFulfillmentId: jest.fn().mockResolvedValue(mockItems),
@@ -32,7 +33,8 @@ describe('ProcessPickingUseCase', () => {
 
   it('should process picking (happy path)', async () => {
     const result = await useCase.execute({
-      fulfillmentId: 'f1', items: [{ fulfillmentItemId: 'i1', quantityPicked: 5 }],
+      fulfillmentId: 'f1',
+      items: [{ fulfillmentItemId: 'i1', quantityPicked: 5 }],
     });
 
     expect(result.fulfillment.fulfillmentId).toBe('f1');
@@ -53,8 +55,11 @@ describe('ProcessPickingUseCase', () => {
   });
 
   it('should throw FulfillmentItemNotFoundError when item not found', async () => {
-    await expect(useCase.execute({
-      fulfillmentId: 'f1', items: [{ fulfillmentItemId: 'missing', quantityPicked: 1 }],
-    })).rejects.toThrow(FulfillmentItemNotFoundError);
+    await expect(
+      useCase.execute({
+        fulfillmentId: 'f1',
+        items: [{ fulfillmentItemId: 'missing', quantityPicked: 1 }],
+      }),
+    ).rejects.toThrow(FulfillmentItemNotFoundError);
   });
 });

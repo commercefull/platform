@@ -350,7 +350,7 @@ export class CouponRepo {
   ): Promise<PromotionCouponUsage> {
     const now = new Date();
 
-    return withTransaction(async (tx) => {
+    return withTransaction(async tx => {
       // Insert usage record
       const usage = await tx.queryOne<PromotionCouponUsage>(
         `INSERT INTO "${COUPON_USAGE_TABLE}" (

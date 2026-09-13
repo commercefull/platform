@@ -13,7 +13,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { ReceiveStoreDispatchUseCase} from './ReceiveStoreDispatch';
+import { ReceiveStoreDispatchUseCase } from './ReceiveStoreDispatch';
 import { StoreDispatchNotFoundError, InventoryLocationNotFoundError } from '../../domain/errors/InventoryErrors';
 
 describe('ReceiveStoreDispatchUseCase', () => {
@@ -24,9 +24,11 @@ describe('ReceiveStoreDispatchUseCase', () => {
   beforeEach(() => {
     mockDispatchRepo = {
       findById: jest.fn().mockResolvedValue({
-        dispatchId: 'd1', toStoreId: 's2',
+        dispatchId: 'd1',
+        toStoreId: 's2',
         items: [{ productId: 'p1', variantId: undefined, sku: 'SKU1', receivedQuantity: 0 }],
-        markReceived: jest.fn(), toJSON: () => ({ dispatchId: 'd1', status: 'received' }),
+        markReceived: jest.fn(),
+        toJSON: () => ({ dispatchId: 'd1', status: 'received' }),
       }),
       save: jest.fn().mockImplementation(async (d: unknown) => d),
     };
@@ -41,7 +43,9 @@ describe('ReceiveStoreDispatchUseCase', () => {
 
   it('should receive dispatch (happy path)', async () => {
     const result = await useCase.execute({
-      dispatchId: 'd1', receivedBy: 'user1', items: [{ dispatchItemId: 'di1', receivedQuantity: 10 }],
+      dispatchId: 'd1',
+      receivedBy: 'user1',
+      items: [{ dispatchItemId: 'di1', receivedQuantity: 10 }],
     });
 
     expect(result.dispatchId).toBe('d1');

@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { UpgradeMembershipUseCase} from './UpgradeMembership';
+import { UpgradeMembershipUseCase } from './UpgradeMembership';
 import { MembershipNotFoundError, MembershipPlanNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
 describe('UpgradeMembershipUseCase', () => {
@@ -12,7 +12,13 @@ describe('UpgradeMembershipUseCase', () => {
 
   beforeEach(() => {
     mockRepo = {
-      getMembershipById: jest.fn().mockResolvedValue({ status: 'active', customerId: 'c1', tierId: 't1', currentPeriodEnd: new Date(Date.now() + 15 * 86400000).toISOString(), billingPeriod: 'monthly' }),
+      getMembershipById: jest.fn().mockResolvedValue({
+        status: 'active',
+        customerId: 'c1',
+        tierId: 't1',
+        currentPeriodEnd: new Date(Date.now() + 15 * 86400000).toISOString(),
+        billingPeriod: 'monthly',
+      }),
       getTierById: jest.fn().mockImplementation(async (id: string) => {
         if (id === 't1') return { name: 'Silver', price: 25, isActive: true };
         if (id === 't2') return { name: 'Gold', price: 50, isActive: true };

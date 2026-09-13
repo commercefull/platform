@@ -33,7 +33,8 @@ describe('ApplyPromotionUseCase', () => {
 
   it('should return invalid when promotion validation fails', async () => {
     mockPromotionRepository.validateCode.mockResolvedValueOnce({
-      valid: false, message: 'Expired',
+      valid: false,
+      message: 'Expired',
     });
 
     const result = await useCase.execute(new ApplyPromotionCommand('EXPIRED', 100));

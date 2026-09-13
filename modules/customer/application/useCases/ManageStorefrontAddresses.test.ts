@@ -38,7 +38,15 @@ describe('ManageStorefrontAddressesUseCase', () => {
   });
 
   it('should create address', async () => {
-    const result = await useCase.create({ customerId: 'c1', firstName: 'John', lastName: 'Doe', addressLine1: '123 Main', city: 'NYC', postalCode: '10001', country: 'US' });
+    const result = await useCase.create({
+      customerId: 'c1',
+      firstName: 'John',
+      lastName: 'Doe',
+      addressLine1: '123 Main',
+      city: 'NYC',
+      postalCode: '10001',
+      country: 'US',
+    });
     expect(result).toEqual({ addressId: 'a2' });
   });
 

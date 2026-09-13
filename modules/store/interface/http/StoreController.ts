@@ -123,7 +123,7 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
       res.status(statusCode).json({
         success: false,
         message: 'Failed to get store',
@@ -156,7 +156,7 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
       res.status(statusCode).json({
         success: false,
         message: 'Failed to get store',
@@ -183,7 +183,7 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
       res.status(statusCode).json({
         success: false,
         message: 'Failed to get stores',
@@ -210,7 +210,7 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
       res.status(statusCode).json({
         success: false,
         message: 'Failed to get active stores',
@@ -235,8 +235,8 @@ export class StoreController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? (error as Error).message : "Unknown error";
-      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
+      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
       res.status(statusCode).json({
         success: false,
         message: 'Failed to update store',
@@ -266,7 +266,7 @@ export class StoreController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
       res.status(statusCode).json({
         success: false,
         message: 'Failed to delete store',
@@ -295,8 +295,8 @@ export class StoreController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? (error as Error).message : "Unknown error";
-      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
+      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
       res.status(statusCode).json({
         success: false,
         message: 'Failed to configure pickup',
@@ -331,8 +331,8 @@ export class StoreController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? (error as Error).message : "Unknown error";
-      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
+      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
       res.status(statusCode).json({
         success: false,
         message: 'Failed to set local delivery zone',
@@ -365,8 +365,8 @@ export class StoreController {
     } catch (error) {
       logger.error('Error:', error);
 
-      const errorMessage = error instanceof Error ? (error as Error).message : "Unknown error";
-      const statusCode = errorMessage.toLowerCase().includes("not found") ? 404 : 400;
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
+      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
       res.status(statusCode).json({
         success: false,
         message: 'Failed to create store hierarchy',

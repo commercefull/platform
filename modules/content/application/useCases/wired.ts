@@ -21,7 +21,8 @@ export const manageContentUseCase = new (class {
   createBlock = (params: Parameters<typeof contentRepo.createBlock>[0]) => contentRepo.createBlock(params);
   updateBlock = (id: string, params: Parameters<typeof contentRepo.updateBlock>[1]) => contentRepo.updateBlock(id, params);
   deleteBlock = (id: string) => contentRepo.deleteBlock(id);
-  reorderBlocks = (pageId: string, blockOrders: Parameters<typeof contentRepo.reorderBlocks>[1]) => contentRepo.reorderBlocks(pageId, blockOrders);
+  reorderBlocks = (pageId: string, blockOrders: Parameters<typeof contentRepo.reorderBlocks>[1]) =>
+    contentRepo.reorderBlocks(pageId, blockOrders);
   findAllContentTypes = (...args: Parameters<typeof contentRepo.findAllContentTypes>) => contentRepo.findAllContentTypes(...args);
   findContentTypeById = (id: string) => contentRepo.findContentTypeById(id);
   findAllTemplates = (...args: Parameters<typeof contentRepo.findAllTemplates>) => contentRepo.findAllTemplates(...args);

@@ -85,15 +85,18 @@ export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) 
       taxAmount: taxResult.taxAmount,
       total: taxResult.total,
       rate: taxResult.rate,
-      taxBreakdown: taxResult.taxAmount > 0
-        ? [{
-            rateId: 'default',
-            rateName: 'Tax',
-            rateValue: taxResult.rate,
-            taxableAmount: subtotal,
-            taxAmount: taxResult.taxAmount,
-          }]
-        : [],
+      taxBreakdown:
+        taxResult.taxAmount > 0
+          ? [
+              {
+                rateId: 'default',
+                rateName: 'Tax',
+                rateValue: taxResult.rate,
+                taxableAmount: subtotal,
+                taxAmount: taxResult.taxAmount,
+              },
+            ]
+          : [],
     });
     return;
   }
@@ -141,7 +144,6 @@ export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) 
   );
 
   res.json(taxResult);
-  
 };
 
 /**
@@ -270,7 +272,6 @@ export const getTaxCategoryByCode = async (req: TypedRequest, res: Response) => 
   }
 
   res.json(taxCategory);
-  
 };
 
 /**
@@ -283,7 +284,6 @@ export const getTaxRates = async (req: TypedRequest, res: Response) => {
   const taxRates = await taxQueryRepository.query.findAllTaxRates(true, country as string, region as string);
 
   res.json(taxRates);
-  
 };
 
 /**
@@ -305,7 +305,6 @@ export const checkCustomerTaxExemption = async (req: TypedRequest, res: Response
     hasExemption: exemptions.length > 0,
     exemptions,
   });
-  
 };
 
 /**
@@ -329,7 +328,6 @@ export const findTaxZoneForAddress = async (req: TypedRequest, res: Response) =>
   }
 
   res.json(taxZone);
-  
 };
 
 /**
@@ -353,5 +351,4 @@ export const getCustomerTaxSettings = async (req: TypedRequest, res: Response) =
       showTaxSeparately: true,
     },
   });
-  
 };

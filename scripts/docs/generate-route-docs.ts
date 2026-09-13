@@ -58,7 +58,12 @@ function parseRouteMounts(): Map<string, string> {
     if (arrayContent) {
       const names = arrayContent
         .split(',')
-        .map(s => s.trim().replace(/^.*\{(\w+)\}.*$/, '$1').replace(/^(\w+).*$/, '$1'))
+        .map(s =>
+          s
+            .trim()
+            .replace(/^.*\{(\w+)\}.*$/, '$1')
+            .replace(/^(\w+).*$/, '$1'),
+        )
         .filter(s => s.length > 0);
 
       for (const name of names) {
@@ -121,7 +126,11 @@ function findRouterFiles(): string[] {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         scanDir(fullPath);
-      } else if (entry.isFile() && (entry.name.endsWith('.ts') && (fullPath.includes('/routers/') || fullPath.includes('/interface/http/')))) {
+      } else if (
+        entry.isFile() &&
+        entry.name.endsWith('.ts') &&
+        (fullPath.includes('/routers/') || fullPath.includes('/interface/http/'))
+      ) {
         if (entry.name.toLowerCase().includes('router')) {
           results.push(fullPath);
         }
@@ -159,7 +168,11 @@ function getPrecedingComment(sourceFile: SourceFile, callExpr: CallExpression): 
         return comment.trim();
       }
       if (Array.isArray(comment)) {
-        return comment.filter(c => c != null).map(c => c.getText()).join(' ').trim();
+        return comment
+          .filter(c => c != null)
+          .map(c => c.getText())
+          .join(' ')
+          .trim();
       }
     }
   }
@@ -223,7 +236,7 @@ function extractRoutes(sourceFile: SourceFile, filePath: string): RouteInfo[] {
     const propAccess = expr.asKindOrThrow(SyntaxKind.PropertyAccessExpression);
     const methodName = propAccess.getName();
 
-    if (!HTTP_METHODS.includes(methodName as typeof HTTP_METHODS[number])) continue;
+    if (!HTTP_METHODS.includes(methodName as (typeof HTTP_METHODS)[number])) continue;
 
     const args = callExpr.getArguments();
     if (args.length < 2) continue;

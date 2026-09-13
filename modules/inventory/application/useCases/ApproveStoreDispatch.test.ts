@@ -7,7 +7,9 @@ import { ApproveStoreDispatchUseCase } from './ApproveStoreDispatch';
 import { StoreDispatchNotFoundError } from '../../domain/errors/InventoryErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ApproveStoreDispatchUseCase', () => {
   let useCase: ApproveStoreDispatchUseCase;
@@ -17,8 +19,11 @@ describe('ApproveStoreDispatchUseCase', () => {
   beforeEach(() => {
     mockDispatchRepo = {
       findById: jest.fn().mockResolvedValue({
-        dispatchId: 'd1', fromStoreId: 's1', items: [{ productId: 'p1', variantId: undefined, requestedQuantity: 10 }],
-        approve: jest.fn(), toJSON: () => ({ dispatchId: 'd1', status: 'approved' }),
+        dispatchId: 'd1',
+        fromStoreId: 's1',
+        items: [{ productId: 'p1', variantId: undefined, requestedQuantity: 10 }],
+        approve: jest.fn(),
+        toJSON: () => ({ dispatchId: 'd1', status: 'approved' }),
       }),
       save: jest.fn().mockImplementation(async (d: unknown) => d),
     };

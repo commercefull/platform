@@ -202,7 +202,11 @@ export class IdentityRepository implements IStoreUserRepository {
   // Admin User Management (from identityAdminUserManagementRepo)
   // ==========================================================================
 
-  async listManagedAdminUsers(filters: { status?: string; limit?: number; offset?: number }): Promise<{ users: AdminUserRecord[]; total: number }> {
+  async listManagedAdminUsers(filters: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ users: AdminUserRecord[]; total: number }> {
     const limit = filters.limit || 20;
     const offset = filters.offset || 0;
     let whereClause = `WHERE "userType" = 'admin'`;
@@ -285,7 +289,10 @@ export class IdentityRepository implements IStoreUserRepository {
     return userId;
   }
 
-  async updateManagedAdminUser(userId: string, updates: { firstName?: string; lastName?: string; status?: string; roleId?: string }): Promise<void> {
+  async updateManagedAdminUser(
+    userId: string,
+    updates: { firstName?: string; lastName?: string; status?: string; roleId?: string },
+  ): Promise<void> {
     const now = new Date();
 
     await query(
@@ -427,17 +434,18 @@ export class IdentityRepository implements IStoreUserRepository {
   }
 
   async saveStoreUser(assignment: UserStoreAssignment): Promise<UserStoreAssignment> {
-    const existing = await queryOne<{ userStoreId: string }>(`SELECT "userStoreId" FROM "${this.storeUserTable}" WHERE "userStoreId" = $1`, [
-      assignment.userStoreId,
-    ]);
+    const existing = await queryOne<{ userStoreId: string }>(
+      `SELECT "userStoreId" FROM "${this.storeUserTable}" WHERE "userStoreId" = $1`,
+      [assignment.userStoreId],
+    );
 
     const payload = assignment.toJSON();
 
     if (payload.isPrimary) {
-      await query(`UPDATE "${this.storeUserTable}" SET "isPrimary" = false, "updatedAt" = NOW() WHERE "userId" = $1 AND "userStoreId" <> $2`, [
-        payload.userId,
-        payload.userStoreId,
-      ]);
+      await query(
+        `UPDATE "${this.storeUserTable}" SET "isPrimary" = false, "updatedAt" = NOW() WHERE "userId" = $1 AND "userStoreId" <> $2`,
+        [payload.userId, payload.userStoreId],
+      );
     }
 
     if (existing) {

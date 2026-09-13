@@ -6,10 +6,13 @@
  * PaymentAuthorizationResult vocabulary.
  */
 
-import { PaymentAuthorizationPort, PaymentAuthorizationRequest, PaymentAuthorizationResult } from '../../application/ports/PaymentAuthorizationPort';
+import {
+  PaymentAuthorizationPort,
+  PaymentAuthorizationRequest,
+  PaymentAuthorizationResult,
+} from '../../application/ports/PaymentAuthorizationPort';
 import { InitiatePaymentUseCase, InitiatePaymentCommand } from '../../../payment/application/useCases/InitiatePayment';
 import { PaymentRepository } from '../../../payment/domain/repositories/PaymentRepository';
-
 
 export class PaymentPaymentAuthorizationAdapter implements PaymentAuthorizationPort {
   private readonly initiatePaymentUseCase: InitiatePaymentUseCase;

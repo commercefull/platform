@@ -95,8 +95,12 @@ export class CurrencyPriceRuleRepo {
     };
 
     // Update the rule - remove type/ruleType to avoid column issues
-     
-    const { type: _type, ruleType: _ruleType, ...updateData } = data as CurrencyPriceRuleUpdateProps & { type?: unknown; ruleType?: unknown };
+
+    const {
+      type: _type,
+      ruleType: _ruleType,
+      ...updateData
+    } = data as CurrencyPriceRuleUpdateProps & { type?: unknown; ruleType?: unknown };
     const updatedRule = await pricingRuleRepo.update(id, {
       ...(updateData as PricingRuleUpdateProps),
       metadata,

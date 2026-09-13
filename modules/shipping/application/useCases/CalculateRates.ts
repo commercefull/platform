@@ -94,7 +94,7 @@ export class CalculateRatesUseCase {
       }
     }
 
-    const zoneIds = zones.map((z) => z.shippingZoneId);
+    const zoneIds = zones.map(z => z.shippingZoneId);
 
     // Get shipping methods for zones
     const methods = await this.shippingRepository.findMethodsForZones(zoneIds, {

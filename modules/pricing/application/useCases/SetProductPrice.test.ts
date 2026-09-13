@@ -1,4 +1,4 @@
-import { SetProductPriceUseCase} from './SetProductPrice';
+import { SetProductPriceUseCase } from './SetProductPrice';
 import { PriceMustBePositiveError, InvalidPriceError, PricingValidationError } from '../../domain/errors/PricingErrors';
 
 describe('SetProductPriceUseCase', () => {
@@ -8,7 +8,10 @@ describe('SetProductPriceUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       setPrice: jest.fn().mockResolvedValue({
-        productId: 'p1', price: 100, salePrice: 80, updatedAt: new Date(),
+        productId: 'p1',
+        price: 100,
+        salePrice: 80,
+        updatedAt: new Date(),
       }),
     };
     useCase = new SetProductPriceUseCase(mockRepo as never);

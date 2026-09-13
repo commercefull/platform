@@ -37,7 +37,8 @@ interface TableInfo {
 
 async function main(): Promise<void> {
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL ||
+    connectionString:
+      process.env.DATABASE_URL ||
       `postgres://${process.env.POSTGRES_USER || 'ecomm-user'}:${process.env.POSTGRES_PASSWORD || 'ecomm-password'}@${process.env.POSTGRES_HOST || '127.0.0.1'}:${process.env.POSTGRES_PORT || '5432'}/${process.env.POSTGRES_DB || 'ecomm-db'}`,
   });
 

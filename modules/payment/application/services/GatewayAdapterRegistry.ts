@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Gateway Adapter Registry
@@ -63,4 +62,3 @@ function getAllPSPAdapters(): PSPAdapter[] {
 function listProviders(): string[] {
   return Array.from(registry.keys());
 }
-

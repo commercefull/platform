@@ -14,10 +14,16 @@ jest.mock('../../../../libs/db', () => ({
 }));
 
 import { ProcessPaymentRefundUseCase, ProcessPaymentRefundCommand } from './ProcessRefund';
-import { TransactionNotFoundError, TransactionCannotBeRefundedError, RefundAmountExceedsRefundableError } from '../../domain/errors/PaymentErrors';
+import {
+  TransactionNotFoundError,
+  TransactionCannotBeRefundedError,
+  RefundAmountExceedsRefundableError,
+} from '../../domain/errors/PaymentErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ProcessPaymentRefundUseCase', () => {
   let useCase: ProcessPaymentRefundUseCase;
@@ -26,8 +32,12 @@ describe('ProcessPaymentRefundUseCase', () => {
 
   beforeEach(() => {
     mockTxn = {
-      transactionId: 't1', status: 'captured', currency: 'USD', refundableAmount: 100,
-      canBeRefunded: true, recordRefund: jest.fn(),
+      transactionId: 't1',
+      status: 'captured',
+      currency: 'USD',
+      refundableAmount: 100,
+      canBeRefunded: true,
+      recordRefund: jest.fn(),
     };
     mockRepo = {
       findTransactionById: jest.fn().mockResolvedValue(mockTxn),

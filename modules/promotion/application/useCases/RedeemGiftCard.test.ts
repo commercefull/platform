@@ -1,14 +1,27 @@
 jest.mock('../../infrastructure/repositories/GiftCardRepository', () => ({
   getGiftCardByCode: jest.fn().mockResolvedValue({
-    promotionGiftCardId: 'gc1', code: 'GIFT100', currentBalance: 100, currency: 'USD',
-    status: 'active', expiresAt: null, isReloadable: true,
+    promotionGiftCardId: 'gc1',
+    code: 'GIFT100',
+    currentBalance: 100,
+    currency: 'USD',
+    status: 'active',
+    expiresAt: null,
+    isReloadable: true,
   }),
   getGiftCard: jest.fn().mockResolvedValue({
-    promotionGiftCardId: 'gc1', code: 'GIFT100', currentBalance: 50, currency: 'USD',
-    status: 'active', expiresAt: null, isReloadable: true,
+    promotionGiftCardId: 'gc1',
+    code: 'GIFT100',
+    currentBalance: 50,
+    currency: 'USD',
+    status: 'active',
+    expiresAt: null,
+    isReloadable: true,
   }),
   redeemGiftCard: jest.fn().mockResolvedValue({
-    promotionGiftCardTransactionId: 't1', promotionGiftCardId: 'gc1', amount: 50, type: 'redemption',
+    promotionGiftCardTransactionId: 't1',
+    promotionGiftCardId: 'gc1',
+    amount: 50,
+    type: 'redemption',
   }),
 }));
 
@@ -55,7 +68,11 @@ describe('RedeemGiftCardUseCase', () => {
 
   it('should return error when gift card is not active', async () => {
     (giftCardRepo.getGiftCardByCode as jest.Mock).mockResolvedValueOnce({
-      giftCardId: 'gc1', code: 'GIFT100', currentBalance: 100, status: 'inactive', expiresAt: null,
+      giftCardId: 'gc1',
+      code: 'GIFT100',
+      currentBalance: 100,
+      status: 'inactive',
+      expiresAt: null,
     });
 
     const result = await useCase.execute(new RedeemGiftCardCommand('GIFT100', 50));
@@ -66,7 +83,11 @@ describe('RedeemGiftCardUseCase', () => {
 
   it('should return error when insufficient balance', async () => {
     (giftCardRepo.getGiftCardByCode as jest.Mock).mockResolvedValueOnce({
-      promotionGiftCardId: 'gc1', code: 'GIFT100', currentBalance: 30, status: 'active', expiresAt: null,
+      promotionGiftCardId: 'gc1',
+      code: 'GIFT100',
+      currentBalance: 30,
+      status: 'active',
+      expiresAt: null,
     });
 
     const result = await useCase.execute(new RedeemGiftCardCommand('GIFT100', 50));

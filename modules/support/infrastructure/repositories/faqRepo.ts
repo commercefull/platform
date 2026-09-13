@@ -84,7 +84,9 @@ export async function getCategories(activeOnly: boolean = true): Promise<FaqCate
     whereClause = '"isActive" = true';
   }
 
-  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "supportFaqCategory" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "name" ASC`);
+  const rows = await query<Record<string, unknown>[]>(
+    `SELECT * FROM "supportFaqCategory" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "name" ASC`,
+  );
   return (rows || []).map(mapToCategory);
 }
 

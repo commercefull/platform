@@ -3,11 +3,13 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { EarnPointsUseCase} from './EarnPoints';
+import { EarnPointsUseCase } from './EarnPoints';
 import { LoyaltyProgramNotFoundError } from '../../domain/errors/LoyaltyErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('EarnPointsUseCase', () => {
   let useCase: EarnPointsUseCase;
@@ -16,7 +18,9 @@ describe('EarnPointsUseCase', () => {
 
   beforeEach(() => {
     mockRepo = {
-      findMemberByCustomerId: jest.fn().mockResolvedValue({ memberId: 'm1', tierId: 't1', availablePoints: 100, lifetimePoints: 200, tier: { multiplier: 1.5 } }),
+      findMemberByCustomerId: jest
+        .fn()
+        .mockResolvedValue({ memberId: 'm1', tierId: 't1', availablePoints: 100, lifetimePoints: 200, tier: { multiplier: 1.5 } }),
       createMember: jest.fn().mockResolvedValue({ memberId: 'm1', tierId: 't1', availablePoints: 0, lifetimePoints: 0 }),
       createTransaction: jest.fn().mockResolvedValue(undefined),
       updateMemberPoints: jest.fn().mockResolvedValue(undefined),

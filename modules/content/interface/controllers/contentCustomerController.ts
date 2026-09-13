@@ -35,7 +35,6 @@ export const getPublishedPages = async (req: TypedRequest, res: Response): Promi
       total: pages.length,
     },
   });
-  
 };
 
 /**
@@ -90,7 +89,7 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
   }
 
   // Sanitize content types to remove sensitive schema information
-  const sanitizedBlocks = pageData.blocks.map((block) => ({
+  const sanitizedBlocks = pageData.blocks.map(block => ({
     id: block.contentBlockId,
     title: block.title,
     sortOrder: block.sortOrder,
@@ -151,5 +150,4 @@ export const getActiveContentTypes = async (req: TypedRequest, res: Response): P
     success: true,
     data: sanitizedContentTypes,
   });
-  
 };

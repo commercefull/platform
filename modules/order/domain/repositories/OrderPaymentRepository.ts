@@ -1,13 +1,5 @@
 export type OrderPaymentType =
-  | 'creditCard'
-  | 'debitCard'
-  | 'paypal'
-  | 'applePay'
-  | 'googlePay'
-  | 'bankTransfer'
-  | 'crypto'
-  | 'giftCard'
-  | 'storeCredit';
+  'creditCard' | 'debitCard' | 'paypal' | 'applePay' | 'googlePay' | 'bankTransfer' | 'crypto' | 'giftCard' | 'storeCredit';
 
 export type OrderPaymentStatus = 'pending' | 'authorized' | 'captured' | 'refunded' | 'partiallyRefunded' | 'voided' | 'failed';
 

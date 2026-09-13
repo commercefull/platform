@@ -31,17 +31,13 @@ describe('ManageProductCollectionUseCase', () => {
   });
 
   it('should create new collection (happy path)', async () => {
-    const result = await useCase.execute(new ManageProductCollectionCommand(
-      'New Collection', 'new-collection',
-    ));
+    const result = await useCase.execute(new ManageProductCollectionCommand('New Collection', 'new-collection'));
 
     expect(result.collection.productCollectionId).toBe('c2');
   });
 
   it('should update existing collection', async () => {
-    const result = await useCase.execute(new ManageProductCollectionCommand(
-      'Updated', 'updated', 'c1',
-    ));
+    const result = await useCase.execute(new ManageProductCollectionCommand('Updated', 'updated', 'c1'));
 
     expect(result.collection.productCollectionId).toBe('c1');
   });
@@ -57,8 +53,8 @@ describe('ManageProductCollectionUseCase', () => {
   it('should throw ProductCollectionNotFoundError when update fails', async () => {
     mockRepo.update.mockResolvedValueOnce(null);
 
-    await expect(useCase.execute(new ManageProductCollectionCommand(
-      'Name', 'slug', 'nonexistent',
-    ))).rejects.toThrow(ProductCollectionNotFoundError);
+    await expect(useCase.execute(new ManageProductCollectionCommand('Name', 'slug', 'nonexistent'))).rejects.toThrow(
+      ProductCollectionNotFoundError,
+    );
   });
 });

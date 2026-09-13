@@ -49,10 +49,8 @@ export async function complete(notificationBatchId: string): Promise<void> {
 
 export async function findAll(limit: number = 50, offset: number = 0): Promise<NotificationBatch[]> {
   return (
-    (await query<NotificationBatch[]>(
-      `SELECT * FROM "notificationBatch" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
-      [limit, offset],
-    )) || []
+    (await query<NotificationBatch[]>(`SELECT * FROM "notificationBatch" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`, [limit, offset])) ||
+    []
   );
 }
 

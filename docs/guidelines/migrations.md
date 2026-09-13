@@ -127,7 +127,7 @@ Add the new schema alongside the old. Both old and new code can coexist.
 // Migration 1: Add new column (nullable, no NOT NULL constraint yet)
 exports.up = async function (knex) {
   await knex.schema.alterTable('product', t => {
-    t.string('sku').nullable();  // New column, old code ignores it
+    t.string('sku').nullable(); // New column, old code ignores it
   });
 };
 
@@ -201,6 +201,7 @@ exports.down = async function (knex) {
 ### Emergency rollback
 
 If a migration breaks production:
+
 1. **Prefer a forward fix** — write a new migration that corrects the issue.
 2. **Rollback only as last resort** — and only if no data has been written to the new schema.
 3. **Never rollback past a data migration** — rolling back a schema migration after its companion data migration has run will lose data.
@@ -210,33 +211,39 @@ If a migration breaks production:
 Before deploying a migration to production, verify:
 
 ### Adding columns
+
 - [ ] New column is **nullable** or has a **safe default** (use `defaultTo`)
 - [ ] No `NOT NULL` constraint in the same migration as the column addition (add it in a follow-up contract migration)
 - [ ] Existing rows will not violate any new constraints
 
 ### Adding indexes
+
 - [ ] Use `CREATE INDEX CONCURRENTLY` for large tables to avoid locking
 - [ ] Knex: `knex.raw('CREATE INDEX CONCURRENTLY "idx_name" ON "table" ("col")')`
 - [ ] Cannot run inside a transaction — use `knex.schema.alterTable` with `transacting: false` or raw SQL
 
 ### Dropping columns
+
 - [ ] No running code references the column (check repositories, raw SQL, views)
 - [ ] Column is not used in any index (drop indexes first)
 - [ ] Column is not referenced by any FK constraint (drop FKs first)
 - [ ] Deployed as a separate migration **after** the code that stops using it has been released
 
 ### Altering columns
+
 - [ ] Type widening (e.g., `int` → `bigint`) is safe; type narrowing requires expand/contract
 - [ ] Adding a default to an existing column is safe in PostgreSQL 11+
 - [ ] Removing a default is safe if the application handles `null`
 
 ### Large tables (> 100K rows)
+
 - [ ] Test the migration against a copy of production data
 - [ ] Estimate migration duration — migrations taking > 30s should be split
 - [ ] Consider `SET lock_timeout = '5s'` to avoid blocking writes
 - [ ] Use `CREATE INDEX CONCURRENTLY` for all new indexes
 
 ### General
+
 - [ ] Migration is **idempotent** — safe to run twice (use `hasTable` / `hasColumn` guards)
 - [ ] `down` function is implemented and tested locally
 - [ ] No `DROP TABLE` in production unless the table is confirmed unused
@@ -255,6 +262,7 @@ yarn db:migrate:smoke:seeded
 ```
 
 The smoke test:
+
 1. Creates a temporary database
 2. Runs all migrations from zero
 3. Verifies the `knexMigrations` table shows all migrations as applied

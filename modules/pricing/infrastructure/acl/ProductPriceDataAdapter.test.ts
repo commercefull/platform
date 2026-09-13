@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 jest.mock('../../../product/infrastructure/repositories/ProductCatalogRepository', () => ({
   __esModule: true,
   default: {
@@ -13,12 +11,12 @@ import { ProductPriceDataAdapter } from './ProductPriceDataAdapter';
 
 describe('ProductPriceDataAdapter', () => {
   let adapter: ProductPriceDataAdapter;
-  let mockProductRepo: any;
-  let mockVariantRepo: any;
+  let mockProductRepo: { findById: jest.Mock };
+  let mockVariantRepo: { findById: jest.Mock; findDefaultForProduct: jest.Mock };
 
   beforeEach(() => {
-    mockProductRepo = productCatalogRepository.products;
-    mockVariantRepo = productCatalogRepository.variants;
+    mockProductRepo = productCatalogRepository.products as unknown as { findById: jest.Mock };
+    mockVariantRepo = productCatalogRepository.variants as unknown as { findById: jest.Mock; findDefaultForProduct: jest.Mock };
     mockProductRepo.findById.mockClear();
     mockVariantRepo.findById.mockClear();
     mockVariantRepo.findDefaultForProduct.mockClear();

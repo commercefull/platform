@@ -177,7 +177,10 @@ router.post('/attribute-sets', asyncHandler(attributeSetController.createAttribu
 router.put('/attribute-sets/:id', asyncHandler(attributeSetController.updateAttributeSet.bind(attributeSetController)));
 router.delete('/attribute-sets/:id', asyncHandler(attributeSetController.deleteAttributeSet.bind(attributeSetController)));
 router.post('/attribute-sets/:id/attributes', asyncHandler(attributeSetController.addAttributeToSet.bind(attributeSetController)));
-router.delete('/attribute-sets/:id/attributes/:attributeId', asyncHandler(attributeSetController.removeAttributeFromSet.bind(attributeSetController)));
+router.delete(
+  '/attribute-sets/:id/attributes/:attributeId',
+  asyncHandler(attributeSetController.removeAttributeFromSet.bind(attributeSetController)),
+);
 router.post('/attribute-sets/:id/attributes/reorder', asyncHandler(attributeSetController.reorderAttributes.bind(attributeSetController)));
 
 // ============================================================================
@@ -212,14 +215,23 @@ router.delete('/attributes/:id/values/:valueId', asyncHandler(attributeControlle
 router.get('/products/:productId/attributes', asyncHandler(attributeController.getProductAttributes.bind(attributeController)));
 router.post('/products/:productId/attributes', asyncHandler(attributeController.setProductAttribute.bind(attributeController)));
 router.put('/products/:productId/attributes', asyncHandler(attributeController.setProductAttributes.bind(attributeController)));
-router.delete('/products/:productId/attributes/:attributeId', asyncHandler(attributeController.removeProductAttribute.bind(attributeController)));
+router.delete(
+  '/products/:productId/attributes/:attributeId',
+  asyncHandler(attributeController.removeProductAttribute.bind(attributeController)),
+);
 
 // ============================================================================
 // Attribute Option Routes
 // ============================================================================
 
-router.get('/attribute-options/attribute/:attributeId/value/:value', asyncHandler(attributeOptionController.getOptionByValue.bind(attributeOptionController)));
-router.get('/attribute-options/attribute/:attributeId', asyncHandler(attributeOptionController.getOptionsByAttribute.bind(attributeOptionController)));
+router.get(
+  '/attribute-options/attribute/:attributeId/value/:value',
+  asyncHandler(attributeOptionController.getOptionByValue.bind(attributeOptionController)),
+);
+router.get(
+  '/attribute-options/attribute/:attributeId',
+  asyncHandler(attributeOptionController.getOptionsByAttribute.bind(attributeOptionController)),
+);
 router.get('/attribute-options/:id', asyncHandler(attributeOptionController.getAttributeOption.bind(attributeOptionController)));
 router.post('/attribute-options', asyncHandler(attributeOptionController.createAttributeOption.bind(attributeOptionController)));
 router.put('/attribute-options/:id', asyncHandler(attributeOptionController.updateAttributeOption.bind(attributeOptionController)));

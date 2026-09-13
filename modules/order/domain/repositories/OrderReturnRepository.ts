@@ -71,7 +71,11 @@ export interface OrderReturnRepository {
   deny(orderReturnId: string, adminNotes?: string): Promise<OrderReturn | null>;
   markInTransit(orderReturnId: string, trackingNumber?: string, trackingUrl?: string): Promise<OrderReturn | null>;
   markReceived(orderReturnId: string): Promise<OrderReturn | null>;
-  completeInspection(orderReturnId: string, passedItems?: Record<string, unknown>, failedItems?: Record<string, unknown>): Promise<OrderReturn | null>;
+  completeInspection(
+    orderReturnId: string,
+    passedItems?: Record<string, unknown>,
+    failedItems?: Record<string, unknown>,
+  ): Promise<OrderReturn | null>;
   complete(orderReturnId: string): Promise<OrderReturn | null>;
   cancel(orderReturnId: string, reason?: string): Promise<OrderReturn | null>;
   addTracking(orderReturnId: string, trackingNumber: string, trackingUrl?: string, carrier?: ReturnCarrier): Promise<OrderReturn | null>;

@@ -276,9 +276,7 @@ export class BasketRepo implements BasketRepository {
   }
 
   private async getItemsWithCurrency(basketId: string, currency: string): Promise<BasketItem[]> {
-    const rows = await query<DbBasketItem[]>('SELECT * FROM "basketItem" WHERE "basketId" = $1 ORDER BY "createdAt" ASC', [
-      basketId,
-    ]);
+    const rows = await query<DbBasketItem[]>('SELECT * FROM "basketItem" WHERE "basketId" = $1 ORDER BY "createdAt" ASC', [basketId]);
 
     return (rows || []).map(row => this.mapToBasketItem(row, basketId, currency));
   }
@@ -394,9 +392,7 @@ export class BasketRepo implements BasketRepository {
   // Private helper methods
   private async syncItems(basket: Basket): Promise<void> {
     // Get current items in DB
-    const existingItems = await query<DbBasketItem[]>('SELECT "basketItemId" FROM "basketItem" WHERE "basketId" = $1', [
-      basket.basketId,
-    ]);
+    const existingItems = await query<DbBasketItem[]>('SELECT "basketItemId" FROM "basketItem" WHERE "basketId" = $1', [basket.basketId]);
     const existingIds = new Set((existingItems || []).map(i => i.basketItemId));
 
     // Track items to keep
@@ -466,7 +462,7 @@ export class BasketRepo implements BasketRepository {
       quantity: Number(row.quantity),
       unitPrice: Money.create(Number(row.unitPrice), currency),
       imageUrl: row.imageUrl ?? undefined,
-      attributes: row.attributes as Record<string, unknown> | undefined ?? undefined,
+      attributes: (row.attributes as Record<string, unknown> | undefined) ?? undefined,
       itemType: (row.itemType as 'physical' | 'digital' | 'subscription' | 'service') || 'physical',
       isGift: Boolean(row.isGift),
       giftMessage: row.giftMessage ?? undefined,

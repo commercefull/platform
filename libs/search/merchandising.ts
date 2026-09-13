@@ -40,10 +40,7 @@ export interface CategoryManualOrder {
 /**
  * Get active merchandising rules for a search context
  */
-export async function getMerchandisingRules(
-  searchTerm?: string,
-  categoryId?: string,
-): Promise<MerchandisingContext> {
+export async function getMerchandisingRules(searchTerm?: string, categoryId?: string): Promise<MerchandisingContext> {
   try {
     const conditions: string[] = ['"isActive" = true'];
     const params: unknown[] = [];
@@ -102,9 +99,7 @@ export async function getMerchandisingRules(
 /**
  * Get manual ordering for a category
  */
-export async function getCategoryManualOrder(
-  categoryId: string,
-): Promise<ManualOrderingContext | undefined> {
+export async function getCategoryManualOrder(categoryId: string): Promise<ManualOrderingContext | undefined> {
   try {
     const results = await query<CategoryManualOrder[]>(
       `SELECT * FROM "categoryManualOrder" WHERE "categoryId" = $1 AND "isActive" = true ORDER BY "position" ASC`,
@@ -140,10 +135,7 @@ export async function createMerchandisingRule(
   return results![0];
 }
 
-export async function updateMerchandisingRule(
-  ruleId: string,
-  updates: Partial<MerchandisingRule>,
-): Promise<MerchandisingRule | null> {
+export async function updateMerchandisingRule(ruleId: string, updates: Partial<MerchandisingRule>): Promise<MerchandisingRule | null> {
   const setClauses: string[] = [];
   const params: unknown[] = [ruleId];
   let paramIndex = 2;
@@ -211,10 +203,7 @@ export async function listMerchandisingRules(filters?: {
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-  const results = await query<MerchandisingRule[]>(
-    `SELECT * FROM "merchandisingRule" ${whereClause} ORDER BY "createdAt" DESC`,
-    params,
-  );
+  const results = await query<MerchandisingRule[]>(`SELECT * FROM "merchandisingRule" ${whereClause} ORDER BY "createdAt" DESC`, params);
 
   return results || [];
 }
@@ -223,10 +212,7 @@ export async function listMerchandisingRules(filters?: {
 // Admin: CRUD operations for category manual ordering
 // ============================================================================
 
-export async function setCategoryManualOrder(
-  categoryId: string,
-  productIds: string[],
-): Promise<void> {
+export async function setCategoryManualOrder(categoryId: string, productIds: string[]): Promise<void> {
   // Delete existing orders for this category
   await query(`DELETE FROM "categoryManualOrder" WHERE "categoryId" = $1`, [categoryId]);
 

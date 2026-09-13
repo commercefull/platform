@@ -7,10 +7,14 @@ import { requireCustomerAuth, requireBusinessAuth, type GraphQLAuthContext } fro
 
 export const customerResolvers = {
   Query: {
-    customer: async (_parent: unknown, args: {
-      customerId?: string;
-      email?: string;
-    }, context: GraphQLAuthContext) => {
+    customer: async (
+      _parent: unknown,
+      args: {
+        customerId?: string;
+        email?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new GetCustomerUseCase(CustomerRepo);
       const command = new GetCustomerCommand(args.customerId, args.email);
@@ -26,16 +30,19 @@ export const customerResolvers = {
   },
 
   Mutation: {
-    registerCustomer: async (_parent: unknown, args: {
-      email: string;
-      firstName: string;
-      lastName: string;
-      password: string;
-      phone?: string;
-      dateOfBirth?: string;
-      preferredCurrency?: string;
-      preferredLanguage?: string;
-    }) => {
+    registerCustomer: async (
+      _parent: unknown,
+      args: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        password: string;
+        phone?: string;
+        dateOfBirth?: string;
+        preferredCurrency?: string;
+        preferredLanguage?: string;
+      },
+    ) => {
       const useCase = new RegisterCustomerUseCase(CustomerRepo);
       const command = new RegisterCustomerCommand(
         args.email,

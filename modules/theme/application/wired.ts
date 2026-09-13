@@ -1,10 +1,5 @@
 import { ThemeRepositoryImpl } from '../infrastructure/repositories/ThemeRepositoryImpl';
-import {
-  ManageThemesUseCase,
-  ManageThemeOverridesUseCase,
-  AssignThemeToStoreUseCase,
-  ResolveStoreThemeUseCase,
-} from './useCases/Theme';
+import { ManageThemesUseCase, ManageThemeOverridesUseCase, AssignThemeToStoreUseCase, ResolveStoreThemeUseCase } from './useCases/Theme';
 
 const themeRepository = new ThemeRepositoryImpl();
 

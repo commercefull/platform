@@ -6,7 +6,13 @@
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
-import type { FraudRule, RuleType, CheckStatus, BlacklistType, RiskLevel } from '../../infrastructure/repositories/PaymentBillingDataRepository';
+import type {
+  FraudRule,
+  RuleType,
+  CheckStatus,
+  BlacklistType,
+  RiskLevel,
+} from '../../infrastructure/repositories/PaymentBillingDataRepository';
 
 const fraudRepo = paymentBillingDataRepository.fraud;
 
@@ -20,7 +26,6 @@ export const getFraudRules: AsyncHandler = async (req, res, _next) => {
   const { activeOnly } = req.query;
   const rules = await fraudRepo.getRules(activeOnly !== 'false');
   res.json({ success: true, data: rules });
-  
 };
 
 export const getFraudRule: AsyncHandler = async (req, res, _next) => {
@@ -30,7 +35,6 @@ export const getFraudRule: AsyncHandler = async (req, res, _next) => {
     return;
   }
   res.json({ success: true, data: rule });
-  
 };
 
 export const createFraudRule: AsyncHandler = async (req, res, _next) => {
@@ -49,7 +53,6 @@ export const createFraudRule: AsyncHandler = async (req, res, _next) => {
   }
   const rule = await fraudRepo.saveRule(body);
   res.status(201).json({ success: true, data: rule });
-  
 };
 
 export const updateFraudRule: AsyncHandler = async (req, res, _next) => {
@@ -59,13 +62,11 @@ export const updateFraudRule: AsyncHandler = async (req, res, _next) => {
     ...body,
   });
   res.json({ success: true, data: rule });
-  
 };
 
 export const deleteFraudRule: AsyncHandler = async (req, res, _next) => {
   await fraudRepo.deleteRule(req.params.id);
   res.json({ success: true, message: 'Rule deactivated' });
-  
 };
 
 // ============================================================================
@@ -79,7 +80,6 @@ export const getFraudChecks: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const getFraudCheck: AsyncHandler = async (req, res, _next) => {
@@ -89,13 +89,11 @@ export const getFraudCheck: AsyncHandler = async (req, res, _next) => {
     return;
   }
   res.json({ success: true, data: check });
-  
 };
 
 export const getPendingReviews: AsyncHandler = async (req, res, _next) => {
   const checks = await fraudRepo.getPendingReviews();
   res.json({ success: true, data: checks });
-  
 };
 
 export const reviewFraudCheck: AsyncHandler = async (req, res, _next) => {
@@ -103,7 +101,6 @@ export const reviewFraudCheck: AsyncHandler = async (req, res, _next) => {
   const reviewedBy = req.user?.userId || req.user?.organizationId || '';
   await fraudRepo.reviewCheck(req.params.id, body.decision, reviewedBy, body.notes);
   res.json({ success: true, message: 'Review submitted' });
-  
 };
 
 // ============================================================================
@@ -117,7 +114,6 @@ export const getBlacklist: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const addToBlacklist: AsyncHandler = async (req, res, _next) => {
@@ -141,11 +137,9 @@ export const addToBlacklist: AsyncHandler = async (req, res, _next) => {
   }
   const entry = await fraudRepo.addToBlacklist({ ...body, addedBy });
   res.status(201).json({ success: true, data: entry });
-  
 };
 
 export const removeFromBlacklist: AsyncHandler = async (req, res, _next) => {
   await fraudRepo.removeFromBlacklist(req.params.id);
   res.json({ success: true, message: 'Entry removed from blacklist' });
-  
 };

@@ -7,7 +7,9 @@ import { LoginOrganizationUseCase } from './LoginOrganization';
 import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('LoginOrganizationUseCase', () => {
   let useCase: LoginOrganizationUseCase;
@@ -17,11 +19,16 @@ describe('LoginOrganizationUseCase', () => {
 
   beforeEach(() => {
     mockOrgRepo = {
-      findByEmail: jest.fn().mockResolvedValue({ organizationId: 'o1', email: 'o@test.com', passwordHash: 'hash', status: 'active', permissions: ['read'] }),
+      findByEmail: jest
+        .fn()
+        .mockResolvedValue({ organizationId: 'o1', email: 'o@test.com', passwordHash: 'hash', status: 'active', permissions: ['read'] }),
       updateLastLogin: jest.fn().mockResolvedValue(undefined),
     };
     mockAuth = { verifyPassword: jest.fn().mockResolvedValue(true) };
-    mockToken = { generateAccessToken: jest.fn().mockResolvedValue('access'), generateRefreshToken: jest.fn().mockResolvedValue('refresh') };
+    mockToken = {
+      generateAccessToken: jest.fn().mockResolvedValue('access'),
+      generateRefreshToken: jest.fn().mockResolvedValue('refresh'),
+    };
     useCase = new LoginOrganizationUseCase(mockOrgRepo as never, mockAuth as never, mockToken as never);
   });
 
@@ -56,7 +63,13 @@ describe('LoginOrganizationUseCase', () => {
   });
 
   it('should allow login with approved status', async () => {
-    mockOrgRepo.findByEmail.mockResolvedValue({ organizationId: 'o1', email: 'o@t.com', passwordHash: 'h', status: 'approved', permissions: [] });
+    mockOrgRepo.findByEmail.mockResolvedValue({
+      organizationId: 'o1',
+      email: 'o@t.com',
+      passwordHash: 'h',
+      status: 'approved',
+      permissions: [],
+    });
 
     const result = await useCase.execute({ email: 'o@t.com', password: 'pass' });
 

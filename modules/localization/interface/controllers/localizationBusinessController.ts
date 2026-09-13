@@ -135,7 +135,10 @@ export const createLocale = async (req: TypedRequest<Record<string, string>, unk
   successResponse(res, locale, 201);
 };
 
-export const updateLocale = async (req: TypedRequest<Record<string, string>, unknown, Partial<Omit<Locale, 'code' | 'createdAt' | 'localeId' | 'updatedAt'>>>, res: Response): Promise<void> => {
+export const updateLocale = async (
+  req: TypedRequest<Record<string, string>, unknown, Partial<Omit<Locale, 'code' | 'createdAt' | 'localeId' | 'updatedAt'>>>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body;
 

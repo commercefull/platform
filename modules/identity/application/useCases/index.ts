@@ -15,7 +15,13 @@ export {
   RequestPasswordResetOutput,
   ResetPasswordOutput,
 } from './customer/ResetCustomerPassword';
-export { VerifyCustomerEmailUseCase, VerifyEmailInput, ResendVerificationInput, VerifyEmailOutput, ResendVerificationOutput } from './customer/VerifyCustomerEmail';
+export {
+  VerifyCustomerEmailUseCase,
+  VerifyEmailInput,
+  ResendVerificationInput,
+  VerifyEmailOutput,
+  ResendVerificationOutput,
+} from './customer/VerifyCustomerEmail';
 
 // Merchant authentication
 export { LoginOrganizationUseCase, LoginOrganizationInput, LoginOrganizationOutput } from './organization/LoginOrganization';

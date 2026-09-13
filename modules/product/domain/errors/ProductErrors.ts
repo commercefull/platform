@@ -50,13 +50,9 @@ export class ProductImageNotFoundError extends AppError {
 
 export class InvalidProductStatusError extends AppError {
   constructor(currentStatus: string, newStatus?: string) {
-    super(
-      newStatus
-        ? `Cannot transition product from ${currentStatus} to ${newStatus}`
-        : `Invalid product status: ${currentStatus}`,
-      400,
-      { code: 'product.invalid_status' },
-    );
+    super(newStatus ? `Cannot transition product from ${currentStatus} to ${newStatus}` : `Invalid product status: ${currentStatus}`, 400, {
+      code: 'product.invalid_status',
+    });
   }
 }
 

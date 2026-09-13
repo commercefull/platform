@@ -4,7 +4,14 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { setupPromotionTests, testCoupon, SEEDED_COUPON_CODE_FIXED, SEEDED_COUPON_CODE_PERCENTAGE, SEEDED_COUPON_CODE_EXPIRED, SEEDED_GIFT_CARD_CODE } from './testUtils';
+import {
+  setupPromotionTests,
+  testCoupon,
+  SEEDED_COUPON_CODE_FIXED,
+  SEEDED_COUPON_CODE_PERCENTAGE,
+  SEEDED_COUPON_CODE_EXPIRED,
+  SEEDED_GIFT_CARD_CODE,
+} from './testUtils';
 import { loginTestUser, expectStatus } from '../testUtils';
 import { TEST_PRODUCT_1_ID } from '../testConstants';
 
@@ -57,11 +64,7 @@ describe('Coupon Expanded Tests', () => {
       const basketId = await createBasketWithItems(100);
       if (!basketId) return;
 
-      const resp = await client.post(
-        `/customer/basket/${basketId}/coupon`,
-        { couponCode: 'NONEXISTENT99999' },
-        { headers: authHeaders() },
-      );
+      const resp = await client.post(`/customer/basket/${basketId}/coupon`, { couponCode: 'NONEXISTENT99999' }, { headers: authHeaders() });
 
       expectStatus(resp, 400);
       await cleanup(basketId);
@@ -71,11 +74,7 @@ describe('Coupon Expanded Tests', () => {
       const basketId = await createBasketWithItems(100);
       if (!basketId) return;
 
-      const resp = await client.post(
-        `/customer/basket/${basketId}/coupon`,
-        { couponCode: '' },
-        { headers: authHeaders() },
-      );
+      const resp = await client.post(`/customer/basket/${basketId}/coupon`, { couponCode: '' }, { headers: authHeaders() });
 
       expectStatus(resp, 400);
       await cleanup(basketId);

@@ -39,14 +39,12 @@ export const listCoupons = async (req: TypedRequest, res: Response): Promise<voi
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createCouponForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'promotions/coupons/create', {
     pageName: 'Create Coupon',
   });
-  
 };
 
 export const createCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -122,7 +120,6 @@ export const viewCoupon = async (req: TypedRequest, res: Response): Promise<void
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editCouponForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -142,7 +139,6 @@ export const editCouponForm = async (req: TypedRequest, res: Response): Promise<
     pageName: `Edit: ${coupon.name}`,
     coupon,
   });
-  
 };
 
 export const updateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -183,7 +179,6 @@ export const updateCoupon = async (req: TypedRequest, res: Response): Promise<vo
   const _coupon = await manageCouponsUseCase.update(couponId, updates);
 
   res.redirect(`/hub/promotions/coupons/${couponId}?success=Coupon updated successfully`);
-  
 };
 
 export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -196,7 +191,6 @@ export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<vo
   }
 
   res.json({ success: true, message: 'Coupon deleted successfully' });
-  
 };
 
 export const validateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -211,5 +205,4 @@ export const validateCoupon = async (req: TypedRequest, res: Response): Promise<
     message: result.message,
     discountAmount: result.coupon ? manageCouponsUseCase.calculateDiscount(result.coupon, orderTotal) : 0,
   });
-  
 };

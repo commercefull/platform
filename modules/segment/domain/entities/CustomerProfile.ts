@@ -55,7 +55,13 @@ export class CustomerProfile {
     this.props = props;
   }
 
-  static create(params: { customerId: string; email?: string; firstName?: string; lastName?: string; organizationId?: string }): CustomerProfile {
+  static create(params: {
+    customerId: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    organizationId?: string;
+  }): CustomerProfile {
     return new CustomerProfile({
       customerProfileId: '',
       customerId: params.customerId,
@@ -105,25 +111,63 @@ export class CustomerProfile {
     return new CustomerProfile(props);
   }
 
-  get customerId(): string { return this.props.customerId; }
-  get email(): string | null { return this.props.email; }
-  get firstName(): string | null { return this.props.firstName; }
-  get lastName(): string | null { return this.props.lastName; }
-  get lifetimeValue(): number { return this.props.lifetimeValue; }
-  get totalSpent(): number { return this.props.totalSpent; }
-  get averageOrderValue(): number { return this.props.averageOrderValue; }
-  get totalOrders(): number { return this.props.totalOrders; }
-  get daysSinceLastOrder(): number | null { return this.props.daysSinceLastOrder; }
-  get ordersLast30Days(): number { return this.props.ordersLast30Days; }
-  get ordersLast90Days(): number { return this.props.ordersLast90Days; }
-  get ordersLast12Months(): number { return this.props.ordersLast12Months; }
-  get rfmSegment(): string | null { return this.props.rfmSegment; }
-  get engagementScore(): number | null { return this.props.engagementScore; }
-  get churnRisk(): number | null { return this.props.churnRisk; }
-  get tags(): string[] | null { return this.props.tags; }
-  get segmentIds(): string[] | null { return this.props.segmentIds; }
-  get tier(): string | null { return this.props.tier; }
-  get lastComputedAt(): Date | null { return this.props.lastComputedAt; }
+  get customerId(): string {
+    return this.props.customerId;
+  }
+  get email(): string | null {
+    return this.props.email;
+  }
+  get firstName(): string | null {
+    return this.props.firstName;
+  }
+  get lastName(): string | null {
+    return this.props.lastName;
+  }
+  get lifetimeValue(): number {
+    return this.props.lifetimeValue;
+  }
+  get totalSpent(): number {
+    return this.props.totalSpent;
+  }
+  get averageOrderValue(): number {
+    return this.props.averageOrderValue;
+  }
+  get totalOrders(): number {
+    return this.props.totalOrders;
+  }
+  get daysSinceLastOrder(): number | null {
+    return this.props.daysSinceLastOrder;
+  }
+  get ordersLast30Days(): number {
+    return this.props.ordersLast30Days;
+  }
+  get ordersLast90Days(): number {
+    return this.props.ordersLast90Days;
+  }
+  get ordersLast12Months(): number {
+    return this.props.ordersLast12Months;
+  }
+  get rfmSegment(): string | null {
+    return this.props.rfmSegment;
+  }
+  get engagementScore(): number | null {
+    return this.props.engagementScore;
+  }
+  get churnRisk(): number | null {
+    return this.props.churnRisk;
+  }
+  get tags(): string[] | null {
+    return this.props.tags;
+  }
+  get segmentIds(): string[] | null {
+    return this.props.segmentIds;
+  }
+  get tier(): string | null {
+    return this.props.tier;
+  }
+  get lastComputedAt(): Date | null {
+    return this.props.lastComputedAt;
+  }
 
   updateAggregates(params: Partial<CustomerProfileProps>): void {
     Object.assign(this.props, params);

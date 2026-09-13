@@ -14,6 +14,7 @@ SearchAdapter interface
 ```
 
 **Configuration:**
+
 ```bash
 SEARCH_BACKEND=postgres   # default | opensearch | pgvector
 ```
@@ -24,22 +25,22 @@ The adapter is initialized at boot via `initSearchAdapter()` in `boot/routes.ts`
 
 ### Customer Routes (public)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/customer/search` | Full-text search with filters, facets, and merchandising |
-| `GET` | `/customer/search/autocomplete` | Autocomplete suggestions |
+| Method | Path                            | Description                                              |
+| ------ | ------------------------------- | -------------------------------------------------------- |
+| `GET`  | `/customer/search`              | Full-text search with filters, facets, and merchandising |
+| `GET`  | `/customer/search/autocomplete` | Autocomplete suggestions                                 |
 
 ### Business Routes (auth required)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/business/search/health` | Search backend health check |
-| `GET` | `/business/search/merchandising` | List merchandising rules |
-| `POST` | `/business/search/merchandising` | Create merchandising rule |
-| `PUT` | `/business/search/merchandising/:ruleId` | Update rule |
-| `DELETE` | `/business/search/merchandising/:ruleId` | Delete rule |
-| `GET` | `/business/search/manual-order/:categoryId` | Get manual order for category |
-| `PUT` | `/business/search/manual-order/:categoryId` | Set manual order for category |
+| Method   | Path                                        | Description                      |
+| -------- | ------------------------------------------- | -------------------------------- |
+| `GET`    | `/business/search/health`                   | Search backend health check      |
+| `GET`    | `/business/search/merchandising`            | List merchandising rules         |
+| `POST`   | `/business/search/merchandising`            | Create merchandising rule        |
+| `PUT`    | `/business/search/merchandising/:ruleId`    | Update rule                      |
+| `DELETE` | `/business/search/merchandising/:ruleId`    | Delete rule                      |
+| `GET`    | `/business/search/manual-order/:categoryId` | Get manual order for category    |
+| `PUT`    | `/business/search/manual-order/:categoryId` | Set manual order for category    |
 | `DELETE` | `/business/search/manual-order/:categoryId` | Delete manual order for category |
 
 ---
@@ -52,16 +53,17 @@ GET /customer/search?q=red+shirt&page=1&limit=20
 
 **Parameters:**
 
-| Param | Type | Description |
-|-------|------|-------------|
-| `q` or `query` | string | Full-text search query |
-| `page` | int | Page number (default: 1) |
-| `limit` | int | Results per page (default: 20) |
-| `sortBy` | string | `name`, `price`, `createdAt`, `popularity`, `rating`, `relevance`, `manual` |
-| `sortOrder` | string | `asc` or `desc` |
-| `includeFacets` | boolean | Include facet counts in response |
+| Param           | Type    | Description                                                                 |
+| --------------- | ------- | --------------------------------------------------------------------------- |
+| `q` or `query`  | string  | Full-text search query                                                      |
+| `page`          | int     | Page number (default: 1)                                                    |
+| `limit`         | int     | Results per page (default: 20)                                              |
+| `sortBy`        | string  | `name`, `price`, `createdAt`, `popularity`, `rating`, `relevance`, `manual` |
+| `sortOrder`     | string  | `asc` or `desc`                                                             |
+| `includeFacets` | boolean | Include facet counts in response                                            |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -154,22 +156,23 @@ Pass the `attributes` parameter as a JSON array:
 
 ### Supported Operators
 
-| Operator | Description | Fields Used |
-|----------|-------------|-------------|
-| `eq` | Equal to | `value` |
-| `neq` | Not equal to | `value` |
-| `in` | In list of values | `values[]` |
-| `nin` | Not in list of values | `values[]` |
-| `gt` | Greater than (numeric) | `minValue` |
-| `gte` | Greater than or equal (numeric) | `minValue` |
-| `lt` | Less than (numeric) | `maxValue` |
-| `lte` | Less than or equal (numeric) | `maxValue` |
-| `between` | Between two values (numeric) | `minValue`, `maxValue` |
-| `like` | ILIKE pattern match | `value` (use `%` as wildcard) |
+| Operator  | Description                     | Fields Used                   |
+| --------- | ------------------------------- | ----------------------------- |
+| `eq`      | Equal to                        | `value`                       |
+| `neq`     | Not equal to                    | `value`                       |
+| `in`      | In list of values               | `values[]`                    |
+| `nin`     | Not in list of values           | `values[]`                    |
+| `gt`      | Greater than (numeric)          | `minValue`                    |
+| `gte`     | Greater than or equal (numeric) | `minValue`                    |
+| `lt`      | Less than (numeric)             | `maxValue`                    |
+| `lte`     | Less than or equal (numeric)    | `maxValue`                    |
+| `between` | Between two values (numeric)    | `minValue`, `maxValue`        |
+| `like`    | ILIKE pattern match             | `value` (use `%` as wildcard) |
 
 ### Identifying Attributes
 
 You can filter by either:
+
 - **`attributeId`** — UUID of the attribute (from `productAttribute` table)
 - **`attributeCode`** — Code string (e.g., `color`, `size`, `brand`)
 
@@ -244,11 +247,11 @@ Merchandising allows you to boost, bury, or pin products in search results.
 
 ### Rule Types
 
-| Type | Effect |
-|------|--------|
-| `boost` | Moves product toward the top of results |
-| `bury` | Moves product toward the bottom of results |
-| `pin` | Locks product at a specific position |
+| Type    | Effect                                     |
+| ------- | ------------------------------------------ |
+| `boost` | Moves product toward the top of results    |
+| `bury`  | Moves product toward the bottom of results |
+| `pin`   | Locks product at a specific position       |
 
 ### Creating Rules
 

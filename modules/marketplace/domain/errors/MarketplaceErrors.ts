@@ -14,7 +14,10 @@ export class VendorAlreadyExistsError extends AppError {
 
 export class VendorStatusError extends AppError {
   constructor(vendorId: string, action: string, currentStatus: string) {
-    super(`Cannot ${action} vendor in status: ${currentStatus}`, 409, { code: 'VENDOR_STATUS_ERROR', details: { vendorId, action, currentStatus } });
+    super(`Cannot ${action} vendor in status: ${currentStatus}`, 409, {
+      code: 'VENDOR_STATUS_ERROR',
+      details: { vendorId, action, currentStatus },
+    });
   }
 }
 
@@ -38,7 +41,10 @@ export class PayoutNotFoundError extends AppError {
 
 export class PayoutStatusError extends AppError {
   constructor(payoutId: string, action: string, currentStatus: string) {
-    super(`Cannot ${action} payout in status: ${currentStatus}`, 409, { code: 'PAYOUT_STATUS_ERROR', details: { payoutId, action, currentStatus } });
+    super(`Cannot ${action} payout in status: ${currentStatus}`, 409, {
+      code: 'PAYOUT_STATUS_ERROR',
+      details: { payoutId, action, currentStatus },
+    });
   }
 }
 

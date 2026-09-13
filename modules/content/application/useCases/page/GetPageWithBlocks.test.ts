@@ -18,9 +18,20 @@ describe('GetPageWithBlocksUseCase', () => {
 
   it('should get page with blocks by ID', async () => {
     mockRepo.findPageById.mockResolvedValue({
-      contentPageId: 'p1', title: 'About', slug: 'about', status: 'published', visibility: 'public',
-      summary: 'About us', featuredImage: null, metaTitle: null, metaDescription: null, publishedAt: null,
-      contentTypeId: 'ct-1', templateId: null, createdAt: new Date(), updatedAt: new Date(),
+      contentPageId: 'p1',
+      title: 'About',
+      slug: 'about',
+      status: 'published',
+      visibility: 'public',
+      summary: 'About us',
+      featuredImage: null,
+      metaTitle: null,
+      metaDescription: null,
+      publishedAt: null,
+      contentTypeId: 'ct-1',
+      templateId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     mockRepo.findBlocksByPageId.mockResolvedValue([
       { contentBlockId: 'b1', blockTypeId: 'bt-1', title: 'Hero', sortOrder: 0, content: {}, isVisible: true },
@@ -46,9 +57,20 @@ describe('GetPageWithBlocksUseCase', () => {
 
   it('should filter inactive blocks by default', async () => {
     mockRepo.findPageById.mockResolvedValue({
-      contentPageId: 'p1', title: 'About', slug: 'about', status: 'published', visibility: 'public',
-      summary: null, featuredImage: null, metaTitle: null, metaDescription: null, publishedAt: null,
-      contentTypeId: 'ct-1', templateId: null, createdAt: new Date(), updatedAt: new Date(),
+      contentPageId: 'p1',
+      title: 'About',
+      slug: 'about',
+      status: 'published',
+      visibility: 'public',
+      summary: null,
+      featuredImage: null,
+      metaTitle: null,
+      metaDescription: null,
+      publishedAt: null,
+      contentTypeId: 'ct-1',
+      templateId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     mockRepo.findBlocksByPageId.mockResolvedValue([
       { contentBlockId: 'b1', blockTypeId: 'bt-1', title: 'Visible', sortOrder: 0, content: {}, isVisible: true },

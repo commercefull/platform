@@ -46,7 +46,11 @@ export interface SubscriptionRepository {
   // Subscription Plans
   getSubscriptionPlan(subscriptionPlanId: string): Promise<SubscriptionPlan | null>;
   getSubscriptionPlans(subscriptionProductId: string, activeOnly?: boolean): Promise<SubscriptionPlan[]>;
-  saveSubscriptionPlan(plan: Partial<SubscriptionPlan> & { subscriptionProductId: string; name: string; price: number }): Promise<SubscriptionPlan>;
+  saveSubscriptionPlan(
+    plan:
+      | (Partial<SubscriptionPlan> & { subscriptionPlanId: string })
+      | (Partial<SubscriptionPlan> & { subscriptionProductId: string; name: string; price: number }),
+  ): Promise<SubscriptionPlan>;
   deleteSubscriptionPlan(subscriptionPlanId: string): Promise<void>;
 
   // Customer Subscriptions
@@ -73,18 +77,8 @@ export interface SubscriptionRepository {
     status: SubscriptionStatus,
     additionalFields?: Partial<CustomerSubscription>,
   ): Promise<void>;
-  cancelSubscription(
-    customerSubscriptionId: string,
-    reason?: string,
-    cancelledBy?: string,
-    cancelAtPeriodEnd?: boolean,
-  ): Promise<void>;
-  pauseSubscription(
-    customerSubscriptionId: string,
-    resumeAt?: Date,
-    reason?: string,
-    pausedBy?: string,
-  ): Promise<SubscriptionPause>;
+  cancelSubscription(customerSubscriptionId: string, reason?: string, cancelledBy?: string, cancelAtPeriodEnd?: boolean): Promise<void>;
+  pauseSubscription(customerSubscriptionId: string, resumeAt?: Date, reason?: string, pausedBy?: string): Promise<SubscriptionPause>;
   resumeSubscription(customerSubscriptionId: string, resumedBy?: string): Promise<void>;
   advanceBillingCycle(customerSubscriptionId: string): Promise<void>;
 
@@ -121,11 +115,7 @@ export interface SubscriptionRepository {
   }): Promise<DunningAttempt>;
   getDunningAttempts(customerSubscriptionId: string): Promise<DunningAttempt[]>;
   getPendingDunningAttempts(beforeDate: Date): Promise<DunningAttempt[]>;
-  updateDunningAttempt(
-    dunningAttemptId: string,
-    status: DunningStatus,
-    additionalFields?: Partial<DunningAttempt>,
-  ): Promise<void>;
+  updateDunningAttempt(dunningAttemptId: string, status: DunningStatus, additionalFields?: Partial<DunningAttempt>): Promise<void>;
 
   // Storefront Queries
   findActivePlansWithProduct(): Promise<unknown[]>;

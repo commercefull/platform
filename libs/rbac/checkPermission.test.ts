@@ -133,29 +133,17 @@ describe('checkPermission', () => {
 
   describe('assertPermission', () => {
     it('should throw UnauthorizedError when no userId', () => {
-      expect(() =>
-        assertPermission({ userId: '', role: 'ADMIN', userType: 'system' }, 'product', 'create'),
-      ).toThrow(UnauthorizedError);
+      expect(() => assertPermission({ userId: '', role: 'ADMIN', userType: 'system' }, 'product', 'create')).toThrow(UnauthorizedError);
     });
 
     it('should throw ForbiddenError when not allowed', () => {
-      expect(() =>
-        assertPermission(
-          { userId: 'user-1', role: 'CASHIER', userType: 'organization' },
-          'product',
-          'create',
-        ),
-      ).toThrow(ForbiddenError);
+      expect(() => assertPermission({ userId: 'user-1', role: 'CASHIER', userType: 'organization' }, 'product', 'create')).toThrow(
+        ForbiddenError,
+      );
     });
 
     it('should not throw when allowed', () => {
-      expect(() =>
-        assertPermission(
-          { userId: 'admin-1', role: 'ADMIN', userType: 'admin' },
-          'product',
-          'create',
-        ),
-      ).not.toThrow();
+      expect(() => assertPermission({ userId: 'admin-1', role: 'ADMIN', userType: 'admin' }, 'product', 'create')).not.toThrow();
     });
   });
 

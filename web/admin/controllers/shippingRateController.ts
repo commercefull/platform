@@ -5,8 +5,13 @@
 
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import { ManageShippingRatesUseCase, ManageShippingZonesUseCase, ManageShippingMethodsAdminUseCase } from '../../../modules/shipping/application/useCases/ManageShippingRates';
+import {
+  ManageShippingRatesUseCase,
+  ManageShippingZonesUseCase,
+  ManageShippingMethodsAdminUseCase,
+} from '../../../modules/shipping/application/useCases/ManageShippingRates';
 import { adminRespond } from '../../respond';
+import { buildFormObject, FieldConfig } from '../utils/formParsing';
 
 const manageShippingRatesUseCase = new ManageShippingRatesUseCase();
 const manageShippingZonesUseCase = new ManageShippingZonesUseCase();
@@ -38,7 +43,6 @@ export const listShippingRates = async (req: TypedRequest, res: Response): Promi
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createShippingRateForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -50,7 +54,6 @@ export const createShippingRateForm = async (req: TypedRequest, res: Response): 
     zones,
     methods,
   });
-  
 };
 
 export const createShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -96,7 +99,6 @@ export const createShippingRate = async (req: TypedRequest, res: Response): Prom
   });
 
   res.redirect(`/hub/shipping/rates/${rate.shippingRateId}?success=Shipping rate created successfully`);
-  
 };
 
 export const viewShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -124,7 +126,6 @@ export const viewShippingRate = async (req: TypedRequest, res: Response): Promis
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editShippingRateForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -149,45 +150,32 @@ export const editShippingRateForm = async (req: TypedRequest, res: Response): Pr
     zones,
     methods,
   });
-  
 };
+
+const shippingRateUpdateFields: FieldConfig[] = [
+  { name: 'name', transform: 'stringOrUndefined' },
+  { name: 'description', transform: 'stringOrUndefined' },
+  { name: 'rateType' },
+  { name: 'baseRate' },
+  { name: 'perItemRate', transform: 'stringOrUndefined' },
+  { name: 'freeThreshold', transform: 'stringOrUndefined' },
+  { name: 'minRate', transform: 'stringOrUndefined' },
+  { name: 'maxRate', transform: 'stringOrUndefined' },
+  { name: 'currency' },
+  { name: 'taxable', transform: 'boolTrue' },
+  { name: 'priority', transform: 'int', falsyValue: 0 },
+  { name: 'validFrom', transform: 'date', falsyValue: null },
+  { name: 'validTo', transform: 'date', falsyValue: null },
+  { name: 'isActive', transform: 'boolTrue' },
+];
+
+function parseShippingRateUpdates(body: RequestBody): Record<string, unknown> {
+  return buildFormObject(body as Record<string, unknown>, shippingRateUpdateFields);
+}
 
 export const updateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   const { rateId } = req.params;
-  const updates: Record<string, unknown> = {};
-
-  const body = req.body as RequestBody;
-  const {
-    name,
-    description,
-    rateType,
-    baseRate,
-    perItemRate,
-    freeThreshold,
-    minRate,
-    maxRate,
-    currency,
-    taxable,
-    priority,
-    validFrom,
-    validTo,
-    isActive,
-  } = body;
-
-  if (name !== undefined) updates.name = name || undefined;
-  if (description !== undefined) updates.description = description || undefined;
-  if (rateType !== undefined) updates.rateType = rateType;
-  if (baseRate !== undefined) updates.baseRate = baseRate;
-  if (perItemRate !== undefined) updates.perItemRate = perItemRate || undefined;
-  if (freeThreshold !== undefined) updates.freeThreshold = freeThreshold || undefined;
-  if (minRate !== undefined) updates.minRate = minRate || undefined;
-  if (maxRate !== undefined) updates.maxRate = maxRate || undefined;
-  if (currency !== undefined) updates.currency = currency;
-  if (taxable !== undefined) updates.taxable = taxable === 'true';
-  if (priority !== undefined) updates.priority = priority ? parseInt(priority) : 0;
-  if (validFrom !== undefined) updates.validFrom = validFrom ? new Date(validFrom) : null;
-  if (validTo !== undefined) updates.validTo = validTo ? new Date(validTo) : null;
-  if (isActive !== undefined) updates.isActive = isActive === 'true';
+  const updates = parseShippingRateUpdates(req.body as RequestBody);
 
   const rate = await manageShippingRatesUseCase.update(rateId, updates);
 
@@ -196,7 +184,6 @@ export const updateShippingRate = async (req: TypedRequest, res: Response): Prom
   }
 
   res.redirect(`/hub/shipping/rates/${rateId}?success=Shipping rate updated successfully`);
-  
 };
 
 export const activateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -209,7 +196,6 @@ export const activateShippingRate = async (req: TypedRequest, res: Response): Pr
   }
 
   res.json({ success: true, message: 'Shipping rate activated successfully' });
-  
 };
 
 export const deactivateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -222,7 +208,6 @@ export const deactivateShippingRate = async (req: TypedRequest, res: Response): 
   }
 
   res.json({ success: true, message: 'Shipping rate deactivated successfully' });
-  
 };
 
 export const deleteShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -235,7 +220,6 @@ export const deleteShippingRate = async (req: TypedRequest, res: Response): Prom
   }
 
   res.json({ success: true, message: 'Shipping rate deleted successfully' });
-  
 };
 
 export const calculateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -262,5 +246,4 @@ export const calculateShippingRate = async (req: TypedRequest, res: Response): P
     rateType: rate.rateType,
     currency: rate.currency,
   });
-  
 };

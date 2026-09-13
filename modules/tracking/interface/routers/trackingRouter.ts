@@ -25,7 +25,11 @@ router.delete('/config/:storeId/meta-capi', isOrganizationLoggedIn, trackingCont
 
 // Event Mappings
 router.post('/config/:storeId/mappings', isOrganizationLoggedIn, trackingController.addEventMapping.bind(trackingController));
-router.delete('/config/:storeId/mappings/:sourceEvent', isOrganizationLoggedIn, trackingController.removeEventMapping.bind(trackingController));
+router.delete(
+  '/config/:storeId/mappings/:sourceEvent',
+  isOrganizationLoggedIn,
+  trackingController.removeEventMapping.bind(trackingController),
+);
 
 // Lifecycle
 router.post('/config/:storeId/activate', isOrganizationLoggedIn, trackingController.activate.bind(trackingController));

@@ -16,7 +16,6 @@ type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => P
 export const getAvailableSubscriptionProducts: AsyncHandler = async (req, res, _next) => {
   const products = await subscriptionRepo.getSubscriptionProducts(true);
   res.json({ success: true, data: products });
-  
 };
 
 export const getSubscriptionProductDetails: AsyncHandler = async (req, res, _next) => {
@@ -34,7 +33,6 @@ export const getSubscriptionProductDetails: AsyncHandler = async (req, res, _nex
 
   const plans = await subscriptionRepo.getSubscriptionPlans(product.subscriptionProductId, true);
   res.json({ success: true, data: { ...product, plans } });
-  
 };
 
 export const getSubscriptionPlanDetails: AsyncHandler = async (req, res, _next) => {
@@ -44,7 +42,6 @@ export const getSubscriptionPlanDetails: AsyncHandler = async (req, res, _next) 
     return;
   }
   res.json({ success: true, data: plan });
-  
 };
 
 // ============================================================================
@@ -60,7 +57,6 @@ export const getMySubscriptions: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const getMySubscription: AsyncHandler = async (req, res, _next) => {
@@ -76,7 +72,6 @@ export const getMySubscription: AsyncHandler = async (req, res, _next) => {
   const plan = await subscriptionRepo.getSubscriptionPlan(subscription.subscriptionPlanId);
 
   res.json({ success: true, data: { ...subscription, plan, orders } });
-  
 };
 
 // ============================================================================
@@ -116,7 +111,6 @@ export const createSubscription: AsyncHandler = async (req, res, _next) => {
   });
 
   res.status(201).json({ success: true, data: subscription });
-  
 };
 
 // ============================================================================
@@ -144,7 +138,6 @@ export const updateMySubscription: AsyncHandler = async (req, res, _next) => {
 
   // For now, we'll just return success - full update logic would need more implementation
   res.json({ success: true, message: 'Subscription updated' });
-  
 };
 
 export const changePlan: AsyncHandler = async (req, res, _next) => {
@@ -171,7 +164,6 @@ export const changePlan: AsyncHandler = async (req, res, _next) => {
 
   // Plan change logic would go here - proration, etc.
   res.json({ success: true, message: 'Plan change scheduled' });
-  
 };
 
 export const pauseMySubscription: AsyncHandler = async (req, res, _next) => {
@@ -220,7 +212,6 @@ export const pauseMySubscription: AsyncHandler = async (req, res, _next) => {
   const pause = await subscriptionRepo.pauseSubscription(req.params.id, resumeAt ? new Date(resumeAt) : undefined, reason, 'customer');
 
   res.json({ success: true, data: pause });
-  
 };
 
 export const resumeMySubscription: AsyncHandler = async (req, res, _next) => {
@@ -239,7 +230,6 @@ export const resumeMySubscription: AsyncHandler = async (req, res, _next) => {
 
   await subscriptionRepo.resumeSubscription(req.params.id, 'customer');
   res.json({ success: true, message: 'Subscription resumed' });
-  
 };
 
 export const cancelMySubscription: AsyncHandler = async (req, res, _next) => {
@@ -289,7 +279,6 @@ export const cancelMySubscription: AsyncHandler = async (req, res, _next) => {
         ? 'Subscription will be cancelled at the end of the current billing period'
         : 'Subscription cancelled immediately',
   });
-  
 };
 
 export const reactivateMySubscription: AsyncHandler = async (req, res, _next) => {
@@ -314,7 +303,6 @@ export const reactivateMySubscription: AsyncHandler = async (req, res, _next) =>
   });
 
   res.json({ success: true, message: 'Subscription reactivated' });
-  
 };
 
 // ============================================================================
@@ -332,7 +320,6 @@ export const getMySubscriptionOrders: AsyncHandler = async (req, res, _next) => 
 
   const orders = await subscriptionRepo.getSubscriptionOrders(req.params.id);
   res.json({ success: true, data: orders });
-  
 };
 
 // ============================================================================
@@ -367,5 +354,4 @@ export const skipNextDelivery: AsyncHandler = async (req, res, _next) => {
   await subscriptionRepo.advanceBillingCycle(subscription.customerSubscriptionId);
 
   res.json({ success: true, message: 'Next delivery skipped' });
-  
 };

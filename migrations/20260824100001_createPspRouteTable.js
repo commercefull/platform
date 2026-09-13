@@ -4,7 +4,7 @@
  */
 
 export async function up(knex) {
-  await knex.schema.createTable('pspRoute', (table) => {
+  await knex.schema.createTable('pspRoute', table => {
     table.string('routeId').primary();
     table.string('organizationId').notNullable().index();
     table.string('provider').notNullable();

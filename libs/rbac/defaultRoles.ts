@@ -14,9 +14,7 @@ export const DEFAULT_ROLE_POLICIES: RolePolicy[] = [
     description: 'Full system access — all resources, all actions',
     isSystem: true,
     isActive: true,
-    permissions: [
-      { resource: '*', action: '*' },
-    ],
+    permissions: [{ resource: '*', action: '*' }],
   },
   {
     roleName: 'MANAGER',

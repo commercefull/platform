@@ -1,4 +1,4 @@
-import { CreateLocaleUseCase} from './CreateLocale';
+import { CreateLocaleUseCase } from './CreateLocale';
 import { LocaleCodeAlreadyExistsError, LocalizationValidationError } from '../../domain/errors/LocalizationErrors';
 
 describe('CreateLocaleUseCase', () => {
@@ -9,7 +9,12 @@ describe('CreateLocaleUseCase', () => {
     mockRepo = {
       findLocaleByCode: jest.fn().mockResolvedValue(null),
       createLocale: jest.fn().mockResolvedValue({
-        localeId: 'loc1', code: 'en-US', name: 'English (US)', isDefault: true, isActive: true, createdAt: new Date(),
+        localeId: 'loc1',
+        code: 'en-US',
+        name: 'English (US)',
+        isDefault: true,
+        isActive: true,
+        createdAt: new Date(),
       }),
     };
     useCase = new CreateLocaleUseCase(mockRepo as never);

@@ -78,9 +78,7 @@ describe('CancelOrderUseCase', () => {
     const repo = createMockOrderRepo(null);
     const useCase = new CancelOrderUseCase(repo);
 
-    await expect(
-      useCase.execute(new CancelOrderCommand('nonexistent', 'reason')),
-    ).rejects.toThrow(OrderNotFoundError);
+    await expect(useCase.execute(new CancelOrderCommand('nonexistent', 'reason'))).rejects.toThrow(OrderNotFoundError);
   });
 
   it('should throw CancelOrderPermissionError when customerId does not match', async () => {
@@ -88,9 +86,7 @@ describe('CancelOrderUseCase', () => {
     const repo = createMockOrderRepo(order);
     const useCase = new CancelOrderUseCase(repo);
 
-    await expect(
-      useCase.execute(new CancelOrderCommand('o-1', 'reason', 'wrong-customer')),
-    ).rejects.toThrow(CancelOrderPermissionError);
+    await expect(useCase.execute(new CancelOrderCommand('o-1', 'reason', 'wrong-customer'))).rejects.toThrow(CancelOrderPermissionError);
   });
 
   it('should throw OrderCannotBeCancelledError when order is completed', async () => {
@@ -102,9 +98,7 @@ describe('CancelOrderUseCase', () => {
     const repo = createMockOrderRepo(order);
     const useCase = new CancelOrderUseCase(repo);
 
-    await expect(
-      useCase.execute(new CancelOrderCommand('o-1', 'reason')),
-    ).rejects.toThrow(OrderCannotBeCancelledError);
+    await expect(useCase.execute(new CancelOrderCommand('o-1', 'reason'))).rejects.toThrow(OrderCannotBeCancelledError);
   });
 });
 
@@ -114,9 +108,7 @@ describe('UpdateOrderStatusUseCase', () => {
     const repo = createMockOrderRepo(order);
     const useCase = new UpdateOrderStatusUseCase(repo);
 
-    const result = await useCase.execute(
-      new UpdateOrderStatusCommand('o-1', OrderStatus.PROCESSING, 'processing'),
-    );
+    const result = await useCase.execute(new UpdateOrderStatusCommand('o-1', OrderStatus.PROCESSING, 'processing'));
 
     expect(result.status).toBe(OrderStatus.PROCESSING);
     expect(repo.save).toHaveBeenCalledWith(order);
@@ -126,9 +118,7 @@ describe('UpdateOrderStatusUseCase', () => {
     const repo = createMockOrderRepo(null);
     const useCase = new UpdateOrderStatusUseCase(repo);
 
-    await expect(
-      useCase.execute(new UpdateOrderStatusCommand('nonexistent', OrderStatus.PROCESSING)),
-    ).rejects.toThrow(OrderNotFoundError);
+    await expect(useCase.execute(new UpdateOrderStatusCommand('nonexistent', OrderStatus.PROCESSING))).rejects.toThrow(OrderNotFoundError);
   });
 });
 
@@ -140,9 +130,7 @@ describe('ProcessRefundUseCase (Order)', () => {
     const repo = createMockOrderRepo(order);
     const useCase = new ProcessRefundUseCase(repo);
 
-    const result = await useCase.execute(
-      new ProcessRefundCommand('o-1', 100, 'customer request'),
-    );
+    const result = await useCase.execute(new ProcessRefundCommand('o-1', 100, 'customer request'));
 
     expect(result.isFullRefund).toBe(true);
     expect(result.refundAmount).toBe(100);
@@ -153,9 +141,7 @@ describe('ProcessRefundUseCase (Order)', () => {
     const repo = createMockOrderRepo(null);
     const useCase = new ProcessRefundUseCase(repo);
 
-    await expect(
-      useCase.execute(new ProcessRefundCommand('nonexistent', 50, 'reason')),
-    ).rejects.toThrow(OrderNotFoundError);
+    await expect(useCase.execute(new ProcessRefundCommand('nonexistent', 50, 'reason'))).rejects.toThrow(OrderNotFoundError);
   });
 
   it('should throw OrderCannotBeRefundedError when order is not refundable', async () => {
@@ -164,9 +150,7 @@ describe('ProcessRefundUseCase (Order)', () => {
     const repo = createMockOrderRepo(order);
     const useCase = new ProcessRefundUseCase(repo);
 
-    await expect(
-      useCase.execute(new ProcessRefundCommand('o-1', 50, 'reason')),
-    ).rejects.toThrow(OrderCannotBeRefundedError);
+    await expect(useCase.execute(new ProcessRefundCommand('o-1', 50, 'reason'))).rejects.toThrow(OrderCannotBeRefundedError);
   });
 
   it('should throw RefundAmountMustBePositiveError for zero amount', async () => {
@@ -176,9 +160,7 @@ describe('ProcessRefundUseCase (Order)', () => {
     const repo = createMockOrderRepo(order);
     const useCase = new ProcessRefundUseCase(repo);
 
-    await expect(
-      useCase.execute(new ProcessRefundCommand('o-1', 0, 'reason')),
-    ).rejects.toThrow(RefundAmountMustBePositiveError);
+    await expect(useCase.execute(new ProcessRefundCommand('o-1', 0, 'reason'))).rejects.toThrow(RefundAmountMustBePositiveError);
   });
 
   it('should throw RefundExceedsOrderTotalError when amount exceeds total', async () => {
@@ -188,9 +170,7 @@ describe('ProcessRefundUseCase (Order)', () => {
     const repo = createMockOrderRepo(order);
     const useCase = new ProcessRefundUseCase(repo);
 
-    await expect(
-      useCase.execute(new ProcessRefundCommand('o-1', 999, 'reason')),
-    ).rejects.toThrow(RefundExceedsOrderTotalError);
+    await expect(useCase.execute(new ProcessRefundCommand('o-1', 999, 'reason'))).rejects.toThrow(RefundExceedsOrderTotalError);
   });
 });
 
@@ -221,14 +201,7 @@ describe('CreateOrderUseCase', () => {
     const repo = createMockOrderRepo(order);
     const useCase = new CreateOrderUseCase(repo);
 
-    const result = await useCase.execute(
-      new CreateOrderCommand(
-        'cust-1',
-        'test@example.com',
-        validItems,
-        validAddress as never,
-      ),
-    );
+    const result = await useCase.execute(new CreateOrderCommand('cust-1', 'test@example.com', validItems, validAddress as never));
 
     expect(result.orderId).toBe('o-1');
     expect(repo.save).toHaveBeenCalled();
@@ -238,32 +211,26 @@ describe('CreateOrderUseCase', () => {
     const repo = createMockOrderRepo(null);
     const useCase = new CreateOrderUseCase(repo);
 
-    await expect(
-      useCase.execute(
-        new CreateOrderCommand('cust-1', 'test@example.com', [], validAddress as never),
-      ),
-    ).rejects.toThrow(OrderMustContainItemsError);
+    await expect(useCase.execute(new CreateOrderCommand('cust-1', 'test@example.com', [], validAddress as never))).rejects.toThrow(
+      OrderMustContainItemsError,
+    );
   });
 
   it('should throw CustomerEmailRequiredError when email is missing', async () => {
     const repo = createMockOrderRepo(null);
     const useCase = new CreateOrderUseCase(repo);
 
-    await expect(
-      useCase.execute(
-        new CreateOrderCommand('cust-1', '', validItems, validAddress as never),
-      ),
-    ).rejects.toThrow(CustomerEmailRequiredError);
+    await expect(useCase.execute(new CreateOrderCommand('cust-1', '', validItems, validAddress as never))).rejects.toThrow(
+      CustomerEmailRequiredError,
+    );
   });
 
   it('should throw ShippingAddressRequiredError when address is missing', async () => {
     const repo = createMockOrderRepo(null);
     const useCase = new CreateOrderUseCase(repo);
 
-    await expect(
-      useCase.execute(
-        new CreateOrderCommand('cust-1', 'test@example.com', validItems, undefined as never),
-      ),
-    ).rejects.toThrow(ShippingAddressRequiredError);
+    await expect(useCase.execute(new CreateOrderCommand('cust-1', 'test@example.com', validItems, undefined as never))).rejects.toThrow(
+      ShippingAddressRequiredError,
+    );
   });
 });

@@ -48,14 +48,15 @@ modules/automation/
 
 A rule is activated by a trigger. Four trigger types are supported:
 
-| Trigger Type | Description | Config Required |
-|---|---|---|
-| `event` | Reacts to a specific event bus event | `triggerConfig.eventName` |
-| `schedule` | Runs on a cron schedule (future) | `triggerConfig.cronExpression` |
-| `manual` | Triggered via API call | None |
-| `segment_membership_added` / `segment_membership_removed` | Reacts to CDP segment changes | `triggerConfig.segmentId` |
+| Trigger Type                                              | Description                          | Config Required                |
+| --------------------------------------------------------- | ------------------------------------ | ------------------------------ |
+| `event`                                                   | Reacts to a specific event bus event | `triggerConfig.eventName`      |
+| `schedule`                                                | Runs on a cron schedule (future)     | `triggerConfig.cronExpression` |
+| `manual`                                                  | Triggered via API call               | None                           |
+| `segment_membership_added` / `segment_membership_removed` | Reacts to CDP segment changes        | `triggerConfig.segmentId`      |
 
 Example — event trigger:
+
 ```json
 {
   "triggerType": "event",
@@ -69,43 +70,43 @@ Conditions are evaluated against a **context object** that contains the triggeri
 
 **15 operators:**
 
-| Operator | Description | Example |
-|---|---|---|
-| `eq` | Equals | `{ field: "customer.tier", operator: "eq", value: "loyal" }` |
-| `neq` | Not equals | `{ field: "order.status", operator: "neq", value: "cancelled" }` |
-| `gt` | Greater than | `{ field: "order.totalAmount", operator: "gt", value: 100 }` |
-| `gte` | Greater than or equal | `{ field: "customer.lifetimeValue", operator: "gte", value: 5000 }` |
-| `lt` | Less than | `{ field: "customer.daysSinceLastOrder", operator: "lt", value: 30 }` |
-| `lte` | Less than or equal | `{ field: "product.price", operator: "lte", value: 50 }` |
-| `in` | Value in list | `{ field: "customer.rfmSegment", operator: "in", values: ["champion", "loyal"] }` |
-| `notIn` | Value not in list | `{ field: "order.status", operator: "notIn", values: ["cancelled", "refunded"] }` |
-| `contains` | Array contains value | `{ field: "customer.tags", operator: "contains", value: "vip" }` |
-| `notContains` | Array does not contain | `{ field: "customer.tags", operator: "notContains", value: "wholesale" }` |
-| `startsWith` | String starts with | `{ field: "event.type", operator: "startsWith", value: "order" }` |
-| `endsWith` | String ends with | `{ field: "event.type", operator: "endsWith", value: ".completed" }` |
-| `isNull` | Value is null/undefined | `{ field: "customer.tier", operator: "isNull" }` |
-| `isNotNull` | Value is not null | `{ field: "customer.tier", operator: "isNotNull" }` |
-| `regex` | Matches regex pattern | `{ field: "event.type", operator: "regex", value: "^order\\." }` |
+| Operator      | Description             | Example                                                                           |
+| ------------- | ----------------------- | --------------------------------------------------------------------------------- |
+| `eq`          | Equals                  | `{ field: "customer.tier", operator: "eq", value: "loyal" }`                      |
+| `neq`         | Not equals              | `{ field: "order.status", operator: "neq", value: "cancelled" }`                  |
+| `gt`          | Greater than            | `{ field: "order.totalAmount", operator: "gt", value: 100 }`                      |
+| `gte`         | Greater than or equal   | `{ field: "customer.lifetimeValue", operator: "gte", value: 5000 }`               |
+| `lt`          | Less than               | `{ field: "customer.daysSinceLastOrder", operator: "lt", value: 30 }`             |
+| `lte`         | Less than or equal      | `{ field: "product.price", operator: "lte", value: 50 }`                          |
+| `in`          | Value in list           | `{ field: "customer.rfmSegment", operator: "in", values: ["champion", "loyal"] }` |
+| `notIn`       | Value not in list       | `{ field: "order.status", operator: "notIn", values: ["cancelled", "refunded"] }` |
+| `contains`    | Array contains value    | `{ field: "customer.tags", operator: "contains", value: "vip" }`                  |
+| `notContains` | Array does not contain  | `{ field: "customer.tags", operator: "notContains", value: "wholesale" }`         |
+| `startsWith`  | String starts with      | `{ field: "event.type", operator: "startsWith", value: "order" }`                 |
+| `endsWith`    | String ends with        | `{ field: "event.type", operator: "endsWith", value: ".completed" }`              |
+| `isNull`      | Value is null/undefined | `{ field: "customer.tier", operator: "isNull" }`                                  |
+| `isNotNull`   | Value is not null       | `{ field: "customer.tier", operator: "isNotNull" }`                               |
+| `regex`       | Matches regex pattern   | `{ field: "event.type", operator: "regex", value: "^order\\." }`                  |
 
 **Predefined fields:**
 
-| Field | Resolved from context |
-|---|---|
-| `event.type` | `context.event.type` |
-| `event.data.*` | `context.event` (full object) |
-| `customer.tier` | `context.customer.tier` |
-| `customer.lifetimeValue` | `context.customer.lifetimeValue` |
-| `customer.totalOrders` | `context.customer.totalOrders` |
-| `customer.daysSinceLastOrder` | `context.customer.daysSinceLastOrder` |
-| `customer.rfmSegment` | `context.customer.rfmSegment` |
-| `customer.tags` | `context.customer.tags` |
-| `order.totalAmount` | `context.order.totalAmount` |
-| `order.itemCount` | `context.order.itemCount` |
-| `order.status` | `context.order.status` |
-| `product.price` | `context.product.price` |
-| `product.categoryId` | `context.product.categoryId` |
-| `product.status` | `context.product.status` |
-| `custom` | Uses `dataPath` for arbitrary nested access |
+| Field                         | Resolved from context                       |
+| ----------------------------- | ------------------------------------------- |
+| `event.type`                  | `context.event.type`                        |
+| `event.data.*`                | `context.event` (full object)               |
+| `customer.tier`               | `context.customer.tier`                     |
+| `customer.lifetimeValue`      | `context.customer.lifetimeValue`            |
+| `customer.totalOrders`        | `context.customer.totalOrders`              |
+| `customer.daysSinceLastOrder` | `context.customer.daysSinceLastOrder`       |
+| `customer.rfmSegment`         | `context.customer.rfmSegment`               |
+| `customer.tags`               | `context.customer.tags`                     |
+| `order.totalAmount`           | `context.order.totalAmount`                 |
+| `order.itemCount`             | `context.order.itemCount`                   |
+| `order.status`                | `context.order.status`                      |
+| `product.price`               | `context.product.price`                     |
+| `product.categoryId`          | `context.product.categoryId`                |
+| `product.status`              | `context.product.status`                    |
+| `custom`                      | Uses `dataPath` for arbitrary nested access |
 
 **Custom dataPath:** For fields not in the predefined list, use `field: "custom"` with a `dataPath` to resolve from the context:
 
@@ -119,6 +120,7 @@ Conditions are evaluated against a **context object** that contains the triggeri
 ```
 
 **Match modes:**
+
 - `all` (default) — All conditions must be true
 - `any` — At least one condition must be true
 
@@ -128,22 +130,23 @@ Actions are the side effects executed when conditions are met. Each action has a
 
 **12 action types:**
 
-| Action Type | Description | Config |
-|---|---|---|
-| `send_notification` | Sends a notification via JobScheduler | `userId`, `notificationType`, `title`, `message`, `data`, `channels` |
-| `send_email` | Sends an email (future) | `to`, `template`, `data` |
-| `add_tag` | Adds a tag to a customer profile | `customerId`, `tag` |
-| `remove_tag` | Removes a tag from a customer profile | `customerId`, `tag` |
-| `add_to_segment` | Adds customer to a CDP segment (future) | `customerId`, `segmentId` |
-| `remove_from_segment` | Removes customer from a segment (future) | `customerId`, `segmentId` |
-| `apply_discount` | Applies a discount (future) | `customerId`, `percent`, `code` |
-| `create_order` | Creates an order (future) | `items`, `customerId` |
-| `update_order_status` | Updates order status (future) | `orderId`, `status` |
-| `emit_event` | Emits a new event on the event bus | `eventName`, `eventData` |
-| `webhook` | Calls an external webhook (future) | `url`, `method`, `headers`, `body` |
-| `custom` | Custom handler — logged only | Any config |
+| Action Type           | Description                              | Config                                                               |
+| --------------------- | ---------------------------------------- | -------------------------------------------------------------------- |
+| `send_notification`   | Sends a notification via JobScheduler    | `userId`, `notificationType`, `title`, `message`, `data`, `channels` |
+| `send_email`          | Sends an email (future)                  | `to`, `template`, `data`                                             |
+| `add_tag`             | Adds a tag to a customer profile         | `customerId`, `tag`                                                  |
+| `remove_tag`          | Removes a tag from a customer profile    | `customerId`, `tag`                                                  |
+| `add_to_segment`      | Adds customer to a CDP segment (future)  | `customerId`, `segmentId`                                            |
+| `remove_from_segment` | Removes customer from a segment (future) | `customerId`, `segmentId`                                            |
+| `apply_discount`      | Applies a discount (future)              | `customerId`, `percent`, `code`                                      |
+| `create_order`        | Creates an order (future)                | `items`, `customerId`                                                |
+| `update_order_status` | Updates order status (future)            | `orderId`, `status`                                                  |
+| `emit_event`          | Emits a new event on the event bus       | `eventName`, `eventData`                                             |
+| `webhook`             | Calls an external webhook (future)       | `url`, `method`, `headers`, `body`                                   |
+| `custom`              | Custom handler — logged only             | Any config                                                           |
 
 **Execution modes:**
+
 - `sequential` (default) — Actions run in order; stops on first failure
 - `parallel` — All actions run concurrently via `Promise.all`
 
@@ -199,15 +202,15 @@ Call `executionEngine.triggerManual(ruleId, context?)` via the API or programmat
 
 All routes are mounted at `/business/automation` with `isOrganizationLoggedIn` auth.
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/automation` | List all rules (query: `activeOnly=true`) |
-| `GET` | `/automation/:ruleId` | Get a single rule |
-| `POST` | `/automation` | Create a new rule |
-| `PUT` | `/automation/:ruleId` | Update a rule |
-| `DELETE` | `/automation/:ruleId` | Soft-delete a rule |
-| `POST` | `/automation/:ruleId/trigger` | Manually trigger a rule (body: `{ context?: {} }`) |
-| `GET` | `/automation/:ruleId/logs` | Get execution logs for a rule (query: `limit=50`) |
+| Method   | Path                          | Description                                        |
+| -------- | ----------------------------- | -------------------------------------------------- |
+| `GET`    | `/automation`                 | List all rules (query: `activeOnly=true`)          |
+| `GET`    | `/automation/:ruleId`         | Get a single rule                                  |
+| `POST`   | `/automation`                 | Create a new rule                                  |
+| `PUT`    | `/automation/:ruleId`         | Update a rule                                      |
+| `DELETE` | `/automation/:ruleId`         | Soft-delete a rule                                 |
+| `POST`   | `/automation/:ruleId/trigger` | Manually trigger a rule (body: `{ context?: {} }`) |
+| `GET`    | `/automation/:ruleId/logs`    | Get execution logs for a rule (query: `limit=50`)  |
 
 ### Create Rule Example
 
@@ -261,48 +264,48 @@ curl -X POST http://localhost:3000/business/automation/rule-id/trigger \
 
 ### `automationRule` table
 
-| Column | Type | Description |
-|---|---|---|
-| `automationRuleId` | UUID PK | Unique identifier |
-| `name` | TEXT | Rule name |
-| `description` | TEXT | Optional description |
-| `triggerType` | TEXT | `event`, `schedule`, `manual`, `segment_membership_added`, `segment_membership_removed` |
-| `triggerConfig` | JSONB | Trigger configuration (eventName, cronExpression, segmentId) |
-| `conditions` | JSONB | Array of condition objects |
-| `conditionMatchMode` | TEXT | `all` or `any` |
-| `actions` | JSONB | Array of action objects |
-| `actionExecutionMode` | TEXT | `sequential` or `parallel` |
-| `isActive` | BOOLEAN | Whether the rule is active |
-| `priority` | INT | Higher = evaluated first |
-| `executionCount` | INT | Total executions |
-| `successCount` | INT | Successful executions |
-| `failureCount` | INT | Failed executions |
-| `lastTriggeredAt` | TIMESTAMP | Last trigger time |
-| `lastExecutedAt` | TIMESTAMP | Last execution completion |
-| `organizationId` | UUID | Optional org scope |
-| `createdBy` | TEXT | Creator |
-| `createdAt` / `updatedAt` / `deletedAt` | TIMESTAMP | Audit timestamps |
+| Column                                  | Type      | Description                                                                             |
+| --------------------------------------- | --------- | --------------------------------------------------------------------------------------- |
+| `automationRuleId`                      | UUID PK   | Unique identifier                                                                       |
+| `name`                                  | TEXT      | Rule name                                                                               |
+| `description`                           | TEXT      | Optional description                                                                    |
+| `triggerType`                           | TEXT      | `event`, `schedule`, `manual`, `segment_membership_added`, `segment_membership_removed` |
+| `triggerConfig`                         | JSONB     | Trigger configuration (eventName, cronExpression, segmentId)                            |
+| `conditions`                            | JSONB     | Array of condition objects                                                              |
+| `conditionMatchMode`                    | TEXT      | `all` or `any`                                                                          |
+| `actions`                               | JSONB     | Array of action objects                                                                 |
+| `actionExecutionMode`                   | TEXT      | `sequential` or `parallel`                                                              |
+| `isActive`                              | BOOLEAN   | Whether the rule is active                                                              |
+| `priority`                              | INT       | Higher = evaluated first                                                                |
+| `executionCount`                        | INT       | Total executions                                                                        |
+| `successCount`                          | INT       | Successful executions                                                                   |
+| `failureCount`                          | INT       | Failed executions                                                                       |
+| `lastTriggeredAt`                       | TIMESTAMP | Last trigger time                                                                       |
+| `lastExecutedAt`                        | TIMESTAMP | Last execution completion                                                               |
+| `organizationId`                        | UUID      | Optional org scope                                                                      |
+| `createdBy`                             | TEXT      | Creator                                                                                 |
+| `createdAt` / `updatedAt` / `deletedAt` | TIMESTAMP | Audit timestamps                                                                        |
 
 **Indexes:** `isActive+deletedAt`, `triggerType+isActive`, `organizationId+isActive`, `priority`
 
 ### `automationExecutionLog` table
 
-| Column | Type | Description |
-|---|---|---|
-| `executionLogId` | UUID PK | Unique identifier |
-| `automationRuleId` | UUID FK | Reference to rule |
-| `triggerType` | TEXT | How the rule was triggered |
-| `triggerEventId` | TEXT | Event ID (if event-triggered) |
-| `correlationId` | TEXT | Correlation ID for tracing |
-| `triggerData` | JSONB | The context that triggered the rule |
-| `conditionResults` | JSONB | Whether conditions passed |
-| `actionResults` | JSONB | Results of each action |
-| `status` | TEXT | `pending`, `running`, `success`, `failed`, `skipped`, `partial` |
-| `errorMessage` | TEXT | Error message if failed |
-| `durationMs` | INT | Execution duration |
-| `startedAt` | TIMESTAMP | Execution start |
-| `completedAt` | TIMESTAMP | Execution completion |
-| `organizationId` | UUID | Optional org scope |
+| Column             | Type      | Description                                                     |
+| ------------------ | --------- | --------------------------------------------------------------- |
+| `executionLogId`   | UUID PK   | Unique identifier                                               |
+| `automationRuleId` | UUID FK   | Reference to rule                                               |
+| `triggerType`      | TEXT      | How the rule was triggered                                      |
+| `triggerEventId`   | TEXT      | Event ID (if event-triggered)                                   |
+| `correlationId`    | TEXT      | Correlation ID for tracing                                      |
+| `triggerData`      | JSONB     | The context that triggered the rule                             |
+| `conditionResults` | JSONB     | Whether conditions passed                                       |
+| `actionResults`    | JSONB     | Results of each action                                          |
+| `status`           | TEXT      | `pending`, `running`, `success`, `failed`, `skipped`, `partial` |
+| `errorMessage`     | TEXT      | Error message if failed                                         |
+| `durationMs`       | INT       | Execution duration                                              |
+| `startedAt`        | TIMESTAMP | Execution start                                                 |
+| `completedAt`      | TIMESTAMP | Execution completion                                            |
+| `organizationId`   | UUID      | Optional org scope                                              |
 
 **Indexes:** `automationRuleId+startedAt`, `status`, `correlationId`, `triggerEventId`
 
@@ -314,11 +317,15 @@ curl -X POST http://localhost:3000/business/automation/rule-id/trigger \
 import { executionEngine } from '../modules/automation/application/useCases/wired';
 
 // Trigger all rules matching an event
-const results = await executionEngine.triggerEvent('order.completed', {
-  orderId: 'o1',
-  customerId: 'c1',
-  totalAmount: 500,
-}, correlationId);
+const results = await executionEngine.triggerEvent(
+  'order.completed',
+  {
+    orderId: 'o1',
+    customerId: 'c1',
+    totalAmount: 500,
+  },
+  correlationId,
+);
 
 // Manually trigger a specific rule
 const result = await executionEngine.triggerManual('rule-uuid', {
@@ -329,10 +336,7 @@ const result = await executionEngine.triggerManual('rule-uuid', {
 ### Using use cases
 
 ```typescript
-import {
-  createAutomationRuleUseCase,
-  listAutomationRulesUseCase,
-} from '../modules/automation/application/useCases/wired';
+import { createAutomationRuleUseCase, listAutomationRulesUseCase } from '../modules/automation/application/useCases/wired';
 
 // Create a rule
 const rule = await createAutomationRuleUseCase.execute({
@@ -340,9 +344,7 @@ const rule = await createAutomationRuleUseCase.execute({
   triggerType: 'event',
   triggerConfig: { eventName: 'inventory.low' },
   conditions: [],
-  actions: [
-    { type: 'send_notification', config: { title: 'Low Stock!', message: 'Reorder needed.' } },
-  ],
+  actions: [{ type: 'send_notification', config: { title: 'Low Stock!', message: 'Reorder needed.' } }],
 });
 
 // List active rules
@@ -375,7 +377,7 @@ import { executionEngine } from '../../modules/automation/application/useCases/w
 
 // Inside registerAllEventHandlers():
 if (moduleRegistry.shouldRegisterEvents('automation')) {
-  eventBus.registerHandler('order.completed', async (payload) => {
+  eventBus.registerHandler('order.completed', async payload => {
     await executionEngine.triggerEvent('order.completed', payload.data, payload.correlationId);
   });
 }
@@ -384,6 +386,7 @@ if (moduleRegistry.shouldRegisterEvents('automation')) {
 ## Execution Log & Audit Trail
 
 Every rule execution is logged in the `automationExecutionLog` table with:
+
 - The trigger data (event payload or manual context)
 - Whether conditions passed
 - Individual action results (success/failure, output, error, duration)
@@ -395,10 +398,12 @@ This provides a complete audit trail for debugging and monitoring automation beh
 ## Testing
 
 Tests are in:
+
 - `modules/automation/domain/automation.test.ts` — Entity lifecycle, condition evaluation (all 15 operators), dataPath resolution, match modes
 - `modules/automation/infrastructure/repositories/automationRepo.test.ts` — Repository CRUD with mocked DB, execution log CRUD
 
 Run:
+
 ```bash
 npx jest --selectProjects unit --testPathPatterns="automation" --no-coverage
 ```

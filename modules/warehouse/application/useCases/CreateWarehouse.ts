@@ -73,9 +73,7 @@ interface WarehouseRepositoryPort {
 }
 
 export class CreateWarehouseUseCase {
-  constructor(
-    private readonly warehouseRepository: WarehouseRepositoryPort,
-  ) {}
+  constructor(private readonly warehouseRepository: WarehouseRepositoryPort) {}
 
   async execute(input: CreateWarehouseInput): Promise<CreateWarehouseOutput> {
     // Check if code already exists

@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Translation Entity
@@ -6,13 +5,7 @@
  */
 
 export type TranslatableEntityType =
-  | 'product'
-  | 'category'
-  | 'collection'
-  | 'contentPage'
-  | 'notificationTemplate'
-  | 'attribute'
-  | 'attributeOption';
+  'product' | 'category' | 'collection' | 'contentPage' | 'notificationTemplate' | 'attribute' | 'attributeOption';
 
 export interface TranslationProps {
   translationId: string;

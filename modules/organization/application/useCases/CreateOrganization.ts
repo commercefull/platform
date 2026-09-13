@@ -26,7 +26,9 @@ export interface CreateOrganizationOutput {
 
 export interface CreateOrganizationRepository {
   findByEmail(email: string): Promise<{ organizationId: string } | null>;
-  create(params: Record<string, unknown>): Promise<{ organizationId: string; name: string; email: string; status: string; createdAt: Date }>;
+  create(
+    params: Record<string, unknown>,
+  ): Promise<{ organizationId: string; name: string; email: string; status: string; createdAt: Date }>;
 }
 
 export class CreateOrganizationUseCase {

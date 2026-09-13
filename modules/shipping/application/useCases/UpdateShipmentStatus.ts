@@ -16,10 +16,7 @@ export interface UpdateShipmentStatusInput {
 export class UpdateShipmentStatusUseCase {
   async execute(input: UpdateShipmentStatusInput): Promise<void> {
     try {
-      await query(
-        `UPDATE "shipment" SET status = $1, "updatedAt" = now() WHERE "shipmentId" = $2`,
-        [input.status, input.shipmentId],
-      );
+      await query(`UPDATE "shipment" SET status = $1, "updatedAt" = now() WHERE "shipmentId" = $2`, [input.status, input.shipmentId]);
       if (input.trackingInfo) {
         logger.info(`updateShipmentStatus: updated shipment ${input.shipmentId} to ${input.status} with tracking info`);
       } else {

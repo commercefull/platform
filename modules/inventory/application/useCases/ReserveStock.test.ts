@@ -42,10 +42,13 @@ describe('ReserveStockUseCase', () => {
     expect(result.results[0].isFullyReserved).toBe(true);
     expect(mockRepo.createReservation).toHaveBeenCalledTimes(1);
     expect(mockRepo.updateReservedQuantity).toHaveBeenCalledWith('inv-1', 30);
-    expect(eventBus.emit).toHaveBeenCalledWith('inventory.reserved', expect.objectContaining({
-      orderId: 'ord-1',
-      allReserved: true,
-    }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'inventory.reserved',
+      expect.objectContaining({
+        orderId: 'ord-1',
+        allReserved: true,
+      }),
+    );
   });
 
   it('should partially reserve when stock is insufficient', async () => {

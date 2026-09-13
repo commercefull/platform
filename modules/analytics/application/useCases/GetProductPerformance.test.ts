@@ -1,4 +1,4 @@
-import { GetProductPerformanceUseCase} from './GetProductPerformance';
+import { GetProductPerformanceUseCase } from './GetProductPerformance';
 
 describe('GetProductPerformanceUseCase', () => {
   let useCase: GetProductPerformanceUseCase;
@@ -16,7 +16,8 @@ describe('GetProductPerformanceUseCase', () => {
 
   it('should get product performance (happy path)', async () => {
     const result = await useCase.execute({
-      startDate: new Date('2024-01-01'), endDate: new Date('2024-12-31'),
+      startDate: new Date('2024-01-01'),
+      endDate: new Date('2024-12-31'),
     });
 
     expect(result.products).toHaveLength(2);
@@ -27,7 +28,8 @@ describe('GetProductPerformanceUseCase', () => {
 
   it('should calculate return rate', async () => {
     const result = await useCase.execute({
-      startDate: new Date('2024-01-01'), endDate: new Date('2024-12-31'),
+      startDate: new Date('2024-01-01'),
+      endDate: new Date('2024-12-31'),
     });
 
     expect(result.products[0].returnRate).toBe(10);
@@ -36,12 +38,20 @@ describe('GetProductPerformanceUseCase', () => {
 
   it('should pass filters to repository', async () => {
     await useCase.execute({
-      storeId: 's1', categoryId: 'cat1', startDate: new Date('2024-01-01'), endDate: new Date('2024-12-31'), sortBy: 'units', limit: 10,
+      storeId: 's1',
+      categoryId: 'cat1',
+      startDate: new Date('2024-01-01'),
+      endDate: new Date('2024-12-31'),
+      sortBy: 'units',
+      limit: 10,
     });
 
     expect(mockRepo.getProductPerformance).toHaveBeenCalledWith(
       expect.objectContaining({ storeId: 's1', categoryId: 'cat1' }),
-      expect.any(Date), expect.any(Date), 'units', 10,
+      expect.any(Date),
+      expect.any(Date),
+      'units',
+      10,
     );
   });
 });

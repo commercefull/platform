@@ -1,4 +1,4 @@
-import { InitiateReturnUseCase} from './InitiateReturn';
+import { InitiateReturnUseCase } from './InitiateReturn';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 
 describe('InitiateReturnUseCase', () => {
@@ -8,7 +8,9 @@ describe('InitiateReturnUseCase', () => {
 
   beforeEach(() => {
     mockFulfillment = {
-      fulfillmentId: 'f1', status: 'delivered', updatedAt: new Date(),
+      fulfillmentId: 'f1',
+      status: 'delivered',
+      updatedAt: new Date(),
       markReturned: jest.fn(),
     };
     mockRepo = {

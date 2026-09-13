@@ -28,14 +28,17 @@ export interface ExecutionLogRepository {
     organizationId?: string;
   }): Promise<string>;
 
-  update(id: string, params: {
-    status: string;
-    conditionResults?: unknown;
-    actionResults?: unknown;
-    errorMessage?: string;
-    durationMs?: number;
-    completedAt?: Date;
-  }): Promise<void>;
+  update(
+    id: string,
+    params: {
+      status: string;
+      conditionResults?: unknown;
+      actionResults?: unknown;
+      errorMessage?: string;
+      durationMs?: number;
+      completedAt?: Date;
+    },
+  ): Promise<void>;
 
   findByRule(ruleId: string, limit?: number): Promise<unknown[]>;
   findByCorrelationId(correlationId: string): Promise<unknown[]>;

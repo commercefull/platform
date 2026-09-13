@@ -2,7 +2,7 @@
  * Create trackingConfig table
  */
 exports.up = function (knex) {
-  return knex.schema.createTable('trackingConfig', (table) => {
+  return knex.schema.createTable('trackingConfig', table => {
     table.string('configId').primary();
     table.string('storeId').notNullable().unique();
     table.string('organizationId').notNullable();

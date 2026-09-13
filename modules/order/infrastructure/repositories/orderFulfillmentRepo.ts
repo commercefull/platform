@@ -262,7 +262,7 @@ export class OrderFulfillmentRepo {
   async markAsShipped(orderFulfillmentId: string, shippedAt?: string): Promise<OrderFulfillment | null> {
     return this.update(orderFulfillmentId, {
       status: 'shipped',
-      shippedAt: shippedAt || unixTimestamp(),
+      shippedAt: shippedAt || String(unixTimestamp()),
     });
   }
 
@@ -272,7 +272,7 @@ export class OrderFulfillmentRepo {
   async markAsDelivered(orderFulfillmentId: string, deliveredAt?: string): Promise<OrderFulfillment | null> {
     return this.update(orderFulfillmentId, {
       status: 'delivered',
-      deliveredAt: deliveredAt || unixTimestamp(),
+      deliveredAt: deliveredAt || String(unixTimestamp()),
     });
   }
 

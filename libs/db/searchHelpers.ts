@@ -19,8 +19,7 @@ export type SearchStrategy = 'ilike' | 'fts';
  * Controlled via env var `SEARCH_STRATEGY=ilike|fts`.
  * Defaults to `ilike` for backward compatibility.
  */
-const configuredStrategy: SearchStrategy =
-  process.env.SEARCH_STRATEGY === 'fts' ? 'fts' : 'ilike';
+const configuredStrategy: SearchStrategy = process.env.SEARCH_STRATEGY === 'fts' ? 'fts' : 'ilike';
 
 /**
  * Result of building a search condition.
@@ -44,17 +43,13 @@ export interface SearchCondition {
  * // clause: 'AND ("name" ILIKE $1 OR "email" ILIKE $1 OR "phone" ILIKE $1)'
  * // params: ['%john%']
  */
-export function buildILikeSearch(
-  searchTerm: string,
-  columns: string[],
-  startParamIndex: number = 1,
-): SearchCondition {
+export function buildILikeSearch(searchTerm: string, columns: string[], startParamIndex: number = 1): SearchCondition {
   if (!searchTerm || columns.length === 0) {
     return { clause: '', params: [], paramCount: 0 };
   }
 
   const pattern = `%${searchTerm}%`;
-  const colConditions = columns.map((col) => `${col} ILIKE $${startParamIndex}`);
+  const colConditions = columns.map(col => `${col} ILIKE $${startParamIndex}`);
   const clause = `AND (${colConditions.join(' OR ')})`;
 
   return { clause, params: [pattern], paramCount: 1 };
@@ -84,7 +79,7 @@ export function buildFtsSearch(
     return { clause: '', params: [], paramCount: 0 };
   }
 
-  const concatenated = columns.map((col) => `COALESCE(${col}, '')`).join(` || ' ' || `);
+  const concatenated = columns.map(col => `COALESCE(${col}, '')`).join(` || ' ' || `);
   const clause = `AND (to_tsvector('${tsConfig}', ${concatenated}) @@ plainto_tsquery('${tsConfig}', $${startParamIndex}))`;
 
   return { clause, params: [searchTerm], paramCount: 1 };
@@ -133,11 +128,7 @@ export function buildSearchCondition(
  * const orderBy = buildSearchOrderBy('"name"', 'ilike', 1);
  * // 'CASE WHEN "name" ILIKE $1 THEN 1 WHEN "name" ILIKE \'%\' || $1 || \'%\' THEN 2 ELSE 3 END ASC'
  */
-export function buildSearchOrderBy(
-  primaryColumn: string,
-  strategy: SearchStrategy = configuredStrategy,
-  paramIndex: number = 1,
-): string {
+export function buildSearchOrderBy(primaryColumn: string, strategy: SearchStrategy = configuredStrategy, paramIndex: number = 1): string {
   if (strategy === 'fts') {
     return `ts_rank(to_tsvector('simple', ${primaryColumn}), plainto_tsquery('simple', $${paramIndex})) DESC`;
   }

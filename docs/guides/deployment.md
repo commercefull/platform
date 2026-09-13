@@ -4,12 +4,12 @@ CommerceFull supports four deployment strategies. Choose based on your cloud pro
 
 ## Quick comparison
 
-| Strategy | Infrastructure | Complexity | Cost | Best for |
-|---|---|---|---|---|
-| **Ansible + VPS** | DigitalOcean, Linode, etc. | Medium | Low | Simple deployments, full control |
-| **Docker + GCP** | Google Cloud Platform | Low | Medium | Google ecosystem |
-| **Docker + Azure** | Microsoft Azure | Low | Medium | Enterprise integration |
-| **ECS + RDS + AWS** | Amazon Web Services | High | High | High availability, enterprise |
+| Strategy            | Infrastructure             | Complexity | Cost   | Best for                         |
+| ------------------- | -------------------------- | ---------- | ------ | -------------------------------- |
+| **Ansible + VPS**   | DigitalOcean, Linode, etc. | Medium     | Low    | Simple deployments, full control |
+| **Docker + GCP**    | Google Cloud Platform      | Low        | Medium | Google ecosystem                 |
+| **Docker + Azure**  | Microsoft Azure            | Low        | Medium | Enterprise integration           |
+| **ECS + RDS + AWS** | Amazon Web Services        | High       | High   | High availability, enterprise    |
 
 ## Prerequisites
 

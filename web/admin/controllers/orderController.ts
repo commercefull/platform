@@ -96,7 +96,6 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -126,7 +125,6 @@ export const viewOrder = async (req: TypedRequest, res: Response): Promise<void>
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -154,7 +152,6 @@ export const updateOrderStatus = async (req: TypedRequest, res: Response): Promi
   } else {
     res.redirect(`/hub/orders/${orderId}?success=Order status updated`);
   }
-  
 };
 
 // ============================================================================
@@ -175,7 +172,6 @@ export const cancelOrder = async (req: TypedRequest, res: Response): Promise<voi
   } else {
     res.redirect(`/hub/orders/${orderId}?success=Order cancelled`);
   }
-  
 };
 
 // ============================================================================
@@ -200,7 +196,6 @@ export const refundForm = async (req: TypedRequest, res: Response): Promise<void
     pageName: `Refund Order #${order.orderNumber}`,
     order,
   });
-  
 };
 
 // ============================================================================
@@ -222,7 +217,6 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
   } else {
     res.redirect(`/hub/orders/${orderId}?success=Refund processed successfully`);
   }
-  
 };
 
 // ============================================================================
@@ -233,7 +227,6 @@ export const listOrderNotes = async (req: TypedRequest, res: Response): Promise<
   const { orderId } = req.params;
   const notes = await manageOrderNotesUseCase.findByOrder(orderId);
   adminRespond(req, res, 'orders/partials/notes', { orderId, notes });
-  
 };
 
 export const addOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -276,7 +269,6 @@ export const listOrderRefunds = async (req: TypedRequest, res: Response): Promis
   const { orderId } = req.params;
   const refunds = await getOrderRefundsUseCase.findByOrder(orderId);
   adminRespond(req, res, 'orders/partials/refunds', { orderId, refunds });
-  
 };
 
 // ============================================================================
@@ -287,7 +279,6 @@ export const listFulfillmentPackages = async (req: TypedRequest, res: Response):
   const { orderId } = req.params;
   const packages = await getFulfillmentPackagesUseCase.findByOrder(orderId);
   adminRespond(req, res, 'orders/partials/packages', { orderId, packages });
-  
 };
 
 export const updatePackageTracking = async (req: TypedRequest, res: Response): Promise<void> => {

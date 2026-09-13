@@ -3,11 +3,7 @@
  */
 
 import { RetryPaymentUseCase } from './RetryPayment';
-import {
-  TransactionNotFoundError,
-  CannotRetryTransactionError,
-  MaxRetryAttemptsReachedError,
-} from '../../domain/errors/PaymentErrors';
+import { TransactionNotFoundError, CannotRetryTransactionError, MaxRetryAttemptsReachedError } from '../../domain/errors/PaymentErrors';
 
 jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
@@ -28,10 +24,7 @@ function createFailedTransaction(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function createMockRepo(
-  tx: ReturnType<typeof createFailedTransaction> | null,
-  retryCount = 0,
-) {
+function createMockRepo(tx: ReturnType<typeof createFailedTransaction> | null, retryCount = 0) {
   return {
     findById: jest.fn().mockResolvedValue(tx),
     countRetries: jest.fn().mockResolvedValue(retryCount),
@@ -63,9 +56,7 @@ describe('RetryPaymentUseCase', () => {
     const repo = createMockRepo(null);
     const useCase = new RetryPaymentUseCase(repo);
 
-    await expect(
-      useCase.execute({ transactionId: 'nonexistent' }),
-    ).rejects.toThrow(TransactionNotFoundError);
+    await expect(useCase.execute({ transactionId: 'nonexistent' })).rejects.toThrow(TransactionNotFoundError);
   });
 
   it('should throw CannotRetryTransactionError when status is not failed', async () => {
@@ -73,9 +64,7 @@ describe('RetryPaymentUseCase', () => {
     const repo = createMockRepo(tx);
     const useCase = new RetryPaymentUseCase(repo);
 
-    await expect(
-      useCase.execute({ transactionId: 'tx-1' }),
-    ).rejects.toThrow(CannotRetryTransactionError);
+    await expect(useCase.execute({ transactionId: 'tx-1' })).rejects.toThrow(CannotRetryTransactionError);
   });
 
   it('should throw MaxRetryAttemptsReachedError when retry count is 3', async () => {
@@ -83,9 +72,7 @@ describe('RetryPaymentUseCase', () => {
     const repo = createMockRepo(tx, 3);
     const useCase = new RetryPaymentUseCase(repo);
 
-    await expect(
-      useCase.execute({ transactionId: 'tx-1' }),
-    ).rejects.toThrow(MaxRetryAttemptsReachedError);
+    await expect(useCase.execute({ transactionId: 'tx-1' })).rejects.toThrow(MaxRetryAttemptsReachedError);
   });
 
   it('should use provided paymentMethodId when specified', async () => {
@@ -95,8 +82,6 @@ describe('RetryPaymentUseCase', () => {
 
     await useCase.execute({ transactionId: 'tx-1', paymentMethodId: 'pm-new' });
 
-    expect(repo.create).toHaveBeenCalledWith(
-      expect.objectContaining({ paymentMethodId: 'pm-new' }),
-    );
+    expect(repo.create).toHaveBeenCalledWith(expect.objectContaining({ paymentMethodId: 'pm-new' }));
   });
 });

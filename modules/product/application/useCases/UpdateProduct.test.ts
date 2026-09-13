@@ -7,7 +7,9 @@ import { UpdateProductUseCase, UpdateProductCommand } from './UpdateProduct';
 import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('UpdateProductUseCase', () => {
   let useCase: UpdateProductUseCase;
@@ -16,11 +18,23 @@ describe('UpdateProductUseCase', () => {
 
   beforeEach(() => {
     mockProduct = {
-      productId: 'p1', name: 'Old', slug: 'old', status: 'active', tags: [], updatedAt: new Date(),
+      productId: 'p1',
+      name: 'Old',
+      slug: 'old',
+      status: 'active',
+      tags: [],
+      updatedAt: new Date(),
       price: { basePrice: 10, salePrice: null, cost: 5 },
-      updateBasicInfo: jest.fn(), updateSeo: jest.fn(), updatePrice: jest.fn(),
-      setSalePrice: jest.fn(), updateDimensions: jest.fn(), assignCategory: jest.fn(),
-      removeCategory: jest.fn(), setFeatured: jest.fn(), addTag: jest.fn(), removeTag: jest.fn(),
+      updateBasicInfo: jest.fn(),
+      updateSeo: jest.fn(),
+      updatePrice: jest.fn(),
+      setSalePrice: jest.fn(),
+      updateDimensions: jest.fn(),
+      assignCategory: jest.fn(),
+      removeCategory: jest.fn(),
+      setFeatured: jest.fn(),
+      addTag: jest.fn(),
+      removeTag: jest.fn(),
       updateMetadata: jest.fn(),
     };
     mockRepo = {

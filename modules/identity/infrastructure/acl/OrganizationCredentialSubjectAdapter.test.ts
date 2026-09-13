@@ -130,9 +130,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       lastName: 'Smith',
     });
 
-    expect(mockOrgRepo.createWithPassword).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Jane Smith' }),
-    );
+    expect(mockOrgRepo.createWithPassword).toHaveBeenCalledWith(expect.objectContaining({ name: 'Jane Smith' }));
   });
 
   it('should derive name from email when no name parts provided', async () => {
@@ -148,9 +146,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       password: 'password123',
     });
 
-    expect(mockOrgRepo.createWithPassword).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'user' }),
-    );
+    expect(mockOrgRepo.createWithPassword).toHaveBeenCalledWith(expect.objectContaining({ name: 'user' }));
   });
 
   it('should no-op updateLoginTimestamp (orgs do not track login timestamps)', async () => {

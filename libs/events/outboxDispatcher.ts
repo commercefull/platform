@@ -17,7 +17,7 @@
  */
 
 import { getActivePool } from '../db/pool';
-import { eventBus} from './eventBus';
+import { eventBus } from './eventBus';
 import { outboxRowToPayload, type OutboxEvent } from './outboxWriter';
 import { logger } from '../logger';
 
@@ -119,9 +119,7 @@ async function dispatchBatch(): Promise<void> {
     logger.debug('Outbox dispatcher claimed events', { count: claimResult.rows.length });
 
     // Dispatch each event — handlers run in parallel for throughput
-    const dispatchPromises = claimResult.rows.map(row =>
-      dispatchOne(client, row as unknown as OutboxEvent),
-    );
+    const dispatchPromises = claimResult.rows.map(row => dispatchOne(client, row as unknown as OutboxEvent));
 
     inFlight += dispatchPromises.length;
     await Promise.all(dispatchPromises);
@@ -135,10 +133,7 @@ async function dispatchBatch(): Promise<void> {
  * Dispatch a single outbox event to all registered handlers.
  * Marks the event as 'processed' on success, or schedules a retry on failure.
  */
-async function dispatchOne(
-  client: import('pg').PoolClient,
-  row: OutboxEvent,
-): Promise<void> {
+async function dispatchOne(client: import('pg').PoolClient, row: OutboxEvent): Promise<void> {
   const payload = outboxRowToPayload(row);
 
   try {
@@ -187,10 +182,7 @@ async function dispatchOne(
       });
     } else {
       // Schedule retry with exponential backoff
-      const backoff = Math.min(
-        BASE_BACKOFF_MS * Math.pow(2, row.attempts - 1),
-        MAX_BACKOFF_MS,
-      );
+      const backoff = Math.min(BASE_BACKOFF_MS * Math.pow(2, row.attempts - 1), MAX_BACKOFF_MS);
       const nextRetry = new Date(Date.now() + backoff);
 
       await client.query(

@@ -56,9 +56,17 @@ interface RawProductData {
 }
 
 export class GetProductPerformanceUseCase {
-  constructor(private readonly analyticsRepository: {
-    getProductPerformance(filters: Record<string, unknown>, startDate: Date, endDate: Date, sortBy: string, limit: number): Promise<RawProductData[]>;
-  }) {}
+  constructor(
+    private readonly analyticsRepository: {
+      getProductPerformance(
+        filters: Record<string, unknown>,
+        startDate: Date,
+        endDate: Date,
+        sortBy: string,
+        limit: number,
+      ): Promise<RawProductData[]>;
+    },
+  ) {}
 
   async execute(input: GetProductPerformanceInput): Promise<GetProductPerformanceOutput> {
     const { storeId, productId, categoryId, startDate, endDate, sortBy = 'revenue', limit = 50 } = input;

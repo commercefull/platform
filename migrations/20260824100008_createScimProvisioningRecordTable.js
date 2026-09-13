@@ -3,7 +3,7 @@
  */
 
 exports.up = function (knex) {
-  return knex.schema.createTable('scimProvisioningRecord', (table) => {
+  return knex.schema.createTable('scimProvisioningRecord', table => {
     table.string('recordId').primary();
     table.string('organizationId').notNullable().index();
     table.string('userId').notNullable().index();

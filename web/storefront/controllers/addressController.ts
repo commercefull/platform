@@ -31,7 +31,6 @@ export const listAddresses = async (req: TypedRequest, res: Response) => {
     pageName: 'My Addresses',
     addresses,
   });
-  
 };
 
 /**
@@ -46,7 +45,6 @@ export const addAddressForm = async (req: TypedRequest, res: Response) => {
   storefrontRespond(req, res, 'addresses/create', {
     pageName: 'Add Address',
   });
-  
 };
 
 /**
@@ -76,7 +74,6 @@ export const addAddress = async (req: TypedRequest, res: Response) => {
   });
 
   return res.redirect('/addresses');
-  
 };
 
 /**
@@ -103,7 +100,6 @@ export const editAddressForm = async (req: TypedRequest, res: Response) => {
     pageName: 'Edit Address',
     address,
   });
-  
 };
 
 /**
@@ -136,7 +132,6 @@ export const updateAddress = async (req: TypedRequest, res: Response) => {
   });
 
   return res.redirect('/addresses');
-  
 };
 
 /**
@@ -153,5 +148,4 @@ export const deleteAddress = async (req: TypedRequest, res: Response) => {
   await manageStorefrontAddressesUseCase.softDelete(addressId, user.customerId);
 
   return res.redirect('/addresses');
-  
 };

@@ -7,7 +7,9 @@ import { CreateCategoryUseCase, CreateCategoryCommand } from './CreateCategory';
 import { CategoryNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CreateCategoryUseCase', () => {
   let useCase: CreateCategoryUseCase;
@@ -17,8 +19,14 @@ describe('CreateCategoryUseCase', () => {
     mockRepo = {
       findCategoryById: jest.fn().mockResolvedValue(null),
       createCategory: jest.fn().mockResolvedValue({
-        contentCategoryId: 'c1', name: 'News', slug: 'news', parentId: null,
-        path: 'news', depth: 0, isActive: true, createdAt: new Date(),
+        contentCategoryId: 'c1',
+        name: 'News',
+        slug: 'news',
+        parentId: null,
+        path: 'news',
+        depth: 0,
+        isActive: true,
+        createdAt: new Date(),
       }),
     };
     useCase = new CreateCategoryUseCase(mockRepo as never);

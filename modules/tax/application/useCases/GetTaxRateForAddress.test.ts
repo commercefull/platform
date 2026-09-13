@@ -1,4 +1,4 @@
-import { GetTaxRateForAddressUseCase} from './GetTaxRateForAddress';
+import { GetTaxRateForAddressUseCase } from './GetTaxRateForAddress';
 
 describe('GetTaxRateForAddressUseCase', () => {
   let useCase: GetTaxRateForAddressUseCase;

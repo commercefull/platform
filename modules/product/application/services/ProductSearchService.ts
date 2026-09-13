@@ -148,7 +148,11 @@ class ProductSearchService {
   /**
    * Build the search SQL query
    */
-  private buildSearchQuery(filters: ProductSearchFilters, limit: number, offset: number): { sql: string; countSql: string; params: unknown[] } {
+  private buildSearchQuery(
+    filters: ProductSearchFilters,
+    limit: number,
+    offset: number,
+  ): { sql: string; countSql: string; params: unknown[] } {
     const conditions: string[] = [];
     const params: unknown[] = [];
     let paramIndex = 1;

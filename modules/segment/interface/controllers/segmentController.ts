@@ -38,16 +38,23 @@ class SegmentController {
     }
   }
 
-  async createSegment(req: TypedRequest<Record<string, never>, Record<string, never>, {
-    name: string;
-    code: string;
-    description?: string;
-    conditions: Array<{ field: string; operator: string; value?: unknown; values?: unknown[] }>;
-    matchMode?: 'all' | 'any';
-    color?: string;
-    icon?: string;
-    organizationId?: string;
-  }>, res: Response): Promise<void> {
+  async createSegment(
+    req: TypedRequest<
+      Record<string, never>,
+      Record<string, never>,
+      {
+        name: string;
+        code: string;
+        description?: string;
+        conditions: Array<{ field: string; operator: string; value?: unknown; values?: unknown[] }>;
+        matchMode?: 'all' | 'any';
+        color?: string;
+        icon?: string;
+        organizationId?: string;
+      }
+    >,
+    res: Response,
+  ): Promise<void> {
     try {
       const segment = await createSegmentUseCase.execute(req.body as Parameters<typeof createSegmentUseCase.execute>[0]);
       res.status(201).json({ success: true, data: segment.toJSON() });
@@ -60,17 +67,27 @@ class SegmentController {
     }
   }
 
-  async updateSegment(req: TypedRequest<{ segmentId: string }, Record<string, never>, {
-    name?: string;
-    description?: string;
-    conditions?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[] }>;
-    matchMode?: 'all' | 'any';
-    color?: string;
-    icon?: string;
-    isActive?: boolean;
-  }>, res: Response): Promise<void> {
+  async updateSegment(
+    req: TypedRequest<
+      { segmentId: string },
+      Record<string, never>,
+      {
+        name?: string;
+        description?: string;
+        conditions?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[] }>;
+        matchMode?: 'all' | 'any';
+        color?: string;
+        icon?: string;
+        isActive?: boolean;
+      }
+    >,
+    res: Response,
+  ): Promise<void> {
     try {
-      const segment = await updateSegmentUseCase.execute(req.params.segmentId, req.body as Parameters<typeof updateSegmentUseCase.execute>[1]);
+      const segment = await updateSegmentUseCase.execute(
+        req.params.segmentId,
+        req.body as Parameters<typeof updateSegmentUseCase.execute>[1],
+      );
       res.json({ success: true, data: segment.toJSON() });
     } catch (error) {
       if (error instanceof SegmentNotFoundError) {

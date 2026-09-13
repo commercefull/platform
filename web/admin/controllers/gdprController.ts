@@ -30,7 +30,6 @@ export const gdprDashboard = async (req: TypedRequest, res: Response): Promise<v
     },
     requests,
   });
-  
 };
 
 // ============================================================================
@@ -78,7 +77,6 @@ export const viewGdprRequest = async (req: TypedRequest, res: Response): Promise
     pageName: `GDPR Request: ${(request as Record<string, unknown>).requestType}`,
     request,
   });
-  
 };
 
 export const processGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -87,7 +85,6 @@ export const processGdprRequest = async (req: TypedRequest, res: Response): Prom
   await manageAdminGdprUseCase.updateStatus(requestId, 'processing');
 
   res.json({ success: true });
-  
 };
 
 export const completeGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -98,7 +95,6 @@ export const completeGdprRequest = async (req: TypedRequest, res: Response): Pro
   await manageAdminGdprUseCase.completeRequest(requestId, notes);
 
   res.json({ success: true });
-  
 };
 
 // ============================================================================
@@ -117,5 +113,4 @@ export const consentManagement = async (req: TypedRequest, res: Response): Promi
     pageName: 'Consent Management',
     consentSettings,
   });
-  
 };

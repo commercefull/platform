@@ -2,9 +2,17 @@ import { OrderAddress } from './OrderAddress';
 
 describe('OrderAddress', () => {
   const baseProps = {
-    orderAddressId: 'a1', orderId: 'o1', addressType: 'shipping' as const,
-    firstName: 'John', lastName: 'Doe', address1: '123 Main St',
-    city: 'NYC', state: 'NY', postalCode: '10001', country: 'USA', countryCode: 'US',
+    orderAddressId: 'a1',
+    orderId: 'o1',
+    addressType: 'shipping' as const,
+    firstName: 'John',
+    lastName: 'Doe',
+    address1: '123 Main St',
+    city: 'NYC',
+    state: 'NY',
+    postalCode: '10001',
+    country: 'USA',
+    countryCode: 'US',
   };
 
   it('should create an address (happy path)', () => {

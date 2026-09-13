@@ -3,7 +3,11 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import { SubscriptionNotFoundError, SubscriptionValidationError, FailedToProcessRenewalError } from '../../domain/errors/SubscriptionErrors';
+import {
+  SubscriptionNotFoundError,
+  SubscriptionValidationError,
+  FailedToProcessRenewalError,
+} from '../../domain/errors/SubscriptionErrors';
 
 export interface ProcessRenewalInput {
   subscriptionId: string;
@@ -83,7 +87,7 @@ export class ProcessRenewalUseCase {
     });
 
     // Process payment
-     
+
     let paymentSuccess = false;
     try {
       await this.paymentService.charge({

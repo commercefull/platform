@@ -49,7 +49,6 @@ export const getMyOrders = async (req: TypedRequest, res: Response): Promise<voi
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
-  
 };
 
 /**
@@ -187,7 +186,6 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
   const order = await useCase.execute(command);
 
   respond(req, res, order, 201);
-  
 };
 
 /**

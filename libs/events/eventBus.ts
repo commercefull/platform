@@ -58,6 +58,8 @@ export type EventType =
   | 'checkout.payment_completed'
   | 'checkout.payment_captured'
   | 'checkout.payment_failed'
+  | 'checkout.fraud_blocked'
+  | 'checkout.fraud_review'
   | 'checkout.failed'
   | 'checkout.config.created'
   | 'checkout.config.updated'

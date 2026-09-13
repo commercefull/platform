@@ -4,17 +4,25 @@ jest.mock('../../../infrastructure/repositories/DynamicAttributeRepository', () 
     findAttributeByCode: jest.fn().mockResolvedValue(null),
     findAttributeById: jest.fn().mockResolvedValue(null),
     createAttribute: jest.fn().mockResolvedValue({
-      productAttributeId: 'a1', name: 'Color', code: 'color', type: 'select', isSystem: false,
+      productAttributeId: 'a1',
+      name: 'Color',
+      code: 'color',
+      type: 'select',
+      isSystem: false,
     }),
     updateAttribute: jest.fn().mockResolvedValue({
-      productAttributeId: 'a1', name: 'Color Updated', code: 'color', type: 'select', isSystem: false,
+      productAttributeId: 'a1',
+      name: 'Color Updated',
+      code: 'color',
+      type: 'select',
+      isSystem: false,
     }),
     findAttributeValues: jest.fn().mockResolvedValue([]),
     setProductAttribute: jest.fn().mockResolvedValue({ productId: 'p1', attributeId: 'a1', value: 'Red' }),
   },
 }));
 
-import { CreateAttributeUseCase} from './CreateAttribute';
+import { CreateAttributeUseCase } from './CreateAttribute';
 import dynamicAttributeRepository from '../../../infrastructure/repositories/DynamicAttributeRepository';
 
 const mockRepo = dynamicAttributeRepository as unknown as Record<string, jest.Mock>;

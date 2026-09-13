@@ -1,5 +1,14 @@
 /**
  * Promotion Aggregate Root
+ *
+ * @deprecated This entity is a legacy model that is NOT wired to checkout.
+ * The real promotion system runs through `PromotionRuleRepository` +
+ * `PromotionEvaluationService` (the `promotionRule`/`promotionAction` tables),
+ * which implements condition matching, stacking, and all action types.
+ * This entity is kept only for backward compatibility with `ApplyPromotion`
+ * and `PromotionRepository` port consumers. New code should use the
+ * rule/action model directly. See `docs/e2e-rule-engine-implementation-plan.md`
+ * Epic C for details.
  */
 
 export type PromotionType = 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'free_shipping' | 'bundle';

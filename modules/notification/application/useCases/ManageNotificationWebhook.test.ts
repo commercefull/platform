@@ -3,13 +3,25 @@ jest.mock('../../infrastructure/repositories/NotificationConfigRepository', () =
   default: {
     webhooks: {
       create: jest.fn().mockResolvedValue({
-        notificationWebhookId: 'w1', organizationId: 'org1', url: 'https://example.com/webhook',
-        events: ['order.created'], isActive: true, createdAt: new Date(), updatedAt: new Date(),
+        notificationWebhookId: 'w1',
+        organizationId: 'org1',
+        url: 'https://example.com/webhook',
+        events: ['order.created'],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }),
       deactivate: jest.fn().mockResolvedValue(true),
       findByMerchant: jest.fn().mockResolvedValue([
-        { notificationWebhookId: 'w1', organizationId: 'org1', url: 'https://example.com/webhook',
-          events: ['order.created'], isActive: true, createdAt: new Date(), updatedAt: new Date() },
+        {
+          notificationWebhookId: 'w1',
+          organizationId: 'org1',
+          url: 'https://example.com/webhook',
+          events: ['order.created'],
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ]),
     },
     templates: {},
@@ -30,27 +42,27 @@ describe('ManageNotificationWebhookUseCase', () => {
   });
 
   it('should create webhook (happy path)', async () => {
-    const result = await useCase.execute(new ManageNotificationWebhookCommand(
-      'create', 'org1', undefined, 'https://example.com/webhook', 'secret', ['order.created'], true,
-    ));
+    const result = await useCase.execute(
+      new ManageNotificationWebhookCommand('create', 'org1', undefined, 'https://example.com/webhook', 'secret', ['order.created'], true),
+    );
 
     expect(result.success).toBe(true);
     expect(result.webhook?.notificationWebhookId).toBe('w1');
   });
 
   it('should return error when url is missing', async () => {
-    const result = await useCase.execute(new ManageNotificationWebhookCommand(
-      'create', 'org1', undefined, undefined, undefined, ['order.created'],
-    ));
+    const result = await useCase.execute(
+      new ManageNotificationWebhookCommand('create', 'org1', undefined, undefined, undefined, ['order.created']),
+    );
 
     expect(result.success).toBe(false);
     expect(result.error).toBe('url is required');
   });
 
   it('should return error when events are missing', async () => {
-    const result = await useCase.execute(new ManageNotificationWebhookCommand(
-      'create', 'org1', undefined, 'https://example.com/webhook', undefined, [],
-    ));
+    const result = await useCase.execute(
+      new ManageNotificationWebhookCommand('create', 'org1', undefined, 'https://example.com/webhook', undefined, []),
+    );
 
     expect(result.success).toBe(false);
     expect(result.error).toBe('events are required');
@@ -64,9 +76,7 @@ describe('ManageNotificationWebhookUseCase', () => {
   });
 
   it('should deactivate webhook', async () => {
-    const result = await useCase.execute(new ManageNotificationWebhookCommand(
-      'deactivate', 'org1', 'w1',
-    ));
+    const result = await useCase.execute(new ManageNotificationWebhookCommand('deactivate', 'org1', 'w1'));
 
     expect(result.success).toBe(true);
   });

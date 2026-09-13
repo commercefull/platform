@@ -67,7 +67,10 @@ describe('ManageCategoriesUseCase', () => {
   });
 
   it('should reorder categories', async () => {
-    await useCase.reorder([{ categoryId: 'c1', position: 1 }, { categoryId: 'c2', position: 2 }]);
+    await useCase.reorder([
+      { categoryId: 'c1', position: 1 },
+      { categoryId: 'c2', position: 2 },
+    ]);
     expect(mockRepo.update).toHaveBeenCalledTimes(2);
   });
 });

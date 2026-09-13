@@ -1,12 +1,4 @@
-export type ReturnStatus =
-  | 'requested'
-  | 'approved'
-  | 'denied'
-  | 'inTransit'
-  | 'received'
-  | 'inspected'
-  | 'completed'
-  | 'cancelled';
+export type ReturnStatus = 'requested' | 'approved' | 'denied' | 'inTransit' | 'received' | 'inspected' | 'completed' | 'cancelled';
 
 import { InvalidReturnTransitionError } from '../errors/ReturnErrors';
 
@@ -98,7 +90,9 @@ export class ReturnRequest {
     returnCarrier?: ReturnCarrier;
     returnShippingPaid?: boolean;
     requiresInspection?: boolean;
-    items: Array<Omit<ReturnItem, 'orderReturnItemId' | 'orderReturnId' | 'createdAt' | 'warrantyStatus'> & { warrantyStatus?: WarrantyStatus }>;
+    items: Array<
+      Omit<ReturnItem, 'orderReturnItemId' | 'orderReturnId' | 'createdAt' | 'warrantyStatus'> & { warrantyStatus?: WarrantyStatus }
+    >;
   }): ReturnRequest {
     const now = new Date();
     const returnNumber = `RET-${now.getTime().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
@@ -193,6 +187,35 @@ export class ReturnRequest {
     if (failedItems) this.props.inspectionFailedItems = failedItems;
   }
 
+  /**
+   * Apply a return rule evaluation result to this request.
+   * Sets requiresInspection based on the rule verdict.
+   * (Epic I — see docs/e2e-rule-engine-implementation-plan.md)
+   */
+  applyRuleEvaluation(result: { requiresInspection: boolean; autoApprove: boolean; requiresManualReview: boolean }): void {
+    this.props.requiresInspection = result.requiresInspection;
+    this.props.updatedAt = new Date();
+  }
+
+  /**
+   * Apply restocking fees to return items based on a return rule evaluation result.
+   * Each item's refundAmount is reduced by the restocking fee.
+   * Returns the total restocking fee applied.
+   * (Epic I — see docs/e2e-rule-engine-implementation-plan.md)
+   */
+  applyRestockingFee(result: { restockingFeePercent: number; restockingFeeFlat: number }): number {
+    let totalFee = 0;
+    for (const item of this.props.items) {
+      if (item.refundAmount === undefined) continue;
+      const percentFee = (item.refundAmount * result.restockingFeePercent) / 100;
+      const fee = Math.min(percentFee + result.restockingFeeFlat, item.refundAmount);
+      item.refundAmount = item.refundAmount - fee;
+      totalFee += fee;
+    }
+    this.props.updatedAt = new Date();
+    return totalFee;
+  }
+
   complete(): void {
     this.transitionTo('completed');
   }
@@ -220,34 +243,90 @@ export class ReturnRequest {
     this.props.updatedAt = new Date();
   }
 
-  get orderReturnId(): string { return this.props.orderReturnId; }
-  get orderId(): string { return this.props.orderId; }
-  get returnNumber(): string { return this.props.returnNumber; }
-  get customerId(): string | undefined { return this.props.customerId; }
-  get status(): ReturnStatus { return this.props.status; }
-  get returnType(): ReturnType { return this.props.returnType; }
-  get requestedAt(): Date { return this.props.requestedAt; }
-  get approvedAt(): Date | undefined { return this.props.approvedAt; }
-  get receivedAt(): Date | undefined { return this.props.receivedAt; }
-  get completedAt(): Date | undefined { return this.props.completedAt; }
-  get rmaNumber(): string | undefined { return this.props.rmaNumber; }
-  get paymentRefundId(): string | undefined { return this.props.paymentRefundId; }
-  get returnShippingPaid(): boolean { return this.props.returnShippingPaid; }
-  get returnShippingAmount(): number | undefined { return this.props.returnShippingAmount; }
-  get returnShippingLabel(): string | undefined { return this.props.returnShippingLabel; }
-  get returnCarrier(): ReturnCarrier { return this.props.returnCarrier; }
-  get returnTrackingNumber(): string | undefined { return this.props.returnTrackingNumber; }
-  get returnTrackingUrl(): string | undefined { return this.props.returnTrackingUrl; }
-  get returnReason(): string | undefined { return this.props.returnReason; }
-  get returnInstructions(): string | undefined { return this.props.returnInstructions; }
-  get customerNotes(): string | undefined { return this.props.customerNotes; }
-  get adminNotes(): string | undefined { return this.props.adminNotes; }
-  get requiresInspection(): boolean { return this.props.requiresInspection; }
-  get inspectionPassedItems(): Record<string, unknown> | undefined { return this.props.inspectionPassedItems; }
-  get inspectionFailedItems(): Record<string, unknown> | undefined { return this.props.inspectionFailedItems; }
-  get items(): ReturnItem[] { return this.props.items; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get orderReturnId(): string {
+    return this.props.orderReturnId;
+  }
+  get orderId(): string {
+    return this.props.orderId;
+  }
+  get returnNumber(): string {
+    return this.props.returnNumber;
+  }
+  get customerId(): string | undefined {
+    return this.props.customerId;
+  }
+  get status(): ReturnStatus {
+    return this.props.status;
+  }
+  get returnType(): ReturnType {
+    return this.props.returnType;
+  }
+  get requestedAt(): Date {
+    return this.props.requestedAt;
+  }
+  get approvedAt(): Date | undefined {
+    return this.props.approvedAt;
+  }
+  get receivedAt(): Date | undefined {
+    return this.props.receivedAt;
+  }
+  get completedAt(): Date | undefined {
+    return this.props.completedAt;
+  }
+  get rmaNumber(): string | undefined {
+    return this.props.rmaNumber;
+  }
+  get paymentRefundId(): string | undefined {
+    return this.props.paymentRefundId;
+  }
+  get returnShippingPaid(): boolean {
+    return this.props.returnShippingPaid;
+  }
+  get returnShippingAmount(): number | undefined {
+    return this.props.returnShippingAmount;
+  }
+  get returnShippingLabel(): string | undefined {
+    return this.props.returnShippingLabel;
+  }
+  get returnCarrier(): ReturnCarrier {
+    return this.props.returnCarrier;
+  }
+  get returnTrackingNumber(): string | undefined {
+    return this.props.returnTrackingNumber;
+  }
+  get returnTrackingUrl(): string | undefined {
+    return this.props.returnTrackingUrl;
+  }
+  get returnReason(): string | undefined {
+    return this.props.returnReason;
+  }
+  get returnInstructions(): string | undefined {
+    return this.props.returnInstructions;
+  }
+  get customerNotes(): string | undefined {
+    return this.props.customerNotes;
+  }
+  get adminNotes(): string | undefined {
+    return this.props.adminNotes;
+  }
+  get requiresInspection(): boolean {
+    return this.props.requiresInspection;
+  }
+  get inspectionPassedItems(): Record<string, unknown> | undefined {
+    return this.props.inspectionPassedItems;
+  }
+  get inspectionFailedItems(): Record<string, unknown> | undefined {
+    return this.props.inspectionFailedItems;
+  }
+  get items(): ReturnItem[] {
+    return this.props.items;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   get isPending(): boolean {
     return ['requested', 'approved', 'inTransit', 'received', 'inspected'].includes(this.props.status);

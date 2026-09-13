@@ -7,7 +7,9 @@ import { ProcessPackingUseCase, ProcessPackingCommand } from './ProcessPacking';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ProcessPackingUseCase', () => {
   let useCase: ProcessPackingUseCase;
@@ -16,8 +18,11 @@ describe('ProcessPackingUseCase', () => {
 
   beforeEach(() => {
     mockFulfillment = {
-      fulfillmentId: 'f1', orderId: 'o1', status: 'picking_complete',
-      startPacking: jest.fn(), completePacking: jest.fn(),
+      fulfillmentId: 'f1',
+      orderId: 'o1',
+      status: 'picking_complete',
+      startPacking: jest.fn(),
+      completePacking: jest.fn(),
     };
     mockRepo = {
       findById: jest.fn().mockResolvedValue(mockFulfillment),

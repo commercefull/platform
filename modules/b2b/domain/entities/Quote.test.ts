@@ -109,8 +109,9 @@ describe('Quote Entity', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
       quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
       quote.send();
-      expect(() => quote.addLineItem({ productId: 'p-2', sku: 'SKU-002', name: 'Gadget', quantity: 1, unitPrice: 20 }))
-        .toThrow('in status: sent');
+      expect(() => quote.addLineItem({ productId: 'p-2', sku: 'SKU-002', name: 'Gadget', quantity: 1, unitPrice: 20 })).toThrow(
+        'in status: sent',
+      );
     });
   });
 

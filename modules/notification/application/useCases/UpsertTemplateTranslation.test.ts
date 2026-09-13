@@ -3,8 +3,12 @@ jest.mock('../../infrastructure/repositories/NotificationConfigRepository', () =
   default: {
     templateTranslations: {
       upsert: jest.fn().mockResolvedValue({
-        notificationTemplateTranslationId: 'tt1', templateId: 't1', locale: 'en-US',
-        subject: 'Hello', body: 'Welcome', updatedAt: new Date(),
+        notificationTemplateTranslationId: 'tt1',
+        templateId: 't1',
+        locale: 'en-US',
+        subject: 'Hello',
+        body: 'Welcome',
+        updatedAt: new Date(),
       }),
     },
     templates: {},
@@ -25,9 +29,7 @@ describe('UpsertTemplateTranslationUseCase', () => {
   });
 
   it('should upsert template translation (happy path)', async () => {
-    const result = await useCase.execute(new UpsertTemplateTranslationCommand(
-      't1', 'en-US', 'Welcome', 'Hello',
-    ));
+    const result = await useCase.execute(new UpsertTemplateTranslationCommand('t1', 'en-US', 'Welcome', 'Hello'));
 
     expect(result.notificationTemplateTranslationId).toBe('tt1');
     expect(result.locale).toBe('en-US');

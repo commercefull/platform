@@ -4,7 +4,9 @@ import { GdprValidationError } from '../errors/GdprErrors';
 describe('GdprDataRequest', () => {
   it('should create a data request (happy path)', () => {
     const req = GdprDataRequest.create({
-      gdprDataRequestId: 'r1', customerId: 'c1', requestType: 'export',
+      gdprDataRequestId: 'r1',
+      customerId: 'c1',
+      requestType: 'export',
     });
     expect(req.gdprDataRequestId).toBe('r1');
     expect(req.status).toBe('pending');
@@ -115,28 +117,46 @@ describe('GdprDataRequest', () => {
 
   it('should detect overdue request', () => {
     const req = GdprDataRequest.reconstitute({
-      gdprDataRequestId: 'r1', customerId: 'c1', requestType: 'export', status: 'pending',
-      identityVerified: false, deadlineAt: new Date(Date.now() - 86400000), extensionRequested: false,
-      createdAt: new Date(), updatedAt: new Date(),
+      gdprDataRequestId: 'r1',
+      customerId: 'c1',
+      requestType: 'export',
+      status: 'pending',
+      identityVerified: false,
+      deadlineAt: new Date(Date.now() - 86400000),
+      extensionRequested: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     expect(req.isOverdue()).toBe(true);
   });
 
   it('should not be overdue for completed requests', () => {
     const req = GdprDataRequest.reconstitute({
-      gdprDataRequestId: 'r1', customerId: 'c1', requestType: 'export', status: 'completed',
-      identityVerified: true, deadlineAt: new Date(Date.now() - 86400000), extensionRequested: false,
-      createdAt: new Date(), updatedAt: new Date(),
+      gdprDataRequestId: 'r1',
+      customerId: 'c1',
+      requestType: 'export',
+      status: 'completed',
+      identityVerified: true,
+      deadlineAt: new Date(Date.now() - 86400000),
+      extensionRequested: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     expect(req.isOverdue()).toBe(false);
   });
 
   it('should use extended deadline for overdue check', () => {
     const req = GdprDataRequest.reconstitute({
-      gdprDataRequestId: 'r1', customerId: 'c1', requestType: 'export', status: 'pending',
-      identityVerified: false, deadlineAt: new Date(Date.now() - 86400000),
-      extensionRequested: true, extendedDeadlineAt: new Date(Date.now() + 86400000),
-      createdAt: new Date(), updatedAt: new Date(),
+      gdprDataRequestId: 'r1',
+      customerId: 'c1',
+      requestType: 'export',
+      status: 'pending',
+      identityVerified: false,
+      deadlineAt: new Date(Date.now() - 86400000),
+      extensionRequested: true,
+      extendedDeadlineAt: new Date(Date.now() + 86400000),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     expect(req.isOverdue()).toBe(false);
   });

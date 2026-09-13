@@ -32,14 +32,12 @@ export const listPaymentGateways = async (req: TypedRequest, res: Response): Pro
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createPaymentGatewayForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'payments/gateways/create', {
     pageName: 'Create Payment Gateway',
   });
-  
 };
 
 export const createPaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -98,7 +96,6 @@ export const viewPaymentGateway = async (req: TypedRequest, res: Response): Prom
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editPaymentGatewayForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -118,7 +115,6 @@ export const editPaymentGatewayForm = async (req: TypedRequest, res: Response): 
     pageName: `Edit: ${gateway.name}`,
     gateway,
   });
-  
 };
 
 export const updatePaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -142,7 +138,6 @@ export const updatePaymentGateway = async (req: TypedRequest, res: Response): Pr
   const _gateway = await managePaymentGatewaysUseCase.update(gatewayId, updates);
 
   res.redirect(`/hub/payments/gateways/${gatewayId}?success=Payment gateway updated successfully`);
-  
 };
 
 export const deletePaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -155,7 +150,6 @@ export const deletePaymentGateway = async (req: TypedRequest, res: Response): Pr
   }
 
   res.json({ success: true, message: 'Payment gateway deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -173,7 +167,6 @@ export const listPaymentMethods = async (req: TypedRequest, res: Response): Prom
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -191,7 +184,6 @@ export const listPaymentTransactions = async (req: TypedRequest, res: Response):
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -208,7 +200,6 @@ export const listDisputes = async (req: TypedRequest, res: Response): Promise<vo
     filters: { status: status || '' },
     success: req.query.success || null,
   });
-  
 };
 
 export const viewDispute = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -225,7 +216,6 @@ export const viewDispute = async (req: TypedRequest, res: Response): Promise<voi
     dispute,
     success: req.query.success || null,
   });
-  
 };
 
 export const updateDisputeStatus = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -255,7 +245,6 @@ export const listPaymentFees = async (req: TypedRequest, res: Response): Promise
     fees,
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -270,7 +259,6 @@ export const listPaymentSettings = async (req: TypedRequest, res: Response): Pro
     settings: allSettings,
     success: req.query.success || null,
   });
-  
 };
 
 export const updatePaymentSettings = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -305,7 +293,6 @@ export const viewPaymentBalance = async (req: TypedRequest, res: Response): Prom
     balances,
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -320,7 +307,6 @@ export const listPaymentReports = async (req: TypedRequest, res: Response): Prom
     reports,
     success: req.query.success || null,
   });
-  
 };
 
 export const viewPaymentReport = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -337,5 +323,4 @@ export const viewPaymentReport = async (req: TypedRequest, res: Response): Promi
     report,
     success: req.query.success || null,
   });
-  
 };

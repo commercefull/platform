@@ -7,9 +7,19 @@
 
 import * as crypto from 'crypto';
 import {
-  PSPAdapter, PSPCapabilities, PSPConfig, WebhookEvent,
-  PaymentRequest, PaymentResponse, CaptureRequest, CaptureResponse,
-  VoidRequest, VoidResponse, RefundRequest, RefundResponse, HealthCheckResult,
+  PSPAdapter,
+  PSPCapabilities,
+  PSPConfig,
+  WebhookEvent,
+  PaymentRequest,
+  PaymentResponse,
+  CaptureRequest,
+  CaptureResponse,
+  VoidRequest,
+  VoidResponse,
+  RefundRequest,
+  RefundResponse,
+  HealthCheckResult,
 } from '../GatewayAdapter';
 
 const PAYPAL_CAPABILITIES: PSPCapabilities = {
@@ -29,9 +39,7 @@ export class PayPalAdapter implements PSPAdapter {
   readonly capabilities = PAYPAL_CAPABILITIES;
 
   private getBaseUrl(config: PSPConfig): string {
-    return config.testMode
-      ? 'https://api-m.sandbox.paypal.com'
-      : 'https://api-m.paypal.com';
+    return config.testMode ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
   }
 
   private async getAccessToken(config: PSPConfig): Promise<string> {
@@ -44,7 +52,7 @@ export class PayPalAdapter implements PSPAdapter {
       body: 'grant_type=client_credentials',
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
     return (data.access_token as string) || '';
   }
 
@@ -101,14 +109,16 @@ export class PayPalAdapter implements PSPAdapter {
 
     const body = {
       intent: 'AUTHORIZE',
-      purchase_units: [{
-        reference_id: request.orderId,
-        amount: {
-          currency_code: request.currency.toUpperCase(),
-          value: request.amount.toFixed(2),
+      purchase_units: [
+        {
+          reference_id: request.orderId,
+          amount: {
+            currency_code: request.currency.toUpperCase(),
+            value: request.amount.toFixed(2),
+          },
+          description: request.description,
         },
-        description: request.description,
-      }],
+      ],
       payer: request.customerEmail ? { email_address: request.customerEmail } : undefined,
       application_context: {
         return_url: request.returnUrl || '',
@@ -125,7 +135,7 @@ export class PayPalAdapter implements PSPAdapter {
       body: JSON.stringify(body),
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       const err = (data.error_details as Array<Record<string, unknown>> | undefined)?.[0];
@@ -163,12 +173,16 @@ export class PayPalAdapter implements PSPAdapter {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(request.amount ? {
-        amount: { value: request.amount.toFixed(2), currency_code: (request.currency || 'USD').toUpperCase() },
-      } : {}),
+      body: JSON.stringify(
+        request.amount
+          ? {
+              amount: { value: request.amount.toFixed(2), currency_code: (request.currency || 'USD').toUpperCase() },
+            }
+          : {},
+      ),
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       return {
@@ -196,7 +210,7 @@ export class PayPalAdapter implements PSPAdapter {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    const data = res.status === 204 ? {} : await res.json() as Record<string, unknown>;
+    const data = res.status === 204 ? {} : ((await res.json()) as Record<string, unknown>);
 
     if (!res.ok && res.status !== 204) {
       return {
@@ -233,7 +247,7 @@ export class PayPalAdapter implements PSPAdapter {
       body: JSON.stringify(body),
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       return {

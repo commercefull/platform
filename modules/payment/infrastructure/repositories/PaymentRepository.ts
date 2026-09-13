@@ -142,18 +142,7 @@ export class PaymentRepo implements IPaymentRepository {
             amount, currency, status, "refundedAmount",
             "createdAt", "updatedAt"
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-          [
-            orderPaymentId,
-            transaction.orderId,
-            'creditCard',
-            'stripe',
-            transaction.amount,
-            transaction.currency,
-            'pending',
-            0,
-            now,
-            now,
-          ],
+          [orderPaymentId, transaction.orderId, 'creditCard', 'stripe', transaction.amount, transaction.currency, 'pending', 0, now, now],
         );
 
         await query(
@@ -471,10 +460,9 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   async findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
-    return queryOne<StoredPaymentMethod>(
-      `SELECT * FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 AND "deletedAt" IS NULL`,
-      [storedPaymentMethodId],
-    );
+    return queryOne<StoredPaymentMethod>(`SELECT * FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 AND "deletedAt" IS NULL`, [
+      storedPaymentMethodId,
+    ]);
   }
 
   async createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {
@@ -501,10 +489,10 @@ export class PaymentRepo implements IPaymentRepository {
 
   async setDefaultStoredMethod(storedPaymentMethodId: string, customerId: string): Promise<StoredPaymentMethod | null> {
     const now = new Date();
-    await query(
-      `UPDATE "storedPaymentMethod" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "deletedAt" IS NULL`,
-      [now, customerId],
-    );
+    await query(`UPDATE "storedPaymentMethod" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "deletedAt" IS NULL`, [
+      now,
+      customerId,
+    ]);
     return queryOne<StoredPaymentMethod>(
       `UPDATE "storedPaymentMethod" SET "isDefault" = true, "updatedAt" = $1 WHERE "storedPaymentMethodId" = $2 RETURNING *`,
       [now, storedPaymentMethodId],

@@ -52,7 +52,7 @@ export const analyticsDashboard = async (req: TypedRequest, res: Response): Prom
       segments: [], // Would implement segmentation
     },
     products: {
-      topSelling: topProducts.map((p) => ({
+      topSelling: topProducts.map(p => ({
         productId: p.productId,
         name: `Product ${p.productId.slice(-8)}`, // Would join with product table
         sales: p.quantitySold,
@@ -60,7 +60,7 @@ export const analyticsDashboard = async (req: TypedRequest, res: Response): Prom
       })),
       lowStock: [], // Would implement inventory alerts
       recommendations: [], // Would implement AI recommendations
-      performance: topProducts.map((p) => ({
+      performance: topProducts.map(p => ({
         productId: p.productId,
         name: `Product ${p.productId.slice(-8)}`,
         views: p.views,
@@ -92,7 +92,6 @@ export const analyticsDashboard = async (req: TypedRequest, res: Response): Prom
     dashboardData,
     filters: { period, segment, category },
   });
-  
 };
 
 export const storeSalesDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -115,7 +114,6 @@ export const storeSalesDashboard = async (req: TypedRequest, res: Response): Pro
       dateTo: dateTo.toISOString().slice(0, 10),
     },
   });
-  
 };
 
 // ============================================================================
@@ -148,8 +146,7 @@ export const predictiveAnalytics = async (req: TypedRequest, res: Response): Pro
 
       const analysis = await predictiveAnalyticsUseCase.predictCustomerChurn(
         customerId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (history as any[]).map((h) => ({ date: h.date, orders: parseInt(h.orders.toString()), revenue: parseFloat(h.revenue.toString()) })),
+        (history as Array<{ date: Date; orders: number; revenue: number }>).map(h => ({ date: h.date, orders: parseInt(String(h.orders)), revenue: parseFloat(String(h.revenue)) })),
       );
 
       return {
@@ -176,7 +173,6 @@ export const predictiveAnalytics = async (req: TypedRequest, res: Response): Pro
     inventoryPredictions,
     customerChurnRisk,
   });
-  
 };
 
 // ============================================================================
@@ -222,7 +218,6 @@ export const customerAnalytics = async (req: TypedRequest, res: Response): Promi
     lifetimeValue,
     segmentationAnalysis,
   });
-  
 };
 
 // ============================================================================
@@ -282,7 +277,6 @@ export const aiRecommendations = async (req: TypedRequest, res: Response): Promi
     personalizedCampaigns,
     crossSellOpportunities,
   });
-  
 };
 
 // ============================================================================
@@ -350,7 +344,6 @@ export const executiveDashboard = async (req: TypedRequest, res: Response): Prom
     alerts,
     trends,
   });
-  
 };
 
 // ============================================================================
@@ -366,7 +359,6 @@ export const realTimeMetrics = async (req: TypedRequest, res: Response): Promise
     data: metrics,
     timestamp: new Date().toISOString(),
   });
-  
 };
 
 // ============================================================================
@@ -382,7 +374,6 @@ export const automatedReports = async (req: TypedRequest, res: Response): Promis
     reports,
     reportHistory,
   });
-  
 };
 
 // ============================================================================
@@ -414,7 +405,6 @@ export const createReportSchedule = async (req: TypedRequest, res: Response): Pr
     message: 'Report schedule created successfully',
     schedule,
   });
-  
 };
 
 export const updateReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -427,7 +417,6 @@ export const updateReportSchedule = async (req: TypedRequest, res: Response): Pr
     success: true,
     message: 'Report schedule updated successfully',
   });
-  
 };
 
 export const deleteReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -439,7 +428,6 @@ export const deleteReportSchedule = async (req: TypedRequest, res: Response): Pr
     success: true,
     message: 'Report schedule deleted successfully',
   });
-  
 };
 
 export const runReportNow = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -461,7 +449,6 @@ export const runReportNow = async (req: TypedRequest, res: Response): Promise<vo
     message: 'Report generated successfully',
     report: reportData,
   });
-  
 };
 
 // ============================================================================
@@ -584,8 +571,16 @@ async function calculateExecutiveKPIs(startDate: Date, endDate: Date) {
 // Business Alerts
 // ============================================================================
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getBusinessAlerts(kpis: Record<string, any>) {
+interface BusinessKPIs {
+  revenue: { growth: number };
+  customers: { growth: number };
+  orders: { average: number; growth: number };
+  inventory: { stockouts: number };
+  profit: { margin: number };
+  marketing: { roi: number };
+}
+
+async function getBusinessAlerts(kpis: BusinessKPIs) {
   const alerts = [];
 
   // Revenue alerts
@@ -651,8 +646,7 @@ async function getBusinessAlerts(kpis: Record<string, any>) {
 // Business Trends Analysis
 // ============================================================================
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function analyzeBusinessTrends(currentKPIs: Record<string, any>, previousKPIs: Record<string, any>) {
+async function analyzeBusinessTrends(currentKPIs: BusinessKPIs, previousKPIs: { orders: { average: number } }) {
   const trends = [];
 
   // Revenue trend

@@ -14,8 +14,12 @@ describe('Vendor Entity', () => {
 
     it('should create with custom values', () => {
       const v = Vendor.create({
-        organizationId: 'org-1', name: 'Acme', email: 'v@acme.com',
-        commissionRate: 15, tier: 'premium', legalName: 'Acme Inc',
+        organizationId: 'org-1',
+        name: 'Acme',
+        email: 'v@acme.com',
+        commissionRate: 15,
+        tier: 'premium',
+        legalName: 'Acme Inc',
       });
       expect(v.commissionRate).toBe(15);
       expect(v.tier).toBe('premium');

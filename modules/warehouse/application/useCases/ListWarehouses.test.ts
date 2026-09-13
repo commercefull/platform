@@ -1,4 +1,4 @@
-import { ListWarehousesUseCase} from './ListWarehouses';
+import { ListWarehousesUseCase } from './ListWarehouses';
 
 describe('ListWarehousesUseCase', () => {
   let useCase: ListWarehousesUseCase;
@@ -7,8 +7,27 @@ describe('ListWarehousesUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findAll: jest.fn().mockResolvedValue([
-        { distributionWarehouseId: 'wh-1', name: 'Main', code: 'WH001', description: 'fulfillment', city: 'Portland', country: 'US', isActive: true, isDefault: true },
-        { distributionWarehouseId: 'wh-2', name: 'East', code: 'EAST', description: 'return', city: 'NYC', country: 'US', isActive: false, isDefault: false, organizationId: 'org-1' },
+        {
+          distributionWarehouseId: 'wh-1',
+          name: 'Main',
+          code: 'WH001',
+          description: 'fulfillment',
+          city: 'Portland',
+          country: 'US',
+          isActive: true,
+          isDefault: true,
+        },
+        {
+          distributionWarehouseId: 'wh-2',
+          name: 'East',
+          code: 'EAST',
+          description: 'return',
+          city: 'NYC',
+          country: 'US',
+          isActive: false,
+          isDefault: false,
+          organizationId: 'org-1',
+        },
       ]),
     };
     useCase = new ListWarehousesUseCase(mockRepo as never);

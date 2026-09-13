@@ -50,9 +50,7 @@ export class OidcTokenExchange {
    * Build the authorization URL for the OIDC code flow.
    */
   buildAuthorizationUrl(provider: OidcProvider, state: string, codeChallenge?: string): string {
-    const authEndpoint = provider.useDiscovery
-      ? provider.issuerUrl
-      : provider.authorizationEndpoint || provider.issuerUrl;
+    const authEndpoint = provider.useDiscovery ? provider.issuerUrl : provider.authorizationEndpoint || provider.issuerUrl;
 
     const params = new URLSearchParams({
       response_type: 'code',
@@ -89,11 +87,7 @@ export class OidcTokenExchange {
   /**
    * Exchange an authorization code for tokens.
    */
-  async exchangeCodeForTokens(
-    provider: OidcProvider,
-    code: string,
-    codeVerifier?: string,
-  ): Promise<OidcTokens> {
+  async exchangeCodeForTokens(provider: OidcProvider, code: string, codeVerifier?: string): Promise<OidcTokens> {
     const tokenEndpoint = provider.tokenEndpoint || `${provider.issuerUrl}/token`;
 
     const body: Record<string, string> = {
@@ -120,7 +114,7 @@ export class OidcTokenExchange {
         throw new OidcTokenError(`Token endpoint returned ${response.status}: ${errorText}`);
       }
 
-      const data = await response.json() as Record<string, unknown>;
+      const data = (await response.json()) as Record<string, unknown>;
       const expiresIn = data.expires_in as number;
       const expiresAt = new Date(Date.now() + (expiresIn || 3600) * 1000);
 
@@ -153,7 +147,7 @@ export class OidcTokenExchange {
         throw new OidcTokenError(`Userinfo endpoint returned ${response.status}`);
       }
 
-      const claims = await response.json() as Record<string, unknown>;
+      const claims = (await response.json()) as Record<string, unknown>;
       return this.mapClaimsToUserInfo(claims, provider.claimMapping);
     } catch (error) {
       if (error instanceof OidcTokenError) throw error;
@@ -197,7 +191,7 @@ export class OidcTokenExchange {
         throw new OidcDiscoveryError(`Discovery endpoint returned ${response.status}`);
       }
 
-      const doc = await response.json() as OidcDiscoveryDocument;
+      const doc = (await response.json()) as OidcDiscoveryDocument;
       this.discoveryCache.set(issuerUrl, { doc, fetchedAt: new Date() });
       return doc;
     } catch (error) {

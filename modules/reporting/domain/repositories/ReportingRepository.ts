@@ -65,7 +65,14 @@ export interface ReportingRepository {
   createExecution(scheduleId: string): Promise<ReportExecutionProps>;
   updateExecution(
     id: string,
-    updates: { status?: string; completedAt?: Date; fileUrl?: string; fileSize?: number; errorMessage?: string; metadata?: Record<string, unknown> },
+    updates: {
+      status?: string;
+      completedAt?: Date;
+      fileUrl?: string;
+      fileSize?: number;
+      errorMessage?: string;
+      metadata?: Record<string, unknown>;
+    },
   ): Promise<ReportExecutionProps | null>;
   listExecutions(scheduleId: string, limit?: number): Promise<ReportExecutionProps[]>;
   findExecutionById(id: string): Promise<ReportExecutionProps | null>;

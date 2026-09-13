@@ -1,8 +1,6 @@
 import { AxiosInstance } from 'axios';
 import { cleanupProductTests, setupProductTests, testAttributeGroup } from '../testUtils';
 
-;
-
 describe('Attribute Group Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
@@ -73,13 +71,17 @@ describe('Attribute Group Tests', () => {
       expect(response.data.data.length).toBeGreaterThan(0);
 
       // Should find our test groups - uses productAttributeGroupId
-      const foundOriginalGroup = response.data.data.find((g: Record<string, unknown>) => (g.productAttributeGroupId || g.id) === testAttributeGroupId);
+      const foundOriginalGroup = response.data.data.find(
+        (g: Record<string, unknown>) => (g.productAttributeGroupId || g.id) === testAttributeGroupId,
+      );
 
       expect(foundOriginalGroup).toBeDefined();
 
       // Only check for new group if it was created
       if (createdGroupId) {
-        const foundNewGroup = response.data.data.find((g: Record<string, unknown>) => (g.productAttributeGroupId || g.id) === createdGroupId);
+        const foundNewGroup = response.data.data.find(
+          (g: Record<string, unknown>) => (g.productAttributeGroupId || g.id) === createdGroupId,
+        );
         expect(foundNewGroup).toBeDefined();
       }
     });
@@ -135,8 +137,7 @@ describe('Attribute Group Tests', () => {
       });
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
-      const returnedId =
-        res.data.data?.productAttributeGroupId || res.data.data?.id;
+      const returnedId = res.data.data?.productAttributeGroupId || res.data.data?.id;
       expect(returnedId).toBe(testAttributeGroupId);
     });
 

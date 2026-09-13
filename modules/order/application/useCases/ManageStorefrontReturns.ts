@@ -4,9 +4,7 @@ import orderFulfillmentDataRepository from '../../infrastructure/repositories/Or
 const orderReturnRepo = orderFulfillmentDataRepository.returns;
 
 export class ManageStorefrontReturnsUseCase {
-  constructor(
-    private readonly returns: OrderReturnRepository = orderReturnRepo,
-  ) {}
+  constructor(private readonly returns: OrderReturnRepository = orderReturnRepo) {}
 
   async findByCustomerIdWithOrderNumber(customerId: string) {
     return this.returns.findByCustomerIdWithOrderNumber(customerId);

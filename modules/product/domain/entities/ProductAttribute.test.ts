@@ -61,7 +61,11 @@ describe('ProductAttribute', () => {
 
   it('should validate number value', () => {
     const attr = ProductAttribute.create({
-      ...baseProps, name: 'Weight', code: 'weight', type: 'number', inputType: 'number',
+      ...baseProps,
+      name: 'Weight',
+      code: 'weight',
+      type: 'number',
+      inputType: 'number',
       validationRules: { minValue: 0, maxValue: 100 },
     });
     expect(attr.validateValue('50').valid).toBe(true);
@@ -72,7 +76,11 @@ describe('ProductAttribute', () => {
 
   it('should validate text with pattern', () => {
     const attr = ProductAttribute.create({
-      ...baseProps, name: 'Code', code: 'code', type: 'text', inputType: 'text',
+      ...baseProps,
+      name: 'Code',
+      code: 'code',
+      type: 'text',
+      inputType: 'text',
       validationRules: { minLength: 2, maxLength: 10, pattern: '^[a-z]+$' },
     });
     expect(attr.validateValue('abc').valid).toBe(true);

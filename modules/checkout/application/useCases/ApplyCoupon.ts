@@ -41,7 +41,11 @@ export class ApplyCouponUseCase {
       throw new BadRequestError('Discount service unavailable');
     }
 
-    const validation = await this.discountQuotePort.validateDiscount(command.couponCode, session.subtotal.amount, session.subtotal.currency);
+    const validation = await this.discountQuotePort.validateDiscount(
+      command.couponCode,
+      session.subtotal.amount,
+      session.subtotal.currency,
+    );
 
     if (!validation.valid || !validation.discount) {
       throw new BadRequestError(validation.error || `Invalid coupon code: ${command.couponCode}`);

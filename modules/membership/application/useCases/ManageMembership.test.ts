@@ -51,7 +51,7 @@ describe('ManageMembershipPlansUseCase', () => {
   });
 
   it('should get statistics', async () => {
-    const result = await useCase.getStatistics() as Record<string, unknown>;
+    const result = (await useCase.getStatistics()) as Record<string, unknown>;
     expect(result.total).toBe(5);
   });
 

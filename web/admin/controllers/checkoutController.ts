@@ -16,7 +16,6 @@ export const checkoutSettings = async (req: TypedRequest, res: Response): Promis
     shippingOptions: [],
     success: req.query.success || null,
   });
-  
 };
 
 export const updateCheckoutSettings = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -40,12 +39,10 @@ export const listPaymentMethods = async (req: TypedRequest, res: Response): Prom
     paymentMethods: [],
     success: req.query.success || null,
   });
-  
 };
 
 export const updatePaymentMethodOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Payment method order updated successfully' });
-  
 };
 
 export const listShippingOptions = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -54,10 +51,8 @@ export const listShippingOptions = async (req: TypedRequest, res: Response): Pro
     shippingOptions: [],
     success: req.query.success || null,
   });
-  
 };
 
 export const updateShippingOptionOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Shipping option order updated successfully' });
-  
 };

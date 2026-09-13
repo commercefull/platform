@@ -14,7 +14,11 @@ export interface CcpaDsrFilters {
 export interface CcpaDsrRepository {
   findById(ccpaDsrId: string): Promise<CcpaDataSubjectRequest | null>;
   findByCustomer(customerId: string): Promise<CcpaDataSubjectRequest[]>;
-  findByOrganization(organizationId: string, filters?: CcpaDsrFilters, pagination?: PaginationOptions): Promise<PaginatedResult<CcpaDataSubjectRequest>>;
+  findByOrganization(
+    organizationId: string,
+    filters?: CcpaDsrFilters,
+    pagination?: PaginationOptions,
+  ): Promise<PaginatedResult<CcpaDataSubjectRequest>>;
   findOverdue(): Promise<CcpaDataSubjectRequest[]>;
   findPending(pagination?: PaginationOptions): Promise<PaginatedResult<CcpaDataSubjectRequest>>;
   save(dsr: CcpaDataSubjectRequest): Promise<CcpaDataSubjectRequest>;

@@ -109,10 +109,7 @@ describe('Configurable Product', () => {
 
   describe('Bundle Price Calculation (Real Prices)', () => {
     it('should calculate bundle price using real product prices', async () => {
-      const res = await client.post(
-        `/customer/products/bundles/${SEEDED_BUNDLE_1_ID}/calculate`,
-        {},
-      );
+      const res = await client.post(`/customer/products/bundles/${SEEDED_BUNDLE_1_ID}/calculate`, {});
 
       if (res.status === 200) {
         expect(res.data.success).toBe(true);
@@ -124,15 +121,12 @@ describe('Configurable Product', () => {
     });
 
     it('should configure variant by options (customer)', async () => {
-      const res = await client.post(
-        `/customer/products/bundles/${SEEDED_BUNDLE_1_ID}/calculate`,
-        {
-          selectedItems: [
-            { productId: SEEDED_PRODUCT_1_ID, quantity: 1 },
-            { productId: SEEDED_PRODUCT_2_ID, quantity: 2 },
-          ],
-        },
-      );
+      const res = await client.post(`/customer/products/bundles/${SEEDED_BUNDLE_1_ID}/calculate`, {
+        selectedItems: [
+          { productId: SEEDED_PRODUCT_1_ID, quantity: 1 },
+          { productId: SEEDED_PRODUCT_2_ID, quantity: 2 },
+        ],
+      });
 
       if (res.status === 200) {
         expect(res.data.success).toBe(true);

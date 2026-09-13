@@ -11,21 +11,29 @@ import { SystemConfigurationRepo } from '../../../configuration/infrastructure/r
 
 export const storeResolvers = {
   Query: {
-    store: async (_parent: unknown, args: {
-      storeId?: string;
-      slug?: string;
-      storeUrl?: string;
-    }, context: GraphQLAuthContext) => {
+    store: async (
+      _parent: unknown,
+      args: {
+        storeId?: string;
+        slug?: string;
+        storeUrl?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new GetStoreUseCase(StoreRepo);
       const query = new GetStoreQuery(args.storeId, args.slug, args.storeUrl);
       return useCase.execute(query);
     },
 
-    stores: async (_parent: unknown, args: {
-      filters?: Record<string, unknown>;
-      pagination?: { page?: number; limit?: number };
-    }, context: GraphQLAuthContext) => {
+    stores: async (
+      _parent: unknown,
+      args: {
+        filters?: Record<string, unknown>;
+        pagination?: { page?: number; limit?: number };
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new ListStoresUseCase(StoreRepo);
       const query = new ListStoresQuery(args.filters as ListStoresQuery['filters'], args.pagination);
@@ -36,7 +44,11 @@ export const storeResolvers = {
   Mutation: {
     createStore: async (_parent: unknown, args: { input: Record<string, unknown> }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new CreateStoreUseCase(StoreRepo, new SystemConfigAdapter(new SystemConfigurationRepo()), new OrganizationLookupAdapter());
+      const useCase = new CreateStoreUseCase(
+        StoreRepo,
+        new SystemConfigAdapter(new SystemConfigurationRepo()),
+        new OrganizationLookupAdapter(),
+      );
       const command = new CreateStoreCommand(args.input as CreateStoreCommand['storeData']);
       const result = await useCase.execute(command);
       return {

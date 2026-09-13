@@ -4,11 +4,7 @@
  * Domain interface for organization data access (organizations, addresses, payment info, authentication).
  */
 
-import type {
-  Organization,
-  OrganizationAddress,
-  OrganizationPaymentInfo,
-} from 'libs/db/types';
+import type { Organization, OrganizationAddress, OrganizationPaymentInfo } from 'libs/db/types';
 
 export type OrganizationCreateParams = Partial<Omit<Organization, 'organizationId' | 'createdAt' | 'updatedAt'>> & {
   name: string;
@@ -29,7 +25,9 @@ export type OrganizationAddressCreateParams = Partial<Omit<OrganizationAddress, 
   country: string;
 };
 
-export type OrganizationPaymentInfoCreateParams = Partial<Omit<OrganizationPaymentInfo, 'organizationPaymentInfoId' | 'createdAt' | 'updatedAt'>> & {
+export type OrganizationPaymentInfoCreateParams = Partial<
+  Omit<OrganizationPaymentInfo, 'organizationPaymentInfoId' | 'createdAt' | 'updatedAt'>
+> & {
   organizationId: string;
   paymentType: string;
   currency: string;
@@ -60,7 +58,10 @@ export interface OrganizationRepository {
   createPaymentInfo(params: OrganizationPaymentInfoCreateParams): Promise<OrganizationPaymentInfo>;
 
   // Authentication
-  authenticate(credentials: { email: string; password: string }): Promise<{ organizationId: string; email: string; name: string; status: string } | null>;
+  authenticate(credentials: {
+    email: string;
+    password: string;
+  }): Promise<{ organizationId: string; email: string; name: string; status: string } | null>;
   hashPassword(password: string): Promise<string>;
   changePassword(organizationId: string, newPassword: string): Promise<boolean>;
   createPasswordResetToken(organizationId: string): Promise<string>;

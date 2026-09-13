@@ -132,16 +132,18 @@ export const saveOverride = async (req: TypedRequest, res: Response): Promise<vo
         customBannerUrl,
       });
     } else {
-      override = await manageOverridesUseCase.create(new CreateThemeOverrideCommand({
-        storeId,
-        themeId,
-        organizationId,
-        settings: typeof settings === 'string' ? JSON.parse(settings) : settings,
-        customCss,
-        customLogoUrl,
-        customFaviconUrl,
-        customBannerUrl,
-      }));
+      override = await manageOverridesUseCase.create(
+        new CreateThemeOverrideCommand({
+          storeId,
+          themeId,
+          organizationId,
+          settings: typeof settings === 'string' ? JSON.parse(settings) : settings,
+          customCss,
+          customLogoUrl,
+          customFaviconUrl,
+          customBannerUrl,
+        }),
+      );
     }
 
     res.json({ success: true, data: override });

@@ -1,4 +1,4 @@
-import { DeleteMediaUseCase} from './DeleteMedia';
+import { DeleteMediaUseCase } from './DeleteMedia';
 import { MediaAssetNotFoundError, MediaValidationError } from '../../domain/errors/MediaErrors';
 
 describe('DeleteMediaUseCase', () => {

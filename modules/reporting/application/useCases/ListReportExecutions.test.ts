@@ -3,7 +3,16 @@ jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
   default: {
     schedules: {
       listExecutions: jest.fn().mockResolvedValue([
-        { reportExecutionId: 'e1', reportScheduleId: 'rs1', status: 'completed', startedAt: new Date(), completedAt: new Date(), recipientCount: 3, deliveryStatus: {}, createdAt: new Date() },
+        {
+          reportExecutionId: 'e1',
+          reportScheduleId: 'rs1',
+          status: 'completed',
+          startedAt: new Date(),
+          completedAt: new Date(),
+          recipientCount: 3,
+          deliveryStatus: {},
+          createdAt: new Date(),
+        },
       ]),
     },
     executions: {},

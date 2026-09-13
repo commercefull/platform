@@ -13,4 +13,3 @@ export interface PaginatedResult<T> {
   hasMore: boolean;
   length: number;
 }
-

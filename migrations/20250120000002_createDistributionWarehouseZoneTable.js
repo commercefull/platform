@@ -17,7 +17,9 @@ exports.up = async function (knex) {
     t.string('name', 100).notNullable();
     t.string('code', 50).notNullable();
     t.text('description');
-    t.enu('zoneType', ['storage', 'picking', 'receiving', 'packing', 'shipping', 'returns', 'cold_storage', 'hazardous', 'secure']).notNullable().defaultTo('storage');
+    t.enu('zoneType', ['storage', 'picking', 'receiving', 'packing', 'shipping', 'returns', 'cold_storage', 'hazardous', 'secure'])
+      .notNullable()
+      .defaultTo('storage');
     t.boolean('isActive').notNullable().defaultTo(true);
     t.integer('sortOrder').defaultTo(0);
     t.jsonb('metadata');

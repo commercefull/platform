@@ -7,7 +7,9 @@ import { LoginAdminUseCase } from './LoginAdmin';
 import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('LoginAdminUseCase', () => {
   let useCase: LoginAdminUseCase;
@@ -18,8 +20,13 @@ describe('LoginAdminUseCase', () => {
   beforeEach(() => {
     mockAdminRepo = {
       findByEmail: jest.fn().mockResolvedValue({
-        adminId: 'a1', email: 'admin@test.com', name: 'Admin', passwordHash: 'hash',
-        role: 'admin', permissions: ['read'], status: 'active',
+        adminId: 'a1',
+        email: 'admin@test.com',
+        name: 'Admin',
+        passwordHash: 'hash',
+        role: 'admin',
+        permissions: ['read'],
+        status: 'active',
       }),
       updateLastLogin: jest.fn().mockResolvedValue(undefined),
     };
@@ -57,7 +64,15 @@ describe('LoginAdminUseCase', () => {
   });
 
   it('should throw AccountNotActiveError when admin is suspended', async () => {
-    mockAdminRepo.findByEmail.mockResolvedValue({ adminId: 'a1', email: 'a@b.com', name: 'A', passwordHash: 'h', role: 'admin', permissions: [], status: 'suspended' });
+    mockAdminRepo.findByEmail.mockResolvedValue({
+      adminId: 'a1',
+      email: 'a@b.com',
+      name: 'A',
+      passwordHash: 'h',
+      role: 'admin',
+      permissions: [],
+      status: 'suspended',
+    });
 
     await expect(useCase.execute({ email: 'a@b.com', password: 'pass' })).rejects.toThrow(AccountNotActiveError);
   });

@@ -3,15 +3,23 @@ jest.mock('../../../infrastructure/repositories/DynamicAttributeRepository', () 
   default: {
     findAttributeByCode: jest.fn().mockResolvedValue(null),
     findAttributeById: jest.fn().mockResolvedValue({
-      productAttributeId: 'a1', name: 'Color', code: 'color', type: 'select', isSystem: false,
+      productAttributeId: 'a1',
+      name: 'Color',
+      code: 'color',
+      type: 'select',
+      isSystem: false,
     }),
     updateAttribute: jest.fn().mockResolvedValue({
-      productAttributeId: 'a1', name: 'Color Updated', code: 'color', type: 'select', isSystem: false,
+      productAttributeId: 'a1',
+      name: 'Color Updated',
+      code: 'color',
+      type: 'select',
+      isSystem: false,
     }),
   },
 }));
 
-import { UpdateAttributeUseCase} from './UpdateAttribute';
+import { UpdateAttributeUseCase } from './UpdateAttribute';
 import dynamicAttributeRepository from '../../../infrastructure/repositories/DynamicAttributeRepository';
 
 const mockRepo = dynamicAttributeRepository as unknown as Record<string, jest.Mock>;
@@ -42,7 +50,11 @@ describe('UpdateAttributeUseCase', () => {
 
   it('should return error when updating system attribute', async () => {
     mockRepo.findAttributeById.mockResolvedValueOnce({
-      productAttributeId: 'a1', name: 'System', code: 'sys', type: 'text', isSystem: true,
+      productAttributeId: 'a1',
+      name: 'System',
+      code: 'sys',
+      type: 'text',
+      isSystem: true,
     });
 
     const result = await useCase.execute({ attributeId: 'a1', name: 'Updated' });

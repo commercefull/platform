@@ -13,9 +13,14 @@ describe('RegisterWebhookUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       createEndpoint: jest.fn().mockResolvedValue({
-        webhookEndpointId: 'wh-1', name: 'Test', url: 'https://example.com/hook',
-        secret: 'secret-123', events: ['product.created'], isActive: true,
-        headers: {}, retryPolicy: {},
+        webhookEndpointId: 'wh-1',
+        name: 'Test',
+        url: 'https://example.com/hook',
+        secret: 'secret-123',
+        events: ['product.created'],
+        isActive: true,
+        headers: {},
+        retryPolicy: {},
       }),
     };
     useCase = new RegisterWebhookUseCase(mockRepo as never);
@@ -23,7 +28,9 @@ describe('RegisterWebhookUseCase', () => {
 
   it('should register a webhook successfully', async () => {
     const input: RegisterWebhookInput = {
-      name: 'Test', url: 'https://example.com/hook', events: ['product.created'],
+      name: 'Test',
+      url: 'https://example.com/hook',
+      events: ['product.created'],
     };
 
     const result = await useCase.execute(input);

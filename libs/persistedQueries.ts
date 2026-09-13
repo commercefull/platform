@@ -105,8 +105,7 @@ export const persistedQueryStore = new PersistedQueryStore();
  */
 export function initPersistedQueries(): void {
   if (process.env.GRAPHQL_PERSISTED_QUERIES === 'true') {
-    const filePath = process.env.GRAPHQL_PERSISTED_QUERIES_FILE
-      ?? join(process.cwd(), 'persistedQueries.json');
+    const filePath = process.env.GRAPHQL_PERSISTED_QUERIES_FILE ?? join(process.cwd(), 'persistedQueries.json');
     persistedQueryStore.loadFromFile(filePath);
   }
 }

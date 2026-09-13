@@ -30,12 +30,12 @@ const REFERENCE_DATA_SEEDS = new Set([
  */
 function getSeedFilter(env) {
   if (env === 'production') {
-    return (file) => false; // No seeds in production
+    return file => false; // No seeds in production
   }
   if (env === 'staging') {
-    return (file) => REFERENCE_DATA_SEEDS.has(file);
+    return file => REFERENCE_DATA_SEEDS.has(file);
   }
-  return (file) => true; // All seeds in development
+  return file => true; // All seeds in development
 }
 
 const activeEnv = process.env.NODE_ENV || 'development';

@@ -34,4 +34,3 @@ export function initSearchAdapter(): void {
       setSearchAdapter(new PostgresFtsAdapter());
   }
 }
-

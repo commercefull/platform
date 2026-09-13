@@ -20,7 +20,10 @@ export class InvalidAutomationRuleError extends AppError {
 
 export class AutomationExecutionError extends AppError {
   constructor(ruleId: string, reason: string) {
-    super(`Automation execution failed for rule ${ruleId}: ${reason}`, 500, { code: 'automation.execution_error', details: { ruleId, reason } });
+    super(`Automation execution failed for rule ${ruleId}: ${reason}`, 500, {
+      code: 'automation.execution_error',
+      details: { ruleId, reason },
+    });
   }
 }
 

@@ -6,14 +6,7 @@
  */
 
 export type AuditCategory =
-  | 'authentication'
-  | 'authorization'
-  | 'dataAccess'
-  | 'dataModification'
-  | 'configuration'
-  | 'payment'
-  | 'compliance'
-  | 'security';
+  'authentication' | 'authorization' | 'dataAccess' | 'dataModification' | 'configuration' | 'payment' | 'compliance' | 'security';
 
 export type AuditSeverity = 'info' | 'warning' | 'critical';
 
@@ -116,30 +109,78 @@ export class AuditLog {
   }
 
   // Getters
-  get auditLogId(): string { return this.props.auditLogId; }
-  get organizationId(): string | undefined { return this.props.organizationId; }
-  get storeId(): string | undefined { return this.props.storeId; }
-  get actorId(): string { return this.props.actorId; }
-  get actorType(): string { return this.props.actorType; }
-  get actorEmail(): string | undefined { return this.props.actorEmail; }
-  get actorName(): string | undefined { return this.props.actorName; }
-  get category(): AuditCategory | undefined { return this.props.category; }
-  get action(): string { return this.props.action; }
-  get resourceType(): string { return this.props.resourceType; }
-  get resourceId(): string | undefined { return this.props.resourceId; }
-  get resourceName(): string | undefined { return this.props.resourceName; }
-  get outcome(): AuditOutcome { return this.props.outcome; }
-  get severity(): AuditSeverity { return this.props.severity; }
-  get ipAddress(): string | undefined { return this.props.ipAddress; }
-  get userAgent(): string | undefined { return this.props.userAgent; }
-  get requestId(): string | undefined { return this.props.requestId; }
-  get correlationId(): string | undefined { return this.props.correlationId; }
-  get metadata(): Record<string, unknown> | undefined { return this.props.metadata; }
-  get previousState(): Record<string, unknown> | undefined { return this.props.previousState; }
-  get newState(): Record<string, unknown> | undefined { return this.props.newState; }
-  get previousHash(): string | undefined { return this.props.previousHash; }
-  get hash(): string | undefined { return this.props.hash; }
-  get createdAt(): Date { return this.props.createdAt; }
+  get auditLogId(): string {
+    return this.props.auditLogId;
+  }
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
+  }
+  get storeId(): string | undefined {
+    return this.props.storeId;
+  }
+  get actorId(): string {
+    return this.props.actorId;
+  }
+  get actorType(): string {
+    return this.props.actorType;
+  }
+  get actorEmail(): string | undefined {
+    return this.props.actorEmail;
+  }
+  get actorName(): string | undefined {
+    return this.props.actorName;
+  }
+  get category(): AuditCategory | undefined {
+    return this.props.category;
+  }
+  get action(): string {
+    return this.props.action;
+  }
+  get resourceType(): string {
+    return this.props.resourceType;
+  }
+  get resourceId(): string | undefined {
+    return this.props.resourceId;
+  }
+  get resourceName(): string | undefined {
+    return this.props.resourceName;
+  }
+  get outcome(): AuditOutcome {
+    return this.props.outcome;
+  }
+  get severity(): AuditSeverity {
+    return this.props.severity;
+  }
+  get ipAddress(): string | undefined {
+    return this.props.ipAddress;
+  }
+  get userAgent(): string | undefined {
+    return this.props.userAgent;
+  }
+  get requestId(): string | undefined {
+    return this.props.requestId;
+  }
+  get correlationId(): string | undefined {
+    return this.props.correlationId;
+  }
+  get metadata(): Record<string, unknown> | undefined {
+    return this.props.metadata;
+  }
+  get previousState(): Record<string, unknown> | undefined {
+    return this.props.previousState;
+  }
+  get newState(): Record<string, unknown> | undefined {
+    return this.props.newState;
+  }
+  get previousHash(): string | undefined {
+    return this.props.previousHash;
+  }
+  get hash(): string | undefined {
+    return this.props.hash;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
 
   isFailure(): boolean {
     return this.props.outcome === 'failure' || this.props.outcome === 'denied';

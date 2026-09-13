@@ -6,7 +6,7 @@ jest.mock('../../infrastructure/repositories/ShippingLabelAggregateRepository', 
   },
 }));
 
-import { TrackShipmentUseCase} from './TrackShipment';
+import { TrackShipmentUseCase } from './TrackShipment';
 import shippingLabelRepo from '../../infrastructure/repositories/ShippingLabelAggregateRepository';
 
 const mockRepo = shippingLabelRepo as unknown as Record<string, jest.Mock>;
@@ -21,8 +21,12 @@ describe('TrackShipmentUseCase', () => {
 
   it('should track shipment by tracking number (happy path)', async () => {
     mockRepo.findByTrackingNumber.mockResolvedValue({
-      trackingNumber: 'TRK123', status: 'in_transit', carrierName: 'FedEx',
-      labelUrl: 'https://label.url', shippingLabelId: 'sl-1', createdAt: new Date(),
+      trackingNumber: 'TRK123',
+      status: 'in_transit',
+      carrierName: 'FedEx',
+      labelUrl: 'https://label.url',
+      shippingLabelId: 'sl-1',
+      createdAt: new Date(),
     });
 
     const result = await useCase.execute({ trackingNumber: 'TRK123' });
@@ -34,8 +38,11 @@ describe('TrackShipmentUseCase', () => {
 
   it('should track shipment by shipping label ID', async () => {
     mockRepo.findById.mockResolvedValue({
-      trackingNumber: 'TRK456', status: 'delivered', carrierName: 'UPS',
-      shippingLabelId: 'sl-2', createdAt: new Date(),
+      trackingNumber: 'TRK456',
+      status: 'delivered',
+      carrierName: 'UPS',
+      shippingLabelId: 'sl-2',
+      createdAt: new Date(),
     });
 
     const result = await useCase.execute({ shippingLabelId: 'sl-2' });

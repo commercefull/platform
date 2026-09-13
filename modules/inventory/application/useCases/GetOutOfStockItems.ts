@@ -45,12 +45,7 @@ interface OutOfStockRecord {
 }
 
 interface GetOutOfStockRepositoryPort {
-  findOutOfStock(options: {
-    warehouseId?: string;
-    includeReserved: boolean;
-    page: number;
-    limit: number;
-  }): Promise<OutOfStockRecord[]>;
+  findOutOfStock(options: { warehouseId?: string; includeReserved: boolean; page: number; limit: number }): Promise<OutOfStockRecord[]>;
 }
 
 export class GetOutOfStockItemsUseCase {

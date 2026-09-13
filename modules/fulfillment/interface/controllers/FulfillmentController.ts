@@ -194,7 +194,9 @@ export const listFulfillments = async (req: TypedRequest, res: Response): Promis
     },
     {
       limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 20,
-      offset: req.query.page ? (parseInt(req.query.page as string, 10) - 1) * (req.query.limit ? parseInt(req.query.limit as string, 10) : 20) : 0,
+      offset: req.query.page
+        ? (parseInt(req.query.page as string, 10) - 1) * (req.query.limit ? parseInt(req.query.limit as string, 10) : 20)
+        : 0,
     },
   );
   res.json({ success: true, data: result });

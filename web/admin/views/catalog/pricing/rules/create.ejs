@@ -2,14 +2,98 @@
   <div class="page-header d-print-none">
     <div class="row align-items-center">
       <div class="col-auto">
-        <a href="/admin/catalog/pricing" class="btn btn-outline-secondary btn-sm mb-2"><%= t('product:pricing.back') %></a>
+        <a href="/admin/catalog/pricing/rules" class="btn btn-outline-secondary btn-sm mb-2"><%= t('product:pricing.back') %></a>
         <h2 class="page-title"><%= pageName %></h2>
       </div>
     </div>
   </div>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger">
+    <i class="fas fa-exclamation-circle me-2"></i><%= error %>
+  </div>
+  <% } %>
+
   <div class="card">
-    <div class="card-body">
-      <p class="text-muted"><%= t('shared:common.comingSoon') %></p>
-    </div>
+    <form method="POST" action="/admin/catalog/pricing/rules">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Rule Name</label>
+            <input type="text" class="form-control" name="name" value="<%= formData?.name || '' %>" required>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Rule Type</label>
+            <select class="form-select" name="ruleType">
+              <option value="fixed" <%= formData?.ruleType === 'fixed' ? 'selected' : '' %>>Fixed Price</option>
+              <option value="percentage" <%= formData?.ruleType === 'percentage' ? 'selected' : '' %>>Percentage Off</option>
+              <option value="tiered" <%= formData?.ruleType === 'tiered' ? 'selected' : '' %>>Tiered Discount</option>
+              <option value="volume" <%= formData?.ruleType === 'volume' ? 'selected' : '' %>>Volume Discount</option>
+              <option value="time_based" <%= formData?.ruleType === 'time_based' ? 'selected' : '' %>>Time-Based</option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Target</label>
+            <select class="form-select" name="target">
+              <option value="all" <%= !formData?.target || formData?.target === 'all' ? 'selected' : '' %>>All Products</option>
+              <option value="product" <%= formData?.target === 'product' ? 'selected' : '' %>>Specific Product</option>
+              <option value="category" <%= formData?.target === 'category' ? 'selected' : '' %>>Category</option>
+              <option value="customer_group" <%= formData?.target === 'customer_group' ? 'selected' : '' %>>Customer Group</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Value</label>
+            <input type="number" class="form-control" name="value" value="<%= formData?.value || '' %>" step="0.01" placeholder="e.g. 10.00 or 10%">
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Currency</label>
+            <input type="text" class="form-control" name="currency" value="<%= formData?.currency || 'USD' %>">
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Priority</label>
+            <input type="number" class="form-control" name="priority" value="<%= formData?.priority || 0 %>" min="0">
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" name="status">
+              <option value="active" <%= !formData?.status || formData?.status === 'active' ? 'selected' : '' %>>Active</option>
+              <option value="inactive" <%= formData?.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" name="description" rows="2"><%= formData?.description || '' %></textarea>
+        </div>
+
+        <!-- Condition Builder (Epic F) -->
+        <h5 class="mt-4 mb-3">Pricing Conditions</h5>
+        <p class="text-muted small">Define conditions that must match for this price rule to apply.</p>
+        <%- include('../../../partials/condition-builder', {
+          fieldName: 'conditions',
+          conditions: formData?.conditions || [],
+          attributes: [
+            { value: 'cartTotal', label: 'Cart Total' },
+            { value: 'itemQuantity', label: 'Item Quantity' },
+            { value: 'productCategory', label: 'Product Category' },
+            { value: 'customerGroup', label: 'Customer Group' },
+            { value: 'customerTier', label: 'Customer Tier' },
+            { value: 'channel', label: 'Sales Channel' }
+          ]
+        }) %>
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save me-1"></i>Create Price Rule
+        </button>
+        <a href="/admin/catalog/pricing/rules" class="btn btn-secondary">
+          <i class="fas fa-times me-1"></i>Cancel
+        </a>
+      </div>
+    </form>
   </div>
 </div>

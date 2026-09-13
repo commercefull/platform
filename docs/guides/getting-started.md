@@ -30,11 +30,11 @@ cp .env.example .env
 
 Edit `.env` and set at minimum:
 
-| Variable | Value | Notes |
-|---|---|---|
-| `SESSION_SECRET` | A random 32+ char string | Required in production |
-| `POSTGRES_PASSWORD` | `ecomm-password` | Matches the Docker container default |
-| `STRIPE_PRIVATE_KEY` | Your Stripe test key | Only if testing payments |
+| Variable             | Value                    | Notes                                |
+| -------------------- | ------------------------ | ------------------------------------ |
+| `SESSION_SECRET`     | A random 32+ char string | Required in production               |
+| `POSTGRES_PASSWORD`  | `ecomm-password`         | Matches the Docker container default |
+| `STRIPE_PRIVATE_KEY` | Your Stripe test key     | Only if testing payments             |
 
 See the [Configuration Reference](#/generated/configuration) for the full list.
 
@@ -80,14 +80,14 @@ The server starts with hot reload via nodemon.
 
 ## Access Points
 
-| Portal | URL | Auth |
-|---|---|---|
-| Storefront | `http://localhost:3000` | Public |
-| Admin Panel | `http://localhost:3000/admin` | `isAdminLoggedIn` |
-| Customer API | `http://localhost:3000/customer/*` | Session or JWT |
+| Portal       | URL                                | Auth                     |
+| ------------ | ---------------------------------- | ------------------------ |
+| Storefront   | `http://localhost:3000`            | Public                   |
+| Admin Panel  | `http://localhost:3000/admin`      | `isAdminLoggedIn`        |
+| Customer API | `http://localhost:3000/customer/*` | Session or JWT           |
 | Business API | `http://localhost:3000/business/*` | `isOrganizationLoggedIn` |
-| Health Check | `http://localhost:3000/health` | None |
-| **Docs** | `http://localhost:3000/docs` | None |
+| Health Check | `http://localhost:3000/health`     | None                     |
+| **Docs**     | `http://localhost:3000/docs`       | None                     |
 
 ## Common commands
 

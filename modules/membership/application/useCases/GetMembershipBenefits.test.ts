@@ -1,4 +1,4 @@
-import { GetMembershipBenefitsUseCase} from './GetMembershipBenefits';
+import { GetMembershipBenefitsUseCase } from './GetMembershipBenefits';
 
 describe('GetMembershipBenefitsUseCase', () => {
   let useCase: GetMembershipBenefitsUseCase;
@@ -7,7 +7,9 @@ describe('GetMembershipBenefitsUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findActiveByCustomerId: jest.fn().mockResolvedValue({ tierId: 't1', endDate: new Date(Date.now() + 30 * 86400000) }),
-      findTierById: jest.fn().mockResolvedValue({ name: 'Gold', level: 2, benefits: [{ type: 'discount', value: 10, description: '10% off' }] }),
+      findTierById: jest
+        .fn()
+        .mockResolvedValue({ name: 'Gold', level: 2, benefits: [{ type: 'discount', value: 10, description: '10% off' }] }),
     };
     useCase = new GetMembershipBenefitsUseCase(mockRepo as never);
   });

@@ -18,9 +18,10 @@ export type ProductListUpdateParams = Partial<Omit<ProductListCreateParams, 'org
 export class ProductListRepo {
   async findByMerchant(organizationId: string): Promise<ProductList[]> {
     return (
-      (await query<ProductList[]>(`SELECT * FROM "productList" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC`, [
-        organizationId,
-      ])) || []
+      (await query<ProductList[]>(
+        `SELECT * FROM "productList" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC`,
+        [organizationId],
+      )) || []
     );
   }
 

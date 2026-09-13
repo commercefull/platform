@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
-
 jest.mock('../../../organization/infrastructure/repositories/organizationRepo', () => ({
   __esModule: true,
   default: {
@@ -8,15 +6,16 @@ jest.mock('../../../organization/infrastructure/repositories/organizationRepo', 
   },
 }));
 
+import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
 import { OrganizationLookupAdapter } from './OrganizationLookupAdapter';
 
 describe('product/OrganizationLookupAdapter', () => {
   let adapter: OrganizationLookupAdapter;
-   
-  let mockOrgRepo: any;
+
+  let mockOrgRepo: { findById: jest.Mock; findAll: jest.Mock };
 
   beforeEach(() => {
-    mockOrgRepo = require('../../../organization/infrastructure/repositories/organizationRepo').default;
+    mockOrgRepo = organizationRepo as unknown as { findById: jest.Mock; findAll: jest.Mock };
     adapter = new OrganizationLookupAdapter();
   });
 

@@ -46,11 +46,14 @@ describe('CancelFulfillmentUseCase', () => {
 
     expect(result.fulfillment.status).toBe('cancelled');
     expect(mockRepo.save).toHaveBeenCalledTimes(1);
-    expect(eventBus.emit).toHaveBeenCalledWith('fulfillment.cancelled', expect.objectContaining({
-      fulfillmentId: 'ful-1',
-      orderId: 'ord-1',
-      reason: 'Customer request',
-    }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'fulfillment.cancelled',
+      expect.objectContaining({
+        fulfillmentId: 'ful-1',
+        orderId: 'ord-1',
+        reason: 'Customer request',
+      }),
+    );
   });
 
   it('should cancel a picking fulfillment', async () => {
@@ -64,17 +67,13 @@ describe('CancelFulfillmentUseCase', () => {
   it('should throw FulfillmentNotFoundError when not found', async () => {
     mockRepo.findById.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute(new CancelFulfillmentCommand('ful-x')),
-    ).rejects.toThrow(FulfillmentNotFoundError);
+    await expect(useCase.execute(new CancelFulfillmentCommand('ful-x'))).rejects.toThrow(FulfillmentNotFoundError);
   });
 
   it('should throw when trying to cancel a delivered fulfillment', async () => {
     mockRepo.findById.mockResolvedValue(createFulfillment('delivered'));
 
-    await expect(
-      useCase.execute(new CancelFulfillmentCommand('ful-1')),
-    ).rejects.toThrow(FulfillmentValidationError);
+    await expect(useCase.execute(new CancelFulfillmentCommand('ful-1'))).rejects.toThrow(FulfillmentValidationError);
   });
 
   it('should pass reason to event', async () => {
@@ -82,8 +81,11 @@ describe('CancelFulfillmentUseCase', () => {
 
     await useCase.execute(new CancelFulfillmentCommand('ful-1', 'Out of stock'));
 
-    expect(eventBus.emit).toHaveBeenCalledWith('fulfillment.cancelled', expect.objectContaining({
-      reason: 'Out of stock',
-    }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'fulfillment.cancelled',
+      expect.objectContaining({
+        reason: 'Out of stock',
+      }),
+    );
   });
 });

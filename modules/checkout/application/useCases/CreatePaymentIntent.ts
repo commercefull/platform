@@ -7,9 +7,9 @@ import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository
 import { BasketSnapshotPort } from '../../application/ports/BasketSnapshotPort';
 import { OrderPlacementPort, CheckoutOutcome } from '../../application/ports/OrderPlacementPort';
 import { PaymentAuthorizationPort } from '../../application/ports/PaymentAuthorizationPort';
+import { FraudScreeningPort } from '../../application/ports/FraudScreeningPort';
 import { CheckoutSessionNotFoundError, CheckoutValidationError } from '../../domain/errors/CheckoutErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
-
 
 // ============================================================================
 // Command
@@ -43,6 +43,7 @@ export class CreatePaymentIntentUseCase {
     private readonly basketSnapshotPort: BasketSnapshotPort,
     private readonly orderPlacementPort: OrderPlacementPort,
     private readonly paymentAuthorizationPort: PaymentAuthorizationPort,
+    private readonly fraudScreeningPort?: FraudScreeningPort,
   ) {}
 
   async execute(command: CreatePaymentIntentCommand): Promise<CreatePaymentIntentResponse> {
@@ -63,7 +64,9 @@ export class CreatePaymentIntentUseCase {
     }
 
     if (!session.isReadyForPayment) {
-      throw new CheckoutValidationError('Session is not ready for payment. Please set shipping address, shipping method, and payment method.');
+      throw new CheckoutValidationError(
+        'Session is not ready for payment. Please set shipping address, shipping method, and payment method.',
+      );
     }
 
     // Load basket items
@@ -143,9 +146,9 @@ export class CreatePaymentIntentUseCase {
     }
 
     const ba: BillingAddressLike | null = session.billingAddress
-      ? session.billingAddress as unknown as BillingAddressLike
+      ? (session.billingAddress as unknown as BillingAddressLike)
       : sa
-        ? sa as unknown as BillingAddressLike
+        ? (sa as unknown as BillingAddressLike)
         : null;
     const billingAddressInput = ba
       ? {
@@ -192,7 +195,55 @@ export class CreatePaymentIntentUseCase {
     await this.orderPlacementPort.updateOrderStatus(orderResponse.orderId, 'pending_payment' as CheckoutOutcome);
 
     // Initiate payment transaction
+    // (declared before fraud screening so it can be used in the screening request)
     const paymentMethodId = session.paymentMethodId || 'default';
+
+    // Fraud screening (Epic G): screen the order before authorizing payment.
+    // Blocked orders fail immediately. Review orders are flagged but proceed.
+    if (this.fraudScreeningPort) {
+      try {
+        const fraudScreeningResult = await this.fraudScreeningPort.screenOrder({
+          checkoutId: session.id,
+          orderId: orderResponse.orderId,
+          customerId: session.customerId,
+          customerEmail,
+          billingCountry: billingAddressInput.country,
+          shippingCountry: shippingAddressInput.country,
+          orderAmount: session.total.amount,
+          currency: session.total.currency,
+          paymentMethodId,
+          isFirstOrder: false, // Not tracked on session yet; fraud service defaults to false
+          isGuestCheckout: !session.customerId,
+        });
+
+        if (fraudScreeningResult.decision === 'blocked') {
+          // Mark order as blocked and fail before payment authorization
+          await this.orderPlacementPort.updateOrderStatus(orderResponse.orderId, 'cancelled' as CheckoutOutcome);
+          eventBus.emit('checkout.fraud_blocked', {
+            checkoutId: session.id,
+            orderId: orderResponse.orderId,
+            riskScore: fraudScreeningResult.riskScore,
+            riskLevel: fraudScreeningResult.riskLevel,
+          });
+          throw new CheckoutValidationError(`Order blocked by fraud screening (risk score: ${fraudScreeningResult.riskScore})`);
+        }
+
+        if (fraudScreeningResult.decision === 'review') {
+          // Flag the order for manual review but proceed with payment
+          eventBus.emit('checkout.fraud_review', {
+            checkoutId: session.id,
+            orderId: orderResponse.orderId,
+            riskScore: fraudScreeningResult.riskScore,
+            riskLevel: fraudScreeningResult.riskLevel,
+          });
+        }
+      } catch (err) {
+        // Re-throw CheckoutValidationError as-is
+        if (err instanceof CheckoutValidationError) throw err;
+        // If screening itself fails, log and proceed (fail-open to avoid blocking checkout on infra issues)
+        // In production, this could be configured to fail-closed
+      }
+    }
 
     let transactionId: string;
     try {

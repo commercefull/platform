@@ -2,9 +2,9 @@ jest.mock('../../infrastructure/repositories/PaymentBillingDataRepository', () =
   __esModule: true,
   default: {
     billing: {
-      findBalancesByMerchant: jest.fn().mockResolvedValue([
-        { paymentBalanceId: 'b1', currency: 'USD', amount: 500, updatedAt: new Date() },
-      ]),
+      findBalancesByMerchant: jest
+        .fn()
+        .mockResolvedValue([{ paymentBalanceId: 'b1', currency: 'USD', amount: 500, updatedAt: new Date() }]),
       getBalance: jest.fn().mockResolvedValue(500),
     },
   },

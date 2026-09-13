@@ -1,4 +1,4 @@
-import { ToggleFeatureFlagUseCase} from './ToggleFeatureFlag';
+import { ToggleFeatureFlagUseCase } from './ToggleFeatureFlag';
 import { ConfigurationValidationError } from '../../domain/errors/ConfigurationErrors';
 
 describe('ToggleFeatureFlagUseCase', () => {
@@ -9,7 +9,10 @@ describe('ToggleFeatureFlagUseCase', () => {
     mockRepo = {
       findFeatureFlag: jest.fn().mockResolvedValue(null),
       upsertFeatureFlag: jest.fn().mockResolvedValue({
-        key: 'new_checkout', enabled: true, scope: 'global', updatedAt: new Date(),
+        key: 'new_checkout',
+        enabled: true,
+        scope: 'global',
+        updatedAt: new Date(),
       }),
     };
     useCase = new ToggleFeatureFlagUseCase(mockRepo as never);

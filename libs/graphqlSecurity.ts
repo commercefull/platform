@@ -61,10 +61,7 @@ export function createDepthLimitRule(maxDepth: number = DEFAULT_MAX_DEPTH) {
  * Walks the query AST and sums field costs. List fields multiply by their
  * cost factor. Rejects queries that exceed maxComplexity.
  */
-function createComplexityRule(
-  maxComplexity: number = DEFAULT_MAX_COMPLEXITY,
-  fieldCosts: Record<string, FieldCost> = defaultFieldCosts,
-) {
+function createComplexityRule(maxComplexity: number = DEFAULT_MAX_COMPLEXITY, fieldCosts: Record<string, FieldCost> = defaultFieldCosts) {
   return (context: ValidationContext): ASTVisitor => {
     let totalComplexity = 0;
 
@@ -98,11 +95,7 @@ function createComplexityRule(
               totalComplexity,
               maxComplexity,
             });
-            context.reportError(
-              new GraphQLError(
-                `Query complexity ${totalComplexity} exceeds maximum allowed ${maxComplexity}`,
-              ),
-            );
+            context.reportError(new GraphQLError(`Query complexity ${totalComplexity} exceeds maximum allowed ${maxComplexity}`));
           }
         },
       },
@@ -114,9 +107,6 @@ function createComplexityRule(
  * Get all validation rules for GraphQL hardening.
  * Returns an array suitable for ApolloServer's `validationRules` option.
  */
-export function getGraphQLValidationRules(
-  maxDepth: number = DEFAULT_MAX_DEPTH,
-  maxComplexity: number = DEFAULT_MAX_COMPLEXITY,
-) {
+export function getGraphQLValidationRules(maxDepth: number = DEFAULT_MAX_DEPTH, maxComplexity: number = DEFAULT_MAX_COMPLEXITY) {
   return [createDepthLimitRule(maxDepth), createComplexityRule(maxComplexity)];
 }

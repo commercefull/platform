@@ -25,7 +25,6 @@ export const membershipDashboard = async (req: TypedRequest, res: Response): Pro
     tiers,
     members,
   });
-  
 };
 
 // ============================================================================
@@ -48,7 +47,6 @@ export const subscriptionDashboard = async (req: TypedRequest, res: Response): P
     plans,
     subscriptions,
   });
-  
 };
 
 // ============================================================================
@@ -73,5 +71,4 @@ export const loyaltyDashboard = async (req: TypedRequest, res: Response): Promis
     transactions,
     settings,
   });
-  
 };

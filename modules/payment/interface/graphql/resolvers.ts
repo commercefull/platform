@@ -3,7 +3,12 @@ import paymentDataRepository from '../../infrastructure/repositories/PaymentData
 const PaymentRepo = paymentDataRepository.payments;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { InitiatePaymentUseCase, InitiatePaymentCommand } from '../../application/useCases/InitiatePayment';
-import { GetTransactionUseCase, GetTransactionCommand, ListTransactionsUseCase, ListTransactionsCommand } from '../../application/useCases/GetTransactions';
+import {
+  GetTransactionUseCase,
+  GetTransactionCommand,
+  ListTransactionsUseCase,
+  ListTransactionsCommand,
+} from '../../application/useCases/GetTransactions';
 import { ProcessPaymentRefundUseCase, ProcessPaymentRefundCommand } from '../../application/useCases/ProcessRefund';
 import { GetPaymentMethodsUseCase, GetPaymentMethodsInput } from '../../application/useCases/GetPaymentMethods';
 import { CapturePaymentUseCase, CapturePaymentInput } from '../../application/useCases/CapturePayment';
@@ -79,23 +84,31 @@ export const paymentResolvers = {
       return useCase.execute(args.input || {});
     },
 
-    transaction: async (_parent: unknown, args: {
-      transactionId?: string;
-      externalId?: string;
-    }, context: GraphQLAuthContext) => {
+    transaction: async (
+      _parent: unknown,
+      args: {
+        transactionId?: string;
+        externalId?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new GetTransactionUseCase(PaymentRepo);
       const command = new GetTransactionCommand(args.transactionId, args.externalId);
       return useCase.execute(command);
     },
 
-    transactions: async (_parent: unknown, args: {
-      filters?: Record<string, unknown>;
-      limit?: number;
-      offset?: number;
-      orderBy?: string;
-      orderDirection?: 'asc' | 'desc';
-    }, context: GraphQLAuthContext) => {
+    transactions: async (
+      _parent: unknown,
+      args: {
+        filters?: Record<string, unknown>;
+        limit?: number;
+        offset?: number;
+        orderBy?: string;
+        orderDirection?: 'asc' | 'desc';
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new ListTransactionsUseCase(PaymentRepo);
       const command = new ListTransactionsCommand(
@@ -110,40 +123,54 @@ export const paymentResolvers = {
   },
 
   Mutation: {
-    initiatePayment: async (_parent: unknown, args: {
-      orderId: string;
-      amount: number;
-      currency: string;
-      paymentMethodConfigId: string;
-      customerId?: string;
-      customerIp?: string;
-    }, context: GraphQLAuthContext) => {
+    initiatePayment: async (
+      _parent: unknown,
+      args: {
+        orderId: string;
+        amount: number;
+        currency: string;
+        paymentMethodConfigId: string;
+        customerId?: string;
+        customerIp?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new InitiatePaymentUseCase(PaymentRepo);
       const command = new InitiatePaymentCommand(
-        args.orderId, args.amount, args.currency,
-        args.paymentMethodConfigId, args.customerId, args.customerIp,
+        args.orderId,
+        args.amount,
+        args.currency,
+        args.paymentMethodConfigId,
+        args.customerId,
+        args.customerIp,
       );
       return useCase.execute(command);
     },
 
-    processRefund: async (_parent: unknown, args: {
-      transactionId: string;
-      amount: number;
-      reason?: string;
-    }, context: GraphQLAuthContext) => {
+    processRefund: async (
+      _parent: unknown,
+      args: {
+        transactionId: string;
+        amount: number;
+        reason?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new ProcessPaymentRefundUseCase(PaymentRepo);
-      const command = new ProcessPaymentRefundCommand(
-        args.transactionId, args.amount, args.reason,
-      );
+      const command = new ProcessPaymentRefundCommand(args.transactionId, args.amount, args.reason);
       return useCase.execute(command);
     },
 
-    capturePayment: async (_parent: unknown, args: {
-      transactionId: string;
-      amount?: number;
-    }, context: GraphQLAuthContext) => {
+    capturePayment: async (
+      _parent: unknown,
+      args: {
+        transactionId: string;
+        amount?: number;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new CapturePaymentUseCase(captureRepoAdapter, captureGatewayAdapter);
       const input: CapturePaymentInput = {

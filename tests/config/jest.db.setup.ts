@@ -8,13 +8,7 @@ import dotenv from 'dotenv';
 // that share the global HTTP agent's sockets
 http.globalAgent.setMaxListeners(50);
 https.globalAgent.setMaxListeners(50);
-import {
-  createDatabase,
-  dropDatabase,
-  getDbConfig,
-  restoreSnapshot,
-  type DbConfig,
-} from './snapshot';
+import { createDatabase, dropDatabase, getDbConfig, restoreSnapshot, type DbConfig } from './snapshot';
 import { generateUUID } from '../../libs/uuid';
 import { closeAllTestPools } from '../../libs/db/pool';
 
@@ -29,7 +23,6 @@ interface TestDbGlobal {
 }
 
 declare global {
-   
   var __testDb: TestDbGlobal | undefined;
 }
 
@@ -74,7 +67,7 @@ afterAll(async () => {
       // Close all test DB pools first to release connections
       await closeAllTestPools();
       // Brief delay to let the server's pool connections settle
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 500));
       await dropDatabase(baseConfig, testDbName);
       console.log(`[Test Teardown] Dropped '${testDbName}'.`);
     } catch (error) {

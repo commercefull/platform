@@ -1,4 +1,4 @@
-import { UpdateMembershipTierUseCase} from './UpdateMembershipTier';
+import { UpdateMembershipTierUseCase } from './UpdateMembershipTier';
 import { MembershipPlanNotFoundError } from '../../domain/errors/MembershipErrors';
 
 describe('UpdateMembershipTierUseCase', () => {
@@ -7,8 +7,12 @@ describe('UpdateMembershipTierUseCase', () => {
 
   beforeEach(() => {
     mockRepo = {
-      getTierById: jest.fn().mockResolvedValue({ tierId: 't1', name: 'Gold', price: 50, billingPeriod: 'monthly', isActive: true, updatedAt: new Date() }),
-      updateTier: jest.fn().mockResolvedValue({ tierId: 't1', name: 'Gold Pro', price: 60, billingPeriod: 'monthly', isActive: true, updatedAt: new Date() }),
+      getTierById: jest
+        .fn()
+        .mockResolvedValue({ tierId: 't1', name: 'Gold', price: 50, billingPeriod: 'monthly', isActive: true, updatedAt: new Date() }),
+      updateTier: jest
+        .fn()
+        .mockResolvedValue({ tierId: 't1', name: 'Gold Pro', price: 60, billingPeriod: 'monthly', isActive: true, updatedAt: new Date() }),
     };
     useCase = new UpdateMembershipTierUseCase(mockRepo as never);
   });

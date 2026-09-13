@@ -1,4 +1,4 @@
-import { CreateTaxRateUseCase} from './CreateTaxRate';
+import { CreateTaxRateUseCase } from './CreateTaxRate';
 import { InvalidTaxRateError, TaxValidationError } from '../../domain/errors/TaxErrors';
 
 describe('CreateTaxRateUseCase', () => {
@@ -8,7 +8,12 @@ describe('CreateTaxRateUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       createTaxRate: jest.fn().mockResolvedValue({
-        taxRateId: 'txr-1', name: 'US Federal', rate: 0.07, country: 'US', isActive: true, createdAt: new Date(),
+        taxRateId: 'txr-1',
+        name: 'US Federal',
+        rate: 0.07,
+        country: 'US',
+        isActive: true,
+        createdAt: new Date(),
       }),
     };
     useCase = new CreateTaxRateUseCase(mockRepo as never);
@@ -24,7 +29,9 @@ describe('CreateTaxRateUseCase', () => {
 
   it('should throw TaxValidationError when required fields missing', async () => {
     await expect(useCase.execute({ name: '', rate: 0.1, type: 'percentage', country: 'US' })).rejects.toThrow(TaxValidationError);
-    await expect(useCase.execute({ name: 'Test', rate: undefined as never, type: 'percentage', country: 'US' })).rejects.toThrow(TaxValidationError);
+    await expect(useCase.execute({ name: 'Test', rate: undefined as never, type: 'percentage', country: 'US' })).rejects.toThrow(
+      TaxValidationError,
+    );
     await expect(useCase.execute({ name: 'Test', rate: 0.1, type: 'percentage', country: '' })).rejects.toThrow(TaxValidationError);
   });
 

@@ -6,7 +6,15 @@
  */
 
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
-import { OrderQueryRepository, OrderShipping, OrderShippingRate, OrderTax, OrderDiscount, OrderPayment, OrderPaymentRefund } from '../../domain/repositories/OrderQueryRepository';
+import {
+  OrderQueryRepository,
+  OrderShipping,
+  OrderShippingRate,
+  OrderTax,
+  OrderDiscount,
+  OrderPayment,
+  OrderPaymentRefund,
+} from '../../domain/repositories/OrderQueryRepository';
 import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
 
 const orderRepo = orderDataRepository.commands;

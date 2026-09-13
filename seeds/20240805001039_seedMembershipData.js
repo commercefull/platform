@@ -146,7 +146,6 @@ exports.up = async function (knex) {
     { planId: planMap.ANNUAL_PREMIUM, benefitId: benefitMap.EXCLUSIVE_CONTENT, isActive: true, priority: 50 },
     { planId: planMap.ANNUAL_PREMIUM, benefitId: benefitMap.EARLY_ACCESS, isActive: true, priority: 60 },
   ]);
-
 };
 
 /**

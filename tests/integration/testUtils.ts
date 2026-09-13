@@ -2,7 +2,6 @@ import axios, { AxiosInstance } from 'axios';
 
 // Global type for per-test-file database isolation
 declare global {
-   
   var __testDb: { testDatabaseName?: string } | undefined;
 }
 

@@ -41,7 +41,6 @@ export const getActivePromotions = async (req: TypedRequest, res: Response): Pro
     success: true,
     data: promotions,
   });
-  
 };
 
 /**
@@ -105,7 +104,6 @@ export const getPromotions = async (req: TypedRequest, res: Response): Promise<v
       offset: parseInt(offset as string),
     },
   });
-  
 };
 
 /**
@@ -128,13 +126,15 @@ export const getPromotionById = async (req: TypedRequest, res: Response): Promis
     success: true,
     data: promotionData,
   });
-  
 };
 
 /**
  * Create a new promotion with rules and actions
  */
-export const createPromotion = async (req: TypedRequest<Record<string, string>, unknown, CreatePromotionInput>, res: Response): Promise<void> => {
+export const createPromotion = async (
+  req: TypedRequest<Record<string, string>, unknown, CreatePromotionInput>,
+  res: Response,
+): Promise<void> => {
   const promotionData = req.body;
 
   // Validate required fields
@@ -163,13 +163,15 @@ export const createPromotion = async (req: TypedRequest<Record<string, string>, 
     data: promotion,
     message: 'Promotion created successfully',
   });
-  
 };
 
 /**
  * Update an existing promotion
  */
-export const updatePromotion = async (req: TypedRequest<Record<string, string>, unknown, UpdatePromotionInput>, res: Response): Promise<void> => {
+export const updatePromotion = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdatePromotionInput>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const promotionData = req.body;
 
@@ -192,7 +194,6 @@ export const updatePromotion = async (req: TypedRequest<Record<string, string>, 
     data: updatedPromotion,
     message: 'Promotion updated successfully',
   });
-  
 };
 
 /**
@@ -227,13 +228,15 @@ export const deletePromotion = async (req: TypedRequest, res: Response): Promise
     success: true,
     message: 'Promotion deleted successfully',
   });
-  
 };
 
 /**
  * Apply a promotion to a cart
  */
-const _applyPromotionToCart = async (req: TypedRequest<Record<string, string>, unknown, ApplyPromotionBody>, res: Response): Promise<void> => {
+const _applyPromotionToCart = async (
+  req: TypedRequest<Record<string, string>, unknown, ApplyPromotionBody>,
+  res: Response,
+): Promise<void> => {
   const { cartId, promotionId } = req.body;
 
   // Validation
@@ -273,7 +276,6 @@ const _applyPromotionToCart = async (req: TypedRequest<Record<string, string>, u
       promotion: promotionData.promotion,
     },
   });
-  
 };
 
 /**
@@ -305,13 +307,15 @@ const _removePromotionFromCart = async (req: TypedRequest, res: Response): Promi
       promotionId,
     },
   });
-  
 };
 
 /**
  * Validate a promotion for a cart
  */
-const _validatePromotionForCart = async (req: TypedRequest<Record<string, string>, unknown, ValidatePromotionBody>, res: Response): Promise<void> => {
+const _validatePromotionForCart = async (
+  req: TypedRequest<Record<string, string>, unknown, ValidatePromotionBody>,
+  res: Response,
+): Promise<void> => {
   const { promotionId, cartTotal, customerId, items: _items } = req.body;
 
   // Validation
@@ -345,7 +349,6 @@ const _validatePromotionForCart = async (req: TypedRequest<Record<string, string
       message: 'Promotion is not valid for this cart',
     });
   }
-  
 };
 
 /**
@@ -367,7 +370,6 @@ export const activatePromotion = async (req: TypedRequest, res: Response): Promi
     data: updatedPromotion,
     message: 'Promotion activated successfully',
   });
-  
 };
 
 /**
@@ -389,5 +391,4 @@ export const pausePromotion = async (req: TypedRequest, res: Response): Promise<
     data: updatedPromotion,
     message: 'Promotion paused successfully',
   });
-  
 };

@@ -3,7 +3,11 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import { SubscriptionNotFoundError, SubscriptionPlanNotFoundError, SubscriptionValidationError } from '../../domain/errors/SubscriptionErrors';
+import {
+  SubscriptionNotFoundError,
+  SubscriptionPlanNotFoundError,
+  SubscriptionValidationError,
+} from '../../domain/errors/SubscriptionErrors';
 
 export interface ChangeSubscriptionPlanInput {
   subscriptionId: string;

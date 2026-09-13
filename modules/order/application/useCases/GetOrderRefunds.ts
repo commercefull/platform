@@ -4,9 +4,7 @@ import orderDataRepository from '../../infrastructure/repositories/OrderDataRepo
 const orderQueryRepo = orderDataRepository.queries;
 
 export class GetOrderRefundsUseCase {
-  constructor(
-    private readonly queryRepo: OrderQueryRepository = orderQueryRepo,
-  ) {}
+  constructor(private readonly queryRepo: OrderQueryRepository = orderQueryRepo) {}
 
   async findByOrder(orderId: string) {
     return this.queryRepo.findRefundsByOrder(orderId);

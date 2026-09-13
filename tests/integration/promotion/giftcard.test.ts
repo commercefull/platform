@@ -15,11 +15,7 @@ describe('Gift Card Business API Tests', () => {
     // Cleanup: cancel any remaining test gift cards
     for (const id of createdGiftCardIds) {
       try {
-        await client.post(
-          `/business/gift-cards/${id}/cancel`,
-          {},
-          { headers: { Authorization: `Bearer ${adminToken}` } },
-        );
+        await client.post(`/business/gift-cards/${id}/cancel`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
       } catch {
         // ignore
       }
@@ -62,11 +58,7 @@ describe('Gift Card Business API Tests', () => {
     it('UC-PRO-008: should reject gift card creation without initialBalance', async () => {
       if (!adminToken) return;
 
-      const response = await client.post(
-        '/business/gift-cards',
-        { type: 'standard' },
-        { headers: authHeaders() },
-      );
+      const response = await client.post('/business/gift-cards', { type: 'standard' }, { headers: authHeaders() });
 
       expect(response.status).toBe(400);
     });
@@ -126,11 +118,7 @@ describe('Gift Card Business API Tests', () => {
     it('UC-PRO-011: should activate a gift card', async () => {
       if (!adminToken || createdGiftCardIds.length === 0) return;
 
-      const response = await client.post(
-        `/business/gift-cards/${createdGiftCardIds[0]}/activate`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/gift-cards/${createdGiftCardIds[0]}/activate`, {}, { headers: authHeaders() });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -155,20 +143,12 @@ describe('Gift Card Business API Tests', () => {
       if (!adminToken) return;
 
       // Create a new gift card to cancel
-      const createResponse = await client.post(
-        '/business/gift-cards',
-        { initialBalance: 50, currency: 'USD' },
-        { headers: authHeaders() },
-      );
+      const createResponse = await client.post('/business/gift-cards', { initialBalance: 50, currency: 'USD' }, { headers: authHeaders() });
 
       if (!createResponse.data.success) return;
       const cardId = createResponse.data.data.promotionGiftCardId;
 
-      const response = await client.post(
-        `/business/gift-cards/${cardId}/cancel`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/gift-cards/${cardId}/cancel`, {}, { headers: authHeaders() });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);

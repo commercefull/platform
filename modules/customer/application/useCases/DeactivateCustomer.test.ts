@@ -7,7 +7,9 @@ import { DeactivateCustomerUseCase, DeactivateCustomerCommand } from './Deactiva
 import { CustomerNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('DeactivateCustomerUseCase', () => {
   let useCase: DeactivateCustomerUseCase;
@@ -27,7 +29,10 @@ describe('DeactivateCustomerUseCase', () => {
     expect(result.success).toBe(true);
     expect(result.customerId).toBe('c1');
     expect(mockRepo.save).toHaveBeenCalled();
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.deactivated', expect.objectContaining({ customerId: 'c1', reason: 'User request' }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'customer.deactivated',
+      expect.objectContaining({ customerId: 'c1', reason: 'User request' }),
+    );
   });
 
   it('should throw CustomerValidationError when customerId is empty', async () => {

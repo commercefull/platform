@@ -12,7 +12,9 @@ import { InitiatePaymentUseCase, InitiatePaymentCommand } from './InitiatePaymen
 import { AmountMustBePositiveError, NoPaymentGatewayConfiguredError } from '../../domain/errors/PaymentErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('InitiatePaymentUseCase', () => {
   let useCase: InitiatePaymentUseCase;

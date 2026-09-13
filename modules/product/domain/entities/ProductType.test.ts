@@ -15,9 +15,7 @@ describe('ProductType', () => {
   it('should manage attribute sets', () => {
     const pt = ProductType.create({ name: 'Simple', slug: 'simple' });
     expect(pt.hasAttributeSets()).toBe(false);
-    pt.setAttributeSets([
-      { productAttributeSetId: 'as1', name: 'Default', code: 'default', attributeCount: 5 },
-    ]);
+    pt.setAttributeSets([{ productAttributeSetId: 'as1', name: 'Default', code: 'default', attributeCount: 5 }]);
     expect(pt.hasAttributeSets()).toBe(true);
     expect(pt.getAttributeSets()).toHaveLength(1);
   });
@@ -30,9 +28,7 @@ describe('ProductType', () => {
 
   it('should serialize to object', () => {
     const pt = ProductType.create({ name: 'Simple', slug: 'simple' });
-    pt.setAttributeSets([
-      { productAttributeSetId: 'as1', name: 'Default', code: 'default', attributeCount: 3 },
-    ]);
+    pt.setAttributeSets([{ productAttributeSetId: 'as1', name: 'Default', code: 'default', attributeCount: 3 }]);
     const obj = pt.toObject();
     expect(obj.name).toBe('Simple');
     expect(obj.attributeSets).toHaveLength(1);

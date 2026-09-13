@@ -18,11 +18,7 @@ export const getDbConfig = (): DbConfig => ({
   database: process.env.POSTGRES_DB || 'ecomm-db',
 });
 
-const execPromise = async (
-  file: string,
-  args: string[] = [],
-  envVars: Record<string, string> = {},
-): Promise<string> =>
+const execPromise = async (file: string, args: string[] = [], envVars: Record<string, string> = {}): Promise<string> =>
   new Promise((resolve, reject) => {
     execFile(file, args, { env: { ...process.env, ...envVars } }, (err, stdout, stderr) => {
       if (err) {
@@ -31,7 +27,7 @@ const execPromise = async (
 
       const stderrFiltered = stderr
         .split('\n')
-        .filter((line) => {
+        .filter(line => {
           if (line.match(/^\(node:\d+\)/)) return false;
           if (line.match(/^\(Use `node --trace-/)) return false;
           if (line.match(/^NOTICE:/)) return false;
@@ -57,11 +53,16 @@ const ensureDirectoryExists = (dirPath: string): void => {
 
 export const createDatabase = async (config: DbConfig, databaseName: string): Promise<void> => {
   const args = [
-    '-h', config.host,
-    '-p', config.port.toString(),
-    '-U', config.user,
-    '-d', config.database,
-    '-c', `CREATE DATABASE "${databaseName}";`,
+    '-h',
+    config.host,
+    '-p',
+    config.port.toString(),
+    '-U',
+    config.user,
+    '-d',
+    config.database,
+    '-c',
+    `CREATE DATABASE "${databaseName}";`,
   ];
 
   await execPromise('psql', args, { PGPASSWORD: config.password });
@@ -70,11 +71,16 @@ export const createDatabase = async (config: DbConfig, databaseName: string): Pr
 
 export const dropDatabase = async (config: DbConfig, databaseName: string): Promise<void> => {
   const args = [
-    '-h', config.host,
-    '-p', config.port.toString(),
-    '-U', config.user,
-    '-d', config.database,
-    '-c', `DROP DATABASE IF EXISTS "${databaseName}" WITH (FORCE);`,
+    '-h',
+    config.host,
+    '-p',
+    config.port.toString(),
+    '-U',
+    config.user,
+    '-d',
+    config.database,
+    '-c',
+    `DROP DATABASE IF EXISTS "${databaseName}" WITH (FORCE);`,
   ];
 
   await execPromise('psql', args, { PGPASSWORD: config.password });
@@ -89,17 +95,26 @@ export const createSnapshot = async (config: DbConfig, dumpDirPath: string): Pro
   const containerName = process.env.DB_CONTAINER_NAME || 'commerce-db';
 
   // Use docker exec to run pg_dump inside the container (matching server version)
-  await execPromise('docker', [
-    'exec',
-    containerName,
-    'pg_dump',
-    '-h', 'localhost',
-    '-p', '5432',
-    '-U', config.user,
-    '-Fc',
-    '-d', config.database,
-    '-f', containerDumpPath,
-  ], { PGPASSWORD: config.password });
+  await execPromise(
+    'docker',
+    [
+      'exec',
+      containerName,
+      'pg_dump',
+      '-h',
+      'localhost',
+      '-p',
+      '5432',
+      '-U',
+      config.user,
+      '-Fc',
+      '-d',
+      config.database,
+      '-f',
+      containerDumpPath,
+    ],
+    { PGPASSWORD: config.password },
+  );
 
   // Copy the dump file from the container to the host
   await execPromise('docker', ['cp', `${containerName}:${containerDumpPath}`, dumpFile]);
@@ -120,19 +135,27 @@ export const restoreSnapshot = async (config: DbConfig, dumpFilePath: string): P
   await execPromise('docker', ['cp', dumpFilePath, `${containerName}:${containerDumpPath}`]);
 
   // Use docker exec to run pg_restore inside the container (matching server version)
-  await execPromise('docker', [
-    'exec',
-    containerName,
-    'pg_restore',
-    '-h', 'localhost',
-    '-p', '5432',
-    '-U', config.user,
-    '-d', config.database,
-    '--clean',
-    '--if-exists',
-    '-Fc',
-    containerDumpPath,
-  ], { PGPASSWORD: config.password });
+  await execPromise(
+    'docker',
+    [
+      'exec',
+      containerName,
+      'pg_restore',
+      '-h',
+      'localhost',
+      '-p',
+      '5432',
+      '-U',
+      config.user,
+      '-d',
+      config.database,
+      '--clean',
+      '--if-exists',
+      '-Fc',
+      containerDumpPath,
+    ],
+    { PGPASSWORD: config.password },
+  );
 
   // Clean up the temp file inside the container
   await execPromise('docker', ['exec', containerName, 'rm', '-f', containerDumpPath]);

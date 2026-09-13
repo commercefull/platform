@@ -1,4 +1,4 @@
-import { ApplyCouponUseCase} from './ApplyCoupon';
+import { ApplyCouponUseCase } from './ApplyCoupon';
 
 describe('ApplyCouponUseCase', () => {
   let useCase: ApplyCouponUseCase;
@@ -7,10 +7,20 @@ describe('ApplyCouponUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findByCode: jest.fn().mockResolvedValue({
-        couponId: 'c1', code: 'SAVE10', type: 'percentage', value: 10,
-        isActive: true, usageLimit: 100, usageCount: 0, customerUsageLimit: 1,
-        startsAt: null, expiresAt: null, minOrderValue: null, maxDiscountAmount: null,
-        applicableProducts: null, applicableCategories: null,
+        couponId: 'c1',
+        code: 'SAVE10',
+        type: 'percentage',
+        value: 10,
+        isActive: true,
+        usageLimit: 100,
+        usageCount: 0,
+        customerUsageLimit: 1,
+        startsAt: null,
+        expiresAt: null,
+        minOrderValue: null,
+        maxDiscountAmount: null,
+        applicableProducts: null,
+        applicableCategories: null,
       }),
       getCustomerUsageCount: jest.fn().mockResolvedValue(0),
       recordUsage: jest.fn().mockResolvedValue(undefined),
@@ -20,7 +30,9 @@ describe('ApplyCouponUseCase', () => {
 
   it('should apply percentage coupon (happy path)', async () => {
     const result = await useCase.execute({
-      couponCode: 'SAVE10', basketId: 'b1', orderTotal: 100,
+      couponCode: 'SAVE10',
+      basketId: 'b1',
+      orderTotal: 100,
     });
 
     expect(result.applied).toBe(true);
@@ -40,9 +52,18 @@ describe('ApplyCouponUseCase', () => {
 
   it('should apply fixed_amount coupon', async () => {
     mockRepo.findByCode.mockResolvedValue({
-      couponId: 'c2', code: 'SAVE5', type: 'fixed_amount', value: 5,
-      isActive: true, usageLimit: 100, usageCount: 0, customerUsageLimit: 1,
-      startsAt: null, expiresAt: null, minOrderValue: null, maxDiscountAmount: null,
+      couponId: 'c2',
+      code: 'SAVE5',
+      type: 'fixed_amount',
+      value: 5,
+      isActive: true,
+      usageLimit: 100,
+      usageCount: 0,
+      customerUsageLimit: 1,
+      startsAt: null,
+      expiresAt: null,
+      minOrderValue: null,
+      maxDiscountAmount: null,
     });
 
     const result = await useCase.execute({ couponCode: 'SAVE5', basketId: 'b1', orderTotal: 100 });
@@ -53,9 +74,18 @@ describe('ApplyCouponUseCase', () => {
 
   it('should cap discount at maxDiscountAmount', async () => {
     mockRepo.findByCode.mockResolvedValue({
-      couponId: 'c3', code: 'SAVE50', type: 'percentage', value: 50,
-      isActive: true, usageLimit: 100, usageCount: 0, customerUsageLimit: 1,
-      startsAt: null, expiresAt: null, minOrderValue: null, maxDiscountAmount: 20,
+      couponId: 'c3',
+      code: 'SAVE50',
+      type: 'percentage',
+      value: 50,
+      isActive: true,
+      usageLimit: 100,
+      usageCount: 0,
+      customerUsageLimit: 1,
+      startsAt: null,
+      expiresAt: null,
+      minOrderValue: null,
+      maxDiscountAmount: 20,
     });
 
     const result = await useCase.execute({ couponCode: 'SAVE50', basketId: 'b1', orderTotal: 100 });

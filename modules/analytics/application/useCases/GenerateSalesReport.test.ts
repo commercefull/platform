@@ -9,7 +9,9 @@ import { eventBus } from '../../../../libs/events/eventBus';
 
 const mockPort: AnalyticsDataPort = {
   getSalesSummary: jest.fn().mockResolvedValue({
-    totalOrders: 100, totalRevenue: 5000, averageOrderValue: 50,
+    totalOrders: 100,
+    totalRevenue: 5000,
+    averageOrderValue: 50,
   }),
   getTopProducts: jest.fn(),
   getCustomerCohorts: jest.fn(),
@@ -71,8 +73,11 @@ describe('GenerateSalesReportUseCase', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(eventBus.emit).toHaveBeenCalledWith('analytics.report.generated', expect.objectContaining({
-      generatedBy: 'admin1',
-    }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'analytics.report.generated',
+      expect.objectContaining({
+        generatedBy: 'admin1',
+      }),
+    );
   });
 });

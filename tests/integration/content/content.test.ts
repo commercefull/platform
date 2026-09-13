@@ -36,7 +36,7 @@ describe('Content Feature Tests', () => {
   let testContentPageId: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testContentBlockId: string;
-   
+
   let testContentTemplateId: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testContentTypeSlug: string;

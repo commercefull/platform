@@ -117,9 +117,11 @@ export async function cleanupCustomerTests(
 
   // 3. Delete Customer Address
   if (testCustomerAddressId) {
-    await client.delete(`/business/customers/${testCustomerId}/addresses/${testCustomerAddressId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    }).catch(() => {});
+    await client
+      .delete(`/business/customers/${testCustomerId}/addresses/${testCustomerAddressId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      })
+      .catch(() => {});
   }
 
   // 4. Delete Customer

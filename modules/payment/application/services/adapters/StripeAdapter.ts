@@ -5,9 +5,19 @@
 
 import * as crypto from 'crypto';
 import {
-  PSPAdapter, PSPCapabilities, PSPConfig, WebhookEvent,
-  PaymentRequest, PaymentResponse, CaptureRequest, CaptureResponse,
-  VoidRequest, VoidResponse, RefundRequest, RefundResponse, HealthCheckResult,
+  PSPAdapter,
+  PSPCapabilities,
+  PSPConfig,
+  WebhookEvent,
+  PaymentRequest,
+  PaymentResponse,
+  CaptureRequest,
+  CaptureResponse,
+  VoidRequest,
+  VoidResponse,
+  RefundRequest,
+  RefundResponse,
+  HealthCheckResult,
 } from '../GatewayAdapter';
 
 const STRIPE_CAPABILITIES: PSPCapabilities = {
@@ -104,7 +114,7 @@ export class StripeAdapter implements PSPAdapter {
       body,
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       const err = data.error as Record<string, unknown> | undefined;
@@ -145,7 +155,7 @@ export class StripeAdapter implements PSPAdapter {
       body,
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       const err = data.error as Record<string, unknown> | undefined;
@@ -178,7 +188,7 @@ export class StripeAdapter implements PSPAdapter {
       body,
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       const err = data.error as Record<string, unknown> | undefined;
@@ -215,7 +225,7 @@ export class StripeAdapter implements PSPAdapter {
       body,
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       const err = data.error as Record<string, unknown> | undefined;

@@ -5,7 +5,7 @@
 
 export async function up(knex) {
   // Theme table — stores theme definitions (built-in and custom)
-  await knex.schema.createTable('theme', (table) => {
+  await knex.schema.createTable('theme', table => {
     table.string('themeId').primary();
     table.string('slug').notNullable().unique();
     table.string('name').notNullable();
@@ -31,7 +31,7 @@ export async function up(knex) {
   });
 
   // Theme override table — per-store theme setting overrides
-  await knex.schema.createTable('themeOverride', (table) => {
+  await knex.schema.createTable('themeOverride', table => {
     table.string('overrideId').primary();
     table.string('storeId').notNullable().index();
     table.string('themeId').notNullable().index();
@@ -51,7 +51,7 @@ export async function up(knex) {
   });
 
   // Theme assignment table — which theme is assigned to which store
-  await knex.schema.createTable('themeAssignment', (table) => {
+  await knex.schema.createTable('themeAssignment', table => {
     table.string('storeId').primary();
     table.string('themeId').notNullable().index();
     table.string('organizationId').notNullable().index();

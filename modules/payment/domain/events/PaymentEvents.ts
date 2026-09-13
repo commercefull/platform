@@ -2,7 +2,6 @@
  * Payment Domain Events
  */
 
-
 export interface DomainEvent {
   eventType: string;
   occurredAt: Date;

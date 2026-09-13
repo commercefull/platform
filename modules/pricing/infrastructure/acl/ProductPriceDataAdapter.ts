@@ -8,11 +8,7 @@
  * Only this adapter may import from product's infrastructure.
  */
 
-import {
-  ProductPriceDataPort,
-  ProductPriceData,
-  VariantPriceData,
-} from '../../application/ports/ProductPriceDataPort';
+import { ProductPriceDataPort, ProductPriceData, VariantPriceData } from '../../application/ports/ProductPriceDataPort';
 import productCatalogRepository from '../../../product/infrastructure/repositories/ProductCatalogRepository';
 
 const productRepo = productCatalogRepository.products;

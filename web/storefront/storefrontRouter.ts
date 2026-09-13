@@ -31,7 +31,13 @@ import { addToBasket, clearBasket, removeFromBasket, updateBasketItem, viewBaske
 import { changePassword, profile, signIn, signInForm, signOut, signUp, signUpForm, updateProfile } from './controllers/authController';
 import { checkout, orderConfirmation, processCheckout } from './controllers/checkoutController';
 import { orderDetails, orderHistory, orderTracking } from './controllers/orderController';
-import { getAllCategories, getCategoriesForNavigation, getCategoryDetails, getCategoryPage, loadCategoriesForNavigation } from './controllers/categoryController';
+import {
+  getAllCategories,
+  getCategoriesForNavigation,
+  getCategoryDetails,
+  getCategoryPage,
+  loadCategoriesForNavigation,
+} from './controllers/categoryController';
 import { addToWishlist, removeFromWishlist, viewWishlist } from './controllers/wishlistController';
 import { getProductReviews, markReviewHelpful, submitReview } from './controllers/reviewController';
 import { addAddress, addAddressForm, deleteAddress, editAddressForm, listAddresses, updateAddress } from './controllers/addressController';
@@ -39,8 +45,24 @@ import { listReturns, returnRequestForm, submitReturnRequest, viewReturn } from 
 import { loyaltyDashboard, pointsHistory, redeemReward } from './controllers/loyaltyController';
 import { cancelSubscription, listPlans, mySubscriptions, viewSubscription } from './controllers/subscriptionController';
 import { joinPlan, listPlans as listMembershipPlans, myMembership, viewPlan } from './controllers/membershipController';
-import { deleteDevice, getDevices, getPreferences, listNotifications, markAllAsRead, markAsRead, registerDevice, updatePreferences } from './controllers/notificationController';
-import { addTicketMessage, createTicketForm, createTicketSubmit, listTickets, submitTicketFeedback, viewTicket } from './controllers/supportController';
+import {
+  deleteDevice,
+  getDevices,
+  getPreferences,
+  listNotifications,
+  markAllAsRead,
+  markAsRead,
+  registerDevice,
+  updatePreferences,
+} from './controllers/notificationController';
+import {
+  addTicketMessage,
+  createTicketForm,
+  createTicketSubmit,
+  listTickets,
+  submitTicketFeedback,
+  viewTicket,
+} from './controllers/supportController';
 import { cancelRequest, createRequestForm, createRequestSubmit, listRequests, viewRequest } from './controllers/gdprController';
 import { getStoreLocator } from './controllers/storeLocatorController';
 import { getPromotionsPage } from './controllers/promotionsController';
@@ -93,12 +115,10 @@ router.get('/stores', asyncHandler(getStoreLocator));
 router.get('/promotions', asyncHandler(getPromotionsPage));
 
 // POST: handle contact us form
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-router.post('/pages/contact-us', [...userContactUsValidationRules(), validateContactUs] as any[], asyncHandler(submitContactForm));
+router.post('/pages/contact-us', [...userContactUsValidationRules(), validateContactUs], asyncHandler(submitContactForm));
 
 // POST: handle contact form submission
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-router.post('/contact-form', [...userContactFormValidationRules(), validateContactForm] as any[], asyncHandler(submitContactFormAdvanced));
+router.post('/contact-form', [...userContactFormValidationRules(), validateContactForm], asyncHandler(submitContactFormAdvanced));
 
 // ============================================================================
 // Product Routes

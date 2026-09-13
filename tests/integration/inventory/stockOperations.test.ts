@@ -121,11 +121,7 @@ describe('Inventory Stock Operations Tests', () => {
 
   describe('POST /business/inventory/locations', () => {
     it('should reject creation with missing required fields', async () => {
-      const response = await client.post(
-        '/business/inventory/locations',
-        { name: 'Test Location' },
-        { headers: authHeaders() },
-      );
+      const response = await client.post('/business/inventory/locations', { name: 'Test Location' }, { headers: authHeaders() });
 
       expectStatus(response, 400);
     });
@@ -196,11 +192,7 @@ describe('Inventory Stock Operations Tests', () => {
 
   describe('POST /business/inventory/locations/:id/reserve', () => {
     it('should reject reserve with missing quantity', async () => {
-      const response = await client.post(
-        `/business/inventory/locations/${randomUUID()}/reserve`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/inventory/locations/${randomUUID()}/reserve`, {}, { headers: authHeaders() });
 
       expectStatus(response, 400);
     });
@@ -222,11 +214,7 @@ describe('Inventory Stock Operations Tests', () => {
 
   describe('POST /business/inventory/locations/:id/release', () => {
     it('should reject release with missing quantity', async () => {
-      const response = await client.post(
-        `/business/inventory/locations/${randomUUID()}/release`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/inventory/locations/${randomUUID()}/release`, {}, { headers: authHeaders() });
 
       expectStatus(response, 400);
     });
@@ -264,10 +252,7 @@ describe('Inventory Stock Operations Tests', () => {
 
   describe('GET /business/inventory/transactions/product/:productId', () => {
     it('should return transaction history for a product', async () => {
-      const response = await client.get(
-        `/business/inventory/transactions/product/${TEST_PRODUCT_1_ID}`,
-        { headers: authHeaders() },
-      );
+      const response = await client.get(`/business/inventory/transactions/product/${TEST_PRODUCT_1_ID}`, { headers: authHeaders() });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -381,11 +366,7 @@ describe('Inventory Stock Operations Tests', () => {
 
   describe('PUT /business/inventory/locations/:id', () => {
     it('should return error for non-existent location', async () => {
-      const response = await client.put(
-        `/business/inventory/locations/${randomUUID()}`,
-        { quantity: 100 },
-        { headers: authHeaders() },
-      );
+      const response = await client.put(`/business/inventory/locations/${randomUUID()}`, { quantity: 100 }, { headers: authHeaders() });
 
       expectStatus(response, 404);
     });
@@ -458,10 +439,9 @@ describe('Inventory Stock Operations Tests', () => {
 
   describe('GET /customer/inventory/availability/product/:productId', () => {
     it('should check availability by productId', async () => {
-      const response = await client.get(
-        `/customer/inventory/availability/product/${TEST_PRODUCT_1_ID}`,
-        { headers: { 'X-Test-Request': 'true' } },
-      );
+      const response = await client.get(`/customer/inventory/availability/product/${TEST_PRODUCT_1_ID}`, {
+        headers: { 'X-Test-Request': 'true' },
+      });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -489,11 +469,7 @@ describe('Inventory Stock Operations Tests', () => {
 
   describe('POST /business/inventory/:inventoryId/restock (legacy)', () => {
     it('should reject restock with missing quantityChange', async () => {
-      const response = await client.post(
-        `/business/inventory/${randomUUID()}/restock`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/inventory/${randomUUID()}/restock`, {}, { headers: authHeaders() });
 
       expectStatus(response, 400);
     });

@@ -1,10 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import {
-  TEST_CONTENT_TYPE_ID,
-  TEST_CONTENT_PAGE_ID,
-  TEST_CONTENT_TEMPLATE_ID,
-  ADMIN_CREDENTIALS,
-} from '../testConstants';
+import { TEST_CONTENT_TYPE_ID, TEST_CONTENT_PAGE_ID, TEST_CONTENT_TEMPLATE_ID, ADMIN_CREDENTIALS } from '../testConstants';
 
 const createClient = () =>
   axios.create({
@@ -21,7 +16,7 @@ describe('Content Page Actions API', () => {
   let adminToken: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testContentTypeId: string;
-   
+
   let testContentPageId: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testContentTemplateId: string;
@@ -199,11 +194,7 @@ describe('Content Page Actions API', () => {
     }
     // Re-publish the shared test page since the unpublish test changed its state
     if (testContentPageId && adminToken) {
-      await client.post(
-        `/business/content/pages/${testContentPageId}/publish`,
-        {},
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      await client.post(`/business/content/pages/${testContentPageId}/publish`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
     }
   });
 });

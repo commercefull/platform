@@ -31,7 +31,6 @@ export const listCategories = async (req: TypedRequest, res: Response): Promise<
     },
     success: req.query.success || null,
   });
-  
 };
 
 export const createCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -41,7 +40,6 @@ export const createCategoryForm = async (req: TypedRequest, res: Response): Prom
     pageName: 'Create Category',
     parentCategories,
   });
-  
 };
 
 export const createCategory = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -93,7 +91,6 @@ export const viewCategory = async (req: TypedRequest, res: Response): Promise<vo
     childCategories,
     success: req.query.success || null,
   });
-  
 };
 
 export const editCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -115,7 +112,6 @@ export const editCategoryForm = async (req: TypedRequest, res: Response): Promis
     category,
     parentCategories: parentCategories.filter(c => c.productCategoryId !== categoryId),
   });
-  
 };
 
 export const updateCategory = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -154,7 +150,6 @@ export const deleteCategory = async (req: TypedRequest, res: Response): Promise<
   const { categoryId } = req.params;
   await manageCategoriesUseCase.delete(categoryId);
   res.json({ success: true, message: 'Category deleted successfully' });
-  
 };
 
 export const reorderCategories = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -166,7 +161,6 @@ export const reorderCategories = async (req: TypedRequest, res: Response): Promi
   }
 
   res.json({ success: true, message: 'Categories reordered successfully' });
-  
 };
 
 // ============================================================================
@@ -187,14 +181,12 @@ export const listCollections = async (req: TypedRequest, res: Response): Promise
     },
     success: req.query.success || null,
   });
-  
 };
 
 export const createCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'catalog/collections/create', {
     pageName: 'Create Collection',
   });
-  
 };
 
 export const createCollection = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -217,7 +209,6 @@ export const viewCollection = async (req: TypedRequest, res: Response): Promise<
     collection: null,
     success: req.query.success || null,
   });
-  
 };
 
 export const editCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -225,7 +216,6 @@ export const editCollectionForm = async (req: TypedRequest, res: Response): Prom
     pageName: 'Edit Collection',
     collection: null,
   });
-  
 };
 
 export const updateCollection = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -245,5 +235,4 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
 
 export const deleteCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Collection deleted successfully' });
-  
 };

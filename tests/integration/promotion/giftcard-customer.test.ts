@@ -32,11 +32,7 @@ describe.skip('Gift Card Customer API Tests', () => {
           testGiftCardCode = createResponse.data.data.code;
 
           // Activate the gift card
-          await client.post(
-            `/business/gift-cards/${testGiftCardId}/activate`,
-            {},
-            { headers: { Authorization: `Bearer ${adminToken}` } },
-          );
+          await client.post(`/business/gift-cards/${testGiftCardId}/activate`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
         }
       } catch {
         // ignore
@@ -47,11 +43,7 @@ describe.skip('Gift Card Customer API Tests', () => {
   afterAll(async () => {
     if (adminToken && testGiftCardId) {
       try {
-        await client.post(
-          `/business/gift-cards/${testGiftCardId}/cancel`,
-          {},
-          { headers: { Authorization: `Bearer ${adminToken}` } },
-        );
+        await client.post(`/business/gift-cards/${testGiftCardId}/cancel`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
       } catch {
         // ignore
       }
@@ -104,11 +96,7 @@ describe.skip('Gift Card Customer API Tests', () => {
           expect(response.data.success).toBe(false);
 
           // Cleanup
-          await client.post(
-            `/business/gift-cards/${createResponse.data.data.promotionGiftCardId}/cancel`,
-            {},
-            { headers: adminHeaders() },
-          );
+          await client.post(`/business/gift-cards/${createResponse.data.data.promotionGiftCardId}/cancel`, {}, { headers: adminHeaders() });
         }
       } catch {
         // ignore

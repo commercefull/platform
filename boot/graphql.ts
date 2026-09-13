@@ -1,4 +1,4 @@
-import { Express } from 'express';
+import { Express, NextFunction, Request, Response } from 'express';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware, ExpressContextFunctionArgument } from '@as-integrations/express5';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
@@ -169,8 +169,7 @@ export function configureGraphQL(app: Express): void {
     { module: 'webhook', defs: webhookTypeDefs },
   ];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const allResolvers: { module: string; res: any }[] = [
+  const allResolvers: { module: string; res: unknown }[] = [
     { module: 'product', res: productResolvers },
     { module: 'order', res: orderResolvers },
     { module: 'customer', res: customerResolvers },
@@ -204,15 +203,11 @@ export function configureGraphQL(app: Express): void {
     { module: 'webhook', res: webhookResolvers },
   ];
 
-  const enabledTypeDefs = allTypeDefs
-    .filter(t => moduleRegistry.shouldIncludeGraphQL(t.module))
-    .map(t => t.defs);
-  const enabledResolvers = allResolvers
-    .filter(r => moduleRegistry.shouldIncludeGraphQL(r.module))
-    .map(r => r.res);
+  const enabledTypeDefs = allTypeDefs.filter(t => moduleRegistry.shouldIncludeGraphQL(t.module)).map(t => t.defs);
+  const enabledResolvers = allResolvers.filter(r => moduleRegistry.shouldIncludeGraphQL(r.module)).map(r => r.res);
 
   const typeDefs = mergeTypeDefs(enabledTypeDefs);
-  const resolvers = mergeResolvers(enabledResolvers);
+  const resolvers = mergeResolvers(enabledResolvers as unknown as NonNullable<Parameters<typeof mergeResolvers>[0]>);
 
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 
@@ -241,7 +236,11 @@ export function configureGraphQL(app: Express): void {
       }
 
       // Log unexpected errors
-      if (formattedError.extensions?.code !== 'BAD_USER_INPUT' && formattedError.extensions?.code !== 'UNAUTHENTICATED' && formattedError.extensions?.code !== 'FORBIDDEN') {
+      if (
+        formattedError.extensions?.code !== 'BAD_USER_INPUT' &&
+        formattedError.extensions?.code !== 'UNAUTHENTICATED' &&
+        formattedError.extensions?.code !== 'FORBIDDEN'
+      ) {
         logger.error('GraphQL error', {
           message: formattedError.message,
           path: formattedError.path,
@@ -266,28 +265,25 @@ export function configureGraphQL(app: Express): void {
 
   // Register /graphql synchronously before storefront routes catch it.
   // The actual Apollo middleware is swapped in once the server has started.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let graphqlHandler: any = null;
+  let graphqlHandler: ((req: Request, res: Response, next: NextFunction) => void) | null = null;
 
-  app.use(
-    '/graphql',
-    (req, res, next) => {
-      // Persisted query enforcement: reject queries not in the allowlist
-      if (persistedQueryStore.isEnabled() && req.method === 'POST' && req.body?.query) {
-        if (!persistedQueryStore.isQueryAllowed(req.body.query)) {
-          res.status(403).json({
-            errors: [{ message: 'Query not in persisted query allowlist' }],
-          });
-          return;
-        }
+  app.use('/graphql', (req, res, next) => {
+    // Persisted query enforcement: reject queries not in the allowlist
+    if (persistedQueryStore.isEnabled() && req.method === 'POST' && req.body?.query) {
+      if (!persistedQueryStore.isQueryAllowed(req.body.query)) {
+        res.status(403).json({
+          errors: [{ message: 'Query not in persisted query allowlist' }],
+        });
+        return;
       }
+    }
 
-      // Serve GraphiQL UI for browser GET requests in non-production
-      if (req.method === 'GET' && process.env.NODE_ENV !== 'production') {
-        const accept = req.headers.accept || '';
-        if (accept.includes('text/html')) {
-          res.setHeader('Content-Type', 'text/html');
-          res.send(`<!DOCTYPE html>
+    // Serve GraphiQL UI for browser GET requests in non-production
+    if (req.method === 'GET' && process.env.NODE_ENV !== 'production') {
+      const accept = req.headers.accept || '';
+      if (accept.includes('text/html')) {
+        res.setHeader('Content-Type', 'text/html');
+        res.send(`<!DOCTYPE html>
 <html>
   <head>
     <title>CommerceFull GraphiQL</title>
@@ -322,26 +318,25 @@ export function configureGraphQL(app: Express): void {
     </script>
   </body>
 </html>`);
-          return;
-        }
+        return;
       }
-      if (graphqlHandler) {
-        graphqlHandler(req, res, next);
-      } else {
-        res.status(503).json({ error: 'GraphQL server is starting, please retry shortly.' });
-      }
-    },
-  );
+    }
+    if (graphqlHandler) {
+      graphqlHandler(req, res, next);
+    } else {
+      res.status(503).json({ error: 'GraphQL server is starting, please retry shortly.' });
+    }
+  });
 
   apolloServer
     .start()
     .then(() => {
       graphqlHandler = expressMiddleware<GraphQLContext>(apolloServer, {
-        context: async (args) => buildContext(args),
+        context: async args => buildContext(args),
       });
       logger.info('GraphQL endpoint mounted at /graphql');
     })
-    .catch((error) => {
+    .catch(error => {
       logger.error('Failed to start Apollo Server:', error);
     });
 }

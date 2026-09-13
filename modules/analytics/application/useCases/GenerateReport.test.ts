@@ -22,11 +22,9 @@ describe('GenerateReportUseCase', () => {
   });
 
   it('should generate sales report with data', async () => {
-    (query as jest.Mock).mockResolvedValueOnce([
-      { date: '2026-01-01', orders: '10', revenue: '1000', customers: '5' },
-    ]).mockResolvedValueOnce([
-      { product_id: 'p1', name: 'Widget', sales: '5', revenue: '500' },
-    ]);
+    (query as jest.Mock)
+      .mockResolvedValueOnce([{ date: '2026-01-01', orders: '10', revenue: '1000', customers: '5' }])
+      .mockResolvedValueOnce([{ product_id: 'p1', name: 'Widget', sales: '5', revenue: '500' }]);
 
     const result = await useCase.execute('sales', { period: '7d' });
     expect(result.summary.totalOrders).toBe(10);
@@ -35,11 +33,9 @@ describe('GenerateReportUseCase', () => {
   });
 
   it('should generate customer report', async () => {
-    (query as jest.Mock).mockResolvedValueOnce([
-      { date: '2026-01-01', new_customers: '3', returning_customers: '2', orders: '5', revenue: '500' },
-    ]).mockResolvedValueOnce([
-      { segment: 'High Value', customers: '10', revenue: '5000' },
-    ]);
+    (query as jest.Mock)
+      .mockResolvedValueOnce([{ date: '2026-01-01', new_customers: '3', returning_customers: '2', orders: '5', revenue: '500' }])
+      .mockResolvedValueOnce([{ segment: 'High Value', customers: '10', revenue: '5000' }]);
 
     const result = await useCase.execute('customers', { period: '7d' });
     expect(result.title).toContain('Customer');
@@ -58,7 +54,15 @@ describe('GenerateReportUseCase', () => {
 
   it('should generate inventory report', async () => {
     (query as jest.Mock).mockResolvedValueOnce([
-      { product_id: 'p1', name: 'Widget', category: 'electronics', stock_quantity: '5', reorder_point: '10', cost_price: '20', sales_velocity: '2' },
+      {
+        product_id: 'p1',
+        name: 'Widget',
+        category: 'electronics',
+        stock_quantity: '5',
+        reorder_point: '10',
+        cost_price: '20',
+        sales_velocity: '2',
+      },
     ]);
 
     const result = await useCase.execute('inventory', { period: '30d' });
@@ -67,7 +71,10 @@ describe('GenerateReportUseCase', () => {
 
   it('should generate executive report', async () => {
     (queryOne as jest.Mock).mockResolvedValueOnce({
-      revenue: '10000', orders: '50', customers: '30', profit: '2500',
+      revenue: '10000',
+      orders: '50',
+      customers: '30',
+      profit: '2500',
     });
 
     const result = await useCase.execute('executive', { period: '1y' });
@@ -81,7 +88,6 @@ describe('GenerateReportUseCase', () => {
   });
 
   it('should throw AnalyticsValidationError for unknown report type', async () => {
-    await expect(useCase.execute('unknown', {}))
-      .rejects.toThrow(AnalyticsValidationError);
+    await expect(useCase.execute('unknown', {})).rejects.toThrow(AnalyticsValidationError);
   });
 });

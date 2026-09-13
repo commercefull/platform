@@ -8,10 +8,7 @@ import { withTransaction } from '../../../../libs/db';
 import { Fulfillment as DbFulfillment, FulfillmentItem as DbFulfillmentItem } from '../../../../libs/db/types';
 import { Fulfillment, FulfillmentStatus, SourceType } from '../../domain/entities/Fulfillment';
 import { FulfillmentItem } from '../../domain/entities/FulfillmentItem';
-import {
-  IFulfillmentRepository,
-  FulfillmentFilters,
-} from '../../domain/repositories/FulfillmentRepository';
+import { IFulfillmentRepository, FulfillmentFilters } from '../../domain/repositories/FulfillmentRepository';
 import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 
 export class FulfillmentRepository implements IFulfillmentRepository {
@@ -21,9 +18,10 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     const props = fulfillment.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Pick<DbFulfillment, 'fulfillmentId'>>('SELECT "fulfillmentId" FROM fulfillment WHERE "fulfillmentId" = $1', [
-      props.fulfillmentId,
-    ]);
+    const existing = await queryOne<Pick<DbFulfillment, 'fulfillmentId'>>(
+      'SELECT "fulfillmentId" FROM fulfillment WHERE "fulfillmentId" = $1',
+      [props.fulfillmentId],
+    );
 
     if (existing) {
       // Update
@@ -223,7 +221,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 
   async delete(fulfillmentId: string): Promise<boolean> {
-    return withTransaction(async (tx) => {
+    return withTransaction(async tx => {
       // Delete items first
       await tx.query('DELETE FROM "fulfillmentItem" WHERE "fulfillmentId" = $1', [fulfillmentId]);
 
@@ -350,10 +348,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   // ===== Batch Operations =====
 
   async updateStatus(fulfillmentId: string, status: FulfillmentStatus): Promise<boolean> {
-    await query(
-      'UPDATE fulfillment SET status = $1, "updatedAt" = NOW() WHERE "fulfillmentId" = $2',
-      [status, fulfillmentId],
-    );
+    await query('UPDATE fulfillment SET status = $1, "updatedAt" = NOW() WHERE "fulfillmentId" = $2', [status, fulfillmentId]);
 
     return true;
   }

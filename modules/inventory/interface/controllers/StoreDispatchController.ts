@@ -48,8 +48,10 @@ function respondError(res: Response, message: string, statusCode: number = 500):
   res.status(statusCode).json({ success: false, error: message });
 }
 
-
-export const createStoreDispatch = async (req: TypedRequest<Record<string, string>, unknown, CreateDispatchBody>, res: Response): Promise<void> => {
+export const createStoreDispatch = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateDispatchBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new CreateStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
   const result = await useCase.execute({
     fromStoreId: req.body.fromStoreId,
@@ -60,7 +62,6 @@ export const createStoreDispatch = async (req: TypedRequest<Record<string, strin
   });
 
   respond(res, result, 201);
-  
 };
 
 export const listStoreDispatches = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -76,7 +77,6 @@ export const listStoreDispatches = async (req: TypedRequest, res: Response): Pro
   });
 
   respond(res, result);
-  
 };
 
 export const getStoreDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -89,26 +89,32 @@ export const getStoreDispatch = async (req: TypedRequest, res: Response): Promis
   }
 
   respond(res, result);
-  
 };
 
-export const approveStoreDispatch = async (req: TypedRequest<Record<string, string>, unknown, ApproveDispatchBody>, res: Response): Promise<void> => {
+export const approveStoreDispatch = async (
+  req: TypedRequest<Record<string, string>, unknown, ApproveDispatchBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new ApproveStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
   const actor = req.body.approvedBy || 'test-admin';
   const result = await useCase.execute(req.params.dispatchId, actor);
   respond(res, result);
-  
 };
 
-export const dispatchFromStore = async (req: TypedRequest<Record<string, string>, unknown, DispatchItemsBody>, res: Response): Promise<void> => {
+export const dispatchFromStore = async (
+  req: TypedRequest<Record<string, string>, unknown, DispatchItemsBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new DispatchFromStoreUseCase(storeDispatchRepository, InventoryRepository);
   const actor = req.body.dispatchedBy || 'test-admin';
   const result = await useCase.execute(req.params.dispatchId, actor, req.body.items);
   respond(res, result);
-  
 };
 
-export const receiveStoreDispatch = async (req: TypedRequest<Record<string, string>, unknown, ReceiveDispatchBody>, res: Response): Promise<void> => {
+export const receiveStoreDispatch = async (
+  req: TypedRequest<Record<string, string>, unknown, ReceiveDispatchBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new ReceiveStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
   const result = await useCase.execute({
     dispatchId: req.params.dispatchId,
@@ -117,12 +123,13 @@ export const receiveStoreDispatch = async (req: TypedRequest<Record<string, stri
     notes: req.body.notes,
   });
   respond(res, result);
-  
 };
 
-export const cancelStoreDispatch = async (req: TypedRequest<Record<string, string>, unknown, CancelDispatchBody>, res: Response): Promise<void> => {
+export const cancelStoreDispatch = async (
+  req: TypedRequest<Record<string, string>, unknown, CancelDispatchBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new CancelStoreDispatchUseCase(storeDispatchRepository);
   const result = await useCase.execute(req.params.dispatchId, req.body.reason);
   respond(res, result);
-  
 };

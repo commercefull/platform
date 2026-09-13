@@ -1,4 +1,4 @@
-import { GetPointsHistoryUseCase} from './GetPointsHistory';
+import { GetPointsHistoryUseCase } from './GetPointsHistory';
 
 describe('GetPointsHistoryUseCase', () => {
   let useCase: GetPointsHistoryUseCase;

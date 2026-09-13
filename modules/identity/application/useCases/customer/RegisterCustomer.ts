@@ -4,7 +4,12 @@
 
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { logger } from '../../../../../libs/logger';
-import { EmailAndPasswordRequiredError, InvalidEmailFormatError, PasswordTooShortError, EmailAlreadyRegisteredError } from '../../../domain/errors/IdentityErrors';
+import {
+  EmailAndPasswordRequiredError,
+  InvalidEmailFormatError,
+  PasswordTooShortError,
+  EmailAlreadyRegisteredError,
+} from '../../../domain/errors/IdentityErrors';
 
 export interface RegisterCustomerInput {
   email: string;

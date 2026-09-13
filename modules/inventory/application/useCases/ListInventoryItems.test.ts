@@ -1,4 +1,4 @@
-import { ListInventoryItemsUseCase} from './ListInventoryItems';
+import { ListInventoryItemsUseCase } from './ListInventoryItems';
 
 describe('ListInventoryItemsUseCase', () => {
   let useCase: ListInventoryItemsUseCase;
@@ -37,9 +37,6 @@ describe('ListInventoryItemsUseCase', () => {
   it('should pass pagination to repository', async () => {
     await useCase.execute({ page: 2, limit: 10 });
 
-    expect(mockRepo.findAll).toHaveBeenCalledWith(
-      expect.any(Object),
-      expect.objectContaining({ limit: 10, offset: 10 }),
-    );
+    expect(mockRepo.findAll).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ limit: 10, offset: 10 }));
   });
 });

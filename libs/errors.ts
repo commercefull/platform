@@ -18,17 +18,19 @@ export class AppError extends Error {
   isExpected: boolean;
   details?: unknown;
 
-  constructor(
-    message: string,
-    statusCode = 400,
-    optionsOrDetails?: AppErrorOptions | unknown,
-  ) {
+  constructor(message: string, statusCode = 400, optionsOrDetails?: AppErrorOptions | unknown) {
     super(message);
     this.name = this.constructor.name;
     this.statusCode = statusCode;
 
     // Support both new options object and legacy details param
-    if (optionsOrDetails !== undefined && optionsOrDetails !== null && typeof optionsOrDetails === 'object' && !Array.isArray(optionsOrDetails) && ('code' in optionsOrDetails || 'severity' in optionsOrDetails || 'details' in optionsOrDetails)) {
+    if (
+      optionsOrDetails !== undefined &&
+      optionsOrDetails !== null &&
+      typeof optionsOrDetails === 'object' &&
+      !Array.isArray(optionsOrDetails) &&
+      ('code' in optionsOrDetails || 'severity' in optionsOrDetails || 'details' in optionsOrDetails)
+    ) {
       const opts = optionsOrDetails as AppErrorOptions;
       this.code = opts.code ?? this.deriveDefaultCode();
       this.severity = opts.severity ?? this.deriveDefaultSeverity();

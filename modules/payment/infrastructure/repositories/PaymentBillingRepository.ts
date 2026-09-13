@@ -82,7 +82,9 @@ class PaymentBillingRepo {
 
   async findBalancesByMerchant(organizationId: string): Promise<PaymentBalance[]> {
     return (
-      (await query<PaymentBalance[]>(`SELECT * FROM "paymentBalance" WHERE "organizationId" = $1 ORDER BY currency ASC`, [organizationId])) || []
+      (await query<PaymentBalance[]>(`SELECT * FROM "paymentBalance" WHERE "organizationId" = $1 ORDER BY currency ASC`, [
+        organizationId,
+      ])) || []
     );
   }
 
@@ -116,9 +118,7 @@ class PaymentBillingRepo {
   }
 
   async findAllBalances(): Promise<PaymentBalance[]> {
-    return (
-      (await query<PaymentBalance[]>(`SELECT * FROM "paymentBalance" ORDER BY "organizationId", currency`)) || []
-    );
+    return (await query<PaymentBalance[]>(`SELECT * FROM "paymentBalance" ORDER BY "organizationId", currency`)) || [];
   }
 
   // --- Disputes ---
@@ -165,15 +165,13 @@ class PaymentBillingRepo {
   async findAllDisputes(status?: string, limit: number = 100): Promise<PaymentDispute[]> {
     if (status) {
       return (
-        (await query<PaymentDispute[]>(
-          `SELECT * FROM "paymentDispute" WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2`,
-          [status, limit],
-        )) || []
+        (await query<PaymentDispute[]>(`SELECT * FROM "paymentDispute" WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2`, [
+          status,
+          limit,
+        ])) || []
       );
     }
-    return (
-      (await query<PaymentDispute[]>(`SELECT * FROM "paymentDispute" ORDER BY "createdAt" DESC LIMIT $1`, [limit])) || []
-    );
+    return (await query<PaymentDispute[]>(`SELECT * FROM "paymentDispute" ORDER BY "createdAt" DESC LIMIT $1`, [limit])) || [];
   }
 
   // --- Fees ---
@@ -202,16 +200,16 @@ class PaymentBillingRepo {
   }
 
   async findAllFees(limit: number = 100): Promise<PaymentFee[]> {
-    return (
-      (await query<PaymentFee[]>(`SELECT * FROM "paymentFee" ORDER BY "createdAt" DESC LIMIT $1`, [limit])) || []
-    );
+    return (await query<PaymentFee[]>(`SELECT * FROM "paymentFee" ORDER BY "createdAt" DESC LIMIT $1`, [limit])) || [];
   }
 
   // --- Reports ---
 
   async findReportsByMerchant(organizationId: string): Promise<PaymentReport[]> {
     return (
-      (await query<PaymentReport[]>(`SELECT * FROM "paymentReport" WHERE "organizationId" = $1 ORDER BY "periodStart" DESC`, [organizationId])) || []
+      (await query<PaymentReport[]>(`SELECT * FROM "paymentReport" WHERE "organizationId" = $1 ORDER BY "periodStart" DESC`, [
+        organizationId,
+      ])) || []
     );
   }
 
@@ -245,9 +243,7 @@ class PaymentBillingRepo {
   }
 
   async findAllReports(limit: number = 100): Promise<PaymentReport[]> {
-    return (
-      (await query<PaymentReport[]>(`SELECT * FROM "paymentReport" ORDER BY "periodStart" DESC LIMIT $1`, [limit])) || []
-    );
+    return (await query<PaymentReport[]>(`SELECT * FROM "paymentReport" ORDER BY "periodStart" DESC LIMIT $1`, [limit])) || [];
   }
 
   async findReportById(paymentReportId: string): Promise<PaymentReport | null> {

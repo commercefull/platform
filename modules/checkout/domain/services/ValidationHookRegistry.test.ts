@@ -13,7 +13,7 @@ describe('ValidationHookRegistry', () => {
   });
 
   it('should register and run a field validator', async () => {
-    validationHookRegistry.registerFieldValidator('minAgeCheck', (ctx) => {
+    validationHookRegistry.registerFieldValidator('minAgeCheck', ctx => {
       const age = Number(ctx.value);
       return { valid: age >= 18, message: age < 18 ? 'Must be 18 or older' : undefined };
     });
@@ -39,7 +39,7 @@ describe('ValidationHookRegistry', () => {
   });
 
   it('should register and run a step validator', async () => {
-    validationHookRegistry.registerStepValidator('validateShippingStep', (ctx) => {
+    validationHookRegistry.registerStepValidator('validateShippingStep', ctx => {
       const hasAddress = !!ctx.fieldValues['addressLine1'];
       return { valid: hasAddress, message: hasAddress ? undefined : 'Address is required' };
     });
@@ -94,7 +94,7 @@ describe('ValidationHookRegistry', () => {
   });
 
   it('should support async validators', async () => {
-    validationHookRegistry.registerFieldValidator('asyncValidator', async (ctx) => {
+    validationHookRegistry.registerFieldValidator('asyncValidator', async ctx => {
       await new Promise(r => setTimeout(r, 10));
       return { valid: ctx.value === 'valid', message: ctx.value !== 'valid' ? 'Invalid value' : undefined };
     });

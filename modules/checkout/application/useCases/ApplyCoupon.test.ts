@@ -61,9 +61,7 @@ describe('ApplyCouponUseCase', () => {
     const discountPort = createMockDiscountPort({ valid: true });
     const useCase = new ApplyCouponUseCase(repo, discountPort);
 
-    await expect(
-      useCase.execute(new ApplyCouponCommand('nonexistent', 'SAVE10')),
-    ).rejects.toThrow(NotFoundError);
+    await expect(useCase.execute(new ApplyCouponCommand('nonexistent', 'SAVE10'))).rejects.toThrow(NotFoundError);
   });
 
   it('should throw BadRequestError when discount port is not available', async () => {
@@ -71,9 +69,7 @@ describe('ApplyCouponUseCase', () => {
     const repo = createMockCheckoutRepo(session);
     const useCase = new ApplyCouponUseCase(repo);
 
-    await expect(
-      useCase.execute(new ApplyCouponCommand('cs-1', 'SAVE10')),
-    ).rejects.toThrow(BadRequestError);
+    await expect(useCase.execute(new ApplyCouponCommand('cs-1', 'SAVE10'))).rejects.toThrow(BadRequestError);
   });
 
   it('should throw BadRequestError when coupon is invalid', async () => {
@@ -85,8 +81,6 @@ describe('ApplyCouponUseCase', () => {
     });
     const useCase = new ApplyCouponUseCase(repo, discountPort);
 
-    await expect(
-      useCase.execute(new ApplyCouponCommand('cs-1', 'EXPIRED')),
-    ).rejects.toThrow(BadRequestError);
+    await expect(useCase.execute(new ApplyCouponCommand('cs-1', 'EXPIRED'))).rejects.toThrow(BadRequestError);
   });
 });

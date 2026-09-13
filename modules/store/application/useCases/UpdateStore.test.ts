@@ -7,7 +7,9 @@ import { UpdateStoreUseCase, UpdateStoreCommand } from './UpdateStore';
 import { StoreNotFoundError, StoreSlugAlreadyExistsError, StoreValidationError } from '../../domain/errors/StoreErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('UpdateStoreUseCase', () => {
   let useCase: UpdateStoreUseCase;
@@ -16,11 +18,23 @@ describe('UpdateStoreUseCase', () => {
 
   beforeEach(() => {
     mockStore = {
-      storeId: 's1', name: 'Old', slug: 'old', storeType: 'merchant_store', storeUrl: 'https://old.com',
-      updateBasicInfo: jest.fn(), updateBranding: jest.fn(), updateAddress: jest.fn(),
-      updateSEO: jest.fn(), updateCurrencies: jest.fn(), updateSettings: jest.fn(),
-      updateSocialLinks: jest.fn(), setOpeningHours: jest.fn(), activate: jest.fn(),
-      deactivate: jest.fn(), feature: jest.fn(), unfeature: jest.fn(),
+      storeId: 's1',
+      name: 'Old',
+      slug: 'old',
+      storeType: 'merchant_store',
+      storeUrl: 'https://old.com',
+      updateBasicInfo: jest.fn(),
+      updateBranding: jest.fn(),
+      updateAddress: jest.fn(),
+      updateSEO: jest.fn(),
+      updateCurrencies: jest.fn(),
+      updateSettings: jest.fn(),
+      updateSocialLinks: jest.fn(),
+      setOpeningHours: jest.fn(),
+      activate: jest.fn(),
+      deactivate: jest.fn(),
+      feature: jest.fn(),
+      unfeature: jest.fn(),
       updatedAt: new Date(),
     };
     mockRepo = {

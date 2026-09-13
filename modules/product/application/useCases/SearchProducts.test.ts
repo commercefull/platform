@@ -5,15 +5,25 @@ describe('SearchProductsUseCase', () => {
   let mockRepo: Record<string, jest.Mock>;
 
   const makeProduct = (id: string) => ({
-    productId: id, name: `Product ${id}`, slug: `product-${id}`, sku: `SKU${id}`,
+    productId: id,
+    name: `Product ${id}`,
+    slug: `product-${id}`,
+    sku: `SKU${id}`,
     price: { basePrice: 100, salePrice: null, effectivePrice: 100, isOnSale: false, discountPercentage: 0 },
-    isFeatured: false, primaryImage: null, categoryId: 'cat1', shortDescription: 'A product',
+    isFeatured: false,
+    primaryImage: null,
+    categoryId: 'cat1',
+    shortDescription: 'A product',
   });
 
   beforeEach(() => {
     mockRepo = {
       search: jest.fn().mockResolvedValue({
-        data: [makeProduct('p1'), makeProduct('p2')], total: 2, limit: 20, offset: 0, hasMore: false,
+        data: [makeProduct('p1'), makeProduct('p2')],
+        total: 2,
+        limit: 20,
+        offset: 0,
+        hasMore: false,
       }),
     };
     useCase = new SearchProductsUseCase(mockRepo as never);

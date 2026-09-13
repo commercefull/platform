@@ -34,7 +34,6 @@ export const getProductReviews = async (req: TypedRequest, res: Response) => {
       averageRating: stats.averageRating,
     },
   });
-  
 };
 
 /**
@@ -78,7 +77,6 @@ export const submitReview = async (req: TypedRequest, res: Response) => {
     return res.json({ success: true, reviewId: result.productReviewId });
   }
   return res.redirect(`/products/${productId}`);
-  
 };
 
 /**
@@ -90,5 +88,4 @@ export const markReviewHelpful = async (req: TypedRequest, res: Response) => {
   await manageProductReviewsUseCase.incrementHelpful(reviewId);
 
   res.json({ success: true });
-  
 };

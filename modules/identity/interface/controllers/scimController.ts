@@ -166,7 +166,7 @@ export class ScimController {
 
       const name = body.name as { givenName?: string; familyName?: string } | undefined;
       const displayName = body.displayName as string | undefined;
-      const active = body.active as boolean | undefined ?? true;
+      const active = (body.active as boolean | undefined) ?? true;
       const externalId = body.externalId as string | undefined;
 
       // Create or find user
@@ -219,7 +219,9 @@ export class ScimController {
         timestamp: now,
       });
 
-      res.status(201).json(this.toScimUser(record.scimUserId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId));
+      res
+        .status(201)
+        .json(this.toScimUser(record.scimUserId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId));
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);
@@ -253,7 +255,7 @@ export class ScimController {
         throw new ScimResourceNotFoundError('User', id);
       }
 
-      const active = body.active as boolean | undefined ?? true;
+      const active = (body.active as boolean | undefined) ?? true;
       if (!active && record.isActive) {
         await this.provisioningRepo.deactivate(record.recordId);
       }
@@ -266,14 +268,16 @@ export class ScimController {
       });
 
       const updatedRecord = await this.provisioningRepo.findByScimUserId(id);
-      res.json(this.toScimUser(
-        updatedRecord!.scimUserId,
-        user,
-        active,
-        updatedRecord!.createdAt,
-        updatedRecord!.updatedAt,
-        updatedRecord!.externalId,
-      ));
+      res.json(
+        this.toScimUser(
+          updatedRecord!.scimUserId,
+          user,
+          active,
+          updatedRecord!.createdAt,
+          updatedRecord!.updatedAt,
+          updatedRecord!.externalId,
+        ),
+      );
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);

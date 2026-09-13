@@ -7,7 +7,12 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import { ManageStorefrontSupportUseCase, type TicketStatus, type TicketPriority, type TicketCategory } from '../../../modules/support/application/useCases/ManageStorefrontSupport';
+import {
+  ManageStorefrontSupportUseCase,
+  type TicketStatus,
+  type TicketPriority,
+  type TicketCategory,
+} from '../../../modules/support/application/useCases/ManageStorefrontSupport';
 
 const manageSupportUseCase = new ManageStorefrontSupportUseCase();
 
@@ -39,7 +44,6 @@ export const listTickets = async (req: TypedRequest, res: Response): Promise<voi
     total: result.total,
     currentStatus: status || 'all',
   });
-  
 };
 
 /**
@@ -69,7 +73,6 @@ export const viewTicket = async (req: TypedRequest, res: Response): Promise<void
     messages,
     attachments,
   });
-  
 };
 
 /**
@@ -86,7 +89,6 @@ export const createTicketForm = async (req: TypedRequest, res: Response): Promis
     formData: {},
     orderId: req.query.orderId as string | undefined,
   });
-  
 };
 
 /**

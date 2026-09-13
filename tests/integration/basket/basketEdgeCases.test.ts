@@ -49,7 +49,12 @@ describe('Basket Edge Cases & Gap Tests', () => {
   };
 
   // Helper to add an item
-  const addItem = async (basketId: string, productId: string = TEST_PRODUCT_1_ID, quantity: number = 1, price: number = 29.99): Promise<Record<string, unknown>> => {
+  const addItem = async (
+    basketId: string,
+    productId: string = TEST_PRODUCT_1_ID,
+    quantity: number = 1,
+    price: number = 29.99,
+  ): Promise<Record<string, unknown>> => {
     const response = await client.post(
       `/customer/basket/${basketId}/items`,
       {
@@ -86,9 +91,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expect(response.data.data.subtotal).toBeCloseTo(2 * 29.99 + 3 * 15.5, 2);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should update subtotal when item quantity changes', async () => {
@@ -116,9 +123,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expect(updateResp.data.data.subtotal).toBeGreaterThan(subtotalBefore);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should add same product twice and merge quantities', async () => {
@@ -140,9 +149,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       }
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
   });
 
@@ -168,9 +179,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expect(response.data.data).toHaveProperty('discountAmount');
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should reject applying coupon to empty basket', async () => {
@@ -186,9 +199,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expectStatus(response, 400);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should reject invalid coupon code', async () => {
@@ -206,9 +221,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expectStatus(response, 400);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should remove an applied coupon from basket', async () => {
@@ -233,9 +250,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expectStatus(response, 400);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
   });
 
@@ -263,9 +282,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expect(response.status).toBe(400);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should reject zero quantity on add', async () => {
@@ -287,9 +308,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expect(response.status).toBe(400);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should handle large quantity values', async () => {
@@ -312,9 +335,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expectStatus(response, 400);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
   });
 
@@ -336,9 +361,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expect(response.data.data.subtotal).toBe(0);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should reflect correct item count in summary', async () => {
@@ -357,9 +384,11 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expect(response.data.data.subtotal).toBeCloseTo(70, 2);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
   });
 

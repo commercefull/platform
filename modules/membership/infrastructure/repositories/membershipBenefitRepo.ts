@@ -13,14 +13,7 @@ import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
 
 // Type aliases for benefit and value types (used in application logic)
 export type BenefitType =
-  | 'discount'
-  | 'freeShipping'
-  | 'contentAccess'
-  | 'prioritySupport'
-  | 'rewardPoints'
-  | 'gift'
-  | 'earlyAccess'
-  | 'custom';
+  'discount' | 'freeShipping' | 'contentAccess' | 'prioritySupport' | 'rewardPoints' | 'gift' | 'earlyAccess' | 'custom';
 export type ValueType = 'fixed' | 'percentage' | 'boolean' | 'text' | 'json';
 
 // Derived types for create/update operations

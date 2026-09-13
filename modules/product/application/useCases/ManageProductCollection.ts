@@ -3,7 +3,12 @@
  * Creates or updates a collection and manages its collection map items
  */
 
-import type { ProductCollection, ProductCollectionMap, ProductCollectionPort, ProductCollectionMapPort } from '../../domain/repositories/ProductCatalogPorts';
+import type {
+  ProductCollection,
+  ProductCollectionMap,
+  ProductCollectionPort,
+  ProductCollectionMapPort,
+} from '../../domain/repositories/ProductCatalogPorts';
 import { ProductCollectionNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================

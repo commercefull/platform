@@ -1,4 +1,4 @@
-import { GetFeatureFlagsUseCase} from './GetFeatureFlags';
+import { GetFeatureFlagsUseCase } from './GetFeatureFlags';
 
 describe('GetFeatureFlagsUseCase', () => {
   let useCase: GetFeatureFlagsUseCase;

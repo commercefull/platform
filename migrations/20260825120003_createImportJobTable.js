@@ -14,9 +14,17 @@ exports.up = function (knex) {
     t.string('sourceStoreUrl', 500);
     t.string('sourceApiKey', 500);
     t.jsonb('sourceConfig');
-    t.jsonb('stats').notNullable().defaultTo(JSON.stringify({
-      totalRecords: 0, processedRecords: 0, successCount: 0, errorCount: 0, skippedCount: 0
-    }));
+    t.jsonb('stats')
+      .notNullable()
+      .defaultTo(
+        JSON.stringify({
+          totalRecords: 0,
+          processedRecords: 0,
+          successCount: 0,
+          errorCount: 0,
+          skippedCount: 0,
+        }),
+      );
     t.timestamp('startedAt');
     t.timestamp('completedAt');
     t.text('errorMessage');

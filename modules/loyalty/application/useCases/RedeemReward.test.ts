@@ -3,8 +3,13 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { RedeemRewardUseCase} from './RedeemReward';
-import { LoyaltyRewardNotFoundError, RewardNotAvailableError, InsufficientPointsError, LoyaltyMemberNotFoundError } from '../../domain/errors/LoyaltyErrors';
+import { RedeemRewardUseCase } from './RedeemReward';
+import {
+  LoyaltyRewardNotFoundError,
+  RewardNotAvailableError,
+  InsufficientPointsError,
+  LoyaltyMemberNotFoundError,
+} from '../../domain/errors/LoyaltyErrors';
 
 describe('RedeemRewardUseCase', () => {
   let useCase: RedeemRewardUseCase;
@@ -13,8 +18,16 @@ describe('RedeemRewardUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       getRewardById: jest.fn().mockResolvedValue({
-        rewardId: 'rwd1', name: '10% Off', type: 'discount', pointsCost: 100, value: 10, valueType: 'percentage',
-        isActive: true, totalQuantity: null, remainingQuantity: 100, maxUsagePerCustomer: null,
+        rewardId: 'rwd1',
+        name: '10% Off',
+        type: 'discount',
+        pointsCost: 100,
+        value: 10,
+        valueType: 'percentage',
+        isActive: true,
+        totalQuantity: null,
+        remainingQuantity: 100,
+        maxUsagePerCustomer: null,
       }),
       getCustomerLoyalty: jest.fn().mockResolvedValue({ pointsBalance: 500 }),
       getRewardUsageCount: jest.fn().mockResolvedValue(0),
@@ -43,7 +56,14 @@ describe('RedeemRewardUseCase', () => {
   });
 
   it('should throw RewardNotAvailableError when reward is inactive', async () => {
-    mockRepo.getRewardById.mockResolvedValue({ rewardId: 'rwd1', name: 'Test', type: 'discount', pointsCost: 100, isActive: false, remainingQuantity: 10 });
+    mockRepo.getRewardById.mockResolvedValue({
+      rewardId: 'rwd1',
+      name: 'Test',
+      type: 'discount',
+      pointsCost: 100,
+      isActive: false,
+      remainingQuantity: 10,
+    });
 
     await expect(useCase.execute({ customerId: 'c1', rewardId: 'rwd1' })).rejects.toThrow(RewardNotAvailableError);
   });

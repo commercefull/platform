@@ -32,7 +32,6 @@ export const supportDashboard = async (req: TypedRequest, res: Response): Promis
     tickets,
     faqs: faqArticles,
   });
-  
 };
 
 // ============================================================================
@@ -56,7 +55,6 @@ export const listSupportTickets = async (req: TypedRequest, res: Response): Prom
     filters: { status, priority, search },
     pagination: { limit: parseInt(limit as string) || 50, offset: parseInt(offset as string) || 0 },
   });
-  
 };
 
 export const viewSupportTicket = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -79,7 +77,6 @@ export const viewSupportTicket = async (req: TypedRequest, res: Response): Promi
     ticket,
     messages,
   });
-  
 };
 
 export const updateTicketStatus = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -94,7 +91,6 @@ export const updateTicketStatus = async (req: TypedRequest, res: Response): Prom
   }
 
   res.json({ success: true });
-  
 };
 
 // ============================================================================
@@ -108,7 +104,6 @@ export const listFaqs = async (req: TypedRequest, res: Response): Promise<void> 
     pageName: 'FAQ Management',
     faqs,
   });
-  
 };
 
 export const createFaq = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -157,5 +152,4 @@ export const deleteFaq = async (req: TypedRequest, res: Response): Promise<void>
   const { faqId } = req.params;
   await manageFaqUseCase.deleteArticle(faqId);
   res.json({ success: true });
-  
 };

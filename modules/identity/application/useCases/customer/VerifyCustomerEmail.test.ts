@@ -4,10 +4,19 @@ jest.mock('../../../../../libs/events/eventBus', () => ({
 }));
 
 import { VerifyCustomerEmailUseCase } from './VerifyCustomerEmail';
-import { VerificationTokenRequiredError, InvalidVerificationTokenError, VerificationTokenAlreadyUsedError, VerificationTokenExpiredError, EmailRequiredOnlyError, EmailAlreadyVerifiedError } from '../../../domain/errors/IdentityErrors';
+import {
+  VerificationTokenRequiredError,
+  InvalidVerificationTokenError,
+  VerificationTokenAlreadyUsedError,
+  VerificationTokenExpiredError,
+  EmailRequiredOnlyError,
+  EmailAlreadyVerifiedError,
+} from '../../../domain/errors/IdentityErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('VerifyCustomerEmailUseCase', () => {
   let useCase: VerifyCustomerEmailUseCase;
@@ -18,14 +27,23 @@ describe('VerifyCustomerEmailUseCase', () => {
 
   beforeEach(() => {
     mockCustomerRepo = { findByEmail: jest.fn().mockResolvedValue(null), update: jest.fn().mockResolvedValue(undefined) };
-    mockVerifyRepo = { findByToken: jest.fn().mockResolvedValue(null), markAsUsed: jest.fn().mockResolvedValue(undefined), create: jest.fn().mockResolvedValue(undefined) };
+    mockVerifyRepo = {
+      findByToken: jest.fn().mockResolvedValue(null),
+      markAsUsed: jest.fn().mockResolvedValue(undefined),
+      create: jest.fn().mockResolvedValue(undefined),
+    };
     mockAuth = { generateVerificationToken: jest.fn().mockResolvedValue('new-token') };
     mockEmail = { sendVerificationEmail: jest.fn().mockResolvedValue(undefined) };
     useCase = new VerifyCustomerEmailUseCase(mockCustomerRepo as never, mockVerifyRepo as never, mockAuth as never, mockEmail as never);
   });
 
   it('should verify email successfully (happy path)', async () => {
-    mockVerifyRepo.findByToken.mockResolvedValue({ customerId: 'c1', token: 'valid', expiresAt: new Date(Date.now() + 3600000), used: false });
+    mockVerifyRepo.findByToken.mockResolvedValue({
+      customerId: 'c1',
+      token: 'valid',
+      expiresAt: new Date(Date.now() + 3600000),
+      used: false,
+    });
 
     const result = await useCase.verify({ token: 'valid' });
 

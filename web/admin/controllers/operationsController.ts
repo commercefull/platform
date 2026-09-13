@@ -28,5 +28,4 @@ export const operationsDashboard = async (req: TypedRequest, res: Response): Pro
     recentFulfillments,
     warehouses,
   });
-  
 };

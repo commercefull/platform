@@ -36,7 +36,7 @@ describe('ManageAdminInventoryUseCase', () => {
   });
 
   it('should get inventory stats', async () => {
-    const result = await useCase.getInventoryStats() as unknown as Record<string, unknown>;
+    const result = (await useCase.getInventoryStats()) as unknown as Record<string, unknown>;
     expect(result.totalProducts).toBe(100);
   });
 

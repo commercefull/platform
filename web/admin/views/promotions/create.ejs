@@ -157,11 +157,71 @@
                   </div>
                 </div>
 
-                <!-- TODO: Add product/category/customer group selection in future iterations -->
-                <div class="alert alert-info">
-                  <i class="icon fas fa-info"></i>
-                  <strong><%= t('common.note') %>:</strong> <%= t('promotion:promotions.futureUpdateNote') %>
+                <!-- Condition Builder (Epic F) -->
+                <h5 class="mt-4 mb-3">Rule Conditions</h5>
+                <p class="text-muted small">Define conditions that must match for this promotion to apply.</p>
+                <%- include('../partials/condition-builder', {
+                  fieldName: 'conditions',
+                  conditions: formData?.conditions || [],
+                  attributes: [
+                    { value: 'cartTotal', label: 'Cart Total' },
+                    { value: 'itemQuantity', label: 'Item Quantity' },
+                    { value: 'productCategory', label: 'Product Category' },
+                    { value: 'customerGroup', label: 'Customer Group' },
+                    { value: 'shippingMethod', label: 'Shipping Method' },
+                    { value: 'paymentMethod', label: 'Payment Method' }
+                  ]
+                }) %>
+
+                <!-- Stackability (Epic C) -->
+                <h5 class="mt-4 mb-3">Stacking</h5>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="stackability">Stackability</label>
+                      <select class="form-control" id="stackability" name="stackability">
+                        <option value="none" <%= (!formData?.stackability || formData?.stackability === 'none') ? 'selected' : '' %>>None (exclusive by default)</option>
+                        <option value="stackable" <%= formData?.stackability === 'stackable' ? 'selected' : '' %>>Stackable (can combine with other stackable promos)</option>
+                        <option value="exclusive" <%= formData?.stackability === 'exclusive' ? 'selected' : '' %>>Exclusive (blocks all other promos)</option>
+                      </select>
+                      <small class="form-text text-muted">Controls how this promotion interacts with others.</small>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="priority">Priority</label>
+                      <input type="number" class="form-control" id="priority" name="priority"
+                             value="<%= formData?.priority || 0 %>" min="0">
+                      <small class="form-text text-muted">Higher priority promotions are evaluated first.</small>
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              <!-- Promotion Preview Panel (Epic F) -->
+              <div class="mt-4 p-3 bg-light rounded">
+                <h5 class="mb-3"><i class="fas fa-eye me-2"></i>Promotion Preview</h5>
+                <p class="text-muted small">Simulate this promotion against a sample cart to verify the discount.</p>
+                <div class="row g-2 mb-2">
+                  <div class="col-md-3">
+                    <label class="form-label small">Sample Cart Total</label>
+                    <input type="number" class="form-control form-control-sm" id="previewCartTotal" value="100" step="0.01">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label small">Item Quantity</label>
+                    <input type="number" class="form-control form-control-sm" id="previewItemQty" value="1" min="1">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label small">Customer Group</label>
+                    <input type="text" class="form-control form-control-sm" id="previewCustomerGroup" placeholder="e.g. VIP">
+                  </div>
+                  <div class="col-md-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-outline-primary btn-sm w-100" id="previewBtn">
+                      <i class="fas fa-play me-1"></i>Preview Discount
+                    </button>
+                  </div>
+                </div>
+                <div id="previewResult" class="mt-2" style="display:none;"></div>
               </div>
 
               <div class="card-footer">
@@ -173,6 +233,63 @@
                 </a>
               </div>
             </form>
+
+<script>
+  document.getElementById('previewBtn').addEventListener('click', async function() {
+    const cartTotal = parseFloat(document.getElementById('previewCartTotal').value) || 0;
+    const itemQty = parseInt(document.getElementById('previewItemQty').value) || 1;
+    const customerGroup = document.getElementById('previewCustomerGroup').value;
+    const resultEl = document.getElementById('previewResult');
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = '<div class="alert alert-info mb-0"><i class="fas fa-spinner fa-spin me-2"></i>Evaluating against active promotions...</div>';
+
+    try {
+      const resp = await fetch('/hub/promotions/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{
+            productId: 'preview-product',
+            name: 'Preview Item',
+            quantity: itemQty,
+            unitPrice: cartTotal / itemQty,
+          }],
+          subtotal: cartTotal,
+          shippingAmount: 0,
+          customerGroup: customerGroup || undefined,
+          currency: 'USD',
+        })
+      });
+      const result = await resp.json();
+
+      if (result.success) {
+        const discount = result.totalDiscountAmount || 0;
+        const freeShipping = result.freeShipping;
+        const applied = result.appliedPromotions || [];
+        let html = '<div class="alert ' + (discount > 0 || freeShipping ? 'alert-success' : 'alert-secondary') + ' mb-0">';
+        html += '<strong>Discount: $' + discount.toFixed(2) + '</strong>';
+        if (freeShipping) html += ' <span class="badge bg-info">Free Shipping</span>';
+        html += '<br>Original Total: $' + cartTotal.toFixed(2) + ' → Final Total: $' + (result.finalTotal || cartTotal - discount).toFixed(2);
+        if (applied.length > 0) {
+          html += '<br><small class="text-muted">Applied promotions:</small><ul class="small mb-0">';
+          applied.forEach(function(p) {
+            html += '<li>' + p.name + ' (' + p.type + ') — $' + (p.discountAmount || 0).toFixed(2) + '</li>';
+          });
+          html += '</ul>';
+        } else {
+          html += '<br><small class="text-muted">No promotions matched this cart.</small>';
+        }
+        if (result.message) html += '<br><small class="text-warning">' + result.message + '</small>';
+        html += '</div>';
+        resultEl.innerHTML = html;
+      } else {
+        resultEl.innerHTML = '<div class="alert alert-danger mb-0">' + (result.error || 'Preview failed') + '</div>';
+      }
+    } catch (err) {
+      resultEl.innerHTML = '<div class="alert alert-danger mb-0">Error: ' + err.message + '</div>';
+    }
+  });
+</script>
           </div>
         </div>
       </div>

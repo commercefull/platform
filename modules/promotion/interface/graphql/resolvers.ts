@@ -8,10 +8,14 @@ const promotionRepo = promotionRuleRepository.promotions;
 
 export const promotionResolvers = {
   Query: {
-    promotions: async (_parent: unknown, args: {
-      filters?: { status?: string; isActive?: boolean; organizationId?: string };
-      pagination?: { limit?: number; offset?: number; orderBy?: string; direction?: 'ASC' | 'DESC' };
-    }, context: GraphQLAuthContext) => {
+    promotions: async (
+      _parent: unknown,
+      args: {
+        filters?: { status?: string; isActive?: boolean; organizationId?: string };
+        pagination?: { limit?: number; offset?: number; orderBy?: string; direction?: 'ASC' | 'DESC' };
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new ListPromotionsUseCase(promotionRepo);
       const command = new ListPromotionsCommand(args.filters, args.pagination);
@@ -26,17 +30,19 @@ export const promotionResolvers = {
   },
 
   Mutation: {
-    redeemGiftCard: async (_parent: unknown, args: {
-      code: string;
-      amount: number;
-      orderId?: string;
-      customerId?: string;
-    }, context: GraphQLAuthContext) => {
+    redeemGiftCard: async (
+      _parent: unknown,
+      args: {
+        code: string;
+        amount: number;
+        orderId?: string;
+        customerId?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireCustomerAuth(context);
       const useCase = new RedeemGiftCardUseCase();
-      const command = new RedeemGiftCardCommand(
-        args.code, args.amount, args.orderId, args.customerId,
-      );
+      const command = new RedeemGiftCardCommand(args.code, args.amount, args.orderId, args.customerId);
       return useCase.execute(command);
     },
   },

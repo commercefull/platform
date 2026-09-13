@@ -1,4 +1,4 @@
-import { CheckPointsBalanceUseCase} from './CheckPointsBalance';
+import { CheckPointsBalanceUseCase } from './CheckPointsBalance';
 
 describe('CheckPointsBalanceUseCase', () => {
   let useCase: CheckPointsBalanceUseCase;
@@ -7,7 +7,9 @@ describe('CheckPointsBalanceUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findMemberByCustomerId: jest.fn().mockResolvedValue({
-        availablePoints: 500, pendingPoints: 50, lifetimePoints: 1000,
+        availablePoints: 500,
+        pendingPoints: 50,
+        lifetimePoints: 1000,
         tier: { tierId: 't1', name: 'Gold', multiplier: 1.5 },
       }),
       findNextTier: jest.fn().mockResolvedValue({ name: 'Platinum', requiredPoints: 2000 }),

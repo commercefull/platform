@@ -14,7 +14,6 @@ export const getMembershipTiers = async (req: TypedRequest, res: Response): Prom
     success: true,
     data: tiers,
   });
-  
 };
 
 export const getMembershipTierById = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -34,7 +33,6 @@ export const getMembershipTierById = async (req: TypedRequest, res: Response): P
     success: true,
     data: tier,
   });
-  
 };
 
 export const getTierBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -56,7 +54,6 @@ export const getTierBenefits = async (req: TypedRequest, res: Response): Promise
     success: true,
     data: benefits,
   });
-  
 };
 
 // User Membership Public Endpoints
@@ -91,7 +88,6 @@ export const getUserMembershipByUserId = async (req: TypedRequest, res: Response
       tier,
     },
   });
-  
 };
 
 export const getUserMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -113,5 +109,4 @@ export const getUserMembershipBenefits = async (req: TypedRequest, res: Response
     success: true,
     data: benefits,
   });
-  
 };

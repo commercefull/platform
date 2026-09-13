@@ -56,16 +56,36 @@ export class IntegrationEventSubscription {
     return new IntegrationEventSubscription(props);
   }
 
-  get subscriptionId(): string { return this.props.subscriptionId; }
-  get integrationId(): string { return this.props.integrationId; }
-  get eventType(): string { return this.props.eventType; }
-  get targetAction(): string { return this.props.targetAction; }
-  get description(): string | null { return this.props.description; }
-  get payloadMapping(): Record<string, unknown> { return this.props.payloadMapping; }
-  get headers(): Record<string, string> | null { return this.props.headers; }
-  get isActive(): boolean { return this.props.isActive; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get subscriptionId(): string {
+    return this.props.subscriptionId;
+  }
+  get integrationId(): string {
+    return this.props.integrationId;
+  }
+  get eventType(): string {
+    return this.props.eventType;
+  }
+  get targetAction(): string {
+    return this.props.targetAction;
+  }
+  get description(): string | null {
+    return this.props.description;
+  }
+  get payloadMapping(): Record<string, unknown> {
+    return this.props.payloadMapping;
+  }
+  get headers(): Record<string, string> | null {
+    return this.props.headers;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   activate(): void {
     this.props.isActive = true;

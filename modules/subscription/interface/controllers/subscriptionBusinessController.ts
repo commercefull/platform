@@ -5,7 +5,32 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { SubscriptionPlan, SubscriptionProduct, SubscriptionStatus, advanceBillingCycle, cancelSubscription, createSubscriptionOrder, deleteSubscriptionPlan as deleteSubscriptionPlanRepo, deleteSubscriptionProduct as deleteSubscriptionProductRepo, getCustomerSubscription as getCustomerSubscriptionRepo, getCustomerSubscriptions as getCustomerSubscriptionsRepo, getDunningAttempts as getDunningAttemptsRepo, getPendingDunningAttempts, getSubscriptionOrders as getSubscriptionOrdersRepo, getSubscriptionPlan as getSubscriptionPlanRepo, getSubscriptionPlans as getSubscriptionPlansRepo, getSubscriptionProduct as getSubscriptionProductRepo, getSubscriptionProducts as getSubscriptionProductsRepo, getSubscriptionsDueBilling as getSubscriptionsDueBillingRepo, pauseSubscription, resumeSubscription, saveSubscriptionPlan, saveSubscriptionProduct, updateSubscriptionOrderStatus, updateSubscriptionStatus as updateSubscriptionStatusRepo } from '../../infrastructure/repositories/subscriptionRepo';
+import {
+  SubscriptionPlan,
+  SubscriptionProduct,
+  SubscriptionStatus,
+  advanceBillingCycle,
+  cancelSubscription,
+  createSubscriptionOrder,
+  deleteSubscriptionPlan as deleteSubscriptionPlanRepo,
+  deleteSubscriptionProduct as deleteSubscriptionProductRepo,
+  getCustomerSubscription as getCustomerSubscriptionRepo,
+  getCustomerSubscriptions as getCustomerSubscriptionsRepo,
+  getDunningAttempts as getDunningAttemptsRepo,
+  getPendingDunningAttempts,
+  getSubscriptionOrders as getSubscriptionOrdersRepo,
+  getSubscriptionPlan as getSubscriptionPlanRepo,
+  getSubscriptionPlans as getSubscriptionPlansRepo,
+  getSubscriptionProduct as getSubscriptionProductRepo,
+  getSubscriptionProducts as getSubscriptionProductsRepo,
+  getSubscriptionsDueBilling as getSubscriptionsDueBillingRepo,
+  pauseSubscription,
+  resumeSubscription,
+  saveSubscriptionPlan,
+  saveSubscriptionProduct,
+  updateSubscriptionOrderStatus,
+  updateSubscriptionStatus as updateSubscriptionStatusRepo,
+} from '../../infrastructure/repositories/subscriptionRepo';
 
 type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
 
@@ -17,7 +42,6 @@ export const getSubscriptionProducts: AsyncHandler = async (req, res, _next) => 
   const { activeOnly } = req.query;
   const products = await getSubscriptionProductsRepo(activeOnly !== 'false');
   res.json({ success: true, data: products });
-  
 };
 
 export const getSubscriptionProduct: AsyncHandler = async (req, res, _next) => {
@@ -29,14 +53,12 @@ export const getSubscriptionProduct: AsyncHandler = async (req, res, _next) => {
 
   const plans = await getSubscriptionPlansRepo(req.params.id);
   res.json({ success: true, data: { ...product, plans } });
-  
 };
 
 export const createSubscriptionProduct: AsyncHandler = async (req, res, _next) => {
   const body = req.body as Partial<SubscriptionProduct> & { productId: string };
   const product = await saveSubscriptionProduct(body);
   res.status(201).json({ success: true, data: product });
-  
 };
 
 export const updateSubscriptionProduct: AsyncHandler = async (req, res, _next) => {
@@ -46,13 +68,11 @@ export const updateSubscriptionProduct: AsyncHandler = async (req, res, _next) =
     ...body,
   } as Partial<SubscriptionProduct> & { productId: string });
   res.json({ success: true, data: product });
-  
 };
 
 export const deleteSubscriptionProduct: AsyncHandler = async (req, res, _next) => {
   await deleteSubscriptionProductRepo(req.params.id);
   res.json({ success: true, message: 'Subscription product deactivated' });
-  
 };
 
 // ============================================================================
@@ -63,7 +83,6 @@ export const getSubscriptionPlans: AsyncHandler = async (req, res, _next) => {
   const { activeOnly } = req.query;
   const plans = await getSubscriptionPlansRepo(req.params.productId, activeOnly !== 'false');
   res.json({ success: true, data: plans });
-  
 };
 
 export const getSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
@@ -73,7 +92,6 @@ export const getSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
     return;
   }
   res.json({ success: true, data: plan });
-  
 };
 
 export const createSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
@@ -83,7 +101,6 @@ export const createSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
     ...body,
   });
   res.status(201).json({ success: true, data: plan });
-  
 };
 
 export const updateSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
@@ -94,13 +111,11 @@ export const updateSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
     ...body,
   });
   res.json({ success: true, data: plan });
-  
 };
 
 export const deleteSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
   await deleteSubscriptionPlanRepo(req.params.planId);
   res.json({ success: true, message: 'Subscription plan deactivated' });
-  
 };
 
 // ============================================================================
@@ -114,7 +129,6 @@ export const getCustomerSubscriptions: AsyncHandler = async (req, res, _next) =>
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const getCustomerSubscription: AsyncHandler = async (req, res, _next) => {
@@ -128,7 +142,6 @@ export const getCustomerSubscription: AsyncHandler = async (req, res, _next) => 
   const dunningAttempts = await getDunningAttemptsRepo(req.params.id);
 
   res.json({ success: true, data: { ...subscription, orders, dunningAttempts } });
-  
 };
 
 export const cancelSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
@@ -138,36 +151,27 @@ export const cancelSubscriptionAdmin: AsyncHandler = async (req, res, _next) => 
   await cancelSubscription(req.params.id, reason, `admin:${adminId}`, cancelAtPeriodEnd !== false);
 
   res.json({ success: true, message: 'Subscription cancelled' });
-  
 };
 
 export const pauseSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
   const { resumeAt, reason } = req.body as { resumeAt?: string; reason?: string };
   const adminId = req.user?.userId || req.user?.organizationId;
 
-  const pause = await pauseSubscription(
-    req.params.id,
-    resumeAt ? new Date(resumeAt) : undefined,
-    reason,
-    `admin:${adminId}`,
-  );
+  const pause = await pauseSubscription(req.params.id, resumeAt ? new Date(resumeAt) : undefined, reason, `admin:${adminId}`);
 
   res.json({ success: true, data: pause });
-  
 };
 
 export const resumeSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
   const adminId = req.user?.userId || req.user?.organizationId;
   await resumeSubscription(req.params.id, `admin:${adminId}`);
   res.json({ success: true, message: 'Subscription resumed' });
-  
 };
 
 export const updateSubscriptionStatus: AsyncHandler = async (req, res, _next) => {
   const { status } = req.body as { status: SubscriptionStatus };
   await updateSubscriptionStatusRepo(req.params.id, status);
   res.json({ success: true, message: 'Subscription status updated' });
-  
 };
 
 // ============================================================================
@@ -177,20 +181,17 @@ export const updateSubscriptionStatus: AsyncHandler = async (req, res, _next) =>
 export const getSubscriptionOrders: AsyncHandler = async (req, res, _next) => {
   const orders = await getSubscriptionOrdersRepo(req.params.subscriptionId);
   res.json({ success: true, data: orders });
-  
 };
 
 export const retrySubscriptionOrder: AsyncHandler = async (req, res, _next) => {
   // Mark order for retry
   await updateSubscriptionOrderStatus(req.params.orderId, 'pending');
   res.json({ success: true, message: 'Order marked for retry' });
-  
 };
 
 export const skipSubscriptionOrder: AsyncHandler = async (req, res, _next) => {
   await updateSubscriptionOrderStatus(req.params.orderId, 'skipped');
   res.json({ success: true, message: 'Order skipped' });
-  
 };
 
 // ============================================================================
@@ -200,13 +201,11 @@ export const skipSubscriptionOrder: AsyncHandler = async (req, res, _next) => {
 export const getDunningAttempts: AsyncHandler = async (req, res, _next) => {
   const attempts = await getDunningAttemptsRepo(req.params.subscriptionId);
   res.json({ success: true, data: attempts });
-  
 };
 
 export const getPendingDunning: AsyncHandler = async (req, res, _next) => {
   const attempts = await getPendingDunningAttempts(new Date());
   res.json({ success: true, data: attempts });
-  
 };
 
 // ============================================================================
@@ -218,7 +217,6 @@ export const getSubscriptionsDueBilling: AsyncHandler = async (req, res, _next) 
   const date = beforeDate ? new Date(beforeDate as string) : new Date();
   const subscriptions = await getSubscriptionsDueBillingRepo(date);
   res.json({ success: true, data: subscriptions });
-  
 };
 
 export const processBillingCycle: AsyncHandler = async (req, res, _next) => {
@@ -243,5 +241,4 @@ export const processBillingCycle: AsyncHandler = async (req, res, _next) => {
   await advanceBillingCycle(subscription.customerSubscriptionId);
 
   res.json({ success: true, data: order });
-  
 };

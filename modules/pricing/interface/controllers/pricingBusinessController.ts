@@ -34,7 +34,6 @@ export const getAllCurrencies = async (req: TypedRequest, res: Response): Promis
     success: true,
     data: currencies,
   });
-  
 };
 
 /**
@@ -55,7 +54,6 @@ export const getDefaultCurrency = async (req: TypedRequest, res: Response): Prom
     success: true,
     data: currency,
   });
-  
 };
 
 /**
@@ -78,7 +76,6 @@ export const getCurrencyByCode = async (req: TypedRequest, res: Response): Promi
     success: true,
     data: currency,
   });
-  
 };
 
 /**
@@ -104,7 +101,6 @@ export const saveCurrency = async (req: TypedRequest<Record<string, string>, unk
     data: result,
     message: existingCurrency ? 'Currency updated successfully' : 'Currency created successfully',
   });
-  
 };
 
 /**
@@ -138,13 +134,15 @@ export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<
     success: true,
     message: 'Currency deleted successfully',
   });
-  
 };
 
 /**
  * Update exchange rates
  */
-export const updateExchangeRates = async (req: TypedRequest<Record<string, string>, unknown, ExchangeRateBody>, res: Response): Promise<void> => {
+export const updateExchangeRates = async (
+  req: TypedRequest<Record<string, string>, unknown, ExchangeRateBody>,
+  res: Response,
+): Promise<void> => {
   const { source } = req.body;
 
   // Update exchange rates from specified source (e.g., API, manual)
@@ -155,7 +153,6 @@ export const updateExchangeRates = async (req: TypedRequest<Record<string, strin
     data: result,
     message: 'Exchange rates updated successfully',
   });
-  
 };
 
 /**
@@ -173,7 +170,6 @@ export const getAllCurrencyRegions = async (req: TypedRequest, res: Response): P
     success: true,
     data: regions,
   });
-  
 };
 
 /**
@@ -196,13 +192,15 @@ export const getCurrencyRegionById = async (req: TypedRequest, res: Response): P
     success: true,
     data: region,
   });
-  
 };
 
 /**
  * Create currency region
  */
-export const createCurrencyRegion = async (req: TypedRequest<Record<string, string>, unknown, CurrencyRegion>, res: Response): Promise<void> => {
+export const createCurrencyRegion = async (
+  req: TypedRequest<Record<string, string>, unknown, CurrencyRegion>,
+  res: Response,
+): Promise<void> => {
   const regionData = req.body;
 
   // Validate required fields
@@ -232,13 +230,15 @@ export const createCurrencyRegion = async (req: TypedRequest<Record<string, stri
     data: newRegion,
     message: 'Currency region created successfully',
   });
-  
 };
 
 /**
  * Update currency region
  */
-export const updateCurrencyRegion = async (req: TypedRequest<Record<string, string>, unknown, Partial<CurrencyRegion>>, res: Response): Promise<void> => {
+export const updateCurrencyRegion = async (
+  req: TypedRequest<Record<string, string>, unknown, Partial<CurrencyRegion>>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const regionData = req.body;
 
@@ -273,7 +273,6 @@ export const updateCurrencyRegion = async (req: TypedRequest<Record<string, stri
     data: updatedRegion,
     message: 'Currency region updated successfully',
   });
-  
 };
 
 /**
@@ -341,7 +340,10 @@ export const getPriceRuleById = async (req: TypedRequest, res: Response): Promis
 /**
  * Create price rule
  */
-export const createPriceRule = async (req: TypedRequest<Record<string, string>, unknown, CurrencyPriceRuleBody>, res: Response): Promise<void> => {
+export const createPriceRule = async (
+  req: TypedRequest<Record<string, string>, unknown, CurrencyPriceRuleBody>,
+  res: Response,
+): Promise<void> => {
   const ruleData = req.body;
 
   // Validate required fields
@@ -384,13 +386,15 @@ export const createPriceRule = async (req: TypedRequest<Record<string, string>, 
     data: newRule,
     message: 'Price rule created successfully',
   });
-  
 };
 
 /**
  * Update price rule
  */
-export const updatePriceRule = async (req: TypedRequest<Record<string, string>, unknown, CurrencyPriceRuleBody>, res: Response): Promise<void> => {
+export const updatePriceRule = async (
+  req: TypedRequest<Record<string, string>, unknown, CurrencyPriceRuleBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const ruleData = req.body;
 
@@ -438,7 +442,6 @@ export const updatePriceRule = async (req: TypedRequest<Record<string, string>, 
     data: updatedRule,
     message: 'Price rule updated successfully',
   });
-  
 };
 
 /**
@@ -464,5 +467,4 @@ export const deletePriceRule = async (req: TypedRequest, res: Response): Promise
     success: true,
     message: 'Price rule deleted successfully',
   });
-  
 };

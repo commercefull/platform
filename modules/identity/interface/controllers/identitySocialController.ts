@@ -140,13 +140,15 @@ export async function getOAuthConfig(req: TypedRequest, res: Response): Promise<
     provider,
     config: config[provider],
   });
-  
 }
 
 /**
  * Handle social login callback for customers
  */
-export async function customerSocialLogin(req: TypedRequest<Record<string, string>, unknown, SocialLoginBody>, res: Response): Promise<void> {
+export async function customerSocialLogin(
+  req: TypedRequest<Record<string, string>, unknown, SocialLoginBody>,
+  res: Response,
+): Promise<void> {
   const { provider } = req.params;
   const { accessToken, idToken, profile: clientProfile } = req.body;
 
@@ -253,13 +255,15 @@ export async function customerSocialLogin(req: TypedRequest<Record<string, strin
     },
     provider: result.provider,
   });
-  
 }
 
 /**
  * Handle social login callback for merchants
  */
-export async function merchantSocialLogin(req: TypedRequest<Record<string, string>, unknown, SocialLoginBody>, res: Response): Promise<void> {
+export async function merchantSocialLogin(
+  req: TypedRequest<Record<string, string>, unknown, SocialLoginBody>,
+  res: Response,
+): Promise<void> {
   const { provider } = req.params;
   const { accessToken, idToken, profile: clientProfile } = req.body;
 
@@ -362,13 +366,15 @@ export async function merchantSocialLogin(req: TypedRequest<Record<string, strin
     },
     provider: result.provider,
   });
-  
 }
 
 /**
  * Link a social account to an existing customer
  */
-export async function linkCustomerSocialAccount(req: TypedRequest<Record<string, string>, unknown, LinkAccountBody>, res: Response): Promise<void> {
+export async function linkCustomerSocialAccount(
+  req: TypedRequest<Record<string, string>, unknown, LinkAccountBody>,
+  res: Response,
+): Promise<void> {
   const { provider } = req.params;
   const customerId = req.user?.id;
 
@@ -435,7 +441,6 @@ export async function linkCustomerSocialAccount(req: TypedRequest<Record<string,
     message: `${provider} account linked successfully`,
     linkedAccount,
   });
-  
 }
 
 /**
@@ -480,7 +485,6 @@ export async function unlinkCustomerSocialAccount(req: TypedRequest, res: Respon
     success: true,
     message: `${provider} account unlinked successfully`,
   });
-  
 }
 
 /**
@@ -505,7 +509,6 @@ export async function getCustomerLinkedAccounts(req: TypedRequest, res: Response
     linkedAccounts,
     supportedProviders: SUPPORTED_PROVIDERS,
   });
-  
 }
 
 /**
@@ -530,5 +533,4 @@ export async function getOrganizationLinkedAccounts(req: TypedRequest, res: Resp
     linkedAccounts,
     supportedProviders: SUPPORTED_PROVIDERS,
   });
-  
 }

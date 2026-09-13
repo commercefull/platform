@@ -17,8 +17,12 @@ describe('CheckoutSession', () => {
   it('should set shipping address', () => {
     const session = CheckoutSession.create({ id: 'cs1', basketId: 'b1' });
     const addr = Address.create({
-      firstName: 'John', lastName: 'Doe', addressLine1: '123 St',
-      city: 'NYC', postalCode: '10001', country: 'USA',
+      firstName: 'John',
+      lastName: 'Doe',
+      addressLine1: '123 St',
+      city: 'NYC',
+      postalCode: '10001',
+      country: 'USA',
     });
     session.setShippingAddress(addr);
     expect(session.shippingAddress).toBeDefined();
@@ -70,8 +74,12 @@ describe('CheckoutSession', () => {
     session.updateAmounts(Money.create(100, 'USD'), Money.create(10, 'USD'));
     session.setShippingMethod('sm1', 'Standard', Money.create(5, 'USD'));
     const addr = Address.create({
-      firstName: 'J', lastName: 'D', addressLine1: '1 St',
-      city: 'NYC', postalCode: '1', country: 'USA',
+      firstName: 'J',
+      lastName: 'D',
+      addressLine1: '1 St',
+      city: 'NYC',
+      postalCode: '1',
+      country: 'USA',
     });
     session.setShippingAddress(addr);
     expect(session.isReadyForPayment).toBe(true);

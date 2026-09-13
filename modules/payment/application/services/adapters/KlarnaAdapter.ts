@@ -6,9 +6,19 @@
 
 import * as crypto from 'crypto';
 import {
-  PSPAdapter, PSPCapabilities, PSPConfig, WebhookEvent,
-  PaymentRequest, PaymentResponse, CaptureRequest, CaptureResponse,
-  VoidRequest, VoidResponse, RefundRequest, RefundResponse, HealthCheckResult,
+  PSPAdapter,
+  PSPCapabilities,
+  PSPConfig,
+  WebhookEvent,
+  PaymentRequest,
+  PaymentResponse,
+  CaptureRequest,
+  CaptureResponse,
+  VoidRequest,
+  VoidResponse,
+  RefundRequest,
+  RefundResponse,
+  HealthCheckResult,
 } from '../GatewayAdapter';
 
 const KLARNA_CAPABILITIES: PSPCapabilities = {
@@ -84,14 +94,16 @@ export class KlarnaAdapter implements PSPAdapter {
       purchase_currency: request.currency.toUpperCase(),
       locale: (config.extra?.locale as string) || 'en-US',
       order_amount: Math.round(request.amount * 100),
-      order_lines: [{
-        type: 'physical',
-        reference: request.orderId,
-        name: request.description || `Order ${request.orderId}`,
-        quantity: 1,
-        total_amount: Math.round(request.amount * 100),
-        unit_price: Math.round(request.amount * 100),
-      }],
+      order_lines: [
+        {
+          type: 'physical',
+          reference: request.orderId,
+          name: request.description || `Order ${request.orderId}`,
+          quantity: 1,
+          total_amount: Math.round(request.amount * 100),
+          unit_price: Math.round(request.amount * 100),
+        },
+      ],
       merchant_urls: {
         confirmation: request.returnUrl || '',
         push: '',
@@ -107,7 +119,7 @@ export class KlarnaAdapter implements PSPAdapter {
       body: JSON.stringify(body),
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       const err = (data.error_messages as Array<string> | undefined)?.[0];
@@ -144,7 +156,7 @@ export class KlarnaAdapter implements PSPAdapter {
       body: JSON.stringify(body),
     });
 
-    const data = res.status === 201 ? {} : await res.json() as Record<string, unknown>;
+    const data = res.status === 201 ? {} : ((await res.json()) as Record<string, unknown>);
 
     if (!res.ok && res.status !== 201) {
       return {
@@ -174,7 +186,7 @@ export class KlarnaAdapter implements PSPAdapter {
       },
     });
 
-    const data = res.status === 204 ? {} : await res.json() as Record<string, unknown>;
+    const data = res.status === 204 ? {} : ((await res.json()) as Record<string, unknown>);
 
     if (!res.ok && res.status !== 204) {
       return {
@@ -210,7 +222,7 @@ export class KlarnaAdapter implements PSPAdapter {
       body: JSON.stringify(body),
     });
 
-    const data = res.status === 201 ? {} : await res.json() as Record<string, unknown>;
+    const data = res.status === 201 ? {} : ((await res.json()) as Record<string, unknown>);
 
     if (!res.ok && res.status !== 201) {
       return {

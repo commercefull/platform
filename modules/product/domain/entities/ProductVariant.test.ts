@@ -100,9 +100,7 @@ describe('ProductVariant', () => {
   });
 
   it('should generate name from attributes statically', () => {
-    const name = ProductVariant.generateName([
-      { attributeId: 'a1', attributeName: 'Color', value: 'blue' },
-    ]);
+    const name = ProductVariant.generateName([{ attributeId: 'a1', attributeName: 'Color', value: 'blue' }]);
     expect(name).toBe('blue');
   });
 

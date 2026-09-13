@@ -9,14 +9,6 @@ const payoutRepo = new VendorPayoutRepositoryImpl();
 
 export const marketplaceController = new MarketplaceController(vendorRepo, commissionRepo, payoutRepo);
 
-export {
-  ManageVendorUseCase,
-  ManageCommissionRuleUseCase,
-  ManagePayoutUseCase,
-} from '../../application/useCases/Marketplace';
+export { ManageVendorUseCase, ManageCommissionRuleUseCase, ManagePayoutUseCase } from '../../application/useCases/Marketplace';
 
-export {
-  VendorRepositoryImpl,
-  CommissionRuleRepositoryImpl,
-  VendorPayoutRepositoryImpl,
-} from '../../infrastructure';
+export { VendorRepositoryImpl, CommissionRuleRepositoryImpl, VendorPayoutRepositoryImpl } from '../../infrastructure';

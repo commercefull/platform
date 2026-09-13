@@ -102,9 +102,10 @@ export class SetShippingAddressUseCase {
         const taxResult = await this.taxQuotePort.calculateTax({
           items: items.map(item => ({
             ...item,
-            unitPrice: applyDiscountBeforeTax && session.discountAmount.amount > 0
-              ? Math.max(0, item.unitPrice - (session.discountAmount.amount / items.length))
-              : item.unitPrice,
+            unitPrice:
+              applyDiscountBeforeTax && session.discountAmount.amount > 0
+                ? Math.max(0, item.unitPrice - session.discountAmount.amount / items.length)
+                : item.unitPrice,
           })),
           shippingAddress: {
             country: command.country,
@@ -143,7 +144,9 @@ export class SetShippingAddressUseCase {
     return mapCheckoutToResponse(session);
   }
 
-  private async getTaxLineItems(session: CheckoutSessionLike): Promise<Array<{ productId: string; name: string; quantity: number; unitPrice: number; taxCategoryId?: string; taxable?: boolean }>> {
+  private async getTaxLineItems(
+    session: CheckoutSessionLike,
+  ): Promise<Array<{ productId: string; name: string; quantity: number; unitPrice: number; taxCategoryId?: string; taxable?: boolean }>> {
     if (!this.basketSnapshotPort) {
       return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPrice: session.subtotal.amount }];
     }
@@ -157,6 +160,8 @@ export class SetShippingAddressUseCase {
         name: item.name,
         quantity: item.quantity,
         unitPrice: item.unitPrice?.amount ?? 0,
+        taxCategoryId: (item as { taxCategoryId?: string }).taxCategoryId,
+        taxable: (item as { taxable?: boolean }).taxable,
       }));
     } catch {
       return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPrice: session.subtotal.amount }];

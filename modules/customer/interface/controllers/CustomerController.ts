@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Customer Controller
@@ -70,7 +69,6 @@ export const registerCustomer = async (req: TypedRequest, res: Response): Promis
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
-  
 };
 
 export const getCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -85,7 +83,6 @@ export const getCustomer = async (req: TypedRequest, res: Response): Promise<voi
   }
 
   respond(req, res, customer);
-  
 };
 
 export const getMyProfile = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -105,7 +102,6 @@ export const getMyProfile = async (req: TypedRequest, res: Response): Promise<vo
   }
 
   respond(req, res, customer);
-  
 };
 
 export const updateMyProfile = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -115,21 +111,23 @@ export const updateMyProfile = async (req: TypedRequest, res: Response): Promise
     return;
   }
 
-  const command = new UpdateCustomerCommand(customerId, req.body as {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    dateOfBirth?: Date;
-    preferredCurrency?: string;
-    preferredLanguage?: string;
-    notes?: string;
-    metadata?: Record<string, unknown>;
-  });
+  const command = new UpdateCustomerCommand(
+    customerId,
+    req.body as {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      dateOfBirth?: Date;
+      preferredCurrency?: string;
+      preferredLanguage?: string;
+      notes?: string;
+      metadata?: Record<string, unknown>;
+    },
+  );
   const useCase = new UpdateCustomerUseCase(CustomerRepo);
   const result = await useCase.execute(command);
 
   respond(req, res, result);
-  
 };
 
 // ============================================================================
@@ -147,7 +145,6 @@ export const getAddresses = async (req: TypedRequest, res: Response): Promise<vo
   const addresses = await useCase.getAddresses(customerId);
 
   respond(req, res, { addresses });
-  
 };
 
 export const addAddress = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -208,7 +205,6 @@ export const addAddress = async (req: TypedRequest, res: Response): Promise<void
   const address = await useCase.addAddress(command);
 
   respond(req, res, address, 201);
-  
 };
 
 export const updateAddress = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -220,12 +216,15 @@ export const updateAddress = async (req: TypedRequest, res: Response): Promise<v
     return;
   }
 
-  const command = new UpdateAddressCommand(customerId, addressId, req.body as Partial<Omit<CustomerAddress, 'customerAddressId' | 'customerId' | 'createdAt' | 'updatedAt'>>);
+  const command = new UpdateAddressCommand(
+    customerId,
+    addressId,
+    req.body as Partial<Omit<CustomerAddress, 'customerAddressId' | 'customerId' | 'createdAt' | 'updatedAt'>>,
+  );
   const useCase = new ManageAddressesUseCase(CustomerRepo);
   const address = await useCase.updateAddress(command);
 
   respond(req, res, address);
-  
 };
 
 export const deleteAddress = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -242,7 +241,6 @@ export const deleteAddress = async (req: TypedRequest, res: Response): Promise<v
   await useCase.deleteAddress(command);
 
   respond(req, res, { deleted: true });
-  
 };
 
 export const setDefaultAddress = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -265,7 +263,6 @@ export const setDefaultAddress = async (req: TypedRequest, res: Response): Promi
   await useCase.setDefaultAddress(command);
 
   respond(req, res, { success: true });
-  
 };
 
 // ============================================================================
@@ -286,7 +283,6 @@ export const listCustomers = async (req: TypedRequest, res: Response): Promise<v
   });
 
   respond(req, res, customers);
-  
 };
 
 export const createCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -316,26 +312,27 @@ export const createCustomer = async (req: TypedRequest, res: Response): Promise<
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
-  
 };
 
 export const updateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   const { customerId } = req.params;
-  const command = new UpdateCustomerCommand(customerId, req.body as {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    dateOfBirth?: Date;
-    preferredCurrency?: string;
-    preferredLanguage?: string;
-    notes?: string;
-    metadata?: Record<string, unknown>;
-  });
+  const command = new UpdateCustomerCommand(
+    customerId,
+    req.body as {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      dateOfBirth?: Date;
+      preferredCurrency?: string;
+      preferredLanguage?: string;
+      notes?: string;
+      metadata?: Record<string, unknown>;
+    },
+  );
   const useCase = new UpdateCustomerUseCase(CustomerRepo);
   const result = await useCase.execute(command);
 
   respond(req, res, result);
-  
 };
 
 export const deleteCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -347,7 +344,6 @@ export const deleteCustomer = async (req: TypedRequest, res: Response): Promise<
   const result = await useCase.execute(command);
 
   respond(req, res, result);
-  
 };
 
 export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -359,7 +355,6 @@ export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<
   const result = await useCase.execute(command);
 
   respond(req, res, result);
-  
 };
 
 export const deactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -371,7 +366,6 @@ export const deactivateCustomer = async (req: TypedRequest, res: Response): Prom
   const result = await useCase.execute(command);
 
   respond(req, res, result);
-  
 };
 
 export const reactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -382,7 +376,6 @@ export const reactivateCustomer = async (req: TypedRequest, res: Response): Prom
   const result = await useCase.execute(command);
 
   respond(req, res, result);
-  
 };
 
 const changePassword = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -398,7 +391,6 @@ const changePassword = async (req: TypedRequest, res: Response): Promise<void> =
   const result = await useCase.execute(command);
 
   respond(req, res, result);
-  
 };
 
 // ============================================================================
@@ -411,7 +403,6 @@ export const getCustomerAddresses = async (req: TypedRequest, res: Response): Pr
   const addresses = await useCase.getAddresses(customerId);
 
   respond(req, res, { addresses });
-  
 };
 
 export const addCustomerAddress = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -467,5 +458,4 @@ export const addCustomerAddress = async (req: TypedRequest, res: Response): Prom
   const address = await useCase.addAddress(command);
 
   respond(req, res, address, 201);
-  
 };

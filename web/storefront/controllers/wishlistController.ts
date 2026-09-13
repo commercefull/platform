@@ -31,7 +31,6 @@ export const viewWishlist = async (req: TypedRequest, res: Response) => {
     pageName: 'My Wishlist',
     items,
   });
-  
 };
 
 /**
@@ -55,7 +54,6 @@ export const addToWishlist = async (req: TypedRequest, res: Response) => {
     return res.json({ success: true });
   }
   return res.redirect('/wishlist');
-  
 };
 
 /**
@@ -75,5 +73,4 @@ export const removeFromWishlist = async (req: TypedRequest, res: Response) => {
     return res.json({ success: true });
   }
   return res.redirect('/wishlist');
-  
 };

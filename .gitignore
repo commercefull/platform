@@ -15,6 +15,7 @@
 /.vscode
 /.idea
 /.kiro
+/.devin
 *.swp
 *.swo
 *~

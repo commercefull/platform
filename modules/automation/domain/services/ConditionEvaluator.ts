@@ -34,17 +34,17 @@ export function evaluateCondition(condition: RuleCondition, context: Record<stri
       return value !== null && value !== undefined;
     case 'regex':
       if (typeof value !== 'string' || typeof condition.value !== 'string') return false;
-      try { return new RegExp(condition.value).test(value); } catch { return false; }
+      try {
+        return new RegExp(condition.value).test(value);
+      } catch {
+        return false;
+      }
     default:
       return false;
   }
 }
 
-export function evaluateConditions(
-  conditions: RuleCondition[],
-  matchMode: ConditionMatchMode,
-  context: Record<string, unknown>,
-): boolean {
+export function evaluateConditions(conditions: RuleCondition[], matchMode: ConditionMatchMode, context: Record<string, unknown>): boolean {
   if (conditions.length === 0) return true;
   if (matchMode === 'all') {
     return conditions.every(c => evaluateCondition(c, context));

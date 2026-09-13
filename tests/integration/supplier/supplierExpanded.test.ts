@@ -116,9 +116,7 @@ describe('Supplier Expanded Tests', () => {
             purchaseOrderId: poId,
             supplierId: SEEDED_SUPPLIER_IDS.ACME_CORP,
             distributionWarehouseId: SEEDED_WAREHOUSE_ID,
-            items: [
-              { productId: '00000000-0000-0000-0000-000000000001', sku: 'TEST-SKU-001', name: 'Test Product', receivedQuantity: 5 },
-            ],
+            items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'TEST-SKU-001', name: 'Test Product', receivedQuantity: 5 }],
           },
           { headers: authHeaders() },
         );
@@ -159,11 +157,9 @@ describe('Supplier Expanded Tests', () => {
 
     it('should create a supplier address', async () => {
       const addressData = createTestSupplierAddress(SEEDED_SUPPLIER_IDS.ACME_CORP);
-      const resp = await client.post(
-        `/business/suppliers/${SEEDED_SUPPLIER_IDS.ACME_CORP}/addresses`,
-        addressData,
-        { headers: authHeaders() },
-      );
+      const resp = await client.post(`/business/suppliers/${SEEDED_SUPPLIER_IDS.ACME_CORP}/addresses`, addressData, {
+        headers: authHeaders(),
+      });
 
       expectStatus(resp, 201);
     });

@@ -588,7 +588,11 @@ describe('Order Event Emission', () => {
     expect(createResp.status).toBe(201);
     const orderId = createResp.data.data.orderId;
 
-    const cancelResp = await client.post(`/customer/order/${orderId}/cancel`, {}, { headers: { Authorization: `Bearer ${customerToken}` } });
+    const cancelResp = await client.post(
+      `/customer/order/${orderId}/cancel`,
+      {},
+      { headers: { Authorization: `Bearer ${customerToken}` } },
+    );
     expect(cancelResp.status).toBe(200);
 
     // Verify the cancel response contains the fields that the order.cancelled event payload includes

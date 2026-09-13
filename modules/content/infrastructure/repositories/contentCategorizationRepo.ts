@@ -23,10 +23,7 @@ export type CategorizationCreateParams = {
 
 export class ContentCategorizationRepo {
   async findCategorizationById(id: string): Promise<ContentCategorization | null> {
-    return queryOne<ContentCategorization>(
-      'SELECT * FROM "contentCategorization" WHERE "contentCategorizationId" = $1',
-      [id],
-    );
+    return queryOne<ContentCategorization>('SELECT * FROM "contentCategorization" WHERE "contentCategorizationId" = $1', [id]);
   }
 
   async findCategorizationsByPageId(pageId: string): Promise<ContentCategorization[]> {
@@ -55,21 +52,14 @@ export class ContentCategorizationRepo {
   async createCategorization(params: CategorizationCreateParams): Promise<ContentCategorization> {
     // If setting as primary, clear existing primary for this page
     if (params.isPrimary) {
-      await query(
-        'UPDATE "contentCategorization" SET "isPrimary" = false WHERE "contentPageId" = $1',
-        [params.contentPageId],
-      );
+      await query('UPDATE "contentCategorization" SET "isPrimary" = false WHERE "contentPageId" = $1', [params.contentPageId]);
     }
 
     const result = await queryOne<ContentCategorization>(
       `INSERT INTO "contentCategorization" ("contentPageId", "categoryId", "isPrimary")
       VALUES ($1, $2, $3)
       RETURNING *`,
-      [
-        params.contentPageId,
-        params.categoryId,
-        params.isPrimary || false,
-      ],
+      [params.contentPageId, params.categoryId, params.isPrimary || false],
     );
 
     if (!result) {

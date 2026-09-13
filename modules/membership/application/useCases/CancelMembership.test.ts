@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { CancelMembershipUseCase} from './CancelMembership';
+import { CancelMembershipUseCase } from './CancelMembership';
 import { MembershipNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
 describe('CancelMembershipUseCase', () => {
@@ -12,7 +12,14 @@ describe('CancelMembershipUseCase', () => {
 
   beforeEach(() => {
     mockRepo = {
-      getMembershipById: jest.fn().mockResolvedValue({ status: 'active', customerId: 'c1', tierId: 't1', billingPeriod: 'monthly', currentPeriodEnd: new Date(Date.now() + 15 * 86400000).toISOString(), createdAt: new Date() }),
+      getMembershipById: jest.fn().mockResolvedValue({
+        status: 'active',
+        customerId: 'c1',
+        tierId: 't1',
+        billingPeriod: 'monthly',
+        currentPeriodEnd: new Date(Date.now() + 15 * 86400000).toISOString(),
+        createdAt: new Date(),
+      }),
       getTierById: jest.fn().mockResolvedValue({ price: 50 }),
       updateMembership: jest.fn().mockResolvedValue(undefined),
       createStatusLog: jest.fn().mockResolvedValue(undefined),

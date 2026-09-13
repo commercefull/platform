@@ -27,10 +27,7 @@ export interface ReportParameters {
   limit?: number;
 }
 
-export async function generateReport(
-  reportType: ReportType,
-  params: ReportParameters,
-): Promise<ReportData> {
+export async function generateReport(reportType: ReportType, params: ReportParameters): Promise<ReportData> {
   const now = new Date();
   const dateFrom = params.dateFrom ? new Date(params.dateFrom) : new Date(now.getFullYear(), now.getMonth(), 1);
   const dateTo = params.dateTo ? new Date(params.dateTo) : now;
@@ -84,16 +81,17 @@ async function generateSalesSummary(from: Date, to: Date, params: ReportParamete
     values,
   );
 
-  const dailyRows = (await query<Record<string, string>[]>(
-    `SELECT
+  const dailyRows =
+    (await query<Record<string, string>[]>(
+      `SELECT
       DATE(o."createdAt") as "date",
       COUNT(*) as "orderCount",
       COALESCE(SUM(o."totalAmount"), 0) as "revenue"
      FROM "order" o ${whereClause}
      GROUP BY DATE(o."createdAt")
      ORDER BY "date" ASC`,
-    values,
-  )) || [];
+      values,
+    )) || [];
 
   return {
     reportType: 'sales_summary',
@@ -132,8 +130,9 @@ async function generateProductPerformance(from: Date, to: Date, params: ReportPa
 
   const limit = params.limit || 50;
 
-  const rows = (await query<Record<string, string>[]>(
-    `SELECT
+  const rows =
+    (await query<Record<string, string>[]>(
+      `SELECT
       oi."productId",
       p."name" as "productName",
       p."sku",
@@ -147,8 +146,8 @@ async function generateProductPerformance(from: Date, to: Date, params: ReportPa
      GROUP BY oi."productId", p."name", p."sku"
      ORDER BY "revenue" DESC
      LIMIT $${idx}`,
-    [...values, limit],
-  )) || [];
+      [...values, limit],
+    )) || [];
 
   const summary = await queryOne<Record<string, string>>(
     `SELECT
@@ -195,8 +194,9 @@ async function generateCustomerSummary(from: Date, to: Date, _params: ReportPara
     [from, to],
   );
 
-  const topCustomers = (await query<Record<string, string>[]>(
-    `SELECT
+  const topCustomers =
+    (await query<Record<string, string>[]>(
+      `SELECT
       c."customerId",
       c."firstName",
       c."lastName",
@@ -211,8 +211,8 @@ async function generateCustomerSummary(from: Date, to: Date, _params: ReportPara
      GROUP BY c."customerId", c."firstName", c."lastName", c."email"
      ORDER BY "totalSpent" DESC
      LIMIT 20`,
-    [from, to],
-  )) || [];
+      [from, to],
+    )) || [];
 
   return {
     reportType: 'customer_summary',
@@ -254,8 +254,9 @@ async function generateInventoryReport(params: ReportParameters): Promise<Report
     whereClause += ` AND i."quantity" <= COALESCE(i."minimumStockLevel", 0)`;
   }
 
-  const rows = (await query<Record<string, string>[]>(
-    `SELECT
+  const rows =
+    (await query<Record<string, string>[]>(
+      `SELECT
       i."inventoryId",
       i."productId",
       p."name" as "productName",
@@ -273,8 +274,8 @@ async function generateInventoryReport(params: ReportParameters): Promise<Report
      LEFT JOIN "product" p ON i."productId" = p."productId"
      ${whereClause}
      ORDER BY p."name" ASC`,
-    values,
-  )) || [];
+      values,
+    )) || [];
 
   const summary = await queryOne<Record<string, string>>(
     `SELECT
@@ -371,7 +372,7 @@ async function generateTaxReport(from: Date, to: Date, _params: ReportParameters
       totalTaxCollected: parseFloat(summary?.totalTaxCollected || '0'),
       totalTaxableRevenue: parseFloat(summary?.totalTaxableRevenue || '0'),
     },
-    rows: (rows || []).map((r) => ({
+    rows: (rows || []).map(r => ({
       orderId: r.orderId,
       orderNumber: r.orderNumber,
       date: r.createdAt,
@@ -402,8 +403,9 @@ async function generateOrderDetail(from: Date, to: Date, params: ReportParameter
     values.push(params.storeId);
   }
 
-  const rows = (await query<Record<string, string>[]>(
-    `SELECT
+  const rows =
+    (await query<Record<string, string>[]>(
+      `SELECT
       o."orderId",
       o."orderNumber",
       o."status",
@@ -418,8 +420,8 @@ async function generateOrderDetail(from: Date, to: Date, params: ReportParameter
      ${whereClause}
      ORDER BY o."createdAt" DESC
      LIMIT 500`,
-    values,
-  )) || [];
+      values,
+    )) || [];
 
   return {
     reportType: 'order_detail',
@@ -446,8 +448,9 @@ async function generateOrderDetail(from: Date, to: Date, params: ReportParameter
 // ============================================================================
 
 async function generatePaymentReport(from: Date, to: Date, _params: ReportParameters): Promise<ReportData> {
-  const rows = (await query<Record<string, string>[]>(
-    `SELECT
+  const rows =
+    (await query<Record<string, string>[]>(
+      `SELECT
       p."paymentId",
       p."orderId",
       p."paymentMethod",
@@ -459,8 +462,8 @@ async function generatePaymentReport(from: Date, to: Date, _params: ReportParame
      WHERE p."createdAt" >= $1 AND p."createdAt" <= $2
      ORDER BY p."createdAt" DESC
      LIMIT 500`,
-    [from, to],
-  )) || [];
+      [from, to],
+    )) || [];
 
   const summary = await queryOne<Record<string, string>>(
     `SELECT
@@ -502,8 +505,9 @@ async function generatePaymentReport(from: Date, to: Date, _params: ReportParame
 // ============================================================================
 
 async function generateFulfillmentReport(from: Date, to: Date, _params: ReportParameters): Promise<ReportData> {
-  const rows = (await query<Record<string, string>[]>(
-    `SELECT
+  const rows =
+    (await query<Record<string, string>[]>(
+      `SELECT
       f."fulfillmentId",
       f."orderId",
       f."status",
@@ -517,8 +521,8 @@ async function generateFulfillmentReport(from: Date, to: Date, _params: ReportPa
      WHERE f."createdAt" >= $1 AND f."createdAt" <= $2
      ORDER BY f."createdAt" DESC
      LIMIT 500`,
-    [from, to],
-  )) || [];
+      [from, to],
+    )) || [];
 
   const summary = await queryOne<Record<string, string>>(
     `SELECT

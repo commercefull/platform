@@ -39,7 +39,12 @@ describe('Basket Expanded Tests', () => {
     return response.data.data.basketId;
   };
 
-  const addItem = async (basketId: string, productId: string = TEST_PRODUCT_1_ID, quantity: number = 1, price: number = 29.99): Promise<Record<string, unknown>> => {
+  const addItem = async (
+    basketId: string,
+    productId: string = TEST_PRODUCT_1_ID,
+    quantity: number = 1,
+    price: number = 29.99,
+  ): Promise<Record<string, unknown>> => {
     const response = await client.post(
       `/customer/basket/${basketId}/items`,
       { productId, sku: 'TEST-SKU-001', name: 'Test Product', quantity, unitPrice: price },
@@ -49,9 +54,11 @@ describe('Basket Expanded Tests', () => {
   };
 
   const cleanup = async (basketId: string) => {
-    await client.delete(`/customer/basket/${basketId}`, {
-      headers: { Authorization: `Bearer ${customerToken}` },
-    }).catch(() => {});
+    await client
+      .delete(`/customer/basket/${basketId}`, {
+        headers: { Authorization: `Bearer ${customerToken}` },
+      })
+      .catch(() => {});
   };
 
   // ============================================================================
@@ -230,10 +237,9 @@ describe('Basket Expanded Tests', () => {
       const itemId = items?.[0]?.basketItemId as string | undefined;
       if (!itemId) return;
 
-      const response = await client.delete(
-        `/customer/basket/${basketId}/items/${itemId}`,
-        { headers: { Authorization: `Bearer ${customerToken}` } },
-      );
+      const response = await client.delete(`/customer/basket/${basketId}/items/${itemId}`, {
+        headers: { Authorization: `Bearer ${customerToken}` },
+      });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -245,10 +251,9 @@ describe('Basket Expanded Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      const response = await client.delete(
-        `/customer/basket/${basketId}/items/00000000-0000-0000-0000-000000000000`,
-        { headers: { Authorization: `Bearer ${customerToken}` } },
-      );
+      const response = await client.delete(`/customer/basket/${basketId}/items/00000000-0000-0000-0000-000000000000`, {
+        headers: { Authorization: `Bearer ${customerToken}` },
+      });
 
       expectStatus(response, 404);
       await cleanup(basketId);

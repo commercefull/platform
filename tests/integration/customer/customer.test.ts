@@ -1,10 +1,6 @@
 import { AxiosInstance } from 'axios';
 import axios from 'axios';
-import {
-  SEEDED_CUSTOMER_ID,
-  SEEDED_CUSTOMER_ADDRESS_ID,
-  SEEDED_CUSTOMER_GROUP_ID,
-} from './testUtils';
+import { SEEDED_CUSTOMER_ID, SEEDED_CUSTOMER_ADDRESS_ID, SEEDED_CUSTOMER_GROUP_ID } from './testUtils';
 
 const createClient = () =>
   axios.create({
@@ -176,7 +172,9 @@ describe('Customer Feature Tests', () => {
       expect(Array.isArray(addresses)).toBe(true);
 
       // Find our test address in the results
-      const address = addresses.find((a: Record<string, unknown>) => (a.customerAddressId || a.addressId || a.id) === testCustomerAddressId);
+      const address = addresses.find(
+        (a: Record<string, unknown>) => (a.customerAddressId || a.addressId || a.id) === testCustomerAddressId,
+      );
       expect(address).toBeDefined();
 
       if (address) {

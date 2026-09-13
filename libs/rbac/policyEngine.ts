@@ -10,14 +10,7 @@
  * - Backward compatibility with flat string permissions
  */
 
-import type {
-  PermissionRule,
-  RolePolicy,
-  PermissionContext,
-  PermissionResult,
-  Resource,
-  Action,
-} from './types';
+import type { PermissionRule, RolePolicy, PermissionContext, PermissionResult, Resource, Action } from './types';
 
 /**
  * Check if a wildcard pattern matches a value.
@@ -38,10 +31,7 @@ function wildcardMatch(pattern: string, value: string): boolean {
  * Evaluate a condition against the permission context.
  * Conditions use '$user.fieldName' syntax to reference user attributes.
  */
-function evaluateCondition(
-  condition: Record<string, unknown>,
-  ctx: PermissionContext,
-): boolean {
+function evaluateCondition(condition: Record<string, unknown>, ctx: PermissionContext): boolean {
   for (const [key, expected] of Object.entries(condition)) {
     let actual: unknown;
 
@@ -78,12 +68,7 @@ function evaluateCondition(
 /**
  * Check if a specific rule matches the requested resource and action.
  */
-function ruleMatches(
-  rule: PermissionRule,
-  resource: Resource,
-  action: Action,
-  ctx: PermissionContext,
-): boolean {
+function ruleMatches(rule: PermissionRule, resource: Resource, action: Action, ctx: PermissionContext): boolean {
   // Resource match
   if (!wildcardMatch(rule.resource, resource)) return false;
 
@@ -106,12 +91,7 @@ function ruleMatches(
  * If any allow rule matches (and no deny), the result is allowed.
  * Otherwise, denied by default.
  */
-export function evaluatePolicy(
-  policy: RolePolicy,
-  resource: Resource,
-  action: Action,
-  ctx: PermissionContext,
-): PermissionResult {
+export function evaluatePolicy(policy: RolePolicy, resource: Resource, action: Action, ctx: PermissionContext): PermissionResult {
   const denyRules: PermissionRule[] = [];
   const allowRules: PermissionRule[] = [];
 
@@ -156,12 +136,7 @@ export function evaluatePolicy(
  * Org-specific policies are checked first, then system defaults.
  * First match wins (allow or deny).
  */
-export function evaluatePolicies(
-  policies: RolePolicy[],
-  resource: Resource,
-  action: Action,
-  ctx: PermissionContext,
-): PermissionResult {
+export function evaluatePolicies(policies: RolePolicy[], resource: Resource, action: Action, ctx: PermissionContext): PermissionResult {
   // Sort: org-specific first, then system
   const sorted = [...policies].sort((a, b) => {
     if (a.isSystem && !b.isSystem) return 1;
@@ -184,10 +159,7 @@ export function evaluatePolicies(
  * Check backward-compatible flat string permission.
  * Supports both old format ('order.create') and new format ('order:view').
  */
-export function checkLegacyPermission(
-  permissions: string[] | undefined,
-  required: string,
-): boolean {
+export function checkLegacyPermission(permissions: string[] | undefined, required: string): boolean {
   if (!permissions || permissions.length === 0) return false;
   if (permissions.includes('*')) return true;
 

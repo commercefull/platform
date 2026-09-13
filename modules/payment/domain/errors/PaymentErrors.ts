@@ -37,7 +37,9 @@ export class CaptureFailedError extends AppError {
 
 export class TransactionCannotBeVoidedError extends AppError {
   constructor(status: string) {
-    super(`Transaction cannot be voided. Current status: ${status}. Only authorized transactions can be voided.`, 400, { code: 'payment.transaction_cannot_be_voided' });
+    super(`Transaction cannot be voided. Current status: ${status}. Only authorized transactions can be voided.`, 400, {
+      code: 'payment.transaction_cannot_be_voided',
+    });
   }
 }
 
@@ -55,7 +57,9 @@ export class TransactionCannotBeRefundedError extends AppError {
 
 export class RefundAmountExceedsRefundableError extends AppError {
   constructor(amount: number, refundable: number) {
-    super(`Refund amount ($${amount}) exceeds refundable amount ($${refundable})`, 400, { code: 'payment.refund_amount_exceeds_refundable' });
+    super(`Refund amount ($${amount}) exceeds refundable amount ($${refundable})`, 400, {
+      code: 'payment.refund_amount_exceeds_refundable',
+    });
   }
 }
 

@@ -136,9 +136,7 @@ export function configureRoutes(app: Express): void {
     { module: 'content', router: contentCustomerRouter },
     { module: 'product', router: searchCustomerRouter },
   ];
-  const enabledCustomerRouters = customerRouters
-    .filter(r => moduleRegistry.shouldMountRoutes(r.module))
-    .map(r => r.router);
+  const enabledCustomerRouters = customerRouters.filter(r => moduleRegistry.shouldMountRoutes(r.module)).map(r => r.router);
   app.use('/customer', enabledCustomerRouters);
 
   // Business/Merchant API routes — conditionally mounted based on module enabled state
@@ -190,9 +188,7 @@ export function configureRoutes(app: Express): void {
     { module: 'migration', router: migrationBusinessRouter },
     { module: 'integration', router: integrationBusinessRouter },
   ];
-  const enabledBusinessRouters = businessRouters
-    .filter(r => moduleRegistry.shouldMountRoutes(r.module))
-    .map(r => r.router);
+  const enabledBusinessRouters = businessRouters.filter(r => moduleRegistry.shouldMountRoutes(r.module)).map(r => r.router);
   app.use('/business', enabledBusinessRouters);
 
   // Audit middleware — auto-records mutating admin/business actions
@@ -214,10 +210,14 @@ export function configureRoutes(app: Express): void {
   const openApiPath = path.resolve(__dirname, '../docs/generated/openapi.json');
   if (fs.existsSync(openApiPath)) {
     const openApiSpec = JSON.parse(fs.readFileSync(openApiPath, 'utf-8'));
-    app.use('/docs/api', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
-      customCssUrl: undefined,
-      customSiteTitle: 'CommerceFull API',
-    } as swaggerUi.SwaggerUiOptions));
+    app.use(
+      '/docs/api',
+      swaggerUi.serve,
+      swaggerUi.setup(openApiSpec, {
+        customCssUrl: undefined,
+        customSiteTitle: 'CommerceFull API',
+      } as swaggerUi.SwaggerUiOptions),
+    );
   }
 
   // Health check endpoint (before other routes for load balancers)

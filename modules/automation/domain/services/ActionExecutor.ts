@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { RuleAction, ActionType } from '../entities/AutomationRule';
 import { eventBus } from '../../../../libs/events/eventBus';
@@ -110,10 +109,10 @@ registerActionHandler('add_tag', async (action, context) => {
   const customerId = (action.config.customerId as string) || (context.customer?.customerId as string);
   const tag = action.config.tag as string;
   if (customerId && tag) {
-    await query(
-      `UPDATE "customerProfile" SET "tags" = array_prepend($1, "tags") WHERE "customerId" = $2 AND NOT ($1 = ANY("tags"))`,
-      [tag, customerId],
-    );
+    await query(`UPDATE "customerProfile" SET "tags" = array_prepend($1, "tags") WHERE "customerId" = $2 AND NOT ($1 = ANY("tags"))`, [
+      tag,
+      customerId,
+    ]);
   }
   return { actionType: 'add_tag', success: true, output: { customerId, tag } };
 });
@@ -122,14 +121,11 @@ registerActionHandler('remove_tag', async (action, context) => {
   const customerId = (action.config.customerId as string) || (context.customer?.customerId as string);
   const tag = action.config.tag as string;
   if (customerId && tag) {
-    await query(
-      `UPDATE "customerProfile" SET "tags" = array_remove("tags", $1) WHERE "customerId" = $2`,
-      [tag, customerId],
-    );
+    await query(`UPDATE "customerProfile" SET "tags" = array_remove("tags", $1) WHERE "customerId" = $2`, [tag, customerId]);
   }
   return { actionType: 'remove_tag', success: true, output: { customerId, tag } };
 });
 
-registerActionHandler('custom', async (action) => {
+registerActionHandler('custom', async action => {
   return { actionType: 'custom', success: true, output: action.config };
 });

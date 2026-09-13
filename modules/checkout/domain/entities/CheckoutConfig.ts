@@ -14,7 +14,8 @@ import { BadRequestError } from '../../../../libs/errors';
 export type FieldType = 'text' | 'email' | 'tel' | 'number' | 'select' | 'checkbox' | 'radio' | 'textarea' | 'date' | 'hidden';
 export type FieldPosition = 'shipping' | 'billing' | 'payment' | 'contact' | 'custom';
 export type StepType = 'contact' | 'shipping' | 'billing' | 'payment' | 'review' | 'confirmation' | 'custom';
-export type ValidationRule = 'required' | 'optional' | 'email' | 'phone' | 'postalCode' | 'minLength' | 'maxLength' | 'pattern' | 'min' | 'max' | 'custom';
+export type ValidationRule =
+  'required' | 'optional' | 'email' | 'phone' | 'postalCode' | 'minLength' | 'maxLength' | 'pattern' | 'min' | 'max' | 'custom';
 
 export interface CheckoutFieldConfig {
   fieldId: string;
@@ -286,16 +287,36 @@ export class CheckoutConfig {
   }
 
   // Getters
-  get configId(): string { return this.props.configId; }
-  get storeId(): string { return this.props.storeId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get name(): string { return this.props.name; }
-  get steps(): CheckoutStepConfig[] { return this.props.steps; }
-  get behavior(): CheckoutBehaviorConfig { return this.props.behavior; }
-  get isActive(): boolean { return this.props.isActive; }
-  get isDefault(): boolean { return this.props.isDefault; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get configId(): string {
+    return this.props.configId;
+  }
+  get storeId(): string {
+    return this.props.storeId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get steps(): CheckoutStepConfig[] {
+    return this.props.steps;
+  }
+  get behavior(): CheckoutBehaviorConfig {
+    return this.props.behavior;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get isDefault(): boolean {
+    return this.props.isDefault;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Domain methods
 

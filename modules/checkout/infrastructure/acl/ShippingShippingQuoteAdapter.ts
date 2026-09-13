@@ -7,7 +7,10 @@
  */
 
 import { ShippingQuotePort, ShippingOption, ShippingQuoteRequest } from '../../application/ports/ShippingQuotePort';
-import { CalculateShippingRatesUseCase, CalculateShippingRatesCommand } from '../../../shipping/application/useCases/CalculateShippingRates';
+import {
+  CalculateShippingRatesUseCase,
+  CalculateShippingRatesCommand,
+} from '../../../shipping/application/useCases/CalculateShippingRates';
 
 export class ShippingShippingQuoteAdapter implements ShippingQuotePort {
   constructor(private readonly calculateShippingRatesUseCase?: CalculateShippingRatesUseCase) {}

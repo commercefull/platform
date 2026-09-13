@@ -35,7 +35,10 @@ import { stopOutboxDispatcher } from './outboxDispatcher';
 import { registerCheckoutEventHandlers } from '../../modules/checkout/application/eventHandlers';
 import { CheckoutRepository as CheckoutRepo } from '../../modules/checkout/infrastructure';
 import { registerOrderPaymentEventHandlers } from '../../modules/order/application/eventHandlers';
-import { registerTrackingEventHandlers, setConsentRepository } from '../../modules/tracking/application/eventHandlers/trackingEventHandlers';
+import {
+  registerTrackingEventHandlers,
+  setConsentRepository,
+} from '../../modules/tracking/application/eventHandlers/trackingEventHandlers';
 import { moduleRegistry } from '../../boot/moduleManifests';
 import { GdprDataRepository } from '../../modules/gdpr/infrastructure';
 import { integrationRepo, credentialRepo, subscriptionRepo, logRepo } from '../../modules/integration/application/useCases/wired';
@@ -320,7 +323,9 @@ function registerOrderEventHandlers(): void {
           customerId: order.customerId,
         });
 
-        logger.info(`order.paid: pickup fulfillment ${result.fulfillment.fulfillmentId} created for order ${orderId} at ${pickupLocationName}`);
+        logger.info(
+          `order.paid: pickup fulfillment ${result.fulfillment.fulfillmentId} created for order ${orderId} at ${pickupLocationName}`,
+        );
         return;
       }
 
@@ -354,7 +359,20 @@ function registerOrderEventHandlers(): void {
       try {
         const stores = await StoreRepo.findActive();
         const orderRouter = new OrderRouter(
-          { findById: async (id: string) => { const s = stores.find(s => s.storeId === id); return s ? { storeId: s.storeId, name: s.name, canFulfillOnline: s.settings?.allowGuestCheckout ?? true, canPickupInStore: s.settings?.pickup?.enabled ?? false, localDeliveryEnabled: s.settings?.localDelivery?.enabled ?? false } : null; } },
+          {
+            findById: async (id: string) => {
+              const s = stores.find(s => s.storeId === id);
+              return s
+                ? {
+                    storeId: s.storeId,
+                    name: s.name,
+                    canFulfillOnline: s.settings?.allowGuestCheckout ?? true,
+                    canPickupInStore: s.settings?.pickup?.enabled ?? false,
+                    localDeliveryEnabled: s.settings?.localDelivery?.enabled ?? false,
+                  }
+                : null;
+            },
+          },
           {
             getAvailableQuantity: async (_storeId: string, productId: string, variantId?: string) => {
               const avail = await InventoryRepo.checkProductAvailability(productId, variantId, 1);
@@ -433,7 +451,19 @@ function registerOrderEventHandlers(): void {
         orderNumber: order.orderNumber,
         sourceType: fulfillmentSourceType,
         sourceId: fulfillmentSourceId,
-        shipFromAddress: shipFromAddress as { addressLine1: string; city: string; postalCode: string; countryCode: string; firstName?: string; lastName?: string; company?: string; addressLine2?: string; state?: string; phone?: string; email?: string },
+        shipFromAddress: shipFromAddress as {
+          addressLine1: string;
+          city: string;
+          postalCode: string;
+          countryCode: string;
+          firstName?: string;
+          lastName?: string;
+          company?: string;
+          addressLine2?: string;
+          state?: string;
+          phone?: string;
+          email?: string;
+        },
         shipToAddress,
         items: fulfillmentItems,
       });
@@ -949,10 +979,9 @@ function registerPaymentEventHandlers(): void {
 
     try {
       // Find the order from the transaction
-      const orderResult = await query<Array<{ orderId: string }>>(
-        'SELECT "orderId" FROM "paymentTransaction" WHERE "transactionId" = $1',
-        [transactionId],
-      );
+      const orderResult = await query<Array<{ orderId: string }>>('SELECT "orderId" FROM "paymentTransaction" WHERE "transactionId" = $1', [
+        transactionId,
+      ]);
       const orderId = orderResult?.[0]?.orderId;
       if (!orderId) return;
 
@@ -1039,7 +1068,9 @@ function registerProductEventHandlers(): void {
     if (!productId) return;
 
     try {
-      logger.info(`product.updated: product ${productId} updated (fields: ${updatedFields?.join(', ') || 'unknown'}) — cache invalidation and search index update queued`);
+      logger.info(
+        `product.updated: product ${productId} updated (fields: ${updatedFields?.join(', ') || 'unknown'}) — cache invalidation and search index update queued`,
+      );
       // Cache invalidation and search index update would be triggered here
     } catch (err: unknown) {
       logger.error(`product.updated handler error: ${(err as Error).message}`);
@@ -1101,13 +1132,7 @@ function registerWebhookDispatch(): void {
 }
 
 function registerIntegrationDispatcher(): void {
-  const dispatcher = new IntegrationEventDispatcher(
-    eventBus,
-    integrationRepo,
-    credentialRepo,
-    subscriptionRepo,
-    logRepo,
-  );
+  const dispatcher = new IntegrationEventDispatcher(eventBus, integrationRepo, credentialRepo, subscriptionRepo, logRepo);
   dispatcher.register();
   logger.info('Integration event dispatcher registered');
 }

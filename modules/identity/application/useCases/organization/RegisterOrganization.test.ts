@@ -3,7 +3,7 @@ jest.mock('../../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { RegisterOrganizationUseCase} from './RegisterOrganization';
+import { RegisterOrganizationUseCase } from './RegisterOrganization';
 import {
   OrganizationRegistrationFieldsRequiredError,
   InvalidEmailFormatError,
@@ -12,7 +12,9 @@ import {
 } from '../../../domain/errors/IdentityErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('RegisterOrganizationUseCase', () => {
   let useCase: RegisterOrganizationUseCase;
@@ -36,7 +38,9 @@ describe('RegisterOrganizationUseCase', () => {
 
   it('should register organization (happy path)', async () => {
     const result = await useCase.execute({
-      email: 'test@business.com', password: 'password123', businessName: 'Test Biz',
+      email: 'test@business.com',
+      password: 'password123',
+      businessName: 'Test Biz',
     });
 
     expect(result.email).toBe('test@business.com');
@@ -47,20 +51,28 @@ describe('RegisterOrganizationUseCase', () => {
   });
 
   it('should throw OrganizationRegistrationFieldsRequiredError when fields missing', async () => {
-    await expect(useCase.execute({ email: '', password: '', businessName: '' })).rejects.toThrow(OrganizationRegistrationFieldsRequiredError);
+    await expect(useCase.execute({ email: '', password: '', businessName: '' })).rejects.toThrow(
+      OrganizationRegistrationFieldsRequiredError,
+    );
   });
 
   it('should throw InvalidEmailFormatError for bad email', async () => {
-    await expect(useCase.execute({ email: 'notanemail', password: 'password123', businessName: 'Test' })).rejects.toThrow(InvalidEmailFormatError);
+    await expect(useCase.execute({ email: 'notanemail', password: 'password123', businessName: 'Test' })).rejects.toThrow(
+      InvalidEmailFormatError,
+    );
   });
 
   it('should throw PasswordTooShortError for short password', async () => {
-    await expect(useCase.execute({ email: 'test@test.com', password: 'short', businessName: 'Test' })).rejects.toThrow(PasswordTooShortError);
+    await expect(useCase.execute({ email: 'test@test.com', password: 'short', businessName: 'Test' })).rejects.toThrow(
+      PasswordTooShortError,
+    );
   });
 
   it('should throw EmailAlreadyRegisteredError when email exists', async () => {
     mockOrgRepo.findByEmail.mockResolvedValue({ organizationId: 'existing' });
 
-    await expect(useCase.execute({ email: 'test@test.com', password: 'password123', businessName: 'Test' })).rejects.toThrow(EmailAlreadyRegisteredError);
+    await expect(useCase.execute({ email: 'test@test.com', password: 'password123', businessName: 'Test' })).rejects.toThrow(
+      EmailAlreadyRegisteredError,
+    );
   });
 });

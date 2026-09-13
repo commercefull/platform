@@ -4,9 +4,7 @@ import paymentDataRepository from '../../infrastructure/repositories/PaymentData
 const PaymentRepo = paymentDataRepository.payments;
 
 export class ManagePaymentSettingsUseCase {
-  constructor(
-    private readonly paymentRepo: PaymentRepository = PaymentRepo,
-  ) {}
+  constructor(private readonly paymentRepo: PaymentRepository = PaymentRepo) {}
 
   async findAll() {
     return this.paymentRepo.findAllSettings();

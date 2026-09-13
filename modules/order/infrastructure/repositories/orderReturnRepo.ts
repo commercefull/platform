@@ -259,7 +259,7 @@ export class OrderReturnRepo {
    */
   async updateStatus(orderReturnId: string, status: OrderReturnStatus): Promise<OrderReturn | null> {
     const updates: Record<string, string> = { status };
-    const now = unixTimestamp();
+    const now = String(unixTimestamp());
 
     // Set appropriate timestamp based on status
     switch (status) {
@@ -537,10 +537,10 @@ export class OrderReturnRepo {
   }
 
   async findOrderForCustomer(orderId: string, customerId: string): Promise<unknown | null> {
-    return await queryOne<unknown>(
-      `SELECT * FROM "order" WHERE "orderId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL`,
-      [orderId, customerId],
-    );
+    return await queryOne<unknown>(`SELECT * FROM "order" WHERE "orderId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL`, [
+      orderId,
+      customerId,
+    ]);
   }
 
   async findOrderItemsWithProduct(orderId: string): Promise<unknown[]> {

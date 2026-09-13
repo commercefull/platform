@@ -40,7 +40,6 @@ export const listContentPages = async (req: TypedRequest, res: Response): Promis
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createContentPageForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -52,7 +51,6 @@ export const createContentPageForm = async (req: TypedRequest, res: Response): P
     contentTypes,
     templates,
   });
-  
 };
 
 export const createContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -96,7 +94,6 @@ export const createContentPage = async (req: TypedRequest, res: Response): Promi
   const result = await createPageUseCase.execute(command);
 
   res.redirect(`/hub/content/pages/${result.contentPageId}?success=Content page created successfully`);
-  
 };
 
 export const viewContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -122,7 +119,6 @@ export const viewContentPage = async (req: TypedRequest, res: Response): Promise
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editContentPageForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -147,7 +143,6 @@ export const editContentPageForm = async (req: TypedRequest, res: Response): Pro
     contentTypes,
     templates,
   });
-  
 };
 
 export const updateContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -185,12 +180,26 @@ export const updateContentPage = async (req: TypedRequest, res: Response): Promi
   if (accessPassword !== undefined) updates.accessPassword = accessPassword || undefined;
   if (isHomePage !== undefined) updates.isHomePage = isHomePage === 'true';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const command = new UpdatePageCommand(pageId, updates as any);
+  const command = new UpdatePageCommand(
+    pageId,
+    updates.title as string | undefined,
+    updates.slug as string | undefined,
+    updates.templateId as string | undefined,
+    updates.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined,
+    updates.visibility as 'public' | 'private' | 'password_protected' | undefined,
+    updates.summary as string | undefined,
+    updates.featuredImage as string | undefined,
+    updates.metaTitle as string | undefined,
+    updates.metaDescription as string | undefined,
+    updates.metaKeywords as string | undefined,
+    undefined,
+    undefined,
+    undefined,
+    updates.isHomePage as boolean | undefined,
+  );
   await updatePageUseCase.execute(command);
 
   res.redirect(`/hub/content/pages/${pageId}?success=Content page updated successfully`);
-  
 };
 
 export const publishContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -200,7 +209,6 @@ export const publishContentPage = async (req: TypedRequest, res: Response): Prom
   await publishPageUseCase.execute(command);
 
   res.json({ success: true, message: 'Content page published successfully' });
-  
 };
 
 export const deleteContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -213,7 +221,6 @@ export const deleteContentPage = async (req: TypedRequest, res: Response): Promi
   }
 
   res.json({ success: true, message: 'Content page deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -229,7 +236,6 @@ export const listContentTemplates = async (req: TypedRequest, res: Response): Pr
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -246,5 +252,4 @@ export const listContentMedia = async (req: TypedRequest, res: Response): Promis
 
     success: req.query.success || null,
   });
-  
 };

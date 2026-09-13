@@ -237,10 +237,7 @@ export class StoreRepo implements IStoreRepository {
     await query(`UPDATE store SET ${setClauses.join(', ')} WHERE "storeId" = $${paramIndex}`, params);
   }
 
-  async updatePickupSettings(
-    storeId: string,
-    pickupSettings: Record<string, unknown>,
-  ): Promise<Store> {
+  async updatePickupSettings(storeId: string, pickupSettings: Record<string, unknown>): Promise<Store> {
     const row = await queryOne<Record<string, unknown>>(
       `UPDATE store SET "settings" = COALESCE("settings", '{}'::jsonb) || jsonb_build_object('pickup', $1::jsonb), "updatedAt" = $2 WHERE "storeId" = $3 RETURNING *`,
       [JSON.stringify(pickupSettings), new Date().toISOString(), storeId],
@@ -249,10 +246,7 @@ export class StoreRepo implements IStoreRepository {
     return this.mapToStore(row);
   }
 
-  async updateLocalDeliverySettings(
-    storeId: string,
-    deliverySettings: Record<string, unknown>,
-  ): Promise<Store> {
+  async updateLocalDeliverySettings(storeId: string, deliverySettings: Record<string, unknown>): Promise<Store> {
     const row = await queryOne<Record<string, unknown>>(
       `UPDATE store SET "settings" = COALESCE("settings", '{}'::jsonb) || jsonb_build_object('localDelivery', $1::jsonb), "updatedAt" = $2 WHERE "storeId" = $3 RETURNING *`,
       [JSON.stringify(deliverySettings), new Date().toISOString(), storeId],
@@ -367,8 +361,9 @@ export class StoreRepo implements IStoreRepository {
       primaryColor: str(row.primaryColor),
       secondaryColor: str(row.secondaryColor),
       theme: str(row.theme),
-      colorScheme: typeof row.colorScheme === 'string' ? JSON.parse(row.colorScheme) : row.colorScheme as Record<string, string> | undefined,
-      address: typeof row.address === 'string' ? JSON.parse(row.address) : row.address as StoreProps['address'],
+      colorScheme:
+        typeof row.colorScheme === 'string' ? JSON.parse(row.colorScheme) : (row.colorScheme as Record<string, string> | undefined),
+      address: typeof row.address === 'string' ? JSON.parse(row.address) : (row.address as StoreProps['address']),
       isActive: Boolean(row.isActive),
       isVerified: Boolean(row.isVerified),
       isFeatured: Boolean(row.isFeatured),
@@ -377,20 +372,30 @@ export class StoreRepo implements IStoreRepository {
       followerCount: row.followerCount ? parseInt(row.followerCount as string) : undefined,
       productCount: row.productCount ? parseInt(row.productCount as string) : undefined,
       orderCount: row.orderCount ? parseInt(row.orderCount as string) : undefined,
-      storePolicies: typeof row.storePolicies === 'string' ? JSON.parse(row.storePolicies) : row.storePolicies as StoreProps['storePolicies'],
-      shippingMethods: typeof row.shippingMethods === 'string' ? JSON.parse(row.shippingMethods) : row.shippingMethods as string[] | undefined,
-      paymentMethods: typeof row.paymentMethods === 'string' ? JSON.parse(row.paymentMethods) : row.paymentMethods as string[] | undefined,
-      supportedCurrencies: typeof row.supportedCurrencies === 'string' ? JSON.parse(row.supportedCurrencies) : row.supportedCurrencies as string[] | undefined,
+      storePolicies:
+        typeof row.storePolicies === 'string' ? JSON.parse(row.storePolicies) : (row.storePolicies as StoreProps['storePolicies']),
+      shippingMethods:
+        typeof row.shippingMethods === 'string' ? JSON.parse(row.shippingMethods) : (row.shippingMethods as string[] | undefined),
+      paymentMethods:
+        typeof row.paymentMethods === 'string' ? JSON.parse(row.paymentMethods) : (row.paymentMethods as string[] | undefined),
+      supportedCurrencies:
+        typeof row.supportedCurrencies === 'string'
+          ? JSON.parse(row.supportedCurrencies)
+          : (row.supportedCurrencies as string[] | undefined),
       defaultCurrency: str(row.defaultCurrency),
-      settings: typeof row.settings === 'string' ? JSON.parse(row.settings) : row.settings as StoreProps['settings'],
+      settings: typeof row.settings === 'string' ? JSON.parse(row.settings) : (row.settings as StoreProps['settings']),
       metaTitle: str(row.metaTitle),
       metaDescription: str(row.metaDescription),
-      metaKeywords: typeof row.metaKeywords === 'string' ? JSON.parse(row.metaKeywords) : row.metaKeywords as string[] | undefined,
-      socialLinks: typeof row.socialLinks === 'string' ? JSON.parse(row.socialLinks) : row.socialLinks as Record<string, string> | undefined,
-      openingHours: typeof row.openingHours === 'string' ? JSON.parse(row.openingHours) : row.openingHours as Record<string, unknown> | undefined,
-      customPages: typeof row.customPages === 'string' ? JSON.parse(row.customPages) : row.customPages as Record<string, unknown> | undefined,
-      customFields: typeof row.customFields === 'string' ? JSON.parse(row.customFields) : row.customFields as Record<string, unknown> | undefined,
-      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata as Record<string, unknown> | undefined,
+      metaKeywords: typeof row.metaKeywords === 'string' ? JSON.parse(row.metaKeywords) : (row.metaKeywords as string[] | undefined),
+      socialLinks:
+        typeof row.socialLinks === 'string' ? JSON.parse(row.socialLinks) : (row.socialLinks as Record<string, string> | undefined),
+      openingHours:
+        typeof row.openingHours === 'string' ? JSON.parse(row.openingHours) : (row.openingHours as Record<string, unknown> | undefined),
+      customPages:
+        typeof row.customPages === 'string' ? JSON.parse(row.customPages) : (row.customPages as Record<string, unknown> | undefined),
+      customFields:
+        typeof row.customFields === 'string' ? JSON.parse(row.customFields) : (row.customFields as Record<string, unknown> | undefined),
+      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : (row.metadata as Record<string, unknown> | undefined),
       createdAt: new Date(row.createdAt as string),
       updatedAt: new Date(row.updatedAt as string),
     });

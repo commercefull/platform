@@ -28,7 +28,6 @@ export const listCategories = async (req: TypedRequest, res: Response): Promise<
   }
 
   res.json({ success: true, data: categories });
-  
 };
 
 /**
@@ -47,7 +46,6 @@ export const getCategory = async (req: TypedRequest, res: Response): Promise<voi
   }
 
   res.json({ success: true, data: category });
-  
 };
 
 /**
@@ -61,5 +59,4 @@ export const getCategoryChildren = async (req: TypedRequest, res: Response): Pro
   const activeChildren = children.filter(c => c.isActive);
 
   res.json({ success: true, data: activeChildren });
-  
 };

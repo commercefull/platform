@@ -26,15 +26,15 @@ Module manifests are declared in `boot/moduleManifests.ts`:
 
 The registry singleton (`libs/moduleRegistry/registry.ts`) exposes:
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `isEnabled(moduleName)` | `boolean` | Whether the module is active |
-| `shouldMountRoutes(moduleName)` | `boolean` | Whether to mount the module's Express routers |
-| `shouldIncludeGraphQL(moduleName)` | `boolean` | Whether to include the module's GraphQL schema |
+| Method                             | Returns   | Description                                     |
+| ---------------------------------- | --------- | ----------------------------------------------- |
+| `isEnabled(moduleName)`            | `boolean` | Whether the module is active                    |
+| `shouldMountRoutes(moduleName)`    | `boolean` | Whether to mount the module's Express routers   |
+| `shouldIncludeGraphQL(moduleName)` | `boolean` | Whether to include the module's GraphQL schema  |
 | `shouldRegisterEvents(moduleName)` | `boolean` | Whether to register the module's event handlers |
-| `shouldRunMigrations(moduleName)` | `boolean` | Whether to run the module's migrations |
-| `setFeatureFlagProvider(fn)` | `void` | Plug in a DB-backed async flag provider |
-| `reset()` | `void` | Clear all registrations (for tests) |
+| `shouldRunMigrations(moduleName)`  | `boolean` | Whether to run the module's migrations          |
+| `setFeatureFlagProvider(fn)`       | `void`    | Plug in a DB-backed async flag provider         |
+| `reset()`                          | `void`    | Clear all registrations (for tests)             |
 
 ### Boot Sequence
 
@@ -49,10 +49,10 @@ app.ts
 
 ## Required vs Optional Modules
 
-| Requirement | Count | Modules |
-|-------------|-------|---------|
-| **Required** | 6 | `identity`, `order`, `product`, `payment`, `configuration`, `organization` |
-| **Optional** | 36 | All others — can be toggled off |
+| Requirement  | Count | Modules                                                                    |
+| ------------ | ----- | -------------------------------------------------------------------------- |
+| **Required** | 6     | `identity`, `order`, `product`, `payment`, `configuration`, `organization` |
+| **Optional** | 36    | All others — can be toggled off                                            |
 
 Required modules are always loaded and cannot be disabled. Optional modules can be toggled via environment variables or a DB-backed feature flag provider.
 
@@ -79,10 +79,7 @@ For runtime toggling without restarts, plug in an async provider:
 import { moduleRegistry } from './libs/moduleRegistry';
 
 moduleRegistry.setFeatureFlagProvider(async (key: string) => {
-  const result = await queryOne<{ isEnabled: boolean }>(
-    `SELECT "isEnabled" FROM "featureFlag" WHERE "key" = $1`,
-    [key],
-  );
+  const result = await queryOne<{ isEnabled: boolean }>(`SELECT "isEnabled" FROM "featureFlag" WHERE "key" = $1`, [key]);
   return result?.isEnabled ?? true; // default to enabled
 });
 ```

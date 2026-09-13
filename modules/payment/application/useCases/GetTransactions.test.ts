@@ -6,10 +6,23 @@ describe('GetTransactionUseCase', () => {
   let mockRepo: Record<string, jest.Mock>;
 
   const makeTxn = () => ({
-    transactionId: 't1', orderId: 'o1', customerId: 'c1', paymentMethodConfigId: 'pm1', gatewayId: 'gw1',
-    externalTransactionId: 'ext-1', amount: 100, currency: 'USD', status: 'captured',
-    refundedAmount: 0, refundableAmount: 100, isPaid: true, canBeRefunded: true,
-    authorizedAt: new Date(), capturedAt: new Date(), createdAt: new Date(), updatedAt: new Date(),
+    transactionId: 't1',
+    orderId: 'o1',
+    customerId: 'c1',
+    paymentMethodConfigId: 'pm1',
+    gatewayId: 'gw1',
+    externalTransactionId: 'ext-1',
+    amount: 100,
+    currency: 'USD',
+    status: 'captured',
+    refundedAmount: 0,
+    refundableAmount: 100,
+    isPaid: true,
+    canBeRefunded: true,
+    authorizedAt: new Date(),
+    capturedAt: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   beforeEach(() => {
@@ -57,12 +70,28 @@ describe('ListTransactionsUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findAllTransactions: jest.fn().mockResolvedValue({
-        data: [{
-          transactionId: 't1', orderId: 'o1', customerId: 'c1', paymentMethodConfigId: 'pm1', gatewayId: 'gw1',
-          amount: 100, currency: 'USD', status: 'captured', refundedAmount: 0, refundableAmount: 100,
-          isPaid: true, canBeRefunded: true, createdAt: new Date(), updatedAt: new Date(),
-        }],
-        total: 1, limit: 50, offset: 0, hasMore: false,
+        data: [
+          {
+            transactionId: 't1',
+            orderId: 'o1',
+            customerId: 'c1',
+            paymentMethodConfigId: 'pm1',
+            gatewayId: 'gw1',
+            amount: 100,
+            currency: 'USD',
+            status: 'captured',
+            refundedAmount: 0,
+            refundableAmount: 100,
+            isPaid: true,
+            canBeRefunded: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+        total: 1,
+        limit: 50,
+        offset: 0,
+        hasMore: false,
       }),
     };
     useCase = new ListTransactionsUseCase(mockRepo as never);

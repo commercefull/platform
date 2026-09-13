@@ -3,14 +3,20 @@ jest.mock('../../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { ResetCustomerPasswordUseCase} from './ResetCustomerPassword';
+import { ResetCustomerPasswordUseCase } from './ResetCustomerPassword';
 import {
-  EmailRequiredOnlyError, TokenRequiredError, PasswordTooShortError,
-  InvalidOrExpiredTokenError, TokenAlreadyUsedError, TokenExpiredError,
+  EmailRequiredOnlyError,
+  TokenRequiredError,
+  PasswordTooShortError,
+  InvalidOrExpiredTokenError,
+  TokenAlreadyUsedError,
+  TokenExpiredError,
 } from '../../../domain/errors/IdentityErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ResetCustomerPasswordUseCase', () => {
   let useCase: ResetCustomerPasswordUseCase;
@@ -26,7 +32,9 @@ describe('ResetCustomerPasswordUseCase', () => {
     };
     mockPasswordResetRepo = {
       create: jest.fn().mockResolvedValue(undefined),
-      findByToken: jest.fn().mockResolvedValue({ customerId: 'c1', token: 'tok123', expiresAt: new Date(Date.now() + 3600000), used: false }),
+      findByToken: jest
+        .fn()
+        .mockResolvedValue({ customerId: 'c1', token: 'tok123', expiresAt: new Date(Date.now() + 3600000), used: false }),
       markAsUsed: jest.fn().mockResolvedValue(undefined),
     };
     mockAuthService = {
@@ -37,7 +45,10 @@ describe('ResetCustomerPasswordUseCase', () => {
       sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
     };
     useCase = new ResetCustomerPasswordUseCase(
-      mockCustomerRepo as never, mockPasswordResetRepo as never, mockAuthService as never, mockEmailService as never,
+      mockCustomerRepo as never,
+      mockPasswordResetRepo as never,
+      mockAuthService as never,
+      mockEmailService as never,
     );
   });
 
@@ -85,13 +96,23 @@ describe('ResetCustomerPasswordUseCase', () => {
   });
 
   it('should throw TokenAlreadyUsedError when token is used', async () => {
-    mockPasswordResetRepo.findByToken.mockResolvedValue({ customerId: 'c1', token: 'tok123', expiresAt: new Date(Date.now() + 3600000), used: true });
+    mockPasswordResetRepo.findByToken.mockResolvedValue({
+      customerId: 'c1',
+      token: 'tok123',
+      expiresAt: new Date(Date.now() + 3600000),
+      used: true,
+    });
 
     await expect(useCase.resetPassword({ token: 'tok123', newPassword: 'newpass123' })).rejects.toThrow(TokenAlreadyUsedError);
   });
 
   it('should throw TokenExpiredError when token is expired', async () => {
-    mockPasswordResetRepo.findByToken.mockResolvedValue({ customerId: 'c1', token: 'tok123', expiresAt: new Date(Date.now() - 3600000), used: false });
+    mockPasswordResetRepo.findByToken.mockResolvedValue({
+      customerId: 'c1',
+      token: 'tok123',
+      expiresAt: new Date(Date.now() - 3600000),
+      used: false,
+    });
 
     await expect(useCase.resetPassword({ token: 'tok123', newPassword: 'newpass123' })).rejects.toThrow(TokenExpiredError);
   });

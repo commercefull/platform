@@ -3,10 +3,12 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { CreateShippingZoneUseCase} from './CreateShippingZone';
+import { CreateShippingZoneUseCase } from './CreateShippingZone';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CreateShippingZoneUseCase', () => {
   let useCase: CreateShippingZoneUseCase;

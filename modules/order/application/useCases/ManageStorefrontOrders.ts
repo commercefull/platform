@@ -7,9 +7,7 @@ const orderRepo = orderDataRepository.commands;
 const orderReturnRepo = orderFulfillmentDataRepository.returns;
 
 export class GetOrderUseCase {
-  constructor(
-    private readonly orders: OrderRepository = orderRepo,
-  ) {}
+  constructor(private readonly orders: OrderRepository = orderRepo) {}
 
   async findById(id: string) {
     return this.orders.findById(id);
@@ -38,9 +36,7 @@ export class GetOrderUseCase {
 }
 
 export class ManageOrderReturnsUseCase {
-  constructor(
-    private readonly returns: OrderReturnRepository = orderReturnRepo,
-  ) {}
+  constructor(private readonly returns: OrderReturnRepository = orderReturnRepo) {}
 
   async findByCustomerId(customerId: string, limit?: number, offset?: number) {
     return this.returns.findByCustomerId(customerId, limit, offset);

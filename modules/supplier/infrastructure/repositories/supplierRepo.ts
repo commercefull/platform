@@ -5,16 +5,11 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
-import {
-  SupplierCodeAlreadyExistsError,
-  FailedToCreateSupplierError,
-  SupplierValidationError,
-} from '../../domain/errors/SupplierErrors';
+import { SupplierCodeAlreadyExistsError, FailedToCreateSupplierError, SupplierValidationError } from '../../domain/errors/SupplierErrors';
 
 // ============================================================================
 // Table Constants
 // ============================================================================
-
 
 // ============================================================================
 // Types

@@ -1,4 +1,4 @@
-import { CreateMembershipTierUseCase} from './CreateMembershipTier';
+import { CreateMembershipTierUseCase } from './CreateMembershipTier';
 import { MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
 describe('CreateMembershipTierUseCase', () => {
@@ -9,7 +9,12 @@ describe('CreateMembershipTierUseCase', () => {
     mockRepo = {
       findTierByLevel: jest.fn().mockResolvedValue(null),
       createTier: jest.fn().mockResolvedValue({
-        tierId: 't1', name: 'Gold', level: 1, price: 50, benefits: [{ type: 'discount', value: 10 }], createdAt: new Date(),
+        tierId: 't1',
+        name: 'Gold',
+        level: 1,
+        price: 50,
+        benefits: [{ type: 'discount', value: 10 }],
+        createdAt: new Date(),
       }),
     };
     useCase = new CreateMembershipTierUseCase(mockRepo as never);

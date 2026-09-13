@@ -1,10 +1,5 @@
 import { AxiosInstance } from 'axios';
-import {
-  setupWarehouseTests,
-  cleanupWarehouseTests,
-  createTestWarehouse,
-  SEEDED_WAREHOUSE_IDS,
-} from './testUtils';
+import { setupWarehouseTests, cleanupWarehouseTests, createTestWarehouse, SEEDED_WAREHOUSE_IDS } from './testUtils';
 import { expectStatus } from '../testUtils';
 
 describe('Warehouse Feature Tests', () => {
@@ -173,27 +168,39 @@ describe('Warehouse Feature Tests', () => {
 
   describe('Warehouse Status Management', () => {
     it('should activate a warehouse', async () => {
-      const response = await client.post(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.RETURNS}/activate`, {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/warehouses/${SEEDED_WAREHOUSE_IDS.RETURNS}/activate`,
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 200);
       expect(response.data.success).toBe(true);
     });
 
     it('should deactivate a warehouse', async () => {
-      const response = await client.post(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.RETURNS}/deactivate`, {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/warehouses/${SEEDED_WAREHOUSE_IDS.RETURNS}/deactivate`,
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 200);
       expect(response.data.success).toBe(true);
     });
 
     it('should set default warehouse', async () => {
-      const response = await client.post(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.RETURNS}/default`, {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/warehouses/${SEEDED_WAREHOUSE_IDS.RETURNS}/default`,
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 200);
     });

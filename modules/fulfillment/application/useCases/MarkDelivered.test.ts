@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { MarkDeliveredUseCase} from './MarkDelivered';
+import { MarkDeliveredUseCase } from './MarkDelivered';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 
 jest.mock('../../domain/events/FulfillmentEvents', () => ({
@@ -20,7 +20,9 @@ describe('MarkDeliveredUseCase', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFulfillment = {
-      fulfillmentId: 'f1', orderId: 'o1', deliveredAt: new Date(),
+      fulfillmentId: 'f1',
+      orderId: 'o1',
+      deliveredAt: new Date(),
       markDelivered: jest.fn(),
     };
     mockRepo = {

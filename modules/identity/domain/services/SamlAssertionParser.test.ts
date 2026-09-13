@@ -86,10 +86,7 @@ describe('SamlAssertionParser', () => {
     });
 
     it('should fall back to nameId if email attribute is missing', () => {
-      const xmlNoEmail = samlXml.replace(
-        /<saml:Attribute Name="email">[\s\S]*?<\/saml:Attribute>/,
-        '',
-      );
+      const xmlNoEmail = samlXml.replace(/<saml:Attribute Name="email">[\s\S]*?<\/saml:Attribute>/, '');
       const base64NoEmail = Buffer.from(xmlNoEmail).toString('base64');
       const assertion = parser.parse(base64NoEmail, provider);
       const userInfo = parser.mapToUserInfo(assertion, provider.attributeMapping);

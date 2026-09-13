@@ -173,10 +173,9 @@ export class NotificationRepo {
   }
 
   async findUnsent(limit: number = 50): Promise<Notification[]> {
-    const results = await query<Notification[]>(
-      'SELECT * FROM notification WHERE "sentAt" IS NULL ORDER BY "createdAt" ASC LIMIT $1',
-      [limit],
-    );
+    const results = await query<Notification[]>('SELECT * FROM notification WHERE "sentAt" IS NULL ORDER BY "createdAt" ASC LIMIT $1', [
+      limit,
+    ]);
     return results || [];
   }
 }

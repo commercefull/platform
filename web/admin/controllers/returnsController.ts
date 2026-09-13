@@ -77,7 +77,8 @@ export const createReturnForm = async (req: TypedRequest, res: Response): Promis
 export const createReturn = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const body = req.body as RequestBody;
-    const { orderId, customerId, returnType, returnReason, customerNotes, returnCarrier, returnShippingPaid, requiresInspection, items } = body;
+    const { orderId, customerId, returnType, returnReason, customerNotes, returnCarrier, returnShippingPaid, requiresInspection, items } =
+      body;
 
     const parsedItems = typeof items === 'string' ? JSON.parse(items) : items;
 
@@ -159,8 +160,16 @@ export const completeInspection = async (req: TypedRequest, res: Response): Prom
   try {
     const { returnId } = req.params;
     const body = req.body as RequestBody;
-    const passedItems = body?.passedItems ? (typeof body.passedItems === 'string' ? JSON.parse(body.passedItems) : body.passedItems) : undefined;
-    const failedItems = body?.failedItems ? (typeof body.failedItems === 'string' ? JSON.parse(body.failedItems) : body.failedItems) : undefined;
+    const passedItems = body?.passedItems
+      ? typeof body.passedItems === 'string'
+        ? JSON.parse(body.passedItems)
+        : body.passedItems
+      : undefined;
+    const failedItems = body?.failedItems
+      ? typeof body.failedItems === 'string'
+        ? JSON.parse(body.failedItems)
+        : body.failedItems
+      : undefined;
     await completeReturnInspectionUseCase.execute(returnId, passedItems, failedItems);
     res.redirect(`/admin/returns/${returnId}?success=Inspection completed`);
   } catch (error: unknown) {

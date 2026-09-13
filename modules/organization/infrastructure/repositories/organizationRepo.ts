@@ -39,7 +39,9 @@ type OrganizationAddressCreateParams = Partial<Omit<OrganizationAddress, 'organi
   country: string;
 };
 
-type OrganizationPaymentInfoCreateParams = Partial<Omit<OrganizationPaymentInfo, 'organizationPaymentInfoId' | 'createdAt' | 'updatedAt'>> & {
+type OrganizationPaymentInfoCreateParams = Partial<
+  Omit<OrganizationPaymentInfo, 'organizationPaymentInfoId' | 'createdAt' | 'updatedAt'>
+> & {
   organizationId: string;
   paymentType: string;
   currency: string;
@@ -68,7 +70,10 @@ export class OrganizationRepo {
   }
 
   async findByStatus(status: string, limit: number = 50): Promise<Organization[]> {
-    const results = await query<Organization[]>('SELECT * FROM "organization" WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2', [status, limit]);
+    const results = await query<Organization[]>('SELECT * FROM "organization" WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2', [
+      status,
+      limit,
+    ]);
     return results || [];
   }
 
@@ -198,9 +203,10 @@ export class OrganizationRepo {
   // ============================================================================
 
   async findAddressesByOrganizationId(organizationId: string): Promise<OrganizationAddress[]> {
-    const results = await query<OrganizationAddress[]>('SELECT * FROM "organizationAddress" WHERE "organizationId" = $1 ORDER BY "isDefault" DESC', [
-      organizationId,
-    ]);
+    const results = await query<OrganizationAddress[]>(
+      'SELECT * FROM "organizationAddress" WHERE "organizationId" = $1 ORDER BY "isDefault" DESC',
+      [organizationId],
+    );
     return results || [];
   }
 
@@ -212,10 +218,10 @@ export class OrganizationRepo {
     const now = new Date();
 
     if (params.isDefault) {
-      await query('UPDATE "organizationAddress" SET "isDefault" = false, "updatedAt" = $1 WHERE "organizationId" = $2 AND "isDefault" = true', [
-        now,
-        params.organizationId,
-      ]);
+      await query(
+        'UPDATE "organizationAddress" SET "isDefault" = false, "updatedAt" = $1 WHERE "organizationId" = $2 AND "isDefault" = true',
+        [now, params.organizationId],
+      );
     }
 
     const result = await queryOne<OrganizationAddress>(
@@ -390,7 +396,11 @@ export class OrganizationRepo {
   }
 
   async updateLastLogin(organizationId: string): Promise<void> {
-    await query('UPDATE "organization" SET "lastLoginAt" = $1, "updatedAt" = $2 WHERE "organizationId" = $3', [new Date(), new Date(), organizationId]);
+    await query('UPDATE "organization" SET "lastLoginAt" = $1, "updatedAt" = $2 WHERE "organizationId" = $3', [
+      new Date(),
+      new Date(),
+      organizationId,
+    ]);
   }
 
   private generateSlug(name: string): string {

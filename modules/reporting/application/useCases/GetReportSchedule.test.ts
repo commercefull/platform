@@ -3,9 +3,16 @@ jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
   default: {
     schedules: {
       findScheduleById: jest.fn().mockResolvedValue({
-        reportScheduleId: 'rs1', name: 'Weekly Sales', reportType: 'sales_summary',
-        frequency: 'weekly', recipients: [], parameters: {}, format: 'pdf',
-        isActive: true, createdAt: new Date(), updatedAt: new Date(),
+        reportScheduleId: 'rs1',
+        name: 'Weekly Sales',
+        reportType: 'sales_summary',
+        frequency: 'weekly',
+        recipients: [],
+        parameters: {},
+        format: 'pdf',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }),
     },
     executions: {},

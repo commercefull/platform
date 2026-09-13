@@ -1,11 +1,7 @@
 import { Vendor, VendorTier, VendorAddress, VendorBankInfo } from '../../domain/entities/Vendor';
 import { CommissionRule, CommissionType, CommissionScope, CommissionTier } from '../../domain/entities/CommissionRule';
 import { VendorPayout, PayoutMethod, PayoutLineItem } from '../../domain/entities/VendorPayout';
-import {
-  VendorRepository,
-  CommissionRuleRepository,
-  VendorPayoutRepository,
-} from '../../domain/repositories/MarketplaceRepository';
+import { VendorRepository, CommissionRuleRepository, VendorPayoutRepository } from '../../domain/repositories/MarketplaceRepository';
 import {
   VendorNotFoundError,
   VendorAlreadyExistsError,
@@ -41,7 +37,11 @@ export class ManageVendorUseCase {
 
     const vendor = Vendor.create(input);
     await this.vendorRepo.save(vendor);
-    await eventBus.emit('marketplace.vendor.registered', { vendorId: vendor.vendorId, organizationId: vendor.organizationId, name: vendor.name });
+    await eventBus.emit('marketplace.vendor.registered', {
+      vendorId: vendor.vendorId,
+      organizationId: vendor.organizationId,
+      name: vendor.name,
+    });
     logger.info('Vendor created', { vendorId: vendor.vendorId, name: vendor.name });
     return vendor;
   }
@@ -60,16 +60,19 @@ export class ManageVendorUseCase {
     return this.vendorRepo.findByStatus(status, organizationId);
   }
 
-  async updateProfile(vendorId: string, updates: {
-    name?: string;
-    legalName?: string;
-    taxId?: string;
-    email?: string;
-    phone?: string;
-    website?: string;
-    logoUrl?: string;
-    description?: string;
-  }): Promise<Vendor> {
+  async updateProfile(
+    vendorId: string,
+    updates: {
+      name?: string;
+      legalName?: string;
+      taxId?: string;
+      email?: string;
+      phone?: string;
+      website?: string;
+      logoUrl?: string;
+      description?: string;
+    },
+  ): Promise<Vendor> {
     const vendor = await this.get(vendorId);
     vendor.updateProfile(updates);
     await this.vendorRepo.save(vendor);
@@ -238,7 +241,13 @@ export class ManageCommissionRuleUseCase {
     await this.ruleRepo.delete(rule.ruleId);
   }
 
-  async calculateCommission(organizationId: string, vendorId: string, amount: number, categoryId?: string, productId?: string): Promise<number> {
+  async calculateCommission(
+    organizationId: string,
+    vendorId: string,
+    amount: number,
+    categoryId?: string,
+    productId?: string,
+  ): Promise<number> {
     const rules = await this.ruleRepo.findActiveByOrganizationId(organizationId);
     const applicable = rules
       .filter(r => {
@@ -278,7 +287,11 @@ export class ManagePayoutUseCase {
 
     const payout = VendorPayout.create(input);
     await this.payoutRepo.save(payout);
-    await eventBus.emit('marketplace.payout.created', { payoutId: payout.payoutId, vendorId: payout.vendorId, netAmount: payout.netAmount });
+    await eventBus.emit('marketplace.payout.created', {
+      payoutId: payout.payoutId,
+      vendorId: payout.vendorId,
+      netAmount: payout.netAmount,
+    });
     return payout;
   }
 
@@ -325,7 +338,11 @@ export class ManagePayoutUseCase {
       vendor.recordPayout(payout.netAmount);
       await this.vendorRepo.save(vendor);
     }
-    await eventBus.emit('marketplace.payout.completed', { payoutId: payout.payoutId, vendorId: payout.vendorId, netAmount: payout.netAmount });
+    await eventBus.emit('marketplace.payout.completed', {
+      payoutId: payout.payoutId,
+      vendorId: payout.vendorId,
+      netAmount: payout.netAmount,
+    });
     return payout;
   }
 

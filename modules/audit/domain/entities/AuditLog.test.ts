@@ -26,13 +26,16 @@ describe('AuditLog entity', () => {
 
     it('should chain to previous hash when provided', () => {
       const prevHash = 'abc123def456';
-      const entry = AuditLog.create({
-        actorId: 'user-2',
-        actorType: 'organization',
-        action: 'order.refund',
-        resourceType: 'order',
-        resourceId: 'ord-1',
-      }, prevHash);
+      const entry = AuditLog.create(
+        {
+          actorId: 'user-2',
+          actorType: 'organization',
+          action: 'order.refund',
+          resourceType: 'order',
+          resourceId: 'ord-1',
+        },
+        prevHash,
+      );
 
       expect(entry.previousHash).toBe(prevHash);
       expect(entry.hash).not.toBe(prevHash);

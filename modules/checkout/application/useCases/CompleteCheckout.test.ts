@@ -79,9 +79,7 @@ describe('CompleteCheckoutUseCase', () => {
     const repo = createMockCheckoutRepo(null);
     const useCase = new CompleteCheckoutUseCase(repo);
 
-    await expect(
-      useCase.execute(new CompleteCheckoutCommand('nonexistent')),
-    ).rejects.toThrow(NotFoundError);
+    await expect(useCase.execute(new CompleteCheckoutCommand('nonexistent'))).rejects.toThrow(NotFoundError);
   });
 
   it('should throw BadRequestError when session is still active', async () => {
@@ -89,9 +87,7 @@ describe('CompleteCheckoutUseCase', () => {
     const repo = createMockCheckoutRepo(session);
     const useCase = new CompleteCheckoutUseCase(repo);
 
-    await expect(
-      useCase.execute(new CompleteCheckoutCommand('cs-1')),
-    ).rejects.toThrow(BadRequestError);
+    await expect(useCase.execute(new CompleteCheckoutCommand('cs-1'))).rejects.toThrow(BadRequestError);
   });
 
   it('should throw NotFoundError when linked order not found', async () => {
@@ -102,9 +98,7 @@ describe('CompleteCheckoutUseCase', () => {
     const orderPort = createMockOrderPort(null);
     const useCase = new CompleteCheckoutUseCase(repo, orderPort);
 
-    await expect(
-      useCase.execute(new CompleteCheckoutCommand('cs-1')),
-    ).rejects.toThrow(NotFoundError);
+    await expect(useCase.execute(new CompleteCheckoutCommand('cs-1'))).rejects.toThrow(NotFoundError);
   });
 
   it('should throw BadRequestError when order is not processing/paid', async () => {
@@ -120,8 +114,6 @@ describe('CompleteCheckoutUseCase', () => {
     });
     const useCase = new CompleteCheckoutUseCase(repo, orderPort);
 
-    await expect(
-      useCase.execute(new CompleteCheckoutCommand('cs-1')),
-    ).rejects.toThrow(BadRequestError);
+    await expect(useCase.execute(new CompleteCheckoutCommand('cs-1'))).rejects.toThrow(BadRequestError);
   });
 });

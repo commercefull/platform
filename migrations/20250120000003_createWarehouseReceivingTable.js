@@ -9,7 +9,11 @@ exports.up = async function (knex) {
 
   await knex.schema.createTable('warehouseReceiving', t => {
     t.uuid('warehouseReceivingId').primary().defaultTo(knex.raw('uuidv7()'));
-    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
+    t.uuid('distributionWarehouseId')
+      .notNullable()
+      .references('distributionWarehouseId')
+      .inTable('distributionWarehouse')
+      .onDelete('CASCADE');
     t.string('receiptNumber', 50).notNullable().unique();
     t.string('sourceType').notNullable(); // purchase_order, transfer, return, adjustment
     t.string('sourceId');

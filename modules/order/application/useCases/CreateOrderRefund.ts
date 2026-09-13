@@ -9,7 +9,11 @@ import { OrderQueryRepository, OrderPaymentRefund, OrderPaymentRefundStatus } fr
 import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
 
 const orderQueryRepo = orderDataRepository.queries;
-import { OrderPaymentNotFoundError, RefundAmountMustBePositiveError, RefundExceedsRefundableBalanceError } from '../../domain/errors/OrderErrors';
+import {
+  OrderPaymentNotFoundError,
+  RefundAmountMustBePositiveError,
+  RefundExceedsRefundableBalanceError,
+} from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Command
@@ -48,9 +52,7 @@ export interface CreateOrderRefundResponse {
 // ============================================================================
 
 export class CreateOrderRefundUseCase {
-  constructor(
-    private readonly queryRepo: OrderQueryRepository = orderQueryRepo,
-  ) {}
+  constructor(private readonly queryRepo: OrderQueryRepository = orderQueryRepo) {}
 
   async execute(command: CreateOrderRefundCommand): Promise<CreateOrderRefundResponse> {
     const payment = await this.queryRepo.findPaymentById(command.orderPaymentId);

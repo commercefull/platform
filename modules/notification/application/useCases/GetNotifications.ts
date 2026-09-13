@@ -69,7 +69,7 @@ export class GetNotificationsUseCase {
     ]);
 
     return {
-      notifications: notifications.map((n) => ({
+      notifications: notifications.map(n => ({
         notificationId: n.notificationId,
         channel: n.channel,
         subject: n.subject,

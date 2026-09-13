@@ -25,9 +25,13 @@ export const reportingResolvers = {
   },
 
   Mutation: {
-    generateReport: async (_parent: unknown, args: {
-      input: { reportType: string; parameters: Record<string, unknown> };
-    }, context: GraphQLAuthContext) => {
+    generateReport: async (
+      _parent: unknown,
+      args: {
+        input: { reportType: string; parameters: Record<string, unknown> };
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new GenerateReportUseCase();
       const result = await useCase.execute({
@@ -42,17 +46,21 @@ export const reportingResolvers = {
       };
     },
 
-    createReportSchedule: async (_parent: unknown, args: {
-      input: {
-        organizationId?: string;
-        name: string;
-        reportType: string;
-        frequency: string;
-        parameters?: Record<string, unknown>;
-        recipients?: string[];
-        format?: string;
-      };
-    }, context: GraphQLAuthContext) => {
+    createReportSchedule: async (
+      _parent: unknown,
+      args: {
+        input: {
+          organizationId?: string;
+          name: string;
+          reportType: string;
+          frequency: string;
+          parameters?: Record<string, unknown>;
+          recipients?: string[];
+          format?: string;
+        };
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new CreateReportScheduleUseCase();
       const result = await useCase.execute({

@@ -41,7 +41,6 @@ export const viewBasket = async (req: TypedRequest, res: Response): Promise<void
     pageName: 'Shopping Cart',
     basket: { ...basket, totals },
   });
-  
 };
 
 // ============================================================================
@@ -116,7 +115,6 @@ export const updateBasketItem = async (req: TypedRequest, res: Response): Promis
   } else {
     res.redirect('/basket?success=' + encodeURIComponent('Cart updated'));
   }
-  
 };
 
 // ============================================================================
@@ -139,7 +137,6 @@ export const removeFromBasket = async (req: TypedRequest, res: Response): Promis
   } else {
     res.redirect('/basket?success=' + encodeURIComponent('Item removed from cart'));
   }
-  
 };
 
 // ============================================================================
@@ -161,7 +158,6 @@ export const clearBasket = async (req: TypedRequest, res: Response): Promise<voi
   } else {
     res.redirect('/basket?success=' + encodeURIComponent('Cart cleared'));
   }
-  
 };
 
 // ============================================================================
@@ -173,7 +169,11 @@ async function calculateBasketTotals(basket: Record<string, unknown>, user: Reco
   const subtotal =
     typeof basket.subtotal === 'number'
       ? basket.subtotal
-      : basketItems?.reduce((sum: number, item: Record<string, unknown>) => sum + ((item.lineTotal as number) ?? (item.unitPrice as number) * (item.quantity as number)), 0) || 0;
+      : basketItems?.reduce(
+          (sum: number, item: Record<string, unknown>) =>
+            sum + ((item.lineTotal as number) ?? (item.unitPrice as number) * (item.quantity as number)),
+          0,
+        ) || 0;
 
   // Use a default US address for basket tax calculation (will be recalculated at checkout with actual address)
   const defaultAddress = {

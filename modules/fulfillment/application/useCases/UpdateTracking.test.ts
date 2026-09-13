@@ -7,7 +7,9 @@ import { UpdateTrackingUseCase, UpdateTrackingCommand } from './UpdateTracking';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('UpdateTrackingUseCase', () => {
   let useCase: UpdateTrackingUseCase;
@@ -16,7 +18,8 @@ describe('UpdateTrackingUseCase', () => {
 
   beforeEach(() => {
     mockFulfillment = {
-      fulfillmentId: 'f1', orderId: 'o1',
+      fulfillmentId: 'f1',
+      orderId: 'o1',
       updateTracking: jest.fn(),
     };
     mockRepo = {

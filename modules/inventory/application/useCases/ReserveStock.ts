@@ -65,9 +65,7 @@ interface ReserveStockRepositoryPort {
 }
 
 export class ReserveStockUseCase {
-  constructor(
-    private readonly inventoryRepository: ReserveStockRepositoryPort,
-  ) {}
+  constructor(private readonly inventoryRepository: ReserveStockRepositoryPort) {}
 
   async execute(input: ReserveStockInput): Promise<ReserveStockOutput> {
     const reservationId = this.generateReservationId();

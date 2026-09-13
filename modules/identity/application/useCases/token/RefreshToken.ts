@@ -2,7 +2,14 @@
  * RefreshToken Use Case
  */
 
-import { RefreshTokenRequiredError, InvalidRefreshTokenError, RefreshTokenRevokedError, RefreshTokenExpiredError, AccountNotActiveError, InvalidTokenRecordError } from '../../../domain/errors/IdentityErrors';
+import {
+  RefreshTokenRequiredError,
+  InvalidRefreshTokenError,
+  RefreshTokenRevokedError,
+  RefreshTokenExpiredError,
+  AccountNotActiveError,
+  InvalidTokenRecordError,
+} from '../../../domain/errors/IdentityErrors';
 
 export interface RefreshTokenInput {
   refreshToken: string;

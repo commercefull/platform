@@ -5,17 +5,7 @@
  */
 
 export type IntegrationProvider =
-  | 'mailchimp'
-  | 'klaviyo'
-  | 'hubspot'
-  | 'sendgrid'
-  | 'quickbooks'
-  | 'xero'
-  | 'stripe'
-  | 'slack'
-  | 'zapier'
-  | 'custom'
-  | string;
+  'mailchimp' | 'klaviyo' | 'hubspot' | 'sendgrid' | 'quickbooks' | 'xero' | 'stripe' | 'slack' | 'zapier' | 'custom' | string;
 
 export type IntegrationStatus = 'active' | 'inactive' | 'error' | 'pending';
 
@@ -71,18 +61,42 @@ export class Integration {
     return new Integration(props);
   }
 
-  get integrationId(): string { return this.props.integrationId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get name(): string { return this.props.name; }
-  get provider(): IntegrationProvider { return this.props.provider; }
-  get status(): IntegrationStatus { return this.props.status; }
-  get description(): string | null { return this.props.description; }
-  get webhookUrl(): string | null { return this.props.webhookUrl; }
-  get config(): Record<string, unknown> { return this.props.config; }
-  get lastSyncAt(): Date | null { return this.props.lastSyncAt; }
-  get lastError(): string | null { return this.props.lastError; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get integrationId(): string {
+    return this.props.integrationId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get provider(): IntegrationProvider {
+    return this.props.provider;
+  }
+  get status(): IntegrationStatus {
+    return this.props.status;
+  }
+  get description(): string | null {
+    return this.props.description;
+  }
+  get webhookUrl(): string | null {
+    return this.props.webhookUrl;
+  }
+  get config(): Record<string, unknown> {
+    return this.props.config;
+  }
+  get lastSyncAt(): Date | null {
+    return this.props.lastSyncAt;
+  }
+  get lastError(): string | null {
+    return this.props.lastError;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   activate(): void {
     this.props.status = 'active';

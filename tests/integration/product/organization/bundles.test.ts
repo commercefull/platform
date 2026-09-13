@@ -10,9 +10,6 @@ import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../../testUtils';
 import { SEEDED_BUNDLE_1_ID, SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID, SEEDED_PRODUCT_3_ID } from '../testUtils';
 
-;
-;
-
 describe('Bundle Management', () => {
   let client: AxiosInstance;
   let adminToken: string;
@@ -26,9 +23,7 @@ describe('Bundle Management', () => {
 
   afterAll(async () => {
     if (createdBundleId) {
-      await client
-        .delete(`/business/bundles/${createdBundleId}`, { headers: { Authorization: `Bearer ${adminToken}` } })
-        .catch(() => {});
+      await client.delete(`/business/bundles/${createdBundleId}`, { headers: { Authorization: `Bearer ${adminToken}` } }).catch(() => {});
     }
   });
 
@@ -119,10 +114,9 @@ describe('Bundle Management', () => {
 
     it('should delete a bundle item', async () => {
       if (!createdBundleId || !createdBundleItemId) return;
-      const res = await client.delete(
-        `/business/bundles/${createdBundleId}/items/${createdBundleItemId}`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.delete(`/business/bundles/${createdBundleId}/items/${createdBundleItemId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
       createdBundleItemId = null;
@@ -188,8 +182,7 @@ describe('Bundle Management', () => {
       );
       // If product already has a bundle, create may return 400 — skip in that case
       if (createRes.status !== 201) return;
-      const bundleId =
-        createRes.data.data?.productBundleId || createRes.data.data?.bundleId || createRes.data.data?.id;
+      const bundleId = createRes.data.data?.productBundleId || createRes.data.data?.bundleId || createRes.data.data?.id;
 
       // Add an item to the bundle
       const itemRes = await client.post(

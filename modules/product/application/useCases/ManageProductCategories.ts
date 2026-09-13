@@ -1,4 +1,9 @@
-import type { ProductCategoryRow, ProductCategoryCreateParams, ProductCategoryUpdateParams, ProductCategoryPort } from '../../domain/repositories/ProductCatalogPorts';
+import type {
+  ProductCategoryRow,
+  ProductCategoryCreateParams,
+  ProductCategoryUpdateParams,
+  ProductCategoryPort,
+} from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageProductCategoriesUseCase {
   constructor(private readonly productCategoryRepo: ProductCategoryPort) {}

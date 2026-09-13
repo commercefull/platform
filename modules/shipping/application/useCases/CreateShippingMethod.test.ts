@@ -3,11 +3,13 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { CreateShippingMethodUseCase} from './CreateShippingMethod';
+import { CreateShippingMethodUseCase } from './CreateShippingMethod';
 import { ShippingValidationError } from '../../domain/errors/ShippingErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CreateShippingMethodUseCase', () => {
   let useCase: CreateShippingMethodUseCase;
@@ -23,7 +25,10 @@ describe('CreateShippingMethodUseCase', () => {
 
   it('should create shipping method (happy path)', async () => {
     const result = await useCase.execute({
-      name: 'Standard Shipping', code: 'std', type: 'flat_rate' as never, basePrice: 9.99,
+      name: 'Standard Shipping',
+      code: 'std',
+      type: 'flat_rate' as never,
+      basePrice: 9.99,
     });
 
     expect(result.shippingMethod.name).toBe('Standard Shipping');
@@ -33,8 +38,13 @@ describe('CreateShippingMethodUseCase', () => {
   it('should throw ShippingValidationError when code already exists', async () => {
     mockRepo.findMethodByCode.mockResolvedValue({ shippingMethodId: 'existing', code: 'std' });
 
-    await expect(useCase.execute({
-      name: 'Test', code: 'std', type: 'flat_rate' as never, basePrice: 5,
-    })).rejects.toThrow(ShippingValidationError);
+    await expect(
+      useCase.execute({
+        name: 'Test',
+        code: 'std',
+        type: 'flat_rate' as never,
+        basePrice: 5,
+      }),
+    ).rejects.toThrow(ShippingValidationError);
   });
 });

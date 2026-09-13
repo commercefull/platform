@@ -9,9 +9,6 @@ import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID } from '../testUtils';
 
-;
-;
-
 describe('Collections & Product Lists', () => {
   let client: AxiosInstance;
   let adminToken: string;
@@ -36,21 +33,13 @@ describe('Collections & Product Lists', () => {
 
   describe('Collections', () => {
     it('should reject creation without name', async () => {
-      const res = await client.post(
-        '/business/collections',
-        { slug: 'no-name' },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.post('/business/collections', { slug: 'no-name' }, { headers: { Authorization: `Bearer ${adminToken}` } });
       expect(res.status).toBe(400);
       expect(res.data.success).toBe(false);
     });
 
     it('should reject creation without slug', async () => {
-      const res = await client.post(
-        '/business/collections',
-        { name: 'No Slug' },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.post('/business/collections', { name: 'No Slug' }, { headers: { Authorization: `Bearer ${adminToken}` } });
       expect(res.status).toBe(400);
       expect(res.data.success).toBe(false);
     });
@@ -62,18 +51,13 @@ describe('Collections & Product Lists', () => {
           name: `Test Collection ${Date.now()}`,
           slug: `test-col-${Date.now()}`,
           isActive: true,
-          addProducts: [
-            { productId: SEEDED_PRODUCT_1_ID, position: 0 },
-          ],
+          addProducts: [{ productId: SEEDED_PRODUCT_1_ID, position: 0 }],
         },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       expect(res.status).toBe(201);
       expect(res.data.success).toBe(true);
-      createdCollectionId =
-        res.data.data?.collection?.productCollectionId ||
-        res.data.data?.productCollectionId ||
-        res.data.data?.id;
+      createdCollectionId = res.data.data?.collection?.productCollectionId || res.data.data?.productCollectionId || res.data.data?.id;
       expect(createdCollectionId).toBeTruthy();
       // Map items should be returned
       expect(Array.isArray(res.data.data?.mapItems)).toBe(true);
@@ -141,17 +125,11 @@ describe('Collections & Product Lists', () => {
         },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
-      removeCollectionId =
-        res.data.data?.collection?.productCollectionId ||
-        res.data.data?.productCollectionId ||
-        res.data.data?.id;
+      removeCollectionId = res.data.data?.collection?.productCollectionId || res.data.data?.productCollectionId || res.data.data?.id;
       // Grab a map item ID to remove
       const mapItems = res.data.data?.mapItems || [];
       if (mapItems.length > 0) {
-        mapItemId =
-          mapItems[0]?.productCollectionMapId ||
-          mapItems[0]?.mapId ||
-          mapItems[0]?.id;
+        mapItemId = mapItems[0]?.productCollectionMapId || mapItems[0]?.mapId || mapItems[0]?.id;
       }
     });
 
@@ -180,9 +158,7 @@ describe('Collections & Product Lists', () => {
       expect(res.data.success).toBe(true);
       // Verify the map items count decreased
       const remainingItems = res.data.data?.mapItems || [];
-      const remainingIds = remainingItems.map((m: Record<string, unknown>) =>
-        m.productCollectionMapId || m.mapId || m.id,
-      );
+      const remainingIds = remainingItems.map((m: Record<string, unknown>) => m.productCollectionMapId || m.mapId || m.id);
       expect(remainingIds).not.toContain(mapItemId);
     });
   });

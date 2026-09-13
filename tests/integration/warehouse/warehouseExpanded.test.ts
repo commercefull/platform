@@ -46,9 +46,7 @@ describe('Warehouse Expanded Tests', () => {
         {
           sourceLocationId: SEEDED_WAREHOUSE_IDS.MAIN,
           destinationLocationId: SEEDED_WAREHOUSE_IDS.WEST_COAST,
-          items: [
-            { productId: '00000000-0000-0000-0000-000000000001', quantity: 5 },
-          ],
+          items: [{ productId: '00000000-0000-0000-0000-000000000001', quantity: 5 }],
         },
         { headers: authHeaders() },
       );
@@ -65,9 +63,7 @@ describe('Warehouse Expanded Tests', () => {
         {
           sourceLocationId: SEEDED_WAREHOUSE_IDS.MAIN,
           destinationLocationId: SEEDED_WAREHOUSE_IDS.MAIN,
-          items: [
-            { productId: '00000000-0000-0000-0000-000000000001', quantity: 5 },
-          ],
+          items: [{ productId: '00000000-0000-0000-0000-000000000001', quantity: 5 }],
         },
         { headers: authHeaders() },
       );
@@ -93,11 +89,7 @@ describe('Warehouse Expanded Tests', () => {
 
     it('should create a zone in a warehouse', async () => {
       const zoneData = createTestZone();
-      const resp = await client.post(
-        `/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/zones`,
-        zoneData,
-        { headers: authHeaders() },
-      );
+      const resp = await client.post(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/zones`, zoneData, { headers: authHeaders() });
 
       expectStatus(resp, 201);
       if (resp.status === 201 || resp.status === 200) {
@@ -107,11 +99,7 @@ describe('Warehouse Expanded Tests', () => {
 
     it('should get a specific zone', async () => {
       const zoneData = createTestZone();
-      const createResp = await client.post(
-        `/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/zones`,
-        zoneData,
-        { headers: authHeaders() },
-      );
+      const createResp = await client.post(`/business/warehouses/${SEEDED_WAREHOUSE_IDS.MAIN}/zones`, zoneData, { headers: authHeaders() });
 
       expectStatus(createResp, 201);
       const zoneId = createResp.data.data?.distributionWarehouseZoneId;

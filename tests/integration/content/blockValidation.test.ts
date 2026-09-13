@@ -1,9 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import {
-  TEST_CONTENT_PAGE_ID,
-  TEST_BLOCK_TYPE_ID,
-  ADMIN_CREDENTIALS,
-} from '../testConstants';
+import { TEST_CONTENT_PAGE_ID, TEST_BLOCK_TYPE_ID, ADMIN_CREDENTIALS } from '../testConstants';
 
 const createClient = () =>
   axios.create({

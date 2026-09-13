@@ -315,7 +315,7 @@ export class SupplierPurchaseOrderRepo {
    */
   async updateStatus(supplierPurchaseOrderId: string, status: SupplierPurchaseOrderStatus): Promise<SupplierPurchaseOrder | null> {
     const updates: Record<string, string> = { status };
-    const now = unixTimestamp();
+    const now = String(unixTimestamp());
 
     // Set appropriate timestamp based on status
     switch (status) {

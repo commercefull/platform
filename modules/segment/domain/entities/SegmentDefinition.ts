@@ -122,32 +122,66 @@ export class SegmentDefinition {
     return new SegmentDefinition(props);
   }
 
-  get segmentId(): string { return this.props.segmentId; }
-  get name(): string { return this.props.name; }
-  get code(): string { return this.props.code; }
-  get description(): string | null { return this.props.description; }
-  get conditions(): SegmentCondition[] { return this.props.conditions; }
-  get matchMode(): MatchMode { return this.props.matchMode; }
-  get isActive(): boolean { return this.props.isActive; }
-  get isSystem(): boolean { return this.props.isSystem; }
-  get color(): string | null { return this.props.color; }
-  get icon(): string | null { return this.props.icon; }
-  get memberCount(): number { return this.props.memberCount; }
-  get lastEvaluatedAt(): Date | null { return this.props.lastEvaluatedAt; }
-  get organizationId(): string | null { return this.props.organizationId; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
-  get deletedAt(): Date | null { return this.props.deletedAt; }
+  get segmentId(): string {
+    return this.props.segmentId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get code(): string {
+    return this.props.code;
+  }
+  get description(): string | null {
+    return this.props.description;
+  }
+  get conditions(): SegmentCondition[] {
+    return this.props.conditions;
+  }
+  get matchMode(): MatchMode {
+    return this.props.matchMode;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get isSystem(): boolean {
+    return this.props.isSystem;
+  }
+  get color(): string | null {
+    return this.props.color;
+  }
+  get icon(): string | null {
+    return this.props.icon;
+  }
+  get memberCount(): number {
+    return this.props.memberCount;
+  }
+  get lastEvaluatedAt(): Date | null {
+    return this.props.lastEvaluatedAt;
+  }
+  get organizationId(): string | null {
+    return this.props.organizationId;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+  get deletedAt(): Date | null {
+    return this.props.deletedAt;
+  }
 
-  update(params: Partial<{
-    name: string;
-    description: string;
-    conditions: SegmentCondition[];
-    matchMode: MatchMode;
-    color: string;
-    icon: string;
-    isActive: boolean;
-  }>): void {
+  update(
+    params: Partial<{
+      name: string;
+      description: string;
+      conditions: SegmentCondition[];
+      matchMode: MatchMode;
+      color: string;
+      icon: string;
+      isActive: boolean;
+    }>,
+  ): void {
     if (params.name !== undefined) this.props.name = params.name;
     if (params.description !== undefined) this.props.description = params.description;
     if (params.conditions !== undefined) this.props.conditions = params.conditions;
@@ -164,8 +198,14 @@ export class SegmentDefinition {
     this.props.updatedAt = new Date();
   }
 
-  activate(): void { this.props.isActive = true; this.props.updatedAt = new Date(); }
-  deactivate(): void { this.props.isActive = false; this.props.updatedAt = new Date(); }
+  activate(): void {
+    this.props.isActive = true;
+    this.props.updatedAt = new Date();
+  }
+  deactivate(): void {
+    this.props.isActive = false;
+    this.props.updatedAt = new Date();
+  }
 
   toJSON(): SegmentDefinitionProps {
     return { ...this.props };

@@ -10,9 +10,6 @@
 import { AxiosInstance } from 'axios';
 import { SEEDED_PRODUCT_2_ID, cleanupProductTests, setupProductTests } from '../testUtils';
 
-;
-;
-
 describe('Product Variants & Barcode', () => {
   let client: AxiosInstance;
   let adminToken: string;
@@ -71,7 +68,10 @@ describe('Product Variants & Barcode', () => {
         sku: `VAR-NEW-${Math.floor(Math.random() * 100000)}`,
         price: 69.99,
         isDefault: false,
-        options: [{ name: 'Color', value: 'Red' }, { name: 'Size', value: 'Large' }],
+        options: [
+          { name: 'Color', value: 'Red' },
+          { name: 'Size', value: 'Large' },
+        ],
       };
 
       const res = await client.post(`/business/products/${testProductId}/variants`, newVariantData, {
@@ -87,17 +87,23 @@ describe('Product Variants & Barcode', () => {
       expect(res.data.data).toHaveProperty('price', newVariantData.price);
 
       // Cleanup
-      await client.delete(`/business/products/variants/${variantId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/business/products/variants/${variantId}`, {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should update a variant', async () => {
       if (!testVariantId) return;
-      const res = await client.put(`/business/products/variants/${testVariantId}`, {
-        name: 'Updated Variant Name',
-        price: 79.99,
-      }, { headers: { Authorization: `Bearer ${adminToken}` } });
+      const res = await client.put(
+        `/business/products/variants/${testVariantId}`,
+        {
+          name: 'Updated Variant Name',
+          price: 79.99,
+        },
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
 
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
@@ -107,7 +113,8 @@ describe('Product Variants & Barcode', () => {
 
     it('should patch variant inventory', async () => {
       if (!testVariantId) return;
-      const res = await client.patch(`/business/products/variants/${testVariantId}/inventory`,
+      const res = await client.patch(
+        `/business/products/variants/${testVariantId}/inventory`,
         { inventory: 150 },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
@@ -138,8 +145,7 @@ describe('Product Variants & Barcode', () => {
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       expect(createRes.status).toBe(201);
-      const variantId =
-        createRes.data.data?.productVariantId || createRes.data.data?.id;
+      const variantId = createRes.data.data?.productVariantId || createRes.data.data?.id;
 
       // Try to create another variant with the same SKU
       const dupRes = await client.post(

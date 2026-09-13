@@ -132,7 +132,9 @@ export class RetryPaymentUseCase {
     }
   }
 
-  private async processWithProvider(_transaction: TransactionRecord): Promise<{ success: boolean; providerTransactionId?: string; error?: string }> {
+  private async processWithProvider(
+    _transaction: TransactionRecord,
+  ): Promise<{ success: boolean; providerTransactionId?: string; error?: string }> {
     // This would be implemented with actual provider SDK
     // For now, return pending to be updated via webhook
     return {

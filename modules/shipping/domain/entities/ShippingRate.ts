@@ -23,6 +23,7 @@ export interface ShippingRateProps {
   countries?: string[];
   isActive: boolean;
   freeShippingThreshold?: number;
+  dimensionalFactor?: number;
   metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
@@ -62,16 +63,37 @@ export class ShippingRate {
     return this.props.isActive;
   }
 
-  calculateRate(weight: number, subtotal: number, quantity: number): number {
+  get dimensionalFactor(): number | undefined {
+    return this.props.dimensionalFactor;
+  }
+
+  /**
+   * Calculate the shipping rate for the given weight, subtotal, and quantity.
+   *
+   * @param weight   Actual weight of the shipment.
+   * @param subtotal Order subtotal (for price-based and free-shipping-threshold checks).
+   * @param quantity Number of items (for quantity-based rates).
+   * @param volume   Optional shipment volume (L×W×H in cubic units). When provided
+   *                 along with `dimensionalFactor`, billable weight is
+   *                 `max(actualWeight, volume / dimensionalFactor)`.
+   */
+  calculateRate(weight: number, subtotal: number, quantity: number, volume?: number): number {
     if (this.props.freeShippingThreshold && subtotal >= this.props.freeShippingThreshold) {
       return 0;
+    }
+
+    // Dimensional weight: billableWeight = max(actualWeight, volume / dimFactor)
+    let billableWeight = weight;
+    if (volume !== undefined && this.props.dimensionalFactor && this.props.dimensionalFactor > 0) {
+      const dimWeight = volume / this.props.dimensionalFactor;
+      billableWeight = Math.max(weight, dimWeight);
     }
 
     let rate = this.props.baseRate;
 
     switch (this.props.calculationType) {
       case 'weight':
-        rate += (this.props.perUnitRate || 0) * weight;
+        rate += (this.props.perUnitRate || 0) * billableWeight;
         break;
       case 'price':
         rate += (this.props.perUnitRate || 0) * (subtotal / 100);

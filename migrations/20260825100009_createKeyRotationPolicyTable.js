@@ -1,5 +1,5 @@
 export async function up(knex) {
-  await knex.schema.createTable('keyRotationPolicy', (table) => {
+  await knex.schema.createTable('keyRotationPolicy', table => {
     table.string('keyRotationPolicyId').primary();
     table.string('organizationId').notNullable().index();
     table.enum('keyType', ['paymentWebhookSecret', 'paymentApiKey', 'jwtSigningKey', 'hmacSigningKey', 'encryptionKey']).notNullable();

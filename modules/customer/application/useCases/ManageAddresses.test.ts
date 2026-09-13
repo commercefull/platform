@@ -37,34 +37,26 @@ describe('ManageAddressesUseCase', () => {
   describe('addAddress', () => {
     it('should add a new address', async () => {
       const result = await useCase.addAddress(
-        new AddAddressCommand(
-          'cust-1',
-          '123 Main St',
-          'Portland',
-          'OR',
-          '97201',
-          'US',
-          'US',
-          'shipping',
-        ),
+        new AddAddressCommand('cust-1', '123 Main St', 'Portland', 'OR', '97201', 'US', 'US', 'shipping'),
       );
 
       expect(result.addressId).toBe('addr-uuid-123');
       expect(result.addressLine1).toBe('123 Main St');
       expect(result.city).toBe('Portland');
-      expect(mockRepo.addAddress).toHaveBeenCalledWith('cust-1', expect.objectContaining({
-        customerAddressId: 'addr-uuid-123',
-        addressLine1: '123 Main St',
-      }));
+      expect(mockRepo.addAddress).toHaveBeenCalledWith(
+        'cust-1',
+        expect.objectContaining({
+          customerAddressId: 'addr-uuid-123',
+          addressLine1: '123 Main St',
+        }),
+      );
     });
 
     it('should throw CustomerNotFoundError when customer does not exist', async () => {
       mockRepo.findById.mockResolvedValue(null);
 
       await expect(
-        useCase.addAddress(
-          new AddAddressCommand('cust-x', '123 Main St', 'Portland', 'OR', '97201', 'US', 'US', 'shipping'),
-        ),
+        useCase.addAddress(new AddAddressCommand('cust-x', '123 Main St', 'Portland', 'OR', '97201', 'US', 'US', 'shipping')),
       ).rejects.toThrow(CustomerNotFoundError);
     });
   });
@@ -82,9 +74,7 @@ describe('ManageAddressesUseCase', () => {
         isDefault: false,
       });
 
-      const result = await useCase.updateAddress(
-        new UpdateAddressCommand('cust-1', 'addr-1', { addressLine1: '456 Oak Ave' }),
-      );
+      const result = await useCase.updateAddress(new UpdateAddressCommand('cust-1', 'addr-1', { addressLine1: '456 Oak Ave' }));
 
       expect(result.addressId).toBe('addr-1');
       expect(result.addressLine1).toBe('456 Oak Ave');
@@ -94,9 +84,7 @@ describe('ManageAddressesUseCase', () => {
     it('should throw CustomerNotFoundError when customer does not exist', async () => {
       mockRepo.findById.mockResolvedValue(null);
 
-      await expect(
-        useCase.updateAddress(new UpdateAddressCommand('cust-x', 'addr-1', {})),
-      ).rejects.toThrow(CustomerNotFoundError);
+      await expect(useCase.updateAddress(new UpdateAddressCommand('cust-x', 'addr-1', {}))).rejects.toThrow(CustomerNotFoundError);
     });
   });
 
@@ -110,17 +98,13 @@ describe('ManageAddressesUseCase', () => {
     it('should throw CustomerNotFoundError when customer does not exist', async () => {
       mockRepo.findById.mockResolvedValue(null);
 
-      await expect(
-        useCase.deleteAddress(new DeleteAddressCommand('cust-x', 'addr-1')),
-      ).rejects.toThrow(CustomerNotFoundError);
+      await expect(useCase.deleteAddress(new DeleteAddressCommand('cust-x', 'addr-1'))).rejects.toThrow(CustomerNotFoundError);
     });
   });
 
   describe('setDefaultAddress', () => {
     it('should set default address', async () => {
-      await useCase.setDefaultAddress(
-        new SetDefaultAddressCommand('cust-1', 'addr-1', 'shipping'),
-      );
+      await useCase.setDefaultAddress(new SetDefaultAddressCommand('cust-1', 'addr-1', 'shipping'));
 
       expect(mockRepo.setDefaultAddress).toHaveBeenCalledWith('cust-1', 'addr-1', 'shipping');
     });
@@ -128,9 +112,9 @@ describe('ManageAddressesUseCase', () => {
     it('should throw CustomerNotFoundError when customer does not exist', async () => {
       mockRepo.findById.mockResolvedValue(null);
 
-      await expect(
-        useCase.setDefaultAddress(new SetDefaultAddressCommand('cust-x', 'addr-1', 'shipping')),
-      ).rejects.toThrow(CustomerNotFoundError);
+      await expect(useCase.setDefaultAddress(new SetDefaultAddressCommand('cust-x', 'addr-1', 'shipping'))).rejects.toThrow(
+        CustomerNotFoundError,
+      );
     });
   });
 

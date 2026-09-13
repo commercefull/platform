@@ -1,7 +1,15 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ContentType, ContentPage, ContentBlock, ContentBlockType, ContentTemplate } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
-import { ContentTypeNotFoundError, ContentPageNotFoundError, ContentBlockNotFoundError, ContentTemplateNotFoundError, ContentValidationError, FailedToCreateContentError, SlugAlreadyExistsError } from '../../domain/errors/ContentErrors';
+import {
+  ContentTypeNotFoundError,
+  ContentPageNotFoundError,
+  ContentBlockNotFoundError,
+  ContentTemplateNotFoundError,
+  ContentValidationError,
+  FailedToCreateContentError,
+  SlugAlreadyExistsError,
+} from '../../domain/errors/ContentErrors';
 
 // Table constants
 const TABLES = {
@@ -19,14 +27,32 @@ export type { ContentType, ContentPage, ContentBlock, ContentTemplate };
 type ContentTypeCreateParams = Omit<ContentType, 'contentTypeId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>;
 type ContentTypeUpdateParams = Partial<Omit<ContentType, 'contentTypeId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>>;
 
-type ContentPageCreateParams = Partial<Omit<ContentPage, 'contentPageId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'publishedBy' | 'path' | 'depth'>> & { title: string; slug: string; contentTypeId: string; status: string; visibility: string };
-type ContentPageUpdateParams = Partial<Omit<ContentPage, 'contentPageId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'publishedBy'>>;
+type ContentPageCreateParams = Partial<
+  Omit<ContentPage, 'contentPageId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'publishedBy' | 'path' | 'depth'>
+> & { title: string; slug: string; contentTypeId: string; status: string; visibility: string };
+type ContentPageUpdateParams = Partial<
+  Omit<ContentPage, 'contentPageId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'publishedBy'>
+>;
 
-type ContentBlockCreateParams = Omit<ContentBlock, 'contentBlockId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'parentBlockId' | 'cssClasses' | 'conditions' | 'settings' | 'area'>;
+type ContentBlockCreateParams = Omit<
+  ContentBlock,
+  | 'contentBlockId'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'parentBlockId'
+  | 'cssClasses'
+  | 'conditions'
+  | 'settings'
+  | 'area'
+>;
 type ContentBlockUpdateParams = Partial<Omit<ContentBlock, 'contentBlockId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>>;
 
 type ContentTemplateCreateParams = Omit<ContentTemplate, 'contentTemplateId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>;
-type ContentTemplateUpdateParams = Partial<Omit<ContentTemplate, 'contentTemplateId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>>;
+type ContentTemplateUpdateParams = Partial<
+  Omit<ContentTemplate, 'contentTemplateId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>
+>;
 
 export class ContentRepo {
   // Content Block Type methods
@@ -409,7 +435,10 @@ export class ContentRepo {
   }
 
   async findBlocksByPageId(pageId: string): Promise<ContentBlock[]> {
-    const results = await query<ContentBlock[]>(`SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentPageId" = $1 ORDER BY "sortOrder" ASC`, [pageId]);
+    const results = await query<ContentBlock[]>(
+      `SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentPageId" = $1 ORDER BY "sortOrder" ASC`,
+      [pageId],
+    );
     return results || [];
   }
 

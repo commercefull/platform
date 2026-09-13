@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Checkout Configuration Use Cases
@@ -245,11 +244,7 @@ export class ValidateCheckoutStepUseCase {
     };
   }
 
-  private validateField(
-    field: CheckoutFieldConfig,
-    value: unknown,
-    allValues: Record<string, unknown>,
-  ): string[] {
+  private validateField(field: CheckoutFieldConfig, value: unknown, allValues: Record<string, unknown>): string[] {
     const errors: string[] = [];
 
     // Check conditional visibility
@@ -320,11 +315,16 @@ export class ValidateCheckoutStepUseCase {
   private evaluateCondition(value: unknown, operator: string, target: string): boolean {
     const strValue = String(value ?? '');
     switch (operator) {
-      case 'eq': return strValue === target;
-      case 'neq': return strValue !== target;
-      case 'contains': return strValue.includes(target);
-      case 'notContains': return !strValue.includes(target);
-      default: return true;
+      case 'eq':
+        return strValue === target;
+      case 'neq':
+        return strValue !== target;
+      case 'contains':
+        return strValue.includes(target);
+      case 'notContains':
+        return !strValue.includes(target);
+      default:
+        return true;
     }
   }
 }

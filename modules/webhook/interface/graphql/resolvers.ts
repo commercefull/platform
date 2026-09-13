@@ -19,7 +19,11 @@ export const webhookResolvers = {
   },
 
   Mutation: {
-    registerWebhook: async (_parent: unknown, args: { input: { name: string; url: string; events: string[]; organizationId?: string; headers?: string } }, context: GraphQLAuthContext) => {
+    registerWebhook: async (
+      _parent: unknown,
+      args: { input: { name: string; url: string; events: string[]; organizationId?: string; headers?: string } },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new RegisterWebhookUseCase(WebhookRepo);
       const input: RegisterWebhookInput = {

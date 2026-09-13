@@ -109,14 +109,16 @@ export const loginOrganization = async (req: TypedRequest<Record<string, string>
       status: subject.status,
     },
   });
-  
 };
 
 /**
  * Registers a new organization account
  * New accounts start with 'pending' status and require admin approval
  */
-export const registerOrganization = async (req: TypedRequest<Record<string, string>, unknown, RegisterBody>, res: Response): Promise<void> => {
+export const registerOrganization = async (
+  req: TypedRequest<Record<string, string>, unknown, RegisterBody>,
+  res: Response,
+): Promise<void> => {
   const { email, password, name, phone, website: _website, description: _description } = req.body;
 
   // Validate required fields
@@ -165,7 +167,6 @@ export const registerOrganization = async (req: TypedRequest<Record<string, stri
       status: newSubject.status,
     },
   });
-  
 };
 
 /**
@@ -230,13 +231,15 @@ export const issueTokenPair = async (req: TypedRequest<Record<string, string>, u
       name: subject.name,
     },
   });
-  
 };
 
 /**
  * Refreshes an expired access token using a valid refresh token
  */
-export const renewAccessToken = async (req: TypedRequest<Record<string, string>, unknown, RefreshTokenBody>, res: Response): Promise<void> => {
+export const renewAccessToken = async (
+  req: TypedRequest<Record<string, string>, unknown, RefreshTokenBody>,
+  res: Response,
+): Promise<void> => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
@@ -303,7 +306,6 @@ export const renewAccessToken = async (req: TypedRequest<Record<string, string>,
     tokenType: 'Bearer',
     expiresIn: ACCESS_TOKEN_DURATION,
   });
-  
 };
 
 /**
@@ -341,7 +343,6 @@ export const checkTokenValidity = async (req: TypedRequest<Record<string, string
       role: decodedPayload.role,
     },
   });
-  
 };
 
 /**
@@ -386,13 +387,15 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
     // REMOVE IN PRODUCTION - only for development
     resetToken,
   });
-  
 };
 
 /**
  * Completes password reset using a valid reset token
  */
-export const resetPassword = async (req: TypedRequest<Record<string, string>, unknown, ResetPasswordBody>, res: Response): Promise<void> => {
+export const resetPassword = async (
+  req: TypedRequest<Record<string, string>, unknown, ResetPasswordBody>,
+  res: Response,
+): Promise<void> => {
   const { token, newPassword, password } = req.body;
   const finalPassword = newPassword || password;
 
@@ -421,7 +424,6 @@ export const resetPassword = async (req: TypedRequest<Record<string, string>, un
     success: true,
     message: 'Your password has been successfully reset',
   });
-  
 };
 
 // ============================================================================
@@ -439,7 +441,10 @@ interface ForceResetBody {
   newPassword: string;
 }
 
-export const getUserAuthDetails = async (req: TypedRequest<Record<string, string>, { userType?: string }>, res: Response): Promise<void> => {
+export const getUserAuthDetails = async (
+  req: TypedRequest<Record<string, string>, { userType?: string }>,
+  res: Response,
+): Promise<void> => {
   const userId = String(req.params.userId);
   const userType = (req.query.userType as string) || 'customer';
 
@@ -476,10 +481,12 @@ export const getUserAuthDetails = async (req: TypedRequest<Record<string, string
       },
     });
   }
-  
 };
 
-export const revokeUserTokens = async (req: TypedRequest<Record<string, string>, unknown, RevokeTokensBody>, res: Response): Promise<void> => {
+export const revokeUserTokens = async (
+  req: TypedRequest<Record<string, string>, unknown, RevokeTokensBody>,
+  res: Response,
+): Promise<void> => {
   const { userId, userType } = req.body;
 
   if (!userId || !userType) {
@@ -489,10 +496,12 @@ export const revokeUserTokens = async (req: TypedRequest<Record<string, string>,
 
   const revokedCount = await refreshTokenRepo.revokeAllForUserWithType(userId, userType);
   res.json({ success: true, data: { revokedCount } });
-  
 };
 
-export const forceResetPassword = async (req: TypedRequest<Record<string, string>, unknown, ForceResetBody>, res: Response): Promise<void> => {
+export const forceResetPassword = async (
+  req: TypedRequest<Record<string, string>, unknown, ForceResetBody>,
+  res: Response,
+): Promise<void> => {
   const { userId, userType, newPassword } = req.body;
 
   if (!userId || !userType || !newPassword) {
@@ -507,7 +516,6 @@ export const forceResetPassword = async (req: TypedRequest<Record<string, string
   }
 
   res.json({ success: true, message: 'Password has been reset successfully' });
-  
 };
 
 export const cleanupExpiredTokens = async (_req: TypedRequest<Record<string, string>, unknown>, res: Response): Promise<void> => {
@@ -523,5 +531,4 @@ export const cleanupExpiredTokens = async (_req: TypedRequest<Record<string, str
       blacklistTokens,
     },
   });
-  
 };

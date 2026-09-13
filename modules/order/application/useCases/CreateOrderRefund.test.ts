@@ -23,9 +23,7 @@ function createMockPayment(overrides: Partial<OrderPayment> = {}): OrderPayment 
   } as OrderPayment;
 }
 
-function createMockQueryRepo(
-  payment: OrderPayment | null = createMockPayment(),
-): jest.Mocked<OrderQueryRepository> {
+function createMockQueryRepo(payment: OrderPayment | null = createMockPayment()): jest.Mocked<OrderQueryRepository> {
   return {
     findNotesByOrder: jest.fn().mockResolvedValue([]),
     createNote: jest.fn(),
@@ -63,9 +61,7 @@ describe('CreateOrderRefundUseCase', () => {
     const queryRepo = createMockQueryRepo();
     const useCase = new CreateOrderRefundUseCase(queryRepo);
 
-    const result = await useCase.execute(
-      new CreateOrderRefundCommand('pay-1', 50, 'partial refund'),
-    );
+    const result = await useCase.execute(new CreateOrderRefundCommand('pay-1', 50, 'partial refund'));
 
     expect(result.orderPaymentRefundId).toBe('ref-1');
     expect(result.amount).toBe(50);
@@ -76,18 +72,14 @@ describe('CreateOrderRefundUseCase', () => {
     const queryRepo = createMockQueryRepo(null);
     const useCase = new CreateOrderRefundUseCase(queryRepo);
 
-    await expect(
-      useCase.execute(new CreateOrderRefundCommand('nonexistent', 50)),
-    ).rejects.toThrow(OrderPaymentNotFoundError);
+    await expect(useCase.execute(new CreateOrderRefundCommand('nonexistent', 50))).rejects.toThrow(OrderPaymentNotFoundError);
   });
 
   it('should throw RefundAmountMustBePositiveError for zero amount', async () => {
     const queryRepo = createMockQueryRepo();
     const useCase = new CreateOrderRefundUseCase(queryRepo);
 
-    await expect(
-      useCase.execute(new CreateOrderRefundCommand('pay-1', 0)),
-    ).rejects.toThrow(RefundAmountMustBePositiveError);
+    await expect(useCase.execute(new CreateOrderRefundCommand('pay-1', 0))).rejects.toThrow(RefundAmountMustBePositiveError);
   });
 
   it('should throw RefundExceedsRefundableBalanceError when amount exceeds refundable', async () => {
@@ -95,8 +87,6 @@ describe('CreateOrderRefundUseCase', () => {
     const queryRepo = createMockQueryRepo(payment);
     const useCase = new CreateOrderRefundUseCase(queryRepo);
 
-    await expect(
-      useCase.execute(new CreateOrderRefundCommand('pay-1', 50)),
-    ).rejects.toThrow(RefundExceedsRefundableBalanceError);
+    await expect(useCase.execute(new CreateOrderRefundCommand('pay-1', 50))).rejects.toThrow(RefundExceedsRefundableBalanceError);
   });
 });

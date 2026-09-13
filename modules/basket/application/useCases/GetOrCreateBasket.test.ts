@@ -67,9 +67,7 @@ describe('GetOrCreateBasketUseCase', () => {
     const repo = createMockBasketRepo(null);
     const useCase = new GetOrCreateBasketUseCase(repo);
 
-    const result = await useCase.execute(
-      new GetOrCreateBasketCommand(undefined, 'sess-1', 'EUR'),
-    );
+    const result = await useCase.execute(new GetOrCreateBasketCommand(undefined, 'sess-1', 'EUR'));
 
     expect(result.basketId).toBe('basket-uuid-123');
     expect(result.sessionId).toBe('sess-1');

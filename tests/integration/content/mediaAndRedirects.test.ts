@@ -60,11 +60,7 @@ describe('Content Media & Redirects API', () => {
     });
 
     it('should return 400 when missing folder name', async () => {
-      const response = await client.post(
-        '/business/content/media-folders',
-        {},
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const response = await client.post('/business/content/media-folders', {}, { headers: { Authorization: `Bearer ${adminToken}` } });
 
       expect(response.status).toBe(400);
     });
@@ -201,10 +197,9 @@ describe('Content Media & Redirects API', () => {
     });
 
     it('should get media usage by entity', async () => {
-      const response = await client.get(
-        '/business/content/media/usage/contentPage/00000000-0000-0000-0000-000000005002',
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const response = await client.get('/business/content/media/usage/contentPage/00000000-0000-0000-0000-000000005002', {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);

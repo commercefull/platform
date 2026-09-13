@@ -1,4 +1,9 @@
-import { FulfillmentStatus, FulfillmentStatusTransitions, canTransitionFulfillmentTo, getFulfillmentStatusLabel } from './FulfillmentStatus';
+import {
+  FulfillmentStatus,
+  FulfillmentStatusTransitions,
+  canTransitionFulfillmentTo,
+  getFulfillmentStatusLabel,
+} from './FulfillmentStatus';
 
 describe('FulfillmentStatus', () => {
   it('should have correct enum values', () => {

@@ -78,7 +78,6 @@ export const getMembershipTiers = async (req: TypedRequest, res: Response): Prom
     success: true,
     data: tiers,
   });
-  
 };
 
 export const getMembershipTierById = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -97,10 +96,12 @@ export const getMembershipTierById = async (req: TypedRequest, res: Response): P
     success: true,
     data: tier,
   });
-  
 };
 
-export const createMembershipTier = async (req: TypedRequest<Record<string, string>, unknown, CreateTierBody>, res: Response): Promise<void> => {
+export const createMembershipTier = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateTierBody>,
+  res: Response,
+): Promise<void> => {
   const { name, description, monthlyPrice, annualPrice, level, isActive = true } = req.body;
 
   // Basic validation
@@ -126,10 +127,12 @@ export const createMembershipTier = async (req: TypedRequest<Record<string, stri
     data: tier,
     message: 'Membership tier created successfully',
   });
-  
 };
 
-export const updateMembershipTier = async (req: TypedRequest<Record<string, string>, unknown, UpdateTierBody>, res: Response): Promise<void> => {
+export const updateMembershipTier = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdateTierBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const { name, description, monthlyPrice, annualPrice, level, isActive } = req.body;
 
@@ -157,7 +160,6 @@ export const updateMembershipTier = async (req: TypedRequest<Record<string, stri
     data: updatedTier,
     message: 'Membership tier updated successfully',
   });
-  
 };
 
 export const deleteMembershipTier = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -189,7 +191,6 @@ export const deleteMembershipTier = async (req: TypedRequest, res: Response): Pr
     success: true,
     message: 'Membership tier deleted successfully',
   });
-  
 };
 
 // Membership Benefit Endpoints
@@ -207,7 +208,6 @@ export const getMembershipBenefits = async (req: TypedRequest, res: Response): P
     success: true,
     data: benefits,
   });
-  
 };
 
 export const getMembershipBenefitById = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -226,19 +226,13 @@ export const getMembershipBenefitById = async (req: TypedRequest, res: Response)
     success: true,
     data: benefit,
   });
-  
 };
 
-export const createMembershipBenefit = async (req: TypedRequest<Record<string, string>, unknown, CreateBenefitBody>, res: Response): Promise<void> => {
-  const {
-    name,
-    description,
-    tierIds,
-    benefitType,
-    discountPercentage,
-    discountAmount,
-    isActive = true,
-  } = req.body;
+export const createMembershipBenefit = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateBenefitBody>,
+  res: Response,
+): Promise<void> => {
+  const { name, description, tierIds, benefitType, discountPercentage, discountAmount, isActive = true } = req.body;
 
   const tierId = tierIds[0];
 
@@ -276,20 +270,14 @@ export const createMembershipBenefit = async (req: TypedRequest<Record<string, s
     data: benefit,
     message: 'Membership benefit created successfully',
   });
-  
 };
 
-export const updateMembershipBenefit = async (req: TypedRequest<Record<string, string>, unknown, UpdateBenefitBody>, res: Response): Promise<void> => {
+export const updateMembershipBenefit = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdateBenefitBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
-  const {
-    name,
-    description,
-    tierIds,
-    benefitType,
-    discountPercentage,
-    discountAmount,
-    isActive,
-  } = req.body;
+  const { name, description, tierIds, benefitType, discountPercentage, discountAmount, isActive } = req.body;
 
   const tierId = tierIds ? tierIds[0] : undefined;
 
@@ -330,7 +318,6 @@ export const updateMembershipBenefit = async (req: TypedRequest<Record<string, s
     data: updatedBenefit,
     message: 'Membership benefit updated successfully',
   });
-  
 };
 
 export const deleteMembershipBenefit = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -352,7 +339,6 @@ export const deleteMembershipBenefit = async (req: TypedRequest, res: Response):
     success: true,
     message: 'Membership benefit deleted successfully',
   });
-  
 };
 
 // User Membership Endpoints
@@ -373,7 +359,6 @@ export const getUserMemberships = async (req: TypedRequest, res: Response): Prom
     success: true,
     data: memberships,
   });
-  
 };
 
 export const getUserMembershipById = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -392,7 +377,6 @@ export const getUserMembershipById = async (req: TypedRequest, res: Response): P
     success: true,
     data: membership,
   });
-  
 };
 
 export const getUserMembershipByUserId = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -411,10 +395,12 @@ export const getUserMembershipByUserId = async (req: TypedRequest, res: Response
     success: true,
     data: membership,
   });
-  
 };
 
-export const createUserMembership = async (req: TypedRequest<Record<string, string>, unknown, CreateUserMembershipBody>, res: Response): Promise<void> => {
+export const createUserMembership = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateUserMembershipBody>,
+  res: Response,
+): Promise<void> => {
   const {
     userId,
     tierId,
@@ -475,10 +461,12 @@ export const createUserMembership = async (req: TypedRequest<Record<string, stri
     data: membership,
     message: 'User membership created successfully',
   });
-  
 };
 
-export const updateUserMembership = async (req: TypedRequest<Record<string, string>, unknown, UpdateUserMembershipBody>, res: Response): Promise<void> => {
+export const updateUserMembership = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdateUserMembershipBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const { tierId, startDate, endDate, isActive, autoRenew, membershipType, lastRenewalDate, nextRenewalDate, paymentMethod } = req.body;
 
@@ -521,7 +509,6 @@ export const updateUserMembership = async (req: TypedRequest<Record<string, stri
     data: updatedMembership,
     message: 'User membership updated successfully',
   });
-  
 };
 
 export const cancelUserMembership = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -544,7 +531,6 @@ export const cancelUserMembership = async (req: TypedRequest, res: Response): Pr
     data: cancelledMembership,
     message: 'User membership cancelled successfully',
   });
-  
 };
 
 export const getUserMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -556,5 +542,4 @@ export const getUserMembershipBenefits = async (req: TypedRequest, res: Response
     success: true,
     data: benefits,
   });
-  
 };

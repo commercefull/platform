@@ -161,6 +161,31 @@ export class InventoryItem {
     this.touch();
   }
 
+  /**
+   * Reserve with allocation rule evaluation result.
+   * Allows backorder if the rule permits it, even when stock is insufficient.
+   * Returns whether this is a backorder reservation.
+   * (Epic J — see docs/e2e-rule-engine-implementation-plan.md)
+   */
+  reserveWithRule(
+    quantity: number,
+    ruleResult: { allowBackorder: boolean; effectiveAvailable: number; maxAllocationPerOrder: number },
+  ): { isBackorder: boolean } {
+    if (ruleResult.maxAllocationPerOrder > 0 && quantity > ruleResult.maxAllocationPerOrder) {
+      throw new InventoryValidationError(`Quantity ${quantity} exceeds max allocation per order (${ruleResult.maxAllocationPerOrder})`);
+    }
+
+    const isBackorder = quantity > this.availableQuantity;
+
+    if (isBackorder && !ruleResult.allowBackorder) {
+      throw new InsufficientStockError(this.props.sku, quantity, this.availableQuantity);
+    }
+
+    this.props.reservedQuantity += quantity;
+    this.touch();
+    return { isBackorder };
+  }
+
   releaseReservation(quantity: number): void {
     this.props.reservedQuantity = Math.max(0, this.props.reservedQuantity - quantity);
     this.touch();

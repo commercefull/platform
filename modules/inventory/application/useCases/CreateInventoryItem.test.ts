@@ -3,7 +3,7 @@ jest.mock('../../../../libs/uuid', () => ({
   generateUUID: jest.fn().mockReturnValue('inv-uuid'),
 }));
 
-import { CreateInventoryItemUseCase} from './CreateInventoryItem';
+import { CreateInventoryItemUseCase } from './CreateInventoryItem';
 import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 describe('CreateInventoryItemUseCase', () => {
@@ -14,8 +14,13 @@ describe('CreateInventoryItemUseCase', () => {
     mockRepo = {
       findBySkuAndWarehouse: jest.fn().mockResolvedValue(null),
       create: jest.fn().mockResolvedValue({
-        inventoryId: 'inv-uuid', productId: 'p1', locationId: 'w1', sku: 'SKU1',
-        quantity: 100, reservedQuantity: 0, createdAt: new Date(),
+        inventoryId: 'inv-uuid',
+        productId: 'p1',
+        locationId: 'w1',
+        sku: 'SKU1',
+        quantity: 100,
+        reservedQuantity: 0,
+        createdAt: new Date(),
       }),
     };
     useCase = new CreateInventoryItemUseCase(mockRepo as never);
@@ -23,7 +28,10 @@ describe('CreateInventoryItemUseCase', () => {
 
   it('should create inventory item (happy path)', async () => {
     const result = await useCase.execute({
-      productId: 'p1', warehouseId: 'w1', sku: 'SKU1', quantity: 100,
+      productId: 'p1',
+      warehouseId: 'w1',
+      sku: 'SKU1',
+      quantity: 100,
     });
 
     expect(result.inventoryItemId).toBe('inv-uuid');
@@ -32,12 +40,16 @@ describe('CreateInventoryItemUseCase', () => {
   });
 
   it('should throw InventoryValidationError when productId is empty', async () => {
-    await expect(useCase.execute({ productId: '', warehouseId: 'w1', sku: 'SKU1', quantity: 10 })).rejects.toThrow(InventoryValidationError);
+    await expect(useCase.execute({ productId: '', warehouseId: 'w1', sku: 'SKU1', quantity: 10 })).rejects.toThrow(
+      InventoryValidationError,
+    );
   });
 
   it('should throw InventoryValidationError when SKU already exists', async () => {
     mockRepo.findBySkuAndWarehouse.mockResolvedValue({ inventoryId: 'existing' });
 
-    await expect(useCase.execute({ productId: 'p1', warehouseId: 'w1', sku: 'SKU1', quantity: 10 })).rejects.toThrow(InventoryValidationError);
+    await expect(useCase.execute({ productId: 'p1', warehouseId: 'w1', sku: 'SKU1', quantity: 10 })).rejects.toThrow(
+      InventoryValidationError,
+    );
   });
 });

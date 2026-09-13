@@ -16,7 +16,11 @@ import {
   DistributionWarehouse as DbDistributionWarehouse,
 } from '../../../../libs/db/types';
 import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
-import { InventoryItemNotFoundError, FailedToCreateInventoryError, InventoryLocationNotFoundError } from '../../domain/errors/InventoryErrors';
+import {
+  InventoryItemNotFoundError,
+  FailedToCreateInventoryError,
+  InventoryLocationNotFoundError,
+} from '../../domain/errors/InventoryErrors';
 
 export interface InventoryFilters {
   productId?: string;
@@ -32,10 +36,7 @@ export interface InventoryFilters {
 export class InventoryRepository {
   // Inventory CRUD
   async findById(inventoryId: string): Promise<Inventory | null> {
-    const row = await queryOne<DbInventoryLocation>(
-      'SELECT * FROM "inventoryLocation" WHERE "inventoryLocationId" = $1',
-      [inventoryId],
-    );
+    const row = await queryOne<DbInventoryLocation>('SELECT * FROM "inventoryLocation" WHERE "inventoryLocationId" = $1', [inventoryId]);
 
     if (!row) return null;
     return this.mapToInventory(row);
@@ -245,10 +246,9 @@ export class InventoryRepository {
   }
 
   async getLocationById(locationId: string): Promise<InventoryLocation | null> {
-    const row = await queryOne<DbDistributionWarehouse>(
-      'SELECT * FROM "distributionWarehouse" WHERE "distributionWarehouseId" = $1',
-      [locationId],
-    );
+    const row = await queryOne<DbDistributionWarehouse>('SELECT * FROM "distributionWarehouse" WHERE "distributionWarehouseId" = $1', [
+      locationId,
+    ]);
 
     if (!row) return null;
     return this.mapToLocation(row);
@@ -513,10 +513,9 @@ export class InventoryRepository {
       [newQuantity, now, inventoryItemId],
     );
 
-    const row = await queryOne<DbInventoryLocation>(
-      'SELECT * FROM "inventoryLocation" WHERE "inventoryLocationId" = $1',
-      [inventoryItemId],
-    );
+    const row = await queryOne<DbInventoryLocation>('SELECT * FROM "inventoryLocation" WHERE "inventoryLocationId" = $1', [
+      inventoryItemId,
+    ]);
     if (!row) throw new InventoryItemNotFoundError(inventoryItemId);
     return this.mapToInventory(row);
   }
@@ -562,10 +561,9 @@ export class InventoryRepository {
       ],
     );
 
-    const row = await queryOne<DbInventoryLocation>(
-      'SELECT * FROM "inventoryLocation" WHERE "inventoryLocationId" = $1',
-      [input.inventoryItemId],
-    );
+    const row = await queryOne<DbInventoryLocation>('SELECT * FROM "inventoryLocation" WHERE "inventoryLocationId" = $1', [
+      input.inventoryItemId,
+    ]);
     if (!row) throw new FailedToCreateInventoryError('Failed to create inventory item');
     return this.mapToInventory(row) as Inventory & { createdAt: Date };
   }
@@ -625,14 +623,13 @@ export class InventoryRepository {
 
   async count(filters?: InventoryFilters): Promise<number> {
     const { whereClause, params } = this.buildWhereClause(filters);
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "inventoryLocation" ${whereClause}`,
-      params,
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "inventoryLocation" ${whereClause}`, params);
     return parseInt(countResult?.count || '0');
   }
 
-  async getStats(filters?: InventoryFilters): Promise<{ totalItems: number; lowStockCount: number; outOfStockCount: number; totalValue?: number }> {
+  async getStats(
+    filters?: InventoryFilters,
+  ): Promise<{ totalItems: number; lowStockCount: number; outOfStockCount: number; totalValue?: number }> {
     interface StatsRow {
       totalItems: string | null;
       lowStockCount: string | null;
@@ -662,7 +659,13 @@ export class InventoryRepository {
     return inv ? inv.availableQuantity : 0;
   }
 
-  async reserveForTransfer(storeId: string, productId: string, variantId: string | undefined, quantity: number, _transferId: string): Promise<void> {
+  async reserveForTransfer(
+    storeId: string,
+    productId: string,
+    variantId: string | undefined,
+    quantity: number,
+    _transferId: string,
+  ): Promise<void> {
     const location = await this.getLocationByStoreId(storeId);
     if (!location) throw new InventoryLocationNotFoundError(storeId);
     const inv = await this.findByProductAndLocation(productId, location.locationId, variantId);
@@ -696,10 +699,11 @@ export class InventoryRepository {
 
   async updateReorderPoint(inventoryItemId: string, reorderPoint: number, _reorderQuantity?: number): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      `UPDATE "inventoryLocation" SET "minimumStockLevel" = $1, "updatedAt" = $2 WHERE "inventoryLocationId" = $3`,
-      [reorderPoint, now, inventoryItemId],
-    );
+    await query(`UPDATE "inventoryLocation" SET "minimumStockLevel" = $1, "updatedAt" = $2 WHERE "inventoryLocationId" = $3`, [
+      reorderPoint,
+      now,
+      inventoryItemId,
+    ]);
   }
 }
 

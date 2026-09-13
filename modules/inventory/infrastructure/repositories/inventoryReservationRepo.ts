@@ -96,8 +96,20 @@ export async function createAtomic(params: CreateReservationParams): Promise<Inv
         "orderId", "locationId", "quantity", "status", "expiresAt", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *`,
-      [reservationId, params.inventoryItemId, params.productId, params.variantId || null, params.sku || null,
-       params.orderId, params.locationId, params.quantity, 'reserved', params.expiresAt || null, now, now],
+      [
+        reservationId,
+        params.inventoryItemId,
+        params.productId,
+        params.variantId || null,
+        params.sku || null,
+        params.orderId,
+        params.locationId,
+        params.quantity,
+        'reserved',
+        params.expiresAt || null,
+        now,
+        now,
+      ],
     );
 
     await client.query('COMMIT');
@@ -116,10 +128,9 @@ export async function findById(reservationId: string): Promise<InventoryReservat
 }
 
 export async function findByOrder(orderId: string): Promise<InventoryReservation[]> {
-  const result = await query<InventoryReservation[]>(
-    'SELECT * FROM "inventoryReservation" WHERE "orderId" = $1 ORDER BY "createdAt" ASC',
-    [orderId],
-  );
+  const result = await query<InventoryReservation[]>('SELECT * FROM "inventoryReservation" WHERE "orderId" = $1 ORDER BY "createdAt" ASC', [
+    orderId,
+  ]);
   return result ?? [];
 }
 
@@ -141,7 +152,8 @@ export async function findByLocation(locationId: string, productId?: string, var
 }
 
 export async function getReservedQuantity(locationId: string, productId: string, variantId?: string): Promise<number> {
-  let sql = 'SELECT COALESCE(SUM("quantity"), 0) as total FROM "inventoryReservation" WHERE "locationId" = $1 AND "productId" = $2 AND "status" = \'reserved\'';
+  let sql =
+    'SELECT COALESCE(SUM("quantity"), 0) as total FROM "inventoryReservation" WHERE "locationId" = $1 AND "productId" = $2 AND "status" = \'reserved\'';
   const params: unknown[] = [locationId, productId];
 
   if (variantId) {

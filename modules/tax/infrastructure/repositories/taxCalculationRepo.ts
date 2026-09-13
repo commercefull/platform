@@ -7,7 +7,6 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 
-
 export type TaxCalculationMethod = 'unitBased' | 'itemBased';
 export type TaxCalculationStatus = 'pending' | 'completed' | 'failed';
 export type TaxCalculationSourceType = 'order' | 'invoice' | 'basket';

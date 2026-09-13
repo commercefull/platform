@@ -32,7 +32,6 @@ class AttributeOptionController {
     }
 
     res.json({ success: true, data: mapOption(option) });
-    
   }
 
   /**
@@ -44,7 +43,6 @@ class AttributeOptionController {
     const options = await attributeOptionRepo.findByAttribute(attributeId);
 
     res.json({ success: true, data: options.map(mapOption) });
-    
   }
 
   /**
@@ -61,7 +59,6 @@ class AttributeOptionController {
     }
 
     res.json({ success: true, data: mapOption(option) });
-    
   }
 
   /**
@@ -69,7 +66,12 @@ class AttributeOptionController {
    * Create a new attribute option
    */
   async createAttributeOption(req: TypedRequest, res: Response): Promise<void> {
-    const { attributeId, value, label, sortOrder } = req.body as { attributeId?: string; value?: string; label?: string; sortOrder?: number };
+    const { attributeId, value, label, sortOrder } = req.body as {
+      attributeId?: string;
+      value?: string;
+      label?: string;
+      sortOrder?: number;
+    };
 
     if (!attributeId || !value) {
       res.status(400).json({ success: false, error: 'attributeId and value are required' });
@@ -107,7 +109,6 @@ class AttributeOptionController {
     });
 
     res.json({ success: true, data: mapOption(updated as ProductAttributeOption) });
-    
   }
 
   /**
@@ -126,7 +127,6 @@ class AttributeOptionController {
     await attributeOptionRepo.delete(id);
 
     res.json({ success: true, message: 'Attribute option deleted successfully' });
-    
   }
 }
 

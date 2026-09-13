@@ -287,7 +287,7 @@ export class DiscountRepo {
    * Delete a product discount
    */
   async delete(id: string): Promise<boolean> {
-    return withTransaction(async (tx) => {
+    return withTransaction(async tx => {
       // Delete related items first
       await tx.query(`DELETE FROM "${DISCOUNT_ITEM_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);
       await tx.query(`DELETE FROM "${DISCOUNT_CUSTOMER_GROUP_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);

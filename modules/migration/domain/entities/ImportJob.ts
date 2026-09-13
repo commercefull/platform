@@ -1,10 +1,4 @@
-export type ImportJobStatus =
-  | 'pending'
-  | 'running'
-  | 'completed'
-  | 'failed'
-  | 'cancelled'
-  | 'paused';
+export type ImportJobStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'paused';
 
 export type ImportJobType =
   | 'full'
@@ -25,7 +19,8 @@ export type ImportJobType =
   | 'brands'
   | 'custom';
 
-export type ImportSource = 'shopify' | 'woocommerce' | 'magento' | 'bigcommerce' | 'prestashop' | 'shopware' | 'wix' | 'squarespace' | 'csv' | 'api' | 'custom';
+export type ImportSource =
+  'shopify' | 'woocommerce' | 'magento' | 'bigcommerce' | 'prestashop' | 'shopware' | 'wix' | 'squarespace' | 'csv' | 'api' | 'custom';
 
 export interface ImportJobStats {
   totalRecords: number;
@@ -102,23 +97,57 @@ export class ImportJob {
     return new ImportJob(props);
   }
 
-  get importJobId(): string { return this.props.importJobId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get jobType(): ImportJobType { return this.props.jobType; }
-  get source(): ImportSource { return this.props.source; }
-  get status(): ImportJobStatus { return this.props.status; }
-  get sourceStoreUrl(): string | undefined { return this.props.sourceStoreUrl; }
-  get sourceApiKey(): string | undefined { return this.props.sourceApiKey; }
-  get sourceConfig(): Record<string, unknown> | undefined { return this.props.sourceConfig; }
-  get stats(): ImportJobStats { return this.props.stats; }
-  get startedAt(): Date | undefined { return this.props.startedAt; }
-  get completedAt(): Date | undefined { return this.props.completedAt; }
-  get errorMessage(): string | undefined { return this.props.errorMessage; }
-  get dryRun(): boolean { return this.props.dryRun; }
-  get autoActivate(): boolean { return this.props.autoActivate; }
-  get metadata(): Record<string, unknown> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get importJobId(): string {
+    return this.props.importJobId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get jobType(): ImportJobType {
+    return this.props.jobType;
+  }
+  get source(): ImportSource {
+    return this.props.source;
+  }
+  get status(): ImportJobStatus {
+    return this.props.status;
+  }
+  get sourceStoreUrl(): string | undefined {
+    return this.props.sourceStoreUrl;
+  }
+  get sourceApiKey(): string | undefined {
+    return this.props.sourceApiKey;
+  }
+  get sourceConfig(): Record<string, unknown> | undefined {
+    return this.props.sourceConfig;
+  }
+  get stats(): ImportJobStats {
+    return this.props.stats;
+  }
+  get startedAt(): Date | undefined {
+    return this.props.startedAt;
+  }
+  get completedAt(): Date | undefined {
+    return this.props.completedAt;
+  }
+  get errorMessage(): string | undefined {
+    return this.props.errorMessage;
+  }
+  get dryRun(): boolean {
+    return this.props.dryRun;
+  }
+  get autoActivate(): boolean {
+    return this.props.autoActivate;
+  }
+  get metadata(): Record<string, unknown> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   start(): void {
     if (this.props.status !== 'pending' && this.props.status !== 'paused') return;

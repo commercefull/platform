@@ -83,11 +83,7 @@ describe('Segment Module Integration Tests', () => {
   describe('Segment evaluation & members', () => {
     it('POST /business/segment/:segmentId/evaluate evaluates segment', async () => {
       if (!orgToken || !segmentId) return;
-      const resp = await client.post(
-        `/business/segment/${segmentId}/evaluate`,
-        {},
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.post(`/business/segment/${segmentId}/evaluate`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       expect([200, 400, 404]).toContain(resp.status);
     });
 
@@ -131,11 +127,7 @@ describe('Segment Module Integration Tests', () => {
 
     it('POST /business/segment/profiles/recompute-all recomputes all profiles', async () => {
       if (!orgToken) return;
-      const resp = await client.post(
-        '/business/segment/profiles/recompute-all',
-        {},
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.post('/business/segment/profiles/recompute-all', {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       expect([200, 202]).toContain(resp.status);
     });
 

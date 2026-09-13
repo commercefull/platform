@@ -97,7 +97,6 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
-  
 };
 
 /**
@@ -117,7 +116,6 @@ export const getOrder = async (req: TypedRequest, res: Response): Promise<void> 
   }
 
   respond(req, res, order, 200);
-  
 };
 
 /**
@@ -209,7 +207,6 @@ export const getOrderStats = async (req: TypedRequest, res: Response): Promise<v
   const stats = await OrderRepo.getOrderStats(Object.keys(filters).length > 0 ? filters : undefined);
 
   respond(req, res, stats, 200);
-  
 };
 
 export const getStoreSalesSummary = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -224,7 +221,6 @@ export const getStoreSalesSummary = async (req: TypedRequest, res: Response): Pr
   });
 
   respond(req, res, summary, 200);
-  
 };
 
 /**
@@ -237,7 +233,6 @@ export const getOrderHistory = async (req: TypedRequest, res: Response): Promise
   const history = await OrderRepo.getStatusHistory(orderId);
 
   respond(req, res, { orderId, history }, 200);
-  
 };
 
 // ============================================================================
@@ -252,7 +247,6 @@ export const listOrderNotes = async (req: TypedRequest, res: Response): Promise<
   const { orderId } = req.params;
   const notes = await orderQueryRepo.findNotesByOrder(orderId);
   respond(req, res, { orderId, notes });
-  
 };
 
 /**
@@ -283,7 +277,6 @@ export const deleteOrderNote = async (req: TypedRequest, res: Response): Promise
     return;
   }
   respond(req, res, { deleted: true });
-  
 };
 
 // ============================================================================
@@ -298,7 +291,6 @@ export const listOrderRefunds = async (req: TypedRequest, res: Response): Promis
   const { orderId } = req.params;
   const refunds = await orderQueryRepo.findRefundsByOrder(orderId);
   respond(req, res, { orderId, refunds });
-  
 };
 
 /**
@@ -309,14 +301,7 @@ export const createOrderRefund = async (req: TypedRequest, res: Response): Promi
   const body = req.body as { orderPaymentId: string; amount: string; reason: string; notes?: string; transactionId?: string };
   const { orderPaymentId, amount, reason, notes, transactionId } = body;
 
-  const command = new CreateOrderRefundCommand(
-    orderPaymentId,
-    parseFloat(amount),
-    reason,
-    notes,
-    transactionId,
-    req.user?.userId,
-  );
+  const command = new CreateOrderRefundCommand(orderPaymentId, parseFloat(amount), reason, notes, transactionId, req.user?.userId);
   const useCase = new CreateOrderRefundUseCase();
   const result = await useCase.execute(command);
 
@@ -339,7 +324,6 @@ export const listFulfillmentPackages = async (req: TypedRequest, res: Response):
   }
   const packages = await orderFulfillmentRepo.findByFulfillment(fulfillmentId as string);
   respond(req, res, { fulfillmentId, packages });
-  
 };
 
 /**
@@ -385,7 +369,6 @@ export const createFulfillmentPackage = async (req: TypedRequest, res: Response)
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
-  
 };
 
 /**
@@ -443,15 +426,16 @@ export const getOrderByNumber = async (req: TypedRequest, res: Response): Promis
 export const getOrderItems = async (req: TypedRequest, res: Response): Promise<void> => {
   const { orderId } = req.params;
   const items = await OrderRepo.getOrderItems(orderId);
-  respond(req, res, items.map(i => i.toJSON()));
+  respond(
+    req,
+    res,
+    items.map(i => i.toJSON()),
+  );
 };
 
 export const getOrderItemById = async (req: TypedRequest, res: Response): Promise<void> => {
   const { orderItemId } = req.params;
-  const row = await queryOne<Record<string, unknown>>(
-    'SELECT * FROM "orderItem" WHERE "orderItemId" = $1',
-    [orderItemId],
-  );
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "orderItem" WHERE "orderItemId" = $1', [orderItemId]);
   if (!row) {
     respondError(req, res, 'Order item not found', 404);
     return;
@@ -467,7 +451,25 @@ export const getOrderItemById = async (req: TypedRequest, res: Response): Promis
 };
 
 export const createOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as { orderId: string; productId: string; sku?: string; name: string; quantity: number; unitPrice: number; discountedUnitPrice?: number; lineTotal?: number; discountTotal?: number; taxTotal?: number; taxRate?: number; taxExempt?: boolean; fulfillmentStatus?: string; giftWrapped?: boolean; isDigital?: boolean; description?: string; variantId?: string };
+  const body = req.body as {
+    orderId: string;
+    productId: string;
+    sku?: string;
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    discountedUnitPrice?: number;
+    lineTotal?: number;
+    discountTotal?: number;
+    taxTotal?: number;
+    taxRate?: number;
+    taxExempt?: boolean;
+    fulfillmentStatus?: string;
+    giftWrapped?: boolean;
+    isDigital?: boolean;
+    description?: string;
+    variantId?: string;
+  };
   const { orderId, productId, name, quantity, unitPrice } = body;
 
   if (!orderId || !productId || !name || !quantity || !unitPrice) {
@@ -502,7 +504,6 @@ export const createOrderItem = async (req: TypedRequest, res: Response): Promise
 
   await OrderRepo.addOrderItem(orderId, item);
   respond(req, res, item.toJSON(), 201);
-  
 };
 
 export const updateOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {

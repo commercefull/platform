@@ -5,15 +5,8 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { logger } from '../../../../libs/logger';
-import {
-  Product as DbProduct,
-  ProductVariant as DbProductVariant,
-  ProductImage as DbProductImage,
-} from '../../../../libs/db/types';
-import {
-  ProductRepository as IProductRepository,
-  ProductFilters,
-} from '../../domain/repositories/ProductRepository';
+import { Product as DbProduct, ProductVariant as DbProductVariant, ProductImage as DbProductImage } from '../../../../libs/db/types';
+import { ProductRepository as IProductRepository, ProductFilters } from '../../domain/repositories/ProductRepository';
 import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 import { Product, ProductImage } from '../../domain/entities/Product';
 import { ProductVariant } from '../../domain/entities/ProductVariant';
@@ -209,7 +202,9 @@ export class ProductRepo implements IProductRepository {
 
   async hardDelete(productId: string): Promise<void> {
     // Remove FK-dependent records before hard deleting
-    await query('DELETE FROM "analyticsReportEvent" WHERE "productId" = $1', [productId]).catch((err: unknown) => { logger.debug('analyticsReportEvent cleanup skipped', { productId, error: err }); });
+    await query('DELETE FROM "analyticsReportEvent" WHERE "productId" = $1', [productId]).catch((err: unknown) => {
+      logger.debug('analyticsReportEvent cleanup skipped', { productId, error: err });
+    });
     await query('DELETE FROM product WHERE "productId" = $1', [productId]);
   }
 
@@ -359,9 +354,7 @@ export class ProductRepo implements IProductRepository {
 
   // Image methods
   async getProductImages(productId: string): Promise<ProductImage[]> {
-    const rows = await query<DbProductImage[]>('SELECT * FROM "productImage" WHERE "productId" = $1 ORDER BY position ASC', [
-      productId,
-    ]);
+    const rows = await query<DbProductImage[]>('SELECT * FROM "productImage" WHERE "productId" = $1 ORDER BY position ASC', [productId]);
     return (rows || []).map(row => ({
       imageId: row.productImageId,
       url: row.url,
@@ -551,12 +544,7 @@ export class ProductRepo implements IProductRepository {
       productId: row.productId,
       sku: row.sku,
       name: row.name || '',
-      price: Price.create(
-        parseFloat(String(row.price || 0)),
-        currency,
-        undefined,
-        undefined,
-      ),
+      price: Price.create(parseFloat(String(row.price || 0)), currency, undefined, undefined),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
         weightUnit: 'g',
@@ -576,4 +564,5 @@ export class ProductRepo implements IProductRepository {
       updatedAt: new Date(row.updatedAt),
     });
   }
-}export default new ProductRepo();
+}
+export default new ProductRepo();

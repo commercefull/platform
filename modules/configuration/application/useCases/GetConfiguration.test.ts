@@ -1,4 +1,4 @@
-import { GetConfigurationUseCase} from './GetConfiguration';
+import { GetConfigurationUseCase } from './GetConfiguration';
 
 describe('GetConfigurationUseCase', () => {
   let useCase: GetConfigurationUseCase;
@@ -11,7 +11,12 @@ describe('GetConfigurationUseCase', () => {
 
   it('should return config at requested scope', async () => {
     mockRepo.findByKey.mockResolvedValue({
-      key: 'site.name', value: 'MyStore', scope: 'store', scopeId: 's1', updatedAt: new Date(), updatedBy: 'admin',
+      key: 'site.name',
+      value: 'MyStore',
+      scope: 'store',
+      scopeId: 's1',
+      updatedAt: new Date(),
+      updatedBy: 'admin',
     });
 
     const result = await useCase.execute({ key: 'site.name', scope: 'store', scopeId: 's1' });

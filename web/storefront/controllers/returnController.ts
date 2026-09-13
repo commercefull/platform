@@ -31,7 +31,6 @@ export const listReturns = async (req: TypedRequest, res: Response) => {
     pageName: 'My Returns',
     returns,
   });
-  
 };
 
 /**
@@ -61,7 +60,6 @@ export const returnRequestForm = async (req: TypedRequest, res: Response) => {
     order,
     items: items || [],
   });
-  
 };
 
 /**
@@ -86,14 +84,17 @@ export const submitReturnRequest = async (req: TypedRequest, res: Response) => {
     });
   }
 
-  const result = await manageStorefrontReturnsUseCase.createSimple(orderId, (reason as string) || 'other', (description as string) || undefined);
+  const result = await manageStorefrontReturnsUseCase.createSimple(
+    orderId,
+    (reason as string) || 'other',
+    (description as string) || undefined,
+  );
 
   if (result) {
     return res.redirect(`/returns`);
   }
 
   return res.redirect('/orders');
-  
 };
 
 /**
@@ -120,5 +121,4 @@ export const viewReturn = async (req: TypedRequest, res: Response) => {
     pageName: `Return #${returnId}`,
     returnRequest,
   });
-  
 };

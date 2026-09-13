@@ -39,7 +39,10 @@ interface AssignUserBody {
   permissions?: string[];
 }
 
-export const assignUserToStore = async (req: TypedRequest<Record<string, string>, unknown, AssignUserBody>, res: Response): Promise<void> => {
+export const assignUserToStore = async (
+  req: TypedRequest<Record<string, string>, unknown, AssignUserBody>,
+  res: Response,
+): Promise<void> => {
   const result = await assignUserToStoreUseCase.execute({
     userId: req.params.userId,
     storeId: req.body.storeId,
@@ -49,23 +52,19 @@ export const assignUserToStore = async (req: TypedRequest<Record<string, string>
   });
 
   res.status(201).json({ success: true, data: result });
-  
 };
 
 export const getUserStores = async (req: TypedRequest, res: Response): Promise<void> => {
   const result = await getUserStoresUseCase.execute(req.params.userId);
   res.json({ success: true, data: result });
-  
 };
 
 export const listStoreUsers = async (req: TypedRequest, res: Response): Promise<void> => {
   const result = await listStoreUsersUseCase.execute(req.params.storeId);
   res.json({ success: true, data: result });
-  
 };
 
 export const removeUserFromStore = async (req: TypedRequest, res: Response): Promise<void> => {
   await removeUserFromStoreUseCase.execute(req.params.userId, req.params.storeId);
   res.json({ success: true });
-  
 };

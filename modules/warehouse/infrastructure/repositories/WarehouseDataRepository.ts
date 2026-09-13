@@ -15,7 +15,12 @@ import warehouseReceivingRepo from './warehouseReceivingRepo';
 import warehousePickPackRepo from './warehousePickPackRepo';
 
 // Re-export types for backward compatibility
-export type { Warehouse, WarehouseCreateParams, WarehouseUpdateParams, WarehouseUpdateParams as WarehouseUpdateInput } from './warehouseRepo';
+export type {
+  Warehouse,
+  WarehouseCreateParams,
+  WarehouseUpdateParams,
+  WarehouseUpdateParams as WarehouseUpdateInput,
+} from './warehouseRepo';
 
 class WarehouseDataRepository {
   readonly warehouses = warehouseRepo;

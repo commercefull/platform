@@ -3,7 +3,7 @@
  */
 
 exports.up = function (knex) {
-  return knex.schema.createTable('samlProvider', (table) => {
+  return knex.schema.createTable('samlProvider', table => {
     table.string('providerId').primary();
     table.string('organizationId').notNullable().index();
     table.string('name').notNullable();

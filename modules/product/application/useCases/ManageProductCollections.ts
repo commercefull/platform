@@ -1,4 +1,9 @@
-import type { ProductCollection, ProductCollectionCreateParams, ProductCollectionUpdateParams, ProductCollectionPort } from '../../domain/repositories/ProductCatalogPorts';
+import type {
+  ProductCollection,
+  ProductCollectionCreateParams,
+  ProductCollectionUpdateParams,
+  ProductCollectionPort,
+} from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageProductCollectionsUseCase {
   constructor(private readonly productCollectionRepo: ProductCollectionPort) {}

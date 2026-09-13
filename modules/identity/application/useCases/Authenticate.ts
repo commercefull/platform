@@ -5,7 +5,12 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { UserRepository } from '../../domain/repositories/UserRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { InvalidCredentialsError, AccountLockedError, AccountNotActiveError, InvalidRefreshTokenError } from '../../domain/errors/IdentityErrors';
+import {
+  InvalidCredentialsError,
+  AccountLockedError,
+  AccountNotActiveError,
+  InvalidRefreshTokenError,
+} from '../../domain/errors/IdentityErrors';
 
 // ============================================================================
 // Commands

@@ -2,7 +2,7 @@
  * Tests for RBAC middleware.
  */
 
-import { Request, Response} from 'express';
+import { Request, Response } from 'express';
 import { requirePermission, requireStoreAccess, buildContextFromRequest } from './middleware';
 
 // Mock checkPermission to control results

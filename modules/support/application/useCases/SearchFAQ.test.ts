@@ -1,4 +1,4 @@
-import { SearchFAQUseCase} from './SearchFAQ';
+import { SearchFAQUseCase } from './SearchFAQ';
 
 describe('SearchFAQUseCase', () => {
   let useCase: SearchFAQUseCase;
@@ -6,9 +6,11 @@ describe('SearchFAQUseCase', () => {
 
   beforeEach(() => {
     mockRepo = {
-      searchFAQ: jest.fn().mockResolvedValue([
-        { faqId: 'f1', question: 'How to return?', answer: 'Use the returns page.', categoryName: 'Returns', helpfulness: 10 },
-      ]),
+      searchFAQ: jest
+        .fn()
+        .mockResolvedValue([
+          { faqId: 'f1', question: 'How to return?', answer: 'Use the returns page.', categoryName: 'Returns', helpfulness: 10 },
+        ]),
     };
     useCase = new SearchFAQUseCase(mockRepo as never);
   });

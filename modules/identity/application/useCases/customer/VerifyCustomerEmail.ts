@@ -4,7 +4,14 @@
 
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { logger } from '../../../../../libs/logger';
-import { VerificationTokenRequiredError, InvalidVerificationTokenError, VerificationTokenAlreadyUsedError, VerificationTokenExpiredError, EmailRequiredOnlyError, EmailAlreadyVerifiedError } from '../../../domain/errors/IdentityErrors';
+import {
+  VerificationTokenRequiredError,
+  InvalidVerificationTokenError,
+  VerificationTokenAlreadyUsedError,
+  VerificationTokenExpiredError,
+  EmailRequiredOnlyError,
+  EmailAlreadyVerifiedError,
+} from '../../../domain/errors/IdentityErrors';
 
 export interface VerifyEmailInput {
   token: string;

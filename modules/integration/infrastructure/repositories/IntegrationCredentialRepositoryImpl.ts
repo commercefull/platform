@@ -27,19 +27,24 @@ export class IntegrationCredentialRepositoryImpl implements IntegrationCredentia
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
-        props.credentialId, props.integrationId, props.type, props.label,
-        props.encryptedData, props.iv, props.authTag, props.expiresAt, props.isActive,
-        props.createdAt, props.updatedAt,
+        props.credentialId,
+        props.integrationId,
+        props.type,
+        props.label,
+        props.encryptedData,
+        props.iv,
+        props.authTag,
+        props.expiresAt,
+        props.isActive,
+        props.createdAt,
+        props.updatedAt,
       ],
     );
     return credential;
   }
 
   async findById(credentialId: string): Promise<IntegrationCredential | null> {
-    const row = await queryOne<CredentialDbRow>(
-      `SELECT * FROM "${Table.IntegrationCredential}" WHERE "credentialId" = $1`,
-      [credentialId],
-    );
+    const row = await queryOne<CredentialDbRow>(`SELECT * FROM "${Table.IntegrationCredential}" WHERE "credentialId" = $1`, [credentialId]);
     if (!row) return null;
     return IntegrationCredential.reconstitute(this.mapRowToProps(row));
   }
@@ -49,7 +54,7 @@ export class IntegrationCredentialRepositoryImpl implements IntegrationCredentia
       `SELECT * FROM "${Table.IntegrationCredential}" WHERE "integrationId" = $1 ORDER BY "createdAt" DESC`,
       [integrationId],
     );
-    return (rows ?? []).map((r) => IntegrationCredential.reconstitute(this.mapRowToProps(r)));
+    return (rows ?? []).map(r => IntegrationCredential.reconstitute(this.mapRowToProps(r)));
   }
 
   async findActiveByIntegration(integrationId: string): Promise<IntegrationCredential[]> {
@@ -57,7 +62,7 @@ export class IntegrationCredentialRepositoryImpl implements IntegrationCredentia
       `SELECT * FROM "${Table.IntegrationCredential}" WHERE "integrationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC`,
       [integrationId],
     );
-    return (rows ?? []).map((r) => IntegrationCredential.reconstitute(this.mapRowToProps(r)));
+    return (rows ?? []).map(r => IntegrationCredential.reconstitute(this.mapRowToProps(r)));
   }
 
   async update(credential: IntegrationCredential): Promise<IntegrationCredential> {
@@ -67,10 +72,7 @@ export class IntegrationCredentialRepositoryImpl implements IntegrationCredentia
         "label" = $2, "encryptedData" = $3, "iv" = $4, "authTag" = $5,
         "expiresAt" = $6, "isActive" = $7, "updatedAt" = $8
       WHERE "credentialId" = $1`,
-      [
-        props.credentialId, props.label, props.encryptedData, props.iv, props.authTag,
-        props.expiresAt, props.isActive, props.updatedAt,
-      ],
+      [props.credentialId, props.label, props.encryptedData, props.iv, props.authTag, props.expiresAt, props.isActive, props.updatedAt],
     );
     return credential;
   }

@@ -67,9 +67,7 @@ interface AdjustStockRepositoryPort {
 }
 
 export class AdjustStockUseCase {
-  constructor(
-    private readonly inventoryRepository: AdjustStockRepositoryPort,
-  ) {}
+  constructor(private readonly inventoryRepository: AdjustStockRepositoryPort) {}
 
   async execute(input: AdjustStockInput): Promise<AdjustStockOutput> {
     // Get current inventory

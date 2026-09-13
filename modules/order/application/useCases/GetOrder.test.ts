@@ -98,9 +98,7 @@ describe('GetOrderUseCase', () => {
     const repo = createMockOrderRepo(order);
     const useCase = new GetOrderUseCase(repo);
 
-    await expect(
-      useCase.execute(new GetOrderCommand('o-1', undefined, 'wrong-customer')),
-    ).rejects.toThrow(OrderPermissionError);
+    await expect(useCase.execute(new GetOrderCommand('o-1', undefined, 'wrong-customer'))).rejects.toThrow(OrderPermissionError);
   });
 
   it('should throw OrderIdOrNumberRequiredError when neither ID nor number provided', () => {

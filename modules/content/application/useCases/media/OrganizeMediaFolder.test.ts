@@ -9,9 +9,15 @@ describe('OrganizeMediaFolderUseCase', () => {
     mockRepo = {
       findFolderById: jest.fn().mockResolvedValue({ folderId: 'f1', name: 'Parent', path: 'Parent', depth: 0 }),
       createFolder: jest.fn().mockImplementation(async (input: { name: string; parentId: string | null; path: string; depth: number }) => ({
-        contentMediaFolderId: 'f2', name: input.name, path: input.path, depth: input.depth, createdAt: new Date(),
+        contentMediaFolderId: 'f2',
+        name: input.name,
+        path: input.path,
+        depth: input.depth,
+        createdAt: new Date(),
       })),
-      updateFolder: jest.fn().mockResolvedValue({ contentMediaFolderId: 'f2', name: 'Child', path: 'NewParent/Child', depth: 1, createdAt: new Date() }),
+      updateFolder: jest
+        .fn()
+        .mockResolvedValue({ contentMediaFolderId: 'f2', name: 'Child', path: 'NewParent/Child', depth: 1, createdAt: new Date() }),
       moveMediaToFolder: jest.fn().mockResolvedValue(undefined),
       getFolderTree: jest.fn().mockResolvedValue([]),
       deleteFolder: jest.fn().mockResolvedValue(undefined),

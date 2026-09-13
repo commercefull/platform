@@ -5,7 +5,16 @@
 
 import { query, queryOne } from '../../../../libs/db';
 
-import { TaxZone, TaxRate, TaxCategory, CustomerTaxExemption, AddressInput, TaxCalculationResult, LineItemTax, TaxExemptionStatus } from '../../taxTypes';
+import {
+  TaxZone,
+  TaxRate,
+  TaxCategory,
+  CustomerTaxExemption,
+  AddressInput,
+  TaxCalculationResult,
+  LineItemTax,
+  TaxExemptionStatus,
+} from '../../taxTypes';
 
 // ============================================================================
 // Table Constants
@@ -35,13 +44,7 @@ export class TaxQueryRepo {
     return { ...result, id: result.taxRateId } as TaxRate;
   }
 
-  async findAllTaxRates(
-    status?: boolean,
-    country?: string,
-    region?: string,
-    limit: number = 50,
-    offset: number = 0,
-  ): Promise<TaxRate[]> {
+  async findAllTaxRates(status?: boolean, country?: string, region?: string, limit: number = 50, offset: number = 0): Promise<TaxRate[]> {
     const params: unknown[] = [];
     let sql = `
       SELECT tr.*
@@ -182,7 +185,7 @@ export class TaxQueryRepo {
   }
 
   // Customer Tax Exemption query methods
-  async findCustomerTaxExemptions(customerId: string, status: TaxExemptionStatus = 'active'): Promise<CustomerTaxExemption[]> {
+  async findCustomerTaxExemptions(customerId: string, status: TaxExemptionStatus = 'approved'): Promise<CustomerTaxExemption[]> {
     try {
       const results = await query<Record<string, unknown>[]>(
         `SELECT * 
@@ -194,7 +197,18 @@ export class TaxQueryRepo {
         [customerId, status],
       );
 
-      return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId })) as CustomerTaxExemption[];
+      return (results || []).map(r => {
+        const parsed = { ...r, id: r.customerTaxExemptionId } as CustomerTaxExemption;
+        // Parse jsonb applicableTaxCategoryIds if present (comes as string from pg)
+        if (typeof r.applicableTaxCategoryIds === 'string') {
+          try {
+            parsed.applicableTaxCategoryIds = JSON.parse(r.applicableTaxCategoryIds as string);
+          } catch {
+            parsed.applicableTaxCategoryIds = null;
+          }
+        }
+        return parsed;
+      });
     } catch {
       return [];
     }
@@ -224,6 +238,53 @@ export class TaxQueryRepo {
     );
 
     return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId })) as CustomerTaxExemption[];
+  }
+
+  /**
+   * Find all tax exemptions (for admin management).
+   * Epic F — admin exemption management screen.
+   */
+  async findAllTaxExemptions(status?: TaxExemptionStatus, limit = 50, offset = 0): Promise<CustomerTaxExemption[]> {
+    let sql = `SELECT * FROM "customerTaxExemption"`;
+    const params: unknown[] = [];
+    if (status) {
+      sql += ` WHERE "status" = $1`;
+      params.push(status);
+    }
+    sql += ` ORDER BY "createdAt" DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(limit, offset);
+    const results = await query<Record<string, unknown>[]>(sql, params);
+    return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId })) as CustomerTaxExemption[];
+  }
+
+  /**
+   * Get tax rate for a specific address and optional tax category.
+   * If `taxCategoryId` is provided, looks up rates for that specific category.
+   * Falls back to the default category if no category-specific rate is found.
+   */
+  async getTaxRateForAddressAndCategory(address: AddressInput, taxCategoryId?: string): Promise<number> {
+    // Find the appropriate tax zone for this address
+    const taxZone = await this.findTaxZoneForAddress(address.country, address.region, address.postalCode, address.city);
+
+    if (!taxZone) return 0;
+
+    // If a specific tax category is provided, try to find rates for it
+    if (taxCategoryId) {
+      const categoryRates = await this.findTaxRatesByCategoryAndZone(taxCategoryId, taxZone.id, true);
+      if (categoryRates && categoryRates.length > 0) {
+        return categoryRates[0].rate; // highest priority (sorted DESC)
+      }
+      // Fall through to default category if no category-specific rate found
+    }
+
+    // Use the default tax category
+    const defaultCategory = await this.findDefaultTaxCategory();
+    if (!defaultCategory) return 0;
+
+    const taxRates = await this.findTaxRatesByCategoryAndZone(defaultCategory.id, taxZone.id, true);
+    if (!taxRates || taxRates.length === 0) return 0;
+
+    return taxRates[0].rate;
   }
 
   /**

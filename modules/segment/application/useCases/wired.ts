@@ -1,11 +1,5 @@
 import { SegmentRepositoryImpl, CustomerProfileRepositoryImpl, SegmentMembershipRepositoryImpl } from '../../infrastructure';
-import {
-  CreateSegmentUseCase,
-  UpdateSegmentUseCase,
-  DeleteSegmentUseCase,
-  GetSegmentUseCase,
-  ListSegmentsUseCase,
-} from './SegmentCrud';
+import { CreateSegmentUseCase, UpdateSegmentUseCase, DeleteSegmentUseCase, GetSegmentUseCase, ListSegmentsUseCase } from './SegmentCrud';
 import {
   GetCustomerProfileUseCase,
   ListCustomerProfilesUseCase,

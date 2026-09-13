@@ -39,11 +39,7 @@ describe('Organization: Product Lifecycle', () => {
     });
 
     it('should reject creation without productTypeId', async () => {
-      const res = await client.post(
-        '/business/products',
-        { name: 'No Type' },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.post('/business/products', { name: 'No Type' }, { headers: { Authorization: `Bearer ${adminToken}` } });
       expect(res.status).toBe(400);
       expect(res.data.success).toBe(false);
     });
@@ -214,23 +210,39 @@ describe('Organization: Product Lifecycle', () => {
       );
       const draftId = createRes.data.data?.productId;
       if (!draftId) return;
-      const res = await client.post(`/business/products/${draftId}/publish`, {}, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
+      const res = await client.post(
+        `/business/products/${draftId}/publish`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
       expect(res.status).toBeGreaterThanOrEqual(400);
-      await client.delete(`/business/products/${draftId}?permanent=true`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/business/products/${draftId}?permanent=true`, {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should publish an ACTIVE product', async () => {
       if (!createdProductId) return;
-      await client.put(`/business/products/${createdProductId}/status`, { status: 'active' }, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      }).catch(() => {});
-      const res = await client.post(`/business/products/${createdProductId}/publish`, {}, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
+      await client
+        .put(
+          `/business/products/${createdProductId}/status`,
+          { status: 'active' },
+          {
+            headers: { Authorization: `Bearer ${adminToken}` },
+          },
+        )
+        .catch(() => {});
+      const res = await client.post(
+        `/business/products/${createdProductId}/publish`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
       expect(res.status).toBe(200);
       expect(res.data.data.visibility).toBe('visible');
       expect(res.data.data.publishedAt).toBeTruthy();
@@ -238,9 +250,13 @@ describe('Organization: Product Lifecycle', () => {
 
     it('should unpublish a product', async () => {
       if (!createdProductId) return;
-      const res = await client.post(`/business/products/${createdProductId}/unpublish`, {}, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
+      const res = await client.post(
+        `/business/products/${createdProductId}/unpublish`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
       expect(res.status).toBe(200);
       expect(['hidden', 'not_visible']).toContain(res.data.data.visibility);
     });
@@ -284,18 +300,16 @@ describe('Organization: Product Lifecycle', () => {
 
   describe('Store availability', () => {
     it('should return store availability for a valid product', async () => {
-      const res = await client.get(
-        `/business/products/${SEEDED_PRODUCT_1_ID}/store-availability`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.get(`/business/products/${SEEDED_PRODUCT_1_ID}/store-availability`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       expectStatus(res, 200);
     });
 
     it('should return 404 for non-existent product store availability', async () => {
-      const res = await client.get(
-        '/business/products/00000000-0000-0000-0000-999999999999/store-availability',
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.get('/business/products/00000000-0000-0000-0000-999999999999/store-availability', {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       expect(res.status).toBe(404);
     });
   });

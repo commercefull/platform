@@ -7,11 +7,14 @@ import { CreateCouponUseCase, CreateCouponCommand } from '../../application/useC
 
 export const couponResolvers = {
   Query: {
-    validateCoupon: async (_parent: unknown, args: {
-      code: string;
-      orderValue: number;
-      customerId?: string;
-    }) => {
+    validateCoupon: async (
+      _parent: unknown,
+      args: {
+        code: string;
+        orderValue: number;
+        customerId?: string;
+      },
+    ) => {
       const useCase = new ValidateCouponUseCase(CouponRepo);
       const command = new ValidateCouponCommand(args.code, args.orderValue, args.customerId);
       return useCase.execute(command);
@@ -19,26 +22,50 @@ export const couponResolvers = {
   },
 
   Mutation: {
-    createCoupon: async (_parent: unknown, args: {
-      input: {
-        code: string; name: string; type: string; value: number; createdBy: string;
-        description?: string; currency?: string; minOrderValue?: number;
-        maxDiscountAmount?: number; usageType?: string; usageLimit?: number;
-        customerUsageLimit?: number; startsAt?: string; expiresAt?: string;
-        applicableProducts?: string[]; applicableCategories?: string[];
-      };
-    }, context: GraphQLAuthContext) => {
+    createCoupon: async (
+      _parent: unknown,
+      args: {
+        input: {
+          code: string;
+          name: string;
+          type: string;
+          value: number;
+          createdBy: string;
+          description?: string;
+          currency?: string;
+          minOrderValue?: number;
+          maxDiscountAmount?: number;
+          usageType?: string;
+          usageLimit?: number;
+          customerUsageLimit?: number;
+          startsAt?: string;
+          expiresAt?: string;
+          applicableProducts?: string[];
+          applicableCategories?: string[];
+        };
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new CreateCouponUseCase(CouponRepo);
       const i = args.input;
       const command = new CreateCouponCommand(
-        i.code, i.name, i.type as 'percentage' | 'fixed_amount' | 'free_shipping',
-        i.value, i.createdBy, i.description, i.currency, i.minOrderValue,
-        i.maxDiscountAmount, i.usageType as 'single_use' | 'multi_use' | 'unlimited',
-        i.usageLimit, i.customerUsageLimit,
+        i.code,
+        i.name,
+        i.type as 'percentage' | 'fixed_amount' | 'free_shipping',
+        i.value,
+        i.createdBy,
+        i.description,
+        i.currency,
+        i.minOrderValue,
+        i.maxDiscountAmount,
+        i.usageType as 'single_use' | 'multi_use' | 'unlimited',
+        i.usageLimit,
+        i.customerUsageLimit,
         i.startsAt ? new Date(i.startsAt) : undefined,
         i.expiresAt ? new Date(i.expiresAt) : undefined,
-        i.applicableProducts, i.applicableCategories,
+        i.applicableProducts,
+        i.applicableCategories,
       );
       const coupon = await useCase.execute(command);
       return {

@@ -5,4 +5,3 @@
 
 export * from './domain/repositories/ReportingRepository';
 export * from './domain/errors/ReportingErrors';
-

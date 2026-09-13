@@ -34,15 +34,33 @@ describe('ReturnRequestRepositoryImpl', () => {
 
   it('findById returns return request when found', async () => {
     const mockRow = {
-      orderReturnId: 'r1', orderId: 'o1', returnNumber: 'RET-001',
-      customerId: 'c1', status: 'requested', returnType: 'refund',
-      requestedAt: new Date(), approvedAt: null, receivedAt: null, completedAt: null,
-      rmaNumber: null, paymentRefundId: null, returnShippingPaid: false,
-      returnShippingAmount: null, returnShippingLabel: null, returnCarrier: 'custom',
-      returnTrackingNumber: null, returnTrackingUrl: null, returnReason: 'damaged',
-      returnInstructions: null, customerNotes: null, adminNotes: null,
-      requiresInspection: true, inspectionPassedItems: null, inspectionFailedItems: null,
-      createdAt: new Date(), updatedAt: new Date(),
+      orderReturnId: 'r1',
+      orderId: 'o1',
+      returnNumber: 'RET-001',
+      customerId: 'c1',
+      status: 'requested',
+      returnType: 'refund',
+      requestedAt: new Date(),
+      approvedAt: null,
+      receivedAt: null,
+      completedAt: null,
+      rmaNumber: null,
+      paymentRefundId: null,
+      returnShippingPaid: false,
+      returnShippingAmount: null,
+      returnShippingLabel: null,
+      returnCarrier: 'custom',
+      returnTrackingNumber: null,
+      returnTrackingUrl: null,
+      returnReason: 'damaged',
+      returnInstructions: null,
+      customerNotes: null,
+      adminNotes: null,
+      requiresInspection: true,
+      inspectionPassedItems: null,
+      inspectionFailedItems: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     mockedQueryOne.mockResolvedValueOnce(mockRow as never);
     mockedQuery.mockResolvedValueOnce([] as never);
@@ -65,15 +83,33 @@ describe('ReturnRequestRepositoryImpl', () => {
       items: [{ orderItemId: 'i1', quantity: 1, returnReason: 'damaged', condition: 'new', restockItem: false }],
     });
     const mockRow = {
-      orderReturnId: 'r1', orderId: 'o1', returnNumber: ret.returnNumber,
-      customerId: null, status: 'requested', returnType: 'refund',
-      requestedAt: new Date(), approvedAt: null, receivedAt: null, completedAt: null,
-      rmaNumber: null, paymentRefundId: null, returnShippingPaid: false,
-      returnShippingAmount: null, returnShippingLabel: null, returnCarrier: 'custom',
-      returnTrackingNumber: null, returnTrackingUrl: null, returnReason: null,
-      returnInstructions: null, customerNotes: null, adminNotes: null,
-      requiresInspection: true, inspectionPassedItems: null, inspectionFailedItems: null,
-      createdAt: new Date(), updatedAt: new Date(),
+      orderReturnId: 'r1',
+      orderId: 'o1',
+      returnNumber: ret.returnNumber,
+      customerId: null,
+      status: 'requested',
+      returnType: 'refund',
+      requestedAt: new Date(),
+      approvedAt: null,
+      receivedAt: null,
+      completedAt: null,
+      rmaNumber: null,
+      paymentRefundId: null,
+      returnShippingPaid: false,
+      returnShippingAmount: null,
+      returnShippingLabel: null,
+      returnCarrier: 'custom',
+      returnTrackingNumber: null,
+      returnTrackingUrl: null,
+      returnReason: null,
+      returnInstructions: null,
+      customerNotes: null,
+      adminNotes: null,
+      requiresInspection: true,
+      inspectionPassedItems: null,
+      inspectionFailedItems: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     mockedQueryOne.mockResolvedValueOnce(mockRow as never);
     mockedQuery.mockResolvedValue([] as never);
@@ -159,7 +195,11 @@ describe('StoreCreditRepositoryImpl', () => {
 
   it('getBalance returns zero balance for new customer', async () => {
     mockedQueryOne.mockResolvedValueOnce({
-      balance: '0', totalCredits: '0', totalDebits: '0', pendingExpiry: '0', lastEntryAt: null,
+      balance: '0',
+      totalCredits: '0',
+      totalDebits: '0',
+      pendingExpiry: '0',
+      lastEntryAt: null,
     } as never);
     const result = await repo.getBalance('c1');
     expect(result.balance).toBe(0);
@@ -170,12 +210,16 @@ describe('StoreCreditRepositoryImpl', () => {
 
   it('getBalance returns correct balance', async () => {
     mockedQueryOne.mockResolvedValueOnce({
-      balance: '150.50', totalCredits: '200', totalDebits: '49.50', pendingExpiry: '50', lastEntryAt: new Date(),
+      balance: '150.50',
+      totalCredits: '200',
+      totalDebits: '49.50',
+      pendingExpiry: '50',
+      lastEntryAt: new Date(),
     } as never);
     const result = await repo.getBalance('c1');
-    expect(result.balance).toBe(150.50);
+    expect(result.balance).toBe(150.5);
     expect(result.totalCredits).toBe(200);
-    expect(result.totalDebits).toBe(49.50);
+    expect(result.totalDebits).toBe(49.5);
     expect(result.pendingExpiry).toBe(50);
     expect(result.lastEntryAt).not.toBeNull();
   });

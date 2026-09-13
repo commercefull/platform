@@ -59,11 +59,7 @@ describe('Returns Module Integration Tests', () => {
   describe('Return workflow', () => {
     it('POST /business/returns/:returnId/approve', async () => {
       if (!orgToken || !returnId) return;
-      const resp = await client.post(
-        `/business/returns/${returnId}/approve`,
-        {},
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.post(`/business/returns/${returnId}/approve`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       expect([200, 400, 404]).toContain(resp.status);
     });
 
@@ -79,11 +75,7 @@ describe('Returns Module Integration Tests', () => {
 
     it('POST /business/returns/:returnId/cancel', async () => {
       if (!orgToken || !returnId) return;
-      const resp = await client.post(
-        `/business/returns/${returnId}/cancel`,
-        {},
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.post(`/business/returns/${returnId}/cancel`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       expect([200, 400, 404]).toContain(resp.status);
     });
   });

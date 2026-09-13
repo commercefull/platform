@@ -80,9 +80,7 @@ describe('GetProductUseCase', () => {
     const repo = createMockProductRepo(product);
     const useCase = new GetProductUseCase(repo);
 
-    const result = await useCase.execute(
-      new GetProductCommand(undefined, undefined, 'SKU-1'),
-    );
+    const result = await useCase.execute(new GetProductCommand(undefined, undefined, 'SKU-1'));
 
     expect(result).not.toBeNull();
     expect(repo.findBySku).toHaveBeenCalledWith('SKU-1');

@@ -76,9 +76,7 @@ describe('CapturePaymentUseCase', () => {
     const gateway = createMockGateway(true);
     const useCase = new CapturePaymentUseCase(repo, gateway);
 
-    await expect(
-      useCase.execute({ transactionId: 'nonexistent' }),
-    ).rejects.toThrow(TransactionNotFoundError);
+    await expect(useCase.execute({ transactionId: 'nonexistent' })).rejects.toThrow(TransactionNotFoundError);
   });
 
   it('should throw TransactionCannotBeCapturedError when status is not authorized', async () => {
@@ -87,9 +85,7 @@ describe('CapturePaymentUseCase', () => {
     const gateway = createMockGateway(true);
     const useCase = new CapturePaymentUseCase(repo, gateway);
 
-    await expect(
-      useCase.execute({ transactionId: 'tx-1' }),
-    ).rejects.toThrow(TransactionCannotBeCapturedError);
+    await expect(useCase.execute({ transactionId: 'tx-1' })).rejects.toThrow(TransactionCannotBeCapturedError);
   });
 
   it('should throw CaptureAmountExceedsAuthorizedError when amount exceeds authorized', async () => {
@@ -98,9 +94,7 @@ describe('CapturePaymentUseCase', () => {
     const gateway = createMockGateway(true);
     const useCase = new CapturePaymentUseCase(repo, gateway);
 
-    await expect(
-      useCase.execute({ transactionId: 'tx-1', amount: 150 }),
-    ).rejects.toThrow(CaptureAmountExceedsAuthorizedError);
+    await expect(useCase.execute({ transactionId: 'tx-1', amount: 150 })).rejects.toThrow(CaptureAmountExceedsAuthorizedError);
   });
 
   it('should throw CaptureFailedError when gateway returns failure', async () => {
@@ -109,9 +103,7 @@ describe('CapturePaymentUseCase', () => {
     const gateway = createMockGateway(false, undefined, 'Gateway declined');
     const useCase = new CapturePaymentUseCase(repo, gateway);
 
-    await expect(
-      useCase.execute({ transactionId: 'tx-1' }),
-    ).rejects.toThrow(CaptureFailedError);
+    await expect(useCase.execute({ transactionId: 'tx-1' })).rejects.toThrow(CaptureFailedError);
 
     expect(repo.updateTransaction).toHaveBeenCalled();
   });

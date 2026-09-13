@@ -139,17 +139,25 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should approve a supplier', async () => {
-      const response = await client.post(`/business/suppliers/${SEEDED_SUPPLIER_IDS.QUALITY_GOODS}/approve`, {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/suppliers/${SEEDED_SUPPLIER_IDS.QUALITY_GOODS}/approve`,
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 200);
     });
 
     it('should suspend a supplier', async () => {
-      const response = await client.post(`/business/suppliers/${SEEDED_SUPPLIER_IDS.QUALITY_GOODS}/suspend`, {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/suppliers/${SEEDED_SUPPLIER_IDS.QUALITY_GOODS}/suspend`,
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 200);
     });
@@ -277,37 +285,53 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should update a purchase order', async () => {
-      const response = await client.put(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}`, {
-        notes: 'Updated PO notes',
-      }, {
-        headers: authHeaders(),
-      });
+      const response = await client.put(
+        `/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}`,
+        {
+          notes: 'Updated PO notes',
+        },
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 200);
     });
 
     it('should send a purchase order', async () => {
-      const response = await client.post(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}/send`, {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}/send`,
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 200);
     });
 
     it('should approve a purchase order', async () => {
-      const response = await client.post(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}/approve`, {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}/approve`,
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 200);
     });
 
     it('should cancel a purchase order', async () => {
-      const response = await client.post(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}/cancel`, {
-        reason: 'Test cancellation',
-      }, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_002}/cancel`,
+        {
+          reason: 'Test cancellation',
+        },
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 200);
     });
@@ -327,15 +351,19 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('should add a purchase order item', async () => {
-      const response = await client.post(`/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_001}/items`, {
-        productId: '00000000-0000-0000-0000-000000000002',
-        sku: 'TEST-SKU-002',
-        name: 'Test Product 2',
-        quantity: 5,
-        unitCost: 19.99,
-      }, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/purchase-orders/${SEEDED_PURCHASE_ORDER_IDS.PO_001}/items`,
+        {
+          productId: '00000000-0000-0000-0000-000000000002',
+          sku: 'TEST-SKU-002',
+          name: 'Test Product 2',
+          quantity: 5,
+          unitCost: 19.99,
+        },
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 201);
     });

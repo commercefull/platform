@@ -12,7 +12,9 @@ import { AbandonCheckoutUseCase, AbandonCheckoutCommand } from './AbandonCheckou
 import { NotFoundError } from '../../../../libs/errors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('AbandonCheckoutUseCase', () => {
   let useCase: AbandonCheckoutUseCase;

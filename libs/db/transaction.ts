@@ -32,9 +32,7 @@ export interface TxClient {
  * });
  * ```
  */
-export async function withTransaction<T>(
-  fn: (tx: TxClient) => Promise<T>,
-): Promise<T> {
+export async function withTransaction<T>(fn: (tx: TxClient) => Promise<T>): Promise<T> {
   const pool = getActivePool();
   const client = await pool.connect();
 

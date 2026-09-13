@@ -27,14 +27,9 @@ export class AuditAdminController {
       offset: parseInt(String(req.query.offset ?? '0'), 10),
     };
 
-    const activeFilters = Object.fromEntries(
-      Object.entries(filters).filter(([, v]) => v),
-    );
+    const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v));
 
-    const result = await auditRepository.findAll(
-      Object.keys(activeFilters).length > 0 ? activeFilters as never : undefined,
-      pagination,
-    );
+    const result = await auditRepository.findAll(Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined, pagination);
 
     res.json(result);
   });
@@ -56,10 +51,7 @@ export class AuditAdminController {
   });
 
   getStats = asyncHandler(async (_req: Request, res: Response) => {
-    const [byAction, byActor] = await Promise.all([
-      auditRepository.countByAction(),
-      auditRepository.countByActor(),
-    ]);
+    const [byAction, byActor] = await Promise.all([auditRepository.countByAction(), auditRepository.countByActor()]);
     res.json({ byAction, byActor });
   });
 

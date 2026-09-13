@@ -6,10 +6,17 @@ describe('SetItemAsGiftUseCase', () => {
   let mockRepo: Record<string, jest.Mock>;
 
   const makeBasket = () => ({
-    basketId: 'b1', customerId: 'c1', sessionId: 's1', status: 'active', currency: 'USD',
-    items: [], itemCount: 0, subtotal: { amount: 0 },
-    createdAt: new Date(), updatedAt: new Date(),
-    findItem: jest.fn((id: string) => id === 'item-1' ? { basketItemId: 'item-1', productId: 'p1' } : null),
+    basketId: 'b1',
+    customerId: 'c1',
+    sessionId: 's1',
+    status: 'active',
+    currency: 'USD',
+    items: [],
+    itemCount: 0,
+    subtotal: { amount: 0 },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    findItem: jest.fn((id: string) => (id === 'item-1' ? { basketItemId: 'item-1', productId: 'p1' } : null)),
     setItemAsGift: jest.fn(),
   });
 

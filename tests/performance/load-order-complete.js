@@ -84,7 +84,7 @@ export default function () {
         quantity: 1,
         unitPrice: 29.99,
       }),
-      jsonHeaders
+      jsonHeaders,
     );
     flowErrors.add(!checkResponse(res, 200, 'add-item'));
   });
@@ -93,11 +93,7 @@ export default function () {
 
   // ─── 3. Initiate checkout ──────────────────────────────────────────
   group('Order Flow: Initiate Checkout', function () {
-    const res = http.post(
-      `${BASE_URL}/customer/checkout`,
-      JSON.stringify({ basketId }),
-      jsonHeaders
-    );
+    const res = http.post(`${BASE_URL}/customer/checkout`, JSON.stringify({ basketId }), jsonHeaders);
     flowErrors.add(!checkResponse(res, 200, 'initiate-checkout'));
     if (res.status === 200) {
       checkoutId = res.json('data.checkoutId');
@@ -116,7 +112,7 @@ export default function () {
     const res = http.put(
       `${BASE_URL}/customer/checkout/${checkoutId}/fulfillment-method`,
       JSON.stringify({ fulfillmentType: 'shipping' }),
-      jsonHeaders
+      jsonHeaders,
     );
     flowErrors.add(!checkResponse(res, 200, 'set-fulfillment'));
   });
@@ -125,11 +121,7 @@ export default function () {
 
   // ─── 5. Set shipping address ───────────────────────────────────────
   group('Order Flow: Set Shipping Address', function () {
-    const res = http.put(
-      `${BASE_URL}/customer/checkout/${checkoutId}/shipping-address`,
-      JSON.stringify(SHIPPING_ADDRESS),
-      jsonHeaders
-    );
+    const res = http.put(`${BASE_URL}/customer/checkout/${checkoutId}/shipping-address`, JSON.stringify(SHIPPING_ADDRESS), jsonHeaders);
     flowErrors.add(!checkResponse(res, 200, 'set-shipping-address'));
   });
 
@@ -138,10 +130,7 @@ export default function () {
   // ─── 6. Get shipping methods (requires shipping address) ──────────
   let shippingMethodId;
   group('Order Flow: Get Shipping Methods', function () {
-    const res = http.get(
-      `${BASE_URL}/customer/checkout/${checkoutId}/shipping-methods`,
-      { headers: { Accept: 'application/json' } }
-    );
+    const res = http.get(`${BASE_URL}/customer/checkout/${checkoutId}/shipping-methods`, { headers: { Accept: 'application/json' } });
     flowErrors.add(!checkResponse(res, 200, 'get-shipping-methods'));
     if (res.status === 200) {
       const methods = res.json('data');
@@ -159,7 +148,7 @@ export default function () {
       const res = http.put(
         `${BASE_URL}/customer/checkout/${checkoutId}/shipping-method`,
         JSON.stringify({ shippingMethodId }),
-        jsonHeaders
+        jsonHeaders,
       );
       flowErrors.add(!checkResponse(res, 200, 'set-shipping-method'));
     });
@@ -170,10 +159,7 @@ export default function () {
   // ─── 8. Get payment methods ────────────────────────────────────────
   let paymentMethodId;
   group('Order Flow: Get Payment Methods', function () {
-    const res = http.get(
-      `${BASE_URL}/customer/checkout/payment-methods`,
-      { headers: { Accept: 'application/json' } }
-    );
+    const res = http.get(`${BASE_URL}/customer/checkout/payment-methods`, { headers: { Accept: 'application/json' } });
     flowErrors.add(!checkResponse(res, 200, 'get-payment-methods'));
     if (res.status === 200) {
       const methods = res.json('data');
@@ -188,11 +174,7 @@ export default function () {
   // ─── 9. Set payment method ─────────────────────────────────────────
   if (paymentMethodId) {
     group('Order Flow: Set Payment Method', function () {
-      const res = http.put(
-        `${BASE_URL}/customer/checkout/${checkoutId}/payment-method`,
-        JSON.stringify({ paymentMethodId }),
-        jsonHeaders
-      );
+      const res = http.put(`${BASE_URL}/customer/checkout/${checkoutId}/payment-method`, JSON.stringify({ paymentMethodId }), jsonHeaders);
       flowErrors.add(!checkResponse(res, 200, 'set-payment-method'));
     });
 
@@ -200,11 +182,7 @@ export default function () {
 
     // ─── 10. Create payment intent ───────────────────────────────────
     group('Order Flow: Create Payment Intent', function () {
-      const res = http.post(
-        `${BASE_URL}/customer/checkout/${checkoutId}/payment-intent`,
-        JSON.stringify({}),
-        jsonHeaders
-      );
+      const res = http.post(`${BASE_URL}/customer/checkout/${checkoutId}/payment-intent`, JSON.stringify({}), jsonHeaders);
       // 200 (intent created) or 400 (invalid state) are acceptable
       flowErrors.add(!(res.status === 200 || res.status === 400));
     });
@@ -213,11 +191,7 @@ export default function () {
 
     // ─── 11. Complete checkout ───────────────────────────────────────
     group('Order Flow: Complete Checkout', function () {
-      const res = http.post(
-        `${BASE_URL}/customer/checkout/${checkoutId}/complete`,
-        JSON.stringify({}),
-        jsonHeaders
-      );
+      const res = http.post(`${BASE_URL}/customer/checkout/${checkoutId}/complete`, JSON.stringify({}), jsonHeaders);
       // 200 (order created) or 400 (missing prerequisites) are acceptable
       if (res.status === 200) {
         ordersCompleted.add(1);

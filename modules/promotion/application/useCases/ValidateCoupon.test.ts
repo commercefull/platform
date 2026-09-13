@@ -24,8 +24,14 @@ describe('ValidateCouponUseCase', () => {
 
   it('should validate a valid coupon (happy path)', async () => {
     mockCouponRepo.findByCode.mockResolvedValue({
-      promotionCouponId: 'c1', code: 'SAVE10', isActive: true, usageCount: 0,
-      maxUsage: 100, minOrderAmount: 50, startDate: null, endDate: null,
+      promotionCouponId: 'c1',
+      code: 'SAVE10',
+      isActive: true,
+      usageCount: 0,
+      maxUsage: 100,
+      minOrderAmount: 50,
+      startDate: null,
+      endDate: null,
     });
 
     const result = await useCase.execute(new ValidateCouponCommand('SAVE10', 100));
@@ -52,7 +58,9 @@ describe('ValidateCouponUseCase', () => {
 
   it('should return invalid when coupon is inactive', async () => {
     mockCouponRepo.findByCode.mockResolvedValue({
-      promotionCouponId: 'c1', code: 'SAVE10', isActive: false,
+      promotionCouponId: 'c1',
+      code: 'SAVE10',
+      isActive: false,
     });
 
     const result = await useCase.execute(new ValidateCouponCommand('SAVE10', 100));
@@ -63,8 +71,13 @@ describe('ValidateCouponUseCase', () => {
 
   it('should return invalid when usage limit reached', async () => {
     mockCouponRepo.findByCode.mockResolvedValue({
-      promotionCouponId: 'c1', code: 'SAVE10', isActive: true, usageCount: 100,
-      maxUsage: 100, startDate: null, endDate: null,
+      promotionCouponId: 'c1',
+      code: 'SAVE10',
+      isActive: true,
+      usageCount: 100,
+      maxUsage: 100,
+      startDate: null,
+      endDate: null,
     });
 
     const result = await useCase.execute(new ValidateCouponCommand('SAVE10', 100));
@@ -75,8 +88,14 @@ describe('ValidateCouponUseCase', () => {
 
   it('should return invalid when minimum order not met', async () => {
     mockCouponRepo.findByCode.mockResolvedValue({
-      promotionCouponId: 'c1', code: 'SAVE10', isActive: true, usageCount: 0,
-      maxUsage: 100, minOrderAmount: 200, startDate: null, endDate: null,
+      promotionCouponId: 'c1',
+      code: 'SAVE10',
+      isActive: true,
+      usageCount: 0,
+      maxUsage: 100,
+      minOrderAmount: 200,
+      startDate: null,
+      endDate: null,
     });
 
     const result = await useCase.execute(new ValidateCouponCommand('SAVE10', 100));

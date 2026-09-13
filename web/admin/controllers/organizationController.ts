@@ -15,14 +15,12 @@ export const listOrganizations = async (req: TypedRequest, res: Response): Promi
     pagination: { total: 0, page: 1, pages: 1 },
     success: req.query.success || null,
   });
-  
 };
 
 export const createOrganizationForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'operations/organizations/create', {
     pageName: 'Add Organization',
   });
-  
 };
 
 export const createOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -44,7 +42,6 @@ export const viewOrganization = async (req: TypedRequest, res: Response): Promis
     organization: null,
     success: req.query.success || null,
   });
-  
 };
 
 export const editOrganizationForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -52,7 +49,6 @@ export const editOrganizationForm = async (req: TypedRequest, res: Response): Pr
     pageName: 'Edit Organization',
     organization: null,
   });
-  
 };
 
 export const updateOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -72,22 +68,18 @@ export const updateOrganization = async (req: TypedRequest, res: Response): Prom
 
 export const deleteOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Organization deleted successfully' });
-  
 };
 
 export const approveOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   const { organizationId } = req.params;
   res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
-  
 };
 
 export const suspendOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   const { organizationId } = req.params;
   res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
-  
 };
 
 // ============================================================================
 // Organization Contacts
 // ============================================================================
-

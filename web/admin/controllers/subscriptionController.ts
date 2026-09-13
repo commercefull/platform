@@ -8,6 +8,7 @@ import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { ManageAdminSubscriptionsUseCase } from '../../../modules/subscription/application/useCases/ManageAdminSubscriptions';
 import { adminRespond } from '../../respond';
+import { buildFormObject, FieldConfig } from '../utils/formParsing';
 
 const manageSubscriptionsUseCase = new ManageAdminSubscriptionsUseCase();
 
@@ -59,7 +60,6 @@ export const listSubscriptionPlans = async (req: TypedRequest, res: Response): P
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createSubscriptionPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -69,57 +69,40 @@ export const createSubscriptionPlanForm = async (req: TypedRequest, res: Respons
     pageName: 'Create Subscription Plan',
     productId,
   });
-  
 };
+
+const subPlanCreateFields: FieldConfig[] = [
+  { name: 'subscriptionProductId' },
+  { name: 'name' },
+  { name: 'description', transform: 'stringOrUndefined' },
+  { name: 'billingInterval', transform: 'stringOrUndefined', default: 'month' },
+  { name: 'billingIntervalCount', transform: 'int', default: 1, falsyValue: 1 },
+  { name: 'price', transform: 'float' },
+  { name: 'compareAtPrice', transform: 'float', falsyValue: undefined },
+  { name: 'currency', transform: 'stringOrUndefined', default: 'USD' },
+  { name: 'setupFee', transform: 'float', default: 0, falsyValue: 0 },
+  { name: 'trialDays', transform: 'int', falsyValue: undefined },
+  { name: 'contractLength', transform: 'int', falsyValue: undefined },
+  { name: 'isContractRequired', transform: 'boolTrue' },
+  { name: 'discountPercent', transform: 'float', default: 0, falsyValue: 0 },
+  { name: 'discountAmount', transform: 'float', default: 0, falsyValue: 0 },
+  { name: 'freeShippingThreshold', transform: 'float', falsyValue: undefined },
+  { name: 'includesFreeShipping', transform: 'boolTrue' },
+  { name: 'includedProducts', transform: 'json', falsyValue: undefined },
+  { name: 'features', transform: 'json', falsyValue: undefined },
+  { name: 'sortOrder', transform: 'int', default: 0, falsyValue: 0 },
+  { name: 'isPopular', transform: 'boolTrue' },
+];
+
+function parseSubscriptionPlanCreateInput(body: RequestBody) {
+  return buildFormObject(body as Record<string, unknown>, subPlanCreateFields);
+}
 
 export const createSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const {
-      subscriptionProductId,
-      name,
-      description,
-      billingInterval,
-      billingIntervalCount,
-      price,
-      compareAtPrice,
-      currency,
-      setupFee,
-      trialDays,
-      contractLength,
-      isContractRequired,
-      discountPercent,
-      discountAmount,
-      freeShippingThreshold,
-      includesFreeShipping,
-      includedProducts,
-      features,
-      sortOrder,
-      isPopular,
-    } = body;
-
-    const plan = await manageSubscriptionsUseCase.saveSubscriptionPlan({
-      subscriptionProductId,
-      name,
-      description: description || undefined,
-      billingInterval: billingInterval || 'month',
-      billingIntervalCount: billingIntervalCount ? parseInt(billingIntervalCount) : 1,
-      price: parseFloat(price),
-      compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : undefined,
-      currency: currency || 'USD',
-      setupFee: setupFee ? parseFloat(setupFee) : 0,
-      trialDays: trialDays ? parseInt(trialDays) : undefined,
-      contractLength: contractLength ? parseInt(contractLength) : undefined,
-      isContractRequired: isContractRequired === 'true',
-      discountPercent: discountPercent ? parseFloat(discountPercent) : 0,
-      discountAmount: discountAmount ? parseFloat(discountAmount) : 0,
-      freeShippingThreshold: freeShippingThreshold ? parseFloat(freeShippingThreshold) : undefined,
-      includesFreeShipping: includesFreeShipping === 'true',
-      includedProducts: includedProducts ? JSON.parse(includedProducts) : undefined,
-      features: features ? JSON.parse(features) : undefined,
-      sortOrder: sortOrder ? parseInt(sortOrder) : 0,
-      isPopular: isPopular === 'true',
-    });
+    const plan = await manageSubscriptionsUseCase.saveSubscriptionPlan(
+      parseSubscriptionPlanCreateInput(req.body as RequestBody) as Parameters<typeof manageSubscriptionsUseCase.saveSubscriptionPlan>[0],
+    );
 
     res.redirect(`/hub/subscription/plans/${plan.subscriptionPlanId}?success=Subscription plan created successfully`);
   } catch (error: unknown) {
@@ -152,7 +135,6 @@ export const viewSubscriptionPlan = async (req: TypedRequest, res: Response): Pr
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editSubscriptionPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -172,67 +154,45 @@ export const editSubscriptionPlanForm = async (req: TypedRequest, res: Response)
     pageName: `Edit: ${plan.name}`,
     plan,
   });
-  
 };
+
+const subPlanUpdateFields: FieldConfig[] = [
+  { name: 'name' },
+  { name: 'description', transform: 'stringOrUndefined' },
+  { name: 'billingInterval' },
+  { name: 'billingIntervalCount', transform: 'int', falsyValue: 1 },
+  { name: 'price', transform: 'float' },
+  { name: 'compareAtPrice', transform: 'float', falsyValue: undefined },
+  { name: 'currency' },
+  { name: 'setupFee', transform: 'float', falsyValue: 0 },
+  { name: 'trialDays', transform: 'int', falsyValue: undefined },
+  { name: 'contractLength', transform: 'int', falsyValue: undefined },
+  { name: 'isContractRequired', transform: 'boolTrue' },
+  { name: 'discountPercent', transform: 'float', falsyValue: 0 },
+  { name: 'discountAmount', transform: 'float', falsyValue: 0 },
+  { name: 'freeShippingThreshold', transform: 'float', falsyValue: undefined },
+  { name: 'includesFreeShipping', transform: 'boolTrue' },
+  { name: 'includedProducts', transform: 'json', falsyValue: undefined },
+  { name: 'features', transform: 'json', falsyValue: undefined },
+  { name: 'sortOrder', transform: 'int', falsyValue: 0 },
+  { name: 'isPopular', transform: 'boolTrue' },
+  { name: 'isActive', transform: 'boolNotFalse' },
+];
+
+function parseSubscriptionPlanUpdates(body: RequestBody): Record<string, unknown> {
+  return buildFormObject(body as Record<string, unknown>, subPlanUpdateFields);
+}
 
 export const updateSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   const { planId } = req.params;
-  const updates: Record<string, unknown> = {};
+  const updates = parseSubscriptionPlanUpdates(req.body as RequestBody);
 
-  const body = req.body as RequestBody;
-  const {
-    name,
-    description,
-    billingInterval,
-    billingIntervalCount,
-    price,
-    compareAtPrice,
-    currency,
-    setupFee,
-    trialDays,
-    contractLength,
-    isContractRequired,
-    discountPercent,
-    discountAmount,
-    freeShippingThreshold,
-    includesFreeShipping,
-    includedProducts,
-    features,
-    sortOrder,
-    isPopular,
-    isActive,
-  } = body;
-
-  if (name !== undefined) updates.name = name;
-  if (description !== undefined) updates.description = description || undefined;
-  if (billingInterval !== undefined) updates.billingInterval = billingInterval;
-  if (billingIntervalCount !== undefined) updates.billingIntervalCount = billingIntervalCount ? parseInt(billingIntervalCount) : 1;
-  if (price !== undefined) updates.price = parseFloat(price);
-  if (compareAtPrice !== undefined) updates.compareAtPrice = compareAtPrice ? parseFloat(compareAtPrice) : undefined;
-  if (currency !== undefined) updates.currency = currency;
-  if (setupFee !== undefined) updates.setupFee = setupFee ? parseFloat(setupFee) : 0;
-  if (trialDays !== undefined) updates.trialDays = trialDays ? parseInt(trialDays) : undefined;
-  if (contractLength !== undefined) updates.contractLength = contractLength ? parseInt(contractLength) : undefined;
-  if (isContractRequired !== undefined) updates.isContractRequired = isContractRequired === 'true';
-  if (discountPercent !== undefined) updates.discountPercent = discountPercent ? parseFloat(discountPercent) : 0;
-  if (discountAmount !== undefined) updates.discountAmount = discountAmount ? parseFloat(discountAmount) : 0;
-  if (freeShippingThreshold !== undefined)
-    updates.freeShippingThreshold = freeShippingThreshold ? parseFloat(freeShippingThreshold) : undefined;
-  if (includesFreeShipping !== undefined) updates.includesFreeShipping = includesFreeShipping === 'true';
-  if (includedProducts !== undefined) updates.includedProducts = includedProducts ? JSON.parse(includedProducts) : undefined;
-  if (features !== undefined) updates.features = features ? JSON.parse(features) : undefined;
-  if (sortOrder !== undefined) updates.sortOrder = sortOrder ? parseInt(sortOrder) : 0;
-  if (isPopular !== undefined) updates.isPopular = isPopular === 'true';
-  if (isActive !== undefined) updates.isActive = isActive !== 'false';
-
-  const _plan = await manageSubscriptionsUseCase.saveSubscriptionPlan({
+  await manageSubscriptionsUseCase.saveSubscriptionPlan({
     subscriptionPlanId: planId,
     ...updates,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
+  });
 
   res.redirect(`/hub/subscription/plans/${planId}?success=Subscription plan updated successfully`);
-  
 };
 
 export const deleteSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -241,7 +201,6 @@ export const deleteSubscriptionPlan = async (req: TypedRequest, res: Response): 
   await manageSubscriptionsUseCase.deleteSubscriptionPlan(planId);
 
   res.json({ success: true, message: 'Subscription plan deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -271,7 +230,6 @@ export const listCustomerSubscriptions = async (req: TypedRequest, res: Response
 
     success: req.query.success || null,
   });
-  
 };
 
 export const viewCustomerSubscription = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -290,7 +248,6 @@ export const viewCustomerSubscription = async (req: TypedRequest, res: Response)
 
     success: req.query.success || null,
   });
-  
 };
 
 export const updateSubscriptionStatus = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -301,7 +258,6 @@ export const updateSubscriptionStatus = async (req: TypedRequest, res: Response)
   await manageSubscriptionsUseCase.updateSubscriptionStatus(subscriptionId, status);
 
   res.json({ success: true, message: `Subscription status updated to ${status}` });
-  
 };
 
 export const cancelCustomerSubscription = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -312,7 +268,6 @@ export const cancelCustomerSubscription = async (req: TypedRequest, res: Respons
   await manageSubscriptionsUseCase.cancelSubscription(subscriptionId, reason, 'admin', cancelAtPeriodEnd === 'true');
 
   res.json({ success: true, message: 'Subscription cancelled successfully' });
-  
 };
 
 // ============================================================================
@@ -339,7 +294,6 @@ export const subscriptionBilling = async (req: TypedRequest, res: Response): Pro
       failedPayments: failedPayments.length,
     },
   });
-  
 };
 
 export const processSubscriptionBilling = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -389,7 +343,6 @@ export const processSubscriptionBilling = async (req: TypedRequest, res: Respons
     message: `Billing processed for subscription ${subscriptionId}`,
     orderId: order.subscriptionOrderId,
   });
-  
 };
 
 export const manageFailedPayments = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -422,5 +375,4 @@ export const manageFailedPayments = async (req: TypedRequest, res: Response): Pr
   } else {
     throw new Error('Invalid action');
   }
-  
 };

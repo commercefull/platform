@@ -18,5 +18,4 @@ export const getStoreLocator = async (req: TypedRequest, res: Response): Promise
     stores,
     user: req.user,
   });
-  
 };

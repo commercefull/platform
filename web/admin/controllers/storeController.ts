@@ -2,8 +2,20 @@ import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { logger } from '../../../libs/logger';
 import { adminRespond } from '../../respond';
-import { listStoresUseCase, getStoreUseCase, createStoreUseCase, updateStoreUseCase, organizationLookupAdapter, FindActiveStoresUseCase } from '../../../modules/store/application/useCases/wired';
-import { listStoreUsersUseCase, assignUserToStoreUseCase, removeUserFromStoreUseCase } from '../../../modules/identity/application/useCases/store/wired';
+import type { PaginatedResult } from '../../../libs/types/shared';
+import {
+  listStoresUseCase,
+  getStoreUseCase,
+  createStoreUseCase,
+  updateStoreUseCase,
+  organizationLookupAdapter,
+  FindActiveStoresUseCase,
+} from '../../../modules/store/application/useCases/wired';
+import {
+  listStoreUsersUseCase,
+  assignUserToStoreUseCase,
+  removeUserFromStoreUseCase,
+} from '../../../modules/identity/application/useCases/store/wired';
 import { GetOrdersByStoreUseCase } from '../../../modules/order/application/useCases/GetOrdersByStore';
 import { GetDispatchesByStoreUseCase } from '../../../modules/inventory/application/useCases/GetDispatchesByStore';
 import { ListStoresQuery } from '../../../modules/store/application/useCases/ListStores';
@@ -34,7 +46,6 @@ export const listStores = async (req: TypedRequest, res: Response): Promise<void
     pagination: { total: result.total, page: result.page, pages: result.totalPages, limit: result.limit },
     filters: { status: req.query.status || '', type: req.query.type || '' },
   });
-  
 };
 
 export const viewStore = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -46,29 +57,28 @@ export const viewStore = async (req: TypedRequest, res: Response): Promise<void>
 
   const [users, orders, dispatches] = await Promise.all([
     listStoreUsersUseCase.execute(req.params.storeId).catch(() => []),
-    getOrdersByStoreUseCase.execute(req.params.storeId, 10, 0).catch(
-      () => ({ data: [] }) as Record<string, unknown>,
-    ),
-    getDispatchesByStoreUseCase.execute(req.params.storeId, 10, 0).catch(() => ({ data: [] }) as Record<string, unknown>),
+    getOrdersByStoreUseCase
+      .execute(req.params.storeId, 10, 0)
+      .catch((): PaginatedResult<unknown> => ({ data: [], total: 0, limit: 10, offset: 0, hasMore: false, length: 0 })),
+    getDispatchesByStoreUseCase
+      .execute(req.params.storeId, 10, 0)
+      .then(result => result as PaginatedResult<{ toJSON: () => unknown }>)
+      .catch((): PaginatedResult<{ toJSON: () => unknown }> => ({ data: [], total: 0, limit: 10, offset: 0, hasMore: false, length: 0 })),
   ]);
 
   adminRespond(req, res, 'stores/view', {
     pageName: storeResult.store.name,
     store: storeResult.store,
     users,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recentOrders: (orders as any).data || [],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recentDispatches: (dispatches as any).data ? (dispatches as any).data.map((dispatch: { toJSON: () => unknown }) => dispatch.toJSON()) : [],
+    recentOrders: orders.data || [],
+    recentDispatches: dispatches.data ? dispatches.data.map(dispatch => dispatch.toJSON()) : [],
   });
-  
 };
 
 export const createStoreForm = async (req: TypedRequest, res: Response): Promise<void> => {
   const organizations = await organizationLookupAdapter.findAll();
   const stores = await findActiveStoresUseCase.execute();
   adminRespond(req, res, 'stores/create', { pageName: 'Create Store', organizations, stores, formData: {} });
-  
 };
 
 export const createStore = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -122,7 +132,6 @@ export const editStoreForm = async (req: TypedRequest, res: Response): Promise<v
     stores,
     formData: storeResult.store,
   });
-  
 };
 
 export const updateStore = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -165,7 +174,6 @@ export const manageStoreUsers = async (req: TypedRequest, res: Response): Promis
   const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
   const users = await listStoreUsersUseCase.execute(req.params.storeId);
   adminRespond(req, res, 'stores/users', { pageName: 'Store Users', store: storeResult.store, users });
-  
 };
 
 export const assignUserToStore = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -185,7 +193,9 @@ export const assignUserToStore = async (req: TypedRequest, res: Response): Promi
     res.redirect(`/admin/stores/${req.params.storeId}/users?success=User assigned successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to assign user')}`);
+    res.redirect(
+      `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to assign user')}`,
+    );
   }
 };
 
@@ -195,6 +205,8 @@ export const removeUserFromStore = async (req: TypedRequest, res: Response): Pro
     res.redirect(`/admin/stores/${req.params.storeId}/users?success=User removed successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to remove user')}`);
+    res.redirect(
+      `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to remove user')}`,
+    );
   }
 };

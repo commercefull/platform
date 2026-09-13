@@ -23,11 +23,7 @@ describe('ReceiveGoodsUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ReceiveGoodsUseCase(
-      mockPurchaseOrderRepo as never,
-      mockReceivingRepo as never,
-      mockInventoryRepo as never,
-    );
+    useCase = new ReceiveGoodsUseCase(mockPurchaseOrderRepo as never, mockReceivingRepo as never, mockInventoryRepo as never);
   });
 
   it('should receive goods (happy path)', async () => {
@@ -58,22 +54,26 @@ describe('ReceiveGoodsUseCase', () => {
   it('should throw PurchaseOrderNotFoundError when PO not found', async () => {
     mockPurchaseOrderRepo.findById.mockResolvedValueOnce(null);
 
-    await expect(useCase.execute({
-      purchaseOrderId: 'nonexistent',
-      receivedItems: [{ productId: 'p1', quantityReceived: 5 }],
-      receivedBy: 'user1',
-      warehouseId: 'w1',
-    })).rejects.toThrow(PurchaseOrderNotFoundError);
+    await expect(
+      useCase.execute({
+        purchaseOrderId: 'nonexistent',
+        receivedItems: [{ productId: 'p1', quantityReceived: 5 }],
+        receivedBy: 'user1',
+        warehouseId: 'w1',
+      }),
+    ).rejects.toThrow(PurchaseOrderNotFoundError);
   });
 
   it('should throw SupplierValidationError for invalid PO status', async () => {
     mockPurchaseOrderRepo.findById.mockResolvedValueOnce({ status: 'draft', items: [] });
 
-    await expect(useCase.execute({
-      purchaseOrderId: 'po1',
-      receivedItems: [{ productId: 'p1', quantityReceived: 5 }],
-      receivedBy: 'user1',
-      warehouseId: 'w1',
-    })).rejects.toThrow(SupplierValidationError);
+    await expect(
+      useCase.execute({
+        purchaseOrderId: 'po1',
+        receivedItems: [{ productId: 'p1', quantityReceived: 5 }],
+        receivedBy: 'user1',
+        warehouseId: 'w1',
+      }),
+    ).rejects.toThrow(SupplierValidationError);
   });
 });

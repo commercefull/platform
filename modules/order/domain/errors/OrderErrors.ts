@@ -41,7 +41,9 @@ export class OrderCannotBeCancelledError extends AppError {
 
 export class OrderCannotBeRefundedError extends AppError {
   constructor(status: string, paymentStatus: string) {
-    super(`Order cannot be refunded. Current status: ${status}, Payment status: ${paymentStatus}`, 400, { code: 'order.cannot_be_refunded' });
+    super(`Order cannot be refunded. Current status: ${status}, Payment status: ${paymentStatus}`, 400, {
+      code: 'order.cannot_be_refunded',
+    });
   }
 }
 

@@ -76,7 +76,10 @@ export class ListProductsForContextUseCase {
     };
   }
 
-  private async buildContextFilters(command: ListProductsForContextCommand, systemConfig: { isMarketplace: boolean; isMultiStore: boolean; isSingleStore: boolean } | null): Promise<ProductFilters> {
+  private async buildContextFilters(
+    command: ListProductsForContextCommand,
+    systemConfig: { isMarketplace: boolean; isMultiStore: boolean; isSingleStore: boolean } | null,
+  ): Promise<ProductFilters> {
     const filters: ProductFilters = {
       status: command.includeInactive ? undefined : ProductStatus.ACTIVE,
       visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED],

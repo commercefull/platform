@@ -46,12 +46,7 @@ interface LowStockRecord {
 }
 
 interface GetLowStockRepositoryPort {
-  findLowStock(options: {
-    warehouseId?: string;
-    threshold?: number;
-    page: number;
-    limit: number;
-  }): Promise<LowStockRecord[]>;
+  findLowStock(options: { warehouseId?: string; threshold?: number; page: number; limit: number }): Promise<LowStockRecord[]>;
 }
 
 export class GetLowStockItemsUseCase {

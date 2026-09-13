@@ -7,7 +7,9 @@ import { DuplicatePageUseCase, DuplicatePageCommand } from './DuplicatePage';
 import { ContentPageNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('DuplicatePageUseCase', () => {
   let useCase: DuplicatePageUseCase;
@@ -16,11 +18,27 @@ describe('DuplicatePageUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findPageById: jest.fn().mockResolvedValue({
-        contentPageId: 'p1', title: 'Original', slug: 'original', contentTypeId: 'ct-1',
-        templateId: null, visibility: 'public', summary: null, featuredImage: null,
-        metaTitle: null, metaDescription: null, metaKeywords: null, customFields: null,
+        contentPageId: 'p1',
+        title: 'Original',
+        slug: 'original',
+        contentTypeId: 'ct-1',
+        templateId: null,
+        visibility: 'public',
+        summary: null,
+        featuredImage: null,
+        metaTitle: null,
+        metaDescription: null,
+        metaKeywords: null,
+        customFields: null,
       }),
-      createPage: jest.fn().mockResolvedValue({ contentPageId: 'p2', title: 'Copy', slug: 'copy', contentTypeId: 'ct-1', status: 'draft', createdAt: new Date() }),
+      createPage: jest.fn().mockResolvedValue({
+        contentPageId: 'p2',
+        title: 'Copy',
+        slug: 'copy',
+        contentTypeId: 'ct-1',
+        status: 'draft',
+        createdAt: new Date(),
+      }),
       findBlocksByPageId: jest.fn().mockResolvedValue([]),
       createBlock: jest.fn().mockResolvedValue({}),
     };

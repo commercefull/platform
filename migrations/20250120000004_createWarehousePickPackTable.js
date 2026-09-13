@@ -9,7 +9,11 @@ exports.up = async function (knex) {
 
   await knex.schema.createTable('warehousePickPack', t => {
     t.uuid('warehousePickPackId').primary().defaultTo(knex.raw('uuidv7()'));
-    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
+    t.uuid('distributionWarehouseId')
+      .notNullable()
+      .references('distributionWarehouseId')
+      .inTable('distributionWarehouse')
+      .onDelete('CASCADE');
     t.string('pickPackNumber', 50).notNullable().unique();
     t.string('orderId');
     t.string('fulfillmentId');

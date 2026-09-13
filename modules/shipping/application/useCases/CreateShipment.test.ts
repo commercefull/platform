@@ -4,20 +4,33 @@ jest.mock('../../infrastructure/repositories/ShippingConfigRepository', () => ({
     carriers: {
       findById: jest.fn().mockResolvedValue(null),
       findByCode: jest.fn().mockImplementation((code: string) => {
-        if (code === 'ups') return Promise.resolve({
-          shippingCarrierId: 'c1', name: 'UPS', code: 'ups', isActive: true,
-          supportedServices: ['ground'], supportedRegions: ['US'], hasApiIntegration: true, requiresContract: false,
-        });
+        if (code === 'ups')
+          return Promise.resolve({
+            shippingCarrierId: 'c1',
+            name: 'UPS',
+            code: 'ups',
+            isActive: true,
+            supportedServices: ['ground'],
+            supportedRegions: ['US'],
+            hasApiIntegration: true,
+            requiresContract: false,
+          });
         return Promise.resolve(null);
       }),
     },
     methods: {
       findById: jest.fn().mockResolvedValue(null),
       findByCode: jest.fn().mockImplementation((code: string) => {
-        if (code === 'ground') return Promise.resolve({
-          shippingMethodId: 'm1', name: 'Ground', code: 'ground', shippingCarrierId: 'c1',
-          isActive: true, estimatedDeliveryDays: 5, handlingDays: 2,
-        });
+        if (code === 'ground')
+          return Promise.resolve({
+            shippingMethodId: 'm1',
+            name: 'Ground',
+            code: 'ground',
+            shippingCarrierId: 'c1',
+            isActive: true,
+            estimatedDeliveryDays: 5,
+            handlingDays: 2,
+          });
         return Promise.resolve(null);
       }),
       findAll: jest.fn().mockResolvedValue([]),
@@ -86,24 +99,28 @@ describe('CreateShipmentUseCase', () => {
   });
 
   it('should throw ShippingCarrierNotFoundError when carrier not found', async () => {
-    await expect(useCase.execute({
-      orderId: 'o1',
-      fromAddress: { street1: '123 Main', city: 'NYC', state: 'NY', postalCode: '10001', country: 'US' },
-      toAddress: { street1: '456 Oak', city: 'LA', state: 'CA', postalCode: '90001', country: 'US' },
-      packages: [{ weight: 2, length: 10, width: 5, height: 3 }],
-      carrierCode: 'nonexistent',
-      serviceCode: 'ground',
-    })).rejects.toThrow(ShippingCarrierNotFoundError);
+    await expect(
+      useCase.execute({
+        orderId: 'o1',
+        fromAddress: { street1: '123 Main', city: 'NYC', state: 'NY', postalCode: '10001', country: 'US' },
+        toAddress: { street1: '456 Oak', city: 'LA', state: 'CA', postalCode: '90001', country: 'US' },
+        packages: [{ weight: 2, length: 10, width: 5, height: 3 }],
+        carrierCode: 'nonexistent',
+        serviceCode: 'ground',
+      }),
+    ).rejects.toThrow(ShippingCarrierNotFoundError);
   });
 
   it('should throw ShippingMethodNotFoundError when method not found', async () => {
-    await expect(useCase.execute({
-      orderId: 'o1',
-      fromAddress: { street1: '123 Main', city: 'NYC', state: 'NY', postalCode: '10001', country: 'US' },
-      toAddress: { street1: '456 Oak', city: 'LA', state: 'CA', postalCode: '90001', country: 'US' },
-      packages: [{ weight: 2, length: 10, width: 5, height: 3 }],
-      carrierCode: 'ups',
-      serviceCode: 'nonexistent',
-    })).rejects.toThrow(ShippingMethodNotFoundError);
+    await expect(
+      useCase.execute({
+        orderId: 'o1',
+        fromAddress: { street1: '123 Main', city: 'NYC', state: 'NY', postalCode: '10001', country: 'US' },
+        toAddress: { street1: '456 Oak', city: 'LA', state: 'CA', postalCode: '90001', country: 'US' },
+        packages: [{ weight: 2, length: 10, width: 5, height: 3 }],
+        carrierCode: 'ups',
+        serviceCode: 'nonexistent',
+      }),
+    ).rejects.toThrow(ShippingMethodNotFoundError);
   });
 });

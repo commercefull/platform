@@ -1,21 +1,17 @@
-/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
+const mockLoyaltyRepo = { findCustomerPoints: jest.fn() };
+
+jest.mock('../../../loyalty/infrastructure/repositories/loyaltyRepo', () => ({
+  LoyaltyRepo: jest.fn(() => mockLoyaltyRepo),
+}));
+
+import { LoyaltyBalanceAdapter } from './LoyaltyBalanceAdapter';
 
 describe('LoyaltyBalanceAdapter', () => {
-  let adapter: import('./LoyaltyBalanceAdapter').LoyaltyBalanceAdapter;
-  let mockLoyaltyRepo: any;
+  let adapter: LoyaltyBalanceAdapter;
 
   beforeEach(() => {
-    mockLoyaltyRepo = { findCustomerPoints: jest.fn() };
-    jest.resetModules();
-    jest.doMock('../../../loyalty/infrastructure/repositories/loyaltyRepo', () => ({
-      LoyaltyRepo: jest.fn(() => mockLoyaltyRepo),
-    }));
-    const { LoyaltyBalanceAdapter } = require('./LoyaltyBalanceAdapter');
+    mockLoyaltyRepo.findCustomerPoints.mockClear();
     adapter = new LoyaltyBalanceAdapter();
-  });
-
-  afterEach(() => {
-    jest.dontMock('../../../loyalty/infrastructure/repositories/loyaltyRepo');
   });
 
   it('implements LoyaltyBalancePort', () => {

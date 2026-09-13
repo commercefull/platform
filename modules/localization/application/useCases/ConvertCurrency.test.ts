@@ -42,9 +42,7 @@ describe('ConvertCurrencyUseCase', () => {
   });
 
   it('should throw CurrencyNotFoundError when target currency not found', async () => {
-    mockRepo.findCurrencyByCode
-      .mockResolvedValueOnce({ currencyId: 'c1', code: 'USD', exchangeRate: 1 })
-      .mockResolvedValueOnce(null);
+    mockRepo.findCurrencyByCode.mockResolvedValueOnce({ currencyId: 'c1', code: 'USD', exchangeRate: 1 }).mockResolvedValueOnce(null);
 
     await expect(useCase.execute({ amount: 100, fromCurrency: 'USD', toCurrency: 'XYZ' })).rejects.toThrow(CurrencyNotFoundError);
   });

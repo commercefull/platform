@@ -7,7 +7,9 @@ import { CreateNavigationUseCase, CreateNavigationCommand } from './CreateNaviga
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CreateNavigationUseCase', () => {
   let useCase: CreateNavigationUseCase;
@@ -16,8 +18,13 @@ describe('CreateNavigationUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       createNavigation: jest.fn().mockResolvedValue({
-        contentNavigationId: 'n1', name: 'Main Menu', slug: 'main-menu',
-        description: null, location: 'header', isActive: true, createdAt: new Date(),
+        contentNavigationId: 'n1',
+        name: 'Main Menu',
+        slug: 'main-menu',
+        description: null,
+        location: 'header',
+        isActive: true,
+        createdAt: new Date(),
       }),
     };
     useCase = new CreateNavigationUseCase(mockRepo as never);

@@ -98,12 +98,7 @@ export async function findAllTaxZones(): Promise<AdminTaxZone[]> {
   return (await query<AdminTaxZone[]>(`SELECT * FROM "taxZone" WHERE "deletedAt" IS NULL ORDER BY "name"`)) || [];
 }
 
-export async function createTaxZone(params: {
-  name: string;
-  description?: string;
-  countries: string[];
-  isActive: boolean;
-}): Promise<void> {
+export async function createTaxZone(params: { name: string; description?: string; countries: string[]; isActive: boolean }): Promise<void> {
   await query(
     `INSERT INTO "taxZone" ("taxZoneId", "name", "description", "countries", "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,

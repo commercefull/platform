@@ -7,7 +7,9 @@ import { AssignUserToStoreUseCase } from './AssignUserToStore';
 import { UserNotFoundError, StoreNotFoundError, UserAlreadyAssignedToStoreError } from '../../../domain/errors/IdentityErrors';
 import { generateUUID } from '../../../../../libs/uuid';
 
-beforeEach(() => { jest.mocked(generateUUID).mockClear(); });
+beforeEach(() => {
+  jest.mocked(generateUUID).mockClear();
+});
 
 describe('AssignUserToStoreUseCase', () => {
   let useCase: AssignUserToStoreUseCase;

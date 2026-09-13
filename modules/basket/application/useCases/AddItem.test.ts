@@ -61,9 +61,7 @@ describe('AddItemUseCase', () => {
     const repo = createMockBasketRepo(basket);
     const useCase = new AddItemUseCase(repo);
 
-    const result = await useCase.execute(
-      new AddItemCommand('b-1', 'p-2', 'SKU-2', 'Gadget', 1, 30),
-    );
+    const result = await useCase.execute(new AddItemCommand('b-1', 'p-2', 'SKU-2', 'Gadget', 1, 30));
 
     expect(result.basketId).toBe('b-1');
     expect(repo.addItem).toHaveBeenCalled();
@@ -74,9 +72,7 @@ describe('AddItemUseCase', () => {
     const repo = createMockBasketRepo(basket);
     const useCase = new AddItemUseCase(repo);
 
-    await useCase.execute(
-      new AddItemCommand('b-1', 'p-1', 'SKU-1', 'Widget', 3, 50),
-    );
+    await useCase.execute(new AddItemCommand('b-1', 'p-1', 'SKU-1', 'Widget', 3, 50));
 
     expect(repo.updateItem).toHaveBeenCalled();
     expect(repo.addItem).not.toHaveBeenCalled();
@@ -86,8 +82,6 @@ describe('AddItemUseCase', () => {
     const repo = createMockBasketRepo(null);
     const useCase = new AddItemUseCase(repo);
 
-    await expect(
-      useCase.execute(new AddItemCommand('nonexistent', 'p-1', 'SKU-1', 'Widget', 1, 50)),
-    ).rejects.toThrow(BasketNotFoundError);
+    await expect(useCase.execute(new AddItemCommand('nonexistent', 'p-1', 'SKU-1', 'Widget', 1, 50))).rejects.toThrow(BasketNotFoundError);
   });
 });

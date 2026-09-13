@@ -4,9 +4,13 @@ jest.mock('../../infrastructure/repositories/ShippingConfigRepository', () => ({
     carriers: {
       findById: jest.fn(),
       findByCode: jest.fn().mockResolvedValue({
-        shippingCarrierId: 'c1', name: 'UPS', code: 'ups',
-        supportedServices: ['ground'], supportedRegions: ['US'],
-        hasApiIntegration: true, requiresContract: false,
+        shippingCarrierId: 'c1',
+        name: 'UPS',
+        code: 'ups',
+        supportedServices: ['ground'],
+        supportedRegions: ['US'],
+        hasApiIntegration: true,
+        requiresContract: false,
       }),
     },
     methods: {},

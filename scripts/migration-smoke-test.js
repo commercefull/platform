@@ -41,10 +41,7 @@ async function run() {
 
     // 2. Run migrations
     console.log('[smoke] Running all migrations...');
-    const migrateResult = spawnSync('npx', [
-      'knex', 'migrate:latest',
-      '--knexfile', 'knexfile.js',
-    ], {
+    const migrateResult = spawnSync('npx', ['knex', 'migrate:latest', '--knexfile', 'knexfile.js'], {
       env: {
         ...process.env,
         POSTGRES_DB: TEST_DB_NAME,
@@ -113,10 +110,7 @@ async function run() {
     // 5. Optionally run seeds
     if (seeded) {
       console.log('[smoke] Running seeds...');
-      const seedResult = spawnSync('npx', [
-        'knex', 'seed:run',
-        '--knexfile', 'knexfile.js',
-      ], {
+      const seedResult = spawnSync('npx', ['knex', 'seed:run', '--knexfile', 'knexfile.js'], {
         env: {
           ...process.env,
           POSTGRES_DB: TEST_DB_NAME,

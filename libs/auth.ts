@@ -153,4 +153,3 @@ export const optionalCustomerAuth = (req: Request, res: Response, next: NextFunc
 
   next();
 };
-

@@ -7,7 +7,9 @@ import { SetPaymentMethodUseCase, SetPaymentMethodCommand } from './SetPaymentMe
 import { NotFoundError, BadRequestError } from '../../../../libs/errors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('SetPaymentMethodUseCase', () => {
   let useCase: SetPaymentMethodUseCase;
@@ -16,14 +18,29 @@ describe('SetPaymentMethodUseCase', () => {
 
   beforeEach(() => {
     mockSession = {
-      id: 'ck-1', basketId: 'b1', customerId: 'c1', guestEmail: undefined,
-      status: 'pending', paymentStatus: 'pending', shippingAddress: null,
-      billingAddress: null, shippingMethodId: undefined, shippingMethodName: undefined,
-      paymentMethodId: undefined, subtotal: { amount: 100, currency: 'USD' },
-      taxAmount: { amount: 0, currency: 'USD' }, shippingAmount: { amount: 0, currency: 'USD' },
-      discountAmount: { amount: 0, currency: 'USD' }, total: { amount: 100, currency: 'USD' },
-      couponCode: undefined, fulfillmentType: 'shipping', notes: undefined, sameAsShipping: false,
-      createdAt: new Date(), updatedAt: new Date(), expiresAt: new Date(),
+      id: 'ck-1',
+      basketId: 'b1',
+      customerId: 'c1',
+      guestEmail: undefined,
+      status: 'pending',
+      paymentStatus: 'pending',
+      shippingAddress: null,
+      billingAddress: null,
+      shippingMethodId: undefined,
+      shippingMethodName: undefined,
+      paymentMethodId: undefined,
+      subtotal: { amount: 100, currency: 'USD' },
+      taxAmount: { amount: 0, currency: 'USD' },
+      shippingAmount: { amount: 0, currency: 'USD' },
+      discountAmount: { amount: 0, currency: 'USD' },
+      total: { amount: 100, currency: 'USD' },
+      couponCode: undefined,
+      fulfillmentType: 'shipping',
+      notes: undefined,
+      sameAsShipping: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      expiresAt: new Date(),
       setPaymentMethod: jest.fn(),
     };
     mockRepo = {

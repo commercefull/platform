@@ -6,10 +6,20 @@ describe('GetOrderDetailsUseCase', () => {
   let mockQueryRepo: Record<string, jest.Mock>;
 
   const makeOrder = () => ({
-    orderId: 'o1', orderNumber: 'ORD-001', status: 'processing', paymentStatus: 'paid',
-    fulfillmentStatus: 'unfulfilled', currencyCode: 'USD', customerEmail: 'test@test.com',
-    subtotal: 100, discountTotal: 10, taxTotal: 8, shippingTotal: 5, totalAmount: 103,
-    createdAt: new Date(), updatedAt: new Date(),
+    orderId: 'o1',
+    orderNumber: 'ORD-001',
+    status: 'processing',
+    paymentStatus: 'paid',
+    fulfillmentStatus: 'unfulfilled',
+    currencyCode: 'USD',
+    customerEmail: 'test@test.com',
+    subtotal: 100,
+    discountTotal: 10,
+    taxTotal: 8,
+    shippingTotal: 5,
+    totalAmount: 103,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   beforeEach(() => {

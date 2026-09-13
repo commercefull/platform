@@ -41,7 +41,6 @@ export const listContentBlocks = async (req: TypedRequest, res: Response): Promi
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createContentBlockForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -74,7 +73,6 @@ export const createContentBlockForm = async (req: TypedRequest, res: Response): 
     contentTypes,
     nextOrder,
   });
-  
 };
 
 export const createContentBlock = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -91,7 +89,6 @@ export const createContentBlock = async (req: TypedRequest, res: Response): Prom
   });
 
   res.redirect(`/hub/content/pages/${contentPageId}?success=Content block created successfully`);
-  
 };
 
 export const editContentBlockForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -119,7 +116,6 @@ export const editContentBlockForm = async (req: TypedRequest, res: Response): Pr
     page,
     contentType,
   });
-  
 };
 
 export const updateContentBlock = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -137,7 +133,6 @@ export const updateContentBlock = async (req: TypedRequest, res: Response): Prom
   const block = await manageContentUseCase.updateBlock(blockId, updates);
 
   res.redirect(`/hub/content/pages/${block.contentPageId}?success=Content block updated successfully`);
-  
 };
 
 export const deleteContentBlock = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -158,7 +153,6 @@ export const deleteContentBlock = async (req: TypedRequest, res: Response): Prom
   }
 
   res.json({ success: true, message: 'Content block deleted successfully' });
-  
 };
 
 export const reorderContentBlocks = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -177,5 +171,4 @@ export const reorderContentBlocks = async (req: TypedRequest, res: Response): Pr
   }
 
   res.json({ success: true, message: 'Content blocks reordered successfully' });
-  
 };

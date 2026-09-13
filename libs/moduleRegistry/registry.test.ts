@@ -103,7 +103,7 @@ describe('moduleRegistry', () => {
 
     it('should use feature flag provider when set', async () => {
       moduleRegistry.registerAll([requiredManifest, optionalManifest]);
-      moduleRegistry.setFeatureFlagProvider(async (key) => {
+      moduleRegistry.setFeatureFlagProvider(async key => {
         return key === 'module.optional.enabled';
       });
       await moduleRegistry.initialize();

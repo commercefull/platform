@@ -47,7 +47,10 @@ export const checkout = async (req: TypedRequest, res: Response): Promise<void> 
   const shippingResult = await shippingUseCase.execute(new GetShippingMethodsQuery(true, true));
 
   // Calculate totals with tax
-  const totals = await calculateCheckoutTotals(basket as unknown as Record<string, unknown>, customer as unknown as Record<string, unknown> | undefined);
+  const totals = await calculateCheckoutTotals(
+    basket as unknown as Record<string, unknown>,
+    customer as unknown as Record<string, unknown> | undefined,
+  );
 
   storefrontRespond(req, res, 'shop/checkout', {
     pageName: 'Checkout',
@@ -57,12 +60,26 @@ export const checkout = async (req: TypedRequest, res: Response): Promise<void> 
     totals,
     user: req.user,
   });
-  
 };
 
 // ============================================================================
 // Process Checkout
 // ============================================================================
+
+function mapAddressFields(addr: Record<string, unknown>) {
+  return {
+    firstName: addr.firstName as string,
+    lastName: addr.lastName as string,
+    address1: (addr.addressLine1 || addr.address1) as string,
+    address2: (addr.addressLine2 || addr.address2) as string,
+    city: addr.city as string,
+    state: addr.state as string,
+    postalCode: addr.postalCode as string,
+    country: addr.country as string,
+    countryCode: (addr.countryCode || addr.country) as string,
+    phone: addr.phone as string,
+  };
+}
 
 export const processCheckout = async (req: TypedRequest, res: Response): Promise<void> => {
   if (!req.user) {
@@ -93,8 +110,10 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
   }
 
   // Parse addresses
-  const shippingAddress = JSON.parse(shippingAddressStr as string);
-  const billingAddress = billingAddressStr ? JSON.parse(billingAddressStr as string) : shippingAddress;
+  const shippingAddress = JSON.parse(shippingAddressStr as string) as Record<string, unknown>;
+  const billingAddress = billingAddressStr
+    ? (JSON.parse(billingAddressStr as string) as Record<string, unknown>)
+    : shippingAddress;
 
   // Get shipping method details
   const getShippingMethodUseCase = new GetShippingMethodDetailsUseCase();
@@ -118,37 +137,15 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
     customerId as string,
     customerEmail as string,
     orderItems,
-    {
-      firstName: shippingAddress.firstName,
-      lastName: shippingAddress.lastName,
-      address1: shippingAddress.addressLine1 || shippingAddress.address1,
-      address2: shippingAddress.addressLine2 || shippingAddress.address2,
-      city: shippingAddress.city,
-      state: shippingAddress.state,
-      postalCode: shippingAddress.postalCode,
-      country: shippingAddress.country,
-      countryCode: shippingAddress.countryCode || shippingAddress.country,
-      phone: shippingAddress.phone,
-    },
-    {
-      firstName: billingAddress.firstName,
-      lastName: billingAddress.lastName,
-      address1: billingAddress.addressLine1 || billingAddress.address1,
-      address2: billingAddress.addressLine2 || billingAddress.address2,
-      city: billingAddress.city,
-      state: billingAddress.state,
-      postalCode: billingAddress.postalCode,
-      country: billingAddress.country,
-      countryCode: billingAddress.countryCode || billingAddress.country,
-      phone: billingAddress.phone,
-    },
+    mapAddressFields(shippingAddress),
+    mapAddressFields(billingAddress),
     basket.basketId,
     undefined,
     undefined,
     customerId,
     'web',
     basket.currency || 'USD',
-    shippingAddress.phone,
+    shippingAddress.phone as string,
     `${shippingAddress.firstName} ${shippingAddress.lastName}`,
     specialInstructions as string | undefined,
     parseFloat(shippingMethod?.cost || '0'),
@@ -156,9 +153,6 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
 
   const orderUseCase = createOrderUseCase;
   const order = await orderUseCase.execute(orderCommand);
-
-  // Clear the basket after successful order creation
-  // (This would be handled by the order creation use case in a real implementation)
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     res.json({
@@ -169,7 +163,6 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
   } else {
     res.redirect(`/order-confirmation/${order.orderId}`);
   }
-  
 };
 
 // ============================================================================
@@ -213,14 +206,17 @@ export const orderConfirmation = async (req: TypedRequest, res: Response): Promi
     order: orderWithTotals,
     user: req.user,
   });
-  
 };
 
 // ============================================================================
 // Helper Functions
 // ============================================================================
 
-async function calculateCheckoutTotals(basket: Record<string, unknown>, customer: Record<string, unknown> | undefined, shippingMethod?: Record<string, unknown>) {
+async function calculateCheckoutTotals(
+  basket: Record<string, unknown>,
+  customer: Record<string, unknown> | undefined,
+  shippingMethod?: Record<string, unknown>,
+) {
   const basketItems = basket.items as Record<string, unknown>[] | undefined;
   // Use basket.subtotal if available, otherwise calculate from items
   const subtotal =

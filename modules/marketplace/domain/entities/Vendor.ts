@@ -151,31 +151,79 @@ export class Vendor {
     return new Vendor(props);
   }
 
-  get vendorId(): string { return this._vendorId; }
-  get organizationId(): string { return this._organizationId; }
-  get name(): string { return this._name; }
-  get legalName(): string | undefined { return this._legalName; }
-  get taxId(): string | undefined { return this._taxId; }
-  get email(): string { return this._email; }
-  get phone(): string | undefined { return this._phone; }
-  get website(): string | undefined { return this._website; }
-  get logoUrl(): string | undefined { return this._logoUrl; }
-  get description(): string | undefined { return this._description; }
-  get status(): VendorStatus { return this._status; }
-  get tier(): VendorTier { return this._tier; }
-  get commissionRate(): number { return this._commissionRate; }
-  get address(): VendorAddress | undefined { return this._address; }
-  get bankInfo(): VendorBankInfo | undefined { return this._bankInfo; }
-  get stats(): VendorStats { return this._stats; }
-  get approvedAt(): Date | undefined { return this._approvedAt; }
-  get suspendedAt(): Date | undefined { return this._suspendedAt; }
-  get terminatedAt(): Date | undefined { return this._terminatedAt; }
-  get createdAt(): Date { return this._createdAt; }
-  get updatedAt(): Date { return this._updatedAt; }
+  get vendorId(): string {
+    return this._vendorId;
+  }
+  get organizationId(): string {
+    return this._organizationId;
+  }
+  get name(): string {
+    return this._name;
+  }
+  get legalName(): string | undefined {
+    return this._legalName;
+  }
+  get taxId(): string | undefined {
+    return this._taxId;
+  }
+  get email(): string {
+    return this._email;
+  }
+  get phone(): string | undefined {
+    return this._phone;
+  }
+  get website(): string | undefined {
+    return this._website;
+  }
+  get logoUrl(): string | undefined {
+    return this._logoUrl;
+  }
+  get description(): string | undefined {
+    return this._description;
+  }
+  get status(): VendorStatus {
+    return this._status;
+  }
+  get tier(): VendorTier {
+    return this._tier;
+  }
+  get commissionRate(): number {
+    return this._commissionRate;
+  }
+  get address(): VendorAddress | undefined {
+    return this._address;
+  }
+  get bankInfo(): VendorBankInfo | undefined {
+    return this._bankInfo;
+  }
+  get stats(): VendorStats {
+    return this._stats;
+  }
+  get approvedAt(): Date | undefined {
+    return this._approvedAt;
+  }
+  get suspendedAt(): Date | undefined {
+    return this._suspendedAt;
+  }
+  get terminatedAt(): Date | undefined {
+    return this._terminatedAt;
+  }
+  get createdAt(): Date {
+    return this._createdAt;
+  }
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
 
-  get isApproved(): boolean { return this._status === 'approved'; }
-  get isPending(): boolean { return this._status === 'pending'; }
-  get canSell(): boolean { return this._status === 'approved'; }
+  get isApproved(): boolean {
+    return this._status === 'approved';
+  }
+  get isPending(): boolean {
+    return this._status === 'pending';
+  }
+  get canSell(): boolean {
+    return this._status === 'approved';
+  }
 
   approve(): void {
     if (this._status !== 'pending' && this._status !== 'suspended') {

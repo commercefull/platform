@@ -17,7 +17,11 @@ describe('AuthenticateCustomerUseCase', () => {
     bcryptModule.compare.mockResolvedValue(true);
     mockRepo = {
       findByEmail: jest.fn().mockResolvedValue({
-        customerId: 'c1', email: 'test@test.com', firstName: 'John', lastName: 'Doe', isVerified: true,
+        customerId: 'c1',
+        email: 'test@test.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        isVerified: true,
       }),
       getPasswordHash: jest.fn().mockResolvedValue('hashed-pw'),
       recordLogin: jest.fn().mockResolvedValue(undefined),

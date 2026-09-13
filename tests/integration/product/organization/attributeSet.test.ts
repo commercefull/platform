@@ -9,7 +9,16 @@
 
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin, expectStatus } from '../../testUtils';
-import { SEEDED_ATTRIBUTE_COLOR_ID, SEEDED_ATTRIBUTE_SET_APPAREL_ID, SEEDED_ATTRIBUTE_SET_DEFAULT_ID, SEEDED_ATTRIBUTE_SET_ELECTRONICS_ID, SEEDED_ATTRIBUTE_SIZE_ID, SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID, SEEDED_PRODUCT_1_ID } from '../testUtils';
+import {
+  SEEDED_ATTRIBUTE_COLOR_ID,
+  SEEDED_ATTRIBUTE_SET_APPAREL_ID,
+  SEEDED_ATTRIBUTE_SET_DEFAULT_ID,
+  SEEDED_ATTRIBUTE_SET_ELECTRONICS_ID,
+  SEEDED_ATTRIBUTE_SIZE_ID,
+  SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID,
+  SEEDED_PRODUCT_TYPE_SIMPLE_ID,
+  SEEDED_PRODUCT_1_ID,
+} from '../testUtils';
 
 describe('Attribute Set Tests', () => {
   let client: AxiosInstance;
@@ -163,7 +172,8 @@ describe('Attribute Set Tests', () => {
 
   describe('Organization: Attribute Set CRUD', () => {
     it('should reject creation without name or code', async () => {
-      const res = await client.post('/business/attribute-sets',
+      const res = await client.post(
+        '/business/attribute-sets',
         { name: 'No Code' },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
@@ -171,12 +181,16 @@ describe('Attribute Set Tests', () => {
     });
 
     it('should create a new attribute set', async () => {
-      const res = await client.post('/business/attribute-sets', {
-        name: 'Test Attribute Set',
-        code: `test-set-${Date.now()}`,
-        description: 'Created by integration test',
-        isActive: true,
-      }, { headers: { Authorization: `Bearer ${adminToken}` } });
+      const res = await client.post(
+        '/business/attribute-sets',
+        {
+          name: 'Test Attribute Set',
+          code: `test-set-${Date.now()}`,
+          description: 'Created by integration test',
+          isActive: true,
+        },
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
 
       expect(res.status).toBe(201);
       expect(res.data.success).toBe(true);
@@ -191,7 +205,8 @@ describe('Attribute Set Tests', () => {
       });
       const code = existing.data.data.code;
 
-      const res = await client.post('/business/attribute-sets',
+      const res = await client.post(
+        '/business/attribute-sets',
         { name: 'Duplicate', code },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
@@ -200,7 +215,8 @@ describe('Attribute Set Tests', () => {
 
     it('should update an attribute set', async () => {
       if (!createdSetId) return;
-      const res = await client.put(`/business/attribute-sets/${createdSetId}`,
+      const res = await client.put(
+        `/business/attribute-sets/${createdSetId}`,
         { name: 'Updated Set Name', description: 'Updated description' },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
@@ -211,7 +227,8 @@ describe('Attribute Set Tests', () => {
 
     it('should add an attribute to the set', async () => {
       if (!createdSetId) return;
-      const res = await client.post(`/business/attribute-sets/${createdSetId}/attributes`,
+      const res = await client.post(
+        `/business/attribute-sets/${createdSetId}/attributes`,
         { attributeId: SEEDED_ATTRIBUTE_COLOR_ID, position: 1, isRequired: false },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
@@ -224,12 +241,14 @@ describe('Attribute Set Tests', () => {
     it('should reorder attributes in the set', async () => {
       if (!createdSetId) return;
       // Add a second attribute first
-      await client.post(`/business/attribute-sets/${createdSetId}/attributes`,
+      await client.post(
+        `/business/attribute-sets/${createdSetId}/attributes`,
         { attributeId: SEEDED_ATTRIBUTE_SIZE_ID, position: 2, isRequired: false },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
 
-      const res = await client.post(`/business/attribute-sets/${createdSetId}/attributes/reorder`,
+      const res = await client.post(
+        `/business/attribute-sets/${createdSetId}/attributes/reorder`,
         { attributeIds: [SEEDED_ATTRIBUTE_SIZE_ID, SEEDED_ATTRIBUTE_COLOR_ID] },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
@@ -239,10 +258,9 @@ describe('Attribute Set Tests', () => {
 
     it('should remove an attribute from the set', async () => {
       if (!createdSetId) return;
-      const res = await client.delete(
-        `/business/attribute-sets/${createdSetId}/attributes/${SEEDED_ATTRIBUTE_COLOR_ID}`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.delete(`/business/attribute-sets/${createdSetId}/attributes/${SEEDED_ATTRIBUTE_COLOR_ID}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
     });

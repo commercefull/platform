@@ -35,12 +35,12 @@ describe('ManageAdminGdprUseCase', () => {
   });
 
   it('should get gdpr stats', async () => {
-    const result = await useCase.getGdprStats() as unknown as Record<string, unknown>;
+    const result = (await useCase.getGdprStats()) as unknown as Record<string, unknown>;
     expect(result.totalRequests).toBe(10);
   });
 
   it('should get consent stats', async () => {
-    const result = await useCase.getConsentStats() as unknown as Record<string, unknown>;
+    const result = (await useCase.getConsentStats()) as unknown as Record<string, unknown>;
     expect(result.totalConsents).toBe(50);
   });
 

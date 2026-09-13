@@ -243,9 +243,10 @@ export async function getBundleItem(bundleItemId: string): Promise<BundleItem | 
 }
 
 export async function getBundleItems(productBundleId: string): Promise<BundleItem[]> {
-  const rows = await query<DbProductBundleItem[]>('SELECT * FROM "productBundleItem" WHERE "productBundleId" = $1 ORDER BY "sortOrder" ASC', [
-    productBundleId,
-  ]);
+  const rows = await query<DbProductBundleItem[]>(
+    'SELECT * FROM "productBundleItem" WHERE "productBundleId" = $1 ORDER BY "sortOrder" ASC',
+    [productBundleId],
+  );
   return (rows || []).map(mapToBundleItem);
 }
 
@@ -324,10 +325,9 @@ export async function deleteBundleItem(bundleItemId: string): Promise<void> {
 
 async function getProductPrice(productId: string, productVariantId?: string): Promise<number> {
   if (productVariantId) {
-    const variant = await queryOne<{ price: string }>(
-      `SELECT "price" FROM "productVariant" WHERE "productVariantId" = $1`,
-      [productVariantId],
-    );
+    const variant = await queryOne<{ price: string }>(`SELECT "price" FROM "productVariant" WHERE "productVariantId" = $1`, [
+      productVariantId,
+    ]);
     if (variant) {
       const vp = parseFloat(variant.price);
       return Number.isFinite(vp) ? vp : 0;
@@ -430,7 +430,7 @@ function mapToBundle(row: DbProductBundle): ProductBundle {
     isActive: Boolean(row.isActive),
     startDate: row.startDate ? new Date(row.startDate) : undefined,
     endDate: row.endDate ? new Date(row.endDate) : undefined,
-    metadata: row.metadata as Record<string, unknown> | undefined ?? undefined,
+    metadata: (row.metadata as Record<string, unknown> | undefined) ?? undefined,
     createdAt: new Date(row.createdAt!),
     updatedAt: new Date(row.updatedAt!),
   };
@@ -451,7 +451,7 @@ function mapToBundleItem(row: DbProductBundleItem): BundleItem {
     priceAdjustment: row.priceAdjustment ? parseFloat(row.priceAdjustment) : 0,
     discountPercent: row.discountPercent ? parseFloat(row.discountPercent) : 0,
     sortOrder: row.sortOrder ?? 0,
-    metadata: row.metadata as Record<string, unknown> | undefined ?? undefined,
+    metadata: (row.metadata as Record<string, unknown> | undefined) ?? undefined,
     createdAt: new Date(row.createdAt!),
     updatedAt: new Date(row.updatedAt!),
   };

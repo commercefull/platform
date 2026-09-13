@@ -55,9 +55,7 @@ describe('Theme Module Integration Tests', () => {
           name: 'Test Custom Theme',
           slug: 'test-custom-theme',
           description: 'Test theme for integration tests',
-          settingsSchema: [
-            { key: 'primaryColor', type: 'color', label: 'Primary Color', defaultValue: '#3B82F6' },
-          ],
+          settingsSchema: [{ key: 'primaryColor', type: 'color', label: 'Primary Color', defaultValue: '#3B82F6' }],
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
@@ -95,21 +93,13 @@ describe('Theme Module Integration Tests', () => {
 
     it('POST /business/theme/:themeId/archive archives theme', async () => {
       if (!orgToken || !themeId) return;
-      const resp = await client.post(
-        `/business/theme/${themeId}/archive`,
-        {},
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.post(`/business/theme/${themeId}/archive`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       expectStatus(resp, 200);
     });
 
     it('POST /business/theme/:themeId/activate activates theme', async () => {
       if (!orgToken || !themeId) return;
-      const resp = await client.post(
-        `/business/theme/${themeId}/activate`,
-        {},
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.post(`/business/theme/${themeId}/activate`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       expectStatus(resp, 200);
     });
   });

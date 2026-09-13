@@ -55,15 +55,4 @@ export type AuditAction =
 export type ActorType = 'admin' | 'organization' | 'customer' | 'system';
 
 export type ResourceType =
-  | 'product'
-  | 'order'
-  | 'inventory'
-  | 'dispatch'
-  | 'customer'
-  | 'user'
-  | 'config'
-  | 'payment'
-  | 'store'
-  | 'webhook'
-  | 'system'
-  | string;
+  'product' | 'order' | 'inventory' | 'dispatch' | 'customer' | 'user' | 'config' | 'payment' | 'store' | 'webhook' | 'system' | string;

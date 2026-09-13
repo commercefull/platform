@@ -7,7 +7,9 @@ import { DeleteCustomerUseCase, DeleteCustomerCommand } from './DeleteCustomer';
 import { CustomerNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('DeleteCustomerUseCase', () => {
   let useCase: DeleteCustomerUseCase;

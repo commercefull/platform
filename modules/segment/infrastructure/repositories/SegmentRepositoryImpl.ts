@@ -32,18 +32,12 @@ function rowToEntity(row: SegmentDbRow): SegmentDefinition {
 
 export class SegmentRepositoryImpl implements SegmentRepository {
   async findById(id: string): Promise<SegmentDefinition | null> {
-    const row = await queryOne<SegmentDbRow>(
-      `SELECT * FROM "segmentDefinition" WHERE "segmentId" = $1 AND "deletedAt" IS NULL`,
-      [id],
-    );
+    const row = await queryOne<SegmentDbRow>(`SELECT * FROM "segmentDefinition" WHERE "segmentId" = $1 AND "deletedAt" IS NULL`, [id]);
     return row ? rowToEntity(row) : null;
   }
 
   async findByCode(code: string): Promise<SegmentDefinition | null> {
-    const row = await queryOne<SegmentDbRow>(
-      `SELECT * FROM "segmentDefinition" WHERE "code" = $1 AND "deletedAt" IS NULL`,
-      [code],
-    );
+    const row = await queryOne<SegmentDbRow>(`SELECT * FROM "segmentDefinition" WHERE "code" = $1 AND "deletedAt" IS NULL`, [code]);
     return row ? rowToEntity(row) : null;
   }
 

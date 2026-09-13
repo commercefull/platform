@@ -52,7 +52,12 @@ export interface SupportRepository {
   createTicket(params: Partial<SupportTicket> & { subject: string; email: string }): Promise<SupportTicket>;
   findTicketById(ticketId: string): Promise<SupportTicket | null>;
   findTicketByNumber(ticketNumber: string): Promise<SupportTicket | null>;
-  listTickets(filters?: { status?: TicketStatus; priority?: TicketPriority; category?: TicketCategory; assignedAgentId?: string }): Promise<SupportTicket[]>;
+  listTickets(filters?: {
+    status?: TicketStatus;
+    priority?: TicketPriority;
+    category?: TicketCategory;
+    assignedAgentId?: string;
+  }): Promise<SupportTicket[]>;
   updateTicket(ticketId: string, updates: Partial<SupportTicket>): Promise<SupportTicket | null>;
   assignTicket(ticketId: string, agentId: string): Promise<SupportTicket | null>;
   updateTicketStatus(ticketId: string, status: TicketStatus): Promise<SupportTicket | null>;
@@ -60,7 +65,13 @@ export interface SupportRepository {
   deleteTicket(ticketId: string): Promise<boolean>;
 
   // Messages
-  createMessage(params: { supportTicketId: string; senderType: SenderType; senderId?: string; message: string; attachments?: unknown[] }): Promise<SupportMessage>;
+  createMessage(params: {
+    supportTicketId: string;
+    senderType: SenderType;
+    senderId?: string;
+    message: string;
+    attachments?: unknown[];
+  }): Promise<SupportMessage>;
   findMessagesByTicketId(ticketId: string): Promise<SupportMessage[]>;
 
   // Agents

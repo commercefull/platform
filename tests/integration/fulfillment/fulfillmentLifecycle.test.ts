@@ -214,11 +214,7 @@ describe('Fulfillment Lifecycle Tests', () => {
 
   describe('POST /business/:fulfillmentId/pick', () => {
     it('should return 404 for non-existent fulfillment', async () => {
-      const response = await client.post(
-        `/business/fulfillments/${randomUUID()}/pick`,
-        { items: [] },
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/fulfillments/${randomUUID()}/pick`, { items: [] }, { headers: authHeaders() });
 
       expectStatus(response, 404);
       expect(response.data.success).toBe(false);
@@ -349,9 +345,13 @@ describe('Fulfillment Lifecycle Tests', () => {
 
   describe('POST /business/:fulfillmentId/deliver', () => {
     it('should return 404 for non-existent fulfillment', async () => {
-      const response = await client.post(`/business/fulfillments/${randomUUID()}/deliver`, {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/fulfillments/${randomUUID()}/deliver`,
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 404);
       expect(response.data.success).toBe(false);
@@ -360,9 +360,13 @@ describe('Fulfillment Lifecycle Tests', () => {
     it('should mark delivered if fulfillment exists and is shipped', async () => {
       if (!createdFulfillmentId) return;
 
-      const response = await client.post(`/business/fulfillments/${createdFulfillmentId}/deliver`, {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        `/business/fulfillments/${createdFulfillmentId}/deliver`,
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expectStatus(response, 200);
       expect(response.data.success).toBe(true);

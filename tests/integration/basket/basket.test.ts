@@ -32,7 +32,7 @@ describe('Basket Feature Tests', () => {
   let adminToken: string;
   let customerToken: string | undefined;
   let customerId: string | undefined;
-   
+
   let guestBasketId: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let customerBasketId: string | undefined;

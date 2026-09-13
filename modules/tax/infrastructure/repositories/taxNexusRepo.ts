@@ -7,7 +7,6 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 
-
 export interface TaxNexus {
   taxNexusId: string;
   createdAt: string;

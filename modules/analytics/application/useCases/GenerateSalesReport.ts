@@ -38,7 +38,7 @@ export class GenerateSalesReportUseCase {
         return { success: false, error: 'Start date must be before end date' };
       }
 
-      const summary = await this.port.getSalesSummary(command.startDate, command.endDate, command.organizationId) as {
+      const summary = (await this.port.getSalesSummary(command.startDate, command.endDate, command.organizationId)) as {
         totalOrders: number;
         totalRevenue: number;
         averageOrderValue: number;

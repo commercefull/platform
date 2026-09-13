@@ -9,12 +9,7 @@ import {
 } from '../../application/useCases/B2B';
 import { PaymentTerms } from '../../domain/entities/Company';
 import { B2BUserRole } from '../../domain/entities/B2BUser';
-import {
-  CompanyRepository,
-  B2BUserRepository,
-  QuoteRepository,
-  ApprovalWorkflowRepository,
-} from '../../domain/repositories/B2BRepository';
+import { CompanyRepository, B2BUserRepository, QuoteRepository, ApprovalWorkflowRepository } from '../../domain/repositories/B2BRepository';
 import {
   CompanyNotFoundError,
   CompanyAlreadyExistsError,
@@ -50,14 +45,25 @@ export class B2BController {
   }
 
   private handleError(res: Response, error: unknown): void {
-    if (error instanceof CompanyNotFoundError || error instanceof B2BUserNotFoundError ||
-        error instanceof QuoteNotFoundError || error instanceof ApprovalWorkflowNotFoundError) {
+    if (
+      error instanceof CompanyNotFoundError ||
+      error instanceof B2BUserNotFoundError ||
+      error instanceof QuoteNotFoundError ||
+      error instanceof ApprovalWorkflowNotFoundError
+    ) {
       res.status(404).json({ success: false, error: error.message, code: error.code });
-    } else if (error instanceof CompanyAlreadyExistsError || error instanceof B2BUserAlreadyExistsError ||
-               error instanceof CompanyStatusError || error instanceof B2BUserStatusError) {
+    } else if (
+      error instanceof CompanyAlreadyExistsError ||
+      error instanceof B2BUserAlreadyExistsError ||
+      error instanceof CompanyStatusError ||
+      error instanceof B2BUserStatusError
+    ) {
       res.status(409).json({ success: false, error: error.message, code: error.code });
-    } else if (error instanceof SpendingLimitExceededError || error instanceof CreditLimitExceededError ||
-               error instanceof UnauthorizedApproverError) {
+    } else if (
+      error instanceof SpendingLimitExceededError ||
+      error instanceof CreditLimitExceededError ||
+      error instanceof UnauthorizedApproverError
+    ) {
       res.status(403).json({ success: false, error: error.message, code: error.code });
     } else if (error instanceof QuoteExpiredError) {
       res.status(410).json({ success: false, error: error.message, code: error.code });
@@ -93,7 +99,9 @@ export class B2BController {
   async createCompany(req: TypedRequest, res: Response): Promise<void> {
     try {
       const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
-      const company = await this.companyUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<typeof this.companyUseCase.create>[0]);
+      const company = await this.companyUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
+        typeof this.companyUseCase.create
+      >[0]);
       res.status(201).json({ success: true, data: company.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -102,7 +110,10 @@ export class B2BController {
 
   async updateCompany(req: TypedRequest<{ companyId: string }>, res: Response): Promise<void> {
     try {
-      const company = await this.companyUseCase.updateProfile(req.params.companyId, req.body as Parameters<typeof this.companyUseCase.updateProfile>[1]);
+      const company = await this.companyUseCase.updateProfile(
+        req.params.companyId,
+        req.body as Parameters<typeof this.companyUseCase.updateProfile>[1],
+      );
       res.json({ success: true, data: company.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -111,7 +122,10 @@ export class B2BController {
 
   async setPaymentTerms(req: TypedRequest<{ companyId: string }>, res: Response): Promise<void> {
     try {
-      const company = await this.companyUseCase.setPaymentTerms(req.params.companyId, (req.body as Record<string, unknown>).paymentTerms as PaymentTerms);
+      const company = await this.companyUseCase.setPaymentTerms(
+        req.params.companyId,
+        (req.body as Record<string, unknown>).paymentTerms as PaymentTerms,
+      );
       res.json({ success: true, data: company.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -120,7 +134,10 @@ export class B2BController {
 
   async setCreditLimit(req: TypedRequest<{ companyId: string }>, res: Response): Promise<void> {
     try {
-      const company = await this.companyUseCase.setCreditLimit(req.params.companyId, (req.body as Record<string, unknown>).creditLimit as number);
+      const company = await this.companyUseCase.setCreditLimit(
+        req.params.companyId,
+        (req.body as Record<string, unknown>).creditLimit as number,
+      );
       res.json({ success: true, data: company.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -202,7 +219,9 @@ export class B2BController {
   async inviteUser(req: TypedRequest, res: Response): Promise<void> {
     try {
       const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
-      const user = await this.userUseCase.invite({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<typeof this.userUseCase.invite>[0]);
+      const user = await this.userUseCase.invite({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
+        typeof this.userUseCase.invite
+      >[0]);
       res.status(201).json({ success: true, data: user.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -256,7 +275,10 @@ export class B2BController {
 
   async setSpendingLimits(req: TypedRequest<{ userId: string }>, res: Response): Promise<void> {
     try {
-      const user = await this.userUseCase.setSpendingLimits(req.params.userId, (req.body as Record<string, unknown>).spendingLimits as Parameters<typeof this.userUseCase.setSpendingLimits>[1]);
+      const user = await this.userUseCase.setSpendingLimits(
+        req.params.userId,
+        (req.body as Record<string, unknown>).spendingLimits as Parameters<typeof this.userUseCase.setSpendingLimits>[1],
+      );
       res.json({ success: true, data: user.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -265,7 +287,10 @@ export class B2BController {
 
   async updateUserProfile(req: TypedRequest<{ userId: string }>, res: Response): Promise<void> {
     try {
-      const user = await this.userUseCase.updateProfile(req.params.userId, req.body as Parameters<typeof this.userUseCase.updateProfile>[1]);
+      const user = await this.userUseCase.updateProfile(
+        req.params.userId,
+        req.body as Parameters<typeof this.userUseCase.updateProfile>[1],
+      );
       res.json({ success: true, data: user.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -305,7 +330,9 @@ export class B2BController {
   async createQuote(req: TypedRequest, res: Response): Promise<void> {
     try {
       const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
-      const quote = await this.quoteUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<typeof this.quoteUseCase.create>[0]);
+      const quote = await this.quoteUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
+        typeof this.quoteUseCase.create
+      >[0]);
       res.status(201).json({ success: true, data: quote.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -314,23 +341,30 @@ export class B2BController {
 
   async addQuoteLineItem(req: TypedRequest<{ quoteId: string }>, res: Response): Promise<void> {
     try {
-      const quote = await this.quoteUseCase.addLineItem(req.params.quoteId, req.body as Parameters<typeof this.quoteUseCase.addLineItem>[1]);
+      const quote = await this.quoteUseCase.addLineItem(
+        req.params.quoteId,
+        req.body as Parameters<typeof this.quoteUseCase.addLineItem>[1],
+      );
       res.json({ success: true, data: quote.toJSON() });
     } catch (error) {
       this.handleError(res, error);
     }
   }
 
-  async updateQuoteLineItem(req: TypedRequest<{ quoteId: string, lineItemId: string }>, res: Response): Promise<void> {
+  async updateQuoteLineItem(req: TypedRequest<{ quoteId: string; lineItemId: string }>, res: Response): Promise<void> {
     try {
-      const quote = await this.quoteUseCase.updateLineItem(req.params.quoteId, req.params.lineItemId, req.body as Parameters<typeof this.quoteUseCase.updateLineItem>[2]);
+      const quote = await this.quoteUseCase.updateLineItem(
+        req.params.quoteId,
+        req.params.lineItemId,
+        req.body as Parameters<typeof this.quoteUseCase.updateLineItem>[2],
+      );
       res.json({ success: true, data: quote.toJSON() });
     } catch (error) {
       this.handleError(res, error);
     }
   }
 
-  async removeQuoteLineItem(req: TypedRequest<{ quoteId: string, lineItemId: string }>, res: Response): Promise<void> {
+  async removeQuoteLineItem(req: TypedRequest<{ quoteId: string; lineItemId: string }>, res: Response): Promise<void> {
     try {
       const quote = await this.quoteUseCase.removeLineItem(req.params.quoteId, req.params.lineItemId);
       res.json({ success: true, data: quote.toJSON() });
@@ -395,7 +429,10 @@ export class B2BController {
 
   async setQuoteInternalNotes(req: TypedRequest<{ quoteId: string }>, res: Response): Promise<void> {
     try {
-      const quote = await this.quoteUseCase.setInternalNotes(req.params.quoteId, (req.body as Record<string, unknown>).internalNotes as string);
+      const quote = await this.quoteUseCase.setInternalNotes(
+        req.params.quoteId,
+        (req.body as Record<string, unknown>).internalNotes as string,
+      );
       res.json({ success: true, data: quote.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -437,7 +474,9 @@ export class B2BController {
   async createApproval(req: TypedRequest, res: Response): Promise<void> {
     try {
       const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
-      const workflow = await this.approvalUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<typeof this.approvalUseCase.create>[0]);
+      const workflow = await this.approvalUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
+        typeof this.approvalUseCase.create
+      >[0]);
       res.status(201).json({ success: true, data: workflow.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -448,7 +487,11 @@ export class B2BController {
     try {
       const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
       const approverId = (req as unknown as { user?: { userId?: string } }).user?.userId ?? organizationId;
-      const workflow = await this.approvalUseCase.approve(req.params.workflowId, approverId, (req.body as Record<string, unknown>).comments as string);
+      const workflow = await this.approvalUseCase.approve(
+        req.params.workflowId,
+        approverId,
+        (req.body as Record<string, unknown>).comments as string,
+      );
       res.json({ success: true, data: workflow.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -459,7 +502,11 @@ export class B2BController {
     try {
       const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
       const approverId = (req as unknown as { user?: { userId?: string } }).user?.userId ?? organizationId;
-      const workflow = await this.approvalUseCase.reject(req.params.workflowId, approverId, (req.body as Record<string, unknown>).comments as string);
+      const workflow = await this.approvalUseCase.reject(
+        req.params.workflowId,
+        approverId,
+        (req.body as Record<string, unknown>).comments as string,
+      );
       res.json({ success: true, data: workflow.toJSON() });
     } catch (error) {
       this.handleError(res, error);

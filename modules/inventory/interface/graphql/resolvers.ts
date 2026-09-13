@@ -18,13 +18,17 @@ type ReserveRepo = ConstructorParameters<typeof ReserveStockUseCase>[0];
 
 export const inventoryResolvers = {
   Query: {
-    inventoryItem: async (_parent: unknown, args: {
-      inventoryItemId?: string;
-      sku?: string;
-      productId?: string;
-      variantId?: string;
-      warehouseId?: string;
-    }, context: GraphQLAuthContext) => {
+    inventoryItem: async (
+      _parent: unknown,
+      args: {
+        inventoryItemId?: string;
+        sku?: string;
+        productId?: string;
+        variantId?: string;
+        warehouseId?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new GetInventoryItemUseCase(InventoryRepo as unknown as GetItemRepo);
       const input: GetInventoryItemInput = {
@@ -37,20 +41,28 @@ export const inventoryResolvers = {
       return useCase.execute(input);
     },
 
-    inventoryItems: async (_parent: unknown, args: {
-      input?: ListInventoryItemsInput;
-    }, context: GraphQLAuthContext) => {
+    inventoryItems: async (
+      _parent: unknown,
+      args: {
+        input?: ListInventoryItemsInput;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new ListInventoryItemsUseCase(InventoryRepo as unknown as ListItemsRepo);
       return useCase.execute(args.input || {});
     },
 
-    lowStockItems: async (_parent: unknown, args: {
-      warehouseId?: string;
-      threshold?: number;
-      page?: number;
-      limit?: number;
-    }, context: GraphQLAuthContext) => {
+    lowStockItems: async (
+      _parent: unknown,
+      args: {
+        warehouseId?: string;
+        threshold?: number;
+        page?: number;
+        limit?: number;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new GetLowStockItemsUseCase(InventoryRepo as unknown as LowStockRepo);
       const input: GetLowStockItemsInput = {
@@ -62,12 +74,16 @@ export const inventoryResolvers = {
       return useCase.execute(input);
     },
 
-    outOfStockItems: async (_parent: unknown, args: {
-      warehouseId?: string;
-      includeReserved?: boolean;
-      page?: number;
-      limit?: number;
-    }, context: GraphQLAuthContext) => {
+    outOfStockItems: async (
+      _parent: unknown,
+      args: {
+        warehouseId?: string;
+        includeReserved?: boolean;
+        page?: number;
+        limit?: number;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new GetOutOfStockItemsUseCase(InventoryRepo as unknown as OutOfStockRepo);
       const input: GetOutOfStockItemsInput = {
@@ -81,13 +97,17 @@ export const inventoryResolvers = {
   },
 
   Mutation: {
-    reserveStock: async (_parent: unknown, args: {
-      orderId: string;
-      items: Array<{ productId: string; variantId?: string; sku?: string; quantity: number; locationId?: string }>;
-      expiresAt?: string;
-      channelId?: string;
-      storeId?: string;
-    }, context: GraphQLAuthContext) => {
+    reserveStock: async (
+      _parent: unknown,
+      args: {
+        orderId: string;
+        items: Array<{ productId: string; variantId?: string; sku?: string; quantity: number; locationId?: string }>;
+        expiresAt?: string;
+        channelId?: string;
+        storeId?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new ReserveStockUseCase(InventoryRepo as unknown as ReserveRepo);
       const input: ReserveStockInput = {

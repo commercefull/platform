@@ -4,13 +4,16 @@ http.globalAgent.setMaxListeners(50);
 https.globalAgent.setMaxListeners(50);
 
 const swcTransform = {
-  '^.+\\.tsx?$': ['@swc/jest', {
-    jsc: {
-      target: 'es2022',
-      parser: { syntax: 'typescript' },
-      transform: {},
+  '^.+\\.tsx?$': [
+    '@swc/jest',
+    {
+      jsc: {
+        target: 'es2022',
+        parser: { syntax: 'typescript' },
+        transform: {},
+      },
     },
-  }],
+  ],
 };
 
 const moduleFileExtensions = ['ts', 'tsx', 'js', 'jsx', 'json', 'node'];
@@ -34,14 +37,7 @@ module.exports = {
       moduleFileExtensions,
       testTimeout: 30000,
       collectCoverage: true,
-      collectCoverageFrom: [
-        'modules/**/*.ts',
-        'libs/**/*.ts',
-        'web/**/*.ts',
-        '!**/*.test.ts',
-        '!**/node_modules/**',
-        '!**/dist/**',
-      ],
+      collectCoverageFrom: ['modules/**/*.ts', 'libs/**/*.ts', 'web/**/*.ts', '!**/*.test.ts', '!**/node_modules/**', '!**/dist/**'],
       coverageDirectory: 'coverage',
       coverageReporters: ['text', 'lcov'],
     },

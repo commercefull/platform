@@ -1,4 +1,4 @@
-import { ProcessImageUseCase} from './ProcessImage';
+import { ProcessImageUseCase } from './ProcessImage';
 
 describe('ProcessImageUseCase', () => {
   let useCase: ProcessImageUseCase;

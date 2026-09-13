@@ -46,7 +46,16 @@ interface ShippingMethodBody {
 }
 
 export const getWarehouses = async (req: TypedRequest, res: Response): Promise<void> => {
-  const { activeOnly = 'true', fulfillmentCenters, returnCenters, organizationId, country, search, _limit = '50', _offset = '0' } = req.query;
+  const {
+    activeOnly = 'true',
+    fulfillmentCenters,
+    returnCenters,
+    organizationId,
+    country,
+    search,
+    _limit = '50',
+    _offset = '0',
+  } = req.query;
 
   let warehouses;
 
@@ -161,7 +170,10 @@ export const getWarehousesByMerchant = async (req: TypedRequest, res: Response):
   successResponse(res, warehouses);
 };
 
-export const createWarehouse = async (req: TypedRequest<Record<string, string>, unknown, CreateWarehouseBody>, res: Response): Promise<void> => {
+export const createWarehouse = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateWarehouseBody>,
+  res: Response,
+): Promise<void> => {
   const {
     name,
     code,
@@ -241,7 +253,10 @@ export const createWarehouse = async (req: TypedRequest<Record<string, string>, 
   successResponse(res, warehouse, 201);
 };
 
-export const updateWarehouse = async (req: TypedRequest<Record<string, string>, unknown, WarehouseUpdateParams>, res: Response): Promise<void> => {
+export const updateWarehouse = async (
+  req: TypedRequest<Record<string, string>, unknown, WarehouseUpdateParams>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body;
 
@@ -303,7 +318,10 @@ export const deactivateWarehouse = async (req: TypedRequest, res: Response): Pro
   successResponse(res, warehouse);
 };
 
-export const addShippingMethod = async (req: TypedRequest<Record<string, string>, unknown, ShippingMethodBody>, res: Response): Promise<void> => {
+export const addShippingMethod = async (
+  req: TypedRequest<Record<string, string>, unknown, ShippingMethodBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   // Accept both { method } and { methodId } as input for compatibility with tests
   const body = req.body as Partial<ShippingMethodBody> & { methodId?: string };
@@ -510,7 +528,10 @@ interface CreateReceivingBody {
   receivedBy?: string;
 }
 
-export const createReceiving = async (req: TypedRequest<Record<string, string>, unknown, CreateReceivingBody>, res: Response): Promise<void> => {
+export const createReceiving = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateReceivingBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const { receiptNumber, sourceType, ...rest } = req.body;
 
@@ -554,7 +575,11 @@ export const getReceivingById = async (req: TypedRequest, res: Response): Promis
 
 export const completeReceiving = async (req: TypedRequest, res: Response): Promise<void> => {
   const { receivingId } = req.params;
-  const { receivedBy, items, hasDiscrepancies } = req.body as { receivedBy?: string; items?: Record<string, unknown>[]; hasDiscrepancies?: boolean };
+  const { receivedBy, items, hasDiscrepancies } = req.body as {
+    receivedBy?: string;
+    items?: Record<string, unknown>[];
+    hasDiscrepancies?: boolean;
+  };
 
   if (items) {
     await warehouseReceivingRepo.updateItems(receivingId, items, hasDiscrepancies ?? false);
@@ -587,7 +612,10 @@ interface CreatePickPackBody {
   notes?: string;
 }
 
-export const createPickPack = async (req: TypedRequest<Record<string, string>, unknown, CreatePickPackBody>, res: Response): Promise<void> => {
+export const createPickPack = async (
+  req: TypedRequest<Record<string, string>, unknown, CreatePickPackBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const { pickPackNumber, ...rest } = req.body;
 

@@ -28,9 +28,7 @@ describe('ApplyProductDiscountUseCase', () => {
   });
 
   it('should process items with no active discounts', async () => {
-    const result = await useCase.execute(new ApplyProductDiscountCommand([
-      { productId: 'p1', price: 100, quantity: 2 },
-    ]));
+    const result = await useCase.execute(new ApplyProductDiscountCommand([{ productId: 'p1', price: 100, quantity: 2 }]));
 
     expect(result.success).toBe(true);
     expect(result.items).toHaveLength(1);

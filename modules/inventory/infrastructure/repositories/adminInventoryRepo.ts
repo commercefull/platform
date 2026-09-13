@@ -91,11 +91,7 @@ export async function findInventoryLevels(params: {
   );
 }
 
-export async function countInventoryLevels(params: {
-  search?: string;
-  locationId?: string;
-  stockStatus?: string;
-}): Promise<number> {
+export async function countInventoryLevels(params: { search?: string; locationId?: string; stockStatus?: string }): Promise<number> {
   let whereClause = 'WHERE 1=1';
   const queryParams: unknown[] = [];
   let paramIndex = 1;
@@ -148,7 +144,9 @@ export async function getInventoryStats(): Promise<InventoryStats> {
 }
 
 export async function findAllLocations(): Promise<Array<{ locationId: string; name: string }>> {
-  return (await query<Array<{ locationId: string; name: string }>>(`SELECT "locationId", "name" FROM "inventoryLocation" ORDER BY "name"`)) || [];
+  return (
+    (await query<Array<{ locationId: string; name: string }>>(`SELECT "locationId", "name" FROM "inventoryLocation" ORDER BY "name"`)) || []
+  );
 }
 
 export async function findLowStockItems(limit: number = 10): Promise<Record<string, string>[]> {
@@ -188,7 +186,11 @@ export async function findInventoryLevelById(inventoryLevelId: string): Promise<
 // Inventory Transactions
 // ============================================================================
 
-export async function findTransactionsByLevelId(inventoryLevelId: string, limit: number, offset: number): Promise<Record<string, string>[]> {
+export async function findTransactionsByLevelId(
+  inventoryLevelId: string,
+  limit: number,
+  offset: number,
+): Promise<Record<string, string>[]> {
   return (
     (await query<Record<string, string>[]>(
       `SELECT * FROM "inventoryTransaction"
@@ -201,10 +203,9 @@ export async function findTransactionsByLevelId(inventoryLevelId: string, limit:
 }
 
 export async function countTransactionsByLevelId(inventoryLevelId: string): Promise<number> {
-  const result = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "inventoryTransaction" WHERE "inventoryLevelId" = $1`,
-    [inventoryLevelId],
-  );
+  const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "inventoryTransaction" WHERE "inventoryLevelId" = $1`, [
+    inventoryLevelId,
+  ]);
   return parseInt(result?.count || '0');
 }
 

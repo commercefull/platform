@@ -25,19 +25,23 @@ export class ImportErrorRepositoryImpl implements ImportErrorRepository {
         "message", "stackTrace", "rawData", "resolvedAt", "createdAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
       [
-        props.importErrorId, props.importJobId, props.entityType, props.sourceId, props.severity,
-        props.message, props.stackTrace, JSON.stringify(props.rawData || {}),
-        props.resolvedAt, props.createdAt,
+        props.importErrorId,
+        props.importJobId,
+        props.entityType,
+        props.sourceId,
+        props.severity,
+        props.message,
+        props.stackTrace,
+        JSON.stringify(props.rawData || {}),
+        props.resolvedAt,
+        props.createdAt,
       ],
     );
     return error;
   }
 
   async findById(importErrorId: string): Promise<ImportError | null> {
-    const row = await queryOne<ImportErrorDbRow>(
-      `SELECT * FROM "${Table.ImportError}" WHERE "importErrorId" = $1`,
-      [importErrorId],
-    );
+    const row = await queryOne<ImportErrorDbRow>(`SELECT * FROM "${Table.ImportError}" WHERE "importErrorId" = $1`, [importErrorId]);
     if (!row) return null;
     return ImportError.reconstitute(this.mapRowToProps(row));
   }
@@ -58,23 +62,17 @@ export class ImportErrorRepositoryImpl implements ImportErrorRepository {
     }
     sql += ` ORDER BY "createdAt" DESC`;
     const rows = await query<ImportErrorDbRow[]>(sql, params as unknown[]);
-    return (rows ?? []).map((r) => ImportError.reconstitute(this.mapRowToProps(r)));
+    return (rows ?? []).map(r => ImportError.reconstitute(this.mapRowToProps(r)));
   }
 
   async update(error: ImportError): Promise<ImportError> {
     const props = error.toJSON();
-    await query(
-      `UPDATE "${Table.ImportError}" SET "resolvedAt" = $2 WHERE "importErrorId" = $1`,
-      [props.importErrorId, props.resolvedAt],
-    );
+    await query(`UPDATE "${Table.ImportError}" SET "resolvedAt" = $2 WHERE "importErrorId" = $1`, [props.importErrorId, props.resolvedAt]);
     return error;
   }
 
   async deleteByJob(importJobId: string): Promise<boolean> {
-    await query(
-      `DELETE FROM "${Table.ImportError}" WHERE "importJobId" = $1`,
-      [importJobId],
-    );
+    await query(`DELETE FROM "${Table.ImportError}" WHERE "importJobId" = $1`, [importJobId]);
     return true;
   }
 

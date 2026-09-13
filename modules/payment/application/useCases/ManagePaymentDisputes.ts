@@ -4,9 +4,7 @@ import paymentBillingDataRepository from '../../infrastructure/repositories/Paym
 const paymentBillingRepo = paymentBillingDataRepository.billing;
 
 export class ManagePaymentDisputesUseCase {
-  constructor(
-    private readonly billingRepo: PaymentBillingRepository = paymentBillingRepo,
-  ) {}
+  constructor(private readonly billingRepo: PaymentBillingRepository = paymentBillingRepo) {}
 
   async findAll(status?: string, limit?: number) {
     return this.billingRepo.findAllDisputes(status, limit);

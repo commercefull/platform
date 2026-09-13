@@ -279,9 +279,7 @@ export class PredictiveAnalyticsUseCase {
   }
 
   async performCustomerSegmentation(): Promise<CustomerSegmentation> {
-    const customerRFM = await query<
-      Array<{ customer_id: string; recency: string; frequency: string; monetary: string }>
-    >(
+    const customerRFM = await query<Array<{ customer_id: string; recency: string; frequency: string; monetary: string }>>(
       `WITH customer_rfm AS (
         SELECT
           customer_id,

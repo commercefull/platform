@@ -2,17 +2,25 @@ jest.mock('../../../infrastructure/repositories/DynamicAttributeRepository', () 
   __esModule: true,
   default: {
     findAttributeById: jest.fn().mockResolvedValue({
-      productAttributeId: 'a1', name: 'Color', code: 'color', type: 'text', isSystem: false,
+      productAttributeId: 'a1',
+      name: 'Color',
+      code: 'color',
+      type: 'text',
+      isSystem: false,
     }),
     findAttributeByCode: jest.fn().mockResolvedValue({
-      productAttributeId: 'a1', name: 'Color', code: 'color', type: 'text', isSystem: false,
+      productAttributeId: 'a1',
+      name: 'Color',
+      code: 'color',
+      type: 'text',
+      isSystem: false,
     }),
     findAttributeValues: jest.fn().mockResolvedValue([]),
     setProductAttribute: jest.fn().mockResolvedValue({ productId: 'p1', attributeId: 'a1', value: 'Red' }),
   },
 }));
 
-import { SetProductAttributeUseCase} from './AssignProductAttributes';
+import { SetProductAttributeUseCase } from './AssignProductAttributes';
 import dynamicAttributeRepository from '../../../infrastructure/repositories/DynamicAttributeRepository';
 
 const mockRepo = dynamicAttributeRepository as unknown as Record<string, jest.Mock>;
@@ -27,7 +35,9 @@ describe('SetProductAttributeUseCase', () => {
 
   it('should set product attribute by ID (happy path)', async () => {
     const result = await useCase.execute({
-      productId: 'p1', attributeId: 'a1', value: 'Red',
+      productId: 'p1',
+      attributeId: 'a1',
+      value: 'Red',
     });
 
     expect(result.success).toBe(true);
@@ -36,7 +46,9 @@ describe('SetProductAttributeUseCase', () => {
 
   it('should set product attribute by code', async () => {
     const result = await useCase.execute({
-      productId: 'p1', attributeCode: 'color', value: 'Blue',
+      productId: 'p1',
+      attributeCode: 'color',
+      value: 'Blue',
     });
 
     expect(result.success).toBe(true);
@@ -47,7 +59,9 @@ describe('SetProductAttributeUseCase', () => {
     mockRepo.findAttributeByCode.mockResolvedValueOnce(null);
 
     const result = await useCase.execute({
-      productId: 'p1', attributeId: 'nonexistent', value: 'Red',
+      productId: 'p1',
+      attributeId: 'nonexistent',
+      value: 'Red',
     });
 
     expect(result.success).toBe(false);

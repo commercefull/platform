@@ -55,13 +55,15 @@ describe('UploadMediaUseCase', () => {
       tags: ['nature'],
     });
 
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      altText: 'A photo',
-      caption: 'My caption',
-      folderId: 'folder-1',
-      uploadedBy: 'user-1',
-      tags: ['nature'],
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        altText: 'A photo',
+        caption: 'My caption',
+        folderId: 'folder-1',
+        uploadedBy: 'user-1',
+        tags: ['nature'],
+      }),
+    );
   });
 
   it('should default tags to empty array', async () => {
@@ -73,9 +75,11 @@ describe('UploadMediaUseCase', () => {
       url: 'https://cdn.example.com/photo.jpg',
     });
 
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      tags: [],
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tags: [],
+      }),
+    );
   });
 
   it('should determine media type as image', async () => {
@@ -87,9 +91,11 @@ describe('UploadMediaUseCase', () => {
       url: 'u',
     });
 
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      mediaType: 'image',
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mediaType: 'image',
+      }),
+    );
   });
 
   it('should determine media type as video', async () => {
@@ -101,9 +107,11 @@ describe('UploadMediaUseCase', () => {
       url: 'u',
     });
 
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      mediaType: 'video',
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mediaType: 'video',
+      }),
+    );
   });
 
   it('should determine media type as document for PDF', async () => {
@@ -115,9 +123,11 @@ describe('UploadMediaUseCase', () => {
       url: 'u',
     });
 
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      mediaType: 'document',
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mediaType: 'document',
+      }),
+    );
   });
 
   it('should determine media type as file for unknown types', async () => {
@@ -129,21 +139,23 @@ describe('UploadMediaUseCase', () => {
       url: 'u',
     });
 
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      mediaType: 'file',
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mediaType: 'file',
+      }),
+    );
   });
 
   it('should throw MediaValidationError when fileName is missing', async () => {
-    await expect(
-      useCase.execute({ fileName: '', mimeType: 'image/jpeg', fileSize: 100, filePath: '/p', url: 'u' }),
-    ).rejects.toThrow(MediaValidationError);
+    await expect(useCase.execute({ fileName: '', mimeType: 'image/jpeg', fileSize: 100, filePath: '/p', url: 'u' })).rejects.toThrow(
+      MediaValidationError,
+    );
   });
 
   it('should throw MediaValidationError when mimeType is missing', async () => {
-    await expect(
-      useCase.execute({ fileName: 'photo.jpg', mimeType: '', fileSize: 100, filePath: '/p', url: 'u' }),
-    ).rejects.toThrow(MediaValidationError);
+    await expect(useCase.execute({ fileName: 'photo.jpg', mimeType: '', fileSize: 100, filePath: '/p', url: 'u' })).rejects.toThrow(
+      MediaValidationError,
+    );
   });
 
   it('should throw MediaValidationError when url is missing', async () => {

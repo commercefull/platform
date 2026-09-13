@@ -1,4 +1,4 @@
-import { AllocateFromPoolUseCase} from './AllocateFromPool';
+import { AllocateFromPoolUseCase } from './AllocateFromPool';
 import { InventoryLocationNotFoundError, InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 describe('AllocateFromPoolUseCase', () => {
@@ -8,9 +8,9 @@ describe('AllocateFromPoolUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findPoolById: jest.fn().mockResolvedValue({ poolId: 'p1', isActive: true, allocationStrategy: 'fifo' }),
-      findAvailableInPool: jest.fn().mockResolvedValue([
-        { inventoryId: 'inv1', locationId: 'loc1', availableQuantity: 50, priority: 1, createdAt: new Date() },
-      ]),
+      findAvailableInPool: jest
+        .fn()
+        .mockResolvedValue([{ inventoryId: 'inv1', locationId: 'loc1', availableQuantity: 50, priority: 1, createdAt: new Date() }]),
       reserveStock: jest.fn().mockResolvedValue(undefined),
       createAllocation: jest.fn().mockResolvedValue(undefined),
     };
@@ -19,7 +19,9 @@ describe('AllocateFromPoolUseCase', () => {
 
   it('should allocate from pool (happy path)', async () => {
     const result = await useCase.execute({
-      poolId: 'p1', orderId: 'o1', items: [{ productId: 'prod1', quantity: 10 }],
+      poolId: 'p1',
+      orderId: 'o1',
+      items: [{ productId: 'prod1', quantity: 10 }],
     });
 
     expect(result.fullyAllocated).toBe(true);
@@ -47,7 +49,9 @@ describe('AllocateFromPoolUseCase', () => {
     ]);
 
     const result = await useCase.execute({
-      poolId: 'p1', orderId: 'o1', items: [{ productId: 'prod1', quantity: 10 }],
+      poolId: 'p1',
+      orderId: 'o1',
+      items: [{ productId: 'prod1', quantity: 10 }],
     });
 
     expect(result.fullyAllocated).toBe(false);

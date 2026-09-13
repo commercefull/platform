@@ -39,7 +39,10 @@ interface _AddShippingMethodBody {
  * Register a new webhook endpoint
  * POST /business/webhooks
  */
-export const registerWebhook = async (req: TypedRequest<Record<string, string>, unknown, RegisterWebhookBody>, res: Response): Promise<void> => {
+export const registerWebhook = async (
+  req: TypedRequest<Record<string, string>, unknown, RegisterWebhookBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new RegisterWebhookUseCase(WebhookRepo);
   const result = await useCase.execute({
     name: req.body.name,
@@ -51,7 +54,6 @@ export const registerWebhook = async (req: TypedRequest<Record<string, string>, 
   });
 
   res.status(201).json({ success: true, data: result });
-  
 };
 
 /**
@@ -83,7 +85,6 @@ export const listWebhooks = async (req: TypedRequest, res: Response): Promise<vo
   );
 
   res.json({ success: true, data: result.data, total: result.total });
-  
 };
 
 /**
@@ -102,14 +103,16 @@ export const getWebhook = async (req: TypedRequest, res: Response): Promise<void
   // Strip secret from response for security
   const { secret: _secret, ...safeEndpoint } = endpoint as unknown as Record<string, unknown>;
   res.json({ success: true, data: safeEndpoint });
-  
 };
 
 /**
  * Update a webhook endpoint
  * PUT /business/webhooks/:webhookEndpointId
  */
-export const updateWebhook = async (req: TypedRequest<Record<string, string>, unknown, UpdateWebhookBody>, res: Response): Promise<void> => {
+export const updateWebhook = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdateWebhookBody>,
+  res: Response,
+): Promise<void> => {
   const { webhookEndpointId } = req.params;
   const updates: Record<string, unknown> = {};
 
@@ -128,7 +131,6 @@ export const updateWebhook = async (req: TypedRequest<Record<string, string>, un
   }
 
   res.json({ success: true, data: result });
-  
 };
 
 /**
@@ -152,7 +154,6 @@ export const getDeliveries = async (req: TypedRequest, res: Response): Promise<v
   );
 
   res.json({ success: true, data: result.data, total: result.total });
-  
 };
 
 /**
@@ -167,7 +168,6 @@ export const getAvailableEvents = async (_req: TypedRequest, res: Response): Pro
       wildcards: ['*', 'product.*', 'order.*', 'inventory.*', 'customer.*', 'payment.*', 'fulfillment.*'],
     },
   });
-  
 };
 
 /**
@@ -234,5 +234,4 @@ export const testWebhook = async (req: TypedRequest, res: Response): Promise<voi
       },
     });
   }
-  
 };

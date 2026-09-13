@@ -7,7 +7,9 @@ import { InvalidWebhookSignatureError } from '../../domain/errors/PaymentErrors'
 
 const mockPaymentRepo = {
   findByProviderTransactionId: jest.fn().mockResolvedValue({
-    transactionId: 't1', orderId: 'o1', amount: 100,
+    transactionId: 't1',
+    orderId: 'o1',
+    amount: 100,
   }),
   updateStatus: jest.fn().mockResolvedValue(undefined),
   findRefundByProviderRefundId: jest.fn().mockResolvedValue(null),
@@ -47,12 +49,14 @@ describe('ProcessWebhookUseCase', () => {
   });
 
   it('should throw InvalidWebhookSignatureError for bad signature', async () => {
-    await expect(useCase.execute({
-      provider: 'stripe',
-      eventType: 'payment_intent.succeeded',
-      payload: {},
-      signature: 'bad_sig',
-    })).rejects.toThrow(InvalidWebhookSignatureError);
+    await expect(
+      useCase.execute({
+        provider: 'stripe',
+        eventType: 'payment_intent.succeeded',
+        payload: {},
+        signature: 'bad_sig',
+      }),
+    ).rejects.toThrow(InvalidWebhookSignatureError);
   });
 
   it('should handle unknown event type', async () => {

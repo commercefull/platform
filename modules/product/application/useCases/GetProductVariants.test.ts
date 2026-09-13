@@ -3,10 +3,22 @@ jest.mock('../../infrastructure/repositories/ProductVariantRepository', () => ({
   default: {
     findAll: jest.fn().mockResolvedValue({
       data: [
-        { variantId: 'v1', productId: 'p1', sku: 'SKU-1', name: 'Red', attributes: [],
+        {
+          variantId: 'v1',
+          productId: 'p1',
+          sku: 'SKU-1',
+          name: 'Red',
+          attributes: [],
           price: { effectivePrice: 10, currency: 'USD', salePrice: null, cost: null, isOnSale: false, discountPercentage: 0 },
-          stockQuantity: 50, lowStockThreshold: 5, isDefault: true, isActive: true, position: 0,
-          isInStock: true, isLowStock: false, isOutOfStock: false },
+          stockQuantity: 50,
+          lowStockThreshold: 5,
+          isDefault: true,
+          isActive: true,
+          position: 0,
+          isInStock: true,
+          isLowStock: false,
+          isOutOfStock: false,
+        },
       ],
       total: 1,
     }),

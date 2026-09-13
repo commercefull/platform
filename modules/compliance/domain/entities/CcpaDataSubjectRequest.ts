@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * CCPA Data Subject Request Entity
@@ -15,12 +14,12 @@
 import { ComplianceValidationError, DsrStatusError } from '../errors/ComplianceErrors';
 
 export type CcpaRequestType =
-  | 'know'          // Right to know what data is collected
-  | 'delete'        // Right to delete
-  | 'optOutSale'    // Right to opt-out of sale of personal data
-  | 'optOutShare'   // Right to opt-out of sharing (as of CPRA)
-  | 'limitUse'      // Right to limit use of sensitive personal data (CPRA)
-  | 'correct';      // Right to correct inaccurate personal data (CPRA)
+  | 'know' // Right to know what data is collected
+  | 'delete' // Right to delete
+  | 'optOutSale' // Right to opt-out of sale of personal data
+  | 'optOutShare' // Right to opt-out of sharing (as of CPRA)
+  | 'limitUse' // Right to limit use of sensitive personal data (CPRA)
+  | 'correct'; // Right to correct inaccurate personal data (CPRA)
 
 export type CcpaRequestStatus = 'pending' | 'verified' | 'processing' | 'completed' | 'rejected' | 'cancelled';
 
@@ -115,33 +114,87 @@ export class CcpaDataSubjectRequest {
   }
 
   // Getters
-  get ccpaDsrId(): string { return this.props.ccpaDsrId; }
-  get customerId(): string { return this.props.customerId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get requestType(): CcpaRequestType { return this.props.requestType; }
-  get status(): CcpaRequestStatus { return this.props.status; }
-  get source(): CcpaRequestSource { return this.props.source; }
-  get reason(): string | undefined { return this.props.reason; }
-  get identityVerified(): boolean { return this.props.identityVerified; }
-  get verificationMethod(): string | undefined { return this.props.verificationMethod; }
-  get verifiedAt(): Date | undefined { return this.props.verifiedAt; }
-  get authorizedAgent(): string | undefined { return this.props.authorizedAgent; }
-  get requestedAt(): Date { return this.props.requestedAt; }
-  get deadlineAt(): Date { return this.props.deadlineAt; }
-  get extensionRequested(): boolean { return this.props.extensionRequested; }
-  get extensionReason(): string | undefined { return this.props.extensionReason; }
-  get extendedDeadlineAt(): Date | undefined { return this.props.extendedDeadlineAt; }
-  get completedAt(): Date | undefined { return this.props.completedAt; }
-  get processedBy(): string | undefined { return this.props.processedBy; }
-  get adminNotes(): string | undefined { return this.props.adminNotes; }
-  get rejectionReason(): string | undefined { return this.props.rejectionReason; }
-  get dataCategoriesRequested(): string[] | undefined { return this.props.dataCategoriesRequested; }
-  get downloadUrl(): string | undefined { return this.props.downloadUrl; }
-  get downloadExpiresAt(): Date | undefined { return this.props.downloadExpiresAt; }
-  get ipAddress(): string | undefined { return this.props.ipAddress; }
-  get userAgent(): string | undefined { return this.props.userAgent; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get ccpaDsrId(): string {
+    return this.props.ccpaDsrId;
+  }
+  get customerId(): string {
+    return this.props.customerId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get requestType(): CcpaRequestType {
+    return this.props.requestType;
+  }
+  get status(): CcpaRequestStatus {
+    return this.props.status;
+  }
+  get source(): CcpaRequestSource {
+    return this.props.source;
+  }
+  get reason(): string | undefined {
+    return this.props.reason;
+  }
+  get identityVerified(): boolean {
+    return this.props.identityVerified;
+  }
+  get verificationMethod(): string | undefined {
+    return this.props.verificationMethod;
+  }
+  get verifiedAt(): Date | undefined {
+    return this.props.verifiedAt;
+  }
+  get authorizedAgent(): string | undefined {
+    return this.props.authorizedAgent;
+  }
+  get requestedAt(): Date {
+    return this.props.requestedAt;
+  }
+  get deadlineAt(): Date {
+    return this.props.deadlineAt;
+  }
+  get extensionRequested(): boolean {
+    return this.props.extensionRequested;
+  }
+  get extensionReason(): string | undefined {
+    return this.props.extensionReason;
+  }
+  get extendedDeadlineAt(): Date | undefined {
+    return this.props.extendedDeadlineAt;
+  }
+  get completedAt(): Date | undefined {
+    return this.props.completedAt;
+  }
+  get processedBy(): string | undefined {
+    return this.props.processedBy;
+  }
+  get adminNotes(): string | undefined {
+    return this.props.adminNotes;
+  }
+  get rejectionReason(): string | undefined {
+    return this.props.rejectionReason;
+  }
+  get dataCategoriesRequested(): string[] | undefined {
+    return this.props.dataCategoriesRequested;
+  }
+  get downloadUrl(): string | undefined {
+    return this.props.downloadUrl;
+  }
+  get downloadExpiresAt(): Date | undefined {
+    return this.props.downloadExpiresAt;
+  }
+  get ipAddress(): string | undefined {
+    return this.props.ipAddress;
+  }
+  get userAgent(): string | undefined {
+    return this.props.userAgent;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   isOverdue(): boolean {
     const deadline = this.props.extendedDeadlineAt || this.props.deadlineAt;
@@ -151,7 +204,7 @@ export class CcpaDataSubjectRequest {
   daysUntilDeadline(): number {
     const deadline = this.props.extendedDeadlineAt || this.props.deadlineAt;
     const diff = deadline.getTime() - Date.now();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return Math.round(diff / (1000 * 60 * 60 * 24));
   }
 
   canProcess(): boolean {

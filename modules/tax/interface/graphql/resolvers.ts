@@ -1,20 +1,19 @@
 import taxQueryRepository from '../../infrastructure/repositories/TaxQueryRepository';
 import taxCommandRepository from '../../infrastructure/repositories/TaxCommandRepository';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { CalculateOrderTaxUseCase, CalculateOrderTaxCommand, OrderLineItem, TaxAddress } from '../../application/useCases/CalculateOrderTax';
+import {
+  CalculateOrderTaxUseCase,
+  CalculateOrderTaxCommand,
+  OrderLineItem,
+  TaxAddress,
+} from '../../application/useCases/CalculateOrderTax';
 import { CreateTaxRateUseCase, CreateTaxRateInput } from '../../application/useCases/CreateTaxRate';
 import { GetTaxRateForAddressUseCase, GetTaxRateForAddressInput } from '../../application/useCases/GetTaxRateForAddress';
 import type { TaxRateType } from '../../taxTypes';
 
 // Adapter that bridges taxQueryRepo to the TaxRepository port interface
 const taxRepoAdapter = {
-  async findRatesForAddress(params: {
-    country: string;
-    state?: string;
-    city?: string;
-    postalCode?: string;
-    taxCategory?: string;
-  }) {
+  async findRatesForAddress(params: { country: string; state?: string; city?: string; postalCode?: string; taxCategory?: string }) {
     const zone = await taxQueryRepository.query.findTaxZoneForAddress(params.country, params.state, params.postalCode, params.city);
     if (!zone) return [];
 
@@ -50,7 +49,7 @@ const taxCommandAdapter = {
   async createTaxRate(data: Record<string, unknown>) {
     const commandRepo = taxCommandRepository.commands;
     const result = await commandRepo.createTaxRate({
-      taxCategoryId: data.taxCategory as string || '',
+      taxCategoryId: (data.taxCategory as string) || '',
       taxZoneId: '',
       name: data.name as string,
       rate: data.rate as number,
@@ -83,14 +82,18 @@ export const taxResolvers = {
   },
 
   Mutation: {
-    calculateOrderTax: async (_parent: unknown, args: {
-      input: {
-        items: OrderLineItem[];
-        shippingAddress: TaxAddress;
-        shippingAmount?: number;
-        customerId?: string;
-      };
-    }, context: GraphQLAuthContext) => {
+    calculateOrderTax: async (
+      _parent: unknown,
+      args: {
+        input: {
+          items: OrderLineItem[];
+          shippingAddress: TaxAddress;
+          shippingAmount?: number;
+          customerId?: string;
+        };
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new CalculateOrderTaxUseCase();
       const command = new CalculateOrderTaxCommand(

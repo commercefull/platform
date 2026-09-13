@@ -243,7 +243,7 @@ export class NotificationDeliveryLogRepo {
   async markAsSent(notificationDeliveryLogId: string, providerMessageId?: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'sent',
-      sentAt: unixTimestamp(),
+      sentAt: String(unixTimestamp()),
       providerMessageId,
     });
   }
@@ -254,7 +254,7 @@ export class NotificationDeliveryLogRepo {
   async markAsDelivered(notificationDeliveryLogId: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'delivered',
-      deliveredAt: unixTimestamp(),
+      deliveredAt: String(unixTimestamp()),
     });
   }
 
@@ -266,7 +266,7 @@ export class NotificationDeliveryLogRepo {
 
     return this.update(notificationDeliveryLogId, {
       status: 'failed',
-      failedAt: unixTimestamp(),
+      failedAt: String(unixTimestamp()),
       failureReason,
       retryCount: log ? log.retryCount + 1 : 1,
     });
@@ -278,7 +278,7 @@ export class NotificationDeliveryLogRepo {
   async markAsBounced(notificationDeliveryLogId: string, failureReason: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'bounced',
-      failedAt: unixTimestamp(),
+      failedAt: String(unixTimestamp()),
       failureReason,
     });
   }
@@ -289,7 +289,7 @@ export class NotificationDeliveryLogRepo {
   async markAsBlocked(notificationDeliveryLogId: string, failureReason: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'blocked',
-      failedAt: unixTimestamp(),
+      failedAt: String(unixTimestamp()),
       failureReason,
     });
   }
@@ -427,7 +427,7 @@ export class NotificationDeliveryLogRepo {
    * Clean up old logs
    */
   async cleanupOldLogs(daysToKeep: number = 90): Promise<number> {
-    const cutoffDate = parseInt(unixTimestamp()) - daysToKeep * 24 * 60 * 60;
+    const cutoffDate = unixTimestamp() - daysToKeep * 24 * 60 * 60;
 
     const result = await queryOne<{ count: string }>(
       `DELETE FROM "notificationDeliveryLog" 

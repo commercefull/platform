@@ -60,23 +60,55 @@ export class StoreCreditLedgerEntry {
     return new StoreCreditLedgerEntry(props);
   }
 
-  get storeCreditLedgerId(): string { return this.props.storeCreditLedgerId; }
-  get customerId(): string { return this.props.customerId; }
-  get entryType(): StoreCreditEntryType { return this.props.entryType; }
-  get referenceType(): string | undefined { return this.props.referenceType; }
-  get referenceId(): string | undefined { return this.props.referenceId; }
-  get amount(): number { return this.props.amount; }
-  get balanceAfter(): number { return this.props.balanceAfter; }
-  get currency(): string { return this.props.currency; }
-  get reason(): string | undefined { return this.props.reason; }
-  get notes(): string | undefined { return this.props.notes; }
-  get createdBy(): string | undefined { return this.props.createdBy; }
-  get expiresAt(): Date | undefined { return this.props.expiresAt; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get storeCreditLedgerId(): string {
+    return this.props.storeCreditLedgerId;
+  }
+  get customerId(): string {
+    return this.props.customerId;
+  }
+  get entryType(): StoreCreditEntryType {
+    return this.props.entryType;
+  }
+  get referenceType(): string | undefined {
+    return this.props.referenceType;
+  }
+  get referenceId(): string | undefined {
+    return this.props.referenceId;
+  }
+  get amount(): number {
+    return this.props.amount;
+  }
+  get balanceAfter(): number {
+    return this.props.balanceAfter;
+  }
+  get currency(): string {
+    return this.props.currency;
+  }
+  get reason(): string | undefined {
+    return this.props.reason;
+  }
+  get notes(): string | undefined {
+    return this.props.notes;
+  }
+  get createdBy(): string | undefined {
+    return this.props.createdBy;
+  }
+  get expiresAt(): Date | undefined {
+    return this.props.expiresAt;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
-  get isCredit(): boolean { return this.props.entryType === 'credit'; }
-  get isDebit(): boolean { return this.props.entryType === 'debit'; }
+  get isCredit(): boolean {
+    return this.props.entryType === 'credit';
+  }
+  get isDebit(): boolean {
+    return this.props.entryType === 'debit';
+  }
   get isExpired(): boolean {
     return this.props.expiresAt !== undefined && this.props.expiresAt < new Date();
   }

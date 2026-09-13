@@ -7,11 +7,7 @@ declare module 'graphql-depth-limit' {
     depthAlias?: Record<string, number>;
   };
 
-  function depthLimit(
-    maxDepth: number,
-    options?: Options,
-    callback?: IgnoreCallback,
-  ): (context: ValidationContext) => ASTVisitor;
+  function depthLimit(maxDepth: number, options?: Options, callback?: IgnoreCallback): (context: ValidationContext) => ASTVisitor;
 
   export = depthLimit;
 }

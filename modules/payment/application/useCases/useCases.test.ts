@@ -57,9 +57,7 @@ describe('ProcessPaymentRefundUseCase', () => {
     const repo = createMockPaymentRepo(tx);
     const useCase = new ProcessPaymentRefundUseCase(repo);
 
-    const result = await useCase.execute(
-      new ProcessPaymentRefundCommand('tx-1', 30, 'partial refund'),
-    );
+    const result = await useCase.execute(new ProcessPaymentRefundCommand('tx-1', 30, 'partial refund'));
 
     expect(result.amount).toBe(30);
     expect(result.transactionId).toBe('tx-1');
@@ -72,9 +70,7 @@ describe('ProcessPaymentRefundUseCase', () => {
     const repo = createMockPaymentRepo(tx);
     const useCase = new ProcessPaymentRefundUseCase(repo);
 
-    const result = await useCase.execute(
-      new ProcessPaymentRefundCommand('tx-1', 100, 'full refund'),
-    );
+    const result = await useCase.execute(new ProcessPaymentRefundCommand('tx-1', 100, 'full refund'));
 
     expect(result.amount).toBe(100);
   });
@@ -83,9 +79,7 @@ describe('ProcessPaymentRefundUseCase', () => {
     const repo = createMockPaymentRepo(null);
     const useCase = new ProcessPaymentRefundUseCase(repo);
 
-    await expect(
-      useCase.execute(new ProcessPaymentRefundCommand('nonexistent', 50, 'reason')),
-    ).rejects.toThrow(TransactionNotFoundError);
+    await expect(useCase.execute(new ProcessPaymentRefundCommand('nonexistent', 50, 'reason'))).rejects.toThrow(TransactionNotFoundError);
   });
 
   it('should throw TransactionCannotBeRefundedError when transaction is PENDING', async () => {
@@ -100,9 +94,7 @@ describe('ProcessPaymentRefundUseCase', () => {
     const repo = createMockPaymentRepo(tx);
     const useCase = new ProcessPaymentRefundUseCase(repo);
 
-    await expect(
-      useCase.execute(new ProcessPaymentRefundCommand('tx-1', 50, 'reason')),
-    ).rejects.toThrow(TransactionCannotBeRefundedError);
+    await expect(useCase.execute(new ProcessPaymentRefundCommand('tx-1', 50, 'reason'))).rejects.toThrow(TransactionCannotBeRefundedError);
   });
 
   it('should throw RefundAmountExceedsRefundableError when amount exceeds refundable', async () => {
@@ -110,9 +102,9 @@ describe('ProcessPaymentRefundUseCase', () => {
     const repo = createMockPaymentRepo(tx);
     const useCase = new ProcessPaymentRefundUseCase(repo);
 
-    await expect(
-      useCase.execute(new ProcessPaymentRefundCommand('tx-1', 150, 'reason')),
-    ).rejects.toThrow(RefundAmountExceedsRefundableError);
+    await expect(useCase.execute(new ProcessPaymentRefundCommand('tx-1', 150, 'reason'))).rejects.toThrow(
+      RefundAmountExceedsRefundableError,
+    );
   });
 });
 
@@ -129,9 +121,7 @@ describe('InitiatePaymentUseCase', () => {
     const repo = createMockPaymentRepo(tx);
     const useCase = new InitiatePaymentUseCase(repo);
 
-    const result = await useCase.execute(
-      new InitiatePaymentCommand('order-1', 100, 'USD', 'pmc-1', 'cust-1', '127.0.0.1'),
-    );
+    const result = await useCase.execute(new InitiatePaymentCommand('order-1', 100, 'USD', 'pmc-1', 'cust-1', '127.0.0.1'));
 
     expect(result.amount).toBe(100);
     expect(result.status).toBe(TransactionStatus.PENDING);
@@ -142,17 +132,15 @@ describe('InitiatePaymentUseCase', () => {
     const repo = createMockPaymentRepo(null);
     const useCase = new InitiatePaymentUseCase(repo);
 
-    await expect(
-      useCase.execute(new InitiatePaymentCommand('order-1', 0, 'USD', 'pmc-1')),
-    ).rejects.toThrow(AmountMustBePositiveError);
+    await expect(useCase.execute(new InitiatePaymentCommand('order-1', 0, 'USD', 'pmc-1'))).rejects.toThrow(AmountMustBePositiveError);
   });
 
   it('should throw NoPaymentGatewayConfiguredError when no gateway', async () => {
     const repo = createMockPaymentRepo(null, null);
     const useCase = new InitiatePaymentUseCase(repo);
 
-    await expect(
-      useCase.execute(new InitiatePaymentCommand('order-1', 100, 'USD', 'pmc-1')),
-    ).rejects.toThrow(NoPaymentGatewayConfiguredError);
+    await expect(useCase.execute(new InitiatePaymentCommand('order-1', 100, 'USD', 'pmc-1'))).rejects.toThrow(
+      NoPaymentGatewayConfiguredError,
+    );
   });
 });

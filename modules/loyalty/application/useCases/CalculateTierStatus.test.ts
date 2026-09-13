@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { CalculateTierStatusUseCase} from './CalculateTierStatus';
+import { CalculateTierStatusUseCase } from './CalculateTierStatus';
 import { LoyaltyMemberNotFoundError } from '../../domain/errors/LoyaltyErrors';
 
 describe('CalculateTierStatusUseCase', () => {
@@ -12,7 +12,17 @@ describe('CalculateTierStatusUseCase', () => {
 
   beforeEach(() => {
     mockRepo = {
-      getCustomerLoyalty: jest.fn().mockResolvedValue({ currentTier: { tierId: 't1', name: 'Silver', level: 1, pointsThreshold: 500, purchasesThreshold: 5, benefits: [], pointsMultiplier: 1.2 } }),
+      getCustomerLoyalty: jest.fn().mockResolvedValue({
+        currentTier: {
+          tierId: 't1',
+          name: 'Silver',
+          level: 1,
+          pointsThreshold: 500,
+          purchasesThreshold: 5,
+          benefits: [],
+          pointsMultiplier: 1.2,
+        },
+      }),
       getTiers: jest.fn().mockResolvedValue([
         { tierId: 't1', name: 'Silver', level: 1, pointsThreshold: 500, purchasesThreshold: 5, benefits: [], pointsMultiplier: 1.2 },
         { tierId: 't2', name: 'Gold', level: 2, pointsThreshold: 1000, purchasesThreshold: 10, benefits: [], pointsMultiplier: 1.5 },

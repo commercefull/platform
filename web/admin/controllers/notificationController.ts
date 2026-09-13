@@ -53,14 +53,12 @@ export const listNotificationTemplates = async (req: TypedRequest, res: Response
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createNotificationTemplateForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'notifications/templates/create', {
     pageName: 'Create Notification Template',
   });
-  
 };
 
 export const createNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -135,7 +133,6 @@ export const viewNotificationTemplate = async (req: TypedRequest, res: Response)
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editNotificationTemplateForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -155,7 +152,6 @@ export const editNotificationTemplateForm = async (req: TypedRequest, res: Respo
     pageName: `Edit: ${template.name}`,
     template,
   });
-  
 };
 
 export const updateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -198,7 +194,6 @@ export const updateNotificationTemplate = async (req: TypedRequest, res: Respons
   }
 
   res.redirect(`/hub/notifications/templates/${templateId}?success=Notification template updated successfully`);
-  
 };
 
 export const activateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -211,7 +206,6 @@ export const activateNotificationTemplate = async (req: TypedRequest, res: Respo
   }
 
   res.json({ success: true, message: 'Notification template activated successfully' });
-  
 };
 
 export const deactivateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -224,7 +218,6 @@ export const deactivateNotificationTemplate = async (req: TypedRequest, res: Res
   }
 
   res.json({ success: true, message: 'Notification template deactivated successfully' });
-  
 };
 
 export const deleteNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -237,7 +230,6 @@ export const deleteNotificationTemplate = async (req: TypedRequest, res: Respons
   }
 
   res.json({ success: true, message: 'Notification template deleted successfully' });
-  
 };
 
 export const cloneNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -252,7 +244,6 @@ export const cloneNotificationTemplate = async (req: TypedRequest, res: Response
     message: 'Notification template cloned successfully',
     template: clonedTemplate,
   });
-  
 };
 
 export const previewNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -265,7 +256,6 @@ export const previewNotificationTemplate = async (req: TypedRequest, res: Respon
     success: true,
     preview,
   });
-  
 };
 
 // ============================================================================
@@ -286,7 +276,6 @@ export const listBatches = async (req: TypedRequest, res: Response): Promise<voi
     limit,
     offset,
   });
-  
 };
 
 export const viewBatch = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -306,7 +295,6 @@ export const viewBatch = async (req: TypedRequest, res: Response): Promise<void>
     batch,
     deliveryLogs,
   });
-  
 };
 
 // ============================================================================
@@ -321,7 +309,6 @@ export const listWebhooks = async (req: TypedRequest, res: Response): Promise<vo
     webhooks,
     success: req.query.success || null,
   });
-  
 };
 
 export const createWebhookForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -329,7 +316,6 @@ export const createWebhookForm = async (req: TypedRequest, res: Response): Promi
     pageName: 'Create Webhook',
     webhook: null,
   });
-  
 };
 
 export const createWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -393,5 +379,4 @@ export const listTemplateTranslations = async (req: TypedRequest, res: Response)
     translations,
     success: req.query.success || null,
   });
-  
 };

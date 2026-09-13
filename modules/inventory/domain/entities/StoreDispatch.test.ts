@@ -35,9 +35,7 @@ describe('StoreDispatch', () => {
         fromStoreId: 'store-1',
         toStoreId: 'store-2',
         dispatchNumber: 'DSP-001',
-        items: [
-          { dispatchItemId: 'item-1', productId: 'prod-1', requestedQuantity: 10 },
-        ],
+        items: [{ dispatchItemId: 'item-1', productId: 'prod-1', requestedQuantity: 10 }],
       });
 
       expect(dispatch.status).toBe('draft');
@@ -105,7 +103,9 @@ describe('StoreDispatch', () => {
 
     it('should throw when dispatched quantity exceeds requested', () => {
       const dispatch = createDispatch('approved');
-      expect(() => dispatch.markDispatched('user-1', [{ dispatchItemId: 'item-1', dispatchedQuantity: 15 }])).toThrow(InventoryValidationError);
+      expect(() => dispatch.markDispatched('user-1', [{ dispatchItemId: 'item-1', dispatchedQuantity: 15 }])).toThrow(
+        InventoryValidationError,
+      );
     });
   });
 

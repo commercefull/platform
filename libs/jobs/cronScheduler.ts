@@ -275,10 +275,10 @@ export const initializeScheduledJobs = (): void => {
         let synced = 0;
         for (const p of products) {
           const available = parseInt(p.totalQuantity, 10) - parseInt(p.totalReserved, 10);
-          await query(
-            `UPDATE "inventoryItem" SET "availableQuantity" = $1, "updatedAt" = now() WHERE "productId" = $2`,
-            [available, p.productId],
-          );
+          await query(`UPDATE "inventoryItem" SET "availableQuantity" = $1, "updatedAt" = now() WHERE "productId" = $2`, [
+            available,
+            p.productId,
+          ]);
           synced++;
         }
         logger.info(`[cron] inventory-sync: synced ${synced} products`);
@@ -296,7 +296,9 @@ export const initializeScheduledJobs = (): void => {
     async () => {
       try {
         // Find products at or below reorder point
-        const lowStockItems = await query<Array<{ productId: string; sku: string; quantity: string; reserved: string; reorderPoint: string }>>(
+        const lowStockItems = await query<
+          Array<{ productId: string; sku: string; quantity: string; reserved: string; reorderPoint: string }>
+        >(
           `SELECT il."productId", p.sku, il.quantity, il.reserved, il."reorderPoint"
            FROM "inventoryLevel" il
            LEFT JOIN product p ON il."productId" = p."productId"
@@ -345,9 +347,7 @@ export const initializeScheduledJobs = (): void => {
     async () => {
       try {
         // Clean up expired user sessions
-        const result = await query<{ rowCount: number }>(
-          `DELETE FROM "userSession" WHERE "expiresAt" < now()`,
-        );
+        const result = await query<{ rowCount: number }>(`DELETE FROM "userSession" WHERE "expiresAt" < now()`);
         const count = result?.rowCount || 0;
 
         // Also clean up connect-pg-simple sessions if table exists
@@ -463,9 +463,7 @@ export const initializeScheduledJobs = (): void => {
 
           // Mark basket as abandoned if no customer (guest basket)
           if (!basket.customerId) {
-            await query(`UPDATE basket SET status = 'abandoned', "updatedAt" = now() WHERE "basketId" = $1`, [
-              basket.basketId,
-            ]);
+            await query(`UPDATE basket SET status = 'abandoned', "updatedAt" = now() WHERE "basketId" = $1`, [basket.basketId]);
           }
         }
 

@@ -4,49 +4,539 @@ import { isAdminLoggedIn } from '../../libs/auth';
 import { getAdminDashboard, getAdminLogin, getAdminProfile, postAdminLogin, postAdminLogout } from './controllers/adminController';
 
 // Import feature controllers
-import { createProduct, createProductCategory, createProductCategoryForm, createProductCollection, createProductCollectionForm, createProductForm, createProductTag, deleteProduct, deleteProductCategory, deleteProductCollection, deleteProductTag, deleteReviewMedia, editProductCategoryForm, editProductCollectionForm, editProductForm, listProductCategories, listProductCollections, listProductPrices, listProductQa, listProductTags, listProducts, listReviewMedia, publishProduct, unpublishProduct, updateProduct, updateProductCategory, updateProductCollection, updateProductStatus, updateQaStatus, upsertProductPrice, viewProduct } from './controllers/productController';
-import { addOrderNote, cancelOrder, deleteOrderNote, listFulfillmentPackages, listOrderNotes, listOrderRefunds, listOrders, processRefund, refundForm, updateOrderStatus, updatePackageTracking, viewOrder } from './controllers/orderController';
-import { addCustomerAddress, customerAddresses, deactivateCustomer, editCustomerForm, listCustomers, reactivateCustomer, updateCustomer, verifyCustomer, viewCustomer } from './controllers/customerController';
-import { createPromotion, createPromotionForm, deletePromotion, editPromotionForm, listPromotions, updatePromotion, viewPromotion } from './controllers/promotionController';
-import { createPaymentGateway, createPaymentGatewayForm, deletePaymentGateway, editPaymentGatewayForm, listDisputes, listPaymentFees, listPaymentGateways, listPaymentMethods, listPaymentReports, listPaymentSettings, listPaymentTransactions, updateDisputeStatus, updatePaymentGateway, updatePaymentSettings, viewDispute, viewPaymentBalance, viewPaymentGateway, viewPaymentReport } from './controllers/paymentController';
-import { activateShippingMethod, createShippingMethod, createShippingMethodForm, deactivateShippingMethod, deleteShippingMethod, editShippingMethodForm, listShippingMethods, updateShippingMethod, viewShippingMethod } from './controllers/shippingController';
-import { createContentPage, createContentPageForm, deleteContentPage, editContentPageForm, listContentMedia, listContentPages, listContentTemplates, publishContentPage, updateContentPage, viewContentPage } from './controllers/contentController';
-import { createCoupon, createCouponForm, deleteCoupon, editCouponForm, listCoupons, updateCoupon, validateCoupon, viewCoupon } from './controllers/couponController';
-import { activateGiftCardAction, assignGiftCardAction, cancelGiftCardAction, checkGiftCardBalance, createGiftCard, createGiftCardForm, editGiftCardForm, listGiftCards, refundToGiftCardAction, reloadGiftCardAction, viewGiftCard } from './controllers/giftCardController';
-import { activateShippingZone, createShippingZone, createShippingZoneForm, deactivateShippingZone, deleteShippingZone, editShippingZoneForm, listShippingZones, updateShippingZone, viewShippingZone } from './controllers/shippingZoneController';
-import { activateShippingRate, calculateShippingRate, createShippingRate, createShippingRateForm, deactivateShippingRate, deleteShippingRate, editShippingRateForm, listShippingRates, updateShippingRate, viewShippingRate } from './controllers/shippingRateController';
-import { activateNotificationTemplate, cloneNotificationTemplate, createNotificationTemplate, createNotificationTemplateForm, createWebhook, createWebhookForm, deactivateNotificationTemplate, deactivateWebhook, deleteNotificationTemplate, editNotificationTemplateForm, listBatches, listNotificationTemplates, listTemplateTranslations, listWebhooks, previewNotificationTemplate, updateNotificationTemplate, viewBatch, viewNotificationTemplate } from './controllers/notificationController';
+import {
+  createProduct,
+  createProductCategory,
+  createProductCategoryForm,
+  createProductCollection,
+  createProductCollectionForm,
+  createProductForm,
+  createProductTag,
+  deleteProduct,
+  deleteProductCategory,
+  deleteProductCollection,
+  deleteProductTag,
+  deleteReviewMedia,
+  editProductCategoryForm,
+  editProductCollectionForm,
+  editProductForm,
+  listProductCategories,
+  listProductCollections,
+  listProductPrices,
+  listProductQa,
+  listProductTags,
+  listProducts,
+  listReviewMedia,
+  publishProduct,
+  unpublishProduct,
+  updateProduct,
+  updateProductCategory,
+  updateProductCollection,
+  updateProductStatus,
+  updateQaStatus,
+  upsertProductPrice,
+  viewProduct,
+} from './controllers/productController';
+import {
+  addOrderNote,
+  cancelOrder,
+  deleteOrderNote,
+  listFulfillmentPackages,
+  listOrderNotes,
+  listOrderRefunds,
+  listOrders,
+  processRefund,
+  refundForm,
+  updateOrderStatus,
+  updatePackageTracking,
+  viewOrder,
+} from './controllers/orderController';
+import {
+  addCustomerAddress,
+  customerAddresses,
+  deactivateCustomer,
+  editCustomerForm,
+  listCustomers,
+  reactivateCustomer,
+  updateCustomer,
+  verifyCustomer,
+  viewCustomer,
+} from './controllers/customerController';
+import {
+  createPromotion,
+  createPromotionForm,
+  deletePromotion,
+  editPromotionForm,
+  listPromotions,
+  previewPromotion,
+  updatePromotion,
+  viewPromotion,
+} from './controllers/promotionController';
+import {
+  createPaymentGateway,
+  createPaymentGatewayForm,
+  deletePaymentGateway,
+  editPaymentGatewayForm,
+  listDisputes,
+  listPaymentFees,
+  listPaymentGateways,
+  listPaymentMethods,
+  listPaymentReports,
+  listPaymentSettings,
+  listPaymentTransactions,
+  updateDisputeStatus,
+  updatePaymentGateway,
+  updatePaymentSettings,
+  viewDispute,
+  viewPaymentBalance,
+  viewPaymentGateway,
+  viewPaymentReport,
+} from './controllers/paymentController';
+import { createFraudRule, deleteFraudRule, listFraudRules, simulateFraudScreening, updateFraudRule } from './controllers/fraudController';
+import {
+  activateShippingMethod,
+  createShippingMethod,
+  createShippingMethodForm,
+  deactivateShippingMethod,
+  deleteShippingMethod,
+  editShippingMethodForm,
+  listShippingMethods,
+  updateShippingMethod,
+  viewShippingMethod,
+} from './controllers/shippingController';
+import {
+  createContentPage,
+  createContentPageForm,
+  deleteContentPage,
+  editContentPageForm,
+  listContentMedia,
+  listContentPages,
+  listContentTemplates,
+  publishContentPage,
+  updateContentPage,
+  viewContentPage,
+} from './controllers/contentController';
+import {
+  createCoupon,
+  createCouponForm,
+  deleteCoupon,
+  editCouponForm,
+  listCoupons,
+  updateCoupon,
+  validateCoupon,
+  viewCoupon,
+} from './controllers/couponController';
+import {
+  activateGiftCardAction,
+  assignGiftCardAction,
+  cancelGiftCardAction,
+  checkGiftCardBalance,
+  createGiftCard,
+  createGiftCardForm,
+  editGiftCardForm,
+  listGiftCards,
+  refundToGiftCardAction,
+  reloadGiftCardAction,
+  viewGiftCard,
+} from './controllers/giftCardController';
+import {
+  activateShippingZone,
+  createShippingZone,
+  createShippingZoneForm,
+  deactivateShippingZone,
+  deleteShippingZone,
+  editShippingZoneForm,
+  listShippingZones,
+  updateShippingZone,
+  viewShippingZone,
+} from './controllers/shippingZoneController';
+import {
+  activateShippingRate,
+  calculateShippingRate,
+  createShippingRate,
+  createShippingRateForm,
+  deactivateShippingRate,
+  deleteShippingRate,
+  editShippingRateForm,
+  listShippingRates,
+  updateShippingRate,
+  viewShippingRate,
+} from './controllers/shippingRateController';
+import {
+  activateNotificationTemplate,
+  cloneNotificationTemplate,
+  createNotificationTemplate,
+  createNotificationTemplateForm,
+  createWebhook,
+  createWebhookForm,
+  deactivateNotificationTemplate,
+  deactivateWebhook,
+  deleteNotificationTemplate,
+  editNotificationTemplateForm,
+  listBatches,
+  listNotificationTemplates,
+  listTemplateTranslations,
+  listWebhooks,
+  previewNotificationTemplate,
+  updateNotificationTemplate,
+  viewBatch,
+  viewNotificationTemplate,
+} from './controllers/notificationController';
 import { generateRobotsTxt, generateSitemap, listSEOSettings, updateSEOSettings } from './controllers/seoController';
-import { createContentBlock, createContentBlockForm, deleteContentBlock, editContentBlockForm, listContentBlocks, reorderContentBlocks, updateContentBlock } from './controllers/contentBlocksController';
-import { createDraft, createDraftForm, deleteDraft, listPageBuilderDrafts, pageBuilderEditor, pageBuilderPreview, publishDraft } from './controllers/pageBuilderController';
-import { activateTheme, archiveTheme, assignTheme, deleteTheme, listThemes, saveOverride, themeDetail, themePreview, unassignTheme } from './controllers/themeController';
-import { activateWarehouse, createWarehouse, createWarehouseForm, deactivateWarehouse, deleteWarehouse, editWarehouseForm, listWarehouses, updateWarehouse, viewWarehouse } from './controllers/warehouseController';
-import { basketAnalytics, cleanupExpiredBaskets, listAbandonedCarts, markCartRecovered, recoverAbandonedCart, sendRecoveryEmail, viewAbandonedCart } from './controllers/basketController';
-import { cancelFulfillment, getFulfillmentStats, listFulfillments, markAsDelivered, markAsShipped, updateFulfillmentStatus, viewFulfillment, warehouseDashboard } from './controllers/fulfillmentController';
-import { activateSupplier, approveSupplier, createSupplier, createSupplierForm, deactivateSupplier, deleteSupplier, editSupplierForm, listSuppliers, suspendSupplier, updateSupplier, viewSupplier } from './controllers/supplierController';
-import { activateMembershipPlan, bulkMembershipOperations, createMembershipPlan, createMembershipPlanForm, deactivateMembershipPlan, deleteMembershipPlan, editMembershipPlanForm, listMembershipBenefits, listMembershipPlans, listMemberships, membershipAnalytics, membershipUpgradeDowngrade, updateMembershipPlan, viewMembershipPlan } from './controllers/membershipController';
-import { cancelCustomerSubscription, createSubscriptionPlan, createSubscriptionPlanForm, deleteSubscriptionPlan, editSubscriptionPlanForm, listCustomerSubscriptions, listSubscriptionPlans, manageFailedPayments, processSubscriptionBilling, subscriptionBilling, updateSubscriptionPlan, updateSubscriptionStatus, viewCustomerSubscription, viewSubscriptionPlan } from './controllers/subscriptionController';
-import { createLoyaltyReward, createLoyaltyRewardForm, deleteLoyaltyReward, editLoyaltyRewardForm, listCustomerLoyalty, listLoyaltyRewards, listLoyaltyTiers, loyaltyAnalytics, updateLoyaltyReward, viewCustomerLoyalty, viewLoyaltyReward } from './controllers/loyaltyController';
-import { aiRecommendations, analyticsDashboard, automatedReports, createReportSchedule, customerAnalytics, deleteReportSchedule, executiveDashboard, predictiveAnalytics, realTimeMetrics, runReportNow, storeSalesDashboard, updateReportSchedule } from './controllers/analyticsController';
-import { createRole, createUser, createUserForm, deleteRole, deleteUser, listRoles, listUsers, updateRole, updateUser, viewUser } from './controllers/usersController';
-import { businessInfo, createCurrency, createLanguage, deleteCurrency, deleteLanguage, storeSettings, updateBusinessInfo, updateCurrency, updateLanguage, updateStoreSettings } from './controllers/settingsController';
-import { adjustStock, approveDispatch, cancelDispatch, createDispatch, createDispatchForm, listDispatches, listInventory, listLocations, lowStockReport, markDispatched, receiveDispatch, viewDispatch, viewInventoryHistory } from './controllers/inventoryController';
-import { createTaxClass, createTaxRate, createTaxZone, deleteTaxClass, deleteTaxRate, deleteTaxZone, listTaxSettings, updateTaxClass, updateTaxRate, updateTaxZone } from './controllers/taxController';
+import {
+  createContentBlock,
+  createContentBlockForm,
+  deleteContentBlock,
+  editContentBlockForm,
+  listContentBlocks,
+  reorderContentBlocks,
+  updateContentBlock,
+} from './controllers/contentBlocksController';
+import {
+  createDraft,
+  createDraftForm,
+  deleteDraft,
+  listPageBuilderDrafts,
+  pageBuilderEditor,
+  pageBuilderPreview,
+  publishDraft,
+} from './controllers/pageBuilderController';
+import {
+  activateTheme,
+  archiveTheme,
+  assignTheme,
+  deleteTheme,
+  listThemes,
+  saveOverride,
+  themeDetail,
+  themePreview,
+  unassignTheme,
+} from './controllers/themeController';
+import {
+  activateWarehouse,
+  createWarehouse,
+  createWarehouseForm,
+  deactivateWarehouse,
+  deleteWarehouse,
+  editWarehouseForm,
+  listWarehouses,
+  updateWarehouse,
+  viewWarehouse,
+} from './controllers/warehouseController';
+import {
+  basketAnalytics,
+  cleanupExpiredBaskets,
+  listAbandonedCarts,
+  markCartRecovered,
+  recoverAbandonedCart,
+  sendRecoveryEmail,
+  viewAbandonedCart,
+} from './controllers/basketController';
+import {
+  cancelFulfillment,
+  getFulfillmentStats,
+  listFulfillments,
+  markAsDelivered,
+  markAsShipped,
+  updateFulfillmentStatus,
+  viewFulfillment,
+  warehouseDashboard,
+} from './controllers/fulfillmentController';
+import {
+  activateSupplier,
+  approveSupplier,
+  createSupplier,
+  createSupplierForm,
+  deactivateSupplier,
+  deleteSupplier,
+  editSupplierForm,
+  listSuppliers,
+  suspendSupplier,
+  updateSupplier,
+  viewSupplier,
+} from './controllers/supplierController';
+import {
+  activateMembershipPlan,
+  bulkMembershipOperations,
+  createMembershipPlan,
+  createMembershipPlanForm,
+  deactivateMembershipPlan,
+  deleteMembershipPlan,
+  editMembershipPlanForm,
+  listMembershipBenefits,
+  listMembershipPlans,
+  listMemberships,
+  membershipAnalytics,
+  membershipUpgradeDowngrade,
+  updateMembershipPlan,
+  viewMembershipPlan,
+} from './controllers/membershipController';
+import {
+  cancelCustomerSubscription,
+  createSubscriptionPlan,
+  createSubscriptionPlanForm,
+  deleteSubscriptionPlan,
+  editSubscriptionPlanForm,
+  listCustomerSubscriptions,
+  listSubscriptionPlans,
+  manageFailedPayments,
+  processSubscriptionBilling,
+  subscriptionBilling,
+  updateSubscriptionPlan,
+  updateSubscriptionStatus,
+  viewCustomerSubscription,
+  viewSubscriptionPlan,
+} from './controllers/subscriptionController';
+import {
+  createLoyaltyReward,
+  createLoyaltyRewardForm,
+  deleteLoyaltyReward,
+  editLoyaltyRewardForm,
+  listCustomerLoyalty,
+  listLoyaltyRewards,
+  listLoyaltyTiers,
+  loyaltyAnalytics,
+  updateLoyaltyReward,
+  viewCustomerLoyalty,
+  viewLoyaltyReward,
+} from './controllers/loyaltyController';
+import {
+  aiRecommendations,
+  analyticsDashboard,
+  automatedReports,
+  createReportSchedule,
+  customerAnalytics,
+  deleteReportSchedule,
+  executiveDashboard,
+  predictiveAnalytics,
+  realTimeMetrics,
+  runReportNow,
+  storeSalesDashboard,
+  updateReportSchedule,
+} from './controllers/analyticsController';
+import {
+  createRole,
+  createUser,
+  createUserForm,
+  deleteRole,
+  deleteUser,
+  listRoles,
+  listUsers,
+  updateRole,
+  updateUser,
+  viewUser,
+} from './controllers/usersController';
+import {
+  businessInfo,
+  createCurrency,
+  createLanguage,
+  deleteCurrency,
+  deleteLanguage,
+  storeSettings,
+  updateBusinessInfo,
+  updateCurrency,
+  updateLanguage,
+  updateStoreSettings,
+} from './controllers/settingsController';
+import {
+  adjustStock,
+  approveDispatch,
+  cancelDispatch,
+  createDispatch,
+  createDispatchForm,
+  listDispatches,
+  listInventory,
+  listLocations,
+  lowStockReport,
+  markDispatched,
+  receiveDispatch,
+  viewDispatch,
+  viewInventoryHistory,
+} from './controllers/inventoryController';
+import { createAllocationRule, deleteAllocationRule, listAllocationRules } from './controllers/inventoryAllocationRuleController';
+import {
+  approveTaxExemption,
+  createTaxClass,
+  createTaxRate,
+  createTaxZone,
+  deleteTaxClass,
+  deleteTaxRate,
+  deleteTaxZone,
+  listTaxExemptions,
+  listTaxSettings,
+  rejectTaxExemption,
+  updateTaxClass,
+  updateTaxRate,
+  updateTaxZone,
+} from './controllers/taxController';
 import { loyaltyDashboard, membershipDashboard, subscriptionDashboard } from './controllers/programsController';
 import { operationsDashboard } from './controllers/operationsController';
-import { completeGdprRequest, consentManagement, createGdprRequest, gdprDashboard, processGdprRequest, viewGdprRequest } from './controllers/gdprController';
-import { createFaq, deleteFaq, listFaqs, listSupportTickets, supportDashboard, updateFaq, updateTicketStatus, viewSupportTicket } from './controllers/supportController';
-import { createCategory, createCategoryForm, createCollection, createCollectionForm, deleteCategory, deleteCollection, editCategoryForm, editCollectionForm, listCategories, listCollections, reorderCategories, updateCategory, updateCollection, viewCategory, viewCollection } from './controllers/assortmentController';
-import { createPriceList, createPriceListForm, createPriceRule, createPriceRuleForm, deletePriceList, deletePriceRule, editPriceListForm, editPriceRuleForm, listPriceLists, listPriceRules, updatePriceList, updatePriceRule, viewPriceList, viewPriceRule } from './controllers/pricingController';
-import { createCurrency as createCurrencyLocalization, createCurrencyForm, createLanguage as createLanguageLocalization, createLanguageForm, createRegion, createRegionForm, deleteCurrency as deleteCurrencyLocalization, deleteLanguage as deleteLanguageLocalization, deleteRegion, editCurrencyForm, editLanguageForm, editRegionForm, listCurrencies, listLanguages, listRegions, localizationDashboard, updateCurrency as updateCurrencyLocalization, updateLanguage as updateLanguageLocalization, updateRegion } from './controllers/localizationController';
-import { approveOrganization, createOrganization, createOrganizationForm, deleteOrganization, editOrganizationForm, listOrganizations, suspendOrganization, updateOrganization, viewOrganization } from './controllers/organizationController';
-import { bulkDeleteMedia, createFolder, deleteMedia, editMediaForm, listMedia, updateMedia, uploadMedia, uploadMediaForm, viewMedia } from './controllers/mediaController';
-import { checkoutSettings, listPaymentMethods as listPaymentMethodsCheckout, listShippingOptions, updateCheckoutSettings, updatePaymentMethodOrder, updateShippingOptionOrder } from './controllers/checkoutController';
-import { assignUserToStore, createStore, createStoreForm, editStoreForm, listStores, manageStoreUsers, removeUserFromStore, updateStore, viewStore } from './controllers/storeController';
-import { createSchedule, createScheduleForm, deleteSchedule, editScheduleForm, generateReport, listSchedules, reportingDashboard, updateSchedule, viewSchedule } from './controllers/reportingController';
-import { activateAutomationRule, createAutomationRule, createAutomationRuleForm, deactivateAutomationRule, deleteAutomationRule, editAutomationRuleForm, listAutomationRules, triggerAutomationRule, updateAutomationRule, viewAutomationRule } from './controllers/automationController';
-import { approveReturn, cancelReturn, completeInspection, completeReturn, createReturn, createReturnForm, denyReturn, listReturns, markInTransit, markReceived, viewReturn, viewStoreCredit } from './controllers/returnsController';
-import { activateIntegration, addCredential, createIntegration, createIntegrationForm, createSubscription, deactivateIntegration, deleteCredential, deleteIntegration, deleteSubscription, listIntegrations, updateIntegration, updateSubscription, viewIntegration } from './controllers/integrationController';
+import {
+  completeGdprRequest,
+  consentManagement,
+  createGdprRequest,
+  gdprDashboard,
+  processGdprRequest,
+  viewGdprRequest,
+} from './controllers/gdprController';
+import {
+  createFaq,
+  deleteFaq,
+  listFaqs,
+  listSupportTickets,
+  supportDashboard,
+  updateFaq,
+  updateTicketStatus,
+  viewSupportTicket,
+} from './controllers/supportController';
+import {
+  createCategory,
+  createCategoryForm,
+  createCollection,
+  createCollectionForm,
+  deleteCategory,
+  deleteCollection,
+  editCategoryForm,
+  editCollectionForm,
+  listCategories,
+  listCollections,
+  reorderCategories,
+  updateCategory,
+  updateCollection,
+  viewCategory,
+  viewCollection,
+} from './controllers/assortmentController';
+import {
+  createPriceList,
+  createPriceListForm,
+  createPriceRule,
+  createPriceRuleForm,
+  deletePriceList,
+  deletePriceRule,
+  editPriceListForm,
+  editPriceRuleForm,
+  listPriceLists,
+  listPriceRules,
+  updatePriceList,
+  updatePriceRule,
+  viewPriceList,
+  viewPriceRule,
+} from './controllers/pricingController';
+import {
+  createCurrency as createCurrencyLocalization,
+  createCurrencyForm,
+  createLanguage as createLanguageLocalization,
+  createLanguageForm,
+  createRegion,
+  createRegionForm,
+  deleteCurrency as deleteCurrencyLocalization,
+  deleteLanguage as deleteLanguageLocalization,
+  deleteRegion,
+  editCurrencyForm,
+  editLanguageForm,
+  editRegionForm,
+  listCurrencies,
+  listLanguages,
+  listRegions,
+  localizationDashboard,
+  updateCurrency as updateCurrencyLocalization,
+  updateLanguage as updateLanguageLocalization,
+  updateRegion,
+} from './controllers/localizationController';
+import {
+  approveOrganization,
+  createOrganization,
+  createOrganizationForm,
+  deleteOrganization,
+  editOrganizationForm,
+  listOrganizations,
+  suspendOrganization,
+  updateOrganization,
+  viewOrganization,
+} from './controllers/organizationController';
+import {
+  bulkDeleteMedia,
+  createFolder,
+  deleteMedia,
+  editMediaForm,
+  listMedia,
+  updateMedia,
+  uploadMedia,
+  uploadMediaForm,
+  viewMedia,
+} from './controllers/mediaController';
+import {
+  checkoutSettings,
+  listPaymentMethods as listPaymentMethodsCheckout,
+  listShippingOptions,
+  updateCheckoutSettings,
+  updatePaymentMethodOrder,
+  updateShippingOptionOrder,
+} from './controllers/checkoutController';
+import {
+  assignUserToStore,
+  createStore,
+  createStoreForm,
+  editStoreForm,
+  listStores,
+  manageStoreUsers,
+  removeUserFromStore,
+  updateStore,
+  viewStore,
+} from './controllers/storeController';
+import {
+  createSchedule,
+  createScheduleForm,
+  deleteSchedule,
+  editScheduleForm,
+  generateReport,
+  listSchedules,
+  reportingDashboard,
+  updateSchedule,
+  viewSchedule,
+} from './controllers/reportingController';
+import {
+  activateAutomationRule,
+  createAutomationRule,
+  createAutomationRuleForm,
+  deactivateAutomationRule,
+  deleteAutomationRule,
+  editAutomationRuleForm,
+  listAutomationRules,
+  triggerAutomationRule,
+  updateAutomationRule,
+  viewAutomationRule,
+} from './controllers/automationController';
+import {
+  approveReturn,
+  cancelReturn,
+  completeInspection,
+  completeReturn,
+  createReturn,
+  createReturnForm,
+  denyReturn,
+  listReturns,
+  markInTransit,
+  markReceived,
+  viewReturn,
+  viewStoreCredit,
+} from './controllers/returnsController';
+import { createReturnRule, deleteReturnRule, listReturnRules } from './controllers/returnRuleController';
+import {
+  activateIntegration,
+  addCredential,
+  createIntegration,
+  createIntegrationForm,
+  createSubscription,
+  deactivateIntegration,
+  deleteCredential,
+  deleteIntegration,
+  deleteSubscription,
+  listIntegrations,
+  updateIntegration,
+  updateSubscription,
+  viewIntegration,
+} from './controllers/integrationController';
 
 const router = express.Router();
 
@@ -257,6 +747,9 @@ router.get('/inventory', asyncHandler(listInventory));
 router.post('/inventory/adjust', asyncHandler(adjustStock));
 router.get('/inventory/locations', asyncHandler(listLocations));
 router.get('/inventory/low-stock', asyncHandler(lowStockReport));
+router.get('/inventory/allocation-rules', asyncHandler(listAllocationRules));
+router.post('/inventory/allocation-rules', asyncHandler(createAllocationRule));
+router.delete('/inventory/allocation-rules/:allocationRuleId', asyncHandler(deleteAllocationRule));
 router.get('/inventory/:inventoryLevelId/history', asyncHandler(viewInventoryHistory));
 router.get('/dispatches', asyncHandler(listDispatches));
 router.get('/dispatches/create', asyncHandler(createDispatchForm));
@@ -281,6 +774,11 @@ router.delete('/tax/zones/:taxZoneId', asyncHandler(deleteTaxZone));
 router.post('/tax/classes', asyncHandler(createTaxClass));
 router.put('/tax/classes/:taxClassId', asyncHandler(updateTaxClass));
 router.delete('/tax/classes/:taxClassId', asyncHandler(deleteTaxClass));
+
+// Tax Exemption Management (Epic F)
+router.get('/tax/exemptions', asyncHandler(listTaxExemptions));
+router.post('/tax/exemptions/:exemptionId/approve', asyncHandler(approveTaxExemption));
+router.post('/tax/exemptions/:exemptionId/reject', asyncHandler(rejectTaxExemption));
 
 // ============================================================================
 // Programs Dashboard Routes
@@ -332,6 +830,7 @@ router.get('/promotions/:promotionId/edit', asyncHandler(editPromotionForm));
 router.post('/promotions/:promotionId', asyncHandler(updatePromotion)); // Form POST
 router.put('/promotions/:promotionId', asyncHandler(updatePromotion)); // API PUT
 router.delete('/promotions/:promotionId', asyncHandler(deletePromotion));
+router.post('/promotions/preview', asyncHandler(previewPromotion));
 
 // ============================================================================
 // Coupon Routes
@@ -396,6 +895,13 @@ router.get('/payments/balance', asyncHandler(viewPaymentBalance));
 // Payment Reports
 router.get('/payments/reports', asyncHandler(listPaymentReports));
 router.get('/payments/reports/:reportId', asyncHandler(viewPaymentReport));
+
+// Fraud Rules (Epic F)
+router.get('/payment/fraud/rules', asyncHandler(listFraudRules));
+router.post('/payment/fraud/rules', asyncHandler(createFraudRule));
+router.put('/payment/fraud/rules/:fraudRuleId', asyncHandler(updateFraudRule));
+router.delete('/payment/fraud/rules/:fraudRuleId', asyncHandler(deleteFraudRule));
+router.post('/payment/fraud/simulate', asyncHandler(simulateFraudScreening));
 
 // ============================================================================
 // Shipping Routes
@@ -776,6 +1282,11 @@ router.post('/returns/:returnId/received', asyncHandler(markReceived));
 router.post('/returns/:returnId/inspect', asyncHandler(completeInspection));
 router.post('/returns/:returnId/complete', asyncHandler(completeReturn));
 router.post('/returns/:returnId/cancel', asyncHandler(cancelReturn));
+
+// Return Rules (Epic F + Epic I)
+router.get('/returns/rules', asyncHandler(listReturnRules));
+router.post('/returns/rules', asyncHandler(createReturnRule));
+router.delete('/returns/rules/:returnRuleId', asyncHandler(deleteReturnRule));
 
 // ============================================================================
 // Page Builder Routes

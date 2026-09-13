@@ -12,30 +12,54 @@ class MockThemeRepository implements ThemeRepository {
   private overrides = new Map<string, ThemeOverride>();
   private assignments = new Map<string, { themeId: string; overrideId?: string }>();
 
-  async findById(themeId: string): Promise<Theme | null> { return this.themes.get(themeId) ?? null; }
+  async findById(themeId: string): Promise<Theme | null> {
+    return this.themes.get(themeId) ?? null;
+  }
   async findBySlug(slug: string): Promise<Theme | null> {
-    for (const t of this.themes.values()) { if (t.slug === slug) return t; }
+    for (const t of this.themes.values()) {
+      if (t.slug === slug) return t;
+    }
     return null;
   }
-  async findAll(): Promise<Theme[]> { return Array.from(this.themes.values()); }
-  async findActive(): Promise<Theme[]> { return Array.from(this.themes.values()).filter(t => t.isActive()); }
-  async findBuiltIn(): Promise<Theme[]> { return Array.from(this.themes.values()).filter(t => t.isBuiltIn()); }
-  async save(theme: Theme): Promise<Theme> { this.themes.set(theme.themeId, theme); return theme; }
-  async delete(themeId: string): Promise<boolean> { return this.themes.delete(themeId); }
+  async findAll(): Promise<Theme[]> {
+    return Array.from(this.themes.values());
+  }
+  async findActive(): Promise<Theme[]> {
+    return Array.from(this.themes.values()).filter(t => t.isActive());
+  }
+  async findBuiltIn(): Promise<Theme[]> {
+    return Array.from(this.themes.values()).filter(t => t.isBuiltIn());
+  }
+  async save(theme: Theme): Promise<Theme> {
+    this.themes.set(theme.themeId, theme);
+    return theme;
+  }
+  async delete(themeId: string): Promise<boolean> {
+    return this.themes.delete(themeId);
+  }
 
   async findOverrideByStore(storeId: string): Promise<ThemeOverride | null> {
-    for (const o of this.overrides.values()) { if (o.storeId === storeId && o.isActive) return o; }
+    for (const o of this.overrides.values()) {
+      if (o.storeId === storeId && o.isActive) return o;
+    }
     return null;
   }
-  async findOverrideById(overrideId: string): Promise<ThemeOverride | null> { return this.overrides.get(overrideId) ?? null; }
+  async findOverrideById(overrideId: string): Promise<ThemeOverride | null> {
+    return this.overrides.get(overrideId) ?? null;
+  }
   async findOverridesByTheme(themeId: string): Promise<ThemeOverride[]> {
     return Array.from(this.overrides.values()).filter(o => o.themeId === themeId);
   }
   async findOverridesByOrganization(organizationId: string): Promise<ThemeOverride[]> {
     return Array.from(this.overrides.values()).filter(o => o.organizationId === organizationId);
   }
-  async saveOverride(override: ThemeOverride): Promise<ThemeOverride> { this.overrides.set(override.overrideId, override); return override; }
-  async deleteOverride(overrideId: string): Promise<boolean> { return this.overrides.delete(overrideId); }
+  async saveOverride(override: ThemeOverride): Promise<ThemeOverride> {
+    this.overrides.set(override.overrideId, override);
+    return override;
+  }
+  async deleteOverride(overrideId: string): Promise<boolean> {
+    return this.overrides.delete(overrideId);
+  }
 
   async findThemeAssignment(storeId: string): Promise<{ themeId: string; overrideId?: string } | null> {
     return this.assignments.get(storeId) ?? null;
@@ -43,7 +67,9 @@ class MockThemeRepository implements ThemeRepository {
   async assignThemeToStore(storeId: string, themeId: string, _organizationId: string): Promise<void> {
     this.assignments.set(storeId, { themeId });
   }
-  async unassignThemeFromStore(storeId: string): Promise<boolean> { return this.assignments.delete(storeId); }
+  async unassignThemeFromStore(storeId: string): Promise<boolean> {
+    return this.assignments.delete(storeId);
+  }
 }
 
 function createTestTheme(): Theme {

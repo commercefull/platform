@@ -23,10 +23,10 @@ export async function findByCustomer(customerId: string): Promise<unknown[]> {
 }
 
 export async function findExisting(customerId: string, productId: string): Promise<WishlistItem | null> {
-  return await queryOne<WishlistItem>(
-    `SELECT "wishlistItemId" FROM "wishlistItem" WHERE "customerId" = $1 AND "productId" = $2`,
-    [customerId, productId],
-  );
+  return await queryOne<WishlistItem>(`SELECT "wishlistItemId" FROM "wishlistItem" WHERE "customerId" = $1 AND "productId" = $2`, [
+    customerId,
+    productId,
+  ]);
 }
 
 export async function create(customerId: string, productId: string): Promise<WishlistItem | null> {

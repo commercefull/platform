@@ -7,9 +7,6 @@ import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin, expectStatus } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID } from '../testUtils';
 
-;
-;
-
 describe('Customer: Product Browsing', () => {
   let client: AxiosInstance;
   let adminToken: string;

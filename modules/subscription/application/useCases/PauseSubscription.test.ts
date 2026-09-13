@@ -3,11 +3,13 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { PauseSubscriptionUseCase} from './PauseSubscription';
+import { PauseSubscriptionUseCase } from './PauseSubscription';
 import { SubscriptionNotFoundError, SubscriptionValidationError } from '../../domain/errors/SubscriptionErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('PauseSubscriptionUseCase', () => {
   let useCase: PauseSubscriptionUseCase;
@@ -26,7 +28,10 @@ describe('PauseSubscriptionUseCase', () => {
 
     expect(result.subscriptionId).toBe('sub-1');
     expect(result.status).toBe('paused');
-    expect(eventBus.emit).toHaveBeenCalledWith('subscription.paused', expect.objectContaining({ subscriptionId: 'sub-1', reason: 'Vacation' }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'subscription.paused',
+      expect.objectContaining({ subscriptionId: 'sub-1', reason: 'Vacation' }),
+    );
   });
 
   it('should throw SubscriptionValidationError when id is empty', async () => {

@@ -56,9 +56,7 @@ interface WarehouseRepositoryPort {
 }
 
 export class ListWarehousesUseCase {
-  constructor(
-    private readonly warehouseRepository: WarehouseRepositoryPort,
-  ) {}
+  constructor(private readonly warehouseRepository: WarehouseRepositoryPort) {}
 
   async execute(input: ListWarehousesInput): Promise<ListWarehousesOutput> {
     const page = input.pagination?.page || 1;

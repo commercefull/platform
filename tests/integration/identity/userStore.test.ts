@@ -47,11 +47,7 @@ describe('User-Store Assignment API', () => {
     it('should reject assignment with missing storeId', async () => {
       if (!adminToken) return;
 
-      const response = await client.post(
-        `/business/auth/users/${TEST_USER_ID}/stores`,
-        { role: 'staff' },
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/auth/users/${TEST_USER_ID}/stores`, { role: 'staff' }, { headers: authHeaders() });
 
       expectStatus(response, 400);
     });
@@ -73,10 +69,7 @@ describe('User-Store Assignment API', () => {
     it('should get stores for a user', async () => {
       if (!adminToken) return;
 
-      const response = await client.get(
-        `/business/auth/users/${TEST_USER_ID}/stores`,
-        { headers: authHeaders() },
-      );
+      const response = await client.get(`/business/auth/users/${TEST_USER_ID}/stores`, { headers: authHeaders() });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -87,10 +80,7 @@ describe('User-Store Assignment API', () => {
     it('should list users for a store', async () => {
       if (!adminToken) return;
 
-      const response = await client.get(
-        `/business/auth/stores/${TEST_STORE_ID}/users`,
-        { headers: authHeaders() },
-      );
+      const response = await client.get(`/business/auth/stores/${TEST_STORE_ID}/users`, { headers: authHeaders() });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -101,10 +91,7 @@ describe('User-Store Assignment API', () => {
     it('should remove a user from a store', async () => {
       if (!adminToken) return;
 
-      const response = await client.delete(
-        `/business/auth/users/${TEST_USER_ID}/stores/${TEST_STORE_ID}`,
-        { headers: authHeaders() },
-      );
+      const response = await client.delete(`/business/auth/users/${TEST_USER_ID}/stores/${TEST_STORE_ID}`, { headers: authHeaders() });
 
       expect([200, 400, 404].includes(response.status)).toBe(true);
     });
@@ -112,9 +99,7 @@ describe('User-Store Assignment API', () => {
 
   describe('Authentication', () => {
     it('should reject requests without auth token', async () => {
-      const response = await client.get(
-        `/business/auth/users/${randomUUID()}/stores`,
-      );
+      const response = await client.get(`/business/auth/users/${randomUUID()}/stores`);
 
       expectStatus(response, 401);
     });

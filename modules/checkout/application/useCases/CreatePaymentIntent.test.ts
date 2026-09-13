@@ -16,19 +16,33 @@ describe('CreatePaymentIntentUseCase', () => {
   beforeEach(() => {
     mockCheckoutRepo = {
       findById: jest.fn().mockResolvedValue({
-        id: 'ck-1', basketId: 'b1', customerId: 'c1', guestEmail: 'test@test.com',
-        status: 'pending', isReadyForPayment: true, paymentIntentId: null, orderId: null,
-        subtotal: { amount: 100, currency: 'USD' }, total: { amount: 100, currency: 'USD' },
-        shippingAmount: { amount: 0, currency: 'USD' }, taxAmount: { amount: 0, currency: 'USD' },
+        id: 'ck-1',
+        basketId: 'b1',
+        customerId: 'c1',
+        guestEmail: 'test@test.com',
+        status: 'pending',
+        isReadyForPayment: true,
+        paymentIntentId: null,
+        orderId: null,
+        subtotal: { amount: 100, currency: 'USD' },
+        total: { amount: 100, currency: 'USD' },
+        shippingAmount: { amount: 0, currency: 'USD' },
+        taxAmount: { amount: 0, currency: 'USD' },
         discountAmount: { amount: 0, currency: 'USD' },
-        shippingAddress: {}, shippingMethodId: 'sm1', paymentMethodId: 'pm1',
-        notes: undefined, metadata: undefined, couponCode: undefined,
+        shippingAddress: {},
+        shippingMethodId: 'sm1',
+        paymentMethodId: 'pm1',
+        notes: undefined,
+        metadata: undefined,
+        couponCode: undefined,
         setPaymentIntent: jest.fn(),
       }),
       save: jest.fn().mockResolvedValue(undefined),
     };
     mockBasketPort = {
-      getSnapshot: jest.fn().mockResolvedValue({ items: [{ productId: 'p1', name: 'Widget', quantity: 2, unitPrice: { amount: 50, currency: 'USD' } }] }),
+      getSnapshot: jest
+        .fn()
+        .mockResolvedValue({ items: [{ productId: 'p1', name: 'Widget', quantity: 2, unitPrice: { amount: 50, currency: 'USD' } }] }),
     };
     mockOrderPort = {
       createOrder: jest.fn().mockResolvedValue({ orderId: 'o1', orderNumber: 'ORD-001' }),
@@ -39,7 +53,10 @@ describe('CreatePaymentIntentUseCase', () => {
       initiatePayment: jest.fn().mockResolvedValue({ transactionId: 'pi_123', clientSecret: 'secret_123' }),
     };
     useCase = new CreatePaymentIntentUseCase(
-      mockCheckoutRepo as never, mockBasketPort as never, mockOrderPort as never, mockPaymentPort as never,
+      mockCheckoutRepo as never,
+      mockBasketPort as never,
+      mockOrderPort as never,
+      mockPaymentPort as never,
     );
   });
 
@@ -52,7 +69,10 @@ describe('CreatePaymentIntentUseCase', () => {
 
   it('should return existing payment intent if already pending', async () => {
     mockCheckoutRepo.findById.mockResolvedValue({
-      id: 'ck-1', status: 'pending_payment', paymentIntentId: 'pi_existing', orderId: 'o_existing',
+      id: 'ck-1',
+      status: 'pending_payment',
+      paymentIntentId: 'pi_existing',
+      orderId: 'o_existing',
     });
     mockOrderPort.findOrder.mockResolvedValue({ orderNumber: 'ORD-999' });
 
@@ -72,5 +92,98 @@ describe('CreatePaymentIntentUseCase', () => {
     mockCheckoutRepo.findById.mockResolvedValue({ id: 'ck-1', status: 'pending', isReadyForPayment: false });
 
     await expect(useCase.execute(new CreatePaymentIntentCommand('ck-1'))).rejects.toThrow(CheckoutValidationError);
+  });
+
+  // ========================================================================
+  // Epic G — Fraud screening integration
+  // ========================================================================
+
+  function makeFraudPort(decision: 'approved' | 'review' | 'blocked' = 'approved'): Record<string, jest.Mock> {
+    return {
+      screenOrder: jest.fn().mockResolvedValue({
+        decision,
+        riskScore: decision === 'blocked' ? 100 : decision === 'review' ? 50 : 0,
+        riskLevel: decision === 'blocked' ? 'critical' : decision === 'review' ? 'medium' : 'low',
+        triggeredRules: decision === 'approved' ? [] : [{ ruleId: 'r1', name: 'Rule', action: decision }],
+      }),
+    };
+  }
+
+  it('should proceed with payment when fraud screening approves', async () => {
+    const fraudPort = makeFraudPort('approved');
+    const uc = new CreatePaymentIntentUseCase(
+      mockCheckoutRepo as never,
+      mockBasketPort as never,
+      mockOrderPort as never,
+      mockPaymentPort as never,
+      fraudPort as never,
+    );
+
+    const result = await uc.execute(new CreatePaymentIntentCommand('ck-1', 'c1'));
+
+    expect(result.orderId).toBe('o1');
+    expect(result.paymentIntent.id).toBe('pi_123');
+    expect(fraudPort.screenOrder).toHaveBeenCalled();
+    expect(mockPaymentPort.initiatePayment).toHaveBeenCalled();
+  });
+
+  it('should block payment when fraud screening returns blocked', async () => {
+    const fraudPort = makeFraudPort('blocked');
+    const uc = new CreatePaymentIntentUseCase(
+      mockCheckoutRepo as never,
+      mockBasketPort as never,
+      mockOrderPort as never,
+      mockPaymentPort as never,
+      fraudPort as never,
+    );
+
+    await expect(uc.execute(new CreatePaymentIntentCommand('ck-1', 'c1'))).rejects.toThrow('Order blocked by fraud screening');
+
+    // Payment should NOT be initiated for blocked orders
+    expect(mockPaymentPort.initiatePayment).not.toHaveBeenCalled();
+    // Order should be cancelled
+    expect(mockOrderPort.updateOrderStatus).toHaveBeenCalledWith('o1', 'cancelled');
+  });
+
+  it('should proceed with payment when fraud screening returns review', async () => {
+    const fraudPort = makeFraudPort('review');
+    const uc = new CreatePaymentIntentUseCase(
+      mockCheckoutRepo as never,
+      mockBasketPort as never,
+      mockOrderPort as never,
+      mockPaymentPort as never,
+      fraudPort as never,
+    );
+
+    const result = await uc.execute(new CreatePaymentIntentCommand('ck-1', 'c1'));
+
+    // Review orders still proceed with payment (flagged for manual review)
+    expect(result.orderId).toBe('o1');
+    expect(result.paymentIntent.id).toBe('pi_123');
+    expect(mockPaymentPort.initiatePayment).toHaveBeenCalled();
+  });
+
+  it('should not screen when no fraud screening port is provided', async () => {
+    const result = await useCase.execute(new CreatePaymentIntentCommand('ck-1', 'c1'));
+
+    expect(result.orderId).toBe('o1');
+    // No screening should happen — backward compatible
+  });
+
+  it('should fail open when fraud screening throws an error', async () => {
+    const fraudPort = { screenOrder: jest.fn().mockRejectedValue(new Error('Screening service unavailable')) };
+    const uc = new CreatePaymentIntentUseCase(
+      mockCheckoutRepo as never,
+      mockBasketPort as never,
+      mockOrderPort as never,
+      mockPaymentPort as never,
+      fraudPort as never,
+    );
+
+    const result = await uc.execute(new CreatePaymentIntentCommand('ck-1', 'c1'));
+
+    // Should proceed with payment despite screening failure (fail-open)
+    expect(result.orderId).toBe('o1');
+    expect(mockPaymentPort.initiatePayment).toHaveBeenCalled();
   });
 });

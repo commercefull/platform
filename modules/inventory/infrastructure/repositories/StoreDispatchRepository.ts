@@ -1,18 +1,11 @@
 import { query, queryOne } from '../../../../libs/db';
 import { StoreDispatch, StoreDispatchItemProps } from '../../domain/entities/StoreDispatch';
-import {
-  StoreDispatchRepository as IStoreDispatchRepository,
-  DispatchFilters,
-} from '../../domain/repositories/StoreDispatchRepository';
+import { StoreDispatchRepository as IStoreDispatchRepository, DispatchFilters } from '../../domain/repositories/StoreDispatchRepository';
 import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
-import {
-  StoreDispatch as DbStoreDispatch,
-  StoreDispatchItem as DbStoreDispatchItem,
-} from '../../../../libs/db/types';
+import { StoreDispatch as DbStoreDispatch, StoreDispatchItem as DbStoreDispatchItem } from '../../../../libs/db/types';
 import { isUuid } from '../../../../libs/uuid';
 
 export class StoreDispatchRepository implements IStoreDispatchRepository {
-
   async findById(dispatchId: string): Promise<StoreDispatch | null> {
     const row = await queryOne<DbStoreDispatch>('SELECT * FROM "storeDispatch" WHERE "dispatchId" = $1', [dispatchId]);
     if (!row) return null;
@@ -242,9 +235,9 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
 
   private mapToDispatch(row: DbStoreDispatch, items: StoreDispatchItemProps[]): StoreDispatch {
     const md: Record<string, unknown> | undefined = row.metadata
-      ? (typeof row.metadata === 'string'
-          ? (JSON.parse(row.metadata as string) as Record<string, unknown>)
-          : (row.metadata as Record<string, unknown>))
+      ? typeof row.metadata === 'string'
+        ? (JSON.parse(row.metadata as string) as Record<string, unknown>)
+        : (row.metadata as Record<string, unknown>)
       : undefined;
     const actorNames = (md?.actorNames as Record<string, unknown> | undefined) || {};
     return StoreDispatch.reconstitute({

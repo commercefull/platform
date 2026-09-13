@@ -30,9 +30,7 @@ describe('Reviews & Q&A', () => {
 
   afterAll(async () => {
     if (createdReviewId) {
-      await client
-        .delete(`/business/reviews/${createdReviewId}`, { headers: { Authorization: `Bearer ${adminToken}` } })
-        .catch(() => {});
+      await client.delete(`/business/reviews/${createdReviewId}`, { headers: { Authorization: `Bearer ${adminToken}` } }).catch(() => {});
     }
   });
 
@@ -41,21 +39,26 @@ describe('Reviews & Q&A', () => {
   describe('Customer: Submit review', () => {
     it('should reject review with invalid rating (0)', async () => {
       const res = await client.post(`/customer/products/${SEEDED_PRODUCT_1_ID}/reviews`, {
-        rating: 0, reviewerName: 'Tester', content: 'Bad rating',
+        rating: 0,
+        reviewerName: 'Tester',
+        content: 'Bad rating',
       });
       expect(res.status).toBe(400);
     });
 
     it('should reject review with invalid rating (6)', async () => {
       const res = await client.post(`/customer/products/${SEEDED_PRODUCT_1_ID}/reviews`, {
-        rating: 6, reviewerName: 'Tester', content: 'Too high',
+        rating: 6,
+        reviewerName: 'Tester',
+        content: 'Too high',
       });
       expect(res.status).toBe(400);
     });
 
     it('should reject review without reviewerName', async () => {
       const res = await client.post(`/customer/products/${SEEDED_PRODUCT_1_ID}/reviews`, {
-        rating: 4, content: 'No name',
+        rating: 4,
+        content: 'No name',
       });
       expect(res.status).toBe(400);
     });
@@ -116,10 +119,7 @@ describe('Reviews & Q&A', () => {
   describe('Customer: Vote on review', () => {
     it('should reject vote without authentication', async () => {
       if (!createdReviewId) return;
-      const res = await client.post(
-        `/customer/products/${SEEDED_PRODUCT_1_ID}/reviews/${createdReviewId}/vote`,
-        { isHelpful: true },
-      );
+      const res = await client.post(`/customer/products/${SEEDED_PRODUCT_1_ID}/reviews/${createdReviewId}/vote`, { isHelpful: true });
       expect(res.status).toBe(401);
     });
 
@@ -173,18 +173,26 @@ describe('Reviews & Q&A', () => {
 
     it('should approve a review', async () => {
       if (!createdReviewId) return;
-      const res = await client.put(`/business/reviews/${createdReviewId}/approve`, {}, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
+      const res = await client.put(
+        `/business/reviews/${createdReviewId}/approve`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
       expect(res.status).toBe(200);
       expect(res.data.data.status).toBe('approved');
     });
 
     it('should reject a review', async () => {
       if (!createdReviewId) return;
-      const res = await client.put(`/business/reviews/${createdReviewId}/reject`, {}, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
+      const res = await client.put(
+        `/business/reviews/${createdReviewId}/reject`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
       expect(res.status).toBe(200);
       expect(res.data.data.status).toBe('rejected');
     });
@@ -305,26 +313,23 @@ describe('Reviews & Q&A', () => {
 
   describe('Organization: Review Media', () => {
     it('should reject listing review media without reviewId query param', async () => {
-      const res = await client.get(
-        `/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.get(`/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       expect(res.status).toBe(400);
     });
 
     it('should list review media for a given reviewId', async () => {
-      const res = await client.get(
-        `/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media?reviewId=${SEEDED_REVIEW_1_ID}`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.get(`/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media?reviewId=${SEEDED_REVIEW_1_ID}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       expectStatus(res, 200);
     });
 
     it('should return 404 when deleting non-existent review media', async () => {
-      const res = await client.delete(
-        `/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media/00000000-0000-0000-0000-999999999999`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.delete(`/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media/00000000-0000-0000-0000-999999999999`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       expect(res.status).toBe(404);
     });
   });

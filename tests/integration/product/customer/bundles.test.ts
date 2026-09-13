@@ -7,9 +7,6 @@ import { AxiosInstance } from 'axios';
 import { createTestClient } from '../../testUtils';
 import { SEEDED_BUNDLE_1_ID, SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID } from '../testUtils';
 
-;
-;
-
 describe('Customer: Bundles', () => {
   let client: AxiosInstance;
 

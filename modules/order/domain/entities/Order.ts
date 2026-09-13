@@ -9,7 +9,14 @@ import { Money } from '../valueObjects/Money';
 import { OrderStatus, canTransitionTo } from '../valueObjects/OrderStatus';
 import { PaymentStatus, canTransitionPaymentTo } from '../valueObjects/PaymentStatus';
 import { FulfillmentStatus, canTransitionFulfillmentTo } from '../valueObjects/FulfillmentStatus';
-import { OrderItemNotFoundError, InvalidOrderTransitionError, InvalidPaymentTransitionError, InvalidFulfillmentTransitionError, OrderCannotBeCancelledError, OrderCannotBeModifiedError } from '../errors/OrderErrors';
+import {
+  OrderItemNotFoundError,
+  InvalidOrderTransitionError,
+  InvalidPaymentTransitionError,
+  InvalidFulfillmentTransitionError,
+  OrderCannotBeCancelledError,
+  OrderCannotBeModifiedError,
+} from '../errors/OrderErrors';
 
 export interface OrderProps {
   orderId: string;

@@ -44,11 +44,13 @@ export interface GetSalesAnalyticsOutput {
 }
 
 export class GetSalesAnalyticsUseCase {
-  constructor(private readonly analyticsRepository: {
-    getSalesTimeSeries(storeId: string | undefined, startDate: Date, endDate: Date, groupBy: string): Promise<SalesDataPoint[]>;
-    getSalesBreakdown(storeId: string | undefined, startDate: Date, endDate: Date, breakdown: string): Promise<SalesBreakdown[]>;
-    getSalesTotals(storeId: string | undefined, startDate: Date, endDate: Date): Promise<{ orders: number; revenue: number }>;
-  }) {}
+  constructor(
+    private readonly analyticsRepository: {
+      getSalesTimeSeries(storeId: string | undefined, startDate: Date, endDate: Date, groupBy: string): Promise<SalesDataPoint[]>;
+      getSalesBreakdown(storeId: string | undefined, startDate: Date, endDate: Date, breakdown: string): Promise<SalesBreakdown[]>;
+      getSalesTotals(storeId: string | undefined, startDate: Date, endDate: Date): Promise<{ orders: number; revenue: number }>;
+    },
+  ) {}
 
   async execute(input: GetSalesAnalyticsInput): Promise<GetSalesAnalyticsOutput> {
     const { storeId, startDate, endDate, groupBy, breakdown } = input;

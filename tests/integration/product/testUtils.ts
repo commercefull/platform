@@ -37,10 +37,10 @@ export const SEEDED_ATTRIBUTE_GROUP_PHYSICAL_ID = '70000000-0000-0000-0000-00000
 export const SEEDED_ATTRIBUTE_GROUP_TECH_ID = '70000000-0000-0000-0000-000000000003';
 
 // Extended test data — seeds/20240805001059_seedProductTestExtended.js
-export const SEEDED_REVIEW_1_ID      = 'a0000000-0000-0000-0000-000000000001';
-export const SEEDED_QA_1_ID          = 'b0000000-0000-0000-0000-000000000001';
-export const SEEDED_BUNDLE_1_ID      = 'c0000000-0000-0000-0000-000000000001';
-export const SEEDED_COLLECTION_1_ID  = 'd0000000-0000-0000-0000-000000000001';
+export const SEEDED_REVIEW_1_ID = 'a0000000-0000-0000-0000-000000000001';
+export const SEEDED_QA_1_ID = 'b0000000-0000-0000-0000-000000000001';
+export const SEEDED_BUNDLE_1_ID = 'c0000000-0000-0000-0000-000000000001';
+export const SEEDED_COLLECTION_1_ID = 'd0000000-0000-0000-0000-000000000001';
 
 // Common test data for product
 export const testProduct = {
@@ -219,21 +219,18 @@ export async function setupProductTests() {
       { headers: { Authorization: `Bearer ${adminToken}` } },
     );
     if (optRes.status === 201) {
-      testAttributeOptionId =
-        optRes.data.data?.productAttributeOptionId || optRes.data.data?.id || null;
+      testAttributeOptionId = optRes.data.data?.productAttributeOptionId || optRes.data.data?.id || null;
     }
   } catch (__) {}
 
   // If creation failed (e.g. duplicate), fetch the existing option by value
   if (!testAttributeOptionId) {
     try {
-      const getRes = await client.get(
-        `/business/attribute-options/attribute/${SEEDED_ATTRIBUTE_COLOR_ID}/value/setup-option`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const getRes = await client.get(`/business/attribute-options/attribute/${SEEDED_ATTRIBUTE_COLOR_ID}/value/setup-option`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       if (getRes.status === 200) {
-        testAttributeOptionId =
-          getRes.data.data?.productAttributeOptionId || getRes.data.data?.id || null;
+        testAttributeOptionId = getRes.data.data?.productAttributeOptionId || getRes.data.data?.id || null;
       }
     } catch (__) {}
   }
@@ -260,7 +257,12 @@ export async function cleanupProductTests(
 ) {
   try {
     // Only delete products that were dynamically created (not seeded ones)
-    if (testProductId && testProductId !== SEEDED_PRODUCT_1_ID && testProductId !== SEEDED_PRODUCT_2_ID && testProductId !== SEEDED_PRODUCT_3_ID) {
+    if (
+      testProductId &&
+      testProductId !== SEEDED_PRODUCT_1_ID &&
+      testProductId !== SEEDED_PRODUCT_2_ID &&
+      testProductId !== SEEDED_PRODUCT_3_ID
+    ) {
       await client.delete(`/business/products/${testProductId}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });

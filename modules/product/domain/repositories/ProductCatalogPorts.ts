@@ -246,9 +246,7 @@ export type ProductReviewCreateParams = Omit<
   'productReviewId' | 'createdAt' | 'updatedAt' | 'helpfulCount' | 'unhelpfulCount' | 'reportCount' | 'isHighlighted'
 >;
 
-export type ProductReviewUpdateParams = Partial<
-  Omit<ProductReviewCreateParams, 'productId' | 'customerId'>
->;
+export type ProductReviewUpdateParams = Partial<Omit<ProductReviewCreateParams, 'productId' | 'customerId'>>;
 
 export interface ReviewFilters {
   productId?: string;

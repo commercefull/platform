@@ -4,10 +4,7 @@ import type { ApprovalWorkflowRepository } from '../../domain/repositories/B2BRe
 
 export class ApprovalWorkflowRepositoryImpl implements ApprovalWorkflowRepository {
   async findById(workflowId: string): Promise<ApprovalWorkflow | null> {
-    const row = await queryOne<ApprovalWorkflowProps>(
-      `SELECT * FROM "b2bApprovalWorkflow" WHERE "workflowId" = $1`,
-      [workflowId],
-    );
+    const row = await queryOne<ApprovalWorkflowProps>(`SELECT * FROM "b2bApprovalWorkflow" WHERE "workflowId" = $1`, [workflowId]);
     return row ? ApprovalWorkflow.reconstitute(row) : null;
   }
 
@@ -74,11 +71,23 @@ export class ApprovalWorkflowRepositoryImpl implements ApprovalWorkflowRepositor
         "updatedAt" = EXCLUDED."updatedAt"
       `,
       [
-        json.workflowId, json.companyId, json.organizationId, json.type,
-        json.referenceId, json.referenceNumber, json.requestedBy,
-        json.requestedByEmail, json.status, json.amount, json.currency,
-        JSON.stringify(json.steps), json.currentStep, json.description ?? null,
-        json.createdAt, json.updatedAt, json.completedAt ?? null,
+        json.workflowId,
+        json.companyId,
+        json.organizationId,
+        json.type,
+        json.referenceId,
+        json.referenceNumber,
+        json.requestedBy,
+        json.requestedByEmail,
+        json.status,
+        json.amount,
+        json.currency,
+        JSON.stringify(json.steps),
+        json.currentStep,
+        json.description ?? null,
+        json.createdAt,
+        json.updatedAt,
+        json.completedAt ?? null,
       ],
     );
   }

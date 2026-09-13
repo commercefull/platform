@@ -8,7 +8,15 @@ import { queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { generateUUID } from '../../../../libs/uuid';
 import { TaxZone, TaxRate, TaxCategory, CustomerTaxExemption, TaxSettings } from '../../taxTypes';
-import { FailedToCreateTaxError, TaxRateNotFoundError, TaxValidationError, TaxCategoryNotFoundError, TaxZoneNotFoundError, TaxExemptionNotFoundError, TaxSettingsNotFoundError } from '../../domain/errors/TaxErrors';
+import {
+  FailedToCreateTaxError,
+  TaxRateNotFoundError,
+  TaxValidationError,
+  TaxCategoryNotFoundError,
+  TaxZoneNotFoundError,
+  TaxExemptionNotFoundError,
+  TaxSettingsNotFoundError,
+} from '../../domain/errors/TaxErrors';
 
 // ============================================================================
 // Table Constants
@@ -181,7 +189,10 @@ export class TaxCommandRepo {
       throw new TaxValidationError('No fields to update');
     }
 
-    const result = await queryOne<Record<string, unknown>>(`UPDATE "${TABLES.TAX_RATE}" SET ${sets.join(', ')} WHERE "taxRateId" = $1 RETURNING *`, params);
+    const result = await queryOne<Record<string, unknown>>(
+      `UPDATE "${TABLES.TAX_RATE}" SET ${sets.join(', ')} WHERE "taxRateId" = $1 RETURNING *`,
+      params,
+    );
 
     if (!result) {
       throw new TaxRateNotFoundError(id);
@@ -389,7 +400,10 @@ export class TaxCommandRepo {
       throw new TaxValidationError('No fields to update');
     }
 
-    const result = await queryOne<Record<string, unknown>>(`UPDATE "${TABLES.TAX_ZONE}" SET ${sets.join(', ')} WHERE "taxZoneId" = $1 RETURNING *`, params);
+    const result = await queryOne<Record<string, unknown>>(
+      `UPDATE "${TABLES.TAX_ZONE}" SET ${sets.join(', ')} WHERE "taxZoneId" = $1 RETURNING *`,
+      params,
+    );
 
     if (!result) {
       throw new TaxZoneNotFoundError(id);
@@ -418,9 +432,10 @@ export class TaxCommandRepo {
         "customerTaxExemptionId", "customerId", "taxZoneId", "type", "status", 
         "name", "exemptionNumber", "businessName", "exemptionReason", "documentUrl", 
         "startDate", "expiryDate", "isVerified", "verifiedBy", 
-        "verifiedAt", "notes", "createdAt", "updatedAt"
+        "verifiedAt", "notes", "applicableTaxCategoryIds", "minOrderAmount", "maxOrderAmount", "exemptionPercent",
+        "createdAt", "updatedAt"
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
       ) RETURNING *`,
       [
         id,
@@ -439,6 +454,10 @@ export class TaxCommandRepo {
         exemption.verifiedBy || null,
         exemption.verifiedAt || null,
         exemption.notes || null,
+        exemption.applicableTaxCategoryIds ? JSON.stringify(exemption.applicableTaxCategoryIds) : null,
+        exemption.minOrderAmount ?? null,
+        exemption.maxOrderAmount ?? null,
+        exemption.exemptionPercent ?? 100,
         now,
         now,
       ],
@@ -532,6 +551,26 @@ export class TaxCommandRepo {
     if (exemption.notes !== undefined) {
       sets.push(`"notes" = $${paramIndex++}`);
       params.push(exemption.notes);
+    }
+
+    if (exemption.applicableTaxCategoryIds !== undefined) {
+      sets.push(`"applicableTaxCategoryIds" = $${paramIndex++}`);
+      params.push(exemption.applicableTaxCategoryIds ? JSON.stringify(exemption.applicableTaxCategoryIds) : null);
+    }
+
+    if (exemption.minOrderAmount !== undefined) {
+      sets.push(`"minOrderAmount" = $${paramIndex++}`);
+      params.push(exemption.minOrderAmount ?? null);
+    }
+
+    if (exemption.maxOrderAmount !== undefined) {
+      sets.push(`"maxOrderAmount" = $${paramIndex++}`);
+      params.push(exemption.maxOrderAmount ?? null);
+    }
+
+    if (exemption.exemptionPercent !== undefined) {
+      sets.push(`"exemptionPercent" = $${paramIndex++}`);
+      params.push(exemption.exemptionPercent);
     }
 
     // Always update the updatedAt timestamp
@@ -722,3 +761,5 @@ export class TaxCommandRepo {
     return !!result;
   }
 }
+
+export default new TaxCommandRepo();

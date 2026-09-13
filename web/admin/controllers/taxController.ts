@@ -7,7 +7,12 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { ManageAdminTaxUseCase } from '../../../modules/tax/application/useCases/ManageAdminTax';
+import { approveTaxExemptionUseCase } from '../../../modules/tax/application/useCases/ApproveTaxExemption';
+import { rejectTaxExemptionUseCase } from '../../../modules/tax/application/useCases/RejectTaxExemption';
+import { TaxQueryRepository } from '../../../modules/tax/infrastructure';
 import { adminRespond } from '../../respond';
+
+const taxQueryRepo = TaxQueryRepository.query;
 
 const manageAdminTaxUseCase = new ManageAdminTaxUseCase();
 
@@ -28,7 +33,6 @@ export const listTaxSettings = async (req: TypedRequest, res: Response): Promise
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -72,14 +76,12 @@ export const updateTaxRate = async (req: TypedRequest, res: Response): Promise<v
   });
 
   res.redirect('/hub/tax?success=Tax rate updated');
-  
 };
 
 export const deleteTaxRate = async (req: TypedRequest, res: Response): Promise<void> => {
   const { taxRateId } = req.params;
   await manageAdminTaxUseCase.softDeleteTaxRate(taxRateId);
   res.json({ success: true });
-  
 };
 
 // ============================================================================
@@ -121,14 +123,12 @@ export const updateTaxZone = async (req: TypedRequest, res: Response): Promise<v
   });
 
   res.redirect('/hub/tax?success=Tax zone updated');
-  
 };
 
 export const deleteTaxZone = async (req: TypedRequest, res: Response): Promise<void> => {
   const { taxZoneId } = req.params;
   await manageAdminTaxUseCase.softDeleteTaxZone(taxZoneId);
   res.json({ success: true });
-  
 };
 
 // ============================================================================
@@ -164,12 +164,52 @@ export const updateTaxClass = async (req: TypedRequest, res: Response): Promise<
   });
 
   res.redirect('/hub/tax?success=Tax class updated');
-  
 };
 
 export const deleteTaxClass = async (req: TypedRequest, res: Response): Promise<void> => {
   const { taxClassId } = req.params;
   await manageAdminTaxUseCase.softDeleteTaxClass(taxClassId);
   res.json({ success: true });
-  
+};
+
+// ============================================================================
+// Tax Exemption Management (Epic F)
+// ============================================================================
+
+export const listTaxExemptions = async (req: TypedRequest, res: Response): Promise<void> => {
+  const status = (req.query.status as string) || undefined;
+  const exemptions = await taxQueryRepo.findAllTaxExemptions(status as never);
+
+  adminRespond(req, res, 'tax/exemptions', {
+    pageName: 'Tax Exemptions',
+    exemptions,
+    filterStatus: status || 'all',
+    success: req.query.success || null,
+    error: req.query.error || null,
+  });
+};
+
+export const approveTaxExemption = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { exemptionId } = req.params;
+    const verifiedBy = (req.user as { id?: string })?.id || 'admin';
+    await approveTaxExemptionUseCase.execute(exemptionId, verifiedBy);
+    res.redirect('/hub/tax/exemptions?success=Exemption approved');
+  } catch (error: unknown) {
+    logger.warn('Error approving tax exemption:', error);
+    res.redirect('/hub/tax/exemptions?error=' + encodeURIComponent((error as Error).message));
+  }
+};
+
+export const rejectTaxExemption = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { exemptionId } = req.params;
+    const body = req.body as RequestBody;
+    const reason = body.reason as string | undefined;
+    await rejectTaxExemptionUseCase.execute(exemptionId, reason);
+    res.redirect('/hub/tax/exemptions?success=Exemption rejected');
+  } catch (error: unknown) {
+    logger.warn('Error rejecting tax exemption:', error);
+    res.redirect('/hub/tax/exemptions?error=' + encodeURIComponent((error as Error).message));
+  }
 };

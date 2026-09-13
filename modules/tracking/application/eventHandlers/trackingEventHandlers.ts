@@ -29,10 +29,7 @@ export function setConsentRepository(repo: GdprCookieConsentRepository): void {
 /**
  * Check if consent is granted for a given category for a session
  */
-async function checkConsent(
-  sessionId: string | undefined,
-  category: 'analytics' | 'marketing' | 'thirdParty',
-): Promise<boolean> {
+async function checkConsent(sessionId: string | undefined, category: 'analytics' | 'marketing' | 'thirdParty'): Promise<boolean> {
   if (!consentRepo || !sessionId) return false;
 
   try {
@@ -87,9 +84,7 @@ export function registerTrackingEventHandlers(): void {
         }
 
         // Check consent
-        const consentCategory = getDefaultEventMappings().find(
-          m => m.sourceEvent === payload.type,
-        )?.consentCategory || 'marketing';
+        const consentCategory = getDefaultEventMappings().find(m => m.sourceEvent === payload.type)?.consentCategory || 'marketing';
 
         const consentGranted = await checkConsent(extracted.sessionId, consentCategory);
 

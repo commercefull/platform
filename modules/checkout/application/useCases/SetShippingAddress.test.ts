@@ -7,7 +7,9 @@ import { SetShippingAddressUseCase, SetShippingAddressCommand } from './SetShipp
 import { NotFoundError, BadRequestError } from '../../../../libs/errors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('SetShippingAddressUseCase', () => {
   let useCase: SetShippingAddressUseCase;
@@ -16,14 +18,29 @@ describe('SetShippingAddressUseCase', () => {
 
   beforeEach(() => {
     mockSession = {
-      id: 'ck-1', basketId: 'b1', customerId: 'c1', guestEmail: undefined,
-      status: 'pending', paymentStatus: 'pending', shippingAddress: null,
-      billingAddress: null, shippingMethodId: undefined, shippingMethodName: undefined,
-      paymentMethodId: undefined, subtotal: { amount: 100, currency: 'USD' },
-      taxAmount: { amount: 0, currency: 'USD' }, shippingAmount: { amount: 0, currency: 'USD' },
-      discountAmount: { amount: 0, currency: 'USD' }, total: { amount: 100, currency: 'USD' },
-      couponCode: undefined, fulfillmentType: 'shipping', notes: undefined, sameAsShipping: false,
-      createdAt: new Date(), updatedAt: new Date(), expiresAt: new Date(),
+      id: 'ck-1',
+      basketId: 'b1',
+      customerId: 'c1',
+      guestEmail: undefined,
+      status: 'pending',
+      paymentStatus: 'pending',
+      shippingAddress: null,
+      billingAddress: null,
+      shippingMethodId: undefined,
+      shippingMethodName: undefined,
+      paymentMethodId: undefined,
+      subtotal: { amount: 100, currency: 'USD' },
+      taxAmount: { amount: 0, currency: 'USD' },
+      shippingAmount: { amount: 0, currency: 'USD' },
+      discountAmount: { amount: 0, currency: 'USD' },
+      total: { amount: 100, currency: 'USD' },
+      couponCode: undefined,
+      fulfillmentType: 'shipping',
+      notes: undefined,
+      sameAsShipping: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      expiresAt: new Date(),
       setShippingAddress: jest.fn(),
       updateAmounts: jest.fn(),
     };
@@ -37,9 +54,7 @@ describe('SetShippingAddressUseCase', () => {
   });
 
   it('should set shipping address (happy path)', async () => {
-    const result = await useCase.execute(new SetShippingAddressCommand(
-      'ck-1', 'John', 'Doe', '123 Main St', 'NYC', '10001', 'US',
-    ));
+    const result = await useCase.execute(new SetShippingAddressCommand('ck-1', 'John', 'Doe', '123 Main St', 'NYC', '10001', 'US'));
 
     expect(result.checkoutId).toBe('ck-1');
     expect(mockSession.setShippingAddress).toHaveBeenCalled();
@@ -49,16 +64,16 @@ describe('SetShippingAddressUseCase', () => {
   it('should throw NotFoundError when session not found', async () => {
     mockRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new SetShippingAddressCommand(
-      'missing', 'John', 'Doe', '123 Main St', 'NYC', '10001', 'US',
-    ))).rejects.toThrow(NotFoundError);
+    await expect(
+      useCase.execute(new SetShippingAddressCommand('missing', 'John', 'Doe', '123 Main St', 'NYC', '10001', 'US')),
+    ).rejects.toThrow(NotFoundError);
   });
 
   it('should throw BadRequestError when address validation fails', async () => {
     mockRepo.validateShippingAddress.mockResolvedValue({ valid: false, errors: ['Invalid postal code'] });
 
-    await expect(useCase.execute(new SetShippingAddressCommand(
-      'ck-1', 'John', 'Doe', '123 Main St', 'NYC', 'bad', 'US',
-    ))).rejects.toThrow(BadRequestError);
+    await expect(useCase.execute(new SetShippingAddressCommand('ck-1', 'John', 'Doe', '123 Main St', 'NYC', 'bad', 'US'))).rejects.toThrow(
+      BadRequestError,
+    );
   });
 });

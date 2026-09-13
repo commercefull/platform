@@ -19,14 +19,18 @@ export const loyaltyResolvers = {
       return useCase.execute(input);
     },
 
-    pointsHistory: async (_parent: unknown, args: {
-      customerId: string;
-      page?: number;
-      limit?: number;
-      type?: 'earned' | 'redeemed' | 'expired' | 'adjusted';
-      startDate?: string;
-      endDate?: string;
-    }, context: GraphQLAuthContext) => {
+    pointsHistory: async (
+      _parent: unknown,
+      args: {
+        customerId: string;
+        page?: number;
+        limit?: number;
+        type?: 'earned' | 'redeemed' | 'expired' | 'adjusted';
+        startDate?: string;
+        endDate?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireCustomerAuth(context);
       const useCase = new GetPointsHistoryUseCase(LoyaltyRepo as never);
       const input: GetPointsHistoryInput = {
@@ -40,10 +44,14 @@ export const loyaltyResolvers = {
       return useCase.execute(input);
     },
 
-    tierStatus: async (_parent: unknown, args: {
-      customerId: string;
-      programId?: string;
-    }, context: GraphQLAuthContext) => {
+    tierStatus: async (
+      _parent: unknown,
+      args: {
+        customerId: string;
+        programId?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireCustomerAuth(context);
       const useCase = new CalculateTierStatusUseCase(LoyaltyRepo as never);
       const input: CalculateTierStatusInput = {
@@ -73,11 +81,15 @@ export const loyaltyResolvers = {
       return useCase.execute(args.input);
     },
 
-    redeemReward: async (_parent: unknown, args: {
-      customerId: string;
-      rewardId: string;
-      orderId?: string;
-    }, context: GraphQLAuthContext) => {
+    redeemReward: async (
+      _parent: unknown,
+      args: {
+        customerId: string;
+        rewardId: string;
+        orderId?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireCustomerAuth(context);
       const useCase = new RedeemRewardUseCase(LoyaltyRepo as never);
       const input: RedeemRewardInput = {

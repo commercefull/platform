@@ -7,7 +7,9 @@ import { CreateRedirectUseCase, CreateRedirectCommand } from './CreateRedirect';
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CreateRedirectUseCase', () => {
   let useCase: CreateRedirectUseCase;
@@ -16,8 +18,14 @@ describe('CreateRedirectUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       createRedirect: jest.fn().mockResolvedValue({
-        contentRedirectId: 'r1', sourceUrl: '/old', targetUrl: '/new',
-        statusCode: '301', isRegex: false, isActive: true, hits: 0, createdAt: new Date(),
+        contentRedirectId: 'r1',
+        sourceUrl: '/old',
+        targetUrl: '/new',
+        statusCode: '301',
+        isRegex: false,
+        isActive: true,
+        hits: 0,
+        createdAt: new Date(),
       }),
     };
     useCase = new CreateRedirectUseCase(mockRepo as never);

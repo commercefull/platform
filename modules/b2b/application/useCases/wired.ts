@@ -18,9 +18,4 @@ export {
   ManageApprovalWorkflowUseCase,
 } from '../../application/useCases/B2B';
 
-export {
-  CompanyRepositoryImpl,
-  B2BUserRepositoryImpl,
-  QuoteRepositoryImpl,
-  ApprovalWorkflowRepositoryImpl,
-} from '../../infrastructure';
+export { CompanyRepositoryImpl, B2BUserRepositoryImpl, QuoteRepositoryImpl, ApprovalWorkflowRepositoryImpl } from '../../infrastructure';

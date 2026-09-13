@@ -114,7 +114,10 @@ export function validateCorsOrigins(): string[] {
     throw new Error('ALLOWED_ORIGINS must be set in production. Example: https://yourdomain.com,https://admin.yourdomain.com');
   }
 
-  const origins = raw.split(',').map(o => o.trim()).filter(Boolean);
+  const origins = raw
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean);
   if (origins.length === 0) {
     throw new Error('ALLOWED_ORIGINS must contain at least one valid origin in production');
   }

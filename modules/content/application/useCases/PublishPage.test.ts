@@ -44,13 +44,19 @@ describe('PublishPageUseCase', () => {
     expect(result.contentPageId).toBe('page-1');
     expect(result.status).toBe('published');
     expect(result.publishedAt).toBeDefined();
-    expect(mockRepo.updatePage).toHaveBeenCalledWith('page-1', expect.objectContaining({
-      status: 'published',
-    }));
-    expect(eventBus.emit).toHaveBeenCalledWith('content.page.published', expect.objectContaining({
-      pageId: 'page-1',
-      title: 'About Us',
-    }));
+    expect(mockRepo.updatePage).toHaveBeenCalledWith(
+      'page-1',
+      expect.objectContaining({
+        status: 'published',
+      }),
+    );
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'content.page.published',
+      expect.objectContaining({
+        pageId: 'page-1',
+        title: 'About Us',
+      }),
+    );
   });
 
   it('should throw ContentValidationError when pageId is empty', async () => {

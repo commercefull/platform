@@ -7,7 +7,9 @@ import { VerifyCustomerUseCase, VerifyCustomerCommand } from './VerifyCustomer';
 import { CustomerNotFoundError, CustomerValidationError, CustomerAlreadyVerifiedError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('VerifyCustomerUseCase', () => {
   let useCase: VerifyCustomerUseCase;

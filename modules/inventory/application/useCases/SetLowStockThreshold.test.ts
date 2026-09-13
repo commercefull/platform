@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { SetLowStockThresholdUseCase} from './SetLowStockThreshold';
+import { SetLowStockThresholdUseCase } from './SetLowStockThreshold';
 import { InventoryValidationError, InventoryItemNotFoundError } from '../../domain/errors/InventoryErrors';
 
 describe('SetLowStockThresholdUseCase', () => {

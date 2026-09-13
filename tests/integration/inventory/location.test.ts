@@ -53,7 +53,9 @@ describe('Inventory Location Tests', () => {
       expect(Array.isArray(response.data.data)).toBe(true);
 
       // Our test location should be in the list - uses inventoryLocationId
-      const testLocation = response.data.data.find((loc: Record<string, unknown>) => (loc.inventoryLocationId || loc.id) === testLocationId);
+      const testLocation = response.data.data.find(
+        (loc: Record<string, unknown>) => (loc.inventoryLocationId || loc.id) === testLocationId,
+      );
       expect(testLocation).toBeDefined();
     });
 
@@ -116,7 +118,9 @@ describe('Inventory Location Tests', () => {
       });
 
       // Our inactive location should not be in the results
-      const inactiveLocation = response.data.data.find((loc: Record<string, unknown>) => (loc.inventoryLocationId || loc.id) === additionalLocationId);
+      const inactiveLocation = response.data.data.find(
+        (loc: Record<string, unknown>) => (loc.inventoryLocationId || loc.id) === additionalLocationId,
+      );
       expect(inactiveLocation).toBeUndefined();
     });
   });

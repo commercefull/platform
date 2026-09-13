@@ -7,7 +7,10 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import fulfillmentPartnerRepository from '../../infrastructure/repositories/FulfillmentPartnerRepository';
-import type { CreateFulfillmentLocationParams, UpdateFulfillmentLocationParams } from '../../infrastructure/repositories/FulfillmentPartnerRepository';
+import type {
+  CreateFulfillmentLocationParams,
+  UpdateFulfillmentLocationParams,
+} from '../../infrastructure/repositories/FulfillmentPartnerRepository';
 import type { FulfillmentPartner } from '../../infrastructure/repositories/FulfillmentPartnerRepository';
 
 const fulfillmentLocationRepo = fulfillmentPartnerRepository.locations;
@@ -33,7 +36,6 @@ export const createLocation = async (req: TypedRequest, res: Response): Promise<
   }
   const result = await fulfillmentLocationRepo.create(body);
   res.status(201).json({ success: true, data: result });
-  
 };
 
 export const getLocation = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -43,19 +45,14 @@ export const getLocation = async (req: TypedRequest, res: Response): Promise<voi
     return;
   }
   res.json({ success: true, data: result });
-  
 };
 
 export const listLocations = async (req: TypedRequest, res: Response): Promise<void> => {
-  const result = await fulfillmentLocationRepo.findByOrganization(
-    req.query.organizationId as string,
-    {
-      type: req.query.type as string,
-      isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
-    },
-  );
+  const result = await fulfillmentLocationRepo.findByOrganization(req.query.organizationId as string, {
+    type: req.query.type as string,
+    isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
+  });
   res.json({ success: true, data: result });
-  
 };
 
 export const updateLocation = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -65,19 +62,16 @@ export const updateLocation = async (req: TypedRequest, res: Response): Promise<
     return;
   }
   res.json({ success: true, data: result });
-  
 };
 
 export const activateLocation = async (req: TypedRequest, res: Response): Promise<void> => {
   const result = await fulfillmentLocationRepo.activate(req.params.locationId);
   res.json({ success: true, activated: result });
-  
 };
 
 export const deactivateLocation = async (req: TypedRequest, res: Response): Promise<void> => {
   const result = await fulfillmentLocationRepo.deactivate(req.params.locationId);
   res.json({ success: true, deactivated: result });
-  
 };
 
 export const findNearestLocations = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -93,7 +87,6 @@ export const findNearestLocations = async (req: TypedRequest, res: Response): Pr
     organizationId: req.query.organizationId as string,
   });
   res.json({ success: true, data: result });
-  
 };
 
 // ============================================================================
@@ -104,7 +97,6 @@ export const listPartners = async (req: TypedRequest, res: Response): Promise<vo
   const activeOnly = req.query.activeOnly !== 'false';
   const result = await fulfillmentPartnerRepo.findAll(activeOnly);
   res.json({ success: true, data: result });
-  
 };
 
 export const getPartner = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -114,7 +106,6 @@ export const getPartner = async (req: TypedRequest, res: Response): Promise<void
     return;
   }
   res.json({ success: true, data: result });
-  
 };
 
 export const createPartner = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -129,7 +120,6 @@ export const createPartner = async (req: TypedRequest, res: Response): Promise<v
   }
   const result = await fulfillmentPartnerRepo.create(body);
   res.status(201).json({ success: true, data: result });
-  
 };
 
 export const updatePartner = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -140,19 +130,16 @@ export const updatePartner = async (req: TypedRequest, res: Response): Promise<v
     return;
   }
   res.status(200).json({ success: true, data: result });
-  
 };
 
 export const deletePartner = async (req: TypedRequest, res: Response): Promise<void> => {
   const { partnerId } = req.params;
   await fulfillmentPartnerRepo.remove(partnerId);
   res.status(200).json({ success: true, message: 'Partner deleted successfully' });
-  
 };
 
 export const deleteLocation = async (req: TypedRequest, res: Response): Promise<void> => {
   const { locationId } = req.params;
   await fulfillmentLocationRepo.deleteLocation(locationId);
   res.status(200).json({ success: true, message: 'Location deleted successfully' });
-  
 };

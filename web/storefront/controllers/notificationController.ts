@@ -40,7 +40,6 @@ export const listNotifications = async (req: TypedRequest, res: Response) => {
     unreadCount,
     pagination: { page, totalPages, total, limit },
   });
-  
 };
 
 /**
@@ -61,7 +60,6 @@ export const markAsRead = async (req: TypedRequest, res: Response) => {
   }
 
   res.redirect('/notifications');
-  
 };
 
 /**
@@ -80,7 +78,6 @@ export const markAllAsRead = async (req: TypedRequest, res: Response) => {
 
   req.flash?.('success', 'All notifications marked as read');
   res.redirect('/notifications');
-  
 };
 
 /**
@@ -96,7 +93,6 @@ export const getPreferences = async (req: TypedRequest, res: Response) => {
     pageName: 'Notification Preferences',
     preferences: preferences || {},
   });
-  
 };
 
 /**
@@ -140,7 +136,6 @@ export const getDevices = async (req: TypedRequest, res: Response) => {
     pageName: 'Push Notification Devices',
     devices,
   });
-  
 };
 
 /**
@@ -155,7 +150,9 @@ export const registerDevice = async (req: TypedRequest, res: Response) => {
     const body = req.body as RequestBody;
     const { deviceToken, platform } = body;
 
-    await registerNotificationDeviceUseCase.execute(new RegisterNotificationDeviceCommand(customerId, 'customer', deviceToken as string, platform as string));
+    await registerNotificationDeviceUseCase.execute(
+      new RegisterNotificationDeviceCommand(customerId, 'customer', deviceToken as string, platform as string),
+    );
 
     req.flash?.('success', 'Device registered successfully');
     res.redirect('/notifications/devices');

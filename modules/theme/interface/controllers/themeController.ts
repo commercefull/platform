@@ -222,11 +222,7 @@ class ThemeController {
   async assignTheme(req: TypedRequest, res: Response) {
     try {
       const body = req.body as Record<string, unknown>;
-      const command = new AssignThemeToStoreCommand(
-        req.params.storeId,
-        body.themeId as string,
-        body.organizationId as string,
-      );
+      const command = new AssignThemeToStoreCommand(req.params.storeId, body.themeId as string, body.organizationId as string);
       await assignThemeUseCase.execute(command);
       res.json({ success: true, message: 'Theme assigned to store' });
     } catch (error) {

@@ -13,9 +13,24 @@ import { RuleAdjustmentRepo } from './pricingRuleAdjustmentRepo';
 import { CurrencyPriceRuleRepo } from './currencyPriceRuleRepo';
 
 // Re-export types for backward compatibility
-export type { PricingRule, PricingRuleCreateProps, PricingRuleUpdateProps, PricingRuleStatus, PricingRuleType, PricingRuleScope, CurrencyPriceRule, CurrencyPriceRuleCreateProps, CurrencyPriceRuleUpdateProps } from '../../domain/pricingRule';
+export type {
+  PricingRule,
+  PricingRuleCreateProps,
+  PricingRuleUpdateProps,
+  PricingRuleStatus,
+  PricingRuleType,
+  PricingRuleScope,
+  CurrencyPriceRule,
+  CurrencyPriceRuleCreateProps,
+  CurrencyPriceRuleUpdateProps,
+} from '../../domain/pricingRule';
 export type { RuleCondition, RuleConditionCreateParams, RuleConditionUpdateParams } from './pricingRuleConditionRepo';
-export type { RuleAdjustment, RuleAdjustmentCreateParams, RuleAdjustmentUpdateParams, RuleAdjustmentType } from './pricingRuleAdjustmentRepo';
+export type {
+  RuleAdjustment,
+  RuleAdjustmentCreateParams,
+  RuleAdjustmentUpdateParams,
+  RuleAdjustmentType,
+} from './pricingRuleAdjustmentRepo';
 
 const ruleConditionRepo = new RuleConditionRepo();
 const ruleAdjustmentRepo = new RuleAdjustmentRepo();

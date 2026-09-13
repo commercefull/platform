@@ -23,7 +23,6 @@ export const getBundles: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const getBundle: AsyncHandler = async (req, res, _next) => {
@@ -34,14 +33,12 @@ export const getBundle: AsyncHandler = async (req, res, _next) => {
   }
   const items = await bundleRepo.getBundleItems(req.params.id);
   res.json({ success: true, data: { ...bundle, items } });
-  
 };
 
 export const createBundle: AsyncHandler = async (req, res, _next) => {
   const body = req.body as Partial<ProductBundle> & { productId: string; name: string };
   const bundle = await bundleRepo.saveBundle(body);
   res.status(201).json({ success: true, data: bundle });
-  
 };
 
 export const updateBundle: AsyncHandler = async (req, res, _next) => {
@@ -56,13 +53,11 @@ export const updateBundle: AsyncHandler = async (req, res, _next) => {
     ...(req.body as Partial<ProductBundle>),
   });
   res.json({ success: true, data: bundle });
-  
 };
 
 export const deleteBundle: AsyncHandler = async (req, res, _next) => {
   await bundleRepo.deleteBundle(req.params.id);
   res.json({ success: true, message: 'Bundle deleted' });
-  
 };
 
 export const addBundleItem: AsyncHandler = async (req, res, _next) => {
@@ -72,7 +67,6 @@ export const addBundleItem: AsyncHandler = async (req, res, _next) => {
     ...body,
   });
   res.status(201).json({ success: true, data: item });
-  
 };
 
 export const updateBundleItem: AsyncHandler = async (req, res, _next) => {
@@ -88,13 +82,11 @@ export const updateBundleItem: AsyncHandler = async (req, res, _next) => {
     ...(req.body as Partial<BundleItem>),
   });
   res.json({ success: true, data: item });
-  
 };
 
 export const deleteBundleItem: AsyncHandler = async (req, res, _next) => {
   await bundleRepo.deleteBundleItem(req.params.itemId);
   res.json({ success: true, message: 'Bundle item deleted' });
-  
 };
 
 // ============================================================================
@@ -104,7 +96,6 @@ export const deleteBundleItem: AsyncHandler = async (req, res, _next) => {
 export const getActiveBundles: AsyncHandler = async (req, res, _next) => {
   const bundles = await bundleRepo.getActiveBundles();
   res.json({ success: true, data: bundles });
-  
 };
 
 export const getBundleDetails: AsyncHandler = async (req, res, _next) => {
@@ -118,7 +109,6 @@ export const getBundleDetails: AsyncHandler = async (req, res, _next) => {
   const pricing = await bundleRepo.calculateBundlePrice(req.params.id);
 
   res.json({ success: true, data: { ...bundle, items, pricing } });
-  
 };
 
 export const getBundleByProduct: AsyncHandler = async (req, res, _next) => {
@@ -132,12 +122,10 @@ export const getBundleByProduct: AsyncHandler = async (req, res, _next) => {
   const pricing = await bundleRepo.calculateBundlePrice(bundle.productBundleId);
 
   res.json({ success: true, data: { ...bundle, items, pricing } });
-  
 };
 
 export const calculateBundlePrice: AsyncHandler = async (req, res, _next) => {
   const { selectedItems } = req.body as { selectedItems?: Array<{ productId: string; productVariantId?: string; quantity: number }> };
   const pricing = await bundleRepo.calculateBundlePrice(req.params.id, selectedItems);
   res.json({ success: true, data: pricing });
-  
 };

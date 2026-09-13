@@ -32,7 +32,10 @@ export class ReturnItemNotFoundError extends AppError {
 
 export class InsufficientStoreCreditError extends AppError {
   constructor(customerId: string, requested: number, available: number) {
-    super(`Insufficient store credit for customer ${customerId}: requested ${requested}, available ${available}`, 400, { code: 'returns.store_credit_insufficient', details: { customerId, requested, available } });
+    super(`Insufficient store credit for customer ${customerId}: requested ${requested}, available ${available}`, 400, {
+      code: 'returns.store_credit_insufficient',
+      details: { customerId, requested, available },
+    });
   }
 }
 

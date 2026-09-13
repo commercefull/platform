@@ -36,7 +36,6 @@ export const getSalesDashboard: AsyncHandler = async (req, res, _next) => {
       realTime,
     },
   });
-  
 };
 
 export const getSalesDaily: AsyncHandler = async (req, res, _next) => {
@@ -53,7 +52,6 @@ export const getSalesDaily: AsyncHandler = async (req, res, _next) => {
   );
 
   res.json({ success: true, ...result });
-  
 };
 
 // ============================================================================
@@ -73,7 +71,6 @@ export const getProductPerformance: AsyncHandler = async (req, res, _next) => {
   );
 
   res.json({ success: true, ...result });
-  
 };
 
 export const getTopProducts: AsyncHandler = async (req, res, _next) => {
@@ -90,7 +87,6 @@ export const getTopProducts: AsyncHandler = async (req, res, _next) => {
   );
 
   res.json({ success: true, data: products });
-  
 };
 
 // ============================================================================
@@ -111,7 +107,6 @@ export const getSearchAnalytics: AsyncHandler = async (req, res, _next) => {
   );
 
   res.json({ success: true, ...result });
-  
 };
 
 export const getZeroResultSearches: AsyncHandler = async (req, res, _next) => {
@@ -127,7 +122,6 @@ export const getZeroResultSearches: AsyncHandler = async (req, res, _next) => {
   );
 
   res.json({ success: true, data: result.data });
-  
 };
 
 // ============================================================================
@@ -143,7 +137,6 @@ export const getCustomerCohorts: AsyncHandler = async (req, res, _next) => {
   );
 
   res.json({ success: true, data: cohorts });
-  
 };
 
 // ============================================================================
@@ -167,7 +160,6 @@ export const getEvents: AsyncHandler = async (req, res, _next) => {
   );
 
   res.json({ success: true, ...result });
-  
 };
 
 export const getEventCounts: AsyncHandler = async (req, res, _next) => {
@@ -179,7 +171,6 @@ export const getEventCounts: AsyncHandler = async (req, res, _next) => {
   const counts = await reportingRepo.getEventCounts(start, end, (groupBy as 'hour' | 'day') || 'hour');
 
   res.json({ success: true, data: counts });
-  
 };
 
 // ============================================================================
@@ -200,7 +191,6 @@ export const getSnapshots: AsyncHandler = async (req, res, _next) => {
   );
 
   res.json({ success: true, data: snapshots });
-  
 };
 
 export const getLatestSnapshot: AsyncHandler = async (req, res, _next) => {
@@ -212,7 +202,6 @@ export const getLatestSnapshot: AsyncHandler = async (req, res, _next) => {
   );
 
   res.json({ success: true, data: snapshot });
-  
 };
 
 // ============================================================================
@@ -225,7 +214,6 @@ export const getRealTimeMetrics: AsyncHandler = async (req, res, _next) => {
   const metrics = await reportingRepo.getRealTimeMetrics(organizationId as string, parseInt(minutes as string) || 60);
 
   res.json({ success: true, data: metrics });
-  
 };
 
 // ============================================================================
@@ -236,7 +224,6 @@ export const getDashboards: AsyncHandler = async (req, res, _next) => {
   const organizationId = req.user?.organizationId || req.user?.id;
   const dashboards = await reportingRepo.getDashboards(organizationId);
   res.json({ success: true, data: dashboards });
-  
 };
 
 export const getDashboard: AsyncHandler = async (req, res, _next) => {
@@ -246,7 +233,6 @@ export const getDashboard: AsyncHandler = async (req, res, _next) => {
     return;
   }
   res.json({ success: true, data: dashboard });
-  
 };
 
 export const createDashboard: AsyncHandler = async (req, res, _next) => {
@@ -262,7 +248,6 @@ export const createDashboard: AsyncHandler = async (req, res, _next) => {
   });
 
   res.status(201).json({ success: true, data: dashboard });
-  
 };
 
 export const updateDashboard: AsyncHandler = async (req, res, _next) => {
@@ -274,11 +259,9 @@ export const updateDashboard: AsyncHandler = async (req, res, _next) => {
   });
 
   res.json({ success: true, data: dashboard });
-  
 };
 
 export const deleteDashboard: AsyncHandler = async (req, res, _next) => {
   await reportingRepo.deleteDashboard(req.params.id);
   res.json({ success: true, message: 'Dashboard deleted' });
-  
 };

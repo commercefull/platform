@@ -1,7 +1,12 @@
 jest.mock('../../infrastructure/repositories/GiftCardRepository', () => ({
   getGiftCardByCode: jest.fn().mockResolvedValue({
-    giftCardId: 'gc1', code: 'GIFT100', currentBalance: 100, currency: 'USD',
-    status: 'active', expiresAt: null, isReloadable: true,
+    giftCardId: 'gc1',
+    code: 'GIFT100',
+    currentBalance: 100,
+    currency: 'USD',
+    status: 'active',
+    expiresAt: null,
+    isReloadable: true,
   }),
 }));
 
@@ -42,8 +47,13 @@ describe('CheckGiftCardBalanceUseCase', () => {
 
   it('should report expired status', async () => {
     (giftCardRepo.getGiftCardByCode as jest.Mock).mockResolvedValueOnce({
-      promotionGiftCardId: 'gc1', code: 'EXPIRED', currentBalance: 50, currency: 'USD',
-      status: 'active', expiresAt: new Date('2020-01-01'), isReloadable: false,
+      promotionGiftCardId: 'gc1',
+      code: 'EXPIRED',
+      currentBalance: 50,
+      currency: 'USD',
+      status: 'active',
+      expiresAt: new Date('2020-01-01'),
+      isReloadable: false,
     });
 
     const result = await useCase.execute(new CheckGiftCardBalanceQuery('EXPIRED'));

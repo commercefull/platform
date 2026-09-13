@@ -54,7 +54,6 @@ export const listRequests = async (req: TypedRequest, res: Response): Promise<vo
     pageName: 'My Data Requests',
     requests: requestData,
   });
-  
 };
 
 /**
@@ -78,7 +77,6 @@ export const viewRequest = async (req: TypedRequest, res: Response): Promise<voi
     request: request.toJSON(),
     requestTypeLabel: REQUEST_TYPE_LABELS[request.requestType] || request.requestType,
   });
-  
 };
 
 /**
@@ -99,7 +97,6 @@ export const createRequestForm = async (req: TypedRequest, res: Response): Promi
     requestTypeLabels: REQUEST_TYPE_LABELS,
     requestTypeDescriptions: REQUEST_TYPE_DESCRIPTIONS,
   });
-  
 };
 
 /**
@@ -144,7 +141,7 @@ export const createRequestSubmit = async (req: TypedRequest, res: Response): Pro
       pageName: 'New Data Request',
       error: (error as Error).message || 'Failed to create request',
       formData: req.body as RequestBody,
-      requestType: (req.body as RequestBody).requestType as string || '',
+      requestType: ((req.body as RequestBody).requestType as string) || '',
       requestTypeLabels: REQUEST_TYPE_LABELS,
       requestTypeDescriptions: REQUEST_TYPE_DESCRIPTIONS,
     });

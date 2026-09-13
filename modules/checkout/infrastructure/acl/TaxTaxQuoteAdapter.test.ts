@@ -14,9 +14,9 @@ import { TaxTaxQuoteAdapter } from './TaxTaxQuoteAdapter';
 
 describe('TaxTaxQuoteAdapter', () => {
   let adapter: TaxTaxQuoteAdapter;
-   
+
   let calculateOrderTaxUseCase: any;
-   
+
   let taxSettingsRepo: any;
 
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('TaxTaxQuoteAdapter', () => {
   it('should map tax calculation result to checkout vocabulary', async () => {
     calculateOrderTaxUseCase.execute.mockResolvedValue({
       success: true,
-      taxAmount: 8.50,
+      taxAmount: 8.5,
     });
 
     const result = await adapter.calculateTax({
@@ -43,7 +43,7 @@ describe('TaxTaxQuoteAdapter', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.taxAmount).toBe(8.50);
+    expect(result.taxAmount).toBe(8.5);
   });
 
   it('should return taxAmount 0 when calculation fails', async () => {

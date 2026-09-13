@@ -1,4 +1,11 @@
-import type { ProductReview, ProductReviewCreateParams, ProductReviewUpdateParams, ReviewStatus, ReviewFilters, ProductReviewPort } from '../../domain/repositories/ProductCatalogPorts';
+import type {
+  ProductReview,
+  ProductReviewCreateParams,
+  ProductReviewUpdateParams,
+  ReviewStatus,
+  ReviewFilters,
+  ProductReviewPort,
+} from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageProductReviewsUseCase {
   constructor(private readonly productReviewRepo: ProductReviewPort) {}

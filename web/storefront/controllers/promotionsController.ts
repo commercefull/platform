@@ -23,5 +23,4 @@ export const getPromotionsPage = async (req: TypedRequest, res: Response): Promi
     coupons: couponsResult || [],
     user: req.user,
   });
-  
 };

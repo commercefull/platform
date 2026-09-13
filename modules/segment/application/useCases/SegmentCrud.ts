@@ -31,15 +31,18 @@ export class CreateSegmentUseCase {
 export class UpdateSegmentUseCase {
   constructor(private segmentRepo: SegmentRepository) {}
 
-  async execute(segmentId: string, params: Partial<{
-    name: string;
-    description: string;
-    conditions: SegmentCondition[];
-    matchMode: MatchMode;
-    color: string;
-    icon: string;
-    isActive: boolean;
-  }>): Promise<SegmentDefinition> {
+  async execute(
+    segmentId: string,
+    params: Partial<{
+      name: string;
+      description: string;
+      conditions: SegmentCondition[];
+      matchMode: MatchMode;
+      color: string;
+      icon: string;
+      isActive: boolean;
+    }>,
+  ): Promise<SegmentDefinition> {
     const segment = await this.segmentRepo.findById(segmentId);
     if (!segment) throw new SegmentNotFoundError(segmentId);
 

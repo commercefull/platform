@@ -19,7 +19,10 @@ describe('SetLocalDeliveryZoneUseCase', () => {
 
   it('should set delivery zone with radius (happy path)', async () => {
     const result = await useCase.execute({
-      storeId: 's1', enabled: true, radiusKm: 10, deliveryFee: 5,
+      storeId: 's1',
+      enabled: true,
+      radiusKm: 10,
+      deliveryFee: 5,
     });
 
     expect(result.storeId).toBe('s1');
@@ -30,7 +33,9 @@ describe('SetLocalDeliveryZoneUseCase', () => {
 
   it('should set delivery zone with postal codes', async () => {
     const result = await useCase.execute({
-      storeId: 's1', enabled: true, postalCodes: ['10001', '10002'],
+      storeId: 's1',
+      enabled: true,
+      postalCodes: ['10001', '10002'],
     });
 
     expect(result.postalCodeCount).toBe(2);
@@ -39,12 +44,10 @@ describe('SetLocalDeliveryZoneUseCase', () => {
   it('should throw StoreNotFoundError when store not found', async () => {
     mockStoreRepository.findById.mockResolvedValueOnce(null);
 
-    await expect(useCase.execute({ storeId: 'nonexistent', enabled: true, radiusKm: 5 }))
-      .rejects.toThrow(StoreNotFoundError);
+    await expect(useCase.execute({ storeId: 'nonexistent', enabled: true, radiusKm: 5 })).rejects.toThrow(StoreNotFoundError);
   });
 
   it('should throw StoreValidationError when no radius or postal codes', async () => {
-    await expect(useCase.execute({ storeId: 's1', enabled: true }))
-      .rejects.toThrow(StoreValidationError);
+    await expect(useCase.execute({ storeId: 's1', enabled: true })).rejects.toThrow(StoreValidationError);
   });
 });

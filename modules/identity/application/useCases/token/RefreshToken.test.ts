@@ -1,5 +1,12 @@
 import { RefreshTokenUseCase } from './RefreshToken';
-import { RefreshTokenRequiredError, InvalidRefreshTokenError, RefreshTokenRevokedError, RefreshTokenExpiredError, AccountNotActiveError, InvalidTokenRecordError } from '../../../domain/errors/IdentityErrors';
+import {
+  RefreshTokenRequiredError,
+  InvalidRefreshTokenError,
+  RefreshTokenRevokedError,
+  RefreshTokenExpiredError,
+  AccountNotActiveError,
+  InvalidTokenRecordError,
+} from '../../../domain/errors/IdentityErrors';
 
 describe('RefreshTokenUseCase', () => {
   let useCase: RefreshTokenUseCase;
@@ -10,14 +17,22 @@ describe('RefreshTokenUseCase', () => {
 
   beforeEach(() => {
     mockRefreshRepo = { findByToken: jest.fn().mockResolvedValue(null), revoke: jest.fn().mockResolvedValue(undefined) };
-    mockToken = { generateAccessToken: jest.fn().mockResolvedValue('new-access'), generateRefreshToken: jest.fn().mockResolvedValue('new-refresh') };
+    mockToken = {
+      generateAccessToken: jest.fn().mockResolvedValue('new-access'),
+      generateRefreshToken: jest.fn().mockResolvedValue('new-refresh'),
+    };
     mockCustomerRepo = { findById: jest.fn().mockResolvedValue(null) };
     mockOrgRepo = { findById: jest.fn().mockResolvedValue(null) };
     useCase = new RefreshTokenUseCase(mockRefreshRepo as never, mockToken as never, mockCustomerRepo as never, mockOrgRepo as never);
   });
 
   it('should refresh customer token (happy path)', async () => {
-    mockRefreshRepo.findByToken.mockResolvedValue({ token: 'valid', customerId: 'c1', revoked: false, expiresAt: new Date(Date.now() + 3600000) });
+    mockRefreshRepo.findByToken.mockResolvedValue({
+      token: 'valid',
+      customerId: 'c1',
+      revoked: false,
+      expiresAt: new Date(Date.now() + 3600000),
+    });
     mockCustomerRepo.findById.mockResolvedValue({ customerId: 'c1', email: 'c@t.com', status: 'active' });
 
     const result = await useCase.execute({ refreshToken: 'valid' });
@@ -28,7 +43,12 @@ describe('RefreshTokenUseCase', () => {
   });
 
   it('should refresh organization token', async () => {
-    mockRefreshRepo.findByToken.mockResolvedValue({ token: 'valid', organizationId: 'o1', revoked: false, expiresAt: new Date(Date.now() + 3600000) });
+    mockRefreshRepo.findByToken.mockResolvedValue({
+      token: 'valid',
+      organizationId: 'o1',
+      revoked: false,
+      expiresAt: new Date(Date.now() + 3600000),
+    });
     mockOrgRepo.findById.mockResolvedValue({ organizationId: 'o1', email: 'o@t.com', status: 'active', permissions: [] });
 
     const result = await useCase.execute({ refreshToken: 'valid' });
@@ -45,19 +65,34 @@ describe('RefreshTokenUseCase', () => {
   });
 
   it('should throw RefreshTokenRevokedError when revoked', async () => {
-    mockRefreshRepo.findByToken.mockResolvedValue({ token: 't', customerId: 'c1', revoked: true, expiresAt: new Date(Date.now() + 3600000) });
+    mockRefreshRepo.findByToken.mockResolvedValue({
+      token: 't',
+      customerId: 'c1',
+      revoked: true,
+      expiresAt: new Date(Date.now() + 3600000),
+    });
 
     await expect(useCase.execute({ refreshToken: 't' })).rejects.toThrow(RefreshTokenRevokedError);
   });
 
   it('should throw RefreshTokenExpiredError when expired', async () => {
-    mockRefreshRepo.findByToken.mockResolvedValue({ token: 't', customerId: 'c1', revoked: false, expiresAt: new Date(Date.now() - 3600000) });
+    mockRefreshRepo.findByToken.mockResolvedValue({
+      token: 't',
+      customerId: 'c1',
+      revoked: false,
+      expiresAt: new Date(Date.now() - 3600000),
+    });
 
     await expect(useCase.execute({ refreshToken: 't' })).rejects.toThrow(RefreshTokenExpiredError);
   });
 
   it('should throw AccountNotActiveError when customer is not active', async () => {
-    mockRefreshRepo.findByToken.mockResolvedValue({ token: 't', customerId: 'c1', revoked: false, expiresAt: new Date(Date.now() + 3600000) });
+    mockRefreshRepo.findByToken.mockResolvedValue({
+      token: 't',
+      customerId: 'c1',
+      revoked: false,
+      expiresAt: new Date(Date.now() + 3600000),
+    });
     mockCustomerRepo.findById.mockResolvedValue({ customerId: 'c1', email: 'c@t.com', status: 'suspended' });
 
     await expect(useCase.execute({ refreshToken: 't' })).rejects.toThrow(AccountNotActiveError);

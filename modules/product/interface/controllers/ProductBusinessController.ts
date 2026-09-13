@@ -242,7 +242,6 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
-  
 };
 
 /**
@@ -269,7 +268,6 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
   }
 
   respond(req, res, product, 200);
-  
 };
 
 export const getProductStoreAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -281,7 +279,6 @@ export const getProductStoreAvailability = async (req: TypedRequest, res: Respon
   });
 
   respond(req, res, result, 200);
-  
 };
 
 /**
@@ -417,7 +414,6 @@ export const updateProductStatus = async (req: TypedRequest, res: Response): Pro
   await ProductRepo.save(product);
 
   respond(req, res, { productId, status: product.status, updatedAt: product.updatedAt.toISOString() }, 200);
-  
 };
 
 /**
@@ -444,7 +440,6 @@ export const updateProductVisibility = async (req: TypedRequest, res: Response):
   await ProductRepo.save(product);
 
   respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
-  
 };
 
 /**
@@ -468,7 +463,6 @@ export const deleteProduct = async (req: TypedRequest, res: Response): Promise<v
   }
 
   respond(req, res, { productId, deleted: true, permanent: permanent === 'true' }, 200);
-  
 };
 
 /**
@@ -487,8 +481,12 @@ export const publishProduct = async (req: TypedRequest, res: Response): Promise<
   product.publish();
   await ProductRepo.save(product);
 
-  respond(req, res, { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() }, 200);
-  
+  respond(
+    req,
+    res,
+    { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() },
+    200,
+  );
 };
 
 /**
@@ -508,7 +506,6 @@ export const unpublishProduct = async (req: TypedRequest, res: Response): Promis
   await ProductRepo.save(product);
 
   respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
-  
 };
 
 // ============================================================================
@@ -534,7 +531,6 @@ export const findByBarcode = async (req: TypedRequest, res: Response): Promise<v
   }
 
   respond(req, res, result);
-  
 };
 
 // ============================================================================
@@ -544,7 +540,6 @@ export const findByBarcode = async (req: TypedRequest, res: Response): Promise<v
 export const getProductVariants = async (req: TypedRequest, res: Response): Promise<void> => {
   const variants = await productVariantRepo.findByProductId(req.params.productId);
   respond(req, res, variants);
-  
 };
 
 export const getProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -554,7 +549,6 @@ export const getProductVariant = async (req: TypedRequest, res: Response): Promi
     return;
   }
   respond(req, res, variant);
-  
 };
 
 export const createProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -564,14 +558,12 @@ export const createProductVariant = async (req: TypedRequest, res: Response): Pr
     ...body,
   } as ProductVariantCreateProps);
   respond(req, res, variant, 201);
-  
 };
 
 export const updateProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
   const body = req.body as ProductVariantUpdateProps;
   const variant = await productVariantRepo.update(req.params.variantId, body);
   respond(req, res, variant);
-  
 };
 
 export const updateVariantInventory = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -589,13 +581,11 @@ export const updateVariantInventory = async (req: TypedRequest, res: Response): 
   // Return variant with the requested inventory value
   // (inventory is managed by the inventory module, not stored on the variant)
   respond(req, res, { ...variant, inventory: parseInt(String(inventory)) });
-  
 };
 
 export const deleteProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
   await productVariantRepo.delete(req.params.variantId);
   respond(req, res, { deleted: true });
-  
 };
 
 // ============================================================================
@@ -605,11 +595,22 @@ export const deleteProductVariant = async (req: TypedRequest, res: Response): Pr
 export const getProductImages = async (req: TypedRequest, res: Response): Promise<void> => {
   const images = await productImageRepo.findByProductId(req.params.productId);
   respond(req, res, images);
-  
 };
 
 export const addProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as { url: string; position?: number; isPrimary?: boolean; productVariantId?: string; alt?: string; title?: string; width?: number; height?: number; size?: number; type?: string; isVisible?: boolean };
+  const body = req.body as {
+    url: string;
+    position?: number;
+    isPrimary?: boolean;
+    productVariantId?: string;
+    alt?: string;
+    title?: string;
+    width?: number;
+    height?: number;
+    size?: number;
+    type?: string;
+    isVisible?: boolean;
+  };
   const image = await productImageRepo.create({
     productId: req.params.productId,
     url: body.url,
@@ -625,20 +626,29 @@ export const addProductImage = async (req: TypedRequest, res: Response): Promise
     isVisible: body.isVisible,
   });
   respond(req, res, image, 201);
-  
 };
 
 export const updateProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as { url?: string; position?: number; isPrimary?: boolean; alt?: string; altText?: string; title?: string; width?: number; height?: number; size?: number; type?: string; isVisible?: boolean };
+  const body = req.body as {
+    url?: string;
+    position?: number;
+    isPrimary?: boolean;
+    alt?: string;
+    altText?: string;
+    title?: string;
+    width?: number;
+    height?: number;
+    size?: number;
+    type?: string;
+    isVisible?: boolean;
+  };
   const image = await productImageRepo.update(req.params.imageId, body);
   respond(req, res, image);
-  
 };
 
 export const deleteProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
   await productImageRepo.delete(req.params.imageId);
   respond(req, res, { deleted: true });
-  
 };
 
 export const reorderProductImages = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -649,7 +659,6 @@ export const reorderProductImages = async (req: TypedRequest, res: Response): Pr
   }
   await productImageRepo.reorder(req.params.productId, imageIds);
   respond(req, res, { reordered: true });
-  
 };
 
 // ============================================================================
@@ -663,7 +672,6 @@ export const listReviews = async (req: TypedRequest, res: Response): Promise<voi
   if (status) filters.status = status as ReviewFilters['status'];
   const reviews = await productReviewRepo.findWithFilters(filters, parseInt(limit as string) || 50, parseInt(offset as string) || 0);
   respond(req, res, reviews);
-  
 };
 
 export const getReview = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -673,7 +681,6 @@ export const getReview = async (req: TypedRequest, res: Response): Promise<void>
     return;
   }
   respond(req, res, review);
-  
 };
 
 export const approveReview = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -683,7 +690,6 @@ export const approveReview = async (req: TypedRequest, res: Response): Promise<v
     return;
   }
   respond(req, res, review);
-  
 };
 
 export const rejectReview = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -693,7 +699,6 @@ export const rejectReview = async (req: TypedRequest, res: Response): Promise<vo
     return;
   }
   respond(req, res, review);
-  
 };
 
 export const respondToReview = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -708,13 +713,11 @@ export const respondToReview = async (req: TypedRequest, res: Response): Promise
     return;
   }
   respond(req, res, review);
-  
 };
 
 export const deleteReview = async (req: TypedRequest, res: Response): Promise<void> => {
   await productReviewRepo.delete(req.params.reviewId);
   respond(req, res, { deleted: true });
-  
 };
 
 // ============================================================================
@@ -887,7 +890,8 @@ export const listDownloads = async (req: TypedRequest, res: Response): Promise<v
 
 export const createDownload = async (req: TypedRequest, res: Response): Promise<void> => {
   const { productId } = req.params;
-  const { name, fileUrl, filePath, fileSize, mimeType, maxDownloads, daysValid, isActive, sampleUrl, sortOrder, productVariantId } = req.body as DownloadBody;
+  const { name, fileUrl, filePath, fileSize, mimeType, maxDownloads, daysValid, isActive, sampleUrl, sortOrder, productVariantId } =
+    req.body as DownloadBody;
   if (!name?.trim()) {
     errorResponse(res, 'name is required', 400);
     return;
@@ -1000,9 +1004,7 @@ export const getVariantMatrix = async (req: TypedRequest, res: Response): Promis
     options: v.options,
     isActive: v.isActive,
   }));
-  const optionAxes = matrix.length > 0
-    ? [...new Set(matrix.flatMap(v => v.options.map(o => o.name)))]
-    : [];
+  const optionAxes = matrix.length > 0 ? [...new Set(matrix.flatMap(v => v.options.map(o => o.name)))] : [];
   successResponse(res, { productId, productName: product.name, hasVariants: product.hasVariants, optionAxes, variants: matrix });
 };
 

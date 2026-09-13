@@ -44,21 +44,18 @@ export const getMyTransactions = async (req: TypedRequest, res: Response): Promi
   });
 
   respond(req, res, result);
-  
 };
 
 export const getTransactionByOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   const { orderId } = req.params;
   const transactions = await PaymentRepo.findTransactionsByOrderId(orderId);
   respond(req, res, { transactions: transactions.map(t => t.toJSON()) });
-  
 };
 
 export const getPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
   const { currency } = req.query;
   const methods = await PaymentRepo.getEnabledPaymentMethods('default', currency as string);
   respond(req, res, { paymentMethods: methods });
-  
 };
 
 // ============================================================================
@@ -95,7 +92,6 @@ export const listTransactions = async (req: TypedRequest, res: Response): Promis
   const result = await useCase.execute(command);
 
   respond(req, res, result);
-  
 };
 
 export const getTransaction = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -110,7 +106,6 @@ export const getTransaction = async (req: TypedRequest, res: Response): Promise<
   }
 
   respond(req, res, transaction);
-  
 };
 
 export const initiatePayment = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -128,7 +123,6 @@ export const initiatePayment = async (req: TypedRequest, res: Response): Promise
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
-  
 };
 
 export const processRefund = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -177,7 +171,6 @@ export const listGateways = async (req: TypedRequest, res: Response): Promise<vo
     [organizationId],
   );
   respond(req, res, rows || []);
-  
 };
 
 export const getGateway = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -192,7 +185,6 @@ export const getGateway = async (req: TypedRequest, res: Response): Promise<void
     return;
   }
   respond(req, res, gateway);
-  
 };
 
 export const createGateway = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -263,7 +255,6 @@ export const createGateway = async (req: TypedRequest, res: Response): Promise<v
   );
 
   respond(req, res, result, 201);
-  
 };
 
 export const updateGateway = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -309,7 +300,6 @@ export const updateGateway = async (req: TypedRequest, res: Response): Promise<v
     return;
   }
   respond(req, res, result);
-  
 };
 
 export const deleteGateway = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -319,7 +309,6 @@ export const deleteGateway = async (req: TypedRequest, res: Response): Promise<v
   await query('UPDATE "paymentGateway" SET "deletedAt" = $1 WHERE "paymentGatewayId" = $2', [now, gatewayId]);
 
   respond(req, res, { success: true });
-  
 };
 
 // ============================================================================
@@ -338,7 +327,6 @@ export const listMethodConfigs = async (req: TypedRequest, res: Response): Promi
     [organizationId],
   );
   respond(req, res, rows || []);
-  
 };
 
 export const getMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -353,7 +341,6 @@ export const getMethodConfig = async (req: TypedRequest, res: Response): Promise
     return;
   }
   respond(req, res, config);
-  
 };
 
 export const createMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -430,7 +417,6 @@ export const createMethodConfig = async (req: TypedRequest, res: Response): Prom
   );
 
   respond(req, res, result, 201);
-  
 };
 
 export const updateMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -478,7 +464,6 @@ export const updateMethodConfig = async (req: TypedRequest, res: Response): Prom
     return;
   }
   respond(req, res, result);
-  
 };
 
 export const deleteMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -488,7 +473,6 @@ export const deleteMethodConfig = async (req: TypedRequest, res: Response): Prom
   await query('UPDATE "paymentMethodConfig" SET "deletedAt" = $1 WHERE "paymentMethodConfigId" = $2', [now, methodConfigId]);
 
   respond(req, res, { success: true });
-  
 };
 
 export const deleteTransaction = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -498,5 +482,4 @@ export const deleteTransaction = async (req: TypedRequest, res: Response): Promi
   await query('UPDATE "paymentTransaction" SET "deletedAt" = $1 WHERE "paymentTransactionId" = $2', [now, transactionId]);
 
   respond(req, res, { success: true });
-  
 };

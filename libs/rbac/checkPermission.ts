@@ -80,11 +80,7 @@ function getApplicablePolicies(ctx: PermissionContext): RolePolicy[] {
  * }
  * ```
  */
-export function checkPermission(
-  ctx: PermissionContext,
-  resource: Resource,
-  action: Action,
-): PermissionResult {
+export function checkPermission(ctx: PermissionContext, resource: Resource, action: Action): PermissionResult {
   // Build the full context with resource/action
   const fullCtx: PermissionContext = { ...ctx, resource, action };
 
@@ -103,17 +99,18 @@ export function checkPermission(
     const dotFormat = `${resource}.${action}`;
     const colonFormat = `${resource}:${action}`;
 
-    if (checkLegacyPermission(ctx.permissions, dotFormat) ||
-        checkLegacyPermission(ctx.permissions, colonFormat)) {
+    if (checkLegacyPermission(ctx.permissions, dotFormat) || checkLegacyPermission(ctx.permissions, colonFormat)) {
       return { allowed: true, allowedFields: ['*'] };
     }
 
     // Try 'order.manage' which covers all order actions
     const manageFormat = `${resource}.manage`;
     const manageColon = `${resource}:manage`;
-    if (action !== 'manage' && action !== '*' &&
-        (checkLegacyPermission(ctx.permissions, manageFormat) ||
-         checkLegacyPermission(ctx.permissions, manageColon))) {
+    if (
+      action !== 'manage' &&
+      action !== '*' &&
+      (checkLegacyPermission(ctx.permissions, manageFormat) || checkLegacyPermission(ctx.permissions, manageColon))
+    ) {
       return { allowed: true, allowedFields: ['*'] };
     }
   }
@@ -134,11 +131,7 @@ export function checkPermission(
  * // proceeds if allowed, throws ForbiddenError if not
  * ```
  */
-export function assertPermission(
-  ctx: PermissionContext,
-  resource: Resource,
-  action: Action,
-): void {
+export function assertPermission(ctx: PermissionContext, resource: Resource, action: Action): void {
   if (!ctx.userId) {
     throw new UnauthorizedError('Authentication required');
   }
@@ -153,12 +146,7 @@ export function assertPermission(
  * Check if the context allows a specific field on a resource.
  * Useful for field-level scoping (e.g., can the user update 'price' on 'product'?).
  */
-export function checkFieldPermission(
-  ctx: PermissionContext,
-  resource: Resource,
-  action: Action,
-  field: string,
-): boolean {
+export function checkFieldPermission(ctx: PermissionContext, resource: Resource, action: Action, field: string): boolean {
   const result = checkPermission(ctx, resource, action);
   if (!result.allowed) return false;
   if (!result.allowedFields || result.allowedFields.includes('*')) return true;
@@ -169,13 +157,8 @@ export function checkFieldPermission(
  * Get the list of allowed fields for a resource+action.
  * Returns ['*'] if all fields are allowed.
  */
-export function getAllowedFields(
-  ctx: PermissionContext,
-  resource: Resource,
-  action: Action,
-): string[] {
+export function getAllowedFields(ctx: PermissionContext, resource: Resource, action: Action): string[] {
   const result = checkPermission(ctx, resource, action);
   if (!result.allowed) return [];
   return result.allowedFields ?? ['*'];
 }
-

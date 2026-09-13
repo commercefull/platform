@@ -11,7 +11,7 @@ import { InventoryStockAvailabilityAdapter } from './InventoryStockAvailabilityA
 
 describe('InventoryStockAvailabilityAdapter', () => {
   let adapter: InventoryStockAvailabilityAdapter;
-   
+
   let InventoryRepo: any;
 
   beforeEach(() => {

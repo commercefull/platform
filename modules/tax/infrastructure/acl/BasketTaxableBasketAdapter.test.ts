@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 jest.mock('../../../basket/infrastructure/repositories/BasketRepository', () => ({
   __esModule: true,
   default: {
@@ -10,12 +8,14 @@ jest.mock('../../../basket/infrastructure/repositories/BasketRepository', () => 
 import basketRepo from '../../../basket/infrastructure/repositories/BasketRepository';
 import { BasketTaxableBasketAdapter } from './BasketTaxableBasketAdapter';
 
+type Basket = NonNullable<Awaited<ReturnType<typeof basketRepo.findById>>>;
+
 describe('BasketTaxableBasketAdapter', () => {
   let adapter: BasketTaxableBasketAdapter;
-  let mockBasketRepo: any;
+  let mockBasketRepo: jest.Mocked<typeof basketRepo>;
 
   beforeEach(() => {
-    mockBasketRepo = basketRepo;
+    mockBasketRepo = basketRepo as unknown as jest.Mocked<typeof basketRepo>;
     jest.mocked(mockBasketRepo.findById).mockClear();
     adapter = new BasketTaxableBasketAdapter();
   });
@@ -32,7 +32,7 @@ describe('BasketTaxableBasketAdapter', () => {
         { productId: 'prod-2', quantity: 1, unitPrice: { amount: 25 } },
       ],
       subtotal: { amount: 46 },
-    });
+    } as unknown as Basket);
 
     const result = await adapter.findById('basket-1');
 
@@ -59,7 +59,7 @@ describe('BasketTaxableBasketAdapter', () => {
       basketId: 'basket-empty',
       items: [],
       subtotal: { amount: 0 },
-    });
+    } as unknown as Basket);
 
     const result = await adapter.findById('basket-empty');
 
@@ -73,7 +73,7 @@ describe('BasketTaxableBasketAdapter', () => {
       basketId: 'basket-null-items',
       items: null,
       subtotal: { amount: 0 },
-    });
+    } as unknown as Basket);
 
     const result = await adapter.findById('basket-null-items');
 

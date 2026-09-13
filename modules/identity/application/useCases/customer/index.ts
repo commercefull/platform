@@ -11,4 +11,10 @@ export {
   RequestPasswordResetOutput,
   ResetPasswordOutput,
 } from './ResetCustomerPassword';
-export { VerifyCustomerEmailUseCase, VerifyEmailInput, ResendVerificationInput, VerifyEmailOutput, ResendVerificationOutput } from './VerifyCustomerEmail';
+export {
+  VerifyCustomerEmailUseCase,
+  VerifyEmailInput,
+  ResendVerificationInput,
+  VerifyEmailOutput,
+  ResendVerificationOutput,
+} from './VerifyCustomerEmail';

@@ -125,11 +125,11 @@ docker-compose exec app yarn db:seed  # optional
 
 ## Access Points
 
-| Portal                 | URL                            | Description                 |
-| ---------------------- | ------------------------------ | --------------------------- |
-| **Storefront**         | http://localhost:3000          | Customer-facing shop        |
-| **Admin Panel**        | http://localhost:3000/admin    | Platform administration     |
-| **Health Check**       | http://localhost:3000/health   | Application health endpoint |
+| Portal           | URL                          | Description                 |
+| ---------------- | ---------------------------- | --------------------------- |
+| **Storefront**   | http://localhost:3000        | Customer-facing shop        |
+| **Admin Panel**  | http://localhost:3000/admin  | Platform administration     |
+| **Health Check** | http://localhost:3000/health | Application health endpoint |
 
 ---
 
@@ -176,21 +176,21 @@ platform/
 
 ## Technology Stack
 
-| Layer                     | Technology                                                |
-| ------------------------- | --------------------------------------------------------- |
-| **Runtime**               | Node.js 20+, TypeScript 5.x                               |
-| **Framework**             | Express 5                                                 |
-| **Database**              | PostgreSQL 18, Knex (migrations), raw SQL via `pg` driver |
-| **Admin UI**            | EJS templates, Tabler (Bootstrap-based)                   |
-| **Storefront UI**         | EJS templates, Tailwind CSS                               |
-| **Payments**              | Stripe                                                    |
-| **Email**                 | Mailjet / Nodemailer                                      |
-| **Cache**                 | Redis (optional, falls back to PostgreSQL sessions)       |
-| **Logging**               | Winston with daily rotation                               |
-| **i18n**                  | i18next with filesystem backend                           |
-| **Testing**               | Jest (unit/integration), k6 (performance)                 |
-| **Build**                 | esbuild                                                   |
-| **Deployment**            | Docker, Docker Compose, Ansible, Terraform                |
+| Layer             | Technology                                                |
+| ----------------- | --------------------------------------------------------- |
+| **Runtime**       | Node.js 20+, TypeScript 5.x                               |
+| **Framework**     | Express 5                                                 |
+| **Database**      | PostgreSQL 18, Knex (migrations), raw SQL via `pg` driver |
+| **Admin UI**      | EJS templates, Tabler (Bootstrap-based)                   |
+| **Storefront UI** | EJS templates, Tailwind CSS                               |
+| **Payments**      | Stripe                                                    |
+| **Email**         | Mailjet / Nodemailer                                      |
+| **Cache**         | Redis (optional, falls back to PostgreSQL sessions)       |
+| **Logging**       | Winston with daily rotation                               |
+| **i18n**          | i18next with filesystem backend                           |
+| **Testing**       | Jest (unit/integration), k6 (performance)                 |
+| **Build**         | esbuild                                                   |
+| **Deployment**    | Docker, Docker Compose, Ansible, Terraform                |
 
 ---
 

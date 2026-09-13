@@ -69,7 +69,10 @@ export async function findZoneById(zoneId: string): Promise<WarehouseZone | null
 }
 
 export async function findZonesByWarehouse(warehouseId: string): Promise<WarehouseZone[]> {
-  const result = await query<WarehouseZone[]>('SELECT * FROM "distributionWarehouseZone" WHERE "distributionWarehouseId" = $1 ORDER BY "sortOrder" ASC, "name" ASC', [warehouseId]);
+  const result = await query<WarehouseZone[]>(
+    'SELECT * FROM "distributionWarehouseZone" WHERE "distributionWarehouseId" = $1 ORDER BY "sortOrder" ASC, "name" ASC',
+    [warehouseId],
+  );
   return result || [];
 }
 
@@ -78,12 +81,30 @@ export async function updateZone(zoneId: string, input: UpdateZoneInput): Promis
   const values: unknown[] = [];
   let paramIndex = 1;
 
-  if (input.name !== undefined) { fields.push(`"name" = $${paramIndex++}`); values.push(input.name); }
-  if (input.description !== undefined) { fields.push(`"description" = $${paramIndex++}`); values.push(input.description); }
-  if (input.zoneType !== undefined) { fields.push(`"zoneType" = $${paramIndex++}`); values.push(input.zoneType); }
-  if (input.isActive !== undefined) { fields.push(`"isActive" = $${paramIndex++}`); values.push(input.isActive); }
-  if (input.sortOrder !== undefined) { fields.push(`"sortOrder" = $${paramIndex++}`); values.push(input.sortOrder); }
-  if (input.metadata !== undefined) { fields.push(`"metadata" = $${paramIndex++}`); values.push(JSON.stringify(input.metadata)); }
+  if (input.name !== undefined) {
+    fields.push(`"name" = $${paramIndex++}`);
+    values.push(input.name);
+  }
+  if (input.description !== undefined) {
+    fields.push(`"description" = $${paramIndex++}`);
+    values.push(input.description);
+  }
+  if (input.zoneType !== undefined) {
+    fields.push(`"zoneType" = $${paramIndex++}`);
+    values.push(input.zoneType);
+  }
+  if (input.isActive !== undefined) {
+    fields.push(`"isActive" = $${paramIndex++}`);
+    values.push(input.isActive);
+  }
+  if (input.sortOrder !== undefined) {
+    fields.push(`"sortOrder" = $${paramIndex++}`);
+    values.push(input.sortOrder);
+  }
+  if (input.metadata !== undefined) {
+    fields.push(`"metadata" = $${paramIndex++}`);
+    values.push(JSON.stringify(input.metadata));
+  }
 
   if (fields.length === 0) return findZoneById(zoneId);
 

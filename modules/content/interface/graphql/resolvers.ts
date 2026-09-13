@@ -13,16 +13,23 @@ export const contentResolvers = {
       const useCase = new CreatePageUseCase(ContentRepo);
       const i = args.input;
       const command = new CreatePageCommand(
-        i.title as string, i.slug as string, i.contentTypeId as string,
+        i.title as string,
+        i.slug as string,
+        i.contentTypeId as string,
         i.templateId as string | undefined,
         (i.status as 'draft' | 'published' | 'scheduled' | 'archived') || 'draft',
         (i.visibility as 'public' | 'private' | 'password_protected') || 'public',
-        i.summary as string | undefined, i.featuredImage as string | undefined,
-        i.parentId as string | undefined, i.metaTitle as string | undefined,
-        i.metaDescription as string | undefined, i.metaKeywords as string | undefined,
+        i.summary as string | undefined,
+        i.featuredImage as string | undefined,
+        i.parentId as string | undefined,
+        i.metaTitle as string | undefined,
+        i.metaDescription as string | undefined,
+        i.metaKeywords as string | undefined,
         i.customFields as Record<string, unknown> | undefined,
-        i.publishedAt as string | undefined, i.scheduledAt as string | undefined,
-        i.isHomePage as boolean | undefined, i.createdBy as string | undefined,
+        i.publishedAt as string | undefined,
+        i.scheduledAt as string | undefined,
+        i.isHomePage as boolean | undefined,
+        i.createdBy as string | undefined,
       );
       const result = await useCase.execute(command);
       return {
@@ -37,16 +44,22 @@ export const contentResolvers = {
       const useCase = new UpdatePageUseCase(ContentRepo);
       const i = args.input;
       const command = new UpdatePageCommand(
-        i.pageId as string, i.title as string | undefined,
-        i.slug as string | undefined, i.templateId as string | undefined,
+        i.pageId as string,
+        i.title as string | undefined,
+        i.slug as string | undefined,
+        i.templateId as string | undefined,
         i.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined,
         i.visibility as 'public' | 'private' | 'password_protected' | undefined,
-        i.summary as string | undefined, i.featuredImage as string | undefined,
-        i.metaTitle as string | undefined, i.metaDescription as string | undefined,
+        i.summary as string | undefined,
+        i.featuredImage as string | undefined,
+        i.metaTitle as string | undefined,
+        i.metaDescription as string | undefined,
         i.metaKeywords as string | undefined,
         i.customFields as Record<string, unknown> | undefined,
-        i.publishedAt as string | undefined, i.scheduledAt as string | undefined,
-        i.isHomePage as boolean | undefined, i.updatedBy as string | undefined,
+        i.publishedAt as string | undefined,
+        i.scheduledAt as string | undefined,
+        i.isHomePage as boolean | undefined,
+        i.updatedBy as string | undefined,
       );
       const result = await useCase.execute(command);
       return {

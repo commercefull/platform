@@ -2,7 +2,14 @@ import identityDataRepository from '../../infrastructure/repositories/IdentityDa
 
 const identityRepo = identityDataRepository.users;
 import { requireAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { LoginUseCase, LoginCommand, RefreshTokenUseCase, RefreshTokenCommand, LogoutUseCase, LogoutCommand } from '../../application/useCases/Authenticate';
+import {
+  LoginUseCase,
+  LoginCommand,
+  RefreshTokenUseCase,
+  RefreshTokenCommand,
+  LogoutUseCase,
+  LogoutCommand,
+} from '../../application/useCases/Authenticate';
 
 export const identityResolvers = {
   Query: {

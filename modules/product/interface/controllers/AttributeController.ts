@@ -48,7 +48,6 @@ class AttributeController {
       success: true,
       data: attributes,
     });
-    
   }
 
   /**
@@ -63,7 +62,6 @@ class AttributeController {
       success: true,
       data: attributes,
     });
-    
   }
 
   /**
@@ -96,7 +94,6 @@ class AttributeController {
         values,
       },
     });
-    
   }
 
   /**
@@ -119,7 +116,6 @@ class AttributeController {
       success: true,
       data: attribute,
     });
-    
   }
 
   /**
@@ -140,7 +136,6 @@ class AttributeController {
     }
 
     res.status(201).json(result);
-    
   }
 
   /**
@@ -163,7 +158,6 @@ class AttributeController {
     }
 
     res.json(result);
-    
   }
 
   /**
@@ -198,7 +192,6 @@ class AttributeController {
       success: true,
       message: 'Attribute deleted successfully',
     });
-    
   }
 
   // ==================== ATTRIBUTE VALUES ====================
@@ -217,7 +210,6 @@ class AttributeController {
     }
 
     res.json(result);
-    
   }
 
   /**
@@ -241,7 +233,6 @@ class AttributeController {
     }
 
     res.status(201).json(result);
-    
   }
 
   /**
@@ -263,7 +254,6 @@ class AttributeController {
       success: true,
       message: 'Attribute value removed successfully',
     });
-    
   }
 
   // ==================== PRODUCT ATTRIBUTES ====================
@@ -282,7 +272,6 @@ class AttributeController {
     }
 
     res.json(result);
-    
   }
 
   /**
@@ -305,7 +294,6 @@ class AttributeController {
     }
 
     res.json(result);
-    
   }
 
   /**
@@ -314,7 +302,10 @@ class AttributeController {
    */
   async setProductAttributes(req: TypedRequest, res: Response): Promise<void> {
     const { productId } = req.params;
-    const { attributes, clearExisting } = req.body as { attributes?: Array<{ attributeId?: string; attributeCode?: string; value: string }>; clearExisting?: boolean };
+    const { attributes, clearExisting } = req.body as {
+      attributes?: Array<{ attributeId?: string; attributeCode?: string; value: string }>;
+      clearExisting?: boolean;
+    };
 
     const result = await setProductAttributesUseCase.execute({
       productId,
@@ -328,7 +319,6 @@ class AttributeController {
     }
 
     res.json(result);
-    
   }
 
   /**
@@ -351,7 +341,6 @@ class AttributeController {
       success: true,
       message: 'Product attribute removed successfully',
     });
-    
   }
 }
 

@@ -34,7 +34,6 @@ export const getCategoriesForNavigation = async (req: TypedRequest, res: Respons
     success: true,
     categories,
   });
-  
 };
 
 // ============================================================================
@@ -47,7 +46,6 @@ export const getAllCategories = async (req: TypedRequest, res: Response): Promis
     success: true,
     categories,
   });
-  
 };
 
 // ============================================================================
@@ -74,7 +72,6 @@ export const getCategoryDetails = async (req: TypedRequest, res: Response): Prom
     category,
     subcategories,
   });
-  
 };
 
 // ============================================================================
@@ -103,5 +100,4 @@ export const getCategoryPage = async (req: TypedRequest, res: Response): Promise
     subcategories,
     featuredProducts,
   });
-  
 };

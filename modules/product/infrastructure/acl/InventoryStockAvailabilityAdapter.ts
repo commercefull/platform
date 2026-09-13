@@ -13,11 +13,7 @@ import InventoryRepo from '../../../inventory/infrastructure/repositories/invent
 
 export class InventoryStockAvailabilityAdapter implements StockAvailabilityPort {
   async checkAvailability(request: StockCheckRequest): Promise<StockCheckResult> {
-    const result = await InventoryRepo.checkProductAvailability(
-      request.productId,
-      request.productVariantId,
-      request.quantity,
-    );
+    const result = await InventoryRepo.checkProductAvailability(request.productId, request.productVariantId, request.quantity);
     return {
       available: result.available,
       totalAvailable: result.totalAvailable,

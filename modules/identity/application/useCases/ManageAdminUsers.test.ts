@@ -38,12 +38,12 @@ describe('ManageAdminUsersUseCase', () => {
   });
 
   it('should find by ID', async () => {
-    const result = await useCase.findById('u1') as unknown as { userId: string };
+    const result = (await useCase.findById('u1')) as unknown as { userId: string };
     expect(result.userId).toBe('u1');
   });
 
   it('should create user', async () => {
-    const result = await useCase.create({ email: 'admin@test.com', passwordHash: 'hash' }) as unknown as { userId: string };
+    const result = (await useCase.create({ email: 'admin@test.com', passwordHash: 'hash' })) as unknown as { userId: string };
     expect(result.userId).toBe('u2');
   });
 
@@ -67,7 +67,7 @@ describe('ManageRolesUseCase', () => {
   });
 
   it('should create role', async () => {
-    const result = await useCase.create({ name: 'Admin', permissions: ['read'] }) as unknown as { roleId: string };
+    const result = (await useCase.create({ name: 'Admin', permissions: ['read'] })) as unknown as { roleId: string };
     expect(result.roleId).toBe('r2');
   });
 

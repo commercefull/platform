@@ -7,7 +7,11 @@
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../respond';
-import { ManageLanguagesUseCase, ManageCurrenciesUseCase, ManageCountriesUseCase } from '../../../modules/localization/application/useCases/ManageLocalization';
+import {
+  ManageLanguagesUseCase,
+  ManageCurrenciesUseCase,
+  ManageCountriesUseCase,
+} from '../../../modules/localization/application/useCases/ManageLocalization';
 
 const manageLanguagesUseCase = new ManageLanguagesUseCase();
 const manageCurrenciesUseCase = new ManageCurrenciesUseCase();
@@ -64,24 +68,15 @@ export const storeSettings = async (req: TypedRequest, res: Response): Promise<v
     currencies: currencies.length > 0 ? currencies : getDefaultCurrencyList(),
     locales,
   });
-  
 };
 
 export const updateStoreSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   const body = req.body as RequestBody;
-  const {
-    addressLine1,
-    addressLine2,
-    city,
-    state,
-    postalCode,
-    country,
-  } = body;
+  const { addressLine1, addressLine2, city, state, postalCode, country } = body;
 
   void { addressLine1, addressLine2, city, state, postalCode, country };
 
   res.json({ success: true });
-  
 };
 
 // ============================================================================
@@ -95,7 +90,6 @@ export const businessInfo = async (req: TypedRequest, res: Response): Promise<vo
     pageName: 'Business Information',
     settings: getDefaultSettings(organizationId),
   });
-  
 };
 
 export const updateBusinessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -104,7 +98,6 @@ export const updateBusinessInfo = async (req: TypedRequest, res: Response): Prom
   void { legalName, taxId, registrationNumber };
 
   res.json({ success: true });
-  
 };
 
 // ============================================================================
@@ -127,7 +120,6 @@ export const localizationSettings = async (req: TypedRequest, res: Response): Pr
     currencies,
     countries,
   });
-  
 };
 
 // ============================================================================
@@ -146,7 +138,6 @@ export const createLanguage = async (req: TypedRequest, res: Response): Promise<
   const languageId = await manageLanguagesUseCase.createLanguage({ code, name, nativeName, isDefault, isActive });
 
   res.json({ success: true, languageId });
-  
 };
 
 export const updateLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -158,7 +149,6 @@ export const updateLanguage = async (req: TypedRequest, res: Response): Promise<
   await manageLanguagesUseCase.updateLanguage(languageId, { name, nativeName, isDefault, isActive });
 
   res.json({ success: true });
-  
 };
 
 export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -174,7 +164,6 @@ export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<
   await manageLanguagesUseCase.deleteLanguage(languageId);
 
   res.json({ success: true });
-  
 };
 
 // ============================================================================
@@ -193,7 +182,6 @@ export const createCurrency = async (req: TypedRequest, res: Response): Promise<
   const currencyId = await manageCurrenciesUseCase.createCurrency({ code, name, symbol, exchangeRate, isDefault, isActive });
 
   res.json({ success: true, currencyId });
-  
 };
 
 export const updateCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -205,7 +193,6 @@ export const updateCurrency = async (req: TypedRequest, res: Response): Promise<
   await manageCurrenciesUseCase.updateCurrency(currencyId, { name, symbol, exchangeRate, isDefault, isActive });
 
   res.json({ success: true });
-  
 };
 
 export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -221,7 +208,6 @@ export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<
   await manageCurrenciesUseCase.deleteCurrency(currencyId);
 
   res.json({ success: true });
-  
 };
 
 // ============================================================================

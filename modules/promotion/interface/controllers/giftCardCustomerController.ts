@@ -5,7 +5,12 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { getGiftCardByCode, getGiftCards, redeemGiftCard as redeemGiftCardRepo, reloadGiftCard as reloadGiftCardRepo } from '../../infrastructure/repositories/GiftCardRepository';
+import {
+  getGiftCardByCode,
+  getGiftCards,
+  redeemGiftCard as redeemGiftCardRepo,
+  reloadGiftCard as reloadGiftCardRepo,
+} from '../../infrastructure/repositories/GiftCardRepository';
 
 interface RedeemOrReloadBody {
   code: string;
@@ -43,7 +48,6 @@ export const checkGiftCardBalance: AsyncHandler = async (req, res, _next) => {
       expiresAt: giftCard.expiresAt,
     },
   });
-  
 };
 
 export const redeemGiftCard: AsyncHandler = async (req, res, _next) => {
@@ -59,7 +63,6 @@ export const redeemGiftCard: AsyncHandler = async (req, res, _next) => {
   const transaction = await redeemGiftCardRepo(giftCard.promotionGiftCardId, amount, orderId, customerId);
 
   res.json({ success: true, data: transaction });
-  
 };
 
 export const getMyGiftCards: AsyncHandler = async (req, res, _next) => {
@@ -72,7 +75,6 @@ export const getMyGiftCards: AsyncHandler = async (req, res, _next) => {
   );
 
   res.json({ success: true, ...result });
-  
 };
 
 export const reloadGiftCard: AsyncHandler = async (req, res, _next) => {
@@ -93,5 +95,4 @@ export const reloadGiftCard: AsyncHandler = async (req, res, _next) => {
   const transaction = await reloadGiftCardRepo(giftCard.promotionGiftCardId, amount, orderId, customerId);
 
   res.json({ success: true, data: transaction });
-  
 };

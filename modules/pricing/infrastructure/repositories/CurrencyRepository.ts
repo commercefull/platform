@@ -14,7 +14,12 @@ import storeCurrencySettingsRepo from './storeCurrencySettingsRepo';
 // Re-export types for backward compatibility
 export type { Currency, CurrencyRegion } from '../../domain/currency';
 export type { CurrencyExchangeRateCreateParams, CurrencyExchangeRateUpdateParams } from './currencyExchangeRateRepo';
-export type { RoundingMethod, PriceDisplayFormat, StoreCurrencySettingsCreateParams, StoreCurrencySettingsUpdateParams } from './storeCurrencySettingsRepo';
+export type {
+  RoundingMethod,
+  PriceDisplayFormat,
+  StoreCurrencySettingsCreateParams,
+  StoreCurrencySettingsUpdateParams,
+} from './storeCurrencySettingsRepo';
 
 class CurrencyRepository {
   // Currencies

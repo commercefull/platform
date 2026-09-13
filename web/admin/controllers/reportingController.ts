@@ -20,7 +20,6 @@ export const reportingDashboard = async (req: TypedRequest, res: Response): Prom
     pageName: 'Reporting Dashboard',
     templates,
   });
-  
 };
 
 export const generateReport = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -44,7 +43,6 @@ export const generateReport = async (req: TypedRequest, res: Response): Promise<
     pageName: 'Report Results',
     report: result,
   });
-  
 };
 
 export const listSchedules = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -55,7 +53,6 @@ export const listSchedules = async (req: TypedRequest, res: Response): Promise<v
     pageName: 'Scheduled Reports',
     schedules,
   });
-  
 };
 
 export const viewSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -74,7 +71,6 @@ export const viewSchedule = async (req: TypedRequest, res: Response): Promise<vo
     schedule,
     executions,
   });
-  
 };
 
 export const createScheduleForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -86,7 +82,6 @@ export const createScheduleForm = async (req: TypedRequest, res: Response): Prom
     templates,
     formData: {},
   });
-  
 };
 
 export const createSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -98,7 +93,12 @@ export const createSchedule = async (req: TypedRequest, res: Response): Promise<
       reportType: body.reportType as ReportType,
       frequency: (body.frequency || 'daily') as never,
       parameters: body.parameters ? JSON.parse(body.parameters) : {},
-      recipients: body.recipients ? body.recipients.split(',').map((r: string) => r.trim()).filter(Boolean) : [],
+      recipients: body.recipients
+        ? body.recipients
+            .split(',')
+            .map((r: string) => r.trim())
+            .filter(Boolean)
+        : [],
       format: (body.format || 'pdf') as never,
     });
     res.redirect(`/admin/reporting/schedules/${result.reportScheduleId}?success=Scheduled report created successfully`);
@@ -128,7 +128,6 @@ export const editScheduleForm = async (req: TypedRequest, res: Response): Promis
     schedule,
     formData: schedule,
   });
-  
 };
 
 export const updateSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -140,7 +139,12 @@ export const updateSchedule = async (req: TypedRequest, res: Response): Promise<
       name: body.name || undefined,
       frequency: (body.frequency || undefined) as never,
       parameters: body.parameters ? JSON.parse(body.parameters) : undefined,
-      recipients: body.recipients ? body.recipients.split(',').map((r: string) => r.trim()).filter(Boolean) : undefined,
+      recipients: body.recipients
+        ? body.recipients
+            .split(',')
+            .map((r: string) => r.trim())
+            .filter(Boolean)
+        : undefined,
       format: (body.format || undefined) as never,
       isActive: body.isActive === 'true',
     });

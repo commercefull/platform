@@ -28,24 +28,33 @@ export class IntegrationLogRepositoryImpl implements IntegrationLogRepository {
         "errorMessage", "durationMs", "createdAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
-        props.logId, props.integrationId, props.subscriptionId, props.eventType, props.targetAction,
-        props.status, props.requestPayload ? JSON.stringify(props.requestPayload) : null,
-        props.responseStatus, props.responseBody, props.errorMessage, props.durationMs, props.createdAt,
+        props.logId,
+        props.integrationId,
+        props.subscriptionId,
+        props.eventType,
+        props.targetAction,
+        props.status,
+        props.requestPayload ? JSON.stringify(props.requestPayload) : null,
+        props.responseStatus,
+        props.responseBody,
+        props.errorMessage,
+        props.durationMs,
+        props.createdAt,
       ],
     );
     return log;
   }
 
   async findById(logId: string): Promise<IntegrationLog | null> {
-    const row = await queryOne<LogDbRow>(
-      `SELECT * FROM "${Table.IntegrationLog}" WHERE "logId" = $1`,
-      [logId],
-    );
+    const row = await queryOne<LogDbRow>(`SELECT * FROM "${Table.IntegrationLog}" WHERE "logId" = $1`, [logId]);
     if (!row) return null;
     return IntegrationLog.reconstitute(this.mapRowToProps(row));
   }
 
-  async findByIntegration(integrationId: string, filters?: { status?: LogStatus; limit?: number; offset?: number }): Promise<{ data: IntegrationLog[]; total: number }> {
+  async findByIntegration(
+    integrationId: string,
+    filters?: { status?: LogStatus; limit?: number; offset?: number },
+  ): Promise<{ data: IntegrationLog[]; total: number }> {
     let sql = `SELECT * FROM "${Table.IntegrationLog}" WHERE "integrationId" = $1`;
     const params: unknown[] = [integrationId];
     if (filters?.status) {
@@ -65,7 +74,7 @@ export class IntegrationLogRepositoryImpl implements IntegrationLogRepository {
 
     const rows = await query<LogDbRow[]>(sql, params as unknown[]);
     return {
-      data: (rows ?? []).map((r) => IntegrationLog.reconstitute(this.mapRowToProps(r))),
+      data: (rows ?? []).map(r => IntegrationLog.reconstitute(this.mapRowToProps(r))),
       total,
     };
   }
@@ -75,14 +84,11 @@ export class IntegrationLogRepositoryImpl implements IntegrationLogRepository {
       `SELECT * FROM "${Table.IntegrationLog}" WHERE "subscriptionId" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
       [subscriptionId, limit],
     );
-    return (rows ?? []).map((r) => IntegrationLog.reconstitute(this.mapRowToProps(r)));
+    return (rows ?? []).map(r => IntegrationLog.reconstitute(this.mapRowToProps(r)));
   }
 
   async deleteByIntegration(integrationId: string): Promise<boolean> {
-    await query(
-      `DELETE FROM "${Table.IntegrationLog}" WHERE "integrationId" = $1`,
-      [integrationId],
-    );
+    await query(`DELETE FROM "${Table.IntegrationLog}" WHERE "integrationId" = $1`, [integrationId]);
     return true;
   }
 
@@ -95,7 +101,9 @@ export class IntegrationLogRepositoryImpl implements IntegrationLogRepository {
       targetAction: row.targetAction,
       status: row.status as LogStatus,
       requestPayload: row.requestPayload
-        ? (typeof row.requestPayload === 'string' ? JSON.parse(row.requestPayload) : row.requestPayload)
+        ? typeof row.requestPayload === 'string'
+          ? JSON.parse(row.requestPayload)
+          : row.requestPayload
         : null,
       responseStatus: row.responseStatus,
       responseBody: row.responseBody,

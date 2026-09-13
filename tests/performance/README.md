@@ -7,11 +7,13 @@ Load, stress, and spike tests for the CommerceFull platform using [k6](https://k
 ### Install k6
 
 **macOS (Homebrew):**
+
 ```bash
 brew install k6
 ```
 
 **Linux:**
+
 ```bash
 sudo gpg -k
 sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A36442D57D3C9381F6C85E878
@@ -21,6 +23,7 @@ sudo apt install k6
 ```
 
 **Docker (no install):**
+
 ```bash
 docker run --rm -i --network host grafana/k6 run - < tests/performance/smoke.js
 ```
@@ -36,19 +39,19 @@ yarn dev         # Start the dev server
 
 ## Test Suites
 
-| File | Type | VUs | Duration | Description |
-|---|---|---|---|---|
-| `smoke.js` | Smoke | 1 | ~10s | Verify server is up and core endpoints respond |
-| `load-product-browse.js` | Load | 20→50 | ~3.5m | Product browsing, search, categories |
-| `load-basket.js` | Load | 10→30 | ~3m | Basket CRUD operations |
-| `load-auth.js` | Load | 10→25 | ~3m | Customer login + authenticated endpoints |
-| `load-checkout.js` | Load | 10→20 | ~3m | Checkout initiation + fulfillment options |
-| `load-merchant.js` | Load | 5→15 | ~3m | Merchant dashboard API (products, orders, analytics) |
-| `load-order-complete.js` | Load | 5→10 | ~4.5m | Full purchase flow: basket→checkout→shipping→payment→complete |
-| `load-coupon.js` | Load | 10→25 | ~3m | Coupon validation, basket coupon apply/remove |
-| `load-storefront.js` | Load | 15→40 | ~5m | Server-rendered EJS pages (home, PLP, PDP, search, content) |
-| `stress.js` | Stress | 50→400 | ~12m | Progressive load to find breaking point |
-| `spike.js` | Spike | 10→300 | ~3.5m | Sudden traffic burst (flash sale simulation) |
+| File                     | Type   | VUs    | Duration | Description                                                   |
+| ------------------------ | ------ | ------ | -------- | ------------------------------------------------------------- |
+| `smoke.js`               | Smoke  | 1      | ~10s     | Verify server is up and core endpoints respond                |
+| `load-product-browse.js` | Load   | 20→50  | ~3.5m    | Product browsing, search, categories                          |
+| `load-basket.js`         | Load   | 10→30  | ~3m      | Basket CRUD operations                                        |
+| `load-auth.js`           | Load   | 10→25  | ~3m      | Customer login + authenticated endpoints                      |
+| `load-checkout.js`       | Load   | 10→20  | ~3m      | Checkout initiation + fulfillment options                     |
+| `load-merchant.js`       | Load   | 5→15   | ~3m      | Merchant dashboard API (products, orders, analytics)          |
+| `load-order-complete.js` | Load   | 5→10   | ~4.5m    | Full purchase flow: basket→checkout→shipping→payment→complete |
+| `load-coupon.js`         | Load   | 10→25  | ~3m      | Coupon validation, basket coupon apply/remove                 |
+| `load-storefront.js`     | Load   | 15→40  | ~5m      | Server-rendered EJS pages (home, PLP, PDP, search, content)   |
+| `stress.js`              | Stress | 50→400 | ~12m     | Progressive load to find breaking point                       |
+| `spike.js`               | Spike  | 10→300 | ~3.5m    | Sudden traffic burst (flash sale simulation)                  |
 
 ## Running Tests
 
@@ -101,13 +104,13 @@ docker run --rm -i --network host grafana/k6 run - < tests/performance/smoke.js
 
 Environment variables (all optional, have sensible defaults):
 
-| Variable | Default | Description |
-|---|---|---|
-| `BASE_URL` | `http://localhost:3000` | Target server URL |
-| `TEST_EMAIL` | `user@example.com` | Customer test email |
-| `TEST_PASSWORD` | `password123` | Customer test password |
-| `TEST_MERCHANT_EMAIL` | `merchant@example.com` | Merchant test email |
-| `TEST_MERCHANT_PASSWORD` | `password123` | Merchant test password |
+| Variable                 | Default                 | Description            |
+| ------------------------ | ----------------------- | ---------------------- |
+| `BASE_URL`               | `http://localhost:3000` | Target server URL      |
+| `TEST_EMAIL`             | `user@example.com`      | Customer test email    |
+| `TEST_PASSWORD`          | `password123`           | Customer test password |
+| `TEST_MERCHANT_EMAIL`    | `merchant@example.com`  | Merchant test email    |
+| `TEST_MERCHANT_PASSWORD` | `password123`           | Merchant test password |
 
 ## Interpreting Results
 
@@ -142,31 +145,37 @@ k6 run --out influxdb=http://localhost:8086/k6 tests/performance/stress.js
 ## Test Flow Diagrams
 
 ### Product Browsing Flow
+
 ```
 GET /customer/products → GET /customer/products/search → GET /customer/products/featured → GET /customer/categories → GET /customer/products/search/suggestions
 ```
 
 ### Basket Flow
+
 ```
 POST /customer/basket → GET /customer/basket/:id → GET /customer/basket/:id/summary → POST /customer/basket/:id/items → GET /customer/basket/:id → DELETE /customer/basket/:id
 ```
 
 ### Checkout Flow
+
 ```
 GET /customer/checkout/payment-methods → GET /customer/checkout/pickup-locations → POST /customer/checkout → GET /customer/checkout/:id/fulfillment-options → GET /customer/checkout/:id/shipping-methods → GET /customer/checkout/:id
 ```
 
 ### Auth Flow
+
 ```
 POST /customer/identity/token → GET /customer/basket/me → GET /customer/order → POST /customer/identity/refresh
 ```
 
 ### Merchant Flow
+
 ```
 POST /business/auth/login → GET /business/products → GET /business/orders → GET /business/customers → GET /business/analytics/sales/dashboard
 ```
 
 ### Order Completion Flow
+
 ```
 POST /customer/basket → POST /customer/basket/:id/items → POST /customer/checkout →
 PUT /customer/checkout/:id/fulfillment-method → PUT /customer/checkout/:id/shipping-address →
@@ -176,6 +185,7 @@ POST /customer/checkout/:id/payment-intent → POST /customer/checkout/:id/compl
 ```
 
 ### Coupon Flow
+
 ```
 POST /customer/coupons/validate → GET /customer/coupons/validate/:code →
 POST /customer/basket → POST /customer/basket/:id/items →
@@ -184,6 +194,7 @@ POST /customer/coupons/apply
 ```
 
 ### Storefront Page Rendering Flow
+
 ```
 GET / → GET /products → GET /search?q=… → GET /pages/about-us → GET /pages/:slug → GET /products/:categorySlug/:productId → GET /products/category/:categorySlug
 ```

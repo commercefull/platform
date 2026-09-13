@@ -17,9 +17,15 @@ describe('Basket', () => {
   beforeEach(() => {
     basket = Basket.create({ basketId: 'b1', customerId: 'c1' });
     item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 2, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 2,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
   });
 
@@ -41,9 +47,15 @@ describe('Basket', () => {
   it('should merge same-product items', () => {
     basket.addItem(item);
     const item2 = BasketItem.create({
-      basketItemId: 'i2', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 3, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i2',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 3,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     basket.addItem(item2);
     expect(basket.uniqueItemCount).toBe(1);
@@ -184,9 +196,15 @@ describe('Basket', () => {
 describe('BasketItem', () => {
   it('should create an item (happy path)', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 2, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 2,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     expect(item.basketItemId).toBe('i1');
     expect(item.quantity).toBe(2);
@@ -195,9 +213,15 @@ describe('BasketItem', () => {
 
   it('should update quantity', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 2, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 2,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     item.updateQuantity(5);
     expect(item.quantity).toBe(5);
@@ -205,27 +229,45 @@ describe('BasketItem', () => {
 
   it('should throw on quantity < 1', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 2, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 2,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     expect(() => item.updateQuantity(0)).toThrow();
   });
 
   it('should throw on quantity > 100', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 2, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 2,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     expect(() => item.updateQuantity(101)).toThrow();
   });
 
   it('should increment and decrement quantity', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 5, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 5,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     item.incrementQuantity(3);
     expect(item.quantity).toBe(8);
@@ -235,9 +277,15 @@ describe('BasketItem', () => {
 
   it('should set and remove gift status', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 1, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 1,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     item.setAsGift('Hello!');
     expect(item.isGift).toBe(true);
@@ -249,9 +297,15 @@ describe('BasketItem', () => {
 
   it('should set discount amount', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 2, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 2,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     item.setDiscountAmount(20);
     expect(item.discountAmount).toBe(20);
@@ -260,18 +314,31 @@ describe('BasketItem', () => {
 
   it('should throw on negative discount', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 1, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 1,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     expect(() => item.setDiscountAmount(-5)).toThrow();
   });
 
   it('should check same product', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', productVariantId: 'v1',
-      sku: 'SKU1', name: 'Widget', quantity: 1, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      productVariantId: 'v1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 1,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     expect(item.isSameProduct('p1', 'v1')).toBe(true);
     expect(item.isSameProduct('p1', 'v2')).toBe(false);
@@ -280,18 +347,30 @@ describe('BasketItem', () => {
 
   it('should detect digital type', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Ebook', quantity: 1, unitPrice: Money.create(10, 'USD'),
-      itemType: 'digital', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Ebook',
+      quantity: 1,
+      unitPrice: Money.create(10, 'USD'),
+      itemType: 'digital',
+      isGift: false,
     });
     expect(item.isDigital).toBe(true);
   });
 
   it('should serialize to JSON', () => {
     const item = BasketItem.create({
-      basketItemId: 'i1', basketId: 'b1', productId: 'p1', sku: 'SKU1',
-      name: 'Widget', quantity: 2, unitPrice: Money.create(50, 'USD'),
-      itemType: 'physical', isGift: false,
+      basketItemId: 'i1',
+      basketId: 'b1',
+      productId: 'p1',
+      sku: 'SKU1',
+      name: 'Widget',
+      quantity: 2,
+      unitPrice: Money.create(50, 'USD'),
+      itemType: 'physical',
+      isGift: false,
     });
     const json = item.toJSON();
     expect(json.basketItemId).toBe('i1');

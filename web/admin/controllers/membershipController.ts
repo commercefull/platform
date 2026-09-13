@@ -6,8 +6,13 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import { ManageMembershipPlansUseCase, ManageMembershipBenefitsUseCase, ManageMembershipSubscriptionsUseCase } from '../../../modules/membership/application/useCases/ManageMembership';
+import {
+  ManageMembershipPlansUseCase,
+  ManageMembershipBenefitsUseCase,
+  ManageMembershipSubscriptionsUseCase,
+} from '../../../modules/membership/application/useCases/ManageMembership';
 import { adminRespond } from '../../respond';
+import { buildFormObject, FieldConfig } from '../utils/formParsing';
 
 const managePlansUseCase = new ManageMembershipPlansUseCase();
 const manageBenefitsUseCase = new ManageMembershipBenefitsUseCase();
@@ -34,73 +39,54 @@ export const listMembershipPlans = async (req: TypedRequest, res: Response): Pro
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createMembershipPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'programs/membership/plans/create', {
     pageName: 'Create Membership Plan',
   });
-  
 };
+
+const planCreateFields: FieldConfig[] = [
+  { name: 'name' },
+  { name: 'code' },
+  { name: 'description', transform: 'stringOrUndefined', default: null },
+  { name: 'shortDescription', default: null },
+  { name: 'isActive', transform: 'boolTrue' },
+  { name: 'isPublic', transform: 'boolTrue' },
+  { name: 'isDefault', transform: 'boolTrue' },
+  { name: 'priority', transform: 'int', default: 0, falsyValue: 0 },
+  { name: 'level', transform: 'int', default: 1, falsyValue: 1 },
+  { name: 'trialDays', transform: 'int', default: 0, falsyValue: 0 },
+  { name: 'price', transform: 'float' },
+  { name: 'salePrice', transform: 'float', default: null, falsyValue: null },
+  { name: 'setupFee', transform: 'float', default: 0, falsyValue: 0 },
+  { name: 'currency', transform: 'stringOrUndefined', default: 'USD' },
+  { name: 'billingCycle', transform: 'stringOrUndefined', default: 'monthly' },
+  { name: 'billingPeriod', transform: 'int', default: 1, falsyValue: 1 },
+  { name: 'maxMembers', transform: 'int', default: null, falsyValue: null },
+  { name: 'autoRenew', transform: 'boolTrue' },
+  { name: 'duration', transform: 'int', default: null, falsyValue: null },
+  { name: 'gracePeriodsAllowed', transform: 'int', default: 0, falsyValue: 0 },
+  { name: 'gracePeriodDays', transform: 'int', default: 0, falsyValue: 0 },
+  { name: 'membershipImage', default: null },
+  { name: 'publicDetails', default: null },
+  { name: 'privateMeta', default: null },
+  { name: 'visibilityRules', default: null },
+  { name: 'availabilityRules', default: null },
+  { name: 'customFields', default: null },
+  { name: 'createdBy', default: null },
+];
+
+function parsePlanCreateInput(body: RequestBody) {
+  return buildFormObject(body as Record<string, unknown>, planCreateFields);
+}
 
 export const createMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const {
-      name,
-      code,
-      description,
-      _shortDescription,
-      isActive,
-      isPublic,
-      isDefault,
-      priority,
-      level,
-      trialDays,
-      price,
-      salePrice,
-      setupFee,
-      currency,
-      billingCycle,
-      billingPeriod,
-      maxMembers,
-      autoRenew,
-      duration,
-      gracePeriodsAllowed,
-      gracePeriodDays,
-    } = body;
-
-    const plan = await managePlansUseCase.create({
-      name,
-      code,
-      description: description || null,
-      shortDescription: null, // Optional field
-      isActive: isActive === 'true',
-      isPublic: isPublic === 'true',
-      isDefault: isDefault === 'true',
-      priority: priority ? parseInt(priority) : 0,
-      level: level ? parseInt(level) : 1,
-      trialDays: trialDays ? parseInt(trialDays) : 0,
-      price: parseFloat(price),
-      salePrice: salePrice ? parseFloat(salePrice) : null,
-      setupFee: setupFee ? parseFloat(setupFee) : 0,
-      currency: currency || 'USD',
-      billingCycle: billingCycle || 'monthly',
-      billingPeriod: billingPeriod ? parseInt(billingPeriod) : 1,
-      maxMembers: maxMembers ? parseInt(maxMembers) : null,
-      autoRenew: autoRenew === 'true',
-      duration: duration ? parseInt(duration) : null,
-      gracePeriodsAllowed: gracePeriodsAllowed ? parseInt(gracePeriodsAllowed) : 0,
-      gracePeriodDays: gracePeriodDays ? parseInt(gracePeriodDays) : 0,
-      membershipImage: null, // Optional field
-      publicDetails: null, // Optional field
-      privateMeta: null, // Optional field
-      visibilityRules: null, // Optional field
-      availabilityRules: null, // Optional field
-      customFields: null, // Optional field
-      createdBy: null, // Optional field - could be set to current user ID
-    });
+    const plan = await managePlansUseCase.create(
+      parsePlanCreateInput(req.body as RequestBody) as Parameters<typeof managePlansUseCase.create>[0],
+    );
 
     res.redirect(`/hub/membership/plans/${plan.membershipPlanId}?success=Membership plan created successfully`);
   } catch (error: unknown) {
@@ -152,7 +138,6 @@ export const viewMembershipPlan = async (req: TypedRequest, res: Response): Prom
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editMembershipPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -172,57 +157,38 @@ export const editMembershipPlanForm = async (req: TypedRequest, res: Response): 
     pageName: `Edit: ${plan.name}`,
     plan,
   });
-  
 };
+
+const planUpdateFields: FieldConfig[] = [
+  { name: 'name' },
+  { name: 'description', transform: 'stringOrUndefined' },
+  { name: 'shortDescription', transform: 'stringOrUndefined' },
+  { name: 'isActive', transform: 'boolTrue' },
+  { name: 'isPublic', transform: 'boolTrue' },
+  { name: 'isDefault', transform: 'boolTrue' },
+  { name: 'priority', transform: 'int', falsyValue: 0 },
+  { name: 'level', transform: 'int', falsyValue: 1 },
+  { name: 'trialDays', transform: 'int', falsyValue: 0 },
+  { name: 'price', transform: 'float' },
+  { name: 'salePrice', transform: 'float', falsyValue: undefined },
+  { name: 'setupFee', transform: 'float', falsyValue: 0 },
+  { name: 'currency' },
+  { name: 'billingCycle' },
+  { name: 'billingPeriod', transform: 'int', falsyValue: 1 },
+  { name: 'maxMembers', transform: 'int', falsyValue: undefined },
+  { name: 'autoRenew', transform: 'boolTrue' },
+  { name: 'duration', transform: 'int', falsyValue: undefined },
+  { name: 'gracePeriodsAllowed', transform: 'int', falsyValue: 0 },
+  { name: 'gracePeriodDays', transform: 'int', falsyValue: 0 },
+];
+
+function parsePlanUpdates(body: RequestBody): Record<string, unknown> {
+  return buildFormObject(body as Record<string, unknown>, planUpdateFields);
+}
 
 export const updateMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   const { planId } = req.params;
-  const updates: Record<string, unknown> = {};
-
-  const body = req.body as RequestBody;
-  const {
-    name,
-    description,
-    shortDescription,
-    isActive,
-    isPublic,
-    isDefault,
-    priority,
-    level,
-    trialDays,
-    price,
-    salePrice,
-    setupFee,
-    currency,
-    billingCycle,
-    billingPeriod,
-    maxMembers,
-    autoRenew,
-    duration,
-    gracePeriodsAllowed,
-    gracePeriodDays,
-  } = body;
-
-  if (name !== undefined) updates.name = name;
-  if (description !== undefined) updates.description = description || undefined;
-  if (shortDescription !== undefined) updates.shortDescription = shortDescription || undefined;
-  if (isActive !== undefined) updates.isActive = isActive === 'true';
-  if (isPublic !== undefined) updates.isPublic = isPublic === 'true';
-  if (isDefault !== undefined) updates.isDefault = isDefault === 'true';
-  if (priority !== undefined) updates.priority = priority ? parseInt(priority) : 0;
-  if (level !== undefined) updates.level = level ? parseInt(level) : 1;
-  if (trialDays !== undefined) updates.trialDays = trialDays ? parseInt(trialDays) : 0;
-  if (price !== undefined) updates.price = parseFloat(price);
-  if (salePrice !== undefined) updates.salePrice = salePrice ? parseFloat(salePrice) : undefined;
-  if (setupFee !== undefined) updates.setupFee = setupFee ? parseFloat(setupFee) : 0;
-  if (currency !== undefined) updates.currency = currency;
-  if (billingCycle !== undefined) updates.billingCycle = billingCycle;
-  if (billingPeriod !== undefined) updates.billingPeriod = billingPeriod ? parseInt(billingPeriod) : 1;
-  if (maxMembers !== undefined) updates.maxMembers = maxMembers ? parseInt(maxMembers) : undefined;
-  if (autoRenew !== undefined) updates.autoRenew = autoRenew === 'true';
-  if (duration !== undefined) updates.duration = duration ? parseInt(duration) : undefined;
-  if (gracePeriodsAllowed !== undefined) updates.gracePeriodsAllowed = gracePeriodsAllowed ? parseInt(gracePeriodsAllowed) : 0;
-  if (gracePeriodDays !== undefined) updates.gracePeriodDays = gracePeriodDays ? parseInt(gracePeriodDays) : 0;
+  const updates = parsePlanUpdates(req.body as RequestBody);
 
   const plan = await managePlansUseCase.update(planId, updates);
 
@@ -231,7 +197,6 @@ export const updateMembershipPlan = async (req: TypedRequest, res: Response): Pr
   }
 
   res.redirect(`/hub/membership/plans/${planId}?success=Membership plan updated successfully`);
-  
 };
 
 export const activateMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -244,7 +209,6 @@ export const activateMembershipPlan = async (req: TypedRequest, res: Response): 
   }
 
   res.json({ success: true, message: 'Membership plan activated successfully' });
-  
 };
 
 export const deactivateMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -257,7 +221,6 @@ export const deactivateMembershipPlan = async (req: TypedRequest, res: Response)
   }
 
   res.json({ success: true, message: 'Membership plan deactivated successfully' });
-  
 };
 
 export const deleteMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -270,7 +233,6 @@ export const deleteMembershipPlan = async (req: TypedRequest, res: Response): Pr
   }
 
   res.json({ success: true, message: 'Membership plan deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -302,7 +264,6 @@ export const listMembershipBenefits = async (req: TypedRequest, res: Response): 
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -330,7 +291,6 @@ export const listMemberships = async (req: TypedRequest, res: Response): Promise
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -392,7 +352,6 @@ export const bulkMembershipOperations = async (req: TypedRequest, res: Response)
     message: `Bulk operation completed: ${successCount} successful, ${failureCount} failed`,
     results,
   });
-  
 };
 
 export const membershipUpgradeDowngrade = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -447,7 +406,6 @@ export const membershipUpgradeDowngrade = async (req: TypedRequest, res: Respons
       prorated: prorate && isUpgrade,
     },
   });
-  
 };
 
 export const membershipAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -486,7 +444,6 @@ export const membershipAnalytics = async (req: TypedRequest, res: Response): Pro
     stats,
     tiers,
   });
-  
 };
 
 // ============================================================================

@@ -1,4 +1,4 @@
-import { GetCustomerTicketsUseCase} from './GetCustomerTickets';
+import { GetCustomerTicketsUseCase } from './GetCustomerTickets';
 
 describe('GetCustomerTicketsUseCase', () => {
   let useCase: GetCustomerTicketsUseCase;
@@ -7,7 +7,16 @@ describe('GetCustomerTicketsUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findTickets: jest.fn().mockResolvedValue([
-        { ticketId: 't1', ticketNumber: 'TK-001', subject: 'Help', type: 'support', priority: 'medium', status: 'open', createdAt: new Date(), commentCount: 2 },
+        {
+          ticketId: 't1',
+          ticketNumber: 'TK-001',
+          subject: 'Help',
+          type: 'support',
+          priority: 'medium',
+          status: 'open',
+          createdAt: new Date(),
+          commentCount: 2,
+        },
       ]),
       countTickets: jest.fn().mockResolvedValue(1),
     };
@@ -26,10 +35,10 @@ describe('GetCustomerTicketsUseCase', () => {
   it('should apply status and type filters', async () => {
     await useCase.execute({ customerId: 'c1', status: 'open', type: 'support' });
 
-    expect(mockRepo.findTickets).toHaveBeenCalledWith(
-      expect.objectContaining({ customerId: 'c1', status: 'open', type: 'support' }),
-      { page: 1, limit: 10 },
-    );
+    expect(mockRepo.findTickets).toHaveBeenCalledWith(expect.objectContaining({ customerId: 'c1', status: 'open', type: 'support' }), {
+      page: 1,
+      limit: 10,
+    });
   });
 
   it('should use default pagination', async () => {

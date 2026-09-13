@@ -22,8 +22,6 @@ export const TEST_MERCHANT = {
 // Setup Functions
 // ============================================================================
 
-
-
 /**
  * Setup function for identity integration tests
  */

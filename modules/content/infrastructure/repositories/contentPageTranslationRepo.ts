@@ -41,10 +41,7 @@ export type PageTranslationUpdateParams = Partial<
 
 export class ContentPageTranslationRepo {
   async findTranslationById(id: string): Promise<ContentPageTranslation | null> {
-    return queryOne<ContentPageTranslation>(
-      'SELECT * FROM "contentPageTranslation" WHERE "contentPageTranslationId" = $1',
-      [id],
-    );
+    return queryOne<ContentPageTranslation>('SELECT * FROM "contentPageTranslation" WHERE "contentPageTranslationId" = $1', [id]);
   }
 
   async findTranslationsByPageId(pageId: string): Promise<ContentPageTranslation[]> {
@@ -56,10 +53,10 @@ export class ContentPageTranslationRepo {
   }
 
   async findTranslationByPageAndLocale(pageId: string, localeId: string): Promise<ContentPageTranslation | null> {
-    return queryOne<ContentPageTranslation>(
-      'SELECT * FROM "contentPageTranslation" WHERE "contentPageId" = $1 AND "localeId" = $2',
-      [pageId, localeId],
-    );
+    return queryOne<ContentPageTranslation>('SELECT * FROM "contentPageTranslation" WHERE "contentPageId" = $1 AND "localeId" = $2', [
+      pageId,
+      localeId,
+    ]);
   }
 
   async findPublishedTranslationsByPageId(pageId: string): Promise<ContentPageTranslation[]> {

@@ -1,9 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import {
-  TEST_CONTENT_PAGE_ID,
-  TEST_CONTENT_CATEGORY_ID,
-  ADMIN_CREDENTIALS,
-} from '../testConstants';
+import { TEST_CONTENT_PAGE_ID, TEST_CONTENT_CATEGORY_ID, ADMIN_CREDENTIALS } from '../testConstants';
 
 const createClient = () =>
   axios.create({
@@ -102,20 +98,18 @@ describe('Content Categorization API', () => {
   });
 
   it('should return 404 for non-existent page', async () => {
-    const response = await client.get(
-      '/business/content/pages/00000000-0000-0000-0000-000000000001/categories',
-      { headers: { Authorization: `Bearer ${adminToken}` } },
-    );
+    const response = await client.get('/business/content/pages/00000000-0000-0000-0000-000000000001/categories', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
 
     expect(response.status).toBe(404);
   });
 
   it('should remove a page from a category', async () => {
     if (!testContentPageId || !testCategoryId) return;
-    const response = await client.delete(
-      `/business/content/pages/${testContentPageId}/categories/${testCategoryId}`,
-      { headers: { Authorization: `Bearer ${adminToken}` } },
-    );
+    const response = await client.delete(`/business/content/pages/${testContentPageId}/categories/${testCategoryId}`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
 
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
@@ -124,10 +118,11 @@ describe('Content Categorization API', () => {
   afterAll(async () => {
     // Remove categorization if created during tests
     if (testContentPageId && testCategoryId && adminToken) {
-      await client.delete(
-        `/business/content/pages/${testContentPageId}/categories/${testCategoryId}`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      ).catch(() => {});
+      await client
+        .delete(`/business/content/pages/${testContentPageId}/categories/${testCategoryId}`, {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        })
+        .catch(() => {});
     }
   });
 });

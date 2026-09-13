@@ -55,7 +55,9 @@ export class SocialAccountNotLinkedError extends AppError {
 
 export class CannotUnlinkOnlyLoginMethodError extends AppError {
   constructor() {
-    super('Cannot unlink the only login method. Please add another login method first.', 400, { code: 'identity.cannot_unlink_only_login_method' });
+    super('Cannot unlink the only login method. Please add another login method first.', 400, {
+      code: 'identity.cannot_unlink_only_login_method',
+    });
   }
 }
 

@@ -8,10 +8,7 @@ import { OidcProviderRepository } from '../../domain/repositories/SsoProviderRep
 
 export class OidcProviderRepositoryImpl implements OidcProviderRepository {
   async findById(providerId: string): Promise<OidcProvider | null> {
-    const row = await queryOne<Record<string, unknown>>(
-      'SELECT * FROM "oidcProvider" WHERE "providerId" = $1',
-      [providerId],
-    );
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "oidcProvider" WHERE "providerId" = $1', [providerId]);
     return row ? this.mapToEntity(row) : null;
   }
 
@@ -33,10 +30,9 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
 
   async save(provider: OidcProvider): Promise<OidcProvider> {
     const props = this.getProps(provider);
-    const existing = await queryOne<Record<string, unknown>>(
-      'SELECT "providerId" FROM "oidcProvider" WHERE "providerId" = $1',
-      [props.providerId],
-    );
+    const existing = await queryOne<Record<string, unknown>>('SELECT "providerId" FROM "oidcProvider" WHERE "providerId" = $1', [
+      props.providerId,
+    ]);
 
     if (existing) {
       await query(
@@ -48,11 +44,21 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
           "jwksUri" = $16, "updatedAt" = NOW()
         WHERE "providerId" = $1`,
         [
-          props.providerId, props.organizationId, props.name, props.issuerUrl,
-          props.clientId, props.clientSecret, JSON.stringify(props.scopes),
-          props.redirectUri, props.usePkce, JSON.stringify(props.claimMapping),
-          props.isActive, props.useDiscovery,
-          props.authorizationEndpoint, props.tokenEndpoint, props.userinfoEndpoint,
+          props.providerId,
+          props.organizationId,
+          props.name,
+          props.issuerUrl,
+          props.clientId,
+          props.clientSecret,
+          JSON.stringify(props.scopes),
+          props.redirectUri,
+          props.usePkce,
+          JSON.stringify(props.claimMapping),
+          props.isActive,
+          props.useDiscovery,
+          props.authorizationEndpoint,
+          props.tokenEndpoint,
+          props.userinfoEndpoint,
           props.jwksUri,
         ],
       );
@@ -65,11 +71,21 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
           "userinfoEndpoint", "jwksUri", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW())`,
         [
-          props.providerId, props.organizationId, props.name, props.issuerUrl,
-          props.clientId, props.clientSecret, JSON.stringify(props.scopes),
-          props.redirectUri, props.usePkce, JSON.stringify(props.claimMapping),
-          props.isActive, props.useDiscovery,
-          props.authorizationEndpoint, props.tokenEndpoint, props.userinfoEndpoint,
+          props.providerId,
+          props.organizationId,
+          props.name,
+          props.issuerUrl,
+          props.clientId,
+          props.clientSecret,
+          JSON.stringify(props.scopes),
+          props.redirectUri,
+          props.usePkce,
+          JSON.stringify(props.claimMapping),
+          props.isActive,
+          props.useDiscovery,
+          props.authorizationEndpoint,
+          props.tokenEndpoint,
+          props.userinfoEndpoint,
           props.jwksUri,
         ],
       );

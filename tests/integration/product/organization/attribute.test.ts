@@ -1,8 +1,6 @@
 import { AxiosInstance } from 'axios';
 import { cleanupProductTests, setupProductTests, testAttribute } from '../testUtils';
 
-;
-
 describe('Attribute Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;

@@ -115,16 +115,19 @@ export class ManageThemesUseCase {
     return toThemeResponse(saved);
   }
 
-  async update(themeId: string, updates: {
-    name?: string;
-    description?: string;
-    settingsSchema?: ThemeSettingsSchema;
-    defaultSettings?: Record<string, string | number | boolean>;
-    layout?: ThemeLayoutConfig;
-    components?: ThemeComponentConfig;
-    assets?: ThemeAssetConfig;
-    tags?: string[];
-  }): Promise<ThemeResponse> {
+  async update(
+    themeId: string,
+    updates: {
+      name?: string;
+      description?: string;
+      settingsSchema?: ThemeSettingsSchema;
+      defaultSettings?: Record<string, string | number | boolean>;
+      layout?: ThemeLayoutConfig;
+      components?: ThemeComponentConfig;
+      assets?: ThemeAssetConfig;
+      tags?: string[];
+    },
+  ): Promise<ThemeResponse> {
     const theme = await this.themeRepository.findById(themeId);
     if (!theme) throw new ThemeNotFoundError(themeId);
 
@@ -172,12 +175,7 @@ export class ManageThemesUseCase {
     return toThemeResponse(theme);
   }
 
-  async list(filters?: {
-    status?: string;
-    type?: string;
-    tags?: string[];
-    organizationId?: string;
-  }): Promise<ThemeResponse[]> {
+  async list(filters?: { status?: string; type?: string; tags?: string[]; organizationId?: string }): Promise<ThemeResponse[]> {
     const themes = await this.themeRepository.findAll(filters);
     return themes.map(toThemeResponse);
   }
@@ -325,15 +323,18 @@ export class ManageThemeOverridesUseCase {
     return toOverrideResponse(saved);
   }
 
-  async update(overrideId: string, updates: {
-    settings?: Record<string, string | number | boolean>;
-    customCss?: string;
-    customLogoUrl?: string;
-    customFaviconUrl?: string;
-    customBannerUrl?: string;
-    customHeadTags?: string[];
-    customBodyAttributes?: Record<string, string>;
-  }): Promise<ThemeOverrideResponse> {
+  async update(
+    overrideId: string,
+    updates: {
+      settings?: Record<string, string | number | boolean>;
+      customCss?: string;
+      customLogoUrl?: string;
+      customFaviconUrl?: string;
+      customBannerUrl?: string;
+      customHeadTags?: string[];
+      customBodyAttributes?: Record<string, string>;
+    },
+  ): Promise<ThemeOverrideResponse> {
     const override = await this.themeRepository.findOverrideById(overrideId);
     if (!override) throw new ThemeOverrideNotFoundError(overrideId);
 
@@ -399,11 +400,7 @@ export class AssignThemeToStoreUseCase {
     if (!theme) throw new ThemeNotFoundError(command.themeId);
     if (!theme.isActive()) throw new ThemeValidationError(`Theme '${theme.slug}' is not active`);
 
-    await this.themeRepository.assignThemeToStore(
-      command.storeId,
-      command.themeId,
-      command.organizationId,
-    );
+    await this.themeRepository.assignThemeToStore(command.storeId, command.themeId, command.organizationId);
 
     eventBus.emit('theme.assigned', { storeId: command.storeId, themeId: command.themeId });
   }

@@ -14,10 +14,7 @@ import { OidcProvider, OidcClaimMapping } from '../../domain/entities/OidcProvid
 import { SamlProviderRepository, OidcProviderRepository } from '../../domain/repositories/SsoProviderRepository';
 import { SamlAssertionParser, SamlUserInfo } from '../../domain/services/SamlAssertionParser';
 import { OidcTokenExchange, OidcUserInfo } from '../../domain/services/OidcTokenExchange';
-import {
-  SsoProviderNotFoundError,
-  SsoValidationError,
-} from '../../domain/errors/SsoErrors';
+import { SsoProviderNotFoundError, SsoValidationError } from '../../domain/errors/SsoErrors';
 import { NotImplementedError } from '../../domain/errors/IdentityErrors';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
 import { generateAccessToken } from '../../utils/jwtHelpers';
@@ -61,18 +58,21 @@ export class ManageSamlProviderUseCase {
     return this.repo.findByOrganizationId(organizationId);
   }
 
-  async update(providerId: string, updates: {
-    name?: string;
-    entityId?: string;
-    ssoUrl?: string;
-    sloUrl?: string;
-    certificate?: string;
-    spEntityId?: string;
-    acsUrl?: string;
-    binding?: 'redirect' | 'post';
-    nameIdFormat?: 'unspecified' | 'emailAddress' | 'persistent' | 'transient';
-    signAuthnRequest?: boolean;
-  }): Promise<SamlProvider> {
+  async update(
+    providerId: string,
+    updates: {
+      name?: string;
+      entityId?: string;
+      ssoUrl?: string;
+      sloUrl?: string;
+      certificate?: string;
+      spEntityId?: string;
+      acsUrl?: string;
+      binding?: 'redirect' | 'post';
+      nameIdFormat?: 'unspecified' | 'emailAddress' | 'persistent' | 'transient';
+      signAuthnRequest?: boolean;
+    },
+  ): Promise<SamlProvider> {
     const provider = await this.repo.findById(providerId);
     if (!provider) throw new SsoProviderNotFoundError(providerId);
     provider.updateMetadata(updates);
@@ -145,20 +145,23 @@ export class ManageOidcProviderUseCase {
     return this.repo.findByOrganizationId(organizationId);
   }
 
-  async update(providerId: string, updates: {
-    name?: string;
-    issuerUrl?: string;
-    clientId?: string;
-    clientSecret?: string;
-    scopes?: string[];
-    redirectUri?: string;
-    usePkce?: boolean;
-    useDiscovery?: boolean;
-    authorizationEndpoint?: string;
-    tokenEndpoint?: string;
-    userinfoEndpoint?: string;
-    jwksUri?: string;
-  }): Promise<OidcProvider> {
+  async update(
+    providerId: string,
+    updates: {
+      name?: string;
+      issuerUrl?: string;
+      clientId?: string;
+      clientSecret?: string;
+      scopes?: string[];
+      redirectUri?: string;
+      usePkce?: boolean;
+      useDiscovery?: boolean;
+      authorizationEndpoint?: string;
+      tokenEndpoint?: string;
+      userinfoEndpoint?: string;
+      jwksUri?: string;
+    },
+  ): Promise<OidcProvider> {
     const provider = await this.repo.findById(providerId);
     if (!provider) throw new SsoProviderNotFoundError(providerId);
     provider.updateConfig(updates);
@@ -283,12 +286,7 @@ export class SsoLoginUseCase {
   /**
    * Handle OIDC callback — exchange code for tokens, fetch userinfo, issue JWT.
    */
-  async handleOidcCallback(
-    providerId: string,
-    code: string,
-    codeVerifier?: string,
-    ip?: string,
-  ): Promise<SsoLoginResult> {
+  async handleOidcCallback(providerId: string, code: string, codeVerifier?: string, ip?: string): Promise<SsoLoginResult> {
     const provider = await this.oidcRepo.findById(providerId);
     if (!provider) throw new SsoProviderNotFoundError(providerId);
     if (!provider.isActive) throw new SsoValidationError('OIDC provider is not active');

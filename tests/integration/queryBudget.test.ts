@@ -50,9 +50,13 @@ describe('Endpoint query-count budget tests', () => {
 
   describe('Basket endpoints', () => {
     it('POST /basket — get or create basket ≤ 8 queries', async () => {
-      const res = await client.post('/basket', {}, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      });
+      const res = await client.post(
+        '/basket',
+        {},
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
       expect([200, 201]).toContain(res.status);
       expectQueryBudget(res, 8, 'POST /basket');
     });
@@ -71,8 +75,7 @@ describe('Endpoint query-count budget tests', () => {
       const listRes = await client.get('/business/orders?limit=1', {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
-      const orderId = listRes.data.data?.orders?.[0]?.orderId
-        ?? listRes.data.data?.[0]?.orderId;
+      const orderId = listRes.data.data?.orders?.[0]?.orderId ?? listRes.data.data?.[0]?.orderId;
       if (!orderId) return; // skip if no seeded data
 
       const res = await client.get(`/business/orders/${orderId}`, {

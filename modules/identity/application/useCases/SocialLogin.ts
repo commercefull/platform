@@ -7,7 +7,12 @@
 import { eventBus } from '../../../../libs/events/eventBus';
 import type { SocialAccountRepo } from '../../infrastructure/repositories/socialAccountRepo';
 import { SocialProvider, UserType, SocialProfileData } from '../../domain/entities/SocialAccount';
-import { EmailRequiredError, SocialAccountAlreadyLinkedError, SocialAccountNotLinkedError, CannotUnlinkOnlyLoginMethodError } from '../../domain/errors/IdentityErrors';
+import {
+  EmailRequiredError,
+  SocialAccountAlreadyLinkedError,
+  SocialAccountNotLinkedError,
+  CannotUnlinkOnlyLoginMethodError,
+} from '../../domain/errors/IdentityErrors';
 
 // ============================================================================
 // Commands

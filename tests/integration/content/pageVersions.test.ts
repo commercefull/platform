@@ -1,8 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import {
-  TEST_CONTENT_PAGE_ID,
-  ADMIN_CREDENTIALS,
-} from '../testConstants';
+import { TEST_CONTENT_PAGE_ID, ADMIN_CREDENTIALS } from '../testConstants';
 
 const createClient = () =>
   axios.create({
@@ -81,10 +78,9 @@ describe('Content Page Versions API', () => {
   });
 
   it('should return 404 for non-existent page versions', async () => {
-    const response = await client.get(
-      '/business/content/pages/00000000-0000-0000-0000-000000000001/versions',
-      { headers: { Authorization: `Bearer ${adminToken}` } },
-    );
+    const response = await client.get('/business/content/pages/00000000-0000-0000-0000-000000000001/versions', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
 
     expect(response.status).toBe(404);
   });

@@ -17,11 +17,44 @@ describe('GetNavigationWithItemsUseCase', () => {
 
   it('should get navigation by ID with items as tree', async () => {
     mockRepo.findNavigationById.mockResolvedValue({
-      contentNavigationId: 'n1', name: 'Main', slug: 'main', description: null, location: 'header', isActive: true,
+      contentNavigationId: 'n1',
+      name: 'Main',
+      slug: 'main',
+      description: null,
+      location: 'header',
+      isActive: true,
     });
     mockRepo.findAllNavigationItems.mockResolvedValue([
-      { contentNavigationItemId: 'ni1', navigationId: 'n1', parentId: null, title: 'Home', type: 'url', url: '/', contentPageId: null, targetSlug: null, icon: null, cssClasses: null, openInNewTab: false, isActive: true, sortOrder: 0 },
-      { contentNavigationItemId: 'ni2', navigationId: 'n1', parentId: 'ni1', title: 'About', type: 'url', url: '/about', contentPageId: null, targetSlug: null, icon: null, cssClasses: null, openInNewTab: false, isActive: true, sortOrder: 0 },
+      {
+        contentNavigationItemId: 'ni1',
+        navigationId: 'n1',
+        parentId: null,
+        title: 'Home',
+        type: 'url',
+        url: '/',
+        contentPageId: null,
+        targetSlug: null,
+        icon: null,
+        cssClasses: null,
+        openInNewTab: false,
+        isActive: true,
+        sortOrder: 0,
+      },
+      {
+        contentNavigationItemId: 'ni2',
+        navigationId: 'n1',
+        parentId: 'ni1',
+        title: 'About',
+        type: 'url',
+        url: '/about',
+        contentPageId: null,
+        targetSlug: null,
+        icon: null,
+        cssClasses: null,
+        openInNewTab: false,
+        isActive: true,
+        sortOrder: 0,
+      },
     ]);
 
     const result = await useCase.execute(new GetNavigationWithItemsQuery('n1'));
@@ -46,11 +79,44 @@ describe('GetNavigationWithItemsUseCase', () => {
 
   it('should filter inactive items by default', async () => {
     mockRepo.findNavigationById.mockResolvedValue({
-      contentNavigationId: 'n1', name: 'Main', slug: 'main', description: null, location: null, isActive: true,
+      contentNavigationId: 'n1',
+      name: 'Main',
+      slug: 'main',
+      description: null,
+      location: null,
+      isActive: true,
     });
     mockRepo.findAllNavigationItems.mockResolvedValue([
-      { contentNavigationItemId: 'ni1', navigationId: 'n1', parentId: null, title: 'Active', type: 'url', url: '/', contentPageId: null, targetSlug: null, icon: null, cssClasses: null, openInNewTab: false, isActive: true, sortOrder: 0 },
-      { contentNavigationItemId: 'ni2', navigationId: 'n1', parentId: null, title: 'Inactive', type: 'url', url: '/hidden', contentPageId: null, targetSlug: null, icon: null, cssClasses: null, openInNewTab: false, isActive: false, sortOrder: 1 },
+      {
+        contentNavigationItemId: 'ni1',
+        navigationId: 'n1',
+        parentId: null,
+        title: 'Active',
+        type: 'url',
+        url: '/',
+        contentPageId: null,
+        targetSlug: null,
+        icon: null,
+        cssClasses: null,
+        openInNewTab: false,
+        isActive: true,
+        sortOrder: 0,
+      },
+      {
+        contentNavigationItemId: 'ni2',
+        navigationId: 'n1',
+        parentId: null,
+        title: 'Inactive',
+        type: 'url',
+        url: '/hidden',
+        contentPageId: null,
+        targetSlug: null,
+        icon: null,
+        cssClasses: null,
+        openInNewTab: false,
+        isActive: false,
+        sortOrder: 1,
+      },
     ]);
 
     const result = await useCase.execute(new GetNavigationWithItemsQuery('n1'));

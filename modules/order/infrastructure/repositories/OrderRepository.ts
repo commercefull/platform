@@ -5,10 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
-import {
-  OrderRepository as IOrderRepository,
-  OrderFilters,
-} from '../../domain/repositories/OrderRepository';
+import { OrderRepository as IOrderRepository, OrderFilters } from '../../domain/repositories/OrderRepository';
 import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 import { Order } from '../../domain/entities/Order';
 import { OrderItem } from '../../domain/entities/OrderItem';
@@ -17,7 +14,12 @@ import { Money } from '../../domain/valueObjects/Money';
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
-import { Order as DbOrder, OrderItem as DbOrderItem, OrderAddress as DbOrderAddress, OrderStatusHistory as DbOrderStatusHistory } from '../../../../libs/db/types';
+import {
+  Order as DbOrder,
+  OrderItem as DbOrderItem,
+  OrderAddress as DbOrderAddress,
+  OrderStatusHistory as DbOrderStatusHistory,
+} from '../../../../libs/db/types';
 
 export class OrderRepo implements IOrderRepository {
   async findById(orderId: string): Promise<Order | null> {
@@ -32,9 +34,7 @@ export class OrderRepo implements IOrderRepository {
   }
 
   async findByOrderNumber(orderNumber: string): Promise<Order | null> {
-    const row = await queryOne<DbOrder>('SELECT * FROM "order" WHERE "orderNumber" = $1 AND "deletedAt" IS NULL', [
-      orderNumber,
-    ]);
+    const row = await queryOne<DbOrder>('SELECT * FROM "order" WHERE "orderNumber" = $1 AND "deletedAt" IS NULL', [orderNumber]);
     if (!row) return null;
 
     const items = await this.getOrderItems(row.orderId);
@@ -479,7 +479,9 @@ export class OrderRepo implements IOrderRepository {
     }));
   }
 
-  async getPaymentStatusHistory(orderId: string): Promise<Array<{ orderId: string; paymentStatus: string; transactionId?: string; createdAt: Date }>> {
+  async getPaymentStatusHistory(
+    orderId: string,
+  ): Promise<Array<{ orderId: string; paymentStatus: string; transactionId?: string; createdAt: Date }>> {
     const rows = await query<Array<{ orderId: string; paymentStatus: string; transactionId: string | null; createdAt: string }>>(
       `SELECT "orderId", "paymentStatus", "transactionId", "createdAt" FROM "orderPaymentHistory"
        WHERE "orderId" = $1 ORDER BY "createdAt" DESC`,
@@ -542,7 +544,9 @@ export class OrderRepo implements IOrderRepository {
   }
 
   private async syncItems(order: Order): Promise<void> {
-    const existingItems = await query<Array<{ orderItemId: string }>>('SELECT "orderItemId" FROM "orderItem" WHERE "orderId" = $1', [order.orderId]);
+    const existingItems = await query<Array<{ orderItemId: string }>>('SELECT "orderItemId" FROM "orderItem" WHERE "orderId" = $1', [
+      order.orderId,
+    ]);
     const existingIds = new Set((existingItems || []).map(i => i.orderItemId));
     const itemsToKeep = new Set<string>();
 
@@ -628,12 +632,7 @@ export class OrderRepo implements IOrderRepository {
     };
   }
 
-  private mapToOrder(
-    row: DbOrder,
-    items: OrderItem[],
-    shippingAddress: OrderAddress | null,
-    billingAddress: OrderAddress | null,
-  ): Order {
+  private mapToOrder(row: DbOrder, items: OrderItem[], shippingAddress: OrderAddress | null, billingAddress: OrderAddress | null): Order {
     const currency = row.currencyCode || 'USD';
 
     return Order.reconstitute({
@@ -680,7 +679,9 @@ export class OrderRepo implements IOrderRepository {
       parentOrderId: row.parentOrderId ?? undefined,
       items,
       tags: row.tags ? (typeof row.tags === 'string' ? JSON.parse(row.tags) : row.tags) : [],
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata) as Record<string, unknown> : undefined,
+      metadata: row.metadata
+        ? ((typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata) as Record<string, unknown>)
+        : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
       deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined,
@@ -718,7 +719,9 @@ export class OrderRepo implements IOrderRepository {
           ? JSON.parse(row.subscriptionInfo as string)
           : row.subscriptionInfo
         : undefined,
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata) as Record<string, unknown> : undefined,
+      metadata: row.metadata
+        ? ((typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata) as Record<string, unknown>)
+        : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

@@ -32,9 +32,7 @@ interface ConfirmReservationRepositoryPort {
 }
 
 export class ConfirmReservationUseCase {
-  constructor(
-    private readonly inventoryRepository: ConfirmReservationRepositoryPort,
-  ) {}
+  constructor(private readonly inventoryRepository: ConfirmReservationRepositoryPort) {}
 
   async execute(input: ConfirmReservationInput): Promise<ConfirmReservationOutput> {
     const reservation = await this.inventoryRepository.findReservationById(input.reservationId);

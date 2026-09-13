@@ -26,11 +26,7 @@ export type {
   SupplierReceivingRecordCreateParams,
   SupplierReceivingRecordUpdateParams,
 } from './receivingRecordRepo';
-export type {
-  SupplierReceivingItem,
-  SupplierReceivingItemCreateParams,
-  SupplierReceivingItemUpdateParams,
-} from './receivingItemRepo';
+export type { SupplierReceivingItem, SupplierReceivingItemCreateParams, SupplierReceivingItemUpdateParams } from './receivingItemRepo';
 
 class SupplierPurchaseOrderDataRepository {
   readonly purchaseOrders = purchaseOrderRepo;

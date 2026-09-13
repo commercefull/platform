@@ -24,19 +24,24 @@ export class ImportMappingRepositoryImpl implements ImportMappingRepository {
         "sourceData", "metadata", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
-        props.importMappingId, props.importJobId, props.entityType, props.sourceId, props.platformId,
-        JSON.stringify(props.sourceData || {}), JSON.stringify(props.metadata || {}),
-        props.createdAt, props.updatedAt,
+        props.importMappingId,
+        props.importJobId,
+        props.entityType,
+        props.sourceId,
+        props.platformId,
+        JSON.stringify(props.sourceData || {}),
+        JSON.stringify(props.metadata || {}),
+        props.createdAt,
+        props.updatedAt,
       ],
     );
     return mapping;
   }
 
   async findById(importMappingId: string): Promise<ImportMapping | null> {
-    const row = await queryOne<ImportMappingDbRow>(
-      `SELECT * FROM "${Table.ImportMapping}" WHERE "importMappingId" = $1`,
-      [importMappingId],
-    );
+    const row = await queryOne<ImportMappingDbRow>(`SELECT * FROM "${Table.ImportMapping}" WHERE "importMappingId" = $1`, [
+      importMappingId,
+    ]);
     if (!row) return null;
     return ImportMapping.reconstitute(this.mapRowToProps(row));
   }
@@ -58,23 +63,20 @@ export class ImportMappingRepositoryImpl implements ImportMappingRepository {
       sql += ` AND "entityType" = $${params.length}`;
     }
     const rows = await query<ImportMappingDbRow[]>(sql, params as unknown[]);
-    return (rows ?? []).map((r) => ImportMapping.reconstitute(this.mapRowToProps(r)));
+    return (rows ?? []).map(r => ImportMapping.reconstitute(this.mapRowToProps(r)));
   }
 
   async findByPlatformId(entityType: string, platformId: string): Promise<ImportMapping | null> {
-    const row = await queryOne<ImportMappingDbRow>(
-      `SELECT * FROM "${Table.ImportMapping}" WHERE "entityType" = $1 AND "platformId" = $2`,
-      [entityType, platformId],
-    );
+    const row = await queryOne<ImportMappingDbRow>(`SELECT * FROM "${Table.ImportMapping}" WHERE "entityType" = $1 AND "platformId" = $2`, [
+      entityType,
+      platformId,
+    ]);
     if (!row) return null;
     return ImportMapping.reconstitute(this.mapRowToProps(row));
   }
 
   async deleteByJob(importJobId: string): Promise<boolean> {
-    await query(
-      `DELETE FROM "${Table.ImportMapping}" WHERE "importJobId" = $1`,
-      [importJobId],
-    );
+    await query(`DELETE FROM "${Table.ImportMapping}" WHERE "importJobId" = $1`, [importJobId]);
     return true;
   }
 

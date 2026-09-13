@@ -57,9 +57,7 @@ describe('UpdateItemQuantityUseCase', () => {
     const repo = createMockBasketRepo(basket);
     const useCase = new UpdateItemQuantityUseCase(repo);
 
-    const result = await useCase.execute(
-      new UpdateItemQuantityCommand('b-1', 'item-1', 5),
-    );
+    const result = await useCase.execute(new UpdateItemQuantityCommand('b-1', 'item-1', 5));
 
     expect(result.basketId).toBe('b-1');
     expect(repo.updateItem).toHaveBeenCalled();
@@ -70,9 +68,7 @@ describe('UpdateItemQuantityUseCase', () => {
     const repo = createMockBasketRepo(basket);
     const useCase = new UpdateItemQuantityUseCase(repo);
 
-    await useCase.execute(
-      new UpdateItemQuantityCommand('b-1', 'item-1', 0),
-    );
+    await useCase.execute(new UpdateItemQuantityCommand('b-1', 'item-1', 0));
 
     expect(repo.removeItem).toHaveBeenCalledWith('item-1');
     expect(repo.updateItem).not.toHaveBeenCalled();
@@ -82,9 +78,7 @@ describe('UpdateItemQuantityUseCase', () => {
     const repo = createMockBasketRepo(null);
     const useCase = new UpdateItemQuantityUseCase(repo);
 
-    await expect(
-      useCase.execute(new UpdateItemQuantityCommand('nonexistent', 'item-1', 5)),
-    ).rejects.toThrow(BasketNotFoundError);
+    await expect(useCase.execute(new UpdateItemQuantityCommand('nonexistent', 'item-1', 5))).rejects.toThrow(BasketNotFoundError);
   });
 
   it('should throw BasketItemNotFoundError when item does not exist', async () => {
@@ -92,8 +86,6 @@ describe('UpdateItemQuantityUseCase', () => {
     const repo = createMockBasketRepo(basket);
     const useCase = new UpdateItemQuantityUseCase(repo);
 
-    await expect(
-      useCase.execute(new UpdateItemQuantityCommand('b-1', 'nonexistent-item', 5)),
-    ).rejects.toThrow(BasketItemNotFoundError);
+    await expect(useCase.execute(new UpdateItemQuantityCommand('b-1', 'nonexistent-item', 5))).rejects.toThrow(BasketItemNotFoundError);
   });
 });

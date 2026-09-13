@@ -5,7 +5,7 @@
 
 export function up(knex) {
   return knex.schema
-    .createTable('integration', (table) => {
+    .createTable('integration', table => {
       table.string('integrationId').primary();
       table.string('organizationId').notNullable();
       table.string('name').notNullable();
@@ -23,7 +23,7 @@ export function up(knex) {
       table.index(['provider']);
       table.index(['status']);
     })
-    .createTable('integrationCredential', (table) => {
+    .createTable('integrationCredential', table => {
       table.string('credentialId').primary();
       table.string('integrationId').notNullable().references('integration.integrationId').onDelete('CASCADE');
       table.string('type').notNullable();
@@ -39,7 +39,7 @@ export function up(knex) {
       table.index(['integrationId']);
       table.index(['integrationId', 'isActive']);
     })
-    .createTable('integrationSubscription', (table) => {
+    .createTable('integrationSubscription', table => {
       table.string('subscriptionId').primary();
       table.string('integrationId').notNullable().references('integration.integrationId').onDelete('CASCADE');
       table.string('eventType').notNullable();
@@ -55,7 +55,7 @@ export function up(knex) {
       table.index(['eventType']);
       table.index(['isActive']);
     })
-    .createTable('integrationLog', (table) => {
+    .createTable('integrationLog', table => {
       table.string('logId').primary();
       table.string('integrationId').notNullable().references('integration.integrationId').onDelete('CASCADE');
       table.string('subscriptionId').nullable();

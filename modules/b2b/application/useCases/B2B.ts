@@ -2,12 +2,7 @@ import { Company, PaymentTerms } from '../../domain/entities/Company';
 import { B2BUser, B2BUserRole, SpendingLimit } from '../../domain/entities/B2BUser';
 import { Quote, QuoteLineItem } from '../../domain/entities/Quote';
 import { ApprovalWorkflow, ApprovalType } from '../../domain/entities/ApprovalWorkflow';
-import {
-  CompanyRepository,
-  B2BUserRepository,
-  QuoteRepository,
-  ApprovalWorkflowRepository,
-} from '../../domain/repositories/B2BRepository';
+import { CompanyRepository, B2BUserRepository, QuoteRepository, ApprovalWorkflowRepository } from '../../domain/repositories/B2BRepository';
 import {
   CompanyNotFoundError,
   CompanyAlreadyExistsError,
@@ -69,16 +64,19 @@ export class ManageCompanyUseCase {
     return this.companyRepo.findByParentId(parentId);
   }
 
-  async updateProfile(companyId: string, updates: {
-    name?: string;
-    legalName?: string;
-    taxId?: string;
-    billingAddress?: Company['billingAddress'];
-    shippingAddress?: Company['shippingAddress'];
-    contactEmail?: string;
-    contactPhone?: string;
-    website?: string;
-  }): Promise<Company> {
+  async updateProfile(
+    companyId: string,
+    updates: {
+      name?: string;
+      legalName?: string;
+      taxId?: string;
+      billingAddress?: Company['billingAddress'];
+      shippingAddress?: Company['shippingAddress'];
+      contactEmail?: string;
+      contactPhone?: string;
+      website?: string;
+    },
+  ): Promise<Company> {
     const company = await this.get(companyId);
     company.updateProfile(updates);
     await this.companyRepo.save(company);
@@ -228,12 +226,15 @@ export class ManageB2BUserUseCase {
     return user;
   }
 
-  async updateProfile(userId: string, updates: {
-    firstName?: string;
-    lastName?: string;
-    department?: string;
-    costCenter?: string;
-  }): Promise<B2BUser> {
+  async updateProfile(
+    userId: string,
+    updates: {
+      firstName?: string;
+      lastName?: string;
+      department?: string;
+      costCenter?: string;
+    },
+  ): Promise<B2BUser> {
     const user = await this.get(userId);
     user.updateProfile(updates);
     await this.userRepo.save(user);

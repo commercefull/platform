@@ -40,10 +40,9 @@ export class ContentPageVersionRepo {
   }
 
   async findLatestVersion(pageId: string): Promise<ContentPageVersion | null> {
-    return queryOne<ContentPageVersion>(
-      'SELECT * FROM "contentPageVersion" WHERE "contentPageId" = $1 ORDER BY "version" DESC LIMIT 1',
-      [pageId],
-    );
+    return queryOne<ContentPageVersion>('SELECT * FROM "contentPageVersion" WHERE "contentPageId" = $1 ORDER BY "version" DESC LIMIT 1', [
+      pageId,
+    ]);
   }
 
   async createVersion(params: PageVersionCreateParams): Promise<ContentPageVersion> {

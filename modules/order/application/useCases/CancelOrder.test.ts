@@ -12,7 +12,9 @@ import { CancelOrderUseCase, CancelOrderCommand } from './CancelOrder';
 import { OrderNotFoundError, CancelOrderPermissionError, OrderCannotBeCancelledError } from '../../domain/errors/OrderErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CancelOrderUseCase', () => {
   let useCase: CancelOrderUseCase;
@@ -21,8 +23,13 @@ describe('CancelOrderUseCase', () => {
 
   beforeEach(() => {
     mockOrder = {
-      orderId: 'o1', orderNumber: 'ORD-001', customerId: 'c1', status: 'pending',
-      canBeCancelled: true, cancelledAt: null, totalAmount: { amount: 100 },
+      orderId: 'o1',
+      orderNumber: 'ORD-001',
+      customerId: 'c1',
+      status: 'pending',
+      canBeCancelled: true,
+      cancelledAt: null,
+      totalAmount: { amount: 100 },
       cancel: jest.fn(),
     };
     mockRepo = {

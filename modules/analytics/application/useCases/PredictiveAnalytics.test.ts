@@ -31,8 +31,7 @@ describe('PredictiveAnalyticsUseCase', () => {
   });
 
   it('should throw AnalyticsValidationError for insufficient data', async () => {
-    await expect(useCase.forecastSalesRevenue([], 7))
-      .rejects.toThrow(AnalyticsValidationError);
+    await expect(useCase.forecastSalesRevenue([], 7)).rejects.toThrow(AnalyticsValidationError);
   });
 
   it('should predict customer churn', async () => {
@@ -51,9 +50,7 @@ describe('PredictiveAnalyticsUseCase', () => {
 
   it('should predict high risk churn for inactive customer', async () => {
     const oldDate = new Date(Date.now() - 120 * 86400000);
-    const result = await useCase.predictCustomerChurn('c1', [
-      { date: oldDate, orders: 1, revenue: 10 },
-    ]);
+    const result = await useCase.predictCustomerChurn('c1', [{ date: oldDate, orders: 1, revenue: 10 }]);
 
     expect(result.riskLevel).toBe('high');
     expect(result.recommendations.length).toBeGreaterThan(0);
@@ -61,9 +58,14 @@ describe('PredictiveAnalyticsUseCase', () => {
 
   it('should predict low risk for active customer', async () => {
     const recentDate = new Date(Date.now() - 5 * 86400000);
-    const result = await useCase.predictCustomerChurn('c1', Array.from({ length: 20 }, () => ({
-      date: recentDate, orders: 20, revenue: 20000,
-    })));
+    const result = await useCase.predictCustomerChurn(
+      'c1',
+      Array.from({ length: 20 }, () => ({
+        date: recentDate,
+        orders: 20,
+        revenue: 20000,
+      })),
+    );
 
     expect(result.riskLevel).toBe('low');
   });

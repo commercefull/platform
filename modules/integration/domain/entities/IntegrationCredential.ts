@@ -58,17 +58,39 @@ export class IntegrationCredential {
     return new IntegrationCredential(props);
   }
 
-  get credentialId(): string { return this.props.credentialId; }
-  get integrationId(): string { return this.props.integrationId; }
-  get type(): CredentialType { return this.props.type; }
-  get label(): string { return this.props.label; }
-  get encryptedData(): string { return this.props.encryptedData; }
-  get iv(): string { return this.props.iv; }
-  get authTag(): string { return this.props.authTag; }
-  get expiresAt(): Date | null { return this.props.expiresAt; }
-  get isActive(): boolean { return this.props.isActive; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get credentialId(): string {
+    return this.props.credentialId;
+  }
+  get integrationId(): string {
+    return this.props.integrationId;
+  }
+  get type(): CredentialType {
+    return this.props.type;
+  }
+  get label(): string {
+    return this.props.label;
+  }
+  get encryptedData(): string {
+    return this.props.encryptedData;
+  }
+  get iv(): string {
+    return this.props.iv;
+  }
+  get authTag(): string {
+    return this.props.authTag;
+  }
+  get expiresAt(): Date | null {
+    return this.props.expiresAt;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   isExpired(): boolean {
     if (!this.props.expiresAt) return false;

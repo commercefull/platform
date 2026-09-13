@@ -22,7 +22,10 @@ interface GenerateReportBody {
   parameters?: Record<string, unknown>;
 }
 
-export const generateReport = async (req: TypedRequest<Record<string, string>, unknown, GenerateReportBody>, res: Response): Promise<void> => {
+export const generateReport = async (
+  req: TypedRequest<Record<string, string>, unknown, GenerateReportBody>,
+  res: Response,
+): Promise<void> => {
   if (!req.body.reportType) {
     res.status(400).json({ success: false, error: 'reportType is required' });
     return;
@@ -33,7 +36,6 @@ export const generateReport = async (req: TypedRequest<Record<string, string>, u
     parameters: req.body.parameters || {},
   });
   res.json({ success: true, data: result });
-  
 };
 
 export const getReportTemplates = async (_req: TypedRequest, res: Response): Promise<void> => {
@@ -41,10 +43,12 @@ export const getReportTemplates = async (_req: TypedRequest, res: Response): Pro
   const templates = await useCase.execute();
   const templateList = Object.values(templates);
   res.json({ success: true, data: templateList });
-  
 };
 
-export const createSchedule = async (req: TypedRequest<Record<string, string>, unknown, CreateReportScheduleInput>, res: Response): Promise<void> => {
+export const createSchedule = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateReportScheduleInput>,
+  res: Response,
+): Promise<void> => {
   if (!req.body.name || !req.body.reportType) {
     res.status(400).json({ success: false, error: 'name and reportType are required' });
     return;
@@ -52,7 +56,6 @@ export const createSchedule = async (req: TypedRequest<Record<string, string>, u
   const useCase = new CreateReportScheduleUseCase();
   const result = await useCase.execute(req.body);
   res.status(201).json({ success: true, data: result });
-  
 };
 
 export const listSchedules = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -60,7 +63,6 @@ export const listSchedules = async (req: TypedRequest, res: Response): Promise<v
   const organizationId = req.query.organizationId as string | undefined;
   const result = await useCase.execute(organizationId);
   res.json({ success: true, data: result });
-  
 };
 
 export const getSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -71,10 +73,12 @@ export const getSchedule = async (req: TypedRequest, res: Response): Promise<voi
     return;
   }
   res.json({ success: true, data: result });
-  
 };
 
-export const updateSchedule = async (req: TypedRequest<Record<string, string>, unknown, UpdateReportScheduleParams>, res: Response): Promise<void> => {
+export const updateSchedule = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdateReportScheduleParams>,
+  res: Response,
+): Promise<void> => {
   const useCase = new UpdateReportScheduleUseCase();
   const result = await useCase.execute({
     reportScheduleId: req.params.scheduleId,
@@ -85,7 +89,6 @@ export const updateSchedule = async (req: TypedRequest<Record<string, string>, u
     return;
   }
   res.json({ success: true, data: result });
-  
 };
 
 export const deleteSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -96,7 +99,6 @@ export const deleteSchedule = async (req: TypedRequest, res: Response): Promise<
     return;
   }
   res.json({ success: true });
-  
 };
 
 export const listExecutions = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -104,5 +106,4 @@ export const listExecutions = async (req: TypedRequest, res: Response): Promise<
   const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
   const result = await useCase.execute(req.params.scheduleId, limit);
   res.json({ success: true, data: result });
-  
 };

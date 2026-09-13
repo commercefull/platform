@@ -172,7 +172,6 @@ export class CustomerPriceRepo {
    * Create a new customer price
    */
   async createPrice(customerPrice: Omit<CustomerPrice, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomerPrice> {
-
     const sql = `
       INSERT INTO "${this.customerPriceTable}" (
         "priceListId", "productId", "productVariantId", "adjustmentType", "adjustmentValue"

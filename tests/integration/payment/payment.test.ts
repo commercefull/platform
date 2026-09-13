@@ -63,7 +63,9 @@ describe('Payment Integration Tests', () => {
       const useCase = new InitiatePaymentUseCase(PaymentRepo);
       let result: Record<string, unknown>;
       try {
-        result = await useCase.execute(new InitiatePaymentCommand('00000000-0000-0000-0000-000000000001', 50, 'USD', 'default')) as unknown as Record<string, unknown>;
+        result = (await useCase.execute(
+          new InitiatePaymentCommand('00000000-0000-0000-0000-000000000001', 50, 'USD', 'default'),
+        )) as unknown as Record<string, unknown>;
       } catch {
         // No gateway configured in test env — acceptable
         return;

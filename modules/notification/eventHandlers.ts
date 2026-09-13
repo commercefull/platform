@@ -239,7 +239,8 @@ export const registerOrderEventHandlers = () => {
 
   // Order ready for pickup event (BOPIS)
   eventBus.registerHandler('order.ready_for_pickup', async (payload: EventPayload) => {
-    const { orderId, orderNumber, pickupLocationId, pickupLocationName, customerId, customerEmail } = payload.data as OrderReadyForPickupPayload;
+    const { orderId, orderNumber, pickupLocationId, pickupLocationName, customerId, customerEmail } =
+      payload.data as OrderReadyForPickupPayload;
 
     await JobScheduler.scheduleNotification({
       userId: customerId,
@@ -425,7 +426,11 @@ export const registerSupplierEventHandlers = () => {
   });
 
   eventBus.registerHandler('receiving.completed', async (payload: EventPayload) => {
-    const { receivingRecordId: _receivingRecordId, purchaseOrderId: _purchaseOrderId, receiptNumber: _receiptNumber } = payload.data as ReceivingCompletedPayload;
+    const {
+      receivingRecordId: _receivingRecordId,
+      purchaseOrderId: _purchaseOrderId,
+      receiptNumber: _receiptNumber,
+    } = payload.data as ReceivingCompletedPayload;
 
     // Update inventory and send notifications
     logger.info(`receiving.completed: triggering inventory update for PO ${_purchaseOrderId} (receipt ${_receiptNumber})`);

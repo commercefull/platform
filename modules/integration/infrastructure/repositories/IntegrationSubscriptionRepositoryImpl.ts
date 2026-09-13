@@ -26,20 +26,25 @@ export class IntegrationSubscriptionRepositoryImpl implements IntegrationSubscri
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
       [
-        props.subscriptionId, props.integrationId, props.eventType, props.targetAction,
-        props.description, JSON.stringify(props.payloadMapping),
-        props.headers ? JSON.stringify(props.headers) : null, props.isActive,
-        props.createdAt, props.updatedAt,
+        props.subscriptionId,
+        props.integrationId,
+        props.eventType,
+        props.targetAction,
+        props.description,
+        JSON.stringify(props.payloadMapping),
+        props.headers ? JSON.stringify(props.headers) : null,
+        props.isActive,
+        props.createdAt,
+        props.updatedAt,
       ],
     );
     return subscription;
   }
 
   async findById(subscriptionId: string): Promise<IntegrationEventSubscription | null> {
-    const row = await queryOne<SubscriptionDbRow>(
-      `SELECT * FROM "${Table.IntegrationSubscription}" WHERE "subscriptionId" = $1`,
-      [subscriptionId],
-    );
+    const row = await queryOne<SubscriptionDbRow>(`SELECT * FROM "${Table.IntegrationSubscription}" WHERE "subscriptionId" = $1`, [
+      subscriptionId,
+    ]);
     if (!row) return null;
     return IntegrationEventSubscription.reconstitute(this.mapRowToProps(row));
   }
@@ -49,7 +54,7 @@ export class IntegrationSubscriptionRepositoryImpl implements IntegrationSubscri
       `SELECT * FROM "${Table.IntegrationSubscription}" WHERE "integrationId" = $1 ORDER BY "createdAt" DESC`,
       [integrationId],
     );
-    return (rows ?? []).map((r) => IntegrationEventSubscription.reconstitute(this.mapRowToProps(r)));
+    return (rows ?? []).map(r => IntegrationEventSubscription.reconstitute(this.mapRowToProps(r)));
   }
 
   async findByEventType(eventType: string): Promise<IntegrationEventSubscription[]> {
@@ -58,8 +63,8 @@ export class IntegrationSubscriptionRepositoryImpl implements IntegrationSubscri
       [eventType],
     );
     return (rows ?? [])
-      .map((r) => IntegrationEventSubscription.reconstitute(this.mapRowToProps(r)))
-      .filter((s) => s.subscribesToEvent(eventType));
+      .map(r => IntegrationEventSubscription.reconstitute(this.mapRowToProps(r)))
+      .filter(s => s.subscribesToEvent(eventType));
   }
 
   async update(subscription: IntegrationEventSubscription): Promise<IntegrationEventSubscription> {
@@ -70,10 +75,13 @@ export class IntegrationSubscriptionRepositoryImpl implements IntegrationSubscri
         "headers" = $5, "isActive" = $6, "updatedAt" = $7
       WHERE "subscriptionId" = $1`,
       [
-        props.subscriptionId, props.targetAction, props.description,
+        props.subscriptionId,
+        props.targetAction,
+        props.description,
         JSON.stringify(props.payloadMapping),
         props.headers ? JSON.stringify(props.headers) : null,
-        props.isActive, props.updatedAt,
+        props.isActive,
+        props.updatedAt,
       ],
     );
     return subscription;

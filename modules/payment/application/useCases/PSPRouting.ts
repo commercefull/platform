@@ -12,11 +12,7 @@ import { FailoverRoutingEngine, GatewayRoute } from '../services/FailoverRouting
 import { getPSPAdapter } from '../services/GatewayAdapterRegistry';
 import type { PSPConfig, PaymentRequest } from '../services/GatewayAdapter';
 import { eventBus } from '../../../../libs/events/eventBus';
-import {
-  ProviderNotSupportedError,
-  NoProvidersAvailableError,
-  AllProvidersExhaustedError,
-} from '../../domain/errors/PaymentErrors';
+import { ProviderNotSupportedError, NoProvidersAvailableError, AllProvidersExhaustedError } from '../../domain/errors/PaymentErrors';
 import { logger } from '../../../../libs/logger';
 
 // ============================================================================
@@ -91,7 +87,14 @@ export class ManagePSPRoutesUseCase {
     if (command.priority !== undefined) existing.updatePriority(command.priority);
     if (command.isActive === true) existing.activate();
     if (command.isActive === false) existing.deactivate();
-    if (command.apiKey || command.publishableKey || command.webhookSecret || command.testMode !== undefined || command.merchantAccount || command.extra) {
+    if (
+      command.apiKey ||
+      command.publishableKey ||
+      command.webhookSecret ||
+      command.testMode !== undefined ||
+      command.merchantAccount ||
+      command.extra
+    ) {
       existing.updateConfig({
         ...(command.apiKey && { apiKey: command.apiKey }),
         ...(command.publishableKey !== undefined && { publishableKey: command.publishableKey }),
@@ -286,13 +289,15 @@ export class RoutePaymentUseCase {
 export class GetProviderHealthUseCase {
   constructor(private readonly routingRepository: PSPRoutingRepository) {}
 
-  async execute(organizationId: string): Promise<Array<{
-    provider: string;
-    routeId: string;
-    priority: number;
-    isActive: boolean;
-    healthy: boolean;
-  }>> {
+  async execute(organizationId: string): Promise<
+    Array<{
+      provider: string;
+      routeId: string;
+      priority: number;
+      isActive: boolean;
+      healthy: boolean;
+    }>
+  > {
     const routes = await this.routingRepository.findActiveRoutes(organizationId);
     const results: Array<{
       provider: string;

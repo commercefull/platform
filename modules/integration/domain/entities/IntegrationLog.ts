@@ -56,18 +56,42 @@ export class IntegrationLog {
     return new IntegrationLog(props);
   }
 
-  get logId(): string { return this.props.logId; }
-  get integrationId(): string { return this.props.integrationId; }
-  get subscriptionId(): string | null { return this.props.subscriptionId; }
-  get eventType(): string { return this.props.eventType; }
-  get targetAction(): string { return this.props.targetAction; }
-  get status(): LogStatus { return this.props.status; }
-  get requestPayload(): Record<string, unknown> | null { return this.props.requestPayload; }
-  get responseStatus(): number | null { return this.props.responseStatus; }
-  get responseBody(): string | null { return this.props.responseBody; }
-  get errorMessage(): string | null { return this.props.errorMessage; }
-  get durationMs(): number | null { return this.props.durationMs; }
-  get createdAt(): Date { return this.props.createdAt; }
+  get logId(): string {
+    return this.props.logId;
+  }
+  get integrationId(): string {
+    return this.props.integrationId;
+  }
+  get subscriptionId(): string | null {
+    return this.props.subscriptionId;
+  }
+  get eventType(): string {
+    return this.props.eventType;
+  }
+  get targetAction(): string {
+    return this.props.targetAction;
+  }
+  get status(): LogStatus {
+    return this.props.status;
+  }
+  get requestPayload(): Record<string, unknown> | null {
+    return this.props.requestPayload;
+  }
+  get responseStatus(): number | null {
+    return this.props.responseStatus;
+  }
+  get responseBody(): string | null {
+    return this.props.responseBody;
+  }
+  get errorMessage(): string | null {
+    return this.props.errorMessage;
+  }
+  get durationMs(): number | null {
+    return this.props.durationMs;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
 
   markSuccess(responseStatus: number, responseBody: string, durationMs: number): void {
     this.props.status = 'success';

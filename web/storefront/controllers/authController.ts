@@ -7,9 +7,7 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
-import {
-  AuthenticateCustomerCommand,
-} from '../../../modules/customer/application/useCases/AuthenticateCustomer';
+import { AuthenticateCustomerCommand } from '../../../modules/customer/application/useCases/AuthenticateCustomer';
 import { RegisterCustomerCommand } from '../../../modules/customer/application/useCases/RegisterCustomer';
 import {
   getCustomerUseCase,
@@ -164,7 +162,6 @@ export const profile = async (req: TypedRequest, res: Response): Promise<void> =
     pageName: 'My Profile',
     customer,
   });
-  
 };
 
 // ============================================================================

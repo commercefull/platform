@@ -8,6 +8,7 @@ import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { ManageSuppliersAdminUseCase } from '../../../modules/supplier/application/useCases/ManageSuppliersAdmin';
 import { adminRespond } from '../../respond';
+import { buildFormObject, FieldConfig } from '../utils/formParsing';
 
 const manageSuppliersUseCase = new ManageSuppliersAdminUseCase();
 
@@ -42,58 +43,51 @@ export const listSuppliers = async (req: TypedRequest, res: Response): Promise<v
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createSupplierForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'operations/suppliers/create', {
     pageName: 'Create Supplier',
   });
-  
 };
+
+const supplierCreateFields: FieldConfig[] = [
+  { name: 'name' },
+  { name: 'code' },
+  { name: 'description', transform: 'stringOrUndefined' },
+  { name: 'website', transform: 'stringOrUndefined' },
+  { name: 'email', transform: 'stringOrUndefined' },
+  { name: 'phone', transform: 'stringOrUndefined' },
+  { name: 'status', transform: 'stringOrUndefined', default: 'pending' },
+  { name: 'isActive', default: true },
+  { name: 'isApproved', default: false },
+  { name: 'currency', transform: 'stringOrUndefined', default: 'USD' },
+  { name: 'minOrderValue', transform: 'float', falsyValue: undefined },
+  { name: 'leadTime', transform: 'int', falsyValue: undefined },
+  { name: 'paymentTerms', transform: 'stringOrUndefined' },
+  { name: 'paymentMethod', transform: 'stringOrUndefined' },
+  { name: 'taxId', transform: 'stringOrUndefined' },
+  { name: 'notes', transform: 'stringOrUndefined' },
+  { name: 'categories', transform: 'passthrough', falsyValue: undefined },
+  { name: 'tags', transform: 'passthrough', falsyValue: undefined },
+];
+
+function parseSupplierCreateInput(body: RequestBody) {
+  const result = buildFormObject(body as Record<string, unknown>, supplierCreateFields);
+  if (typeof result.categories === 'string') {
+    result.categories = result.categories.split(',').map((c: string) => c.trim());
+  }
+  if (typeof result.tags === 'string') {
+    result.tags = result.tags.split(',').map((t: string) => t.trim());
+  }
+  return result;
+}
 
 export const createSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const {
-      name,
-      code,
-      description,
-      website,
-      email,
-      phone,
-      status,
-      currency,
-      minOrderValue,
-      leadTime,
-      paymentTerms,
-      paymentMethod,
-      taxId,
-      notes,
-      categories,
-      tags,
-    } = body;
-
-    const supplier = await manageSuppliersUseCase.create({
-      name,
-      code,
-      description: description || undefined,
-      website: website || undefined,
-      email: email || undefined,
-      phone: phone || undefined,
-      status: status || 'pending',
-      isActive: true, // Default to active
-      isApproved: false, // Require approval process
-      currency: currency || 'USD',
-      minOrderValue: minOrderValue ? parseFloat(minOrderValue) : undefined,
-      leadTime: leadTime ? parseInt(leadTime) : undefined,
-      paymentTerms: paymentTerms || undefined,
-      paymentMethod: paymentMethod || undefined,
-      taxId: taxId || undefined,
-      notes: notes || undefined,
-      categories: categories ? categories.split(',').map((c: string) => c.trim()) : undefined,
-      tags: tags ? tags.split(',').map((t: string) => t.trim()) : undefined,
-    });
+    const supplier = await manageSuppliersUseCase.create(
+      parseSupplierCreateInput(req.body as RequestBody) as Parameters<typeof manageSuppliersUseCase.create>[0],
+    );
 
     res.redirect(`/hub/suppliers/${supplier.supplierId}?success=Supplier created successfully`);
   } catch (error: unknown) {
@@ -126,7 +120,6 @@ export const viewSupplier = async (req: TypedRequest, res: Response): Promise<vo
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editSupplierForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -146,49 +139,41 @@ export const editSupplierForm = async (req: TypedRequest, res: Response): Promis
     pageName: `Edit: ${supplier.name}`,
     supplier,
   });
-  
 };
+
+const supplierUpdateFields: FieldConfig[] = [
+  { name: 'name' },
+  { name: 'description', transform: 'stringOrUndefined' },
+  { name: 'website', transform: 'stringOrUndefined' },
+  { name: 'email', transform: 'stringOrUndefined' },
+  { name: 'phone', transform: 'stringOrUndefined' },
+  { name: 'status' },
+  { name: 'currency' },
+  { name: 'minOrderValue', transform: 'float', falsyValue: undefined },
+  { name: 'leadTime', transform: 'int', falsyValue: undefined },
+  { name: 'paymentTerms', transform: 'stringOrUndefined' },
+  { name: 'paymentMethod', transform: 'stringOrUndefined' },
+  { name: 'taxId', transform: 'stringOrUndefined' },
+  { name: 'notes', transform: 'stringOrUndefined' },
+  { name: 'categories', transform: 'passthrough', falsyValue: undefined },
+  { name: 'tags', transform: 'passthrough', falsyValue: undefined },
+  { name: 'rating', transform: 'float', falsyValue: undefined },
+];
+
+function parseSupplierUpdates(body: RequestBody): Record<string, unknown> {
+  const updates = buildFormObject(body as Record<string, unknown>, supplierUpdateFields);
+  if (typeof updates.categories === 'string') {
+    updates.categories = updates.categories.split(',').map((c: string) => c.trim());
+  }
+  if (typeof updates.tags === 'string') {
+    updates.tags = updates.tags.split(',').map((t: string) => t.trim());
+  }
+  return updates;
+}
 
 export const updateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   const { supplierId } = req.params;
-  const updates: Record<string, unknown> = {};
-
-  const body = req.body as RequestBody;
-  const {
-    name,
-    description,
-    website,
-    email,
-    phone,
-    status,
-    currency,
-    minOrderValue,
-    leadTime,
-    paymentTerms,
-    paymentMethod,
-    taxId,
-    notes,
-    categories,
-    tags,
-    rating,
-  } = body;
-
-  if (name !== undefined) updates.name = name;
-  if (description !== undefined) updates.description = description || undefined;
-  if (website !== undefined) updates.website = website || undefined;
-  if (email !== undefined) updates.email = email || undefined;
-  if (phone !== undefined) updates.phone = phone || undefined;
-  if (status !== undefined) updates.status = status;
-  if (currency !== undefined) updates.currency = currency;
-  if (minOrderValue !== undefined) updates.minOrderValue = minOrderValue ? parseFloat(minOrderValue) : undefined;
-  if (leadTime !== undefined) updates.leadTime = leadTime ? parseInt(leadTime) : undefined;
-  if (paymentTerms !== undefined) updates.paymentTerms = paymentTerms || undefined;
-  if (paymentMethod !== undefined) updates.paymentMethod = paymentMethod || undefined;
-  if (taxId !== undefined) updates.taxId = taxId || undefined;
-  if (notes !== undefined) updates.notes = notes || undefined;
-  if (categories !== undefined) updates.categories = categories ? categories.split(',').map((c: string) => c.trim()) : undefined;
-  if (tags !== undefined) updates.tags = tags ? tags.split(',').map((t: string) => t.trim()) : undefined;
-  if (rating !== undefined) updates.rating = rating ? parseFloat(rating) : undefined;
+  const updates = parseSupplierUpdates(req.body as RequestBody);
 
   const supplier = await manageSuppliersUseCase.update(supplierId, updates);
 
@@ -197,7 +182,6 @@ export const updateSupplier = async (req: TypedRequest, res: Response): Promise<
   }
 
   res.redirect(`/hub/suppliers/${supplierId}?success=Supplier updated successfully`);
-  
 };
 
 export const approveSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -210,7 +194,6 @@ export const approveSupplier = async (req: TypedRequest, res: Response): Promise
   }
 
   res.json({ success: true, message: 'Supplier approved successfully' });
-  
 };
 
 export const suspendSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -223,7 +206,6 @@ export const suspendSupplier = async (req: TypedRequest, res: Response): Promise
   }
 
   res.json({ success: true, message: 'Supplier suspended successfully' });
-  
 };
 
 export const activateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -236,7 +218,6 @@ export const activateSupplier = async (req: TypedRequest, res: Response): Promis
   }
 
   res.json({ success: true, message: 'Supplier activated successfully' });
-  
 };
 
 export const deactivateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -249,7 +230,6 @@ export const deactivateSupplier = async (req: TypedRequest, res: Response): Prom
   }
 
   res.json({ success: true, message: 'Supplier deactivated successfully' });
-  
 };
 
 export const deleteSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -262,5 +242,4 @@ export const deleteSupplier = async (req: TypedRequest, res: Response): Promise<
   }
 
   res.json({ success: true, message: 'Supplier deleted successfully' });
-  
 };

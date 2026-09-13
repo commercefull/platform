@@ -4,26 +4,22 @@ import type { VendorRepository } from '../../domain/repositories/MarketplaceRepo
 
 export class VendorRepositoryImpl implements VendorRepository {
   async findById(vendorId: string): Promise<Vendor | null> {
-    const row = await queryOne<VendorProps>(
-      `SELECT * FROM "marketplaceVendor" WHERE "vendorId" = $1`,
-      [vendorId],
-    );
+    const row = await queryOne<VendorProps>(`SELECT * FROM "marketplaceVendor" WHERE "vendorId" = $1`, [vendorId]);
     return row ? Vendor.reconstitute(row) : null;
   }
 
   async findByOrganizationId(organizationId: string): Promise<Vendor[]> {
-    const rows = await query<VendorProps[]>(
-      `SELECT * FROM "marketplaceVendor" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`,
-      [organizationId],
-    );
+    const rows = await query<VendorProps[]>(`SELECT * FROM "marketplaceVendor" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`, [
+      organizationId,
+    ]);
     return (rows ?? []).map(r => Vendor.reconstitute(r));
   }
 
   async findByEmail(email: string, organizationId: string): Promise<Vendor | null> {
-    const row = await queryOne<VendorProps>(
-      `SELECT * FROM "marketplaceVendor" WHERE "email" = $1 AND "organizationId" = $2`,
-      [email, organizationId],
-    );
+    const row = await queryOne<VendorProps>(`SELECT * FROM "marketplaceVendor" WHERE "email" = $1 AND "organizationId" = $2`, [
+      email,
+      organizationId,
+    ]);
     return row ? Vendor.reconstitute(row) : null;
   }
 
@@ -66,13 +62,27 @@ export class VendorRepositoryImpl implements VendorRepository {
         "updatedAt" = EXCLUDED."updatedAt"
       `,
       [
-        json.vendorId, json.organizationId, json.name, json.legalName ?? null,
-        json.taxId ?? null, json.email, json.phone ?? null, json.website ?? null,
-        json.logoUrl ?? null, json.description ?? null, json.status, json.tier,
-        json.commissionRate, JSON.stringify(json.address ?? null),
-        JSON.stringify(json.bankInfo ?? null), JSON.stringify(json.stats),
-        json.approvedAt ?? null, json.suspendedAt ?? null, json.terminatedAt ?? null,
-        json.createdAt, json.updatedAt,
+        json.vendorId,
+        json.organizationId,
+        json.name,
+        json.legalName ?? null,
+        json.taxId ?? null,
+        json.email,
+        json.phone ?? null,
+        json.website ?? null,
+        json.logoUrl ?? null,
+        json.description ?? null,
+        json.status,
+        json.tier,
+        json.commissionRate,
+        JSON.stringify(json.address ?? null),
+        JSON.stringify(json.bankInfo ?? null),
+        JSON.stringify(json.stats),
+        json.approvedAt ?? null,
+        json.suspendedAt ?? null,
+        json.terminatedAt ?? null,
+        json.createdAt,
+        json.updatedAt,
       ],
     );
   }

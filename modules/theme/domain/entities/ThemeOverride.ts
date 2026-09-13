@@ -76,20 +76,48 @@ export class ThemeOverride {
   }
 
   // Getters
-  get overrideId(): string { return this.props.overrideId; }
-  get storeId(): string { return this.props.storeId; }
-  get themeId(): string { return this.props.themeId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get settings(): Record<string, string | number | boolean> { return this.props.settings; }
-  get customCss(): string | undefined { return this.props.customCss; }
-  get customLogoUrl(): string | undefined { return this.props.customLogoUrl; }
-  get customFaviconUrl(): string | undefined { return this.props.customFaviconUrl; }
-  get customBannerUrl(): string | undefined { return this.props.customBannerUrl; }
-  get customHeadTags(): string[] | undefined { return this.props.customHeadTags; }
-  get customBodyAttributes(): Record<string, string> | undefined { return this.props.customBodyAttributes; }
-  get isActive(): boolean { return this.props.isActive; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get overrideId(): string {
+    return this.props.overrideId;
+  }
+  get storeId(): string {
+    return this.props.storeId;
+  }
+  get themeId(): string {
+    return this.props.themeId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get settings(): Record<string, string | number | boolean> {
+    return this.props.settings;
+  }
+  get customCss(): string | undefined {
+    return this.props.customCss;
+  }
+  get customLogoUrl(): string | undefined {
+    return this.props.customLogoUrl;
+  }
+  get customFaviconUrl(): string | undefined {
+    return this.props.customFaviconUrl;
+  }
+  get customBannerUrl(): string | undefined {
+    return this.props.customBannerUrl;
+  }
+  get customHeadTags(): string[] | undefined {
+    return this.props.customHeadTags;
+  }
+  get customBodyAttributes(): Record<string, string> | undefined {
+    return this.props.customBodyAttributes;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Lifecycle
 

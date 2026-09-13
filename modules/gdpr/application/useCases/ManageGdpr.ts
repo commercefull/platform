@@ -37,7 +37,10 @@ export class ManageGdprRequestsUseCase {
   async findByCustomerId(customerId: string) {
     return gdprDataRequestRepo.findByCustomerId(customerId);
   }
-  async findAll(filters?: Parameters<typeof gdprDataRequestRepo.findAll>[0], pagination?: Parameters<typeof gdprDataRequestRepo.findAll>[1]) {
+  async findAll(
+    filters?: Parameters<typeof gdprDataRequestRepo.findAll>[0],
+    pagination?: Parameters<typeof gdprDataRequestRepo.findAll>[1],
+  ) {
     return gdprDataRequestRepo.findAll(filters, pagination);
   }
   async save(request: Parameters<typeof gdprDataRequestRepo.save>[0]) {

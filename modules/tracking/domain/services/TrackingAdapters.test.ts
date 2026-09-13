@@ -79,7 +79,9 @@ describe('MetaCAPIAdapter', () => {
     accessToken: 'test-token',
   };
 
-  function makeConfig(overrides?: Partial<{ gtm: GTMConfig | null; metaCapi: MetaCAPIConfig | null; status: string; hashPii: boolean }>): TrackingConfig {
+  function makeConfig(
+    overrides?: Partial<{ gtm: GTMConfig | null; metaCapi: MetaCAPIConfig | null; status: string; hashPii: boolean }>,
+  ): TrackingConfig {
     return TrackingConfig.reconstitute({
       configId: 'cfg-2',
       storeId: 'store-2',
@@ -104,7 +106,12 @@ describe('MetaCAPIAdapter', () => {
       targetEvent: 'Purchase',
       providers: (overrides?.providers as string[]) || ['meta_capi'],
       userData: { email: 'test@example.com', phone: '+1234567890', sessionId: 'sess-2' },
-      ecommerceData: { transactionId: 'tx-2', value: 49.99, currency: 'USD', items: [{ productId: 'p1', name: 'Product 1', quantity: 2, price: 24.99 }] },
+      ecommerceData: {
+        transactionId: 'tx-2',
+        value: 49.99,
+        currency: 'USD',
+        items: [{ productId: 'p1', name: 'Product 1', quantity: 2, price: 24.99 }],
+      },
       customData: {},
       consentCategory: 'marketing',
       consentGranted: overrides?.consentGranted ?? true,

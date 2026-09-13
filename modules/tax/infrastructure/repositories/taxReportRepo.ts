@@ -7,7 +7,6 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 
-
 export type TaxReportType = 'sales' | 'filing' | 'jurisdiction' | 'summary' | 'exemption' | 'audit';
 export type TaxReportStatus = 'pending' | 'processing' | 'completed' | 'failed';
 export type TaxReportFileFormat = 'csv' | 'xlsx' | 'pdf' | 'json';

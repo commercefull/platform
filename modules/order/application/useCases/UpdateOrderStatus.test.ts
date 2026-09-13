@@ -12,7 +12,9 @@ import { UpdateOrderStatusUseCase, UpdateOrderStatusCommand } from './UpdateOrde
 import { OrderNotFoundError } from '../../domain/errors/OrderErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('UpdateOrderStatusUseCase', () => {
   let useCase: UpdateOrderStatusUseCase;
@@ -21,7 +23,10 @@ describe('UpdateOrderStatusUseCase', () => {
 
   beforeEach(() => {
     mockOrder = {
-      orderId: 'o1', orderNumber: 'ORD-001', status: 'pending', updatedAt: new Date(),
+      orderId: 'o1',
+      orderNumber: 'ORD-001',
+      status: 'pending',
+      updatedAt: new Date(),
       updateStatus: jest.fn(),
     };
     mockRepo = {

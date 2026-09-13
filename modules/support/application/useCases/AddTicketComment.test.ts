@@ -8,7 +8,9 @@ describe('AddTicketCommentUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findTicketById: jest.fn().mockResolvedValue({ ticketId: 'tkt-1', status: 'open' }),
-      createComment: jest.fn().mockResolvedValue({ commentId: 'cmt-1', ticketId: 'tkt-1', authorType: 'customer', isInternal: false, createdAt: new Date() }),
+      createComment: jest
+        .fn()
+        .mockResolvedValue({ commentId: 'cmt-1', ticketId: 'tkt-1', authorType: 'customer', isInternal: false, createdAt: new Date() }),
       updateTicket: jest.fn().mockResolvedValue(undefined),
     };
     useCase = new AddTicketCommentUseCase(mockRepo as never);
@@ -22,19 +24,29 @@ describe('AddTicketCommentUseCase', () => {
   });
 
   it('should throw SupportValidationError when required fields missing', async () => {
-    await expect(useCase.execute({ ticketId: '', authorId: 'a', authorType: 'customer', content: 'c' })).rejects.toThrow(SupportValidationError);
-    await expect(useCase.execute({ ticketId: 't', authorId: '', authorType: 'customer', content: 'c' })).rejects.toThrow(SupportValidationError);
-    await expect(useCase.execute({ ticketId: 't', authorId: 'a', authorType: 'customer', content: '' })).rejects.toThrow(SupportValidationError);
+    await expect(useCase.execute({ ticketId: '', authorId: 'a', authorType: 'customer', content: 'c' })).rejects.toThrow(
+      SupportValidationError,
+    );
+    await expect(useCase.execute({ ticketId: 't', authorId: '', authorType: 'customer', content: 'c' })).rejects.toThrow(
+      SupportValidationError,
+    );
+    await expect(useCase.execute({ ticketId: 't', authorId: 'a', authorType: 'customer', content: '' })).rejects.toThrow(
+      SupportValidationError,
+    );
   });
 
   it('should throw SupportTicketNotFoundError when ticket does not exist', async () => {
     mockRepo.findTicketById.mockResolvedValue(null);
 
-    await expect(useCase.execute({ ticketId: 'missing', authorId: 'a', authorType: 'customer', content: 'c' })).rejects.toThrow(SupportTicketNotFoundError);
+    await expect(useCase.execute({ ticketId: 'missing', authorId: 'a', authorType: 'customer', content: 'c' })).rejects.toThrow(
+      SupportTicketNotFoundError,
+    );
   });
 
   it('should throw SupportValidationError when customer tries to add internal comment', async () => {
-    await expect(useCase.execute({ ticketId: 'tkt-1', authorId: 'cust-1', authorType: 'customer', content: 'c', isInternal: true })).rejects.toThrow(SupportValidationError);
+    await expect(
+      useCase.execute({ ticketId: 'tkt-1', authorId: 'cust-1', authorType: 'customer', content: 'c', isInternal: true }),
+    ).rejects.toThrow(SupportValidationError);
   });
 
   it('should reopen ticket when customer replies to resolved ticket', async () => {

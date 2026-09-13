@@ -66,11 +66,13 @@ describe('CreateFulfillmentUseCase', () => {
   it('should emit fulfillment.created event', async () => {
     await useCase.execute(createInput());
 
-    expect(emitFulfillmentCreated).toHaveBeenCalledWith(expect.objectContaining({
-      orderId: 'ord-1',
-      orderNumber: 'ORD-001',
-      sourceType: 'warehouse',
-    }));
+    expect(emitFulfillmentCreated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderId: 'ord-1',
+        orderNumber: 'ORD-001',
+        sourceType: 'warehouse',
+      }),
+    );
   });
 
   it('should set quantityFulfilled to 0 for all items', async () => {

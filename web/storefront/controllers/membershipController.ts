@@ -21,7 +21,6 @@ export const listPlans = async (req: TypedRequest, res: Response) => {
     pageName: 'Membership Plans',
     plans,
   });
-  
 };
 
 /**
@@ -44,7 +43,6 @@ export const viewPlan = async (req: TypedRequest, res: Response) => {
     plan,
     benefits,
   });
-  
 };
 
 /**
@@ -65,7 +63,6 @@ export const myMembership = async (req: TypedRequest, res: Response) => {
     membership,
     benefits,
   });
-  
 };
 
 /**

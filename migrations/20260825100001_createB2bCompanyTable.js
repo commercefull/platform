@@ -1,5 +1,5 @@
 export async function up(knex) {
-  await knex.schema.createTable('b2bCompany', (table) => {
+  await knex.schema.createTable('b2bCompany', table => {
     table.uuid('companyId').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('organizationId').notNullable().index();
     table.string('name').notNullable();

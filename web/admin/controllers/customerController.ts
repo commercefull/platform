@@ -64,7 +64,6 @@ export const listCustomers = async (req: TypedRequest, res: Response): Promise<v
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -94,7 +93,6 @@ export const viewCustomer = async (req: TypedRequest, res: Response): Promise<vo
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -118,7 +116,6 @@ export const editCustomerForm = async (req: TypedRequest, res: Response): Promis
     pageName: `Edit: ${customer.firstName} ${customer.lastName}`,
     customer,
   });
-  
 };
 
 // ============================================================================
@@ -132,7 +129,6 @@ export const updateCustomer = async (req: TypedRequest, res: Response): Promise<
   await updateCustomerUseCase.execute({ customerId, updates });
 
   res.redirect(`/hub/customers/${customerId}?success=Customer updated successfully`);
-  
 };
 
 // ============================================================================
@@ -147,7 +143,6 @@ export const deactivateCustomer = async (req: TypedRequest, res: Response): Prom
   await deactivateCustomerUseCase.execute({ customerId, reason });
 
   res.json({ success: true, message: 'Customer deactivated' });
-  
 };
 
 // ============================================================================
@@ -160,7 +155,6 @@ export const reactivateCustomer = async (req: TypedRequest, res: Response): Prom
   await reactivateCustomerUseCase.execute({ customerId });
 
   res.json({ success: true, message: 'Customer reactivated' });
-  
 };
 
 // ============================================================================
@@ -175,7 +169,6 @@ export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<
   await verifyCustomerUseCase.execute(command);
 
   res.json({ success: true, message: 'Customer verified' });
-  
 };
 
 // ============================================================================
@@ -204,7 +197,6 @@ export const customerAddresses = async (req: TypedRequest, res: Response): Promi
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -238,5 +230,4 @@ export const addCustomerAddress = async (req: TypedRequest, res: Response): Prom
   } else {
     res.redirect(`/hub/customers/${customerId}/addresses?success=Address added`);
   }
-  
 };

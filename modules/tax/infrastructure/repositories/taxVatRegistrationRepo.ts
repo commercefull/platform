@@ -9,7 +9,6 @@ import { query, queryOne } from '../../../../libs/db';
 // Table Constants
 // ============================================================================
 
-
 // ============================================================================
 // Types
 // ============================================================================
@@ -75,14 +74,17 @@ export interface VatValidationLog {
 // ============================================================================
 
 export async function getVatRegistration(vatRegistrationId: string): Promise<VatRegistration | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "taxVatRegistration" WHERE "vatRegistrationId" = $1', [vatRegistrationId]);
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "taxVatRegistration" WHERE "vatRegistrationId" = $1', [
+    vatRegistrationId,
+  ]);
   return row ? mapToVatRegistration(row) : null;
 }
 
 export async function getVatRegistrationsByMerchant(organizationId: string): Promise<VatRegistration[]> {
-  const rows = await query<Record<string, unknown>[]>('SELECT * FROM "taxVatRegistration" WHERE "organizationId" = $1 ORDER BY "countryCode" ASC', [
-    organizationId,
-  ]);
+  const rows = await query<Record<string, unknown>[]>(
+    'SELECT * FROM "taxVatRegistration" WHERE "organizationId" = $1 ORDER BY "countryCode" ASC',
+    [organizationId],
+  );
   return (rows || []).map(mapToVatRegistration);
 }
 

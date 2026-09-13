@@ -23,7 +23,6 @@ const categoryPromotionRepo = promotionRuleRepository.categories;
 export const getActiveCategoryPromotions = async (req: TypedRequest, res: Response): Promise<void> => {
   const promotions = await categoryPromotionRepo.getActivePromotions();
   res.status(200).json({ success: true, data: promotions || [] });
-  
 };
 
 // Get promotions by category ID
@@ -31,7 +30,6 @@ export const getPromotionsByCategoryId = async (req: TypedRequest, res: Response
   const { categoryId } = req.params;
   const promotions = await categoryPromotionRepo.getByCategoryId(categoryId);
   res.status(200).json({ success: true, data: promotions || [] });
-  
 };
 
 // Get promotion by ID
@@ -45,26 +43,29 @@ export const getCategoryPromotionById = async (req: TypedRequest, res: Response)
   }
 
   res.status(200).json({ success: true, data: promotion });
-  
 };
 
 // Create a new category promotion
-export const createCategoryPromotion = async (req: TypedRequest<Record<string, string>, unknown, CategoryCreateBody>, res: Response): Promise<void> => {
+export const createCategoryPromotion = async (
+  req: TypedRequest<Record<string, string>, unknown, CategoryCreateBody>,
+  res: Response,
+): Promise<void> => {
   const promotionData = req.body;
 
   const promotion = await categoryPromotionRepo.create(promotionData);
   res.status(201).json({ success: true, data: promotion });
-  
 };
 
 // Update an existing category promotion
-export const updateCategoryPromotion = async (req: TypedRequest<Record<string, string>, unknown, CategoryUpdateBody>, res: Response): Promise<void> => {
+export const updateCategoryPromotion = async (
+  req: TypedRequest<Record<string, string>, unknown, CategoryUpdateBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const promotionData = req.body;
 
   const promotion = await categoryPromotionRepo.update(id, promotionData);
   res.status(200).json({ success: true, data: promotion });
-  
 };
 
 // Delete a category promotion
@@ -72,5 +73,4 @@ export const deleteCategoryPromotion = async (req: TypedRequest, res: Response):
   const { id } = req.params;
   await categoryPromotionRepo.delete(id);
   res.status(200).json({ success: true, message: 'Category promotion deleted successfully' });
-  
 };

@@ -80,9 +80,7 @@ interface WarehouseRepositoryPort {
 }
 
 export class GetWarehouseUseCase {
-  constructor(
-    private readonly warehouseRepository: WarehouseRepositoryPort,
-  ) {}
+  constructor(private readonly warehouseRepository: WarehouseRepositoryPort) {}
 
   async execute(input: GetWarehouseInput): Promise<GetWarehouseOutput> {
     if (!input.warehouseId && !input.code) {

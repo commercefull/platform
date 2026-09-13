@@ -8,32 +8,36 @@ import { requireAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAu
 
 export const basketResolvers = {
   Query: {
-    myBasket: async (_parent: unknown, args: {
-      currency?: string;
-    }, context: GraphQLAuthContext) => {
+    myBasket: async (
+      _parent: unknown,
+      args: {
+        currency?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       const user = requireAuth(context);
       const useCase = new GetOrCreateBasketUseCase(BasketRepo);
-      const command = new GetOrCreateBasketCommand(
-        user.customerId || user._id,
-        context.sessionId,
-        args.currency ?? 'USD',
-      );
+      const command = new GetOrCreateBasketCommand(user.customerId || user._id, context.sessionId, args.currency ?? 'USD');
       return useCase.execute(command);
     },
   },
 
   Mutation: {
-    addItemToBasket: async (_parent: unknown, args: {
-      basketId: string;
-      productId: string;
-      sku: string;
-      name: string;
-      quantity: number;
-      unitPrice: number;
-      productVariantId?: string;
-      imageUrl?: string;
-      itemType?: string;
-    }, context: GraphQLAuthContext) => {
+    addItemToBasket: async (
+      _parent: unknown,
+      args: {
+        basketId: string;
+        productId: string;
+        sku: string;
+        name: string;
+        quantity: number;
+        unitPrice: number;
+        productVariantId?: string;
+        imageUrl?: string;
+        itemType?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const useCase = new AddItemUseCase(BasketRepo);
       const command = new AddItemCommand(
@@ -51,25 +55,29 @@ export const basketResolvers = {
       return useCase.execute(command);
     },
 
-    updateBasketItemQuantity: async (_parent: unknown, args: {
-      basketId: string;
-      basketItemId: string;
-      quantity: number;
-    }, context: GraphQLAuthContext) => {
+    updateBasketItemQuantity: async (
+      _parent: unknown,
+      args: {
+        basketId: string;
+        basketItemId: string;
+        quantity: number;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const useCase = new UpdateItemQuantityUseCase(BasketRepo);
-      const command = new UpdateItemQuantityCommand(
-        args.basketId,
-        args.basketItemId,
-        args.quantity,
-      );
+      const command = new UpdateItemQuantityCommand(args.basketId, args.basketItemId, args.quantity);
       return useCase.execute(command);
     },
 
-    removeBasketItem: async (_parent: unknown, args: {
-      basketId: string;
-      basketItemId: string;
-    }, context: GraphQLAuthContext) => {
+    removeBasketItem: async (
+      _parent: unknown,
+      args: {
+        basketId: string;
+        basketItemId: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const useCase = new RemoveItemUseCase(BasketRepo);
       const command = new RemoveItemCommand(args.basketId, args.basketItemId);

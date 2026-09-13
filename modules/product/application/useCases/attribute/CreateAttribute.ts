@@ -1,4 +1,8 @@
-import dynamicAttributeRepository, { ProductAttributeCreateInput, ProductAttribute, AttributeType } from '../../../infrastructure/repositories/DynamicAttributeRepository';
+import dynamicAttributeRepository, {
+  ProductAttributeCreateInput,
+  ProductAttribute,
+  AttributeType,
+} from '../../../infrastructure/repositories/DynamicAttributeRepository';
 
 export interface CreateAttributeCommand {
   name: string;
@@ -72,7 +76,7 @@ export class CreateAttributeUseCase {
         description: command.description,
         groupId: command.groupId,
         type: (command.type || 'text') as AttributeType,
-        inputType: ((command.inputType || command.type || 'text') as AttributeType),
+        inputType: (command.inputType || command.type || 'text') as AttributeType,
         isRequired: command.isRequired,
         isUnique: command.isUnique,
         isSearchable: command.isSearchable,

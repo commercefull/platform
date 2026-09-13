@@ -17,7 +17,6 @@ export const getPromotionsByCartId = async (req: TypedRequest, res: Response): P
   const { cartId } = req.params;
   const promotions = await cartPromotionRepo.getByBasketId(cartId);
   res.status(200).json({ success: true, data: promotions || [] });
-  
 };
 
 // Get promotion by ID
@@ -31,26 +30,29 @@ export const getCartPromotionById = async (req: TypedRequest, res: Response): Pr
   }
 
   res.status(200).json({ success: true, data: promotion });
-  
 };
 
 // Apply a promotion to a cart
-export const applyPromotion = async (req: TypedRequest<Record<string, string>, unknown, CartPromotionBody>, res: Response): Promise<void> => {
+export const applyPromotion = async (
+  req: TypedRequest<Record<string, string>, unknown, CartPromotionBody>,
+  res: Response,
+): Promise<void> => {
   const promotionData = req.body;
 
   const promotion = await cartPromotionRepo.create(promotionData);
   res.status(201).json({ success: true, data: promotion });
-  
 };
 
 // Update a cart promotion
-export const updateCartPromotion = async (req: TypedRequest<Record<string, string>, unknown, Partial<Pick<PromotionCart, 'discountAmount' | 'status'>>>, res: Response): Promise<void> => {
+export const updateCartPromotion = async (
+  req: TypedRequest<Record<string, string>, unknown, Partial<Pick<PromotionCart, 'discountAmount' | 'status'>>>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const promotionData = req.body;
 
   const promotion = await cartPromotionRepo.update(id, promotionData);
   res.status(200).json({ success: true, data: promotion });
-  
 };
 
 // Remove a promotion from a cart
@@ -58,5 +60,4 @@ export const removePromotion = async (req: TypedRequest, res: Response): Promise
   const { id } = req.params;
   await cartPromotionRepo.delete(id);
   res.status(200).json({ success: true, message: 'Cart promotion removed successfully' });
-  
 };

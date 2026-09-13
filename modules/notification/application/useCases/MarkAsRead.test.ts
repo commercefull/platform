@@ -81,9 +81,7 @@ describe('MarkAsReadUseCase', () => {
   });
 
   it('should throw when notificationIds is empty', async () => {
-    await expect(
-      useCase.execute({ notificationIds: [], recipientId: 'cust-1' }),
-    ).rejects.toThrow(NotificationValidationError);
+    await expect(useCase.execute({ notificationIds: [], recipientId: 'cust-1' })).rejects.toThrow(NotificationValidationError);
   });
 
   it('should return markedAt timestamp', async () => {

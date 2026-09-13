@@ -85,7 +85,6 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -112,7 +111,12 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
     getReviewStatsUseCase
       .execute(productId)
       .catch(() => ({ totalReviews: 0, averageRating: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, verifiedPurchaseCount: 0 })),
-    product.productTypeId ? listProductTypesUseCase.execute().then(types => types.find((t: { productTypeId: string }) => t.productTypeId === product.productTypeId) || null).catch(() => null) : Promise.resolve(null),
+    product.productTypeId
+      ? listProductTypesUseCase
+          .execute()
+          .then(types => types.find((t: { productTypeId: string }) => t.productTypeId === product.productTypeId) || null)
+          .catch(() => null)
+      : Promise.resolve(null),
     product.categoryId ? manageCategoriesUseCase.findOne(product.categoryId).catch(() => null) : Promise.resolve(null),
   ]);
 
@@ -126,7 +130,6 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
     brandName: null,
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -134,10 +137,7 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
 // ============================================================================
 
 export const createProductForm = async (req: TypedRequest, res: Response): Promise<void> => {
-  const [productTypes, categories] = await Promise.all([
-    listProductTypesUseCase.execute(),
-    manageCategoriesUseCase.findActive(),
-  ]);
+  const [productTypes, categories] = await Promise.all([listProductTypesUseCase.execute(), manageCategoriesUseCase.findActive()]);
 
   adminRespond(req, res, 'products/create', {
     pageName: 'Create Product',
@@ -147,7 +147,6 @@ export const createProductForm = async (req: TypedRequest, res: Response): Promi
 
     formData: {},
   });
-  
 };
 
 // ============================================================================
@@ -190,10 +189,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     } = body;
 
     if (!name?.trim()) {
-      const [productTypes, categories] = await Promise.all([
-        listProductTypesUseCase.execute(),
-        manageCategoriesUseCase.findActive(),
-      ]);
+      const [productTypes, categories] = await Promise.all([listProductTypesUseCase.execute(), manageCategoriesUseCase.findActive()]);
       adminRespond(req, res, 'products/create', {
         pageName: 'Create Product',
         error: 'Product name is required',
@@ -291,7 +287,6 @@ export const editProductForm = async (req: TypedRequest, res: Response): Promise
     productAttributes,
     allAttributes,
   });
-  
 };
 
 // ============================================================================
@@ -306,7 +301,6 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
   await updateProductUseCase.execute(command);
 
   res.redirect(`/admin/products/${productId}?success=Product updated successfully`);
-  
 };
 
 // ============================================================================
@@ -326,7 +320,6 @@ export const deleteProduct = async (req: TypedRequest, res: Response): Promise<v
   await deleteProductUseCase.execute(productId, permanent === 'true');
 
   res.json({ success: true, message: 'Product deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -350,7 +343,6 @@ export const updateProductStatus = async (req: TypedRequest, res: Response): Pro
   } catch {
     res.status(404).json({ success: false, message: 'Product not found' });
   }
-  
 };
 
 // ============================================================================
@@ -366,7 +358,6 @@ export const publishProduct = async (req: TypedRequest, res: Response): Promise<
   } catch {
     res.status(404).json({ success: false, message: 'Product not found' });
   }
-  
 };
 
 // ============================================================================
@@ -382,7 +373,6 @@ export const unpublishProduct = async (req: TypedRequest, res: Response): Promis
   } catch {
     res.status(404).json({ success: false, message: 'Product not found' });
   }
-  
 };
 
 // ============================================================================
@@ -396,7 +386,6 @@ export const listProductCategories = async (req: TypedRequest, res: Response): P
     categories,
     success: req.query.success || null,
   });
-  
 };
 
 export const createProductCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -407,7 +396,6 @@ export const createProductCategoryForm = async (req: TypedRequest, res: Response
     categories,
     formData: {},
   });
-  
 };
 
 export const createProductCategory = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -434,7 +422,10 @@ export const createProductCategory = async (req: TypedRequest, res: Response): P
 
 export const editProductCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
   const { categoryId } = req.params;
-  const [category, categories] = await Promise.all([manageProductCategoriesUseCase.findById(categoryId), manageProductCategoriesUseCase.findAll()]);
+  const [category, categories] = await Promise.all([
+    manageProductCategoriesUseCase.findById(categoryId),
+    manageProductCategoriesUseCase.findAll(),
+  ]);
   if (!category) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Category not found' });
     return;
@@ -445,7 +436,6 @@ export const editProductCategoryForm = async (req: TypedRequest, res: Response):
     categories: categories.filter(c => c.productCategoryId !== categoryId),
     formData: category,
   });
-  
 };
 
 export const updateProductCategory = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -493,7 +483,6 @@ export const listProductTags = async (req: TypedRequest, res: Response): Promise
     tags,
     success: req.query.success || null,
   });
-  
 };
 
 export const createProductTag = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -534,7 +523,6 @@ export const listProductCollections = async (req: TypedRequest, res: Response): 
     collections,
     success: req.query.success || null,
   });
-  
 };
 
 export const createProductCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -543,7 +531,6 @@ export const createProductCollectionForm = async (req: TypedRequest, res: Respon
     collection: null,
     formData: {},
   });
-  
 };
 
 export const createProductCollection = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -577,7 +564,6 @@ export const editProductCollectionForm = async (req: TypedRequest, res: Response
     collection,
     formData: collection,
   });
-  
 };
 
 export const updateProductCollection = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -618,7 +604,6 @@ export const listProductQa = async (req: TypedRequest, res: Response): Promise<v
   const { productId } = req.params;
   const qaList = await manageProductQaUseCase.findByProduct(productId);
   res.render('admin/views/products/partials/qa', { qaList, productId });
-  
 };
 
 export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -630,7 +615,9 @@ export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<
     res.redirect(`/admin/products/${productId}?success=Q%26A status updated`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to update Q&A status'));
+    res.redirect(
+      `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to update Q&A status'),
+    );
   }
 };
 
@@ -648,7 +635,6 @@ export const listReviewMedia = async (req: TypedRequest, res: Response): Promise
     })),
   );
   res.render('admin/views/products/partials/review-media', { mediaByReview, productId });
-  
 };
 
 export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -658,7 +644,9 @@ export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promi
     res.redirect(`/admin/products/${productId}?success=Media deleted`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to delete media'));
+    res.redirect(
+      `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to delete media'),
+    );
   }
 };
 
@@ -670,7 +658,6 @@ export const listProductPrices = async (req: TypedRequest, res: Response): Promi
   const { productId } = req.params;
   const prices = await manageProductPricesUseCase.findByProduct(productId);
   res.render('admin/views/products/partials/prices', { prices, productId });
-  
 };
 
 export const upsertProductPrice = async (req: TypedRequest, res: Response): Promise<void> => {

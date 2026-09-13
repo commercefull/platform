@@ -94,12 +94,30 @@ export async function updateSchedule(id: string, params: UpdateReportSchedulePar
   const values: unknown[] = [];
   let idx = 1;
 
-  if (params.name !== undefined) { fields.push(`"name" = $${idx++}`); values.push(params.name); }
-  if (params.frequency !== undefined) { fields.push(`"type" = $${idx++}`); values.push(params.frequency); }
-  if (params.parameters !== undefined) { fields.push(`"parameters" = $${idx++}`); values.push(JSON.stringify(params.parameters)); }
-  if (params.recipients !== undefined) { fields.push(`"recipients" = $${idx++}`); values.push(JSON.stringify(params.recipients)); }
-  if (params.format !== undefined) { fields.push(`"format" = $${idx++}`); values.push(params.format); }
-  if (params.isActive !== undefined) { fields.push(`"isActive" = $${idx++}`); values.push(params.isActive); }
+  if (params.name !== undefined) {
+    fields.push(`"name" = $${idx++}`);
+    values.push(params.name);
+  }
+  if (params.frequency !== undefined) {
+    fields.push(`"type" = $${idx++}`);
+    values.push(params.frequency);
+  }
+  if (params.parameters !== undefined) {
+    fields.push(`"parameters" = $${idx++}`);
+    values.push(JSON.stringify(params.parameters));
+  }
+  if (params.recipients !== undefined) {
+    fields.push(`"recipients" = $${idx++}`);
+    values.push(JSON.stringify(params.recipients));
+  }
+  if (params.format !== undefined) {
+    fields.push(`"format" = $${idx++}`);
+    values.push(params.format);
+  }
+  if (params.isActive !== undefined) {
+    fields.push(`"isActive" = $${idx++}`);
+    values.push(params.isActive);
+  }
 
   if (fields.length === 0) return findScheduleById(id);
 
@@ -123,10 +141,12 @@ export async function deleteSchedule(id: string): Promise<boolean> {
 }
 
 export async function markScheduleRun(id: string, nextRunAt: Date): Promise<void> {
-  await query(
-    `UPDATE "reportingReportSchedule" SET "lastRunAt" = $1, "nextRunAt" = $2, "updatedAt" = $3 WHERE "reportScheduleId" = $4`,
-    [new Date(), nextRunAt, new Date(), id],
-  );
+  await query(`UPDATE "reportingReportSchedule" SET "lastRunAt" = $1, "nextRunAt" = $2, "updatedAt" = $3 WHERE "reportScheduleId" = $4`, [
+    new Date(),
+    nextRunAt,
+    new Date(),
+    id,
+  ]);
 }
 
 export async function createExecution(scheduleId: string): Promise<ReportExecutionProps> {
@@ -143,18 +163,43 @@ export async function createExecution(scheduleId: string): Promise<ReportExecuti
 
 export async function updateExecution(
   id: string,
-  updates: { status?: string; completedAt?: Date; fileUrl?: string; fileSize?: number; errorMessage?: string; metadata?: Record<string, unknown> },
+  updates: {
+    status?: string;
+    completedAt?: Date;
+    fileUrl?: string;
+    fileSize?: number;
+    errorMessage?: string;
+    metadata?: Record<string, unknown>;
+  },
 ): Promise<ReportExecutionProps | null> {
   const fields: string[] = [];
   const values: unknown[] = [];
   let idx = 1;
 
-  if (updates.status !== undefined) { fields.push(`"status" = $${idx++}`); values.push(updates.status); }
-  if (updates.completedAt !== undefined) { fields.push(`"completedAt" = $${idx++}`); values.push(updates.completedAt); }
-  if (updates.fileUrl !== undefined) { fields.push(`"fileUrl" = $${idx++}`); values.push(updates.fileUrl); }
-  if (updates.fileSize !== undefined) { fields.push(`"fileSize" = $${idx++}`); values.push(updates.fileSize); }
-  if (updates.errorMessage !== undefined) { fields.push(`"errorMessage" = $${idx++}`); values.push(updates.errorMessage); }
-  if (updates.metadata !== undefined) { fields.push(`"metadata" = $${idx++}`); values.push(JSON.stringify(updates.metadata)); }
+  if (updates.status !== undefined) {
+    fields.push(`"status" = $${idx++}`);
+    values.push(updates.status);
+  }
+  if (updates.completedAt !== undefined) {
+    fields.push(`"completedAt" = $${idx++}`);
+    values.push(updates.completedAt);
+  }
+  if (updates.fileUrl !== undefined) {
+    fields.push(`"fileUrl" = $${idx++}`);
+    values.push(updates.fileUrl);
+  }
+  if (updates.fileSize !== undefined) {
+    fields.push(`"fileSize" = $${idx++}`);
+    values.push(updates.fileSize);
+  }
+  if (updates.errorMessage !== undefined) {
+    fields.push(`"errorMessage" = $${idx++}`);
+    values.push(updates.errorMessage);
+  }
+  if (updates.metadata !== undefined) {
+    fields.push(`"metadata" = $${idx++}`);
+    values.push(JSON.stringify(updates.metadata));
+  }
 
   if (fields.length === 0) return null;
 
@@ -211,7 +256,11 @@ function mapExecutionRow(row: ReportingReportExecution): ReportExecutionProps {
     fileUrl: row.fileUrl ?? undefined,
     fileSize: row.fileSize ?? undefined,
     errorMessage: row.errorMessage ?? undefined,
-    metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata as Record<string, unknown>) : undefined,
+    metadata: row.metadata
+      ? typeof row.metadata === 'string'
+        ? JSON.parse(row.metadata as string)
+        : (row.metadata as Record<string, unknown>)
+      : undefined,
   };
 }
 

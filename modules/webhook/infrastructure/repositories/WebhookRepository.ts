@@ -9,11 +9,7 @@ import { Table } from '../../../../libs/db/types';
 import { WebhookEndpointProps } from '../../domain/entities/WebhookEndpoint';
 import { WebhookDeliveryProps } from '../../domain/entities/WebhookDelivery';
 import { FailedToCreateWebhookEndpointError, FailedToCreateWebhookDeliveryError } from '../../domain/errors/WebhookErrors';
-import {
-  WebhookRepositoryInterface,
-  WebhookEndpointFilters,
-  WebhookDeliveryFilters,
-} from '../../domain/repositories/WebhookRepository';
+import { WebhookRepositoryInterface, WebhookEndpointFilters, WebhookDeliveryFilters } from '../../domain/repositories/WebhookRepository';
 import { PaginationOptions } from 'libs/types/shared';
 
 class WebhookRepository implements WebhookRepositoryInterface {

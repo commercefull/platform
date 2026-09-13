@@ -25,7 +25,6 @@ class ProductTypeController {
       success: true,
       data: productTypes,
     });
-    
   }
 
   /**
@@ -54,7 +53,6 @@ class ProductTypeController {
         attributeSets,
       },
     });
-    
   }
 
   /**
@@ -77,7 +75,6 @@ class ProductTypeController {
       success: true,
       data: productType,
     });
-    
   }
 
   /**
@@ -115,7 +112,6 @@ class ProductTypeController {
       success: true,
       data: productType,
     });
-    
   }
 
   /**
@@ -156,7 +152,6 @@ class ProductTypeController {
       success: true,
       data: updated,
     });
-    
   }
 
   /**
@@ -181,7 +176,6 @@ class ProductTypeController {
       success: true,
       message: 'Product type deleted successfully',
     });
-    
   }
 
   /**
@@ -206,7 +200,6 @@ class ProductTypeController {
       success: true,
       data: attributes,
     });
-    
   }
 }
 

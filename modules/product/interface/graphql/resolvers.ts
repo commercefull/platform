@@ -5,31 +5,31 @@ import { getProductUseCase, listProductsUseCase, searchProductsUseCase } from '.
 
 export const productResolvers = {
   Query: {
-    product: async (_parent: unknown, args: {
-      productId?: string;
-      slug?: string;
-      sku?: string;
-      includeVariants?: boolean;
-      includeImages?: boolean;
-    }) => {
+    product: async (
+      _parent: unknown,
+      args: {
+        productId?: string;
+        slug?: string;
+        sku?: string;
+        includeVariants?: boolean;
+        includeImages?: boolean;
+      },
+    ) => {
       const useCase = getProductUseCase;
-      const command = new GetProductCommand(
-        args.productId,
-        args.slug,
-        args.sku,
-        args.includeVariants ?? true,
-        args.includeImages ?? true,
-      );
+      const command = new GetProductCommand(args.productId, args.slug, args.sku, args.includeVariants ?? true, args.includeImages ?? true);
       return useCase.execute(command);
     },
 
-    products: async (_parent: unknown, args: {
-      filters?: Record<string, unknown>;
-      limit?: number;
-      offset?: number;
-      orderBy?: string;
-      orderDirection?: 'asc' | 'desc';
-    }) => {
+    products: async (
+      _parent: unknown,
+      args: {
+        filters?: Record<string, unknown>;
+        limit?: number;
+        offset?: number;
+        orderBy?: string;
+        orderDirection?: 'asc' | 'desc';
+      },
+    ) => {
       const useCase = listProductsUseCase;
       const command = new ListProductsCommand(
         args.filters,
@@ -41,13 +41,16 @@ export const productResolvers = {
       return useCase.execute(command);
     },
 
-    searchProducts: async (_parent: unknown, args: {
-      query: string;
-      filters?: Record<string, unknown>;
-      limit?: number;
-      offset?: number;
-      orderBy?: string;
-    }) => {
+    searchProducts: async (
+      _parent: unknown,
+      args: {
+        query: string;
+        filters?: Record<string, unknown>;
+        limit?: number;
+        offset?: number;
+        orderBy?: string;
+      },
+    ) => {
       const useCase = searchProductsUseCase;
       const command = new SearchProductsCommand(
         args.query,

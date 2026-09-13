@@ -110,22 +110,52 @@ export class TrackingConfig {
   }
 
   // Getters
-  get configId(): string { return this.props.configId; }
-  get storeId(): string { return this.props.storeId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get status(): TrackingStatus { return this.props.status; }
-  get gtm(): GTMConfig | null { return this.props.gtm; }
-  get metaCapi(): MetaCAPIConfig | null { return this.props.metaCapi; }
-  get eventMappings(): EventMapping[] { return this.props.eventMappings; }
-  get defaultConsentCategory(): 'analytics' | 'marketing' | 'thirdParty' { return this.props.defaultConsentCategory; }
-  get hashPii(): boolean { return this.props.hashPii; }
-  get serverSideEnabled(): boolean { return this.props.serverSideEnabled; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get configId(): string {
+    return this.props.configId;
+  }
+  get storeId(): string {
+    return this.props.storeId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get status(): TrackingStatus {
+    return this.props.status;
+  }
+  get gtm(): GTMConfig | null {
+    return this.props.gtm;
+  }
+  get metaCapi(): MetaCAPIConfig | null {
+    return this.props.metaCapi;
+  }
+  get eventMappings(): EventMapping[] {
+    return this.props.eventMappings;
+  }
+  get defaultConsentCategory(): 'analytics' | 'marketing' | 'thirdParty' {
+    return this.props.defaultConsentCategory;
+  }
+  get hashPii(): boolean {
+    return this.props.hashPii;
+  }
+  get serverSideEnabled(): boolean {
+    return this.props.serverSideEnabled;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
-  isGtmEnabled(): boolean { return this.props.gtm !== null && this.props.status === 'active'; }
-  isMetaCapiEnabled(): boolean { return this.props.metaCapi !== null && this.props.status === 'active'; }
-  isActive(): boolean { return this.props.status === 'active'; }
+  isGtmEnabled(): boolean {
+    return this.props.gtm !== null && this.props.status === 'active';
+  }
+  isMetaCapiEnabled(): boolean {
+    return this.props.metaCapi !== null && this.props.status === 'active';
+  }
+  isActive(): boolean {
+    return this.props.status === 'active';
+  }
 
   /**
    * Find the event mapping for a given source event type

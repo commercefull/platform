@@ -446,9 +446,10 @@ export async function getDashboards(organizationId?: string): Promise<AnalyticsR
 }
 
 export async function getDashboard(dashboardId: string): Promise<AnalyticsReportDashboard | null> {
-  const row = await queryOne<AnalyticsReportDashboardRow>('SELECT * FROM "analyticsReportDashboard" WHERE "analyticsReportDashboardId" = $1', [
-    dashboardId,
-  ]);
+  const row = await queryOne<AnalyticsReportDashboardRow>(
+    'SELECT * FROM "analyticsReportDashboard" WHERE "analyticsReportDashboardId" = $1',
+    [dashboardId],
+  );
   return row ? mapToAnalyticsReportDashboard(row) : null;
 }
 

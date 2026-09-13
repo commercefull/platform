@@ -8,12 +8,7 @@ jest.mock('../logger', () => ({
 
 import { query } from '../db';
 import { PostgresFtsAdapter } from './postgresFtsAdapter';
-import {
-  setSearchAdapter,
-  getSearchAdapter,
-  isSearchAdapterConfigured,
-  type SearchProductItem,
-} from './types';
+import { setSearchAdapter, getSearchAdapter, isSearchAdapterConfigured, type SearchProductItem } from './types';
 
 const mockedQuery = query as jest.MockedFunction<typeof query>;
 
@@ -67,15 +62,53 @@ describe('PostgresFtsAdapter', () => {
 
     it('applies merchandising boost/bury/pin', async () => {
       const mockProducts: SearchProductItem[] = [
-        { productId: 'normal1', name: 'Normal 1', slug: 'n1', price: 10, status: 'active', visibility: 'visible', isFeatured: false, isNew: false, isBestseller: false },
-        { productId: 'boosted1', name: 'Boosted 1', slug: 'b1', price: 20, status: 'active', visibility: 'visible', isFeatured: false, isNew: false, isBestseller: false },
-        { productId: 'buried1', name: 'Buried 1', slug: 'br1', price: 30, status: 'active', visibility: 'visible', isFeatured: false, isNew: false, isBestseller: false },
-        { productId: 'pinned1', name: 'Pinned 1', slug: 'p1', price: 40, status: 'active', visibility: 'visible', isFeatured: false, isNew: false, isBestseller: false },
+        {
+          productId: 'normal1',
+          name: 'Normal 1',
+          slug: 'n1',
+          price: 10,
+          status: 'active',
+          visibility: 'visible',
+          isFeatured: false,
+          isNew: false,
+          isBestseller: false,
+        },
+        {
+          productId: 'boosted1',
+          name: 'Boosted 1',
+          slug: 'b1',
+          price: 20,
+          status: 'active',
+          visibility: 'visible',
+          isFeatured: false,
+          isNew: false,
+          isBestseller: false,
+        },
+        {
+          productId: 'buried1',
+          name: 'Buried 1',
+          slug: 'br1',
+          price: 30,
+          status: 'active',
+          visibility: 'visible',
+          isFeatured: false,
+          isNew: false,
+          isBestseller: false,
+        },
+        {
+          productId: 'pinned1',
+          name: 'Pinned 1',
+          slug: 'p1',
+          price: 40,
+          status: 'active',
+          visibility: 'visible',
+          isFeatured: false,
+          isNew: false,
+          isBestseller: false,
+        },
       ];
 
-      mockedQuery
-        .mockResolvedValueOnce(mockProducts as never)
-        .mockResolvedValueOnce([{ count: '4' }] as never);
+      mockedQuery.mockResolvedValueOnce(mockProducts as never).mockResolvedValueOnce([{ count: '4' }] as never);
 
       const result = await adapter.search({
         query: 'test',
@@ -98,15 +131,53 @@ describe('PostgresFtsAdapter', () => {
 
     it('applies manual ordering for category', async () => {
       const mockProducts: SearchProductItem[] = [
-        { productId: 'p3', name: 'Product 3', slug: 'p3', price: 30, status: 'active', visibility: 'visible', isFeatured: false, isNew: false, isBestseller: false },
-        { productId: 'p1', name: 'Product 1', slug: 'p1', price: 10, status: 'active', visibility: 'visible', isFeatured: false, isNew: false, isBestseller: false },
-        { productId: 'p2', name: 'Product 2', slug: 'p2', price: 20, status: 'active', visibility: 'visible', isFeatured: false, isNew: false, isBestseller: false },
-        { productId: 'p4', name: 'Product 4', slug: 'p4', price: 40, status: 'active', visibility: 'visible', isFeatured: false, isNew: false, isBestseller: false },
+        {
+          productId: 'p3',
+          name: 'Product 3',
+          slug: 'p3',
+          price: 30,
+          status: 'active',
+          visibility: 'visible',
+          isFeatured: false,
+          isNew: false,
+          isBestseller: false,
+        },
+        {
+          productId: 'p1',
+          name: 'Product 1',
+          slug: 'p1',
+          price: 10,
+          status: 'active',
+          visibility: 'visible',
+          isFeatured: false,
+          isNew: false,
+          isBestseller: false,
+        },
+        {
+          productId: 'p2',
+          name: 'Product 2',
+          slug: 'p2',
+          price: 20,
+          status: 'active',
+          visibility: 'visible',
+          isFeatured: false,
+          isNew: false,
+          isBestseller: false,
+        },
+        {
+          productId: 'p4',
+          name: 'Product 4',
+          slug: 'p4',
+          price: 40,
+          status: 'active',
+          visibility: 'visible',
+          isFeatured: false,
+          isNew: false,
+          isBestseller: false,
+        },
       ];
 
-      mockedQuery
-        .mockResolvedValueOnce(mockProducts as never)
-        .mockResolvedValueOnce([{ count: '4' }] as never);
+      mockedQuery.mockResolvedValueOnce(mockProducts as never).mockResolvedValueOnce([{ count: '4' }] as never);
 
       const result = await adapter.search({
         categoryId: 'cat1',
@@ -145,9 +216,7 @@ describe('PostgresFtsAdapter', () => {
           { text: 'Red Shirt', type: 'product', productId: 'p1' },
           { text: 'Red Dress', type: 'product', productId: 'p2' },
         ] as never)
-        .mockResolvedValueOnce([
-          { text: 'Red Collection', type: 'category', categoryId: 'c1' },
-        ] as never);
+        .mockResolvedValueOnce([{ text: 'Red Collection', type: 'category', categoryId: 'c1' }] as never);
 
       const result = await adapter.autocomplete('red', 10);
 

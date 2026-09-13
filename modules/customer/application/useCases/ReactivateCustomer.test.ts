@@ -7,7 +7,9 @@ import { ReactivateCustomerUseCase, ReactivateCustomerCommand } from './Reactiva
 import { CustomerNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ReactivateCustomerUseCase', () => {
   let useCase: ReactivateCustomerUseCase;

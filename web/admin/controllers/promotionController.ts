@@ -17,6 +17,10 @@ import {
   deletePromotionUseCase,
 } from '../../../modules/promotion/application/useCases/wired';
 import { ManagePromotionsUseCase } from '../../../modules/promotion/application/useCases/ManagePromotions';
+import {
+  promotionEvaluationService,
+  type PromotionEvaluationContext,
+} from '../../../modules/promotion/application/services/PromotionEvaluationService';
 import { adminRespond } from '../../respond';
 
 const managePromotionsUseCase = new ManagePromotionsUseCase();
@@ -65,7 +69,6 @@ export const listPromotions = async (req: TypedRequest, res: Response): Promise<
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -76,7 +79,6 @@ export const createPromotionForm = async (req: TypedRequest, res: Response): Pro
   adminRespond(req, res, 'promotions/create', {
     pageName: 'Create Promotion',
   });
-  
 };
 
 // ============================================================================
@@ -86,7 +88,8 @@ export const createPromotionForm = async (req: TypedRequest, res: Response): Pro
 export const createPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const body = req.body as RequestBody;
-    const { code, name, description, type, value, minOrderAmount, maxDiscountAmount, usageLimit, usageLimitPerCustomer, startsAt, endsAt } = body;
+    const { code, name, description, type, value, minOrderAmount, maxDiscountAmount, usageLimit, usageLimitPerCustomer, startsAt, endsAt } =
+      body;
 
     const command = new CreatePromotionCommand(
       name,
@@ -141,7 +144,6 @@ export const viewPromotion = async (req: TypedRequest, res: Response): Promise<v
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -165,7 +167,6 @@ export const editPromotionForm = async (req: TypedRequest, res: Response): Promi
     pageName: `Edit: ${promotion.name}`,
     promotion,
   });
-  
 };
 
 // ============================================================================
@@ -209,7 +210,6 @@ export const updatePromotion = async (req: TypedRequest, res: Response): Promise
   await updatePromotionUseCase.execute(command);
 
   res.redirect(`/hub/promotions/${promotionId}?success=Promotion updated successfully`);
-  
 };
 
 // ============================================================================
@@ -223,5 +223,79 @@ export const deletePromotion = async (req: TypedRequest, res: Response): Promise
   await deletePromotionUseCase.execute(command);
 
   res.json({ success: true, message: 'Promotion deleted successfully' });
-  
+};
+
+// ============================================================================
+// Promotion Preview (server-side evaluation via PromotionEvaluationService)
+// ============================================================================
+
+export const previewPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const body = req.body as RequestBody;
+    const {
+      items: rawItems,
+      subtotal,
+      shippingAmount,
+      customerId,
+      customerGroup,
+      isFirstOrder,
+      shippingMethodId,
+      paymentMethodId,
+      couponCode,
+      currency,
+    } = body;
+
+    // Build sample cart items from request
+    const items = Array.isArray(rawItems)
+      ? rawItems
+      : [
+          {
+            productId: 'sample-product',
+            name: 'Sample Product',
+            quantity: parseInt(body.itemQty as string, 10) || 1,
+            unitPrice: parseFloat(body.cartTotal as string) || parseFloat(subtotal as string) || 100,
+          },
+        ];
+
+    const context: PromotionEvaluationContext = {
+      items: items.map(
+        (item: { productId: string; name: string; quantity: number; unitPrice: number; categoryId?: string; isDigital?: boolean }) => ({
+          productId: item.productId || 'sample-product',
+          name: item.name || 'Sample Product',
+          quantity: item.quantity || 1,
+          unitPrice: item.unitPrice || 0,
+          categoryId: item.categoryId,
+          isDigital: item.isDigital,
+        }),
+      ),
+      subtotal:
+        parseFloat(subtotal as string) ||
+        items.reduce((sum: number, i: { unitPrice: number; quantity: number }) => sum + i.unitPrice * i.quantity, 0),
+      shippingAmount: parseFloat(shippingAmount as string) || 0,
+      customerId: customerId || undefined,
+      customerGroup: customerGroup || undefined,
+      isFirstOrder: isFirstOrder === 'true',
+      shippingMethodId: shippingMethodId || undefined,
+      paymentMethodId: paymentMethodId || undefined,
+      couponCode: couponCode || undefined,
+      currency: currency || 'USD',
+    };
+
+    const result = await promotionEvaluationService.evaluate(context);
+
+    res.json({
+      success: true,
+      totalDiscountAmount: result.totalDiscountAmount,
+      shippingDiscountAmount: result.shippingDiscountAmount,
+      freeShipping: result.freeShipping,
+      lineItemDiscounts: result.lineItemDiscounts,
+      freeItems: result.freeItems,
+      appliedPromotions: result.appliedPromotions,
+      message: result.message,
+      finalTotal: context.subtotal - result.totalDiscountAmount,
+    });
+  } catch (error: unknown) {
+    logger.warn('Error previewing promotion:', error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
 };

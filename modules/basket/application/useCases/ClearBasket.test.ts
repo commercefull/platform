@@ -7,16 +7,25 @@ import { ClearBasketUseCase, ClearBasketCommand } from './ClearBasket';
 import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ClearBasketUseCase', () => {
   let useCase: ClearBasketUseCase;
   let mockRepo: Record<string, jest.Mock>;
 
   const makeBasket = () => ({
-    basketId: 'b1', customerId: 'c1', sessionId: 's1', status: 'active', currency: 'USD',
-    items: [], itemCount: 2, subtotal: { amount: 100 },
-    createdAt: new Date(), updatedAt: new Date(),
+    basketId: 'b1',
+    customerId: 'c1',
+    sessionId: 's1',
+    status: 'active',
+    currency: 'USD',
+    items: [],
+    itemCount: 2,
+    subtotal: { amount: 100 },
+    createdAt: new Date(),
+    updatedAt: new Date(),
     clearItems: jest.fn(),
   });
 

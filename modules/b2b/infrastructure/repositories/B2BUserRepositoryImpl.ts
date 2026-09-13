@@ -4,34 +4,24 @@ import type { B2BUserRepository } from '../../domain/repositories/B2BRepository'
 
 export class B2BUserRepositoryImpl implements B2BUserRepository {
   async findById(userId: string): Promise<B2BUser | null> {
-    const row = await queryOne<B2BUserProps>(
-      `SELECT * FROM "b2bUser" WHERE "userId" = $1`,
-      [userId],
-    );
+    const row = await queryOne<B2BUserProps>(`SELECT * FROM "b2bUser" WHERE "userId" = $1`, [userId]);
     return row ? B2BUser.reconstitute(row) : null;
   }
 
   async findByEmail(email: string, companyId: string): Promise<B2BUser | null> {
-    const row = await queryOne<B2BUserProps>(
-      `SELECT * FROM "b2bUser" WHERE "email" = $1 AND "companyId" = $2`,
-      [email, companyId],
-    );
+    const row = await queryOne<B2BUserProps>(`SELECT * FROM "b2bUser" WHERE "email" = $1 AND "companyId" = $2`, [email, companyId]);
     return row ? B2BUser.reconstitute(row) : null;
   }
 
   async findByCompanyId(companyId: string): Promise<B2BUser[]> {
-    const rows = await query<B2BUserProps[]>(
-      `SELECT * FROM "b2bUser" WHERE "companyId" = $1 ORDER BY "createdAt" DESC`,
-      [companyId],
-    );
+    const rows = await query<B2BUserProps[]>(`SELECT * FROM "b2bUser" WHERE "companyId" = $1 ORDER BY "createdAt" DESC`, [companyId]);
     return (rows ?? []).map(r => B2BUser.reconstitute(r));
   }
 
   async findByOrganizationId(organizationId: string): Promise<B2BUser[]> {
-    const rows = await query<B2BUserProps[]>(
-      `SELECT * FROM "b2bUser" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`,
-      [organizationId],
-    );
+    const rows = await query<B2BUserProps[]>(`SELECT * FROM "b2bUser" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`, [
+      organizationId,
+    ]);
     return (rows ?? []).map(r => B2BUser.reconstitute(r));
   }
 
@@ -57,11 +47,22 @@ export class B2BUserRepositoryImpl implements B2BUserRepository {
         "updatedAt" = EXCLUDED."updatedAt"
       `,
       [
-        json.userId, json.companyId, json.organizationId, json.email,
-        json.firstName ?? null, json.lastName ?? null, json.role, json.status,
-        JSON.stringify(json.spendingLimits), json.department ?? null,
-        json.costCenter ?? null, json.invitedAt, json.activatedAt ?? null,
-        json.lastLoginAt ?? null, json.createdAt, json.updatedAt,
+        json.userId,
+        json.companyId,
+        json.organizationId,
+        json.email,
+        json.firstName ?? null,
+        json.lastName ?? null,
+        json.role,
+        json.status,
+        JSON.stringify(json.spendingLimits),
+        json.department ?? null,
+        json.costCenter ?? null,
+        json.invitedAt,
+        json.activatedAt ?? null,
+        json.lastLoginAt ?? null,
+        json.createdAt,
+        json.updatedAt,
       ],
     );
   }

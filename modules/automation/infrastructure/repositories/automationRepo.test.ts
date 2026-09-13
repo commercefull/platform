@@ -38,13 +38,27 @@ describe('AutomationRuleRepositoryImpl', () => {
 
   it('findById returns rule when found', async () => {
     const mockRow = {
-      automationRuleId: 'r1', name: 'Test Rule', description: null,
-      triggerType: 'event', triggerConfig: { eventName: 'order.created' },
-      conditions: [], conditionMatchMode: 'all',
-      actions: [{ type: 'custom', config: {} }], actionExecutionMode: 'sequential',
-      isActive: true, priority: 0, executionCount: 0, successCount: 0, failureCount: 0,
-      lastTriggeredAt: null, lastExecutedAt: null, organizationId: null, createdBy: null,
-      createdAt: new Date(), updatedAt: new Date(), deletedAt: null,
+      automationRuleId: 'r1',
+      name: 'Test Rule',
+      description: null,
+      triggerType: 'event',
+      triggerConfig: { eventName: 'order.created' },
+      conditions: [],
+      conditionMatchMode: 'all',
+      actions: [{ type: 'custom', config: {} }],
+      actionExecutionMode: 'sequential',
+      isActive: true,
+      priority: 0,
+      executionCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      lastTriggeredAt: null,
+      lastExecutedAt: null,
+      organizationId: null,
+      createdBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
     };
     mockedQueryOne.mockResolvedValueOnce(mockRow as never);
     const result = await repo.findById('r1');
@@ -74,13 +88,27 @@ describe('AutomationRuleRepositoryImpl', () => {
       actions: [{ type: 'custom', config: {} }],
     });
     const mockRow = {
-      automationRuleId: 'r1', name: 'New Rule', description: null,
-      triggerType: 'event', triggerConfig: { eventName: 'test.event' },
-      conditions: [], conditionMatchMode: 'all',
-      actions: [{ type: 'custom', config: {} }], actionExecutionMode: 'sequential',
-      isActive: true, priority: 0, executionCount: 0, successCount: 0, failureCount: 0,
-      lastTriggeredAt: null, lastExecutedAt: null, organizationId: null, createdBy: null,
-      createdAt: new Date(), updatedAt: new Date(), deletedAt: null,
+      automationRuleId: 'r1',
+      name: 'New Rule',
+      description: null,
+      triggerType: 'event',
+      triggerConfig: { eventName: 'test.event' },
+      conditions: [],
+      conditionMatchMode: 'all',
+      actions: [{ type: 'custom', config: {} }],
+      actionExecutionMode: 'sequential',
+      isActive: true,
+      priority: 0,
+      executionCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      lastTriggeredAt: null,
+      lastExecutedAt: null,
+      organizationId: null,
+      createdBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
     };
     mockedQueryOne.mockResolvedValueOnce(mockRow as never);
     const result = await repo.create(rule);
@@ -107,12 +135,27 @@ describe('AutomationRuleRepositoryImpl', () => {
 
   it('activate returns activated rule', async () => {
     const mockRow = {
-      automationRuleId: 'r1', name: 'Test', description: null,
-      triggerType: 'manual', triggerConfig: {}, conditions: [], conditionMatchMode: 'all',
-      actions: [{ type: 'custom', config: {} }], actionExecutionMode: 'sequential',
-      isActive: true, priority: 0, executionCount: 0, successCount: 0, failureCount: 0,
-      lastTriggeredAt: null, lastExecutedAt: null, organizationId: null, createdBy: null,
-      createdAt: new Date(), updatedAt: new Date(), deletedAt: null,
+      automationRuleId: 'r1',
+      name: 'Test',
+      description: null,
+      triggerType: 'manual',
+      triggerConfig: {},
+      conditions: [],
+      conditionMatchMode: 'all',
+      actions: [{ type: 'custom', config: {} }],
+      actionExecutionMode: 'sequential',
+      isActive: true,
+      priority: 0,
+      executionCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      lastTriggeredAt: null,
+      lastExecutedAt: null,
+      organizationId: null,
+      createdBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
     };
     mockedQueryOne.mockResolvedValueOnce(mockRow as never);
     const result = await repo.activate('r1');
@@ -122,12 +165,27 @@ describe('AutomationRuleRepositoryImpl', () => {
 
   it('deactivate returns deactivated rule', async () => {
     const mockRow = {
-      automationRuleId: 'r1', name: 'Test', description: null,
-      triggerType: 'manual', triggerConfig: {}, conditions: [], conditionMatchMode: 'all',
-      actions: [{ type: 'custom', config: {} }], actionExecutionMode: 'sequential',
-      isActive: false, priority: 0, executionCount: 0, successCount: 0, failureCount: 0,
-      lastTriggeredAt: null, lastExecutedAt: null, organizationId: null, createdBy: null,
-      createdAt: new Date(), updatedAt: new Date(), deletedAt: null,
+      automationRuleId: 'r1',
+      name: 'Test',
+      description: null,
+      triggerType: 'manual',
+      triggerConfig: {},
+      conditions: [],
+      conditionMatchMode: 'all',
+      actions: [{ type: 'custom', config: {} }],
+      actionExecutionMode: 'sequential',
+      isActive: false,
+      priority: 0,
+      executionCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      lastTriggeredAt: null,
+      lastExecutedAt: null,
+      organizationId: null,
+      createdBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
     };
     mockedQueryOne.mockResolvedValueOnce(mockRow as never);
     const result = await repo.deactivate('r1');

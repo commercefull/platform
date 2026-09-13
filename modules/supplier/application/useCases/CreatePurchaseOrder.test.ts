@@ -3,11 +3,13 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { CreatePurchaseOrderUseCase} from './CreatePurchaseOrder';
+import { CreatePurchaseOrderUseCase } from './CreatePurchaseOrder';
 import { SupplierNotFoundError, SupplierNotActiveError, SupplierValidationError } from '../../domain/errors/SupplierErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CreatePurchaseOrderUseCase', () => {
   let useCase: CreatePurchaseOrderUseCase;
@@ -20,7 +22,12 @@ describe('CreatePurchaseOrderUseCase', () => {
     };
     mockPORepo = {
       create: jest.fn().mockResolvedValue({
-        purchaseOrderId: 'po-1', poNumber: 'PO-12345678', supplierId: 's1', totalAmount: 100, status: 'draft', createdAt: new Date(),
+        purchaseOrderId: 'po-1',
+        poNumber: 'PO-12345678',
+        supplierId: 's1',
+        totalAmount: 100,
+        status: 'draft',
+        createdAt: new Date(),
       }),
     };
     useCase = new CreatePurchaseOrderUseCase(mockSupplierRepo as never, mockPORepo as never);
@@ -50,9 +57,11 @@ describe('CreatePurchaseOrderUseCase', () => {
   });
 
   it('should throw SupplierValidationError when order total below minimum', async () => {
-    await expect(useCase.execute({
-      supplierId: 's1',
-      items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitCost: 10 }],
-    })).rejects.toThrow(SupplierValidationError);
+    await expect(
+      useCase.execute({
+        supplierId: 's1',
+        items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitCost: 10 }],
+      }),
+    ).rejects.toThrow(SupplierValidationError);
   });
 });

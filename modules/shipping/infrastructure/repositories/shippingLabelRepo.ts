@@ -115,7 +115,9 @@ export async function findByOrderId(orderId: string): Promise<ShippingLabel[]> {
 }
 
 export async function findByFulfillmentId(fulfillmentId: string): Promise<ShippingLabel[]> {
-  const result = await query<ShippingLabel[]>('SELECT * FROM "shippingLabel" WHERE "fulfillmentId" = $1 ORDER BY "createdAt" DESC', [fulfillmentId]);
+  const result = await query<ShippingLabel[]>('SELECT * FROM "shippingLabel" WHERE "fulfillmentId" = $1 ORDER BY "createdAt" DESC', [
+    fulfillmentId,
+  ]);
   return result || [];
 }
 
@@ -128,7 +130,10 @@ export async function voidLabel(shippingLabelId: string, reason?: string): Promi
 }
 
 export async function findAll(limit = 50, offset = 0): Promise<ShippingLabel[]> {
-  const result = await query<ShippingLabel[]>('SELECT * FROM "shippingLabel" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]);
+  const result = await query<ShippingLabel[]>('SELECT * FROM "shippingLabel" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [
+    limit,
+    offset,
+  ]);
   return result || [];
 }
 

@@ -7,7 +7,9 @@ import { CreateTemplateUseCase, CreateTemplateCommand } from './CreateTemplate';
 import { ContentTypeNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CreateTemplateUseCase', () => {
   let useCase: CreateTemplateUseCase;
@@ -17,8 +19,14 @@ describe('CreateTemplateUseCase', () => {
     mockRepo = {
       findContentTypeById: jest.fn().mockResolvedValue({ contentTypeId: 'ct-1', name: 'Blog', slug: 'blog' }),
       createTemplate: jest.fn().mockResolvedValue({
-        contentTemplateId: 't1', name: 'Blog Template', slug: 'blog-template',
-        description: 'A blog template', thumbnail: null, isSystem: false, isActive: true, createdAt: new Date(),
+        contentTemplateId: 't1',
+        name: 'Blog Template',
+        slug: 'blog-template',
+        description: 'A blog template',
+        thumbnail: null,
+        isSystem: false,
+        isActive: true,
+        createdAt: new Date(),
       }),
     };
     useCase = new CreateTemplateUseCase(mockRepo as never);
@@ -39,6 +47,12 @@ describe('CreateTemplateUseCase', () => {
   it('should validate compatible content types', async () => {
     mockRepo.findContentTypeById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new CreateTemplateCommand('Name', 'slug', undefined, undefined, undefined, undefined, undefined, undefined, undefined, ['missing-ct']))).rejects.toThrow(ContentTypeNotFoundError);
+    await expect(
+      useCase.execute(
+        new CreateTemplateCommand('Name', 'slug', undefined, undefined, undefined, undefined, undefined, undefined, undefined, [
+          'missing-ct',
+        ]),
+      ),
+    ).rejects.toThrow(ContentTypeNotFoundError);
   });
 });

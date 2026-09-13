@@ -21,7 +21,9 @@ describe('SetExchangeRateUseCase', () => {
     expect(result.previousRate).toBe(1.2);
     expect(result.newRate).toBe(0.9);
     expect(mockRepo.updateCurrency).toHaveBeenCalledWith('c1', expect.objectContaining({ exchangeRate: 0.9 }));
-    expect(mockRepo.createExchangeRateHistory).toHaveBeenCalledWith(expect.objectContaining({ currencyCode: 'EUR', rate: 0.9, previousRate: 1.2 }));
+    expect(mockRepo.createExchangeRateHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ currencyCode: 'EUR', rate: 0.9, previousRate: 1.2 }),
+    );
   });
 
   it('should throw LocalizationValidationError when currencyCode is empty', async () => {

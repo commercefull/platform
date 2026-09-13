@@ -2,7 +2,14 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import pricingRuleRepository from '../../infrastructure/repositories/PricingRuleRepository';
 import pricingDataRepository from '../../infrastructure/repositories/PricingDataRepository';
-import { CustomerPriceList, CustomerPrice, PricingRuleCreateProps, PricingRuleStatus, PricingRuleUpdateProps, TierPrice } from '../../domain/pricingRule';
+import {
+  CustomerPriceList,
+  CustomerPrice,
+  PricingRuleCreateProps,
+  PricingRuleStatus,
+  PricingRuleUpdateProps,
+  TierPrice,
+} from '../../domain/pricingRule';
 
 interface PricingRuleBody {
   name?: string;
@@ -72,7 +79,6 @@ export const getPricingRules = async (req: TypedRequest, res: Response): Promise
       pages: Math.ceil(total / limitNum),
     },
   });
-  
 };
 
 /**
@@ -94,13 +100,15 @@ export const getPricingRule = async (req: TypedRequest, res: Response): Promise<
     success: true,
     data: rule,
   });
-  
 };
 
 /**
  * Create a new pricing rule
  */
-export const createPricingRule = async (req: TypedRequest<Record<string, string>, unknown, PricingRuleBody>, res: Response): Promise<void> => {
+export const createPricingRule = async (
+  req: TypedRequest<Record<string, string>, unknown, PricingRuleBody>,
+  res: Response,
+): Promise<void> => {
   const ruleData = req.body;
 
   // Validate required fields
@@ -127,13 +135,15 @@ export const createPricingRule = async (req: TypedRequest<Record<string, string>
     success: true,
     data: newRule,
   });
-  
 };
 
 /**
  * Update a pricing rule
  */
-export const updatePricingRule = async (req: TypedRequest<Record<string, string>, unknown, PricingRuleBody>, res: Response): Promise<void> => {
+export const updatePricingRule = async (
+  req: TypedRequest<Record<string, string>, unknown, PricingRuleBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const ruleData = req.body;
 
@@ -152,7 +162,6 @@ export const updatePricingRule = async (req: TypedRequest<Record<string, string>
     success: true,
     data: updatedRule,
   });
-  
 };
 
 /**
@@ -176,7 +185,6 @@ export const deletePricingRule = async (req: TypedRequest, res: Response): Promi
     success: true,
     message: 'Pricing rule deleted successfully',
   });
-  
 };
 
 /**
@@ -206,7 +214,6 @@ export const getTierPrices = async (req: TypedRequest, res: Response): Promise<v
       pages: Math.ceil(total / limitNum),
     },
   });
-  
 };
 
 /**
@@ -228,7 +235,6 @@ export const getTierPrice = async (req: TypedRequest, res: Response): Promise<vo
     success: true,
     data: tierPrice,
   });
-  
 };
 
 /**
@@ -252,7 +258,6 @@ export const createTierPrice = async (req: TypedRequest<Record<string, string>, 
     success: true,
     data: newTierPrice,
   });
-  
 };
 
 /**
@@ -271,13 +276,15 @@ export const updateTierPrice = async (req: TypedRequest<Record<string, string>, 
     return;
   }
 
-  const updatedTierPrice = await pricingDataRepository.tierPrices.update(id, tierPriceData as Partial<Omit<TierPrice, 'id' | 'createdAt' | 'updatedAt'>>);
+  const updatedTierPrice = await pricingDataRepository.tierPrices.update(
+    id,
+    tierPriceData as Partial<Omit<TierPrice, 'id' | 'createdAt' | 'updatedAt'>>,
+  );
 
   res.json({
     success: true,
     data: updatedTierPrice,
   });
-  
 };
 
 /**
@@ -301,7 +308,6 @@ export const deleteTierPrice = async (req: TypedRequest, res: Response): Promise
     success: true,
     message: 'Tier price deleted successfully',
   });
-  
 };
 
 /**
@@ -335,7 +341,6 @@ export const getPriceLists = async (req: TypedRequest, res: Response): Promise<v
       pages: Math.ceil(priceLists.length / limitNum),
     },
   });
-  
 };
 
 /**
@@ -363,7 +368,6 @@ export const getPriceList = async (req: TypedRequest, res: Response): Promise<vo
       prices,
     },
   });
-  
 };
 
 /**
@@ -381,13 +385,14 @@ export const createPriceList = async (req: TypedRequest<Record<string, string>, 
     return;
   }
 
-  const newPriceList = await pricingDataRepository.customerPrices.createPriceList(priceListData as Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>);
+  const newPriceList = await pricingDataRepository.customerPrices.createPriceList(
+    priceListData as Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>,
+  );
 
   res.status(201).json({
     success: true,
     data: newPriceList,
   });
-  
 };
 
 /**
@@ -406,13 +411,15 @@ export const updatePriceList = async (req: TypedRequest<Record<string, string>, 
     return;
   }
 
-  const updatedPriceList = await pricingDataRepository.customerPrices.updatePriceList(id, priceListData as Partial<Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>>);
+  const updatedPriceList = await pricingDataRepository.customerPrices.updatePriceList(
+    id,
+    priceListData as Partial<Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>>,
+  );
 
   res.json({
     success: true,
     data: updatedPriceList,
   });
-  
 };
 
 /**
@@ -436,7 +443,6 @@ export const deletePriceList = async (req: TypedRequest, res: Response): Promise
     success: true,
     message: 'Price list deleted successfully',
   });
-  
 };
 
 /**
@@ -474,5 +480,4 @@ export const addPriceToList = async (req: TypedRequest<Record<string, string>, u
     success: true,
     data: newPrice,
   });
-  
 };

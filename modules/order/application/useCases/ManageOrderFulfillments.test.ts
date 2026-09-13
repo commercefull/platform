@@ -72,7 +72,7 @@ describe('ManageOrderFulfillmentsUseCase', () => {
   });
 
   it('should get status statistics', async () => {
-    const result = await useCase.getStatusStatistics() as unknown as Record<string, unknown>;
+    const result = (await useCase.getStatusStatistics()) as unknown as Record<string, unknown>;
     expect(result.pending).toBe(5);
   });
 

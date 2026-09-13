@@ -26,14 +26,12 @@ export const listLoyaltyTiers = async (req: TypedRequest, res: Response): Promis
     filters: { includeInactive },
     success: req.query.success || null,
   });
-  
 };
 
 export const createLoyaltyTierForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'programs/loyalty/tiers/create', {
     pageName: 'Create Loyalty Tier',
   });
-  
 };
 
 export const createLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -80,7 +78,6 @@ export const viewLoyaltyTier = async (req: TypedRequest, res: Response): Promise
     tier,
     success: req.query.success || null,
   });
-  
 };
 
 export const editLoyaltyTierForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -100,7 +97,6 @@ export const editLoyaltyTierForm = async (req: TypedRequest, res: Response): Pro
     pageName: `Edit: ${tier.name}`,
     tier,
   });
-  
 };
 
 export const updateLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -121,7 +117,6 @@ export const updateLoyaltyTier = async (req: TypedRequest, res: Response): Promi
   const _tier = await manageLoyaltyAdminUseCase.updateTier(tierId, updates);
 
   res.redirect(`/hub/loyalty/tiers/${tierId}?success=Loyalty tier updated successfully`);
-  
 };
 
 export const deleteLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -130,7 +125,6 @@ export const deleteLoyaltyTier = async (req: TypedRequest, res: Response): Promi
   await manageLoyaltyAdminUseCase.deleteTier(tierId);
 
   res.json({ success: true, message: 'Loyalty tier deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -149,14 +143,12 @@ export const listLoyaltyRewards = async (req: TypedRequest, res: Response): Prom
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createLoyaltyRewardForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'programs/loyalty/rewards/create', {
     pageName: 'Create Loyalty Reward',
   });
-  
 };
 
 export const createLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -207,7 +199,6 @@ export const viewLoyaltyReward = async (req: TypedRequest, res: Response): Promi
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editLoyaltyRewardForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -227,7 +218,6 @@ export const editLoyaltyRewardForm = async (req: TypedRequest, res: Response): P
     pageName: `Edit: ${reward.name}`,
     reward,
   });
-  
 };
 
 export const updateLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -235,7 +225,8 @@ export const updateLoyaltyReward = async (req: TypedRequest, res: Response): Pro
   const updates: Record<string, unknown> = {};
 
   const body = req.body as RequestBody;
-  const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } = body;
+  const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
+    body;
 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description || undefined;
@@ -251,7 +242,6 @@ export const updateLoyaltyReward = async (req: TypedRequest, res: Response): Pro
   const _reward = await manageLoyaltyAdminUseCase.updateReward(rewardId, updates);
 
   res.redirect(`/hub/loyalty/rewards/${rewardId}?success=Loyalty reward updated successfully`);
-  
 };
 
 export const deleteLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -260,7 +250,6 @@ export const deleteLoyaltyReward = async (req: TypedRequest, res: Response): Pro
   await manageLoyaltyAdminUseCase.deleteReward(rewardId);
 
   res.json({ success: true, message: 'Loyalty reward deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -283,7 +272,6 @@ export const listCustomerLoyalty = async (req: TypedRequest, res: Response): Pro
 
     success: req.query.success || null,
   });
-  
 };
 
 export const viewCustomerLoyalty = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -309,7 +297,6 @@ export const viewCustomerLoyalty = async (req: TypedRequest, res: Response): Pro
 
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -332,5 +319,4 @@ export const loyaltyAnalytics = async (req: TypedRequest, res: Response): Promis
     pageName: 'Loyalty Analytics',
     stats,
   });
-  
 };

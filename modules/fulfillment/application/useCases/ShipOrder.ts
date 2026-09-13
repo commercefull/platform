@@ -37,7 +37,11 @@ export class ShipOrderUseCase {
       // ok
     } else if (fulfillment.status === 'pending' || fulfillment.status === 'assigned') {
       // fast-path to ready_to_ship per test expectations
-      try { fulfillment.markReadyToShip(); } catch (err) { logger.debug('Fulfillment auto-transition to ready_to_ship skipped', { error: err }); }
+      try {
+        fulfillment.markReadyToShip();
+      } catch (err) {
+        logger.debug('Fulfillment auto-transition to ready_to_ship skipped', { error: err });
+      }
     }
 
     // Mark as shipped with tracking info

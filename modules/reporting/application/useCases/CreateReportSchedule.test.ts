@@ -3,9 +3,16 @@ jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
   default: {
     schedules: {
       createSchedule: jest.fn().mockResolvedValue({
-        reportScheduleId: 'rs1', name: 'Weekly Sales', reportType: 'sales_summary', frequency: 'weekly',
-        recipients: ['admin@test.com'], parameters: {}, format: 'pdf', isActive: true,
-        createdAt: new Date(), updatedAt: new Date(),
+        reportScheduleId: 'rs1',
+        name: 'Weekly Sales',
+        reportType: 'sales_summary',
+        frequency: 'weekly',
+        recipients: ['admin@test.com'],
+        parameters: {},
+        format: 'pdf',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }),
     },
     executions: {},
@@ -28,7 +35,9 @@ describe('CreateReportScheduleUseCase', () => {
 
   it('should create report schedule (happy path)', async () => {
     const result = await useCase.execute({
-      name: 'Weekly Sales', reportType: 'sales_summary', frequency: 'weekly',
+      name: 'Weekly Sales',
+      reportType: 'sales_summary',
+      frequency: 'weekly',
       recipients: ['admin@test.com'],
     });
 

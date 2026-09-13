@@ -83,28 +83,72 @@ export class Quote {
     return new Quote(props);
   }
 
-  get quoteId(): string { return this.props.quoteId; }
-  get companyId(): string { return this.props.companyId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get quoteNumber(): string { return this.props.quoteNumber; }
-  get status(): QuoteStatus { return this.props.status; }
-  get requestedBy(): string { return this.props.requestedBy; }
-  get lineItems(): QuoteLineItem[] { return [...this.props.lineItems]; }
-  get subtotal(): number { return this.props.subtotal; }
-  get discountTotal(): number { return this.props.discountTotal; }
-  get taxTotal(): number { return this.props.taxTotal; }
-  get total(): number { return this.props.total; }
-  get currency(): string { return this.props.currency; }
-  get notes(): string | undefined { return this.props.notes; }
-  get internalNotes(): string | undefined { return this.props.internalNotes; }
-  get validUntil(): Date { return this.props.validUntil; }
-  get sentAt(): Date | undefined { return this.props.sentAt; }
-  get viewedAt(): Date | undefined { return this.props.viewedAt; }
-  get acceptedAt(): Date | undefined { return this.props.acceptedAt; }
-  get rejectedAt(): Date | undefined { return this.props.rejectedAt; }
-  get convertedOrderId(): string | undefined { return this.props.convertedOrderId; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get quoteId(): string {
+    return this.props.quoteId;
+  }
+  get companyId(): string {
+    return this.props.companyId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get quoteNumber(): string {
+    return this.props.quoteNumber;
+  }
+  get status(): QuoteStatus {
+    return this.props.status;
+  }
+  get requestedBy(): string {
+    return this.props.requestedBy;
+  }
+  get lineItems(): QuoteLineItem[] {
+    return [...this.props.lineItems];
+  }
+  get subtotal(): number {
+    return this.props.subtotal;
+  }
+  get discountTotal(): number {
+    return this.props.discountTotal;
+  }
+  get taxTotal(): number {
+    return this.props.taxTotal;
+  }
+  get total(): number {
+    return this.props.total;
+  }
+  get currency(): string {
+    return this.props.currency;
+  }
+  get notes(): string | undefined {
+    return this.props.notes;
+  }
+  get internalNotes(): string | undefined {
+    return this.props.internalNotes;
+  }
+  get validUntil(): Date {
+    return this.props.validUntil;
+  }
+  get sentAt(): Date | undefined {
+    return this.props.sentAt;
+  }
+  get viewedAt(): Date | undefined {
+    return this.props.viewedAt;
+  }
+  get acceptedAt(): Date | undefined {
+    return this.props.acceptedAt;
+  }
+  get rejectedAt(): Date | undefined {
+    return this.props.rejectedAt;
+  }
+  get convertedOrderId(): string | undefined {
+    return this.props.convertedOrderId;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   addLineItem(item: Omit<QuoteLineItem, 'lineItemId'>): void {
     if (this.props.status !== 'draft') {

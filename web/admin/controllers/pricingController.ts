@@ -6,6 +6,17 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
+import { pricingRuleRepo } from '../../../modules/pricing/infrastructure';
+import {
+  PricingRuleType,
+  PricingRuleStatus,
+  PricingRuleScope,
+  PricingAdjustmentType,
+  type PricingCondition,
+  type PricingAdjustment,
+  type PricingRuleCreateProps,
+  type PricingRuleUpdateProps,
+} from '../../../modules/pricing/domain/pricingRule';
 import { adminRespond } from '../../respond';
 
 // ============================================================================
@@ -20,14 +31,12 @@ export const listPriceLists = async (req: TypedRequest, res: Response): Promise<
     pagination: { total: 0, page: 1, pages: 1 },
     success: req.query.success || null,
   });
-  
 };
 
 export const createPriceListForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'catalog/pricing/lists/create', {
     pageName: 'Create Price List',
   });
-  
 };
 
 export const createPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -49,7 +58,6 @@ export const viewPriceList = async (req: TypedRequest, res: Response): Promise<v
     priceList: null,
     success: req.query.success || null,
   });
-  
 };
 
 export const editPriceListForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -57,7 +65,6 @@ export const editPriceListForm = async (req: TypedRequest, res: Response): Promi
     pageName: 'Edit Price List',
     priceList: null,
   });
-  
 };
 
 export const updatePriceList = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -77,7 +84,6 @@ export const updatePriceList = async (req: TypedRequest, res: Response): Promise
 
 export const deletePriceList = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Price list deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -85,24 +91,67 @@ export const deletePriceList = async (req: TypedRequest, res: Response): Promise
 // ============================================================================
 
 export const listPriceRules = async (req: TypedRequest, res: Response): Promise<void> => {
+  let priceRules: never[] = [];
+  try {
+    const rules = await pricingRuleRepo.findAllRules();
+    priceRules = (rules || []).map(r => ({
+      priceRuleId: r.pricingRuleId || r.id,
+      name: r.name,
+      ruleType: r.ruleType || r.type,
+      target: r.scope,
+      value: r.adjustments?.[0]?.value ?? 0,
+      priority: r.priority,
+      status: r.isActive ? 'active' : r.status === PricingRuleStatus.ACTIVE ? 'active' : 'inactive',
+    })) as never[];
+  } catch (error) {
+    logger.warn('Error fetching price rules:', error);
+  }
+
   adminRespond(req, res, 'catalog/pricing/rules/index', {
     pageName: 'Price Rules',
-    priceRules: [],
-    pagination: { total: 0, page: 1, pages: 1 },
+    priceRules,
+    pagination: { total: priceRules.length, page: 1, pages: 1 },
     success: req.query.success || null,
   });
-  
 };
 
 export const createPriceRuleForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'catalog/pricing/rules/create', {
     pageName: 'Create Price Rule',
   });
-  
 };
 
 export const createPriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
+    const body = req.body as RequestBody;
+    const { name, description, ruleType, target, value, priority, status, conditions } = body;
+
+    // Parse conditions from the condition-builder form
+    const parsedConditions = parsePricingConditionsFromForm(conditions);
+
+    // Build adjustments from the value
+    const adjustments: PricingAdjustment[] = [];
+    if (value !== undefined && value !== '') {
+      const numValue = parseFloat(value as string) || 0;
+      adjustments.push({
+        type: ruleType === 'percentage' ? PricingAdjustmentType.PERCENTAGE : PricingAdjustmentType.FIXED,
+        value: numValue,
+      });
+    }
+
+    const createProps: PricingRuleCreateProps = {
+      name,
+      description: description || undefined,
+      type: mapRuleType(ruleType as string),
+      scope: mapScope(target as string),
+      status: status === 'inactive' ? PricingRuleStatus.INACTIVE : PricingRuleStatus.ACTIVE,
+      priority: priority ? parseInt(priority as string, 10) : 0,
+      conditions: parsedConditions,
+      adjustments,
+    };
+
+    await pricingRuleRepo.create(createProps);
+
     res.redirect('/admin/catalog/pricing/rules?success=Price rule created successfully');
   } catch (error: unknown) {
     logger.warn('Error creating price rule:', error);
@@ -115,25 +164,66 @@ export const createPriceRule = async (req: TypedRequest, res: Response): Promise
 };
 
 export const viewPriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
+  const { ruleId } = req.params;
+  let priceRule = null;
+  try {
+    priceRule = await pricingRuleRepo.findById(ruleId);
+  } catch (error) {
+    logger.warn('Error fetching price rule:', error);
+  }
+
   adminRespond(req, res, 'catalog/pricing/rules/view', {
     pageName: 'Price Rule Details',
-    priceRule: null,
+    priceRule,
     success: req.query.success || null,
   });
-  
 };
 
 export const editPriceRuleForm = async (req: TypedRequest, res: Response): Promise<void> => {
+  const { ruleId } = req.params;
+  let priceRule = null;
+  try {
+    priceRule = await pricingRuleRepo.findById(ruleId);
+  } catch (error) {
+    logger.warn('Error fetching price rule for edit:', error);
+  }
+
   adminRespond(req, res, 'catalog/pricing/rules/edit', {
     pageName: 'Edit Price Rule',
-    priceRule: null,
+    priceRule,
   });
-  
 };
 
 export const updatePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { ruleId } = req.params;
+    const body = req.body as RequestBody;
+    const { name, description, ruleType, target, value, priority, status, conditions } = body;
+
+    const parsedConditions = parsePricingConditionsFromForm(conditions);
+
+    const updateProps: PricingRuleUpdateProps = {
+      name: name as string,
+      description: (description as string) || undefined,
+      scope: mapScope(target as string),
+      status: status === 'inactive' ? PricingRuleStatus.INACTIVE : PricingRuleStatus.ACTIVE,
+      priority: priority ? parseInt(priority as string, 10) : 0,
+      conditions: parsedConditions,
+    };
+
+    // Rebuild adjustments if value is provided
+    if (value !== undefined && value !== '') {
+      const numValue = parseFloat(value as string) || 0;
+      updateProps.adjustments = [
+        {
+          type: ruleType === 'percentage' ? PricingAdjustmentType.PERCENTAGE : PricingAdjustmentType.FIXED,
+          value: numValue,
+        },
+      ];
+    }
+
+    await pricingRuleRepo.update(ruleId, updateProps);
+
     res.redirect(`/admin/catalog/pricing/rules/${ruleId}?success=Price rule updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error updating price rule:', error);
@@ -147,6 +237,90 @@ export const updatePriceRule = async (req: TypedRequest, res: Response): Promise
 };
 
 export const deletePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
-  res.json({ success: true, message: 'Price rule deleted successfully' });
-  
+  try {
+    const { ruleId } = req.params;
+    await pricingRuleRepo.delete(ruleId);
+    res.json({ success: true, message: 'Price rule deleted successfully' });
+  } catch (error: unknown) {
+    logger.warn('Error deleting price rule:', error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
 };
+
+// ============================================================================
+// Helpers — parse condition-builder form data + map enums
+// ============================================================================
+
+function parsePricingConditionsFromForm(conditions: unknown): PricingCondition[] {
+  if (!conditions) return [];
+  // If conditions is a JSON string (from a hidden input), parse it
+  if (typeof conditions === 'string') {
+    try {
+      const parsed = JSON.parse(conditions);
+      if (Array.isArray(parsed)) {
+        return parsed.map(c => normalizePricingCondition(c));
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  }
+  // If conditions is an array of {attribute, operator, value} from the condition builder
+  if (Array.isArray(conditions)) {
+    return conditions.map(c => normalizePricingCondition(c));
+  }
+  return [];
+}
+
+function normalizePricingCondition(c: unknown): PricingCondition {
+  const cond = c as { attribute?: string; operator?: string; value?: string; type?: string; parameters?: Record<string, unknown> };
+  // Already in PricingCondition shape
+  if (cond.type && cond.parameters) {
+    return { type: cond.type, parameters: cond.parameters };
+  }
+  // Convert from condition-builder shape {attribute, operator, value}
+  let value: unknown = cond.value || '';
+  if (typeof value === 'string' && !isNaN(Number(value)) && value !== '') {
+    value = Number(value);
+  }
+  if (cond.operator === 'in' && typeof value === 'string') {
+    value = value.split(',').map(v => v.trim());
+  }
+  return {
+    type: cond.attribute || cond.type || '',
+    parameters: {
+      operator: cond.operator || 'eq',
+      value,
+    },
+  };
+}
+
+function mapRuleType(ruleType: string): PricingRuleType {
+  switch (ruleType) {
+    case 'fixed':
+      return PricingRuleType.QUANTITY_BASED;
+    case 'percentage':
+      return PricingRuleType.QUANTITY_BASED;
+    case 'tiered':
+      return PricingRuleType.QUANTITY_BASED;
+    case 'volume':
+      return PricingRuleType.QUANTITY_BASED;
+    case 'time_based':
+      return PricingRuleType.TIME_BASED;
+    default:
+      return PricingRuleType.QUANTITY_BASED;
+  }
+}
+
+function mapScope(target: string): PricingRuleScope {
+  switch (target) {
+    case 'product':
+      return PricingRuleScope.PRODUCT;
+    case 'category':
+      return PricingRuleScope.CATEGORY;
+    case 'customer_group':
+      return PricingRuleScope.CUSTOMER_GROUP;
+    default:
+      return PricingRuleScope.GLOBAL;
+  }
+}

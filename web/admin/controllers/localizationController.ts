@@ -20,7 +20,6 @@ export const localizationDashboard = async (req: TypedRequest, res: Response): P
     regions: [],
     success: req.query.success || null,
   });
-  
 };
 
 // ============================================================================
@@ -34,14 +33,12 @@ export const listLanguages = async (req: TypedRequest, res: Response): Promise<v
     pagination: { total: 0, page: 1, pages: 1 },
     success: req.query.success || null,
   });
-  
 };
 
 export const createLanguageForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'settings/localization/languages/create', {
     pageName: 'Add Language',
   });
-  
 };
 
 export const createLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -62,7 +59,6 @@ export const editLanguageForm = async (req: TypedRequest, res: Response): Promis
     pageName: 'Edit Language',
     language: null,
   });
-  
 };
 
 export const updateLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -81,7 +77,6 @@ export const updateLanguage = async (req: TypedRequest, res: Response): Promise<
 
 export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Language deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -95,14 +90,12 @@ export const listCurrencies = async (req: TypedRequest, res: Response): Promise<
     pagination: { total: 0, page: 1, pages: 1 },
     success: req.query.success || null,
   });
-  
 };
 
 export const createCurrencyForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'settings/localization/currencies/create', {
     pageName: 'Add Currency',
   });
-  
 };
 
 export const createCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -123,7 +116,6 @@ export const editCurrencyForm = async (req: TypedRequest, res: Response): Promis
     pageName: 'Edit Currency',
     currency: null,
   });
-  
 };
 
 export const updateCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -142,7 +134,6 @@ export const updateCurrency = async (req: TypedRequest, res: Response): Promise<
 
 export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Currency deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -156,14 +147,12 @@ export const listRegions = async (req: TypedRequest, res: Response): Promise<voi
     pagination: { total: 0, page: 1, pages: 1 },
     success: req.query.success || null,
   });
-  
 };
 
 export const createRegionForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'settings/localization/regions/create', {
     pageName: 'Add Region',
   });
-  
 };
 
 export const createRegion = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -184,7 +173,6 @@ export const editRegionForm = async (req: TypedRequest, res: Response): Promise<
     pageName: 'Edit Region',
     region: null,
   });
-  
 };
 
 export const updateRegion = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -203,5 +191,4 @@ export const updateRegion = async (req: TypedRequest, res: Response): Promise<vo
 
 export const deleteRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   res.json({ success: true, message: 'Region deleted successfully' });
-  
 };

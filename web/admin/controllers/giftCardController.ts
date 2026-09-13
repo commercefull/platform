@@ -7,6 +7,7 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { ManageGiftCardsUseCase } from '../../../modules/promotion/application/useCases/ManagePromotions';
+import type { PromotionGiftCard } from '../../../modules/promotion/infrastructure';
 import { adminRespond } from '../../respond';
 
 const manageGiftCardsUseCase = new ManageGiftCardsUseCase();
@@ -20,14 +21,15 @@ export const listGiftCards = async (req: TypedRequest, res: Response): Promise<v
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
 
-  const result = await manageGiftCardsUseCase.getGiftCards({ status: status as 'pending' | 'active' | 'depleted' | 'expired' | 'cancelled' | 'suspended' | undefined }, { limit, offset });
+  const result = await manageGiftCardsUseCase.getGiftCards(
+    { status: status as 'pending' | 'active' | 'depleted' | 'expired' | 'cancelled' | 'suspended' | undefined },
+    { limit, offset },
+  );
 
   // Get total stats
   const totalResult = await manageGiftCardsUseCase.getGiftCards();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const totalValue = totalResult.data.reduce((sum: number, card: any) => sum + card.currentBalance, 0);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const activeCards = totalResult.data.filter((card: any) => card.status === 'active').length;
+  const totalValue = totalResult.data.reduce((sum: number, card: PromotionGiftCard) => sum + card.currentBalance, 0);
+  const activeCards = totalResult.data.filter((card: PromotionGiftCard) => card.status === 'active').length;
 
   adminRespond(req, res, 'promotions/gift-cards/index', {
     pageName: 'Gift Cards',
@@ -42,14 +44,12 @@ export const listGiftCards = async (req: TypedRequest, res: Response): Promise<v
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createGiftCardForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'promotions/gift-cards/create', {
     pageName: 'Create Gift Card',
   });
-  
 };
 
 export const createGiftCard = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -127,7 +127,6 @@ export const viewGiftCard = async (req: TypedRequest, res: Response): Promise<vo
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editGiftCardForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -147,7 +146,6 @@ export const editGiftCardForm = async (req: TypedRequest, res: Response): Promis
     pageName: `Edit: ${giftCard.code}`,
     giftCard,
   });
-  
 };
 
 export const activateGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -156,7 +154,6 @@ export const activateGiftCardAction = async (req: TypedRequest, res: Response): 
   await manageGiftCardsUseCase.activateGiftCard(giftCardId);
 
   res.json({ success: true, message: 'Gift card activated successfully' });
-  
 };
 
 export const assignGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -167,7 +164,6 @@ export const assignGiftCardAction = async (req: TypedRequest, res: Response): Pr
   await manageGiftCardsUseCase.assignGiftCard(giftCardId, customerId);
 
   res.json({ success: true, message: 'Gift card assigned successfully' });
-  
 };
 
 export const reloadGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -182,7 +178,6 @@ export const reloadGiftCardAction = async (req: TypedRequest, res: Response): Pr
     message: 'Gift card reloaded successfully',
     transaction,
   });
-  
 };
 
 export const refundToGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -197,7 +192,6 @@ export const refundToGiftCardAction = async (req: TypedRequest, res: Response): 
     message: 'Refund applied to gift card successfully',
     transaction,
   });
-  
 };
 
 export const cancelGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -206,7 +200,6 @@ export const cancelGiftCardAction = async (req: TypedRequest, res: Response): Pr
   await manageGiftCardsUseCase.cancelGiftCard(giftCardId);
 
   res.json({ success: true, message: 'Gift card cancelled successfully' });
-  
 };
 
 export const checkGiftCardBalance = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -226,5 +219,4 @@ export const checkGiftCardBalance = async (req: TypedRequest, res: Response): Pr
     status: giftCard.status,
     expiresAt: giftCard.expiresAt,
   });
-  
 };

@@ -163,10 +163,9 @@ describe('Integration Module Integration Tests', () => {
 
     it('UC-INT-011 — DELETE /business/integration/:id/credentials/:credentialId', async () => {
       if (!orgToken || !integrationId || !credentialId) return;
-      const resp = await client.delete(
-        `/business/integration/${integrationId}/credentials/${credentialId}`,
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.delete(`/business/integration/${integrationId}/credentials/${credentialId}`, {
+        headers: { Authorization: `Bearer ${orgToken}` },
+      });
       expectStatus(resp, 200);
     });
   });
@@ -212,10 +211,9 @@ describe('Integration Module Integration Tests', () => {
 
     it('UC-INT-015 — DELETE /business/integration/:id/subscriptions/:subscriptionId', async () => {
       if (!orgToken || !integrationId || !subscriptionId) return;
-      const resp = await client.delete(
-        `/business/integration/${integrationId}/subscriptions/${subscriptionId}`,
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.delete(`/business/integration/${integrationId}/subscriptions/${subscriptionId}`, {
+        headers: { Authorization: `Bearer ${orgToken}` },
+      });
       expectStatus(resp, 200);
     });
   });

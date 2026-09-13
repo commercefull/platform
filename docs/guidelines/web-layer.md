@@ -50,10 +50,10 @@ export const listProducts = async (req: Request, res: Response) => {
 
 ## Response Helpers (`web/respond.ts`)
 
-| Helper              | Portal     | Layout                  |
-| ------------------- | ---------- | ----------------------- |
-| `adminRespond`      | Admin      | `admin/views/layout`    |
-| `storefrontRespond` | Storefront | Direct render           |
+| Helper              | Portal     | Layout               |
+| ------------------- | ---------- | -------------------- |
+| `adminRespond`      | Admin      | `admin/views/layout` |
+| `storefrontRespond` | Storefront | Direct render        |
 
 ## EJS Template Conventions
 

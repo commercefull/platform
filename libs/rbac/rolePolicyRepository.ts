@@ -9,7 +9,7 @@
 import { query, queryOne } from '../db';
 import { logger } from '../logger';
 import type { RolePolicy, PermissionRule } from './types';
-import { DEFAULT_ROLE_POLICIES} from './defaultRoles';
+import { DEFAULT_ROLE_POLICIES } from './defaultRoles';
 import { setOrgPolicyCache, clearOrgPolicyCache } from './checkPermission';
 
 interface RolePolicyRow {
@@ -39,9 +39,7 @@ function rowToPolicy(row: RolePolicyRow): RolePolicy {
  */
 export async function loadOrgRolePolicies(): Promise<void> {
   try {
-    const rows = await query<RolePolicyRow[]>(
-      'SELECT * FROM "rolePolicy" WHERE "isActive" = true AND "organizationId" IS NOT NULL',
-    );
+    const rows = await query<RolePolicyRow[]>('SELECT * FROM "rolePolicy" WHERE "isActive" = true AND "organizationId" IS NOT NULL');
 
     const cache = new Map<string, RolePolicy[]>();
 
@@ -68,10 +66,9 @@ export async function loadOrgRolePolicies(): Promise<void> {
  * Combines org-specific overrides with system defaults.
  */
 async function getRolePoliciesForOrg(organizationId: string): Promise<RolePolicy[]> {
-  const rows = await query<RolePolicyRow[]>(
-    'SELECT * FROM "rolePolicy" WHERE "organizationId" = $1 AND "isActive" = true',
-    [organizationId],
-  );
+  const rows = await query<RolePolicyRow[]>('SELECT * FROM "rolePolicy" WHERE "organizationId" = $1 AND "isActive" = true', [
+    organizationId,
+  ]);
 
   const orgPolicies = (rows ?? []).map(rowToPolicy);
   const systemPolicies = DEFAULT_ROLE_POLICIES;
@@ -125,14 +122,11 @@ async function upsertOrgRolePolicy(
  * Delete a custom org-specific role policy.
  * The system default will take effect after deletion.
  */
-async function deleteOrgRolePolicy(
-  organizationId: string,
-  roleName: string,
-): Promise<void> {
-  await queryOne(
-    `DELETE FROM "rolePolicy" WHERE "organizationId" = $1 AND "roleName" = $2 AND "isSystem" = false`,
-    [organizationId, roleName],
-  );
+async function deleteOrgRolePolicy(organizationId: string, roleName: string): Promise<void> {
+  await queryOne(`DELETE FROM "rolePolicy" WHERE "organizationId" = $1 AND "roleName" = $2 AND "isSystem" = false`, [
+    organizationId,
+    roleName,
+  ]);
   await loadOrgRolePolicies();
 }
 

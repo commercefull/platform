@@ -196,11 +196,7 @@ describe('Coupon Business API', () => {
     it('should reject validation with missing order value', async () => {
       if (!adminToken) return;
 
-      const response = await client.post(
-        '/business/coupons/validate',
-        { code: 'INVALID-CODE' },
-        { headers: authHeaders() },
-      );
+      const response = await client.post('/business/coupons/validate', { code: 'INVALID-CODE' }, { headers: authHeaders() });
 
       expectStatus(response, 400);
     });
@@ -222,10 +218,7 @@ describe('Coupon Business API', () => {
     it('should reject validation with non-existent code', async () => {
       if (!adminToken) return;
 
-      const response = await client.get(
-        '/business/coupons/validate/NON-EXISTENT-CODE-12345',
-        { headers: authHeaders() },
-      );
+      const response = await client.get('/business/coupons/validate/NON-EXISTENT-CODE-12345', { headers: authHeaders() });
 
       expectStatus(response, 400);
     });

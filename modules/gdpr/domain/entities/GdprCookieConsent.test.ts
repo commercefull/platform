@@ -4,7 +4,8 @@ import { GdprValidationError } from '../errors/GdprErrors';
 describe('GdprCookieConsent', () => {
   it('should create anonymous consent (happy path)', () => {
     const consent = GdprCookieConsent.createAnonymous({
-      gdprCookieConsentId: 'c1', sessionId: 's1',
+      gdprCookieConsentId: 'c1',
+      sessionId: 's1',
       preferences: { functional: true, analytics: false, marketing: false, thirdParty: false },
     });
     expect(consent.gdprCookieConsentId).toBe('c1');
@@ -17,7 +18,8 @@ describe('GdprCookieConsent', () => {
 
   it('should create customer consent', () => {
     const consent = GdprCookieConsent.createForCustomer({
-      gdprCookieConsentId: 'c1', customerId: 'cust1',
+      gdprCookieConsentId: 'c1',
+      customerId: 'cust1',
       preferences: { analytics: true },
     });
     expect(consent.customerId).toBe('cust1');
@@ -27,7 +29,8 @@ describe('GdprCookieConsent', () => {
 
   it('should get preferences', () => {
     const consent = GdprCookieConsent.createAnonymous({
-      gdprCookieConsentId: 'c1', sessionId: 's1',
+      gdprCookieConsentId: 'c1',
+      sessionId: 's1',
       preferences: { functional: true, analytics: true, marketing: false, thirdParty: true },
     });
     const prefs = consent.getPreferences();
@@ -40,7 +43,8 @@ describe('GdprCookieConsent', () => {
 
   it('should check if category is allowed', () => {
     const consent = GdprCookieConsent.createAnonymous({
-      gdprCookieConsentId: 'c1', sessionId: 's1',
+      gdprCookieConsentId: 'c1',
+      sessionId: 's1',
       preferences: { analytics: true },
     });
     expect(consent.isAllowed('necessary')).toBe(true);
@@ -50,7 +54,9 @@ describe('GdprCookieConsent', () => {
 
   it('should update preferences', () => {
     const consent = GdprCookieConsent.createAnonymous({
-      gdprCookieConsentId: 'c1', sessionId: 's1', preferences: {},
+      gdprCookieConsentId: 'c1',
+      sessionId: 's1',
+      preferences: {},
     });
     consent.updatePreferences({ marketing: true, thirdParty: true });
     expect(consent.marketing).toBe(true);
@@ -59,7 +65,9 @@ describe('GdprCookieConsent', () => {
 
   it('should accept all', () => {
     const consent = GdprCookieConsent.createAnonymous({
-      gdprCookieConsentId: 'c1', sessionId: 's1', preferences: {},
+      gdprCookieConsentId: 'c1',
+      sessionId: 's1',
+      preferences: {},
     });
     consent.acceptAll();
     expect(consent.functional).toBe(true);
@@ -70,7 +78,8 @@ describe('GdprCookieConsent', () => {
 
   it('should reject all optional', () => {
     const consent = GdprCookieConsent.createAnonymous({
-      gdprCookieConsentId: 'c1', sessionId: 's1',
+      gdprCookieConsentId: 'c1',
+      sessionId: 's1',
       preferences: { functional: true, analytics: true, marketing: true, thirdParty: true },
     });
     consent.rejectAll();
@@ -83,7 +92,9 @@ describe('GdprCookieConsent', () => {
 
   it('should link to customer', () => {
     const consent = GdprCookieConsent.createAnonymous({
-      gdprCookieConsentId: 'c1', sessionId: 's1', preferences: {},
+      gdprCookieConsentId: 'c1',
+      sessionId: 's1',
+      preferences: {},
     });
     consent.linkToCustomer('cust1');
     expect(consent.customerId).toBe('cust1');
@@ -92,34 +103,53 @@ describe('GdprCookieConsent', () => {
 
   it('should throw on double link', () => {
     const consent = GdprCookieConsent.createForCustomer({
-      gdprCookieConsentId: 'c1', customerId: 'cust1', preferences: {},
+      gdprCookieConsentId: 'c1',
+      customerId: 'cust1',
+      preferences: {},
     });
     expect(() => consent.linkToCustomer('cust2')).toThrow(GdprValidationError);
   });
 
   it('should check expiry', () => {
     const consent = GdprCookieConsent.reconstitute({
-      gdprCookieConsentId: 'c1', sessionId: 's1', necessary: true, functional: false,
-      analytics: false, marketing: false, thirdParty: false, consentMethod: 'banner',
-      consentedAt: new Date(), expiresAt: new Date(Date.now() - 86400000),
-      createdAt: new Date(), updatedAt: new Date(),
+      gdprCookieConsentId: 'c1',
+      sessionId: 's1',
+      necessary: true,
+      functional: false,
+      analytics: false,
+      marketing: false,
+      thirdParty: false,
+      consentMethod: 'banner',
+      consentedAt: new Date(),
+      expiresAt: new Date(Date.now() - 86400000),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     expect(consent.isExpired()).toBe(true);
   });
 
   it('should not be expired when no expiresAt', () => {
     const consent = GdprCookieConsent.reconstitute({
-      gdprCookieConsentId: 'c1', sessionId: 's1', necessary: true, functional: false,
-      analytics: false, marketing: false, thirdParty: false, consentMethod: 'banner',
+      gdprCookieConsentId: 'c1',
+      sessionId: 's1',
+      necessary: true,
+      functional: false,
+      analytics: false,
+      marketing: false,
+      thirdParty: false,
+      consentMethod: 'banner',
       consentedAt: new Date(),
-      createdAt: new Date(), updatedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     expect(consent.isExpired()).toBe(false);
   });
 
   it('should serialize to JSON', () => {
     const consent = GdprCookieConsent.createAnonymous({
-      gdprCookieConsentId: 'c1', sessionId: 's1', preferences: {},
+      gdprCookieConsentId: 'c1',
+      sessionId: 's1',
+      preferences: {},
     });
     const json = consent.toJSON();
     expect(json.gdprCookieConsentId).toBe('c1');

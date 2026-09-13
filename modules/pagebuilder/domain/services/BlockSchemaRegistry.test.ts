@@ -138,9 +138,7 @@ describe('BlockSchemaRegistry', () => {
         description: 'A custom banner block',
         icon: 'ti ti-star',
         category: 'advanced',
-        fields: [
-          { key: 'title', label: 'Title', type: 'text', required: true },
-        ],
+        fields: [{ key: 'title', label: 'Title', type: 'text', required: true }],
         defaultContent: { title: '' },
       };
 

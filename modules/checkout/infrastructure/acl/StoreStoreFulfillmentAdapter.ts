@@ -8,7 +8,11 @@
 
 import { StoreFulfillmentPort, StoreFulfillmentOption, PickupLocation } from '../../application/ports/StoreFulfillmentPort';
 import StoreRepo from '../../../store/infrastructure/repositories/StoreRepo';
-import { getLocations as getAllPickupLocations, getLocation as getPickupLocation, findNearestLocations as findNearestPickupLocations } from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import {
+  getLocations as getAllPickupLocations,
+  getLocation as getPickupLocation,
+  findNearestLocations as findNearestPickupLocations,
+} from '../../../store/infrastructure/repositories/pickupLocationRepo';
 
 export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   async checkLocalDeliveryEligibility(address: {
@@ -33,13 +37,15 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
         }
       }
 
-      if (!isEligible && deliverySettings.radiusKm && address.latitude && address.longitude && store.address?.latitude && store.address?.longitude) {
-        const distance = this.calculateDistance(
-          address.latitude,
-          address.longitude,
-          store.address.latitude,
-          store.address.longitude,
-        );
+      if (
+        !isEligible &&
+        deliverySettings.radiusKm &&
+        address.latitude &&
+        address.longitude &&
+        store.address?.latitude &&
+        store.address?.longitude
+      ) {
+        const distance = this.calculateDistance(address.latitude, address.longitude, store.address.latitude, store.address.longitude);
         if (distance <= deliverySettings.radiusKm) {
           isEligible = true;
         }

@@ -40,30 +40,20 @@ interface SetThresholdRepositoryPort {
 }
 
 export class SetLowStockThresholdUseCase {
-  constructor(
-    private readonly inventoryRepository: SetThresholdRepositoryPort,
-  ) {}
+  constructor(private readonly inventoryRepository: SetThresholdRepositoryPort) {}
 
   async execute(input: SetLowStockThresholdInput): Promise<SetLowStockThresholdOutput> {
     if (input.reorderPoint < 0) {
       throw new InventoryValidationError('Reorder point must be >= 0');
     }
 
-    const inventory = await this.inventoryRepository.findByProduct(
-      input.productId,
-      input.variantId,
-      input.locationId,
-    );
+    const inventory = await this.inventoryRepository.findByProduct(input.productId, input.variantId, input.locationId);
 
     if (!inventory) {
       throw new InventoryItemNotFoundError(`${input.productId}:${input.locationId}`);
     }
 
-    await this.inventoryRepository.updateReorderPoint(
-      inventory.inventoryId,
-      input.reorderPoint,
-      input.reorderQuantity,
-    );
+    await this.inventoryRepository.updateReorderPoint(inventory.inventoryId, input.reorderPoint, input.reorderQuantity);
 
     const isLowStock = inventory.quantity <= input.reorderPoint;
 

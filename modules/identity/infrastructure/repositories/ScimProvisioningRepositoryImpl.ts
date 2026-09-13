@@ -7,18 +7,12 @@ import { ScimProvisioningRecord, ScimProvisioningRepository } from '../../domain
 
 export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepository {
   async findByScimUserId(scimUserId: string): Promise<ScimProvisioningRecord | null> {
-    const row = await queryOne<Record<string, unknown>>(
-      'SELECT * FROM "scimProvisioningRecord" WHERE "scimUserId" = $1',
-      [scimUserId],
-    );
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "scimProvisioningRecord" WHERE "scimUserId" = $1', [scimUserId]);
     return row ? this.mapToRecord(row) : null;
   }
 
   async findByUserId(userId: string): Promise<ScimProvisioningRecord | null> {
-    const row = await queryOne<Record<string, unknown>>(
-      'SELECT * FROM "scimProvisioningRecord" WHERE "userId" = $1',
-      [userId],
-    );
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "scimProvisioningRecord" WHERE "userId" = $1', [userId]);
     return row ? this.mapToRecord(row) : null;
   }
 
@@ -31,10 +25,9 @@ export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepositor
   }
 
   async save(record: ScimProvisioningRecord): Promise<ScimProvisioningRecord> {
-    const existing = await queryOne<Record<string, unknown>>(
-      'SELECT "recordId" FROM "scimProvisioningRecord" WHERE "recordId" = $1',
-      [record.recordId],
-    );
+    const existing = await queryOne<Record<string, unknown>>('SELECT "recordId" FROM "scimProvisioningRecord" WHERE "recordId" = $1', [
+      record.recordId,
+    ]);
 
     if (existing) {
       await query(
@@ -44,9 +37,14 @@ export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepositor
           "isActive" = $8, "updatedAt" = NOW()
         WHERE "recordId" = $1`,
         [
-          record.recordId, record.organizationId, record.userId,
-          record.scimUserId, record.externalId, record.source,
-          record.providerId, record.isActive,
+          record.recordId,
+          record.organizationId,
+          record.userId,
+          record.scimUserId,
+          record.externalId,
+          record.source,
+          record.providerId,
+          record.isActive,
         ],
       );
     } else {
@@ -57,10 +55,17 @@ export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepositor
           "isActive", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
-          record.recordId, record.organizationId, record.userId,
-          record.userType, record.scimUserId, record.externalId,
-          record.source, record.providerId, record.isActive,
-          record.createdAt, record.updatedAt,
+          record.recordId,
+          record.organizationId,
+          record.userId,
+          record.userType,
+          record.scimUserId,
+          record.externalId,
+          record.source,
+          record.providerId,
+          record.isActive,
+          record.createdAt,
+          record.updatedAt,
         ],
       );
     }
@@ -69,10 +74,7 @@ export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepositor
   }
 
   async deactivate(recordId: string): Promise<void> {
-    await query(
-      'UPDATE "scimProvisioningRecord" SET "isActive" = false, "updatedAt" = NOW() WHERE "recordId" = $1',
-      [recordId],
-    );
+    await query('UPDATE "scimProvisioningRecord" SET "isActive" = false, "updatedAt" = NOW() WHERE "recordId" = $1', [recordId]);
   }
 
   async delete(recordId: string): Promise<void> {

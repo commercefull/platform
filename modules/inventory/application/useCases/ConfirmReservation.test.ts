@@ -3,10 +3,12 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { ConfirmReservationUseCase} from './ConfirmReservation';
+import { ConfirmReservationUseCase } from './ConfirmReservation';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ConfirmReservationUseCase', () => {
   let useCase: ConfirmReservationUseCase;
@@ -14,7 +16,9 @@ describe('ConfirmReservationUseCase', () => {
 
   beforeEach(() => {
     mockRepo = {
-      findReservationById: jest.fn().mockResolvedValue({ reservationId: 'r1', orderId: 'o1', status: 'active', productId: 'p1', quantity: 5 }),
+      findReservationById: jest
+        .fn()
+        .mockResolvedValue({ reservationId: 'r1', orderId: 'o1', status: 'active', productId: 'p1', quantity: 5 }),
       updateReservationStatus: jest.fn().mockResolvedValue(undefined),
     };
     useCase = new ConfirmReservationUseCase(mockRepo as never);

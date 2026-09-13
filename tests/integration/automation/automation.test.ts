@@ -83,11 +83,7 @@ describe('Automation Module Integration Tests', () => {
   describe('Rule lifecycle', () => {
     it('POST /business/automation/:ruleId/trigger triggers rule manually', async () => {
       if (!orgToken || !ruleId) return;
-      const resp = await client.post(
-        `/business/automation/${ruleId}/trigger`,
-        {},
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.post(`/business/automation/${ruleId}/trigger`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       expect([200, 400, 404]).toContain(resp.status);
     });
 

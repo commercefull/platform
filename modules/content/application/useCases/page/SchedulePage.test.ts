@@ -7,7 +7,9 @@ import { SchedulePageUseCase, SchedulePageCommand } from './SchedulePage';
 import { ContentPageNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('SchedulePageUseCase', () => {
   let useCase: SchedulePageUseCase;
@@ -16,7 +18,13 @@ describe('SchedulePageUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findPageById: jest.fn().mockResolvedValue({ contentPageId: 'p1', title: 'Post', slug: 'post', status: 'draft' }),
-      updatePage: jest.fn().mockResolvedValue({ contentPageId: 'p1', title: 'Post', slug: 'post', status: 'scheduled', scheduledAt: new Date(Date.now() + 86400000) }),
+      updatePage: jest.fn().mockResolvedValue({
+        contentPageId: 'p1',
+        title: 'Post',
+        slug: 'post',
+        status: 'scheduled',
+        scheduledAt: new Date(Date.now() + 86400000),
+      }),
     };
     useCase = new SchedulePageUseCase(mockRepo as never);
   });
@@ -41,6 +49,8 @@ describe('SchedulePageUseCase', () => {
   it('should throw ContentPageNotFoundError when page does not exist', async () => {
     mockRepo.findPageById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new SchedulePageCommand('missing', new Date(Date.now() + 86400000)))).rejects.toThrow(ContentPageNotFoundError);
+    await expect(useCase.execute(new SchedulePageCommand('missing', new Date(Date.now() + 86400000)))).rejects.toThrow(
+      ContentPageNotFoundError,
+    );
   });
 });

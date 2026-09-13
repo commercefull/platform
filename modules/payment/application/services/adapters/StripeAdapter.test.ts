@@ -18,11 +18,7 @@ describe('StripeAdapter', () => {
   });
 
   it('should return false when signature header missing t or v1', () => {
-    const result = adapter.verifySignature(
-      Buffer.from('body'),
-      { 'stripe-signature': 't=123' },
-      'secret',
-    );
+    const result = adapter.verifySignature(Buffer.from('body'), { 'stripe-signature': 't=123' }, 'secret');
     expect(result).toBe(false);
   });
 
@@ -34,11 +30,7 @@ describe('StripeAdapter', () => {
     const sig = crypto.createHmac('sha256', secret).update(signed).digest('hex');
     const header = `t=${timestamp},v1=${sig}`;
 
-    const result = adapter.verifySignature(
-      Buffer.from(body),
-      { 'stripe-signature': header },
-      secret,
-    );
+    const result = adapter.verifySignature(Buffer.from(body), { 'stripe-signature': header }, secret);
     expect(result).toBe(true);
   });
 

@@ -1,14 +1,6 @@
 {
-  "entryPoints": [
-    "modules/*/domain",
-    "modules/*/application",
-    "libs"
-  ],
-  "exclude": [
-    "modules/*/infrastructure",
-    "modules/*/interface",
-    "**/node_modules/**"
-  ],
+  "entryPoints": ["modules/*/domain", "modules/*/application", "libs"],
+  "exclude": ["modules/*/infrastructure", "modules/*/interface", "**/node_modules/**"],
   "out": "docs/generated/code-reference",
   "plugin": ["typedoc-plugin-markdown"],
   "theme": "markdown",

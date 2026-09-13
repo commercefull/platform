@@ -44,10 +44,13 @@ describe('ReleaseReservationUseCase', () => {
     expect(result.items[0].releasedQuantity).toBe(10);
     expect(mockRepo.updateReservedQuantity).toHaveBeenCalledWith('inv-1', 20);
     expect(mockRepo.updateReservationStatus).toHaveBeenCalledWith('res-1', 'released', 'cancelled');
-    expect(eventBus.emit).toHaveBeenCalledWith('inventory.released', expect.objectContaining({
-      reservationId: 'res-1',
-      releasedCount: 1,
-    }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'inventory.released',
+      expect.objectContaining({
+        reservationId: 'res-1',
+        releasedCount: 1,
+      }),
+    );
   });
 
   it('should release all reservations by orderId', async () => {

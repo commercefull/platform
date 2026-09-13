@@ -2,7 +2,10 @@ import { Organization } from './Organization';
 
 describe('Organization', () => {
   const baseProps = {
-    organizationId: 'o1', name: 'Acme Corp', code: 'ACME', email: 'info@acme.com',
+    organizationId: 'o1',
+    name: 'Acme Corp',
+    code: 'ACME',
+    email: 'info@acme.com',
   };
 
   it('should create an organization (happy path)', () => {

@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { RenewMembershipUseCase} from './RenewMembership';
+import { RenewMembershipUseCase } from './RenewMembership';
 import { MembershipNotFoundError, MembershipPlanNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
 describe('RenewMembershipUseCase', () => {
@@ -12,7 +12,14 @@ describe('RenewMembershipUseCase', () => {
 
   beforeEach(() => {
     mockRepo = {
-      getMembershipById: jest.fn().mockResolvedValue({ membershipId: 'm1', status: 'active', customerId: 'c1', tierId: 't1', billingPeriod: 'monthly', currentPeriodEnd: new Date().toISOString() }),
+      getMembershipById: jest.fn().mockResolvedValue({
+        membershipId: 'm1',
+        status: 'active',
+        customerId: 'c1',
+        tierId: 't1',
+        billingPeriod: 'monthly',
+        currentPeriodEnd: new Date().toISOString(),
+      }),
       getTierById: jest.fn().mockResolvedValue({ price: 50, billingPeriod: 'monthly' }),
       updateMembership: jest.fn().mockResolvedValue(undefined),
       createStatusLog: jest.fn().mockResolvedValue(undefined),
@@ -29,7 +36,13 @@ describe('RenewMembershipUseCase', () => {
   });
 
   it('should reactivate pending_cancellation membership', async () => {
-    mockRepo.getMembershipById.mockResolvedValue({ membershipId: 'm1', status: 'pending_cancellation', customerId: 'c1', tierId: 't1', billingPeriod: 'monthly' });
+    mockRepo.getMembershipById.mockResolvedValue({
+      membershipId: 'm1',
+      status: 'pending_cancellation',
+      customerId: 'c1',
+      tierId: 't1',
+      billingPeriod: 'monthly',
+    });
 
     const result = await useCase.execute({ membershipId: 'm1' });
 

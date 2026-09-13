@@ -28,10 +28,9 @@ export class CouponRepository {
 
   async findByCode(code: string): Promise<Coupon | null> {
     if (!code) return null;
-    const row = await queryOne<PromotionCoupon>(
-      `SELECT * FROM "promotionCoupon" WHERE code = $1 AND "isActive" = true LIMIT 1`,
-      [code.toUpperCase()],
-    );
+    const row = await queryOne<PromotionCoupon>(`SELECT * FROM "promotionCoupon" WHERE code = $1 AND "isActive" = true LIMIT 1`, [
+      code.toUpperCase(),
+    ]);
 
     if (!row) return null;
     return this.mapToCoupon(row);
@@ -70,7 +69,10 @@ export class CouponRepository {
   async save(coupon: Coupon): Promise<Coupon> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<{ promotionCouponId: string }>('SELECT "promotionCouponId" FROM "promotionCoupon" WHERE "promotionCouponId" = $1', [coupon.couponId]);
+    const existing = await queryOne<{ promotionCouponId: string }>(
+      'SELECT "promotionCouponId" FROM "promotionCoupon" WHERE "promotionCouponId" = $1',
+      [coupon.couponId],
+    );
 
     if (existing) {
       await query(
@@ -145,12 +147,17 @@ export class CouponRepository {
   }
 
   // Coupon Usage tracking
-  async recordUsage(usage: CouponUsage | { couponId: string; basketId?: string; customerId?: string; discountAmount: number }): Promise<CouponUsage> {
+  async recordUsage(
+    usage: CouponUsage | { couponId: string; basketId?: string; customerId?: string; discountAmount: number },
+  ): Promise<CouponUsage> {
     const now = new Date().toISOString();
     const fullUsage: CouponUsage = {
-      usageId: 'usageId' in usage ? (usage as CouponUsage).usageId : `usg_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`,
+      usageId:
+        'usageId' in usage
+          ? (usage as CouponUsage).usageId
+          : `usg_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`,
       couponId: usage.couponId,
-      orderId: 'orderId' in usage ? (usage as CouponUsage).orderId : ('basketId' in usage ? (usage.basketId || '') : ''),
+      orderId: 'orderId' in usage ? (usage as CouponUsage).orderId : 'basketId' in usage ? usage.basketId || '' : '',
       customerId: usage.customerId || '',
       discountAmount: usage.discountAmount,
       usedAt: 'usedAt' in usage ? (usage as CouponUsage).usedAt : new Date(),
@@ -160,11 +167,22 @@ export class CouponRepository {
       `INSERT INTO "promotionCouponUsage" (
         "promotionCouponUsageId", "promotionCouponId", "orderId", "customerId", "discountAmount", "currencyCode", "usedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [fullUsage.usageId, fullUsage.couponId, fullUsage.orderId || null, fullUsage.customerId || null, String(fullUsage.discountAmount), 'USD', now],
+      [
+        fullUsage.usageId,
+        fullUsage.couponId,
+        fullUsage.orderId || null,
+        fullUsage.customerId || null,
+        String(fullUsage.discountAmount),
+        'USD',
+        now,
+      ],
     );
 
     // Update coupon usage count
-    await query('UPDATE "promotionCoupon" SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "promotionCouponId" = $2', [now, fullUsage.couponId]);
+    await query('UPDATE "promotionCoupon" SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "promotionCouponId" = $2', [
+      now,
+      fullUsage.couponId,
+    ]);
 
     return fullUsage;
   }
@@ -181,20 +199,31 @@ export class CouponRepository {
       `INSERT INTO "promotionCouponUsage" (
         "promotionCouponUsageId", "promotionCouponId", "orderId", "customerId", "discountAmount", "currencyCode", "usedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [redemption.redemptionId, redemption.couponId, redemption.orderId, redemption.customerId || null, String(redemption.discountAmount), 'USD', redemption.redeemedAt.toISOString()],
+      [
+        redemption.redemptionId,
+        redemption.couponId,
+        redemption.orderId,
+        redemption.customerId || null,
+        String(redemption.discountAmount),
+        'USD',
+        redemption.redeemedAt.toISOString(),
+      ],
     );
   }
 
   async incrementUsageCount(couponId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query('UPDATE "promotionCoupon" SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "promotionCouponId" = $2', [now, couponId]);
+    await query('UPDATE "promotionCoupon" SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "promotionCouponId" = $2', [
+      now,
+      couponId,
+    ]);
   }
 
   async getUsageHistory(couponId: string, limit: number = 50): Promise<CouponUsage[]> {
-    const rows = await query<PromotionCouponUsage[]>(`SELECT * FROM "promotionCouponUsage" WHERE "promotionCouponId" = $1 ORDER BY "usedAt" DESC LIMIT $2`, [
-      couponId,
-      limit,
-    ]);
+    const rows = await query<PromotionCouponUsage[]>(
+      `SELECT * FROM "promotionCouponUsage" WHERE "promotionCouponId" = $1 ORDER BY "usedAt" DESC LIMIT $2`,
+      [couponId, limit],
+    );
 
     return (rows || []).map(row => ({
       usageId: row.promotionCouponUsageId,

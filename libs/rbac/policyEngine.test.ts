@@ -3,7 +3,7 @@
  */
 
 import { evaluatePolicy, evaluatePolicies, checkLegacyPermission } from './policyEngine';
-import type { RolePolicy, PermissionContext} from './types';
+import type { RolePolicy, PermissionContext } from './types';
 
 describe('policyEngine', () => {
   describe('evaluatePolicy', () => {

@@ -7,12 +7,12 @@ import { ListStoreUsersUseCase } from './ListStoreUsers';
 import { AssignUserToStoreUseCase } from './AssignUserToStore';
 import { RemoveUserFromStoreUseCase } from './RemoveUserFromStore';
 import { StoreLookupAdapter } from '../../../infrastructure/acl/StoreLookupAdapter';
+import type { UserRepository } from '../../../domain/repositories/UserRepository';
 
 export const listStoreUsersUseCase = new ListStoreUsersUseCase(identityRepo);
 export const removeUserFromStoreUseCase = new RemoveUserFromStoreUseCase(identityRepo);
 export const assignUserToStoreUseCase = new AssignUserToStoreUseCase(
   identityRepo,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  { findById: async (userId: string) => ({ userId }) } as any,
+  { findById: async (userId: string) => ({ userId }) } as unknown as UserRepository,
   new StoreLookupAdapter(storeRepo),
 );

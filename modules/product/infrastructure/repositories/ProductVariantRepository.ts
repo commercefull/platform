@@ -28,9 +28,7 @@ export interface ProductVariantFilters {
 
 export class ProductVariantRepository {
   async findById(variantId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE "productVariantId" = $1', [
-      variantId,
-    ]);
+    const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE "productVariantId" = $1', [variantId]);
 
     if (!row) return null;
 
@@ -112,9 +110,10 @@ export class ProductVariantRepository {
   async save(variant: ProductVariant): Promise<ProductVariant> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<{ productVariantId: string }>('SELECT "productVariantId" FROM "productVariant" WHERE "productVariantId" = $1', [
-      variant.variantId,
-    ]);
+    const existing = await queryOne<{ productVariantId: string }>(
+      'SELECT "productVariantId" FROM "productVariant" WHERE "productVariantId" = $1',
+      [variant.variantId],
+    );
 
     if (existing) {
       await query(
@@ -187,10 +186,7 @@ export class ProductVariantRepository {
 
   async delete(variantId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query('UPDATE "productVariant" SET status = \'archived\', "updatedAt" = $1 WHERE "productVariantId" = $2', [
-      now,
-      variantId,
-    ]);
+    await query('UPDATE "productVariant" SET status = \'archived\', "updatedAt" = $1 WHERE "productVariantId" = $2', [now, variantId]);
   }
 
   // Helper methods

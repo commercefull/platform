@@ -4,13 +4,7 @@
  * Domain interface for loyalty data access (tiers, points, transactions, rewards, redemptions).
  */
 
-import type {
-  LoyaltyTier,
-  LoyaltyPoints,
-  LoyaltyTransaction,
-  LoyaltyReward,
-  LoyaltyRedemption,
-} from 'libs/db/types';
+import type { LoyaltyTier, LoyaltyPoints, LoyaltyTransaction, LoyaltyReward, LoyaltyRedemption } from 'libs/db/types';
 
 export interface CreateLoyaltyTierInput {
   name: string;

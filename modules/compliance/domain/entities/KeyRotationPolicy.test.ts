@@ -30,13 +30,11 @@ describe('KeyRotationPolicy Entity', () => {
     });
 
     it('should throw if rotation interval is too short', () => {
-      expect(() => KeyRotationPolicy.create({ ...baseParams, rotationIntervalDays: 3 }))
-        .toThrow(ComplianceValidationError);
+      expect(() => KeyRotationPolicy.create({ ...baseParams, rotationIntervalDays: 3 })).toThrow(ComplianceValidationError);
     });
 
     it('should throw if rotation interval is too long', () => {
-      expect(() => KeyRotationPolicy.create({ ...baseParams, rotationIntervalDays: 800 }))
-        .toThrow(ComplianceValidationError);
+      expect(() => KeyRotationPolicy.create({ ...baseParams, rotationIntervalDays: 800 })).toThrow(ComplianceValidationError);
     });
   });
 

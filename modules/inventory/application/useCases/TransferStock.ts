@@ -4,7 +4,6 @@
  * Transfers inventory between locations (warehouses, stores).
  */
 
-
 import { InventoryLocationNotFoundError } from '../../domain/errors/InventoryErrors';
 
 export interface TransferStockItemInput {
@@ -87,9 +86,7 @@ interface TransferStockRepositoryPort {
 }
 
 export class TransferStockUseCase {
-  constructor(
-    private readonly inventoryRepository: TransferStockRepositoryPort,
-  ) {}
+  constructor(private readonly inventoryRepository: TransferStockRepositoryPort) {}
 
   async execute(input: TransferStockInput): Promise<TransferStockOutput> {
     const transferId = this.generateTransferId();

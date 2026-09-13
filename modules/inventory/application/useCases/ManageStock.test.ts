@@ -13,11 +13,20 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { RestockUseCase, RestockCommand, AdjustStockCommand, AdjustStockUseCase, ReserveStockCommand, ReserveStockUseCase } from './ManageStock';
-import { InventoryItemNotFoundError} from '../../domain/errors/InventoryErrors';
+import {
+  RestockUseCase,
+  RestockCommand,
+  AdjustStockCommand,
+  AdjustStockUseCase,
+  ReserveStockCommand,
+  ReserveStockUseCase,
+} from './ManageStock';
+import { InventoryItemNotFoundError } from '../../domain/errors/InventoryErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('RestockUseCase', () => {
   let useCase: RestockUseCase;

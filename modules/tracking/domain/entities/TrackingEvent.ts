@@ -68,21 +68,49 @@ export class TrackingEvent {
     return new TrackingEvent(props);
   }
 
-  get eventId(): string { return this.props.eventId; }
-  get storeId(): string { return this.props.storeId; }
-  get sourceEvent(): string { return this.props.sourceEvent; }
-  get targetEvent(): string { return this.props.targetEvent; }
-  get providers(): string[] { return this.props.providers; }
-  get userData(): TrackingUserData { return this.props.userData; }
-  get ecommerceData(): TrackingEcommerceData { return this.props.ecommerceData; }
-  get customData(): Record<string, unknown> { return this.props.customData; }
-  get consentCategory(): 'analytics' | 'marketing' | 'thirdParty' { return this.props.consentCategory; }
-  get consentGranted(): boolean { return this.props.consentGranted; }
-  get timestamp(): Date { return this.props.timestamp; }
-  get correlationId(): string | undefined { return this.props.correlationId; }
+  get eventId(): string {
+    return this.props.eventId;
+  }
+  get storeId(): string {
+    return this.props.storeId;
+  }
+  get sourceEvent(): string {
+    return this.props.sourceEvent;
+  }
+  get targetEvent(): string {
+    return this.props.targetEvent;
+  }
+  get providers(): string[] {
+    return this.props.providers;
+  }
+  get userData(): TrackingUserData {
+    return this.props.userData;
+  }
+  get ecommerceData(): TrackingEcommerceData {
+    return this.props.ecommerceData;
+  }
+  get customData(): Record<string, unknown> {
+    return this.props.customData;
+  }
+  get consentCategory(): 'analytics' | 'marketing' | 'thirdParty' {
+    return this.props.consentCategory;
+  }
+  get consentGranted(): boolean {
+    return this.props.consentGranted;
+  }
+  get timestamp(): Date {
+    return this.props.timestamp;
+  }
+  get correlationId(): string | undefined {
+    return this.props.correlationId;
+  }
 
-  shouldSendToGtm(): boolean { return this.props.providers.includes('gtm') && this.props.consentGranted; }
-  shouldSendToMetaCapi(): boolean { return this.props.providers.includes('meta_capi') && this.props.consentGranted; }
+  shouldSendToGtm(): boolean {
+    return this.props.providers.includes('gtm') && this.props.consentGranted;
+  }
+  shouldSendToMetaCapi(): boolean {
+    return this.props.providers.includes('meta_capi') && this.props.consentGranted;
+  }
 
   /**
    * Get user data with PII hashed (SHA-256) for Meta CAPI

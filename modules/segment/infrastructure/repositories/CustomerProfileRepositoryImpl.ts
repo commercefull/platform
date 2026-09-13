@@ -63,18 +63,15 @@ function rowToEntity(row: ProfileDbRow): CustomerProfile {
 
 export class CustomerProfileRepositoryImpl implements CustomerProfileRepository {
   async findByCustomerId(customerId: string): Promise<CustomerProfile | null> {
-    const row = await queryOne<ProfileDbRow>(
-      `SELECT * FROM "customerProfile" WHERE "customerId" = $1`,
-      [customerId],
-    );
+    const row = await queryOne<ProfileDbRow>(`SELECT * FROM "customerProfile" WHERE "customerId" = $1`, [customerId]);
     return row ? rowToEntity(row) : null;
   }
 
   async findAll(limit = 50, offset = 0): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(
-      `SELECT * FROM "customerProfile" ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`,
-      [limit, offset],
-    );
+    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "customerProfile" ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`, [
+      limit,
+      offset,
+    ]);
     return (rows || []).map(rowToEntity);
   }
 
@@ -90,18 +87,14 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
   }
 
   async findByTier(tier: string): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(
-      `SELECT * FROM "customerProfile" WHERE "tier" = $1 ORDER BY "lifetimeValue" DESC`,
-      [tier],
-    );
+    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "customerProfile" WHERE "tier" = $1 ORDER BY "lifetimeValue" DESC`, [tier]);
     return (rows || []).map(rowToEntity);
   }
 
   async findByRFM(rfmSegment: string): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(
-      `SELECT * FROM "customerProfile" WHERE "rfmSegment" = $1 ORDER BY "lifetimeValue" DESC`,
-      [rfmSegment],
-    );
+    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "customerProfile" WHERE "rfmSegment" = $1 ORDER BY "lifetimeValue" DESC`, [
+      rfmSegment,
+    ]);
     return (rows || []).map(rowToEntity);
   }
 
@@ -154,13 +147,34 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
         "updatedAt" = NOW()
       RETURNING *`,
       [
-        p.customerId, p.email, p.firstName, p.lastName, p.status, p.tier,
-        p.lifetimeValue, p.totalSpent, p.averageOrderValue, p.totalOrders,
-        p.firstOrderDate, p.lastOrderDate, p.daysSinceLastOrder,
-        p.ordersLast30Days, p.ordersLast90Days, p.ordersLast12Months,
-        p.productViews, p.cartCount, p.abandonedCarts, p.wishlistItemCount,
-        p.reviewCount, p.averageReviewRating, p.visitCount, p.lastVisitDate,
-        p.rfmSegment, p.engagementScore, p.churnRisk, p.riskScore,
+        p.customerId,
+        p.email,
+        p.firstName,
+        p.lastName,
+        p.status,
+        p.tier,
+        p.lifetimeValue,
+        p.totalSpent,
+        p.averageOrderValue,
+        p.totalOrders,
+        p.firstOrderDate,
+        p.lastOrderDate,
+        p.daysSinceLastOrder,
+        p.ordersLast30Days,
+        p.ordersLast90Days,
+        p.ordersLast12Months,
+        p.productViews,
+        p.cartCount,
+        p.abandonedCarts,
+        p.wishlistItemCount,
+        p.reviewCount,
+        p.averageReviewRating,
+        p.visitCount,
+        p.lastVisitDate,
+        p.rfmSegment,
+        p.engagementScore,
+        p.churnRisk,
+        p.riskScore,
         p.preferredCategories ? JSON.stringify(p.preferredCategories) : null,
         p.preferredProducts ? JSON.stringify(p.preferredProducts) : null,
         p.preferredPaymentMethods ? JSON.stringify(p.preferredPaymentMethods) : null,
@@ -169,7 +183,9 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
         p.tags ? JSON.stringify(p.tags) : null,
         p.customAttributes ? JSON.stringify(p.customAttributes) : null,
         p.segmentIds ? JSON.stringify(p.segmentIds) : null,
-        p.organizationId, p.lastComputedAt, p.updatedAt,
+        p.organizationId,
+        p.lastComputedAt,
+        p.updatedAt,
       ],
     );
     if (!row) throw new SegmentValidationError('Failed to upsert customer profile');
@@ -182,12 +198,29 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
     let paramIndex = 2;
 
     const fields = [
-      'lifetimeValue', 'totalSpent', 'averageOrderValue', 'totalOrders',
-      'firstOrderDate', 'lastOrderDate', 'daysSinceLastOrder',
-      'ordersLast30Days', 'ordersLast90Days', 'ordersLast12Months',
-      'productViews', 'cartCount', 'abandonedCarts', 'wishlistItemCount',
-      'reviewCount', 'averageReviewRating', 'visitCount', 'lastVisitDate',
-      'rfmSegment', 'engagementScore', 'churnRisk', 'riskScore', 'tier',
+      'lifetimeValue',
+      'totalSpent',
+      'averageOrderValue',
+      'totalOrders',
+      'firstOrderDate',
+      'lastOrderDate',
+      'daysSinceLastOrder',
+      'ordersLast30Days',
+      'ordersLast90Days',
+      'ordersLast12Months',
+      'productViews',
+      'cartCount',
+      'abandonedCarts',
+      'wishlistItemCount',
+      'reviewCount',
+      'averageReviewRating',
+      'visitCount',
+      'lastVisitDate',
+      'rfmSegment',
+      'engagementScore',
+      'churnRisk',
+      'riskScore',
+      'tier',
     ];
 
     for (const field of fields) {
@@ -210,10 +243,9 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
   }
 
   async delete(customerId: string): Promise<boolean> {
-    const row = await queryOne<{ customerId: string }>(
-      `DELETE FROM "customerProfile" WHERE "customerId" = $1 RETURNING "customerId"`,
-      [customerId],
-    );
+    const row = await queryOne<{ customerId: string }>(`DELETE FROM "customerProfile" WHERE "customerId" = $1 RETURNING "customerId"`, [
+      customerId,
+    ]);
     return !!row;
   }
 

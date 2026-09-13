@@ -68,7 +68,9 @@ export type SupplierUpdateParams = Partial<Omit<Supplier, 'supplierId' | 'code' 
 export type SupplierAddressCreateParams = Omit<SupplierAddress, 'supplierAddressId' | 'createdAt' | 'updatedAt'>;
 export type SupplierAddressUpdateParams = Partial<Omit<SupplierAddress, 'supplierAddressId' | 'supplierId' | 'createdAt' | 'updatedAt'>>;
 export type SupplierProductCreateParams = Omit<SupplierProduct, 'supplierProductId' | 'createdAt' | 'updatedAt'>;
-export type SupplierProductUpdateParams = Partial<Omit<SupplierProduct, 'supplierProductId' | 'supplierId' | 'productId' | 'createdAt' | 'updatedAt'>>;
+export type SupplierProductUpdateParams = Partial<
+  Omit<SupplierProduct, 'supplierProductId' | 'supplierId' | 'productId' | 'createdAt' | 'updatedAt'>
+>;
 
 export interface SupplierRepository {
   // Suppliers

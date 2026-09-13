@@ -9,7 +9,7 @@ const slugify = (str: string) => {
   return str;
 };
 
-export const  stringify = (obj: unknown) => {
+export const stringify = (obj: unknown) => {
   let cache: unknown[] = [];
   let str = JSON.stringify(obj, function (key, value) {
     if (typeof value === 'object' && value !== null) {
@@ -24,4 +24,4 @@ export const  stringify = (obj: unknown) => {
   });
   cache = []; // reset the cache
   return str;
-}
+};

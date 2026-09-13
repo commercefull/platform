@@ -29,10 +29,9 @@ export class ContentMediaUsageRepo {
   }
 
   async findUsageByMediaId(mediaId: string): Promise<ContentMediaUsage[]> {
-    const results = await query<ContentMediaUsage[]>(
-      'SELECT * FROM "contentMediaUsage" WHERE "mediaId" = $1 ORDER BY "createdAt" DESC',
-      [mediaId],
-    );
+    const results = await query<ContentMediaUsage[]>('SELECT * FROM "contentMediaUsage" WHERE "mediaId" = $1 ORDER BY "createdAt" DESC', [
+      mediaId,
+    ]);
     return results || [];
   }
 
@@ -50,13 +49,7 @@ export class ContentMediaUsageRepo {
       VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT ("mediaId", "entityType", "entityId", "field") DO UPDATE SET "sortOrder" = EXCLUDED."sortOrder"
       RETURNING *`,
-      [
-        params.mediaId,
-        params.entityType,
-        params.entityId,
-        params.field || null,
-        params.sortOrder || 0,
-      ],
+      [params.mediaId, params.entityType, params.entityId, params.field || null, params.sortOrder || 0],
     );
 
     if (!result) {
@@ -83,10 +76,7 @@ export class ContentMediaUsageRepo {
   }
 
   async getUsageCount(mediaId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      'SELECT COUNT(*) as count FROM "contentMediaUsage" WHERE "mediaId" = $1',
-      [mediaId],
-    );
+    const result = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "contentMediaUsage" WHERE "mediaId" = $1', [mediaId]);
     return result ? parseInt(result.count) : 0;
   }
 }

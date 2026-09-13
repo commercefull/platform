@@ -8,7 +8,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { logger } from '../../../../libs/logger';
-import { AuditLog} from '../../domain/entities/AuditLog';
+import { AuditLog } from '../../domain/entities/AuditLog';
 import type { AuditAction, ActorType, ResourceType } from '../../domain/enums/AuditAction';
 import { AuditRepository, AuditLogFilters } from '../../domain/repositories/AuditRepository';
 import type { PaginatedResult, PaginationOptions } from '../../../../libs/types/shared';
@@ -99,10 +99,7 @@ export class AuditRepositoryImpl implements AuditRepository {
   }
 
   async findById(auditLogId: string): Promise<AuditLog | null> {
-    const row = await queryOne<AuditLogRow>(
-      'SELECT * FROM "auditLog" WHERE "auditLogId" = $1',
-      [auditLogId],
-    );
+    const row = await queryOne<AuditLogRow>('SELECT * FROM "auditLog" WHERE "auditLogId" = $1', [auditLogId]);
     return row ? rowToEntity(row) : null;
   }
 
@@ -112,16 +109,46 @@ export class AuditRepositoryImpl implements AuditRepository {
     let paramIdx = 1;
 
     if (filters) {
-      if (filters.actorId) { conditions.push(`"actorId" = $${paramIdx++}`); params.push(filters.actorId); }
-      if (filters.actorType) { conditions.push(`"actorType" = $${paramIdx++}`); params.push(filters.actorType); }
-      if (filters.action) { conditions.push(`"action" = $${paramIdx++}`); params.push(filters.action); }
-      if (filters.resourceType) { conditions.push(`"resourceType" = $${paramIdx++}`); params.push(filters.resourceType); }
-      if (filters.resourceId) { conditions.push(`"resourceId" = $${paramIdx++}`); params.push(filters.resourceId); }
-      if (filters.organizationId) { conditions.push(`"organizationId" = $${paramIdx++}`); params.push(filters.organizationId); }
-      if (filters.storeId) { conditions.push(`"storeId" = $${paramIdx++}`); params.push(filters.storeId); }
-      if (filters.correlationId) { conditions.push(`"correlationId" = $${paramIdx++}`); params.push(filters.correlationId); }
-      if (filters.createdAfter) { conditions.push(`"createdAt" >= $${paramIdx++}`); params.push(filters.createdAfter); }
-      if (filters.createdBefore) { conditions.push(`"createdAt" <= $${paramIdx++}`); params.push(filters.createdBefore); }
+      if (filters.actorId) {
+        conditions.push(`"actorId" = $${paramIdx++}`);
+        params.push(filters.actorId);
+      }
+      if (filters.actorType) {
+        conditions.push(`"actorType" = $${paramIdx++}`);
+        params.push(filters.actorType);
+      }
+      if (filters.action) {
+        conditions.push(`"action" = $${paramIdx++}`);
+        params.push(filters.action);
+      }
+      if (filters.resourceType) {
+        conditions.push(`"resourceType" = $${paramIdx++}`);
+        params.push(filters.resourceType);
+      }
+      if (filters.resourceId) {
+        conditions.push(`"resourceId" = $${paramIdx++}`);
+        params.push(filters.resourceId);
+      }
+      if (filters.organizationId) {
+        conditions.push(`"organizationId" = $${paramIdx++}`);
+        params.push(filters.organizationId);
+      }
+      if (filters.storeId) {
+        conditions.push(`"storeId" = $${paramIdx++}`);
+        params.push(filters.storeId);
+      }
+      if (filters.correlationId) {
+        conditions.push(`"correlationId" = $${paramIdx++}`);
+        params.push(filters.correlationId);
+      }
+      if (filters.createdAfter) {
+        conditions.push(`"createdAt" >= $${paramIdx++}`);
+        params.push(filters.createdAfter);
+      }
+      if (filters.createdBefore) {
+        conditions.push(`"createdAt" <= $${paramIdx++}`);
+        params.push(filters.createdBefore);
+      }
     }
 
     const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -156,17 +183,14 @@ export class AuditRepositoryImpl implements AuditRepository {
   }
 
   async findByCorrelationId(correlationId: string): Promise<AuditLog[]> {
-    const rows = await query<AuditLogRow[]>(
-      'SELECT * FROM "auditLog" WHERE "correlationId" = $1 ORDER BY "createdAt" ASC',
-      [correlationId],
-    );
+    const rows = await query<AuditLogRow[]>('SELECT * FROM "auditLog" WHERE "correlationId" = $1 ORDER BY "createdAt" ASC', [
+      correlationId,
+    ]);
     return (rows ?? []).map(rowToEntity);
   }
 
   async getLatestHash(): Promise<string> {
-    const row = await queryOne<{ hash: string }>(
-      'SELECT "hash" FROM "auditLog" ORDER BY "createdAt" DESC, "auditLogId" DESC LIMIT 1',
-    );
+    const row = await queryOne<{ hash: string }>('SELECT "hash" FROM "auditLog" ORDER BY "createdAt" DESC, "auditLogId" DESC LIMIT 1');
     return row?.hash ?? 'genesis';
   }
 

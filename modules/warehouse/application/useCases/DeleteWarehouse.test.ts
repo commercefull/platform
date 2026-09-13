@@ -3,11 +3,13 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { DeleteWarehouseUseCase} from './DeleteWarehouse';
+import { DeleteWarehouseUseCase } from './DeleteWarehouse';
 import { WarehouseNotFoundError, WarehouseValidationError } from '../../domain/errors/WarehouseErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('DeleteWarehouseUseCase', () => {
   let useCase: DeleteWarehouseUseCase;

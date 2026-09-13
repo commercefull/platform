@@ -189,12 +189,20 @@ describe('ReturnRequest', () => {
 
   it('reconstitute restores from props', () => {
     const props = {
-      orderReturnId: 'r1', orderId: 'o1', returnNumber: 'RET-001',
-      customerId: 'c1', status: 'approved' as const, returnType: 'refund' as const,
-      requestedAt: new Date(), approvedAt: new Date(),
-      returnShippingPaid: false, returnCarrier: 'ups' as const,
-      requiresInspection: true, items: [],
-      createdAt: new Date(), updatedAt: new Date(),
+      orderReturnId: 'r1',
+      orderId: 'o1',
+      returnNumber: 'RET-001',
+      customerId: 'c1',
+      status: 'approved' as const,
+      returnType: 'refund' as const,
+      requestedAt: new Date(),
+      approvedAt: new Date(),
+      returnShippingPaid: false,
+      returnCarrier: 'ups' as const,
+      requiresInspection: true,
+      items: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     const ret = ReturnRequest.reconstitute(props);
@@ -210,6 +218,180 @@ describe('ReturnRequest', () => {
     expect(ret.canTransitionTo('cancelled')).toBe(true);
     expect(ret.canTransitionTo('completed')).toBe(false);
     expect(ret.canTransitionTo('received')).toBe(false);
+  });
+
+  // Epic I — Return rule integration
+  describe('applyRuleEvaluation (Epic I)', () => {
+    it('sets requiresInspection from rule evaluation result', () => {
+      const ret = ReturnRequest.create({
+        orderId: 'o1',
+        returnType: 'refund',
+        items: baseItems,
+      });
+
+      expect(ret.requiresInspection).toBe(true); // default
+
+      ret.applyRuleEvaluation({
+        requiresInspection: false,
+        autoApprove: true,
+        requiresManualReview: false,
+      });
+
+      expect(ret.requiresInspection).toBe(false);
+    });
+
+    it('sets requiresInspection to true when rule requires it', () => {
+      const ret = ReturnRequest.create({
+        orderId: 'o1',
+        returnType: 'refund',
+        requiresInspection: false,
+        items: baseItems,
+      });
+
+      expect(ret.requiresInspection).toBe(false);
+
+      ret.applyRuleEvaluation({
+        requiresInspection: true,
+        autoApprove: false,
+        requiresManualReview: true,
+      });
+
+      expect(ret.requiresInspection).toBe(true);
+    });
+  });
+
+  describe('applyRestockingFee (Epic I)', () => {
+    it('applies percentage-based restocking fee to items', () => {
+      const ret = ReturnRequest.create({
+        orderId: 'o1',
+        returnType: 'refund',
+        items: [
+          {
+            orderItemId: 'item-1',
+            quantity: 1,
+            returnReason: 'other' as ReturnItemReason,
+            condition: 'new' as ReturnItemCondition,
+            restockItem: true,
+            refundAmount: 100,
+          },
+        ],
+      });
+
+      const totalFee = ret.applyRestockingFee({
+        restockingFeePercent: 10,
+        restockingFeeFlat: 0,
+      });
+
+      expect(totalFee).toBe(10); // 10% of 100
+      expect(ret.items[0].refundAmount).toBe(90); // 100 - 10
+    });
+
+    it('applies flat + percentage restocking fee', () => {
+      const ret = ReturnRequest.create({
+        orderId: 'o1',
+        returnType: 'refund',
+        items: [
+          {
+            orderItemId: 'item-1',
+            quantity: 1,
+            returnReason: 'other' as ReturnItemReason,
+            condition: 'new' as ReturnItemCondition,
+            restockItem: true,
+            refundAmount: 100,
+          },
+        ],
+      });
+
+      const totalFee = ret.applyRestockingFee({
+        restockingFeePercent: 5,
+        restockingFeeFlat: 2,
+      });
+
+      expect(totalFee).toBe(7); // 5% of 100 + 2 flat
+      expect(ret.items[0].refundAmount).toBe(93);
+    });
+
+    it('caps restocking fee at refund amount', () => {
+      const ret = ReturnRequest.create({
+        orderId: 'o1',
+        returnType: 'refund',
+        items: [
+          {
+            orderItemId: 'item-1',
+            quantity: 1,
+            returnReason: 'other' as ReturnItemReason,
+            condition: 'new' as ReturnItemCondition,
+            restockItem: true,
+            refundAmount: 50,
+          },
+        ],
+      });
+
+      const totalFee = ret.applyRestockingFee({
+        restockingFeePercent: 50,
+        restockingFeeFlat: 100,
+      });
+
+      expect(totalFee).toBe(50); // capped at refund amount
+      expect(ret.items[0].refundAmount).toBe(0);
+    });
+
+    it('skips items without refundAmount', () => {
+      const ret = ReturnRequest.create({
+        orderId: 'o1',
+        returnType: 'exchange',
+        items: [
+          {
+            orderItemId: 'item-1',
+            quantity: 1,
+            returnReason: 'other' as ReturnItemReason,
+            condition: 'new' as ReturnItemCondition,
+            restockItem: true,
+          },
+        ],
+      });
+
+      const totalFee = ret.applyRestockingFee({
+        restockingFeePercent: 10,
+        restockingFeeFlat: 0,
+      });
+
+      expect(totalFee).toBe(0);
+    });
+
+    it('applies restocking fee across multiple items', () => {
+      const ret = ReturnRequest.create({
+        orderId: 'o1',
+        returnType: 'refund',
+        items: [
+          {
+            orderItemId: 'item-1',
+            quantity: 1,
+            returnReason: 'other' as ReturnItemReason,
+            condition: 'new' as ReturnItemCondition,
+            restockItem: true,
+            refundAmount: 100,
+          },
+          {
+            orderItemId: 'item-2',
+            quantity: 1,
+            returnReason: 'other' as ReturnItemReason,
+            condition: 'used' as ReturnItemCondition,
+            restockItem: false,
+            refundAmount: 50,
+          },
+        ],
+      });
+
+      const totalFee = ret.applyRestockingFee({
+        restockingFeePercent: 10,
+        restockingFeeFlat: 0,
+      });
+
+      expect(totalFee).toBe(15); // 10% of 100 + 10% of 50
+      expect(ret.items[0].refundAmount).toBe(90);
+      expect(ret.items[1].refundAmount).toBe(45);
+    });
   });
 });
 
@@ -269,10 +451,20 @@ describe('StoreCreditLedgerEntry', () => {
 
   it('reconstitute restores from props', () => {
     const props = {
-      storeCreditLedgerId: 'scl1', customerId: 'c1', entryType: 'credit' as const,
-      referenceType: 'return', referenceId: 'r1', amount: 200, balanceAfter: 200,
-      currency: 'EUR', reason: 'Test', notes: undefined, createdBy: 'admin',
-      expiresAt: undefined, createdAt: new Date(), updatedAt: new Date(),
+      storeCreditLedgerId: 'scl1',
+      customerId: 'c1',
+      entryType: 'credit' as const,
+      referenceType: 'return',
+      referenceId: 'r1',
+      amount: 200,
+      balanceAfter: 200,
+      currency: 'EUR',
+      reason: 'Test',
+      notes: undefined,
+      createdBy: 'admin',
+      expiresAt: undefined,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     const entry = StoreCreditLedgerEntry.reconstitute(props);

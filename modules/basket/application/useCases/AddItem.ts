@@ -86,7 +86,7 @@ export class AddItemUseCase {
       sessionId: basket.sessionId,
       status: basket.status,
       currency: basket.currency,
-      items: basket.items.map((item) => ({
+      items: basket.items.map(item => ({
         basketItemId: item.basketItemId,
         productId: item.productId,
         productVariantId: item.productVariantId,

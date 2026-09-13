@@ -38,17 +38,14 @@ export class SegmentMembershipRepositoryImpl implements SegmentMembershipReposit
   }
 
   async remove(segmentId: string, customerId: string): Promise<void> {
-    await query(
-      `UPDATE "segmentMembership" SET "isActive" = false, "updatedAt" = NOW() WHERE "segmentId" = $1 AND "customerId" = $2`,
-      [segmentId, customerId],
-    );
+    await query(`UPDATE "segmentMembership" SET "isActive" = false, "updatedAt" = NOW() WHERE "segmentId" = $1 AND "customerId" = $2`, [
+      segmentId,
+      customerId,
+    ]);
   }
 
   async removeAllForSegment(segmentId: string): Promise<void> {
-    await query(
-      `UPDATE "segmentMembership" SET "isActive" = false, "updatedAt" = NOW() WHERE "segmentId" = $1`,
-      [segmentId],
-    );
+    await query(`UPDATE "segmentMembership" SET "isActive" = false, "updatedAt" = NOW() WHERE "segmentId" = $1`, [segmentId]);
   }
 
   async countBySegment(segmentId: string): Promise<number> {

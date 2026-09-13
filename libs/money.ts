@@ -68,6 +68,38 @@ export class Money {
     return new Money((this._amount * percent) / 100, this._currency);
   }
 
+  /**
+   * Allocate this amount across `weights` proportionally, with delta correction
+   * so the parts sum to the original amount exactly (no penny drift).
+   * @param weights Proportional weights (need not sum to 1).
+   */
+  allocate(weights: number[]): Money[] {
+    if (weights.length === 0) return [];
+    const weightSum = weights.reduce((s, w) => s + w, 0);
+    if (weightSum === 0) return weights.map(() => new Money(0, this._currency));
+
+    const rawCents = weights.map(w => (this.cents * w) / weightSum);
+    const roundedCents = rawCents.map(c => Math.round(c));
+    const totalCents = Math.round(this.cents);
+    const currentSum = roundedCents.reduce((s, c) => s + c, 0);
+    const delta = totalCents - currentSum;
+
+    if (delta !== 0) {
+      // Apply delta to the largest-weight line to minimise relative distortion.
+      let maxIdx = 0;
+      let maxWeight = -Infinity;
+      for (let i = 0; i < weights.length; i++) {
+        if (weights[i] > maxWeight) {
+          maxWeight = weights[i];
+          maxIdx = i;
+        }
+      }
+      roundedCents[maxIdx] += delta;
+    }
+
+    return roundedCents.map(c => new Money(c / 100, this._currency));
+  }
+
   isZero(): boolean {
     return this._amount === 0;
   }

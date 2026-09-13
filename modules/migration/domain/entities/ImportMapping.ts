@@ -43,15 +43,33 @@ export class ImportMapping {
     return new ImportMapping(props);
   }
 
-  get importMappingId(): string { return this.props.importMappingId; }
-  get importJobId(): string { return this.props.importJobId; }
-  get entityType(): string { return this.props.entityType; }
-  get sourceId(): string { return this.props.sourceId; }
-  get platformId(): string { return this.props.platformId; }
-  get sourceData(): Record<string, unknown> | undefined { return this.props.sourceData; }
-  get metadata(): Record<string, unknown> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get importMappingId(): string {
+    return this.props.importMappingId;
+  }
+  get importJobId(): string {
+    return this.props.importJobId;
+  }
+  get entityType(): string {
+    return this.props.entityType;
+  }
+  get sourceId(): string {
+    return this.props.sourceId;
+  }
+  get platformId(): string {
+    return this.props.platformId;
+  }
+  get sourceData(): Record<string, unknown> | undefined {
+    return this.props.sourceData;
+  }
+  get metadata(): Record<string, unknown> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   updatePlatformId(platformId: string): void {
     this.props.platformId = platformId;

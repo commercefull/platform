@@ -26,10 +26,14 @@ export const notificationResolvers = {
       return useCase.execute(input);
     },
 
-    markNotificationsAsRead: async (_parent: unknown, args: {
-      notificationIds: string[];
-      recipientId: string;
-    }, context: GraphQLAuthContext) => {
+    markNotificationsAsRead: async (
+      _parent: unknown,
+      args: {
+        notificationIds: string[];
+        recipientId: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireAuth(context);
       const useCase = new MarkAsReadUseCase(NotificationRepo);
       const input: MarkAsReadInput = {

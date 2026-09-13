@@ -140,11 +140,7 @@ describe('Tax Zones API Integration Tests', () => {
     it('should reject creation without required fields (name)', async () => {
       if (!adminToken) return;
 
-      const response = await client.post(
-        '/business/tax/zones',
-        { code: 'TEST123', countries: ['US'] },
-        { headers: authHeaders() },
-      );
+      const response = await client.post('/business/tax/zones', { code: 'TEST123', countries: ['US'] }, { headers: authHeaders() });
 
       expect(response.status).toBe(400);
     });
@@ -152,11 +148,7 @@ describe('Tax Zones API Integration Tests', () => {
     it('should reject creation without required fields (code)', async () => {
       if (!adminToken) return;
 
-      const response = await client.post(
-        '/business/tax/zones',
-        { name: 'Missing Code', countries: ['US'] },
-        { headers: authHeaders() },
-      );
+      const response = await client.post('/business/tax/zones', { name: 'Missing Code', countries: ['US'] }, { headers: authHeaders() });
 
       expect(response.status).toBe(400);
     });
@@ -225,11 +217,7 @@ describe('Tax Zones API Integration Tests', () => {
       const zoneId = createResponse.data.data.id;
       createdZoneIds.push(zoneId);
 
-      const response = await client.put(
-        `/business/tax/zones/${zoneId}`,
-        { countries: ['US', 'CA', 'MX'] },
-        { headers: authHeaders() },
-      );
+      const response = await client.put(`/business/tax/zones/${zoneId}`, { countries: ['US', 'CA', 'MX'] }, { headers: authHeaders() });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -248,11 +236,7 @@ describe('Tax Zones API Integration Tests', () => {
       const zoneId = createResponse.data.data.id;
       createdZoneIds.push(zoneId);
 
-      const response = await client.put(
-        `/business/tax/zones/${zoneId}`,
-        { countries: [] },
-        { headers: authHeaders() },
-      );
+      const response = await client.put(`/business/tax/zones/${zoneId}`, { countries: [] }, { headers: authHeaders() });
 
       expect(response.status).toBe(400);
     });

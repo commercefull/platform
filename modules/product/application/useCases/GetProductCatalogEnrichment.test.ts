@@ -78,14 +78,12 @@ describe('GetProductCatalogEnrichmentUseCase', () => {
   });
 
   it('should throw ProductValidationError when productId is empty', async () => {
-    await expect(useCase.execute(new GetProductCatalogEnrichmentCommand('')))
-      .rejects.toThrow(ProductValidationError);
+    await expect(useCase.execute(new GetProductCatalogEnrichmentCommand(''))).rejects.toThrow(ProductValidationError);
   });
 
   it('should throw ProductNotFoundError when product not found', async () => {
     mockProductRepo.findById.mockResolvedValueOnce(null);
 
-    await expect(useCase.execute(new GetProductCatalogEnrichmentCommand('nonexistent')))
-      .rejects.toThrow(ProductNotFoundError);
+    await expect(useCase.execute(new GetProductCatalogEnrichmentCommand('nonexistent'))).rejects.toThrow(ProductNotFoundError);
   });
 });

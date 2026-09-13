@@ -8,27 +8,31 @@ import { requireCustomerAuth, requireBusinessAuth, type GraphQLAuthContext } fro
 
 export const orderResolvers = {
   Query: {
-    order: async (_parent: unknown, args: {
-      orderId?: string;
-      orderNumber?: string;
-    }, context: GraphQLAuthContext) => {
+    order: async (
+      _parent: unknown,
+      args: {
+        orderId?: string;
+        orderNumber?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       const { customerId } = requireCustomerAuth(context);
       const useCase = new GetOrderUseCase(OrderRepo);
-      const command = new GetOrderCommand(
-        args.orderId,
-        args.orderNumber,
-        customerId,
-      );
+      const command = new GetOrderCommand(args.orderId, args.orderNumber, customerId);
       return useCase.execute(command);
     },
 
-    myOrders: async (_parent: unknown, args: {
-      customerId: string;
-      limit?: number;
-      offset?: number;
-      orderBy?: string;
-      orderDirection?: 'asc' | 'desc';
-    }, context: GraphQLAuthContext) => {
+    myOrders: async (
+      _parent: unknown,
+      args: {
+        customerId: string;
+        limit?: number;
+        offset?: number;
+        orderBy?: string;
+        orderDirection?: 'asc' | 'desc';
+      },
+      context: GraphQLAuthContext,
+    ) => {
       const { customerId } = requireCustomerAuth(context);
       const useCase = new GetCustomerOrdersUseCase(OrderRepo);
       const command = new GetCustomerOrdersCommand(
@@ -41,13 +45,17 @@ export const orderResolvers = {
       return useCase.execute(command);
     },
 
-    orders: async (_parent: unknown, args: {
-      filters?: Record<string, unknown>;
-      limit?: number;
-      offset?: number;
-      orderBy?: string;
-      orderDirection?: 'asc' | 'desc';
-    }, context: GraphQLAuthContext) => {
+    orders: async (
+      _parent: unknown,
+      args: {
+        filters?: Record<string, unknown>;
+        limit?: number;
+        offset?: number;
+        orderBy?: string;
+        orderDirection?: 'asc' | 'desc';
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireBusinessAuth(context);
       const useCase = new ListOrdersUseCase(OrderRepo);
       const command = new ListOrdersCommand(

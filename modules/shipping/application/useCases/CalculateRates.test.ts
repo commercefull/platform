@@ -3,10 +3,12 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { CalculateRatesUseCase} from './CalculateRates';
+import { CalculateRatesUseCase } from './CalculateRates';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CalculateRatesUseCase', () => {
   let useCase: CalculateRatesUseCase;
@@ -18,14 +20,24 @@ describe('CalculateRatesUseCase', () => {
       findDefaultZone: jest.fn().mockResolvedValue(null),
       findMethodsForZones: jest.fn().mockResolvedValue([
         {
-          shippingMethodId: 'm1', name: 'Standard', code: 'std', isDefault: true,
-          estimatedDaysMin: 3, estimatedDaysMax: 5, carrierType: 'fedex',
+          shippingMethodId: 'm1',
+          name: 'Standard',
+          code: 'std',
+          isDefault: true,
+          estimatedDaysMin: 3,
+          estimatedDaysMax: 5,
+          carrierType: 'fedex',
           isAvailableFor: jest.fn().mockReturnValue(true),
           calculateRate: jest.fn().mockReturnValue(9.99),
         },
         {
-          shippingMethodId: 'm2', name: 'Express', code: 'exp', isDefault: false,
-          estimatedDaysMin: 1, estimatedDaysMax: 2, carrierType: 'ups',
+          shippingMethodId: 'm2',
+          name: 'Express',
+          code: 'exp',
+          isDefault: false,
+          estimatedDaysMin: 1,
+          estimatedDaysMax: 2,
+          carrierType: 'ups',
           isAvailableFor: jest.fn().mockReturnValue(true),
           calculateRate: jest.fn().mockReturnValue(19.99),
         },
@@ -63,14 +75,24 @@ describe('CalculateRatesUseCase', () => {
   it('should skip unavailable methods', async () => {
     mockRepo.findMethodsForZones.mockResolvedValue([
       {
-        shippingMethodId: 'm1', name: 'Standard', code: 'std', isDefault: true,
-        estimatedDaysMin: 3, estimatedDaysMax: 5, carrierType: 'fedex',
+        shippingMethodId: 'm1',
+        name: 'Standard',
+        code: 'std',
+        isDefault: true,
+        estimatedDaysMin: 3,
+        estimatedDaysMax: 5,
+        carrierType: 'fedex',
         isAvailableFor: jest.fn().mockReturnValue(false),
         calculateRate: jest.fn().mockReturnValue(9.99),
       },
       {
-        shippingMethodId: 'm2', name: 'Express', code: 'exp', isDefault: false,
-        estimatedDaysMin: 1, estimatedDaysMax: 2, carrierType: 'ups',
+        shippingMethodId: 'm2',
+        name: 'Express',
+        code: 'exp',
+        isDefault: false,
+        estimatedDaysMin: 1,
+        estimatedDaysMax: 2,
+        carrierType: 'ups',
         isAvailableFor: jest.fn().mockReturnValue(true),
         calculateRate: jest.fn().mockReturnValue(19.99),
       },
@@ -89,14 +111,24 @@ describe('CalculateRatesUseCase', () => {
   it('should set defaultRateId to cheapest when no default method', async () => {
     mockRepo.findMethodsForZones.mockResolvedValue([
       {
-        shippingMethodId: 'm1', name: 'Standard', code: 'std', isDefault: false,
-        estimatedDaysMin: 3, estimatedDaysMax: 5, carrierType: 'fedex',
+        shippingMethodId: 'm1',
+        name: 'Standard',
+        code: 'std',
+        isDefault: false,
+        estimatedDaysMin: 3,
+        estimatedDaysMax: 5,
+        carrierType: 'fedex',
         isAvailableFor: jest.fn().mockReturnValue(true),
         calculateRate: jest.fn().mockReturnValue(9.99),
       },
       {
-        shippingMethodId: 'm2', name: 'Express', code: 'exp', isDefault: false,
-        estimatedDaysMin: 1, estimatedDaysMax: 2, carrierType: 'ups',
+        shippingMethodId: 'm2',
+        name: 'Express',
+        code: 'exp',
+        isDefault: false,
+        estimatedDaysMin: 1,
+        estimatedDaysMax: 2,
+        carrierType: 'ups',
         isAvailableFor: jest.fn().mockReturnValue(true),
         calculateRate: jest.fn().mockReturnValue(19.99),
       },

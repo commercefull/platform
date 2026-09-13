@@ -4,10 +4,14 @@ jest.mock('../../infrastructure/repositories/ShippingConfigRepository', () => ({
     carriers: {},
     methods: {
       findById: jest.fn().mockResolvedValue({
-        shippingMethodId: 'm1', name: 'Ground', estimatedDeliveryDays: 5,
+        shippingMethodId: 'm1',
+        name: 'Ground',
+        estimatedDeliveryDays: 5,
       }),
       findDefault: jest.fn().mockResolvedValue({
-        shippingMethodId: 'm0', name: 'Standard', estimatedDeliveryDays: 3,
+        shippingMethodId: 'm0',
+        name: 'Standard',
+        estimatedDeliveryDays: 3,
       }),
       findAll: jest.fn(),
       findByCarrier: jest.fn(),

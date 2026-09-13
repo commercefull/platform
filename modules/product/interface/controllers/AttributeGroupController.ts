@@ -16,7 +16,6 @@ class AttributeGroupController {
       success: true,
       data: groups || [],
     });
-    
   }
 
   /**
@@ -39,7 +38,6 @@ class AttributeGroupController {
       success: true,
       data: group,
     });
-    
   }
 
   /**
@@ -62,7 +60,6 @@ class AttributeGroupController {
       success: true,
       data: group,
     });
-    
   }
 
   /**
@@ -102,7 +99,6 @@ class AttributeGroupController {
       success: true,
       data: group,
     });
-    
   }
 
   /**
@@ -133,7 +129,6 @@ class AttributeGroupController {
       success: true,
       data: group,
     });
-    
   }
 
   /**
@@ -159,7 +154,6 @@ class AttributeGroupController {
       success: true,
       message: 'Attribute group deleted successfully',
     });
-    
   }
 }
 

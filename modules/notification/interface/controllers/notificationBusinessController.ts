@@ -91,7 +91,6 @@ export const getAllNotifications = async (req: TypedRequest, res: Response): Pro
     data: notifications,
     pagination: { limit, offset, total: notifications.length },
   });
-  
 };
 
 export const getNotificationById = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -102,10 +101,12 @@ export const getNotificationById = async (req: TypedRequest, res: Response): Pro
     return;
   }
   res.status(200).json({ success: true, data: notification });
-  
 };
 
-export const createNotification = async (req: TypedRequest<Record<string, string>, unknown, CreateNotificationBody>, res: Response): Promise<void> => {
+export const createNotification = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateNotificationBody>,
+  res: Response,
+): Promise<void> => {
   const { userId, userType, type, title, content, channel, priority, category, data, metadata } = req.body;
   if (!userId || !type || !title || !content || !channel) {
     res.status(400).json({ success: false, message: 'userId, type, title, content, and channel are required' });
@@ -124,10 +125,12 @@ export const createNotification = async (req: TypedRequest<Record<string, string
     metadata,
   });
   res.status(201).json({ success: true, data: notification });
-  
 };
 
-export const updateNotification = async (req: TypedRequest<Record<string, string>, unknown, UpdateNotificationBody>, res: Response): Promise<void> => {
+export const updateNotification = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdateNotificationBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const { title, content, priority, category, data, metadata } = req.body;
   const existing = await notificationRepo.findById(id);
@@ -137,7 +140,6 @@ export const updateNotification = async (req: TypedRequest<Record<string, string
   }
   const updated = await notificationRepo.update(id, { title, content, priority, category, data, metadata });
   res.status(200).json({ success: true, data: updated });
-  
 };
 
 export const markNotificationAsSent = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -148,7 +150,6 @@ export const markNotificationAsSent = async (req: TypedRequest, res: Response): 
     return;
   }
   res.status(200).json({ success: true, data: notification });
-  
 };
 
 export const getUnreadNotifications = async (req: UserRequest, res: Response): Promise<void> => {
@@ -159,7 +160,6 @@ export const getUnreadNotifications = async (req: UserRequest, res: Response): P
   }
   const notifications = await notificationRepo.findUnreadByUser(userId);
   res.json({ success: true, data: notifications });
-  
 };
 
 export const getRecentNotifications = async (req: UserRequest, res: Response): Promise<void> => {
@@ -171,7 +171,6 @@ export const getRecentNotifications = async (req: UserRequest, res: Response): P
   const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
   const notifications = await notificationRepo.findByUser(userId, limit);
   res.json({ success: true, data: notifications });
-  
 };
 
 export const markNotificationAsRead = async (req: UserRequest, res: Response): Promise<void> => {
@@ -191,7 +190,6 @@ export const markNotificationAsRead = async (req: UserRequest, res: Response): P
     return;
   }
   res.json({ success: true, data: updatedNotification });
-  
 };
 
 export const markAllNotificationsAsRead = async (req: UserRequest, res: Response): Promise<void> => {
@@ -202,7 +200,6 @@ export const markAllNotificationsAsRead = async (req: UserRequest, res: Response
   }
   const updatedCount = await notificationRepo.markAllAsRead(userId);
   res.json({ success: true, data: { count: updatedCount } });
-  
 };
 
 export const deleteNotification = async (req: UserRequest, res: Response): Promise<void> => {
@@ -227,7 +224,6 @@ export const deleteNotification = async (req: UserRequest, res: Response): Promi
     return;
   }
   res.json({ success: true, data: { id } });
-  
 };
 
 export const getUnreadCount = async (req: UserRequest, res: Response): Promise<void> => {
@@ -238,7 +234,6 @@ export const getUnreadCount = async (req: UserRequest, res: Response): Promise<v
   }
   const count = await notificationRepo.countUnread(userId);
   res.json({ success: true, data: { count } });
-  
 };
 
 // ============================================================================
@@ -342,7 +337,10 @@ export const listTranslations = async (req: TypedRequest, res: Response): Promis
 /**
  * POST /business/notifications/templates/:templateId/translations
  */
-export const upsertTranslation = async (req: TypedRequest<Record<string, string>, unknown, UpsertTranslationBody>, res: Response): Promise<void> => {
+export const upsertTranslation = async (
+  req: TypedRequest<Record<string, string>, unknown, UpsertTranslationBody>,
+  res: Response,
+): Promise<void> => {
   const { templateId } = req.params;
   const { locale, subject, body } = req.body;
   const useCase = new UpsertTemplateTranslationUseCase(notificationTemplateTranslationRepo);
@@ -431,11 +429,14 @@ export const getTemplateById = async (req: TypedRequest, res: Response): Promise
 export const getTemplatesByType = async (req: TypedRequest, res: Response): Promise<void> => {
   const { type } = req.params;
   const all = await notificationTemplateRepo.findAll(false);
-  const filtered = all.filter((t) => t.type === type);
+  const filtered = all.filter(t => t.type === type);
   successResponse(res, filtered.map(mapTemplate));
 };
 
-export const createTemplate = async (req: TypedRequest<Record<string, string>, unknown, CreateTemplateBody>, res: Response): Promise<void> => {
+export const createTemplate = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateTemplateBody>,
+  res: Response,
+): Promise<void> => {
   const { code, name, type, supportedChannels, defaultChannel } = req.body;
   if (!code || !name || !type || !supportedChannels || !defaultChannel) {
     errorResponse(res, 'code, name, type, supportedChannels, and defaultChannel are required', 400);
@@ -463,7 +464,10 @@ export const createTemplate = async (req: TypedRequest<Record<string, string>, u
   successResponse(res, mapTemplate(created), 201);
 };
 
-export const updateTemplate = async (req: TypedRequest<Record<string, string>, unknown, UpdateTemplateBody>, res: Response): Promise<void> => {
+export const updateTemplate = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdateTemplateBody>,
+  res: Response,
+): Promise<void> => {
   const id = String(req.params.id);
   const existing = await notificationTemplateRepo.findById(id);
   if (!existing) {
@@ -555,7 +559,10 @@ interface UpdatePreferenceAdminBody {
   metadata?: Record<string, unknown>;
 }
 
-export const updatePreferenceAdmin = async (req: TypedRequest<Record<string, string>, unknown, UpdatePreferenceAdminBody>, res: Response): Promise<void> => {
+export const updatePreferenceAdmin = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdatePreferenceAdminBody>,
+  res: Response,
+): Promise<void> => {
   const id = String(req.params.id);
   const existing = await notificationPreferenceRepo.findById(id);
   if (!existing) {

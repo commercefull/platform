@@ -1,4 +1,4 @@
-import { GetWarehouseUseCase} from './GetWarehouse';
+import { GetWarehouseUseCase } from './GetWarehouse';
 import { WarehouseValidationError } from '../../domain/errors/WarehouseErrors';
 
 describe('GetWarehouseUseCase', () => {
@@ -15,9 +15,20 @@ describe('GetWarehouseUseCase', () => {
 
   it('should get warehouse by ID (happy path)', async () => {
     mockRepo.findById.mockResolvedValue({
-      distributionWarehouseId: 'wh-1', name: 'Main', code: 'WH001', description: 'Main WH',
-      addressLine1: '123 St', city: 'Portland', state: 'OR', postalCode: '97201', country: 'US',
-      timezone: 'America/Los_Angeles', isActive: true, isDefault: true, createdAt: '2024-01-01', updatedAt: '2024-01-02',
+      distributionWarehouseId: 'wh-1',
+      name: 'Main',
+      code: 'WH001',
+      description: 'Main WH',
+      addressLine1: '123 St',
+      city: 'Portland',
+      state: 'OR',
+      postalCode: '97201',
+      country: 'US',
+      timezone: 'America/Los_Angeles',
+      isActive: true,
+      isDefault: true,
+      createdAt: '2024-01-01',
+      updatedAt: '2024-01-02',
     });
 
     const result = await useCase.execute({ warehouseId: 'wh-1' });
@@ -29,9 +40,20 @@ describe('GetWarehouseUseCase', () => {
 
   it('should get warehouse by code', async () => {
     mockRepo.findByCode.mockResolvedValue({
-      distributionWarehouseId: 'wh-2', name: 'East', code: 'EAST', description: '',
-      addressLine1: '456 Ave', city: 'NYC', state: 'NY', postalCode: '10001', country: 'US',
-      timezone: 'America/New_York', isActive: true, isDefault: false, createdAt: '2024-01-01', updatedAt: '2024-01-02',
+      distributionWarehouseId: 'wh-2',
+      name: 'East',
+      code: 'EAST',
+      description: '',
+      addressLine1: '456 Ave',
+      city: 'NYC',
+      state: 'NY',
+      postalCode: '10001',
+      country: 'US',
+      timezone: 'America/New_York',
+      isActive: true,
+      isDefault: false,
+      createdAt: '2024-01-01',
+      updatedAt: '2024-01-02',
     });
 
     const result = await useCase.execute({ code: 'EAST' });

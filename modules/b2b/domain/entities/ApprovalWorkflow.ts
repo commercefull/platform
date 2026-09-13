@@ -85,23 +85,57 @@ export class ApprovalWorkflow {
     return new ApprovalWorkflow(props);
   }
 
-  get workflowId(): string { return this.props.workflowId; }
-  get companyId(): string { return this.props.companyId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get type(): ApprovalType { return this.props.type; }
-  get referenceId(): string { return this.props.referenceId; }
-  get referenceNumber(): string { return this.props.referenceNumber; }
-  get requestedBy(): string { return this.props.requestedBy; }
-  get requestedByEmail(): string { return this.props.requestedByEmail; }
-  get status(): ApprovalStatus { return this.props.status; }
-  get amount(): number { return this.props.amount; }
-  get currency(): string { return this.props.currency; }
-  get steps(): ApprovalStep[] { return this.props.steps.map(s => ({ ...s })); }
-  get currentStep(): number { return this.props.currentStep; }
-  get description(): string | undefined { return this.props.description; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
-  get completedAt(): Date | undefined { return this.props.completedAt; }
+  get workflowId(): string {
+    return this.props.workflowId;
+  }
+  get companyId(): string {
+    return this.props.companyId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get type(): ApprovalType {
+    return this.props.type;
+  }
+  get referenceId(): string {
+    return this.props.referenceId;
+  }
+  get referenceNumber(): string {
+    return this.props.referenceNumber;
+  }
+  get requestedBy(): string {
+    return this.props.requestedBy;
+  }
+  get requestedByEmail(): string {
+    return this.props.requestedByEmail;
+  }
+  get status(): ApprovalStatus {
+    return this.props.status;
+  }
+  get amount(): number {
+    return this.props.amount;
+  }
+  get currency(): string {
+    return this.props.currency;
+  }
+  get steps(): ApprovalStep[] {
+    return this.props.steps.map(s => ({ ...s }));
+  }
+  get currentStep(): number {
+    return this.props.currentStep;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+  get completedAt(): Date | undefined {
+    return this.props.completedAt;
+  }
 
   approve(approverId: string, comments?: string): void {
     if (this.props.status !== 'pending') {

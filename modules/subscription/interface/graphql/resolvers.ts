@@ -1,7 +1,15 @@
 import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { CreateSubscriptionUseCase, CreateSubscriptionCommand, CreateSubscriptionInput } from '../../application/useCases/CreateSubscription';
-import { CancelSubscriptionUseCase, CancelSubscriptionCommand, CancelSubscriptionInput } from '../../application/useCases/CancelSubscription';
+import {
+  CreateSubscriptionUseCase,
+  CreateSubscriptionCommand,
+  CreateSubscriptionInput,
+} from '../../application/useCases/CreateSubscription';
+import {
+  CancelSubscriptionUseCase,
+  CancelSubscriptionCommand,
+  CancelSubscriptionInput,
+} from '../../application/useCases/CancelSubscription';
 import { ChangeSubscriptionPlanUseCase, ChangeSubscriptionPlanInput } from '../../application/useCases/ChangeSubscriptionPlan';
 import { PauseSubscriptionUseCase, PauseSubscriptionInput } from '../../application/useCases/PauseSubscription';
 import { ResumeSubscriptionUseCase, ResumeSubscriptionInput } from '../../application/useCases/ResumeSubscription';
@@ -23,10 +31,7 @@ const subscriptionRepoAdapter = {
     };
   },
   async update(id: string, data: Record<string, unknown>) {
-    await subscriptionRepo.updateSubscriptionStatus(
-      id,
-      (data.status as subscriptionRepo.SubscriptionStatus) ?? 'active',
-    );
+    await subscriptionRepo.updateSubscriptionStatus(id, (data.status as subscriptionRepo.SubscriptionStatus) ?? 'active');
   },
 };
 
@@ -61,12 +66,16 @@ export const subscriptionResolvers = {
       return useCase.execute(command);
     },
 
-    changeSubscriptionPlan: async (_parent: unknown, args: {
-      subscriptionId: string;
-      newPlanId: string;
-      applyImmediately?: boolean;
-      prorateCharges?: boolean;
-    }, context: GraphQLAuthContext) => {
+    changeSubscriptionPlan: async (
+      _parent: unknown,
+      args: {
+        subscriptionId: string;
+        newPlanId: string;
+        applyImmediately?: boolean;
+        prorateCharges?: boolean;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireCustomerAuth(context);
       const useCase = new ChangeSubscriptionPlanUseCase(subscriptionRepoAdapter, planRepoAdapter);
       const input: ChangeSubscriptionPlanInput = {
@@ -78,11 +87,15 @@ export const subscriptionResolvers = {
       return useCase.execute(input);
     },
 
-    pauseSubscription: async (_parent: unknown, args: {
-      subscriptionId: string;
-      reason?: string;
-      pauseUntil?: string;
-    }, context: GraphQLAuthContext) => {
+    pauseSubscription: async (
+      _parent: unknown,
+      args: {
+        subscriptionId: string;
+        reason?: string;
+        pauseUntil?: string;
+      },
+      context: GraphQLAuthContext,
+    ) => {
       requireCustomerAuth(context);
       const useCase = new PauseSubscriptionUseCase(subscriptionRepoAdapter);
       const input: PauseSubscriptionInput = {

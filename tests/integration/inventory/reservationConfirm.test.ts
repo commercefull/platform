@@ -66,20 +66,13 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
     it('should reject confirm without reservationId in body', async () => {
       if (!organizationToken) return;
 
-      const response = await client.post(
-        `/business/inventory/reservations/${randomUUID()}/confirm`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/inventory/reservations/${randomUUID()}/confirm`, {}, { headers: authHeaders() });
 
       expectStatus(response, 404);
     });
 
     it('should require authentication for confirm', async () => {
-      const response = await client.post(
-        `/business/inventory/reservations/${randomUUID()}/confirm`,
-        { reservationId: randomUUID() },
-      );
+      const response = await client.post(`/business/inventory/reservations/${randomUUID()}/confirm`, { reservationId: randomUUID() });
 
       expect(response.status).toBe(401);
     });
@@ -202,14 +195,11 @@ describe('Inventory Reservation Confirm & Threshold Tests', () => {
     });
 
     it('should require authentication', async () => {
-      const response = await client.put(
-        `/business/inventory/products/${TEST_PRODUCT_ID}/threshold`,
-        {
-          productId: TEST_PRODUCT_ID,
-          locationId: '20000000-0000-0000-0000-000000000001',
-          reorderPoint: 10,
-        },
-      );
+      const response = await client.put(`/business/inventory/products/${TEST_PRODUCT_ID}/threshold`, {
+        productId: TEST_PRODUCT_ID,
+        locationId: '20000000-0000-0000-0000-000000000001',
+        reorderPoint: 10,
+      });
 
       expect(response.status).toBe(401);
     });

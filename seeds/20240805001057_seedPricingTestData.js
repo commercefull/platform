@@ -90,24 +90,30 @@ exports.seed = async function (knex) {
   await knex('productCategoryMap').insert(categoryMappings).onConflict(['productId', 'productCategoryId']).ignore();
 
   // Create a test price list
-  await knex('pricingPriceList').insert({
-    priceListId: TEST_PRICE_LIST_ID,
-    name: 'Test Price List',
-    description: 'Price list for integration tests',
-    priority: 1,
-    isActive: true,
-  }).onConflict('priceListId').ignore();
+  await knex('pricingPriceList')
+    .insert({
+      priceListId: TEST_PRICE_LIST_ID,
+      name: 'Test Price List',
+      description: 'Price list for integration tests',
+      priority: 1,
+      isActive: true,
+    })
+    .onConflict('priceListId')
+    .ignore();
 
   // Create a test pricing rule with currency_conversion type
-  await knex('pricingRule').insert({
-    pricingRuleId: TEST_PRICING_RULE_ID,
-    name: 'Test Currency Price Rule',
-    description: 'Pricing rule for currency conversion tests',
-    ruleType: 'percentage',
-    scope: 'global',
-    priority: 1,
-    isActive: true,
-  }).onConflict('pricingRuleId').ignore();
+  await knex('pricingRule')
+    .insert({
+      pricingRuleId: TEST_PRICING_RULE_ID,
+      name: 'Test Currency Price Rule',
+      description: 'Pricing rule for currency conversion tests',
+      ruleType: 'percentage',
+      scope: 'global',
+      priority: 1,
+      isActive: true,
+    })
+    .onConflict('pricingRuleId')
+    .ignore();
 };
 
 exports.up = exports.seed;

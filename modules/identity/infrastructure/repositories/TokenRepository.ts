@@ -7,11 +7,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { IdentityRefreshTokens, IdentityTokenBlacklist } from '../../../../libs/db/types';
-import {
-  TokenRepository,
-  RefreshTokenInfo,
-  TokenBlacklistInfo,
-} from '../../domain/repositories/TokenRepository';
+import { TokenRepository, RefreshTokenInfo, TokenBlacklistInfo } from '../../domain/repositories/TokenRepository';
 import { FailedToCreateRefreshTokenError, FailedToCreateBlacklistEntryError } from '../../domain/errors/IdentityErrors';
 
 export class TokenRepositoryImpl implements TokenRepository {

@@ -2,8 +2,12 @@ import { query, queryOne } from '../../../../libs/db';
 import type { AutomationRuleRepository, ExecutionLogRepository } from '../../domain/repositories/AutomationRepository';
 import { AutomationRule } from '../../domain/entities/AutomationRule';
 import type {
-  TriggerType, TriggerConfig, RuleCondition, ConditionMatchMode,
-  RuleAction, ActionExecutionMode,
+  TriggerType,
+  TriggerConfig,
+  RuleCondition,
+  ConditionMatchMode,
+  RuleAction,
+  ActionExecutionMode,
 } from '../../domain/entities/AutomationRule';
 import { AutomationValidationError } from '../../domain/errors/AutomationErrors';
 
@@ -42,10 +46,7 @@ function rowToEntity(row: RuleDbRow): AutomationRule {
 
 export class AutomationRuleRepositoryImpl implements AutomationRuleRepository {
   async findById(id: string): Promise<AutomationRule | null> {
-    const row = await queryOne<RuleDbRow>(
-      `SELECT * FROM "automationRule" WHERE "automationRuleId" = $1 AND "deletedAt" IS NULL`,
-      [id],
-    );
+    const row = await queryOne<RuleDbRow>(`SELECT * FROM "automationRule" WHERE "automationRuleId" = $1 AND "deletedAt" IS NULL`, [id]);
     return row ? rowToEntity(row) : null;
   }
 
@@ -93,12 +94,25 @@ export class AutomationRuleRepositoryImpl implements AutomationRuleRepository {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
        RETURNING *`,
       [
-        props.name, props.description, props.triggerType,
-        JSON.stringify(props.triggerConfig), JSON.stringify(props.conditions),
-        props.conditionMatchMode, JSON.stringify(props.actions), props.actionExecutionMode,
-        props.isActive, props.priority, props.executionCount, props.successCount,
-        props.failureCount, props.lastTriggeredAt, props.lastExecutedAt,
-        props.organizationId, props.createdBy, props.createdAt, props.updatedAt,
+        props.name,
+        props.description,
+        props.triggerType,
+        JSON.stringify(props.triggerConfig),
+        JSON.stringify(props.conditions),
+        props.conditionMatchMode,
+        JSON.stringify(props.actions),
+        props.actionExecutionMode,
+        props.isActive,
+        props.priority,
+        props.executionCount,
+        props.successCount,
+        props.failureCount,
+        props.lastTriggeredAt,
+        props.lastExecutedAt,
+        props.organizationId,
+        props.createdBy,
+        props.createdAt,
+        props.updatedAt,
       ],
     );
     if (!row) throw new AutomationValidationError('Failed to create automation rule');
@@ -115,11 +129,21 @@ export class AutomationRuleRepositoryImpl implements AutomationRuleRepository {
         "failureCount" = $12, "lastTriggeredAt" = $13, "lastExecutedAt" = $14, "updatedAt" = NOW()
        WHERE "automationRuleId" = $15 AND "deletedAt" IS NULL RETURNING *`,
       [
-        props.name, props.description, JSON.stringify(props.triggerConfig),
-        JSON.stringify(props.conditions), props.conditionMatchMode,
-        JSON.stringify(props.actions), props.actionExecutionMode,
-        props.isActive, props.priority, props.executionCount, props.successCount,
-        props.failureCount, props.lastTriggeredAt, props.lastExecutedAt, props.automationRuleId,
+        props.name,
+        props.description,
+        JSON.stringify(props.triggerConfig),
+        JSON.stringify(props.conditions),
+        props.conditionMatchMode,
+        JSON.stringify(props.actions),
+        props.actionExecutionMode,
+        props.isActive,
+        props.priority,
+        props.executionCount,
+        props.successCount,
+        props.failureCount,
+        props.lastTriggeredAt,
+        props.lastExecutedAt,
+        props.automationRuleId,
       ],
     );
     return row ? rowToEntity(row) : null;
@@ -173,22 +197,29 @@ export class ExecutionLogRepositoryImpl implements ExecutionLogRepository {
         "triggerData", "status", "organizationId", "startedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING "executionLogId"`,
       [
-        params.automationRuleId, params.triggerType, params.triggerEventId ?? null,
-        params.correlationId ?? null, params.triggerData ? JSON.stringify(params.triggerData) : null,
-        params.status, params.organizationId ?? null,
+        params.automationRuleId,
+        params.triggerType,
+        params.triggerEventId ?? null,
+        params.correlationId ?? null,
+        params.triggerData ? JSON.stringify(params.triggerData) : null,
+        params.status,
+        params.organizationId ?? null,
       ],
     );
     return row?.executionLogId ?? '';
   }
 
-  async update(id: string, params: {
-    status: string;
-    conditionResults?: unknown;
-    actionResults?: unknown;
-    errorMessage?: string;
-    durationMs?: number;
-    completedAt?: Date;
-  }): Promise<void> {
+  async update(
+    id: string,
+    params: {
+      status: string;
+      conditionResults?: unknown;
+      actionResults?: unknown;
+      errorMessage?: string;
+      durationMs?: number;
+      completedAt?: Date;
+    },
+  ): Promise<void> {
     await query(
       `UPDATE "automationExecutionLog" SET
         "status" = $1, "conditionResults" = $2, "actionResults" = $3,
@@ -215,18 +246,14 @@ export class ExecutionLogRepositoryImpl implements ExecutionLogRepository {
   }
 
   async findByCorrelationId(correlationId: string): Promise<unknown[]> {
-    const rows = await query<unknown[]>(
-      `SELECT * FROM "automationExecutionLog" WHERE "correlationId" = $1 ORDER BY "startedAt" DESC`,
-      [correlationId],
-    );
+    const rows = await query<unknown[]>(`SELECT * FROM "automationExecutionLog" WHERE "correlationId" = $1 ORDER BY "startedAt" DESC`, [
+      correlationId,
+    ]);
     return rows || [];
   }
 
   async findRecent(limit = 50): Promise<unknown[]> {
-    const rows = await query<unknown[]>(
-      `SELECT * FROM "automationExecutionLog" ORDER BY "startedAt" DESC LIMIT $1`,
-      [limit],
-    );
+    const rows = await query<unknown[]>(`SELECT * FROM "automationExecutionLog" ORDER BY "startedAt" DESC LIMIT $1`, [limit]);
     return rows || [];
   }
 
@@ -239,10 +266,9 @@ export class ExecutionLogRepositoryImpl implements ExecutionLogRepository {
   }
 
   async countByStatus(status: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "automationExecutionLog" WHERE "status" = $1`,
-      [status],
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "automationExecutionLog" WHERE "status" = $1`, [
+      status,
+    ]);
     return result ? parseInt(result.count, 10) : 0;
   }
 }

@@ -30,7 +30,16 @@ exports.up = function (knex) {
     t.string('hash').notNullable(); // SHA-256 of (previousHash + canonical JSON of this row)
 
     // SOC2 compliance columns
-    t.enu('category', ['authentication', 'authorization', 'dataAccess', 'dataModification', 'configuration', 'payment', 'compliance', 'security']).index();
+    t.enu('category', [
+      'authentication',
+      'authorization',
+      'dataAccess',
+      'dataModification',
+      'configuration',
+      'payment',
+      'compliance',
+      'security',
+    ]).index();
     t.enu('outcome', ['success', 'failure', 'denied']).notNullable().defaultTo('success');
     t.enu('severity', ['info', 'warning', 'critical']).notNullable().defaultTo('info');
     t.string('requestId');

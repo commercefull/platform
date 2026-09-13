@@ -95,11 +95,7 @@ class MigrationController {
 
   async lookupMapping(req: TypedRequest<{ importJobId: string }>, res: Response): Promise<void> {
     const { entityType, sourceId } = req.query;
-    const mapping = await manageImportMappings.findByJobAndSource(
-      req.params.importJobId,
-      entityType as string,
-      sourceId as string,
-    );
+    const mapping = await manageImportMappings.findByJobAndSource(req.params.importJobId, entityType as string, sourceId as string);
     if (!mapping) {
       res.status(404).json({ success: false, error: 'Mapping not found' });
       return;

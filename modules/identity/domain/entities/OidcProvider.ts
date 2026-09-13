@@ -123,24 +123,60 @@ export class OidcProvider {
   }
 
   // Getters
-  get providerId(): string { return this.props.providerId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get name(): string { return this.props.name; }
-  get issuerUrl(): string { return this.props.issuerUrl; }
-  get clientId(): string { return this.props.clientId; }
-  get clientSecret(): string { return this.props.clientSecret; }
-  get scopes(): string[] { return this.props.scopes; }
-  get redirectUri(): string { return this.props.redirectUri; }
-  get usePkce(): boolean { return this.props.usePkce; }
-  get useDiscovery(): boolean { return this.props.useDiscovery; }
-  get authorizationEndpoint(): string | undefined { return this.props.authorizationEndpoint; }
-  get tokenEndpoint(): string | undefined { return this.props.tokenEndpoint; }
-  get userinfoEndpoint(): string | undefined { return this.props.userinfoEndpoint; }
-  get jwksUri(): string | undefined { return this.props.jwksUri; }
-  get claimMapping(): OidcClaimMapping { return this.props.claimMapping; }
-  get isActive(): boolean { return this.props.isActive; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get providerId(): string {
+    return this.props.providerId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get issuerUrl(): string {
+    return this.props.issuerUrl;
+  }
+  get clientId(): string {
+    return this.props.clientId;
+  }
+  get clientSecret(): string {
+    return this.props.clientSecret;
+  }
+  get scopes(): string[] {
+    return this.props.scopes;
+  }
+  get redirectUri(): string {
+    return this.props.redirectUri;
+  }
+  get usePkce(): boolean {
+    return this.props.usePkce;
+  }
+  get useDiscovery(): boolean {
+    return this.props.useDiscovery;
+  }
+  get authorizationEndpoint(): string | undefined {
+    return this.props.authorizationEndpoint;
+  }
+  get tokenEndpoint(): string | undefined {
+    return this.props.tokenEndpoint;
+  }
+  get userinfoEndpoint(): string | undefined {
+    return this.props.userinfoEndpoint;
+  }
+  get jwksUri(): string | undefined {
+    return this.props.jwksUri;
+  }
+  get claimMapping(): OidcClaimMapping {
+    return this.props.claimMapping;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Domain methods
   activate(): void {

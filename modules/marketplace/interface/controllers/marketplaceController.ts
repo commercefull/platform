@@ -1,16 +1,8 @@
 import { Response } from 'express';
 import { TypedRequest } from '../../../../libs/types/express';
 import { logger } from '../../../../libs/logger';
-import {
-  ManageVendorUseCase,
-  ManageCommissionRuleUseCase,
-  ManagePayoutUseCase,
-} from '../../application/useCases/Marketplace';
-import {
-  VendorRepository,
-  CommissionRuleRepository,
-  VendorPayoutRepository,
-} from '../../domain/repositories/MarketplaceRepository';
+import { ManageVendorUseCase, ManageCommissionRuleUseCase, ManagePayoutUseCase } from '../../application/useCases/Marketplace';
+import { VendorRepository, CommissionRuleRepository, VendorPayoutRepository } from '../../domain/repositories/MarketplaceRepository';
 import { VendorTier } from '../../domain/entities/Vendor';
 import { PayoutMethod } from '../../domain/entities/VendorPayout';
 import {
@@ -29,22 +21,16 @@ export class MarketplaceController {
   private commissionUseCase: ManageCommissionRuleUseCase;
   private payoutUseCase: ManagePayoutUseCase;
 
-  constructor(
-    vendorRepo: VendorRepository,
-    commissionRepo: CommissionRuleRepository,
-    payoutRepo: VendorPayoutRepository,
-  ) {
+  constructor(vendorRepo: VendorRepository, commissionRepo: CommissionRuleRepository, payoutRepo: VendorPayoutRepository) {
     this.vendorUseCase = new ManageVendorUseCase(vendorRepo);
     this.commissionUseCase = new ManageCommissionRuleUseCase(commissionRepo, vendorRepo);
     this.payoutUseCase = new ManagePayoutUseCase(payoutRepo, vendorRepo);
   }
 
   private handleError(res: Response, error: unknown): void {
-    if (error instanceof VendorNotFoundError || error instanceof CommissionRuleNotFoundError ||
-        error instanceof PayoutNotFoundError) {
+    if (error instanceof VendorNotFoundError || error instanceof CommissionRuleNotFoundError || error instanceof PayoutNotFoundError) {
       res.status(404).json({ success: false, error: error.message, code: error.code });
-    } else if (error instanceof VendorAlreadyExistsError || error instanceof VendorStatusError ||
-               error instanceof PayoutStatusError) {
+    } else if (error instanceof VendorAlreadyExistsError || error instanceof VendorStatusError || error instanceof PayoutStatusError) {
       res.status(409).json({ success: false, error: error.message, code: error.code });
     } else if (error instanceof CommissionValidationError || error instanceof MarketplaceValidationError) {
       res.status(400).json({ success: false, error: error.message, code: error.code });
@@ -85,7 +71,9 @@ export class MarketplaceController {
   async createVendor(req: TypedRequest, res: Response): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
-      const vendor = await this.vendorUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<typeof this.vendorUseCase.create>[0]);
+      const vendor = await this.vendorUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
+        typeof this.vendorUseCase.create
+      >[0]);
       res.status(201).json({ success: true, data: vendor.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -94,7 +82,10 @@ export class MarketplaceController {
 
   async updateVendor(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
     try {
-      const vendor = await this.vendorUseCase.updateProfile(req.params.vendorId, req.body as Parameters<typeof this.vendorUseCase.updateProfile>[1]);
+      const vendor = await this.vendorUseCase.updateProfile(
+        req.params.vendorId,
+        req.body as Parameters<typeof this.vendorUseCase.updateProfile>[1],
+      );
       res.json({ success: true, data: vendor.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -103,7 +94,10 @@ export class MarketplaceController {
 
   async setVendorAddress(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
     try {
-      const vendor = await this.vendorUseCase.setAddress(req.params.vendorId, req.body as Parameters<typeof this.vendorUseCase.setAddress>[1]);
+      const vendor = await this.vendorUseCase.setAddress(
+        req.params.vendorId,
+        req.body as Parameters<typeof this.vendorUseCase.setAddress>[1],
+      );
       res.json({ success: true, data: vendor.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -112,7 +106,10 @@ export class MarketplaceController {
 
   async setVendorBankInfo(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
     try {
-      const vendor = await this.vendorUseCase.setBankInfo(req.params.vendorId, req.body as Parameters<typeof this.vendorUseCase.setBankInfo>[1]);
+      const vendor = await this.vendorUseCase.setBankInfo(
+        req.params.vendorId,
+        req.body as Parameters<typeof this.vendorUseCase.setBankInfo>[1],
+      );
       res.json({ success: true, data: vendor.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -157,7 +154,10 @@ export class MarketplaceController {
 
   async setVendorCommissionRate(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
     try {
-      const vendor = await this.vendorUseCase.setCommissionRate(req.params.vendorId, (req.body as Record<string, unknown>).commissionRate as number);
+      const vendor = await this.vendorUseCase.setCommissionRate(
+        req.params.vendorId,
+        (req.body as Record<string, unknown>).commissionRate as number,
+      );
       res.json({ success: true, data: vendor.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -198,7 +198,9 @@ export class MarketplaceController {
   async createCommissionRule(req: TypedRequest, res: Response): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
-      const rule = await this.commissionUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<typeof this.commissionUseCase.create>[0]);
+      const rule = await this.commissionUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
+        typeof this.commissionUseCase.create
+      >[0]);
       res.status(201).json({ success: true, data: rule.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -225,7 +227,11 @@ export class MarketplaceController {
 
   async setCommissionValidity(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
     try {
-      const rule = await this.commissionUseCase.setValidity(req.params.ruleId, (req.body as Record<string, unknown>).startsAt as Date | undefined, (req.body as Record<string, unknown>).endsAt as Date | undefined);
+      const rule = await this.commissionUseCase.setValidity(
+        req.params.ruleId,
+        (req.body as Record<string, unknown>).startsAt as Date | undefined,
+        (req.body as Record<string, unknown>).endsAt as Date | undefined,
+      );
       res.json({ success: true, data: rule.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -262,7 +268,12 @@ export class MarketplaceController {
   async calculateCommission(req: TypedRequest, res: Response): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
-      const { vendorId, amount, categoryId, productId } = req.body as { vendorId: string; amount: number; categoryId?: string; productId?: string };
+      const { vendorId, amount, categoryId, productId } = req.body as {
+        vendorId: string;
+        amount: number;
+        categoryId?: string;
+        productId?: string;
+      };
       const commission = await this.commissionUseCase.calculateCommission(organizationId, vendorId, amount, categoryId, productId);
       res.json({ success: true, data: { commission } });
     } catch (error) {
@@ -302,7 +313,9 @@ export class MarketplaceController {
   async createPayout(req: TypedRequest, res: Response): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
-      const payout = await this.payoutUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<typeof this.payoutUseCase.create>[0]);
+      const payout = await this.payoutUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
+        typeof this.payoutUseCase.create
+      >[0]);
       res.status(201).json({ success: true, data: payout.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -311,7 +324,10 @@ export class MarketplaceController {
 
   async addPayoutLineItem(req: TypedRequest<{ payoutId: string }>, res: Response): Promise<void> {
     try {
-      const payout = await this.payoutUseCase.addLineItem(req.params.payoutId, req.body as Parameters<typeof this.payoutUseCase.addLineItem>[1]);
+      const payout = await this.payoutUseCase.addLineItem(
+        req.params.payoutId,
+        req.body as Parameters<typeof this.payoutUseCase.addLineItem>[1],
+      );
       res.json({ success: true, data: payout.toJSON() });
     } catch (error) {
       this.handleError(res, error);
@@ -329,7 +345,10 @@ export class MarketplaceController {
 
   async completePayout(req: TypedRequest<{ payoutId: string }>, res: Response): Promise<void> {
     try {
-      const payout = await this.payoutUseCase.complete(req.params.payoutId, (req.body as Record<string, unknown>).transactionRef as string | undefined);
+      const payout = await this.payoutUseCase.complete(
+        req.params.payoutId,
+        (req.body as Record<string, unknown>).transactionRef as string | undefined,
+      );
       res.json({ success: true, data: payout.toJSON() });
     } catch (error) {
       this.handleError(res, error);

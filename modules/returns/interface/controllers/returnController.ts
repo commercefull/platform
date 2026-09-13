@@ -39,29 +39,36 @@ class ReturnController {
     }
   }
 
-  async createReturn(req: TypedRequest<Record<string, never>, Record<string, never>, {
-    orderId: string;
-    customerId?: string;
-    returnType: string;
-    returnReason?: string;
-    customerNotes?: string;
-    returnCarrier?: string;
-    returnShippingPaid?: boolean;
-    requiresInspection?: boolean;
-    items: Array<{
-      orderItemId: string;
-      quantity: number;
-      returnReason: string;
-      returnReasonDetail?: string;
-      condition: string;
-      restockItem?: boolean;
-      refundAmount?: number;
-      exchangeProductId?: string;
-      exchangeVariantId?: string;
-      notes?: string;
-      warrantyStatus?: string;
-    }>;
-  }>, res: Response): Promise<void> {
+  async createReturn(
+    req: TypedRequest<
+      Record<string, never>,
+      Record<string, never>,
+      {
+        orderId: string;
+        customerId?: string;
+        returnType: string;
+        returnReason?: string;
+        customerNotes?: string;
+        returnCarrier?: string;
+        returnShippingPaid?: boolean;
+        requiresInspection?: boolean;
+        items: Array<{
+          orderItemId: string;
+          quantity: number;
+          returnReason: string;
+          returnReasonDetail?: string;
+          condition: string;
+          restockItem?: boolean;
+          refundAmount?: number;
+          exchangeProductId?: string;
+          exchangeVariantId?: string;
+          notes?: string;
+          warrantyStatus?: string;
+        }>;
+      }
+    >,
+    res: Response,
+  ): Promise<void> {
     try {
       const result = await createReturnRequestUseCase.execute(req.body as Parameters<typeof createReturnRequestUseCase.execute>[0]);
       res.status(201).json({ success: true, data: result.toJSON() });
@@ -74,7 +81,10 @@ class ReturnController {
     }
   }
 
-  async approveReturn(req: TypedRequest<{ returnId: string }, Record<string, never>, { rmaNumber?: string }>, res: Response): Promise<void> {
+  async approveReturn(
+    req: TypedRequest<{ returnId: string }, Record<string, never>, { rmaNumber?: string }>,
+    res: Response,
+  ): Promise<void> {
     try {
       const result = await approveReturnRequestUseCase.execute(req.params.returnId, req.body?.rmaNumber);
       res.json({ success: true, data: result.toJSON() });
@@ -100,7 +110,10 @@ class ReturnController {
     }
   }
 
-  async markInTransit(req: TypedRequest<{ returnId: string }, Record<string, never>, { trackingNumber?: string; trackingUrl?: string }>, res: Response): Promise<void> {
+  async markInTransit(
+    req: TypedRequest<{ returnId: string }, Record<string, never>, { trackingNumber?: string; trackingUrl?: string }>,
+    res: Response,
+  ): Promise<void> {
     try {
       const result = await markReturnInTransitUseCase.execute(req.params.returnId, req.body?.trackingNumber, req.body?.trackingUrl);
       res.json({ success: true, data: result.toJSON() });
@@ -126,7 +139,14 @@ class ReturnController {
     }
   }
 
-  async completeInspection(req: TypedRequest<{ returnId: string }, Record<string, never>, { passedItems?: Record<string, unknown>; failedItems?: Record<string, unknown> }>, res: Response): Promise<void> {
+  async completeInspection(
+    req: TypedRequest<
+      { returnId: string },
+      Record<string, never>,
+      { passedItems?: Record<string, unknown>; failedItems?: Record<string, unknown> }
+    >,
+    res: Response,
+  ): Promise<void> {
     try {
       const result = await completeReturnInspectionUseCase.execute(req.params.returnId, req.body?.passedItems, req.body?.failedItems);
       res.json({ success: true, data: result.toJSON() });
@@ -186,13 +206,20 @@ class ReturnController {
     res.json({ success: true, data: ledger.map(e => e.toJSON()) });
   }
 
-  async debitStoreCredit(req: TypedRequest<Record<string, never>, Record<string, never>, {
-    customerId: string;
-    amount: number;
-    referenceType?: string;
-    referenceId?: string;
-    reason?: string;
-  }>, res: Response): Promise<void> {
+  async debitStoreCredit(
+    req: TypedRequest<
+      Record<string, never>,
+      Record<string, never>,
+      {
+        customerId: string;
+        amount: number;
+        referenceType?: string;
+        referenceId?: string;
+        reason?: string;
+      }
+    >,
+    res: Response,
+  ): Promise<void> {
     try {
       const result = await debitStoreCreditUseCase.execute(req.body as Parameters<typeof debitStoreCreditUseCase.execute>[0]);
       res.json({ success: true, data: result.toJSON() });

@@ -89,7 +89,6 @@ export const createCoupon = async (req: TypedRequest, res: Response): Promise<vo
   );
   const coupon = await useCase.execute(command);
   res.status(201).json({ success: true, data: coupon });
-  
 };
 
 export const validateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -102,7 +101,6 @@ export const validateCoupon = async (req: TypedRequest, res: Response): Promise<
     return;
   }
   res.json({ success: true, data: result });
-  
 };
 
 export const applyCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -116,7 +114,6 @@ export const applyCoupon = async (req: TypedRequest, res: Response): Promise<voi
     items: body.items,
   });
   res.json({ success: true, data: result });
-  
 };
 
 export const redeemCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -129,7 +126,6 @@ export const redeemCoupon = async (req: TypedRequest, res: Response): Promise<vo
     discountAmount: body.discountAmount,
   });
   res.json({ success: true, data: result });
-  
 };
 
 export const getCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -148,7 +144,6 @@ export const getCoupon = async (req: TypedRequest, res: Response): Promise<void>
     return;
   }
   res.json({ success: true, data: coupon });
-  
 };
 
 export const listCoupons = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -164,13 +159,11 @@ export const listCoupons = async (req: TypedRequest, res: Response): Promise<voi
     },
   );
   res.json({ success: true, data: result });
-  
 };
 
 export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   await couponRepository.delete(req.params.couponId);
   res.json({ success: true, message: 'Coupon deleted' });
-  
 };
 
 export default {

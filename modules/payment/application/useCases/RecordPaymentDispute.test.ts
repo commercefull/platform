@@ -3,8 +3,16 @@ jest.mock('../../infrastructure/repositories/PaymentBillingDataRepository', () =
   default: {
     billing: {
       createDispute: jest.fn().mockResolvedValue({
-        paymentDisputeId: 'd1', paymentId: 'p1', organizationId: 'org1', externalDisputeId: 'ext1',
-        status: 'open', reason: 'Fraud', amount: 100, currency: 'USD', dueBy: undefined, createdAt: new Date(),
+        paymentDisputeId: 'd1',
+        paymentId: 'p1',
+        organizationId: 'org1',
+        externalDisputeId: 'ext1',
+        status: 'open',
+        reason: 'Fraud',
+        amount: 100,
+        currency: 'USD',
+        dueBy: undefined,
+        createdAt: new Date(),
       }),
     },
   },
@@ -35,9 +43,7 @@ describe('RecordPaymentDisputeUseCase', () => {
   });
 
   it('should record payment dispute (happy path)', async () => {
-    const result = await useCase.execute(new RecordPaymentDisputeCommand(
-      'p1', 'org1', 100, 'USD', 'open', 'ext1', 'Fraud',
-    ));
+    const result = await useCase.execute(new RecordPaymentDisputeCommand('p1', 'org1', 100, 'USD', 'open', 'ext1', 'Fraud'));
 
     expect(result.paymentDisputeId).toBe('d1');
     expect(result.status).toBe('open');
@@ -46,6 +52,8 @@ describe('RecordPaymentDisputeUseCase', () => {
   it('should throw FailedToCreatePaymentDisputeError when creation fails', async () => {
     mockRepo.billing.createDispute.mockResolvedValueOnce(null);
 
-    await expect(useCase.execute(new RecordPaymentDisputeCommand('p1', 'org1', 100, 'USD'))).rejects.toThrow(FailedToCreatePaymentDisputeError);
+    await expect(useCase.execute(new RecordPaymentDisputeCommand('p1', 'org1', 100, 'USD'))).rejects.toThrow(
+      FailedToCreatePaymentDisputeError,
+    );
   });
 });

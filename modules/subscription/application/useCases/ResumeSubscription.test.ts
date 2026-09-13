@@ -3,11 +3,13 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { ResumeSubscriptionUseCase} from './ResumeSubscription';
+import { ResumeSubscriptionUseCase } from './ResumeSubscription';
 import { SubscriptionNotFoundError, SubscriptionValidationError } from '../../domain/errors/SubscriptionErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ResumeSubscriptionUseCase', () => {
   let useCase: ResumeSubscriptionUseCase;

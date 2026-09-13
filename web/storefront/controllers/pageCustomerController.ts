@@ -18,7 +18,6 @@ export const getHomePage = async (req: TypedRequest, res: Response): Promise<voi
     categories: [],
     user: req.user,
   });
-  
 };
 
 // GET: display about us page
@@ -120,7 +119,14 @@ export const submitContactFormAdvanced = (req: TypedRequest, res: Response): voi
 
   // TODO: Add email sending logic here using nodemailer
   // For now, we'll just log the form data and show success
-  logger.info('Advanced contact form submission', { name: (name as string).trim(), email: (email as string).trim(), phone: (phone as string)?.trim() || null, subject, message: (message as string).trim(), submittedAt: new Date() });
+  logger.info('Advanced contact form submission', {
+    name: (name as string).trim(),
+    email: (email as string).trim(),
+    phone: (phone as string)?.trim() || null,
+    subject,
+    message: (message as string).trim(),
+    submittedAt: new Date(),
+  });
 
   req.flash('success', "Thank you for your message! We've received your inquiry and will get back to you within 24 hours.");
   res.redirect('/contact-form');

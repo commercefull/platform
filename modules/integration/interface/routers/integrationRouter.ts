@@ -20,13 +20,22 @@ router.delete('/:integrationId', asyncHandler(integrationController.deleteIntegr
 router.post('/:integrationId/credentials', asyncHandler(integrationController.addCredential.bind(integrationController)));
 router.get('/:integrationId/credentials', asyncHandler(integrationController.listCredentials.bind(integrationController)));
 router.put('/:integrationId/credentials/:credentialId', asyncHandler(integrationController.updateCredential.bind(integrationController)));
-router.delete('/:integrationId/credentials/:credentialId', asyncHandler(integrationController.deleteCredential.bind(integrationController)));
+router.delete(
+  '/:integrationId/credentials/:credentialId',
+  asyncHandler(integrationController.deleteCredential.bind(integrationController)),
+);
 
 // Event subscriptions
 router.post('/:integrationId/subscriptions', asyncHandler(integrationController.createSubscription.bind(integrationController)));
 router.get('/:integrationId/subscriptions', asyncHandler(integrationController.listSubscriptions.bind(integrationController)));
-router.put('/:integrationId/subscriptions/:subscriptionId', asyncHandler(integrationController.updateSubscription.bind(integrationController)));
-router.delete('/:integrationId/subscriptions/:subscriptionId', asyncHandler(integrationController.deleteSubscription.bind(integrationController)));
+router.put(
+  '/:integrationId/subscriptions/:subscriptionId',
+  asyncHandler(integrationController.updateSubscription.bind(integrationController)),
+);
+router.delete(
+  '/:integrationId/subscriptions/:subscriptionId',
+  asyncHandler(integrationController.deleteSubscription.bind(integrationController)),
+);
 
 // Logs
 router.get('/:integrationId/logs', asyncHandler(integrationController.listLogs.bind(integrationController)));

@@ -47,10 +47,17 @@ export async function create(input: CreatePickPackInput): Promise<WarehousePickP
   `;
 
   const result = await queryOne<WarehousePickPack>(sql, [
-    id, input.distributionWarehouseId, input.pickPackNumber,
-    input.orderId || null, input.fulfillmentId || null,
-    'pending', input.items ? JSON.stringify(input.items) : null,
-    input.assignedTo || null, input.notes || null, now, now,
+    id,
+    input.distributionWarehouseId,
+    input.pickPackNumber,
+    input.orderId || null,
+    input.fulfillmentId || null,
+    'pending',
+    input.items ? JSON.stringify(input.items) : null,
+    input.assignedTo || null,
+    input.notes || null,
+    now,
+    now,
   ]);
 
   if (!result) throw new FailedToCreateWarehouseEntityError('Failed to create pick/pack record');

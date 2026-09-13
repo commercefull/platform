@@ -12,7 +12,9 @@ import { CreateDataRequestUseCase, CreateDataRequestCommand } from './CreateData
 import { CustomerIdRequiredError, GdprValidationError } from '../../domain/errors/GdprErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CreateDataRequestUseCase', () => {
   let useCase: CreateDataRequestUseCase;

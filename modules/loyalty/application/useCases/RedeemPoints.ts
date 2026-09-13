@@ -3,7 +3,13 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import { LoyaltyMemberNotFoundError, LoyaltyRewardNotFoundError, RewardNotAvailableError, InsufficientPointsError, LoyaltyValidationError } from '../../domain/errors/LoyaltyErrors';
+import {
+  LoyaltyMemberNotFoundError,
+  LoyaltyRewardNotFoundError,
+  RewardNotAvailableError,
+  InsufficientPointsError,
+  LoyaltyValidationError,
+} from '../../domain/errors/LoyaltyErrors';
 
 export interface RedeemPointsInput {
   customerId: string;

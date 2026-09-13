@@ -101,10 +101,7 @@ export class ThemeRegistry {
    * Resolve the complete theme configuration for a store.
    * This is the main entry point for storefront rendering.
    */
-  async resolveThemeForStore(
-    storeId: string,
-    repository: ThemeRepository,
-  ): Promise<ResolvedTheme | null> {
+  async resolveThemeForStore(storeId: string, repository: ThemeRepository): Promise<ResolvedTheme | null> {
     const assignment = await repository.findThemeAssignment(storeId);
     if (!assignment) return null;
 

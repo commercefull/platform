@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { TrackPageViewUseCase} from './TrackPageView';
+import { TrackPageViewUseCase } from './TrackPageView';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 describe('TrackPageViewUseCase', () => {
@@ -16,7 +16,9 @@ describe('TrackPageViewUseCase', () => {
 
   it('should track page view (happy path)', async () => {
     const result = await useCase.execute({
-      sessionId: 's1', pageUrl: '/home', pageTitle: 'Home',
+      sessionId: 's1',
+      pageUrl: '/home',
+      pageTitle: 'Home',
     });
 
     expect(result.success).toBe(true);

@@ -11,10 +11,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import {
-  PSPAdapter, PSPConfig, PaymentRequest, PaymentResponse,
-  HealthCheckResult,
-} from './GatewayAdapter';
+import { PSPAdapter, PSPConfig, PaymentRequest, PaymentResponse, HealthCheckResult } from './GatewayAdapter';
 import { NoPaymentGatewayConfiguredError, PaymentValidationError } from '../../domain/errors/PaymentErrors';
 
 export interface GatewayRoute {
@@ -164,6 +161,9 @@ export class FailoverRoutingEngine {
     const availableRoutes = this.getAvailableRoutes();
 
     if (availableRoutes.length === 0) {
+      if (this.routes.length > 0) {
+        throw new PaymentValidationError('All payment providers are unavailable');
+      }
       throw new NoPaymentGatewayConfiguredError();
     }
 
@@ -325,9 +325,16 @@ export class FailoverRoutingEngine {
   private isRetryableError(errorCode?: string): boolean {
     if (!errorCode) return false;
     const retryableCodes = [
-      'rate_limit', 'rate_limited', 'temporarily_unavailable',
-      'network_error', 'timeout', 'service_unavailable',
-      'stripe_error', 'paypal_error', 'klarna_error', 'affirm_error',
+      'rate_limit',
+      'rate_limited',
+      'temporarily_unavailable',
+      'network_error',
+      'timeout',
+      'service_unavailable',
+      'stripe_error',
+      'paypal_error',
+      'klarna_error',
+      'affirm_error',
     ];
     return retryableCodes.includes(errorCode.toLowerCase());
   }

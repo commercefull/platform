@@ -23,15 +23,17 @@ describe('OutboxWriter', () => {
 
     it('should pass correlationId and source when provided', async () => {
       const tx = mockTx('evt-002');
-      await writeToOutbox(tx, 'order.paid', { orderId: 'o2' }, {
-        correlationId: 'corr-abc',
-        source: 'checkout',
-      });
-
-      expect(tx.queryOne).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.arrayContaining(['order.paid', 'corr-abc', 'checkout']),
+      await writeToOutbox(
+        tx,
+        'order.paid',
+        { orderId: 'o2' },
+        {
+          correlationId: 'corr-abc',
+          source: 'checkout',
+        },
       );
+
+      expect(tx.queryOne).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining(['order.paid', 'corr-abc', 'checkout']));
     });
 
     it('should return empty string if insert returns no row', async () => {

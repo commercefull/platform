@@ -120,30 +120,76 @@ export class VendorPayout {
     return new VendorPayout(props);
   }
 
-  get payoutId(): string { return this._payoutId; }
-  get vendorId(): string { return this._vendorId; }
-  get organizationId(): string { return this._organizationId; }
-  get payoutNumber(): string { return this._payoutNumber; }
-  get status(): PayoutStatus { return this._status; }
-  get method(): PayoutMethod { return this._method; }
-  get periodStart(): Date { return this._periodStart; }
-  get periodEnd(): Date { return this._periodEnd; }
-  get lineItems(): PayoutLineItem[] { return this._lineItems; }
-  get grossAmount(): number { return this._grossAmount; }
-  get commissionAmount(): number { return this._commissionAmount; }
-  get netAmount(): number { return this._netAmount; }
-  get currency(): string { return this._currency; }
-  get transactionRef(): string | undefined { return this._transactionRef; }
-  get failureReason(): string | undefined { return this._failureReason; }
-  get processedAt(): Date | undefined { return this._processedAt; }
-  get completedAt(): Date | undefined { return this._completedAt; }
-  get createdAt(): Date { return this._createdAt; }
-  get updatedAt(): Date { return this._updatedAt; }
+  get payoutId(): string {
+    return this._payoutId;
+  }
+  get vendorId(): string {
+    return this._vendorId;
+  }
+  get organizationId(): string {
+    return this._organizationId;
+  }
+  get payoutNumber(): string {
+    return this._payoutNumber;
+  }
+  get status(): PayoutStatus {
+    return this._status;
+  }
+  get method(): PayoutMethod {
+    return this._method;
+  }
+  get periodStart(): Date {
+    return this._periodStart;
+  }
+  get periodEnd(): Date {
+    return this._periodEnd;
+  }
+  get lineItems(): PayoutLineItem[] {
+    return this._lineItems;
+  }
+  get grossAmount(): number {
+    return this._grossAmount;
+  }
+  get commissionAmount(): number {
+    return this._commissionAmount;
+  }
+  get netAmount(): number {
+    return this._netAmount;
+  }
+  get currency(): string {
+    return this._currency;
+  }
+  get transactionRef(): string | undefined {
+    return this._transactionRef;
+  }
+  get failureReason(): string | undefined {
+    return this._failureReason;
+  }
+  get processedAt(): Date | undefined {
+    return this._processedAt;
+  }
+  get completedAt(): Date | undefined {
+    return this._completedAt;
+  }
+  get createdAt(): Date {
+    return this._createdAt;
+  }
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
 
-  get isPending(): boolean { return this._status === 'pending'; }
-  get isCompleted(): boolean { return this._status === 'completed'; }
-  get isProcessing(): boolean { return this._status === 'processing'; }
-  get lineItemCount(): number { return this._lineItems.length; }
+  get isPending(): boolean {
+    return this._status === 'pending';
+  }
+  get isCompleted(): boolean {
+    return this._status === 'completed';
+  }
+  get isProcessing(): boolean {
+    return this._status === 'processing';
+  }
+  get lineItemCount(): number {
+    return this._lineItems.length;
+  }
 
   addLineItem(item: Omit<PayoutLineItem, 'payoutDate'>): void {
     if (this._status !== 'pending') {

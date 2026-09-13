@@ -1,9 +1,6 @@
 import { PaymentTransaction } from './PaymentTransaction';
 import { TransactionStatus } from '../valueObjects/PaymentStatus';
-import {
-  RefundAmountExceedsRefundableError,
-  InvalidStatusTransitionError,
-} from '../errors/PaymentErrors';
+import { RefundAmountExceedsRefundableError, InvalidStatusTransitionError } from '../errors/PaymentErrors';
 
 describe('PaymentTransaction', () => {
   const baseProps = {

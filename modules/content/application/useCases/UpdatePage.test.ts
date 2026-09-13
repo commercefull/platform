@@ -7,7 +7,9 @@ import { UpdatePageUseCase, UpdatePageCommand } from './UpdatePage';
 import { ContentPageNotFoundError, ContentValidationError } from '../../domain/errors/ContentErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('UpdatePageUseCase', () => {
   let useCase: UpdatePageUseCase;
@@ -16,11 +18,25 @@ describe('UpdatePageUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findPageById: jest.fn().mockResolvedValue({
-        contentPageId: 'p1', title: 'Old', slug: 'old', status: 'draft', contentTypeId: 'ct-1',
-        templateId: null, visibility: 'public', summary: null, metaTitle: null, metaDescription: null,
-        publishedAt: null, scheduledAt: null, isHomePage: false, createdAt: new Date(), updatedAt: new Date(),
+        contentPageId: 'p1',
+        title: 'Old',
+        slug: 'old',
+        status: 'draft',
+        contentTypeId: 'ct-1',
+        templateId: null,
+        visibility: 'public',
+        summary: null,
+        metaTitle: null,
+        metaDescription: null,
+        publishedAt: null,
+        scheduledAt: null,
+        isHomePage: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }),
-      updatePage: jest.fn().mockResolvedValue({ contentPageId: 'p1', title: 'New', slug: 'new', status: 'published', updatedAt: new Date() }),
+      updatePage: jest
+        .fn()
+        .mockResolvedValue({ contentPageId: 'p1', title: 'New', slug: 'new', status: 'published', updatedAt: new Date() }),
     };
     useCase = new UpdatePageUseCase(mockRepo as never);
   });

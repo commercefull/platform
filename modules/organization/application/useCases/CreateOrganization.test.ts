@@ -15,8 +15,11 @@ describe('CreateOrganizationUseCase', () => {
     mockRepo = {
       findByEmail: jest.fn().mockResolvedValue(null),
       create: jest.fn().mockResolvedValue({
-        organizationId: 'org-1', name: 'Acme Corp', email: 'info@acme.com',
-        status: 'pending', createdAt: new Date('2026-01-01'),
+        organizationId: 'org-1',
+        name: 'Acme Corp',
+        email: 'info@acme.com',
+        status: 'pending',
+        createdAt: new Date('2026-01-01'),
       }),
     };
     useCase = new CreateOrganizationUseCase(mockRepo as never);
@@ -40,13 +43,30 @@ describe('CreateOrganizationUseCase', () => {
 
   it('should pass all input fields to repository create', async () => {
     await useCase.execute({
-      name: 'Acme', email: 'test@test.com', phone: '123', businessType: 'retail',
-      taxId: 'TAX123', website: 'acme.com', description: 'Test org', logo: 'logo.png', password: 'secret',
+      name: 'Acme',
+      email: 'test@test.com',
+      phone: '123',
+      businessType: 'retail',
+      taxId: 'TAX123',
+      website: 'acme.com',
+      description: 'Test org',
+      logo: 'logo.png',
+      password: 'secret',
     });
 
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'Acme', email: 'test@test.com', phone: '123', businessType: 'retail',
-      taxId: 'TAX123', website: 'acme.com', description: 'Test org', logo: 'logo.png', password: 'secret', status: 'pending',
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Acme',
+        email: 'test@test.com',
+        phone: '123',
+        businessType: 'retail',
+        taxId: 'TAX123',
+        website: 'acme.com',
+        description: 'Test org',
+        logo: 'logo.png',
+        password: 'secret',
+        status: 'pending',
+      }),
+    );
   });
 });

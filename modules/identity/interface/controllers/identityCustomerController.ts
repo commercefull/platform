@@ -98,7 +98,6 @@ export const loginCustomer = async (req: TypedRequest<Record<string, string>, un
       email: subject.email,
     },
   });
-  
 };
 
 /**
@@ -155,13 +154,7 @@ export const registerCustomer = async (req: TypedRequest<Record<string, string>,
   });
 
   // Generate access token for immediate login
-  const accessToken = generateAccessToken(
-    newSubject.id,
-    newSubject.email,
-    'customer',
-    CUSTOMER_JWT_SECRET,
-    ACCESS_TOKEN_DURATION,
-  );
+  const accessToken = generateAccessToken(newSubject.id, newSubject.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
   res.status(201).json({
     success: true,
@@ -173,7 +166,6 @@ export const registerCustomer = async (req: TypedRequest<Record<string, string>,
       lastName: newSubject.lastName,
     },
   });
-  
 };
 
 /**
@@ -231,13 +223,15 @@ export const issueTokenPair = async (req: TypedRequest<Record<string, string>, u
       email: subject.email,
     },
   });
-  
 };
 
 /**
  * Refreshes an expired access token using a valid refresh token
  */
-export const renewAccessToken = async (req: TypedRequest<Record<string, string>, unknown, RefreshTokenBody>, res: Response): Promise<void> => {
+export const renewAccessToken = async (
+  req: TypedRequest<Record<string, string>, unknown, RefreshTokenBody>,
+  res: Response,
+): Promise<void> => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
@@ -296,7 +290,6 @@ export const renewAccessToken = async (req: TypedRequest<Record<string, string>,
     tokenType: 'Bearer',
     expiresIn: ACCESS_TOKEN_DURATION,
   });
-  
 };
 
 /**
@@ -334,7 +327,6 @@ export const checkTokenValidity = async (req: TypedRequest<Record<string, string
       role: decodedPayload.role,
     },
   });
-  
 };
 
 /**
@@ -379,13 +371,15 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
     // REMOVE IN PRODUCTION - only for development
     resetToken,
   });
-  
 };
 
 /**
  * Completes password reset using a valid reset token
  */
-export const resetPassword = async (req: TypedRequest<Record<string, string>, unknown, ResetPasswordBody>, res: Response): Promise<void> => {
+export const resetPassword = async (
+  req: TypedRequest<Record<string, string>, unknown, ResetPasswordBody>,
+  res: Response,
+): Promise<void> => {
   const { token, newPassword, password } = req.body;
   const finalPassword = newPassword || password;
 
@@ -414,7 +408,6 @@ export const resetPassword = async (req: TypedRequest<Record<string, string>, un
     success: true,
     message: 'Your password has been successfully reset',
   });
-  
 };
 
 /**
@@ -457,7 +450,6 @@ export const logoutCustomer = async (req: TypedRequest<Record<string, string>, u
     success: true,
     message: 'Logged out successfully',
   });
-  
 };
 
 /**
@@ -481,5 +473,4 @@ export const get2FAStatus = async (req: TypedRequest<Record<string, string>, unk
       method: null,
     },
   });
-  
 };

@@ -101,10 +101,7 @@ export async function createPool(input: {
 }
 
 export async function findPoolById(poolId: string): Promise<InventoryPool | null> {
-  const row = await queryOne<DbInventoryPool>(
-    'SELECT * FROM "inventoryPool" WHERE "inventoryPoolId" = $1',
-    [poolId],
-  );
+  const row = await queryOne<DbInventoryPool>('SELECT * FROM "inventoryPool" WHERE "inventoryPoolId" = $1', [poolId]);
   if (!row) return null;
 
   const locationRows = await query<DbInventoryPoolLocation[]>(
@@ -134,11 +131,7 @@ interface PoolInventoryRow {
   createdAt: string;
 }
 
-export async function findAvailableInPool(
-  poolId: string,
-  productId: string,
-  variantId?: string,
-): Promise<PoolLocation[]> {
+export async function findAvailableInPool(poolId: string, productId: string, variantId?: string): Promise<PoolLocation[]> {
   const rows = await query<PoolInventoryRow[]>(
     `SELECT i."inventoryLocationId" as "inventoryId", i."distributionWarehouseId" as "locationId",
             i."availableQuantity", COALESCE(pl.priority, 0) as priority, i."createdAt"
@@ -160,12 +153,7 @@ export async function findAvailableInPool(
   }));
 }
 
-export async function reserveStock(
-  inventoryId: string,
-  quantity: number,
-  _orderId: string,
-  _allocationId: string,
-): Promise<void> {
+export async function reserveStock(inventoryId: string, quantity: number, _orderId: string, _allocationId: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
     `UPDATE "inventoryLocation" SET "reservedQuantity" = "reservedQuantity" + $1, "availableQuantity" = "availableQuantity" - $1, "updatedAt" = $2 WHERE "inventoryLocationId" = $3`,
@@ -191,17 +179,7 @@ export async function createAllocation(input: {
           "inventoryAllocationId", "inventoryPoolId", "productId", "variantId",
           "orderId", "sourceLocationId", quantity, status, "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, 'reserved', $8, $9)`,
-        [
-          allocId,
-          input.poolId,
-          result.productId,
-          result.variantId || null,
-          input.orderId,
-          alloc.locationId,
-          alloc.quantity,
-          now,
-          now,
-        ],
+        [allocId, input.poolId, result.productId, result.variantId || null, input.orderId, alloc.locationId, alloc.quantity, now, now],
       );
     }
   }

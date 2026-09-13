@@ -20,7 +20,12 @@ describe('ReorderPageBlocksUseCase', () => {
   });
 
   it('should reorder blocks successfully', async () => {
-    const result = await useCase.execute(new ReorderPageBlocksCommand('p1', [{ id: 'b1', order: 1 }, { id: 'b2', order: 0 }]));
+    const result = await useCase.execute(
+      new ReorderPageBlocksCommand('p1', [
+        { id: 'b1', order: 1 },
+        { id: 'b2', order: 0 },
+      ]),
+    );
 
     expect(result.blocksReordered).toBe(2);
     expect(mockRepo.reorderBlocks).toHaveBeenCalled();

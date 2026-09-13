@@ -1,7 +1,15 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import supplierDataRepository from '../../infrastructure/repositories/SupplierDataRepository';
-import type { SupplierFilters, SupplierStatus, SupplierCreateParams, SupplierUpdateParams, SupplierAddressType, SupplierAddressUpdateParams, SupplierProductUpdateParams } from '../../infrastructure/repositories/SupplierDataRepository';
+import type {
+  SupplierFilters,
+  SupplierStatus,
+  SupplierCreateParams,
+  SupplierUpdateParams,
+  SupplierAddressType,
+  SupplierAddressUpdateParams,
+  SupplierProductUpdateParams,
+} from '../../infrastructure/repositories/SupplierDataRepository';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 
 const supplierRepo = supplierDataRepository.suppliers;
@@ -221,21 +229,22 @@ export const getSupplierAddresses = async (req: TypedRequest, res: Response): Pr
 
 export const createSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   const { id: supplierId } = req.params;
-  const { name, addressLine1, city, state, postalCode, country, addressType, isDefault, contactName, contactEmail, contactPhone, notes } = req.body as {
-    name: string;
-    addressLine1: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-    addressType?: string;
-    isDefault?: boolean;
-    contactName?: string;
-    contactEmail?: string;
-    contactPhone?: string;
-    notes?: string;
-    addressLine2?: string;
-  };
+  const { name, addressLine1, city, state, postalCode, country, addressType, isDefault, contactName, contactEmail, contactPhone, notes } =
+    req.body as {
+      name: string;
+      addressLine1: string;
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+      addressType?: string;
+      isDefault?: boolean;
+      contactName?: string;
+      contactEmail?: string;
+      contactPhone?: string;
+      notes?: string;
+      addressLine2?: string;
+    };
 
   if (!name || !addressLine1 || !city || !state || !postalCode || !country) {
     validationErrorResponse(res, ['Missing required address fields']);
@@ -297,7 +306,22 @@ export const getSupplierProducts = async (req: TypedRequest, res: Response): Pro
 
 export const addProductToSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   const { id: supplierId } = req.params;
-  const { productId, productVariantId, sku, supplierSku, supplierProductName, isPreferred, unitCost, currency, minimumOrderQuantity, leadTime, packagingInfo, dimensions, weight, notes } = req.body as {
+  const {
+    productId,
+    productVariantId,
+    sku,
+    supplierSku,
+    supplierProductName,
+    isPreferred,
+    unitCost,
+    currency,
+    minimumOrderQuantity,
+    leadTime,
+    packagingInfo,
+    dimensions,
+    weight,
+    notes,
+  } = req.body as {
     productId: string;
     productVariantId?: string;
     sku: string;

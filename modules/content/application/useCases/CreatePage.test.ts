@@ -24,15 +24,25 @@ function makeContentRepo(overrides?: Partial<Record<string, jest.Mock>>): Record
   };
 }
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('CreatePageUseCase', () => {
   it('should create a page successfully', async () => {
     const repo = makeContentRepo({
       createPage: jest.fn().mockResolvedValue({
-        contentPageId: 'p1', title: 'About', slug: 'about', contentTypeId: 'ct-1',
-        templateId: null, status: 'draft', visibility: 'public', summary: null,
-        isHomePage: false, createdAt: new Date(), updatedAt: new Date(),
+        contentPageId: 'p1',
+        title: 'About',
+        slug: 'about',
+        contentTypeId: 'ct-1',
+        templateId: null,
+        status: 'draft',
+        visibility: 'public',
+        summary: null,
+        isHomePage: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }),
     });
     const useCase = new CreatePageUseCase(repo as never);
@@ -63,6 +73,8 @@ describe('CreatePageUseCase', () => {
     const repo = makeContentRepo({ findTemplateById: jest.fn().mockResolvedValue(null) });
     const useCase = new CreatePageUseCase(repo as never);
 
-    await expect(useCase.execute(new CreatePageCommand('Title', 'slug', 'ct-1', 'missing-tmpl'))).rejects.toThrow(ContentTemplateNotFoundError);
+    await expect(useCase.execute(new CreatePageCommand('Title', 'slug', 'ct-1', 'missing-tmpl'))).rejects.toThrow(
+      ContentTemplateNotFoundError,
+    );
   });
 });

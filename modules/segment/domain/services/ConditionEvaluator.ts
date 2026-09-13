@@ -1,4 +1,4 @@
-import type { SegmentCondition} from '../entities/SegmentDefinition';
+import type { SegmentCondition } from '../entities/SegmentDefinition';
 import type { CustomerProfile } from '../entities/CustomerProfile';
 
 export function evaluateCondition(condition: SegmentCondition, profile: CustomerProfile): boolean {
@@ -48,11 +48,7 @@ export function evaluateCondition(condition: SegmentCondition, profile: Customer
   }
 }
 
-export function evaluateConditions(
-  conditions: SegmentCondition[],
-  matchMode: 'all' | 'any',
-  profile: CustomerProfile,
-): boolean {
+export function evaluateConditions(conditions: SegmentCondition[], matchMode: 'all' | 'any', profile: CustomerProfile): boolean {
   if (conditions.length === 0) return true;
   if (matchMode === 'all') {
     return conditions.every(c => evaluateCondition(c, profile));

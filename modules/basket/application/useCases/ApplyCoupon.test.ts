@@ -7,7 +7,9 @@ import { ApplyCouponUseCase, ApplyCouponCommand } from './ApplyCoupon';
 import { BasketNotFoundError, BasketValidationError } from '../../domain/errors/BasketErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ApplyCouponUseCase', () => {
   let useCase: ApplyCouponUseCase;
@@ -15,8 +17,11 @@ describe('ApplyCouponUseCase', () => {
   let mockDiscountPort: Record<string, jest.Mock>;
 
   const makeBasket = () => ({
-    basketId: 'b1', customerId: 'c1', subtotal: { amount: 100 },
-    applyCoupon: jest.fn(), toJSON: jest.fn().mockReturnValue({ basketId: 'b1' }),
+    basketId: 'b1',
+    customerId: 'c1',
+    subtotal: { amount: 100 },
+    applyCoupon: jest.fn(),
+    toJSON: jest.fn().mockReturnValue({ basketId: 'b1' }),
   });
 
   beforeEach(() => {
@@ -26,7 +31,8 @@ describe('ApplyCouponUseCase', () => {
     };
     mockDiscountPort = {
       validateDiscount: jest.fn().mockResolvedValue({
-        valid: true, discount: { type: 'percentage', value: 10, discountAmount: 10 },
+        valid: true,
+        discount: { type: 'percentage', value: 10, discountAmount: 10 },
       }),
     };
     useCase = new ApplyCouponUseCase(mockRepo as never, mockDiscountPort as never);
@@ -36,7 +42,10 @@ describe('ApplyCouponUseCase', () => {
     const result = await useCase.execute(new ApplyCouponCommand('b1', 'SAVE10'));
 
     expect(result.basketId).toBe('b1');
-    expect(eventBus.emit).toHaveBeenCalledWith('promotion.coupon_applied', expect.objectContaining({ basketId: 'b1', couponCode: 'SAVE10' }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'promotion.coupon_applied',
+      expect.objectContaining({ basketId: 'b1', couponCode: 'SAVE10' }),
+    );
   });
 
   it('should throw BasketNotFoundError when basket does not exist', async () => {

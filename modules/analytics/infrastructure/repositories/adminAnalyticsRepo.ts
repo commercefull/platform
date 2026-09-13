@@ -53,7 +53,10 @@ export async function findRecentCustomerId(): Promise<string | null> {
 // Executive KPIs
 // ============================================================================
 
-export async function getRevenueData(startDate: Date, endDate: Date): Promise<{
+export async function getRevenueData(
+  startDate: Date,
+  endDate: Date,
+): Promise<{
   revenue: number;
   orders: number;
   averageOrder: number;
@@ -83,7 +86,10 @@ export async function getRevenueData(startDate: Date, endDate: Date): Promise<{
   };
 }
 
-export async function getCustomerData(startDate: Date, endDate: Date): Promise<{
+export async function getCustomerData(
+  startDate: Date,
+  endDate: Date,
+): Promise<{
   total: number;
   active: number;
   ltv: number;
@@ -118,7 +124,10 @@ export async function getCustomerData(startDate: Date, endDate: Date): Promise<{
   };
 }
 
-export async function getInventoryData(startDate: Date, endDate: Date): Promise<{
+export async function getInventoryData(
+  startDate: Date,
+  endDate: Date,
+): Promise<{
   turnover: number;
   stockouts: number;
   value: number;

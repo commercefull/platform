@@ -1,4 +1,4 @@
-import { CreatePriceListUseCase} from './CreatePriceList';
+import { CreatePriceListUseCase } from './CreatePriceList';
 import { PricingValidationError } from '../../domain/errors/PricingErrors';
 
 describe('CreatePriceListUseCase', () => {
@@ -8,7 +8,12 @@ describe('CreatePriceListUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       createPriceList: jest.fn().mockResolvedValue({
-        priceListId: 'pl-1', name: 'Retail', type: 'standard', currencyCode: 'USD', isDefault: false, createdAt: new Date(),
+        priceListId: 'pl-1',
+        name: 'Retail',
+        type: 'standard',
+        currencyCode: 'USD',
+        isDefault: false,
+        createdAt: new Date(),
       }),
     };
     useCase = new CreatePriceListUseCase(mockRepo as never);

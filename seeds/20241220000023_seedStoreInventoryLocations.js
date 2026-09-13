@@ -50,9 +50,7 @@ exports.seed = async function (knex) {
 
   // Seed inventory for test product at the active store warehouse
   const TEST_PRODUCT_ID = '00000000-0000-0000-0000-000000000001';
-  await knex('inventoryLocation')
-    .where('inventoryLocationId', '20000000-0000-7001-8000-000000000001')
-    .del();
+  await knex('inventoryLocation').where('inventoryLocationId', '20000000-0000-7001-8000-000000000001').del();
 
   await knex('inventoryLocation').insert({
     inventoryLocationId: '20000000-0000-7001-8000-000000000001',

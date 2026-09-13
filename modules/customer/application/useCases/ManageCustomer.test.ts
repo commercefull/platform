@@ -35,7 +35,11 @@ jest.mock('../../infrastructure/repositories/CustomerDataRepository', () => ({
 import { ManageCustomersUseCase, ManageCustomerAddressesUseCase, ManageWishlistUseCase } from './ManageCustomer';
 import customerDataRepository from '../../infrastructure/repositories/CustomerDataRepository';
 
-const mockRepo = customerDataRepository as unknown as { customers: Record<string, jest.Mock>; addresses: Record<string, jest.Mock>; wishlist: Record<string, jest.Mock> };
+const mockRepo = customerDataRepository as unknown as {
+  customers: Record<string, jest.Mock>;
+  addresses: Record<string, jest.Mock>;
+  wishlist: Record<string, jest.Mock>;
+};
 
 describe('ManageCustomersUseCase', () => {
   let useCase: ManageCustomersUseCase;

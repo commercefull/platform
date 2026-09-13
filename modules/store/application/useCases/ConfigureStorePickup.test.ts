@@ -19,7 +19,8 @@ describe('ConfigureStorePickupUseCase', () => {
 
   it('should configure pickup (happy path)', async () => {
     const result = await useCase.execute({
-      storeId: 's1', enabled: true,
+      storeId: 's1',
+      enabled: true,
       settings: { prepareTimeMinutes: 30, maxHoldDays: 14 },
     });
 
@@ -39,7 +40,6 @@ describe('ConfigureStorePickupUseCase', () => {
   it('should throw StoreNotFoundError when store not found', async () => {
     mockStoreRepository.findById.mockResolvedValueOnce(null);
 
-    await expect(useCase.execute({ storeId: 'nonexistent', enabled: true }))
-      .rejects.toThrow(StoreNotFoundError);
+    await expect(useCase.execute({ storeId: 'nonexistent', enabled: true })).rejects.toThrow(StoreNotFoundError);
   });
 });

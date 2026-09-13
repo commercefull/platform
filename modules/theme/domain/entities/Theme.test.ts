@@ -23,10 +23,16 @@ describe('Theme', () => {
           groupId: 'layout',
           label: 'Layout',
           settings: [
-            { key: 'containerWidth', label: 'Container Width', type: 'select' as const, defaultValue: '1280px', options: [
-              { label: '1024px', value: '1024px' },
-              { label: '1280px', value: '1280px' },
-            ] },
+            {
+              key: 'containerWidth',
+              label: 'Container Width',
+              type: 'select' as const,
+              defaultValue: '1280px',
+              options: [
+                { label: '1024px', value: '1024px' },
+                { label: '1280px', value: '1280px' },
+              ],
+            },
             { key: 'showSidebar', label: 'Show Sidebar', type: 'checkbox' as const, defaultValue: true },
           ],
         },
@@ -41,11 +47,14 @@ describe('Theme', () => {
     layout: {
       regions: ['header', 'main', 'footer'],
       pageLayouts: [
-        { pageType: 'home', regions: [
-          { region: 'header', component: 'Header' },
-          { region: 'main', component: 'HomePage' },
-          { region: 'footer', component: 'Footer' },
-        ]},
+        {
+          pageType: 'home',
+          regions: [
+            { region: 'header', component: 'Header' },
+            { region: 'main', component: 'HomePage' },
+            { region: 'footer', component: 'Footer' },
+          ],
+        },
       ],
     },
     components: {

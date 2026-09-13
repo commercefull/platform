@@ -4,7 +4,11 @@ jest.mock('../../infrastructure/repositories/NotificationDataRepository', () => 
     notifications: {},
     eventLogs: {
       create: jest.fn().mockResolvedValue({
-        notificationEventLogId: 'log1', eventType: 'sent', entityId: 'n1', entityType: 'notification', createdAt: new Date(),
+        notificationEventLogId: 'log1',
+        eventType: 'sent',
+        entityId: 'n1',
+        entityType: 'notification',
+        createdAt: new Date(),
       }),
     },
   },

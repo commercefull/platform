@@ -15,7 +15,10 @@ describe('ProductCategory', () => {
 
   it('should create a child category with parent path', () => {
     const cat = ProductCategory.create({
-      categoryId: 'c2', name: 'Phones', parentId: 'c1', parentPath: 'c1',
+      categoryId: 'c2',
+      name: 'Phones',
+      parentId: 'c1',
+      parentPath: 'c1',
     });
     expect(cat.level).toBe(2);
     expect(cat.path).toBe('c1/c2');

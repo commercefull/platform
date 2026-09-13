@@ -122,9 +122,13 @@ describe('Media API Integration', () => {
     });
 
     it('should handle missing files', async () => {
-      const response = await client.post('/business/media/upload', {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        '/business/media/upload',
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expect([400, 500].includes(response.status)).toBe(true);
     });
@@ -180,9 +184,13 @@ describe('Media API Integration', () => {
     });
 
     it('should handle empty batch', async () => {
-      const response = await client.post('/business/media/upload/batch', {}, {
-        headers: authHeaders(),
-      });
+      const response = await client.post(
+        '/business/media/upload/batch',
+        {},
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expect([400, 500].includes(response.status)).toBe(true);
     });

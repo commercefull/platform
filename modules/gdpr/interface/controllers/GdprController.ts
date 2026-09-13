@@ -20,7 +20,11 @@ import {
   RejectRequestCommand,
   VerifyIdentityCommand,
 } from '../../application/useCases/ProcessDataRequest';
-import { ManageCookieConsentUseCase, RecordCookieConsentCommand, UpdateCookieConsentCommand } from '../../application/useCases/ManageCookieConsent';
+import {
+  ManageCookieConsentUseCase,
+  RecordCookieConsentCommand,
+  UpdateCookieConsentCommand,
+} from '../../application/useCases/ManageCookieConsent';
 import { GdprService } from '../../domain/repositories/GdprRepository';
 
 // ============================================================================
@@ -97,7 +101,10 @@ function createGdprService(): GdprService {
 
     deleteCustomerData: async (customerId: string) => {
       await query('DELETE FROM "customerAddress" WHERE "customerId" = $1', [customerId]);
-      await query('UPDATE "customer" SET "deletedAt" = now(), "email" = \'deleted_\' || "customerId" || \'@deleted.local\', "firstName" = \'Deleted\', "lastName" = \'User\', "phone" = NULL, "dateOfBirth" = NULL, "updatedAt" = now() WHERE "customerId" = $1', [customerId]);
+      await query(
+        'UPDATE "customer" SET "deletedAt" = now(), "email" = \'deleted_\' || "customerId" || \'@deleted.local\', "firstName" = \'Deleted\', "lastName" = \'User\', "phone" = NULL, "dateOfBirth" = NULL, "updatedAt" = now() WHERE "customerId" = $1',
+        [customerId],
+      );
     },
   };
 }
@@ -195,7 +202,6 @@ export const createDataRequest: AsyncHandler = async (req, res, _next) => {
 
   const result = await createDataRequestUseCase.execute(command);
   res.status(201).json({ success: true, data: result });
-  
 };
 
 /**
@@ -210,7 +216,6 @@ export const getMyDataRequests: AsyncHandler = async (req, res, _next) => {
 
   const requests = await gdprDataRequestRepo.findByCustomerId(customerId);
   res.json({ success: true, data: requests.map(r => r.toJSON()) });
-  
 };
 
 /**
@@ -235,7 +240,6 @@ export const cancelDataRequest: AsyncHandler = async (req, res, _next) => {
   await gdprDataRequestRepo.save(request);
 
   res.json({ success: true, data: { status: request.status }, message: 'Request cancelled' });
-  
 };
 
 // ============================================================================
@@ -266,7 +270,6 @@ export const listDataRequests: AsyncHandler = async (req, res, _next) => {
     ...result,
     data: result.data.map(r => r.toJSON()),
   });
-  
 };
 
 /**
@@ -279,7 +282,6 @@ export const getDataRequest: AsyncHandler = async (req, res, _next) => {
     return;
   }
   res.json({ success: true, data: request.toJSON() });
-  
 };
 
 /**
@@ -288,7 +290,6 @@ export const getDataRequest: AsyncHandler = async (req, res, _next) => {
 export const getOverdueRequests: AsyncHandler = async (req, res, _next) => {
   const requests = await gdprDataRequestRepo.findOverdueRequests();
   res.json({ success: true, data: requests.map(r => r.toJSON()), total: requests.length });
-  
 };
 
 /**
@@ -311,7 +312,6 @@ export const getGdprStatistics: AsyncHandler = async (req, res, _next) => {
       averageProcessingTimeDays: avgProcessingTime,
     },
   });
-  
 };
 
 /**
@@ -325,29 +325,31 @@ export const verifyIdentity: AsyncHandler = async (req, res, _next) => {
 
   const result = await useCase.verifyIdentity(command);
   res.json({ success: true, data: { isVerified: true, ...result } });
-  
 };
 
 /**
  * Process an export request (admin)
  */
 export const processExportRequest: AsyncHandler = async (req, res, _next) => {
-  const adminId = req.user?.userId || req.user?.id || "";
+  const adminId = req.user?.userId || req.user?.id || '';
   const gdprService = createGdprService();
 
   const useCase = new ProcessDataRequestUseCase(gdprDataRequestRepo, gdprService);
-  const command = new ProcessExportRequestCommand(req.params.gdprDataRequestId, adminId || '', (req.body as ProcessExportBody).format || 'json');
+  const command = new ProcessExportRequestCommand(
+    req.params.gdprDataRequestId,
+    adminId || '',
+    (req.body as ProcessExportBody).format || 'json',
+  );
 
   const result = await useCase.processExport(command);
   res.json({ success: true, data: result });
-  
 };
 
 /**
  * Process a deletion request (admin)
  */
 export const processDeletionRequest: AsyncHandler = async (req, res, _next) => {
-  const adminId = req.user?.userId || req.user?.id || "";
+  const adminId = req.user?.userId || req.user?.id || '';
   const gdprService = createGdprService();
 
   const useCase = new ProcessDataRequestUseCase(gdprDataRequestRepo, gdprService);
@@ -355,14 +357,13 @@ export const processDeletionRequest: AsyncHandler = async (req, res, _next) => {
 
   const result = await useCase.processDeletion(command);
   res.json({ success: true, data: result });
-  
 };
 
 /**
  * Reject a request (admin)
  */
 export const rejectRequest: AsyncHandler = async (req, res, _next) => {
-  const adminId = req.user?.userId || req.user?.id || "";
+  const adminId = req.user?.userId || req.user?.id || '';
   const gdprService = createGdprService();
 
   const useCase = new ProcessDataRequestUseCase(gdprDataRequestRepo, gdprService);
@@ -370,7 +371,6 @@ export const rejectRequest: AsyncHandler = async (req, res, _next) => {
 
   const result = await useCase.reject(command);
   res.json({ success: true, data: result });
-  
 };
 
 // ============================================================================
@@ -397,7 +397,6 @@ export const recordCookieConsent: AsyncHandler = async (req, res, _next) => {
 
   const result = await manageCookieConsentUseCase.recordConsent(command);
   res.status(200).json({ success: true, data: { cookieConsentId: result.gdprCookieConsentId, ...result.preferences } });
-  
 };
 
 /**
@@ -412,7 +411,6 @@ export const getCookieConsent: AsyncHandler = async (req, res, _next) => {
     return;
   }
   res.json({ success: true, data: { cookieConsentId: result.gdprCookieConsentId, ...result.preferences } });
-  
 };
 
 /**
@@ -432,7 +430,6 @@ export const acceptAllCookies: AsyncHandler = async (req, res, _next) => {
       preferenceCookies: true,
     },
   });
-  
 };
 
 /**
@@ -452,7 +449,6 @@ export const rejectAllCookies: AsyncHandler = async (req, res, _next) => {
       preferenceCookies: false,
     },
   });
-  
 };
 
 /**
@@ -464,18 +460,13 @@ export const updateCookieConsent: AsyncHandler = async (req, res, _next) => {
 
   const result = await manageCookieConsentUseCase.updateConsent(command);
   res.json({ success: true, data: { cookieConsentId: result.gdprCookieConsentId, ...result.preferences } });
-  
 };
 
 /**
  * Get cookie consent statistics (admin)
  */
 export const getCookieConsentStatistics: AsyncHandler = async (req, res, _next) => {
-  const [stats, byCountry] = await Promise.all([
-    gdprCookieConsentRepo.getConsentStatistics(),
-    gdprCookieConsentRepo.getConsentByCountry(),
-  ]);
+  const [stats, byCountry] = await Promise.all([gdprCookieConsentRepo.getConsentStatistics(), gdprCookieConsentRepo.getConsentByCountry()]);
 
   res.json({ success: true, data: { totalConsents: stats.total, ...stats, byCountry } });
-  
 };

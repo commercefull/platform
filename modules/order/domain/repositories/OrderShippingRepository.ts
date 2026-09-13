@@ -15,7 +15,10 @@ export interface OrderShipping {
 
 export type OrderShippingCreateParams = Omit<OrderShipping, 'orderShippingId' | 'createdAt' | 'updatedAt'>;
 export type OrderShippingUpdateParams = Partial<
-  Pick<OrderShipping, 'shippingMethod' | 'carrier' | 'service' | 'amount' | 'taxAmount' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'>
+  Pick<
+    OrderShipping,
+    'shippingMethod' | 'carrier' | 'service' | 'amount' | 'taxAmount' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'
+  >
 >;
 
 export interface OrderShippingRepository {

@@ -29,7 +29,10 @@ describe('UpdateTicketUseCase', () => {
   it('should set resolvedAt when status changes to resolved', async () => {
     await useCase.execute({ ticketId: 'tkt-1', status: 'resolved', updatedBy: 'agent-1' });
 
-    expect(mockRepo.updateTicket).toHaveBeenCalledWith('tkt-1', expect.objectContaining({ resolvedAt: expect.any(Date), updatedBy: 'agent-1' }));
+    expect(mockRepo.updateTicket).toHaveBeenCalledWith(
+      'tkt-1',
+      expect.objectContaining({ resolvedAt: expect.any(Date), updatedBy: 'agent-1' }),
+    );
   });
 
   it('should set closedAt when status changes to closed', async () => {

@@ -136,11 +136,7 @@ export class AutomationExecutionEngine {
     }
   }
 
-  async triggerEvent(
-    eventName: string,
-    eventData: unknown,
-    correlationId?: string,
-  ): Promise<ExecutionResult[]> {
+  async triggerEvent(eventName: string, eventData: unknown, correlationId?: string): Promise<ExecutionResult[]> {
     const rules = await this.ruleRepo.findByEventName(eventName, true);
     if (rules.length === 0) return [];
 
@@ -157,10 +153,7 @@ export class AutomationExecutionEngine {
     return results;
   }
 
-  async triggerManual(
-    ruleId: string,
-    context?: Record<string, unknown>,
-  ): Promise<ExecutionResult> {
+  async triggerManual(ruleId: string, context?: Record<string, unknown>): Promise<ExecutionResult> {
     const rule = await this.ruleRepo.findById(ruleId);
     if (!rule) throw new AutomationRuleNotFoundError(ruleId);
 

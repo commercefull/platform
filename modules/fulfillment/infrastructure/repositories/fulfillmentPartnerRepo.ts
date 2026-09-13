@@ -48,13 +48,34 @@ export async function update(
   const values: unknown[] = [];
   let idx = 1;
 
-  if (params.name !== undefined) { fields.push(`name = $${idx++}`); values.push(params.name); }
-  if (params.type !== undefined) { fields.push(`type = $${idx++}`); values.push(params.type); }
-  if (params.isActive !== undefined) { fields.push(`"isActive" = $${idx++}`); values.push(params.isActive); }
-  if (params.apiConfig !== undefined) { fields.push(`"apiConfig" = $${idx++}`); values.push(JSON.stringify(params.apiConfig)); }
-  if (params.address !== undefined) { fields.push(`"address" = $${idx++}`); values.push(JSON.stringify(params.address)); }
-  if (params.contactEmail !== undefined) { fields.push(`"contactEmail" = $${idx++}`); values.push(params.contactEmail); }
-  if (params.contactPhone !== undefined) { fields.push(`"contactPhone" = $${idx++}`); values.push(params.contactPhone); }
+  if (params.name !== undefined) {
+    fields.push(`name = $${idx++}`);
+    values.push(params.name);
+  }
+  if (params.type !== undefined) {
+    fields.push(`type = $${idx++}`);
+    values.push(params.type);
+  }
+  if (params.isActive !== undefined) {
+    fields.push(`"isActive" = $${idx++}`);
+    values.push(params.isActive);
+  }
+  if (params.apiConfig !== undefined) {
+    fields.push(`"apiConfig" = $${idx++}`);
+    values.push(JSON.stringify(params.apiConfig));
+  }
+  if (params.address !== undefined) {
+    fields.push(`"address" = $${idx++}`);
+    values.push(JSON.stringify(params.address));
+  }
+  if (params.contactEmail !== undefined) {
+    fields.push(`"contactEmail" = $${idx++}`);
+    values.push(params.contactEmail);
+  }
+  if (params.contactPhone !== undefined) {
+    fields.push(`"contactPhone" = $${idx++}`);
+    values.push(params.contactPhone);
+  }
 
   if (fields.length === 0) return findById(fulfillmentPartnerId);
 

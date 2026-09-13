@@ -33,7 +33,13 @@ export interface SendNotificationRepository {
 }
 
 export interface NotificationService {
-  send?(params: { channel: NotificationChannel; recipientId: string; subject?: string; content: string; data?: Record<string, unknown> }): Promise<void>;
+  send?(params: {
+    channel: NotificationChannel;
+    recipientId: string;
+    subject?: string;
+    content: string;
+    data?: Record<string, unknown>;
+  }): Promise<void>;
 }
 
 export class SendNotificationUseCase {

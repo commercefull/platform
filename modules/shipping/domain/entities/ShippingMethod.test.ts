@@ -2,8 +2,14 @@ import { ShippingMethod } from './ShippingMethod';
 
 describe('ShippingMethod', () => {
   const baseProps = {
-    name: 'Standard', code: 'STD', type: 'flat_rate' as const, basePrice: 10, zoneIds: ['z1'],
-    isActive: true, isDefault: false, sortOrder: 0,
+    name: 'Standard',
+    code: 'STD',
+    type: 'flat_rate' as const,
+    basePrice: 10,
+    zoneIds: ['z1'],
+    isActive: true,
+    isDefault: false,
+    sortOrder: 0,
   };
 
   it('should create a shipping method (happy path)', () => {

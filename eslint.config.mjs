@@ -46,12 +46,24 @@ export default [
           },
         ],
       }],
+      // Code complexity rules
+      complexity: ['warn', { max: 15 }],
+      'max-lines-per-function': ['warn', { max: 150, skipComments: true }],
+      'max-params': ['warn', { max: 5 }],
+      'max-depth': ['warn', { max: 5 }],
+      'max-lines': ['warn', { max: 500, skipComments: true }],
     },
   },
   {
     files: ['**/interface/jobs/**/*.ts', 'scripts/**/*.ts', 'tests/**/*.ts'],
     rules: {
       'no-console': 'off',
+      // Relax complexity rules for tests and scripts
+      complexity: 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
     },
   },
   {

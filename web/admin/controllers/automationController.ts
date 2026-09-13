@@ -45,7 +45,19 @@ export const createAutomationRuleForm = async (req: TypedRequest, res: Response)
 export const createAutomationRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const body = req.body as RequestBody;
-    const { name, description, triggerType, eventName, cronExpression, segmentId, conditions, conditionMatchMode, actions, actionExecutionMode, priority } = body;
+    const {
+      name,
+      description,
+      triggerType,
+      eventName,
+      cronExpression,
+      segmentId,
+      conditions,
+      conditionMatchMode,
+      actions,
+      actionExecutionMode,
+      priority,
+    } = body;
 
     const triggerConfig: Record<string, unknown> = {};
     if (eventName) triggerConfig.eventName = eventName;
@@ -124,7 +136,19 @@ export const updateAutomationRule = async (req: TypedRequest, res: Response): Pr
   try {
     const { ruleId } = req.params;
     const body = req.body as RequestBody;
-    const { name, description, eventName, cronExpression, segmentId, conditions, conditionMatchMode, actions, actionExecutionMode, isActive, priority } = body;
+    const {
+      name,
+      description,
+      eventName,
+      cronExpression,
+      segmentId,
+      conditions,
+      conditionMatchMode,
+      actions,
+      actionExecutionMode,
+      isActive,
+      priority,
+    } = body;
 
     const updates: Record<string, unknown> = {};
     if (name !== undefined) updates.name = name;

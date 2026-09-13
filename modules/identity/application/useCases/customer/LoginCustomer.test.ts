@@ -7,7 +7,9 @@ import { LoginCustomerUseCase } from './LoginCustomer';
 import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('LoginCustomerUseCase', () => {
   let useCase: LoginCustomerUseCase;
@@ -21,7 +23,10 @@ describe('LoginCustomerUseCase', () => {
       updateLastLogin: jest.fn().mockResolvedValue(undefined),
     };
     mockAuth = { verifyPassword: jest.fn().mockResolvedValue(true) };
-    mockToken = { generateAccessToken: jest.fn().mockResolvedValue('access-token'), generateRefreshToken: jest.fn().mockResolvedValue('refresh-token') };
+    mockToken = {
+      generateAccessToken: jest.fn().mockResolvedValue('access-token'),
+      generateRefreshToken: jest.fn().mockResolvedValue('refresh-token'),
+    };
     useCase = new LoginCustomerUseCase(mockCustomerRepo as never, mockAuth as never, mockToken as never);
   });
 

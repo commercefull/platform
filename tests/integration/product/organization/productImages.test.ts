@@ -10,9 +10,6 @@ import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID } from '../testUtils';
 
-;
-;
-
 describe('Product Images & Media', () => {
   let client: AxiosInstance;
   let adminToken: string;
@@ -89,10 +86,9 @@ describe('Product Images & Media', () => {
 
     it('should delete an image', async () => {
       if (!createdImageId) return;
-      const res = await client.delete(
-        `/business/products/${SEEDED_PRODUCT_1_ID}/images/${createdImageId}`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const res = await client.delete(`/business/products/${SEEDED_PRODUCT_1_ID}/images/${createdImageId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
       createdImageId = null;
@@ -128,8 +124,7 @@ describe('Product Images & Media', () => {
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       expect(primaryRes.status).toBe(201);
-      primaryImageId =
-        primaryRes.data.data?.imageId || primaryRes.data.data?.productImageId || primaryRes.data.data?.id;
+      primaryImageId = primaryRes.data.data?.imageId || primaryRes.data.data?.productImageId || primaryRes.data.data?.id;
 
       // Add a secondary image
       const secondaryRes = await client.post(
@@ -143,22 +138,19 @@ describe('Product Images & Media', () => {
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       expect(secondaryRes.status).toBe(201);
-      secondaryImageId =
-        secondaryRes.data.data?.imageId || secondaryRes.data.data?.productImageId || secondaryRes.data.data?.id;
+      secondaryImageId = secondaryRes.data.data?.imageId || secondaryRes.data.data?.productImageId || secondaryRes.data.data?.id;
 
       // Delete the primary image
-      const deleteRes = await client.delete(
-        `/business/products/${SEEDED_PRODUCT_1_ID}/images/${primaryImageId}`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const deleteRes = await client.delete(`/business/products/${SEEDED_PRODUCT_1_ID}/images/${primaryImageId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       expect(deleteRes.status).toBe(200);
       primaryImageId = null;
 
       // List images and check if a new primary was promoted
-      const listRes = await client.get(
-        `/business/products/${SEEDED_PRODUCT_1_ID}/images`,
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      const listRes = await client.get(`/business/products/${SEEDED_PRODUCT_1_ID}/images`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
       expect(listRes.status).toBe(200);
       const images = listRes.data.data;
       const _hasPrimary = images.some((img: Record<string, unknown>) => img.isPrimary === true);

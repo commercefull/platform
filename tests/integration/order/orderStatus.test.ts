@@ -34,7 +34,6 @@ describe('Order Status Tests', () => {
   let adminToken: string;
   let customerToken: string;
   let testOrderId: string;
-  let testOrderItemId: string;
 
   beforeAll(async () => {
     const setup = await setupOrderTests();
@@ -42,7 +41,6 @@ describe('Order Status Tests', () => {
     adminToken = setup.adminToken;
     customerToken = setup.customerToken;
     testOrderId = setup.testOrderId;
-    testOrderItemId = setup.testOrderItemId;
   });
 
   afterAll(async () => {

@@ -1,0 +1,163 @@
+<%
+/**
+ * Condition Builder Partial
+ *
+ * Renders a dynamic condition builder for rule configuration.
+ * Each row has: attribute, operator, value.
+ * Supports add/remove rows.
+ * Serializes to: [{ attribute, operator, value }]
+ *
+ * Usage:
+ *   <%- include('../partials/condition-builder', {
+ *     fieldName: 'conditions',
+ *     conditions: existingConditions || [],
+ *     attributes: [
+ *       { value: 'orderAmount', label: 'Order Amount' },
+ *       { value: 'weight', label: 'Weight' },
+ *     ]
+ *   }) %>
+ *
+ * See docs/e2e-rule-engine-implementation-plan.md Epic F.
+ */
+%>
+
+<div class="condition-builder" data-field-name="<%= fieldName || 'conditions' %>">
+  <div class="condition-rows">
+    <% if (conditions && conditions.length > 0) { %>
+      <% conditions.forEach(function(cond, idx) { %>
+        <div class="condition-row row mb-2" data-row-index="<%= idx %>">
+          <div class="col-md-4">
+            <select class="form-control form-control-sm condition-attribute" name="<%= fieldName %>[<%= idx %>][attribute]">
+              <% (attributes || []).forEach(function(attr) { %>
+                <option value="<%= attr.value %>" <%= cond.attribute === attr.value ? 'selected' : '' %>><%= attr.label %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select class="form-control form-control-sm condition-operator" name="<%= fieldName %>[<%= idx %>][operator]">
+              <option value="eq" <%= cond.operator === 'eq' ? 'selected' : '' %>>equals</option>
+              <option value="neq" <%= cond.operator === 'neq' ? 'selected' : '' %>>not equals</option>
+              <option value="gt" <%= cond.operator === 'gt' ? 'selected' : '' %>>greater than</option>
+              <option value="gte" <%= cond.operator === 'gte' ? 'selected' : '' %>>greater or equal</option>
+              <option value="lt" <%= cond.operator === 'lt' ? 'selected' : '' %>>less than</option>
+              <option value="lte" <%= cond.operator === 'lte' ? 'selected' : '' %>>less or equal</option>
+              <option value="in" <%= cond.operator === 'in' ? 'selected' : '' %>>in (comma-separated)</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <input type="text" class="form-control form-control-sm condition-value" name="<%= fieldName %>[<%= idx %>][value]"
+                   value="<%= cond.value !== undefined && cond.value !== null ? String(cond.value) : '' %>"
+                   placeholder="Value">
+          </div>
+          <div class="col-md-1">
+            <button type="button" class="btn btn-outline-danger btn-sm condition-remove" title="Remove">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      <% }); %>
+    <% } else { %>
+      <div class="condition-row row mb-2" data-row-index="0">
+        <div class="col-md-4">
+          <select class="form-control form-control-sm condition-attribute" name="<%= fieldName %>[0][attribute]">
+            <option value="">Select attribute...</option>
+            <% (attributes || []).forEach(function(attr) { %>
+              <option value="<%= attr.value %>"><%= attr.label %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-control form-control-sm condition-operator" name="<%= fieldName %>[0][operator]">
+            <option value="eq">equals</option>
+            <option value="neq">not equals</option>
+            <option value="gt">greater than</option>
+            <option value="gte">greater or equal</option>
+            <option value="lt">less than</option>
+            <option value="lte">less or equal</option>
+            <option value="in">in (comma-separated)</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <input type="text" class="form-control form-control-sm condition-value" name="<%= fieldName %>[0][value]"
+                 placeholder="Value">
+        </div>
+        <div class="col-md-1">
+          <button type="button" class="btn btn-outline-danger btn-sm condition-remove" title="Remove">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    <% } %>
+  </div>
+  <button type="button" class="btn btn-outline-primary btn-sm condition-add mt-1">
+    <i class="fas fa-plus"></i> Add Condition
+  </button>
+</div>
+
+<script>
+  (function() {
+    var builders = document.querySelectorAll('.condition-builder');
+    builders.forEach(function(builder) {
+      var fieldName = builder.getAttribute('data-field-name');
+      var rowsContainer = builder.querySelector('.condition-rows');
+      var addBtn = builder.querySelector('.condition-add');
+
+      addBtn.addEventListener('click', function() {
+        var rows = rowsContainer.querySelectorAll('.condition-row');
+        var idx = rows.length;
+        var attributes = '<%= (attributes || []).map(function(a) { return '<option value="' + a.value + '">' + a.label + '</option>'; }).join('') %>';
+        var newRow = document.createElement('div');
+        newRow.className = 'condition-row row mb-2';
+        newRow.setAttribute('data-row-index', idx);
+        newRow.innerHTML =
+          '<div class="col-md-4">' +
+            '<select class="form-control form-control-sm condition-attribute" name="' + fieldName + '[' + idx + '][attribute]">' +
+              '<option value="">Select attribute...</option>' + attributes +
+            '</select>' +
+          '</div>' +
+          '<div class="col-md-3">' +
+            '<select class="form-control form-control-sm condition-operator" name="' + fieldName + '[' + idx + '][operator]">' +
+              '<option value="eq">equals</option>' +
+              '<option value="neq">not equals</option>' +
+              '<option value="gt">greater than</option>' +
+              '<option value="gte">greater or equal</option>' +
+              '<option value="lt">less than</option>' +
+              '<option value="lte">less or equal</option>' +
+              '<option value="in">in (comma-separated)</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="col-md-4">' +
+            '<input type="text" class="form-control form-control-sm condition-value" name="' + fieldName + '[' + idx + '][value]" placeholder="Value">' +
+          '</div>' +
+          '<div class="col-md-1">' +
+            '<button type="button" class="btn btn-outline-danger btn-sm condition-remove" title="Remove"><i class="fas fa-times"></i></button>' +
+          '</div>';
+        rowsContainer.appendChild(newRow);
+      });
+
+      rowsContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.condition-remove')) {
+          var row = e.target.closest('.condition-row');
+          var rows = rowsContainer.querySelectorAll('.condition-row');
+          if (rows.length > 1) {
+            row.remove();
+            reindexRows();
+          }
+        }
+      });
+
+      function reindexRows() {
+        var rows = rowsContainer.querySelectorAll('.condition-row');
+        rows.forEach(function(row, idx) {
+          row.setAttribute('data-row-index', idx);
+          var attr = row.querySelector('.condition-attribute');
+          var op = row.querySelector('.condition-operator');
+          var val = row.querySelector('.condition-value');
+          if (attr) attr.setAttribute('name', fieldName + '[' + idx + '][attribute]');
+          if (op) op.setAttribute('name', fieldName + '[' + idx + '][operator]');
+          if (val) val.setAttribute('name', fieldName + '[' + idx + '][value]');
+        });
+      }
+    });
+  })();
+</script>

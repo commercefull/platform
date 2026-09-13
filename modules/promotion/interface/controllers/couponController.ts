@@ -1,6 +1,9 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import couponDiscountRepository, { type CreateCouponInput, type UpdateCouponInput } from '../../infrastructure/repositories/CouponDiscountRepository';
+import couponDiscountRepository, {
+  type CreateCouponInput,
+  type UpdateCouponInput,
+} from '../../infrastructure/repositories/CouponDiscountRepository';
 
 const couponRepo = couponDiscountRepository.coupons;
 
@@ -39,7 +42,6 @@ export const getActiveCoupons = async (req: TypedRequest, res: Response): Promis
       offset: offset ? parseInt(offset as string) : 0,
     },
   });
-  
 };
 
 /**
@@ -55,7 +57,6 @@ export const getCouponById = async (req: TypedRequest, res: Response): Promise<v
   }
 
   res.status(200).json({ success: true, data: coupon });
-  
 };
 
 /**
@@ -73,7 +74,6 @@ export const getCouponByCode = async (req: TypedRequest, res: Response): Promise
   }
 
   res.status(200).json({ success: true, data: coupon });
-  
 };
 
 /**
@@ -110,7 +110,6 @@ export const createCoupon = async (req: TypedRequest<Record<string, string>, unk
     data: coupon,
     message: 'Coupon created successfully',
   });
-  
 };
 
 /**
@@ -139,7 +138,6 @@ export const updateCoupon = async (req: TypedRequest<Record<string, string>, unk
     data: updatedCoupon,
     message: 'Coupon updated successfully',
   });
-  
 };
 
 /**
@@ -164,13 +162,15 @@ export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<vo
     success: true,
     message: 'Coupon deleted successfully',
   });
-  
 };
 
 /**
  * Validate a coupon for a cart
  */
-export const validateCoupon = async (req: TypedRequest<Record<string, string>, unknown, ValidateCouponBody>, res: Response): Promise<void> => {
+export const validateCoupon = async (
+  req: TypedRequest<Record<string, string>, unknown, ValidateCouponBody>,
+  res: Response,
+): Promise<void> => {
   const { code, orderTotal, customerId, organizationId } = req.body;
 
   // Validation
@@ -197,7 +197,6 @@ export const validateCoupon = async (req: TypedRequest<Record<string, string>, u
     success: true,
     data: result,
   });
-  
 };
 
 /**
@@ -227,13 +226,15 @@ export const getCouponUsage = async (req: TypedRequest, res: Response): Promise<
       remainingUsage: existingCoupon.maxUsage ? existingCoupon.maxUsage - existingCoupon.usageCount : null,
     },
   });
-  
 };
 
 /**
  * Calculate coupon discount for a cart
  */
-export const calculateCouponDiscount = async (req: TypedRequest<Record<string, string>, unknown, CalculateDiscountBody>, res: Response): Promise<void> => {
+export const calculateCouponDiscount = async (
+  req: TypedRequest<Record<string, string>, unknown, CalculateDiscountBody>,
+  res: Response,
+): Promise<void> => {
   const { code, orderTotal, items: _items, organizationId } = req.body;
 
   // Validation
@@ -267,5 +268,4 @@ export const calculateCouponDiscount = async (req: TypedRequest<Record<string, s
       finalTotal: parseFloat(orderTotal) - discountAmount,
     },
   });
-  
 };

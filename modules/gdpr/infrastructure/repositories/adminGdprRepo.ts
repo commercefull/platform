@@ -60,7 +60,12 @@ export async function getGdprStats(): Promise<GdprStats> {
 }
 
 export async function getConsentStats(): Promise<ConsentStats> {
-  const result = await queryOne<{ marketingConsent: string; marketingConsentRate: string; analyticsConsent: string; analyticsConsentRate: string }>(
+  const result = await queryOne<{
+    marketingConsent: string;
+    marketingConsentRate: string;
+    analyticsConsent: string;
+    analyticsConsentRate: string;
+  }>(
     `SELECT
       COUNT(CASE WHEN "acceptsMarketing" = true THEN 1 END) as "marketingConsent",
       ROUND(100.0 * COUNT(CASE WHEN "acceptsMarketing" = true THEN 1 END) / COUNT(*), 1) as "marketingConsentRate",
@@ -102,10 +107,9 @@ export async function findRequestById(requestId: string): Promise<unknown | null
 }
 
 export async function findCustomerIdByEmail(email: string): Promise<string | null> {
-  const result = await queryOne<{ customerId: string }>(
-    `SELECT "customerId" FROM "customer" WHERE "email" = $1 AND "deletedAt" IS NULL`,
-    [email],
-  );
+  const result = await queryOne<{ customerId: string }>(`SELECT "customerId" FROM "customer" WHERE "email" = $1 AND "deletedAt" IS NULL`, [
+    email,
+  ]);
   return result?.customerId || null;
 }
 

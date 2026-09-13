@@ -26,14 +26,12 @@ export const listShippingZones = async (req: TypedRequest, res: Response): Promi
 
     success: req.query.success || null,
   });
-  
 };
 
 export const createShippingZoneForm = async (req: TypedRequest, res: Response): Promise<void> => {
   adminRespond(req, res, 'shipping/zones/create', {
     pageName: 'Create Shipping Zone',
   });
-  
 };
 
 export const createShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -87,7 +85,6 @@ export const viewShippingZone = async (req: TypedRequest, res: Response): Promis
 
     success: req.query.success || null,
   });
-  
 };
 
 export const editShippingZoneForm = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -107,7 +104,6 @@ export const editShippingZoneForm = async (req: TypedRequest, res: Response): Pr
     pageName: `Edit: ${zone.name}`,
     zone,
   });
-  
 };
 
 export const updateShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -132,7 +128,6 @@ export const updateShippingZone = async (req: TypedRequest, res: Response): Prom
   }
 
   res.redirect(`/hub/shipping/zones/${zoneId}?success=Shipping zone updated successfully`);
-  
 };
 
 export const activateShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -145,7 +140,6 @@ export const activateShippingZone = async (req: TypedRequest, res: Response): Pr
   }
 
   res.json({ success: true, message: 'Shipping zone activated successfully' });
-  
 };
 
 export const deactivateShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -158,7 +152,6 @@ export const deactivateShippingZone = async (req: TypedRequest, res: Response): 
   }
 
   res.json({ success: true, message: 'Shipping zone deactivated successfully' });
-  
 };
 
 export const deleteShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -171,5 +164,4 @@ export const deleteShippingZone = async (req: TypedRequest, res: Response): Prom
   }
 
   res.json({ success: true, message: 'Shipping zone deleted successfully' });
-  
 };

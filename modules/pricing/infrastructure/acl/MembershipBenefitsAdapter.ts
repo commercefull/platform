@@ -8,10 +8,7 @@
  * Only this adapter may import from membership's infrastructure.
  */
 
-import {
-  MembershipBenefitsPort,
-  MembershipDiscountBenefit,
-} from '../../application/ports/MembershipBenefitsPort';
+import { MembershipBenefitsPort, MembershipDiscountBenefit } from '../../application/ports/MembershipBenefitsPort';
 import { MembershipRepo } from '../../../membership/infrastructure/repositories/membershipRepo';
 
 export class MembershipBenefitsAdapter implements MembershipBenefitsPort {

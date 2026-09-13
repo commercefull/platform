@@ -4,7 +4,11 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { CheckoutSession as DbCheckoutSession, ShippingMethod as DbShippingMethod, PaymentMethod as DbPaymentMethod } from '../../../../libs/db/types';
+import {
+  CheckoutSession as DbCheckoutSession,
+  ShippingMethod as DbShippingMethod,
+  PaymentMethod as DbPaymentMethod,
+} from '../../../../libs/db/types';
 import { generateUUID } from '../../../../libs/uuid';
 import { CheckoutRepository, ShippingMethodData, PaymentMethodData } from '../../domain/repositories/CheckoutRepository';
 import { CheckoutSession, CheckoutStatus, PaymentStatus, FulfillmentType } from '../../domain/entities/CheckoutSession';
@@ -44,10 +48,9 @@ export class CheckoutRepo implements CheckoutRepository {
   async save(session: CheckoutSession): Promise<CheckoutSession> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<DbCheckoutSession>(
-      'SELECT "checkoutSessionId" FROM "checkoutSession" WHERE "checkoutSessionId" = $1',
-      [session.id],
-    );
+    const existing = await queryOne<DbCheckoutSession>('SELECT "checkoutSessionId" FROM "checkoutSession" WHERE "checkoutSessionId" = $1', [
+      session.id,
+    ]);
 
     const metadata: Record<string, unknown> = { ...(session.metadata || {}) };
     if (session.shippingAddress) {
@@ -302,7 +305,20 @@ export class CheckoutRepo implements CheckoutRepository {
     let shippingAddress: Address | undefined = undefined;
     if (meta?.shippingAddress) {
       try {
-        shippingAddress = Address.create(meta.shippingAddress as { firstName: string; lastName: string; addressLine1: string; city: string; postalCode: string; country: string; company?: string; addressLine2?: string; region?: string; phone?: string });
+        shippingAddress = Address.create(
+          meta.shippingAddress as {
+            firstName: string;
+            lastName: string;
+            addressLine1: string;
+            city: string;
+            postalCode: string;
+            country: string;
+            company?: string;
+            addressLine2?: string;
+            region?: string;
+            phone?: string;
+          },
+        );
       } catch {
         // ignore invalid address
       }
@@ -311,21 +327,35 @@ export class CheckoutRepo implements CheckoutRepository {
     let billingAddress: Address | undefined = undefined;
     if (meta?.billingAddress) {
       try {
-        billingAddress = Address.create(meta.billingAddress as { firstName: string; lastName: string; addressLine1: string; city: string; postalCode: string; country: string; company?: string; addressLine2?: string; region?: string; phone?: string });
+        billingAddress = Address.create(
+          meta.billingAddress as {
+            firstName: string;
+            lastName: string;
+            addressLine1: string;
+            city: string;
+            postalCode: string;
+            country: string;
+            company?: string;
+            addressLine2?: string;
+            region?: string;
+            phone?: string;
+          },
+        );
       } catch {
         // ignore invalid address
       }
     }
 
     // orderId is stored in convertedToOrderId column or in metadata JSONB
-    const orderId: string | undefined = (row.convertedToOrderId ?? (meta?.orderId as string | undefined)) ?? undefined;
+    const orderId: string | undefined = row.convertedToOrderId ?? (meta?.orderId as string | undefined) ?? undefined;
 
     // If the session has expired but is still marked active/pending, gently extend its expiration
     const now = new Date();
     const originalExpiresAt = new Date((row.expiresAt as string | Date) ?? now);
-    const revivedExpiresAt = originalExpiresAt < now && (row.status === 'active' || row.status === 'pending_payment')
-      ? new Date(now.getTime() + 30 * 60 * 1000)
-      : originalExpiresAt;
+    const revivedExpiresAt =
+      originalExpiresAt < now && (row.status === 'active' || row.status === 'pending_payment')
+        ? new Date(now.getTime() + 30 * 60 * 1000)
+        : originalExpiresAt;
 
     return CheckoutSession.reconstitute({
       id: row.checkoutSessionId,
@@ -350,7 +380,11 @@ export class CheckoutRepo implements CheckoutRepository {
       couponCode: meta?.couponCode as string | undefined,
       fulfillmentType: (meta?.fulfillmentType as FulfillmentType) ?? 'shipping',
       notes: row.notes ?? undefined,
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata as Record<string, unknown>) : undefined,
+      metadata: row.metadata
+        ? typeof row.metadata === 'string'
+          ? JSON.parse(row.metadata as string)
+          : (row.metadata as Record<string, unknown>)
+        : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
       completedAt: row.convertedToOrderId ? new Date(row.updatedAt) : undefined,

@@ -87,28 +87,55 @@ describe('Coupon', () => {
 
     it('status should be inactive when isActive is false', () => {
       const c = Coupon.reconstitute({
-        couponId: 'c-1', code: 'T', name: 'T', type: 'percentage', value: 10,
-        usageType: 'unlimited', usageCount: 0, conditions: [], isActive: false,
-        createdBy: 'a', createdAt: new Date(), updatedAt: new Date(),
+        couponId: 'c-1',
+        code: 'T',
+        name: 'T',
+        type: 'percentage',
+        value: 10,
+        usageType: 'unlimited',
+        usageCount: 0,
+        conditions: [],
+        isActive: false,
+        createdBy: 'a',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       expect(c.status).toBe('inactive');
     });
 
     it('isExpired should be true when expiresAt is in the past', () => {
       const c = Coupon.reconstitute({
-        couponId: 'c-1', code: 'T', name: 'T', type: 'percentage', value: 10,
-        usageType: 'unlimited', usageCount: 0, conditions: [], isActive: true,
+        couponId: 'c-1',
+        code: 'T',
+        name: 'T',
+        type: 'percentage',
+        value: 10,
+        usageType: 'unlimited',
+        usageCount: 0,
+        conditions: [],
+        isActive: true,
         expiresAt: new Date('2020-01-01'),
-        createdBy: 'a', createdAt: new Date(), updatedAt: new Date(),
+        createdBy: 'a',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       expect(c.isExpired).toBe(true);
     });
 
     it('isDepleted should be true for single_use with usageCount >= 1', () => {
       const c = Coupon.reconstitute({
-        couponId: 'c-1', code: 'T', name: 'T', type: 'percentage', value: 10,
-        usageType: 'single_use', usageCount: 1, conditions: [], isActive: true,
-        createdBy: 'a', createdAt: new Date(), updatedAt: new Date(),
+        couponId: 'c-1',
+        code: 'T',
+        name: 'T',
+        type: 'percentage',
+        value: 10,
+        usageType: 'single_use',
+        usageCount: 1,
+        conditions: [],
+        isActive: true,
+        createdBy: 'a',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       expect(c.isDepleted).toBe(true);
     });
@@ -125,9 +152,19 @@ describe('Coupon', () => {
 
     it('remainingUses should calculate for multi_use', () => {
       const c = Coupon.reconstitute({
-        couponId: 'c-1', code: 'T', name: 'T', type: 'percentage', value: 10,
-        usageType: 'multi_use', usageLimit: 100, usageCount: 30, conditions: [], isActive: true,
-        createdBy: 'a', createdAt: new Date(), updatedAt: new Date(),
+        couponId: 'c-1',
+        code: 'T',
+        name: 'T',
+        type: 'percentage',
+        value: 10,
+        usageType: 'multi_use',
+        usageLimit: 100,
+        usageCount: 30,
+        conditions: [],
+        isActive: true,
+        createdBy: 'a',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       expect(c.remainingUses).toBe(70);
     });
@@ -168,9 +205,18 @@ describe('Coupon', () => {
 
     it('should return false when coupon is not active status', () => {
       const c = Coupon.reconstitute({
-        couponId: 'c-1', code: 'T', name: 'T', type: 'percentage', value: 10,
-        usageType: 'unlimited', usageCount: 0, conditions: [], isActive: false,
-        createdBy: 'a', createdAt: new Date(), updatedAt: new Date(),
+        couponId: 'c-1',
+        code: 'T',
+        name: 'T',
+        type: 'percentage',
+        value: 10,
+        usageType: 'unlimited',
+        usageCount: 0,
+        conditions: [],
+        isActive: false,
+        createdBy: 'a',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       expect(c.canBeApplied(100)).toBe(false);
     });

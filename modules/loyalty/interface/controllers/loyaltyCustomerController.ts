@@ -61,7 +61,6 @@ export const getPublicTiers = async (req: TypedRequest, res: Response): Promise<
   }));
 
   respond(res, publicTiers);
-  
 };
 
 /**
@@ -76,12 +75,14 @@ export const getPublicRewards = async (req: TypedRequest, res: Response): Promis
     name: reward.name,
     description: reward.description,
     pointsCost: reward.pointsCost,
-    freeShipping: reward.metadata && typeof reward.metadata === 'object' && 'freeShipping' in reward.metadata ? reward.metadata.freeShipping : undefined,
+    freeShipping:
+      reward.metadata && typeof reward.metadata === 'object' && 'freeShipping' in reward.metadata
+        ? reward.metadata.freeShipping
+        : undefined,
     expiresAt: reward.validTo,
   }));
 
   respond(res, publicRewards);
-  
 };
 
 // ============================================================================
@@ -129,7 +130,6 @@ export const getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promi
       benefits: tier.benefits,
     },
   });
-  
 };
 
 /**
@@ -160,7 +160,6 @@ export const getMyTransactions = async (req: UserRequest, res: Response): Promis
     data: formattedTransactions,
     pagination: { limit },
   });
-  
 };
 
 /**
@@ -230,5 +229,4 @@ export const getMyRedemptions = async (req: UserRequest, res: Response): Promise
   );
 
   respond(res, detailedRedemptions);
-  
 };

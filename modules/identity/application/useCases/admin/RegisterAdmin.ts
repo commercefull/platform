@@ -4,7 +4,12 @@
  */
 
 import { eventBus } from '../../../../../libs/events/eventBus';
-import { AdminFieldsRequiredError, PasswordTooShortError, OnlySuperAdminCanCreateError, EmailAlreadyRegisteredError } from '../../../domain/errors/IdentityErrors';
+import {
+  AdminFieldsRequiredError,
+  PasswordTooShortError,
+  OnlySuperAdminCanCreateError,
+  EmailAlreadyRegisteredError,
+} from '../../../domain/errors/IdentityErrors';
 
 export interface RegisterAdminInput {
   email: string;
@@ -36,7 +41,14 @@ export interface AdminRecord {
 export interface AdminRepository {
   findByEmail(email: string): Promise<AdminRecord | null>;
   findById(adminId: string): Promise<AdminRecord | null>;
-  create(admin: { email: string; name: string; passwordHash: string; role: string; permissions: string[]; status: string }): Promise<AdminRecord>;
+  create(admin: {
+    email: string;
+    name: string;
+    passwordHash: string;
+    role: string;
+    permissions: string[];
+    status: string;
+  }): Promise<AdminRecord>;
 }
 
 export interface AuthService {

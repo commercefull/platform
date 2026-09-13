@@ -23,11 +23,7 @@ jest.mock('bcryptjs', () => ({
 }));
 
 import { RegisterCustomerUseCase, RegisterCustomerCommand } from './RegisterCustomer';
-import {
-  EmailRequiredError,
-  CustomerEmailAlreadyExistsError,
-  CustomerValidationError,
-} from '../../domain/errors/CustomerErrors';
+import { EmailRequiredError, CustomerEmailAlreadyExistsError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { generateUUID } from '../../../../libs/uuid';
 
@@ -46,7 +42,9 @@ describe('RegisterCustomerUseCase', () => {
     jest.mocked(generateUUID).mockReturnValue('test-uuid-123');
   });
 
-  function createCommand(overrides?: Partial<{ email: string; firstName: string; lastName: string; password: string; phone: string }>): RegisterCustomerCommand {
+  function createCommand(
+    overrides?: Partial<{ email: string; firstName: string; lastName: string; password: string; phone: string }>,
+  ): RegisterCustomerCommand {
     return new RegisterCustomerCommand(
       overrides?.email ?? 'john@example.com',
       overrides?.firstName ?? 'John',
@@ -66,10 +64,13 @@ describe('RegisterCustomerUseCase', () => {
     expect(result.isVerified).toBe(false);
     expect(mockRepo.save).toHaveBeenCalledTimes(1);
     expect(mockRepo.updatePassword).toHaveBeenCalledWith('test-uuid-123', 'hashed-password');
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.registered', expect.objectContaining({
-      customerId: 'test-uuid-123',
-      email: 'john@example.com',
-    }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'customer.registered',
+      expect.objectContaining({
+        customerId: 'test-uuid-123',
+        email: 'john@example.com',
+      }),
+    );
   });
 
   it('should throw EmailRequiredError when email is empty', async () => {

@@ -4,5 +4,4 @@
  */
 
 export * from './application/useCases';
-export * from './domain/repositories/PricingRepository';
 export * from './domain/errors/PricingErrors';

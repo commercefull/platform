@@ -6,9 +6,19 @@
 
 import * as crypto from 'crypto';
 import {
-  PSPAdapter, PSPCapabilities, PSPConfig, WebhookEvent,
-  PaymentRequest, PaymentResponse, CaptureRequest, CaptureResponse,
-  VoidRequest, VoidResponse, RefundRequest, RefundResponse, HealthCheckResult,
+  PSPAdapter,
+  PSPCapabilities,
+  PSPConfig,
+  WebhookEvent,
+  PaymentRequest,
+  PaymentResponse,
+  CaptureRequest,
+  CaptureResponse,
+  VoidRequest,
+  VoidResponse,
+  RefundRequest,
+  RefundResponse,
+  HealthCheckResult,
 } from '../GatewayAdapter';
 
 const AFFIRM_CAPABILITIES: PSPCapabilities = {
@@ -30,9 +40,7 @@ export class AffirmAdapter implements PSPAdapter {
   readonly capabilities = AFFIRM_CAPABILITIES;
 
   private getBaseUrl(config: PSPConfig): string {
-    return config.testMode
-      ? 'https://sandbox.affirm.com/api/v1'
-      : 'https://api.affirm.com/api/v1';
+    return config.testMode ? 'https://sandbox.affirm.com/api/v1' : 'https://api.affirm.com/api/v1';
   }
 
   private getAuthHeader(config: PSPConfig): string {
@@ -84,14 +92,16 @@ export class AffirmAdapter implements PSPAdapter {
       merchant_internal_reference_id: request.orderId,
       amount: Math.round(request.amount * 100),
       currency: request.currency.toUpperCase(),
-      items: [{
-        display_name: request.description || `Order ${request.orderId}`,
-        sku: request.orderId,
-        unit_price: Math.round(request.amount * 100),
-        qty: 1,
-        item_image_url: '',
-        item_url: '',
-      }],
+      items: [
+        {
+          display_name: request.description || `Order ${request.orderId}`,
+          sku: request.orderId,
+          unit_price: Math.round(request.amount * 100),
+          qty: 1,
+          item_image_url: '',
+          item_url: '',
+        },
+      ],
       merchant: {
         public_api_key: config.publishableKey || config.apiKey,
         user_confirmation_url: request.returnUrl || '',
@@ -109,7 +119,7 @@ export class AffirmAdapter implements PSPAdapter {
       body: JSON.stringify(body),
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       return {
@@ -142,7 +152,7 @@ export class AffirmAdapter implements PSPAdapter {
       },
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       return {
@@ -172,7 +182,7 @@ export class AffirmAdapter implements PSPAdapter {
       },
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       return {
@@ -208,7 +218,7 @@ export class AffirmAdapter implements PSPAdapter {
       body: JSON.stringify(body),
     });
 
-    const data = await res.json() as Record<string, unknown>;
+    const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
       return {

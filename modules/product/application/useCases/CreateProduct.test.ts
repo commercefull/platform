@@ -4,11 +4,7 @@
 
 import { CreateProductUseCase, CreateProductCommand } from './CreateProduct';
 import { Product } from '../../domain/entities/Product';
-import {
-  ProductSkuAlreadyExistsError,
-  ProductSlugAlreadyExistsError,
-  ProductValidationError,
-} from '../../domain/errors/ProductErrors';
+import { ProductSkuAlreadyExistsError, ProductSlugAlreadyExistsError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
 import type { ProductRepository } from '../../domain/repositories/ProductRepository';
 
@@ -78,11 +74,13 @@ function createMockProductRepo(product: Product | null = null): jest.Mocked<Prod
 describe('CreateProductUseCase', () => {
   it('should create a product successfully', async () => {
     const repo = createMockProductRepo();
-    const useCase = new CreateProductUseCase(repo, { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never, { setProductAttributes: jest.fn() } as never);
-
-    const result = await useCase.execute(
-      new CreateProductCommand('Test Product', 'A test product', 'pt-1'),
+    const useCase = new CreateProductUseCase(
+      repo,
+      { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never,
+      { setProductAttributes: jest.fn() } as never,
     );
+
+    const result = await useCase.execute(new CreateProductCommand('Test Product', 'A test product', 'pt-1'));
 
     expect(result.productId).toBe('p-1');
     expect(result.name).toBe('Test Product');
@@ -92,41 +90,51 @@ describe('CreateProductUseCase', () => {
 
   it('should throw ProductValidationError when name is empty', async () => {
     const repo = createMockProductRepo();
-    const useCase = new CreateProductUseCase(repo, { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never, { setProductAttributes: jest.fn() } as never);
+    const useCase = new CreateProductUseCase(
+      repo,
+      { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never,
+      { setProductAttributes: jest.fn() } as never,
+    );
 
-    await expect(
-      useCase.execute(new CreateProductCommand('', 'desc', 'pt-1')),
-    ).rejects.toThrow(ProductValidationError);
+    await expect(useCase.execute(new CreateProductCommand('', 'desc', 'pt-1'))).rejects.toThrow(ProductValidationError);
   });
 
   it('should throw ProductValidationError when productTypeId is empty', async () => {
     const repo = createMockProductRepo();
-    const useCase = new CreateProductUseCase(repo, { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never, { setProductAttributes: jest.fn() } as never);
+    const useCase = new CreateProductUseCase(
+      repo,
+      { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never,
+      { setProductAttributes: jest.fn() } as never,
+    );
 
-    await expect(
-      useCase.execute(new CreateProductCommand('Test', 'desc', '')),
-    ).rejects.toThrow(ProductValidationError);
+    await expect(useCase.execute(new CreateProductCommand('Test', 'desc', ''))).rejects.toThrow(ProductValidationError);
   });
 
   it('should throw ProductSkuAlreadyExistsError when SKU exists', async () => {
     const existingProduct = createProduct();
     const repo = createMockProductRepo();
     repo.findBySku = jest.fn().mockResolvedValue(existingProduct);
-    const useCase = new CreateProductUseCase(repo, { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never, { setProductAttributes: jest.fn() } as never);
+    const useCase = new CreateProductUseCase(
+      repo,
+      { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never,
+      { setProductAttributes: jest.fn() } as never,
+    );
 
-    await expect(
-      useCase.execute(new CreateProductCommand('Test', 'desc', 'pt-1', 'SKU-1')),
-    ).rejects.toThrow(ProductSkuAlreadyExistsError);
+    await expect(useCase.execute(new CreateProductCommand('Test', 'desc', 'pt-1', 'SKU-1'))).rejects.toThrow(ProductSkuAlreadyExistsError);
   });
 
   it('should throw ProductSlugAlreadyExistsError when slug exists', async () => {
     const existingProduct = createProduct();
     const repo = createMockProductRepo();
     repo.findBySlug = jest.fn().mockResolvedValue(existingProduct);
-    const useCase = new CreateProductUseCase(repo, { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never, { setProductAttributes: jest.fn() } as never);
+    const useCase = new CreateProductUseCase(
+      repo,
+      { getAttributesForProductType: jest.fn().mockResolvedValue([]) } as never,
+      { setProductAttributes: jest.fn() } as never,
+    );
 
-    await expect(
-      useCase.execute(new CreateProductCommand('Test', 'desc', 'pt-1', undefined, 'test-slug')),
-    ).rejects.toThrow(ProductSlugAlreadyExistsError);
+    await expect(useCase.execute(new CreateProductCommand('Test', 'desc', 'pt-1', undefined, 'test-slug'))).rejects.toThrow(
+      ProductSlugAlreadyExistsError,
+    );
   });
 });

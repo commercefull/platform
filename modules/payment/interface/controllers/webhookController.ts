@@ -46,149 +46,153 @@ export async function handleGatewayWebhook(req: Request, res: Response): Promise
   try {
     const rawBody: Buffer = req.body as Buffer;
 
-  // 1. Detect provider and resolve adapter
-  const provider = detectProvider(req);
-  const adapter = getAdapter(provider);
+    // 1. Detect provider and resolve adapter
+    const provider = detectProvider(req);
+    const adapter = getAdapter(provider);
 
-  // 2. Look up the webhook secret for this gateway from the DB (or env fallback)
-  const gatewayRow = await PaymentRepo.getDefaultGateway('default').catch(() => null);
-  const secret: string = (gatewayRow as { webhookSecret?: string } | null)?.webhookSecret || process.env.PAYMENT_WEBHOOK_SECRET || '';
+    // 2. Look up the webhook secret for this gateway from the DB (or env fallback)
+    const gatewayRow = await PaymentRepo.getDefaultGateway('default').catch(() => null);
+    const secret: string = (gatewayRow as { webhookSecret?: string } | null)?.webhookSecret || process.env.PAYMENT_WEBHOOK_SECRET || '';
 
-  // 3. Verify signature
-  if (secret) {
-    const valid = adapter.verifySignature(rawBody, req.headers as Record<string, string | undefined>, secret);
-    if (!valid) {
-      res.status(400).json({ error: 'Invalid signature' });
-      return;
-    }
-  } else {
-    logger.warning(`[webhook] No webhook secret configured for provider "${provider}" — skipping signature verification`);
-  }
-
-  // 4. Parse body
-  let rawPayload: Record<string, unknown>;
-  try {
-    rawPayload = JSON.parse(rawBody.toString('utf8'));
-  } catch {
-    res.status(400).json({ error: 'Invalid JSON body' });
-    return;
-  }
-
-  // 5. Record the raw webhook for audit / idempotency
-  const dataObj = rawPayload.data as Record<string, unknown> | undefined;
-  const dataObject = dataObj?.object as Record<string, unknown> | undefined;
-  const notificationItems = rawPayload.notificationItems as Array<Record<string, unknown>> | undefined;
-  const firstNotification = notificationItems?.[0] as Record<string, unknown> | undefined;
-  const notificationItem = firstNotification?.NotificationRequestItem as Record<string, unknown> | undefined;
-
-  const externalId: string =
-    (dataObject?.id as string) ||
-    (rawPayload.externalTransactionId as string) ||
-    (notificationItem?.pspReference as string) ||
-    '';
-
-  if (externalId) {
-    const recordUseCase = new ProcessPaymentWebhookUseCase();
-    const recorded = await recordUseCase
-      .execute(new ProcessPaymentWebhookCommand(externalId, provider, (rawPayload.type as string) || (rawPayload.eventCode as string) || 'unknown', rawPayload))
-      .catch(() => null);
-
-    if (recorded?.alreadyExisted) {
-      // Already processed — respond immediately without re-running side effects
-      res.status(200).json({ received: true });
-      return;
-    }
-  }
-
-  // 6. Normalize to canonical event
-  const event = adapter.normalize(rawPayload);
-  if (!event) {
-    // Unrecognised event type — silently acknowledge
-    res.status(200).json({ received: true });
-    return;
-  }
-
-  // 7. Look up the internal transaction
-  const transaction = await PaymentRepo.findTransactionByExternalId(event.externalTransactionId);
-  if (!transaction) {
-    res.status(200).json({ received: true });
-    return;
-  }
-
-  // 8. Dispatch to core handler based on normalized event type
-  if (event.type === 'payment_succeeded') {
-    if (transaction.status === 'paid') {
-      res.status(200).json({ received: true });
-      return;
-    }
-
-    try {
-      transaction.markAsPaid(event.externalTransactionId, event.gatewayResponse);
-      await PaymentRepo.saveTransaction(transaction);
-
-      const checkoutSummary = await orderStatusSyncPort.findCheckoutByPaymentIntentId(event.externalTransactionId);
-      if (checkoutSummary) {
-        const orderInfo = await orderStatusSyncPort.markOrderPaid(checkoutSummary.orderId);
-
-        // Emit events — checkout and order modules handle their own state updates
-        // via event subscriptions (Published Language pattern)
-        eventBus.emit('order.paid', {
-          orderId: checkoutSummary.orderId,
-          orderNumber: orderInfo?.orderNumber ?? checkoutSummary.orderNumber,
-          customerId: checkoutSummary.customerId,
-          totalAmount: checkoutSummary.totalAmount,
-        });
-
-        eventBus.emit('checkout.payment_captured', {
-          checkoutId: checkoutSummary.checkoutId,
-          orderId: checkoutSummary.orderId,
-          paymentIntentId: event.externalTransactionId,
-        });
+    // 3. Verify signature
+    if (secret) {
+      const valid = adapter.verifySignature(rawBody, req.headers as Record<string, string | undefined>, secret);
+      if (!valid) {
+        res.status(400).json({ error: 'Invalid signature' });
+        return;
       }
-    } catch (err: unknown) {
-      logger.error('[webhook] payment_succeeded handler error:', err);
+    } else {
+      logger.warning(`[webhook] No webhook secret configured for provider "${provider}" — skipping signature verification`);
     }
 
-    res.status(200).json({ received: true });
-    return;
-  }
+    // 4. Parse body
+    let rawPayload: Record<string, unknown>;
+    try {
+      rawPayload = JSON.parse(rawBody.toString('utf8'));
+    } catch {
+      res.status(400).json({ error: 'Invalid JSON body' });
+      return;
+    }
 
-  if (event.type === 'payment_failed') {
-    if (transaction.status === 'failed') {
+    // 5. Record the raw webhook for audit / idempotency
+    const dataObj = rawPayload.data as Record<string, unknown> | undefined;
+    const dataObject = dataObj?.object as Record<string, unknown> | undefined;
+    const notificationItems = rawPayload.notificationItems as Array<Record<string, unknown>> | undefined;
+    const firstNotification = notificationItems?.[0] as Record<string, unknown> | undefined;
+    const notificationItem = firstNotification?.NotificationRequestItem as Record<string, unknown> | undefined;
+
+    const externalId: string =
+      (dataObject?.id as string) || (rawPayload.externalTransactionId as string) || (notificationItem?.pspReference as string) || '';
+
+    if (externalId) {
+      const recordUseCase = new ProcessPaymentWebhookUseCase();
+      const recorded = await recordUseCase
+        .execute(
+          new ProcessPaymentWebhookCommand(
+            externalId,
+            provider,
+            (rawPayload.type as string) || (rawPayload.eventCode as string) || 'unknown',
+            rawPayload,
+          ),
+        )
+        .catch(() => null);
+
+      if (recorded?.alreadyExisted) {
+        // Already processed — respond immediately without re-running side effects
+        res.status(200).json({ received: true });
+        return;
+      }
+    }
+
+    // 6. Normalize to canonical event
+    const event = adapter.normalize(rawPayload);
+    if (!event) {
+      // Unrecognised event type — silently acknowledge
       res.status(200).json({ received: true });
       return;
     }
 
-    try {
-      transaction.fail(event.errorCode!, event.errorMessage!, event.gatewayResponse);
-      await PaymentRepo.saveTransaction(transaction);
-
-      const checkoutSummary = await orderStatusSyncPort.findCheckoutByPaymentIntentId(event.externalTransactionId);
-      if (checkoutSummary) {
-        // Emit events — order and checkout modules handle their own state updates
-        // via event subscriptions (Published Language pattern)
-        eventBus.emit('order.payment_failed', {
-          orderId: checkoutSummary.orderId,
-          customerId: checkoutSummary.customerId,
-          reason: event.errorMessage,
-        });
-
-        eventBus.emit('checkout.failed', {
-          checkoutId: checkoutSummary.checkoutId,
-          orderId: checkoutSummary.orderId,
-          reason: event.errorMessage,
-        });
-      }
-    } catch (err: unknown) {
-      logger.error('[webhook] payment_failed handler error:', err);
+    // 7. Look up the internal transaction
+    const transaction = await PaymentRepo.findTransactionByExternalId(event.externalTransactionId);
+    if (!transaction) {
+      res.status(200).json({ received: true });
+      return;
     }
 
-    res.status(200).json({ received: true });
-    return;
-  }
+    // 8. Dispatch to core handler based on normalized event type
+    if (event.type === 'payment_succeeded') {
+      if (transaction.status === 'paid') {
+        res.status(200).json({ received: true });
+        return;
+      }
 
-  // Other normalized types (refund_completed, etc.) — acknowledge, handle later
-  res.status(200).json({ received: true });
+      try {
+        transaction.markAsPaid(event.externalTransactionId, event.gatewayResponse);
+        await PaymentRepo.saveTransaction(transaction);
+
+        const checkoutSummary = await orderStatusSyncPort.findCheckoutByPaymentIntentId(event.externalTransactionId);
+        if (checkoutSummary) {
+          const orderInfo = await orderStatusSyncPort.markOrderPaid(checkoutSummary.orderId);
+
+          // Emit events — checkout and order modules handle their own state updates
+          // via event subscriptions (Published Language pattern)
+          eventBus.emit('order.paid', {
+            orderId: checkoutSummary.orderId,
+            orderNumber: orderInfo?.orderNumber ?? checkoutSummary.orderNumber,
+            customerId: checkoutSummary.customerId,
+            totalAmount: checkoutSummary.totalAmount,
+          });
+
+          eventBus.emit('checkout.payment_captured', {
+            checkoutId: checkoutSummary.checkoutId,
+            orderId: checkoutSummary.orderId,
+            paymentIntentId: event.externalTransactionId,
+          });
+        }
+      } catch (err: unknown) {
+        logger.error('[webhook] payment_succeeded handler error:', err);
+      }
+
+      res.status(200).json({ received: true });
+      return;
+    }
+
+    if (event.type === 'payment_failed') {
+      if (transaction.status === 'failed') {
+        res.status(200).json({ received: true });
+        return;
+      }
+
+      try {
+        transaction.fail(event.errorCode!, event.errorMessage!, event.gatewayResponse);
+        await PaymentRepo.saveTransaction(transaction);
+
+        const checkoutSummary = await orderStatusSyncPort.findCheckoutByPaymentIntentId(event.externalTransactionId);
+        if (checkoutSummary) {
+          // Emit events — order and checkout modules handle their own state updates
+          // via event subscriptions (Published Language pattern)
+          eventBus.emit('order.payment_failed', {
+            orderId: checkoutSummary.orderId,
+            customerId: checkoutSummary.customerId,
+            reason: event.errorMessage,
+          });
+
+          eventBus.emit('checkout.failed', {
+            checkoutId: checkoutSummary.checkoutId,
+            orderId: checkoutSummary.orderId,
+            reason: event.errorMessage,
+          });
+        }
+      } catch (err: unknown) {
+        logger.error('[webhook] payment_failed handler error:', err);
+      }
+
+      res.status(200).json({ received: true });
+      return;
+    }
+
+    // Other normalized types (refund_completed, etc.) — acknowledge, handle later
+    res.status(200).json({ received: true });
   } catch (error: unknown) {
     logger.error('[webhook] Unhandled error:', error);
     res.status(200).json({ received: true });

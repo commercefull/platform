@@ -93,9 +93,7 @@ exports.up = function (knex) {
   ];
 
   return Promise.all(
-    indexes.map(({ table, name, expr }) =>
-      knex.raw(`CREATE INDEX IF NOT EXISTS "${name}" ON "${table}" USING GIN (${expr})`),
-    ),
+    indexes.map(({ table, name, expr }) => knex.raw(`CREATE INDEX IF NOT EXISTS "${name}" ON "${table}" USING GIN (${expr})`)),
   );
 };
 
@@ -120,7 +118,5 @@ exports.down = function (knex) {
     'idx_shippingCarrier_fts',
   ];
 
-  return Promise.all(
-    indexNames.map((name) => knex.raw(`DROP INDEX IF EXISTS "${name}"`)),
-  );
+  return Promise.all(indexNames.map(name => knex.raw(`DROP INDEX IF EXISTS "${name}"`)));
 };

@@ -50,11 +50,7 @@ describe('Checkout Expanded Tests', () => {
   };
 
   const createCheckout = async (basketId: string): Promise<string | null> => {
-    const resp = await client.post(
-      '/customer/checkout',
-      { basketId },
-      { headers: authHeaders() },
-    );
+    const resp = await client.post('/customer/checkout', { basketId }, { headers: authHeaders() });
     if (resp.status !== 200 && resp.status !== 201) return null;
     return resp.data?.data?.checkoutId || resp.data?.checkoutId || null;
   };
@@ -84,11 +80,7 @@ describe('Checkout Expanded Tests', () => {
     });
 
     it('should reject checkout creation for empty basket', async () => {
-      const basketResp = await client.post(
-        '/customer/basket',
-        { sessionId: `empty-checkout-${Date.now()}` },
-        { headers: authHeaders() },
-      );
+      const basketResp = await client.post('/customer/basket', { sessionId: `empty-checkout-${Date.now()}` }, { headers: authHeaders() });
       if (basketResp.status !== 200) return;
       const basketId = basketResp.data.data.basketId;
 
@@ -108,13 +100,12 @@ describe('Checkout Expanded Tests', () => {
       const basketId = await createBasketWithItem();
       if (!basketId) return;
       const checkoutId = await createCheckout(basketId);
-      if (!checkoutId) { await cleanup(basketId); return; }
+      if (!checkoutId) {
+        await cleanup(basketId);
+        return;
+      }
 
-      const resp = await client.put(
-        `/customer/checkout/${checkoutId}/shipping-address`,
-        TEST_SHIPPING_ADDRESS,
-        { headers: authHeaders() },
-      );
+      const resp = await client.put(`/customer/checkout/${checkoutId}/shipping-address`, TEST_SHIPPING_ADDRESS, { headers: authHeaders() });
 
       expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);
@@ -126,13 +117,12 @@ describe('Checkout Expanded Tests', () => {
       const basketId = await createBasketWithItem();
       if (!basketId) return;
       const checkoutId = await createCheckout(basketId);
-      if (!checkoutId) { await cleanup(basketId); return; }
+      if (!checkoutId) {
+        await cleanup(basketId);
+        return;
+      }
 
-      const resp = await client.put(
-        `/customer/checkout/${checkoutId}/billing-address`,
-        TEST_BILLING_ADDRESS,
-        { headers: authHeaders() },
-      );
+      const resp = await client.put(`/customer/checkout/${checkoutId}/billing-address`, TEST_BILLING_ADDRESS, { headers: authHeaders() });
 
       expectStatus(resp, 200);
       await cleanup(basketId);
@@ -142,13 +132,12 @@ describe('Checkout Expanded Tests', () => {
       const basketId = await createBasketWithItem();
       if (!basketId) return;
       const checkoutId = await createCheckout(basketId);
-      if (!checkoutId) { await cleanup(basketId); return; }
+      if (!checkoutId) {
+        await cleanup(basketId);
+        return;
+      }
 
-      const resp = await client.put(
-        `/customer/checkout/${checkoutId}/shipping-address`,
-        { firstName: 'Test' },
-        { headers: authHeaders() },
-      );
+      const resp = await client.put(`/customer/checkout/${checkoutId}/shipping-address`, { firstName: 'Test' }, { headers: authHeaders() });
 
       expectStatus(resp, 400);
       await cleanup(basketId);
@@ -164,7 +153,10 @@ describe('Checkout Expanded Tests', () => {
       const basketId = await createBasketWithItem();
       if (!basketId) return;
       const checkoutId = await createCheckout(basketId);
-      if (!checkoutId) { await cleanup(basketId); return; }
+      if (!checkoutId) {
+        await cleanup(basketId);
+        return;
+      }
 
       const resp = await client.put(
         `/customer/checkout/${checkoutId}/fulfillment-method`,
@@ -180,12 +172,12 @@ describe('Checkout Expanded Tests', () => {
       const basketId = await createBasketWithItem();
       if (!basketId) return;
       const checkoutId = await createCheckout(basketId);
-      if (!checkoutId) { await cleanup(basketId); return; }
+      if (!checkoutId) {
+        await cleanup(basketId);
+        return;
+      }
 
-      const resp = await client.get(
-        `/customer/checkout/${checkoutId}/fulfillment-options`,
-        { headers: authHeaders() },
-      );
+      const resp = await client.get(`/customer/checkout/${checkoutId}/fulfillment-options`, { headers: authHeaders() });
 
       expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);
@@ -203,18 +195,14 @@ describe('Checkout Expanded Tests', () => {
       const basketId = await createBasketWithItem();
       if (!basketId) return;
       const checkoutId = await createCheckout(basketId);
-      if (!checkoutId) { await cleanup(basketId); return; }
+      if (!checkoutId) {
+        await cleanup(basketId);
+        return;
+      }
 
-      await client.put(
-        `/customer/checkout/${checkoutId}/shipping-address`,
-        TEST_SHIPPING_ADDRESS,
-        { headers: authHeaders() },
-      );
+      await client.put(`/customer/checkout/${checkoutId}/shipping-address`, TEST_SHIPPING_ADDRESS, { headers: authHeaders() });
 
-      const resp = await client.get(
-        `/customer/checkout/${checkoutId}/shipping-methods`,
-        { headers: authHeaders() },
-      );
+      const resp = await client.get(`/customer/checkout/${checkoutId}/shipping-methods`, { headers: authHeaders() });
 
       expectStatus(resp, 200);
       await cleanup(basketId);
@@ -230,12 +218,12 @@ describe('Checkout Expanded Tests', () => {
       const basketId = await createBasketWithItem();
       if (!basketId) return;
       const checkoutId = await createCheckout(basketId);
-      if (!checkoutId) { await cleanup(basketId); return; }
+      if (!checkoutId) {
+        await cleanup(basketId);
+        return;
+      }
 
-      const resp = await client.get(
-        `/customer/checkout/${checkoutId}/summary`,
-        { headers: authHeaders() },
-      );
+      const resp = await client.get(`/customer/checkout/${checkoutId}/summary`, { headers: authHeaders() });
 
       expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);

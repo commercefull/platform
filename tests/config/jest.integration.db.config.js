@@ -20,13 +20,16 @@ module.exports = {
   roots: ['<rootDir>/tests/integration'],
   testMatch: ['**/*.test.ts'],
   transform: {
-    '^.+\\.tsx?$': ['@swc/jest', {
-      jsc: {
-        target: 'es2022',
-        parser: { syntax: 'typescript' },
-        transform: {},
+    '^.+\\.tsx?$': [
+      '@swc/jest',
+      {
+        jsc: {
+          target: 'es2022',
+          parser: { syntax: 'typescript' },
+          transform: {},
+        },
       },
-    }],
+    ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   verbose: true,

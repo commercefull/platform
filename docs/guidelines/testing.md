@@ -75,13 +75,13 @@ describe('Product API', () => {
 
 ### Test utilities (`tests/integration/testUtils.ts`)
 
-| Utility | Description |
-| ------- | ----------- |
-| `createTestClient()` | Creates an Axios instance with `X-Test-Database` and `X-Test-Request` headers |
-| `loginTestAdmin(client)` | Logs in as `merchant@example.com` / `password123`, returns access token |
-| `loginTestUser(client)` | Logs in as `testcustomer@example.com` / `password123`, returns access token |
-| `expectStatus(response, code)` | Asserts HTTP status with detailed error logging |
-| `clearTokenCache()` | Clears cached tokens (for testing auth flows) |
+| Utility                        | Description                                                                   |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| `createTestClient()`           | Creates an Axios instance with `X-Test-Database` and `X-Test-Request` headers |
+| `loginTestAdmin(client)`       | Logs in as `merchant@example.com` / `password123`, returns access token       |
+| `loginTestUser(client)`        | Logs in as `testcustomer@example.com` / `password123`, returns access token   |
+| `expectStatus(response, code)` | Asserts HTTP status with detailed error logging                               |
+| `clearTokenCache()`            | Clears cached tokens (for testing auth flows)                                 |
 
 ### Auth requirements for integration tests
 
@@ -115,18 +115,18 @@ expect([200, 400, 404]).toContain(resp.status);
 
 ## Module Integration Test Coverage
 
-| Module | Test File | Coverage |
-| ------ | --------- | -------- |
-| audit | `tests/integration/audit/audit.test.ts` | List, stats, verify chain, correlation ID, single log, auth |
-| automation | `tests/integration/automation/automation.test.ts` | Rule CRUD, trigger, logs, delete, auth |
-| integration | `tests/integration/integration/integration.test.ts` | CRUD, credentials, subscriptions, logs, auth |
-| marketplace | `tests/integration/marketplace/marketplace.test.ts` | Vendor CRUD + lifecycle, commission rules, payouts, auth |
-| pagebuilder | `tests/integration/pagebuilder/pagebuilder.test.ts` | Block types, draft CRUD, block ops, publish, preview, auth |
-| returns | `tests/integration/returns/returns.test.ts` | List, create, workflow transitions, store credit, auth |
-| segment | `tests/integration/segment/segment.test.ts` | Segment CRUD, evaluation, members, profiles, auth |
-| theme | `tests/integration/theme/theme.test.ts` | Theme CRUD, overrides, assignment, resolution, auth |
-| tracking | `tests/integration/tracking/tracking.test.ts` | Config CRUD, GTM, Meta CAPI, mappings, lifecycle, auth |
-| webhook | `tests/integration/webhook/webhook.test.ts` | Endpoint CRUD, delivery attempts, auth |
+| Module      | Test File                                           | Coverage                                                    |
+| ----------- | --------------------------------------------------- | ----------------------------------------------------------- |
+| audit       | `tests/integration/audit/audit.test.ts`             | List, stats, verify chain, correlation ID, single log, auth |
+| automation  | `tests/integration/automation/automation.test.ts`   | Rule CRUD, trigger, logs, delete, auth                      |
+| integration | `tests/integration/integration/integration.test.ts` | CRUD, credentials, subscriptions, logs, auth                |
+| marketplace | `tests/integration/marketplace/marketplace.test.ts` | Vendor CRUD + lifecycle, commission rules, payouts, auth    |
+| pagebuilder | `tests/integration/pagebuilder/pagebuilder.test.ts` | Block types, draft CRUD, block ops, publish, preview, auth  |
+| returns     | `tests/integration/returns/returns.test.ts`         | List, create, workflow transitions, store credit, auth      |
+| segment     | `tests/integration/segment/segment.test.ts`         | Segment CRUD, evaluation, members, profiles, auth           |
+| theme       | `tests/integration/theme/theme.test.ts`             | Theme CRUD, overrides, assignment, resolution, auth         |
+| tracking    | `tests/integration/tracking/tracking.test.ts`       | Config CRUD, GTM, Meta CAPI, mappings, lifecycle, auth      |
+| webhook     | `tests/integration/webhook/webhook.test.ts`         | Endpoint CRUD, delivery attempts, auth                      |
 
 ## Commands
 
@@ -152,25 +152,25 @@ npx jest --testPathPattern=audit             # Run by pattern
 
 All business routes follow the `/business/{topic}/...` pattern:
 
-| Topic | Path prefix | Example |
-| ----- | ----------- | ------- |
-| Products | `/business/products` | `GET /business/products/:id` |
-| Orders | `/business/orders` | `POST /business/orders` |
-| Stores | `/business/stores` | `PUT /business/stores/:id/pickup` |
-| Media | `/business/media` | `POST /business/media/upload` |
-| Fulfillment | `/business/fulfillments` | `POST /business/fulfillments/:id/ship` |
-| Fulfillment locations | `/business/fulfillment/locations` | `GET /business/fulfillment/locations` |
-| Fulfillment partners | `/business/fulfillment/partners` | `POST /business/fulfillment/partners` |
-| Configuration | `/business/configuration` | `GET /business/configuration/active` |
-| Coupons | `/business/coupons` | `POST /business/coupons` |
-| Identity (auth) | `/business/auth` | `POST /business/auth/login` |
-| Identity (user-store) | `/business/auth/users` | `GET /business/auth/users/:userId/stores` |
-| Audit | `/business/audit` | `GET /business/audit/logs` |
-| Integration | `/business/integration` | `POST /business/integration` |
-| Automation | `/business/automation` | `POST /business/automation/rules` |
-| Returns | `/business/returns` | `POST /business/returns/requests` |
-| Themes | `/business/themes` | `GET /business/themes` |
-| Page Builder | `/business/page-builder` | `POST /business/page-builder/drafts` |
-| Segment | `/business/segment` | `GET /business/segment` |
-| Marketplace | `/business/vendors` | `POST /business/vendors` |
-| Tracking | `/business/tracking` | `GET /business/tracking/config` |
+| Topic                 | Path prefix                       | Example                                   |
+| --------------------- | --------------------------------- | ----------------------------------------- |
+| Products              | `/business/products`              | `GET /business/products/:id`              |
+| Orders                | `/business/orders`                | `POST /business/orders`                   |
+| Stores                | `/business/stores`                | `PUT /business/stores/:id/pickup`         |
+| Media                 | `/business/media`                 | `POST /business/media/upload`             |
+| Fulfillment           | `/business/fulfillments`          | `POST /business/fulfillments/:id/ship`    |
+| Fulfillment locations | `/business/fulfillment/locations` | `GET /business/fulfillment/locations`     |
+| Fulfillment partners  | `/business/fulfillment/partners`  | `POST /business/fulfillment/partners`     |
+| Configuration         | `/business/configuration`         | `GET /business/configuration/active`      |
+| Coupons               | `/business/coupons`               | `POST /business/coupons`                  |
+| Identity (auth)       | `/business/auth`                  | `POST /business/auth/login`               |
+| Identity (user-store) | `/business/auth/users`            | `GET /business/auth/users/:userId/stores` |
+| Audit                 | `/business/audit`                 | `GET /business/audit/logs`                |
+| Integration           | `/business/integration`           | `POST /business/integration`              |
+| Automation            | `/business/automation`            | `POST /business/automation/rules`         |
+| Returns               | `/business/returns`               | `POST /business/returns/requests`         |
+| Themes                | `/business/themes`                | `GET /business/themes`                    |
+| Page Builder          | `/business/page-builder`          | `POST /business/page-builder/drafts`      |
+| Segment               | `/business/segment`               | `GET /business/segment`                   |
+| Marketplace           | `/business/vendors`               | `POST /business/vendors`                  |
+| Tracking              | `/business/tracking`              | `GET /business/tracking/config`           |

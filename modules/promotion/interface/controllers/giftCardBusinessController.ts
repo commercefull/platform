@@ -5,7 +5,15 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { activateGiftCard as activateGiftCardRepo, cancelGiftCard as cancelGiftCardRepo, createGiftCard as createGiftCardRepo, getGiftCard as getGiftCardRepo, getGiftCards as getGiftCardsRepo, getTransactions, refundToGiftCard as refundToGiftCardRepo } from '../../infrastructure/repositories/GiftCardRepository';
+import {
+  activateGiftCard as activateGiftCardRepo,
+  cancelGiftCard as cancelGiftCardRepo,
+  createGiftCard as createGiftCardRepo,
+  getGiftCard as getGiftCardRepo,
+  getGiftCards as getGiftCardsRepo,
+  getTransactions,
+  refundToGiftCard as refundToGiftCardRepo,
+} from '../../infrastructure/repositories/GiftCardRepository';
 import { type GiftCardStatus, type GiftCardType, type DeliveryMethod } from '../../infrastructure/repositories/GiftCardRepository';
 
 interface CreateGiftCardBody {
@@ -39,7 +47,6 @@ export const getGiftCards: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const getGiftCard: AsyncHandler = async (req, res, _next) => {
@@ -50,7 +57,6 @@ export const getGiftCard: AsyncHandler = async (req, res, _next) => {
   }
   const transactions = await getTransactions(req.params.id);
   res.json({ success: true, data: { ...giftCard, transactions } });
-  
 };
 
 export const createGiftCard: AsyncHandler = async (req, res, _next) => {
@@ -61,13 +67,11 @@ export const createGiftCard: AsyncHandler = async (req, res, _next) => {
   }
   const giftCard = await createGiftCardRepo(body);
   res.status(201).json({ success: true, data: giftCard });
-  
 };
 
 export const activateGiftCard: AsyncHandler = async (req, res, _next) => {
   await activateGiftCardRepo(req.params.id);
   res.json({ success: true, message: 'Gift card activated' });
-  
 };
 
 export const refundToGiftCard: AsyncHandler = async (req, res, _next) => {
@@ -75,11 +79,9 @@ export const refundToGiftCard: AsyncHandler = async (req, res, _next) => {
   const body = req.body as RefundBody;
   const transaction = await refundToGiftCardRepo(req.params.id, body.amount, body.orderId, adminId, body.notes);
   res.json({ success: true, data: transaction });
-  
 };
 
 export const cancelGiftCard: AsyncHandler = async (req, res, _next) => {
   await cancelGiftCardRepo(req.params.id);
   res.json({ success: true, message: 'Gift card cancelled' });
-  
 };

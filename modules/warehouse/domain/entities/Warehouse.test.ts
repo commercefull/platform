@@ -3,8 +3,13 @@ import { WarehouseValidationError } from '../errors/WarehouseErrors';
 
 describe('Warehouse', () => {
   const baseProps = {
-    warehouseId: 'w1', name: 'Main WH', code: 'WH01', type: 'warehouse' as const,
-    organizationId: 'org1', isDefault: false, priority: 1,
+    warehouseId: 'w1',
+    name: 'Main WH',
+    code: 'WH01',
+    type: 'warehouse' as const,
+    organizationId: 'org1',
+    isDefault: false,
+    priority: 1,
     address: { line1: '123 St', city: 'NYC', postalCode: '10001', country: 'USA' },
   };
 

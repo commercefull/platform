@@ -31,8 +31,7 @@ describe('GetProductStoreAvailabilityUseCase', () => {
   it('should throw ProductNotFoundError when product not found', async () => {
     mockProductRepository.findById.mockResolvedValueOnce(null);
 
-    await expect(useCase.execute({ productId: 'nonexistent' }))
-      .rejects.toThrow(ProductNotFoundError);
+    await expect(useCase.execute({ productId: 'nonexistent' })).rejects.toThrow(ProductNotFoundError);
   });
 
   it('should use specific variant when provided', async () => {

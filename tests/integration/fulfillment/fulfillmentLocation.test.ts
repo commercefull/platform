@@ -68,8 +68,7 @@ describe('Fulfillment Location & Partner Tests', () => {
         expectStatus(response, 201);
         expect(response.data.success).toBe(true);
         expect(response.data.data).toBeDefined();
-        createdLocationId =
-          response.data.data?.fulfillmentLocationId || response.data.data?.id;
+        createdLocationId = response.data.data?.fulfillmentLocationId || response.data.data?.id;
       });
 
       it('should reject creation with missing name', async () => {
@@ -149,11 +148,7 @@ describe('Fulfillment Location & Partner Tests', () => {
       it('should activate a location', async () => {
         if (!createdLocationId) return;
 
-        const response = await client.post(
-          `/business/fulfillment/locations/${createdLocationId}/activate`,
-          {},
-          { headers: authHeaders() },
-        );
+        const response = await client.post(`/business/fulfillment/locations/${createdLocationId}/activate`, {}, { headers: authHeaders() });
 
         expectStatus(response, 200);
         expect(response.data.success).toBe(true);
@@ -230,16 +225,11 @@ describe('Fulfillment Location & Partner Tests', () => {
         expectStatus(response, 201);
         expect(response.data.success).toBe(true);
         expect(response.data.data).toBeDefined();
-        createdPartnerId =
-          response.data.data?.fulfillmentPartnerId || response.data.data?.id;
+        createdPartnerId = response.data.data?.fulfillmentPartnerId || response.data.data?.id;
       });
 
       it('should reject partner creation with missing name', async () => {
-        const response = await client.post(
-          '/business/fulfillment/partners',
-          { code: 'MISSING-NAME' },
-          { headers: authHeaders() },
-        );
+        const response = await client.post('/business/fulfillment/partners', { code: 'MISSING-NAME' }, { headers: authHeaders() });
 
         expectStatus(response, 400);
         expect(response.data.success).toBe(false);

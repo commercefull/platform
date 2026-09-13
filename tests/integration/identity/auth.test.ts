@@ -1,5 +1,11 @@
 import { AxiosInstance } from 'axios';
-import { setupAuthTests, cleanupAuthTests, TEST_CUSTOMER as testCustomer, TEST_MERCHANT as testOrganization, TEST_MERCHANT as testAdmin } from './testUtils';
+import {
+  setupAuthTests,
+  cleanupAuthTests,
+  TEST_CUSTOMER as testCustomer,
+  TEST_MERCHANT as testOrganization,
+  TEST_MERCHANT as testAdmin,
+} from './testUtils';
 
 describe('Auth Feature Tests', () => {
   let client: AxiosInstance;
@@ -152,11 +158,15 @@ describe('Auth Feature Tests', () => {
         return;
       }
 
-      const response = await client.post('/customer/identity/logout', {
-        refreshToken,
-      }, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const response = await client.post(
+        '/customer/identity/logout',
+        {
+          refreshToken,
+        },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);

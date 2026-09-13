@@ -58,7 +58,7 @@ export class CustomerLoyaltyTransactionRepo {
 
   async findExpiring(customerId: string, days = 30): Promise<CustomerLoyaltyTransaction[]> {
     const now = unixTimestamp();
-    const futureDate = parseInt(now) + days * 24 * 60 * 60;
+    const futureDate = now + days * 24 * 60 * 60;
     return (
       (await query<CustomerLoyaltyTransaction[]>(
         `SELECT * FROM "customerLoyaltyTransaction" WHERE "customerId" = $1 AND "type" = 'earn' AND "expiresAt" IS NOT NULL AND "expiresAt" BETWEEN $2 AND $3`,

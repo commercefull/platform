@@ -46,10 +46,12 @@ describe('AdjustStockUseCase', () => {
     expect(result.newQuantity).toBe(80);
     expect(result.adjustmentAmount).toBe(30);
     expect(mockRepo.updateQuantity).toHaveBeenCalledWith('inv-1', 80);
-    expect(mockRepo.recordTransaction).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'adjustment',
-      reason: 'correction',
-    }));
+    expect(mockRepo.recordTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'adjustment',
+        reason: 'correction',
+      }),
+    );
   });
 
   it('should increment quantity', async () => {
@@ -108,11 +110,13 @@ describe('AdjustStockUseCase', () => {
 
     expect(result.previousQuantity).toBe(0);
     expect(result.newQuantity).toBe(30);
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      productId: 'prod-1',
-      locationId: 'loc-1',
-      quantity: 30,
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        productId: 'prod-1',
+        locationId: 'loc-1',
+        quantity: 30,
+      }),
+    );
   });
 
   it('should emit inventory.low event when quantity drops below threshold', async () => {
@@ -131,10 +135,13 @@ describe('AdjustStockUseCase', () => {
       reason: 'damage',
     });
 
-    expect(eventBus.emit).toHaveBeenCalledWith('inventory.low', expect.objectContaining({
-      productId: 'prod-1',
-      currentQuantity: 8,
-    }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'inventory.low',
+      expect.objectContaining({
+        productId: 'prod-1',
+        currentQuantity: 8,
+      }),
+    );
   });
 
   it('should emit inventory.out_of_stock when quantity is zero', async () => {
@@ -153,9 +160,12 @@ describe('AdjustStockUseCase', () => {
       reason: 'expired',
     });
 
-    expect(eventBus.emit).toHaveBeenCalledWith('inventory.out_of_stock', expect.objectContaining({
-      productId: 'prod-1',
-    }));
+    expect(eventBus.emit).toHaveBeenCalledWith(
+      'inventory.out_of_stock',
+      expect.objectContaining({
+        productId: 'prod-1',
+      }),
+    );
   });
 
   it('should throw for invalid adjustment type', async () => {

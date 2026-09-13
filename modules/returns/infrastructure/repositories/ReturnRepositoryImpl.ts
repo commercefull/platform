@@ -2,7 +2,15 @@ import { query, queryOne } from '../../../../libs/db';
 import { logger } from '../../../../libs/logger';
 import type { ReturnRequestRepository, ReturnItemRepository, StoreCreditRepository } from '../../domain/repositories/ReturnRepository';
 import { ReturnRequest } from '../../domain/entities/ReturnRequest';
-import type { ReturnStatus, ReturnType, ReturnItem, ReturnCarrier, ReturnItemCondition, ReturnItemReason, WarrantyStatus } from '../../domain/entities/ReturnRequest';
+import type {
+  ReturnStatus,
+  ReturnType,
+  ReturnItem,
+  ReturnCarrier,
+  ReturnItemCondition,
+  ReturnItemReason,
+  WarrantyStatus,
+} from '../../domain/entities/ReturnRequest';
 import { StoreCreditLedgerEntry } from '../../domain/entities/StoreCredit';
 import type { StoreCreditEntryType, CustomerStoreCreditBalance } from '../../domain/entities/StoreCredit';
 import { ReturnValidationError } from '../../domain/errors/ReturnErrors';
@@ -114,30 +122,21 @@ function rowToEntity(row: ReturnDbRow, items: ReturnItem[] = []): ReturnRequest 
 
 export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
   async findById(id: string): Promise<ReturnRequest | null> {
-    const row = await queryOne<ReturnDbRow>(
-      `SELECT * FROM "orderReturn" WHERE "orderReturnId" = $1`,
-      [id],
-    );
+    const row = await queryOne<ReturnDbRow>(`SELECT * FROM "orderReturn" WHERE "orderReturnId" = $1`, [id]);
     if (!row) return null;
     const items = await this.fetchItems(id);
     return rowToEntity(row, items);
   }
 
   async findByReturnNumber(returnNumber: string): Promise<ReturnRequest | null> {
-    const row = await queryOne<ReturnDbRow>(
-      `SELECT * FROM "orderReturn" WHERE "returnNumber" = $1`,
-      [returnNumber],
-    );
+    const row = await queryOne<ReturnDbRow>(`SELECT * FROM "orderReturn" WHERE "returnNumber" = $1`, [returnNumber]);
     if (!row) return null;
     const items = await this.fetchItems(row.orderReturnId);
     return rowToEntity(row, items);
   }
 
   async findByOrderId(orderId: string): Promise<ReturnRequest[]> {
-    const rows = await query<ReturnDbRow[]>(
-      `SELECT * FROM "orderReturn" WHERE "orderId" = $1 ORDER BY "requestedAt" DESC`,
-      [orderId],
-    );
+    const rows = await query<ReturnDbRow[]>(`SELECT * FROM "orderReturn" WHERE "orderId" = $1 ORDER BY "requestedAt" DESC`, [orderId]);
     return Promise.all((rows || []).map(async r => rowToEntity(r, await this.fetchItems(r.orderReturnId))));
   }
 
@@ -192,11 +191,19 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        RETURNING *`,
       [
-        props.orderId, props.returnNumber, props.customerId ?? null,
-        props.status, props.returnType, props.requestedAt,
-        props.returnShippingPaid, props.returnCarrier,
-        props.returnReason ?? null, props.customerNotes ?? null,
-        props.requiresInspection, props.createdAt, props.updatedAt,
+        props.orderId,
+        props.returnNumber,
+        props.customerId ?? null,
+        props.status,
+        props.returnType,
+        props.requestedAt,
+        props.returnShippingPaid,
+        props.returnCarrier,
+        props.returnReason ?? null,
+        props.customerNotes ?? null,
+        props.requiresInspection,
+        props.createdAt,
+        props.updatedAt,
       ],
     );
     if (!row) throw new ReturnValidationError('Failed to create return request');
@@ -211,11 +218,19 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
             "notes", "warrantyStatus", "createdAt"
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
           [
-            row.orderReturnId, item.orderItemId, item.quantity,
-            item.returnReason, item.returnReasonDetail ?? null, item.condition,
-            item.restockItem, item.refundAmount ?? null,
-            item.exchangeProductId ?? null, item.exchangeVariantId ?? null,
-            item.notes ?? null, item.warrantyStatus, item.createdAt,
+            row.orderReturnId,
+            item.orderItemId,
+            item.quantity,
+            item.returnReason,
+            item.returnReasonDetail ?? null,
+            item.condition,
+            item.restockItem,
+            item.refundAmount ?? null,
+            item.exchangeProductId ?? null,
+            item.exchangeVariantId ?? null,
+            item.notes ?? null,
+            item.warrantyStatus,
+            item.createdAt,
           ],
         );
       }
@@ -238,11 +253,18 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
         "updatedAt" = NOW()
        WHERE "orderReturnId" = $16 RETURNING *`,
       [
-        props.status, props.approvedAt ?? null, props.receivedAt ?? null,
-        props.completedAt ?? null, props.rmaNumber ?? null, props.paymentRefundId ?? null,
-        props.returnShippingPaid, props.returnShippingAmount ?? null,
-        props.returnShippingLabel ?? null, props.returnTrackingNumber ?? null,
-        props.returnTrackingUrl ?? null, props.returnCarrier,
+        props.status,
+        props.approvedAt ?? null,
+        props.receivedAt ?? null,
+        props.completedAt ?? null,
+        props.rmaNumber ?? null,
+        props.paymentRefundId ?? null,
+        props.returnShippingPaid,
+        props.returnShippingAmount ?? null,
+        props.returnShippingLabel ?? null,
+        props.returnTrackingNumber ?? null,
+        props.returnTrackingUrl ?? null,
+        props.returnCarrier,
         props.adminNotes ?? null,
         props.inspectionPassedItems ? JSON.stringify(props.inspectionPassedItems) : null,
         props.inspectionFailedItems ? JSON.stringify(props.inspectionFailedItems) : null,
@@ -263,18 +285,12 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
   }
 
   async countByStatus(status: ReturnStatus): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "orderReturn" WHERE "status" = $1`,
-      [status],
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "orderReturn" WHERE "status" = $1`, [status]);
     return result ? parseInt(result.count, 10) : 0;
   }
 
   async countByCustomerId(customerId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "orderReturn" WHERE "customerId" = $1`,
-      [customerId],
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "orderReturn" WHERE "customerId" = $1`, [customerId]);
     return result ? parseInt(result.count, 10) : 0;
   }
 
@@ -283,8 +299,14 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
       `SELECT "status", COUNT(*) as count FROM "orderReturn" GROUP BY "status"`,
     );
     const stats = {
-      requested: 0, approved: 0, denied: 0, inTransit: 0,
-      received: 0, inspected: 0, completed: 0, cancelled: 0,
+      requested: 0,
+      approved: 0,
+      denied: 0,
+      inTransit: 0,
+      received: 0,
+      inspected: 0,
+      completed: 0,
+      cancelled: 0,
     } as Record<ReturnStatus, number>;
     for (const row of rows || []) {
       stats[row.status as ReturnStatus] = parseInt(row.count, 10);
@@ -304,28 +326,23 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
   }
 
   private async fetchItems(returnId: string): Promise<ReturnItem[]> {
-    const rows = await query<ReturnItemDbRow[]>(
-      `SELECT * FROM "orderReturnItem" WHERE "orderReturnId" = $1 ORDER BY "createdAt" ASC`,
-      [returnId],
-    );
+    const rows = await query<ReturnItemDbRow[]>(`SELECT * FROM "orderReturnItem" WHERE "orderReturnId" = $1 ORDER BY "createdAt" ASC`, [
+      returnId,
+    ]);
     return (rows || []).map(itemRowToEntity);
   }
 }
 
 export class ReturnItemRepositoryImpl implements ReturnItemRepository {
   async findByReturnId(returnId: string): Promise<ReturnItem[]> {
-    const rows = await query<ReturnItemDbRow[]>(
-      `SELECT * FROM "orderReturnItem" WHERE "orderReturnId" = $1 ORDER BY "createdAt" ASC`,
-      [returnId],
-    );
+    const rows = await query<ReturnItemDbRow[]>(`SELECT * FROM "orderReturnItem" WHERE "orderReturnId" = $1 ORDER BY "createdAt" ASC`, [
+      returnId,
+    ]);
     return (rows || []).map(itemRowToEntity);
   }
 
   async findById(itemId: string): Promise<ReturnItem | null> {
-    const row = await queryOne<ReturnItemDbRow>(
-      `SELECT * FROM "orderReturnItem" WHERE "orderReturnItemId" = $1`,
-      [itemId],
-    );
+    const row = await queryOne<ReturnItemDbRow>(`SELECT * FROM "orderReturnItem" WHERE "orderReturnItemId" = $1`, [itemId]);
     return row ? itemRowToEntity(row) : null;
   }
 
@@ -340,11 +357,19 @@ export class ReturnItemRepositoryImpl implements ReturnItemRepository {
           "notes", "warrantyStatus", "createdAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
         [
-          returnId, item.orderItemId, item.quantity,
-          item.returnReason, item.returnReasonDetail ?? null, item.condition,
-          item.restockItem, item.refundAmount ?? null,
-          item.exchangeProductId ?? null, item.exchangeVariantId ?? null,
-          item.notes ?? null, item.warrantyStatus, item.createdAt,
+          returnId,
+          item.orderItemId,
+          item.quantity,
+          item.returnReason,
+          item.returnReasonDetail ?? null,
+          item.condition,
+          item.restockItem,
+          item.refundAmount ?? null,
+          item.exchangeProductId ?? null,
+          item.exchangeVariantId ?? null,
+          item.notes ?? null,
+          item.warrantyStatus,
+          item.createdAt,
         ],
       );
       if (row) created.push(itemRowToEntity(row));
@@ -365,7 +390,13 @@ export class ReturnItemRepositoryImpl implements ReturnItemRepository {
 
 export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   async getBalance(customerId: string): Promise<CustomerStoreCreditBalance> {
-    const row = await queryOne<{ balance: string; totalCredits: string; totalDebits: string; pendingExpiry: string; lastEntryAt: Date | null }>(
+    const row = await queryOne<{
+      balance: string;
+      totalCredits: string;
+      totalDebits: string;
+      pendingExpiry: string;
+      lastEntryAt: Date | null;
+    }>(
       `SELECT
         COALESCE(SUM(CASE WHEN "entryType" = 'credit' THEN "amount" ELSE 0 END) -
                  SUM(CASE WHEN "entryType" IN ('debit', 'expiry') THEN "amount" ELSE 0 END), 0) as balance,
@@ -413,10 +444,19 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        RETURNING *`,
       [
-        props.customerId, props.entryType, props.referenceType ?? null, props.referenceId ?? null,
-        props.amount, props.balanceAfter, props.currency,
-        props.reason ?? null, props.notes ?? null, props.createdBy ?? null,
-        props.expiresAt ?? null, props.createdAt, props.updatedAt,
+        props.customerId,
+        props.entryType,
+        props.referenceType ?? null,
+        props.referenceId ?? null,
+        props.amount,
+        props.balanceAfter,
+        props.currency,
+        props.reason ?? null,
+        props.notes ?? null,
+        props.createdBy ?? null,
+        props.expiresAt ?? null,
+        props.createdAt,
+        props.updatedAt,
       ],
     );
     if (!row) throw new ReturnValidationError('Failed to create store credit entry');
@@ -440,22 +480,24 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
       `SELECT * FROM "storeCreditLedger" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
       [customerId, limit],
     );
-    return (rows || []).map((row: Record<string, unknown>) => StoreCreditLedgerEntry.reconstitute({
-      storeCreditLedgerId: row.storeCreditLedgerId as string,
-      customerId: row.customerId as string,
-      entryType: row.entryType as StoreCreditEntryType,
-      referenceType: row.referenceType as string | undefined,
-      referenceId: row.referenceId as string | undefined,
-      amount: parseFloat(row.amount as string),
-      balanceAfter: parseFloat(row.balanceAfter as string),
-      currency: row.currency as string,
-      reason: row.reason as string | undefined,
-      notes: row.notes as string | undefined,
-      createdBy: row.createdBy as string | undefined,
-      expiresAt: row.expiresAt as Date | undefined,
-      createdAt: row.createdAt as Date,
-      updatedAt: row.updatedAt as Date,
-    }));
+    return (rows || []).map((row: Record<string, unknown>) =>
+      StoreCreditLedgerEntry.reconstitute({
+        storeCreditLedgerId: row.storeCreditLedgerId as string,
+        customerId: row.customerId as string,
+        entryType: row.entryType as StoreCreditEntryType,
+        referenceType: row.referenceType as string | undefined,
+        referenceId: row.referenceId as string | undefined,
+        amount: parseFloat(row.amount as string),
+        balanceAfter: parseFloat(row.balanceAfter as string),
+        currency: row.currency as string,
+        reason: row.reason as string | undefined,
+        notes: row.notes as string | undefined,
+        createdBy: row.createdBy as string | undefined,
+        expiresAt: row.expiresAt as Date | undefined,
+        createdAt: row.createdAt as Date,
+        updatedAt: row.updatedAt as Date,
+      }),
+    );
   }
 
   async findByReference(referenceType: string, referenceId: string): Promise<StoreCreditLedgerEntry | null> {

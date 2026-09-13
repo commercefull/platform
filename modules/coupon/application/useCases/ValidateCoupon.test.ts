@@ -37,9 +37,7 @@ describe('ValidateCouponUseCase', () => {
       discountAmount: 10,
     });
 
-    const result = await useCase.execute(
-      new ValidateCouponCommand('SAVE10', 100, 'cust-1'),
-    );
+    const result = await useCase.execute(new ValidateCouponCommand('SAVE10', 100, 'cust-1'));
 
     expect(result.valid).toBe(true);
     expect(result.coupon!.couponId).toBe('c-1');
@@ -53,9 +51,7 @@ describe('ValidateCouponUseCase', () => {
       error: 'Coupon expired',
     });
 
-    const result = await useCase.execute(
-      new ValidateCouponCommand('EXPIRED', 100),
-    );
+    const result = await useCase.execute(new ValidateCouponCommand('EXPIRED', 100));
 
     expect(result.valid).toBe(false);
     expect(result.error).toBe('Coupon expired');
@@ -64,9 +60,7 @@ describe('ValidateCouponUseCase', () => {
   it('should return invalid with default error when no error provided', async () => {
     mockRepo.validateCouponCode.mockResolvedValue({ valid: false });
 
-    const result = await useCase.execute(
-      new ValidateCouponCommand('UNKNOWN', 100),
-    );
+    const result = await useCase.execute(new ValidateCouponCommand('UNKNOWN', 100));
 
     expect(result.valid).toBe(false);
     expect(result.error).toBe('Invalid coupon');
@@ -111,9 +105,7 @@ describe('ValidateCouponUseCase', () => {
       discountAmount: 10,
     });
 
-    const result = await useCase.execute(
-      new ValidateCouponCommand('SAVE10', 100),
-    );
+    const result = await useCase.execute(new ValidateCouponCommand('SAVE10', 100));
 
     expect(result.applicableItems).toBeUndefined();
   });

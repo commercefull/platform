@@ -9,10 +9,7 @@
  * infrastructure / application / domain layers.
  */
 
-import {
-  OrderStatusSyncPort,
-  CheckoutSyncSummary,
-} from '../../application/ports/OrderStatusSyncPort';
+import { OrderStatusSyncPort, CheckoutSyncSummary } from '../../application/ports/OrderStatusSyncPort';
 import CheckoutRepo from '../../../checkout/infrastructure/repositories/CheckoutRepository';
 import orderDataRepository from '../../../order/infrastructure/repositories/OrderDataRepository';
 

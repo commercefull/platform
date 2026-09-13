@@ -32,11 +32,39 @@ export const searchBusinessRouter = express.Router();
 
 searchBusinessRouter.get('/search/health', isOrganizationLoggedIn, asyncHandler(searchController.health.bind(searchController)));
 
-searchBusinessRouter.get('/search/merchandising', isOrganizationLoggedIn, asyncHandler(searchController.listMerchandisingRules.bind(searchController)));
-searchBusinessRouter.post('/search/merchandising', isOrganizationLoggedIn, asyncHandler(searchController.createMerchandisingRule.bind(searchController)));
-searchBusinessRouter.put('/search/merchandising/:ruleId', isOrganizationLoggedIn, asyncHandler(searchController.updateMerchandisingRule.bind(searchController)));
-searchBusinessRouter.delete('/search/merchandising/:ruleId', isOrganizationLoggedIn, asyncHandler(searchController.deleteMerchandisingRule.bind(searchController)));
+searchBusinessRouter.get(
+  '/search/merchandising',
+  isOrganizationLoggedIn,
+  asyncHandler(searchController.listMerchandisingRules.bind(searchController)),
+);
+searchBusinessRouter.post(
+  '/search/merchandising',
+  isOrganizationLoggedIn,
+  asyncHandler(searchController.createMerchandisingRule.bind(searchController)),
+);
+searchBusinessRouter.put(
+  '/search/merchandising/:ruleId',
+  isOrganizationLoggedIn,
+  asyncHandler(searchController.updateMerchandisingRule.bind(searchController)),
+);
+searchBusinessRouter.delete(
+  '/search/merchandising/:ruleId',
+  isOrganizationLoggedIn,
+  asyncHandler(searchController.deleteMerchandisingRule.bind(searchController)),
+);
 
-searchBusinessRouter.get('/search/manual-order/:categoryId', isOrganizationLoggedIn, asyncHandler(searchController.getCategoryManualOrder.bind(searchController)));
-searchBusinessRouter.put('/search/manual-order/:categoryId', isOrganizationLoggedIn, asyncHandler(searchController.setCategoryManualOrder.bind(searchController)));
-searchBusinessRouter.delete('/search/manual-order/:categoryId', isOrganizationLoggedIn, asyncHandler(searchController.deleteCategoryManualOrder.bind(searchController)));
+searchBusinessRouter.get(
+  '/search/manual-order/:categoryId',
+  isOrganizationLoggedIn,
+  asyncHandler(searchController.getCategoryManualOrder.bind(searchController)),
+);
+searchBusinessRouter.put(
+  '/search/manual-order/:categoryId',
+  isOrganizationLoggedIn,
+  asyncHandler(searchController.setCategoryManualOrder.bind(searchController)),
+);
+searchBusinessRouter.delete(
+  '/search/manual-order/:categoryId',
+  isOrganizationLoggedIn,
+  asyncHandler(searchController.deleteCategoryManualOrder.bind(searchController)),
+);

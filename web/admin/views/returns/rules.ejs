@@ -1,0 +1,221 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-undo me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item">Returns</li>
+            <li class="breadcrumb-item active">Rules</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-check-circle me-2"></i><%= success %>
+      </div>
+      <% } %>
+      <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-exclamation-circle me-2"></i><%= error %>
+      </div>
+      <% } %>
+
+      <!-- Create Return Rule -->
+      <div class="card card-primary">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-plus me-2"></i>Create Return Rule</h3>
+        </div>
+        <form method="POST" action="/hub/returns/rules">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Rule Name</label>
+                <input type="text" class="form-control" name="name" required>
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Scope</label>
+                <select class="form-select" name="scope">
+                  <option value="global" selected>Global</option>
+                  <option value="category">Category</option>
+                  <option value="product">Product</option>
+                </select>
+              </div>
+              <div class="col-md-2 mb-3">
+                <label class="form-label">Priority</label>
+                <input type="number" class="form-control" name="priority" value="0" min="0">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Refund Method</label>
+                <select class="form-select" name="refundMethod">
+                  <option value="original" selected>Original Payment</option>
+                  <option value="storeCredit">Store Credit</option>
+                  <option value="either">Either</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" name="description" rows="2"></textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Return Window (days)</label>
+                <input type="number" class="form-control" name="returnWindowDays" min="0" placeholder="30">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Restocking Fee (%)</label>
+                <input type="number" class="form-control" name="restockingFeePercent" value="0" min="0" max="100" step="0.01">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Restocking Fee (flat)</label>
+                <input type="number" class="form-control" name="restockingFeeFlat" value="0" min="0" step="0.01">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Return Shipping Cost</label>
+                <input type="number" class="form-control" name="returnShippingCost" value="0" min="0" step="0.01">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-3 mb-3">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="customerPaysReturnShipping" value="true">
+                  <label class="form-check-label">Customer pays return shipping</label>
+                </div>
+              </div>
+              <div class="col-md-3 mb-3">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="autoApprove" value="true">
+                  <label class="form-check-label">Auto-approve returns</label>
+                </div>
+              </div>
+              <div class="col-md-3 mb-3">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="requiresManualReview" value="true">
+                  <label class="form-check-label">Requires manual review</label>
+                </div>
+              </div>
+              <div class="col-md-3 mb-3">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="requiresInspection" value="true" checked>
+                  <label class="form-check-label">Requires inspection</label>
+                </div>
+              </div>
+            </div>
+
+            <h5 class="mt-3 mb-2">Conditions (optional)</h5>
+            <p class="text-muted small">Define conditions that must match for this rule to apply.</p>
+            <%- include('../partials/condition-builder', {
+              fieldName: 'conditions',
+              conditions: [],
+              attributes: [
+                { value: 'orderTotal', label: 'Order Total' },
+                { value: 'itemCondition', label: 'Item Condition' },
+                { value: 'returnType', label: 'Return Type' },
+                { value: 'customerOrdersCount', label: 'Customer Order Count' }
+              ]
+            }) %>
+          </div>
+          <div class="card-footer">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i>Create Rule
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Existing Rules -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h3 class="card-title">Existing Return Rules</h3>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-striped table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Scope</th>
+                <th>Window</th>
+                <th>Restocking %</th>
+                <th>Auto-Approve</th>
+                <th>Inspection</th>
+                <th>Refund Method</th>
+                <th>Priority</th>
+                <th width="80">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (!rules || rules.length === 0) { %>
+              <tr><td colspan="9" class="text-center text-muted py-4">No return rules configured.</td></tr>
+              <% } else { %>
+                <% rules.forEach(function(rule) { %>
+                <tr>
+                  <td><%= rule.name || rule.toJSON().name %></td>
+                  <td><span class="badge bg-info"><%= rule.scope || rule.toJSON().scope %></span></td>
+                  <td><%= (rule.returnWindowDays || rule.toJSON().returnWindowDays) || '—' %> days</td>
+                  <td><%= (rule.restockingFeePercent || rule.toJSON().restockingFeePercent) || 0 %>%</td>
+                  <td>
+                    <% if (rule.autoApprove || rule.toJSON().autoApprove) { %>
+                      <i class="fas fa-check text-success"></i>
+                    <% } else { %>
+                      <i class="fas fa-times text-danger"></i>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (rule.requiresInspection || rule.toJSON().requiresInspection) { %>
+                      <i class="fas fa-check text-success"></i>
+                    <% } else { %>
+                      <i class="fas fa-times text-danger"></i>
+                    <% } %>
+                  </td>
+                  <td><%= rule.refundMethod || rule.toJSON().refundMethod %></td>
+                  <td><%= rule.priority || rule.toJSON().priority %></td>
+                  <td>
+                    <button class="btn btn-outline-danger btn-sm" onclick="deleteRule('<%= rule.id || rule.toJSON().returnRuleId %>')">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  async function deleteRule(ruleId) {
+    if (!confirm('Delete this return rule?')) return;
+    try {
+      const resp = await fetch('/hub/returns/rules/' + ruleId, { method: 'DELETE' });
+      const result = await resp.json();
+      if (result.success) {
+        location.reload();
+      } else {
+        alert(result.error || 'Failed to delete rule');
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

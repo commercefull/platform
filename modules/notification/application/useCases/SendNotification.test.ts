@@ -35,16 +35,20 @@ describe('SendNotificationUseCase', () => {
 
     expect(result.status).toBe('sent');
     expect(result.sentAt).toBeDefined();
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      recipientId: 'cust-1',
-      channel: 'email',
-      status: 'pending',
-    }));
-    expect(mockService.send).toHaveBeenCalledWith(expect.objectContaining({
-      channel: 'email',
-      recipientId: 'cust-1',
-      content: 'Welcome!',
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientId: 'cust-1',
+        channel: 'email',
+        status: 'pending',
+      }),
+    );
+    expect(mockService.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        channel: 'email',
+        recipientId: 'cust-1',
+        content: 'Welcome!',
+      }),
+    );
     expect(mockRepo.updateStatus).toHaveBeenCalledWith(expect.any(String), 'sent');
   });
 
@@ -61,9 +65,11 @@ describe('SendNotificationUseCase', () => {
 
     expect(result.status).toBe('queued');
     expect(mockService.send).not.toHaveBeenCalled();
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      status: 'scheduled',
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'scheduled',
+      }),
+    );
   });
 
   it('should return failed status when service throws', async () => {
@@ -122,8 +128,10 @@ describe('SendNotificationUseCase', () => {
       content: 'Test',
     });
 
-    expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      priority: 'normal',
-    }));
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        priority: 'normal',
+      }),
+    );
   });
 });

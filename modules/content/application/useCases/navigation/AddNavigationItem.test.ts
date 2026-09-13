@@ -7,7 +7,9 @@ import { AddNavigationItemUseCase, AddNavigationItemCommand } from './AddNavigat
 import { NavigationMenuNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('AddNavigationItemUseCase', () => {
   let useCase: AddNavigationItemUseCase;
@@ -19,9 +21,16 @@ describe('AddNavigationItemUseCase', () => {
       findNavigationById: jest.fn().mockResolvedValue({ contentNavigationId: 'n1' }),
       findNavigationItemById: jest.fn().mockResolvedValue(null),
       createNavigationItem: jest.fn().mockResolvedValue({
-        contentNavigationItemId: 'ni1', navigationId: 'n1', parentId: null,
-        title: 'Home', type: 'url', url: '/', contentPageId: null,
-        isActive: true, sortOrder: 0, depth: 0,
+        contentNavigationItemId: 'ni1',
+        navigationId: 'n1',
+        parentId: null,
+        title: 'Home',
+        type: 'url',
+        url: '/',
+        contentPageId: null,
+        isActive: true,
+        sortOrder: 0,
+        depth: 0,
       }),
     };
     mockContentRepo = { findPageById: jest.fn().mockResolvedValue(null) };
@@ -43,7 +52,9 @@ describe('AddNavigationItemUseCase', () => {
   it('should throw NavigationMenuNotFoundError when navigation does not exist', async () => {
     mockNavRepo.findNavigationById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new AddNavigationItemCommand('missing', 'Home', 'url', undefined, '/'))).rejects.toThrow(NavigationMenuNotFoundError);
+    await expect(useCase.execute(new AddNavigationItemCommand('missing', 'Home', 'url', undefined, '/'))).rejects.toThrow(
+      NavigationMenuNotFoundError,
+    );
   });
 
   it('should throw ContentValidationError when URL type has no url', async () => {
@@ -53,9 +64,16 @@ describe('AddNavigationItemUseCase', () => {
   it('should set depth based on parent item', async () => {
     mockNavRepo.findNavigationItemById.mockResolvedValue({ contentNavigationItemId: 'parent', depth: 1 });
     mockNavRepo.createNavigationItem.mockResolvedValue({
-      contentNavigationItemId: 'ni2', navigationId: 'n1', parentId: 'parent',
-      title: 'Sub', type: 'url', url: '/sub', contentPageId: null,
-      isActive: true, sortOrder: 0, depth: 2,
+      contentNavigationItemId: 'ni2',
+      navigationId: 'n1',
+      parentId: 'parent',
+      title: 'Sub',
+      type: 'url',
+      url: '/sub',
+      contentPageId: null,
+      isActive: true,
+      sortOrder: 0,
+      depth: 2,
     });
 
     const result = await useCase.execute(new AddNavigationItemCommand('n1', 'Sub', 'url', 'parent', '/sub'));

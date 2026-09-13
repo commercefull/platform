@@ -1,9 +1,23 @@
-
 // Tax Types
 export type TaxCalculationMethod = 'unit_based' | 'row_based' | 'total_based';
 export type TaxRateType = 'percentage' | 'fixed';
-export type TaxExemptionStatus = 'pending' | 'active' | 'expired' | 'revoked' | 'rejected';
-export type TaxExemptionType = 'business' | 'government' | 'nonprofit' | 'educational' | 'reseller' | 'diplomatic' | 'other';
+export type TaxExemptionStatus = 'pending' | 'approved' | 'active' | 'expired' | 'revoked' | 'rejected';
+export type TaxExemptionType =
+  | 'business'
+  | 'individual'
+  | 'government'
+  | 'nonprofit'
+  | 'educational'
+  | 'reseller'
+  | 'diplomatic'
+  | 'other'
+  // Rule-engine parity types (Epic B)
+  | 'resale'
+  | 'vatReverseCharge'
+  | 'agricultural'
+  | 'manufacturing'
+  | 'medical'
+  | 'export';
 
 export type TaxZone = {
   id: string;
@@ -75,6 +89,11 @@ export type CustomerTaxExemption = {
   verifiedAt?: number;
   notes?: string;
   metadata?: unknown;
+  // Epic B — exemption scope (category-aware, amount-bounded, partial)
+  applicableTaxCategoryIds?: string[] | null;
+  minOrderAmount?: number | null;
+  maxOrderAmount?: number | null;
+  exemptionPercent?: number;
   createdAt: number;
   updatedAt: number;
 };
@@ -135,3 +154,13 @@ export type AddressInput = {
   city?: string;
   postalCode?: string;
 };
+
+// Epic B — Exemption evaluation verdict
+export type ExemptionVerdict = 'exempt' | 'notExempt' | 'partiallyExempt' | 'pending';
+
+// Epic B — Context for evaluating an exemption against a line item
+export interface ExemptionEvaluationContext {
+  taxCategoryId?: string;
+  orderSubtotal: number;
+  now?: Date;
+}

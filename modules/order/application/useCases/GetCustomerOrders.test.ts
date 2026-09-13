@@ -69,18 +69,14 @@ describe('GetCustomerOrdersUseCase', () => {
     const repo = createMockOrderRepo();
     const useCase = new GetCustomerOrdersUseCase(repo);
 
-    await expect(
-      useCase.execute(new GetCustomerOrdersCommand('')),
-    ).rejects.toThrow(CustomerIdRequiredError);
+    await expect(useCase.execute(new GetCustomerOrdersCommand(''))).rejects.toThrow(CustomerIdRequiredError);
   });
 
   it('should pass pagination parameters to repository', async () => {
     const repo = createMockOrderRepo();
     const useCase = new GetCustomerOrdersUseCase(repo);
 
-    await useCase.execute(
-      new GetCustomerOrdersCommand('cust-1', 10, 20, 'status', 'asc'),
-    );
+    await useCase.execute(new GetCustomerOrdersCommand('cust-1', 10, 20, 'status', 'asc'));
 
     expect(repo.findByCustomerId).toHaveBeenCalledWith(
       'cust-1',

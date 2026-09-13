@@ -1,4 +1,4 @@
-import { ListMediaUseCase} from './ListMedia';
+import { ListMediaUseCase } from './ListMedia';
 
 describe('ListMediaUseCase', () => {
   let useCase: ListMediaUseCase;
@@ -7,8 +7,24 @@ describe('ListMediaUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findAll: jest.fn().mockResolvedValue([
-        { mediaId: 'm1', fileName: 'image1.jpg', mimeType: 'image/jpeg', fileSize: 1024, url: '/img1.jpg', mediaType: 'image', createdAt: new Date() },
-        { mediaId: 'm2', fileName: 'doc1.pdf', mimeType: 'application/pdf', fileSize: 2048, url: '/doc1.pdf', mediaType: 'document', createdAt: new Date() },
+        {
+          mediaId: 'm1',
+          fileName: 'image1.jpg',
+          mimeType: 'image/jpeg',
+          fileSize: 1024,
+          url: '/img1.jpg',
+          mediaType: 'image',
+          createdAt: new Date(),
+        },
+        {
+          mediaId: 'm2',
+          fileName: 'doc1.pdf',
+          mimeType: 'application/pdf',
+          fileSize: 2048,
+          url: '/doc1.pdf',
+          mediaType: 'document',
+          createdAt: new Date(),
+        },
       ]),
       count: jest.fn().mockResolvedValue(2),
     };
@@ -35,9 +51,6 @@ describe('ListMediaUseCase', () => {
   it('should use custom pagination', async () => {
     await useCase.execute({ page: 2, limit: 10 });
 
-    expect(mockRepo.findAll).toHaveBeenCalledWith(
-      expect.any(Object),
-      expect.objectContaining({ page: 2, limit: 10 }),
-    );
+    expect(mockRepo.findAll).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ page: 2, limit: 10 }));
   });
 });

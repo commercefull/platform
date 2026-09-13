@@ -59,31 +59,57 @@ export class Brand {
   }
 
   private static generateSlug(name: string): string {
-    return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
-  get brandId(): string { return this.props.brandId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get name(): string { return this.props.name; }
-  get slug(): string { return this.props.slug; }
-  get description(): string | undefined { return this.props.description; }
-  get logoUrl(): string | undefined { return this.props.logoUrl; }
-  get website(): string | undefined { return this.props.website; }
-  get countryOfOrigin(): string | undefined { return this.props.countryOfOrigin; }
-  get status(): BrandStatus { return this.props.status; }
-  get metadata(): Record<string, unknown> | undefined { return this.props.metadata; }
-  get externalId(): string | undefined { return this.props.externalId; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
-  get deletedAt(): Date | undefined { return this.props.deletedAt; }
+  get brandId(): string {
+    return this.props.brandId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get slug(): string {
+    return this.props.slug;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get logoUrl(): string | undefined {
+    return this.props.logoUrl;
+  }
+  get website(): string | undefined {
+    return this.props.website;
+  }
+  get countryOfOrigin(): string | undefined {
+    return this.props.countryOfOrigin;
+  }
+  get status(): BrandStatus {
+    return this.props.status;
+  }
+  get metadata(): Record<string, unknown> | undefined {
+    return this.props.metadata;
+  }
+  get externalId(): string | undefined {
+    return this.props.externalId;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+  get deletedAt(): Date | undefined {
+    return this.props.deletedAt;
+  }
 
-  updateProfile(updates: {
-    name?: string;
-    description?: string;
-    logoUrl?: string;
-    website?: string;
-    countryOfOrigin?: string;
-  }): void {
+  updateProfile(updates: { name?: string; description?: string; logoUrl?: string; website?: string; countryOfOrigin?: string }): void {
     if (updates.name !== undefined) this.props.name = updates.name;
     if (updates.description !== undefined) this.props.description = updates.description;
     if (updates.logoUrl !== undefined) this.props.logoUrl = updates.logoUrl;

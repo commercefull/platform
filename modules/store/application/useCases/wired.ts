@@ -11,7 +11,11 @@ import systemConfigurationRepo from '../../../configuration/infrastructure/repos
 
 export const listStoresUseCase = new ListStoresUseCase(storeRepo);
 export const getStoreUseCase = new GetStoreUseCase(storeRepo);
-export const createStoreUseCase = new CreateStoreUseCase(storeRepo, new SystemConfigAdapter(systemConfigurationRepo), new OrganizationLookupAdapter());
+export const createStoreUseCase = new CreateStoreUseCase(
+  storeRepo,
+  new SystemConfigAdapter(systemConfigurationRepo),
+  new OrganizationLookupAdapter(),
+);
 export const updateStoreUseCase = new UpdateStoreUseCase(storeRepo);
 export const organizationLookupAdapter = new OrganizationLookupAdapter();
 

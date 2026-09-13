@@ -85,9 +85,7 @@ describe('PCI-DSS Tokenisation-Only Assertions', () => {
       };
 
       const keys = Object.keys(sampleRequest);
-      const violations = keys.filter(key =>
-        FORBIDDEN_CARD_FIELDS.some(f => key.toLowerCase() === f.toLowerCase()),
-      );
+      const violations = keys.filter(key => FORBIDDEN_CARD_FIELDS.some(f => key.toLowerCase() === f.toLowerCase()));
 
       expect(violations).toEqual([]);
     });
@@ -117,9 +115,7 @@ describe('PCI-DSS Tokenisation-Only Assertions', () => {
 
       const details = props.paymentMethodDetails as Record<string, unknown>;
       const keys = Object.keys(details);
-      const violations = keys.filter(key =>
-        FORBIDDEN_CARD_FIELDS.some(f => key.toLowerCase() === f.toLowerCase()),
-      );
+      const violations = keys.filter(key => FORBIDDEN_CARD_FIELDS.some(f => key.toLowerCase() === f.toLowerCase()));
 
       expect(violations).toEqual([]);
       expect(details.last4).toBe('4242');
@@ -169,9 +165,7 @@ describe('PCI-DSS Tokenisation-Only Assertions', () => {
       };
 
       const keys = Object.keys(sample);
-      const violations = keys.filter(key =>
-        FORBIDDEN_CARD_FIELDS.some(f => key.toLowerCase() === f.toLowerCase()),
-      );
+      const violations = keys.filter(key => FORBIDDEN_CARD_FIELDS.some(f => key.toLowerCase() === f.toLowerCase()));
 
       expect(violations).toEqual([]);
     });

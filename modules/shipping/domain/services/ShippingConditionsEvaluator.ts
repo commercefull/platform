@@ -51,10 +51,7 @@ function matchGlob(pattern: string, value: string): boolean {
   return regex.test(value);
 }
 
-export function evaluateConditions(
-  conditions: unknown,
-  ctx: ShippingConditionContext,
-): ShippingConditionsResult {
+export function evaluateConditions(conditions: unknown, ctx: ShippingConditionContext): ShippingConditionsResult {
   if (!conditions || typeof conditions !== 'object') {
     return { applicable: true, adjustment: 0 };
   }

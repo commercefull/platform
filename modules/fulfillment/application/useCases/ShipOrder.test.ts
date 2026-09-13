@@ -69,9 +69,7 @@ describe('ShipOrderUseCase', () => {
   it('should throw FulfillmentNotFoundError when not found', async () => {
     mockRepo.findById.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute({ fulfillmentId: 'ful-x', trackingNumber: 'TRK-1' }),
-    ).rejects.toThrow(FulfillmentNotFoundError);
+    await expect(useCase.execute({ fulfillmentId: 'ful-x', trackingNumber: 'TRK-1' })).rejects.toThrow(FulfillmentNotFoundError);
   });
 
   it('should emit fulfillment.shipped event', async () => {
@@ -84,13 +82,15 @@ describe('ShipOrderUseCase', () => {
       carrierName: 'FedEx',
     });
 
-    expect(emitFulfillmentShipped).toHaveBeenCalledWith(expect.objectContaining({
-      fulfillmentId: 'ful-1',
-      orderId: 'ord-1',
-      trackingNumber: 'TRK-123',
-      trackingUrl: 'https://track.example.com/TRK-123',
-      carrierName: 'FedEx',
-    }));
+    expect(emitFulfillmentShipped).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fulfillmentId: 'ful-1',
+        orderId: 'ord-1',
+        trackingNumber: 'TRK-123',
+        trackingUrl: 'https://track.example.com/TRK-123',
+        carrierName: 'FedEx',
+      }),
+    );
   });
 
   it('should save the fulfillment after shipping', async () => {

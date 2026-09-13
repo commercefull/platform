@@ -50,7 +50,7 @@ export class GetFeatureFlagsUseCase {
     });
 
     return {
-      flags: flags.map((f) => ({
+      flags: flags.map(f => ({
         key: f.key,
         name: f.name,
         description: f.description,

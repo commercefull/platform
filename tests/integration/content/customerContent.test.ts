@@ -1,9 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import {
-  TEST_CONTENT_TYPE_ID,
-  TEST_CONTENT_TEMPLATE_ID,
-  ADMIN_CREDENTIALS,
-} from '../testConstants';
+import { TEST_CONTENT_TYPE_ID, TEST_CONTENT_TEMPLATE_ID, ADMIN_CREDENTIALS } from '../testConstants';
 
 const createClient = () =>
   axios.create({
@@ -58,11 +54,7 @@ describe('Content Customer API', () => {
       createdPageSlug = response.data.data.slug || slug;
 
       // Ensure it's published
-      await client.post(
-        `/business/content/pages/${createdPageId}/publish`,
-        {},
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
+      await client.post(`/business/content/pages/${createdPageId}/publish`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
     }
   });
 

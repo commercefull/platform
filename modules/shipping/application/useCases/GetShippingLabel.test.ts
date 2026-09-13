@@ -2,10 +2,14 @@ jest.mock('../../infrastructure/repositories/ShippingLabelAggregateRepository', 
   __esModule: true,
   default: {
     findById: jest.fn().mockResolvedValue({
-      shippingLabelId: 'l1', trackingNumber: 'TRK123', shippingCarrierId: 'c1',
+      shippingLabelId: 'l1',
+      trackingNumber: 'TRK123',
+      shippingCarrierId: 'c1',
     }),
     findByTrackingNumber: jest.fn().mockResolvedValue({
-      shippingLabelId: 'l1', trackingNumber: 'TRK123', shippingCarrierId: 'c1',
+      shippingLabelId: 'l1',
+      trackingNumber: 'TRK123',
+      shippingCarrierId: 'c1',
     }),
   },
 }));

@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { ProcessPointsExpirationUseCase} from './ProcessPointsExpiration';
+import { ProcessPointsExpirationUseCase } from './ProcessPointsExpiration';
 
 describe('ProcessPointsExpirationUseCase', () => {
   let useCase: ProcessPointsExpirationUseCase;

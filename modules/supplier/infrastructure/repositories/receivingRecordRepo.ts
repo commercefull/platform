@@ -11,7 +11,6 @@ import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierE
 // Table Constants
 // ============================================================================
 
-
 // ============================================================================
 // Types
 // ============================================================================
@@ -101,10 +100,8 @@ export class SupplierReceivingRecordRepo {
 
   async findAll(limit = 100): Promise<SupplierReceivingRecord[]> {
     return (
-      (await query<SupplierReceivingRecord[]>(
-        `SELECT * FROM "supplierReceivingRecord" ORDER BY "receivedDate" DESC LIMIT $1`,
-        [limit],
-      )) || []
+      (await query<SupplierReceivingRecord[]>(`SELECT * FROM "supplierReceivingRecord" ORDER BY "receivedDate" DESC LIMIT $1`, [limit])) ||
+      []
     );
   }
 
@@ -172,7 +169,7 @@ export class SupplierReceivingRecordRepo {
   }
 
   async complete(id: string): Promise<SupplierReceivingRecord | null> {
-    return this.update(id, { status: 'completed', completedAt: unixTimestamp() });
+    return this.update(id, { status: 'completed', completedAt: String(unixTimestamp()) });
   }
 
   async cancel(id: string): Promise<SupplierReceivingRecord | null> {

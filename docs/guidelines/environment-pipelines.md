@@ -4,11 +4,11 @@
 
 ## Environments
 
-| Environment   | `NODE_ENV`     | Purpose                          | DB                      | Seeds                 |
-| ------------- | -------------- | -------------------------------- | ----------------------- | --------------------- |
-| **development** | `development`  | Local dev, hot reload            | `commercefull_dev`      | All seeds             |
-| **staging**     | `staging`      | Pre-prod validation, UAT         | `commercefull_staging`  | Reference data only   |
-| **production**  | `production`   | Live customer traffic            | `commercefull_prod`     | No seeds (manual)     |
+| Environment     | `NODE_ENV`    | Purpose                  | DB                     | Seeds               |
+| --------------- | ------------- | ------------------------ | ---------------------- | ------------------- |
+| **development** | `development` | Local dev, hot reload    | `commercefull_dev`     | All seeds           |
+| **staging**     | `staging`     | Pre-prod validation, UAT | `commercefull_staging` | Reference data only |
+| **production**  | `production`  | Live customer traffic    | `commercefull_prod`    | No seeds (manual)   |
 
 ## Promotion Strategy
 
@@ -23,6 +23,7 @@ Promotion is **artifact-based**, not source-based. The same build artifact (Dock
 ### Step-by-step promotion
 
 1. **Build artifact** (once, in CI):
+
    ```bash
    yarn prd:build          # produces app.mjs
    docker build -t commercefull:$VERSION .
@@ -30,6 +31,7 @@ Promotion is **artifact-based**, not source-based. The same build artifact (Dock
    ```
 
 2. **Deploy to staging**:
+
    ```bash
    # Run migrations (forward-only)
    knex migrate:latest --env staging
@@ -46,6 +48,7 @@ Promotion is **artifact-based**, not source-based. The same build artifact (Dock
    ```
 
 3. **Smoke test staging**:
+
    ```bash
    curl https://staging.yourdomain.com/health
    yarn db:migrate:validate
@@ -54,6 +57,7 @@ Promotion is **artifact-based**, not source-based. The same build artifact (Dock
    ```
 
 4. **Promote to production** (same artifact):
+
    ```bash
    # Run migrations (forward-only)
    knex migrate:latest --env production
@@ -80,11 +84,11 @@ Promotion is **artifact-based**, not source-based. The same build artifact (Dock
 
 ### Three seed categories
 
-| Category          | Description                          | Runs in dev | Runs in staging | Runs in prod |
-| ----------------- | ------------------------------------ |:-----------:|:---------------:|:------------:|
-| **Reference data** | Currencies, countries, locales, tax categories, notification templates, default roles | ✅ | ✅ | ❌ (pre-seeded manually) |
-| **Sample data**   | Test users, sample products, sample orders | ✅ | ❌ | ❌ |
-| **Test data**     | Integration test fixtures            | ✅ | ❌ | ❌ |
+| Category           | Description                                                                           | Runs in dev | Runs in staging |       Runs in prod       |
+| ------------------ | ------------------------------------------------------------------------------------- | :---------: | :-------------: | :----------------------: |
+| **Reference data** | Currencies, countries, locales, tax categories, notification templates, default roles |     ✅      |       ✅        | ❌ (pre-seeded manually) |
+| **Sample data**    | Test users, sample products, sample orders                                            |     ✅      |       ❌        |            ❌            |
+| **Test data**      | Integration test fixtures                                                             |     ✅      |       ❌        |            ❌            |
 
 ### How it works
 
@@ -117,6 +121,7 @@ These seeds populate lookup tables that the application depends on:
 ### Production seeding
 
 Production should **never** run `knex seed:run`. Reference data is inserted via:
+
 1. A one-time manual SQL script after the first deployment.
 2. A migration that inserts reference data (for new tables only).
 3. The admin UI (for roles, notification templates, etc.).
@@ -144,17 +149,17 @@ The `infra/ecs-aws/` directory contains AWS CDK infrastructure that achieves fea
 
 ### Parity matrix
 
-| Feature                | Ansible VPS | Docker GCP | Docker Azure | ECS AWS |
-| ---------------------- |:-----------:|:----------:|:------------:|:-------:|
-| SSL/TLS termination    | ✅ Nginx    | ✅ Cloud LB | ✅ Front Door | ✅ ALB  |
-| Auto-scaling           | ❌          | ✅ Cloud Run | ✅ Container Apps | ✅ Fargate |
-| Managed PostgreSQL     | ❌          | ✅ Cloud SQL | ✅ Azure DB | ✅ RDS  |
-| Media file storage     | Local FS    | ✅ Cloud Storage | ✅ Blob Storage | ✅ S3 |
-| Secrets management     | .env file   | Secret Manager | Key Vault | SSM Parameter Store |
-| Multi-AZ               | ❌          | ✅          | ✅           | ✅      |
-| CDN                    | ❌          | ✅ Cloud CDN | ✅ Azure CDN | ✅ CloudFront |
-| Health checks          | ✅          | ✅          | ✅           | ✅ ALB  |
-| Log aggregation        | File + journald | Cloud Logging | App Insights | CloudWatch |
+| Feature             |   Ansible VPS   |    Docker GCP    |   Docker Azure    |       ECS AWS       |
+| ------------------- | :-------------: | :--------------: | :---------------: | :-----------------: |
+| SSL/TLS termination |    ✅ Nginx     |   ✅ Cloud LB    |   ✅ Front Door   |       ✅ ALB        |
+| Auto-scaling        |       ❌        |   ✅ Cloud Run   | ✅ Container Apps |     ✅ Fargate      |
+| Managed PostgreSQL  |       ❌        |   ✅ Cloud SQL   |    ✅ Azure DB    |       ✅ RDS        |
+| Media file storage  |    Local FS     | ✅ Cloud Storage |  ✅ Blob Storage  |        ✅ S3        |
+| Secrets management  |    .env file    |  Secret Manager  |     Key Vault     | SSM Parameter Store |
+| Multi-AZ            |       ❌        |        ✅        |        ✅         |         ✅          |
+| CDN                 |       ❌        |   ✅ Cloud CDN   |   ✅ Azure CDN    |    ✅ CloudFront    |
+| Health checks       |       ✅        |        ✅        |        ✅         |       ✅ ALB        |
+| Log aggregation     | File + journald |  Cloud Logging   |   App Insights    |     CloudWatch      |
 
 ### AWS-specific configuration
 

@@ -18,7 +18,6 @@ export const getTaxRate = async (req: TypedRequest, res: Response) => {
   }
 
   res.json({ success: true, data: taxRate });
-  
 };
 
 export const getAllTaxRates = async (req: TypedRequest, res: Response) => {
@@ -37,7 +36,6 @@ export const getAllTaxRates = async (req: TypedRequest, res: Response) => {
   const taxRates = await taxQueryRepository.query.findAllTaxRates(statusFilter, country as string, region as string, limitNum, offsetNum);
 
   res.json({ success: true, data: taxRates });
-  
 };
 
 export const createTaxRate = async (req: TypedRequest, res: Response) => {
@@ -56,7 +54,20 @@ export const createTaxRate = async (req: TypedRequest, res: Response) => {
     startDate?: number;
   };
 
-  const { name, description, rate, taxCategoryId, taxZoneId, priority, isActive, type, isCompound, includeInPrice, isShippingTaxable, startDate } = body;
+  const {
+    name,
+    description,
+    rate,
+    taxCategoryId,
+    taxZoneId,
+    priority,
+    isActive,
+    type,
+    isCompound,
+    includeInPrice,
+    isShippingTaxable,
+    startDate,
+  } = body;
 
   if (!name || rate === undefined || !taxCategoryId || !taxZoneId) {
     return res.status(400).json({
@@ -83,7 +94,6 @@ export const createTaxRate = async (req: TypedRequest, res: Response) => {
   const createdTaxRate = await taxCommandRepository.commands.createTaxRate(newTaxRate);
 
   res.status(201).json({ success: true, data: createdTaxRate });
-  
 };
 
 export const updateTaxRate = async (req: TypedRequest, res: Response) => {
@@ -118,7 +128,6 @@ export const updateTaxRate = async (req: TypedRequest, res: Response) => {
   const result = await taxCommandRepository.commands.updateTaxRate(id, updatedTaxRate);
 
   res.json({ success: true, data: result });
-  
 };
 
 export const deleteTaxRate = async (req: TypedRequest, res: Response) => {
@@ -133,7 +142,6 @@ export const deleteTaxRate = async (req: TypedRequest, res: Response) => {
   await taxCommandRepository.commands.deleteTaxRate(id);
 
   res.json({ success: true, message: 'Tax rate deleted successfully' });
-  
 };
 
 // Tax Category Methods
@@ -151,7 +159,6 @@ export const getAllTaxCategories = async (req: TypedRequest, res: Response) => {
   const taxCategories = await taxQueryRepository.query.findAllTaxCategories(isActive);
 
   res.json({ success: true, data: taxCategories });
-  
 };
 
 export const getTaxCategory = async (req: TypedRequest, res: Response) => {
@@ -163,7 +170,6 @@ export const getTaxCategory = async (req: TypedRequest, res: Response) => {
   }
 
   res.json({ success: true, data: taxCategory });
-  
 };
 
 export const createTaxCategory = async (req: TypedRequest, res: Response) => {
@@ -193,7 +199,6 @@ export const createTaxCategory = async (req: TypedRequest, res: Response) => {
   const createdCategory = await taxCommandRepository.commands.createTaxCategory(newTaxCategory);
 
   res.status(201).json({ success: true, data: createdCategory });
-  
 };
 
 export const updateTaxCategory = async (req: TypedRequest, res: Response) => {
@@ -226,7 +231,6 @@ export const updateTaxCategory = async (req: TypedRequest, res: Response) => {
   const result = await taxCommandRepository.commands.updateTaxCategory(id, updatedCategory);
 
   res.json({ success: true, data: result });
-  
 };
 
 export const deleteTaxCategory = async (req: TypedRequest, res: Response) => {
@@ -241,7 +245,6 @@ export const deleteTaxCategory = async (req: TypedRequest, res: Response) => {
   await taxCommandRepository.commands.deleteTaxCategory(id);
 
   res.json({ success: true, message: 'Tax category deleted successfully' });
-  
 };
 
 // Tax Zone Methods
@@ -260,7 +263,6 @@ export const getAllTaxZones = async (req: TypedRequest, res: Response) => {
   const taxZones = await taxQueryRepository.query.findAllTaxZones(statusFilter, limitNum, offsetNum);
 
   res.json({ success: true, data: taxZones });
-  
 };
 
 export const getTaxZoneById = async (req: TypedRequest, res: Response) => {
@@ -277,7 +279,6 @@ export const getTaxZoneById = async (req: TypedRequest, res: Response) => {
   }
 
   res.json({ success: true, data: taxZone });
-  
 };
 
 export const createTaxZone = async (req: TypedRequest, res: Response) => {
@@ -313,7 +314,6 @@ export const createTaxZone = async (req: TypedRequest, res: Response) => {
   const createdTaxZone = await taxCommandRepository.commands.createTaxZone(newTaxZone);
 
   res.status(201).json({ success: true, data: createdTaxZone });
-  
 };
 
 export const updateTaxZone = async (req: TypedRequest, res: Response) => {
@@ -357,7 +357,6 @@ export const updateTaxZone = async (req: TypedRequest, res: Response) => {
   const result = await taxCommandRepository.commands.updateTaxZone(id, updatedTaxZone);
 
   res.json({ success: true, data: result });
-  
 };
 
 export const deleteTaxZone = async (req: TypedRequest, res: Response) => {
@@ -372,5 +371,4 @@ export const deleteTaxZone = async (req: TypedRequest, res: Response) => {
   await taxCommandRepository.commands.deleteTaxZone(id);
 
   res.json({ success: true, message: 'Tax zone deleted successfully' });
-  
 };

@@ -110,7 +110,6 @@ function mapBasketToResponse(basket: Basket): BasketResponse {
     createdAt: basket.createdAt.toISOString(),
     updatedAt: basket.updatedAt.toISOString(),
   };
-
 }
 
 // Admin override: apply a coupon without strict customer validations
@@ -144,7 +143,6 @@ export const applyCouponAdmin = async (req: TypedRequest, res: Response): Promis
   await BasketRepo.save(basket);
 
   respond(req, res, basket.toJSON(), 200);
-  
 };
 
 export const listBaskets = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -156,7 +154,6 @@ export const listBaskets = async (req: TypedRequest, res: Response): Promise<voi
     [limit, offset],
   );
   respond(req, res, { items: rows || [], count: (rows || []).length }, 200);
-  
 };
 
 function mapBasketToSummary(basket: Basket): { basketId: string; itemCount: number; subtotal: number; currency: string } {
@@ -204,7 +201,6 @@ export const getOrCreateBasket = async (req: TypedRequest, res: Response): Promi
   const basket = await useCase.execute(command);
 
   respond(req, res, basket, 200);
-  
 };
 
 /**
@@ -222,7 +218,6 @@ export const getBasket = async (req: TypedRequest, res: Response): Promise<void>
   }
 
   respond(req, res, mapBasketToResponse(basket), 200);
-  
 };
 
 /**
@@ -240,7 +235,6 @@ export const getBasketSummary = async (req: TypedRequest, res: Response): Promis
   }
 
   respond(req, res, mapBasketToSummary(basket), 200);
-  
 };
 
 /**
@@ -285,7 +279,6 @@ export const addItem = async (req: TypedRequest, res: Response): Promise<void> =
   const basket = await useCase.execute(command);
 
   respond(req, res, basket, 201);
-  
 };
 
 /**
@@ -307,7 +300,6 @@ export const updateItemQuantity = async (req: TypedRequest, res: Response): Prom
   const basket = await useCase.execute(command);
 
   respond(req, res, basket, 200);
-  
 };
 
 /**
@@ -356,7 +348,6 @@ export const getMyBasket = async (req: TypedRequest, res: Response): Promise<voi
   const basket = await useCase.execute(command);
 
   respond(req, res, basket, 200);
-  
 };
 
 /**
@@ -448,7 +439,6 @@ export const deleteBasket = async (req: TypedRequest, res: Response): Promise<vo
   await BasketRepo.delete(basketId);
 
   respond(req, res, { message: 'Basket deleted successfully' }, 200);
-  
 };
 
 // ============================================================================
@@ -480,5 +470,4 @@ export const removeCoupon = async (req: TypedRequest, res: Response): Promise<vo
   const basket = await useCase.execute(command);
 
   respond(req, res, basket, 200);
-  
 };

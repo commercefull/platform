@@ -4,7 +4,7 @@
  */
 
 export async function up(knex) {
-  await knex.schema.createTable('checkoutConfig', (table) => {
+  await knex.schema.createTable('checkoutConfig', table => {
     table.string('configId').primary();
     table.string('storeId').notNullable().index();
     table.string('organizationId').notNullable().index();

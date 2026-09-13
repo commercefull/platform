@@ -3,11 +3,13 @@ jest.mock('../../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { LogoutCustomerUseCase} from './LogoutCustomer';
+import { LogoutCustomerUseCase } from './LogoutCustomer';
 import { CustomerIdAndTokenRequiredError } from '../../../domain/errors/IdentityErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('LogoutCustomerUseCase', () => {
   let useCase: LogoutCustomerUseCase;

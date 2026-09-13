@@ -18,10 +18,7 @@ export async function findPaginated<T>(
   const orderBy = pagination?.orderBy || 'createdAt';
   const orderDir = (pagination?.orderDirection || 'desc').toUpperCase();
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "${table}" ${whereClause}`,
-    params,
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "${table}" ${whereClause}`, params);
   const total = parseInt(countResult?.count || '0', 10);
 
   const rows = await query<T[]>(
@@ -37,9 +34,6 @@ export async function findPaginated<T>(
  * Execute a COUNT query using a pre-built WHERE clause.
  */
 export async function countRows(table: string, whereClause: string, params: unknown[]): Promise<number> {
-  const result = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "${table}" ${whereClause}`,
-    params,
-  );
+  const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "${table}" ${whereClause}`, params);
   return parseInt(result?.count || '0', 10);
 }

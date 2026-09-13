@@ -71,8 +71,12 @@ export class MyEntity {
   }
 
   // Getters only — mutations go through domain methods
-  get myEntityId(): string { return this.props.myEntityId; }
-  get name(): string { return this.props.name; }
+  get myEntityId(): string {
+    return this.props.myEntityId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
 
   private touch(): void {
     this.props.updatedAt = new Date();
@@ -142,10 +146,7 @@ import { MyEntityRepository } from '../../domain/repositories/MyEntityRepository
 
 export class MyEntityRepositoryImpl implements MyEntityRepository {
   async findById(id: string): Promise<MyEntity | null> {
-    const row = await queryOne<MyEntityProps>(
-      `SELECT * FROM "myEntity" WHERE "myEntityId" = $1 AND "deletedAt" IS NULL`,
-      [id],
-    );
+    const row = await queryOne<MyEntityProps>(`SELECT * FROM "myEntity" WHERE "myEntityId" = $1 AND "deletedAt" IS NULL`, [id]);
     return row ? MyEntity.reconstitute(row) : null;
   }
 
@@ -297,7 +298,7 @@ If your module emits or consumes events, register handlers in `libs/events/regis
 
 ```typescript
 if (moduleRegistry.shouldRegisterEvents('myModule')) {
-  registerHandler('mymodule.created', async (data) => {
+  registerHandler('mymodule.created', async data => {
     // React to event
   });
 }
@@ -350,6 +351,7 @@ tests/integration/<moduleName>/<moduleName>.test.ts
 ```
 
 Follow the pattern in [Testing Standards](#/guidelines/testing). Include:
+
 - CRUD operations
 - Lifecycle transitions
 - Listing and retrieval

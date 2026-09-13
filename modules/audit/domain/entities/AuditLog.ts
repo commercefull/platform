@@ -105,24 +105,60 @@ export class AuditLog {
     return new AuditLog(props);
   }
 
-  get auditLogId(): string { return this.props.auditLogId; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get actorId(): string { return this.props.actorId; }
-  get actorType(): ActorType { return this.props.actorType; }
-  get actorEmail(): string | undefined { return this.props.actorEmail; }
-  get actorName(): string | undefined { return this.props.actorName; }
-  get action(): AuditAction { return this.props.action; }
-  get resourceType(): ResourceType { return this.props.resourceType; }
-  get resourceId(): string | undefined { return this.props.resourceId; }
-  get resourceName(): string | undefined { return this.props.resourceName; }
-  get ipAddress(): string | undefined { return this.props.ipAddress; }
-  get userAgent(): string | undefined { return this.props.userAgent; }
-  get correlationId(): string | undefined { return this.props.correlationId; }
-  get organizationId(): string | undefined { return this.props.organizationId; }
-  get storeId(): string | undefined { return this.props.storeId; }
-  get metadata(): Record<string, unknown> | undefined { return this.props.metadata; }
-  get previousHash(): string { return this.props.previousHash; }
-  get hash(): string { return this.props.hash; }
+  get auditLogId(): string {
+    return this.props.auditLogId;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get actorId(): string {
+    return this.props.actorId;
+  }
+  get actorType(): ActorType {
+    return this.props.actorType;
+  }
+  get actorEmail(): string | undefined {
+    return this.props.actorEmail;
+  }
+  get actorName(): string | undefined {
+    return this.props.actorName;
+  }
+  get action(): AuditAction {
+    return this.props.action;
+  }
+  get resourceType(): ResourceType {
+    return this.props.resourceType;
+  }
+  get resourceId(): string | undefined {
+    return this.props.resourceId;
+  }
+  get resourceName(): string | undefined {
+    return this.props.resourceName;
+  }
+  get ipAddress(): string | undefined {
+    return this.props.ipAddress;
+  }
+  get userAgent(): string | undefined {
+    return this.props.userAgent;
+  }
+  get correlationId(): string | undefined {
+    return this.props.correlationId;
+  }
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
+  }
+  get storeId(): string | undefined {
+    return this.props.storeId;
+  }
+  get metadata(): Record<string, unknown> | undefined {
+    return this.props.metadata;
+  }
+  get previousHash(): string {
+    return this.props.previousHash;
+  }
+  get hash(): string {
+    return this.props.hash;
+  }
 
   /**
    * Verify that this record's hash is valid given its content and previousHash.
@@ -161,17 +197,20 @@ function computeHash(data: {
   previousHash: string;
   metadata?: Record<string, unknown>;
 }): string {
-  const canonical = JSON.stringify({
-    auditLogId: data.auditLogId,
-    createdAt: data.createdAt,
-    actorId: data.actorId,
-    actorType: data.actorType,
-    action: data.action,
-    resourceType: data.resourceType,
-    resourceId: data.resourceId ?? null,
-    previousHash: data.previousHash,
-    metadata: data.metadata ?? null,
-  }, Object.keys(data).sort());
+  const canonical = JSON.stringify(
+    {
+      auditLogId: data.auditLogId,
+      createdAt: data.createdAt,
+      actorId: data.actorId,
+      actorType: data.actorType,
+      action: data.action,
+      resourceType: data.resourceType,
+      resourceId: data.resourceId ?? null,
+      previousHash: data.previousHash,
+      metadata: data.metadata ?? null,
+    },
+    Object.keys(data).sort(),
+  );
 
   return createHash('sha256').update(canonical).digest('hex');
 }

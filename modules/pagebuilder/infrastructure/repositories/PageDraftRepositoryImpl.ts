@@ -26,10 +26,7 @@ interface DraftRow {
 
 export class PageDraftRepositoryImpl implements PageDraftRepository {
   async findById(draftId: string): Promise<PageDraft | null> {
-    const row = await queryOne<DraftRow>(
-      `SELECT * FROM "pageDraft" WHERE "draftId" = $1`,
-      [draftId],
-    );
+    const row = await queryOne<DraftRow>(`SELECT * FROM "pageDraft" WHERE "draftId" = $1`, [draftId]);
     return row ? this.mapToDraft(row) : null;
   }
 
@@ -145,10 +142,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
   }
 
   async delete(draftId: string): Promise<boolean> {
-    const result = await queryOne<{ id: string }>(
-      `DELETE FROM "pageDraft" WHERE "draftId" = $1 RETURNING "draftId" as id`,
-      [draftId],
-    );
+    const result = await queryOne<{ id: string }>(`DELETE FROM "pageDraft" WHERE "draftId" = $1 RETURNING "draftId" as id`, [draftId]);
     return !!result;
   }
 

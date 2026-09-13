@@ -107,7 +107,9 @@ export async function saveLocation(params: CreatePickupLocationParams): Promise<
  * Get a pickup location by ID
  */
 export async function getLocation(pickupLocationId: string): Promise<PickupLocation | null> {
-  const result = await queryOne<Record<string, unknown>>('SELECT * FROM "storePickupLocation" WHERE "pickupLocationId" = $1', [pickupLocationId]);
+  const result = await queryOne<Record<string, unknown>>('SELECT * FROM "storePickupLocation" WHERE "pickupLocationId" = $1', [
+    pickupLocationId,
+  ]);
 
   return result ? mapToPickupLocation(result) : null;
 }
@@ -177,7 +179,9 @@ export async function updateLocation(pickupLocationId: string, params: UpdatePic
  * Delete a pickup location
  */
 export async function deleteLocation(pickupLocationId: string): Promise<boolean> {
-  const result = await query<Record<string, unknown>[]>('DELETE FROM "storePickupLocation" WHERE "pickupLocationId" = $1', [pickupLocationId]);
+  const result = await query<Record<string, unknown>[]>('DELETE FROM "storePickupLocation" WHERE "pickupLocationId" = $1', [
+    pickupLocationId,
+  ]);
 
   return (result?.length ?? 0) > 0;
 }
@@ -259,7 +263,10 @@ function mapToPickupLocation(row: Record<string, unknown>): PickupLocation {
     },
     latitude: row.latitude ? parseFloat(row.latitude as string) : undefined,
     longitude: row.longitude ? parseFloat(row.longitude as string) : undefined,
-    operatingHours: typeof row.operatingHours === 'string' ? JSON.parse(row.operatingHours) : row.operatingHours as Record<string, { open: string; close: string }> | undefined,
+    operatingHours:
+      typeof row.operatingHours === 'string'
+        ? JSON.parse(row.operatingHours)
+        : (row.operatingHours as Record<string, { open: string; close: string }> | undefined),
     isActive: Boolean(row.isActive),
     contactPhone: str(row.contactPhone),
     contactEmail: str(row.contactEmail),

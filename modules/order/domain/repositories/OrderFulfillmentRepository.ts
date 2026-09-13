@@ -28,7 +28,19 @@ export interface OrderFulfillment {
 
 export type OrderFulfillmentCreateParams = Omit<OrderFulfillment, 'orderFulfillmentId' | 'createdAt' | 'updatedAt' | 'fulfillmentNumber'>;
 export type OrderFulfillmentUpdateParams = Partial<
-  Pick<OrderFulfillment, 'status' | 'trackingNumber' | 'trackingUrl' | 'carrierCode' | 'carrierName' | 'shippingMethod' | 'shippedAt' | 'deliveredAt' | 'estimatedDeliveryDate' | 'notes'>
+  Pick<
+    OrderFulfillment,
+    | 'status'
+    | 'trackingNumber'
+    | 'trackingUrl'
+    | 'carrierCode'
+    | 'carrierName'
+    | 'shippingMethod'
+    | 'shippedAt'
+    | 'deliveredAt'
+    | 'estimatedDeliveryDate'
+    | 'notes'
+  >
 >;
 
 export interface OrderFulfillmentRepository {
@@ -41,7 +53,13 @@ export interface OrderFulfillmentRepository {
   create(params: OrderFulfillmentCreateParams): Promise<OrderFulfillment>;
   update(orderFulfillmentId: string, params: OrderFulfillmentUpdateParams): Promise<OrderFulfillment | null>;
   updateStatus(orderFulfillmentId: string, status: FulfillmentStatus): Promise<OrderFulfillment | null>;
-  addTracking(orderFulfillmentId: string, trackingNumber: string, carrierCode?: string, carrierName?: string, trackingUrl?: string): Promise<OrderFulfillment | null>;
+  addTracking(
+    orderFulfillmentId: string,
+    trackingNumber: string,
+    carrierCode?: string,
+    carrierName?: string,
+    trackingUrl?: string,
+  ): Promise<OrderFulfillment | null>;
   markAsShipped(orderFulfillmentId: string, shippedAt?: string): Promise<OrderFulfillment | null>;
   markAsDelivered(orderFulfillmentId: string, deliveredAt?: string): Promise<OrderFulfillment | null>;
   cancel(orderFulfillmentId: string, notes?: string): Promise<OrderFulfillment | null>;

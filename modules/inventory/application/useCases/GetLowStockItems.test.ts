@@ -1,4 +1,4 @@
-import { GetLowStockItemsUseCase} from './GetLowStockItems';
+import { GetLowStockItemsUseCase } from './GetLowStockItems';
 
 describe('GetLowStockItemsUseCase', () => {
   let useCase: GetLowStockItemsUseCase;
@@ -7,8 +7,26 @@ describe('GetLowStockItemsUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findLowStock: jest.fn().mockResolvedValue([
-        { inventoryItemId: 'i1', productId: 'p1', sku: 'SKU1', warehouseId: 'w1', quantity: 5, reservedQuantity: 0, reorderPoint: 10, reorderQuantity: 50 },
-        { inventoryItemId: 'i2', productId: 'p2', sku: 'SKU2', warehouseId: 'w1', quantity: 2, reservedQuantity: 1, reorderPoint: 5, reorderQuantity: 20 },
+        {
+          inventoryItemId: 'i1',
+          productId: 'p1',
+          sku: 'SKU1',
+          warehouseId: 'w1',
+          quantity: 5,
+          reservedQuantity: 0,
+          reorderPoint: 10,
+          reorderQuantity: 50,
+        },
+        {
+          inventoryItemId: 'i2',
+          productId: 'p2',
+          sku: 'SKU2',
+          warehouseId: 'w1',
+          quantity: 2,
+          reservedQuantity: 1,
+          reorderPoint: 5,
+          reorderQuantity: 20,
+        },
       ]),
     };
     useCase = new GetLowStockItemsUseCase(mockRepo as never);

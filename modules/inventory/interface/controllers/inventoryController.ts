@@ -111,7 +111,6 @@ function respondError(res: Response, message: string, statusCode: number = 500):
   res.status(statusCode).json({ success: false, error: message });
 }
 
-
 // ============================================================================
 // Inventory Location Controllers
 // ============================================================================
@@ -136,7 +135,6 @@ export const getInventoryLocation = async (req: TypedRequest, res: Response): Pr
   }
 
   respond(res, location);
-  
 };
 
 /**
@@ -149,9 +147,8 @@ export const listInventoryLocations = async (req: TypedRequest, res: Response): 
 
   // Prefer store locations listing
   const result = await pickupLocationPort.findAll();
-  const data = result.map((loc) => ({ ...loc, id: loc.id }));
+  const data = result.map(loc => ({ ...loc, id: loc.id }));
   respondWithPagination(res, data, limit, offset);
-  
 };
 
 /**
@@ -215,7 +212,6 @@ export const createInventoryLocation = async (req: TypedRequest, res: Response):
   });
 
   respond(res, location, 201);
-  
 };
 
 /**
@@ -255,7 +251,6 @@ export const updateInventoryLocation = async (req: TypedRequest, res: Response):
   });
 
   respond(res, location);
-  
 };
 
 /**
@@ -277,7 +272,6 @@ export const deleteInventoryLocation = async (req: TypedRequest, res: Response):
   }
   await inventoryRepo.deleteLocation(inventoryLocationId);
   respond(res, { message: 'Inventory location deleted successfully' });
-  
 };
 
 // ============================================================================
@@ -337,7 +331,6 @@ export const adjustStock = async (req: TypedRequest, res: Response): Promise<voi
   }
 
   respond(res, updatedLocation);
-  
 };
 
 /**
@@ -369,7 +362,6 @@ export const reserveStock = async (req: TypedRequest, res: Response): Promise<vo
   });
 
   respond(res, updatedLocation);
-  
 };
 
 /**
@@ -399,7 +391,6 @@ export const releaseReservation = async (req: TypedRequest, res: Response): Prom
   });
 
   respond(res, updatedLocation);
-  
 };
 
 // ============================================================================
@@ -431,7 +422,6 @@ export const checkAvailability = async (req: TypedRequest, res: Response): Promi
     totalAvailable: location.availableQuantity,
     requestedQuantity: quantity,
   });
-  
 };
 
 /**
@@ -440,7 +430,6 @@ export const checkAvailability = async (req: TypedRequest, res: Response): Promi
 export const getLowStock = async (req: TypedRequest, res: Response): Promise<void> => {
   const locations = await inventoryRepo.findLowStockLocations();
   respond(res, locations);
-  
 };
 
 /**
@@ -449,7 +438,6 @@ export const getLowStock = async (req: TypedRequest, res: Response): Promise<voi
 export const getOutOfStock = async (req: TypedRequest, res: Response): Promise<void> => {
   const locations = await inventoryRepo.findOutOfStockLocations();
   respond(res, locations);
-  
 };
 
 // ============================================================================
@@ -465,7 +453,6 @@ export const getTransactionHistory = async (req: TypedRequest, res: Response): P
 
   const transactions = await inventoryRepo.findTransactionsByProductId(productId, limit);
   respond(res, transactions);
-  
 };
 
 /**
@@ -474,7 +461,6 @@ export const getTransactionHistory = async (req: TypedRequest, res: Response): P
 export const getTransactionTypes = async (req: TypedRequest, res: Response): Promise<void> => {
   const types = await inventoryRepo.findAllTransactionTypes();
   respond(res, types);
-  
 };
 
 // ============================================================================
@@ -488,7 +474,6 @@ export const checkProductAvailability = async (req: TypedRequest, res: Response)
 
   const result = await inventoryRepo.checkProductAvailability(productId, variantId, quantity);
   respond(res, result);
-  
 };
 
 // ============================================================================
@@ -504,7 +489,10 @@ interface TransferStockBody {
   initiatedBy?: string;
 }
 
-export const transferStock = async (req: TypedRequest<Record<string, string>, unknown, TransferStockBody>, res: Response): Promise<void> => {
+export const transferStock = async (
+  req: TypedRequest<Record<string, string>, unknown, TransferStockBody>,
+  res: Response,
+): Promise<void> => {
   if (!req.body.sourceLocationId || !req.body.destinationLocationId || !req.body.items) {
     respondError(res, 'sourceLocationId, destinationLocationId, and items are required', 400);
     return;
@@ -527,7 +515,6 @@ export const transferStock = async (req: TypedRequest<Record<string, string>, un
     initiatedBy: req.body.initiatedBy,
   });
   respond(res, result);
-  
 };
 
 // ============================================================================
@@ -548,7 +535,10 @@ interface CreateInventoryItemBody {
   metadata?: Record<string, unknown>;
 }
 
-export const createInventoryItem = async (req: TypedRequest<Record<string, string>, unknown, CreateInventoryItemBody>, res: Response): Promise<void> => {
+export const createInventoryItem = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateInventoryItemBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new CreateInventoryItemUseCase(inventoryRepository);
   const result = await useCase.execute({
     productId: req.body.productId,
@@ -564,7 +554,6 @@ export const createInventoryItem = async (req: TypedRequest<Record<string, strin
     metadata: req.body.metadata,
   });
   respond(res, result, 201);
-  
 };
 
 // ============================================================================
@@ -581,7 +570,10 @@ interface CreatePoolBody {
   reservationPolicy?: 'immediate' | 'deferred';
 }
 
-export const createInventoryPool = async (req: TypedRequest<Record<string, string>, unknown, CreatePoolBody>, res: Response): Promise<void> => {
+export const createInventoryPool = async (
+  req: TypedRequest<Record<string, string>, unknown, CreatePoolBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new CreateInventoryPoolUseCase(inventoryPoolRepo);
   const result = await useCase.execute({
     ownerType: req.body.ownerType,
@@ -593,7 +585,6 @@ export const createInventoryPool = async (req: TypedRequest<Record<string, strin
     reservationPolicy: req.body.reservationPolicy,
   });
   respond(res, result, 201);
-  
 };
 
 interface AllocateFromPoolBody {
@@ -604,7 +595,10 @@ interface AllocateFromPoolBody {
   customerLocation?: { latitude: number; longitude: number; postalCode?: string };
 }
 
-export const allocateFromPool = async (req: TypedRequest<Record<string, string>, unknown, AllocateFromPoolBody>, res: Response): Promise<void> => {
+export const allocateFromPool = async (
+  req: TypedRequest<Record<string, string>, unknown, AllocateFromPoolBody>,
+  res: Response,
+): Promise<void> => {
   if (!req.body.poolId) {
     respondError(res, 'poolId is required', 400);
     return;
@@ -622,7 +616,6 @@ export const allocateFromPool = async (req: TypedRequest<Record<string, string>,
     customerLocation: req.body.customerLocation,
   });
   respond(res, result);
-  
 };
 
 // ============================================================================
@@ -653,7 +646,6 @@ export const getInventoryItem = async (req: TypedRequest, res: Response): Promis
     return;
   }
   respond(res, result.item);
-  
 };
 
 // ============================================================================
@@ -674,7 +666,6 @@ export const listInventoryItems = async (req: TypedRequest, res: Response): Prom
     sortOrder: req.query.sortOrder as 'asc' | 'desc' | undefined,
   });
   respond(res, result);
-  
 };
 
 // ============================================================================
@@ -690,7 +681,10 @@ interface TransferBetweenStoresBody {
   requestedBy?: string;
 }
 
-export const transferBetweenStores = async (req: TypedRequest<Record<string, string>, unknown, TransferBetweenStoresBody>, res: Response): Promise<void> => {
+export const transferBetweenStores = async (
+  req: TypedRequest<Record<string, string>, unknown, TransferBetweenStoresBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new TransferBetweenStoresUseCase(inventoryRepository);
   const result = await useCase.execute({
     sourceStoreId: req.body.sourceStoreId,
@@ -701,7 +695,6 @@ export const transferBetweenStores = async (req: TypedRequest<Record<string, str
     requestedBy: req.body.requestedBy,
   });
   respond(res, result, 201);
-  
 };
 
 // ============================================================================
@@ -713,7 +706,10 @@ interface ConfirmReservationBody {
   orderId?: string;
 }
 
-export const confirmReservation = async (req: TypedRequest<Record<string, string>, unknown, ConfirmReservationBody>, res: Response): Promise<void> => {
+export const confirmReservation = async (
+  req: TypedRequest<Record<string, string>, unknown, ConfirmReservationBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new ConfirmReservationUseCase(inventoryRepo);
   const result = await useCase.execute({
     reservationId: req.body.reservationId,
@@ -724,7 +720,6 @@ export const confirmReservation = async (req: TypedRequest<Record<string, string
     return;
   }
   respond(res, result);
-  
 };
 
 // ============================================================================
@@ -739,7 +734,10 @@ interface SetLowStockThresholdBody {
   reorderQuantity?: number;
 }
 
-export const setLowStockThreshold = async (req: TypedRequest<Record<string, string>, unknown, SetLowStockThresholdBody>, res: Response): Promise<void> => {
+export const setLowStockThreshold = async (
+  req: TypedRequest<Record<string, string>, unknown, SetLowStockThresholdBody>,
+  res: Response,
+): Promise<void> => {
   const useCase = new SetLowStockThresholdUseCase(inventoryRepository);
   const result = await useCase.execute({
     productId: req.body.productId,
@@ -749,5 +747,4 @@ export const setLowStockThreshold = async (req: TypedRequest<Record<string, stri
     reorderQuantity: req.body.reorderQuantity,
   });
   respond(res, result);
-  
 };

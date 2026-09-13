@@ -6,7 +6,7 @@ describe('Identity Feature Tests', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let adminToken: string;
   let customerToken: string;
-   
+
   let organizationToken: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let customerRefreshToken: string;

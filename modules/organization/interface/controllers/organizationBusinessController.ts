@@ -83,7 +83,6 @@ export const getOrganizations = async (req: TypedRequest, res: Response): Promis
     data: orgs,
     pagination: { limit, offset, total: orgs.length },
   });
-  
 };
 
 export const getOrganizationById = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -96,10 +95,12 @@ export const getOrganizationById = async (req: TypedRequest, res: Response): Pro
   }
 
   res.status(200).json({ success: true, data: org });
-  
 };
 
-export const createOrganization = async (req: TypedRequest<Record<string, string>, unknown, CreateOrganizationBody>, res: Response): Promise<void> => {
+export const createOrganization = async (
+  req: TypedRequest<Record<string, string>, unknown, CreateOrganizationBody>,
+  res: Response,
+): Promise<void> => {
   const { name, email, phone, website, logoUrl, logo, description, password, status = 'pending' } = req.body;
 
   if (!name || !email) {
@@ -125,10 +126,12 @@ export const createOrganization = async (req: TypedRequest<Record<string, string
   });
 
   res.status(201).json({ success: true, data: org, message: 'Organization created successfully' });
-  
 };
 
-export const updateOrganization = async (req: TypedRequest<Record<string, string>, unknown, UpdateOrganizationBody>, res: Response): Promise<void> => {
+export const updateOrganization = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdateOrganizationBody>,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const { name, email, phone, website, logoUrl, description, status } = req.body;
 
@@ -149,7 +152,6 @@ export const updateOrganization = async (req: TypedRequest<Record<string, string
   const updated = await repo.update(id, { name, email, phone, website, logo: logoUrl, description, status });
 
   res.status(200).json({ success: true, data: updated, message: 'Organization updated successfully' });
-  
 };
 
 export const deleteOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -168,7 +170,6 @@ export const deleteOrganization = async (req: TypedRequest, res: Response): Prom
   } else {
     res.status(500).json({ success: false, message: 'Failed to delete organization' });
   }
-  
 };
 
 export const getOrganizationStores = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -183,7 +184,6 @@ export const getOrganizationStores = async (req: TypedRequest, res: Response): P
   const stores = await repo.getStoresByOrganization(id);
 
   res.status(200).json({ success: true, data: stores });
-  
 };
 
 export const getOrganizationAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -198,10 +198,12 @@ export const getOrganizationAddresses = async (req: TypedRequest, res: Response)
   const addresses = await repo.findAddressesByOrganizationId(organizationId);
 
   res.status(200).json({ success: true, data: addresses });
-  
 };
 
-export const addOrganizationAddress = async (req: TypedRequest<Record<string, string>, unknown, AddOrganizationAddressBody>, res: Response): Promise<void> => {
+export const addOrganizationAddress = async (
+  req: TypedRequest<Record<string, string>, unknown, AddOrganizationAddressBody>,
+  res: Response,
+): Promise<void> => {
   const { organizationId } = req.params;
   const { addressLine1, addressLine2, city, state, postalCode, country, isPrimary = false } = req.body;
 
@@ -228,10 +230,12 @@ export const addOrganizationAddress = async (req: TypedRequest<Record<string, st
   });
 
   res.status(201).json({ success: true, data: address, message: 'Organization address added successfully' });
-  
 };
 
-export const updateOrganizationAddress = async (req: TypedRequest<Record<string, string>, unknown, UpdateOrganizationAddressBody>, res: Response): Promise<void> => {
+export const updateOrganizationAddress = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdateOrganizationAddressBody>,
+  res: Response,
+): Promise<void> => {
   const { organizationId, addressId } = req.params;
   const { addressLine1, addressLine2, city, state, postalCode, country, isDefault } = req.body;
 
@@ -261,7 +265,6 @@ export const updateOrganizationAddress = async (req: TypedRequest<Record<string,
     },
     message: 'Organization address updated successfully',
   });
-  
 };
 
 export const getOrganizationPaymentInfo = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -276,10 +279,12 @@ export const getOrganizationPaymentInfo = async (req: TypedRequest, res: Respons
   const paymentInfo = await repo.findPaymentInfoByOrganizationId(organizationId);
 
   res.status(200).json({ success: true, data: paymentInfo || [] });
-  
 };
 
-export const addOrganizationPaymentInfo = async (req: TypedRequest<Record<string, string>, unknown, AddOrganizationPaymentInfoBody>, res: Response): Promise<void> => {
+export const addOrganizationPaymentInfo = async (
+  req: TypedRequest<Record<string, string>, unknown, AddOrganizationPaymentInfoBody>,
+  res: Response,
+): Promise<void> => {
   const { organizationId } = req.params;
   const { accountHolderName, bankName, accountNumber, routingNumber, paymentProcessor, isVerified = false } = req.body;
 
@@ -312,10 +317,12 @@ export const addOrganizationPaymentInfo = async (req: TypedRequest<Record<string
   });
 
   res.status(201).json({ success: true, data: paymentInfo, message: 'Organization payment information added successfully' });
-  
 };
 
-export const updateOrganizationPaymentInfo = async (req: TypedRequest<Record<string, string>, unknown, UpdateOrganizationPaymentInfoBody>, res: Response): Promise<void> => {
+export const updateOrganizationPaymentInfo = async (
+  req: TypedRequest<Record<string, string>, unknown, UpdateOrganizationPaymentInfoBody>,
+  res: Response,
+): Promise<void> => {
   const { organizationId, paymentInfoId } = req.params;
   const { accountHolderName, bankName, accountNumber, routingNumber, paymentProcessor, isVerified } = req.body;
 
@@ -344,5 +351,4 @@ export const updateOrganizationPaymentInfo = async (req: TypedRequest<Record<str
     },
     message: 'Organization payment information updated successfully',
   });
-  
 };

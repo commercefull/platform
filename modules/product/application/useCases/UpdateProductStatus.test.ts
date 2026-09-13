@@ -68,9 +68,7 @@ describe('UpdateProductStatusUseCase', () => {
     const repo = createMockProductRepo(null);
     const useCase = new UpdateProductStatusUseCase(repo);
 
-    await expect(
-      useCase.updateStatus('nonexistent', ProductStatus.ACTIVE),
-    ).rejects.toThrow(ProductNotFoundError);
+    await expect(useCase.updateStatus('nonexistent', ProductStatus.ACTIVE)).rejects.toThrow(ProductNotFoundError);
   });
 
   it('should publish an active product', async () => {
@@ -88,9 +86,7 @@ describe('UpdateProductStatusUseCase', () => {
     const repo = createMockProductRepo(null);
     const useCase = new UpdateProductStatusUseCase(repo);
 
-    await expect(
-      useCase.publish('nonexistent'),
-    ).rejects.toThrow(ProductNotFoundError);
+    await expect(useCase.publish('nonexistent')).rejects.toThrow(ProductNotFoundError);
   });
 
   it('should unpublish a published product', async () => {
@@ -109,8 +105,6 @@ describe('UpdateProductStatusUseCase', () => {
     const repo = createMockProductRepo(null);
     const useCase = new UpdateProductStatusUseCase(repo);
 
-    await expect(
-      useCase.unpublish('nonexistent'),
-    ).rejects.toThrow(ProductNotFoundError);
+    await expect(useCase.unpublish('nonexistent')).rejects.toThrow(ProductNotFoundError);
   });
 });

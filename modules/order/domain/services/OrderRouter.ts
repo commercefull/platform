@@ -4,7 +4,13 @@
  * Routes orders to appropriate store/warehouse for fulfillment.
  */
 
-import { NoEligibleStoresError, NoStoresWithInventoryError, NoPickupStoresError, NoFulfillmentStoresError, NoStoresWithInventoryForFulfillmentError } from '../errors/OrderErrors';
+import {
+  NoEligibleStoresError,
+  NoStoresWithInventoryError,
+  NoPickupStoresError,
+  NoFulfillmentStoresError,
+  NoStoresWithInventoryForFulfillmentError,
+} from '../errors/OrderErrors';
 
 export interface Store {
   storeId: string;

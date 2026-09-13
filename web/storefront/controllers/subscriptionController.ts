@@ -21,7 +21,6 @@ export const listPlans = async (req: TypedRequest, res: Response) => {
     pageName: 'Subscription Plans',
     plans,
   });
-  
 };
 
 /**
@@ -37,7 +36,6 @@ export const mySubscriptions = async (req: TypedRequest, res: Response) => {
     pageName: 'My Subscriptions',
     subscriptions,
   });
-  
 };
 
 /**
@@ -63,7 +61,6 @@ export const viewSubscription = async (req: TypedRequest, res: Response) => {
     subscription,
     billingHistory,
   });
-  
 };
 
 /**

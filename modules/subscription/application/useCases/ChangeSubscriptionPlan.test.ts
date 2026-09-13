@@ -3,11 +3,17 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { ChangeSubscriptionPlanUseCase} from './ChangeSubscriptionPlan';
-import { SubscriptionNotFoundError, SubscriptionPlanNotFoundError, SubscriptionValidationError } from '../../domain/errors/SubscriptionErrors';
+import { ChangeSubscriptionPlanUseCase } from './ChangeSubscriptionPlan';
+import {
+  SubscriptionNotFoundError,
+  SubscriptionPlanNotFoundError,
+  SubscriptionValidationError,
+} from '../../domain/errors/SubscriptionErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ChangeSubscriptionPlanUseCase', () => {
   let useCase: ChangeSubscriptionPlanUseCase;
@@ -16,7 +22,13 @@ describe('ChangeSubscriptionPlanUseCase', () => {
 
   beforeEach(() => {
     mockSubRepo = {
-      findById: jest.fn().mockResolvedValue({ status: 'active', planId: 'old-plan', customerId: 'c1', nextBillingDate: new Date(Date.now() + 86400000).toISOString(), price: 10 }),
+      findById: jest.fn().mockResolvedValue({
+        status: 'active',
+        planId: 'old-plan',
+        customerId: 'c1',
+        nextBillingDate: new Date(Date.now() + 86400000).toISOString(),
+        price: 10,
+      }),
       update: jest.fn().mockResolvedValue(undefined),
     };
     mockPlanRepo = { findById: jest.fn().mockResolvedValue({ price: 20 }) };
@@ -49,7 +61,12 @@ describe('ChangeSubscriptionPlanUseCase', () => {
   });
 
   it('should throw SubscriptionValidationError for inactive subscription', async () => {
-    mockSubRepo.findById.mockResolvedValue({ status: 'canceled', planId: 'old', customerId: 'c1', nextBillingDate: new Date().toISOString() });
+    mockSubRepo.findById.mockResolvedValue({
+      status: 'canceled',
+      planId: 'old',
+      customerId: 'c1',
+      nextBillingDate: new Date().toISOString(),
+    });
 
     await expect(useCase.execute({ subscriptionId: 'sub-1', newPlanId: 'p' })).rejects.toThrow(SubscriptionValidationError);
   });

@@ -1,5 +1,9 @@
 import type { CustomerProfile } from '../../domain/entities/CustomerProfile';
-import type { CustomerProfileRepository, SegmentRepository, SegmentMembershipRepository } from '../../domain/repositories/SegmentRepository';
+import type {
+  CustomerProfileRepository,
+  SegmentRepository,
+  SegmentMembershipRepository,
+} from '../../domain/repositories/SegmentRepository';
 import { evaluateConditions } from '../../domain/services/ConditionEvaluator';
 import { SegmentNotFoundError } from '../../domain/errors/SegmentErrors';
 

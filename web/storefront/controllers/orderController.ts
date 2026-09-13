@@ -49,7 +49,6 @@ export const orderHistory = async (req: TypedRequest, res: Response): Promise<vo
     filters: { status },
     user: req.user,
   });
-  
 };
 
 // ============================================================================
@@ -89,7 +88,6 @@ export const orderDetails = async (req: TypedRequest, res: Response): Promise<vo
     order: { ...order, totals },
     user: req.user,
   });
-  
 };
 
 // ============================================================================
@@ -125,7 +123,6 @@ export const orderTracking = async (req: TypedRequest, res: Response): Promise<v
     order: { ...order, totals, timeline },
     user: req.user,
   });
-  
 };
 
 // ============================================================================

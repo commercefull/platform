@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { GetOutOfStockItemsUseCase} from './GetOutOfStockItems';
+import { GetOutOfStockItemsUseCase } from './GetOutOfStockItems';
 
 describe('GetOutOfStockItemsUseCase', () => {
   let useCase: GetOutOfStockItemsUseCase;
@@ -12,8 +12,24 @@ describe('GetOutOfStockItemsUseCase', () => {
   beforeEach(() => {
     mockRepo = {
       findOutOfStock: jest.fn().mockResolvedValue([
-        { inventoryItemId: 'i1', productId: 'p1', sku: 'SKU1', warehouseId: 'w1', reservedQuantity: 5, reorderQuantity: 50, lastStockedAt: '2024-01-01' },
-        { inventoryItemId: 'i2', productId: 'p2', sku: 'SKU2', warehouseId: 'w1', reservedQuantity: 0, reorderQuantity: 20, lastStockedAt: '2024-02-01' },
+        {
+          inventoryItemId: 'i1',
+          productId: 'p1',
+          sku: 'SKU1',
+          warehouseId: 'w1',
+          reservedQuantity: 5,
+          reorderQuantity: 50,
+          lastStockedAt: '2024-01-01',
+        },
+        {
+          inventoryItemId: 'i2',
+          productId: 'p2',
+          sku: 'SKU2',
+          warehouseId: 'w1',
+          reservedQuantity: 0,
+          reorderQuantity: 20,
+          lastStockedAt: '2024-02-01',
+        },
       ]),
     };
     useCase = new GetOutOfStockItemsUseCase(mockRepo as never);

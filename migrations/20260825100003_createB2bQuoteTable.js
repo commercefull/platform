@@ -1,5 +1,5 @@
 export async function up(knex) {
-  await knex.schema.createTable('b2bQuote', (table) => {
+  await knex.schema.createTable('b2bQuote', table => {
     table.uuid('quoteId').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('companyId').notNullable().references('companyId').inTable('b2bCompany').onDelete('CASCADE').index();
     table.uuid('organizationId').notNullable().index();

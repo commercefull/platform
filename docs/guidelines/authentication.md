@@ -15,11 +15,11 @@ export const isAdminLoggedIn = async (req, res, next) => {
 
 ## Auth Middleware
 
-| Middleware             | User Type    | JWT Secret            | Login Redirect    |
-| ---------------------- | ------------ | --------------------- | ----------------- |
-| `isAdminLoggedIn`      | Admin        | `ADMIN_JWT_SECRET`    | `/admin/login`    |
-| `isOrganizationLoggedIn` | Organization | `MERCHANT_JWT_SECRET` | `/admin/login`    |
-| `isCustomerLoggedIn`   | Customer     | `CUSTOMER_JWT_SECRET` | `/login`          |
+| Middleware               | User Type    | JWT Secret            | Login Redirect |
+| ------------------------ | ------------ | --------------------- | -------------- |
+| `isAdminLoggedIn`        | Admin        | `ADMIN_JWT_SECRET`    | `/admin/login` |
+| `isOrganizationLoggedIn` | Organization | `MERCHANT_JWT_SECRET` | `/admin/login` |
+| `isCustomerLoggedIn`     | Customer     | `CUSTOMER_JWT_SECRET` | `/login`       |
 
 Apply at router level:
 

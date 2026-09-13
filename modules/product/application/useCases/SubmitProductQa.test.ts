@@ -9,8 +9,14 @@ jest.mock('../../infrastructure/repositories/productQaRepo', () => ({
   __esModule: true,
   default: {
     create: jest.fn().mockResolvedValue({
-      productQaId: 'q1', productId: 'p1', question: 'Is this durable?', status: 'pending',
-      customerId: 'c1', askerName: 'John', askerEmail: 'john@test.com', createdAt: new Date(),
+      productQaId: 'q1',
+      productId: 'p1',
+      question: 'Is this durable?',
+      status: 'pending',
+      customerId: 'c1',
+      askerName: 'John',
+      askerEmail: 'john@test.com',
+      createdAt: new Date(),
     }),
   },
 }));
@@ -31,9 +37,7 @@ describe('SubmitProductQaUseCase', () => {
   });
 
   it('should submit Q&A (happy path)', async () => {
-    const result = await useCase.execute(new SubmitProductQaCommand(
-      'p1', 'Is this durable?', 'c1', 'John', 'john@test.com',
-    ));
+    const result = await useCase.execute(new SubmitProductQaCommand('p1', 'Is this durable?', 'c1', 'John', 'john@test.com'));
 
     expect(result.productQaId).toBe('q1');
     expect(result.status).toBe('pending');

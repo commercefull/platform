@@ -23,7 +23,11 @@ describe('ValidateShippingAddressUseCase', () => {
 
   it('should return errors for missing fields', async () => {
     const result = await useCase.execute({
-      street1: '', city: '', state: '', postalCode: '', country: '',
+      street1: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: '',
     });
 
     expect(result.valid).toBe(false);

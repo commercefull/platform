@@ -56,9 +56,7 @@ export class GenerateReportUseCase {
     const [startDate, endDate] = parsePeriod(period);
     const generatedAt = new Date();
 
-    const salesData = await query<
-      Array<{ date: string; orders: string; revenue: string; customers: string }>
-    >(
+    const salesData = await query<Array<{ date: string; orders: string; revenue: string; customers: string }>>(
       `SELECT
         DATE(created_at) as date,
         COUNT(*) as orders,
@@ -78,9 +76,7 @@ export class GenerateReportUseCase {
     const totalCustomers = salesDataSafe.reduce((sum, d) => sum + parseInt(d.customers || '0'), 0);
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-    const topProducts = await query<
-      Array<{ product_id: string; name: string; sales: string; revenue: string }>
-    >(
+    const topProducts = await query<Array<{ product_id: string; name: string; sales: string; revenue: string }>>(
       `SELECT
         p.product_id,
         p.name,
@@ -131,11 +127,11 @@ export class GenerateReportUseCase {
           title: 'Top Products by Revenue',
           type: 'bar',
           data: {
-            labels: (topProducts || []).map((p) => p.name?.substring(0, 20) || ''),
+            labels: (topProducts || []).map(p => p.name?.substring(0, 20) || ''),
             datasets: [
               {
                 label: 'Revenue',
-                data: (topProducts || []).map((p) => parseFloat(p.revenue || '0')),
+                data: (topProducts || []).map(p => parseFloat(p.revenue || '0')),
               },
             ],
           },
@@ -184,9 +180,7 @@ export class GenerateReportUseCase {
       [startDate, endDate],
     );
 
-    const segmentData = await query<
-      Array<{ segment: string; customers: string; revenue: string }>
-    >(
+    const segmentData = await query<Array<{ segment: string; customers: string; revenue: string }>>(
       `SELECT
         CASE
           WHEN total_spent > 500 THEN 'High Value'
@@ -311,7 +305,15 @@ export class GenerateReportUseCase {
 
   private async generateInventoryReport(_period: string, _parameters: Record<string, unknown>): Promise<ReportData> {
     const inventoryData = await query<
-      Array<{ product_id: string; name: string; category: string; stock_quantity: string; reorder_point: string; cost_price: string; sales_velocity: string }>
+      Array<{
+        product_id: string;
+        name: string;
+        category: string;
+        stock_quantity: string;
+        reorder_point: string;
+        cost_price: string;
+        sales_velocity: string;
+      }>
     >(
       `SELECT
         p.product_id,

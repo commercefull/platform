@@ -1,10 +1,11 @@
 import { query, queryOne } from '../../../../libs/db';
 
 export async function findByUserId(userId: string, limit: number, offset: number): Promise<unknown[]> {
-  const results = await query<unknown[]>(
-    `SELECT * FROM "notification" WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
-    [userId, limit, offset],
-  );
+  const results = await query<unknown[]>(`SELECT * FROM "notification" WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`, [
+    userId,
+    limit,
+    offset,
+  ]);
   return results || [];
 }
 

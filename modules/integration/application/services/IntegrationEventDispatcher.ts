@@ -12,7 +12,12 @@
 import { randomUUID } from 'crypto';
 import { logger } from '../../../../libs/logger';
 import { eventBus, type EventPayload } from '../../../../libs/events/eventBus';
-import type { IntegrationRepository, IntegrationCredentialRepository, IntegrationSubscriptionRepository, IntegrationLogRepository } from '../../domain/repositories/IntegrationRepository';
+import type {
+  IntegrationRepository,
+  IntegrationCredentialRepository,
+  IntegrationSubscriptionRepository,
+  IntegrationLogRepository,
+} from '../../domain/repositories/IntegrationRepository';
 import { IntegrationLog } from '../../domain/entities/IntegrationLog';
 import { decryptCredential } from '../../domain/services/CredentialCrypto';
 

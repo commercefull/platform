@@ -1,4 +1,9 @@
-import type { ProductReview, ProductReviewMedia, ProductReviewPort, ProductReviewMediaPort } from '../../domain/repositories/ProductCatalogPorts';
+import type {
+  ProductReview,
+  ProductReviewMedia,
+  ProductReviewPort,
+  ProductReviewMediaPort,
+} from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageReviewMediaUseCase {
   constructor(

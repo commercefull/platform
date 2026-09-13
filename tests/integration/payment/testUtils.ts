@@ -130,7 +130,13 @@ export const setupPaymentTests = async () => {
  * Cleanup function for payment integration tests
  * Removes test data created during setup
  */
-export const cleanupPaymentTests = async (client: AxiosInstance, adminToken: string, testGatewayId: string, testMethodConfigId: string, testOrderId?: string) => {
+export const cleanupPaymentTests = async (
+  client: AxiosInstance,
+  adminToken: string,
+  testGatewayId: string,
+  testMethodConfigId: string,
+  testOrderId?: string,
+) => {
   // Delete test order
   if (testOrderId) {
     try {

@@ -162,8 +162,8 @@ export class CalculateShippingRatesUseCase {
 
           const estimatedDays = method.estimatedDeliveryDays
             ? typeof method.estimatedDeliveryDays === 'object'
-              ? (method.estimatedDeliveryDays as { min?: number }).min ?? null
-              : method.estimatedDeliveryDays as number
+              ? ((method.estimatedDeliveryDays as { min?: number }).min ?? null)
+              : (method.estimatedDeliveryDays as number)
             : method.handlingDays;
 
           rateOptions.push({

@@ -48,9 +48,7 @@ interface ReleaseReservationRepositoryPort {
 }
 
 export class ReleaseReservationUseCase {
-  constructor(
-    private readonly inventoryRepository: ReleaseReservationRepositoryPort,
-  ) {}
+  constructor(private readonly inventoryRepository: ReleaseReservationRepositoryPort) {}
 
   async execute(input: ReleaseReservationInput): Promise<ReleaseReservationOutput> {
     if (!input.reservationId && !input.orderId) {

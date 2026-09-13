@@ -152,10 +152,12 @@ export class ProductImageRepo {
   async reorder(productId: string, imageIds: string[]): Promise<boolean> {
     const now = new Date();
     for (let i = 0; i < imageIds.length; i++) {
-      await query(
-        `UPDATE "${Table.ProductImage}" SET "position" = $1, "updatedAt" = $2 WHERE "productImageId" = $3 AND "productId" = $4`,
-        [i, now, imageIds[i], productId],
-      );
+      await query(`UPDATE "${Table.ProductImage}" SET "position" = $1, "updatedAt" = $2 WHERE "productImageId" = $3 AND "productId" = $4`, [
+        i,
+        now,
+        imageIds[i],
+        productId,
+      ]);
     }
     return true;
   }

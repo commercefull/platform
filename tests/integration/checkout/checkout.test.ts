@@ -23,7 +23,6 @@ describe('Checkout Feature Tests', () => {
     jest.setTimeout(30000);
     client = createClient();
 
-     
     // Get admin token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     adminToken = loginResponse.data.accessToken;

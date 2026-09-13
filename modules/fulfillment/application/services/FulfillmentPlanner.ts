@@ -36,7 +36,16 @@ export class FulfillmentPlanner {
     private readonly stores: Array<{
       storeId: string;
       name: string;
-      address?: { line1: string; line2?: string; city: string; state: string; postalCode: string; country: string; latitude?: number; longitude?: number };
+      address?: {
+        line1: string;
+        line2?: string;
+        city: string;
+        state: string;
+        postalCode: string;
+        country: string;
+        latitude?: number;
+        longitude?: number;
+      };
       settings?: { allowOnlineOrdering?: boolean; pickup?: { enabled?: boolean }; localDelivery?: { enabled?: boolean } };
       priority?: number;
     }>,

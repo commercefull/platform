@@ -48,9 +48,7 @@ export class ManageOrderFulfillmentsUseCase {
 }
 
 export class GetOrderForFulfillmentUseCase {
-  constructor(
-    private readonly orders: OrderRepository = orderRepo,
-  ) {}
+  constructor(private readonly orders: OrderRepository = orderRepo) {}
 
   async findById(id: string) {
     return this.orders.findById(id);

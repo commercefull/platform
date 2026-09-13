@@ -3,10 +3,13 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { RedeemPointsUseCase} from './RedeemPoints';
+import { RedeemPointsUseCase } from './RedeemPoints';
 import {
-  LoyaltyMemberNotFoundError, LoyaltyRewardNotFoundError, RewardNotAvailableError,
-  InsufficientPointsError, LoyaltyValidationError,
+  LoyaltyMemberNotFoundError,
+  LoyaltyRewardNotFoundError,
+  RewardNotAvailableError,
+  InsufficientPointsError,
+  LoyaltyValidationError,
 } from '../../domain/errors/LoyaltyErrors';
 
 describe('RedeemPointsUseCase', () => {

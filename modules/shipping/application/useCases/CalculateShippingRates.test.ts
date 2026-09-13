@@ -6,9 +6,7 @@ jest.mock('../../infrastructure/repositories/ShippingConfigRepository', () => ({
     zones: {
       findById: jest.fn().mockResolvedValue({ shippingZoneId: 'z1', name: 'US' }),
       findAll: jest.fn().mockResolvedValue([{ shippingZoneId: 'z1' }]),
-      findByLocation: jest.fn().mockResolvedValue([
-        { shippingZoneId: 'z1', name: 'US Zone', isActive: true },
-      ]),
+      findByLocation: jest.fn().mockResolvedValue([{ shippingZoneId: 'z1', name: 'US Zone', isActive: true }]),
       create: jest.fn(),
       update: jest.fn(),
       activate: jest.fn(),
@@ -20,8 +18,13 @@ jest.mock('../../infrastructure/repositories/ShippingConfigRepository', () => ({
       findActive: jest.fn(),
       findByMethod: jest.fn(),
       findByZoneAndMethod: jest.fn().mockResolvedValue({
-        shippingRateId: 'r1', rateType: 'flat', baseRate: 10, currency: 'USD',
-        name: 'Standard', taxable: false, conditions: null,
+        shippingRateId: 'r1',
+        rateType: 'flat',
+        baseRate: 10,
+        currency: 'USD',
+        name: 'Standard',
+        taxable: false,
+        conditions: null,
       }),
       create: jest.fn(),
       update: jest.fn(),
@@ -47,9 +50,7 @@ describe('CalculateShippingRatesUseCase', () => {
   });
 
   it('should return error when country is missing', async () => {
-    const result = await useCase.execute(new CalculateShippingRatesCommand(
-      { country: '' }, { subtotal: 100, itemCount: 1 },
-    ));
+    const result = await useCase.execute(new CalculateShippingRatesCommand({ country: '' }, { subtotal: 100, itemCount: 1 }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('country_required');
@@ -58,9 +59,7 @@ describe('CalculateShippingRatesUseCase', () => {
   it('should return error when no zone found', async () => {
     mockRepo.zones.findByLocation.mockResolvedValueOnce([]);
 
-    const result = await useCase.execute(new CalculateShippingRatesCommand(
-      { country: 'XX' }, { subtotal: 100, itemCount: 1 },
-    ));
+    const result = await useCase.execute(new CalculateShippingRatesCommand({ country: 'XX' }, { subtotal: 100, itemCount: 1 }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('no_zone_found');

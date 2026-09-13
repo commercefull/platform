@@ -1,4 +1,4 @@
-import { GetPaymentMethodsUseCase} from './GetPaymentMethods';
+import { GetPaymentMethodsUseCase } from './GetPaymentMethods';
 
 describe('GetPaymentMethodsUseCase', () => {
   let useCase: GetPaymentMethodsUseCase;
@@ -7,9 +7,11 @@ describe('GetPaymentMethodsUseCase', () => {
 
   beforeEach(() => {
     mockPaymentRepo = {
-      findSavedPaymentMethods: jest.fn().mockResolvedValue([
-        { paymentMethodId: 'pm1', type: 'card', provider: 'stripe', name: 'Visa', isDefault: true, last4: '4242', brand: 'visa' },
-      ]),
+      findSavedPaymentMethods: jest
+        .fn()
+        .mockResolvedValue([
+          { paymentMethodId: 'pm1', type: 'card', provider: 'stripe', name: 'Visa', isDefault: true, last4: '4242', brand: 'visa' },
+        ]),
     };
     mockConfigRepo = {
       findActiveConfigs: jest.fn().mockResolvedValue([

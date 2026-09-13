@@ -12,10 +12,7 @@ export interface NotificationPreference {
   updatedAt: Date;
 }
 
-export type NotificationPreferenceUpsertParams = Omit<
-  NotificationPreference,
-  'notificationPreferenceId' | 'updatedAt'
->;
+export type NotificationPreferenceUpsertParams = Omit<NotificationPreference, 'notificationPreferenceId' | 'updatedAt'>;
 
 export async function findByUser(userId: string, userType: string): Promise<NotificationPreference[]> {
   return (
@@ -27,17 +24,12 @@ export async function findByUser(userId: string, userType: string): Promise<Noti
 }
 
 export async function findById(notificationPreferenceId: string): Promise<NotificationPreference | null> {
-  return queryOne<NotificationPreference>(
-    `SELECT * FROM "notificationPreference" WHERE "notificationPreferenceId" = $1`,
-    [notificationPreferenceId],
-  );
+  return queryOne<NotificationPreference>(`SELECT * FROM "notificationPreference" WHERE "notificationPreferenceId" = $1`, [
+    notificationPreferenceId,
+  ]);
 }
 
-export async function findByUserAndType(
-  userId: string,
-  userType: string,
-  type: string,
-): Promise<NotificationPreference | null> {
+export async function findByUserAndType(userId: string, userType: string, type: string): Promise<NotificationPreference | null> {
   return queryOne<NotificationPreference>(
     `SELECT * FROM "notificationPreference" WHERE "userId" = $1 AND "userType" = $2 AND "type" = $3`,
     [userId, userType, type],

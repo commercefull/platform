@@ -3,14 +3,12 @@
  */
 
 import { InventoryItem } from './InventoryItem';
-import {
-  InventoryValidationError,
-  InvalidStockQuantityError,
-  InsufficientStockError,
-} from '../errors/InventoryErrors';
+import { InventoryValidationError, InvalidStockQuantityError, InsufficientStockError } from '../errors/InventoryErrors';
 
 describe('InventoryItem', () => {
-  function createItem(overrides?: Partial<{ quantity: number; reservedQuantity: number; lowStockThreshold: number; reorderPoint: number }>): InventoryItem {
+  function createItem(
+    overrides?: Partial<{ quantity: number; reservedQuantity: number; lowStockThreshold: number; reorderPoint: number }>,
+  ): InventoryItem {
     return InventoryItem.reconstitute({
       inventoryId: 'inv-1',
       productId: 'prod-1',
@@ -162,6 +160,64 @@ describe('InventoryItem', () => {
     it('should throw InsufficientStockError when reserving more than available', () => {
       const item = createItem({ quantity: 10, reservedQuantity: 5 });
       expect(() => item.reserve(10)).toThrow(InsufficientStockError);
+    });
+  });
+
+  // Epic J — Allocation rule integration
+  describe('reserveWithRule (Epic J)', () => {
+    it('should reserve when stock is sufficient', () => {
+      const item = createItem({ quantity: 100, reservedQuantity: 10 });
+      const result = item.reserveWithRule(20, {
+        allowBackorder: false,
+        effectiveAvailable: 90,
+        maxAllocationPerOrder: 0,
+      });
+      expect(item.reservedQuantity).toBe(30);
+      expect(result.isBackorder).toBe(false);
+    });
+
+    it('should allow backorder when rule permits and stock is insufficient', () => {
+      const item = createItem({ quantity: 10, reservedQuantity: 5 });
+      const result = item.reserveWithRule(20, {
+        allowBackorder: true,
+        effectiveAvailable: 5,
+        maxAllocationPerOrder: 0,
+      });
+      expect(item.reservedQuantity).toBe(25);
+      expect(result.isBackorder).toBe(true);
+    });
+
+    it('should throw when stock insufficient and backorder not allowed', () => {
+      const item = createItem({ quantity: 10, reservedQuantity: 5 });
+      expect(() =>
+        item.reserveWithRule(20, {
+          allowBackorder: false,
+          effectiveAvailable: 5,
+          maxAllocationPerOrder: 0,
+        }),
+      ).toThrow(InsufficientStockError);
+    });
+
+    it('should throw when quantity exceeds maxAllocationPerOrder', () => {
+      const item = createItem({ quantity: 100, reservedQuantity: 0 });
+      expect(() =>
+        item.reserveWithRule(50, {
+          allowBackorder: true,
+          effectiveAvailable: 100,
+          maxAllocationPerOrder: 25,
+        }),
+      ).toThrow();
+    });
+
+    it('should allow reservation at maxAllocationPerOrder boundary', () => {
+      const item = createItem({ quantity: 100, reservedQuantity: 0 });
+      const result = item.reserveWithRule(25, {
+        allowBackorder: false,
+        effectiveAvailable: 100,
+        maxAllocationPerOrder: 25,
+      });
+      expect(item.reservedQuantity).toBe(25);
+      expect(result.isBackorder).toBe(false);
     });
   });
 

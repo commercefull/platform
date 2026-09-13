@@ -7,12 +7,7 @@ import { Coupon } from '../../domain/entities/Coupon';
 export interface CouponRepositoryPort {
   findByCode(code: string): Promise<Coupon | null>;
   getCustomerUsageCount(couponId: string, customerId: string): Promise<number>;
-  recordUsage(usage: {
-    couponId: string;
-    basketId: string;
-    customerId?: string;
-    discountAmount: number;
-  }): Promise<unknown>;
+  recordUsage(usage: { couponId: string; basketId: string; customerId?: string; discountAmount: number }): Promise<unknown>;
 }
 
 export interface ApplyCouponInput {

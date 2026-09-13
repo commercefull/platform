@@ -85,7 +85,10 @@ export async function findBinById(binId: string): Promise<WarehouseBin | null> {
 }
 
 export async function findBinsByWarehouse(warehouseId: string): Promise<WarehouseBin[]> {
-  const result = await query<WarehouseBin[]>('SELECT * FROM "distributionWarehouseBin" WHERE "distributionWarehouseId" = $1 ORDER BY "priority" ASC, "locationCode" ASC', [warehouseId]);
+  const result = await query<WarehouseBin[]>(
+    'SELECT * FROM "distributionWarehouseBin" WHERE "distributionWarehouseId" = $1 ORDER BY "priority" ASC, "locationCode" ASC',
+    [warehouseId],
+  );
   return result || [];
 }
 
@@ -94,17 +97,50 @@ export async function updateBin(binId: string, input: UpdateBinInput): Promise<W
   const values: unknown[] = [];
   let paramIndex = 1;
 
-  if (input.binType !== undefined) { fields.push(`"binType" = $${paramIndex++}`); values.push(input.binType); }
-  if (input.isActive !== undefined) { fields.push(`"isActive" = $${paramIndex++}`); values.push(input.isActive); }
-  if (input.height !== undefined) { fields.push(`"height" = $${paramIndex++}`); values.push(input.height); }
-  if (input.width !== undefined) { fields.push(`"width" = $${paramIndex++}`); values.push(input.width); }
-  if (input.depth !== undefined) { fields.push(`"depth" = $${paramIndex++}`); values.push(input.depth); }
-  if (input.maxVolume !== undefined) { fields.push(`"maxVolume" = $${paramIndex++}`); values.push(input.maxVolume); }
-  if (input.maxWeight !== undefined) { fields.push(`"maxWeight" = $${paramIndex++}`); values.push(input.maxWeight); }
-  if (input.isPickable !== undefined) { fields.push(`"isPickable" = $${paramIndex++}`); values.push(input.isPickable); }
-  if (input.isReceivable !== undefined) { fields.push(`"isReceivable" = $${paramIndex++}`); values.push(input.isReceivable); }
-  if (input.isMixed !== undefined) { fields.push(`"isMixed" = $${paramIndex++}`); values.push(input.isMixed); }
-  if (input.priority !== undefined) { fields.push(`"priority" = $${paramIndex++}`); values.push(input.priority); }
+  if (input.binType !== undefined) {
+    fields.push(`"binType" = $${paramIndex++}`);
+    values.push(input.binType);
+  }
+  if (input.isActive !== undefined) {
+    fields.push(`"isActive" = $${paramIndex++}`);
+    values.push(input.isActive);
+  }
+  if (input.height !== undefined) {
+    fields.push(`"height" = $${paramIndex++}`);
+    values.push(input.height);
+  }
+  if (input.width !== undefined) {
+    fields.push(`"width" = $${paramIndex++}`);
+    values.push(input.width);
+  }
+  if (input.depth !== undefined) {
+    fields.push(`"depth" = $${paramIndex++}`);
+    values.push(input.depth);
+  }
+  if (input.maxVolume !== undefined) {
+    fields.push(`"maxVolume" = $${paramIndex++}`);
+    values.push(input.maxVolume);
+  }
+  if (input.maxWeight !== undefined) {
+    fields.push(`"maxWeight" = $${paramIndex++}`);
+    values.push(input.maxWeight);
+  }
+  if (input.isPickable !== undefined) {
+    fields.push(`"isPickable" = $${paramIndex++}`);
+    values.push(input.isPickable);
+  }
+  if (input.isReceivable !== undefined) {
+    fields.push(`"isReceivable" = $${paramIndex++}`);
+    values.push(input.isReceivable);
+  }
+  if (input.isMixed !== undefined) {
+    fields.push(`"isMixed" = $${paramIndex++}`);
+    values.push(input.isMixed);
+  }
+  if (input.priority !== undefined) {
+    fields.push(`"priority" = $${paramIndex++}`);
+    values.push(input.priority);
+  }
 
   if (fields.length === 0) return findBinById(binId);
 

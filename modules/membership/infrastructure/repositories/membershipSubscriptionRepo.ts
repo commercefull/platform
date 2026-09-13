@@ -86,7 +86,7 @@ export class MembershipSubscriptionRepo {
 
   async findExpiringSoon(days = 7): Promise<MembershipSubscription[]> {
     const now = unixTimestamp();
-    const futureDate = parseInt(now) + days * 24 * 60 * 60;
+    const futureDate = now + days * 24 * 60 * 60;
     return (
       (await query<MembershipSubscription[]>(
         `SELECT * FROM "membershipSubscription" WHERE "status" = 'active' AND "endDate" IS NOT NULL AND "endDate" BETWEEN $1 AND $2`,
@@ -97,7 +97,7 @@ export class MembershipSubscriptionRepo {
 
   async findTrialEnding(days = 3): Promise<MembershipSubscription[]> {
     const now = unixTimestamp();
-    const futureDate = parseInt(now) + days * 24 * 60 * 60;
+    const futureDate = now + days * 24 * 60 * 60;
     return (
       (await query<MembershipSubscription[]>(
         `SELECT * FROM "membershipSubscription" WHERE "status" = 'trial' AND "trialEndDate" BETWEEN $1 AND $2`,

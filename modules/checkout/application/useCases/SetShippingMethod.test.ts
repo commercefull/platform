@@ -7,7 +7,9 @@ import { SetShippingMethodUseCase, SetShippingMethodCommand } from './SetShippin
 import { NotFoundError, BadRequestError } from '../../../../libs/errors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('SetShippingMethodUseCase', () => {
   let useCase: SetShippingMethodUseCase;
@@ -17,15 +19,37 @@ describe('SetShippingMethodUseCase', () => {
 
   beforeEach(() => {
     mockSession = {
-      id: 'ck-1', basketId: 'b1', customerId: 'c1', guestEmail: undefined,
-      status: 'pending', paymentStatus: 'pending',
-      shippingAddress: { country: 'US', region: 'OR', city: 'Portland', postalCode: '97201', firstName: 'J', lastName: 'D', addressLine1: '123 St' },
-      billingAddress: null, shippingMethodId: undefined, shippingMethodName: undefined,
-      paymentMethodId: undefined, subtotal: { amount: 100, currency: 'USD' },
-      taxAmount: { amount: 0, currency: 'USD' }, shippingAmount: { amount: 0, currency: 'USD' },
-      discountAmount: { amount: 0, currency: 'USD' }, total: { amount: 100, currency: 'USD' },
-      couponCode: undefined, fulfillmentType: 'shipping', notes: undefined, sameAsShipping: false,
-      createdAt: new Date(), updatedAt: new Date(), expiresAt: new Date(),
+      id: 'ck-1',
+      basketId: 'b1',
+      customerId: 'c1',
+      guestEmail: undefined,
+      status: 'pending',
+      paymentStatus: 'pending',
+      shippingAddress: {
+        country: 'US',
+        region: 'OR',
+        city: 'Portland',
+        postalCode: '97201',
+        firstName: 'J',
+        lastName: 'D',
+        addressLine1: '123 St',
+      },
+      billingAddress: null,
+      shippingMethodId: undefined,
+      shippingMethodName: undefined,
+      paymentMethodId: undefined,
+      subtotal: { amount: 100, currency: 'USD' },
+      taxAmount: { amount: 0, currency: 'USD' },
+      shippingAmount: { amount: 0, currency: 'USD' },
+      discountAmount: { amount: 0, currency: 'USD' },
+      total: { amount: 100, currency: 'USD' },
+      couponCode: undefined,
+      fulfillmentType: 'shipping',
+      notes: undefined,
+      sameAsShipping: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      expiresAt: new Date(),
       setShippingMethod: jest.fn(),
     };
     mockRepo = {

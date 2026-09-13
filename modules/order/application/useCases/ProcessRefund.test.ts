@@ -9,10 +9,17 @@ jest.mock('../../../../libs/db', () => ({
 }));
 
 import { ProcessRefundUseCase, ProcessRefundCommand } from './ProcessRefund';
-import { OrderNotFoundError, OrderCannotBeRefundedError, RefundAmountMustBePositiveError, RefundExceedsOrderTotalError } from '../../domain/errors/OrderErrors';
+import {
+  OrderNotFoundError,
+  OrderCannotBeRefundedError,
+  RefundAmountMustBePositiveError,
+  RefundExceedsOrderTotalError,
+} from '../../domain/errors/OrderErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('ProcessRefundUseCase', () => {
   let useCase: ProcessRefundUseCase;
@@ -21,9 +28,16 @@ describe('ProcessRefundUseCase', () => {
 
   beforeEach(() => {
     mockOrder = {
-      orderId: 'o1', orderNumber: 'ORD-001', customerId: 'c1', status: 'processing',
-      paymentStatus: 'paid', canBeRefunded: true, totalAmount: { amount: 100 },
-      updatePaymentStatus: jest.fn(), updateStatus: jest.fn(), addAdminNote: jest.fn(),
+      orderId: 'o1',
+      orderNumber: 'ORD-001',
+      customerId: 'c1',
+      status: 'processing',
+      paymentStatus: 'paid',
+      canBeRefunded: true,
+      totalAmount: { amount: 100 },
+      updatePaymentStatus: jest.fn(),
+      updateStatus: jest.fn(),
+      addAdminNote: jest.fn(),
     };
     mockRepo = {
       findById: jest.fn().mockResolvedValue(mockOrder),

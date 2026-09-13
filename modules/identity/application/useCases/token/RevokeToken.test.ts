@@ -7,7 +7,9 @@ import { RevokeTokenUseCase } from './RevokeToken';
 import { TokenRequiredOnlyError, UserIdRequiredError } from '../../../domain/errors/IdentityErrors';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
-beforeEach(() => { jest.mocked(eventBus.emit).mockClear(); });
+beforeEach(() => {
+  jest.mocked(eventBus.emit).mockClear();
+});
 
 describe('RevokeTokenUseCase', () => {
   let useCase: RevokeTokenUseCase;
@@ -16,7 +18,11 @@ describe('RevokeTokenUseCase', () => {
 
   beforeEach(() => {
     mockBlacklist = { add: jest.fn().mockResolvedValue(undefined) };
-    mockRefresh = { revoke: jest.fn().mockResolvedValue(undefined), revokeAllForCustomer: jest.fn().mockResolvedValue(3), revokeAllForMerchant: jest.fn().mockResolvedValue(5) };
+    mockRefresh = {
+      revoke: jest.fn().mockResolvedValue(undefined),
+      revokeAllForCustomer: jest.fn().mockResolvedValue(3),
+      revokeAllForMerchant: jest.fn().mockResolvedValue(5),
+    };
     useCase = new RevokeTokenUseCase(mockBlacklist as never, mockRefresh as never);
   });
 
@@ -36,7 +42,9 @@ describe('RevokeTokenUseCase', () => {
   });
 
   it('should throw TokenRequiredOnlyError when token missing', async () => {
-    await expect(useCase.revokeOne({ token: '', tokenType: 'access', userId: 'c1', userType: 'customer' })).rejects.toThrow(TokenRequiredOnlyError);
+    await expect(useCase.revokeOne({ token: '', tokenType: 'access', userId: 'c1', userType: 'customer' })).rejects.toThrow(
+      TokenRequiredOnlyError,
+    );
   });
 
   it('should revoke all tokens for customer', async () => {

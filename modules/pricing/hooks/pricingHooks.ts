@@ -39,32 +39,29 @@ export async function calculateBasketPrices(
     applyLoyaltyDiscount: false,
     loyaltyPointsToApply: 0,
     includeTax: false,
-    ..._options
+    ..._options,
   };
-  
+
   let _totalDiscount = 0;
-  
+
   // Process each item in the basket through the pricing service
   for (let i = 0; i < basket.items.length; i++) {
     const item = basket.items[i];
-    
+
     // Calculate item price using pricing service
-    const result = await pricingService.calculatePrice(
-      item.productId,
-      {
-        variantId: item.productVariantId,
-        quantity: item.quantity,
-        customerId: basket.customerId,
-        additionalData: pricingOptions
-      }
-    );
-    
+    const result = await pricingService.calculatePrice(item.productId, {
+      variantId: item.productVariantId,
+      quantity: item.quantity,
+      customerId: basket.customerId,
+      additionalData: pricingOptions,
+    });
+
     // Track discounts applied
     if (result.appliedRules && result.appliedRules.length > 0) {
       _totalDiscount += result.appliedRules.reduce((sum: number, rule: unknown) => sum + (rule as { impact: number }).impact, 0);
     }
   }
-  
+
   return basket;
 }
 

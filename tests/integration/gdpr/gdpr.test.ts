@@ -22,9 +22,13 @@ describe('GDPR Feature Tests', () => {
       if (existing.data?.data) {
         for (const req of existing.data.data) {
           if (req.status === 'pending' && req.gdprDataRequestId) {
-            await client.post(`/customer/gdpr/requests/${req.gdprDataRequestId}/cancel`, {}, {
-              headers: { Authorization: `Bearer ${customerToken}` },
-            });
+            await client.post(
+              `/customer/gdpr/requests/${req.gdprDataRequestId}/cancel`,
+              {},
+              {
+                headers: { Authorization: `Bearer ${customerToken}` },
+              },
+            );
           }
         }
       }
@@ -426,7 +430,9 @@ describe('GDPR Feature Tests', () => {
       });
 
       // Find a pending request that we can reject
-      const pendingRequest = listResponse.data.data.find((r: Record<string, unknown>) => r.status === 'pending' && r.gdprDataRequestId !== testRequestId);
+      const pendingRequest = listResponse.data.data.find(
+        (r: Record<string, unknown>) => r.status === 'pending' && r.gdprDataRequestId !== testRequestId,
+      );
 
       if (!pendingRequest) {
         // Skip if no pending request available

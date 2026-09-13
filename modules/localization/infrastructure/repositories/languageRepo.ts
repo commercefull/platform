@@ -18,7 +18,13 @@ export async function findLanguageById(languageId: string): Promise<LanguageReco
   return queryOne<LanguageRecord>(`SELECT * FROM "language" WHERE "languageId" = $1`, [languageId]);
 }
 
-export async function createLanguage(params: { code: string; name: string; nativeName?: string; isDefault?: boolean; isActive?: boolean }): Promise<string> {
+export async function createLanguage(params: {
+  code: string;
+  name: string;
+  nativeName?: string;
+  isDefault?: boolean;
+  isActive?: boolean;
+}): Promise<string> {
   const languageId = uuidv4();
   const now = new Date();
 
@@ -29,13 +35,25 @@ export async function createLanguage(params: { code: string; name: string; nativ
   await query(
     `INSERT INTO "language" ("languageId", "code", "name", "nativeName", "isDefault", "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-    [languageId, params.code, params.name, params.nativeName || params.name, params.isDefault || false, params.isActive !== false, now, now],
+    [
+      languageId,
+      params.code,
+      params.name,
+      params.nativeName || params.name,
+      params.isDefault || false,
+      params.isActive !== false,
+      now,
+      now,
+    ],
   );
 
   return languageId;
 }
 
-export async function updateLanguage(languageId: string, updates: { name?: string; nativeName?: string; isDefault?: boolean; isActive?: boolean }): Promise<void> {
+export async function updateLanguage(
+  languageId: string,
+  updates: { name?: string; nativeName?: string; isDefault?: boolean; isActive?: boolean },
+): Promise<void> {
   const now = new Date();
 
   if (updates.isDefault) {

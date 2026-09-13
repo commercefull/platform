@@ -27,9 +27,7 @@ describe('ContentPage', () => {
     });
 
     it('should create with provided blocks', () => {
-      const blocks: ContentBlock[] = [
-        { blockId: 'b-1', type: 'text', content: { text: 'Hello' }, position: 0 },
-      ];
+      const blocks: ContentBlock[] = [{ blockId: 'b-1', type: 'text', content: { text: 'Hello' }, position: 0 }];
       const page = ContentPage.create({
         pageId: 'page-1',
         title: 'Test',

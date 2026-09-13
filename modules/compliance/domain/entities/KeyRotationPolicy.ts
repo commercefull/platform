@@ -8,12 +8,7 @@
 
 import { ComplianceValidationError } from '../errors/ComplianceErrors';
 
-export type KeyType =
-  | 'paymentWebhookSecret'
-  | 'paymentApiKey'
-  | 'jwtSigningKey'
-  | 'hmacSigningKey'
-  | 'encryptionKey';
+export type KeyType = 'paymentWebhookSecret' | 'paymentApiKey' | 'jwtSigningKey' | 'hmacSigningKey' | 'encryptionKey';
 
 export type KeyRotationStatus = 'active' | 'rotating' | 'retired' | 'expired';
 
@@ -65,14 +60,10 @@ export class KeyRotationPolicy {
     const interval = params.rotationIntervalDays ?? DEFAULT_ROTATION_INTERVALS[params.keyType];
 
     if (interval < MIN_ROTATION_INTERVAL) {
-      throw new ComplianceValidationError(
-        `Rotation interval must be at least ${MIN_ROTATION_INTERVAL} days`,
-      );
+      throw new ComplianceValidationError(`Rotation interval must be at least ${MIN_ROTATION_INTERVAL} days`);
     }
     if (interval > MAX_ROTATION_INTERVAL) {
-      throw new ComplianceValidationError(
-        `Rotation interval must not exceed ${MAX_ROTATION_INTERVAL} days`,
-      );
+      throw new ComplianceValidationError(`Rotation interval must not exceed ${MAX_ROTATION_INTERVAL} days`);
     }
 
     const nextRotation = new Date(now);
@@ -100,20 +91,48 @@ export class KeyRotationPolicy {
   }
 
   // Getters
-  get keyRotationPolicyId(): string { return this.props.keyRotationPolicyId; }
-  get organizationId(): string { return this.props.organizationId; }
-  get keyType(): KeyType { return this.props.keyType; }
-  get keyIdentifier(): string { return this.props.keyIdentifier; }
-  get rotationIntervalDays(): number { return this.props.rotationIntervalDays; }
-  get lastRotatedAt(): Date { return this.props.lastRotatedAt; }
-  get nextRotationAt(): Date { return this.props.nextRotationAt; }
-  get status(): KeyRotationStatus { return this.props.status; }
-  get previousKeyId(): string | undefined { return this.props.previousKeyId; }
-  get rotationCount(): number { return this.props.rotationCount; }
-  get gracePeriodDays(): number { return this.props.gracePeriodDays; }
-  get notifyBeforeDays(): number { return this.props.notifyBeforeDays; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get keyRotationPolicyId(): string {
+    return this.props.keyRotationPolicyId;
+  }
+  get organizationId(): string {
+    return this.props.organizationId;
+  }
+  get keyType(): KeyType {
+    return this.props.keyType;
+  }
+  get keyIdentifier(): string {
+    return this.props.keyIdentifier;
+  }
+  get rotationIntervalDays(): number {
+    return this.props.rotationIntervalDays;
+  }
+  get lastRotatedAt(): Date {
+    return this.props.lastRotatedAt;
+  }
+  get nextRotationAt(): Date {
+    return this.props.nextRotationAt;
+  }
+  get status(): KeyRotationStatus {
+    return this.props.status;
+  }
+  get previousKeyId(): string | undefined {
+    return this.props.previousKeyId;
+  }
+  get rotationCount(): number {
+    return this.props.rotationCount;
+  }
+  get gracePeriodDays(): number {
+    return this.props.gracePeriodDays;
+  }
+  get notifyBeforeDays(): number {
+    return this.props.notifyBeforeDays;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   isDueForRotation(): boolean {
     return new Date() >= this.props.nextRotationAt && this.props.status === 'active';
@@ -138,9 +157,7 @@ export class KeyRotationPolicy {
 
   startRotation(previousKeyId: string): void {
     if (this.props.status !== 'active') {
-      throw new ComplianceValidationError(
-        `Cannot rotate key in status: ${this.props.status}`,
-      );
+      throw new ComplianceValidationError(`Cannot rotate key in status: ${this.props.status}`);
     }
     this.props.status = 'rotating';
     this.props.previousKeyId = previousKeyId;
@@ -149,9 +166,7 @@ export class KeyRotationPolicy {
 
   completeRotation(): void {
     if (this.props.status !== 'rotating') {
-      throw new ComplianceValidationError(
-        `Cannot complete rotation in status: ${this.props.status}`,
-      );
+      throw new ComplianceValidationError(`Cannot complete rotation in status: ${this.props.status}`);
     }
     const now = new Date();
     this.props.status = 'active';
@@ -173,9 +188,7 @@ export class KeyRotationPolicy {
 
   updateInterval(days: number): void {
     if (days < MIN_ROTATION_INTERVAL || days > MAX_ROTATION_INTERVAL) {
-      throw new ComplianceValidationError(
-        `Rotation interval must be between ${MIN_ROTATION_INTERVAL} and ${MAX_ROTATION_INTERVAL} days`,
-      );
+      throw new ComplianceValidationError(`Rotation interval must be between ${MIN_ROTATION_INTERVAL} and ${MAX_ROTATION_INTERVAL} days`);
     }
     this.props.rotationIntervalDays = days;
     const next = new Date(this.props.lastRotatedAt);

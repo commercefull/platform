@@ -62,7 +62,8 @@ export function validateMigrationFile(filePath: string, content: string): Migrat
           file: filePath,
           line: lineNum,
           rule: 'NOT_NULL_WITHOUT_DEFAULT',
-          message: 'NOT NULL column added without default in alterTable — use expand/contract (add nullable, backfill, then add constraint)',
+          message:
+            'NOT NULL column added without default in alterTable — use expand/contract (add nullable, backfill, then add constraint)',
           severity: 'error',
         });
       }
@@ -74,14 +75,21 @@ export function validateMigrationFile(filePath: string, content: string): Migrat
         file: filePath,
         line: lineNum,
         rule: 'DROP_COLUMN',
-        message: 'DROP COLUMN detected — ensure no running code references this column. Deploy code change first, then drop in a follow-up migration.',
+        message:
+          'DROP COLUMN detected — ensure no running code references this column. Deploy code change first, then drop in a follow-up migration.',
         severity: 'error',
       });
     }
 
     // Rule 3: DROP TABLE without guard
     if (line.match(/\.dropTable\(/i) || line.match(/\.dropTableIfExists\(/i)) {
-      if (!line.match(/ifExists/i) && !lines.slice(Math.max(0, i - 3), i).join('\n').match(/hasTable/i)) {
+      if (
+        !line.match(/ifExists/i) &&
+        !lines
+          .slice(Math.max(0, i - 3), i)
+          .join('\n')
+          .match(/hasTable/i)
+      ) {
         violations.push({
           file: filePath,
           line: lineNum,
@@ -220,9 +228,7 @@ export function formatResults(result: ValidationResult): string {
 
 // CLI entry point
 if (require.main === module) {
-  const dir = process.argv.includes('--dir')
-    ? process.argv[process.argv.indexOf('--dir') + 1]
-    : join(process.cwd(), 'migrations');
+  const dir = process.argv.includes('--dir') ? process.argv[process.argv.indexOf('--dir') + 1] : join(process.cwd(), 'migrations');
 
   const result = validateMigrations(dir);
   console.log(formatResults(result));

@@ -5,7 +5,11 @@
  * Validates: Requirements 2.11
  */
 
-import { OrderFulfillmentPackageRepository, OrderFulfillmentPackage, OrderFulfillmentPackageCreateParams } from '../../domain/repositories/OrderFulfillmentPackageRepository';
+import {
+  OrderFulfillmentPackageRepository,
+  OrderFulfillmentPackage,
+  OrderFulfillmentPackageCreateParams,
+} from '../../domain/repositories/OrderFulfillmentPackageRepository';
 import orderFulfillmentDataRepository from '../../infrastructure/repositories/OrderFulfillmentDataRepository';
 
 const orderFulfillmentRepo = orderFulfillmentDataRepository.fulfillments;

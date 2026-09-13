@@ -134,9 +134,7 @@ export class PostgresFtsAdapter implements SearchAdapter {
    * Index all products (no-op for Postgres FTS)
    */
   async indexAll(): Promise<number> {
-    const result = await query<Array<{ count: string }>>(
-      `SELECT COUNT(*) as count FROM "${PRODUCT_TABLE}" WHERE "deletedAt" IS NULL`,
-    );
+    const result = await query<Array<{ count: string }>>(`SELECT COUNT(*) as count FROM "${PRODUCT_TABLE}" WHERE "deletedAt" IS NULL`);
     const count = parseInt(result?.[0]?.count || '0', 10);
     logger.info('PostgresFtsAdapter: indexAll (no-op, tsvector generated at query time)', { productCount: count });
     return count;
@@ -571,15 +569,10 @@ export class PostgresFtsAdapter implements SearchAdapter {
   // Private: Merchandising
   // ===========================================================================
 
-  private applyMerchandising(
-    products: SearchProductItem[],
-    merch: MerchandisingContext,
-  ): SearchProductItem[] {
+  private applyMerchandising(products: SearchProductItem[], merch: MerchandisingContext): SearchProductItem[] {
     const boostSet = new Set(merch.boostProductIds || []);
     const burySet = new Set(merch.buryProductIds || []);
-    const pinnedMap = new Map<string, number>(
-      (merch.pinnedProducts || []).map(p => [p.productId, p.position]),
-    );
+    const pinnedMap = new Map<string, number>((merch.pinnedProducts || []).map(p => [p.productId, p.position]));
 
     const featuredBoost = merch.featuredBoost ?? 1;
     const bestsellerBoost = merch.bestsellerBoost ?? 1;
@@ -619,8 +612,7 @@ export class PostgresFtsAdapter implements SearchAdapter {
     pinned.sort((a, b) => (pinnedMap.get(a.productId) ?? 0) - (pinnedMap.get(b.productId) ?? 0));
 
     // Sort boosted/normal by score (if available) then by createdAt
-    const sortByScore = (a: SearchProductItem, b: SearchProductItem) =>
-      (b.score ?? 0) - (a.score ?? 0);
+    const sortByScore = (a: SearchProductItem, b: SearchProductItem) => (b.score ?? 0) - (a.score ?? 0);
 
     boosted.sort(sortByScore);
     normal.sort(sortByScore);
@@ -632,13 +624,8 @@ export class PostgresFtsAdapter implements SearchAdapter {
   // Private: Manual Ordering
   // ===========================================================================
 
-  private applyManualOrdering(
-    products: SearchProductItem[],
-    manual: ManualOrderingContext,
-  ): SearchProductItem[] {
-    const orderMap = new Map<string, number>(
-      manual.productIds.map((id, index) => [id, index]),
-    );
+  private applyManualOrdering(products: SearchProductItem[], manual: ManualOrderingContext): SearchProductItem[] {
+    const orderMap = new Map<string, number>(manual.productIds.map((id, index) => [id, index]));
 
     const ordered: SearchProductItem[] = [];
     const unordered: SearchProductItem[] = [];

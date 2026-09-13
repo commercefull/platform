@@ -27,7 +27,9 @@ export const loyaltyDashboard = async (req: TypedRequest, res: Response) => {
 
   const membership = await manageStorefrontLoyaltyUseCase.findMemberWithTier(user.customerId);
   const recentTransactions = await manageStorefrontLoyaltyUseCase.findCustomerTransactions(user.customerId, 20, 0);
-  const availableRewards = await manageStorefrontLoyaltyUseCase.findAvailableRewards((membership as Record<string, unknown>)?.pointsBalance as number || 0);
+  const availableRewards = await manageStorefrontLoyaltyUseCase.findAvailableRewards(
+    ((membership as Record<string, unknown>)?.pointsBalance as number) || 0,
+  );
 
   storefrontRespond(req, res, 'loyalty/index', {
     pageName: 'My Loyalty',
@@ -35,7 +37,6 @@ export const loyaltyDashboard = async (req: TypedRequest, res: Response) => {
     transactions: recentTransactions,
     rewards: availableRewards,
   });
-  
 };
 
 /**
@@ -68,7 +69,6 @@ export const pointsHistory = async (req: TypedRequest, res: Response) => {
       hasPrev: currentPage > 1,
     },
   });
-  
 };
 
 /**
@@ -97,11 +97,14 @@ export const redeemReward = async (req: TypedRequest, res: Response) => {
   }
 
   await manageStorefrontLoyaltyUseCase.deductPoints(user.customerId, rewardData.pointsCost as number);
-  await manageStorefrontLoyaltyUseCase.createRedeemTransaction(user.customerId, -(rewardData.pointsCost as number), `Redeemed: ${rewardData.name}`);
+  await manageStorefrontLoyaltyUseCase.createRedeemTransaction(
+    user.customerId,
+    -(rewardData.pointsCost as number),
+    `Redeemed: ${rewardData.name}`,
+  );
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     return res.json({ success: true });
   }
   return res.redirect('/loyalty');
-  
 };

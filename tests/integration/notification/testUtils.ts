@@ -137,13 +137,9 @@ export const setupNotificationTests = async () => {
   // Create test preference using customer token
   if (customerToken) {
     try {
-      const createPreferenceResponse = await client.post(
-        '/customer/notifications/preferences',
-        testPreferenceData,
-        {
-          headers: { Authorization: `Bearer ${customerToken}` },
-        },
-      );
+      const createPreferenceResponse = await client.post('/customer/notifications/preferences', testPreferenceData, {
+        headers: { Authorization: `Bearer ${customerToken}` },
+      });
 
       if (createPreferenceResponse.data?.data?.id) {
         testPreferenceId = createPreferenceResponse.data.data.id;

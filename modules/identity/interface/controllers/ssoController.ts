@@ -9,12 +9,7 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
-import {
-  manageSamlUseCase,
-  manageOidcUseCase,
-  ssoLoginUseCase,
-  listProvidersUseCase,
-} from '../../application/wired';
+import { manageSamlUseCase, manageOidcUseCase, ssoLoginUseCase, listProvidersUseCase } from '../../application/wired';
 
 class SsoController {
   // ── List Providers ────────────────────────────────────────────

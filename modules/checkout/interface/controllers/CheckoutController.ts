@@ -96,9 +96,12 @@ interface CouponBody {
  * Initiate checkout
  * POST /checkout
  */
-export const initiateCheckout = async (req: TypedRequest<Record<string, string>, unknown, InitiateCheckoutBody>, res: Response): Promise<void> => {
+export const initiateCheckout = async (
+  req: TypedRequest<Record<string, string>, unknown, InitiateCheckoutBody>,
+  res: Response,
+): Promise<void> => {
   const { basketId, guestEmail } = req.body;
-  const customerId = req.user?.customerId || (req.user as Record<string, unknown> | undefined)?.id as string | undefined;
+  const customerId = req.user?.customerId || ((req.user as Record<string, unknown> | undefined)?.id as string | undefined);
 
   if (!basketId) {
     respondError(req, res, 'Basket ID is required', 400);
@@ -128,7 +131,6 @@ export const getCheckout = async (req: TypedRequest, res: Response): Promise<voi
   }
 
   respond(req, res, mapCheckoutToResponse(session) as unknown as unknown, 200);
-  
 };
 
 /**
@@ -147,14 +149,16 @@ export const getCheckoutSummary = async (req: TypedRequest, res: Response): Prom
 
   // Reuse the same mapper; response includes subtotal, tax, shipping, discount, total
   respond(req, res, mapCheckoutToResponse(session) as unknown as unknown, 200);
-  
 };
 
 /**
  * Set shipping address
  * PUT /checkout/:checkoutId/shipping-address
  */
-export const setShippingAddress = async (req: TypedRequest<Record<string, string>, unknown, ShippingAddressBody>, res: Response): Promise<void> => {
+export const setShippingAddress = async (
+  req: TypedRequest<Record<string, string>, unknown, ShippingAddressBody>,
+  res: Response,
+): Promise<void> => {
   const { checkoutId } = req.params;
   const { firstName, lastName, company, addressLine1, addressLine2, city, region, postalCode, country, phone } = req.body;
 
@@ -177,7 +181,6 @@ export const setShippingAddress = async (req: TypedRequest<Record<string, string
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
-  
 };
 
 /**
@@ -239,7 +242,6 @@ export const getShippingMethods = async (req: TypedRequest, res: Response): Prom
   }));
 
   respond(req, res, methods as unknown as unknown, 200);
-  
 };
 
 /**
@@ -262,14 +264,16 @@ export const getPickupLocations = async (req: TypedRequest, res: Response): Prom
 
   const locations = await ports.storeFulfillment.getAllPickupLocations();
   respond(req, res, locations as unknown as unknown, 200);
-  
 };
 
 /**
  * Set pickup location for checkout (BOPIS flow)
  * PUT /checkout/:checkoutId/pickup-location
  */
-export const setPickupLocation = async (req: TypedRequest<Record<string, string>, unknown, PickupLocationBody>, res: Response): Promise<void> => {
+export const setPickupLocation = async (
+  req: TypedRequest<Record<string, string>, unknown, PickupLocationBody>,
+  res: Response,
+): Promise<void> => {
   const { checkoutId } = req.params;
   const { pickupLocationId } = req.body;
 
@@ -334,14 +338,16 @@ export const setPickupLocation = async (req: TypedRequest<Record<string, string>
     (responseData as Record<string, unknown>).inventoryWarnings = inventoryWarnings;
   }
   respond(req, res, responseData, 200);
-  
 };
 
 /**
  * Set fulfillment method (shipping, pickup, local_delivery, digital)
  * PUT /checkout/:checkoutId/fulfillment-method
  */
-export const setFulfillmentMethod = async (req: TypedRequest<Record<string, string>, unknown, FulfillmentMethodBody>, res: Response): Promise<void> => {
+export const setFulfillmentMethod = async (
+  req: TypedRequest<Record<string, string>, unknown, FulfillmentMethodBody>,
+  res: Response,
+): Promise<void> => {
   const { checkoutId } = req.params;
   const { fulfillmentType } = req.body;
 
@@ -355,14 +361,16 @@ export const setFulfillmentMethod = async (req: TypedRequest<Record<string, stri
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
-  
 };
 
 /**
  * Set shipping method
  * PUT /checkout/:checkoutId/shipping-method
  */
-export const setShippingMethod = async (req: TypedRequest<Record<string, string>, unknown, ShippingMethodBody>, res: Response): Promise<void> => {
+export const setShippingMethod = async (
+  req: TypedRequest<Record<string, string>, unknown, ShippingMethodBody>,
+  res: Response,
+): Promise<void> => {
   const { checkoutId } = req.params;
   const { shippingMethodId } = req.body;
 
@@ -377,7 +385,6 @@ export const setShippingMethod = async (req: TypedRequest<Record<string, string>
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
-  
 };
 
 /**
@@ -387,14 +394,16 @@ export const setShippingMethod = async (req: TypedRequest<Record<string, string>
 export const getPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
   const methods = await CheckoutRepo.getAvailablePaymentMethods();
   respond(req, res, methods as unknown as unknown, 200);
-  
 };
 
 /**
  * Set payment method
  * PUT /checkout/:checkoutId/payment-method
  */
-export const setPaymentMethod = async (req: TypedRequest<Record<string, string>, unknown, PaymentMethodBody>, res: Response): Promise<void> => {
+export const setPaymentMethod = async (
+  req: TypedRequest<Record<string, string>, unknown, PaymentMethodBody>,
+  res: Response,
+): Promise<void> => {
   const { checkoutId } = req.params;
   const { paymentMethodId } = req.body;
 
@@ -408,7 +417,6 @@ export const setPaymentMethod = async (req: TypedRequest<Record<string, string>,
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
-  
 };
 
 /**
@@ -430,7 +438,6 @@ export const applyCoupon = async (req: TypedRequest<Record<string, string>, unkn
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
-  
 };
 
 /**
@@ -445,7 +452,6 @@ export const removeCoupon = async (req: TypedRequest, res: Response): Promise<vo
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
-  
 };
 
 /**
@@ -461,7 +467,6 @@ export const completeCheckout = async (req: TypedRequest, res: Response): Promis
   const result = await useCase.execute(command);
 
   respond(req, res, result as unknown as unknown, 201);
-  
 };
 
 /**
@@ -477,14 +482,16 @@ export const abandonCheckout = async (req: TypedRequest, res: Response): Promise
   const result = await useCase.execute(command);
 
   respond(req, res, result as unknown as unknown, 200);
-  
 };
 
 /**
  * Set billing address
  * PUT /checkout/:checkoutId/billing-address
  */
-export const setBillingAddress = async (req: TypedRequest<Record<string, string>, unknown, BillingAddressBody>, res: Response): Promise<void> => {
+export const setBillingAddress = async (
+  req: TypedRequest<Record<string, string>, unknown, BillingAddressBody>,
+  res: Response,
+): Promise<void> => {
   const { checkoutId } = req.params;
   const { firstName, lastName, company, addressLine1, addressLine2, city, region, postalCode, country, phone, sameAsShipping } = req.body;
 
@@ -507,7 +514,6 @@ export const setBillingAddress = async (req: TypedRequest<Record<string, string>
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
-  
 };
 
 /**
@@ -516,16 +522,11 @@ export const setBillingAddress = async (req: TypedRequest<Record<string, string>
  */
 export const createPaymentIntent = async (req: TypedRequest, res: Response): Promise<void> => {
   const { checkoutId } = req.params;
-  const customerId = req.user?.customerId || (req.user as Record<string, unknown> | undefined)?.id as string | undefined;
+  const customerId = req.user?.customerId || ((req.user as Record<string, unknown> | undefined)?.id as string | undefined);
 
   const ports = getCheckoutPorts();
   const command = new CreatePaymentIntentCommand(checkoutId, customerId);
-  const useCase = new CreatePaymentIntentUseCase(
-    CheckoutRepo,
-    ports.basketSnapshot,
-    ports.orderPlacement,
-    ports.paymentAuthorization,
-  );
+  const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, ports.basketSnapshot, ports.orderPlacement, ports.paymentAuthorization);
   const result = await useCase.execute(command);
 
   respond(req, res, result as unknown as unknown, 201);
@@ -563,7 +564,6 @@ export const getLocalDeliveryOptions = async (req: TypedRequest, res: Response):
   const result = await ports.storeFulfillment.checkLocalDeliveryEligibility(address);
 
   respond(req, res, result as unknown as unknown, 200);
-  
 };
 
 /**
@@ -661,7 +661,6 @@ export const getFulfillmentOptions = async (req: TypedRequest, res: Response): P
   }
 
   respond(req, res, options as unknown as unknown, 200);
-  
 };
 
 /**
@@ -693,12 +692,14 @@ export const getPickupSlots = async (req: TypedRequest, res: Response): Promise<
   }
 
   const useCase = new GetPickupSlotsUseCase();
-  const slots = useCase.execute({
-    maxOrdersPerSlot: 10,
-    prepareTimeMinutes: 60,
-    operatingHours: {} as Record<string, { open: string; close: string }>,
-  }, daysAhead);
+  const slots = useCase.execute(
+    {
+      maxOrdersPerSlot: 10,
+      prepareTimeMinutes: 60,
+      operatingHours: {} as Record<string, { open: string; close: string }>,
+    },
+    daysAhead,
+  );
 
   respond(req, res, slots as unknown as unknown, 200);
-  
 };

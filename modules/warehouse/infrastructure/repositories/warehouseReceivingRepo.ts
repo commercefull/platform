@@ -55,10 +55,22 @@ export async function create(input: CreateReceivingInput): Promise<WarehouseRece
   `;
 
   const result = await queryOne<WarehouseReceiving>(sql, [
-    id, input.distributionWarehouseId, input.receiptNumber, input.sourceType, input.sourceId || null,
-    'pending', input.expectedDate || null, input.carrierName || null, input.trackingNumber || null,
-    input.packageCount || null, input.notes || null, false,
-    input.items ? JSON.stringify(input.items) : null, input.receivedBy || null, now, now,
+    id,
+    input.distributionWarehouseId,
+    input.receiptNumber,
+    input.sourceType,
+    input.sourceId || null,
+    'pending',
+    input.expectedDate || null,
+    input.carrierName || null,
+    input.trackingNumber || null,
+    input.packageCount || null,
+    input.notes || null,
+    false,
+    input.items ? JSON.stringify(input.items) : null,
+    input.receivedBy || null,
+    now,
+    now,
   ]);
 
   if (!result) throw new FailedToCreateWarehouseEntityError('Failed to create receiving record');
@@ -96,10 +108,17 @@ export async function updateStatus(id: string, status: string, receivedBy?: stri
   }
   values.push(id);
 
-  return queryOne<WarehouseReceiving>(`UPDATE "warehouseReceiving" SET ${fields.join(', ')} WHERE "warehouseReceivingId" = $${values.length} RETURNING *`, values);
+  return queryOne<WarehouseReceiving>(
+    `UPDATE "warehouseReceiving" SET ${fields.join(', ')} WHERE "warehouseReceivingId" = $${values.length} RETURNING *`,
+    values,
+  );
 }
 
-export async function updateItems(id: string, items: Record<string, unknown>[], hasDiscrepancies: boolean): Promise<WarehouseReceiving | null> {
+export async function updateItems(
+  id: string,
+  items: Record<string, unknown>[],
+  hasDiscrepancies: boolean,
+): Promise<WarehouseReceiving | null> {
   const now = new Date();
   return queryOne<WarehouseReceiving>(
     `UPDATE "warehouseReceiving" SET "items" = $1, "hasDiscrepancies" = $2, "updatedAt" = $3 WHERE "warehouseReceivingId" = $4 RETURNING *`,

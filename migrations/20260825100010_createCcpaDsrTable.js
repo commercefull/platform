@@ -1,5 +1,5 @@
 export async function up(knex) {
-  await knex.schema.createTable('ccpaDsr', (table) => {
+  await knex.schema.createTable('ccpaDsr', table => {
     table.string('ccpaDsrId').primary();
     table.string('customerId').notNullable().index();
     table.string('organizationId').notNullable().index();

@@ -160,7 +160,9 @@ export interface OrderRepository {
   /**
    * Get payment status history
    */
-  getPaymentStatusHistory(orderId: string): Promise<Array<{ orderId: string; paymentStatus: string; transactionId?: string; createdAt: Date }>>;
+  getPaymentStatusHistory(
+    orderId: string,
+  ): Promise<Array<{ orderId: string; paymentStatus: string; transactionId?: string; createdAt: Date }>>;
 
   /**
    * Get fulfillment status history

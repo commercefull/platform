@@ -8,10 +8,7 @@ import { SamlProviderRepository } from '../../domain/repositories/SsoProviderRep
 
 export class SamlProviderRepositoryImpl implements SamlProviderRepository {
   async findById(providerId: string): Promise<SamlProvider | null> {
-    const row = await queryOne<Record<string, unknown>>(
-      'SELECT * FROM "samlProvider" WHERE "providerId" = $1',
-      [providerId],
-    );
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "samlProvider" WHERE "providerId" = $1', [providerId]);
     return row ? this.mapToEntity(row) : null;
   }
 
@@ -33,10 +30,9 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
 
   async save(provider: SamlProvider): Promise<SamlProvider> {
     const props = this.getProps(provider);
-    const existing = await queryOne<Record<string, unknown>>(
-      'SELECT "providerId" FROM "samlProvider" WHERE "providerId" = $1',
-      [props.providerId],
-    );
+    const existing = await queryOne<Record<string, unknown>>('SELECT "providerId" FROM "samlProvider" WHERE "providerId" = $1', [
+      props.providerId,
+    ]);
 
     if (existing) {
       await query(
@@ -48,10 +44,21 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
           "isActive" = $16, "updatedAt" = NOW()
         WHERE "providerId" = $1`,
         [
-          props.providerId, props.organizationId, props.name, props.entityId,
-          props.ssoUrl, props.sloUrl, props.certificate, props.spEntityId,
-          props.acsUrl, props.binding, props.nameIdFormat, props.signAuthnRequest,
-          props.spPrivateKey, props.spCertificate, JSON.stringify(props.attributeMapping),
+          props.providerId,
+          props.organizationId,
+          props.name,
+          props.entityId,
+          props.ssoUrl,
+          props.sloUrl,
+          props.certificate,
+          props.spEntityId,
+          props.acsUrl,
+          props.binding,
+          props.nameIdFormat,
+          props.signAuthnRequest,
+          props.spPrivateKey,
+          props.spCertificate,
+          JSON.stringify(props.attributeMapping),
           props.isActive,
         ],
       );
@@ -64,10 +71,21 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
           "attributeMapping", "isActive", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW())`,
         [
-          props.providerId, props.organizationId, props.name, props.entityId,
-          props.ssoUrl, props.sloUrl, props.certificate, props.spEntityId,
-          props.acsUrl, props.binding, props.nameIdFormat, props.signAuthnRequest,
-          props.spPrivateKey, props.spCertificate, JSON.stringify(props.attributeMapping),
+          props.providerId,
+          props.organizationId,
+          props.name,
+          props.entityId,
+          props.ssoUrl,
+          props.sloUrl,
+          props.certificate,
+          props.spEntityId,
+          props.acsUrl,
+          props.binding,
+          props.nameIdFormat,
+          props.signAuthnRequest,
+          props.spPrivateKey,
+          props.spCertificate,
+          JSON.stringify(props.attributeMapping),
           props.isActive,
         ],
       );

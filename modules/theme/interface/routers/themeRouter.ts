@@ -22,7 +22,11 @@ router.post('/:themeId/archive', isOrganizationLoggedIn, themeController.archive
 
 // Theme overrides
 router.get('/overrides/store/:storeId', isOrganizationLoggedIn, themeController.getOverrideByStore.bind(themeController));
-router.get('/overrides/organization/:organizationId', isOrganizationLoggedIn, themeController.getOverridesByOrganization.bind(themeController));
+router.get(
+  '/overrides/organization/:organizationId',
+  isOrganizationLoggedIn,
+  themeController.getOverridesByOrganization.bind(themeController),
+);
 router.post('/overrides', isOrganizationLoggedIn, themeController.createOverride.bind(themeController));
 router.put('/overrides/:overrideId', isOrganizationLoggedIn, themeController.updateOverride.bind(themeController));
 router.delete('/overrides/:overrideId', isOrganizationLoggedIn, themeController.deleteOverride.bind(themeController));

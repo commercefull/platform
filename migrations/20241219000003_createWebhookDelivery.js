@@ -28,9 +28,7 @@ exports.up = async function (knex) {
     t.index(['createdAt']);
   });
 
-  await knex.raw(
-    'CREATE INDEX "webhookDelivery_retry_idx" ON "webhookDelivery" ("status", "nextRetryAt") WHERE "status" = \'retrying\'',
-  );
+  await knex.raw('CREATE INDEX "webhookDelivery_retry_idx" ON "webhookDelivery" ("status", "nextRetryAt") WHERE "status" = \'retrying\'');
 };
 
 /**

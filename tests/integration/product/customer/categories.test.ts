@@ -62,10 +62,7 @@ describe('Customer: Category Browsing', () => {
         },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
-      parentId =
-        parentRes.data.data?.productCategoryId ||
-        parentRes.data.data?.categoryId ||
-        parentRes.data.data?.id;
+      parentId = parentRes.data.data?.productCategoryId || parentRes.data.data?.categoryId || parentRes.data.data?.id;
 
       const childRes = await client.post(
         '/business/categories',
@@ -76,10 +73,7 @@ describe('Customer: Category Browsing', () => {
         },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
-      childId =
-        childRes.data.data?.productCategoryId ||
-        childRes.data.data?.categoryId ||
-        childRes.data.data?.id;
+      childId = childRes.data.data?.productCategoryId || childRes.data.data?.categoryId || childRes.data.data?.id;
     });
 
     afterAll(async () => {
@@ -107,9 +101,7 @@ describe('Customer: Category Browsing', () => {
     });
 
     it('should return empty array for non-existent category children', async () => {
-      const res = await client.get(
-        '/customer/categories/00000000-0000-0000-0000-999999999999/children',
-      );
+      const res = await client.get('/customer/categories/00000000-0000-0000-0000-999999999999/children');
       // Controller returns empty array for non-existent parent, not 404
       expect(res.status).toBe(200);
       expect(Array.isArray(res.data.data)).toBe(true);

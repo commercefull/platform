@@ -38,7 +38,6 @@ export const listSEOSettings = async (req: TypedRequest, res: Response): Promise
 
     success: req.query.success || null,
   });
-  
 };
 
 export const updateSEOSettings = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -60,7 +59,20 @@ export const updateSEOSettings = async (req: TypedRequest, res: Response): Promi
     } = body;
 
     // In a real implementation, this would save to database
-    logger.info('SEO Settings Update', { siteName, siteDescription, defaultMetaTitle, defaultMetaDescription, defaultKeywords, robotsTxt, googleAnalyticsId, facebookPixelId, twitterCardType, ogImageUrl, structuredData: structuredData === 'true', canonicalUrls: canonicalUrls === 'true' });
+    logger.info('SEO Settings Update', {
+      siteName,
+      siteDescription,
+      defaultMetaTitle,
+      defaultMetaDescription,
+      defaultKeywords,
+      robotsTxt,
+      googleAnalyticsId,
+      facebookPixelId,
+      twitterCardType,
+      ogImageUrl,
+      structuredData: structuredData === 'true',
+      canonicalUrls: canonicalUrls === 'true',
+    });
 
     res.redirect('/hub/marketing/seo?success=SEO settings updated successfully');
   } catch (error: unknown) {
@@ -93,7 +105,6 @@ Sitemap: https://Commercefull.com/sitemap.xml`;
   res.setHeader('Content-Type', 'text/plain');
   res.setHeader('Content-Disposition', 'attachment; filename="robots.txt"');
   res.send(robotsTxt);
-  
 };
 
 export const generateSitemap = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -135,5 +146,4 @@ export const generateSitemap = async (req: TypedRequest, res: Response): Promise
   res.setHeader('Content-Type', 'application/xml');
   res.setHeader('Content-Disposition', 'attachment; filename="sitemap.xml"');
   res.send(sitemapXml);
-  
 };

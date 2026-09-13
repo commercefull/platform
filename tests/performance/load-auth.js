@@ -49,7 +49,7 @@ export default function () {
         email: TEST_EMAIL,
         password: TEST_PASSWORD,
       }),
-      { headers: { 'Content-Type': 'application/json', Accept: 'application/json' } }
+      { headers: { 'Content-Type': 'application/json', Accept: 'application/json' } },
     );
 
     authErrors.add(!checkResponse(res, 200, 'login'));
@@ -101,11 +101,9 @@ export default function () {
       authErrors.add(true);
       return;
     }
-    const res = http.post(
-      `${BASE_URL}/customer/identity/refresh`,
-      JSON.stringify({ refreshToken }),
-      { headers: { 'Content-Type': 'application/json', Accept: 'application/json' } }
-    );
+    const res = http.post(`${BASE_URL}/customer/identity/refresh`, JSON.stringify({ refreshToken }), {
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    });
     // 200 (renewed) or 401 (revoked/expired) are both acceptable outcomes
     authErrors.add(!(res.status === 200 || res.status === 401));
   });

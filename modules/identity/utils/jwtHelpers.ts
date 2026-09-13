@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import jwt, { SignOptions, JwtPayload } from 'jsonwebtoken';
 import { randomUUID } from 'crypto';

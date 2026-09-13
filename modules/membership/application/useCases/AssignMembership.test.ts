@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { AssignMembershipUseCase} from './AssignMembership';
+import { AssignMembershipUseCase } from './AssignMembership';
 import { MembershipPlanNotFoundError, MembershipAlreadyActiveError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
 describe('AssignMembershipUseCase', () => {
@@ -14,7 +14,14 @@ describe('AssignMembershipUseCase', () => {
     mockRepo = {
       findTierById: jest.fn().mockResolvedValue({ name: 'Gold', isActive: true, billingPeriod: 'monthly', price: 50 }),
       findActiveByCustomerId: jest.fn().mockResolvedValue(null),
-      createMembership: jest.fn().mockResolvedValue({ membershipId: 'm1', customerId: 'c1', tierId: 't1', status: 'active', startDate: new Date(), endDate: new Date() }),
+      createMembership: jest.fn().mockResolvedValue({
+        membershipId: 'm1',
+        customerId: 'c1',
+        tierId: 't1',
+        status: 'active',
+        startDate: new Date(),
+        endDate: new Date(),
+      }),
       incrementTierMembers: jest.fn().mockResolvedValue(undefined),
     };
     useCase = new AssignMembershipUseCase(mockRepo as never);

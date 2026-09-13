@@ -4,7 +4,14 @@
 
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { logger } from '../../../../../libs/logger';
-import { EmailRequiredOnlyError, TokenRequiredError, PasswordTooShortError, InvalidOrExpiredTokenError, TokenAlreadyUsedError, TokenExpiredError } from '../../../domain/errors/IdentityErrors';
+import {
+  EmailRequiredOnlyError,
+  TokenRequiredError,
+  PasswordTooShortError,
+  InvalidOrExpiredTokenError,
+  TokenAlreadyUsedError,
+  TokenExpiredError,
+} from '../../../domain/errors/IdentityErrors';
 
 export interface RequestPasswordResetInput {
   email: string;

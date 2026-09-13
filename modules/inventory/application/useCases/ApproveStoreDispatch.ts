@@ -29,7 +29,11 @@ export class ApproveStoreDispatchUseCase {
 
     if (sourceLocation) {
       for (const item of dispatch.items) {
-        const inventory = await this.inventoryRepository.findByProductAndLocation(item.productId, sourceLocation.locationId, item.variantId);
+        const inventory = await this.inventoryRepository.findByProductAndLocation(
+          item.productId,
+          sourceLocation.locationId,
+          item.variantId,
+        );
         // Soft-validate: if inventory missing or insufficient, still allow approval
         if (!inventory || inventory.availableQuantity < item.requestedQuantity) {
           // no-op; approval remains allowed

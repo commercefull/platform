@@ -159,26 +159,66 @@ export class Theme {
   }
 
   // Getters
-  get themeId(): string { return this.props.themeId; }
-  get slug(): string { return this.props.slug; }
-  get name(): string { return this.props.name; }
-  get description(): string | undefined { return this.props.description; }
-  get version(): string { return this.props.version; }
-  get type(): ThemeType { return this.props.type; }
-  get status(): ThemeStatus { return this.props.status; }
-  get author(): string | undefined { return this.props.author; }
-  get screenshotUrl(): string | undefined { return this.props.screenshotUrl; }
-  get previewUrl(): string | undefined { return this.props.previewUrl; }
-  get settingsSchema(): ThemeSettingsSchema { return this.props.settingsSchema; }
-  get defaultSettings(): Record<string, string | number | boolean> { return this.props.defaultSettings; }
-  get layout(): ThemeLayoutConfig { return this.props.layout; }
-  get components(): ThemeComponentConfig { return this.props.components; }
-  get assets(): ThemeAssetConfig { return this.props.assets; }
-  get tags(): string[] { return this.props.tags; }
-  get isCustomizable(): boolean { return this.props.isCustomizable; }
-  get organizationId(): string | undefined { return this.props.organizationId; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get themeId(): string {
+    return this.props.themeId;
+  }
+  get slug(): string {
+    return this.props.slug;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get version(): string {
+    return this.props.version;
+  }
+  get type(): ThemeType {
+    return this.props.type;
+  }
+  get status(): ThemeStatus {
+    return this.props.status;
+  }
+  get author(): string | undefined {
+    return this.props.author;
+  }
+  get screenshotUrl(): string | undefined {
+    return this.props.screenshotUrl;
+  }
+  get previewUrl(): string | undefined {
+    return this.props.previewUrl;
+  }
+  get settingsSchema(): ThemeSettingsSchema {
+    return this.props.settingsSchema;
+  }
+  get defaultSettings(): Record<string, string | number | boolean> {
+    return this.props.defaultSettings;
+  }
+  get layout(): ThemeLayoutConfig {
+    return this.props.layout;
+  }
+  get components(): ThemeComponentConfig {
+    return this.props.components;
+  }
+  get assets(): ThemeAssetConfig {
+    return this.props.assets;
+  }
+  get tags(): string[] {
+    return this.props.tags;
+  }
+  get isCustomizable(): boolean {
+    return this.props.isCustomizable;
+  }
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Lifecycle
 

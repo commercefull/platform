@@ -48,7 +48,6 @@ export const listAbandonedCarts = async (req: TypedRequest, res: Response): Prom
 
     success: req.query.success || null,
   });
-  
 };
 
 export const viewAbandonedCart = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -80,7 +79,6 @@ export const viewAbandonedCart = async (req: TypedRequest, res: Response): Promi
 
     success: req.query.success || null,
   });
-  
 };
 
 export const recoverAbandonedCart = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -95,7 +93,13 @@ export const recoverAbandonedCart = async (req: TypedRequest, res: Response): Pr
   }
 
   // For now, just mark as recovered (in a real implementation, this would trigger email campaigns, etc.)
-  logger.info('Recovering abandoned cart', { basketId, recoveryMethod, cartValue: basket.items.reduce((total, item) => total + item.unitPrice.amount * item.quantity, 0), customerId: basket.customerId, sessionId: basket.sessionId });
+  logger.info('Recovering abandoned cart', {
+    basketId,
+    recoveryMethod,
+    cartValue: basket.items.reduce((total, item) => total + item.unitPrice.amount * item.quantity, 0),
+    customerId: basket.customerId,
+    sessionId: basket.sessionId,
+  });
 
   // In a real implementation, you might:
   // 1. Send recovery email with cart contents
@@ -109,7 +113,6 @@ export const recoverAbandonedCart = async (req: TypedRequest, res: Response): Pr
     recoveryMethod,
     basketId,
   });
-  
 };
 
 export const sendRecoveryEmail = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -128,7 +131,15 @@ export const sendRecoveryEmail = async (req: TypedRequest, res: Response): Promi
   }
 
   // In a real implementation, this would integrate with your email service
-  logger.info('Sending recovery email', { basketId, customerId: basket.customerId, template, subject, discountCode, cartItems: basket.items.length, cartValue: basket.items.reduce((total, item) => total + item.unitPrice.amount * item.quantity, 0) });
+  logger.info('Sending recovery email', {
+    basketId,
+    customerId: basket.customerId,
+    template,
+    subject,
+    discountCode,
+    cartItems: basket.items.length,
+    cartValue: basket.items.reduce((total, item) => total + item.unitPrice.amount * item.quantity, 0),
+  });
 
   res.json({
     success: true,
@@ -136,7 +147,6 @@ export const sendRecoveryEmail = async (req: TypedRequest, res: Response): Promi
     basketId,
     customerId: basket.customerId,
   });
-  
 };
 
 export const markCartRecovered = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -145,7 +155,6 @@ export const markCartRecovered = async (req: TypedRequest, res: Response): Promi
   // In a real implementation, this would be called when a customer completes purchase from recovered cart
 
   res.json({ success: true, message: 'Cart marked as recovered' });
-  
 };
 
 // ============================================================================
@@ -219,7 +228,6 @@ export const basketAnalytics = async (req: TypedRequest, res: Response): Promise
     pageName: 'Cart Analytics',
     stats,
   });
-  
 };
 
 export const cleanupExpiredBaskets = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -236,5 +244,4 @@ export const cleanupExpiredBaskets = async (req: TypedRequest, res: Response): P
     message: `Successfully cleaned up ${deletedCount} expired baskets`,
     deletedCount,
   });
-  
 };

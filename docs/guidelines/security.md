@@ -76,51 +76,51 @@ Every business router mounted under `/business` must apply `isOrganizationLogged
 
 ### Routers verified as protected
 
-| Router | Middleware |
-| ------ | ---------- |
-| `identityBusinessRouter` | `isOrganizationLoggedIn` (after public auth routes) |
-| `organizationBusinessRouter` | `isOrganizationLoggedIn` |
-| `promotionBusinessRouter` | `isOrganizationLoggedIn` |
-| `productBusinessRouter` | `isOrganizationLoggedIn` |
-| `orderBusinessRouter` | `isOrganizationLoggedIn` |
-| `taxBusinessRouter` | `isOrganizationLoggedIn` |
-| `customerBusinessRouter` | `isOrganizationLoggedIn` |
-| `gdprBusinessRouter` | `isOrganizationLoggedIn` |
-| `subscriptionBusinessRouter` | `isOrganizationLoggedIn` |
-| `supportBusinessRouter` | `isOrganizationLoggedIn` |
-| `analyticsBusinessRouter` | `isOrganizationLoggedIn` |
-| `warehouseMerchantRouter` | `isOrganizationLoggedIn` |
-| `supplierMerchantRouter` | `isOrganizationLoggedIn` |
-| `localizationMerchantRouter` | `isOrganizationLoggedIn` |
-| `pricingMerchantRouter` | `isOrganizationLoggedIn` |
-| `loyaltyMerchantRouter` | `isOrganizationLoggedIn` |
-| `notificationMerchantRouter` | `isOrganizationLoggedIn` |
-| `contentRouterAdmin` | `isOrganizationLoggedIn` |
-| `membershipBusinessRouter` | `isOrganizationLoggedIn` |
-| `shippingBusinessRouter` | `isOrganizationLoggedIn` |
-| `inventoryBusinessRouter` | `isOrganizationLoggedIn` |
-| `paymentBusinessRouter` | `isOrganizationLoggedIn` |
-| `basketBusinessRouter` | `isOrganizationLoggedIn` |
-| `attributeBusinessRouter` | `isOrganizationLoggedIn` |
-| `webhookBusinessRouter` | `isOrganizationLoggedIn` |
-| `reportingBusinessRouter` | `isOrganizationLoggedIn` |
-| `fulfillmentLocationRouter` | `isOrganizationLoggedIn` (per-route) |
-| `fulfillmentBusinessRouter` | `isOrganizationLoggedIn` |
-| `storeRouter` | `isOrganizationLoggedIn` |
-| `mediaRouter` | `isOrganizationLoggedIn` |
-| `systemConfigurationRouter` | `isOrganizationLoggedIn` |
-| `couponBusinessRouter` | `isOrganizationLoggedIn` |
-| `userStoreRouter` | Protected via parent `identityBusinessRouter` |
-| `auditAdminRouter` | `isOrganizationLoggedIn` |
-| `integrationRouter` | `isOrganizationLoggedIn` |
-| `automationRouter` | `isOrganizationLoggedIn` |
-| `returnRouter` | `isOrganizationLoggedIn` |
-| `themeRouter` | `isOrganizationLoggedIn` |
-| `pageBuilderRouter` | `isOrganizationLoggedIn` |
-| `segmentRouter` | `isOrganizationLoggedIn` |
-| `marketplaceRouter` | `isOrganizationLoggedIn` |
-| `trackingRouter` | `isOrganizationLoggedIn` |
-| `ssoRouter` | `isOrganizationLoggedIn` (after public SSO login endpoints) |
-| `scimRouter` | Bearer token auth (`SCIM_BEARER_TOKEN`) |
-| `b2bBusinessRouter` | `isOrganizationLoggedIn` |
-| `complianceRouter` | `isOrganizationLoggedIn` |
+| Router                       | Middleware                                                  |
+| ---------------------------- | ----------------------------------------------------------- |
+| `identityBusinessRouter`     | `isOrganizationLoggedIn` (after public auth routes)         |
+| `organizationBusinessRouter` | `isOrganizationLoggedIn`                                    |
+| `promotionBusinessRouter`    | `isOrganizationLoggedIn`                                    |
+| `productBusinessRouter`      | `isOrganizationLoggedIn`                                    |
+| `orderBusinessRouter`        | `isOrganizationLoggedIn`                                    |
+| `taxBusinessRouter`          | `isOrganizationLoggedIn`                                    |
+| `customerBusinessRouter`     | `isOrganizationLoggedIn`                                    |
+| `gdprBusinessRouter`         | `isOrganizationLoggedIn`                                    |
+| `subscriptionBusinessRouter` | `isOrganizationLoggedIn`                                    |
+| `supportBusinessRouter`      | `isOrganizationLoggedIn`                                    |
+| `analyticsBusinessRouter`    | `isOrganizationLoggedIn`                                    |
+| `warehouseMerchantRouter`    | `isOrganizationLoggedIn`                                    |
+| `supplierMerchantRouter`     | `isOrganizationLoggedIn`                                    |
+| `localizationMerchantRouter` | `isOrganizationLoggedIn`                                    |
+| `pricingMerchantRouter`      | `isOrganizationLoggedIn`                                    |
+| `loyaltyMerchantRouter`      | `isOrganizationLoggedIn`                                    |
+| `notificationMerchantRouter` | `isOrganizationLoggedIn`                                    |
+| `contentRouterAdmin`         | `isOrganizationLoggedIn`                                    |
+| `membershipBusinessRouter`   | `isOrganizationLoggedIn`                                    |
+| `shippingBusinessRouter`     | `isOrganizationLoggedIn`                                    |
+| `inventoryBusinessRouter`    | `isOrganizationLoggedIn`                                    |
+| `paymentBusinessRouter`      | `isOrganizationLoggedIn`                                    |
+| `basketBusinessRouter`       | `isOrganizationLoggedIn`                                    |
+| `attributeBusinessRouter`    | `isOrganizationLoggedIn`                                    |
+| `webhookBusinessRouter`      | `isOrganizationLoggedIn`                                    |
+| `reportingBusinessRouter`    | `isOrganizationLoggedIn`                                    |
+| `fulfillmentLocationRouter`  | `isOrganizationLoggedIn` (per-route)                        |
+| `fulfillmentBusinessRouter`  | `isOrganizationLoggedIn`                                    |
+| `storeRouter`                | `isOrganizationLoggedIn`                                    |
+| `mediaRouter`                | `isOrganizationLoggedIn`                                    |
+| `systemConfigurationRouter`  | `isOrganizationLoggedIn`                                    |
+| `couponBusinessRouter`       | `isOrganizationLoggedIn`                                    |
+| `userStoreRouter`            | Protected via parent `identityBusinessRouter`               |
+| `auditAdminRouter`           | `isOrganizationLoggedIn`                                    |
+| `integrationRouter`          | `isOrganizationLoggedIn`                                    |
+| `automationRouter`           | `isOrganizationLoggedIn`                                    |
+| `returnRouter`               | `isOrganizationLoggedIn`                                    |
+| `themeRouter`                | `isOrganizationLoggedIn`                                    |
+| `pageBuilderRouter`          | `isOrganizationLoggedIn`                                    |
+| `segmentRouter`              | `isOrganizationLoggedIn`                                    |
+| `marketplaceRouter`          | `isOrganizationLoggedIn`                                    |
+| `trackingRouter`             | `isOrganizationLoggedIn`                                    |
+| `ssoRouter`                  | `isOrganizationLoggedIn` (after public SSO login endpoints) |
+| `scimRouter`                 | Bearer token auth (`SCIM_BEARER_TOKEN`)                     |
+| `b2bBusinessRouter`          | `isOrganizationLoggedIn`                                    |
+| `complianceRouter`           | `isOrganizationLoggedIn`                                    |

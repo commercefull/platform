@@ -79,15 +79,11 @@ describe('AddOrderNoteUseCase', () => {
     const queryRepo = createMockQueryRepo();
     const useCase = new AddOrderNoteUseCase(repo, queryRepo);
 
-    const result = await useCase.execute(
-      new AddOrderNoteCommand('o-1', 'Test note', false, 'admin-1'),
-    );
+    const result = await useCase.execute(new AddOrderNoteCommand('o-1', 'Test note', false, 'admin-1'));
 
     expect(result.orderNoteId).toBe('note-1');
     expect(result.content).toBe('Test note');
-    expect(queryRepo.createNote).toHaveBeenCalledWith(
-      expect.objectContaining({ orderId: 'o-1', content: 'Test note' }),
-    );
+    expect(queryRepo.createNote).toHaveBeenCalledWith(expect.objectContaining({ orderId: 'o-1', content: 'Test note' }));
   });
 
   it('should throw OrderNotFoundError when order does not exist', async () => {
@@ -95,9 +91,7 @@ describe('AddOrderNoteUseCase', () => {
     const queryRepo = createMockQueryRepo();
     const useCase = new AddOrderNoteUseCase(repo, queryRepo);
 
-    await expect(
-      useCase.execute(new AddOrderNoteCommand('nonexistent', 'note')),
-    ).rejects.toThrow(OrderNotFoundError);
+    await expect(useCase.execute(new AddOrderNoteCommand('nonexistent', 'note'))).rejects.toThrow(OrderNotFoundError);
   });
 
   it('should throw NoteContentEmptyError when content is empty', async () => {
@@ -106,8 +100,6 @@ describe('AddOrderNoteUseCase', () => {
     const queryRepo = createMockQueryRepo();
     const useCase = new AddOrderNoteUseCase(repo, queryRepo);
 
-    await expect(
-      useCase.execute(new AddOrderNoteCommand('o-1', '  ')),
-    ).rejects.toThrow(NoteContentEmptyError);
+    await expect(useCase.execute(new AddOrderNoteCommand('o-1', '  '))).rejects.toThrow(NoteContentEmptyError);
   });
 });

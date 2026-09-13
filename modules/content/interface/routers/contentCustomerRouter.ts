@@ -1,10 +1,6 @@
 import express from 'express';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import {
-  getPublishedPages,
-  getPublishedPageBySlug,
-  getActiveContentTypes,
-} from '../controllers/contentCustomerController';
+import { getPublishedPages, getPublishedPageBySlug, getActiveContentTypes } from '../controllers/contentCustomerController';
 
 const router = express.Router();
 

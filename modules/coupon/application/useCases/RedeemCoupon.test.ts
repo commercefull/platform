@@ -3,7 +3,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
 }));
 
-import { RedeemCouponUseCase} from './RedeemCoupon';
+import { RedeemCouponUseCase } from './RedeemCoupon';
 import { CouponNotFoundError } from '../../domain/errors/CouponErrors';
 
 describe('RedeemCouponUseCase', () => {

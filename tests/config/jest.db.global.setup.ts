@@ -1,14 +1,6 @@
 import path from 'node:path';
 import dotenv from 'dotenv';
-import {
-  createDatabase,
-  createSnapshot,
-  dropDatabase,
-  getDbConfig,
-  runMigrations,
-  runSeeds,
-  type DbConfig,
-} from './snapshot';
+import { createDatabase, createSnapshot, dropDatabase, getDbConfig, runMigrations, runSeeds, type DbConfig } from './snapshot';
 
 dotenv.config({ path: './.env' });
 

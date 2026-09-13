@@ -20,11 +20,20 @@ describe('MoveCategoryUseCase', () => {
 
   it('should move category to new parent', async () => {
     mockRepo.findCategoryById.mockImplementation((id: string) =>
-      id === 'c1' ? Promise.resolve({ contentCategoryId: 'c1', name: 'Old', slug: 'old', path: 'old', depth: 0 })
-      : id === 'c2' ? Promise.resolve({ contentCategoryId: 'c2', name: 'New Parent', slug: 'new-parent', path: 'new-parent', depth: 0 })
-      : Promise.resolve(null),
+      id === 'c1'
+        ? Promise.resolve({ contentCategoryId: 'c1', name: 'Old', slug: 'old', path: 'old', depth: 0 })
+        : id === 'c2'
+          ? Promise.resolve({ contentCategoryId: 'c2', name: 'New Parent', slug: 'new-parent', path: 'new-parent', depth: 0 })
+          : Promise.resolve(null),
     );
-    mockRepo.moveCategory.mockResolvedValue({ contentCategoryId: 'c1', name: 'Old', slug: 'old', parentId: 'c2', path: 'new-parent/old', depth: 1 });
+    mockRepo.moveCategory.mockResolvedValue({
+      contentCategoryId: 'c1',
+      name: 'Old',
+      slug: 'old',
+      parentId: 'c2',
+      path: 'new-parent/old',
+      depth: 1,
+    });
 
     const result = await useCase.execute(new MoveCategoryCommand('c1', 'c2'));
 
@@ -40,9 +49,11 @@ describe('MoveCategoryUseCase', () => {
 
   it('should throw ContentValidationError when moving to descendant', async () => {
     mockRepo.findCategoryById.mockImplementation((id: string) =>
-      id === 'c1' ? Promise.resolve({ contentCategoryId: 'c1', name: 'Parent', slug: 'parent', path: 'parent', depth: 0 })
-      : id === 'c2' ? Promise.resolve({ contentCategoryId: 'c2', name: 'Child', slug: 'child', path: 'parent/child', depth: 1 })
-      : Promise.resolve(null),
+      id === 'c1'
+        ? Promise.resolve({ contentCategoryId: 'c1', name: 'Parent', slug: 'parent', path: 'parent', depth: 0 })
+        : id === 'c2'
+          ? Promise.resolve({ contentCategoryId: 'c2', name: 'Child', slug: 'child', path: 'parent/child', depth: 1 })
+          : Promise.resolve(null),
     );
 
     await expect(useCase.execute(new MoveCategoryCommand('c1', 'c2'))).rejects.toThrow(ContentValidationError);

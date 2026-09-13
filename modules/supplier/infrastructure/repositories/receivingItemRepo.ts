@@ -11,7 +11,6 @@ import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierE
 // Table Constants
 // ============================================================================
 
-
 // ============================================================================
 // Types
 // ============================================================================
@@ -186,7 +185,7 @@ export class SupplierReceivingItemRepo {
     return this.update(id, {
       status: 'accepted',
       acceptanceStatus: 'accepted',
-      processedAt: unixTimestamp(),
+      processedAt: String(unixTimestamp()),
       processedBy,
     });
   }
@@ -196,7 +195,7 @@ export class SupplierReceivingItemRepo {
       status: 'rejected',
       acceptanceStatus: 'rejected',
       discrepancyReason: reason,
-      processedAt: unixTimestamp(),
+      processedAt: String(unixTimestamp()),
       processedBy,
     });
   }

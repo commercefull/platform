@@ -7,13 +7,13 @@
 
 Every cross-module edge must be classified as exactly one of these. Anything else is a violation.
 
-| Pattern | When to use | Mechanism |
-|---|---|---|
-| **Shared Kernel** | Truly universal, stable, dependency-free primitives | Promote to `libs/`. Deliberately tiny — additions require review. Candidates: `Money`, `Address`, `Currency`, pagination types, ID types. |
-| **Anti-Corruption Layer** | Consumer needs a synchronous answer or action from another module | Consumer-owned **port** + provider-facing **adapter** that translates. Detailed below. |
-| **Published Language** | Consumer reacts to something that happened; no return value needed | Domain event on the event bus with a versioned, documented payload. Preferred once the durable outbox exists. |
+| Pattern                   | When to use                                                        | Mechanism                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Shared Kernel**         | Truly universal, stable, dependency-free primitives                | Promote to `libs/`. Deliberately tiny — additions require review. Candidates: `Money`, `Address`, `Currency`, pagination types, ID types. |
+| **Anti-Corruption Layer** | Consumer needs a synchronous answer or action from another module  | Consumer-owned **port** + provider-facing **adapter** that translates. Detailed below.                                                    |
+| **Published Language**    | Consumer reacts to something that happened; no return value needed | Domain event on the event bus with a versioned, documented payload. Preferred once the durable outbox exists.                             |
 
-**Rule of thumb**: if the consumer needs an *answer*, use an ACL. If it needs to *know*, use an event. If it is a *value type with no behaviour or dependencies*, use the shared kernel.
+**Rule of thumb**: if the consumer needs an _answer_, use an ACL. If it needs to _know_, use an event. If it is a _value type with no behaviour or dependencies_, use the shared kernel.
 
 ## 2. ACL Structure and Conventions
 

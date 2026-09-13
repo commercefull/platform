@@ -6,10 +6,6 @@ export { MetaCAPIAdapter } from './domain/services/MetaCAPIAdapter';
 export { getDefaultEventMappings } from './domain/services/defaultEventMappings';
 export { TrackingConfigRepository } from './domain/repositories/TrackingConfigRepository';
 export { TrackingConfigRepositoryImpl } from './infrastructure/repositories/TrackingConfigRepositoryImpl';
-export {
-  ManageTrackingConfigUseCase,
-  ProcessTrackingEventUseCase,
-  GetTrackingStatusUseCase,
-} from './application/useCases/Tracking';
+export { ManageTrackingConfigUseCase, ProcessTrackingEventUseCase, GetTrackingStatusUseCase } from './application/useCases/Tracking';
 export { registerTrackingEventHandlers, setConsentRepository } from './application/eventHandlers/trackingEventHandlers';
 export { trackingBusinessRouter } from './interface/routers/trackingRouter';

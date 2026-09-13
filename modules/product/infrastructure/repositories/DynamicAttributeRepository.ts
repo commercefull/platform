@@ -34,18 +34,7 @@ export interface ProductAttribute {
 }
 
 export type AttributeType =
-  | 'text'
-  | 'number'
-  | 'select'
-  | 'checkbox'
-  | 'radio'
-  | 'date'
-  | 'datetime'
-  | 'time'
-  | 'file'
-  | 'image'
-  | 'video'
-  | 'document';
+  'text' | 'number' | 'select' | 'checkbox' | 'radio' | 'date' | 'datetime' | 'time' | 'file' | 'image' | 'video' | 'document';
 
 export type AttributeInputType = AttributeType;
 

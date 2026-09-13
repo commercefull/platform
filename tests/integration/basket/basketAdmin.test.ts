@@ -31,11 +31,9 @@ describe('Basket Admin/Business API Tests', () => {
 
     // Get customer token for creating test baskets
     try {
-      const customerLoginResponse = await client.post(
-        '/customer/identity/login',
-        CUSTOMER_CREDENTIALS,
-        { headers: { 'X-Test-Request': 'true' } },
-      );
+      const customerLoginResponse = await client.post('/customer/identity/login', CUSTOMER_CREDENTIALS, {
+        headers: { 'X-Test-Request': 'true' },
+      });
       customerToken = customerLoginResponse.data?.accessToken || '';
     } catch {
       customerToken = '';
@@ -190,8 +188,8 @@ describe('Basket Admin/Business API Tests', () => {
       const response = await client.post(
         '/business/basket/00000000-0000-0000-0000-000000000000/coupon',
         { couponCode: 'TESTFIXED10' },
-        { headers: { Authorization: `Bearer ${adminToken}` },
-      });
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
 
       expectStatus(response, 404);
     });
@@ -218,9 +216,11 @@ describe('Basket Admin/Business API Tests', () => {
       expect(response.data.success).toBe(true);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
   });
 
@@ -245,9 +245,11 @@ describe('Basket Admin/Business API Tests', () => {
       expect(response.data.success).toBe(true);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
 
     it('should reject invalid expiration days', async () => {
@@ -265,9 +267,11 @@ describe('Basket Admin/Business API Tests', () => {
       expect(response.status).toBe(400);
 
       // Cleanup
-      await client.delete(`/customer/basket/${basketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      }).catch(() => {});
+      await client
+        .delete(`/customer/basket/${basketId}`, {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        })
+        .catch(() => {});
     });
   });
 
@@ -310,10 +314,7 @@ describe('Basket Admin/Business API Tests', () => {
     });
 
     it('should require auth for applying coupon', async () => {
-      const response = await client.post(
-        `/business/basket/${TEST_GUEST_BASKET_ID}/coupon`,
-        { couponCode: 'TEST' },
-      );
+      const response = await client.post(`/business/basket/${TEST_GUEST_BASKET_ID}/coupon`, { couponCode: 'TEST' });
       expect(response.status).toBe(401);
     });
 
@@ -323,18 +324,12 @@ describe('Basket Admin/Business API Tests', () => {
     });
 
     it('should require auth for assigning basket', async () => {
-      const response = await client.post(
-        `/business/basket/${TEST_GUEST_BASKET_ID}/assign`,
-        { customerId: 'test' },
-      );
+      const response = await client.post(`/business/basket/${TEST_GUEST_BASKET_ID}/assign`, { customerId: 'test' });
       expect(response.status).toBe(401);
     });
 
     it('should require auth for extending expiration', async () => {
-      const response = await client.put(
-        `/business/basket/${TEST_GUEST_BASKET_ID}/expiration`,
-        { days: 7 },
-      );
+      const response = await client.put(`/business/basket/${TEST_GUEST_BASKET_ID}/expiration`, { days: 7 });
       expect(response.status).toBe(401);
     });
 

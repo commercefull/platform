@@ -105,11 +105,11 @@ export class CreateSubscriptionUseCase {
       // 4. Determine trial period
       const trialDays = plan.trialDays || product.trialDays || 0;
       const now = new Date();
-       
+
       let trialStartAt: Date | undefined;
       let trialEndAt: Date | undefined;
       let _currentPeriodStart = now;
-       
+
       let currentPeriodEnd: Date;
       let status: 'pending' | 'trialing' | 'active' = 'pending';
 

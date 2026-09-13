@@ -8,7 +8,13 @@ import { TypedRequest } from 'libs/types/express';
 import supportDataRepository from '../../infrastructure/repositories/SupportDataRepository';
 import supportInfoRepository from '../../infrastructure/repositories/SupportInfoRepository';
 import type { AlertStatus } from '../../infrastructure/repositories/SupportInfoRepository';
-import type { TicketStatus, TicketPriority, TicketCategory, SupportAgent, SupportTicket } from '../../infrastructure/repositories/SupportDataRepository';
+import type {
+  TicketStatus,
+  TicketPriority,
+  TicketCategory,
+  SupportAgent,
+  SupportTicket,
+} from '../../infrastructure/repositories/SupportDataRepository';
 import type { FaqCategory, FaqArticle } from '../../infrastructure/repositories/SupportInfoRepository';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 
@@ -30,7 +36,6 @@ export const getAgents: AsyncHandler = async (req, res, _next) => {
     department: department as string,
   });
   res.json({ success: true, data: agents });
-  
 };
 
 export const getAgent: AsyncHandler = async (req, res, _next) => {
@@ -40,14 +45,12 @@ export const getAgent: AsyncHandler = async (req, res, _next) => {
     return;
   }
   res.json({ success: true, data: agent });
-  
 };
 
 export const createAgent: AsyncHandler = async (req, res, _next) => {
   const body = req.body as Partial<SupportAgent> & { email: string; firstName: string; lastName: string };
   const agent = await supportRepo.saveAgent(body);
   res.status(201).json({ success: true, data: agent });
-  
 };
 
 export const updateAgent: AsyncHandler = async (req, res, _next) => {
@@ -57,7 +60,6 @@ export const updateAgent: AsyncHandler = async (req, res, _next) => {
     ...body,
   } as Partial<SupportAgent> & { email: string; firstName: string; lastName: string });
   res.json({ success: true, data: agent });
-  
 };
 
 // ============================================================================
@@ -78,7 +80,6 @@ export const getTickets: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const getTicket: AsyncHandler = async (req, res, _next) => {
@@ -92,41 +93,35 @@ export const getTicket: AsyncHandler = async (req, res, _next) => {
   const attachments = await supportRepo.getAttachments(req.params.id);
 
   res.json({ success: true, data: { ...ticket, messages, attachments } });
-  
 };
 
 export const updateTicket: AsyncHandler = async (req, res, _next) => {
   const body = req.body as Partial<SupportTicket>;
   const ticket = await supportRepo.updateTicket(req.params.id, body);
   res.json({ success: true, data: ticket });
-  
 };
 
 export const assignTicket: AsyncHandler = async (req, res, _next) => {
   const { agentId } = req.body as { agentId: string };
   const ticket = await supportRepo.updateTicket(req.params.id, { assignedAgentId: agentId });
   res.json({ success: true, data: ticket });
-  
 };
 
 export const resolveTicket: AsyncHandler = async (req, res, _next) => {
   const { resolutionType, resolutionNotes } = req.body as { resolutionType: string; resolutionNotes?: string };
   await supportRepo.resolveTicket(req.params.id, resolutionType, resolutionNotes);
   res.json({ success: true, message: 'Ticket resolved' });
-  
 };
 
 export const closeTicket: AsyncHandler = async (req, res, _next) => {
   await supportRepo.closeTicket(req.params.id);
   res.json({ success: true, message: 'Ticket closed' });
-  
 };
 
 export const escalateTicket: AsyncHandler = async (req, res, _next) => {
   const { escalatedTo, reason } = req.body as { escalatedTo: string; reason: string };
   await supportRepo.escalateTicket(req.params.id, escalatedTo, reason);
   res.json({ success: true, message: 'Ticket escalated' });
-  
 };
 
 export const addAgentMessage: AsyncHandler = async (req, res, _next) => {
@@ -146,7 +141,6 @@ export const addAgentMessage: AsyncHandler = async (req, res, _next) => {
   });
 
   res.status(201).json({ success: true, data: message });
-  
 };
 
 // ============================================================================
@@ -157,7 +151,6 @@ export const getFaqCategories: AsyncHandler = async (req, res, _next) => {
   const { activeOnly } = req.query;
   const categories = await faqRepo.getCategories(activeOnly !== 'false');
   res.json({ success: true, data: categories });
-  
 };
 
 export const getFaqCategory: AsyncHandler = async (req, res, _next) => {
@@ -167,14 +160,12 @@ export const getFaqCategory: AsyncHandler = async (req, res, _next) => {
     return;
   }
   res.json({ success: true, data: category });
-  
 };
 
 export const createFaqCategory: AsyncHandler = async (req, res, _next) => {
   const body = req.body as Partial<FaqCategory> & { name: string };
   const category = await faqRepo.saveCategory(body);
   res.status(201).json({ success: true, data: category });
-  
 };
 
 export const updateFaqCategory: AsyncHandler = async (req, res, _next) => {
@@ -184,13 +175,11 @@ export const updateFaqCategory: AsyncHandler = async (req, res, _next) => {
     ...body,
   } as Partial<FaqCategory> & { name: string });
   res.json({ success: true, data: category });
-  
 };
 
 export const deleteFaqCategory: AsyncHandler = async (req, res, _next) => {
   await faqRepo.deleteCategory(req.params.id);
   res.json({ success: true, message: 'Category deleted' });
-  
 };
 
 // ============================================================================
@@ -208,7 +197,6 @@ export const getFaqArticles: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const getFaqArticle: AsyncHandler = async (req, res, _next) => {
@@ -218,7 +206,6 @@ export const getFaqArticle: AsyncHandler = async (req, res, _next) => {
     return;
   }
   res.json({ success: true, data: article });
-  
 };
 
 export const createFaqArticle: AsyncHandler = async (req, res, _next) => {
@@ -229,7 +216,6 @@ export const createFaqArticle: AsyncHandler = async (req, res, _next) => {
     ...body,
   });
   res.status(201).json({ success: true, data: article });
-  
 };
 
 export const updateFaqArticle: AsyncHandler = async (req, res, _next) => {
@@ -241,25 +227,21 @@ export const updateFaqArticle: AsyncHandler = async (req, res, _next) => {
     ...body,
   });
   res.json({ success: true, data: article });
-  
 };
 
 export const publishFaqArticle: AsyncHandler = async (req, res, _next) => {
   await faqRepo.publishArticle(req.params.id);
   res.json({ success: true, message: 'Article published' });
-  
 };
 
 export const unpublishFaqArticle: AsyncHandler = async (req, res, _next) => {
   await faqRepo.unpublishArticle(req.params.id);
   res.json({ success: true, message: 'Article unpublished' });
-  
 };
 
 export const deleteFaqArticle: AsyncHandler = async (req, res, _next) => {
   await faqRepo.deleteArticle(req.params.id);
   res.json({ success: true, message: 'Article deleted' });
-  
 };
 
 // ============================================================================
@@ -273,7 +255,6 @@ export const getStockAlerts: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const getPriceAlerts: AsyncHandler = async (req, res, _next) => {
@@ -283,7 +264,6 @@ export const getPriceAlerts: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
-  
 };
 
 export const notifyStockAlerts: AsyncHandler = async (req, res, _next) => {
@@ -303,7 +283,6 @@ export const notifyStockAlerts: AsyncHandler = async (req, res, _next) => {
   }
 
   res.json({ success: true, message: `Notified ${alerts.length} alerts` });
-  
 };
 
 export const notifyPriceAlerts: AsyncHandler = async (req, res, _next) => {
@@ -326,5 +305,4 @@ export const notifyPriceAlerts: AsyncHandler = async (req, res, _next) => {
   await alertRepo.updatePriceAlertCurrentPrice(productId, newPrice);
 
   res.json({ success: true, message: `Notified ${alerts.length} alerts` });
-  
 };

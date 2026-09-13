@@ -1,8 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import {
-  TEST_CONTENT_PAGE_ID,
-  ADMIN_CREDENTIALS,
-} from '../testConstants';
+import { TEST_CONTENT_PAGE_ID, ADMIN_CREDENTIALS } from '../testConstants';
 
 const createClient = () =>
   axios.create({
@@ -85,10 +82,9 @@ describe('Content Page Translations API', () => {
 
   it('should get translation by locale', async () => {
     if (!testContentPageId || !testLocaleId) return;
-    const response = await client.get(
-      `/business/content/pages/${testContentPageId}/translations/${testLocaleId}`,
-      { headers: { Authorization: `Bearer ${adminToken}` } },
-    );
+    const response = await client.get(`/business/content/pages/${testContentPageId}/translations/${testLocaleId}`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
 
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
