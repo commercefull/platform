@@ -535,3 +535,9 @@ We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for gu
 ## License
 
 This project is licensed under the [Apache License 2.0](./LICENSE).
+
+---
+
+## Need Help?
+
+CommerceFull is built and maintained by **[N17](https://n17.foo)** — a software studio specialising in retail and commerce infrastructure.
