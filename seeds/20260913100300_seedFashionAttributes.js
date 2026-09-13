@@ -21,19 +21,19 @@ exports.seed = async function (knex) {
   const colorAttr = await knex('productAttribute').where({ code: 'color' }).first('productAttributeId');
   const sizeAttr = await knex('productAttribute').where({ code: 'size' }).first('productAttributeId');
 
-  // Add extended colour values (with metadata for swatch hex)
+  // Add extended colour values
   if (colorAttr) {
     const existingColours = await knex('productAttributeValue').where({ attributeId: colorAttr.productAttributeId }).pluck('value');
 
     const newColours = [
-      { value: 'navy', displayValue: 'Navy', position: 50, metadata: JSON.stringify({ hex: '#1a2a4a' }) },
-      { value: 'charcoal', displayValue: 'Charcoal', position: 60, metadata: JSON.stringify({ hex: '#36454f' }) },
-      { value: 'olive', displayValue: 'Olive', position: 70, metadata: JSON.stringify({ hex: '#556b2f' }) },
-      { value: 'cream', displayValue: 'Cream', position: 80, metadata: JSON.stringify({ hex: '#f5f5dc' }) },
-      { value: 'burgundy', displayValue: 'Burgundy', position: 90, metadata: JSON.stringify({ hex: '#800020' }) },
-      { value: 'forest-green', displayValue: 'Forest Green', position: 100, metadata: JSON.stringify({ hex: '#228b22' }) },
-      { value: 'sand', displayValue: 'Sand', position: 110, metadata: JSON.stringify({ hex: '#c2b280' }) },
-      { value: 'grey', displayValue: 'Grey', position: 120, metadata: JSON.stringify({ hex: '#808080' }) },
+      { value: 'navy', displayValue: 'Navy', position: 50 },
+      { value: 'charcoal', displayValue: 'Charcoal', position: 60 },
+      { value: 'olive', displayValue: 'Olive', position: 70 },
+      { value: 'cream', displayValue: 'Cream', position: 80 },
+      { value: 'burgundy', displayValue: 'Burgundy', position: 90 },
+      { value: 'forest-green', displayValue: 'Forest Green', position: 100 },
+      { value: 'sand', displayValue: 'Sand', position: 110 },
+      { value: 'grey', displayValue: 'Grey', position: 120 },
     ];
 
     const coloursToAdd = newColours.filter(c => !existingColours.includes(c.value));
@@ -44,7 +44,6 @@ exports.seed = async function (knex) {
           value: c.value,
           displayValue: c.displayValue,
           position: c.position,
-          metadata: c.metadata,
         })),
       );
     }
