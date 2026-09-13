@@ -68,6 +68,31 @@
       .badge-patch {
         background: #a855f7;
       }
+      /* Cover page links — style as buttons */
+      section.cover .cover-main a {
+        border-radius: 2rem;
+        border: 1px solid var(--docsify-theme-color, #2563eb);
+        box-sizing: border-box;
+        color: var(--docsify-theme-color, #2563eb);
+        display: inline-block;
+        font-size: 1.05rem;
+        letter-spacing: .1rem;
+        margin: .5rem 1rem;
+        padding: .75em 2rem;
+        text-decoration: none;
+        transition: all .15s ease;
+      }
+      section.cover .cover-main a:last-child {
+        background-color: var(--docsify-theme-color, #2563eb);
+        color: #fff;
+      }
+      section.cover .cover-main a:last-child:hover {
+        color: inherit;
+        opacity: .8;
+      }
+      section.cover .cover-main a:hover {
+        color: inherit;
+      }
     </style>
   </head>
   <body>
