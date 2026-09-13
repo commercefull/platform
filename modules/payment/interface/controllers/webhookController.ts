@@ -11,14 +11,13 @@
 
 import { Request, Response } from 'express';
 import { logger } from '../../../../libs/logger';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
 
 const PaymentRepo = paymentDataRepository.payments;
 import { eventBus } from '../../../../libs/events/eventBus';
 import { getAdapter } from '../../application/services/GatewayAdapterRegistry';
 import { ProcessPaymentWebhookUseCase, ProcessPaymentWebhookCommand } from '../../application/useCases/ProcessPaymentWebhook';
-import { CheckoutOrderStatusSyncAdapter } from '../../infrastructure/acl/CheckoutOrderStatusSyncAdapter';
 import type { OrderStatusSyncPort } from '../../application/ports/OrderStatusSyncPort';
+import { paymentDataRepository, CheckoutOrderStatusSyncAdapter } from '../../application/wired';
 
 // Ports
 const orderStatusSyncPort: OrderStatusSyncPort = new CheckoutOrderStatusSyncAdapter();

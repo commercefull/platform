@@ -82,7 +82,7 @@ yarn test:unit              # Unit tests
 yarn test:int               # Integration tests (requires PostgreSQL)
 
 # Code Quality
-yarn lint                   # TypeScript check + ESLint
+yarn lint                   # TypeScript check + ESLint + dependency-cruiser
 yarn lint:errors            # ESLint errors only
 yarn lint:fix               # ESLint with auto-fix
 yarn format                 # Prettier format all files
@@ -114,6 +114,11 @@ yarn job:new:organization   # Create a new organization
 - **Always use `libs/logger`** in production code — never `console.log`.
 - **All `/business` routes must use `isOrganizationLoggedIn`** — except public auth endpoints in `identityBusinessRouter` (login, register, token refresh, password reset).
 - **Follow `/business/{topic}/...` route naming** — every business router must include its module topic as a path prefix (e.g. `/business/media/upload`, not `/business/upload`).
+- **Domain entities are the single source of truth** — infrastructure and application layers import types from `domain/entities/`, never redefine them; domain repository ports import from the entity, not from `libs/db/types`.
+- **Export domain entities from `index.ts`** — every module's barrel must export its domain entities so they are reachable from the entry point (prevents `no-orphans` violations).
+- **No empty or stub domain files** — every domain file must be wired through the module or deleted.
+- **`boot/` is the composition root** — it is exempt from deep-import and `no-restricted-imports` rules; it may import directly from module infrastructure for wiring.
+- **Dependency-cruiser violations are errors** — `yarn lint` runs `tsc --noEmit && eslint && dependency-cruiser`; any violation fails the build.
 
 ## Module & Migration Documentation
 
@@ -122,4 +127,4 @@ yarn job:new:organization   # Create a new organization
 
 ---
 
-**Last Updated**: August 2026
+**Last Updated**: September 2026

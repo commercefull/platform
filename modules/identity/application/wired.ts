@@ -9,6 +9,9 @@ import { ManageSamlProviderUseCase, ManageOidcProviderUseCase, SsoLoginUseCase, 
 import { SamlProviderRepositoryImpl } from '../infrastructure/repositories/SamlProviderRepositoryImpl';
 import { OidcProviderRepositoryImpl } from '../infrastructure/repositories/OidcProviderRepositoryImpl';
 import { OrganizationCredentialSubjectAdapter } from '../infrastructure/acl/OrganizationCredentialSubjectAdapter';
+import { ScimProvisioningRepositoryImpl } from '../infrastructure/repositories/ScimProvisioningRepositoryImpl';
+import identityDataRepository from '../infrastructure/repositories/IdentityDataRepository';
+import { CustomerCredentialSubjectAdapter } from '../infrastructure/acl/CustomerCredentialSubjectAdapter';
 
 const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
@@ -21,3 +24,5 @@ export const manageSamlUseCase = new ManageSamlProviderUseCase(samlRepo);
 export const manageOidcUseCase = new ManageOidcProviderUseCase(oidcRepo);
 export const ssoLoginUseCase = new SsoLoginUseCase(samlRepo, oidcRepo, orgPort, ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
 export const listProvidersUseCase = new ListSsoProvidersUseCase(samlRepo, oidcRepo);
+
+export { ScimProvisioningRepositoryImpl, OrganizationCredentialSubjectAdapter, identityDataRepository, CustomerCredentialSubjectAdapter };

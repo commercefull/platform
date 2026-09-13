@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import productCatalogRepository from '../../infrastructure/repositories/ProductCatalogRepository';
-import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
+import { productCatalogRepository, productAttributeRepository } from '../../application/wired';
 
 const productTypeRepository = productCatalogRepository.types;
 const productAttributeSetRepository = productAttributeRepository.sets;

@@ -8,8 +8,8 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { FraudScreeningService } from '../../application/services/FraudScreeningService';
-import { FraudRepo as fraudRepo } from '../../infrastructure';
 import { adminRespond } from '../../../../libs/adminRespond';
+import { FraudRepo as fraudRepo } from '../../application/wired';
 
 const fraudScreeningService = new FraudScreeningService();
 

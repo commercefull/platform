@@ -6,9 +6,9 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import { inventoryAllocationRuleRepo } from '../../infrastructure';
 import type { AttributeCondition } from '../../../../libs/rules/conditions';
 import { adminRespond } from '../../../../libs/adminRespond';
+import { inventoryAllocationRuleRepo } from '../../application/wired';
 
 // ============================================================================
 // List Inventory Allocation Rules

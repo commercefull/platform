@@ -7,8 +7,8 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { ManageGiftCardsUseCase } from '../../application/useCases/ManagePromotions';
-import type { PromotionGiftCard } from '../../infrastructure';
 import { adminRespond } from '../../../../libs/adminRespond';
+import { PromotionGiftCard } from '../../application/wired';
 
 const manageGiftCardsUseCase = new ManageGiftCardsUseCase();
 

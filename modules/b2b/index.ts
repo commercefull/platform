@@ -8,3 +8,16 @@ export * from './application/useCases';
 export * from './infrastructure';
 export { b2bController } from './application/useCases/wired';
 export { b2bBusinessRouter } from './interface/routers/b2bRouter';
+export {
+  listB2BCompanies,
+  viewB2BCompany,
+  createB2BCompanyForm,
+  createB2BCompany,
+  editB2BCompanyForm,
+  updateB2BCompany,
+  approveB2BCompany,
+  suspendB2BCompany,
+  reactivateB2BCompany,
+  listB2BQuotes,
+  viewB2BQuote,
+} from './interface/controllers/adminB2BController';

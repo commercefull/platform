@@ -1,0 +1,26 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/segments/<%= segment.segmentId %>" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="/admin/segments/<%= segment.segmentId %>">
+      <div class="mb-3"><label class="form-label">Name</label><input type="text" name="name" value="<%= segment.name %>" class="form-control"></div>
+      <div class="mb-3"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="2"><%= segment.description || '' %></textarea></div>
+      <div class="mb-3"><label class="form-label">Conditions (JSON)</label>
+        <textarea name="conditions" class="form-control" rows="6"><%- JSON.stringify(segment.conditions || {}, null, 2) %></textarea>
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" name="isActive" <%= segment.isActive ? 'checked' : '' %> class="form-check-input">
+        <label class="form-check-label">Active</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Update Segment</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

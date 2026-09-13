@@ -1,10 +1,9 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import currencyRepository from '../../infrastructure/repositories/CurrencyRepository';
-import pricingRuleRepository from '../../infrastructure/repositories/PricingRuleRepository';
 import { CurrencyPriceRule, CurrencyPriceRuleCreateProps, CurrencyPriceRuleUpdateProps } from '../../domain/pricingRule';
 import { Currency, CurrencyRegion } from '../../domain/currency';
 import pricingService from '../../application/pricingService';
+import { currencyRepository, pricingRuleRepository } from '../../application/wired';
 
 interface ExchangeRateBody {
   source: string;

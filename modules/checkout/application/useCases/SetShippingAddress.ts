@@ -121,11 +121,7 @@ export class SetShippingAddressUseCase {
         taxAmount = 0;
       }
     } catch {
-      taxAmount = await this.checkoutRepository.calculateTax(session.subtotal.amount, session.shippingAmount.amount, {
-        country: command.country,
-        region: command.region,
-        postalCode: command.postalCode,
-      });
+      taxAmount = 0;
     }
     session.updateAmounts(session.subtotal, Money.create(taxAmount, session.subtotal.currency));
 

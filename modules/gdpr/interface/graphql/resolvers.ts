@@ -1,4 +1,3 @@
-import gdprDataRepository from '../../infrastructure/repositories/GdprDataRepository';
 import { requireCustomerAuth, requireAdminAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CreateDataRequestUseCase, CreateDataRequestCommand } from '../../application/useCases/CreateDataRequest';
 import {
@@ -8,6 +7,7 @@ import {
   RejectRequestCommand,
 } from '../../application/useCases/ProcessDataRequest';
 import { ManageCookieConsentUseCase, RecordCookieConsentCommand } from '../../application/useCases/ManageCookieConsent';
+import { gdprDataRepository } from '../../application/wired';
 
 const dataRequestRepo = gdprDataRepository.dataRequests;
 const cookieConsentRepo = gdprDataRepository.cookieConsent;

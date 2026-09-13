@@ -1,3 +1,4 @@
+import { OrganizationRepo } from '../../application/wired';
 /**
  * Job: Create New Organization
  * Creates a new organization account with the specified email, name, and password
@@ -6,7 +7,6 @@
  * yarn job:new:organization --email=org@example.com --pass=password123 --name="My Organization"
  */
 
-import { OrganizationRepo } from '../../infrastructure/repositories/organizationRepo';
 
 async function run() {
   const args = process.argv.slice(2);

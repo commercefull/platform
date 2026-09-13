@@ -109,7 +109,20 @@ export class ListProductsUseCase {
 
 ## Domain Entity Pattern (Aggregate Root)
 
+Domain entities are the **single source of truth** for type definitions within a module. All layers (infrastructure, application, interface) must import types from the domain entity — never redefine them.
+
 ```typescript
+// domain/entities/Product.ts — canonical type definitions
+export type ProductStatus = 'draft' | 'active' | 'archived';
+
+export interface ProductProps {
+  productId: string;
+  name: string;
+  status: ProductStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class Product {
   private props: ProductProps;
 
@@ -152,6 +165,16 @@ export class Product {
 }
 ```
 
+### Type Source-of-Truth Rules
+
+1. **Domain entity defines the types** — `ProductProps`, `ProductStatus`, etc. live in `domain/entities/`.
+2. **Domain repository port imports from entity** — `domain/repositories/ProductRepository.ts` imports types from `domain/entities/Product.ts`, not from `libs/db/types`.
+3. **Infrastructure imports from domain** — `infrastructure/repositories/*.ts` import types from `domain/entities/`, not from `libs/db/types` or their own redefinitions.
+4. **Application imports from domain** — `application/wired.ts` imports types from `domain/entities/` and `domain/repositories/`.
+5. **Module `index.ts` exports domain entities** — so they are reachable from the entry point and do not trigger `no-orphans` violations.
+
+**Anti-pattern**: Infrastructure files that define their own `interface Product { ... }` instead of importing from `domain/entities/` create duplicate types and orphan the domain entity.
+
 ## Repository Pattern
 
 - Domain defines the **interface** (`domain/repositories/*.ts`).
@@ -165,6 +188,21 @@ export interface IProductRepository {
   save(product: Product): Promise<Product>;
   delete(productId: string): Promise<void>;
 }
+```
+
+## Module Barrel Exports (`index.ts`)
+
+Every module's `index.ts` must export its domain entities alongside its use cases, repository interfaces, and errors. This ensures domain entities are reachable from the entry point and do not trigger `no-orphans` violations in dependency-cruiser.
+
+```typescript
+// modules/product/index.ts
+export * from './application/useCases';
+export * from './domain/repositories/ProductRepository';
+export * from './domain/events/ProductEvents';
+export * from './domain/errors/ProductErrors';
+export * from './domain/entities/ProductType';      // ← domain entity
+export * from './domain/entities/ProductAttribute';  // ← domain entity
+export * from './domain/entities/Brand';              // ← domain entity
 ```
 
 ## Value Object Pattern

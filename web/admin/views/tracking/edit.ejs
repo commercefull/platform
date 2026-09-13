@@ -1,0 +1,19 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/tracking/<%= config.storeId %>" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="/admin/tracking/<%= config.storeId %>">
+      <div class="mb-3 form-check"><input type="checkbox" name="hashPii" <%= config.hashPii ? 'checked' : '' %> class="form-check-input"><label class="form-check-label">Hash PII</label></div>
+      <div class="mb-3 form-check"><input type="checkbox" name="serverSideEnabled" <%= config.serverSideEnabled ? 'checked' : '' %> class="form-check-input"><label class="form-check-label">Server-Side Tracking</label></div>
+      <button type="submit" class="btn btn-primary">Update Config</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

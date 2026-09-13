@@ -7,6 +7,9 @@ export * from './application/useCases';
 export * from './domain/repositories/ProductRepository';
 export * from './domain/events/ProductEvents';
 export * from './domain/errors/ProductErrors';
+export * from './domain/entities/ProductType';
+export * from './domain/entities/ProductAttribute';
+export * from './domain/entities/Brand';
 
 // Interface exports (routers, GraphQL)
 export { productCustomerRouter } from './interface/routers/productCustomerRouter';

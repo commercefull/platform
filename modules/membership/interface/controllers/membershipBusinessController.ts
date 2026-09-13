@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import membershipSubscriptionDataRepository from '../../infrastructure/repositories/MembershipSubscriptionDataRepository';
-import type { LegacyMembershipBenefit as _MembershipBenefit } from '../../infrastructure/repositories/MembershipSubscriptionDataRepository';
+import { membershipSubscriptionDataRepository } from '../../application/wired';
+import { LegacyMembershipBenefit as _MembershipBenefit } from '../../application/wired';
 
 const membershipRepo = membershipSubscriptionDataRepository.memberships;
 

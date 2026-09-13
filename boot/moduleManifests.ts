@@ -192,7 +192,7 @@ const manifests: ModuleManifest[] = [
     ],
     graphql: { enabled: true },
     events: { subscribes: [], publishes: [] },
-    tables: { names: ['shippingMethod', 'shippingZone', 'shippingRate'] },
+    tables: { names: ['shippingMethod', 'shippingZone', 'shippingRate', 'shippingSurcharge'] },
   },
   {
     name: 'warehouse',

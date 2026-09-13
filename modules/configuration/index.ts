@@ -11,3 +11,11 @@ export * from './domain/errors/ConfigurationErrors';
 export { systemConfigurationRouter } from './interface/http/SystemConfigurationRouter';
 export { configurationTypeDefs } from './interface/graphql/typeDefs';
 export { configurationResolvers } from './interface/graphql/resolvers';
+export {
+  listSystemConfigurations,
+  viewSystemConfiguration,
+  createSystemConfigurationForm,
+  createSystemConfiguration,
+  editSystemConfigurationForm,
+  updateSystemConfiguration,
+} from './interface/http/adminConfigurationController';

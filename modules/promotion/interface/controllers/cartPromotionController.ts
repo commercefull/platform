@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import promotionRuleRepository, { type PromotionCart } from '../../infrastructure/repositories/PromotionRuleRepository';
+import { promotionRuleRepository, type PromotionCart } from '../../application/wired';
 
 type CartCreateProps = Pick<PromotionCart, 'basketId' | 'promotionId' | 'discountAmount' | 'status'> &
   Partial<Pick<PromotionCart, 'promotionCouponId' | 'couponCode' | 'currencyCode' | 'appliedBy'>>;

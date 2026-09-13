@@ -1,9 +1,9 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import warehouseDataRepository from '../../infrastructure/repositories/WarehouseDataRepository';
-import type { WarehouseUpdateParams } from '../../infrastructure/repositories/WarehouseDataRepository';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { warehouseDataRepository } from '../../application/wired';
+import { WarehouseUpdateParams } from '../../application/wired';
 
 const warehouseRepo = warehouseDataRepository.warehouses;
 const warehouseZoneRepo = warehouseDataRepository.zones;

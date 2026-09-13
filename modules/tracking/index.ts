@@ -9,3 +9,13 @@ export { TrackingConfigRepositoryImpl } from './infrastructure/repositories/Trac
 export { ManageTrackingConfigUseCase, ProcessTrackingEventUseCase, GetTrackingStatusUseCase } from './application/useCases/Tracking';
 export { registerTrackingEventHandlers, setConsentRepository } from './application/eventHandlers/trackingEventHandlers';
 export { trackingBusinessRouter } from './interface/routers/trackingRouter';
+export {
+  listTrackingConfigs,
+  viewTrackingConfig,
+  createTrackingConfigForm,
+  createTrackingConfig,
+  editTrackingConfigForm,
+  activateTrackingConfig,
+  disableTrackingConfig,
+  deleteTrackingConfig,
+} from './interface/controllers/adminTrackingController';

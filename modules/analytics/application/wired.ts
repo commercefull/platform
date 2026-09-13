@@ -9,6 +9,7 @@ import * as analyticsRepo from '../infrastructure/repositories/analyticsRepo';
 import * as adminAnalyticsRepo from '../infrastructure/repositories/adminAnalyticsRepo';
 import { GetAnalyticsDataUseCase } from './useCases/GetAnalyticsData';
 import { GenerateSalesReportUseCase } from './useCases/GenerateSalesReport';
+import analyticsDataRepository from '../infrastructure/repositories/AnalyticsDataRepository';
 
 const analyticsDataPort = {
   getSalesSummary: analyticsRepo.getSalesSummary,
@@ -25,3 +26,5 @@ const analyticsDataPort = {
 
 export const getAnalyticsDataUseCase = new GetAnalyticsDataUseCase(analyticsDataPort);
 export const generateSalesReportUseCase = new GenerateSalesReportUseCase(analyticsDataPort);
+
+export { analyticsDataRepository };

@@ -18,6 +18,8 @@ Quick reference. For the full rules, see the individual standards documents.
 - Use the Winston logger (`logger.error()`, `logger.info()`) instead of `console.log`.
 - Write use cases as classes with an `execute()` method.
 - Create domain entities with `create()` and `reconstitute()` factory methods.
+- Import types from `domain/entities/` in all layers — domain entities are the single source of truth.
+- Export domain entities from the module's `index.ts` so they are reachable from the entry point.
 - Check for existing data before inserting in seed files.
 - Use `t.timestamp('deletedAt')` for soft deletes.
 - Keep migrations as JavaScript files (not TypeScript).
@@ -61,6 +63,8 @@ Quick reference. For the full rules, see the individual standards documents.
 - Store plaintext credentials in the database — use `libs/secrets` encryption.
 - Log decrypted credential values or sensitive PII.
 - Use `throw new Error('...')` in `domain/` or `application/` — use typed domain errors.
+- Redefine types in infrastructure that already exist in `domain/entities/` — import from the domain entity instead.
+- Leave empty or stub domain files — every domain file must be wired through the module or deleted.
 - Add a module without registering it in `boot/moduleManifests.ts`.
 - Mount routes without checking `moduleRegistry.shouldMountRoutes()`.
 - Use `emitEvent()` for events that must survive crashes — use `writeToOutbox()` within a transaction instead.

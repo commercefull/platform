@@ -1,10 +1,10 @@
-import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
 
 const OrderRepo = orderDataRepository.commands;
 import { GetOrderUseCase, GetOrderCommand } from '../../application/useCases/GetOrder';
 import { GetCustomerOrdersUseCase, GetCustomerOrdersCommand } from '../../application/useCases/GetCustomerOrders';
 import { ListOrdersUseCase, ListOrdersCommand } from '../../application/useCases/ListOrders';
 import { requireCustomerAuth, requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
+import { orderDataRepository } from '../../application/wired';
 
 export const orderResolvers = {
   Query: {

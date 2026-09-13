@@ -1,7 +1,5 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import pricingRuleRepository from '../../infrastructure/repositories/PricingRuleRepository';
-import pricingDataRepository from '../../infrastructure/repositories/PricingDataRepository';
 import {
   CustomerPriceList,
   CustomerPrice,
@@ -10,6 +8,7 @@ import {
   PricingRuleUpdateProps,
   TierPrice,
 } from '../../domain/pricingRule';
+import { pricingRuleRepository, pricingDataRepository } from '../../application/wired';
 
 interface PricingRuleBody {
   name?: string;

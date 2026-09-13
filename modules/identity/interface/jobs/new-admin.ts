@@ -7,7 +7,7 @@
  */
 
 import { hashAString } from '../../../../libs/hash';
-import identityDataRepository from '../../infrastructure/repositories/IdentityDataRepository';
+import { identityDataRepository } from '../../application/wired';
 
 const identityRepo = identityDataRepository.users;
 

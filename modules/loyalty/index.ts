@@ -6,6 +6,7 @@
 export * from './application/useCases';
 export * from './domain/repositories/LoyaltyRepository';
 export * from './domain/errors/LoyaltyErrors';
+export * from './domain/entities/LoyaltyProgram';
 
 // Interface exports (routers, GraphQL)
 export { loyaltyCustomerRouter } from './interface/routers/loyaltyCustomerRouter';

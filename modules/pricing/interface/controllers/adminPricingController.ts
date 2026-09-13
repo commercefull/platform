@@ -6,7 +6,6 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import { pricingRuleRepo } from '../../infrastructure';
 import {
   PricingRuleType,
   PricingRuleStatus,
@@ -18,6 +17,7 @@ import {
   type PricingRuleUpdateProps,
 } from '../../domain/pricingRule';
 import { adminRespond } from '../../../../libs/adminRespond';
+import { pricingRuleRepo } from '../../application/wired';
 
 // ============================================================================
 // Price Lists

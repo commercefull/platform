@@ -5,10 +5,10 @@
 
 import { Request, Response } from 'express';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
 
 const PaymentRepo = paymentDataRepository.payments;
 import { SaveStoredPaymentMethodCommand, SaveStoredPaymentMethodUseCase } from '../../application/useCases/SaveStoredPaymentMethod';
+import { paymentDataRepository } from '../../application/wired';
 
 // ============================================================================
 // Stored Payment Methods

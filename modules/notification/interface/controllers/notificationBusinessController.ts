@@ -1,13 +1,11 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
-import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
-import type { NotificationTemplate } from '../../infrastructure/repositories/NotificationConfigRepository';
-import type { NotificationPreference } from '../../infrastructure/repositories/notificationPreferenceRepo';
 import { SendNotificationBatchUseCase, SendNotificationBatchCommand } from '../../application/useCases/SendNotificationBatch';
 import { ManageNotificationWebhookUseCase, ManageNotificationWebhookCommand } from '../../application/useCases/ManageNotificationWebhook';
 import { UpsertTemplateTranslationUseCase, UpsertTemplateTranslationCommand } from '../../application/useCases/UpsertTemplateTranslation';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
+import { notificationDataRepository, notificationConfigRepository } from '../../application/wired';
+import { NotificationTemplate, NotificationPreference } from '../../application/wired';
 
 const NotificationRepo = notificationDataRepository.notifications;
 const notificationBatchRepo = notificationDataRepository.batches;

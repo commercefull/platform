@@ -1,8 +1,8 @@
-import pricingDataRepository from '../../infrastructure/repositories/PricingDataRepository';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CalculatePriceUseCase, CalculatePriceInput } from '../../application/useCases/CalculatePrice';
 import { CreatePriceListUseCase, CreatePriceListInput } from '../../application/useCases/CreatePriceList';
 import { SetProductPriceUseCase, SetProductPriceInput } from '../../application/useCases/SetProductPrice';
+import { pricingDataRepository } from '../../application/wired';
 
 export const pricingResolvers = {
   Query: {

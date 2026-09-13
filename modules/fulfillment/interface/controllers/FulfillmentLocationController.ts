@@ -6,12 +6,8 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import fulfillmentPartnerRepository from '../../infrastructure/repositories/FulfillmentPartnerRepository';
-import type {
-  CreateFulfillmentLocationParams,
-  UpdateFulfillmentLocationParams,
-} from '../../infrastructure/repositories/FulfillmentPartnerRepository';
-import type { FulfillmentPartner } from '../../infrastructure/repositories/FulfillmentPartnerRepository';
+import { fulfillmentPartnerRepository } from '../../application/wired';
+import { CreateFulfillmentLocationParams, UpdateFulfillmentLocationParams, FulfillmentPartner } from '../../application/wired';
 
 const fulfillmentLocationRepo = fulfillmentPartnerRepository.locations;
 const fulfillmentPartnerRepo = fulfillmentPartnerRepository.partners;

@@ -47,7 +47,6 @@ describe('SetShippingAddressUseCase', () => {
     mockRepo = {
       findById: jest.fn().mockResolvedValue(mockSession),
       validateShippingAddress: jest.fn().mockResolvedValue({ valid: true, errors: [] }),
-      calculateTax: jest.fn().mockResolvedValue(0),
       save: jest.fn().mockResolvedValue(undefined),
     };
     useCase = new SetShippingAddressUseCase(mockRepo as never);

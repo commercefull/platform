@@ -5,14 +5,8 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
-import type {
-  FraudRule,
-  RuleType,
-  CheckStatus,
-  BlacklistType,
-  RiskLevel,
-} from '../../infrastructure/repositories/PaymentBillingDataRepository';
+import { paymentBillingDataRepository } from '../../application/wired';
+import { FraudRule, RuleType, CheckStatus, BlacklistType, RiskLevel } from '../../application/wired';
 
 const fraudRepo = paymentBillingDataRepository.fraud;
 

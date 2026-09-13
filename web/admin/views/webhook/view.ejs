@@ -1,0 +1,51 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <div>
+    <a href="/admin/webhooks/<%= endpoint.webhookEndpointId %>/edit" class="btn btn-warning btn-sm">Edit</a>
+    <a href="/admin/webhooks/<%= endpoint.webhookEndpointId %>/deliveries" class="btn btn-info btn-sm">Deliveries</a>
+    <a href="/admin/webhooks" class="btn btn-secondary btn-sm">Back</a>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <table class="table table-sm">
+      <tr><th>Endpoint ID</th><td><code><%= endpoint.webhookEndpointId %></code></td></tr>
+      <tr><th>Name</th><td><%= endpoint.name %></td></tr>
+      <tr><th>URL</th><td><code><%= endpoint.url %></code></td></tr>
+      <tr><th>Active</th><td><%= endpoint.isActive ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>' %></td></tr>
+      <tr><th>Organization</th><td><%= endpoint.organizationId || '-' %></td></tr>
+      <tr><th>Created</th><td><%= endpoint.createdAt ? new Date(endpoint.createdAt).toLocaleString() : '-' %></td></tr>
+    </table>
+  </div>
+</div>
+
+<% if (endpoint.events && endpoint.events.length > 0) { %>
+<div class="card mb-3">
+  <div class="card-header"><h5>Subscribed Events</h5></div>
+  <div class="card-body">
+    <% endpoint.events.forEach(function(ev) { %>
+    <span class="badge bg-info me-1"><%= ev %></span>
+    <% }); %>
+  </div>
+</div>
+<% } %>
+
+<% if (endpoint.headers) { %>
+<div class="card mb-3">
+  <div class="card-header"><h5>Custom Headers</h5></div>
+  <div class="card-body">
+    <pre class="bg-light p-3 rounded"><code><%- JSON.stringify(endpoint.headers, null, 2) %></code></pre>
+  </div>
+</div>
+<% } %>
+
+<form method="POST" action="/admin/webhooks/<%= endpoint.webhookEndpointId %>/delete" class="mt-2"
+  onsubmit="return confirm('Delete this webhook endpoint?');">
+  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+</form>
+
+<%- include('../partials/footer') %>

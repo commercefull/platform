@@ -1,0 +1,42 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/migration/<%= importJobId %>" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-striped table-sm">
+      <thead><tr><th>Error ID</th><th>Entity</th><th>Severity</th><th>Message</th><th>Resolved</th><th>Actions</th></tr></thead>
+      <tbody>
+        <% errors.forEach(function(e) { %>
+        <tr>
+          <td><code><%= (e.importErrorId || e.errorId || '').substring(0, 8) %>...</code></td>
+          <td><%= e.entityType || '-' %></td>
+          <td>
+            <% if (e.severity === 'critical') { %><span class="badge bg-danger"><%= e.severity %></span>
+            <% } else if (e.severity === 'warning') { %><span class="badge bg-warning"><%= e.severity %></span>
+            <% } else { %><span class="badge bg-info"><%= e.severity %></span><% } %>
+          </td>
+          <td><%= e.errorMessage || e.message || '-' %></td>
+          <td><%= e.resolved ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>' %></td>
+          <td>
+            <% if (!e.resolved) { %>
+            <form method="POST" action="/admin/migration/<%= importJobId %>/errors/<%= e.importErrorId || e.errorId %>/resolve" class="d-inline">
+              <button type="submit" class="btn btn-success btn-sm">Resolve</button>
+            </form>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+        <% if (!errors || errors.length === 0) { %>
+        <tr><td colspan="6" class="text-center text-muted">No errors found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -9,3 +9,5 @@ export const manageDraftsUseCase = new ManageDraftsUseCase(draftRepo);
 export const publishDraftUseCase = new PublishDraftUseCase(draftRepo);
 export const previewDraftUseCase = new PreviewDraftUseCase(draftRepo, themeRepo);
 export const getBlockTypesUseCase = new GetBlockTypesUseCase();
+
+export { PageDraftRepositoryImpl, ThemeRepositoryImpl };

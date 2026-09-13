@@ -1,0 +1,55 @@
+<%- include('../../partials/header', { pageName, title: pageName }) %>
+<%- include('../../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/b2b/companies/<%= company.companyId %>" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="/admin/b2b/companies/<%= company.companyId %>">
+      <div class="mb-3">
+        <label class="form-label">Name *</label>
+        <input type="text" name="name" value="<%= company.name %>" required class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Legal Name</label>
+        <input type="text" name="legalName" value="<%= company.legalName || '' %>" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tax ID</label>
+        <input type="text" name="taxId" value="<%= company.taxId || '' %>" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Payment Terms</label>
+        <select name="paymentTerms" class="form-select">
+          <option value="net15" <%= company.paymentTerms === 'net15' ? 'selected' : '' %>>Net 15</option>
+          <option value="net30" <%= company.paymentTerms === 'net30' ? 'selected' : '' %>>Net 30</option>
+          <option value="net60" <%= company.paymentTerms === 'net60' ? 'selected' : '' %>>Net 60</option>
+          <option value="immediate" <%= company.paymentTerms === 'immediate' ? 'selected' : '' %>>Immediate</option>
+          <option value="prepaid" <%= company.paymentTerms === 'prepaid' ? 'selected' : '' %>>Prepaid</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Credit Limit</label>
+        <input type="number" name="creditLimit" step="0.01" value="<%= company.creditLimit != null ? company.creditLimit : '' %>" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contact Email</label>
+        <input type="email" name="contactEmail" value="<%= company.contactEmail || '' %>" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contact Phone</label>
+        <input type="text" name="contactPhone" value="<%= company.contactPhone || '' %>" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Website</label>
+        <input type="url" name="website" value="<%= company.website || '' %>" class="form-control">
+      </div>
+      <button type="submit" class="btn btn-primary">Update Company</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../../partials/footer') %>

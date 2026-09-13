@@ -1,11 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import promotionRepo, {
-  CreatePromotionInput,
-  PromotionScope,
-  PromotionStatus,
-  UpdatePromotionInput,
-} from '../../infrastructure/repositories/promotionRepo';
+import { promotionRepo, CreatePromotionInput, PromotionScope, PromotionStatus, UpdatePromotionInput } from '../../application/wired';
 
 interface ApplyPromotionBody {
   cartId: string;

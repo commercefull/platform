@@ -1,14 +1,12 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import identityDataRepository from '../../infrastructure/repositories/IdentityDataRepository';
 
 const tokenRepo = identityDataRepository.tokens;
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
-import { OrganizationCredentialSubjectAdapter } from '../../infrastructure/acl/OrganizationCredentialSubjectAdapter';
-import { CustomerCredentialSubjectAdapter } from '../../infrastructure/acl/CustomerCredentialSubjectAdapter';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
 import { emitOrganizationLogin, emitOrganizationRegistered, emitOrganizationTokenRefreshed } from '../../domain/events/emitIdentityEvent';
+import { identityDataRepository, OrganizationCredentialSubjectAdapter, CustomerCredentialSubjectAdapter } from '../../application/wired';
 
 // Environment configuration with secure defaults
 const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'merchant-secret-key-should-be-in-env';

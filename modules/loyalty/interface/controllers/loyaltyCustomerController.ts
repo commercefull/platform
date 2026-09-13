@@ -6,7 +6,7 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import loyaltyDataRepository from '../../infrastructure/repositories/LoyaltyDataRepository';
+import { loyaltyDataRepository } from '../../application/wired';
 
 const loyaltyRepo = loyaltyDataRepository.points;
 

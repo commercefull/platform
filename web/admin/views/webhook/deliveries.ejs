@@ -1,0 +1,35 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/webhooks/<%= webhookEndpointId %>" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-striped table-sm">
+      <thead><tr><th>Delivery ID</th><th>Event</th><th>Status</th><th>Attempts</th><th>Timestamp</th></tr></thead>
+      <tbody>
+        <% deliveries.forEach(function(d) { %>
+        <tr>
+          <td><code><%= (d.deliveryId || d.id || '').substring(0, 8) %>...</code></td>
+          <td><%= d.eventType || d.event || '-' %></td>
+          <td>
+            <% if (d.status === 'delivered') { %><span class="badge bg-success"><%= d.status %></span>
+            <% } else if (d.status === 'failed') { %><span class="badge bg-danger"><%= d.status %></span>
+            <% } else { %><span class="badge bg-info"><%= d.status %></span><% } %>
+          </td>
+          <td><%= d.attemptCount || d.attempts || 0 %></td>
+          <td><%= d.createdAt ? new Date(d.createdAt).toLocaleString() : '-' %></td>
+        </tr>
+        <% }); %>
+        <% if (!deliveries || deliveries.length === 0) { %>
+        <tr><td colspan="5" class="text-center text-muted">No deliveries found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,4 +1,3 @@
-import analyticsDataRepository from '../../infrastructure/repositories/AnalyticsDataRepository';
 
 const DashboardQueryRepo = analyticsDataRepository.dashboard;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
@@ -8,6 +7,7 @@ import { GetProductPerformanceUseCase, GetProductPerformanceInput } from '../../
 import { TrackPageViewUseCase, TrackPageViewCommand } from '../../application/useCases/TrackPageView';
 import { GenerateSalesReportCommand } from '../../application/useCases/GenerateSalesReport';
 import { generateSalesReportUseCase } from '../../application/wired';
+import { analyticsDataRepository } from '../../application/wired';
 
 export const analyticsResolvers = {
   Query: {

@@ -7,7 +7,6 @@ import { TypedRequest } from 'libs/types/express';
 
 import type { ReportType } from '../../domain/entities/ReportEntities';
 import type { CreateReportScheduleInput } from '../../application/useCases/CreateReportSchedule';
-import type { UpdateReportScheduleParams } from '../../infrastructure/repositories/ReportingDataRepository';
 import { GenerateReportUseCase } from '../../application/useCases/GenerateReport';
 import { GetReportTemplatesUseCase } from '../../application/useCases/GetReportTemplates';
 import { CreateReportScheduleUseCase } from '../../application/useCases/CreateReportSchedule';
@@ -16,6 +15,7 @@ import { GetReportScheduleUseCase } from '../../application/useCases/GetReportSc
 import { UpdateReportScheduleUseCase } from '../../application/useCases/UpdateReportSchedule';
 import { DeleteReportScheduleUseCase } from '../../application/useCases/DeleteReportSchedule';
 import { ListReportExecutionsUseCase } from '../../application/useCases/ListReportExecutions';
+import { UpdateReportScheduleParams } from '../../application/wired';
 
 interface GenerateReportBody {
   reportType: ReportType;

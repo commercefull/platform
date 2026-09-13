@@ -9,7 +9,6 @@
  * and provider repositories.
  */
 
-import CheckoutRepo from './repositories/CheckoutRepository';
 import { BasketRepository as BasketRepo } from '../../basket/infrastructure';
 import { OrderDataRepository as OrderDataRepo } from '../../order/infrastructure';
 
@@ -72,5 +71,3 @@ export function getCheckoutPorts(): CheckoutPorts {
 
   return cachedPorts;
 }
-
-export { CheckoutRepo };

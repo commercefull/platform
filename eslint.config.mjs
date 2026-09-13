@@ -67,6 +67,12 @@ export default [
     },
   },
   {
+    files: ['boot/**/*.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
+    },
+  },
+  {
     ignores: [
       'node_modules/',
       'dist/',

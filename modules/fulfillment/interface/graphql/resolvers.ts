@@ -1,4 +1,3 @@
-import fulfillmentDataRepository from '../../infrastructure/repositories/FulfillmentDataRepository';
 
 const fulfillmentRepository = fulfillmentDataRepository.fulfillments;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
@@ -8,6 +7,7 @@ import { ShipOrderUseCase, ShipOrderInput } from '../../application/useCases/Shi
 import { MarkDeliveredUseCase, MarkDeliveredInput } from '../../application/useCases/MarkDelivered';
 import { CancelFulfillmentUseCase, CancelFulfillmentCommand } from '../../application/useCases/CancelFulfillment';
 import { UpdateTrackingUseCase, UpdateTrackingCommand } from '../../application/useCases/UpdateTracking';
+import { fulfillmentDataRepository } from '../../application/wired';
 
 export const fulfillmentResolvers = {
   Query: {

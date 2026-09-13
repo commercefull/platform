@@ -5,16 +5,7 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import {
-  activateGiftCard as activateGiftCardRepo,
-  cancelGiftCard as cancelGiftCardRepo,
-  createGiftCard as createGiftCardRepo,
-  getGiftCard as getGiftCardRepo,
-  getGiftCards as getGiftCardsRepo,
-  getTransactions,
-  refundToGiftCard as refundToGiftCardRepo,
-} from '../../infrastructure/repositories/GiftCardRepository';
-import { type GiftCardStatus, type GiftCardType, type DeliveryMethod } from '../../infrastructure/repositories/GiftCardRepository';
+import { activateGiftCardRepo, cancelGiftCardRepo, createGiftCardRepo, getGiftCardRepo, getGiftCardsRepo, getTransactions, refundToGiftCardRepo, type GiftCardStatus, type GiftCardType, type DeliveryMethod } from '../../application/wired';
 
 interface CreateGiftCardBody {
   type?: GiftCardType;

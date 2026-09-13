@@ -1,0 +1,67 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/tracking/create" class="btn btn-primary btn-sm">Create Config</a>
+</div>
+
+<form method="GET" action="/admin/tracking" class="row g-2 mb-3">
+  <div class="col-md-4">
+    <input type="text" name="storeId" value="<%= storeId || '' %>" class="form-control form-control-sm" placeholder="Enter Store ID to view config">
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary btn-sm">View</button>
+  </div>
+</form>
+
+<% if (config) { %>
+<div class="card mb-3">
+  <div class="card-header d-flex justify-content-between">
+    <h5>Tracking Config: <%= config.storeId %></h5>
+    <div>
+      <a href="/admin/tracking/<%= config.storeId %>" class="btn btn-info btn-sm">View</a>
+      <a href="/admin/tracking/<%= config.storeId %>/edit" class="btn btn-warning btn-sm">Edit</a>
+    </div>
+  </div>
+  <div class="card-body">
+    <table class="table table-sm">
+      <tr><th>Config ID</th><td><code><%= config.configId %></code></td></tr>
+      <tr><th>Store ID</th><td><%= config.storeId %></td></tr>
+      <tr><th>Active</th><td><%= config.isActive ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>' %></td></tr>
+      <tr><th>Hash PII</th><td><%= config.hashPii ? 'Yes' : 'No' %></td></tr>
+      <tr><th>Server-Side Tracking</th><td><%= config.serverSideEnabled ? 'Yes' : 'No' %></td></tr>
+    </table>
+  </div>
+</div>
+
+<% if (status) { %>
+<div class="card">
+  <div class="card-header"><h5>Tracking Status</h5></div>
+  <div class="card-body">
+    <pre class="bg-light p-3 rounded"><code><%- JSON.stringify(status, null, 2) %></code></pre>
+  </div>
+</div>
+<% } %>
+
+<% if (config.isActive) { %>
+<form method="POST" action="/admin/tracking/<%= config.storeId %>/disable" class="mt-2 d-inline">
+  <button type="submit" class="btn btn-danger btn-sm">Disable</button>
+</form>
+<% } else { %>
+<form method="POST" action="/admin/tracking/<%= config.storeId %>/activate" class="mt-2 d-inline">
+  <button type="submit" class="btn btn-success btn-sm">Activate</button>
+</form>
+<% } %>
+<form method="POST" action="/admin/tracking/<%= config.storeId %>/delete" class="mt-2 d-inline"
+  onsubmit="return confirm('Delete this tracking config?');">
+  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+</form>
+
+<% } else if (storeId) { %>
+<div class="alert alert-info">No tracking configuration found for store: <%= storeId %></div>
+<% } else { %>
+<div class="alert alert-info">Enter a Store ID to view its tracking configuration.</div>
+<% } %>
+
+<%- include('../partials/footer') %>

@@ -4,7 +4,6 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
 
 const PaymentRepo = paymentDataRepository.payments;
 import { InitiatePaymentCommand, InitiatePaymentUseCase } from '../../application/useCases/InitiatePayment';
@@ -17,6 +16,7 @@ import {
 } from '../../application/useCases/GetTransactions';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 import { query, queryOne } from '../../../../libs/db';
+import { paymentDataRepository } from '../../application/wired';
 
 function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });

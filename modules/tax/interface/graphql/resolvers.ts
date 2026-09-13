@@ -1,5 +1,3 @@
-import taxQueryRepository from '../../infrastructure/repositories/TaxQueryRepository';
-import taxCommandRepository from '../../infrastructure/repositories/TaxCommandRepository';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import {
   CalculateOrderTaxUseCase,
@@ -10,6 +8,7 @@ import {
 import { CreateTaxRateUseCase, CreateTaxRateInput } from '../../application/useCases/CreateTaxRate';
 import { GetTaxRateForAddressUseCase, GetTaxRateForAddressInput } from '../../application/useCases/GetTaxRateForAddress';
 import type { TaxRateType } from '../../taxTypes';
+import { taxQueryRepository, taxCommandRepository } from '../../application/wired';
 
 // Adapter that bridges taxQueryRepo to the TaxRepository port interface
 const taxRepoAdapter = {

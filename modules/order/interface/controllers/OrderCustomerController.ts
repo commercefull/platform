@@ -5,13 +5,13 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
 
 const OrderRepo = orderDataRepository.commands;
 import { CreateOrderCommand, CreateOrderUseCase, OrderItemInput, AddressInput } from '../../application/useCases/CreateOrder';
 import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
 import { GetCustomerOrdersCommand, GetCustomerOrdersUseCase } from '../../application/useCases/GetCustomerOrders';
 import { CancelOrderCommand, CancelOrderUseCase } from '../../application/useCases/CancelOrder';
+import { orderDataRepository } from '../../application/wired';
 
 // ============================================================================
 // Content Negotiation Helpers

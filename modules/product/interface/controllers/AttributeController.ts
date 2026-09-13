@@ -1,6 +1,5 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
 
 const dynamicAttributeRepository = productAttributeRepository.dynamic;
 import createAttributeUseCase from '../../application/useCases/attribute/CreateAttribute';
@@ -19,6 +18,7 @@ import {
   removeProductAttributeUseCase,
 } from '../../application/useCases/attribute/AssignProductAttributes';
 import type { SetProductAttributeCommand } from '../../application/useCases/attribute/AssignProductAttributes';
+import { productAttributeRepository } from '../../application/wired';
 
 class AttributeController {
   // ==================== ATTRIBUTE CRUD ====================

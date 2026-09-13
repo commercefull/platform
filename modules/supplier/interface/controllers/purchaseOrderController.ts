@@ -1,15 +1,8 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import supplierPurchaseOrderDataRepository from '../../infrastructure/repositories/SupplierPurchaseOrderDataRepository';
-import type {
-  SupplierPurchaseOrderStatus,
-  SupplierPurchaseOrderCreateParams,
-  SupplierPurchaseOrderUpdateParams,
-  SupplierPurchaseOrderItemCreateParams,
-  SupplierPurchaseOrderItemUpdateParams,
-} from '../../infrastructure/repositories/SupplierPurchaseOrderDataRepository';
-import supplierDataRepository from '../../infrastructure/repositories/SupplierDataRepository';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
+import { supplierPurchaseOrderDataRepository, supplierDataRepository } from '../../application/wired';
+import { SupplierPurchaseOrderStatus, SupplierPurchaseOrderCreateParams, SupplierPurchaseOrderUpdateParams, SupplierPurchaseOrderItemCreateParams, SupplierPurchaseOrderItemUpdateParams } from '../../application/wired';
 
 // Use the singleton instance directly
 const purchaseOrderRepo = supplierPurchaseOrderDataRepository.purchaseOrders;

@@ -1,13 +1,10 @@
-import storeDataRepository from '../../infrastructure/repositories/StoreDataRepository';
 
 const StoreRepo = storeDataRepository.stores;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetStoreUseCase, GetStoreQuery } from '../../application/useCases/GetStore';
 import { ListStoresUseCase, ListStoresQuery } from '../../application/useCases/ListStores';
 import { CreateStoreUseCase, CreateStoreCommand } from '../../application/useCases/CreateStore';
-import { OrganizationLookupAdapter } from '../../infrastructure/acl/OrganizationLookupAdapter';
-import { SystemConfigAdapter } from '../../infrastructure/acl/SystemConfigAdapter';
-import { SystemConfigurationRepo } from '../../../configuration/infrastructure/repositories/SystemConfigurationRepo';
+import { storeDataRepository, OrganizationLookupAdapter, SystemConfigAdapter, SystemConfigurationRepo } from '../../application/wired';
 
 export const storeResolvers = {
   Query: {

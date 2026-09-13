@@ -1,9 +1,9 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import localizationDataRepository from '../../infrastructure/repositories/LocalizationDataRepository';
-import type { CountryCreateParams, CountryUpdateParams } from '../../infrastructure/repositories/LocalizationDataRepository';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 import { Locale } from '../../../../libs/db/types';
+import { localizationDataRepository } from '../../application/wired';
+import { CountryCreateParams, CountryUpdateParams } from '../../application/wired';
 
 const LocaleRepo = localizationDataRepository.locales;
 const CountryRepo = localizationDataRepository.countries;

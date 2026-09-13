@@ -5,8 +5,6 @@
 
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
-import { PageDraftRepositoryImpl } from '../../infrastructure/repositories/PageDraftRepositoryImpl';
-import { ThemeRepositoryImpl } from '../../../theme/infrastructure/repositories/ThemeRepositoryImpl';
 import {
   ManageDraftsUseCase,
   ManageBlocksUseCase,
@@ -18,6 +16,7 @@ import {
   UpdateBlockCommand,
   MoveBlockCommand,
 } from '../../application/useCases/PageBuilder';
+import { PageDraftRepositoryImpl, ThemeRepositoryImpl } from '../../application/wired';
 
 const draftRepo = new PageDraftRepositoryImpl();
 const themeRepo = new ThemeRepositoryImpl();

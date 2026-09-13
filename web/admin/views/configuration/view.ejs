@@ -1,0 +1,57 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <div>
+    <a href="/admin/configuration/<%= config.configId %>/edit" class="btn btn-warning btn-sm">Edit</a>
+    <a href="/admin/configuration" class="btn btn-secondary btn-sm">Back</a>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header"><h5>Platform Settings</h5></div>
+  <div class="card-body">
+    <table class="table table-sm">
+      <tr><th>Platform Name</th><td><%= config.platformSettings.platformName %></td></tr>
+      <tr><th>Domain</th><td><%= config.platformSettings.platformDomain %></td></tr>
+      <tr><th>Support Email</th><td><%= config.platformSettings.supportEmail %></td></tr>
+      <tr><th>Default Currency</th><td><%= config.platformSettings.defaultCurrency %></td></tr>
+      <tr><th>Default Language</th><td><%= config.platformSettings.defaultLanguage %></td></tr>
+      <tr><th>Timezone</th><td><%= config.platformSettings.timezone %></td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header"><h5>System Mode</h5></div>
+  <div class="card-body">
+    <table class="table table-sm">
+      <tr><th>Mode</th><td><span class="badge bg-info"><%= config.systemMode %></span></td></tr>
+      <tr><th>Is Marketplace</th><td><%= config.isMarketplace ? 'Yes' : 'No' %></td></tr>
+      <tr><th>Is Multi-Store</th><td><%= config.isMultiStore ? 'Yes' : 'No' %></td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header"><h5>Features</h5></div>
+  <div class="card-body">
+    <div class="row">
+      <% Object.entries(config.features).forEach(function([key, val]) { %>
+      <div class="col-md-4 mb-1">
+        <span class="badge <%= val ? 'bg-success' : 'bg-secondary' %>"><%= val ? '✓' : '✗' %> <%= key %></span>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header"><h5>Security Settings</h5></div>
+  <div class="card-body">
+    <pre class="bg-light p-3 rounded"><code><%- JSON.stringify(config.securitySettings, null, 2) %></code></pre>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -84,4 +84,14 @@ router.post('/labels/:id/void', asyncHandler(shippingController.voidLabel));
 router.get('/track/:id', asyncHandler(shippingController.trackShipment));
 router.get('/track', asyncHandler(shippingController.trackShipment));
 
+// ============================================================================
+// Surcharges
+// ============================================================================
+
+router.get('/rates/:rateId/surcharges', asyncHandler(shippingController.getSurchargesByRate));
+router.get('/surcharges/:id', asyncHandler(shippingController.getSurchargeById));
+router.post('/surcharges', asyncHandler(shippingController.createSurcharge));
+router.put('/surcharges/:id', asyncHandler(shippingController.updateSurcharge));
+router.delete('/surcharges/:id', asyncHandler(shippingController.deleteSurcharge));
+
 export const shippingBusinessRouter = router;

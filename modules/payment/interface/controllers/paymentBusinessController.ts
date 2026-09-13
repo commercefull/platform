@@ -6,12 +6,11 @@
 
 import { Request, Response } from 'express';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
 
 const paymentBillingRepo = paymentBillingDataRepository.billing;
 const PaymentRepo = paymentDataRepository.payments;
 import { GetPaymentBalanceCommand, GetPaymentBalanceUseCase } from '../../application/useCases/GetPaymentBalance';
+import { paymentBillingDataRepository, paymentDataRepository } from '../../application/wired';
 
 // ============================================================================
 // Disputes

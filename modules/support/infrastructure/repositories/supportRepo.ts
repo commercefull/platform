@@ -5,101 +5,23 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { SupportTicketNotFoundError } from '../../domain/errors/SupportErrors';
+import type {
+  TicketStatus,
+  TicketPriority,
+  TicketCategory,
+  TicketChannel,
+  SenderType,
+  SupportTicketProps,
+} from '../../domain/entities/SupportTicket';
+import type { SupportAgent, AgentRole } from '../../domain/repositories/SupportRepository';
 
-// ============================================================================
-// Table Constants
-// ============================================================================
-
-/* const _TABLE = {
-  AGENT: Table.SupportAgent,
-  TICKET: Table.SupportTicket,
-  MESSAGE: Table.SupportMessage,
-  ATTACHMENT: Table.SupportAttachment,
-}; */
+export type { TicketStatus, TicketPriority, TicketCategory, TicketChannel, SenderType, SupportTicketProps, SupportAgent, AgentRole };
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type TicketStatus = 'open' | 'pending' | 'in_progress' | 'waiting_customer' | 'resolved' | 'closed';
-export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
-export type TicketCategory = 'order' | 'shipping' | 'return' | 'product' | 'payment' | 'account' | 'technical' | 'other';
-export type TicketChannel = 'web' | 'email' | 'phone' | 'chat' | 'social';
-export type SenderType = 'customer' | 'agent' | 'system';
-export type AgentRole = 'agent' | 'supervisor' | 'admin';
-
-export interface SupportAgent {
-  supportAgentId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  displayName?: string;
-  avatarUrl?: string;
-  role: AgentRole;
-  department?: string;
-  skills?: string[];
-  languages?: string[];
-  isActive: boolean;
-  isAvailable: boolean;
-  maxTickets: number;
-  currentTickets: number;
-  totalTicketsHandled: number;
-  averageResponseTimeMinutes?: number;
-  averageResolutionTimeMinutes?: number;
-  satisfactionScore?: number;
-  satisfactionCount: number;
-  timezone: string;
-  workingHours?: Record<string, unknown>;
-  notificationPreferences?: Record<string, unknown>;
-  metadata?: Record<string, unknown>;
-  lastActiveAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface SupportTicket {
-  supportTicketId: string;
-  ticketNumber: string;
-  customerId?: string;
-  orderId?: string;
-  email: string;
-  name?: string;
-  phone?: string;
-  subject: string;
-  description?: string;
-  status: TicketStatus;
-  priority: TicketPriority;
-  category: TicketCategory;
-  subcategory?: string;
-  channel: TicketChannel;
-  assignedAgentId?: string;
-  lastMessageBy?: string;
-  lastMessageByType?: SenderType;
-  lastMessageAt?: Date;
-  firstResponseAt?: Date;
-  responseTimeMinutes?: number;
-  resolvedAt?: Date;
-  resolutionTimeMinutes?: number;
-  resolutionType?: string;
-  resolutionNotes?: string;
-  customerSatisfaction?: number;
-  customerFeedback?: string;
-  feedbackRequested: boolean;
-  feedbackRequestedAt?: Date;
-  tags?: string[];
-  isEscalated: boolean;
-  escalatedTo?: string;
-  escalatedAt?: Date;
-  escalationReason?: string;
-  isSpam: boolean;
-  reopenCount: number;
-  customFields?: Record<string, unknown>;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-  closedAt?: Date;
-  dueAt?: Date;
-}
+export type SupportTicket = SupportTicketProps;
 
 export interface SupportMessage {
   supportMessageId: string;

@@ -5,8 +5,8 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import productEngagementRepository from '../../infrastructure/repositories/ProductEngagementRepository';
-import type { BundleType, ProductBundle, BundleItem } from '../../infrastructure/repositories/bundleRepo';
+import { productEngagementRepository } from '../../application/wired';
+import { BundleType, ProductBundle, BundleItem } from '../../application/wired';
 
 const bundleRepo = productEngagementRepository.bundles;
 

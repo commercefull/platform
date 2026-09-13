@@ -1,10 +1,10 @@
-import warehouseDataRepository from '../../infrastructure/repositories/WarehouseDataRepository';
 
 const WarehouseRepo = warehouseDataRepository.warehouses;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetWarehouseUseCase, GetWarehouseInput } from '../../application/useCases/GetWarehouse';
 import { ListWarehousesUseCase, ListWarehousesInput } from '../../application/useCases/ListWarehouses';
 import { CreateWarehouseUseCase, CreateWarehouseInput } from '../../application/useCases/CreateWarehouse';
+import { warehouseDataRepository } from '../../application/wired';
 
 export const warehouseResolvers = {
   Query: {

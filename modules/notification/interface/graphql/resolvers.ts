@@ -1,10 +1,10 @@
-import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
 
 const NotificationRepo = notificationDataRepository.notifications;
 import { requireAuth, requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetNotificationsUseCase, GetNotificationsInput } from '../../application/useCases/GetNotifications';
 import { SendNotificationUseCase, SendNotificationInput } from '../../application/useCases/SendNotification';
 import { MarkAsReadUseCase, MarkAsReadInput } from '../../application/useCases/MarkAsRead';
+import { notificationDataRepository } from '../../application/wired';
 
 export const notificationResolvers = {
   Query: {

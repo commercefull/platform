@@ -6,7 +6,6 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import inventoryDataRepository from '../../infrastructure/repositories/InventoryDataRepository';
 
 const inventoryRepo = inventoryDataRepository.stock;
 const inventoryRepository = inventoryDataRepository.items;
@@ -22,9 +21,9 @@ import {
   ConfirmReservationUseCase,
   SetLowStockThresholdUseCase,
 } from '../../application/useCases';
-import { StorePickupLocationAdapter } from '../../infrastructure/acl/StorePickupLocationAdapter';
 import type { PickupLocationPort } from '../../application/ports/PickupLocationPort';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { inventoryDataRepository, StorePickupLocationAdapter } from '../../application/wired';
 
 // Ports
 const pickupLocationPort: PickupLocationPort = new StorePickupLocationAdapter();

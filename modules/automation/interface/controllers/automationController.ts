@@ -8,8 +8,8 @@ import {
   listAutomationRulesUseCase,
   executionEngine,
 } from '../../application/useCases/wired';
-import { ExecutionLogRepositoryImpl } from '../../infrastructure';
 import { AutomationRuleNotFoundError, InvalidAutomationRuleError } from '../../domain/errors/AutomationErrors';
+import { ExecutionLogRepositoryImpl } from '../../application/wired';
 
 class AutomationController {
   async listRules(req: TypedRequest, res: Response): Promise<void> {

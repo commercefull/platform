@@ -5,16 +5,6 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import shippingConfigRepository from '../../infrastructure/repositories/ShippingConfigRepository';
-import shippingLabelRepo from '../../infrastructure/repositories/ShippingLabelAggregateRepository';
-import type { CreateShippingCarrierInput, UpdateShippingCarrierInput } from '../../infrastructure/repositories/ShippingConfigRepository';
-import type { CreateShippingMethodInput, UpdateShippingMethodInput } from '../../infrastructure/repositories/ShippingConfigRepository';
-import type { CreateShippingZoneInput, UpdateShippingZoneInput } from '../../infrastructure/repositories/ShippingConfigRepository';
-import type { CreateShippingRateInput, UpdateShippingRateInput } from '../../infrastructure/repositories/ShippingConfigRepository';
-import type {
-  CreateShippingPackagingTypeInput,
-  UpdateShippingPackagingTypeInput,
-} from '../../infrastructure/repositories/ShippingConfigRepository';
 import {
   CalculateShippingRatesCommand,
   calculateShippingRatesUseCase,
@@ -26,12 +16,16 @@ import { createShippingLabelUseCase } from '../../application/useCases/CreateShi
 import { getShippingLabelUseCase } from '../../application/useCases/GetShippingLabel';
 import { voidShippingLabelUseCase } from '../../application/useCases/VoidShippingLabel';
 import { trackShipmentUseCase } from '../../application/useCases/TrackShipment';
+import { shippingConfigRepository, shippingLabelRepo } from '../../application/wired';
+import { CreateShippingCarrierInput, UpdateShippingCarrierInput, CreateShippingMethodInput, UpdateShippingMethodInput, CreateShippingZoneInput, UpdateShippingZoneInput, CreateShippingRateInput, UpdateShippingRateInput, CreateShippingPackagingTypeInput, UpdateShippingPackagingTypeInput } from '../../application/wired';
+import type { CreateShippingSurchargeInput, UpdateShippingSurchargeInput } from '../../application/wired';
 
 const shippingCarrierRepo = shippingConfigRepository.carriers;
 const shippingMethodRepo = shippingConfigRepository.methods;
 const shippingZoneRepo = shippingConfigRepository.zones;
 const shippingRateRepo = shippingConfigRepository.rates;
 const packagingTypeRepo = shippingConfigRepository.packaging;
+const shippingSurchargeRepo = shippingConfigRepository.surcharges;
 
 // ============================================================================
 // Carriers
@@ -485,4 +479,56 @@ export const trackShipment = async (req: TypedRequest, res: Response): Promise<v
     return;
   }
   res.status(200).json({ success: true, data: result.tracking });
+};
+
+// ============================================================================
+// Surcharges
+// ============================================================================
+
+export const getSurchargesByRate = async (req: TypedRequest, res: Response): Promise<void> => {
+  const { rateId } = req.params;
+  const { activeOnly } = req.query;
+  const surcharges = await shippingSurchargeRepo.findByRateId(rateId, activeOnly !== 'false');
+  res.status(200).json({ success: true, data: surcharges });
+};
+
+export const getSurchargeById = async (req: TypedRequest, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const surcharge = await shippingSurchargeRepo.findById(id);
+  if (!surcharge) {
+    res.status(404).json({ success: false, message: 'Surcharge not found' });
+    return;
+  }
+  res.status(200).json({ success: true, data: surcharge });
+};
+
+export const createSurcharge = async (req: TypedRequest, res: Response): Promise<void> => {
+  const input = req.body as CreateShippingSurchargeInput;
+  if (!input.shippingRateId || !input.type || !input.calculationType || input.value === undefined) {
+    res.status(400).json({ success: false, message: 'Missing required fields: shippingRateId, type, calculationType, value' });
+    return;
+  }
+  const surcharge = await shippingSurchargeRepo.create(input);
+  res.status(201).json({ success: true, data: surcharge });
+};
+
+export const updateSurcharge = async (req: TypedRequest, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const input = req.body as UpdateShippingSurchargeInput;
+  const surcharge = await shippingSurchargeRepo.update(id, input);
+  if (!surcharge) {
+    res.status(404).json({ success: false, message: 'Surcharge not found' });
+    return;
+  }
+  res.status(200).json({ success: true, data: surcharge });
+};
+
+export const deleteSurcharge = async (req: TypedRequest, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const deleted = await shippingSurchargeRepo.delete(id);
+  if (!deleted) {
+    res.status(404).json({ success: false, message: 'Surcharge not found' });
+    return;
+  }
+  res.status(200).json({ success: true, message: 'Surcharge deleted' });
 };

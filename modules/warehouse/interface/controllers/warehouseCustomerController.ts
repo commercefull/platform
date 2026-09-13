@@ -5,11 +5,11 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import warehouseDataRepository from '../../infrastructure/repositories/WarehouseDataRepository';
 
 const warehouseRepo = warehouseDataRepository.warehouses;
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { query } from '../../../../libs/db';
+import { warehouseDataRepository } from '../../application/wired';
 
 /**
  * Find nearest stores based on customer location

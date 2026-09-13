@@ -1,4 +1,3 @@
-import loyaltyDataRepository from '../../infrastructure/repositories/LoyaltyDataRepository';
 
 const LoyaltyRepo = loyaltyDataRepository.points;
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
@@ -9,6 +8,7 @@ import { GetPointsHistoryUseCase, GetPointsHistoryInput } from '../../applicatio
 import { CalculateTierStatusUseCase, CalculateTierStatusInput } from '../../application/useCases/CalculateTierStatus';
 import { CreateRewardUseCase, CreateRewardInput } from '../../application/useCases/CreateReward';
 import { RedeemRewardUseCase, RedeemRewardInput } from '../../application/useCases/RedeemReward';
+import { loyaltyDataRepository } from '../../application/wired';
 
 export const loyaltyResolvers = {
   Query: {

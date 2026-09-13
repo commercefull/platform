@@ -7,7 +7,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { CustomerAddress } from '../../../../libs/db/types';
-import customerDataRepository from '../../infrastructure/repositories/CustomerDataRepository';
 
 const CustomerRepo = customerDataRepository.customers;
 import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../application/useCases/RegisterCustomer';
@@ -25,6 +24,7 @@ import {
   SetDefaultAddressCommand,
   ManageAddressesUseCase,
 } from '../../application/useCases/ManageAddresses';
+import { customerDataRepository } from '../../application/wired';
 
 // ============================================================================
 // Helpers

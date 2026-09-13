@@ -1,0 +1,62 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/shipping/surcharges" class="btn btn-secondary"><i class="ti ti-arrow-left"></i> Back</a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><%= pageName %></h3></div>
+      <div class="card-body">
+        <form method="POST" action="/admin/shipping/surcharges/<%= surcharge.shippingSurchargeId %>">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Shipping Rate ID</label>
+              <input type="text" class="form-control" value="<%= surcharge.shippingRateId %>" disabled>
+              <small class="text-muted">Rate ID cannot be changed</small>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Surcharge Type</label>
+              <select name="type" class="form-select">
+                <option value="fuel" <%= surcharge.type === 'fuel' ? 'selected' : '' %>>Fuel</option>
+                <option value="remoteArea" <%= surcharge.type === 'remoteArea' ? 'selected' : '' %>>Remote Area</option>
+                <option value="residential" <%= surcharge.type === 'residential' ? 'selected' : '' %>>Residential</option>
+                <option value="oversize" <%= surcharge.type === 'oversize' ? 'selected' : '' %>>Oversize</option>
+                <option value="signature" <%= surcharge.type === 'signature' ? 'selected' : '' %>>Signature</option>
+                <option value="insurance" <%= surcharge.type === 'insurance' ? 'selected' : '' %>>Insurance</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Calculation Type</label>
+              <select name="calculationType" class="form-select">
+                <option value="flat" <%= surcharge.calculationType === 'flat' ? 'selected' : '' %>>Flat Amount</option>
+                <option value="percentage" <%= surcharge.calculationType === 'percentage' ? 'selected' : '' %>>Percentage of Base</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Value</label>
+              <input type="number" name="value" class="form-control" value="<%= surcharge.value %>" step="0.01" min="0" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Conditions (JSON, optional)</label>
+            <textarea name="conditions" class="form-control" rows="3"><%= surcharge.conditions ? JSON.stringify(surcharge.conditions) : '' %></textarea>
+          </div>
+          <div class="mb-3">
+            <div class="form-check">
+              <input type="checkbox" name="isActive" value="true" class="form-check-input" id="isActive" <%= surcharge.isActive ? 'checked' : '' %>>
+              <label class="form-check-label" for="isActive">Active</label>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <a href="/admin/shipping/surcharges/<%= surcharge.shippingSurchargeId %>" class="btn btn-secondary">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

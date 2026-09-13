@@ -1,4 +1,3 @@
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
 
 const PaymentRepo = paymentDataRepository.payments;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
@@ -12,6 +11,7 @@ import {
 import { ProcessPaymentRefundUseCase, ProcessPaymentRefundCommand } from '../../application/useCases/ProcessRefund';
 import { GetPaymentMethodsUseCase, GetPaymentMethodsInput } from '../../application/useCases/GetPaymentMethods';
 import { CapturePaymentUseCase, CapturePaymentInput } from '../../application/useCases/CapturePayment';
+import { paymentDataRepository } from '../../application/wired';
 
 // Adapters that bridge PaymentRepo to use-case port interfaces
 const paymentMethodsRepoAdapter = {

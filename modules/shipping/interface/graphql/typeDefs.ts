@@ -60,5 +60,42 @@ export const shippingTypeDefs = `#graphql
   type Query {
     shippingRates(destinationAddress: ShippingAddressInput!, orderDetails: OrderDetailsInput!): CalculateShippingRatesResult!
     shippingMethods(activeOnly: Boolean, displayOnFrontend: Boolean, carrierId: String): ShippingMethodsResult!
+    shippingSurcharges(rateId: String!, activeOnly: Boolean): [ShippingSurcharge!]!
+    shippingSurcharge(id: String!): ShippingSurcharge
+  }
+
+  type Mutation {
+    createShippingSurcharge(input: ShippingSurchargeInput!): ShippingSurcharge!
+    updateShippingSurcharge(id: String!, input: ShippingSurchargeUpdateInput!): ShippingSurcharge
+    deleteShippingSurcharge(id: String!): Boolean!
+  }
+
+  type ShippingSurcharge {
+    shippingSurchargeId: String!
+    shippingRateId: String!
+    type: String!
+    calculationType: String!
+    value: String!
+    conditions: String
+    isActive: Boolean!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input ShippingSurchargeInput {
+    shippingRateId: String!
+    type: String!
+    calculationType: String!
+    value: String!
+    conditions: String
+    isActive: Boolean
+  }
+
+  input ShippingSurchargeUpdateInput {
+    type: String
+    calculationType: String
+    value: String
+    conditions: String
+    isActive: Boolean
   }
 `;

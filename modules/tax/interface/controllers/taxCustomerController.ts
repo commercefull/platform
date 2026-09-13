@@ -1,9 +1,8 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import taxQueryRepository from '../../infrastructure/repositories/TaxQueryRepository';
 import { AddressInput } from '../../taxTypes';
-import { BasketTaxableBasketAdapter } from '../../infrastructure/acl/BasketTaxableBasketAdapter';
 import type { TaxableBasketPort } from '../../application/ports/TaxableBasketPort';
+import { taxQueryRepository, BasketTaxableBasketAdapter } from '../../application/wired';
 
 // Ports
 const taxableBasketPort: TaxableBasketPort = new BasketTaxableBasketAdapter();

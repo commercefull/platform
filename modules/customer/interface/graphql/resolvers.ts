@@ -1,9 +1,9 @@
-import customerDataRepository from '../../infrastructure/repositories/CustomerDataRepository';
 
 const CustomerRepo = customerDataRepository.customers;
 import { GetCustomerUseCase, GetCustomerCommand } from '../../application/useCases/GetCustomer';
 import { RegisterCustomerUseCase, RegisterCustomerCommand } from '../../application/useCases/RegisterCustomer';
 import { requireCustomerAuth, requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
+import { customerDataRepository } from '../../application/wired';
 
 export const customerResolvers = {
   Query: {

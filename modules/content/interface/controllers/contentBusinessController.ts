@@ -1,9 +1,7 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import contentDataRepository from '../../infrastructure/repositories/ContentDataRepository';
-import contentStructureRepository from '../../infrastructure/repositories/ContentStructureRepository';
-import contentMediaDataRepository from '../../infrastructure/repositories/ContentMediaDataRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { contentDataRepository, contentStructureRepository, contentMediaDataRepository } from '../../application/wired';
 
 // ============================================================================
 // Request Body Interfaces

@@ -75,11 +75,6 @@ export interface CheckoutRepository {
   validateShippingAddress(address: unknown): Promise<{ valid: boolean; errors: string[] }>;
 
   /**
-   * Calculate tax for checkout
-   */
-  calculateTax(subtotal: number, shippingAmount: number, address: unknown): Promise<number>;
-
-  /**
    * Find checkout session by payment intent ID
    */
   findByPaymentIntentId(paymentIntentId: string): Promise<CheckoutSession | null>;

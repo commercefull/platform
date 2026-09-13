@@ -4,13 +4,11 @@
  * Domain interface for support data access (tickets, messages, agents, admin operations).
  */
 
-import type { SupportTicket, SupportMessage } from 'libs/db/types';
+import type { SupportTicketProps, TicketStatus, TicketPriority, TicketCategory, TicketChannel, SenderType } from '../entities/SupportTicket';
+import type { SupportMessage } from 'libs/db/types';
 
-export type TicketStatus = 'open' | 'pending' | 'in_progress' | 'waiting_customer' | 'resolved' | 'closed';
-export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
-export type TicketCategory = 'order' | 'shipping' | 'return' | 'product' | 'payment' | 'account' | 'technical' | 'other';
-export type TicketChannel = 'web' | 'email' | 'phone' | 'chat' | 'social';
-export type SenderType = 'customer' | 'agent' | 'system';
+export type { TicketStatus, TicketPriority, TicketCategory, TicketChannel, SenderType };
+type SupportTicket = SupportTicketProps;
 export type AgentRole = 'agent' | 'supervisor' | 'admin';
 
 export interface SupportAgent {

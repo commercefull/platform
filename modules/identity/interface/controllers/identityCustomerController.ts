@@ -1,14 +1,13 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import identityDataRepository from '../../infrastructure/repositories/IdentityDataRepository';
 
 const tokenRepo = identityDataRepository.tokens;
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
 import { emitCustomerLogin, emitCustomerRegistered, emitCustomerTokenRefreshed } from '../../domain/events/emitIdentityEvent';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { CustomerCredentialSubjectAdapter } from '../../infrastructure/acl/CustomerCredentialSubjectAdapter';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
+import { identityDataRepository, CustomerCredentialSubjectAdapter } from '../../application/wired';
 
 // Environment configuration with secure defaults
 const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';

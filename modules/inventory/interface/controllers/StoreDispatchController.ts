@@ -1,7 +1,5 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import inventoryDataRepository from '../../infrastructure/repositories/InventoryDataRepository';
-import storeDispatchRepository from '../../infrastructure/repositories/StoreDispatchAggregateRepository';
 
 const InventoryRepository = inventoryDataRepository.items;
 import { CreateStoreDispatchUseCase } from '../../application/useCases/CreateStoreDispatch';
@@ -12,6 +10,7 @@ import { DispatchFromStoreUseCase } from '../../application/useCases/DispatchFro
 import { ReceiveStoreDispatchUseCase } from '../../application/useCases/ReceiveStoreDispatch';
 import { CancelStoreDispatchUseCase } from '../../application/useCases/CancelStoreDispatch';
 import { DispatchStatus } from '../../domain/entities/StoreDispatch';
+import { inventoryDataRepository, storeDispatchRepository } from '../../application/wired';
 
 interface CreateDispatchBody {
   fromStoreId: string;

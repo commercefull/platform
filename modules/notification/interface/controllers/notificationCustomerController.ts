@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
-import type { NotificationPreference } from '../../infrastructure/repositories/notificationPreferenceRepo';
 
 const notificationPreferenceRepo = notificationConfigRepository.preferences;
 const notificationDeviceRepo = notificationConfigRepository.devices;
@@ -13,6 +11,8 @@ import {
   RegisterNotificationDeviceUseCase,
   RegisterNotificationDeviceCommand,
 } from '../../application/useCases/RegisterNotificationDevice';
+import { notificationConfigRepository } from '../../application/wired';
+import { NotificationPreference } from '../../application/wired';
 
 function mapPreference(p: NotificationPreference) {
   return {

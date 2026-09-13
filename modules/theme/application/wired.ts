@@ -7,3 +7,5 @@ export const manageThemesUseCase = new ManageThemesUseCase(themeRepository);
 export const manageOverridesUseCase = new ManageThemeOverridesUseCase(themeRepository);
 export const assignThemeUseCase = new AssignThemeToStoreUseCase(themeRepository);
 export const resolveThemeUseCase = new ResolveStoreThemeUseCase(themeRepository);
+
+export { ThemeRepositoryImpl };

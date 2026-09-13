@@ -7,7 +7,6 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
-import { ThemeRepositoryImpl } from '../../infrastructure/repositories/ThemeRepositoryImpl';
 import {
   ManageThemesUseCase,
   ManageThemeOverridesUseCase,
@@ -18,6 +17,7 @@ import {
   AssignThemeToStoreCommand,
 } from '../../application/useCases/Theme';
 import { themeRegistry } from '../../domain/services/ThemeRegistry';
+import { ThemeRepositoryImpl } from '../../application/wired';
 
 const themeRepository = new ThemeRepositoryImpl();
 const manageThemesUseCase = new ManageThemesUseCase(themeRepository);

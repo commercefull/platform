@@ -1,8 +1,7 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import taxQueryRepository from '../../infrastructure/repositories/TaxQueryRepository';
-import taxCommandRepository from '../../infrastructure/repositories/TaxCommandRepository';
 import { TaxRate, TaxCategory, TaxZone, TaxRateType } from '../../taxTypes';
+import { taxQueryRepository, taxCommandRepository } from '../../application/wired';
 
 export const getTaxRate = async (req: TypedRequest, res: Response) => {
   const { id } = req.params;

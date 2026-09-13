@@ -6,7 +6,6 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import fulfillmentDataRepository from '../../infrastructure/repositories/FulfillmentDataRepository';
 
 const fulfillmentRepository = fulfillmentDataRepository.fulfillments;
 import { FulfillmentStatus, SourceType, Address } from '../../domain/entities/Fulfillment';
@@ -21,6 +20,7 @@ import {
   UpdateTrackingUseCase,
   InitiateReturnUseCase,
 } from '../../application/useCases';
+import { fulfillmentDataRepository } from '../../application/wired';
 
 // ============================================================================
 // Request Body Interfaces

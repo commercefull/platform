@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
+import { productAttributeRepository } from '../../application/wired';
 
 const attributeGroupRepo = productAttributeRepository.groups;
 

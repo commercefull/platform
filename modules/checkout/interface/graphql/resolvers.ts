@@ -1,5 +1,3 @@
-import CheckoutRepo from '../../infrastructure/repositories/CheckoutRepository';
-import { getCheckoutPorts } from '../../infrastructure/compositionRoot';
 import { requireAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { InitiateCheckoutUseCase, InitiateCheckoutCommand, mapCheckoutToResponse } from '../../application/useCases/InitiateCheckout';
 import { SetShippingAddressUseCase, SetShippingAddressCommand } from '../../application/useCases/SetShippingAddress';
@@ -11,6 +9,7 @@ import { RemoveCouponUseCase, RemoveCouponCommand } from '../../application/useC
 import { CreatePaymentIntentUseCase, CreatePaymentIntentCommand } from '../../application/useCases/CreatePaymentIntent';
 import { CompleteCheckoutUseCase, CompleteCheckoutCommand } from '../../application/useCases/CompleteCheckout';
 import { AbandonCheckoutUseCase, AbandonCheckoutCommand } from '../../application/useCases/AbandonCheckout';
+import { CheckoutRepo, getCheckoutPorts } from '../../application/wired';
 
 export const checkoutResolvers = {
   Query: {

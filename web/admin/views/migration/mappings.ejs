@@ -1,0 +1,30 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/migration/<%= importJobId %>" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-striped table-sm">
+      <thead><tr><th>Entity Type</th><th>Source Field</th><th>Target Field</th><th>Transform</th></tr></thead>
+      <tbody>
+        <% mappings.forEach(function(m) { %>
+        <tr>
+          <td><%= m.entityType || '-' %></td>
+          <td><%= m.sourceField || '-' %></td>
+          <td><%= m.targetField || '-' %></td>
+          <td><%= m.transform || '-' %></td>
+        </tr>
+        <% }); %>
+        <% if (!mappings || mappings.length === 0) { %>
+        <tr><td colspan="4" class="text-center text-muted">No mappings found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

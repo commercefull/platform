@@ -6,10 +6,10 @@ import { ListStoreUsersUseCase } from '../../application/useCases/store/ListStor
 import { RemoveUserFromStoreUseCase } from '../../application/useCases/store/RemoveUserFromStore';
 import { UserRepository } from '../../domain/repositories/UserRepository';
 import { StoreLookupPort } from '../../application/ports/StoreLookupPort';
-import identityDataRepository from '../../infrastructure/repositories/IdentityDataRepository';
 
 const identityRepo = identityDataRepository.users;
 import { StoreRole } from '../../domain/entities/UserStoreAssignment';
+import { identityDataRepository } from '../../application/wired';
 
 const fallbackUserRepository: Pick<UserRepository, 'findById'> = {
   async findById(userId: string) {

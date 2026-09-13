@@ -5,12 +5,7 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import {
-  getGiftCardByCode,
-  getGiftCards,
-  redeemGiftCard as redeemGiftCardRepo,
-  reloadGiftCard as reloadGiftCardRepo,
-} from '../../infrastructure/repositories/GiftCardRepository';
+import { getGiftCardByCode, getGiftCards, redeemGiftCardRepo, reloadGiftCardRepo } from '../../application/wired';
 
 interface RedeemOrReloadBody {
   code: string;

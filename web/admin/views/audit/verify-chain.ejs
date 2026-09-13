@@ -1,0 +1,57 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/audit" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="GET" action="/admin/audit/verify-chain" class="row g-2">
+      <div class="col-md-5">
+        <label class="form-label">From Log ID (optional)</label>
+        <input type="text" name="fromId" value="<%= fromId %>" class="form-control form-control-sm" placeholder="Starting log ID">
+      </div>
+      <div class="col-md-5">
+        <label class="form-label">To Log ID (optional)</label>
+        <input type="text" name="toId" value="<%= toId %>" class="form-control form-control-sm" placeholder="Ending log ID">
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary btn-sm">Verify</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<% if (result) { %>
+<div class="card">
+  <div class="card-header">
+    <h5>Verification Result
+      <% if (result.valid) { %>
+      <span class="badge bg-success">Valid</span>
+      <% } else { %>
+      <span class="badge bg-danger">Invalid</span>
+      <% } %>
+    </h5>
+  </div>
+  <div class="card-body">
+    <p><strong>Checked:</strong> <%= result.checked %></p>
+    <% if (result.invalidEntries && result.invalidEntries.length > 0) { %>
+    <h6>Invalid Entries</h6>
+    <table class="table table-sm table-striped">
+      <thead><tr><th>Log ID</th><th>Reason</th></tr></thead>
+      <tbody>
+        <% result.invalidEntries.forEach(function(entry) { %>
+        <tr><td><code><%= entry.logId %></code></td><td><%= entry.reason %></td></tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else if (result.valid) { %>
+    <p class="text-success">All checked entries have valid hash chains.</p>
+    <% } %>
+  </div>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

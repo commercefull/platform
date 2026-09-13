@@ -1,0 +1,135 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/shipping/surcharges/create" class="btn btn-primary"><i class="ti ti-plus"></i> Create Surcharge</a>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+
+    <!-- Filter -->
+    <div class="row mb-3">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-body">
+            <form method="GET" class="form-inline">
+              <div class="form-group me-3">
+                <label class="me-2">Rate ID:</label>
+                <input type="text" name="rateId" class="form-control" value="<%= filters.rateId %>" placeholder="Filter by rate ID">
+              </div>
+              <div class="form-group me-3">
+                <label class="me-2">Active Only:</label>
+                <select name="activeOnly" class="form-select">
+                  <option value="true" <%= filters.activeOnly ? 'selected' : '' %>>Active Only</option>
+                  <option value="false" <%= !filters.activeOnly ? 'selected' : '' %>>All</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-secondary"><i class="fas fa-filter"></i> Filter</button>
+              <a href="/admin/shipping/surcharges" class="btn btn-outline-secondary ms-2"><i class="fas fa-times"></i> Clear</a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Surcharges Table -->
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Surcharges</h3></div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover text-nowrap">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Rate ID</th>
+              <th>Calculation</th>
+              <th>Value</th>
+              <th>Active</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!surcharges || surcharges.length === 0) { %>
+              <tr>
+                <td colspan="7" class="text-center py-4">
+                  <em>No surcharges found. <a href="/admin/shipping/surcharges/create">Create one</a>.</em>
+                </td>
+              </tr>
+            <% } else { %>
+              <% surcharges.forEach(surcharge => { %>
+                <tr>
+                  <td><span class="badge badge-secondary"><%= surcharge.type %></span></td>
+                  <td><small class="text-muted"><%= surcharge.shippingRateId %></small></td>
+                  <td><%= surcharge.calculationType %></td>
+                  <td><%= surcharge.calculationType === 'percentage' ? surcharge.value + '%' : surcharge.value %></td>
+                  <td>
+                    <% if (surcharge.isActive) { %>
+                      <span class="badge badge-success">Active</span>
+                    <% } else { %>
+                      <span class="badge badge-secondary">Inactive</span>
+                    <% } %>
+                  </td>
+                  <td><small><%= new Date(surcharge.createdAt).toLocaleDateString() %></small></td>
+                  <td>
+                    <a href="/admin/shipping/surcharges/<%= surcharge.shippingSurchargeId %>" class="btn btn-sm btn-info">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="/admin/shipping/surcharges/<%= surcharge.shippingSurchargeId %>/edit" class="btn btn-sm btn-primary">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-sm btn-danger" onclick="deleteSurcharge('<%= surcharge.shippingSurchargeId %>', '<%= surcharge.type %>')">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Surcharge</h4>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the "<strong id="deleteItemName"></strong>" surcharge?</p>
+        <p class="text-danger"><small>This action cannot be undone.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function deleteSurcharge(id, name) {
+  document.getElementById('deleteItemName').textContent = name;
+  document.getElementById('confirmDeleteBtn').onclick = function() {
+    fetch(`/admin/shipping/surcharges/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) { location.reload(); }
+      else { alert('Error: ' + data.message); }
+    })
+    .catch(error => { alert('Error deleting surcharge'); console.error(error); });
+  };
+  $('#deleteModal').modal('show');
+}
+</script>

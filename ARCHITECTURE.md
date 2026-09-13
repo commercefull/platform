@@ -63,6 +63,14 @@ Infrastructure→  SQL repositories, external adapters
 
 Overall project dependency direction: `web → modules → libs`.
 
+### Composition Root (`boot/`)
+
+`boot/` is the application's composition root — it wires modules together at startup. It is exempt from the deep-import and `no-restricted-imports` rules that apply to `web/` and `modules/`. `boot/` may import directly from `modules/*/infrastructure/repositories/` for wiring purposes (e.g., `boot/scheduledJobs.ts`, `boot/registerEventHandlers.ts`).
+
+### Enforcement
+
+All dependency rules are enforced by [dependency-cruiser](https://github.com/sverweij/dependency-cruiser) via `yarn lint` (which runs `tsc --noEmit && eslint && dependency-cruiser`). Violations are **errors**, not warnings — the build fails on any violation. See `.dependency-cruiser.cjs` for the full rule set.
+
 ## Route Mounting
 
 Routes are configured in `boot/routes.ts`:
@@ -87,6 +95,32 @@ Routes are configured in `boot/routes.ts`:
 | Content     | `content`, `media`, `notification`                                                                                                              |
 | Commerce    | `supplier`                                                                                                                                      |
 | Platform    | `identity`, `configuration`, `localization`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`, `reporting`, `webhook`, `tracking` |
+
+### Domain Entities as Single Source of Truth
+
+Domain entities (`domain/entities/*.ts`) are the canonical type definitions for each module. Infrastructure and application layers must **import** types from the domain entity — never redefine them. This prevents type drift and ensures the domain remains the single source of truth.
+
+**Pattern** (reference: `support` module):
+
+1. `domain/entities/SupportTicket.ts` defines `SupportTicketProps`, `TicketStatus`, `TicketPriority`, etc.
+2. `domain/repositories/SupportRepository.ts` imports types from the entity, defines `type SupportTicket = SupportTicketProps`.
+3. `infrastructure/repositories/supportRepo.ts` imports types from the domain entity (not from `libs/db/types`).
+4. `application/wired.ts` imports types from the domain entity and domain repository.
+5. `index.ts` exports the domain entity so it is reachable from the entry point.
+
+**Anti-pattern**: Infrastructure files that define their own `interface SupportTicket { ... }` instead of importing from `domain/entities/` create duplicate types and orphan the domain entity.
+
+### Module Barrel Exports (`index.ts`)
+
+Every module's `index.ts` must export its domain entities alongside its use cases, repository interfaces, and errors. This ensures domain entities are reachable from the entry point and do not trigger `no-orphans` violations.
+
+```typescript
+// modules/support/index.ts
+export * from './application/useCases';
+export * from './domain/repositories/SupportRepository';
+export * from './domain/errors/SupportErrors';
+export * from './domain/entities/SupportTicket';  // ← domain entity export
+```
 
 ### Planned modules (not yet implemented)
 

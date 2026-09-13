@@ -7,7 +7,7 @@ import { addOrderNote, cancelOrder, deleteOrderNote, listFulfillmentPackages, li
 import { addCustomerAddress, customerAddresses, deactivateCustomer, editCustomerForm, listCustomers, reactivateCustomer, updateCustomer, verifyCustomer, viewCustomer } from '../../modules/customer';
 import { createPromotion, createPromotionForm, deletePromotion, editPromotionForm, listPromotions, previewPromotion, updatePromotion, viewPromotion, createCoupon, createCouponForm, deleteCoupon, editCouponForm, listCoupons, updateCoupon, validateCoupon, viewCoupon, activateGiftCardAction, assignGiftCardAction, cancelGiftCardAction, checkGiftCardBalance, createGiftCard, createGiftCardForm, editGiftCardForm, listGiftCards, refundToGiftCardAction, reloadGiftCardAction, viewGiftCard } from '../../modules/promotion';
 import { createPaymentGateway, createPaymentGatewayForm, deletePaymentGateway, editPaymentGatewayForm, listDisputes, listPaymentFees, listPaymentGateways, listPaymentMethods, listPaymentReports, listPaymentSettings, listPaymentTransactions, updateDisputeStatus, updatePaymentGateway, updatePaymentSettings, viewDispute, viewPaymentBalance, viewPaymentGateway, viewPaymentReport, createFraudRule, deleteFraudRule, listFraudRules, simulateFraudScreening, updateFraudRule } from '../../modules/payment';
-import { activateShippingMethod, createShippingMethod, createShippingMethodForm, deactivateShippingMethod, deleteShippingMethod, editShippingMethodForm, listShippingMethods, updateShippingMethod, viewShippingMethod, activateShippingZone, createShippingZone, createShippingZoneForm, deactivateShippingZone, deleteShippingZone, editShippingZoneForm, listShippingZones, updateShippingZone, viewShippingZone, activateShippingRate, calculateShippingRate, createShippingRate, createShippingRateForm, deactivateShippingRate, deleteShippingRate, editShippingRateForm, listShippingRates, updateShippingRate, viewShippingRate } from '../../modules/shipping';
+import { activateShippingMethod, createShippingMethod, createShippingMethodForm, deactivateShippingMethod, deleteShippingMethod, editShippingMethodForm, listShippingMethods, updateShippingMethod, viewShippingMethod, activateShippingZone, createShippingZone, createShippingZoneForm, deactivateShippingZone, deleteShippingZone, editShippingZoneForm, listShippingZones, updateShippingZone, viewShippingZone, activateShippingRate, calculateShippingRate, createShippingRate, createShippingRateForm, deactivateShippingRate, deleteShippingRate, editShippingRateForm, listShippingRates, updateShippingRate, viewShippingRate, listShippingSurcharges, createShippingSurchargeForm, createShippingSurcharge, viewShippingSurcharge, editShippingSurchargeForm, updateShippingSurcharge, deleteShippingSurcharge } from '../../modules/shipping';
 import { createContentPage, createContentPageForm, deleteContentPage, editContentPageForm, listContentMedia, listContentPages, listContentTemplates, publishContentPage, updateContentPage, viewContentPage, generateRobotsTxt, generateSitemap, listSEOSettings, updateSEOSettings, createContentBlock, createContentBlockForm, deleteContentBlock, editContentBlockForm, listContentBlocks, reorderContentBlocks, updateContentBlock } from '../../modules/content';
 import { activateNotificationTemplate, cloneNotificationTemplate, createNotificationTemplate, createNotificationTemplateForm, createWebhook, createWebhookForm, deactivateNotificationTemplate, deactivateWebhook, deleteNotificationTemplate, editNotificationTemplateForm, listBatches, listNotificationTemplates, listTemplateTranslations, listWebhooks, previewNotificationTemplate, updateNotificationTemplate, viewBatch, viewNotificationTemplate } from '../../modules/notification';
 import { createDraft, createDraftForm, deleteDraft, listPageBuilderDrafts, pageBuilderEditor, pageBuilderPreview, publishDraft } from '../../modules/pagebuilder';
@@ -34,6 +34,14 @@ import { createSchedule, createScheduleForm, deleteSchedule, editScheduleForm, g
 import { activateAutomationRule, createAutomationRule, createAutomationRuleForm, deactivateAutomationRule, deleteAutomationRule, editAutomationRuleForm, listAutomationRules, triggerAutomationRule, updateAutomationRule, viewAutomationRule } from '../../modules/automation';
 import { approveReturn, cancelReturn, completeInspection, completeReturn, createReturn, createReturnForm, denyReturn, listReturns, markInTransit, markReceived, viewReturn, viewStoreCredit, createReturnRule, deleteReturnRule, listReturnRules } from '../../modules/returns';
 import { activateIntegration, addCredential, createIntegration, createIntegrationForm, createSubscription, deactivateIntegration, deleteCredential, deleteIntegration, deleteSubscription, listIntegrations, updateIntegration, updateSubscription, viewIntegration } from '../../modules/integration';
+import { listAuditLogs, viewAuditLog, auditStats, verifyChain } from '../../modules/audit';
+import { listB2BCompanies, viewB2BCompany, createB2BCompanyForm, createB2BCompany, editB2BCompanyForm, updateB2BCompany, approveB2BCompany, suspendB2BCompany, reactivateB2BCompany, listB2BQuotes, viewB2BQuote } from '../../modules/b2b';
+import { listSystemConfigurations, viewSystemConfiguration, createSystemConfigurationForm, createSystemConfiguration, editSystemConfigurationForm, updateSystemConfiguration } from '../../modules/configuration';
+import { listVendors, viewVendor, createVendorForm, createVendor, editVendorForm, updateVendor, approveVendor, suspendVendor, listCommissionRules, viewCommissionRule, listPayouts, viewPayout } from '../../modules/marketplace';
+import { listSegments, viewSegment, createSegmentForm, createSegment, editSegmentForm, updateSegment, deleteSegment, evaluateSegment, viewSegmentMembers } from '../../modules/segment';
+import { listTrackingConfigs, viewTrackingConfig, createTrackingConfigForm, createTrackingConfig, editTrackingConfigForm, activateTrackingConfig, disableTrackingConfig, deleteTrackingConfig } from '../../modules/tracking';
+import { listWebhookEndpoints, viewWebhookEndpoint, createWebhookForm as createWebhookEndpointForm, createWebhook as createWebhookEndpoint, editWebhookForm as editWebhookEndpointForm, updateWebhook, deleteWebhook as deleteWebhookEndpoint, viewWebhookDeliveries } from '../../modules/webhook';
+import { listImportJobs, viewImportJob, createImportJobForm, createImportJob, startImportJob, pauseImportJob, cancelImportJob, deleteImportJob, viewImportMappings, viewImportErrors, resolveImportError } from '../../modules/migration';
 
 const router = express.Router();
 
@@ -444,6 +452,18 @@ router.post('/shipping/rates/:rateId/deactivate', asyncHandler(deactivateShippin
 router.delete('/shipping/rates/:rateId', asyncHandler(deleteShippingRate));
 router.post('/shipping/rates/calculate', asyncHandler(calculateShippingRate));
 
+// ============================================================================
+// Shipping Surcharges Routes
+// ============================================================================
+
+router.get('/shipping/surcharges', asyncHandler(listShippingSurcharges));
+router.get('/shipping/surcharges/create', asyncHandler(createShippingSurchargeForm));
+router.post('/shipping/surcharges', asyncHandler(createShippingSurcharge));
+router.get('/shipping/surcharges/:surchargeId', asyncHandler(viewShippingSurcharge));
+router.get('/shipping/surcharges/:surchargeId/edit', asyncHandler(editShippingSurchargeForm));
+router.post('/shipping/surcharges/:surchargeId', asyncHandler(updateShippingSurcharge));
+router.delete('/shipping/surcharges/:surchargeId', asyncHandler(deleteShippingSurcharge));
+
 router.get('/content/pages', asyncHandler(listContentPages));
 router.get('/content/pages/create', asyncHandler(createContentPageForm));
 router.post('/content/pages', asyncHandler(createContentPage));
@@ -828,5 +848,114 @@ router.post('/integrations/:integrationId/credentials/:credentialId/delete', asy
 router.post('/integrations/:integrationId/subscriptions', asyncHandler(createSubscription));
 router.post('/integrations/:integrationId/subscriptions/:subscriptionId', asyncHandler(updateSubscription));
 router.post('/integrations/:integrationId/subscriptions/:subscriptionId/delete', asyncHandler(deleteSubscription));
+
+// ============================================================================
+// Audit Logs Routes
+// ============================================================================
+
+router.get('/audit', asyncHandler(listAuditLogs));
+router.get('/audit/stats', asyncHandler(auditStats));
+router.get('/audit/verify-chain', asyncHandler(verifyChain));
+router.get('/audit/:logId', asyncHandler(viewAuditLog));
+
+// ============================================================================
+// B2B Routes
+// ============================================================================
+
+router.get('/b2b/companies', asyncHandler(listB2BCompanies));
+router.get('/b2b/companies/create', asyncHandler(createB2BCompanyForm));
+router.post('/b2b/companies', asyncHandler(createB2BCompany));
+router.get('/b2b/companies/:companyId', asyncHandler(viewB2BCompany));
+router.get('/b2b/companies/:companyId/edit', asyncHandler(editB2BCompanyForm));
+router.post('/b2b/companies/:companyId', asyncHandler(updateB2BCompany));
+router.post('/b2b/companies/:companyId/approve', asyncHandler(approveB2BCompany));
+router.post('/b2b/companies/:companyId/suspend', asyncHandler(suspendB2BCompany));
+router.post('/b2b/companies/:companyId/reactivate', asyncHandler(reactivateB2BCompany));
+router.get('/b2b/quotes', asyncHandler(listB2BQuotes));
+router.get('/b2b/quotes/:quoteId', asyncHandler(viewB2BQuote));
+
+// ============================================================================
+// System Configuration Routes
+// ============================================================================
+
+router.get('/configuration', asyncHandler(listSystemConfigurations));
+router.get('/configuration/create', asyncHandler(createSystemConfigurationForm));
+router.post('/configuration', asyncHandler(createSystemConfiguration));
+router.get('/configuration/:configId', asyncHandler(viewSystemConfiguration));
+router.get('/configuration/:configId/edit', asyncHandler(editSystemConfigurationForm));
+router.post('/configuration/:configId', asyncHandler(updateSystemConfiguration));
+
+// ============================================================================
+// Marketplace Routes
+// ============================================================================
+
+router.get('/marketplace/vendors', asyncHandler(listVendors));
+router.get('/marketplace/vendors/create', asyncHandler(createVendorForm));
+router.post('/marketplace/vendors', asyncHandler(createVendor));
+router.get('/marketplace/vendors/:vendorId', asyncHandler(viewVendor));
+router.get('/marketplace/vendors/:vendorId/edit', asyncHandler(editVendorForm));
+router.post('/marketplace/vendors/:vendorId', asyncHandler(updateVendor));
+router.post('/marketplace/vendors/:vendorId/approve', asyncHandler(approveVendor));
+router.post('/marketplace/vendors/:vendorId/suspend', asyncHandler(suspendVendor));
+router.get('/marketplace/commissions', asyncHandler(listCommissionRules));
+router.get('/marketplace/commissions/:ruleId', asyncHandler(viewCommissionRule));
+router.get('/marketplace/payouts', asyncHandler(listPayouts));
+router.get('/marketplace/payouts/:payoutId', asyncHandler(viewPayout));
+
+// ============================================================================
+// Segment Routes
+// ============================================================================
+
+router.get('/segments', asyncHandler(listSegments));
+router.get('/segments/create', asyncHandler(createSegmentForm));
+router.post('/segments', asyncHandler(createSegment));
+router.get('/segments/:segmentId', asyncHandler(viewSegment));
+router.get('/segments/:segmentId/edit', asyncHandler(editSegmentForm));
+router.post('/segments/:segmentId', asyncHandler(updateSegment));
+router.post('/segments/:segmentId/delete', asyncHandler(deleteSegment));
+router.post('/segments/:segmentId/evaluate', asyncHandler(evaluateSegment));
+router.get('/segments/:segmentId/members', asyncHandler(viewSegmentMembers));
+
+// ============================================================================
+// Tracking Routes
+// ============================================================================
+
+router.get('/tracking', asyncHandler(listTrackingConfigs));
+router.get('/tracking/create', asyncHandler(createTrackingConfigForm));
+router.post('/tracking', asyncHandler(createTrackingConfig));
+router.get('/tracking/:storeId', asyncHandler(viewTrackingConfig));
+router.get('/tracking/:storeId/edit', asyncHandler(editTrackingConfigForm));
+router.post('/tracking/:storeId/activate', asyncHandler(activateTrackingConfig));
+router.post('/tracking/:storeId/disable', asyncHandler(disableTrackingConfig));
+router.post('/tracking/:storeId/delete', asyncHandler(deleteTrackingConfig));
+
+// ============================================================================
+// Webhook Routes
+// ============================================================================
+
+router.get('/webhooks', asyncHandler(listWebhookEndpoints));
+router.get('/webhooks/create', asyncHandler(createWebhookEndpointForm));
+router.post('/webhooks', asyncHandler(createWebhookEndpoint));
+router.get('/webhooks/:webhookEndpointId', asyncHandler(viewWebhookEndpoint));
+router.get('/webhooks/:webhookEndpointId/edit', asyncHandler(editWebhookEndpointForm));
+router.post('/webhooks/:webhookEndpointId', asyncHandler(updateWebhook));
+router.post('/webhooks/:webhookEndpointId/delete', asyncHandler(deleteWebhookEndpoint));
+router.get('/webhooks/:webhookEndpointId/deliveries', asyncHandler(viewWebhookDeliveries));
+
+// ============================================================================
+// Migration Routes
+// ============================================================================
+
+router.get('/migration', asyncHandler(listImportJobs));
+router.get('/migration/create', asyncHandler(createImportJobForm));
+router.post('/migration', asyncHandler(createImportJob));
+router.get('/migration/:importJobId', asyncHandler(viewImportJob));
+router.post('/migration/:importJobId/start', asyncHandler(startImportJob));
+router.post('/migration/:importJobId/pause', asyncHandler(pauseImportJob));
+router.post('/migration/:importJobId/cancel', asyncHandler(cancelImportJob));
+router.post('/migration/:importJobId/delete', asyncHandler(deleteImportJob));
+router.get('/migration/:importJobId/mappings', asyncHandler(viewImportMappings));
+router.get('/migration/:importJobId/errors', asyncHandler(viewImportErrors));
+router.post('/migration/:importJobId/errors/:importErrorId/resolve', asyncHandler(resolveImportError));
 
 export const adminRouter = router;

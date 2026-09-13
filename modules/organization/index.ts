@@ -6,6 +6,7 @@
 export * from './application/useCases';
 export * from './domain/repositories/OrganizationRepository';
 export * from './domain/errors/OrganizationErrors';
+export * from './domain/entities/Organization';
 
 // Interface exports (routers, GraphQL)
 export { organizationBusinessRouter } from './interface/http/organizationBusinessRouter';

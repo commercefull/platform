@@ -1,4 +1,3 @@
-import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import {
   CreateSubscriptionUseCase,
@@ -13,6 +12,7 @@ import {
 import { ChangeSubscriptionPlanUseCase, ChangeSubscriptionPlanInput } from '../../application/useCases/ChangeSubscriptionPlan';
 import { PauseSubscriptionUseCase, PauseSubscriptionInput } from '../../application/useCases/PauseSubscription';
 import { ResumeSubscriptionUseCase, ResumeSubscriptionInput } from '../../application/useCases/ResumeSubscription';
+import { subscriptionRepo } from '../../application/wired';
 
 // Adapter to adapt the repo module to the port interface expected by use cases
 const subscriptionRepoAdapter = {

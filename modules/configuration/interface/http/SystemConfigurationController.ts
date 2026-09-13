@@ -9,8 +9,8 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { UpdateSystemConfigurationUseCase, UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
-import { SystemConfigurationRepo } from '../../infrastructure/repositories/SystemConfigurationRepo';
 import { isUuid } from 'libs/uuid';
+import { SystemConfigurationRepo } from '../../application/wired';
 
 interface CreateConfigBody {
   configId?: string;

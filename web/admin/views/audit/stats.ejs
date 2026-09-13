@@ -1,0 +1,48 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/audit" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><h5>By Action</h5></div>
+      <div class="card-body">
+        <table class="table table-sm table-striped">
+          <thead><tr><th>Action</th><th>Count</th></tr></thead>
+          <tbody>
+            <% byAction.forEach(function(item) { %>
+            <tr><td><span class="badge bg-primary"><%= item.action %></span></td><td><%= item.count %></td></tr>
+            <% }); %>
+            <% if (!byAction || byAction.length === 0) { %>
+            <tr><td colspan="2" class="text-muted text-center">No data</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><h5>By Actor Type</h5></div>
+      <div class="card-body">
+        <table class="table table-sm table-striped">
+          <thead><tr><th>Actor Type</th><th>Count</th></tr></thead>
+          <tbody>
+            <% byActor.forEach(function(item) { %>
+            <tr><td><%= item.actorType %></td><td><%= item.count %></td></tr>
+            <% }); %>
+            <% if (!byActor || byActor.length === 0) { %>
+            <tr><td colspan="2" class="text-muted text-center">No data</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

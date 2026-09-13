@@ -1,0 +1,45 @@
+<%- include('../../partials/header', { pageName, title: pageName }) %>
+<%- include('../../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+</div>
+
+<form method="GET" action="/admin/marketplace/payouts" class="row g-2 mb-3">
+  <div class="col-md-3"><input type="text" name="vendorId" value="<%= filters.vendorId %>" class="form-control form-control-sm" placeholder="Vendor ID"></div>
+  <div class="col-md-3">
+    <select name="status" class="form-select form-select-sm">
+      <option value="">All Statuses</option>
+      <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+      <option value="processing" <%= filters.status === 'processing' ? 'selected' : '' %>>Processing</option>
+      <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
+      <option value="failed" <%= filters.status === 'failed' ? 'selected' : '' %>>Failed</option>
+    </select>
+  </div>
+  <div class="col-md-2"><button type="submit" class="btn btn-primary btn-sm">Filter</button><a href="/admin/marketplace/payouts" class="btn btn-secondary btn-sm">Clear</a></div>
+</form>
+
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-striped table-sm">
+      <thead><tr><th>Payout ID</th><th>Vendor</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody>
+        <% payouts.forEach(function(p) { %>
+        <tr>
+          <td><code><%= (p.payoutId || '').substring(0, 8) %>...</code></td>
+          <td><%= p.vendorId %></td>
+          <td>$<%= (p.amount || 0).toFixed(2) %></td>
+          <td><span class="badge bg-info"><%= p.status %></span></td>
+          <td><%= p.createdAt ? new Date(p.createdAt).toLocaleDateString() : '-' %></td>
+          <td><a href="/admin/marketplace/payouts/<%= p.payoutId %>" class="btn btn-info btn-sm">View</a></td>
+        </tr>
+        <% }); %>
+        <% if (!payouts || payouts.length === 0) { %>
+        <tr><td colspan="6" class="text-center text-muted">No payouts found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../../partials/footer') %>

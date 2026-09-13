@@ -25,7 +25,6 @@ function createMockCheckoutRepo(session: CheckoutSession | null = null): jest.Mo
     getAvailableShippingMethods: jest.fn().mockResolvedValue([]),
     getAvailablePaymentMethods: jest.fn().mockResolvedValue([]),
     validateShippingAddress: jest.fn().mockResolvedValue({ valid: true, errors: [] }),
-    calculateTax: jest.fn().mockResolvedValue(0),
     findByPaymentIntentId: jest.fn().mockResolvedValue(null),
   } as never as jest.Mocked<CheckoutRepository>;
 }

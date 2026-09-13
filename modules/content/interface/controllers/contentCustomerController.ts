@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import contentDataRepository from '../../infrastructure/repositories/ContentDataRepository';
+import { contentDataRepository } from '../../application/wired';
 
 const contentRepo = contentDataRepository.pages;
 

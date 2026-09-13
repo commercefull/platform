@@ -5,8 +5,6 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
-import orderFulfillmentDataRepository from '../../infrastructure/repositories/OrderFulfillmentDataRepository';
 
 const OrderRepo = orderDataRepository.commands;
 const orderQueryRepo = orderDataRepository.queries;
@@ -28,6 +26,7 @@ import { OrderItem } from '../../domain/entities/OrderItem';
 import { Money } from '../../domain/valueObjects/Money';
 import { generateUUID } from '../../../../libs/uuid';
 import { query, queryOne } from '../../../../libs/db';
+import { orderDataRepository, orderFulfillmentDataRepository } from '../../application/wired';
 
 // ============================================================================
 // Content Negotiation Helpers

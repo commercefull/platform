@@ -1,0 +1,43 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/configuration/<%= config.configId %>" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="/admin/configuration/<%= config.configId %>">
+      <div class="mb-3">
+        <label class="form-label">Platform Name</label>
+        <input type="text" name="platformName" value="<%= config.platformSettings.platformName %>" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Platform Domain</label>
+        <input type="text" name="platformDomain" value="<%= config.platformSettings.platformDomain %>" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Support Email</label>
+        <input type="email" name="supportEmail" value="<%= config.platformSettings.supportEmail %>" class="form-control">
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Default Currency</label>
+          <input type="text" name="defaultCurrency" value="<%= config.platformSettings.defaultCurrency %>" class="form-control">
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Default Language</label>
+          <input type="text" name="defaultLanguage" value="<%= config.platformSettings.defaultLanguage %>" class="form-control">
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Timezone</label>
+          <input type="text" name="timezone" value="<%= config.platformSettings.timezone %>" class="form-control">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Update Configuration</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

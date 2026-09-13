@@ -1,10 +1,10 @@
-import contentDataRepository from '../../infrastructure/repositories/ContentDataRepository';
 
 const ContentRepo = contentDataRepository.pages;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CreatePageUseCase, CreatePageCommand } from '../../application/useCases/CreatePage';
 import { UpdatePageUseCase, UpdatePageCommand } from '../../application/useCases/UpdatePage';
 import { PublishPageUseCase, PublishPageCommand } from '../../application/useCases/PublishPage';
+import { contentDataRepository } from '../../application/wired';
 
 export const contentResolvers = {
   Mutation: {

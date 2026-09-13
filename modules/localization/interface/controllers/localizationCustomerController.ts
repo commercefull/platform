@@ -5,12 +5,12 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import localizationDataRepository from '../../infrastructure/repositories/LocalizationDataRepository';
 
 const localeRepo = localizationDataRepository.locales;
 const countryRepo = localizationDataRepository.countries;
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { Locale, Country } from '../../../../libs/db/types';
+import { localizationDataRepository } from '../../application/wired';
 
 /**
  * Get all active locales

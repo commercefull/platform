@@ -5,7 +5,7 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import productCatalogRepository from '../../infrastructure/repositories/ProductCatalogRepository';
+import { productCatalogRepository } from '../../application/wired';
 
 const categoryRepo = productCatalogRepository.categories;
 

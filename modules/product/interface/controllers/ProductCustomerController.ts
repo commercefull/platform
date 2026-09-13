@@ -6,8 +6,6 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import productCatalogRepository from '../../infrastructure/repositories/ProductCatalogRepository';
-import productEngagementRepository from '../../infrastructure/repositories/ProductEngagementRepository';
 import { GetProductCommand } from '../../application/useCases/GetProduct';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
 import { SearchProductsCommand } from '../../application/useCases/SearchProducts';
@@ -15,7 +13,6 @@ import { SubmitProductQaCommand } from '../../application/useCases/SubmitProduct
 import { VoteOnReviewCommand } from '../../application/useCases/VoteOnReview';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
-import type { ReviewRating } from '../../infrastructure/repositories/ProductEngagementRepository';
 import {
   listProductsUseCase,
   getProductUseCase,
@@ -24,7 +21,8 @@ import {
   voteOnReviewUseCase,
 } from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import { InventoryStockAvailabilityAdapter } from '../../infrastructure/acl/InventoryStockAvailabilityAdapter';
+import { productCatalogRepository, productEngagementRepository, InventoryStockAvailabilityAdapter } from '../../application/wired';
+import { ReviewRating } from '../../application/wired';
 
 const ProductRepo = productCatalogRepository.productRepository;
 const productReviewRepo = productEngagementRepository.reviews;

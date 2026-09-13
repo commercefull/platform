@@ -5,7 +5,7 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import analyticsDataRepository from '../../infrastructure/repositories/AnalyticsDataRepository';
+import { analyticsDataRepository } from '../../application/wired';
 
 const analyticsRepo = analyticsDataRepository.analytics;
 const reportingRepo = analyticsDataRepository.reporting;

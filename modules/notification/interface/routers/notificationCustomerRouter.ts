@@ -8,10 +8,10 @@ import express from 'express';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 import { MarkAsReadUseCase } from '../../application/useCases';
-import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
 
 const notificationRepo = notificationDataRepository.notifications;
 import * as notificationCustomerController from '../controllers/notificationCustomerController';
+import { notificationDataRepository } from '../../application/wired';
 
 const router = express.Router();
 

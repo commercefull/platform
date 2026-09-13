@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
-import type { ProductAttributeOption } from '../../infrastructure/repositories/ProductAttributeRepository';
+import { productAttributeRepository } from '../../application/wired';
+import { ProductAttributeOption } from '../../application/wired';
 
 const attributeOptionRepo = productAttributeRepository.options;
 

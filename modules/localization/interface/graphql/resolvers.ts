@@ -1,4 +1,3 @@
-import localizationDataRepository from '../../infrastructure/repositories/LocalizationDataRepository';
 
 const CurrencyRepo = localizationDataRepository.currencies;
 const LocaleRepo = localizationDataRepository.locales;
@@ -7,6 +6,7 @@ import { ConvertCurrencyUseCase, ConvertCurrencyInput } from '../../application/
 import { CreateCurrencyUseCase, CreateCurrencyInput } from '../../application/useCases/CreateCurrency';
 import { CreateLocaleUseCase, CreateLocaleInput } from '../../application/useCases/CreateLocale';
 import { SetExchangeRateUseCase, SetExchangeRateInput } from '../../application/useCases/SetExchangeRate';
+import { localizationDataRepository } from '../../application/wired';
 
 export const localizationResolvers = {
   Query: {

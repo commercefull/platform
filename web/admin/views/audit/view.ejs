@@ -1,0 +1,35 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/audit" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <table class="table table-sm">
+      <tr><th>Log ID</th><td><code><%= log.logId %></code></td></tr>
+      <tr><th>Timestamp</th><td><%= new Date(log.createdAt).toLocaleString() %></td></tr>
+      <tr><th>Actor</th><td><%= log.actorType %> — <%= log.actorId %></td></tr>
+      <tr><th>Action</th><td><span class="badge bg-primary"><%= log.action %></span></td></tr>
+      <tr><th>Resource</th><td><%= log.resourceType %>: <%= log.resourceId || '-' %></td></tr>
+      <tr><th>Organization</th><td><%= log.organizationId || '-' %></td></tr>
+      <tr><th>Correlation ID</th><td><code><%= log.correlationId || '-' %></code></td></tr>
+      <tr><th>Previous Hash</th><td><code><%= log.previousHash ? log.previousHash.substring(0, 24) + '...' : 'genesis' %></code></td></tr>
+      <tr><th>Hash</th><td><code><%= log.hash %></code></td></tr>
+    </table>
+
+    <% if (log.metadata) { %>
+    <h5>Metadata</h5>
+    <pre class="bg-light p-3 rounded"><code><%- JSON.stringify(log.metadata, null, 2) %></code></pre>
+    <% } %>
+
+    <% if (log.context) { %>
+    <h5>Context</h5>
+    <pre class="bg-light p-3 rounded"><code><%- JSON.stringify(log.context, null, 2) %></code></pre>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

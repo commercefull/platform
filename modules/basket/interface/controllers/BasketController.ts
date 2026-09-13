@@ -6,35 +6,36 @@
 import { query } from '../../../../libs/db';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import BasketRepo from '../../infrastructure/repositories/BasketRepository';
 import { Basket } from '../../domain/entities/Basket';
 import {
   BasketResponse,
   GetOrCreateBasketCommand,
-  GetOrCreateBasketUseCase,
   AddItemCommand,
-  AddItemUseCase,
   UpdateItemQuantityCommand,
-  UpdateItemQuantityUseCase,
   RemoveItemCommand,
-  RemoveItemUseCase,
   ClearBasketCommand,
-  ClearBasketUseCase,
   MergeBasketsCommand,
-  MergeBasketsUseCase,
   AssignBasketToCustomerCommand,
-  AssignBasketToCustomerUseCase,
   SetItemAsGiftCommand,
-  SetItemAsGiftUseCase,
   ExtendExpirationCommand,
-  ExtendExpirationUseCase,
   ApplyCouponCommand,
-  ApplyCouponUseCase,
   RemoveCouponCommand,
-  RemoveCouponUseCase,
 } from '../../application/useCases';
-import { CouponDiscountQuoteAdapter } from '../../infrastructure/acl/CouponDiscountQuoteAdapter';
-import { CouponRepository } from '../../../coupon/infrastructure';
+import {
+  basketRepo as BasketRepo,
+  discountQuotePort,
+  getOrCreateBasketUseCase,
+  addItemUseCase,
+  updateItemQuantityUseCase,
+  removeItemUseCase,
+  clearBasketUseCase,
+  mergeBasketsUseCase,
+  assignBasketToCustomerUseCase,
+  setItemAsGiftUseCase,
+  extendExpirationUseCase,
+  applyCouponUseCase,
+  removeCouponUseCase,
+} from '../../application/useCases/wired';
 
 // ============================================================================
 // Request Body Interfaces
@@ -129,7 +130,6 @@ export const applyCouponAdmin = async (req: TypedRequest, res: Response): Promis
     return;
   }
 
-  const discountQuotePort = new CouponDiscountQuoteAdapter(CouponRepository);
   const validation = await discountQuotePort.validateDiscount(couponCode, basket.subtotal.amount, basket.customerId);
   if (!validation.valid || !validation.discount) {
     respondError(req, res, validation.error || 'Invalid coupon code', 400);
@@ -197,8 +197,7 @@ export const getOrCreateBasket = async (req: TypedRequest, res: Response): Promi
   }
 
   const command = new GetOrCreateBasketCommand(customerId, sessionId, currency);
-  const useCase = new GetOrCreateBasketUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await getOrCreateBasketUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };
@@ -275,8 +274,7 @@ export const addItem = async (req: TypedRequest, res: Response): Promise<void> =
     itemType || 'physical',
   );
 
-  const useCase = new AddItemUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await addItemUseCase.execute(command);
 
   respond(req, res, basket, 201);
 };
@@ -296,8 +294,7 @@ export const updateItemQuantity = async (req: TypedRequest, res: Response): Prom
   }
 
   const command = new UpdateItemQuantityCommand(basketId, basketItemId, quantity);
-  const useCase = new UpdateItemQuantityUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await updateItemQuantityUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };
@@ -310,8 +307,7 @@ export const removeItem = async (req: TypedRequest, res: Response): Promise<void
   const { basketId, basketItemId } = req.params;
 
   const command = new RemoveItemCommand(basketId, basketItemId);
-  const useCase = new RemoveItemUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await removeItemUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };
@@ -324,8 +320,7 @@ export const clearBasket = async (req: TypedRequest, res: Response): Promise<voi
   const { basketId } = req.params;
 
   const command = new ClearBasketCommand(basketId);
-  const useCase = new ClearBasketUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await clearBasketUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };
@@ -344,8 +339,7 @@ export const getMyBasket = async (req: TypedRequest, res: Response): Promise<voi
   }
 
   const command = new GetOrCreateBasketCommand(customerId, sessionId);
-  const useCase = new GetOrCreateBasketUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await getOrCreateBasketUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };
@@ -364,8 +358,7 @@ export const mergeBaskets = async (req: TypedRequest, res: Response): Promise<vo
   }
 
   const command = new MergeBasketsCommand(sourceBasketId, targetBasketId);
-  const useCase = new MergeBasketsUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await mergeBasketsUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };
@@ -385,8 +378,7 @@ export const assignToCustomer = async (req: TypedRequest, res: Response): Promis
   }
 
   const command = new AssignBasketToCustomerCommand(basketId, customerId);
-  const useCase = new AssignBasketToCustomerUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await assignBasketToCustomerUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };
@@ -401,8 +393,7 @@ export const setItemAsGift = async (req: TypedRequest, res: Response): Promise<v
   const { giftMessage } = body;
 
   const command = new SetItemAsGiftCommand(basketId, basketItemId, giftMessage);
-  const useCase = new SetItemAsGiftUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await setItemAsGiftUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };
@@ -417,8 +408,7 @@ export const extendExpiration = async (req: TypedRequest, res: Response): Promis
   const { days } = body;
 
   const command = new ExtendExpirationCommand(basketId, days || 7);
-  const useCase = new ExtendExpirationUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await extendExpirationUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };
@@ -456,8 +446,7 @@ export const applyCoupon = async (req: TypedRequest, res: Response): Promise<voi
   }
 
   const command = new ApplyCouponCommand(basketId, couponCode);
-  const useCase = new ApplyCouponUseCase(BasketRepo, new CouponDiscountQuoteAdapter(CouponRepository));
-  const basket = await useCase.execute(command);
+  const basket = await applyCouponUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };
@@ -466,8 +455,7 @@ export const removeCoupon = async (req: TypedRequest, res: Response): Promise<vo
   const { basketId } = req.params;
 
   const command = new RemoveCouponCommand(basketId);
-  const useCase = new RemoveCouponUseCase(BasketRepo);
-  const basket = await useCase.execute(command);
+  const basket = await removeCouponUseCase.execute(command);
 
   respond(req, res, basket, 200);
 };

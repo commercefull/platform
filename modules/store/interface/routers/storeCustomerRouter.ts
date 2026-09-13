@@ -6,7 +6,7 @@
 
 import { Router, Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import storeDataRepository from '../../infrastructure/repositories/StoreDataRepository';
+import { storeDataRepository } from '../../application/wired';
 
 const storeRepo = storeDataRepository.stores;
 const router = Router();

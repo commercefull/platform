@@ -1,0 +1,30 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/segments/<%= segment.segmentId %>" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-striped table-sm">
+      <thead><tr><th>Customer ID</th><th>Email</th><th>Name</th><th>Joined</th></tr></thead>
+      <tbody>
+        <% members.forEach(function(m) { %>
+        <tr>
+          <td><code><%= m.customerId || m.id %></code></td>
+          <td><%= m.email || '-' %></td>
+          <td><%= m.name || m.firstName || '-' %></td>
+          <td><%= m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : '-' %></td>
+        </tr>
+        <% }); %>
+        <% if (!members || members.length === 0) { %>
+        <tr><td colspan="4" class="text-center text-muted">No members found. Try evaluating the segment.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

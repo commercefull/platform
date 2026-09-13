@@ -6,7 +6,6 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import couponRepository from '../../infrastructure/repositories/CouponRepository';
 import {
   CreateCouponUseCase,
   CreateCouponCommand,
@@ -15,6 +14,7 @@ import {
   ApplyCouponUseCase,
   RedeemCouponUseCase,
 } from '../../application/useCases';
+import { couponRepository } from '../../application/wired';
 
 interface CreateCouponBody {
   code: string;

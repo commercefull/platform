@@ -8,8 +8,7 @@
 import { Router } from 'express';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { ScimController } from '../controllers/scimController';
-import { ScimProvisioningRepositoryImpl } from '../../infrastructure/repositories/ScimProvisioningRepositoryImpl';
-import { OrganizationCredentialSubjectAdapter } from '../../infrastructure/acl/OrganizationCredentialSubjectAdapter';
+import { ScimProvisioningRepositoryImpl, OrganizationCredentialSubjectAdapter } from '../../application/wired';
 
 const provisioningRepo = new ScimProvisioningRepositoryImpl();
 const orgPort = new OrganizationCredentialSubjectAdapter();

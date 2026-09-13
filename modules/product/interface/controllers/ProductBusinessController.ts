@@ -5,9 +5,6 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import productCatalogRepository from '../../infrastructure/repositories/ProductCatalogRepository';
-import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
-import productEngagementRepository from '../../infrastructure/repositories/ProductEngagementRepository';
 import { CreateProductCommand } from '../../application/useCases/CreateProduct';
 import { GetProductCommand } from '../../application/useCases/GetProduct';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
@@ -15,7 +12,6 @@ import { UpdateProductCommand } from '../../application/useCases/UpdateProduct';
 import { ManageProductCollectionCommand } from '../../application/useCases/ManageProductCollection';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
-import type { ProductVariantCreateProps, ProductVariantUpdateProps } from '../../infrastructure/repositories/productVariantRepo';
 import { GetProductStoreAvailabilityUseCase } from '../../application/useCases/GetProductStoreAvailability';
 import {
   listProductsUseCase,
@@ -25,9 +21,8 @@ import {
   manageProductCollectionUseCase,
 } from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import type { ProductQaStatus } from '../../infrastructure/repositories/ProductEngagementRepository';
-import type { RelationType } from '../../infrastructure/repositories/ProductEngagementRepository';
-import type { ReviewFilters } from '../../infrastructure/repositories/ProductEngagementRepository';
+import { productCatalogRepository, productAttributeRepository, productEngagementRepository } from '../../application/wired';
+import { ProductVariantCreateProps, ProductVariantUpdateProps, ProductQaStatus, RelationType, ReviewFilters } from '../../application/wired';
 
 const ProductRepo = productCatalogRepository.productRepository;
 const productVariantRepo = productCatalogRepository.variants;

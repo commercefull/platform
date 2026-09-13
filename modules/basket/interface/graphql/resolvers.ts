@@ -1,9 +1,17 @@
-import BasketRepo from '../../infrastructure/repositories/BasketRepository';
-import { GetOrCreateBasketUseCase, GetOrCreateBasketCommand } from '../../application/useCases/GetOrCreateBasket';
-import { AddItemUseCase, AddItemCommand } from '../../application/useCases/AddItem';
-import { UpdateItemQuantityUseCase, UpdateItemQuantityCommand } from '../../application/useCases/UpdateItemQuantity';
-import { RemoveItemUseCase, RemoveItemCommand } from '../../application/useCases/RemoveItem';
-import { ClearBasketUseCase, ClearBasketCommand } from '../../application/useCases/ClearBasket';
+import {
+  GetOrCreateBasketCommand,
+  AddItemCommand,
+  UpdateItemQuantityCommand,
+  RemoveItemCommand,
+  ClearBasketCommand,
+} from '../../application/useCases';
+import {
+  getOrCreateBasketUseCase,
+  addItemUseCase,
+  updateItemQuantityUseCase,
+  removeItemUseCase,
+  clearBasketUseCase,
+} from '../../application/useCases/wired';
 import { requireAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 
 export const basketResolvers = {
@@ -16,9 +24,8 @@ export const basketResolvers = {
       context: GraphQLAuthContext,
     ) => {
       const user = requireAuth(context);
-      const useCase = new GetOrCreateBasketUseCase(BasketRepo);
       const command = new GetOrCreateBasketCommand(user.customerId || user._id, context.sessionId, args.currency ?? 'USD');
-      return useCase.execute(command);
+      return getOrCreateBasketUseCase.execute(command);
     },
   },
 
@@ -39,7 +46,6 @@ export const basketResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const useCase = new AddItemUseCase(BasketRepo);
       const command = new AddItemCommand(
         args.basketId,
         args.productId,
@@ -52,7 +58,7 @@ export const basketResolvers = {
         undefined,
         (args.itemType as 'physical' | 'digital' | 'subscription' | 'service') ?? 'physical',
       );
-      return useCase.execute(command);
+      return addItemUseCase.execute(command);
     },
 
     updateBasketItemQuantity: async (
@@ -65,9 +71,8 @@ export const basketResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const useCase = new UpdateItemQuantityUseCase(BasketRepo);
       const command = new UpdateItemQuantityCommand(args.basketId, args.basketItemId, args.quantity);
-      return useCase.execute(command);
+      return updateItemQuantityUseCase.execute(command);
     },
 
     removeBasketItem: async (
@@ -79,16 +84,14 @@ export const basketResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const useCase = new RemoveItemUseCase(BasketRepo);
       const command = new RemoveItemCommand(args.basketId, args.basketItemId);
-      return useCase.execute(command);
+      return removeItemUseCase.execute(command);
     },
 
     clearBasket: async (_parent: unknown, args: { basketId: string }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const useCase = new ClearBasketUseCase(BasketRepo);
       const command = new ClearBasketCommand(args.basketId);
-      return useCase.execute(command);
+      return clearBasketUseCase.execute(command);
     },
   },
 };

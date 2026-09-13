@@ -1,8 +1,8 @@
-import SystemConfigRepo from '../../infrastructure/repositories/SystemConfigurationRepo';
 import { requireBusinessAuth, requireAdminAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { GetConfigurationUseCase, GetConfigurationInput } from '../../application/useCases/GetConfiguration';
 import { GetFeatureFlagsUseCase, GetFeatureFlagsInput } from '../../application/useCases/GetFeatureFlags';
 import { ToggleFeatureFlagUseCase, ToggleFeatureFlagInput } from '../../application/useCases/ToggleFeatureFlag';
+import { SystemConfigRepo } from '../../application/wired';
 
 export const configurationResolvers = {
   Query: {

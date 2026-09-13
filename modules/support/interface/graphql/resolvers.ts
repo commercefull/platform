@@ -1,13 +1,11 @@
-import supportDataRepository from '../../infrastructure/repositories/SupportDataRepository';
-import supportInfoRepository from '../../infrastructure/repositories/SupportInfoRepository';
-import type { TicketPriority, TicketCategory, SenderType, SupportTicket } from '../../infrastructure/repositories/SupportDataRepository';
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CreateTicketUseCase, CreateTicketInput } from '../../application/useCases/CreateTicket';
 import { UpdateTicketUseCase, UpdateTicketInput } from '../../application/useCases/UpdateTicket';
 import { GetCustomerTicketsUseCase, GetCustomerTicketsInput } from '../../application/useCases/GetCustomerTickets';
 import { AddTicketCommentUseCase, AddTicketCommentInput } from '../../application/useCases/AddTicketComment';
 import { SearchFAQUseCase, SearchFAQInput } from '../../application/useCases/SearchFAQ';
-import type { FaqArticle } from '../../infrastructure/repositories/SupportInfoRepository';
+import { supportDataRepository, supportInfoRepository } from '../../application/wired';
+import { TicketPriority, TicketCategory, SenderType, SupportTicket, FaqArticle } from '../../application/wired';
 
 const supportRepo = supportDataRepository.tickets;
 const faqRepo = supportInfoRepository.faq;

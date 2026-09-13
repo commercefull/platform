@@ -6,7 +6,10 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID as uuidv4 } from '../../../../libs/uuid';
-import type { SupportTicket, SupportMessage } from 'libs/db/types';
+import type { SupportTicketProps } from '../../domain/entities/SupportTicket';
+import type { SupportMessage } from 'libs/db/types';
+
+export type SupportTicket = SupportTicketProps;
 
 export type SupportTicketWithCustomer = SupportTicket & {
   customerEmail?: string;

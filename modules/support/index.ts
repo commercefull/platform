@@ -6,6 +6,7 @@
 export * from './application/useCases';
 export * from './domain/repositories/SupportRepository';
 export * from './domain/errors/SupportErrors';
+export * from './domain/entities/SupportTicket';
 
 // Interface exports (routers, GraphQL)
 export { supportCustomerRouter } from './interface/routers/supportCustomerRouter';

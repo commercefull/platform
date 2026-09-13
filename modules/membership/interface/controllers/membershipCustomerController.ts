@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import membershipSubscriptionDataRepository from '../../infrastructure/repositories/MembershipSubscriptionDataRepository';
+import { membershipSubscriptionDataRepository } from '../../application/wired';
 
 const membershipRepo = membershipSubscriptionDataRepository.memberships;
 

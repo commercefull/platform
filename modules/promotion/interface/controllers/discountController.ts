@@ -1,9 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import couponDiscountRepository, {
-  type CreateProductDiscountInput,
-  type UpdateProductDiscountInput,
-} from '../../infrastructure/repositories/CouponDiscountRepository';
+import { couponDiscountRepository, type CreateProductDiscountInput, type UpdateProductDiscountInput } from '../../application/wired';
 
 const discountRepo = couponDiscountRepository.discounts;
 

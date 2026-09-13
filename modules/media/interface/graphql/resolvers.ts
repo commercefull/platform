@@ -1,8 +1,8 @@
-import { PostgreSQLMediaRepository } from '../../infrastructure/repositories/mediaRepo';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { UploadMediaUseCase, UploadMediaInput } from '../../application/useCases/UploadMedia';
 import { ListMediaUseCase, ListMediaInput } from '../../application/useCases/ListMedia';
 import { DeleteMediaUseCase, DeleteMediaInput } from '../../application/useCases/DeleteMedia';
+import { PostgreSQLMediaRepository } from '../../application/wired';
 
 const mediaRepo = new PostgreSQLMediaRepository();
 

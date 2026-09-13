@@ -1,0 +1,51 @@
+<%- include('../../partials/header', { pageName, title: pageName }) %>
+<%- include('../../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/b2b/quotes" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <table class="table table-sm">
+      <tr><th>Quote ID</th><td><code><%= quote.quoteId %></code></td></tr>
+      <tr><th>Quote Number</th><td><%= quote.quoteNumber %></td></tr>
+      <tr><th>Company</th><td><%= quote.companyId %></td></tr>
+      <tr><th>Status</th><td><span class="badge bg-info"><%= quote.status %></span></td></tr>
+      <tr><th>Requested By</th><td><%= quote.requestedBy %></td></tr>
+      <tr><th>Subtotal</th><td>$<%= quote.subtotal.toFixed(2) %></td></tr>
+      <tr><th>Discount</th><td>$<%= quote.discountTotal.toFixed(2) %></td></tr>
+      <tr><th>Tax</th><td>$<%= quote.taxTotal.toFixed(2) %></td></tr>
+      <tr><th>Total</th><td><strong>$<%= quote.total.toFixed(2) %> <%= quote.currency %></strong></td></tr>
+      <tr><th>Valid Until</th><td><%= new Date(quote.validUntil).toLocaleDateString() %></td></tr>
+      <tr><th>Notes</th><td><%= quote.notes || '-' %></td></tr>
+      <tr><th>Created</th><td><%= new Date(quote.createdAt).toLocaleString() %></td></tr>
+    </table>
+  </div>
+</div>
+
+<% if (quote.lineItems && quote.lineItems.length > 0) { %>
+<h5>Line Items</h5>
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-sm table-striped">
+      <thead><tr><th>SKU</th><th>Name</th><th>Qty</th><th>Unit Price</th><th>Discount</th><th>Total</th></tr></thead>
+      <tbody>
+        <% quote.lineItems.forEach(function(item) { %>
+        <tr>
+          <td><%= item.sku %></td>
+          <td><%= item.name %></td>
+          <td><%= item.quantity %></td>
+          <td>$<%= item.unitPrice.toFixed(2) %></td>
+          <td><%= item.discountPercent ? item.discountPercent + '%' : '-' %></td>
+          <td>$<%= (item.quantity * item.unitPrice * (1 - (item.discountPercent || 0) / 100)).toFixed(2) %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% } %>
+
+<%- include('../../partials/footer') %>

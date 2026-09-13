@@ -1,0 +1,79 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <div>
+    <a href="/admin/audit/stats" class="btn btn-info btn-sm">Stats</a>
+    <a href="/admin/audit/verify-chain" class="btn btn-warning btn-sm">Verify Chain</a>
+  </div>
+</div>
+
+<form method="GET" action="/admin/audit" class="row g-2 mb-3">
+  <div class="col-md-2">
+    <input type="text" name="actorId" value="<%= filters.actorId || '' %>" class="form-control form-control-sm" placeholder="Actor ID">
+  </div>
+  <div class="col-md-2">
+    <input type="text" name="actorType" value="<%= filters.actorType || '' %>" class="form-control form-control-sm" placeholder="Actor Type">
+  </div>
+  <div class="col-md-2">
+    <input type="text" name="action" value="<%= filters.action || '' %>" class="form-control form-control-sm" placeholder="Action">
+  </div>
+  <div class="col-md-2">
+    <input type="text" name="resourceType" value="<%= filters.resourceType || '' %>" class="form-control form-control-sm" placeholder="Resource Type">
+  </div>
+  <div class="col-md-2">
+    <input type="text" name="organizationId" value="<%= filters.organizationId || '' %>" class="form-control form-control-sm" placeholder="Org ID">
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="/admin/audit" class="btn btn-secondary btn-sm">Clear</a>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Actor</th>
+          <th>Action</th>
+          <th>Resource</th>
+          <th>Org ID</th>
+          <th>Hash</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% logs.forEach(function(log) { %>
+        <tr>
+          <td><%= new Date(log.createdAt).toLocaleString() %></td>
+          <td><%= log.actorType %>: <%= log.actorId %></td>
+          <td><span class="badge bg-primary"><%= log.action %></span></td>
+          <td><%= log.resourceType %>: <%= log.resourceId || '-' %></td>
+          <td><%= log.organizationId || '-' %></td>
+          <td><code title="<%= log.hash %>"><%= log.hash ? log.hash.substring(0, 12) + '...' : '-' %></code></td>
+          <td><a href="/admin/audit/<%= log.logId %>" class="btn btn-info btn-sm">View</a></td>
+        </tr>
+        <% }); %>
+        <% if (!logs || logs.length === 0) { %>
+        <tr><td colspan="7" class="text-center text-muted">No audit logs found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+    <div class="d-flex justify-content-between align-items-center">
+      <span class="text-muted">Total: <%= total %></span>
+      <div>
+        <% if (pagination.offset > 0) { %>
+        <a href="/admin/audit?offset=<%= Math.max(0, pagination.offset - pagination.limit) %>" class="btn btn-sm btn-outline-primary">Previous</a>
+        <% } %>
+        <% if (pagination.offset + pagination.limit < total) { %>
+        <a href="/admin/audit?offset=<%= pagination.offset + pagination.limit %>" class="btn btn-sm btn-outline-primary">Next</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

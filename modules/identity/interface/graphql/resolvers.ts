@@ -1,4 +1,3 @@
-import identityDataRepository from '../../infrastructure/repositories/IdentityDataRepository';
 
 const identityRepo = identityDataRepository.users;
 import { requireAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
@@ -10,6 +9,7 @@ import {
   LogoutUseCase,
   LogoutCommand,
 } from '../../application/useCases/Authenticate';
+import { identityDataRepository } from '../../application/wired';
 
 export const identityResolvers = {
   Query: {

@@ -1,16 +1,8 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import supplierDataRepository from '../../infrastructure/repositories/SupplierDataRepository';
-import type {
-  SupplierFilters,
-  SupplierStatus,
-  SupplierCreateParams,
-  SupplierUpdateParams,
-  SupplierAddressType,
-  SupplierAddressUpdateParams,
-  SupplierProductUpdateParams,
-} from '../../infrastructure/repositories/SupplierDataRepository';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
+import { supplierDataRepository } from '../../application/wired';
+import { SupplierFilters, SupplierStatus, SupplierCreateParams, SupplierUpdateParams, SupplierAddressType, SupplierAddressUpdateParams, SupplierProductUpdateParams } from '../../application/wired';
 
 const supplierRepo = supplierDataRepository.suppliers;
 const SupplierAddressRepo = supplierDataRepository.addresses;

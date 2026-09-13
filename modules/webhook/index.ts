@@ -10,3 +10,13 @@ export * from './domain/errors/WebhookErrors';
 export { webhookBusinessRouter } from './interface/routers/webhookBusinessRouter';
 export { webhookTypeDefs } from './interface/graphql/typeDefs';
 export { webhookResolvers } from './interface/graphql/resolvers';
+export {
+  listWebhookEndpoints,
+  viewWebhookEndpoint,
+  createWebhookForm,
+  createWebhook,
+  editWebhookForm,
+  updateWebhook,
+  deleteWebhook,
+  viewWebhookDeliveries,
+} from './interface/controllers/adminWebhookController';

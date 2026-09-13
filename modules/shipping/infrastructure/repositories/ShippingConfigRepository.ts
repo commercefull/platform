@@ -12,6 +12,7 @@ import shippingMethodRepo from './shippingMethodRepo';
 import shippingZoneRepo from './shippingZoneRepo';
 import shippingRateRepo from './shippingRateRepo';
 import packagingTypeRepo from './packagingTypeRepo';
+import shippingSurchargeRepo from './shippingSurchargeRepo';
 
 // Re-export types for backward compatibility
 export type { ShippingCarrier, CreateShippingCarrierInput, UpdateShippingCarrierInput } from './shippingCarrierRepo';
@@ -19,6 +20,7 @@ export type { ShippingMethod, CreateShippingMethodInput, UpdateShippingMethodInp
 export type { ShippingZone, CreateShippingZoneInput, UpdateShippingZoneInput } from './shippingZoneRepo';
 export type { ShippingRate, CreateShippingRateInput, UpdateShippingRateInput } from './shippingRateRepo';
 export type { ShippingPackagingType, CreateShippingPackagingTypeInput, UpdateShippingPackagingTypeInput } from './packagingTypeRepo';
+export type { ShippingSurcharge, CreateShippingSurchargeInput, UpdateShippingSurchargeInput } from './shippingSurchargeRepo';
 
 class ShippingConfigRepository {
   readonly carriers = shippingCarrierRepo;
@@ -26,6 +28,7 @@ class ShippingConfigRepository {
   readonly zones = shippingZoneRepo;
   readonly rates = shippingRateRepo;
   readonly packaging = packagingTypeRepo;
+  readonly surcharges = shippingSurchargeRepo;
 }
 
 export default new ShippingConfigRepository();

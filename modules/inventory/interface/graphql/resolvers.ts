@@ -1,4 +1,3 @@
-import inventoryDataRepository from '../../infrastructure/repositories/InventoryDataRepository';
 
 const InventoryRepo = inventoryDataRepository.items;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
@@ -7,6 +6,7 @@ import { ListInventoryItemsUseCase, ListInventoryItemsInput } from '../../applic
 import { GetLowStockItemsUseCase, GetLowStockItemsInput } from '../../application/useCases/GetLowStockItems';
 import { GetOutOfStockItemsUseCase, GetOutOfStockItemsInput } from '../../application/useCases/GetOutOfStockItems';
 import { ReserveStockUseCase, ReserveStockInput } from '../../application/useCases/ReserveStock';
+import { inventoryDataRepository } from '../../application/wired';
 
 // The InventoryRepository implements all these methods but the use case port interfaces
 // are structurally narrower. Use type assertions to satisfy the constraints.

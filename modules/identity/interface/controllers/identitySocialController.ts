@@ -6,7 +6,6 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import identityDataRepository from '../../infrastructure/repositories/IdentityDataRepository';
 
 const socialAccountRepo = identityDataRepository.social;
 import { SocialProvider, SocialProfileData } from '../../domain/entities/SocialAccount';
@@ -19,9 +18,8 @@ import {
 } from '../../application/useCases/SocialLogin';
 import { generateAccessToken } from '../../utils/jwtHelpers';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { CustomerCredentialSubjectAdapter } from '../../infrastructure/acl/CustomerCredentialSubjectAdapter';
-import { OrganizationCredentialSubjectAdapter } from '../../infrastructure/acl/OrganizationCredentialSubjectAdapter';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
+import { identityDataRepository, CustomerCredentialSubjectAdapter, OrganizationCredentialSubjectAdapter } from '../../application/wired';
 
 // Environment configuration
 const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';

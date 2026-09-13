@@ -9,8 +9,8 @@ import { TypedRequest, RequestBody } from 'libs/types/express';
 import { ManageAdminTaxUseCase } from '../../application/useCases/ManageAdminTax';
 import { approveTaxExemptionUseCase } from '../../application/useCases/ApproveTaxExemption';
 import { rejectTaxExemptionUseCase } from '../../application/useCases/RejectTaxExemption';
-import { TaxQueryRepository } from '../../infrastructure';
 import { adminRespond } from '../../../../libs/adminRespond';
+import { TaxQueryRepository } from '../../application/wired';
 
 const taxQueryRepo = TaxQueryRepository.query;
 

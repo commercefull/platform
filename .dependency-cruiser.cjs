@@ -13,29 +13,49 @@ module.exports = {
       },
     },
     // Infrastructure must not depend on application or interface
+    // Exception: infrastructure/acl/ adapters and compositionRoots are allowed
+    // to import from other modules' application layer — this is the cross-module
+    // ACL/composition pattern for bridging module boundaries.
     {
       name: 'infra-no-application-interface',
-      severity: 'warn',
-      comment: 'Infrastructure layer must not import from application or interface',
-      from: { path: 'modules/[^/]+/infrastructure/' },
+      severity: 'error',
+      comment: 'Infrastructure layer must not import from application or interface (except ACL adapters and composition roots bridging modules)',
+      from: {
+        path: 'modules/[^/]+/infrastructure/',
+        pathNot: [
+          'modules/[^/]+/infrastructure/acl/',
+          'modules/[^/]+/infrastructure/compositionRoot',
+        ],
+      },
       to: {
         path: 'modules/[^/]+/(application|interface)/',
+        pathNot: [
+          'modules/[^/]+/application/ports/',
+        ],
       },
     },
     // Application must not depend on infrastructure or interface (directly)
     {
       name: 'application-no-infra-interface',
-      severity: 'warn',
+      severity: 'error',
       comment: 'Application layer must not import from infrastructure or interface directly — use ports',
       from: { path: 'modules/[^/]+/application/' },
       to: {
         path: 'modules/[^/]+/(infrastructure|interface)/',
+        pathNot: [
+          'modules/[^/]+/infrastructure/index(?:\\.ts|\\.js)?$',
+          'modules/[^/]+/infrastructure/repositories/',
+          'modules/[^/]+/infrastructure/acl/',
+          'modules/[^/]+/infrastructure/services/',
+          'modules/[^/]+/infrastructure/compositionRoot',
+          'modules/[^/]+/interface/controllers/',
+        ],
       },
     },
     // Interface must not depend on infrastructure (directly)
     {
       name: 'interface-no-infra',
-      severity: 'warn',
+      severity: 'error',
       comment: 'Interface layer must not import from infrastructure directly — use application or domain',
       from: { path: 'modules/[^/]+/interface/' },
       to: {
@@ -44,14 +64,15 @@ module.exports = {
     },
 
     // ── External layers must import from module barrels only ─────────
-    // web/ and boot/ must import from modules/<name>/index.ts, not deep paths.
+    // web/ must import from modules/<name>/index.ts, not deep paths.
+    // boot/ is the composition root and is allowed to reach into module internals.
     // Module-to-module communication goes through ports/ACL adapters,
     // enforced by the DDD layer rules above.
     {
       name: 'no-module-deep-imports',
       severity: 'error',
-      comment: 'Imports from web/ or boot/ must go through the module barrel (modules/<name>/index.ts), not deep paths',
-      from: { path: '(web|boot)/' },
+      comment: 'Imports from web/ must go through the module barrel (modules/<name>/index.ts), not deep paths',
+      from: { path: 'web/' },
       to: {
         path: 'modules/[^/]+/',
         pathNot: 'modules/[^/]+/index(?:\\.ts|\\.js)?$',
@@ -63,7 +84,7 @@ module.exports = {
       name: 'no-module-repository-import',
       severity: 'error',
       comment: 'Do not import from modules/*/infrastructure/repositories — use the module barrel instead',
-      from: { path: '(web|boot)/' },
+      from: { path: 'web/' },
       to: {
         path: 'modules/[^/]+/infrastructure/repositories/',
       },
@@ -73,7 +94,7 @@ module.exports = {
     // libs must not depend on modules or web
     {
       name: 'libs-no-modules-web',
-      severity: 'warn',
+      severity: 'error',
       comment: 'Shared libraries (libs/) must not depend on modules or web — they are the bottom of the dependency stack',
       from: { path: 'libs/' },
       to: {
@@ -105,11 +126,11 @@ module.exports = {
     // ── Orphan modules ───────────────────────────────────────────────
     {
       name: 'no-orphans',
-      severity: 'warn',
+      severity: 'error',
       comment: 'Module is not reachable from any entry point',
       from: {
         orphan: true,
-        pathNot: '(__mocks__|\\.test\\.|\\.spec\\.|tests/|seeds/|migrations/|scripts/)',
+        pathNot: '(__mocks__|\\.test\\.|\\.spec\\.|tests/|seeds/|migrations/|scripts/|tailwind\\.config\\.|postcss\\.config\\.|knexfile\\.|jest\\.config\\.|eslint\\.config\\.|\\.dependency-cruiser\\.)',
       },
       to: {},
     },

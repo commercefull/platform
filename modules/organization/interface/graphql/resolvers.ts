@@ -1,6 +1,6 @@
-import OrganizationRepo from '../../infrastructure/repositories/organizationRepo';
 import { requireAdminAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CreateOrganizationUseCase, CreateOrganizationInput } from '../../application/useCases/CreateOrganization';
+import { organizationRepoInstance as OrganizationRepo } from '../../application/wired';
 
 export const organizationResolvers = {
   Query: {},

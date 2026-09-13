@@ -5,10 +5,8 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import supportDataRepository from '../../infrastructure/repositories/SupportDataRepository';
-import supportInfoRepository from '../../infrastructure/repositories/SupportInfoRepository';
-import type { AlertStatus, NotificationChannel, PriceAlertType } from '../../infrastructure/repositories/SupportInfoRepository';
-import type { TicketStatus, TicketPriority, TicketCategory } from '../../infrastructure/repositories/SupportDataRepository';
+import { supportDataRepository, supportInfoRepository } from '../../application/wired';
+import { AlertStatus, NotificationChannel, PriceAlertType, TicketStatus, TicketPriority, TicketCategory } from '../../application/wired';
 
 const supportRepo = supportDataRepository.tickets;
 const faqRepo = supportInfoRepository.faq;

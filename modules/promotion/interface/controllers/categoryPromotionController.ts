@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import promotionRuleRepository from '../../infrastructure/repositories/PromotionRuleRepository';
+import { promotionRuleRepository } from '../../application/wired';
 
 interface CategoryCreateBody {
   productCategoryId: string;

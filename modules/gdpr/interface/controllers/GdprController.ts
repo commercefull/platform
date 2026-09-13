@@ -11,7 +11,6 @@ import { CookiePreferences } from '../../domain/entities/GdprCookieConsent';
 
 // Type for async route handlers
 type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
-import gdprDataRepository from '../../infrastructure/repositories/GdprDataRepository';
 import { CreateDataRequestUseCase, CreateDataRequestCommand } from '../../application/useCases/CreateDataRequest';
 import {
   ProcessDataRequestUseCase,
@@ -26,6 +25,7 @@ import {
   UpdateCookieConsentCommand,
 } from '../../application/useCases/ManageCookieConsent';
 import { GdprService } from '../../domain/repositories/GdprRepository';
+import { gdprDataRepository } from '../../application/wired';
 
 // ============================================================================
 // GDPR Service Factory

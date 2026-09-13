@@ -1,0 +1,37 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/webhooks/<%= endpoint.webhookEndpointId %>" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="/admin/webhooks/<%= endpoint.webhookEndpointId %>">
+      <div class="mb-3"><label class="form-label">Name</label><input type="text" name="name" value="<%= endpoint.name %>" class="form-control"></div>
+      <div class="mb-3"><label class="form-label">URL</label><input type="url" name="url" value="<%= endpoint.url %>" class="form-control"></div>
+      <div class="mb-3">
+        <label class="form-label">Events</label>
+        <div class="row">
+          <% availableEvents.forEach(function(ev) { %>
+          <div class="col-md-4 mb-1">
+            <div class="form-check">
+              <input type="checkbox" name="events" value="<%= ev %>" class="form-check-input" id="edit_ev_<%= ev %>"
+                <%= (endpoint.events || []).includes(ev) ? 'checked' : '' %>>
+              <label class="form-check-label" for="edit_ev_<%= ev %>"><%= ev %></label>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" name="isActive" <%= endpoint.isActive ? 'checked' : '' %> class="form-check-input">
+        <label class="form-check-label">Active</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Update Webhook</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

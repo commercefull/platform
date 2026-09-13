@@ -1,0 +1,38 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/segments/create" class="btn btn-primary btn-sm">Create Segment</a>
+</div>
+
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-striped table-sm">
+      <thead><tr><th>Name</th><th>Description</th><th>Type</th><th>Active</th><th>Members</th><th>Actions</th></tr></thead>
+      <tbody>
+        <% segments.forEach(function(s) { %>
+        <tr>
+          <td><a href="/admin/segments/<%= s.segmentId %>"><%= s.name %></a></td>
+          <td><%= s.description || '-' %></td>
+          <td><span class="badge bg-info"><%= s.type || 'static' %></span></td>
+          <td><%= s.isActive ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>' %></td>
+          <td><%= s.memberCount || 0 %></td>
+          <td>
+            <a href="/admin/segments/<%= s.segmentId %>" class="btn btn-info btn-sm">View</a>
+            <a href="/admin/segments/<%= s.segmentId %>/edit" class="btn btn-warning btn-sm">Edit</a>
+            <form method="POST" action="/admin/segments/<%= s.segmentId %>/evaluate" class="d-inline">
+              <button type="submit" class="btn btn-success btn-sm">Evaluate</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+        <% if (!segments || segments.length === 0) { %>
+        <tr><td colspan="6" class="text-center text-muted">No segments found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

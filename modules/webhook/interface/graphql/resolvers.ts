@@ -1,8 +1,8 @@
-import WebhookRepo from '../../infrastructure/repositories/WebhookRepository';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { RegisterWebhookUseCase, RegisterWebhookInput } from '../../application/useCases/RegisterWebhook';
 import { ListWebhooksUseCase } from '../../application/useCases/ListWebhooks';
 import { UnregisterWebhookUseCase } from '../../application/useCases/UnregisterWebhook';
+import { WebhookRepo } from '../../application/wired';
 
 export const webhookResolvers = {
   Query: {

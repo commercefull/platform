@@ -1,0 +1,46 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/shipping/surcharges" class="btn btn-secondary me-2"><i class="ti ti-arrow-left"></i> Back</a>
+      <a href="/admin/shipping/surcharges/<%= surcharge.shippingSurchargeId %>/edit" class="btn btn-primary"><i class="ti ti-edit"></i> Edit</a>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Details</h3></div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-4">Surcharge ID</dt><dd class="col-sm-8"><code><%= surcharge.shippingSurchargeId %></code></dd>
+              <dt class="col-sm-4">Shipping Rate ID</dt><dd class="col-sm-8"><code><%= surcharge.shippingRateId %></code></dd>
+              <dt class="col-sm-4">Type</dt><dd class="col-sm-8"><span class="badge badge-secondary"><%= surcharge.type %></span></dd>
+              <dt class="col-sm-4">Calculation Type</dt><dd class="col-sm-8"><%= surcharge.calculationType %></dd>
+              <dt class="col-sm-4">Value</dt><dd class="col-sm-8"><%= surcharge.calculationType === 'percentage' ? surcharge.value + '%' : surcharge.value %></dd>
+              <dt class="col-sm-4">Conditions</dt><dd class="col-sm-8"><%= surcharge.conditions ? JSON.stringify(surcharge.conditions) : '-' %></dd>
+              <dt class="col-sm-4">Active</dt><dd class="col-sm-8"><span class="badge bg-<%= surcharge.isActive ? 'success' : 'secondary' %>"><%= surcharge.isActive ? 'Active' : 'Inactive' %></span></dd>
+              <dt class="col-sm-4">Created</dt><dd class="col-sm-8"><%= new Date(surcharge.createdAt).toLocaleString() %></dd>
+              <dt class="col-sm-4">Updated</dt><dd class="col-sm-8"><%= new Date(surcharge.updatedAt).toLocaleString() %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Actions</h3></div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <a href="/admin/shipping/surcharges/<%= surcharge.shippingSurchargeId %>/edit" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Surcharge</a>
+              <a href="/admin/shipping/surcharges" class="btn btn-outline-secondary"><i class="fas fa-list"></i> Back to List</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

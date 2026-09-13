@@ -7,9 +7,9 @@ import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../../../libs/adminRespond';
+import { ReturnRuleRepo as returnRuleRepo } from '../../application/wired';
 
 // Use the repository via the infrastructure barrel
-import { ReturnRuleRepo as returnRuleRepo } from '../../infrastructure';
 
 // ============================================================================
 // List Return Rules

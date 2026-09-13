@@ -24,7 +24,7 @@
     "test:unit": "jest --selectProjects unit --detectOpenHandles",
     "test:int": "jest --selectProjects integration --runInBand --detectOpenHandles --forceExit",
     "test:all": "yarn test:unit && yarn test:int",
-    "lint": "node_modules/@typescript/native/bin/tsc --noEmit && eslint . --ext .ts,.js",
+    "lint": "node_modules/@typescript/native/bin/tsc --noEmit && eslint . --ext .ts,.js && dependency-cruiser .",
     "lint:errors": "eslint . --ext .ts,.js --quiet",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md,html,css,scss}\"",

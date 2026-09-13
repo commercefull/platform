@@ -14,7 +14,6 @@ import { CheckoutRepository, ShippingMethodData, PaymentMethodData } from '../..
 import { CheckoutSession, CheckoutStatus, PaymentStatus, FulfillmentType } from '../../domain/entities/CheckoutSession';
 import { Address } from '../../domain/valueObjects/Address';
 import { Money } from '../../../../libs/money';
-import { calculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
 
 export class CheckoutRepo implements CheckoutRepository {
   async findById(id: string): Promise<CheckoutSession | null> {
@@ -263,37 +262,6 @@ export class CheckoutRepo implements CheckoutRepository {
     if (!addr.postalCode) errors.push('Postal code is required');
     if (!addr.country) errors.push('Country is required');
     return { valid: errors.length === 0, errors };
-  }
-
-  async calculateTax(subtotal: number, shippingAmount: number, address: unknown): Promise<number> {
-    const addr = address as Record<string, unknown>;
-    try {
-      const result = await calculateOrderTaxUseCase.execute({
-        items: [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPrice: subtotal }],
-        shippingAddress: {
-          country: String(addr.country || ''),
-          region: addr.region as string | undefined,
-          postalCode: addr.postalCode as string | undefined,
-          city: addr.city as string | undefined,
-        },
-        shippingAmount,
-      });
-      return result.success ? result.taxAmount : 0;
-    } catch {
-      // Fall back to simplified query if tax use case fails
-      const row = await queryOne<Record<string, unknown>>(
-        `SELECT tr.rate FROM "taxRate" tr
-         JOIN "taxZone" tz ON tz."taxZoneId" = tr."taxZoneId"
-         WHERE tz."countries" @> $1::jsonb AND tr."isActive" = true AND tz."isActive" = true
-         ORDER BY tz."isDefault" DESC LIMIT 1`,
-        [JSON.stringify([addr.country])],
-      );
-      if (row) {
-        const taxRate = Number(row.rate) / 100;
-        return Math.round((subtotal + shippingAmount) * taxRate * 100) / 100;
-      }
-      return 0;
-    }
   }
 
   private mapToCheckoutSession(row: DbCheckoutSession): CheckoutSession {

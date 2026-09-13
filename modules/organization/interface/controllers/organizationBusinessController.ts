@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { OrganizationRepo, Organization } from '../../infrastructure/repositories/organizationRepo';
+import { OrganizationRepo, Organization } from '../../application/wired';
 
 interface CreateOrganizationBody {
   name: string;

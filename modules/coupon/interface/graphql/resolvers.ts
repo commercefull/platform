@@ -1,9 +1,9 @@
-import CouponRepo from '../../infrastructure/repositories/CouponRepository';
 import { requireBusinessAuth, requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { ValidateCouponUseCase, ValidateCouponCommand } from '../../application/useCases/ValidateCoupon';
 import { ApplyCouponUseCase, ApplyCouponInput } from '../../application/useCases/ApplyCoupon';
 import { RedeemCouponUseCase, RedeemCouponInput } from '../../application/useCases/RedeemCoupon';
 import { CreateCouponUseCase, CreateCouponCommand } from '../../application/useCases/CreateCoupon';
+import { CouponRepo } from '../../application/wired';
 
 export const couponResolvers = {
   Query: {

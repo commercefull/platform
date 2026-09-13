@@ -84,10 +84,6 @@ class InMemoryCheckoutRepository {
     return { valid: true, errors: [] };
   }
 
-  async calculateTax(_subtotal: number, _shippingAmount: number, _address: unknown): Promise<number> {
-    return 0;
-  }
-
   async findByPaymentIntentId(_paymentIntentId: string): Promise<CheckoutSession | null> {
     return null;
   }

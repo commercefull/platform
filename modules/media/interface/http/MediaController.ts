@@ -9,9 +9,7 @@ import { TypedRequest } from 'libs/types/express';
 import multer from 'multer';
 import { ProcessImageUseCase } from '../../application/useCases/ProcessImage';
 import { DownloadImageUseCase } from '../../application/useCases/DownloadImage';
-import { PostgreSQLMediaRepository } from '../../infrastructure/repositories/mediaRepo';
-import { SharpImageProcessingService } from '../../infrastructure/services/SharpImageProcessingService';
-import { StorageServiceFactory } from '../../infrastructure/services/StorageServiceFactory';
+import { PostgreSQLMediaRepository, SharpImageProcessingService, StorageServiceFactory } from '../../application/wired';
 
 interface MediaUploadBody {
   altText?: string;

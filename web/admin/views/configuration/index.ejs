@@ -1,0 +1,35 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/configuration/create" class="btn btn-primary btn-sm">Create Configuration</a>
+</div>
+
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-striped table-sm">
+      <thead><tr><th>Config ID</th><th>Platform Name</th><th>Mode</th><th>Domain</th><th>Support Email</th><th>Actions</th></tr></thead>
+      <tbody>
+        <% configs.forEach(function(c) { %>
+        <tr>
+          <td><code><%= c.configId.substring(0, 8) %>...</code></td>
+          <td><a href="/admin/configuration/<%= c.configId %>"><%= c.platformSettings.platformName %></a></td>
+          <td><span class="badge bg-info"><%= c.systemMode %></span></td>
+          <td><%= c.platformSettings.platformDomain %></td>
+          <td><%= c.platformSettings.supportEmail %></td>
+          <td>
+            <a href="/admin/configuration/<%= c.configId %>" class="btn btn-info btn-sm">View</a>
+            <a href="/admin/configuration/<%= c.configId %>/edit" class="btn btn-warning btn-sm">Edit</a>
+          </td>
+        </tr>
+        <% }); %>
+        <% if (!configs || configs.length === 0) { %>
+        <tr><td colspan="6" class="text-center text-muted">No configurations found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

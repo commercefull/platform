@@ -1,0 +1,47 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <a href="/admin/migration" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="/admin/migration">
+      <div class="mb-3">
+        <label class="form-label">Job Type *</label>
+        <select name="jobType" required class="form-select">
+          <option value="full">Full</option>
+          <option value="products">Products</option>
+          <option value="customers">Customers</option>
+          <option value="orders">Orders</option>
+          <option value="categories">Categories</option>
+          <option value="collections">Collections</option>
+          <option value="inventory">Inventory</option>
+          <option value="coupons">Coupons</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Source *</label>
+        <select name="source" required class="form-select">
+          <option value="shopify">Shopify</option>
+          <option value="woocommerce">WooCommerce</option>
+          <option value="magento">Magento</option>
+          <option value="bigcommerce">BigCommerce</option>
+          <option value="csv">CSV</option>
+          <option value="api">API</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="mb-3"><label class="form-label">Source Store URL</label><input type="url" name="sourceStoreUrl" class="form-control" placeholder="https://old-store.com"></div>
+      <div class="mb-3"><label class="form-label">Source API Key</label><input type="password" name="sourceApiKey" class="form-control"></div>
+      <div class="mb-3 form-check"><input type="checkbox" name="dryRun" class="form-check-input"><label class="form-check-label">Dry Run (preview only)</label></div>
+      <div class="mb-3 form-check"><input type="checkbox" name="autoActivate" class="form-check-input"><label class="form-check-label">Auto-activate imported data</label></div>
+      <button type="submit" class="btn btn-primary">Create Import Job</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

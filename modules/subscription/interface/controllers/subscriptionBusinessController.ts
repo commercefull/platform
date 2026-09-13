@@ -5,32 +5,7 @@
 
 import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import {
-  SubscriptionPlan,
-  SubscriptionProduct,
-  SubscriptionStatus,
-  advanceBillingCycle,
-  cancelSubscription,
-  createSubscriptionOrder,
-  deleteSubscriptionPlan as deleteSubscriptionPlanRepo,
-  deleteSubscriptionProduct as deleteSubscriptionProductRepo,
-  getCustomerSubscription as getCustomerSubscriptionRepo,
-  getCustomerSubscriptions as getCustomerSubscriptionsRepo,
-  getDunningAttempts as getDunningAttemptsRepo,
-  getPendingDunningAttempts,
-  getSubscriptionOrders as getSubscriptionOrdersRepo,
-  getSubscriptionPlan as getSubscriptionPlanRepo,
-  getSubscriptionPlans as getSubscriptionPlansRepo,
-  getSubscriptionProduct as getSubscriptionProductRepo,
-  getSubscriptionProducts as getSubscriptionProductsRepo,
-  getSubscriptionsDueBilling as getSubscriptionsDueBillingRepo,
-  pauseSubscription,
-  resumeSubscription,
-  saveSubscriptionPlan,
-  saveSubscriptionProduct,
-  updateSubscriptionOrderStatus,
-  updateSubscriptionStatus as updateSubscriptionStatusRepo,
-} from '../../infrastructure/repositories/subscriptionRepo';
+import { SubscriptionPlan, SubscriptionProduct, SubscriptionStatus, advanceBillingCycle, cancelSubscription, createSubscriptionOrder, deleteSubscriptionPlanRepo, deleteSubscriptionProductRepo, getCustomerSubscriptionRepo, getCustomerSubscriptionsRepo, getDunningAttemptsRepo, getPendingDunningAttempts, getSubscriptionOrdersRepo, getSubscriptionPlanRepo, getSubscriptionPlansRepo, getSubscriptionProductRepo, getSubscriptionProductsRepo, getSubscriptionsDueBillingRepo, pauseSubscription, resumeSubscription, saveSubscriptionPlan, saveSubscriptionProduct, updateSubscriptionOrderStatus, updateSubscriptionStatusRepo } from '../../application/wired';
 
 type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
 

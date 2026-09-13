@@ -6,6 +6,7 @@
 export * from './application/useCases';
 export * from './domain/repositories/ShippingRepository';
 export * from './domain/errors/ShippingErrors';
+export * from './domain/entities/ShippingRate';
 
 // Interface exports (routers, GraphQL)
 export { shippingCustomerRouter } from './interface/routers/shippingCustomerRouter';

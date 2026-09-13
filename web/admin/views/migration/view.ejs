@@ -1,0 +1,64 @@
+<%- include('../partials/header', { pageName, title: pageName }) %>
+<%- include('../partials/alerts') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><%= pageName %></h2>
+  <div>
+    <a href="/admin/migration/<%= job.importJobId %>/mappings" class="btn btn-info btn-sm">Mappings</a>
+    <a href="/admin/migration/<%= job.importJobId %>/errors" class="btn btn-warning btn-sm">Errors</a>
+    <a href="/admin/migration" class="btn btn-secondary btn-sm">Back</a>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <table class="table table-sm">
+      <tr><th>Job ID</th><td><code><%= job.importJobId %></code></td></tr>
+      <tr><th>Job Type</th><td><%= job.jobType %></td></tr>
+      <tr><th>Source</th><td><%= job.source %></td></tr>
+      <tr><th>Status</th><td><span class="badge bg-info"><%= job.status %></span></td></tr>
+      <tr><th>Source Store URL</th><td><%= job.sourceStoreUrl || '-' %></td></tr>
+      <tr><th>Dry Run</th><td><%= job.dryRun ? 'Yes' : 'No' %></td></tr>
+      <tr><th>Auto Activate</th><td><%= job.autoActivate ? 'Yes' : 'No' %></td></tr>
+      <tr><th>Created</th><td><%= new Date(job.createdAt).toLocaleString() %></td></tr>
+      <% if (job.startedAt) { %><tr><th>Started</th><td><%= new Date(job.startedAt).toLocaleString() %></td></tr><% } %>
+      <% if (job.completedAt) { %><tr><th>Completed</th><td><%= new Date(job.completedAt).toLocaleString() %></td></tr><% } %>
+      <% if (job.errorMessage) { %><tr><th>Error</th><td class="text-danger"><%= job.errorMessage %></td></tr><% } %>
+    </table>
+  </div>
+</div>
+
+<% if (job.stats) { %>
+<div class="card mb-3">
+  <div class="card-header"><h5>Stats</h5></div>
+  <div class="card-body">
+    <table class="table table-sm">
+      <tr><th>Total Records</th><td><%= job.stats.totalRecords %></td></tr>
+      <tr><th>Processed</th><td><%= job.stats.processedRecords %></td></tr>
+      <tr><th>Success</th><td><span class="text-success"><%= job.stats.successCount %></span></td></tr>
+      <tr><th>Errors</th><td><span class="text-danger"><%= job.stats.errorCount %></span></td></tr>
+      <tr><th>Skipped</th><td><%= job.stats.skippedCount %></td></tr>
+    </table>
+  </div>
+</div>
+<% } %>
+
+<div class="mt-3">
+  <% if (job.status === 'pending') { %>
+  <form method="POST" action="/admin/migration/<%= job.importJobId %>/start" class="d-inline"><button type="submit" class="btn btn-success btn-sm">Start</button></form>
+  <% } %>
+  <% if (job.status === 'running') { %>
+  <form method="POST" action="/admin/migration/<%= job.importJobId %>/pause" class="d-inline"><button type="submit" class="btn btn-warning btn-sm">Pause</button></form>
+  <% } %>
+  <% if (job.status === 'paused') { %>
+  <form method="POST" action="/admin/migration/<%= job.importJobId %>/start" class="d-inline"><button type="submit" class="btn btn-success btn-sm">Resume</button></form>
+  <% } %>
+  <% if (job.status !== 'running') { %>
+  <form method="POST" action="/admin/migration/<%= job.importJobId %>/cancel" class="d-inline"><button type="submit" class="btn btn-danger btn-sm">Cancel</button></form>
+  <% } %>
+  <form method="POST" action="/admin/migration/<%= job.importJobId %>/delete" class="d-inline" onsubmit="return confirm('Delete this import job?');">
+    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

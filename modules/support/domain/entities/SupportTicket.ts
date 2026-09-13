@@ -5,26 +5,54 @@
  * priority handling, and assignment tracking.
  */
 
-export type TicketStatus = 'open' | 'in_progress' | 'waiting_on_customer' | 'resolved' | 'closed';
+export type TicketStatus = 'open' | 'pending' | 'in_progress' | 'waiting_customer' | 'resolved' | 'closed';
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
-export type TicketCategory = 'general' | 'order' | 'payment' | 'shipping' | 'return' | 'product' | 'account' | 'technical';
+export type TicketCategory = 'order' | 'shipping' | 'return' | 'product' | 'payment' | 'account' | 'technical' | 'other';
+export type TicketChannel = 'web' | 'email' | 'phone' | 'chat' | 'social';
+export type SenderType = 'customer' | 'agent' | 'system';
 
 export interface SupportTicketProps {
   supportTicketId: string;
-  customerId: string;
+  ticketNumber: string;
+  customerId?: string;
   orderId?: string;
+  email: string;
+  name?: string;
+  phone?: string;
   subject: string;
-  description: string;
+  description?: string;
   status: TicketStatus;
   priority: TicketPriority;
   category: TicketCategory;
-  assignedTo?: string;
-  resolvedAt?: string;
-  closedAt?: string;
+  subcategory?: string;
+  channel: TicketChannel;
+  assignedAgentId?: string;
+  lastMessageBy?: string;
+  lastMessageByType?: SenderType;
+  lastMessageAt?: Date;
+  firstResponseAt?: Date;
+  responseTimeMinutes?: number;
+  resolvedAt?: Date;
+  resolutionTimeMinutes?: number;
+  resolutionType?: string;
+  resolutionNotes?: string;
+  customerSatisfaction?: number;
+  customerFeedback?: string;
+  feedbackRequested: boolean;
+  feedbackRequestedAt?: Date;
+  tags?: string[];
+  isEscalated: boolean;
+  escalatedTo?: string;
+  escalatedAt?: Date;
+  escalationReason?: string;
+  isSpam: boolean;
+  reopenCount: number;
+  customFields?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  closedAt?: Date;
+  dueAt?: Date;
 }
 
 export class SupportTicket {
@@ -38,7 +66,7 @@ export class SupportTicket {
     return this.props.supportTicketId;
   }
 
-  get customerId(): string {
+  get customerId(): string | undefined {
     return this.props.customerId;
   }
 
@@ -55,18 +83,18 @@ export class SupportTicket {
   }
 
   assignTo(agentId: string): void {
-    this.props.assignedTo = agentId;
+    this.props.assignedAgentId = agentId;
     this.props.status = 'in_progress';
   }
 
   resolve(): void {
     this.props.status = 'resolved';
-    this.props.resolvedAt = new Date().toISOString();
+    this.props.resolvedAt = new Date();
   }
 
   close(): void {
     this.props.status = 'closed';
-    this.props.closedAt = new Date().toISOString();
+    this.props.closedAt = new Date();
   }
 
   reopen(): void {

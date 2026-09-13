@@ -6,12 +6,12 @@
 
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import WebhookRepo from '../../infrastructure/repositories/WebhookRepository';
 import { RegisterWebhookUseCase } from '../../application/useCases/RegisterWebhook';
 import { UnregisterWebhookUseCase } from '../../application/useCases/UnregisterWebhook';
 import { ListWebhooksUseCase } from '../../application/useCases/ListWebhooks';
 import { SYNC_RELEVANT_EVENTS } from '../../domain/valueObjects/WebhookEventType';
 import { DeliveryStatus } from '../../domain/entities/WebhookDelivery';
+import { WebhookRepo } from '../../application/wired';
 
 interface RegisterWebhookBody {
   name: string;
