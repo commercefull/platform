@@ -4,3 +4,7 @@ export * from './domain/entities/Integration';
 export * from './domain/entities/IntegrationCredential';
 export * from './domain/entities/IntegrationEventSubscription';
 export * from './domain/entities/IntegrationLog';
+
+// Interface exports (routers, GraphQL)
+export { integrationBusinessRouter } from './interface/routers/integrationRouter';
+export * from './interface/controllers';

@@ -5,3 +5,6 @@ export * from './domain/errors/SegmentErrors';
 export * from './domain/repositories/SegmentRepository';
 export * from './infrastructure';
 export * from './application/useCases';
+
+// Interface exports (routers, GraphQL)
+export { segmentBusinessRouter } from './interface/routers/segmentRouter';

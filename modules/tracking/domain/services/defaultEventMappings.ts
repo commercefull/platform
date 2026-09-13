@@ -1,4 +1,4 @@
-import { EventMapping } from '../entities/TrackingConfig';
+import type { EventMapping } from '../types';
 
 /**
  * Default event mappings that map platform event bus events

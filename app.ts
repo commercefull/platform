@@ -17,7 +17,7 @@ import { startQueryCounterContext } from './libs/db/queryCounter';
 import passport from 'passport';
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from './libs/form';
 import { createSessionStore } from './libs/session/sessionStoreFactory';
-import { initializeAnalyticsHandlers } from './boot/analyticsEventHandler';
+import { initializeAnalyticsHandlers } from './modules/analytics';
 import { configureRoutes } from './boot/routes';
 import { expressHttpLogger, logger } from './libs/logger';
 import { errorMiddleware } from './libs/errorMiddleware';

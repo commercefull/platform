@@ -6,8 +6,9 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingRate } from '../../../../libs/db/types';
 import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
+import { calculateRate } from '../../domain/services/calculateRate';
 
-export { ShippingRate };
+export { ShippingRate, calculateRate };
 
 export type CreateShippingRateInput = Omit<ShippingRate, 'shippingRateId' | 'createdAt' | 'updatedAt'>;
 export type UpdateShippingRateInput = Partial<
@@ -153,57 +154,6 @@ export async function count(zoneId?: string, methodId?: string): Promise<number>
 
   const result = await queryOne<{ count: string }>(sql, params);
   return result ? parseInt(result.count, 10) : 0;
-}
-
-/**
- * Calculate shipping rate for an order
- */
-export function calculateRate(rate: ShippingRate, orderTotal: number, itemCount: number, weight?: number): number {
-  if (rate.rateType === 'free') return 0;
-
-  // Check free threshold
-  if (rate.freeThreshold && orderTotal >= parseFloat(rate.freeThreshold)) {
-    return 0;
-  }
-
-  let calculatedRate = parseFloat(rate.baseRate);
-
-  switch (rate.rateType) {
-    case 'flat':
-      break;
-    case 'itemBased':
-      calculatedRate += parseFloat(rate.perItemRate || '0') * itemCount;
-      break;
-    case 'priceBased':
-      if (rate.rateMatrix) {
-        // Use rate matrix for price-based calculation
-        const matrix = typeof rate.rateMatrix === 'string' ? JSON.parse(rate.rateMatrix) : rate.rateMatrix;
-        for (const tier of matrix.tiers || []) {
-          if (orderTotal >= tier.min && orderTotal < tier.max) {
-            calculatedRate = tier.rate;
-            break;
-          }
-        }
-      }
-      break;
-    case 'weightBased':
-      if (weight && rate.rateMatrix) {
-        const matrix = typeof rate.rateMatrix === 'string' ? JSON.parse(rate.rateMatrix) : rate.rateMatrix;
-        for (const tier of matrix.tiers || []) {
-          if (weight >= tier.min && weight < tier.max) {
-            calculatedRate = tier.rate;
-            break;
-          }
-        }
-      }
-      break;
-  }
-
-  // Apply min/max constraints
-  if (rate.minRate) calculatedRate = Math.max(calculatedRate, parseFloat(rate.minRate));
-  if (rate.maxRate) calculatedRate = Math.min(calculatedRate, parseFloat(rate.maxRate));
-
-  return calculatedRate;
 }
 
 export default {

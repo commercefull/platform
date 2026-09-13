@@ -6,3 +6,10 @@
 export * from './application/useCases';
 export * from './domain/repositories/LocalizationRepository';
 export * from './domain/errors/LocalizationErrors';
+
+// Interface exports (routers, GraphQL)
+export { localizationCustomerRouter } from './interface/routers/localizationCustomerRouter';
+export { localizationMerchantRouter } from './interface/routers/localizationBusinessRouter';
+export { localizationTypeDefs } from './interface/graphql/typeDefs';
+export { localizationResolvers } from './interface/graphql/resolvers';
+export * from './interface/controllers';

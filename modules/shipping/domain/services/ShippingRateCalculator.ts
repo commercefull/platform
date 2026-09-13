@@ -13,9 +13,9 @@
  * See `docs/e2e-rule-engine-implementation-plan.md` Epic D.
  */
 
-import { calculateRate } from '../../infrastructure/repositories/shippingRateRepo';
-import shippingSurchargeRepo from '../../infrastructure/repositories/shippingSurchargeRepo';
+import { calculateRate } from './calculateRate';
 import { ShippingSurcharge as ShippingSurchargeEntity, SurchargeContext } from '../../domain/entities/ShippingSurcharge';
+import type { ShippingSurchargePort } from '../../domain/repositories/ShippingSurchargePort';
 import type { ShippingRate, ShippingSurcharge } from '../../../../libs/db/types';
 import type { AttributeCondition } from '../../../../libs/rules/conditions';
 
@@ -41,6 +41,8 @@ export interface ShippingCalculationResult {
 }
 
 export class ShippingRateCalculator {
+  constructor(private readonly surchargePort?: ShippingSurchargePort) {}
+
   /**
    * Calculate the full shipping amount for a rate, including surcharges.
    */
@@ -60,7 +62,9 @@ export class ShippingRateCalculator {
     }
 
     // 3. Load and apply surcharges
-    const rawSurcharges = await shippingSurchargeRepo.findByRateId(input.rate.shippingRateId, true);
+    const rawSurcharges = this.surchargePort
+      ? await this.surchargePort.findActiveByRateId(input.rate.shippingRateId)
+      : [];
     const surchargeContext: SurchargeContext = {
       baseRate: baseAmount,
       weight: input.totalWeight,

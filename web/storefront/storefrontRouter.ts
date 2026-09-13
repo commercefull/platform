@@ -1,74 +1,40 @@
 import express from 'express';
 import { asyncHandler } from '../../libs/asyncHandler';
+import { resolveTheme } from './themeMiddleware';
 import {
   userContactUsValidationRules,
   validateContactUs,
   userContactFormValidationRules,
   validateContactForm,
-} from '../../modules/content/validator';
-import {
-  getHomePage,
-  getAboutUsPage,
-  getShippingPolicyPage,
-  getCareersPage,
-  getContactUsPage,
-  submitContactForm,
-  getContactFormPage,
-  submitContactFormAdvanced,
-  getFaqPage,
-  getReturnsPage,
-  getSupportPage,
-} from './controllers/pageCustomerController';
+} from '../../modules/content';
 import {
   getActiveContentTypes,
   getPublishedPageBySlug,
   getPublishedPages,
-} from '../../modules/content/interface/controllers/contentCustomerController';
-
-// Import new controllers
-import { getCategoryProducts, getProduct, listProducts, searchProducts } from './controllers/productController';
-import { addToBasket, clearBasket, removeFromBasket, updateBasketItem, viewBasket } from './controllers/basketController';
-import { changePassword, profile, signIn, signInForm, signOut, signUp, signUpForm, updateProfile } from './controllers/authController';
-import { checkout, orderConfirmation, processCheckout } from './controllers/checkoutController';
-import { orderDetails, orderHistory, orderTracking } from './controllers/orderController';
-import {
-  getAllCategories,
-  getCategoriesForNavigation,
-  getCategoryDetails,
-  getCategoryPage,
-  loadCategoriesForNavigation,
-} from './controllers/categoryController';
-import { addToWishlist, removeFromWishlist, viewWishlist } from './controllers/wishlistController';
-import { getProductReviews, markReviewHelpful, submitReview } from './controllers/reviewController';
-import { addAddress, addAddressForm, deleteAddress, editAddressForm, listAddresses, updateAddress } from './controllers/addressController';
-import { listReturns, returnRequestForm, submitReturnRequest, viewReturn } from './controllers/returnController';
-import { loyaltyDashboard, pointsHistory, redeemReward } from './controllers/loyaltyController';
-import { cancelSubscription, listPlans, mySubscriptions, viewSubscription } from './controllers/subscriptionController';
-import { joinPlan, listPlans as listMembershipPlans, myMembership, viewPlan } from './controllers/membershipController';
-import {
-  deleteDevice,
-  getDevices,
-  getPreferences,
-  listNotifications,
-  markAllAsRead,
-  markAsRead,
-  registerDevice,
-  updatePreferences,
-} from './controllers/notificationController';
-import {
-  addTicketMessage,
-  createTicketForm,
-  createTicketSubmit,
-  listTickets,
-  submitTicketFeedback,
-  viewTicket,
-} from './controllers/supportController';
-import { cancelRequest, createRequestForm, createRequestSubmit, listRequests, viewRequest } from './controllers/gdprController';
-import { getStoreLocator } from './controllers/storeLocatorController';
-import { getPromotionsPage } from './controllers/promotionsController';
+} from '../../modules/content';
 import { isCustomerLoggedIn } from '../../libs/auth';
+import { getHomePage, getAboutUsPage, getShippingPolicyPage, getCareersPage, getContactUsPage, submitContactForm, getContactFormPage, submitContactFormAdvanced, getFaqPage, getReturnsPage, getSupportPage } from '../../modules/content';
+import { getCategoryProducts, getStorefrontProduct as getProduct, listStorefrontProducts as listProducts, searchProducts, getAllCategories, getCategoriesForNavigation, getCategoryDetails, getCategoryPage, loadCategoriesForNavigation, getProductReviews, markReviewHelpful, submitReview } from '../../modules/product';
+import { addToBasket, clearBasket, removeFromBasket, updateBasketItem, viewBasket } from '../../modules/basket';
+import { changePassword, profile, signIn, signInForm, signOut, signUp, signUpForm, updateProfile, addToWishlist, removeFromWishlist, viewWishlist, addAddress, addAddressForm, deleteAddress, editAddressForm, listAddresses, updateAddress } from '../../modules/customer';
+import { checkout, orderConfirmation, processCheckout } from '../../modules/checkout';
+import { orderDetails, orderHistory, orderTracking, listReturns, returnRequestForm, submitReturnRequest, viewReturn } from '../../modules/order';
+import { loyaltyDashboard, pointsHistory, redeemReward } from '../../modules/loyalty';
+import { cancelSubscription, listPlans, mySubscriptions, viewSubscription } from '../../modules/subscription';
+import { joinPlan, listPlans as listMembershipPlans, myMembership, viewPlan } from '../../modules/membership';
+import { deleteDevice, getDevices, getPreferences, listNotifications, markAllAsRead, markAsRead, registerDevice, updatePreferences } from '../../modules/notification';
+import { addTicketMessage, createTicketForm, createTicketSubmit, listTickets, submitTicketFeedback, viewTicket } from '../../modules/support';
+import { cancelRequest, createRequestForm, createRequestSubmit, listRequests, viewRequest } from '../../modules/gdpr';
+import { getStoreLocator } from '../../modules/store';
+import { getPromotionsPage } from '../../modules/promotion';
 
 const router = express.Router();
+
+// ============================================================================
+// Theme Resolution Middleware
+// ============================================================================
+
+router.use(resolveTheme);
 
 // ============================================================================
 // Category Navigation Middleware

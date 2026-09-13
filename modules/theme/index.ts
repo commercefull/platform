@@ -11,3 +11,7 @@ export * from './domain/repositories/ThemeRepository';
 export * from './domain/services/ThemeRegistry';
 export * from './domain/errors/ThemeErrors';
 export * from './domain/builtInThemes';
+
+// Interface exports (routers, GraphQL)
+export { themeBusinessRouter } from './interface/routers/themeRouter';
+export * from './interface/controllers';

@@ -8,8 +8,8 @@
 
 import { TrackingValidationError } from '../errors/TrackingErrors';
 import { getDefaultEventMappings } from '../services/defaultEventMappings';
+import type { EventMapping, TrackingProvider } from '../types';
 
-export type TrackingProvider = 'gtm' | 'meta_capi';
 export type TrackingStatus = 'active' | 'disabled';
 
 export interface GTMConfig {
@@ -28,16 +28,7 @@ export interface MetaCAPIConfig {
   useDataLayer?: boolean;
 }
 
-export interface EventMapping {
-  /** Source event type from the event bus (e.g. 'order.paid') */
-  sourceEvent: string;
-  /** Target event name for the provider (e.g. 'Purchase', 'PageView') */
-  targetEvent: string;
-  /** Which providers should receive this event */
-  providers: TrackingProvider[];
-  /** Consent category required to send this event */
-  consentCategory: 'analytics' | 'marketing' | 'thirdParty';
-}
+export { EventMapping, TrackingProvider };
 
 export interface TrackingConfigProps {
   configId: string;

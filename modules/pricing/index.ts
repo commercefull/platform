@@ -5,3 +5,9 @@
 
 export * from './application/useCases';
 export * from './domain/errors/PricingErrors';
+
+// Interface exports (routers, GraphQL)
+export { pricingMerchantRouter } from './interface/routers/pricingBusinessRouter';
+export { pricingTypeDefs } from './interface/graphql/typeDefs';
+export { pricingResolvers } from './interface/graphql/resolvers';
+export * from './interface/controllers';

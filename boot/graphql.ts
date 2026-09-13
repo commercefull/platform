@@ -8,68 +8,39 @@ import { SessionService } from '../libs/session';
 import { logger } from '../libs/logger';
 import { AppError } from '../libs/errors';
 
-import { productTypeDefs } from '../modules/product/interface/graphql/typeDefs';
-import { productResolvers } from '../modules/product/interface/graphql/resolvers';
-import { orderTypeDefs } from '../modules/order/interface/graphql/typeDefs';
-import { orderResolvers } from '../modules/order/interface/graphql/resolvers';
-import { customerTypeDefs } from '../modules/customer/interface/graphql/typeDefs';
-import { customerResolvers } from '../modules/customer/interface/graphql/resolvers';
-import { basketTypeDefs } from '../modules/basket/interface/graphql/typeDefs';
-import { basketResolvers } from '../modules/basket/interface/graphql/resolvers';
-import { checkoutTypeDefs } from '../modules/checkout/interface/graphql/typeDefs';
-import { checkoutResolvers } from '../modules/checkout/interface/graphql/resolvers';
-import { paymentTypeDefs } from '../modules/payment/interface/graphql/typeDefs';
-import { paymentResolvers } from '../modules/payment/interface/graphql/resolvers';
-import { inventoryTypeDefs } from '../modules/inventory/interface/graphql/typeDefs';
-import { inventoryResolvers } from '../modules/inventory/interface/graphql/resolvers';
-import { fulfillmentTypeDefs } from '../modules/fulfillment/interface/graphql/typeDefs';
-import { fulfillmentResolvers } from '../modules/fulfillment/interface/graphql/resolvers';
-import { shippingTypeDefs } from '../modules/shipping/interface/graphql/typeDefs';
-import { shippingResolvers } from '../modules/shipping/interface/graphql/resolvers';
-import { promotionTypeDefs } from '../modules/promotion/interface/graphql/typeDefs';
-import { promotionResolvers } from '../modules/promotion/interface/graphql/resolvers';
-import { loyaltyTypeDefs } from '../modules/loyalty/interface/graphql/typeDefs';
-import { loyaltyResolvers } from '../modules/loyalty/interface/graphql/resolvers';
-import { membershipTypeDefs } from '../modules/membership/interface/graphql/typeDefs';
-import { membershipResolvers } from '../modules/membership/interface/graphql/resolvers';
-import { subscriptionTypeDefs } from '../modules/subscription/interface/graphql/typeDefs';
-import { subscriptionResolvers } from '../modules/subscription/interface/graphql/resolvers';
-import { couponTypeDefs } from '../modules/coupon/interface/graphql/typeDefs';
-import { couponResolvers } from '../modules/coupon/interface/graphql/resolvers';
-import { notificationTypeDefs } from '../modules/notification/interface/graphql/typeDefs';
-import { notificationResolvers } from '../modules/notification/interface/graphql/resolvers';
-import { storeTypeDefs } from '../modules/store/interface/graphql/typeDefs';
-import { storeResolvers } from '../modules/store/interface/graphql/resolvers';
-import { taxTypeDefs } from '../modules/tax/interface/graphql/typeDefs';
-import { taxResolvers } from '../modules/tax/interface/graphql/resolvers';
-import { pricingTypeDefs } from '../modules/pricing/interface/graphql/typeDefs';
-import { pricingResolvers } from '../modules/pricing/interface/graphql/resolvers';
-import { organizationTypeDefs } from '../modules/organization/interface/graphql/typeDefs';
-import { organizationResolvers } from '../modules/organization/interface/graphql/resolvers';
-import { analyticsTypeDefs } from '../modules/analytics/interface/graphql/typeDefs';
-import { analyticsResolvers } from '../modules/analytics/interface/graphql/resolvers';
-import { contentTypeDefs } from '../modules/content/interface/graphql/typeDefs';
-import { contentResolvers } from '../modules/content/interface/graphql/resolvers';
-import { mediaTypeDefs } from '../modules/media/interface/graphql/typeDefs';
-import { mediaResolvers } from '../modules/media/interface/graphql/resolvers';
-import { localizationTypeDefs } from '../modules/localization/interface/graphql/typeDefs';
-import { localizationResolvers } from '../modules/localization/interface/graphql/resolvers';
-import { configurationTypeDefs } from '../modules/configuration/interface/graphql/typeDefs';
-import { configurationResolvers } from '../modules/configuration/interface/graphql/resolvers';
-import { supplierTypeDefs } from '../modules/supplier/interface/graphql/typeDefs';
-import { supplierResolvers } from '../modules/supplier/interface/graphql/resolvers';
-import { gdprTypeDefs } from '../modules/gdpr/interface/graphql/typeDefs';
-import { gdprResolvers } from '../modules/gdpr/interface/graphql/resolvers';
-import { identityTypeDefs } from '../modules/identity/interface/graphql/typeDefs';
-import { identityResolvers } from '../modules/identity/interface/graphql/resolvers';
-import { reportingTypeDefs } from '../modules/reporting/interface/graphql/typeDefs';
-import { reportingResolvers } from '../modules/reporting/interface/graphql/resolvers';
-import { supportTypeDefs } from '../modules/support/interface/graphql/typeDefs';
-import { supportResolvers } from '../modules/support/interface/graphql/resolvers';
-import { warehouseTypeDefs } from '../modules/warehouse/interface/graphql/typeDefs';
-import { warehouseResolvers } from '../modules/warehouse/interface/graphql/resolvers';
-import { webhookTypeDefs } from '../modules/webhook/interface/graphql/typeDefs';
-import { webhookResolvers } from '../modules/webhook/interface/graphql/resolvers';
+// Module barrels — GraphQL typeDefs and resolvers imported from barrels only
+import * as Product from '../modules/product';
+import * as Order from '../modules/order';
+import * as Customer from '../modules/customer';
+import * as Basket from '../modules/basket';
+import * as Checkout from '../modules/checkout';
+import * as Payment from '../modules/payment';
+import * as Inventory from '../modules/inventory';
+import * as Fulfillment from '../modules/fulfillment';
+import * as Shipping from '../modules/shipping';
+import * as Promotion from '../modules/promotion';
+import * as Loyalty from '../modules/loyalty';
+import * as Membership from '../modules/membership';
+import * as Subscription from '../modules/subscription';
+import * as Coupon from '../modules/coupon';
+import * as Notification from '../modules/notification';
+import * as Store from '../modules/store';
+import * as Tax from '../modules/tax';
+import * as Pricing from '../modules/pricing';
+import * as Organization from '../modules/organization';
+import * as Analytics from '../modules/analytics';
+import * as Content from '../modules/content';
+import * as Media from '../modules/media';
+import * as Localization from '../modules/localization';
+import * as Configuration from '../modules/configuration';
+import * as Supplier from '../modules/supplier';
+import * as Gdpr from '../modules/gdpr';
+import * as Identity from '../modules/identity';
+import * as Reporting from '../modules/reporting';
+import * as Support from '../modules/support';
+import * as Warehouse from '../modules/warehouse';
+import * as Webhook from '../modules/webhook';
+
 import { moduleRegistry } from './moduleManifests';
 import { getGraphQLValidationRules } from '../libs/graphqlSecurity';
 import { persistedQueryStore, initPersistedQueries } from '../libs/persistedQueries';
@@ -136,71 +107,71 @@ async function buildContext({ req }: ExpressContextFunctionArgument): Promise<Gr
 export function configureGraphQL(app: Express): void {
   // Build arrays of typeDefs and resolvers, filtered by module enabled state
   const allTypeDefs: { module: string; defs: string }[] = [
-    { module: 'product', defs: productTypeDefs },
-    { module: 'order', defs: orderTypeDefs },
-    { module: 'customer', defs: customerTypeDefs },
-    { module: 'basket', defs: basketTypeDefs },
-    { module: 'checkout', defs: checkoutTypeDefs },
-    { module: 'payment', defs: paymentTypeDefs },
-    { module: 'inventory', defs: inventoryTypeDefs },
-    { module: 'fulfillment', defs: fulfillmentTypeDefs },
-    { module: 'shipping', defs: shippingTypeDefs },
-    { module: 'promotion', defs: promotionTypeDefs },
-    { module: 'loyalty', defs: loyaltyTypeDefs },
-    { module: 'membership', defs: membershipTypeDefs },
-    { module: 'subscription', defs: subscriptionTypeDefs },
-    { module: 'coupon', defs: couponTypeDefs },
-    { module: 'notification', defs: notificationTypeDefs },
-    { module: 'store', defs: storeTypeDefs },
-    { module: 'tax', defs: taxTypeDefs },
-    { module: 'pricing', defs: pricingTypeDefs },
-    { module: 'analytics', defs: analyticsTypeDefs },
-    { module: 'content', defs: contentTypeDefs },
-    { module: 'media', defs: mediaTypeDefs },
-    { module: 'localization', defs: localizationTypeDefs },
-    { module: 'configuration', defs: configurationTypeDefs },
-    { module: 'organization', defs: organizationTypeDefs },
-    { module: 'supplier', defs: supplierTypeDefs },
-    { module: 'gdpr', defs: gdprTypeDefs },
-    { module: 'identity', defs: identityTypeDefs },
-    { module: 'reporting', defs: reportingTypeDefs },
-    { module: 'support', defs: supportTypeDefs },
-    { module: 'warehouse', defs: warehouseTypeDefs },
-    { module: 'webhook', defs: webhookTypeDefs },
+    { module: 'product', defs: Product.productTypeDefs },
+    { module: 'order', defs: Order.orderTypeDefs },
+    { module: 'customer', defs: Customer.customerTypeDefs },
+    { module: 'basket', defs: Basket.basketTypeDefs },
+    { module: 'checkout', defs: Checkout.checkoutTypeDefs },
+    { module: 'payment', defs: Payment.paymentTypeDefs },
+    { module: 'inventory', defs: Inventory.inventoryTypeDefs },
+    { module: 'fulfillment', defs: Fulfillment.fulfillmentTypeDefs },
+    { module: 'shipping', defs: Shipping.shippingTypeDefs },
+    { module: 'promotion', defs: Promotion.promotionTypeDefs },
+    { module: 'loyalty', defs: Loyalty.loyaltyTypeDefs },
+    { module: 'membership', defs: Membership.membershipTypeDefs },
+    { module: 'subscription', defs: Subscription.subscriptionTypeDefs },
+    { module: 'coupon', defs: Coupon.couponTypeDefs },
+    { module: 'notification', defs: Notification.notificationTypeDefs },
+    { module: 'store', defs: Store.storeTypeDefs },
+    { module: 'tax', defs: Tax.taxTypeDefs },
+    { module: 'pricing', defs: Pricing.pricingTypeDefs },
+    { module: 'analytics', defs: Analytics.analyticsTypeDefs },
+    { module: 'content', defs: Content.contentTypeDefs },
+    { module: 'media', defs: Media.mediaTypeDefs },
+    { module: 'localization', defs: Localization.localizationTypeDefs },
+    { module: 'configuration', defs: Configuration.configurationTypeDefs },
+    { module: 'organization', defs: Organization.organizationTypeDefs },
+    { module: 'supplier', defs: Supplier.supplierTypeDefs },
+    { module: 'gdpr', defs: Gdpr.gdprTypeDefs },
+    { module: 'identity', defs: Identity.identityTypeDefs },
+    { module: 'reporting', defs: Reporting.reportingTypeDefs },
+    { module: 'support', defs: Support.supportTypeDefs },
+    { module: 'warehouse', defs: Warehouse.warehouseTypeDefs },
+    { module: 'webhook', defs: Webhook.webhookTypeDefs },
   ];
 
   const allResolvers: { module: string; res: unknown }[] = [
-    { module: 'product', res: productResolvers },
-    { module: 'order', res: orderResolvers },
-    { module: 'customer', res: customerResolvers },
-    { module: 'basket', res: basketResolvers },
-    { module: 'checkout', res: checkoutResolvers },
-    { module: 'payment', res: paymentResolvers },
-    { module: 'inventory', res: inventoryResolvers },
-    { module: 'fulfillment', res: fulfillmentResolvers },
-    { module: 'shipping', res: shippingResolvers },
-    { module: 'promotion', res: promotionResolvers },
-    { module: 'loyalty', res: loyaltyResolvers },
-    { module: 'membership', res: membershipResolvers },
-    { module: 'subscription', res: subscriptionResolvers },
-    { module: 'coupon', res: couponResolvers },
-    { module: 'notification', res: notificationResolvers },
-    { module: 'store', res: storeResolvers },
-    { module: 'tax', res: taxResolvers },
-    { module: 'pricing', res: pricingResolvers },
-    { module: 'analytics', res: analyticsResolvers },
-    { module: 'content', res: contentResolvers },
-    { module: 'media', res: mediaResolvers },
-    { module: 'localization', res: localizationResolvers },
-    { module: 'configuration', res: configurationResolvers },
-    { module: 'organization', res: organizationResolvers },
-    { module: 'supplier', res: supplierResolvers },
-    { module: 'gdpr', res: gdprResolvers },
-    { module: 'identity', res: identityResolvers },
-    { module: 'reporting', res: reportingResolvers },
-    { module: 'support', res: supportResolvers },
-    { module: 'warehouse', res: warehouseResolvers },
-    { module: 'webhook', res: webhookResolvers },
+    { module: 'product', res: Product.productResolvers },
+    { module: 'order', res: Order.orderResolvers },
+    { module: 'customer', res: Customer.customerResolvers },
+    { module: 'basket', res: Basket.basketResolvers },
+    { module: 'checkout', res: Checkout.checkoutResolvers },
+    { module: 'payment', res: Payment.paymentResolvers },
+    { module: 'inventory', res: Inventory.inventoryResolvers },
+    { module: 'fulfillment', res: Fulfillment.fulfillmentResolvers },
+    { module: 'shipping', res: Shipping.shippingResolvers },
+    { module: 'promotion', res: Promotion.promotionResolvers },
+    { module: 'loyalty', res: Loyalty.loyaltyResolvers },
+    { module: 'membership', res: Membership.membershipResolvers },
+    { module: 'subscription', res: Subscription.subscriptionResolvers },
+    { module: 'coupon', res: Coupon.couponResolvers },
+    { module: 'notification', res: Notification.notificationResolvers },
+    { module: 'store', res: Store.storeResolvers },
+    { module: 'tax', res: Tax.taxResolvers },
+    { module: 'pricing', res: Pricing.pricingResolvers },
+    { module: 'analytics', res: Analytics.analyticsResolvers },
+    { module: 'content', res: Content.contentResolvers },
+    { module: 'media', res: Media.mediaResolvers },
+    { module: 'localization', res: Localization.localizationResolvers },
+    { module: 'configuration', res: Configuration.configurationResolvers },
+    { module: 'organization', res: Organization.organizationResolvers },
+    { module: 'supplier', res: Supplier.supplierResolvers },
+    { module: 'gdpr', res: Gdpr.gdprResolvers },
+    { module: 'identity', res: Identity.identityResolvers },
+    { module: 'reporting', res: Reporting.reportingResolvers },
+    { module: 'support', res: Support.supportResolvers },
+    { module: 'warehouse', res: Warehouse.warehouseResolvers },
+    { module: 'webhook', res: Webhook.webhookResolvers },
   ];
 
   const enabledTypeDefs = allTypeDefs.filter(t => moduleRegistry.shouldIncludeGraphQL(t.module)).map(t => t.defs);

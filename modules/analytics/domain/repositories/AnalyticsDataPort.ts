@@ -5,7 +5,7 @@
  * Infrastructure implementations must structurally satisfy this interface.
  */
 
-import type { ProductPerformance, CustomerCohort } from '../../infrastructure/repositories/analyticsRepo';
+import type { ProductPerformance, CustomerCohort } from '../types';
 
 export interface SalesSummary {
   totalRevenue: number;

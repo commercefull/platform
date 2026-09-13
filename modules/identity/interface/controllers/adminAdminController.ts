@@ -1,0 +1,172 @@
+import { logger } from '../../../../libs/logger';
+import { Response } from 'express';
+import { TypedRequest, RequestBody } from 'libs/types/express';
+import bcrypt from 'bcryptjs';
+import { SessionService } from '../../../../libs/session';
+import { AdminAuthUseCase, GetDashboardDataUseCase } from '../../application/useCases/AdminAuth';
+import { adminRespond } from '../../../../libs/adminRespond';
+
+// Session cookie name
+const SESSION_COOKIE_NAME = 'cf_session';
+
+const adminAuthUseCase = new AdminAuthUseCase();
+const getDashboardDataUseCase = new GetDashboardDataUseCase();
+
+// GET: admin dashboard
+export const getAdminDashboard = async (req: TypedRequest, res: Response) => {
+  // Fetch real dashboard data using query repository
+  const [stats, recentOrders, topProducts, revenueByDay] = await Promise.all([
+    getDashboardDataUseCase.getAdminDashboardStats(),
+    getDashboardDataUseCase.getRecentOrders(5),
+    getDashboardDataUseCase.getTopProducts(5),
+    getDashboardDataUseCase.getRevenueByDay(7),
+  ]);
+
+  const dashboardData = {
+    pageName: 'Dashboard',
+    stats,
+    recentOrders,
+    topProducts,
+    revenueByDay,
+  };
+
+  adminRespond(req, res, 'dashboard', dashboardData);
+};
+
+// GET: admin login page
+export const getAdminLogin = async (req: TypedRequest, res: Response) => {
+  // Check if already logged in via session
+  const sessionId = req.cookies?.[SESSION_COOKIE_NAME];
+  if (sessionId) {
+    const session = await SessionService.getSession(sessionId);
+    if (session && session.userType === 'admin') {
+      return res.redirect('/admin');
+    }
+  }
+
+  adminRespond(req, res, 'login', {
+    pageName: 'Admin Login',
+  });
+};
+
+// POST: admin login (handled by auth routes)
+
+// GET: admin logout (handled by auth routes)
+
+// POST: admin login form submission
+export const postAdminLogin = async (req: TypedRequest, res: Response) => {
+  try {
+    const body = req.body as RequestBody;
+    const { email, password, rememberMe } = body;
+
+    // Basic validation
+    if (!email || !password) {
+      res.status(500);
+      return adminRespond(req, res, 'login', {
+        pageName: 'Admin Login',
+        error: 'Email and password are required',
+      });
+    }
+
+    // Authenticate against admin database
+    const admin = await adminAuthUseCase.findByEmail(email);
+
+    if (!admin) {
+      res.status(500);
+      return adminRespond(req, res, 'login', {
+        pageName: 'Admin Login',
+        error: 'Invalid email or password',
+      });
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
+    if (!isValidPassword) {
+      res.status(500);
+      return adminRespond(req, res, 'login', {
+        pageName: 'Admin Login',
+        error: 'Invalid email or password',
+      });
+    }
+
+    // Check admin status
+    if (admin.status !== 'active') {
+      res.status(500);
+      return adminRespond(req, res, 'login', {
+        pageName: 'Admin Login',
+        error: 'Account is not active. Please contact super admin.',
+      });
+    }
+
+    const storeAssignments = await adminAuthUseCase.findStoreAssignmentsByUserId(admin.adminId);
+    const primaryStore = storeAssignments.find(assignment => assignment.isPrimary) || storeAssignments[0];
+
+    // Create session
+    const sessionId = await SessionService.createSession({
+      userId: admin.adminId,
+      userType: 'admin',
+      email: admin.email,
+      name: admin.name,
+      role: admin.role,
+      storeId: primaryStore?.storeId,
+      storeRole: primaryStore?.role,
+      storeIds: storeAssignments.map(assignment => assignment.storeId),
+      permissions: admin.permissions,
+      userAgent: req.headers['user-agent'],
+      ipAddress: req.ip,
+      expiresInHours: rememberMe ? 168 : 8, // 7 days or 8 hours
+    });
+
+    // Set session cookie
+    res.cookie(SESSION_COOKIE_NAME, sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000,
+      sameSite: 'lax',
+    });
+
+    // Update last login
+    await adminAuthUseCase.updateLastLogin(admin.adminId);
+
+    // Redirect to dashboard
+    return res.redirect('/admin');
+  } catch (error) {
+    logger.warn('Error:', error);
+
+    adminRespond(req, res, 'login', {
+      pageName: 'Admin Login',
+      error: 'An error occurred during login',
+    });
+  }
+};
+
+// POST: admin logout
+export const postAdminLogout = async (req: TypedRequest, res: Response) => {
+  try {
+    // Get session ID from cookie
+    const sessionId = req.cookies?.[SESSION_COOKIE_NAME];
+
+    // Invalidate session in database
+    if (sessionId) {
+      await SessionService.invalidateSession(sessionId);
+    }
+
+    // Clear session cookie
+    res.clearCookie(SESSION_COOKIE_NAME);
+
+    // Redirect to login page
+    res.redirect('/admin/login');
+  } catch (error) {
+    logger.warn('Error:', error);
+
+    res.clearCookie(SESSION_COOKIE_NAME);
+    res.redirect('/admin/login');
+  }
+};
+
+// GET: admin profile
+export const getAdminProfile = async (req: TypedRequest, res: Response) => {
+  adminRespond(req, res, 'profile', {
+    pageName: 'Admin Profile',
+  });
+};

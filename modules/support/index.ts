@@ -6,3 +6,10 @@
 export * from './application/useCases';
 export * from './domain/repositories/SupportRepository';
 export * from './domain/errors/SupportErrors';
+
+// Interface exports (routers, GraphQL)
+export { supportCustomerRouter } from './interface/routers/supportCustomerRouter';
+export { supportBusinessRouter } from './interface/routers/supportBusinessRouter';
+export { supportTypeDefs } from './interface/graphql/typeDefs';
+export { supportResolvers } from './interface/graphql/resolvers';
+export * from './interface/controllers';

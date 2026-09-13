@@ -5,3 +5,6 @@ export * from './domain/errors/MigrationErrors';
 export * from './domain/repositories/MigrationRepository';
 export * from './infrastructure';
 export * from './application/useCases';
+
+// Interface exports (routers, GraphQL)
+export { migrationBusinessRouter } from './interface/routers/migrationRouter';

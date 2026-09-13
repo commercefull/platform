@@ -1,5 +1,5 @@
 import CheckoutRepo from '../../infrastructure/repositories/CheckoutRepository';
-import { getCheckoutPorts } from '../../../../boot/container';
+import { getCheckoutPorts } from '../../infrastructure/compositionRoot';
 import { requireAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { InitiateCheckoutUseCase, InitiateCheckoutCommand, mapCheckoutToResponse } from '../../application/useCases/InitiateCheckout';
 import { SetShippingAddressUseCase, SetShippingAddressCommand } from '../../application/useCases/SetShippingAddress';

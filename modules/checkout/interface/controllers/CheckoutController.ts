@@ -6,7 +6,7 @@
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import CheckoutRepo from '../../infrastructure/repositories/CheckoutRepository';
-import { getCheckoutPorts } from '../../../../boot/container';
+import { getCheckoutPorts } from '../../infrastructure/compositionRoot';
 import {
   InitiateCheckoutCommand,
   InitiateCheckoutUseCase,

@@ -6,3 +6,10 @@
 export * from './application/useCases';
 export * from './domain/repositories/PromotionRepository';
 export * from './domain/errors/PromotionErrors';
+
+// Interface exports (routers, GraphQL)
+export { promotionCustomerRouter } from './interface/routers/customerRouter';
+export { promotionBusinessRouter } from './interface/routers/businessRouter';
+export { promotionTypeDefs } from './interface/graphql/typeDefs';
+export { promotionResolvers } from './interface/graphql/resolvers';
+export * from './interface/controllers';

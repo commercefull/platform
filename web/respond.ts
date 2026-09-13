@@ -56,7 +56,7 @@ export async function storefrontRespond(req: TypedRequest, res: Response, view: 
   const successMsg = req.flash ? req.flash('success')[0] : null;
   const errorMsg = req.flash ? req.flash('error')[0] : null;
 
-  res.render(`storefront/views/${view}`, {
+  res.render(`storefront/themes/default/${view}`, {
     // Common variables needed by header/navbar partials
     user: req.user,
     session: req.session,

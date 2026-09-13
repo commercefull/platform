@@ -2,24 +2,18 @@
  * Unit Tests for ShippingRateCalculator Service (Epic D)
  */
 
-jest.mock('../../infrastructure/repositories/shippingRateRepo', () => ({
+jest.mock('./calculateRate', () => ({
   calculateRate: jest.fn(),
 }));
 
-jest.mock('../../infrastructure/repositories/shippingSurchargeRepo', () => ({
-  __esModule: true,
-  default: {
-    findByRateId: jest.fn(),
-  },
-}));
-
 import { ShippingRateCalculator } from './ShippingRateCalculator';
-import { calculateRate } from '../../infrastructure/repositories/shippingRateRepo';
-import shippingSurchargeRepo from '../../infrastructure/repositories/shippingSurchargeRepo';
+import { calculateRate } from './calculateRate';
+import type { ShippingSurchargePort } from '../repositories/ShippingSurchargePort';
 import type { ShippingRate, ShippingSurcharge } from '../../../../libs/db/types';
 
 describe('ShippingRateCalculator', () => {
   let calculator: ShippingRateCalculator;
+  let mockSurchargePort: jest.Mocked<ShippingSurchargePort>;
 
   const mockRate = {
     shippingRateId: 'rate1',
@@ -39,9 +33,11 @@ describe('ShippingRateCalculator', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    calculator = new ShippingRateCalculator();
+    mockSurchargePort = {
+      findActiveByRateId: jest.fn().mockResolvedValue([]),
+    };
+    calculator = new ShippingRateCalculator(mockSurchargePort);
     jest.mocked(calculateRate).mockReturnValue(10);
-    jest.mocked(shippingSurchargeRepo.findByRateId).mockResolvedValue([]);
   });
 
   it('returns base amount with no surcharges', async () => {
@@ -87,7 +83,7 @@ describe('ShippingRateCalculator', () => {
       updatedAt: new Date(),
     } as ShippingSurcharge;
 
-    jest.mocked(shippingSurchargeRepo.findByRateId).mockResolvedValue([mockSurcharge]);
+    jest.mocked(mockSurchargePort.findActiveByRateId).mockResolvedValue([mockSurcharge]);
 
     const result = await calculator.calculate({
       rate: mockRate,
@@ -115,7 +111,7 @@ describe('ShippingRateCalculator', () => {
       updatedAt: new Date(),
     } as ShippingSurcharge;
 
-    jest.mocked(shippingSurchargeRepo.findByRateId).mockResolvedValue([mockSurcharge]);
+    jest.mocked(mockSurchargePort.findActiveByRateId).mockResolvedValue([mockSurcharge]);
 
     const result = await calculator.calculate({
       rate: mockRate,
@@ -154,7 +150,7 @@ describe('ShippingRateCalculator', () => {
       updatedAt: new Date(),
     } as unknown as ShippingSurcharge;
 
-    jest.mocked(shippingSurchargeRepo.findByRateId).mockResolvedValue([fuelSurcharge, residentialSurcharge]);
+    jest.mocked(mockSurchargePort.findActiveByRateId).mockResolvedValue([fuelSurcharge, residentialSurcharge]);
 
     const result = await calculator.calculate({
       rate: mockRate,
@@ -183,7 +179,7 @@ describe('ShippingRateCalculator', () => {
       updatedAt: new Date(),
     } as unknown as ShippingSurcharge;
 
-    jest.mocked(shippingSurchargeRepo.findByRateId).mockResolvedValue([remoteSurcharge]);
+    jest.mocked(mockSurchargePort.findActiveByRateId).mockResolvedValue([remoteSurcharge]);
 
     const result = await calculator.calculate({
       rate: mockRate,
@@ -211,7 +207,7 @@ describe('ShippingRateCalculator', () => {
       updatedAt: new Date(),
     } as ShippingSurcharge;
 
-    jest.mocked(shippingSurchargeRepo.findByRateId).mockResolvedValue([inactiveSurcharge]);
+    jest.mocked(mockSurchargePort.findActiveByRateId).mockResolvedValue([inactiveSurcharge]);
 
     const result = await calculator.calculate({
       rate: mockRate,

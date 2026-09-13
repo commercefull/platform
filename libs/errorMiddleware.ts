@@ -77,7 +77,7 @@ export function errorMiddleware(err: unknown, req: Request, res: Response, _next
   res.locals.message = isProduction && !appError.isExpected ? 'An error occurred' : appError.message;
   res.locals.error = isProduction ? {} : { message: appError.message, stack: appError.stack };
 
-  res.render('storefront/views/error', {
+  res.render('storefront/themes/default/error', {
     pageName: 'Error',
     message: res.locals.message,
     error: res.locals.error,
