@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "app.mjs",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "NODE_ENV=development nodemon app.ts",
     "prd": "yarn prd:build && yarn prd:run",

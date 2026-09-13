@@ -3,7 +3,7 @@
 > **Own your store. Not just rent it.** — Your data. Your checkout. Your rules. Your exit.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-green.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue.svg)](https://www.postgresql.org)
 [![Tests](https://img.shields.io/badge/Tests-5%2C000%2B%20passing-brightgreen.svg)](#quality-metrics)
@@ -134,7 +134,7 @@ Enforced via `yarn lint` (TypeScript + ESLint + dependency-cruiser) and `yarn te
 
 ### Prerequisites
 
-- **Node.js** 20+ and **Yarn** 1.x
+- **Node.js** 22+ and **Yarn** 1.x
 - **Docker** (for PostgreSQL) or a local PostgreSQL 15+ instance
 
 ### Development Setup
@@ -236,7 +236,7 @@ platform/
 
 | Layer             | Technology                                                |
 | ----------------- | --------------------------------------------------------- |
-| **Runtime**       | Node.js 20+, TypeScript 5.x                               |
+| **Runtime**       | Node.js 22+, TypeScript 5.x                               |
 | **Framework**     | Express 5                                                 |
 | **APIs**          | REST + GraphQL (depth-limited)                            |
 | **Database**      | PostgreSQL 18, Knex (migrations), raw SQL via `pg` driver |
