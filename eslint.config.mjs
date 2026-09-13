@@ -85,6 +85,7 @@ export default [
       'infra/',
       '**/*.d.ts',
       '**/*.js',
+      'app.mjs',
       '!eslint.config.mjs',
       '.env*',
       '!.env.example',
