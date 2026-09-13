@@ -1,6 +1,6 @@
 import { query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
-import type { Product } from '../../infrastructure/repositories/productRepo';
+import type { Product } from '../../domain/entities/Product';
 
 /**
  * Search filters for product queries

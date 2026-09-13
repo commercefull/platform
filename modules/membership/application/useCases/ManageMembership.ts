@@ -1,6 +1,5 @@
-import membershipPlanRepository from '../../infrastructure/repositories/MembershipPlanRepository';
-import membershipSubscriptionDataRepository from '../../infrastructure/repositories/MembershipSubscriptionDataRepository';
-import type { MembershipSubscription } from '../../infrastructure/repositories/MembershipSubscriptionDataRepository';
+import { membershipPlanRepository, membershipSubscriptionDataRepository } from '../wired';
+import type { MembershipSubscription } from '../wired';
 
 const membershipPlanRepo = membershipPlanRepository.plans;
 const membershipSubscriptionRepo = membershipSubscriptionDataRepository.subscriptions;

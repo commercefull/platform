@@ -1,4 +1,4 @@
-import membershipPlanRepository from '../../infrastructure/repositories/MembershipPlanRepository';
+import { membershipPlanRepository } from '../wired';
 
 const adminProgramsRepo = membershipPlanRepository.admin;
 const storefrontMembershipRepo = membershipPlanRepository.storefront;

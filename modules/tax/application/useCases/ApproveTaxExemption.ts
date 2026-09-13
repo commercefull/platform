@@ -6,7 +6,7 @@
  * `CalculateOrderTax` (per Epic B).
  */
 
-import taxCommandRepo from '../../infrastructure/repositories/taxCommandRepo';
+import { taxCommandRepo } from '../wired';
 import type { CustomerTaxExemption } from '../../taxTypes';
 
 export class ApproveTaxExemptionUseCase {

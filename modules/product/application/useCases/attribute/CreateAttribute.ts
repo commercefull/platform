@@ -1,8 +1,9 @@
-import dynamicAttributeRepository, {
+import { dynamicAttributeRepo as dynamicAttributeRepository } from '../wired';
+import type {
   ProductAttributeCreateInput,
   ProductAttribute,
   AttributeType,
-} from '../../../infrastructure/repositories/DynamicAttributeRepository';
+} from '../../../domain/repositories/ProductCatalogPorts';
 
 export interface CreateAttributeCommand {
   name: string;

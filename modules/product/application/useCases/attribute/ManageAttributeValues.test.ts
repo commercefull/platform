@@ -1,6 +1,5 @@
-jest.mock('../../../infrastructure/repositories/DynamicAttributeRepository', () => ({
-  __esModule: true,
-  default: {
+jest.mock('../../../infrastructure/repositories/DynamicAttributeRepository', () => {
+  const mock = {
     findAttributeById: jest.fn().mockResolvedValue({
       productAttributeId: 'a1',
       name: 'Color',
@@ -17,8 +16,13 @@ jest.mock('../../../infrastructure/repositories/DynamicAttributeRepository', () 
       position: 0,
     }),
     deleteAttributeValue: jest.fn().mockResolvedValue(true),
-  },
-}));
+  };
+  return {
+    __esModule: true,
+    default: mock,
+    DynamicAttributeRepository: function () { return mock; },
+  };
+});
 
 import { AddAttributeValueUseCase } from './ManageAttributeValues';
 import dynamicAttributeRepository from '../../../infrastructure/repositories/DynamicAttributeRepository';

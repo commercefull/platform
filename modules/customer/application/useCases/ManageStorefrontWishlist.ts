@@ -1,6 +1,7 @@
-import customerDataRepository from '../../infrastructure/repositories/CustomerDataRepository';
+import type { StorefrontWishlistRepository } from '../../domain/repositories/StorefrontWishlistRepository';
+import { customerDataRepository } from '../wired';
 
-const storefrontWishlistRepo = customerDataRepository.wishlist;
+const storefrontWishlistRepo: StorefrontWishlistRepository = customerDataRepository.wishlist;
 
 export class ManageStorefrontWishlistUseCase {
   async findByCustomer(customerId: string) {

@@ -1,7 +1,7 @@
-import customerDataRepository from '../../infrastructure/repositories/CustomerDataRepository';
-import type { CustomerAddressCreateParams, CustomerAddressUpdateParams } from '../../infrastructure/repositories/CustomerDataRepository';
+import type { CustomerAddressRepository, CustomerAddressCreateParams, CustomerAddressUpdateParams } from '../../domain/repositories/CustomerAddressRepository';
+import { customerDataRepository } from '../wired';
 
-const customerAddressRepo = customerDataRepository.addresses;
+const customerAddressRepo: CustomerAddressRepository = customerDataRepository.addresses;
 
 export class ManageStorefrontAddressesUseCase {
   async findActiveByCustomerId(customerId: string) {

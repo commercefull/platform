@@ -9,7 +9,7 @@
  * longer silently ignored.
  */
 
-import taxQueryRepository from '../../infrastructure/repositories/TaxQueryRepository';
+import { taxQueryRepository } from '../wired';
 import { TaxExemption } from '../../domain/entities/TaxExemption';
 import type { CustomerTaxExemption, ExemptionVerdict } from '../../taxTypes';
 

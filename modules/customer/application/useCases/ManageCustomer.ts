@@ -1,8 +1,11 @@
-import customerDataRepository from '../../infrastructure/repositories/CustomerDataRepository';
+import type { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import type { CustomerAddressRepository } from '../../domain/repositories/CustomerAddressRepository';
+import type { StorefrontWishlistRepository } from '../../domain/repositories/StorefrontWishlistRepository';
+import { customerDataRepository } from '../wired';
 
-const customerRepo = customerDataRepository.customers;
-const customerAddressRepo = customerDataRepository.addresses;
-const storefrontWishlistRepo = customerDataRepository.wishlist;
+const customerRepo: CustomerRepository = customerDataRepository.customers;
+const customerAddressRepo: CustomerAddressRepository = customerDataRepository.addresses;
+const storefrontWishlistRepo: StorefrontWishlistRepository = customerDataRepository.wishlist;
 
 export class ManageCustomersUseCase {
   async findById(id: string) {

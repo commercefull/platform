@@ -16,6 +16,7 @@ import productCollectionMapRepo from '../../infrastructure/repositories/productC
 import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 import { ProductAttributeSetRepository } from '../../infrastructure/repositories/ProductAttributeSetRepository';
 import brandRepo from '../../infrastructure/repositories/brandRepo';
+import type { DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
 
 import { ListProductsUseCase } from './ListProducts';
 import { CreateProductUseCase } from './CreateProduct';
@@ -42,7 +43,7 @@ import { GetProductCatalogEnrichmentUseCase } from './GetProductCatalogEnrichmen
 import { GetProductAttributesUseCase } from './GetProductAttributes';
 import { SearchProductsUseCase } from './SearchProducts';
 
-const dynamicAttributeRepo = new DynamicAttributeRepository();
+export const dynamicAttributeRepo: DynamicAttributePort = new DynamicAttributeRepository();
 const attributeSetRepo = new ProductAttributeSetRepository();
 
 export const listProductsUseCase = new ListProductsUseCase(productRepo);

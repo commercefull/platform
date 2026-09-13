@@ -1,7 +1,8 @@
-import dynamicAttributeRepository, {
+import { dynamicAttributeRepo as dynamicAttributeRepository } from '../wired';
+import type {
   ProductAttributeData,
   ProductAttribute,
-} from '../../../infrastructure/repositories/DynamicAttributeRepository';
+} from '../../../domain/repositories/ProductCatalogPorts';
 
 // ==================== Set Product Attribute ====================
 

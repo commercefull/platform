@@ -1,6 +1,4 @@
-import pricingRuleRepository from '../infrastructure/repositories/PricingRuleRepository';
-import pricingDataRepository from '../infrastructure/repositories/PricingDataRepository';
-import currencyRepository from '../infrastructure/repositories/CurrencyRepository';
+import { pricingRuleRepository, pricingDataRepository, currencyRepository } from './wired';
 import { PriceContext, PricingAdjustmentType, PricingResult, PricingRule, PricingRuleScope } from '../domain/pricingRule';
 
 import { Currency, formatCurrency } from '../domain/currency';

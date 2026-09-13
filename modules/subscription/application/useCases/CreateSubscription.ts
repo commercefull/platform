@@ -3,8 +3,8 @@
  * Creates a new customer subscription
  */
 
-import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
-import { CustomerSubscription, SubscriptionPlan, SubscriptionProduct } from '../../infrastructure/repositories/subscriptionRepo';
+import { subscriptionRepo } from '../wired';
+import { CustomerSubscription, SubscriptionPlan, SubscriptionProduct } from '../../domain/repositories/SubscriptionRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================

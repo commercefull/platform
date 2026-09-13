@@ -1,7 +1,8 @@
-import dynamicAttributeRepository, {
+import { dynamicAttributeRepo as dynamicAttributeRepository } from '../wired';
+import type {
   ProductAttributeValue,
   AttributeValueCreateInput,
-} from '../../../infrastructure/repositories/DynamicAttributeRepository';
+} from '../../../domain/repositories/ProductCatalogPorts';
 
 // ==================== Add Attribute Value ====================
 

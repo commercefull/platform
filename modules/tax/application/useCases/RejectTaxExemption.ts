@@ -5,7 +5,7 @@
  * Rejected exemptions are not evaluated by `CalculateOrderTax`.
  */
 
-import taxCommandRepo from '../../infrastructure/repositories/taxCommandRepo';
+import { taxCommandRepo } from '../wired';
 import type { CustomerTaxExemption } from '../../taxTypes';
 
 export class RejectTaxExemptionUseCase {

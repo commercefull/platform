@@ -1,5 +1,4 @@
-import supportDataRepository from '../../infrastructure/repositories/SupportDataRepository';
-import supportInfoRepository from '../../infrastructure/repositories/SupportInfoRepository';
+import { supportDataRepository, supportInfoRepository } from '../wired';
 
 const adminSupportRepo = supportDataRepository.admin;
 const faqRepo = supportInfoRepository.faq;

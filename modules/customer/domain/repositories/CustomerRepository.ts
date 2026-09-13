@@ -46,7 +46,10 @@ export interface CustomerRepository {
   // Authentication helpers
   getPasswordHash(customerId: string): Promise<string | null>;
   updatePassword(customerId: string, passwordHash: string): Promise<void>;
+  updatePasswordHash(customerId: string, passwordHash: string): Promise<void>;
+  updateLastLogin(customerId: string): Promise<void>;
   recordLogin(customerId: string): Promise<void>;
+  recordFailedLogin(customerId: string): Promise<void>;
 
   // Verification
   verifyEmail(customerId: string): Promise<void>;

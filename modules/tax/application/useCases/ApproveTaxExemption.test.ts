@@ -2,12 +2,16 @@
  * Unit Tests for ApproveTaxExemption Use Case
  */
 
-jest.mock('../../infrastructure/repositories/taxCommandRepo', () => ({
-  __esModule: true,
-  default: {
+jest.mock('../../infrastructure/repositories/taxCommandRepo', () => {
+  const mock = {
     updateTaxExemption: jest.fn(),
-  },
-}));
+  };
+  return {
+    __esModule: true,
+    default: mock,
+    TaxCommandRepo: function () { return mock; },
+  };
+});
 
 import { ApproveTaxExemptionUseCase } from './ApproveTaxExemption';
 import taxCommandRepo from '../../infrastructure/repositories/taxCommandRepo';

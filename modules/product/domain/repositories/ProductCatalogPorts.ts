@@ -523,10 +523,72 @@ export interface SetProductAttributeInput {
   value: string;
 }
 
+export interface SetProductAttributeSingleInput {
+  productId: string;
+  attributeId: string;
+  value: string;
+  productVariantId?: string;
+}
+
+export interface ProductAttributeValue {
+  productAttributeValueId: string;
+  attributeId: string;
+  value: string;
+  displayValue?: string;
+  position: number;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ProductAttributeCreateInput {
+  name: string;
+  code: string;
+  description?: string;
+  groupId?: string;
+  type?: AttributeType;
+  inputType?: AttributeType;
+  isRequired?: boolean;
+  isUnique?: boolean;
+  isSearchable?: boolean;
+  isFilterable?: boolean;
+  isComparable?: boolean;
+  isVisibleOnFront?: boolean;
+  isUsedInProductListing?: boolean;
+  useForVariants?: boolean;
+  useForConfigurations?: boolean;
+  position?: number;
+  defaultValue?: string;
+  validationRules?: Record<string, unknown>;
+  options?: Record<string, unknown>;
+  organizationId?: string;
+  isGlobal?: boolean;
+}
+
+export type ProductAttributeUpdateInput = Partial<ProductAttributeCreateInput>;
+
+export interface AttributeValueCreateInput {
+  attributeId: string;
+  value: string;
+  displayValue?: string;
+  position?: number;
+  isDefault?: boolean;
+}
+
 export interface DynamicAttributePort {
-  getProductAttributes(productId: string): Promise<Array<ProductAttributeData & { attribute: ProductAttribute }>>;
+  findAttributeById(id: string): Promise<ProductAttribute | null>;
+  findAttributeByCode(code: string): Promise<ProductAttribute | null>;
   findAllAttributes(): Promise<ProductAttribute[]>;
+  createAttribute(input: ProductAttributeCreateInput): Promise<ProductAttribute>;
+  updateAttribute(id: string, input: ProductAttributeUpdateInput): Promise<ProductAttribute | null>;
+  findAttributeValues(attributeId: string): Promise<ProductAttributeValue[]>;
+  createAttributeValue(input: AttributeValueCreateInput): Promise<ProductAttributeValue>;
+  deleteAttributeValue(id: string): Promise<boolean>;
+  getProductAttributes(productId: string): Promise<Array<ProductAttributeData & { attribute: ProductAttribute }>>;
+  setProductAttribute(input: SetProductAttributeSingleInput): Promise<ProductAttributeData>;
   setProductAttributes(productId: string, attributes: SetProductAttributeInput[]): Promise<void>;
+  removeProductAttribute(productId: string, attributeId: string): Promise<boolean>;
+  clearProductAttributes(productId: string): Promise<boolean>;
 }
 
 // ============================================================================

@@ -3,6 +3,8 @@ import taxCommandRepository from '../infrastructure/repositories/TaxCommandRepos
 import { BasketTaxableBasketAdapter } from '../infrastructure/acl/BasketTaxableBasketAdapter';
 import { TaxQueryRepository } from '../infrastructure';
 
+export const taxCommandRepo = taxCommandRepository.commands;
+
 export { taxQueryRepository, taxCommandRepository, BasketTaxableBasketAdapter };
 
 export { TaxQueryRepository };

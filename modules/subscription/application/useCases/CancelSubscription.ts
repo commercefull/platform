@@ -3,8 +3,8 @@
  * Cancels a customer subscription
  */
 
-import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
-import { CustomerSubscription } from '../../infrastructure/repositories/subscriptionRepo';
+import { subscriptionRepo } from '../wired';
+import { CustomerSubscription } from '../../domain/repositories/SubscriptionRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================

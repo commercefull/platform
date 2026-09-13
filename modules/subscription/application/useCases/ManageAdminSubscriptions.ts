@@ -1,4 +1,4 @@
-import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
+import { subscriptionRepo } from '../wired';
 
 export class ManageAdminSubscriptionsUseCase {
   async getSubscriptionPlan(id: string) {

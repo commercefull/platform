@@ -7,7 +7,7 @@
  * `ApproveTaxExemption` before they take effect.
  */
 
-import taxCommandRepo from '../../infrastructure/repositories/taxCommandRepo';
+import { taxCommandRepo } from '../wired';
 import type { CustomerTaxExemption, TaxExemptionType } from '../../taxTypes';
 
 export interface CreateTaxExemptionInput {

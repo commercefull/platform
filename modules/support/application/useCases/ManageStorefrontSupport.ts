@@ -1,7 +1,7 @@
-import supportDataRepository from '../../infrastructure/repositories/SupportDataRepository';
+import { supportDataRepository } from '../wired';
 
 const supportRepo = supportDataRepository.tickets;
-export type { TicketStatus, TicketPriority, TicketCategory } from '../../infrastructure/repositories/SupportDataRepository';
+export type { TicketStatus, TicketPriority, TicketCategory } from '../../domain/repositories/SupportRepository';
 
 export class ManageStorefrontSupportUseCase {
   async getAgent(id: string) {

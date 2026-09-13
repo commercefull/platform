@@ -2,12 +2,16 @@
  * Unit Tests for CreateTaxExemption Use Case
  */
 
-jest.mock('../../infrastructure/repositories/taxCommandRepo', () => ({
-  __esModule: true,
-  default: {
+jest.mock('../../infrastructure/repositories/taxCommandRepo', () => {
+  const mock = {
     createTaxExemption: jest.fn(),
-  },
-}));
+  };
+  return {
+    __esModule: true,
+    default: mock,
+    TaxCommandRepo: function () { return mock; },
+  };
+});
 
 import { CreateTaxExemptionUseCase } from './CreateTaxExemption';
 import taxCommandRepo from '../../infrastructure/repositories/taxCommandRepo';

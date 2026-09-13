@@ -1,4 +1,4 @@
-import taxQueryRepository from '../../infrastructure/repositories/TaxQueryRepository';
+import { taxQueryRepository } from '../wired';
 
 const adminTaxRepo = taxQueryRepository.admin;
 
