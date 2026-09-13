@@ -1,0 +1,12 @@
+{
+  "bootstrap-sha": "f34640f7",
+  "include-component-in-tag": false,
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "changelog-path": "CHANGELOG.md",
+      "draft": false,
+      "prerelease": false
+    }
+  }
+}
