@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for CommerceFull Platform
+# Multi-stage Dockerfile for Commercefull Platform
 # Stage 1: Build stage
 FROM node:20-alpine AS builder
 

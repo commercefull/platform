@@ -1,5 +1,5 @@
 #!/bin/bash
-# CommerceFull GCP Terraform Deployment Script
+# Commercefull GCP Terraform Deployment Script
 
 set -euo pipefail
 
@@ -26,7 +26,7 @@ usage() {
     cat << EOF
 Usage: $SCRIPT_NAME [OPTIONS]
 
-Deploy CommerceFull to GCP using Terraform
+Deploy Commercefull to GCP using Terraform
 
 OPTIONS:
     -e, --environment ENV    Environment (dev|staging|prod) [default: prod]
@@ -286,7 +286,7 @@ post_deployment() {
         # Print deployment summary
         cat << EOF
 
-🎉 CommerceFull GCP deployment completed successfully!
+🎉 Commercefull GCP deployment completed successfully!
 
 Deployment Details:
 Environment: $ENVIRONMENT

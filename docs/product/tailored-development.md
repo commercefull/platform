@@ -2,13 +2,13 @@
 
 > **The concern:** Does custom development quietly recreate the lock-in you left Shopify to escape?
 >
-> **The answer:** No. CommerceFull is Apache-2.0 licensed. Bespoke modules are yours — full source, full ownership, full portability. The platform cannot revoke, restrict, or meter your access to code you paid to build.
+> **The answer:** No. Commercefull is Apache-2.0 licensed. Bespoke modules are yours — full source, full ownership, full portability. The platform cannot revoke, restrict, or meter your access to code you paid to build.
 
 ---
 
 ## How Tailored Development Works
 
-Tailored development is the third tier in CommerceFull's offering:
+Tailored development is the third tier in Commercefull's offering:
 
 1. **Self-Hosted** — free, open-source core, support included
 2. **Managed Hosting** — we run infrastructure, you own data and code
@@ -31,7 +31,7 @@ Tailored development produces new modules that follow the same DDD architecture 
 | Can the platform revoke access? | **No.** The core platform is Apache-2.0. Bespoke modules are separate works. |
 | Can you take the code to another platform? | **Yes.** It's standard TypeScript + PostgreSQL + Express. No proprietary runtime. |
 | Can you modify the code yourself? | **Yes.** Full source is delivered. No obfuscation, no compiled binaries. |
-| Is there a dependency on CommerceFull's servers? | **No.** Self-hosted means self-hosted. No phone-home, no license server, no telemetry requirement. |
+| Is there a dependency on Commercefull's servers? | **No.** Self-hosted means self-hosted. No phone-home, no license server, no telemetry requirement. |
 | Can you hire another team to maintain it? | **Yes.** The codebase follows documented DDD conventions (see [AGENTS.md](../../AGENTS.md) and [engineering standards](../guidelines/README.md)). |
 
 ---
@@ -54,7 +54,7 @@ The platform itself is Apache-2.0. You can fork it, audit it, and run it forever
 | Templates | EJS | No |
 | CSS | Tailwind | No |
 
-There is no CommerceFull-specific runtime, DSL, or proprietary abstraction layer. A developer who knows Node.js, TypeScript, and PostgreSQL can work with the codebase.
+There is no Commercefull-specific runtime, DSL, or proprietary abstraction layer. A developer who knows Node.js, TypeScript, and PostgreSQL can work with the codebase.
 
 ### 3. Module isolation
 
@@ -70,8 +70,8 @@ All data lives in standard PostgreSQL tables with documented schemas. No proprie
 
 - No proprietary frameworks or libraries you must license to run the code
 - No compiled or obfuscated deliverables
-- No dependency on CommerceFull's infrastructure to function
-- No "managed runtime" that only CommerceFull can operate
+- No dependency on Commercefull's infrastructure to function
+- No "managed runtime" that only Commercefull can operate
 - No contractual lock-in to ongoing maintenance payments
 
 Tailored development is a service engagement, not a subscription. Once delivered, the code is yours.

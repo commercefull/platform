@@ -1,6 +1,6 @@
 # API Reference
 
-> Auto-generated OpenAPI 3.0 specification for the CommerceFull REST API.
+> Auto-generated OpenAPI 3.0 specification for the Commercefull REST API.
 
 The full interactive API explorer is available at **`/docs/api`** when the server is running.
 
@@ -44,4 +44,4 @@ curl -X POST http://localhost:3000/business/auth/login \
 
 ## GraphQL
 
-CommerceFull also exposes a GraphQL endpoint at `/graphql` alongside the REST API. See `boot/graphql.ts` for the schema configuration.
+Commercefull also exposes a GraphQL endpoint at `/graphql` alongside the REST API. See `boot/graphql.ts` for the schema configuration.

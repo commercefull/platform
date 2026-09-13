@@ -1,6 +1,6 @@
 # Cost Comparison — The App Tax vs. Built-In
 
-> Shopify's app tax compounds. CommerceFull ships loyalty, subscriptions, membership, reviews, returns, analytics, and compliance natively.
+> Shopify's app tax compounds. Commercefull ships loyalty, subscriptions, membership, reviews, returns, analytics, and compliance natively.
 
 ---
 
@@ -15,7 +15,7 @@ Every feature a growing merchant needs — loyalty, subscriptions, reviews, retu
 
 ## Scenario 1: Growing Merchant (~$1M revenue, ~1,000 orders/mo)
 
-| Feature | Shopify App | Shopify Cost/mo | CommerceFull |
+| Feature | Shopify App | Shopify Cost/mo | Commercefull |
 |---|---|---|---|
 | Platform subscription | Shopify plan | $105 | $0 (self-hosted) |
 | Loyalty program | Smile.io Growth | $199 | Built in |
@@ -30,7 +30,7 @@ Every feature a growing merchant needs — loyalty, subscriptions, reviews, retu
 
 ## Scenario 2: Established Merchant (~$10M revenue, ~5,000 orders/mo)
 
-| Feature | Shopify App | Shopify Cost/mo | CommerceFull |
+| Feature | Shopify App | Shopify Cost/mo | Commercefull |
 |---|---|---|---|
 | Platform subscription | Shopify Advanced | $399 | $0 (self-hosted) |
 | Loyalty program | Smile.io Plus | $999 | Built in |
@@ -47,9 +47,9 @@ Every feature a growing merchant needs — loyalty, subscriptions, reviews, retu
 
 ## What's Built In
 
-CommerceFull ships 43 modules covering the full commerce lifecycle. The features Shopify merchants pay extra for are native:
+Commercefull ships 43 modules covering the full commerce lifecycle. The features Shopify merchants pay extra for are native:
 
-| Shopify Paid App Category | CommerceFull Module | Cost |
+| Shopify Paid App Category | Commercefull Module | Cost |
 |---|---|---|
 | Loyalty (Smile.io, LoyaltyLion) | `loyalty` | $0 |
 | Subscriptions (Recharge, Skio) | `subscription` | $0 |
@@ -67,14 +67,14 @@ CommerceFull ships 43 modules covering the full commerce lifecycle. The features
 
 ## The Real Comparison
 
-| | Shopify (Growing) | Shopify (Established) | CommerceFull |
+| | Shopify (Growing) | Shopify (Established) | Commercefull |
 |---|---|---|---|
 | Platform fee | $105/mo | $399/mo | $0 |
 | App stack | $667/mo | $3,543/mo | $0 |
 | **Total monthly** | **$772/mo** | **$3,942/mo** | **$0** |
 | **Total annual** | **$9,264/yr** | **$47,304/yr** | **$0** |
 
-CommerceFull's only cost is infrastructure — your own server, or a managed hosting plan if you prefer not to self-host. Either way, the app tax is zero.
+Commercefull's only cost is infrastructure — your own server, or a managed hosting plan if you prefer not to self-host. Either way, the app tax is zero.
 
 ---
 

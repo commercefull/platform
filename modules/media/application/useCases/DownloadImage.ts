@@ -76,7 +76,7 @@ export class DownloadImageUseCase {
     try {
       const response = await fetch(url, {
         redirect: 'follow',
-        headers: { 'User-Agent': 'CommerceFull-MediaPipeline/1.0' },
+        headers: { 'User-Agent': 'Commercefull-MediaPipeline/1.0' },
       });
 
       if (!response.ok) {

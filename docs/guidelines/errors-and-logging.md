@@ -1,6 +1,6 @@
 # Errors & Logging Guidelines
 
-> Severity policy, domain error rules, and the RFC 7807 target shape for CommerceFull.
+> Severity policy, domain error rules, and the RFC 7807 target shape for Commercefull.
 > Source: §6 of the gap analysis. This document is the normative reference for all modules.
 
 ## 1. Log Level Severity Policy

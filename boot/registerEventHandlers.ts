@@ -817,7 +817,7 @@ function registerMerchantEventHandlers(): void {
         userId: organizationId,
         type: 'merchant_approved',
         title: 'Merchant Account Approved',
-        message: `Welcome to CommerceFull! Your merchant account${businessName ? ` "${businessName}"` : ''} has been approved.`,
+        message: `Welcome to Commercefull! Your merchant account${businessName ? ` "${businessName}"` : ''} has been approved.`,
         data: { organizationId, businessName },
         channels: ['email', 'in_app'],
       });
@@ -1015,7 +1015,7 @@ function registerCustomerEventHandlers(): void {
       await JobScheduler.scheduleNotification({
         userId: customerId,
         type: 'customer_welcome',
-        title: 'Welcome to CommerceFull!',
+        title: 'Welcome to Commercefull!',
         message: `Welcome${firstName ? `, ${firstName}` : ''}! Your account has been created successfully. Start exploring our marketplace today.`,
         data: { customerId, email, firstName },
         channels: ['email', 'in_app'],

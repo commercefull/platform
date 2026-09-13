@@ -46,7 +46,7 @@ export class ApiGatewayConstruct extends Construct {
 
     this.api = new apigatewayv2.HttpApi(this, 'HttpApi', {
       apiName: `commercefull-${environment}`,
-      description: `CommerceFull HTTP API (${environment})`,
+      description: `Commercefull HTTP API (${environment})`,
     });
 
     // VPC Link — connects API Gateway to private resources

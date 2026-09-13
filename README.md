@@ -1,4 +1,4 @@
-# CommerceFull Platform
+# Commercefull Platform
 
 > **Own your store. Not just rent it.** — Your data. Your checkout. Your rules. Your exit.
 
@@ -10,7 +10,7 @@
 [![Modules](https://img.shields.io/badge/Modules-43-blue.svg)](#modules)
 [![ESLint](https://img.shields.io/badge/ESLint-0%20errors-brightgreen.svg)](#quality-metrics)
 
-CommerceFull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs plus **GraphQL**, and 43 business modules covering the full commerce lifecycle.
+Commercefull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs plus **GraphQL**, and 43 business modules covering the full commerce lifecycle.
 
 ---
 
@@ -344,7 +344,7 @@ Copy `.env.example` to `.env` and configure:
 
 ## Architecture
 
-CommerceFull follows **Domain-Driven Design (DDD)** with a layered architecture:
+Commercefull follows **Domain-Driven Design (DDD)** with a layered architecture:
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -390,7 +390,7 @@ For a detailed architecture guide, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Modules
 
-CommerceFull includes 43 business modules:
+Commercefull includes 43 business modules:
 
 | Module          | Description                                                              |
 | --------------- | ------------------------------------------------------------------------ |
@@ -540,4 +540,4 @@ This project is licensed under the [Apache License 2.0](./LICENSE).
 
 ## Need Help?
 
-CommerceFull is built and maintained by **[N17](https://n17.foo)** — a software studio specialising in retail and commerce infrastructure.
+Commercefull is built and maintained by **[N17](https://n17.foo)** — a software studio specialising in retail and commerce infrastructure.

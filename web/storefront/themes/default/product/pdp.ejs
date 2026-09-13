@@ -63,7 +63,7 @@
   "description": "<%= (product.shortDescription || product.description || '').replace(/"/g, '\\"') %>",
   "sku": "<%= product.sku || product.productId %>",
   <% if (product.brandId) { %>
-  "brand": { "@type": "Brand", "name": "<%= product.brandName || 'CommerceFull' %>" },
+  "brand": { "@type": "Brand", "name": "<%= product.brandName || 'Commercefull' %>" },
   <% } %>
   "offers": {
     "@type": "Offer",

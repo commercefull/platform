@@ -1,4 +1,4 @@
-# CommerceFull Platform - Deployment Infrastructure
+# Commercefull Platform - Deployment Infrastructure
 
 This directory contains deployment configurations and documentation for multiple cloud and infrastructure providers.
 
@@ -40,7 +40,7 @@ az deployment group create --resource-group commercefull-rg --template-file azur
 
 ```bash
 cd infra/aws
-cdk deploy CommerceFull-App
+cdk deploy Commercefull-App
 ```
 
 ## Infrastructure Implementation Status

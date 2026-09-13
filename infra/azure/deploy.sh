@@ -1,5 +1,5 @@
 #!/bin/bash
-# CommerceFull Azure Terraform Deployment Script
+# Commercefull Azure Terraform Deployment Script
 
 set -euo pipefail
 
@@ -26,7 +26,7 @@ usage() {
     cat << EOF
 Usage: $SCRIPT_NAME [OPTIONS]
 
-Deploy CommerceFull to Azure using Terraform
+Deploy Commercefull to Azure using Terraform
 
 OPTIONS:
     -e, --environment ENV    Environment (dev|staging|prod) [default: prod]
@@ -284,7 +284,7 @@ post_deployment() {
         # Print deployment summary
         cat << EOF
 
-🎉 CommerceFull Azure deployment completed successfully!
+🎉 Commercefull Azure deployment completed successfully!
 
 Deployment Details:
 Environment: $ENVIRONMENT

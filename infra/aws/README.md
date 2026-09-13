@@ -1,6 +1,6 @@
 # ECS + RDS + AWS Deployment
 
-Deploy CommerceFull platform to Amazon Web Services using ECS (Elastic Container Service) and RDS (Relational Database Service) for high availability and enterprise-grade deployment.
+Deploy Commercefull platform to Amazon Web Services using ECS (Elastic Container Service) and RDS (Relational Database Service) for high availability and enterprise-grade deployment.
 
 ## Overview
 
@@ -69,10 +69,10 @@ npm install
 cdk synth
 
 # Deploy infrastructure
-cdk deploy CommerceFull-Infra --require-approval never
+cdk deploy Commercefull-Infra --require-approval never
 
 # Get outputs for application deployment
-cdk deploy CommerceFull-App --require-approval never --outputs-file outputs.json
+cdk deploy Commercefull-App --require-approval never --outputs-file outputs.json
 ```
 
 ### 3. Deploy Application
@@ -145,13 +145,13 @@ export class InfrastructureStack extends Stack {
     super(scope, id, props);
 
     // VPC with public and private subnets
-    const vpc = new ec2.Vpc(this, 'CommerceFullVPC', {
+    const vpc = new ec2.Vpc(this, 'CommercefullVPC', {
       maxAzs: 3,
       natGateways: 1,
     });
 
     // RDS PostgreSQL database
-    const database = new rds.DatabaseInstance(this, 'CommerceFullDB', {
+    const database = new rds.DatabaseInstance(this, 'CommercefullDB', {
       engine: rds.DatabaseInstanceEngine.postgres({ version: rds.PostgresEngineVersion.VER_18 }),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
       vpc,
@@ -164,19 +164,19 @@ export class InfrastructureStack extends Stack {
     });
 
     // ECS Cluster
-    const cluster = new ecs.Cluster(this, 'CommerceFullCluster', {
+    const cluster = new ecs.Cluster(this, 'CommercefullCluster', {
       vpc,
       containerInsights: true,
     });
 
     // Application Load Balancer
-    const loadBalancer = new elbv2.ApplicationLoadBalancer(this, 'CommerceFullALB', {
+    const loadBalancer = new elbv2.ApplicationLoadBalancer(this, 'CommercefullALB', {
       vpc,
       internetFacing: true,
     });
 
     // CloudFront Distribution
-    const distribution = new cloudfront.Distribution(this, 'CommerceFullDistribution', {
+    const distribution = new cloudfront.Distribution(this, 'CommercefullDistribution', {
       defaultBehavior: {
         origin: new origins.LoadBalancerV2Origin(loadBalancer),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -236,7 +236,7 @@ aws/
 #### VPC and Networking
 
 ```typescript
-const vpc = new ec2.Vpc(this, 'CommerceFullVPC', {
+const vpc = new ec2.Vpc(this, 'CommercefullVPC', {
   maxAzs: 3, // Multi-AZ for high availability
   subnetConfiguration: [
     {
@@ -261,7 +261,7 @@ const vpc = new ec2.Vpc(this, 'CommerceFullVPC', {
 #### RDS PostgreSQL Database
 
 ```typescript
-const database = new rds.DatabaseInstance(this, 'CommerceFullDB', {
+const database = new rds.DatabaseInstance(this, 'CommercefullDB', {
   engine: rds.DatabaseInstanceEngine.postgres({
     version: rds.PostgresEngineVersion.VER_18,
   }),
@@ -283,19 +283,19 @@ const database = new rds.DatabaseInstance(this, 'CommerceFullDB', {
 #### ECS Cluster and Service
 
 ```typescript
-const cluster = new ecs.Cluster(this, 'CommerceFullCluster', {
+const cluster = new ecs.Cluster(this, 'CommercefullCluster', {
   vpc,
   containerInsights: true,
   capacityProviders: ['FARGATE', 'FARGATE_SPOT'],
 });
 
-const taskDefinition = new ecs.FargateTaskDefinition(this, 'CommerceFullTask', {
+const taskDefinition = new ecs.FargateTaskDefinition(this, 'CommercefullTask', {
   memoryLimitMiB: 512,
   cpu: 256,
   family: 'commercefull-app',
 });
 
-const container = taskDefinition.addContainer('CommerceFullContainer', {
+const container = taskDefinition.addContainer('CommercefullContainer', {
   image: ecs.ContainerImage.fromEcrRepository(repository, 'latest'),
   memoryLimitMiB: 512,
   environment: {
@@ -312,7 +312,7 @@ const container = taskDefinition.addContainer('CommerceFullContainer', {
   }),
 });
 
-const service = new ecs.FargateService(this, 'CommerceFullService', {
+const service = new ecs.FargateService(this, 'CommercefullService', {
   cluster,
   taskDefinition,
   desiredCount: 2,
@@ -325,7 +325,7 @@ const service = new ecs.FargateService(this, 'CommerceFullService', {
 #### Application Load Balancer
 
 ```typescript
-const loadBalancer = new elbv2.ApplicationLoadBalancer(this, 'CommerceFullALB', {
+const loadBalancer = new elbv2.ApplicationLoadBalancer(this, 'CommercefullALB', {
   vpc,
   internetFacing: true,
   deletionProtection: true,
@@ -350,11 +350,11 @@ const httpsListener = loadBalancer.addListener('HTTPSListener', {
   open: true,
 });
 
-httpsListener.addTargets('CommerceFullTargets', {
+httpsListener.addTargets('CommercefullTargets', {
   port: 80,
   targets: [
     service.loadBalancerTarget({
-      containerName: 'CommerceFullContainer',
+      containerName: 'CommercefullContainer',
       containerPort: 3000,
     }),
   ],
@@ -517,7 +517,7 @@ aws cloudwatch get-metric-statistics \
 
 # Set up CloudWatch alarms
 aws cloudwatch put-metric-alarm \
-  --alarm-name "CommerceFull-HighCPU" \
+  --alarm-name "Commercefull-HighCPU" \
   --alarm-description "CPU usage above 80%" \
   --metric-name CPUUtilization \
   --namespace AWS/ECS \

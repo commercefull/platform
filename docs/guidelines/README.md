@@ -1,6 +1,6 @@
-# CommerceFull Engineering Guidelines
+# Commercefull Engineering Guidelines
 
-This folder contains the authoritative coding and engineering standards for the CommerceFull platform. Each document is scoped to a single topic to keep context minimal and precise.
+This folder contains the authoritative coding and engineering standards for the Commercefull platform. Each document is scoped to a single topic to keep context minimal and precise.
 
 ## Index
 

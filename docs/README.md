@@ -1,12 +1,12 @@
-# CommerceFull
+# Commercefull
 
 > **Own your store. Not just rent it.** — Your data. Your checkout. Your rules. Your exit.
 
-CommerceFull is a self-hosted e-commerce platform built with Express 5, TypeScript, and PostgreSQL. It follows a DDD architecture with 43 bounded contexts, server-rendered EJS views, and REST + GraphQL APIs. No platform tax, no checkout sandbox, no data lock-in.
+Commercefull is a self-hosted e-commerce platform built with Express 5, TypeScript, and PostgreSQL. It follows a DDD architecture with 43 bounded contexts, server-rendered EJS views, and REST + GraphQL APIs. No platform tax, no checkout sandbox, no data lock-in.
 
 ## Explore
 
-- **[Why CommerceFull](#/product/positioning)** — the ownership narrative and five pillars
+- **[Why Commercefull](#/product/positioning)** — the ownership narrative and five pillars
 - **[Getting Started](#/guides/getting-started)** — set up your dev environment
 - **[Adding a New Module](#/guides/adding-a-module)** — step-by-step guide for engineers
 - **[Module Registry & Feature Flags](#/guides/module-registry)** — toggle modules on/off

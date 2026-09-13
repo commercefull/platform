@@ -175,7 +175,7 @@ The `infra/aws/` directory contains AWS CDK infrastructure that achieves feature
 cd infra/aws
 npm install
 cdk bootstrap    # one-time
-cdk deploy CommerceFull-App
+cdk deploy Commercefull-App
 ```
 
 See `infra/aws/README.md` for detailed instructions.

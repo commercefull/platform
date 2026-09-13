@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide walks you through setting up CommerceFull for local development.
+This guide walks you through setting up Commercefull for local development.
 
 ## Prerequisites
 

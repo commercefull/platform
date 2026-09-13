@@ -1,10 +1,10 @@
-# CommerceFull Architecture Overview
+# Commercefull Architecture Overview
 
-High-level architecture of the CommerceFull platform. Detailed standards and patterns live in [`docs/guidelines/`](./docs/guidelines/README.md).
+High-level architecture of the Commercefull platform. Detailed standards and patterns live in [`docs/guidelines/`](./docs/guidelines/README.md).
 
 ## System Context
 
-CommerceFull is an e-commerce platform. A single Express application serves two portals (Admin, Storefront) and two API surfaces (`/customer`, `/business`), backed by PostgreSQL.
+Commercefull is an e-commerce platform. A single Express application serves two portals (Admin, Storefront) and two API surfaces (`/customer`, `/business`), backed by PostgreSQL.
 
 ```
                     ┌─────────────────────────┐

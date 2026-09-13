@@ -91,36 +91,69 @@ export const createSnapshot = async (config: DbConfig, dumpDirPath: string): Pro
   ensureDirectoryExists(dumpDirPath);
 
   const dumpFile = path.join(dumpDirPath, `${config.database}.dump`);
-  const containerDumpPath = `/tmp/${config.database}.dump`;
   const containerName = process.env.DB_CONTAINER_NAME || 'commerce-db';
 
-  // Use docker exec to run pg_dump inside the container (matching server version)
-  await execPromise(
-    'docker',
-    [
-      'exec',
-      containerName,
+  // Check if the Docker container is running; if so, use docker exec for
+  // matching pg_dump version. Otherwise, fall back to host pg_dump (CI
+  // runners have pg_dump available via the postgresql-client package).
+  let useDocker = false;
+  try {
+    await execPromise('docker', ['inspect', containerName]);
+    useDocker = true;
+  } catch {
+    useDocker = false;
+  }
+
+  if (useDocker) {
+    const containerDumpPath = `/tmp/${config.database}.dump`;
+
+    // Use docker exec to run pg_dump inside the container (matching server version)
+    await execPromise(
+      'docker',
+      [
+        'exec',
+        containerName,
+        'pg_dump',
+        '-h',
+        'localhost',
+        '-p',
+        '5432',
+        '-U',
+        config.user,
+        '-Fc',
+        '-d',
+        config.database,
+        '-f',
+        containerDumpPath,
+      ],
+      { PGPASSWORD: config.password },
+    );
+
+    // Copy the dump file from the container to the host
+    await execPromise('docker', ['cp', `${containerName}:${containerDumpPath}`, dumpFile]);
+
+    // Clean up the temp file inside the container
+    await execPromise('docker', ['exec', containerName, 'rm', '-f', containerDumpPath]);
+  } else {
+    // Use host pg_dump directly (CI runner / no Docker container available)
+    await execPromise(
       'pg_dump',
-      '-h',
-      'localhost',
-      '-p',
-      '5432',
-      '-U',
-      config.user,
-      '-Fc',
-      '-d',
-      config.database,
-      '-f',
-      containerDumpPath,
-    ],
-    { PGPASSWORD: config.password },
-  );
-
-  // Copy the dump file from the container to the host
-  await execPromise('docker', ['cp', `${containerName}:${containerDumpPath}`, dumpFile]);
-
-  // Clean up the temp file inside the container
-  await execPromise('docker', ['exec', containerName, 'rm', '-f', containerDumpPath]);
+      [
+        '-h',
+        config.host,
+        '-p',
+        config.port.toString(),
+        '-U',
+        config.user,
+        '-Fc',
+        '-d',
+        config.database,
+        '-f',
+        dumpFile,
+      ],
+      { PGPASSWORD: config.password },
+    );
+  }
 
   console.log(`Snapshot created at ${dumpFile}`);
 
@@ -128,37 +161,69 @@ export const createSnapshot = async (config: DbConfig, dumpDirPath: string): Pro
 };
 
 export const restoreSnapshot = async (config: DbConfig, dumpFilePath: string): Promise<void> => {
-  const containerDumpPath = `/tmp/${path.basename(dumpFilePath)}`;
   const containerName = process.env.DB_CONTAINER_NAME || 'commerce-db';
 
-  // Copy the dump file into the container
-  await execPromise('docker', ['cp', dumpFilePath, `${containerName}:${containerDumpPath}`]);
+  // Check if the Docker container is running
+  let useDocker = false;
+  try {
+    await execPromise('docker', ['inspect', containerName]);
+    useDocker = true;
+  } catch {
+    useDocker = false;
+  }
 
-  // Use docker exec to run pg_restore inside the container (matching server version)
-  await execPromise(
-    'docker',
-    [
-      'exec',
-      containerName,
+  if (useDocker) {
+    const containerDumpPath = `/tmp/${path.basename(dumpFilePath)}`;
+
+    // Copy the dump file into the container
+    await execPromise('docker', ['cp', dumpFilePath, `${containerName}:${containerDumpPath}`]);
+
+    // Use docker exec to run pg_restore inside the container (matching server version)
+    await execPromise(
+      'docker',
+      [
+        'exec',
+        containerName,
+        'pg_restore',
+        '-h',
+        'localhost',
+        '-p',
+        '5432',
+        '-U',
+        config.user,
+        '-d',
+        config.database,
+        '--clean',
+        '--if-exists',
+        '-Fc',
+        containerDumpPath,
+      ],
+      { PGPASSWORD: config.password },
+    );
+
+    // Clean up the temp file inside the container
+    await execPromise('docker', ['exec', containerName, 'rm', '-f', containerDumpPath]);
+  } else {
+    // Use host pg_restore directly (CI runner / no Docker container available)
+    await execPromise(
       'pg_restore',
-      '-h',
-      'localhost',
-      '-p',
-      '5432',
-      '-U',
-      config.user,
-      '-d',
-      config.database,
-      '--clean',
-      '--if-exists',
-      '-Fc',
-      containerDumpPath,
-    ],
-    { PGPASSWORD: config.password },
-  );
-
-  // Clean up the temp file inside the container
-  await execPromise('docker', ['exec', containerName, 'rm', '-f', containerDumpPath]);
+      [
+        '-h',
+        config.host,
+        '-p',
+        config.port.toString(),
+        '-U',
+        config.user,
+        '-d',
+        config.database,
+        '--clean',
+        '--if-exists',
+        '-Fc',
+        dumpFilePath,
+      ],
+      { PGPASSWORD: config.password },
+    );
+  }
 
   console.log(`Snapshot restored to '${config.database}' successfully.`);
 };

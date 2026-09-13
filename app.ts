@@ -410,7 +410,7 @@ app.locals.formSubmit = formSubmit;
 const port = process.env.PORT || 10000;
 app.set('port', port);
 const server = app.listen(port, () => {
-  logger.info(`CommerceFull service started on port ${port}`);
+  logger.info(`Commercefull service started on port ${port}`);
 });
 
 server.on('error', (err: Error) => {

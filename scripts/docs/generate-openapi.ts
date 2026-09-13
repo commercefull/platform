@@ -488,9 +488,9 @@ function main(): void {
   const spec = {
     openapi: '3.0.3',
     info: {
-      title: 'CommerceFull API',
+      title: 'Commercefull API',
       version: '1.0.0',
-      description: 'Auto-generated OpenAPI specification for the CommerceFull platform REST API.',
+      description: 'Auto-generated OpenAPI specification for the Commercefull platform REST API.',
     },
     servers: [
       {

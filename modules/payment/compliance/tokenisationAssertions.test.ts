@@ -1,7 +1,7 @@
 /**
  * PCI-DSS Tokenisation-Only Assertion Tests
  *
- * These tests verify at the code level that the CommerceFull platform
+ * These tests verify at the code level that the Commercefull platform
  * never receives, processes, or stores Primary Account Numbers (PAN).
  * The platform operates under SAQ A-EP — all cardholder data interaction
  * is delegated to PCI-DSS-certified PSPs via tokenisation.

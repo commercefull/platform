@@ -1,6 +1,6 @@
 # Adding a New Module
 
-Step-by-step guide for engineers to add a new bounded context to the CommerceFull platform.
+Step-by-step guide for engineers to add a new bounded context to the Commercefull platform.
 
 ## Overview
 

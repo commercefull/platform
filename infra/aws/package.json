@@ -1,7 +1,7 @@
 {
   "name": "commercefull-infrastructure",
   "version": "1.0.0",
-  "description": "AWS CDK infrastructure for CommerceFull platform",
+  "description": "AWS CDK infrastructure for Commercefull platform",
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc",

@@ -5,7 +5,7 @@
   "plugin": ["typedoc-plugin-markdown"],
   "theme": "markdown",
   "readme": "none",
-  "name": "CommerceFull Code Reference",
+  "name": "Commercefull Code Reference",
   "includeVersion": true,
   "disableSources": false,
   "categorizeByGroup": true,
@@ -17,6 +17,6 @@
     "external": false
   },
   "textContentMappings": {
-    "title": "CommerceFull Code Reference"
+    "title": "Commercefull Code Reference"
   }
 }

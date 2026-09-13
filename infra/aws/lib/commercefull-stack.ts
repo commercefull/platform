@@ -14,7 +14,7 @@ import { EcsConstruct } from './constructs/ecs-construct';
 import { CloudFrontConstruct } from './constructs/cloudfront-construct';
 import { ApiGatewayConstruct } from './constructs/apigateway-construct';
 
-export interface CommerceFullStackProps extends cdk.StackProps {
+export interface CommercefullStackProps extends cdk.StackProps {
   readonly domainName?: string;
   readonly environment?: string;
   readonly createVpc?: boolean;
@@ -48,7 +48,7 @@ export interface CommerceFullStackProps extends cdk.StackProps {
 }
 
 /**
- * Top-level stack that composes all CommerceFull infrastructure constructs.
+ * Top-level stack that composes all Commercefull infrastructure constructs.
  *
  * Two deployment modes:
  *
@@ -59,8 +59,8 @@ export interface CommerceFullStackProps extends cdk.StackProps {
  * 2. Standard: ALB → ECS, optional API Gateway in front of ALB
  *    Full-featured with request-based auto-scaling.
  */
-export class CommerceFullStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props: CommerceFullStackProps = {}) {
+export class CommercefullStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: CommercefullStackProps = {}) {
     super(scope, id, props);
 
     const environment = props.environment || 'prod';

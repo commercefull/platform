@@ -1,6 +1,6 @@
-# Contributing to CommerceFull
+# Contributing to Commercefull
 
-Thank you for your interest in contributing to CommerceFull! This guide will help you get started.
+Thank you for your interest in contributing to Commercefull! This guide will help you get started.
 
 ## Table of Contents
 
@@ -127,7 +127,7 @@ test(order): add integration tests for order cancellation
 
 ## Project Architecture
 
-CommerceFull follows **Domain-Driven Design (DDD)**. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full guide.
+Commercefull follows **Domain-Driven Design (DDD)**. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full guide.
 
 ### Key Principles
 
@@ -466,4 +466,4 @@ Include:
 - Review the [ARCHITECTURE.md](./ARCHITECTURE.md) for technical details
 - See [AGENTS.md](./AGENTS.md) for AI coding agent guidelines
 
-Thank you for contributing to CommerceFull!
+Thank you for contributing to Commercefull!

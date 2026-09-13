@@ -1,6 +1,6 @@
 # Performance Testing with k6
 
-Load, stress, and spike tests for the CommerceFull platform using [k6](https://k6.io).
+Load, stress, and spike tests for the Commercefull platform using [k6](https://k6.io).
 
 ## Prerequisites
 

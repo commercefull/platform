@@ -1,6 +1,6 @@
-# CommerceFull — Ansible VPS Infrastructure
+# Commercefull — Ansible VPS Infrastructure
 
-Hardened Ansible infrastructure for deploying CommerceFull to a single VPS.
+Hardened Ansible infrastructure for deploying Commercefull to a single VPS.
 
 ## Stack
 

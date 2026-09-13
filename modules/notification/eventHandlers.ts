@@ -353,7 +353,7 @@ export const registerCustomerEventHandlers = () => {
     await JobScheduler.scheduleNotification({
       userId: customerId,
       type: 'welcome',
-      title: 'Welcome to CommerceFull!',
+      title: 'Welcome to Commercefull!',
       message: `Welcome ${firstName}! Thank you for joining us.`,
       data: { customerId, email },
     });
@@ -361,7 +361,7 @@ export const registerCustomerEventHandlers = () => {
     // Send welcome email
     await JobScheduler.scheduleEmail({
       to: email,
-      subject: 'Welcome to CommerceFull!',
+      subject: 'Welcome to Commercefull!',
       template: 'welcome-email',
       data: { firstName, lastName },
     });
@@ -383,7 +383,7 @@ export const registerSupplierEventHandlers = () => {
     // Send supplier welcome email
     await JobScheduler.scheduleEmail({
       to: email,
-      subject: 'Welcome to CommerceFull Supplier Network',
+      subject: 'Welcome to Commercefull Supplier Network',
       template: 'supplier-welcome',
       data: { supplierId, name },
     });

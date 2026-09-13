@@ -1,12 +1,12 @@
 # Migrating from Shopify
 
-> **Your exit.** This guide walks through a complete Shopify→CommerceFull migration using the platform's built-in migration module.
+> **Your exit.** This guide walks through a complete Shopify→Commercefull migration using the platform's built-in migration module.
 
 ---
 
 ## Overview
 
-CommerceFull's [migration module](../modules/migration.md) provides the orchestration layer for importing data from external commerce platforms. It tracks each import as a job, maintains a mapping table between source-platform IDs and platform-internal IDs, and logs any errors encountered.
+Commercefull's [migration module](../modules/migration.md) provides the orchestration layer for importing data from external commerce platforms. It tracks each import as a job, maintains a mapping table between source-platform IDs and platform-internal IDs, and logs any errors encountered.
 
 The module supports imports from: **Shopify**, WooCommerce, Magento, BigCommerce, PrestaShop, Shopware, Wix, Squarespace, CSV, or custom API sources.
 
@@ -16,7 +16,7 @@ This guide focuses on Shopify — the most common migration path.
 
 ## Prerequisites
 
-- CommerceFull installed and running (`yarn dev` or production build)
+- Commercefull installed and running (`yarn dev` or production build)
 - PostgreSQL migrated (`yarn db:migrate`)
 - Admin account created (`yarn job:new:admin`)
 - Organization created (`yarn job:new:organization`)
@@ -26,7 +26,7 @@ This guide focuses on Shopify — the most common migration path.
 
 ## What Can Be Migrated
 
-| Entity | Shopify Source | CommerceFull Module |
+| Entity | Shopify Source | Commercefull Module |
 |---|---|---|
 | Products | Shopify Products API | `product` |
 | Product variants | Shopify Products API (variants) | `product` |
@@ -90,7 +90,7 @@ curl -X POST http://localhost:3000/business/migration/jobs/{importJobId}/start \
 
 ### Step 4: Stream Records
 
-For each record from your Shopify export, import it into the appropriate CommerceFull module and record the mapping:
+For each record from your Shopify export, import it into the appropriate Commercefull module and record the mapping:
 
 ```bash
 # 1. Create the product via the Business API
@@ -104,7 +104,7 @@ curl -X POST http://localhost:3000/business/products \
     "currency": "USD"
   }'
 
-# 2. Record the mapping (Shopify product ID → CommerceFull product ID)
+# 2. Record the mapping (Shopify product ID → Commercefull product ID)
 curl -X POST http://localhost:3000/business/migration/jobs/{importJobId}/mappings \
   -H "Content-Type: application/json" \
   -H "Cookie: your_session_cookie" \
@@ -159,18 +159,18 @@ curl -X POST http://localhost:3000/business/migration/jobs/{importJobId}/complet
 
 1. **Verify data** — spot-check products, customers, and orders in the admin panel
 2. **Test checkout** — run a test order end-to-end
-3. **Update DNS** — point your domain to the new CommerceFull instance
-4. **Redirect Shopify traffic** — set up 301 redirects from old Shopify URLs to new CommerceFull URLs
+3. **Update DNS** — point your domain to the new Commercefull instance
+4. **Redirect Shopify traffic** — set up 301 redirects from old Shopify URLs to new Commercefull URLs
 5. **Cancel Shopify** — once you've verified everything works, cancel your Shopify subscription
 
 ---
 
 ## ID Mapping and Deduplication
 
-The migration module maintains a mapping table (`importMapping`) that links Shopify IDs to CommerceFull IDs. This enables:
+The migration module maintains a mapping table (`importMapping`) that links Shopify IDs to Commercefull IDs. This enables:
 
 - **Re-run safety** — if a migration fails partway through, re-running won't create duplicates (the mapping is checked first)
-- **Cross-entity references** — when importing orders that reference Shopify customer IDs, the mapping table resolves them to CommerceFull customer IDs
+- **Cross-entity references** — when importing orders that reference Shopify customer IDs, the mapping table resolves them to Commercefull customer IDs
 - **Rollback** — identify which entities were created by a specific import job
 
 ---
@@ -178,7 +178,7 @@ The migration module maintains a mapping table (`importMapping`) that links Shop
 ## Migration Checklist
 
 - [ ] Export all data from Shopify (products, customers, orders, inventory, coupons, pages)
-- [ ] Create import job in CommerceFull (`source: shopify`)
+- [ ] Create import job in Commercefull (`source: shopify`)
 - [ ] Run dry-run import (`dryRun: true`) and review errors
 - [ ] Fix data issues in export files
 - [ ] Run full import (`dryRun: false`)
@@ -189,7 +189,7 @@ The migration module maintains a mapping table (`importMapping`) that links Shop
 - [ ] Configure shipping zones and rates
 - [ ] Configure tax rates
 - [ ] Set up email notifications
-- [ ] Update DNS to point to CommerceFull
+- [ ] Update DNS to point to Commercefull
 - [ ] Set up 301 redirects from Shopify URLs
 - [ ] Monitor for 48 hours
 - [ ] Cancel Shopify subscription

@@ -1,11 +1,11 @@
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { CommerceFullStack } from '../lib/commercefull-stack';
+import { CommercefullStack } from '../lib/commercefull-stack';
 
-describe('CommerceFullStack', () => {
+describe('CommercefullStack', () => {
   function createStack(overrides: Record<string, unknown> = {}) {
     const app = new cdk.App();
-    const stack = new CommerceFullStack(app, 'TestStack', {
+    const stack = new CommercefullStack(app, 'TestStack', {
       env: { account: '123456789012', region: 'us-east-1' },
       stackName: 'TestStack',
       environment: 'prod',

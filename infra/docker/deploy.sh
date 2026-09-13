@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# CommerceFull Docker Production Deployment Script
+# Commercefull Docker Production Deployment Script
 # This script helps deploy the application in production using Docker
 
 set -e

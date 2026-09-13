@@ -1,6 +1,6 @@
 # Automation Engine
 
-A guide to the CommerceFull automation engine — how rules are defined, persisted, evaluated, and executed on the event bus.
+A guide to the Commercefull automation engine — how rules are defined, persisted, evaluated, and executed on the event bus.
 
 ## Architecture Overview
 

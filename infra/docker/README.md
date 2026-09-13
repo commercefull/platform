@@ -1,6 +1,6 @@
-# CommerceFull Docker Setup
+# Commercefull Docker Setup
 
-This directory contains the Docker configuration for deploying CommerceFull in production.
+This directory contains the Docker configuration for deploying Commercefull in production.
 
 ## Files
 

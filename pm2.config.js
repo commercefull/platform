@@ -1,5 +1,5 @@
 /**
- * PM2 Process Configuration for CommerceFull
+ * PM2 Process Configuration for Commercefull
  * Used by Ansible VPS deployment (infra/vps/roles/deploy/tasks/restart.yml)
  *
  * Usage:

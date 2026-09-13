@@ -1,8 +1,8 @@
-# PCI-DSS SAQ Boundary — CommerceFull Platform
+# PCI-DSS SAQ Boundary — Commercefull Platform
 
 ## Scope
 
-CommerceFull is a **SAQ A-EP** environment. The platform never receives, processes, or stores Primary Account Numbers (PAN). All cardholder data interaction is delegated to PCI-DSS-certified third-party payment service providers (PSPs) via tokenisation.
+Commercefull is a **SAQ A-EP** environment. The platform never receives, processes, or stores Primary Account Numbers (PAN). All cardholder data interaction is delegated to PCI-DSS-certified third-party payment service providers (PSPs) via tokenisation.
 
 ## Architecture
 
@@ -11,7 +11,7 @@ Customer Browser
     │
     ▼
 ┌──────────────────────────────────┐
-│  CommerceFull Platform           │
+│  Commercefull Platform           │
 │  (SAQ A-EP scope)                │
 │                                  │
 │  ┌─────────────┐  ┌───────────┐  │
@@ -41,7 +41,7 @@ Customer Browser
 └──────────────────────────────────┘
 ```
 
-## What CommerceFull DOES handle
+## What Commercefull DOES handle
 
 - **Payment method tokens** — PSP-issued opaque tokens (e.g. `pm_1AbCdE...`, `tok_abc123`)
 - **Last 4 digits** — For display purposes only (e.g. "Visa ending in 4242")
@@ -49,7 +49,7 @@ Customer Browser
 - **Expiry month/year** — For display ("expires 12/2026")
 - **PSP transaction IDs** — For reconciliation and refund processing
 
-## What CommerceFull does NOT handle
+## What Commercefull does NOT handle
 
 - **PAN** — Full card numbers are never transmitted to or stored by the platform
 - **CVV/CVC** — Never transmitted to or stored by the platform
@@ -71,10 +71,10 @@ Customer Browser
 
 1. Customer enters card data in PSP-hosted iframe/SDK (Stripe Elements, Adyen Drop-in)
 2. PSP tokenises card data and returns a `paymentMethodToken` to the browser
-3. Browser sends `paymentMethodToken` + order details to CommerceFull checkout API
-4. CommerceFull payment module forwards token + amount to PSP for processing
+3. Browser sends `paymentMethodToken` + order details to Commercefull checkout API
+4. Commercefull payment module forwards token + amount to PSP for processing
 5. PSP returns transaction result (success/failed) + `externalTransactionId`
-6. CommerceFull stores: token, externalTransactionId, last4, brand, expiry — never PAN
+6. Commercefull stores: token, externalTransactionId, last4, brand, expiry — never PAN
 
 ## Assertion Tests
 

@@ -1,6 +1,6 @@
 # Checkout Security — PCI Compliance Without Sandbox Lock-in
 
-> **The one-line answer:** CommerceFull is SAQ A-EP compliant — card data never touches the platform. PSP-hosted iframes (Stripe Elements, Adyen Drop-in) collect card input, tokenise it, and return only an opaque token. You control the checkout code; the PSP handles the card.
+> **The one-line answer:** Commercefull is SAQ A-EP compliant — card data never touches the platform. PSP-hosted iframes (Stripe Elements, Adyen Drop-in) collect card input, tokenise it, and return only an opaque token. You control the checkout code; the PSP handles the card.
 
 ---
 
@@ -11,7 +11,7 @@ Customer Browser
     │
     ▼
 ┌──────────────────────────────────┐
-│  CommerceFull Platform           │
+│  Commercefull Platform           │
 │  (SAQ A-EP scope)                │
 │                                  │
 │  ┌─────────────┐  ┌───────────┐  │
@@ -45,7 +45,7 @@ Customer Browser
 
 ## The Difference
 
-| | Shopify | CommerceFull |
+| | Shopify | Commercefull |
 |---|---|---|
 | **Checkout control** | Sandboxed — scripts/pixels stripped on non-Plus (Aug 26, 2026) | Full control — you own the checkout code |
 | **Card data handling** | PSP-hosted iframe (SAQ A-EP) | PSP-hosted iframe (SAQ A-EP) — same standard |
@@ -57,7 +57,7 @@ Customer Browser
 
 ## Why This Is Secure Without Sandboxing
 
-Shopify sandboxes checkout to *reduce their PCI scope and control the script surface*. CommerceFull achieves the same PCI compliance through tokenisation — the platform never receives, processes, or stores Primary Account Numbers (PAN). The security boundary is at the PSP iframe, not at a checkout sandbox.
+Shopify sandboxes checkout to *reduce their PCI scope and control the script surface*. Commercefull achieves the same PCI compliance through tokenisation — the platform never receives, processes, or stores Primary Account Numbers (PAN). The security boundary is at the PSP iframe, not at a checkout sandbox.
 
 **What the platform handles:** PSP-issued tokens, last 4 digits (display only), card brand, expiry, transaction IDs.
 
@@ -73,7 +73,7 @@ Shopify sandboxes checkout to *reduce their PCI scope and control the script sur
 
 ## Supported PSPs
 
-CommerceFull's payment failover system supports multiple PSPs with circuit breakers and health checks:
+Commercefull's payment failover system supports multiple PSPs with circuit breakers and health checks:
 
 - Stripe
 - Adyen

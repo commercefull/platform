@@ -1,5 +1,5 @@
 #!/bin/bash
-# CommerceFull AWS CDK Deployment Script
+# Commercefull AWS CDK Deployment Script
 
 set -euo pipefail
 
@@ -12,7 +12,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 # Default values
 ENVIRONMENT="${ENVIRONMENT:-prod}"
 ACTION="${ACTION:-deploy}"
-CONTEXT="${CONTEXT:-CommerceFull-App}"
+CONTEXT="${CONTEXT:-Commercefull-App}"
 AUTO_APPROVE="${AUTO_APPROVE:-false}"
 DESTROY="${DESTROY:-false}"
 DIFF_ONLY="${DIFF_ONLY:-false}"
@@ -27,12 +27,12 @@ usage() {
     cat << EOF
 Usage: $SCRIPT_NAME [OPTIONS]
 
-Deploy CommerceFull to AWS using CDK
+Deploy Commercefull to AWS using CDK
 
 OPTIONS:
     -e, --environment ENV    Environment (dev|staging|prod) [default: prod]
     -a, --action ACTION      CDK action (deploy|destroy|diff|synth) [default: deploy]
-    -c, --context CONTEXT    CDK context/stack name [default: CommerceFull-App]
+    -c, --context CONTEXT    CDK context/stack name [default: Commercefull-App]
     --auto-approve          Auto-approve CDK changes
     --diff-only             Only show diff, don't deploy
     --destroy               Destroy infrastructure
@@ -244,7 +244,7 @@ post_deployment() {
         # Print deployment summary
         cat << EOF
 
-🎉 CommerceFull AWS deployment completed successfully!
+🎉 Commercefull AWS deployment completed successfully!
 
 Deployment Details:
 Environment: $ENVIRONMENT

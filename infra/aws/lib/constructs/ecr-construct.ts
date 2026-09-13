@@ -10,7 +10,7 @@ export interface EcrConstructProps {
 }
 
 /**
- * ECR repository for the CommerceFull container image with lifecycle rules.
+ * ECR repository for the Commercefull container image with lifecycle rules.
  */
 export class EcrConstruct extends Construct {
   readonly repository: ecr.Repository;

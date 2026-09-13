@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { CommerceFullStack } from '../lib/commercefull-stack';
+import { CommercefullStack } from '../lib/commercefull-stack';
 
 const app = new cdk.App();
 
@@ -30,12 +30,12 @@ const enableApiGateway = process.env.ENABLE_API_GATEWAY
   : costOptimized; // always on in cost-optimized mode
 const enableRoute53 = (process.env.ENABLE_ROUTE53 ?? 'true') !== 'false';
 
-new CommerceFullStack(app, 'CommerceFull', {
+new CommercefullStack(app, 'Commercefull', {
   env,
-  stackName: 'CommerceFull',
-  description: 'CommerceFull E-commerce Platform Infrastructure',
+  stackName: 'Commercefull',
+  description: 'Commercefull E-commerce Platform Infrastructure',
   tags: {
-    Project: 'CommerceFull',
+    Project: 'Commercefull',
     Environment: environment,
     ManagedBy: 'CDK',
   },

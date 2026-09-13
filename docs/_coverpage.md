@@ -1,4 +1,4 @@
-# CommerceFull
+# Commercefull
 
 > Own your store. Not just rent it.
 
@@ -7,6 +7,6 @@
 - PostgreSQL + Express + TypeScript
 
 - [Get Started](#/guides/getting-started)
-- [Why CommerceFull](#/product/positioning)
+- [Why Commercefull](#/product/positioning)
 - [API Reference](#/generated/api-reference)
 - [Architecture](#/architecture/overview)

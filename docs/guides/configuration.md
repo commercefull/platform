@@ -1,6 +1,6 @@
 # Configuration
 
-CommerceFull is configured entirely through environment variables. Copy `.env.example` to `.env` and adjust as needed.
+Commercefull is configured entirely through environment variables. Copy `.env.example` to `.env` and adjust as needed.
 
 > The full machine-generated reference with every variable, its default, and description is in the [Configuration Reference](#/generated/configuration).
 

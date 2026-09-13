@@ -137,7 +137,7 @@ resource "google_storage_bucket" "media" {
 # Service Account for Cloud Run
 resource "google_service_account" "cloud_run" {
   account_id   = "${var.app_name}-sa-${var.environment}"
-  display_name = "CommerceFull Cloud Run Service Account"
+  display_name = "Commercefull Cloud Run Service Account"
 }
 
 # IAM roles for service account

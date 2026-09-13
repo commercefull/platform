@@ -1,4 +1,4 @@
--- CommerceFull PostgreSQL Initialization Script
+-- Commercefull PostgreSQL Initialization Script
 -- This script runs when the PostgreSQL container starts for the first time
 
 -- Create extensions if they don't exist
@@ -32,5 +32,5 @@ SET timezone = 'UTC';
 -- Log initialization completion
 DO $$
 BEGIN
-    RAISE NOTICE 'CommerceFull PostgreSQL initialization completed successfully';
+    RAISE NOTICE 'Commercefull PostgreSQL initialization completed successfully';
 END $$;

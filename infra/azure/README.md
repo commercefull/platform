@@ -1,6 +1,6 @@
 # Docker Azure Deployment
 
-Deploy CommerceFull platform to Microsoft Azure using Docker containers.
+Deploy Commercefull platform to Microsoft Azure using Docker containers.
 
 ## Overview
 

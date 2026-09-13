@@ -1,6 +1,6 @@
 # Deployment
 
-CommerceFull supports four deployment strategies. Choose based on your cloud provider and scalability needs.
+Commercefull supports four deployment strategies. Choose based on your cloud provider and scalability needs.
 
 ## Quick comparison
 

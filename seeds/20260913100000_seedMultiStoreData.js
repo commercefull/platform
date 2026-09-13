@@ -27,7 +27,7 @@ exports.seed = async function (knex) {
   await knex(tableName).insert([
     {
       storeId: STORE_IDS.UK,
-      name: 'CommerceFull UK',
+      name: 'Commercefull UK',
       slug: 'uk',
       storeUrl: 'https://uk.shop.example.com',
       organizationId: ORG_ID,
@@ -57,7 +57,7 @@ exports.seed = async function (knex) {
         inventoryDisplayMode: 'show_low_stock',
         priceDisplayMode: 'inclusive_tax',
       }),
-      metaTitle: 'CommerceFull UK — Premium Multi-Brand Fashion',
+      metaTitle: 'Commercefull UK — Premium Multi-Brand Fashion',
       metaDescription: 'Shop premium fashion brands across menswear, womenswear, and accessories.',
       socialLinks: JSON.stringify({
         instagram: 'https://instagram.com/commercefull_uk',
@@ -67,7 +67,7 @@ exports.seed = async function (knex) {
     },
     {
       storeId: STORE_IDS.US,
-      name: 'CommerceFull US',
+      name: 'Commercefull US',
       slug: 'us',
       storeUrl: 'https://us.shop.example.com',
       organizationId: ORG_ID,
@@ -97,7 +97,7 @@ exports.seed = async function (knex) {
         inventoryDisplayMode: 'show_low_stock',
         priceDisplayMode: 'exclusive_tax',
       }),
-      metaTitle: 'CommerceFull US — Premium Multi-Brand Fashion',
+      metaTitle: 'Commercefull US — Premium Multi-Brand Fashion',
       metaDescription: 'Shop premium fashion brands across menswear, womenswear, and accessories.',
       socialLinks: JSON.stringify({
         instagram: 'https://instagram.com/commercefull_us',

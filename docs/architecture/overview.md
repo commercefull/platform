@@ -2,7 +2,7 @@
 
 > This is a symlinked copy of [ARCHITECTURE.md](../../ARCHITECTURE.md) rendered for the docs site.
 
-CommerceFull is an e-commerce platform. A single Express application serves two portals (Admin, Storefront) and two API surfaces (`/customer`, `/business`), backed by PostgreSQL.
+Commercefull is an e-commerce platform. A single Express application serves two portals (Admin, Storefront) and two API surfaces (`/customer`, `/business`), backed by PostgreSQL.
 
 ```
                     ┌─────────────────────────┐

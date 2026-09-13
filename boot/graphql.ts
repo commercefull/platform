@@ -257,7 +257,7 @@ export function configureGraphQL(app: Express): void {
         res.send(`<!DOCTYPE html>
 <html>
   <head>
-    <title>CommerceFull GraphiQL</title>
+    <title>Commercefull GraphiQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>body { margin: 0; height: 100vh; } #graphiql { height: 100vh; }</style>

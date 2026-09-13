@@ -1,6 +1,6 @@
 # Docker GCP Deployment
 
-Deploy CommerceFull platform to Google Cloud Platform using Docker containers.
+Deploy Commercefull platform to Google Cloud Platform using Docker containers.
 
 ## Overview
 
@@ -92,7 +92,7 @@ Internet
     ↓
 [Google Cloud Load Balancer (HTTPS)]
     ↓
-[Cloud Run (CommerceFull App)]
+[Cloud Run (Commercefull App)]
     ↙               ↘
 [Cloud SQL]    [Cloud Storage]
 (PostgreSQL)   (Files/Media)

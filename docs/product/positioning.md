@@ -1,4 +1,4 @@
-# Why CommerceFull
+# Why Commercefull
 
 > **Own your store. Not just rent it.**
 >
@@ -25,7 +25,7 @@ Every merchant eventually hits the same wall with the two dominant platforms:
 4. **Security is diffused** — most serious vulnerabilities live in the plugin ecosystem, not the core.
 5. **Poor trust signal** — low independent review ratings tied to maintenance complaints.
 
-**The insight:** Shopify's failure mode is *lock-in*. WooCommerce's failure mode is *abandonment*. CommerceFull solves both without inheriting either.
+**The insight:** Shopify's failure mode is *lock-in*. WooCommerce's failure mode is *abandonment*. Commercefull solves both without inheriting either.
 
 ---
 
@@ -61,7 +61,7 @@ Custom-built modules and workflows for specific business needs — compliance, u
 
 ## Comparison
 
-| Dimension | Shopify | WooCommerce | CommerceFull |
+| Dimension | Shopify | WooCommerce | Commercefull |
 |---|---|---|---|
 | **Data ownership** | Limited export, lives on their servers | Full, but fragile | Full, self-hosted, fully exportable |
 | **Checkout control** | Sandboxed (Plus for customization) | Full, but plugin-fragile | Full, no restrictions |
@@ -85,7 +85,7 @@ Each pillar is backed by provable documentation — not just claims.
 
 ### Your Cost — the app tax, quantified
 
-A full Shopify DTC app stack runs $300–$800/month near $1M revenue and $2,500–$6,000/month near $10M. CommerceFull ships loyalty, subscriptions, membership, reviews, returns, analytics, and compliance natively — zero app tax.
+A full Shopify DTC app stack runs $300–$800/month near $1M revenue and $2,500–$6,000/month near $10M. Commercefull ships loyalty, subscriptions, membership, reviews, returns, analytics, and compliance natively — zero app tax.
 
 → [Cost comparison with real Shopify app pricing](./cost-comparison.md)
 

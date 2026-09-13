@@ -180,7 +180,7 @@ export function configureRoutes(app: Express): void {
       swaggerUi.serve,
       swaggerUi.setup(openApiSpec, {
         customCssUrl: undefined,
-        customSiteTitle: 'CommerceFull API',
+        customSiteTitle: 'Commercefull API',
       } as swaggerUi.SwaggerUiOptions),
     );
   }

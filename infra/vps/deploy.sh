@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================
-# CommerceFull - Ansible Deployment Wrapper
+# Commercefull - Ansible Deployment Wrapper
 # ===========================================
 # Quick shortcuts for common operations.
 # All commands run from the infra/vps directory.
@@ -72,7 +72,7 @@ case "${1:-help}" in
         ;;
     help|--help|-h)
         cat << 'EOF'
-CommerceFull Ansible VPS Deployment
+Commercefull Ansible VPS Deployment
 
 Usage: ./deploy.sh <command> [ansible-options...]
 
