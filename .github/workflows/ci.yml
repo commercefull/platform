@@ -54,6 +54,7 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: commercefull
+      PORT: 3000
       NODE_ENV: development
     steps:
       - uses: actions/checkout@v5
