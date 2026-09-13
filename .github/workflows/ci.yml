@@ -70,7 +70,23 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn db:migrate
       - run: yarn db:seed
+      - name: Start server
+        run: |
+          npx tsx app.ts &
+          echo $! > .server.pid
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/health > /dev/null 2>&1; then
+              echo "Server is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Server failed to start"
+          exit 1
       - run: yarn test:int
+      - name: Stop server
+        if: always()
+        run: kill $(cat .server.pid) 2>/dev/null || true
 
   docs-check:
     name: Documentation Check
