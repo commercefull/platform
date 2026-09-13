@@ -6,14 +6,19 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue.svg)](https://www.postgresql.org)
+[![Tests](https://img.shields.io/badge/Tests-5%2C000%2B%20passing-brightgreen.svg)](#quality-metrics)
+[![Modules](https://img.shields.io/badge/Modules-43-blue.svg)](#modules)
+[![ESLint](https://img.shields.io/badge/ESLint-0%20errors-brightgreen.svg)](#quality-metrics)
 
-CommerceFull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs, and 36 business modules covering the full commerce lifecycle.
+CommerceFull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs plus **GraphQL**, and 43 business modules covering the full commerce lifecycle.
 
 ---
 
 ## Table of Contents
 
 - [Features](#features)
+- [Enterprise Features](#enterprise-features)
+- [Quality Metrics](#quality-metrics)
 - [Quick Start](#quick-start)
 - [Access Points](#access-points)
 - [Project Structure](#project-structure)
@@ -62,13 +67,66 @@ CommerceFull is an open-source e-commerce platform built with Node.js, TypeScrip
 
 ### Platform
 
-- **Admin Panel** — Full platform management across all 36 modules
+- **Admin Panel** — Full platform management across all 43 modules
 - **Content Management** — Pages, blocks, templates, and media library
 - **Notifications** — Email/push templates with event-driven delivery
 - **Analytics** — Sales, product, customer, and predictive analytics
 - **GDPR Compliance** — Data requests, consent management, and audit trails
 - **Support Center** — Ticket management and FAQ system
 - **Internationalization** — Multi-locale, multi-currency, multi-region support
+
+---
+
+## Enterprise Features
+
+### Security & Access Control
+
+- **Enterprise SSO** — SAML 2.0 and OpenID Connect providers per organization, with configurable attribute/claim mapping and provider lifecycle management
+- **SCIM 2.0 Provisioning** — `/business/scim/v2` user lifecycle provisioning for IdP-driven onboarding and offboarding
+- **Granular RBAC** — Policy engine with resource + action + field-level scoping, deny-rule precedence, per-organization role policies, and 6 built-in system roles (admin, manager, cashier, viewer, support, operations)
+- **Immutable Audit Log** — Append-only, SHA-256 hash-chained audit trail capturing mutating business actions, with tamper detection, chain verification, and sensitive-field redaction
+
+### Reliability & Extensibility
+
+- **Durable Event Bus** — Transactional outbox with at-least-once delivery, exponential-backoff retries, dead-letter queue, and event replay
+- **Module Registry** — 37 optional modules toggleable via env vars or a DB-backed feature-flag provider; routes, GraphQL schema, event handlers, and migrations are gated per module
+- **Outbound Webhooks** — HMAC-SHA256-signed deliveries with retry and delivery tracking
+- **Payment Failover** — Multi-PSP routing (Stripe, PayPal, Klarna, Apple Pay, Affirm) with circuit breakers, health checks, and priority routing
+- **GraphQL API** — Merged schema across modules with query depth limiting
+
+### Compliance & Governance
+
+- **GDPR** — Data subject requests, cookie consent, and audit trails
+- **CCPA & SOC 2** — Data subject requests, key rotation policy, and audit logging via the `compliance` module
+- **PCI DSS** — SAQ boundary documentation in [`docs/compliance/`](./docs/compliance/pci-dss-saq-boundary.md)
+- **Consent-Gated Tracking** — Server-side GTM container and Meta CAPI adapters with SHA-256 PII hashing and per-store consent categories
+
+### B2B & Multi-Vendor
+
+- **B2B Commerce** — Company hierarchies, multi-user spending limits, price books, RFQ→quote→order flow, Net-15/30/60 terms, and approval workflows
+- **Marketplace** — Vendor onboarding, commission rules (percentage/fixed/tiered), payouts, and order splitting
+- **Returns & RMA** — Explicit state machine, carrier return labels, store-credit ledger, and warranty claims
+- **Platform Migration** — Import jobs, source-to-platform ID mappings, and error tracking
+
+---
+
+## Quality Metrics
+
+Enforced via `yarn lint` (TypeScript + ESLint + dependency-cruiser) and `yarn test`. See the [quality action plan](./docs/quality-action-plan.md) for the full audit trail.
+
+| Metric                              | Value                                          |
+| ----------------------------------- | ---------------------------------------------- |
+| **Test cases**                      | 5,000+ across 630+ files (unit + integration)  |
+| **TypeScript**                      | Strict mode — `tsc --noEmit` clean             |
+| **ESLint errors**                   | 0                                              |
+| **Dependency-cruiser violations**   | 0 — module boundaries enforced at build time   |
+| **Circular dependencies**           | 0                                              |
+| **Cross-module import violations**  | 0 — all cross-module access via ACL ports      |
+| **Unused files (knip)**             | 0                                              |
+| **Security scanning**               | Semgrep + OSV-Scanner, SHA-pinned CI actions   |
+| **Performance testing**             | k6 smoke, load, stress, and spike suites       |
+| **Database migrations**             | 300+ versioned Knex migrations                 |
+| **Locales**                         | 16                                             |
 
 ---
 
@@ -146,7 +204,7 @@ platform/
 │   ├── session/               #   Session management
 │   ├── types/                 #   Shared TypeScript types
 │   └── validation/            #   Input validation helpers
-├── modules/                   # 36 business modules (DDD)
+├── modules/                   # 43 business modules (DDD)
 │   ├── product/               #   Example: Product module
 │   │   ├── application/       #     Use cases
 │   │   ├── domain/            #     Entities, value objects, events
@@ -180,6 +238,7 @@ platform/
 | ----------------- | --------------------------------------------------------- |
 | **Runtime**       | Node.js 20+, TypeScript 5.x                               |
 | **Framework**     | Express 5                                                 |
+| **APIs**          | REST + GraphQL (depth-limited)                            |
 | **Database**      | PostgreSQL 18, Knex (migrations), raw SQL via `pg` driver |
 | **Admin UI**      | EJS templates, Tabler (Bootstrap-based)                   |
 | **Storefront UI** | EJS templates, Tailwind CSS                               |
@@ -296,7 +355,7 @@ CommerceFull follows **Domain-Driven Design (DDD)** with a layered architecture:
 │  └──────────┘ └──────────┘ └────────┘ └──────────────┘  │
 ├──────────────────────────────────────────────────────────┤
 │                  modules/ (Business Logic)                │
-│  36 bounded contexts with DDD structure                  │
+│  43 bounded contexts with DDD structure                  │
 │  Each: domain → application → infrastructure → interface │
 ├──────────────────────────────────────────────────────────┤
 │                    libs/ (Shared)                         │
@@ -331,46 +390,53 @@ For a detailed architecture guide, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Modules
 
-CommerceFull includes 36 business modules:
+CommerceFull includes 43 business modules:
 
-| Module          | Description                                        |
-| --------------- | -------------------------------------------------- |
-| `analytics`     | Sales, product, customer, and predictive analytics |
-| `assortment`    | Categories, collections, and product assortment    |
-| `b2b`           | B2B companies, quotes, credit terms                |
-| `basket`        | Shopping cart management                           |
-| `brand`         | Brand management                                   |
-| `business`      | Business entity management                         |
-| `channel`       | Sales channel configuration                        |
-| `checkout`      | Checkout session and flow                          |
-| `configuration` | System-wide configuration                          |
-| `content`       | CMS pages, blocks, and templates                   |
-| `coupon`        | Coupon codes and validation                        |
-| `customer`      | Customer profiles and groups                       |
-| `fulfillment`   | Order fulfillment and shipping                     |
-| `gdpr`          | GDPR compliance and data requests                  |
-| `identity`      | Authentication and authorization (IAM)             |
-| `inventory`     | Stock levels, reservations, and lot tracking       |
-| `localization`  | Countries, currencies, and locales                 |
-| `loyalty`       | Loyalty programs, points, and tiers                |
-| `media`         | File and media management (S3/local)               |
-| `membership`    | Membership plans and subscriptions                 |
-| `merchant`      | Merchant onboarding and management                 |
-| `notification`  | Email/push notification templates                  |
-| `order`         | Order lifecycle management                         |
-| `organization`  | Organization hierarchy                             |
-| `payment`       | Payment processing (Stripe)                        |
-| `pricing`       | Price lists, rules, and dynamic pricing            |
-| `product`       | Product catalog with master/variant architecture   |
-| `promotion`     | Promotions, discounts, and gift cards              |
-| `segment`       | Customer segmentation                              |
-| `shipping`      | Shipping methods, zones, and rates                 |
-| `store`         | Store management                                   |
-| `subscription`  | Recurring subscription billing                     |
-| `supplier`      | Supplier and purchase order management             |
-| `support`       | Support tickets and FAQ                            |
-| `tax`           | Tax calculation, zones, and classes                |
-| `warehouse`     | Warehouse and distribution management              |
+| Module          | Description                                                              |
+| --------------- | ------------------------------------------------------------------------ |
+| `analytics`     | Sales, product, customer, and predictive analytics                       |
+| `audit`         | Immutable, hash-chained audit log                                        |
+| `automation`    | Rule engine — condition/action DSL executed on the event bus             |
+| `b2b`           | B2B companies, quotes, price books, credit terms, approval workflows     |
+| `basket`        | Shopping cart management                                                 |
+| `checkout`      | Checkout sessions, configurable steps, payment capture flow              |
+| `compliance`    | SOC 2 audit logging, key rotation, CCPA data subject requests            |
+| `configuration` | System-wide configuration and feature flags                              |
+| `content`       | CMS pages, blocks, and templates                                         |
+| `coupon`        | Coupon codes and validation                                              |
+| `customer`      | Customer profiles and groups                                             |
+| `fulfillment`   | Order fulfillment, packing, and shipping labels                          |
+| `gdpr`          | GDPR compliance and data requests                                        |
+| `identity`      | Authentication and authorization (IAM), SSO (SAML/OIDC), SCIM 2.0        |
+| `integration`   | Third-party integrations with encrypted credentials                      |
+| `inventory`     | Stock levels, reservations, and lot tracking                             |
+| `localization`  | Countries, currencies, and locales                                       |
+| `loyalty`       | Loyalty programs, points, and tiers                                      |
+| `marketplace`   | Multi-vendor marketplace — commissions, payouts, order splitting         |
+| `media`         | File and media management (S3/local)                                     |
+| `membership`    | Membership plans and subscriptions                                       |
+| `migration`     | External platform migration — import jobs and ID mappings                |
+| `notification`  | Email/push notification templates                                        |
+| `order`         | Order lifecycle management                                               |
+| `organization`  | Organization hierarchy                                                   |
+| `pagebuilder`   | Drag-and-drop page builder with block schema and theme integration       |
+| `payment`       | Multi-PSP payment processing with failover routing                       |
+| `pricing`       | Price lists, rules, and dynamic pricing                                  |
+| `product`       | Product catalog with master/variant architecture                         |
+| `promotion`     | Promotions, discounts, and gift cards                                    |
+| `reporting`     | Report generation and exports                                            |
+| `returns`       | Returns, exchanges, store credit, and warranty claims                    |
+| `segment`       | Customer segmentation (CDP)                                              |
+| `shipping`      | Shipping methods, zones, and rates                                       |
+| `store`         | Store management, pickup, and local delivery                             |
+| `subscription`  | Recurring subscription billing                                           |
+| `supplier`      | Supplier and purchase order management                                   |
+| `support`       | Support tickets and FAQ                                                  |
+| `tax`           | Tax calculation, zones, and classes                                      |
+| `theme`         | Theme engine — registry, per-store overrides, CSS variables              |
+| `tracking`      | Consent-gated server-side tracking (GTM Server + Meta CAPI)              |
+| `warehouse`     | Warehouse and distribution management                                    |
+| `webhook`       | Outbound webhook delivery with HMAC signatures                           |
 
 ---
 
@@ -378,7 +444,7 @@ CommerceFull includes 36 business modules:
 
 ### Admin Panel (`/admin`)
 
-Full platform management with 41 controllers covering all modules. Built with Tabler (Bootstrap-based) UI framework.
+Full platform management covering all 43 modules. Built with Tabler (Bootstrap-based) UI framework.
 
 **Key sections:** Dashboard, Products, Orders, Customers, Inventory, Promotions, Payments, Shipping, Content, Analytics, Programs (Membership, Subscription, Loyalty), Operations (Warehouses, Fulfillment, Suppliers), Settings, Users & Roles, GDPR, Support.
 
