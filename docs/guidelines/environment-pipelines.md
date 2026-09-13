@@ -128,7 +128,7 @@ Production should **never** run `knex seed:run`. Reference data is inserted via:
 
 ## AWS Dual-Hosting Parity
 
-The `infra/ecs-aws/` directory contains AWS CDK infrastructure that achieves feature parity with the other deployment strategies.
+The `infra/aws/` directory contains AWS CDK infrastructure that achieves feature parity with the other deployment strategies.
 
 ### Architecture
 
@@ -172,13 +172,13 @@ The `infra/ecs-aws/` directory contains AWS CDK infrastructure that achieves fea
 ### Deploying to AWS
 
 ```bash
-cd infra/ecs-aws
+cd infra/aws
 npm install
 cdk bootstrap    # one-time
 cdk deploy CommerceFull-App
 ```
 
-See `infra/ecs-aws/README.md` for detailed instructions.
+See `infra/aws/README.md` for detailed instructions.
 
 ## CI/CD Pipeline (recommended)
 

@@ -14,7 +14,7 @@ This directory contains the Docker configuration for deploying CommerceFull in p
 
 ## AWS ECS Integration
 
-This Docker setup is fully compatible with the AWS ECS deployment in `../ecs-aws/`. The `build-for-ecs.sh` script automatically builds and pushes images to ECR for ECS deployment.
+This Docker setup is fully compatible with the AWS ECS deployment in `../aws/`. The `build-for-ecs.sh` script automatically builds and pushes images to ECR for ECS deployment.
 
 ### Using with ECS
 
@@ -23,7 +23,7 @@ This Docker setup is fully compatible with the AWS ECS deployment in `../ecs-aws
 ./build-for-ecs.sh
 
 # Then deploy via ECS CDK
-cd ../ecs-aws
+cd ../aws
 ./deploy.sh --environment prod
 ```
 

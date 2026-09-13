@@ -110,7 +110,11 @@
     </footer>
 
     <!-- Storefront JS -->
+    <% if (typeof isProduction !== 'undefined' && isProduction) { %>
+    <script src="/javascripts/storefront/bundle.min.js" type="module"></script>
+    <% } else { %>
     <script src="/javascripts/storefront/main.js" type="module"></script>
+    <% } %>
 
     <!-- Cart Drawer -->
     <%- include("cart-drawer") %>

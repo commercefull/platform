@@ -6,11 +6,11 @@
 
 | Directory       | Strategy                       | Use Case                      |
 | --------------- | ------------------------------ | ----------------------------- |
-| `ansible-vps/`  | Ansible on traditional VPS     | Simple, full control          |
+| `vps/`  | Ansible on traditional VPS     | Simple, full control          |
 | `docker/`       | Docker Compose (local/staging) | Development, CI               |
-| `docker-gcp/`   | Terraform + Cloud Run          | Google Cloud deployment       |
-| `docker-azure/` | Terraform + Container Apps     | Azure deployment              |
-| `ecs-aws/`      | AWS CDK + ECS Fargate + RDS    | High availability, enterprise |
+| `gcp/`   | Terraform + Cloud Run          | Google Cloud deployment       |
+| `azure/` | Terraform + Container Apps     | Azure deployment              |
+| `aws/`      | AWS CDK + ECS Fargate + RDS    | High availability, enterprise |
 
 ## Docker Development
 

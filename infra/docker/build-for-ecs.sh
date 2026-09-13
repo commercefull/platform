@@ -22,8 +22,8 @@ print_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
-# Get project root (assuming this script is in infra/docker/)
-PROJECT_ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
+# Get project root (this script is in infra/docker/)
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 INFRA_DOCKER_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Get AWS account and region
@@ -56,4 +56,4 @@ print_success "Docker image built and pushed successfully!"
 print_info "Image: $ECR_URI:latest"
 print_info ""
 print_info "You can now deploy using the ECS CDK:"
-print_info "cd infra/ecs-aws && ./deploy.sh --environment prod"
+print_info "cd infra/aws && ./deploy.sh --environment prod"

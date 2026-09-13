@@ -21,10 +21,7 @@ RUN yarn install --frozen-lockfile --production=false
 # Copy source code
 COPY . .
 
-# Build CSS
-RUN yarn css:build
-
-# Build application for production
+# Build CSS + storefront bundle + application (prd:build includes css:build and storefront:build)
 RUN yarn prd:build
 
 # Stage 2: Production stage
@@ -77,5 +74,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start application
-CMD ["yarn", "prd:run"]
+# Start application (no --watch in containers)
+CMD ["yarn", "prd:run:docker"]

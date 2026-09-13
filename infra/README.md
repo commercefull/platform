@@ -18,28 +18,28 @@ Choose your preferred deployment strategy:
 ### 1. Ansible on VPS (Recommended for simplicity)
 
 ```bash
-cd infra/ansible-vps
+cd infra/vps
 ansible-playbook -i inventory.ini deploy.yml
 ```
 
 ### 2. Docker on GCP (Recommended for Google ecosystem)
 
 ```bash
-cd infra/docker-gcp
+cd infra/gcp
 gcloud builds submit --config cloudbuild.yaml .
 ```
 
 ### 3. Docker on Azure (Recommended for Microsoft ecosystem)
 
 ```bash
-cd infra/docker-azure
+cd infra/azure
 az deployment group create --resource-group commercefull-rg --template-file azuredeploy.json
 ```
 
 ### 4. ECS + RDS on AWS (Recommended for high availability)
 
 ```bash
-cd infra/ecs-aws
+cd infra/aws
 cdk deploy CommerceFull-App
 ```
 

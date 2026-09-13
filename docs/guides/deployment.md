@@ -24,21 +24,21 @@ CommerceFull supports four deployment strategies. Choose based on your cloud pro
 Full Ansible automation with 7 roles: common, postgresql, nodejs, app, nginx, ssl, monitoring.
 
 ```bash
-cd infra/ansible-vps
+cd infra/vps
 # Edit inventory.ini with your server IP
 ansible-playbook -i inventory.ini deploy.yml
 ```
 
 **Features**: Automated PostgreSQL 18, SSL via Let's Encrypt, systemd service, log rotation, security hardening (UFW, Fail2ban), backup automation.
 
-See `infra/ansible-vps/README.md` for details.
+See `infra/vps/README.md` for details.
 
 ## 2. Docker + GCP
 
 Terraform infrastructure: Cloud Run, Cloud SQL, Cloud Storage, Cloud Load Balancer.
 
 ```bash
-cd infra/docker-gcp
+cd infra/gcp
 # Edit terraform.tfvars
 terraform init
 terraform apply
@@ -47,14 +47,14 @@ terraform apply
 
 **Features**: Serverless containers, auto-scaling, Cloud Storage for media, CI/CD ready.
 
-See `infra/docker-gcp/README.md` for details.
+See `infra/gcp/README.md` for details.
 
 ## 3. Docker + Azure
 
 Terraform infrastructure: Container Apps, Azure Database for PostgreSQL, Storage Account, Front Door.
 
 ```bash
-cd infra/docker-azure
+cd infra/azure
 # Edit terraform.tfvars
 terraform init
 terraform apply
@@ -63,20 +63,20 @@ terraform apply
 
 **Features**: Serverless, global distribution, Key Vault secrets, Application Insights.
 
-See `infra/docker-azure/README.md` for details.
+See `infra/azure/README.md` for details.
 
 ## 4. ECS + RDS + AWS
 
 AWS CDK v2: VPC, ECS Fargate, RDS, ALB, CloudFront, S3.
 
 ```bash
-cd infra/ecs-aws
+cd infra/aws
 ./deploy.sh --environment prod
 ```
 
 **Features**: Fargate auto-scaling, RDS PostgreSQL, CloudFront CDN, S3 media, Systems Manager secrets, CloudWatch.
 
-See `infra/ecs-aws/README.md` for details.
+See `infra/aws/README.md` for details.
 
 ## Docker (local production)
 

@@ -1,0 +1,63 @@
+---
+# ===========================================
+# Deploy Role - Restart Application
+# ===========================================
+
+- name: Check if PM2 config exists
+  ansible.builtin.stat:
+    path: '{{ current_link }}/pm2.config.js'
+  register: pm2_config
+
+- name: Check if PM2 process is already running
+  ansible.builtin.shell: pm2 jlist 2>/dev/null | grep -q '"name":"commercefull"' || echo "not_running"
+  args:
+    executable: /bin/bash
+  environment:
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  register: pm2_status
+  changed_when: false
+  when: pm2_config.stat.exists
+
+- name: Start PM2 processes (first deployment)
+  ansible.builtin.shell: |
+    cd {{ current_link }} && pm2 start pm2.config.js --env {{ node_env }}
+  args:
+    executable: /bin/bash
+  environment:
+    NODE_ENV: '{{ node_env }}'
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  when: pm2_config.stat.exists and pm2_status.stdout == "not_running"
+  register: pm2_start
+
+- name: Restart PM2 processes (subsequent deployments)
+  ansible.builtin.shell: |
+    cd {{ current_link }} && pm2 restart pm2.config.js --update-env --env {{ node_env }}
+  args:
+    executable: /bin/bash
+  environment:
+    NODE_ENV: '{{ node_env }}'
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  when: pm2_config.stat.exists and pm2_status.stdout != "not_running"
+  register: pm2_restart
+
+- name: Save PM2 process list
+  ansible.builtin.shell: pm2 save
+  environment:
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  when: pm2_config.stat.exists
+
+- name: Ensure PM2 starts on boot
+  ansible.builtin.shell: pm2 startup systemd -u {{ app_user }} --hp /home/{{ app_user }}
+  environment:
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+  become: true
+  when: pm2_config.stat.exists
+  changed_when: false

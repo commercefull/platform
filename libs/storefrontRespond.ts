@@ -43,6 +43,8 @@ export async function storefrontRespond(req: TypedRequest, res: Response, view: 
     canonicalUrl,
     ogType: 'website',
     twitterCard: 'summary_large_image',
+    // Production flag for conditional asset loading
+    isProduction: process.env.NODE_ENV === 'production',
     // Price formatting helpers (from libs/money)
     formatPrice,
     formatPriceWithTax,
