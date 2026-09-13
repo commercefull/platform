@@ -76,3 +76,33 @@ Custom-built modules and workflows for specific business needs — compliance, u
 
 - **New and growing merchants** evaluating platforms from scratch
 - **Merchants actively trying to leave Shopify** — already paying for Plus or stacking apps, price-sensitive to platform tax, searching for alternatives
+
+---
+
+## The Evidence
+
+Each pillar is backed by provable documentation — not just claims.
+
+### Your Cost — the app tax, quantified
+
+A full Shopify DTC app stack runs $300–$800/month near $1M revenue and $2,500–$6,000/month near $10M. CommerceFull ships loyalty, subscriptions, membership, reviews, returns, analytics, and compliance natively — zero app tax.
+
+→ [Cost comparison with real Shopify app pricing](./cost-comparison.md)
+
+### Your Exit — a real migration path
+
+The migration module supports imports from Shopify, WooCommerce, Magento, BigCommerce, and 7 other sources. Full job lifecycle, ID mapping, error tracking, and deduplication. Step-by-step Shopify migration guide with API examples and a cutover checklist.
+
+→ [Migrating from Shopify](../guides/migrating-from-shopify.md) · [Migration module reference](../modules/migration.md)
+
+### Your Checkout — secure without sandboxing
+
+SAQ A-EP compliant — same PCI standard as Shopify. Card data never touches the platform; PSP-hosted iframes (Stripe Elements, Adyen Drop-in) handle tokenisation. The difference: you control the checkout code. No script stripping, no Plus paywall for pixels.
+
+→ [Checkout security and PCI compliance](./checkout-security.md) · [PCI-DSS SAQ boundary](../compliance/pci-dss-saq-boundary.md)
+
+### Tailored Development — ownership without lock-in
+
+Apache-2.0 core. Bespoke modules are standard TypeScript + PostgreSQL + Express — no proprietary runtime, no license server, no phone-home. Full source delivered. You own it, you can port it, you can hire anyone to maintain it.
+
+→ [Tailored development ownership guarantees](./tailored-development.md)
