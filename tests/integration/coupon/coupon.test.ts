@@ -232,7 +232,7 @@ describe('Coupon Business API', () => {
         headers: authHeaders(),
       });
 
-      expect([400, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(404);
     });
   });
 

@@ -118,7 +118,7 @@ describe('Media API Integration', () => {
       });
 
       // Should fail at multer validation
-      expect([400, 500].includes(response.status)).toBe(true);
+      expect(response.status).toBe(400);
     });
 
     it('should handle missing files', async () => {
@@ -130,7 +130,7 @@ describe('Media API Integration', () => {
         },
       );
 
-      expect([400, 500].includes(response.status)).toBe(true);
+      expect(response.status).toBe(400);
     });
 
     it('should handle oversized files', async () => {
@@ -146,7 +146,7 @@ describe('Media API Integration', () => {
         },
       });
 
-      expect([400, 500].includes(response.status)).toBe(true);
+      expect(response.status).toBe(400);
     });
   });
 
@@ -192,7 +192,7 @@ describe('Media API Integration', () => {
         },
       );
 
-      expect([400, 500].includes(response.status)).toBe(true);
+      expect(response.status).toBe(400);
     });
   });
 
@@ -267,7 +267,7 @@ describe('Media API Integration', () => {
         },
       });
 
-      expect([400, 500].includes(response.status)).toBe(true);
+      expect(response.status).toBe(400);
       expect(response.data.success).toBe(false);
     });
 
@@ -285,7 +285,7 @@ describe('Media API Integration', () => {
         },
       });
 
-      expect([400, 500].includes(response.status)).toBe(true);
+      expect(response.status).toBe(400);
       expect(response.data.success).toBe(false);
     });
   });

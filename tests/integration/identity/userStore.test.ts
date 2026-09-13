@@ -41,7 +41,7 @@ describe('User-Store Assignment API', () => {
         { headers: authHeaders() },
       );
 
-      expect([201, 400, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(201);
     });
 
     it('should reject assignment with missing storeId', async () => {
@@ -93,7 +93,7 @@ describe('User-Store Assignment API', () => {
 
       const response = await client.delete(`/business/auth/users/${TEST_USER_ID}/stores/${TEST_STORE_ID}`, { headers: authHeaders() });
 
-      expect([200, 400, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(200);
     });
   });
 

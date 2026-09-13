@@ -309,8 +309,8 @@ describe('Store CRUD Tests', () => {
         headers: authHeaders(),
       });
 
-      // Controller returns 200 (idempotent delete) or 400/404
-      expect([200, 400, 404].includes(response.status)).toBe(true);
+      // Controller returns 200 (idempotent delete)
+      expect(response.status).toBe(200);
     });
   });
 });

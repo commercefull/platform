@@ -139,7 +139,7 @@ describe('Identity Expanded Tests', () => {
       });
 
       // Should get 400 for invalid provider
-      expect([400, 401, 404].includes(resp.status)).toBe(true);
+      expect(resp.status).toBe(400);
     });
   });
 

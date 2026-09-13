@@ -52,11 +52,17 @@ export default [
       'max-params': ['warn', { max: 5 }],
       'max-depth': ['warn', { max: 5 }],
       'max-lines': ['warn', { max: 500, skipComments: true }],
-      // Ban expect([array]).toContain(x) — assert a single expected value
-      'no-restricted-syntax': ['error', {
-        selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='toContain'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='ArrayExpression']",
-        message: 'Do not use expect([array]).toContain(x). Assert a single expected value with expect(x).toBe(y) instead.',
-      }],
+      // Ban expect([array]).toContain(x) and expect([array].includes(x)).toBe(true)
+      'no-restricted-syntax': ['error',
+        {
+          selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='toContain'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='ArrayExpression']",
+          message: 'Do not use expect([array]).toContain(x). Assert a single expected value with expect(x).toBe(y) instead.',
+        },
+        {
+          selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='toBe'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='CallExpression'][callee.object.arguments.0.callee.type='MemberExpression'][callee.object.arguments.0.callee.property.name='includes'][callee.object.arguments.0.callee.object.type='ArrayExpression']",
+          message: 'Do not use expect([array].includes(x)).toBe(true). Assert a single expected value with expect(x).toBe(y) instead.',
+        },
+      ],
     },
   },
   {

@@ -252,7 +252,7 @@ describe('Payment Fraud Prevention Tests', () => {
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
 
-      expect([200, 400, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(404);
     });
   });
 

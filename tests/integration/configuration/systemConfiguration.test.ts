@@ -166,7 +166,7 @@ describe('SystemConfiguration API Integration', () => {
         headers: authHeaders(),
       });
 
-      expect([400, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(404);
       expect(response.data.success).toBe(false);
     });
   });
@@ -329,7 +329,7 @@ describe('SystemConfiguration API Integration', () => {
         headers: authHeaders(),
       });
 
-      expect([400, 500].includes(response.status)).toBe(true);
+      expect(response.status).toBe(400);
       expect(response.data.success).toBe(false);
     });
 

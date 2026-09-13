@@ -402,12 +402,12 @@ describe('Basket Edge Cases & Gap Tests', () => {
       const response = await client.post('/customer/basket', {
         sessionId: 'no-auth-test',
       });
-      expect([200, 201].includes(response.status)).toBe(true);
+      expect(response.status).toBe(201);
     });
 
     it('should allow guest basket retrieval without auth', async () => {
       const response = await client.get('/customer/basket/00000000-0000-0000-0000-000000000001');
-      expect([200, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(200);
     });
 
     it('should allow guest adding items without auth', async () => {
@@ -416,17 +416,17 @@ describe('Basket Edge Cases & Gap Tests', () => {
         quantity: 1,
         unitPrice: 10,
       });
-      expect([200, 201, 400, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(201);
     });
 
     it('should allow guest basket summary without auth', async () => {
       const response = await client.get('/customer/basket/00000000-0000-0000-0000-000000000001/summary');
-      expect([200, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(200);
     });
 
     it('should allow guest clearing basket without auth', async () => {
       const response = await client.delete('/customer/basket/00000000-0000-0000-0000-000000000001/items');
-      expect([200, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(200);
     });
 
     it('should allow guest merging baskets without auth', async () => {
@@ -434,7 +434,7 @@ describe('Basket Edge Cases & Gap Tests', () => {
         sourceBasketId: '00000000-0000-0000-0000-000000000001',
         targetBasketId: '00000000-0000-0000-0000-000000000002',
       });
-      expect([200, 400, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(201);
     });
   });
 });

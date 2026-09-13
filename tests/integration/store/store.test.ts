@@ -106,7 +106,7 @@ describe('Store API Integration', () => {
         headers: authHeaders(),
       });
 
-      expect([400, 409].includes(response.status)).toBe(true);
+      expect(response.status).toBe(409);
       expect(response.data.success).toBe(false);
     });
 
@@ -121,7 +121,7 @@ describe('Store API Integration', () => {
         headers: authHeaders(),
       });
 
-      expect([400, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(400);
       expect(response.data.success).toBe(false);
     });
   });

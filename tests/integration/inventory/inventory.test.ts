@@ -286,7 +286,7 @@ describe('Inventory Feature Tests', () => {
     it('should allow public access to availability check', async () => {
       const response = await client.get('/customer/inventory/availability/TEST-SKU');
 
-      expect([200, 404].includes(response.status)).toBe(true);
+      expect(response.status).toBe(404);
     });
   });
 });
