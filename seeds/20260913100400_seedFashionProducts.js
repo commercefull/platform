@@ -558,7 +558,7 @@ exports.seed = async function (knex) {
     await knex('productImage').insert({
       productId,
       url: `/uploads/products/${p.slug}.jpg`,
-      altText: p.name,
+      alt: p.name,
       position: 1,
       isPrimary: true,
     });
@@ -574,11 +574,11 @@ exports.seed = async function (knex) {
         name: `${p.name} - ${v.size.toUpperCase()} / ${v.colour}`,
         price: p.price,
         salePrice: p.salePrice,
-        attributes: JSON.stringify([
+        optionValues: JSON.stringify([
           { name: 'size', value: v.size },
           { name: 'color', value: v.colour },
         ]),
-        isActive: true,
+        status: 'active',
         position: i + 1,
         createdAt: now,
         updatedAt: now,

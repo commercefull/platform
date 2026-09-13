@@ -31,13 +31,13 @@ exports.seed = async function (knex) {
     }
 
     // Get all variants for this product
-    const variants = await knex('productVariant').where({ productId: product.productId }).select('productVariantId', 'sku', 'attributes');
+    const variants = await knex('productVariant').where({ productId: product.productId }).select('productVariantId', 'sku', 'optionValues');
 
     for (const variant of variants) {
-      // Parse attributes to find size + colour
+      // Parse optionValues to find size + colour
       let attrs = {};
       try {
-        attrs = typeof variant.attributes === 'string' ? JSON.parse(variant.attributes) : variant.attributes;
+        attrs = typeof variant.optionValues === 'string' ? JSON.parse(variant.optionValues) : variant.optionValues;
       } catch {
         attrs = {};
       }
