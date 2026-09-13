@@ -13,7 +13,7 @@ Commercefull supports four deployment strategies. Choose based on your cloud pro
 
 ## Prerequisites
 
-- Node.js 18+ and npm/yarn
+- Node.js 22+ and npm/yarn
 - Docker and Docker Compose
 - Git
 - SSH access to target environments

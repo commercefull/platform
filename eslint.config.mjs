@@ -52,6 +52,11 @@ export default [
       'max-params': ['warn', { max: 5 }],
       'max-depth': ['warn', { max: 5 }],
       'max-lines': ['warn', { max: 500, skipComments: true }],
+      // Ban expect([array]).toContain(x.status) — assert a single status
+      'no-restricted-syntax': ['error', {
+        selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='toContain'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='ArrayExpression'][arguments.0.type='MemberExpression'][arguments.0.property.name='status']",
+        message: 'Do not use expect([array]).toContain(x.status) for HTTP status assertions. Assert a single expected status with expect(resp.status).toBe(200) instead.',
+      }],
     },
   },
   {

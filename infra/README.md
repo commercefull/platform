@@ -196,7 +196,7 @@ See individual deployment directories for specific troubleshooting guides.
 
 ### Global Requirements
 
-- Node.js 18+ and npm
+- Node.js 22+ and npm
 - Docker and Docker Compose
 - Git
 - SSH access to target environments

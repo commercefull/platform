@@ -140,8 +140,6 @@ describe('Order Error Handling (AppError)', () => {
 
     expect(res.status).toBe(400);
     expect(res.data.success).toBe(false);
-    // Could be refund_exceeds_total or cannot_be_refunded depending on order state
-    expect([400, 404]).toContain(res.status);
   });
 });
 

@@ -57,7 +57,7 @@ describe('Endpoint query-count budget tests', () => {
           headers: { Authorization: `Bearer ${customerToken}` },
         },
       );
-      expect([200, 201]).toContain(res.status);
+      expect(res.status).toBe(200);
       expectQueryBudget(res, 8, 'POST /basket');
     });
   });

@@ -36,10 +36,8 @@ describe('Automation Module Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200]).toContain(resp.status);
-      if (resp.data.success) {
-        ruleId = resp.data.data?.ruleId || resp.data.data?.id || '';
-      }
+      expect(resp.status).toBe(201);
+      ruleId = resp.data.data?.ruleId || resp.data.data?.id || '';
     });
 
     it('GET /business/automation returns list', async () => {
@@ -84,7 +82,7 @@ describe('Automation Module Integration Tests', () => {
     it('POST /business/automation/:ruleId/trigger triggers rule manually', async () => {
       if (!orgToken || !ruleId) return;
       const resp = await client.post(`/business/automation/${ruleId}/trigger`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('GET /business/automation/:ruleId/logs returns execution logs', async () => {

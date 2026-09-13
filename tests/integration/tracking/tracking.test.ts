@@ -47,7 +47,7 @@ describe('Tracking Module Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(201);
     });
 
     it('DELETE /business/tracking/config/:storeId deletes config', async () => {
@@ -55,7 +55,7 @@ describe('Tracking Module Integration Tests', () => {
       const resp = await client.delete(`/business/tracking/config/${testStoreId}`, {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
@@ -67,7 +67,7 @@ describe('Tracking Module Integration Tests', () => {
         { containerId: 'GTM-TEST123' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('DELETE /business/tracking/config/:storeId/gtm removes GTM', async () => {
@@ -75,7 +75,7 @@ describe('Tracking Module Integration Tests', () => {
       const resp = await client.delete(`/business/tracking/config/${testStoreId}/gtm`, {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
@@ -87,7 +87,7 @@ describe('Tracking Module Integration Tests', () => {
         { pixelId: '1234567890', accessToken: 'test-token' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('DELETE /business/tracking/config/:storeId/meta-capi removes Meta CAPI', async () => {
@@ -95,7 +95,7 @@ describe('Tracking Module Integration Tests', () => {
       const resp = await client.delete(`/business/tracking/config/${testStoreId}/meta-capi`, {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
@@ -107,7 +107,7 @@ describe('Tracking Module Integration Tests', () => {
         { sourceEvent: 'order.created', targetEvent: 'Purchase' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 201, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(201);
     });
 
     it('DELETE /business/tracking/config/:storeId/mappings/:sourceEvent removes mapping', async () => {
@@ -115,7 +115,7 @@ describe('Tracking Module Integration Tests', () => {
       const resp = await client.delete(`/business/tracking/config/${testStoreId}/mappings/order.created`, {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
@@ -127,7 +127,7 @@ describe('Tracking Module Integration Tests', () => {
         {},
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('POST /business/tracking/config/:storeId/disable disables tracking', async () => {
@@ -137,7 +137,7 @@ describe('Tracking Module Integration Tests', () => {
         {},
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('POST /business/tracking/config/:storeId/hash-pii toggles PII hashing', async () => {
@@ -147,7 +147,7 @@ describe('Tracking Module Integration Tests', () => {
         { hashPii: true },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('POST /business/tracking/config/:storeId/server-side toggles server-side', async () => {
@@ -157,7 +157,7 @@ describe('Tracking Module Integration Tests', () => {
         { serverSideEnabled: true },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
@@ -169,7 +169,7 @@ describe('Tracking Module Integration Tests', () => {
         { storeId: testStoreId, event: 'order.created', data: { orderId: 'test-123' } },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 

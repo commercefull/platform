@@ -58,10 +58,8 @@ describe('Page Builder Module Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200]).toContain(resp.status);
-      if (resp.data.success) {
-        draftId = resp.data.data?.draftId || resp.data.data?.id || '';
-      }
+      expect(resp.status).toBe(201);
+      draftId = resp.data.data?.draftId || resp.data.data?.id || '';
     });
 
     it('GET /business/page-builder/drafts returns list', async () => {
@@ -115,10 +113,8 @@ describe('Page Builder Module Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200]).toContain(resp.status);
-      if (resp.data.success) {
-        blockId = resp.data.data?.blockId || resp.data.data?.id || '';
-      }
+      expect(resp.status).toBe(201);
+      blockId = resp.data.data?.blockId || resp.data.data?.id || '';
     });
 
     it('PATCH /business/page-builder/drafts/:draftId/blocks/:blockId updates block', async () => {
@@ -158,7 +154,7 @@ describe('Page Builder Module Integration Tests', () => {
         {},
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('GET /business/page-builder/drafts/:draftId/preview returns preview data', async () => {
@@ -166,7 +162,7 @@ describe('Page Builder Module Integration Tests', () => {
       const resp = await client.get(`/business/page-builder/drafts/${draftId}/preview`, {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('POST /business/page-builder/drafts/:draftId/unpublish unpublishes draft', async () => {
@@ -176,7 +172,7 @@ describe('Page Builder Module Integration Tests', () => {
         {},
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 

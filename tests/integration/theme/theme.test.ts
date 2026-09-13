@@ -59,10 +59,8 @@ describe('Theme Module Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200]).toContain(resp.status);
-      if (resp.data.success) {
-        themeId = resp.data.data?.themeId || resp.data.data?.id || '';
-      }
+      expect(resp.status).toBe(201);
+      themeId = resp.data.data?.themeId || resp.data.data?.id || '';
     });
 
     it('GET /business/theme/:themeId returns single theme', async () => {
@@ -78,7 +76,7 @@ describe('Theme Module Integration Tests', () => {
       const resp = await client.get('/business/theme/slug/test-custom-theme', {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('PUT /business/theme/:themeId updates theme', async () => {
@@ -116,10 +114,8 @@ describe('Theme Module Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200, 400]).toContain(resp.status);
-      if (resp.data.success) {
-        overrideId = resp.data.data?.overrideId || resp.data.data?.id || '';
-      }
+      expect(resp.status).toBe(201);
+      overrideId = resp.data.data?.overrideId || resp.data.data?.id || '';
     });
 
     it('GET /business/theme/overrides/store/:storeId returns override by store', async () => {
@@ -127,7 +123,7 @@ describe('Theme Module Integration Tests', () => {
       const resp = await client.get('/business/theme/overrides/store/00000000-0000-0000-0000-000000000001', {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('DELETE /business/theme/overrides/:overrideId removes override', async () => {
@@ -135,7 +131,7 @@ describe('Theme Module Integration Tests', () => {
       const resp = await client.delete(`/business/theme/overrides/${overrideId}`, {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
@@ -147,7 +143,7 @@ describe('Theme Module Integration Tests', () => {
         { themeId },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('GET /business/theme/assignment/:storeId returns assignment', async () => {
@@ -155,7 +151,7 @@ describe('Theme Module Integration Tests', () => {
       const resp = await client.get('/business/theme/assignment/00000000-0000-0000-0000-000000000001', {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('GET /business/theme/resolve/:storeId resolves theme for storefront', async () => {
@@ -163,7 +159,7 @@ describe('Theme Module Integration Tests', () => {
       const resp = await client.get('/business/theme/resolve/00000000-0000-0000-0000-000000000001', {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('DELETE /business/theme/assign/:storeId unassigns theme', async () => {
@@ -171,7 +167,7 @@ describe('Theme Module Integration Tests', () => {
       const resp = await client.delete('/business/theme/assign/00000000-0000-0000-0000-000000000001', {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 

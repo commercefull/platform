@@ -36,10 +36,8 @@ describe('Segment Module Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200]).toContain(resp.status);
-      if (resp.data.success) {
-        segmentId = resp.data.data?.segmentId || resp.data.data?.id || '';
-      }
+      expect(resp.status).toBe(201);
+      segmentId = resp.data.data?.segmentId || resp.data.data?.id || '';
     });
 
     it('GET /business/segment returns list', async () => {
@@ -84,7 +82,7 @@ describe('Segment Module Integration Tests', () => {
     it('POST /business/segment/:segmentId/evaluate evaluates segment', async () => {
       if (!orgToken || !segmentId) return;
       const resp = await client.post(`/business/segment/${segmentId}/evaluate`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('GET /business/segment/:segmentId/members returns members', async () => {
@@ -112,7 +110,7 @@ describe('Segment Module Integration Tests', () => {
       const resp = await client.get('/business/segment/profiles/00000000-0000-0000-0000-000000000001', {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('POST /business/segment/profiles/:customerId/compute computes profile', async () => {
@@ -122,13 +120,13 @@ describe('Segment Module Integration Tests', () => {
         {},
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('POST /business/segment/profiles/recompute-all recomputes all profiles', async () => {
       if (!orgToken) return;
       const resp = await client.post('/business/segment/profiles/recompute-all', {}, { headers: { Authorization: `Bearer ${orgToken}` } });
-      expect([200, 202]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('GET /business/segment/profiles/:customerId/segments returns membership', async () => {

@@ -38,10 +38,8 @@ describe('Marketplace Module Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200]).toContain(resp.status);
-      if (resp.data.success) {
-        vendorId = resp.data.data?.vendorId || resp.data.data?.id || '';
-      }
+      expect(resp.status).toBe(201);
+      vendorId = resp.data.data?.vendorId || resp.data.data?.id || '';
     });
 
     it('GET /business/vendors returns list', async () => {
@@ -80,7 +78,7 @@ describe('Marketplace Module Integration Tests', () => {
         { street: '123 Main St', city: 'Test City', country: 'US', postalCode: '12345' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('PUT /business/vendors/:vendorId/bank-info sets bank info', async () => {
@@ -90,7 +88,7 @@ describe('Marketplace Module Integration Tests', () => {
         { bankName: 'Test Bank', accountNumber: '123456789', routingNumber: '123456789' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
@@ -98,7 +96,7 @@ describe('Marketplace Module Integration Tests', () => {
     it('POST /business/vendors/:vendorId/approve approves vendor', async () => {
       if (!orgToken || !vendorId) return;
       const resp = await client.post(`/business/vendors/${vendorId}/approve`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('POST /business/vendors/:vendorId/suspend suspends vendor', async () => {
@@ -108,7 +106,7 @@ describe('Marketplace Module Integration Tests', () => {
         { reason: 'Policy violation' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('PUT /business/vendors/:vendorId/tier sets vendor tier', async () => {
@@ -118,7 +116,7 @@ describe('Marketplace Module Integration Tests', () => {
         { tier: 'gold' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('PUT /business/vendors/:vendorId/commission-rate sets commission', async () => {
@@ -128,7 +126,7 @@ describe('Marketplace Module Integration Tests', () => {
         { commissionRate: 0.15 },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
@@ -144,10 +142,8 @@ describe('Marketplace Module Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200]).toContain(resp.status);
-      if (resp.data.success) {
-        commissionRuleId = resp.data.data?.ruleId || resp.data.data?.id || '';
-      }
+      expect(resp.status).toBe(201);
+      commissionRuleId = resp.data.data?.ruleId || resp.data.data?.id || '';
     });
 
     it('GET /business/commission-rules returns list', async () => {
@@ -203,7 +199,7 @@ describe('Marketplace Module Integration Tests', () => {
         { vendorId: vendorId || '00000000-0000-0000-0000-000000000001', amount: 100.0 },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
@@ -215,10 +211,8 @@ describe('Marketplace Module Integration Tests', () => {
         { vendorId, amount: 50.0, currency: 'USD' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200]).toContain(resp.status);
-      if (resp.data.success) {
-        payoutId = resp.data.data?.payoutId || resp.data.data?.id || '';
-      }
+      expect(resp.status).toBe(201);
+      payoutId = resp.data.data?.payoutId || resp.data.data?.id || '';
     });
 
     it('GET /business/payouts returns list', async () => {
@@ -240,7 +234,7 @@ describe('Marketplace Module Integration Tests', () => {
     it('POST /business/payouts/:payoutId/process processes payout', async () => {
       if (!orgToken || !payoutId) return;
       const resp = await client.post(`/business/payouts/${payoutId}/process`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('POST /business/payouts/:payoutId/cancel cancels payout', async () => {
@@ -250,7 +244,7 @@ describe('Marketplace Module Integration Tests', () => {
         { reason: 'Test cancellation' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 

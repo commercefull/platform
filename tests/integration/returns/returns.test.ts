@@ -49,10 +49,8 @@ describe('Returns Module Integration Tests', () => {
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([201, 200, 400, 404]).toContain(resp.status);
-      if (resp.data.success) {
-        returnId = resp.data.data?.returnId || resp.data.data?.id || '';
-      }
+      expect(resp.status).toBe(201);
+      returnId = resp.data.data?.returnId || resp.data.data?.id || '';
     });
   });
 
@@ -60,7 +58,7 @@ describe('Returns Module Integration Tests', () => {
     it('POST /business/returns/:returnId/approve', async () => {
       if (!orgToken || !returnId) return;
       const resp = await client.post(`/business/returns/${returnId}/approve`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('POST /business/returns/:returnId/deny', async () => {
@@ -70,13 +68,13 @@ describe('Returns Module Integration Tests', () => {
         { reason: 'Outside return window' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('POST /business/returns/:returnId/cancel', async () => {
       if (!orgToken || !returnId) return;
       const resp = await client.post(`/business/returns/${returnId}/cancel`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
@@ -86,7 +84,7 @@ describe('Returns Module Integration Tests', () => {
       const resp = await client.get('/business/store-credit/balance', {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
 
     it('GET /business/store-credit/ledger returns ledger', async () => {
@@ -94,7 +92,7 @@ describe('Returns Module Integration Tests', () => {
       const resp = await client.get('/business/store-credit/ledger', {
         headers: { Authorization: `Bearer ${orgToken}` },
       });
-      expect([200, 400, 404]).toContain(resp.status);
+      expect(resp.status).toBe(200);
     });
   });
 
