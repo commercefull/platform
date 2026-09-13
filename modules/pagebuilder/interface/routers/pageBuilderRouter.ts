@@ -1,6 +1,7 @@
 /**
  * Page Builder Business Router
  * All routes under /business/page-builder
+ * Mounted at /business, routes prefixed with /page-builder.
  */
 
 import { Router } from 'express';
@@ -13,30 +14,30 @@ const router = Router();
 router.use(isOrganizationLoggedIn);
 
 // Block types
-router.get('/block-types', asyncHandler(pageBuilderController.listBlockTypes));
-router.get('/block-types/:category', asyncHandler(pageBuilderController.listBlockTypesByCategory));
+router.get('/page-builder/block-types', asyncHandler(pageBuilderController.listBlockTypes));
+router.get('/page-builder/block-types/:category', asyncHandler(pageBuilderController.listBlockTypesByCategory));
 
 // Drafts
-router.get('/drafts', asyncHandler(pageBuilderController.listDrafts));
-router.get('/drafts/:draftId', asyncHandler(pageBuilderController.getDraft));
-router.post('/drafts', asyncHandler(pageBuilderController.createDraft));
-router.patch('/drafts/:draftId/title', asyncHandler(pageBuilderController.updateDraftTitle));
-router.patch('/drafts/:draftId/slug', asyncHandler(pageBuilderController.updateDraftSlug));
-router.patch('/drafts/:draftId/theme', asyncHandler(pageBuilderController.updateDraftTheme));
-router.delete('/drafts/:draftId', asyncHandler(pageBuilderController.deleteDraft));
+router.get('/page-builder/drafts', asyncHandler(pageBuilderController.listDrafts));
+router.get('/page-builder/drafts/:draftId', asyncHandler(pageBuilderController.getDraft));
+router.post('/page-builder/drafts', asyncHandler(pageBuilderController.createDraft));
+router.patch('/page-builder/drafts/:draftId/title', asyncHandler(pageBuilderController.updateDraftTitle));
+router.patch('/page-builder/drafts/:draftId/slug', asyncHandler(pageBuilderController.updateDraftSlug));
+router.patch('/page-builder/drafts/:draftId/theme', asyncHandler(pageBuilderController.updateDraftTheme));
+router.delete('/page-builder/drafts/:draftId', asyncHandler(pageBuilderController.deleteDraft));
 
 // Blocks
-router.post('/drafts/:draftId/blocks', asyncHandler(pageBuilderController.addBlock));
-router.patch('/drafts/:draftId/blocks/:blockId', asyncHandler(pageBuilderController.updateBlock));
-router.patch('/drafts/:draftId/blocks/:blockId/move', asyncHandler(pageBuilderController.moveBlock));
-router.delete('/drafts/:draftId/blocks/:blockId', asyncHandler(pageBuilderController.removeBlock));
-router.post('/drafts/:draftId/regions/:region/reorder', asyncHandler(pageBuilderController.reorderBlocks));
+router.post('/page-builder/drafts/:draftId/blocks', asyncHandler(pageBuilderController.addBlock));
+router.patch('/page-builder/drafts/:draftId/blocks/:blockId', asyncHandler(pageBuilderController.updateBlock));
+router.patch('/page-builder/drafts/:draftId/blocks/:blockId/move', asyncHandler(pageBuilderController.moveBlock));
+router.delete('/page-builder/drafts/:draftId/blocks/:blockId', asyncHandler(pageBuilderController.removeBlock));
+router.post('/page-builder/drafts/:draftId/regions/:region/reorder', asyncHandler(pageBuilderController.reorderBlocks));
 
 // Publish
-router.post('/drafts/:draftId/publish', asyncHandler(pageBuilderController.publishDraft));
-router.post('/drafts/:draftId/unpublish', asyncHandler(pageBuilderController.unpublishDraft));
+router.post('/page-builder/drafts/:draftId/publish', asyncHandler(pageBuilderController.publishDraft));
+router.post('/page-builder/drafts/:draftId/unpublish', asyncHandler(pageBuilderController.unpublishDraft));
 
 // Preview
-router.get('/drafts/:draftId/preview', asyncHandler(pageBuilderController.previewDraft));
+router.get('/page-builder/drafts/:draftId/preview', asyncHandler(pageBuilderController.previewDraft));
 
 export const pageBuilderBusinessRouter = router;

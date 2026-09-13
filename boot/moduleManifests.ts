@@ -559,6 +559,7 @@ const manifests: ModuleManifest[] = [
     description: 'Server-side tracking — consent-gated GTM Server container + Meta CAPI adapter, sourced from the durable event stream',
     requirement: 'optional',
     dependsOn: ['gdpr'],
+    routes: [{ path: '/business/tracking', auth: 'organization' }],
     graphql: { enabled: false },
     events: {
       subscribes: [

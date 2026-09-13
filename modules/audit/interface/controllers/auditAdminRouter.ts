@@ -2,7 +2,7 @@
  * Audit Admin Router
  *
  * Read-only audit log endpoints for admin/organization users.
- * Mounted at /business/audit
+ * Mounted at /business, routes prefixed with /audit.
  */
 
 import { Router } from 'express';
@@ -14,10 +14,10 @@ const controller = new AuditAdminController();
 
 router.use(isOrganizationLoggedIn);
 
-router.get('/', controller.listLogs);
-router.get('/stats', controller.getStats);
-router.get('/verify', controller.verifyChain);
-router.get('/correlation/:correlationId', controller.findByCorrelationId);
-router.get('/:id', controller.getLog);
+router.get('/audit', controller.listLogs);
+router.get('/audit/stats', controller.getStats);
+router.get('/audit/verify', controller.verifyChain);
+router.get('/audit/correlation/:correlationId', controller.findByCorrelationId);
+router.get('/audit/:id', controller.getLog);
 
 export const auditAdminRouter = router;
