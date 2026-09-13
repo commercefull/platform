@@ -82,27 +82,27 @@ The Loyalty feature manages customer loyalty programs including points earning, 
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                                | Controller                      | Description                                |
-| ------ | ------------------------------------------------------- | ------------------------------- | ------------------------------------------ |
-| GET    | `/business/loyalty/customers/:customerId/points`        | `getCustomerPoints`             | Customer Management                        |
-| POST   | `/business/loyalty/customers/:customerId/points/adjust` | `adjustCustomerPoints`          | —                                          |
-| GET    | `/business/loyalty/customers/:customerId/redemptions`   | `getCustomerRedemptions`        | —                                          |
-| GET    | `/business/loyalty/customers/:customerId/transactions`  | `getCustomerPointsTransactions` | —                                          |
-| POST   | `/business/loyalty/orders/:orderId/points`              | `processOrderPoints`            | Order Processing                           |
-| PUT    | `/business/loyalty/redemptions/:id/status`              | `updateRedemptionStatus`        | Redemption Management                      |
-| GET    | `/business/loyalty/rewards`                             | `getRewards`                    | Reward Management                          |
-| POST   | `/business/loyalty/rewards`                             | `createReward`                  | —                                          |
-| GET    | `/business/loyalty/rewards/:id`                         | `getRewardById`                 | —                                          |
-| PUT    | `/business/loyalty/rewards/:id`                         | `updateReward`                  | —                                          |
-| GET    | `/business/loyalty/tiers`                               | `getTiers`                      | Tier Management                            |
-| POST   | `/business/loyalty/tiers`                               | `createTier`                    | —                                          |
-| GET    | `/business/loyalty/tiers/:id`                           | `getTierById`                   | —                                          |
-| PUT    | `/business/loyalty/tiers/:id`                           | `updateTier`                    | —                                          |
-| GET    | `/customer/loyalty/my-redemptions`                      | `isCustomerLoggedIn`            | —                                          |
-| GET    | `/customer/loyalty/my-status`                           | `isCustomerLoggedIn`            | Customer authenticated routes              |
-| GET    | `/customer/loyalty/my-transactions`                     | `isCustomerLoggedIn`            | —                                          |
-| POST   | `/customer/loyalty/redeem`                              | `isCustomerLoggedIn`            | —                                          |
-| GET    | `/customer/loyalty/rewards`                             | `getPublicRewards`              | —                                          |
-| GET    | `/customer/loyalty/tiers`                               | `getPublicTiers`                | Public routes (no authentication required) |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/loyalty/customers/:customerId/points` | `asyncHandler(getCustomerPoints)` | Customer Management |
+| POST | `/loyalty/customers/:customerId/points/adjust` | `asyncHandler(adjustCustomerPoints)` | — |
+| GET | `/loyalty/customers/:customerId/redemptions` | `asyncHandler(getCustomerRedemptions)` | — |
+| GET | `/loyalty/customers/:customerId/transactions` | `asyncHandler(getCustomerPointsTransactions)` | — |
+| GET | `/loyalty/my-redemptions` | `isCustomerLoggedIn` | — |
+| GET | `/loyalty/my-status` | `isCustomerLoggedIn` | Customer authenticated routes |
+| GET | `/loyalty/my-transactions` | `isCustomerLoggedIn` | — |
+| POST | `/loyalty/orders/:orderId/points` | `asyncHandler(processOrderPoints)` | Order Processing |
+| POST | `/loyalty/redeem` | `isCustomerLoggedIn` | — |
+| PUT | `/loyalty/redemptions/:id/status` | `asyncHandler(updateRedemptionStatus)` | Redemption Management |
+| GET | `/loyalty/rewards` | `asyncHandler(getRewards)` | Reward Management |
+| POST | `/loyalty/rewards` | `asyncHandler(createReward)` | — |
+| GET | `/loyalty/rewards` | `asyncHandler(loyaltyController.getPublicRewards)` | — |
+| GET | `/loyalty/rewards/:id` | `asyncHandler(getRewardById)` | — |
+| PUT | `/loyalty/rewards/:id` | `asyncHandler(updateReward)` | — |
+| GET | `/loyalty/tiers` | `asyncHandler(getTiers)` | Tier Management |
+| POST | `/loyalty/tiers` | `asyncHandler(createTier)` | — |
+| GET | `/loyalty/tiers` | `asyncHandler(loyaltyController.getPublicTiers)` | Public routes (no authentication required) |
+| GET | `/loyalty/tiers/:id` | `asyncHandler(getTierById)` | — |
+| PUT | `/loyalty/tiers/:id` | `asyncHandler(updateTier)` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

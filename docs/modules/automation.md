@@ -56,3 +56,18 @@ The Automation module provides a rule-based automation engine — condition/acti
 | PUT    | `/business/automation/rules/:id`            | Update automation rule |
 | DELETE | `/business/automation/rules/:id`            | Delete automation rule |
 | GET    | `/business/automation/rules/:id/executions` | Get execution history  |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/automation` | `isOrganizationLoggedIn` | Rule CRUD |
+| POST | `/automation` | `isOrganizationLoggedIn` | — |
+| GET | `/automation/:ruleId` | `isOrganizationLoggedIn` | — |
+| PUT | `/automation/:ruleId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/automation/:ruleId` | `isOrganizationLoggedIn` | — |
+| GET | `/automation/:ruleId/logs` | `isOrganizationLoggedIn` | — |
+| POST | `/automation/:ruleId/trigger` | `isOrganizationLoggedIn` | Manual trigger & execution logs |
+
+<!-- GENERATED:ENDPOINTS:END -->

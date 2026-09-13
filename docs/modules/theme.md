@@ -71,3 +71,30 @@ The Theme module provides a theme engine — theme registry, per-store overrides
 | POST   | `/business/theme/:themeId/assign`   | Assign theme to store     |
 | POST   | `/business/theme/:themeId/unassign` | Unassign theme from store |
 | PUT    | `/business/theme/:themeId/override` | Save per-store override   |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/` | `isOrganizationLoggedIn` | Theme CRUD |
+| POST | `/` | `isOrganizationLoggedIn` | — |
+| GET | `/:themeId` | `isOrganizationLoggedIn` | — |
+| PUT | `/:themeId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/:themeId` | `isOrganizationLoggedIn` | — |
+| POST | `/:themeId/activate` | `isOrganizationLoggedIn` | — |
+| POST | `/:themeId/archive` | `isOrganizationLoggedIn` | — |
+| POST | `/assign/:storeId` | `isOrganizationLoggedIn` | Theme assignment |
+| DELETE | `/assign/:storeId` | `isOrganizationLoggedIn` | — |
+| GET | `/assignment/:storeId` | `isOrganizationLoggedIn` | — |
+| GET | `/built-in` | `isOrganizationLoggedIn` | — |
+| POST | `/overrides` | `isOrganizationLoggedIn` | — |
+| PUT | `/overrides/:overrideId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/overrides/:overrideId` | `isOrganizationLoggedIn` | — |
+| GET | `/overrides/organization/:organizationId` | `isOrganizationLoggedIn` | — |
+| GET | `/overrides/store/:storeId` | `isOrganizationLoggedIn` | Theme overrides |
+| GET | `/resolve/:storeId` | `isOrganizationLoggedIn` | Resolve theme for storefront rendering |
+| POST | `/seed/built-in` | `isOrganizationLoggedIn` | Admin: seed built-in themes |
+| GET | `/slug/:slug` | `isOrganizationLoggedIn` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

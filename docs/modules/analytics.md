@@ -95,24 +95,24 @@ The analytics system listens to and tracks these events:
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                  | Controller              | Description                                                                |
-| ------ | ----------------------------------------- | ----------------------- | -------------------------------------------------------------------------- |
-| GET    | `/business/analytics/customers/cohorts`   | `getCustomerCohorts`    | GET /business/analytics/customers/cohorts - Get customer cohort analysis   |
-| GET    | `/business/analytics/dashboards`          | `getDashboards`         | GET /business/analytics/dashboards - List dashboards                       |
-| POST   | `/business/analytics/dashboards`          | `createDashboard`       | POST /business/analytics/dashboards - Create dashboard                     |
-| GET    | `/business/analytics/dashboards/:id`      | `getDashboard`          | GET /business/analytics/dashboards/:id - Get dashboard                     |
-| PUT    | `/business/analytics/dashboards/:id`      | `updateDashboard`       | PUT /business/analytics/dashboards/:id - Update dashboard                  |
-| DELETE | `/business/analytics/dashboards/:id`      | `deleteDashboard`       | DELETE /business/analytics/dashboards/:id - Delete dashboard               |
-| GET    | `/business/analytics/events`              | `getEvents`             | GET /business/analytics/events - Get tracked events                        |
-| GET    | `/business/analytics/events/counts`       | `getEventCounts`        | GET /business/analytics/events/counts - Get event counts by period         |
-| GET    | `/business/analytics/products`            | `getProductPerformance` | GET /business/analytics/products - Get product performance data            |
-| GET    | `/business/analytics/products/top`        | `getTopProducts`        | GET /business/analytics/products/top - Get top performing products         |
-| GET    | `/business/analytics/realtime`            | `getRealTimeMetrics`    | GET /business/analytics/realtime - Get real-time metrics                   |
-| GET    | `/business/analytics/sales/daily`         | `getSalesDaily`         | GET /business/analytics/sales/daily - Get daily sales data                 |
-| GET    | `/business/analytics/sales/dashboard`     | `getSalesDashboard`     | GET /business/analytics/sales/dashboard - Get sales dashboard with summary |
-| GET    | `/business/analytics/search`              | `getSearchAnalytics`    | GET /business/analytics/search - Get search analytics                      |
-| GET    | `/business/analytics/search/zero-results` | `getZeroResultSearches` | GET /business/analytics/search/zero-results - Get zero result searches     |
-| GET    | `/business/analytics/snapshots`           | `getSnapshots`          | GET /business/analytics/snapshots - Get historical snapshots               |
-| GET    | `/business/analytics/snapshots/latest`    | `getLatestSnapshot`     | GET /business/analytics/snapshots/latest - Get latest snapshot             |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/analytics/customers/cohorts` | `asyncHandler(analyticsController.getCustomerCohorts)` | GET /business/analytics/customers/cohorts - Get customer cohort analysis |
+| GET | `/analytics/dashboards` | `asyncHandler(analyticsController.getDashboards)` | GET /business/analytics/dashboards - List dashboards |
+| POST | `/analytics/dashboards` | `asyncHandler(analyticsController.createDashboard)` | POST /business/analytics/dashboards - Create dashboard |
+| GET | `/analytics/dashboards/:id` | `asyncHandler(analyticsController.getDashboard)` | GET /business/analytics/dashboards/:id - Get dashboard |
+| PUT | `/analytics/dashboards/:id` | `asyncHandler(analyticsController.updateDashboard)` | PUT /business/analytics/dashboards/:id - Update dashboard |
+| DELETE | `/analytics/dashboards/:id` | `asyncHandler(analyticsController.deleteDashboard)` | DELETE /business/analytics/dashboards/:id - Delete dashboard |
+| GET | `/analytics/events` | `asyncHandler(analyticsController.getEvents)` | GET /business/analytics/events - Get tracked events |
+| GET | `/analytics/events/counts` | `asyncHandler(analyticsController.getEventCounts)` | GET /business/analytics/events/counts - Get event counts by period |
+| GET | `/analytics/products` | `asyncHandler(analyticsController.getProductPerformance)` | GET /business/analytics/products - Get product performance data |
+| GET | `/analytics/products/top` | `asyncHandler(analyticsController.getTopProducts)` | GET /business/analytics/products/top - Get top performing products |
+| GET | `/analytics/realtime` | `asyncHandler(analyticsController.getRealTimeMetrics)` | GET /business/analytics/realtime - Get real-time metrics |
+| GET | `/analytics/sales/daily` | `asyncHandler(analyticsController.getSalesDaily)` | GET /business/analytics/sales/daily - Get daily sales data |
+| GET | `/analytics/sales/dashboard` | `asyncHandler(analyticsController.getSalesDashboard)` | GET /business/analytics/sales/dashboard - Get sales dashboard with summary |
+| GET | `/analytics/search` | `asyncHandler(analyticsController.getSearchAnalytics)` | GET /business/analytics/search - Get search analytics |
+| GET | `/analytics/search/zero-results` | `asyncHandler(analyticsController.getZeroResultSearches)` | GET /business/analytics/search/zero-results - Get zero result searches |
+| GET | `/analytics/snapshots` | `asyncHandler(analyticsController.getSnapshots)` | GET /business/analytics/snapshots - Get historical snapshots |
+| GET | `/analytics/snapshots/latest` | `asyncHandler(analyticsController.getLatestSnapshot)` | GET /business/analytics/snapshots/latest - Get latest snapshot |
 
 <!-- GENERATED:ENDPOINTS:END -->

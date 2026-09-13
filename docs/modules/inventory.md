@@ -74,43 +74,43 @@ The Inventory feature manages product stock levels, reservations, and availabili
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                                     | Controller                 | Description                             |
-| ------ | ------------------------------------------------------------ | -------------------------- | --------------------------------------- |
-| GET    | `/business/inventory`                                        | `listInventory`            | —                                       |
-| GET    | `/business/inventory/:inventoryId`                           | `getInventory`             | —                                       |
-| POST   | `/business/inventory/:inventoryId/adjust`                    | `adjustStock`              | —                                       |
-| POST   | `/business/inventory/:inventoryId/reserve`                   | `reserveStock`             | —                                       |
-| POST   | `/business/inventory/:inventoryId/restock`                   | `restockInventory`         | —                                       |
-| POST   | `/business/inventory/items`                                  | `createInventoryItem`      | —                                       |
-| GET    | `/business/inventory/items`                                  | `listInventoryItems`       | —                                       |
-| GET    | `/business/inventory/items/lookup`                           | `getInventoryItem`         | —                                       |
-| GET    | `/business/inventory/locations`                              | `listInventoryLocations`   | —                                       |
-| POST   | `/business/inventory/locations`                              | `createInventoryLocation`  | —                                       |
-| GET    | `/business/inventory/locations/:inventoryLocationId`         | `getInventoryLocation`     | —                                       |
-| PUT    | `/business/inventory/locations/:inventoryLocationId`         | `updateInventoryLocation`  | —                                       |
-| DELETE | `/business/inventory/locations/:inventoryLocationId`         | `deleteInventoryLocation`  | —                                       |
-| POST   | `/business/inventory/locations/:inventoryLocationId/adjust`  | `adjustStock`              | —                                       |
-| POST   | `/business/inventory/locations/:inventoryLocationId/release` | `releaseReservation`       | —                                       |
-| POST   | `/business/inventory/locations/:inventoryLocationId/reserve` | `reserveStock`             | —                                       |
-| GET    | `/business/inventory/locations/low-stock`                    | `getLowStock`              | —                                       |
-| GET    | `/business/inventory/locations/out-of-stock`                 | `getOutOfStock`            | —                                       |
-| GET    | `/business/inventory/low-stock`                              | `getLowStock`              | —                                       |
-| POST   | `/business/inventory/pools`                                  | `createInventoryPool`      | —                                       |
-| POST   | `/business/inventory/pools/allocate`                         | `allocateFromPool`         | —                                       |
-| PUT    | `/business/inventory/products/:productId/threshold`          | `setLowStockThreshold`     | —                                       |
-| POST   | `/business/inventory/reservations/:reservationId/confirm`    | `confirmReservation`       | —                                       |
-| GET    | `/business/inventory/transactions/product/:productId`        | `getTransactionHistory`    | —                                       |
-| GET    | `/business/inventory/transactions/types`                     | `getTransactionTypes`      | —                                       |
-| POST   | `/business/inventory/transfer`                               | `transferStock`            | —                                       |
-| POST   | `/business/inventory/transfer-between-stores`                | `transferBetweenStores`    | —                                       |
-| GET    | `/customer/inventory/availability/:sku`                      | `checkAvailability`        | Check product availability by SKU       |
-| GET    | `/customer/inventory/availability/product/:productId`        | `checkProductAvailability` | Check product availability by productId |
-| POST   | `/dispatches`                                                | `createStoreDispatch`      | —                                       |
-| GET    | `/dispatches`                                                | `listStoreDispatches`      | —                                       |
-| GET    | `/dispatches/:dispatchId`                                    | `getStoreDispatch`         | —                                       |
-| PUT    | `/dispatches/:dispatchId/approve`                            | `approveStoreDispatch`     | —                                       |
-| PUT    | `/dispatches/:dispatchId/cancel`                             | `cancelStoreDispatch`      | —                                       |
-| PUT    | `/dispatches/:dispatchId/dispatch`                           | `dispatchFromStore`        | —                                       |
-| PUT    | `/dispatches/:dispatchId/receive`                            | `receiveStoreDispatch`     | —                                       |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/dispatches` | `asyncHandler(createStoreDispatch)` | — |
+| GET | `/dispatches` | `asyncHandler(listStoreDispatches)` | — |
+| GET | `/dispatches/:dispatchId` | `asyncHandler(getStoreDispatch)` | — |
+| PUT | `/dispatches/:dispatchId/approve` | `asyncHandler(approveStoreDispatch)` | — |
+| PUT | `/dispatches/:dispatchId/cancel` | `asyncHandler(cancelStoreDispatch)` | — |
+| PUT | `/dispatches/:dispatchId/dispatch` | `asyncHandler(dispatchFromStore)` | — |
+| PUT | `/dispatches/:dispatchId/receive` | `asyncHandler(receiveStoreDispatch)` | — |
+| GET | `/inventory` | `asyncHandler(inventoryController.listInventoryLocations)` | — |
+| GET | `/inventory/:inventoryId` | `asyncHandler(inventoryController.getInventoryLocation)` | — |
+| POST | `/inventory/:inventoryId/adjust` | `asyncHandler(inventoryController.adjustStock)` | — |
+| POST | `/inventory/:inventoryId/reserve` | `asyncHandler(inventoryController.reserveStock)` | — |
+| POST | `/inventory/:inventoryId/restock` | `asyncHandler(inventoryController.adjustStock)` | — |
+| GET | `/inventory/availability/:sku` | `asyncHandler(checkAvailability)` | Check product availability by SKU |
+| GET | `/inventory/availability/product/:productId` | `asyncHandler(checkProductAvailability)` | Check product availability by productId |
+| POST | `/inventory/items` | `asyncHandler(inventoryController.createInventoryItem)` | — |
+| GET | `/inventory/items` | `asyncHandler(inventoryController.listInventoryItems)` | — |
+| GET | `/inventory/items/lookup` | `asyncHandler(inventoryController.getInventoryItem)` | — |
+| GET | `/inventory/locations` | `asyncHandler(inventoryController.listInventoryLocations)` | — |
+| POST | `/inventory/locations` | `asyncHandler(inventoryController.createInventoryLocation)` | — |
+| GET | `/inventory/locations/:inventoryLocationId` | `asyncHandler(inventoryController.getInventoryLocation)` | — |
+| PUT | `/inventory/locations/:inventoryLocationId` | `asyncHandler(inventoryController.updateInventoryLocation)` | — |
+| DELETE | `/inventory/locations/:inventoryLocationId` | `asyncHandler(inventoryController.deleteInventoryLocation)` | — |
+| POST | `/inventory/locations/:inventoryLocationId/adjust` | `asyncHandler(inventoryController.adjustStock)` | — |
+| POST | `/inventory/locations/:inventoryLocationId/release` | `asyncHandler(inventoryController.releaseReservation)` | — |
+| POST | `/inventory/locations/:inventoryLocationId/reserve` | `asyncHandler(inventoryController.reserveStock)` | — |
+| GET | `/inventory/locations/low-stock` | `asyncHandler(inventoryController.getLowStock)` | — |
+| GET | `/inventory/locations/out-of-stock` | `asyncHandler(inventoryController.getOutOfStock)` | — |
+| GET | `/inventory/low-stock` | `asyncHandler(inventoryController.getLowStock)` | — |
+| POST | `/inventory/pools` | `asyncHandler(inventoryController.createInventoryPool)` | — |
+| POST | `/inventory/pools/allocate` | `asyncHandler(inventoryController.allocateFromPool)` | — |
+| PUT | `/inventory/products/:productId/threshold` | `asyncHandler(inventoryController.setLowStockThreshold)` | — |
+| POST | `/inventory/reservations/:reservationId/confirm` | `asyncHandler(inventoryController.confirmReservation)` | — |
+| GET | `/inventory/transactions/product/:productId` | `asyncHandler(inventoryController.getTransactionHistory)` | — |
+| GET | `/inventory/transactions/types` | `asyncHandler(inventoryController.getTransactionTypes)` | — |
+| POST | `/inventory/transfer` | `asyncHandler(inventoryController.transferStock)` | — |
+| POST | `/inventory/transfer-between-stores` | `asyncHandler(inventoryController.transferBetweenStores)` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -121,15 +121,23 @@ The webhook module does not emit domain events. It consumes events from the plat
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                           | Controller           | Description                     |
-| ------ | -------------------------------------------------- | -------------------- | ------------------------------- |
-| GET    | `/business/webhooks/events`                        | `getAvailableEvents` | List subscribable event types   |
-| GET    | `/business/webhooks`                               | `listWebhooks`       | List webhook endpoints          |
-| POST   | `/business/webhooks`                               | `registerWebhook`    | Register a new webhook endpoint |
-| GET    | `/business/webhooks/:webhookEndpointId`            | `getWebhook`         | Get a single webhook endpoint   |
-| PUT    | `/business/webhooks/:webhookEndpointId`            | `updateWebhook`      | Update a webhook endpoint       |
-| DELETE | `/business/webhooks/:webhookEndpointId`            | `unregisterWebhook`  | Delete a webhook endpoint       |
-| GET    | `/business/webhooks/:webhookEndpointId/deliveries` | `getDeliveries`      | List deliveries for a webhook   |
-| POST   | `/business/webhooks/:webhookEndpointId/test`       | `testWebhook`        | Send a test event to a webhook  |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/webhooks` | `asyncHandler(webhookController.listWebhooks)` | List webhook endpoints
+GET /business/webhooks |
+| POST | `/webhooks` | `asyncHandler(webhookController.registerWebhook)` | Register a new webhook endpoint
+POST /business/webhooks |
+| GET | `/webhooks/:webhookEndpointId` | `asyncHandler(webhookController.getWebhook)` | Get a single webhook endpoint
+GET /business/webhooks/:webhookEndpointId |
+| PUT | `/webhooks/:webhookEndpointId` | `asyncHandler(webhookController.updateWebhook)` | Update a webhook endpoint
+PUT /business/webhooks/:webhookEndpointId |
+| DELETE | `/webhooks/:webhookEndpointId` | `asyncHandler(webhookController.unregisterWebhook)` | Delete a webhook endpoint
+DELETE /business/webhooks/:webhookEndpointId |
+| GET | `/webhooks/:webhookEndpointId/deliveries` | `asyncHandler(webhookController.getDeliveries)` | Get deliveries for a webhook endpoint
+GET /business/webhooks/:webhookEndpointId/deliveries |
+| POST | `/webhooks/:webhookEndpointId/test` | `asyncHandler(webhookController.testWebhook)` | Test a webhook endpoint
+POST /business/webhooks/:webhookEndpointId/test |
+| GET | `/webhooks/events` | `asyncHandler(webhookController.getAvailableEvents)` | Get available event types
+GET /business/webhooks/events |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -75,3 +75,28 @@ The Page Builder module provides a drag-and-drop page editor with a block schema
 | POST   | `/business/page-builder/drafts/:id/publish` | Publish draft              |
 | POST   | `/business/page-builder/drafts/:id/preview` | Preview draft              |
 | GET    | `/business/page-builder/blocks`             | List available block types |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/block-types` | `asyncHandler(pageBuilderController.listBlockTypes)` | Block types |
+| GET | `/block-types/:category` | `asyncHandler(pageBuilderController.listBlockTypesByCategory)` | — |
+| GET | `/drafts` | `asyncHandler(pageBuilderController.listDrafts)` | Drafts |
+| POST | `/drafts` | `asyncHandler(pageBuilderController.createDraft)` | — |
+| GET | `/drafts/:draftId` | `asyncHandler(pageBuilderController.getDraft)` | — |
+| DELETE | `/drafts/:draftId` | `asyncHandler(pageBuilderController.deleteDraft)` | — |
+| POST | `/drafts/:draftId/blocks` | `asyncHandler(pageBuilderController.addBlock)` | Blocks |
+| PATCH | `/drafts/:draftId/blocks/:blockId` | `asyncHandler(pageBuilderController.updateBlock)` | — |
+| DELETE | `/drafts/:draftId/blocks/:blockId` | `asyncHandler(pageBuilderController.removeBlock)` | — |
+| PATCH | `/drafts/:draftId/blocks/:blockId/move` | `asyncHandler(pageBuilderController.moveBlock)` | — |
+| GET | `/drafts/:draftId/preview` | `asyncHandler(pageBuilderController.previewDraft)` | Preview |
+| POST | `/drafts/:draftId/publish` | `asyncHandler(pageBuilderController.publishDraft)` | Publish |
+| POST | `/drafts/:draftId/regions/:region/reorder` | `asyncHandler(pageBuilderController.reorderBlocks)` | — |
+| PATCH | `/drafts/:draftId/slug` | `asyncHandler(pageBuilderController.updateDraftSlug)` | — |
+| PATCH | `/drafts/:draftId/theme` | `asyncHandler(pageBuilderController.updateDraftTheme)` | — |
+| PATCH | `/drafts/:draftId/title` | `asyncHandler(pageBuilderController.updateDraftTitle)` | — |
+| POST | `/drafts/:draftId/unpublish` | `asyncHandler(pageBuilderController.unpublishDraft)` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

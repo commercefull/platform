@@ -1,12 +1,12 @@
 # CommerceFull
 
-> E-commerce platform
+> Own your store. Not just rent it.
 
-- Two portals: Admin & Storefront (EJS)
-- 36 bounded contexts (DDD architecture)
+- Your data. Your checkout. Your rules. Your exit.
+- Self-hosted commerce — 43 modules, fully exportable
 - PostgreSQL + Express + TypeScript
-- REST API + GraphQL
 
 - [Get Started](#/guides/getting-started)
+- [Why CommerceFull](#/product/positioning)
 - [API Reference](#/generated/api-reference)
 - [Architecture](#/architecture/overview)

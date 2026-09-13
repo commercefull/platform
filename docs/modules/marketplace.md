@@ -67,3 +67,42 @@ The Marketplace module provides multi-vendor marketplace capabilities — vendor
 | GET    | `/business/marketplace/payouts`              | List payouts            |
 | PUT    | `/business/marketplace/payouts/:id/process`  | Start payout processing |
 | PUT    | `/business/marketplace/payouts/:id/complete` | Complete payout         |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/commission-rules` | `isOrganizationLoggedIn` | Commission rules |
+| POST | `/commission-rules` | `isOrganizationLoggedIn` | — |
+| GET | `/commission-rules/:ruleId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/commission-rules/:ruleId` | `isOrganizationLoggedIn` | — |
+| POST | `/commission-rules/:ruleId/activate` | `isOrganizationLoggedIn` | — |
+| POST | `/commission-rules/:ruleId/deactivate` | `isOrganizationLoggedIn` | — |
+| PUT | `/commission-rules/:ruleId/priority` | `isOrganizationLoggedIn` | — |
+| PUT | `/commission-rules/:ruleId/rate` | `isOrganizationLoggedIn` | — |
+| PUT | `/commission-rules/:ruleId/validity` | `isOrganizationLoggedIn` | — |
+| POST | `/commission-rules/calculate` | `isOrganizationLoggedIn` | — |
+| GET | `/payouts` | `isOrganizationLoggedIn` | Payouts |
+| POST | `/payouts` | `isOrganizationLoggedIn` | — |
+| GET | `/payouts/:payoutId` | `isOrganizationLoggedIn` | — |
+| POST | `/payouts/:payoutId/cancel` | `isOrganizationLoggedIn` | — |
+| POST | `/payouts/:payoutId/complete` | `isOrganizationLoggedIn` | — |
+| POST | `/payouts/:payoutId/fail` | `isOrganizationLoggedIn` | — |
+| POST | `/payouts/:payoutId/line-items` | `isOrganizationLoggedIn` | — |
+| PUT | `/payouts/:payoutId/method` | `isOrganizationLoggedIn` | — |
+| POST | `/payouts/:payoutId/process` | `isOrganizationLoggedIn` | — |
+| POST | `/payouts/:payoutId/retry` | `isOrganizationLoggedIn` | — |
+| GET | `/vendors` | `isOrganizationLoggedIn` | Vendor CRUD + lifecycle |
+| POST | `/vendors` | `isOrganizationLoggedIn` | — |
+| GET | `/vendors/:vendorId` | `isOrganizationLoggedIn` | — |
+| PUT | `/vendors/:vendorId` | `isOrganizationLoggedIn` | — |
+| PUT | `/vendors/:vendorId/address` | `isOrganizationLoggedIn` | — |
+| POST | `/vendors/:vendorId/approve` | `isOrganizationLoggedIn` | — |
+| PUT | `/vendors/:vendorId/bank-info` | `isOrganizationLoggedIn` | — |
+| PUT | `/vendors/:vendorId/commission-rate` | `isOrganizationLoggedIn` | — |
+| POST | `/vendors/:vendorId/suspend` | `isOrganizationLoggedIn` | — |
+| POST | `/vendors/:vendorId/terminate` | `isOrganizationLoggedIn` | — |
+| PUT | `/vendors/:vendorId/tier` | `isOrganizationLoggedIn` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

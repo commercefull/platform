@@ -192,24 +192,24 @@ The integration module is **separate from the webhook module** — webhooks forw
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                                             | Controller              | Description                        |
-| ------ | -------------------------------------------------------------------- | ----------------------- | ---------------------------------- |
-| POST   | `/business/integration`                                              | `createIntegration`     | Create a new integration           |
-| GET    | `/business/integration`                                              | `listIntegrations`      | List integrations for organization |
-| GET    | `/business/integration/:integrationId`                               | `getIntegration`        | Get a single integration           |
-| PUT    | `/business/integration/:integrationId`                               | `updateIntegration`     | Update integration details         |
-| POST   | `/business/integration/:integrationId/activate`                      | `activateIntegration`   | Activate integration               |
-| POST   | `/business/integration/:integrationId/deactivate`                    | `deactivateIntegration` | Deactivate integration             |
-| DELETE | `/business/integration/:integrationId`                               | `deleteIntegration`     | Delete integration                 |
-| POST   | `/business/integration/:integrationId/credentials`                   | `addCredential`         | Add encrypted credential           |
-| GET    | `/business/integration/:integrationId/credentials`                   | `listCredentials`       | List credentials                   |
-| PUT    | `/business/integration/:integrationId/credentials/:credentialId`     | `updateCredential`      | Update credential                  |
-| DELETE | `/business/integration/:integrationId/credentials/:credentialId`     | `deleteCredential`      | Delete credential                  |
-| POST   | `/business/integration/:integrationId/subscriptions`                 | `createSubscription`    | Create event subscription          |
-| GET    | `/business/integration/:integrationId/subscriptions`                 | `listSubscriptions`     | List event subscriptions           |
-| PUT    | `/business/integration/:integrationId/subscriptions/:subscriptionId` | `updateSubscription`    | Update subscription                |
-| DELETE | `/business/integration/:integrationId/subscriptions/:subscriptionId` | `deleteSubscription`    | Delete subscription                |
-| GET    | `/business/integration/:integrationId/logs`                          | `listLogs`              | List dispatch logs                 |
-| DELETE | `/business/integration/:integrationId/logs`                          | `deleteLogs`            | Clear dispatch logs                |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/` | `asyncHandler(integrationController.createIntegration.bind(in` | Integration CRUD |
+| GET | `/` | `asyncHandler(integrationController.listIntegrations.bind(int` | — |
+| GET | `/:integrationId` | `asyncHandler(integrationController.getIntegration.bind(integ` | — |
+| PUT | `/:integrationId` | `asyncHandler(integrationController.updateIntegration.bind(in` | — |
+| DELETE | `/:integrationId` | `asyncHandler(integrationController.deleteIntegration.bind(in` | — |
+| POST | `/:integrationId/activate` | `asyncHandler(integrationController.activateIntegration.bind(` | — |
+| POST | `/:integrationId/credentials` | `asyncHandler(integrationController.addCredential.bind(integr` | Credentials |
+| GET | `/:integrationId/credentials` | `asyncHandler(integrationController.listCredentials.bind(inte` | — |
+| PUT | `/:integrationId/credentials/:credentialId` | `asyncHandler(integrationController.updateCredential.bind(int` | — |
+| DELETE | `/:integrationId/credentials/:credentialId` | `asyncHandler(integrationController.deleteCredential.bind(int` | — |
+| POST | `/:integrationId/deactivate` | `asyncHandler(integrationController.deactivateIntegration.bin` | — |
+| GET | `/:integrationId/logs` | `asyncHandler(integrationController.listLogs.bind(integration` | Logs |
+| DELETE | `/:integrationId/logs` | `asyncHandler(integrationController.deleteLogs.bind(integrati` | — |
+| POST | `/:integrationId/subscriptions` | `asyncHandler(integrationController.createSubscription.bind(i` | Event subscriptions |
+| GET | `/:integrationId/subscriptions` | `asyncHandler(integrationController.listSubscriptions.bind(in` | — |
+| PUT | `/:integrationId/subscriptions/:subscriptionId` | `asyncHandler(integrationController.updateSubscription.bind(i` | — |
+| DELETE | `/:integrationId/subscriptions/:subscriptionId` | `asyncHandler(integrationController.deleteSubscription.bind(i` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

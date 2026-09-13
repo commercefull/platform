@@ -70,73 +70,71 @@ The Notification feature manages in-app notifications for merchants and administ
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                                     | Controller                   | Description                                                                                                                                                                                                                             |
-| ------ | ------------------------------------------------------------ | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/business/notification-preferences`                         | `getAllPreferences`          | ============================================================================ Admin preference routes ============================================================================                                                       |
-| PUT    | `/business/notification-preferences/:id`                     | `updatePreferenceAdmin`      | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notification-preferences/user/:userId`            | `getPreferencesByUser`       | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notification-templates`                           | `getAllTemplates`            | ============================================================================ Template routes ============================================================================                                                               |
-| POST   | `/business/notification-templates`                           | `createTemplate`             | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notification-templates/:id`                       | `getTemplateById`            | —                                                                                                                                                                                                                                       |
-| PUT    | `/business/notification-templates/:id`                       | `updateTemplate`             | —                                                                                                                                                                                                                                       |
-| DELETE | `/business/notification-templates/:id`                       | `deleteTemplate`             | —                                                                                                                                                                                                                                       |
-| POST   | `/business/notification-templates/:id/preview`               | `previewTemplate`            | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notification-templates/type/:type`                | `getTemplatesByType`         | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notifications`                                    | `getAllNotifications`        | ============================================================================ Admin CRUD routes for notifications ============================================================================                                           |
-| POST   | `/business/notifications`                                    | `createNotification`         | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notifications/:id`                                | `getNotificationById`        | —                                                                                                                                                                                                                                       |
-| PUT    | `/business/notifications/:id`                                | `updateNotification`         | —                                                                                                                                                                                                                                       |
-| DELETE | `/business/notifications/:id`                                | `deleteNotification`         | —                                                                                                                                                                                                                                       |
-| PUT    | `/business/notifications/:id/read`                           | `markNotificationAsRead`     | —                                                                                                                                                                                                                                       |
-| POST   | `/business/notifications/:id/send`                           | `markNotificationAsSent`     | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notifications/batches`                            | `listBatches`                | ============================================================================ Batch routes ============================================================================                                                                  |
-| POST   | `/business/notifications/batches`                            | `sendBatch`                  | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notifications/batches/:batchId`                   | `getBatch`                   | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notifications/count`                              | `getUnreadCount`             | —                                                                                                                                                                                                                                       |
-| PUT    | `/business/notifications/read-all`                           | `markAllNotificationsAsRead` | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notifications/recent`                             | `getRecentNotifications`     | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notifications/templates/:templateId/translations` | `listTranslations`           | ============================================================================ Template translation routes ============================================================================                                                   |
-| POST   | `/business/notifications/templates/:templateId/translations` | `upsertTranslation`          | —                                                                                                                                                                                                                                       |
-| GET    | `/business/notifications/unread`                             | `getUnreadNotifications`     | ============================================================================ User-specific routes (for logged-in merchant viewing their own notifications) ============================================================================ |
-| GET    | `/business/notifications/webhooks`                           | `listWebhooks`               | ============================================================================ Webhook routes ============================================================================                                                                |
-| POST   | `/business/notifications/webhooks`                           | `createWebhook`              | —                                                                                                                                                                                                                                       |
-| DELETE | `/business/notifications/webhooks/:webhookId`                | `deactivateWebhook`          | —                                                                                                                                                                                                                                       |
-| GET    | `/customer/notifications`                                    | `async (req, res) => {       |
-| try {  |
-
-    const customerId = req.use` | — |
-
-| GET | `/customer/notifications/:id` | `async (req, res) => {
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/notification-preferences` | `asyncHandler(getAllPreferences)` | ============================================================================ Admin preference routes ============================================================================ |
+| PUT | `/notification-preferences/:id` | `asyncHandler(updatePreferenceAdmin)` | — |
+| GET | `/notification-preferences/user/:userId` | `asyncHandler(getPreferencesByUser)` | — |
+| GET | `/notification-templates` | `asyncHandler(getAllTemplates)` | ============================================================================ Template routes ============================================================================ |
+| POST | `/notification-templates` | `asyncHandler(createTemplate)` | — |
+| GET | `/notification-templates/:id` | `asyncHandler(getTemplateById)` | — |
+| PUT | `/notification-templates/:id` | `asyncHandler(updateTemplate)` | — |
+| DELETE | `/notification-templates/:id` | `asyncHandler(deleteTemplate)` | — |
+| POST | `/notification-templates/:id/preview` | `asyncHandler(previewTemplate)` | — |
+| GET | `/notification-templates/type/:type` | `asyncHandler(getTemplatesByType)` | — |
+| GET | `/notifications` | `asyncHandler(getAllNotifications)` | ============================================================================ Admin CRUD routes for notifications ============================================================================ |
+| POST | `/notifications` | `asyncHandler(createNotification)` | — |
+| GET | `/notifications` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
-| PUT | `/customer/notifications/:notificationId/read` | `async (req, res) => {
+| GET | `/notifications/:id` | `asyncHandler(getNotificationById)` | — |
+| PUT | `/notifications/:id` | `asyncHandler(updateNotification)` | — |
+| DELETE | `/notifications/:id` | `asyncHandler(deleteNotification)` | — |
+| GET | `/notifications/:id` | `async (req, res) => {
+  try {
+    const customerId = req.use` | — |
+| PUT | `/notifications/:id/read` | `asyncHandler(markNotificationAsRead)` | — |
+| POST | `/notifications/:id/send` | `asyncHandler(markNotificationAsSent)` | — |
+| PUT | `/notifications/:notificationId/read` | `async (req, res) => {
   try {
     const useCase = new MarkAs` | — |
-| PATCH | `/customer/notifications/:notificationId/read` | `async (req, res) => {
+| PATCH | `/notifications/:notificationId/read` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
-| GET | `/customer/notifications/count` | `async (req, res) => {
+| GET | `/notifications/batches` | `asyncHandler(listBatches)` | ============================================================================ Batch routes ============================================================================ |
+| POST | `/notifications/batches` | `asyncHandler(sendBatch)` | — |
+| GET | `/notifications/batches/:batchId` | `asyncHandler(getBatch)` | — |
+| GET | `/notifications/count` | `asyncHandler(getUnreadCount)` | — |
+| GET | `/notifications/count` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
-| GET | `/customer/notifications/devices` | `listDevices` | — |
-| POST | `/customer/notifications/devices` | `registerDevice` | — |
-| DELETE | `/customer/notifications/devices/:deviceToken` | `deleteDevice` | — |
-| GET | `/customer/notifications/preferences` | `getPreferences` | — |
-| POST | `/customer/notifications/preferences` | `createPreference` | — |
-| GET | `/customer/notifications/preferences/:id` | `getPreferenceById` | — |
-| PUT | `/customer/notifications/preferences/:id` | `updatePreference` | — |
-| DELETE | `/customer/notifications/preferences/:id` | `deletePreference` | — |
-| PUT | `/customer/notifications/preferences/:id/schedule` | `updateSchedule` | — |
-| POST | `/customer/notifications/preferences/bulk` | `bulkUpdatePreferences` | — |
-| GET | `/customer/notifications/preferences/type/:type` | `getPreferenceByType` | — |
-| PUT | `/customer/notifications/read` | `async (req, res) => {
+| GET | `/notifications/devices` | `asyncHandler(notificationCustomerController.listDevices)` | — |
+| POST | `/notifications/devices` | `asyncHandler(notificationCustomerController.registerDevice)` | — |
+| DELETE | `/notifications/devices/:deviceToken` | `asyncHandler(notificationCustomerController.deleteDevice)` | — |
+| GET | `/notifications/preferences` | `asyncHandler(notificationCustomerController.getPreferences)` | — |
+| POST | `/notifications/preferences` | `asyncHandler(notificationCustomerController.createPreference` | — |
+| GET | `/notifications/preferences/:id` | `asyncHandler(notificationCustomerController.getPreferenceByI` | — |
+| PUT | `/notifications/preferences/:id` | `asyncHandler(notificationCustomerController.updatePreference` | — |
+| DELETE | `/notifications/preferences/:id` | `asyncHandler(notificationCustomerController.deletePreference` | — |
+| PUT | `/notifications/preferences/:id/schedule` | `asyncHandler(notificationCustomerController.updateSchedule)` | — |
+| POST | `/notifications/preferences/bulk` | `asyncHandler(notificationCustomerController.bulkUpdatePrefer` | — |
+| GET | `/notifications/preferences/type/:type` | `asyncHandler(notificationCustomerController.getPreferenceByT` | — |
+| PUT | `/notifications/read` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
-| POST | `/customer/notifications/read` | `async (req, res) => {
+| POST | `/notifications/read` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
-| GET | `/customer/notifications/unread-count` | `async (req, res) => {
+| PUT | `/notifications/read-all` | `asyncHandler(markAllNotificationsAsRead)` | — |
+| GET | `/notifications/recent` | `asyncHandler(getRecentNotifications)` | — |
+| GET | `/notifications/templates/:templateId/translations` | `asyncHandler(listTranslations)` | ============================================================================ Template translation routes ============================================================================ |
+| POST | `/notifications/templates/:templateId/translations` | `asyncHandler(upsertTranslation)` | — |
+| GET | `/notifications/unread` | `asyncHandler(getUnreadNotifications)` | ============================================================================ User-specific routes (for logged-in merchant viewing their own notifications) ============================================================================ |
+| GET | `/notifications/unread-count` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
+| GET | `/notifications/webhooks` | `asyncHandler(listWebhooks)` | ============================================================================ Webhook routes ============================================================================ |
+| POST | `/notifications/webhooks` | `asyncHandler(createWebhook)` | — |
+| DELETE | `/notifications/webhooks/:webhookId` | `asyncHandler(deactivateWebhook)` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

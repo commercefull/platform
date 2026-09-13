@@ -71,3 +71,52 @@ The B2B module provides business-to-business commerce capabilities — company h
 | POST   | `/business/b2b/approvals`             | Create approval workflow   |
 | PUT    | `/business/b2b/approvals/:id/approve` | Approve request            |
 | PUT    | `/business/b2b/approvals/:id/reject`  | Reject request             |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/approvals` | `isOrganizationLoggedIn` | Approval workflows |
+| POST | `/approvals` | `isOrganizationLoggedIn` | — |
+| GET | `/approvals/:workflowId` | `isOrganizationLoggedIn` | — |
+| POST | `/approvals/:workflowId/approve` | `isOrganizationLoggedIn` | — |
+| POST | `/approvals/:workflowId/cancel` | `isOrganizationLoggedIn` | — |
+| POST | `/approvals/:workflowId/escalate` | `isOrganizationLoggedIn` | — |
+| POST | `/approvals/:workflowId/reject` | `isOrganizationLoggedIn` | — |
+| GET | `/companies` | `isOrganizationLoggedIn` | Company CRUD + lifecycle |
+| POST | `/companies` | `isOrganizationLoggedIn` | — |
+| GET | `/companies/:companyId` | `isOrganizationLoggedIn` | — |
+| PUT | `/companies/:companyId` | `isOrganizationLoggedIn` | — |
+| POST | `/companies/:companyId/approve` | `isOrganizationLoggedIn` | — |
+| PUT | `/companies/:companyId/credit-limit` | `isOrganizationLoggedIn` | — |
+| PUT | `/companies/:companyId/payment-terms` | `isOrganizationLoggedIn` | — |
+| POST | `/companies/:companyId/reactivate` | `isOrganizationLoggedIn` | — |
+| GET | `/companies/:companyId/subsidiaries` | `isOrganizationLoggedIn` | — |
+| POST | `/companies/:companyId/suspend` | `isOrganizationLoggedIn` | — |
+| POST | `/companies/:companyId/terminate` | `isOrganizationLoggedIn` | — |
+| GET | `/quotes` | `isOrganizationLoggedIn` | Quote management |
+| POST | `/quotes` | `isOrganizationLoggedIn` | — |
+| GET | `/quotes/:quoteId` | `isOrganizationLoggedIn` | — |
+| POST | `/quotes/:quoteId/accept` | `isOrganizationLoggedIn` | — |
+| POST | `/quotes/:quoteId/convert` | `isOrganizationLoggedIn` | — |
+| PUT | `/quotes/:quoteId/internal-notes` | `isOrganizationLoggedIn` | — |
+| POST | `/quotes/:quoteId/line-items` | `isOrganizationLoggedIn` | — |
+| PUT | `/quotes/:quoteId/line-items/:lineItemId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/quotes/:quoteId/line-items/:lineItemId` | `isOrganizationLoggedIn` | — |
+| PUT | `/quotes/:quoteId/notes` | `isOrganizationLoggedIn` | — |
+| POST | `/quotes/:quoteId/reject` | `isOrganizationLoggedIn` | — |
+| POST | `/quotes/:quoteId/send` | `isOrganizationLoggedIn` | — |
+| POST | `/quotes/:quoteId/viewed` | `isOrganizationLoggedIn` | — |
+| GET | `/users` | `isOrganizationLoggedIn` | B2B User management |
+| GET | `/users/:userId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/users/:userId` | `isOrganizationLoggedIn` | — |
+| POST | `/users/:userId/activate` | `isOrganizationLoggedIn` | — |
+| PUT | `/users/:userId/profile` | `isOrganizationLoggedIn` | — |
+| POST | `/users/:userId/reactivate` | `isOrganizationLoggedIn` | — |
+| PUT | `/users/:userId/role` | `isOrganizationLoggedIn` | — |
+| PUT | `/users/:userId/spending-limits` | `isOrganizationLoggedIn` | — |
+| POST | `/users/:userId/suspend` | `isOrganizationLoggedIn` | — |
+| POST | `/users/invite` | `isOrganizationLoggedIn` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

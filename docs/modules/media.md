@@ -101,9 +101,10 @@ The media module does not currently emit domain events.
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                       | Controller                     | Description                                   |
-| ------ | ------------------------------ | ------------------------------ | --------------------------------------------- |
-| POST   | `/business/media/upload`       | `MediaController.uploadImage`  | Upload and process a single image             |
-| POST   | `/business/media/upload/batch` | `MediaController.uploadImages` | Upload and process multiple images (up to 10) |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/media/download` | `asyncHandler(mediaController.downloadImage)` | Download remote image by URL |
+| POST | `/media/upload` | `uploadSingle` | Upload single image |
+| POST | `/media/upload/batch` | `uploadMultiple` | Upload multiple images |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -95,12 +95,12 @@ The configuration module does not currently emit domain events.
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                            | Controller                     | Description                     |
-| ------ | ----------------------------------- | ------------------------------ | ------------------------------- |
-| POST   | `/business/configuration`           | `createSystemConfiguration`    | Create system configuration     |
-| PUT    | `/business/configuration/:configId` | `updateSystemConfiguration`    | Update system configuration     |
-| GET    | `/business/configuration/active`    | `getActiveSystemConfiguration` | Get active system configuration |
-| GET    | `/business/configuration/:configId` | `getSystemConfiguration`       | Get system configuration by ID  |
-| GET    | `/business/configuration`           | `listSystemConfigurations`     | List all system configurations  |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/configuration` | `asyncHandler(systemConfigurationController.createSystemConfi` | Create system configuration |
+| GET | `/configuration` | `asyncHandler(systemConfigurationController.listSystemConfigu` | List all system configurations |
+| PUT | `/configuration/:configId` | `asyncHandler(systemConfigurationController.updateSystemConfi` | Update system configuration |
+| GET | `/configuration/:configId` | `asyncHandler(systemConfigurationController.getSystemConfigur` | Get system configuration by ID |
+| GET | `/configuration/active` | `asyncHandler(systemConfigurationController.getActiveSystemCo` | Get active system configuration (must be before /:configId to avoid matching "active" as an ID) |
 
 <!-- GENERATED:ENDPOINTS:END -->

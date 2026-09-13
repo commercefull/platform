@@ -114,24 +114,24 @@ The GDPR (General Data Protection Regulation) feature handles compliance with EU
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                            | Controller                   | Description                   |
-| ------ | --------------------------------------------------- | ---------------------------- | ----------------------------- |
-| GET    | `/business/gdpr/cookies/statistics`                 | `getCookieConsentStatistics` | Get cookie consent statistics |
-| GET    | `/business/gdpr/requests`                           | `listDataRequests`           | List all GDPR requests        |
-| GET    | `/business/gdpr/requests/:gdprDataRequestId`        | `getDataRequest`             | Get a specific request        |
-| POST   | `/business/gdpr/requests/:gdprDataRequestId/delete` | `processDeletionRequest`     | Process deletion request      |
-| POST   | `/business/gdpr/requests/:gdprDataRequestId/export` | `processExportRequest`       | Process export request        |
-| POST   | `/business/gdpr/requests/:gdprDataRequestId/reject` | `rejectRequest`              | Reject a request              |
-| POST   | `/business/gdpr/requests/:gdprDataRequestId/verify` | `verifyIdentity`             | Verify customer identity      |
-| GET    | `/business/gdpr/requests/overdue`                   | `getOverdueRequests`         | Get overdue requests          |
-| GET    | `/business/gdpr/statistics`                         | `getGdprStatistics`          | Get GDPR statistics           |
-| POST   | `/customer/gdpr/cookies/accept-all`                 | `acceptAllCookies`           | Accept all cookies            |
-| POST   | `/customer/gdpr/cookies/consent`                    | `recordCookieConsent`        | Record cookie consent         |
-| GET    | `/customer/gdpr/cookies/consent`                    | `getCookieConsent`           | Get current consent           |
-| PUT    | `/customer/gdpr/cookies/consent/:cookieConsentId`   | `updateCookieConsent`        | Update cookie preferences     |
-| POST   | `/customer/gdpr/cookies/reject-all`                 | `rejectAllCookies`           | Reject all optional cookies   |
-| POST   | `/customer/gdpr/requests`                           | `isCustomerLoggedIn`         | Create a new data request     |
-| GET    | `/customer/gdpr/requests`                           | `isCustomerLoggedIn`         | Get my data requests          |
-| POST   | `/customer/gdpr/requests/:gdprDataRequestId/cancel` | `isCustomerLoggedIn`         | Cancel a request              |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/gdpr/cookies/accept-all` | `asyncHandler(acceptAllCookies)` | Accept all cookies |
+| POST | `/gdpr/cookies/consent` | `asyncHandler(recordCookieConsent)` | Record cookie consent |
+| GET | `/gdpr/cookies/consent` | `asyncHandler(getCookieConsent)` | Get current consent |
+| PUT | `/gdpr/cookies/consent/:cookieConsentId` | `asyncHandler(updateCookieConsent)` | Update cookie preferences |
+| POST | `/gdpr/cookies/reject-all` | `asyncHandler(rejectAllCookies)` | Reject all optional cookies |
+| GET | `/gdpr/cookies/statistics` | `asyncHandler(getCookieConsentStatistics)` | Get cookie consent statistics |
+| GET | `/gdpr/requests` | `asyncHandler(listDataRequests)` | List all GDPR requests |
+| POST | `/gdpr/requests` | `isCustomerLoggedIn` | Create a new data request |
+| GET | `/gdpr/requests` | `isCustomerLoggedIn` | Get my data requests |
+| GET | `/gdpr/requests/:gdprDataRequestId` | `asyncHandler(getDataRequest)` | Get a specific request |
+| POST | `/gdpr/requests/:gdprDataRequestId/cancel` | `isCustomerLoggedIn` | Cancel a request |
+| POST | `/gdpr/requests/:gdprDataRequestId/delete` | `asyncHandler(processDeletionRequest)` | Process deletion request |
+| POST | `/gdpr/requests/:gdprDataRequestId/export` | `asyncHandler(processExportRequest)` | Process export request |
+| POST | `/gdpr/requests/:gdprDataRequestId/reject` | `asyncHandler(rejectRequest)` | Reject a request |
+| POST | `/gdpr/requests/:gdprDataRequestId/verify` | `asyncHandler(verifyIdentity)` | Verify customer identity |
+| GET | `/gdpr/requests/overdue` | `asyncHandler(getOverdueRequests)` | Get overdue requests |
+| GET | `/gdpr/statistics` | `asyncHandler(getGdprStatistics)` | Get GDPR statistics |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -107,194 +107,194 @@ The Product feature manages the product catalog, including products, variants, b
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method                                               | Endpoint                                                          | Controller                    | Description                                                         |
-| ---------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------- |
-| GET                                                  | `/business/attribute-groups`                                      | `bind`                        | —                                                                   |
-| POST                                                 | `/business/attribute-groups`                                      | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attribute-groups/:id`                                  | `bind`                        | —                                                                   |
-| PUT                                                  | `/business/attribute-groups/:id`                                  | `bind`                        | —                                                                   |
-| DELETE                                               | `/business/attribute-groups/:id`                                  | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attribute-groups/code/:code`                           | `bind`                        | —                                                                   |
-| POST                                                 | `/business/attribute-options`                                     | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attribute-options/:id`                                 | `bind`                        | —                                                                   |
-| PUT                                                  | `/business/attribute-options/:id`                                 | `bind`                        | —                                                                   |
-| DELETE                                               | `/business/attribute-options/:id`                                 | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attribute-options/attribute/:attributeId`              | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attribute-options/attribute/:attributeId/value/:value` | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attribute-sets`                                        | `bind`                        | —                                                                   |
-| POST                                                 | `/business/attribute-sets`                                        | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attribute-sets/:id`                                    | `bind`                        | —                                                                   |
-| PUT                                                  | `/business/attribute-sets/:id`                                    | `bind`                        | —                                                                   |
-| DELETE                                               | `/business/attribute-sets/:id`                                    | `bind`                        | —                                                                   |
-| POST                                                 | `/business/attribute-sets/:id/attributes`                         | `bind`                        | —                                                                   |
-| DELETE                                               | `/business/attribute-sets/:id/attributes/:attributeId`            | `bind`                        | —                                                                   |
-| POST                                                 | `/business/attribute-sets/:id/attributes/reorder`                 | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attributes`                                            | `isOrganizationLoggedIn`      | List all attributes                                                 |
-| POST                                                 | `/business/attributes`                                            | `isOrganizationLoggedIn`      | Create attribute                                                    |
-| GET                                                  | `/business/attributes`                                            | `bind`                        | —                                                                   |
-| POST                                                 | `/business/attributes`                                            | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attributes/:id`                                        | `isOrganizationLoggedIn`      | Get attribute by ID                                                 |
-| PUT                                                  | `/business/attributes/:id`                                        | `isOrganizationLoggedIn`      | Update attribute                                                    |
-| DELETE                                               | `/business/attributes/:id`                                        | `isOrganizationLoggedIn`      | Delete attribute                                                    |
-| GET                                                  | `/business/attributes/:id`                                        | `bind`                        | —                                                                   |
-| PUT                                                  | `/business/attributes/:id`                                        | `bind`                        | —                                                                   |
-| DELETE                                               | `/business/attributes/:id`                                        | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attributes/:id/values`                                 | `isOrganizationLoggedIn`      | Get attribute values                                                |
-| POST                                                 | `/business/attributes/:id/values`                                 | `isOrganizationLoggedIn`      | Add attribute value                                                 |
-| GET                                                  | `/business/attributes/:id/values`                                 | `bind`                        | Attribute Values                                                    |
-| POST                                                 | `/business/attributes/:id/values`                                 | `bind`                        | —                                                                   |
-| DELETE                                               | `/business/attributes/:id/values/:valueId`                        | `isOrganizationLoggedIn`      | Remove attribute value                                              |
-| DELETE                                               | `/business/attributes/:id/values/:valueId`                        | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attributes/code/:code`                                 | `isOrganizationLoggedIn`      | Get attribute by code                                               |
-| GET                                                  | `/business/attributes/code/:code`                                 | `bind`                        | —                                                                   |
-| GET                                                  | `/business/attributes/group/:groupId`                             | `bind`                        | —                                                                   |
-| GET                                                  | `/business/bundles`                                               | `getBundles`                  | —                                                                   |
-| POST                                                 | `/business/bundles`                                               | `createBundle`                | —                                                                   |
-| GET                                                  | `/business/bundles/:id`                                           | `getBundle`                   | —                                                                   |
-| PUT                                                  | `/business/bundles/:id`                                           | `updateBundle`                | —                                                                   |
-| DELETE                                               | `/business/bundles/:id`                                           | `deleteBundle`                | —                                                                   |
-| POST                                                 | `/business/bundles/:id/items`                                     | `addBundleItem`               | —                                                                   |
-| PUT                                                  | `/business/bundles/:id/items/:itemId`                             | `updateBundleItem`            | —                                                                   |
-| DELETE                                               | `/business/bundles/:id/items/:itemId`                             | `deleteBundleItem`            | —                                                                   |
-| GET                                                  | `/business/categories`                                            | `listCategories`              | —                                                                   |
-| POST                                                 | `/business/categories`                                            | `createCategory`              | —                                                                   |
-| GET                                                  | `/business/categories/:id`                                        | `getCategory`                 | —                                                                   |
-| PUT                                                  | `/business/categories/:id`                                        | `updateCategory`              | —                                                                   |
-| DELETE                                               | `/business/categories/:id`                                        | `deleteCategory`              | —                                                                   |
-| GET                                                  | `/business/categories/:id/children`                               | `getCategoryChildren`         | —                                                                   |
-| GET                                                  | `/business/categories/root`                                       | `getRootCategories`           | —                                                                   |
-| GET                                                  | `/business/categories/slug/:slug`                                 | `getCategoryBySlug`           | —                                                                   |
-| GET                                                  | `/business/collections`                                           | `listCollections`             | —                                                                   |
-| POST                                                 | `/business/collections`                                           | `createCollection`            | —                                                                   |
-| PUT                                                  | `/business/collections/:collectionId`                             | `updateCollection`            | —                                                                   |
-| DELETE                                               | `/business/collections/:collectionId`                             | `deleteCollection`            | —                                                                   |
-| PUT                                                  | `/business/downloads/:downloadId`                                 | `updateDownload`              | —                                                                   |
-| DELETE                                               | `/business/downloads/:downloadId`                                 | `deleteDownload`              | —                                                                   |
-| GET                                                  | `/business/product-types`                                         | `isOrganizationLoggedIn`      | List all product types                                              |
-| POST                                                 | `/business/product-types`                                         | `isOrganizationLoggedIn`      | Create product type                                                 |
-| GET                                                  | `/business/product-types`                                         | `bind`                        | —                                                                   |
-| POST                                                 | `/business/product-types`                                         | `bind`                        | —                                                                   |
-| GET                                                  | `/business/product-types/:id`                                     | `isOrganizationLoggedIn`      | Get product type by ID                                              |
-| PUT                                                  | `/business/product-types/:id`                                     | `isOrganizationLoggedIn`      | Update product type                                                 |
-| DELETE                                               | `/business/product-types/:id`                                     | `isOrganizationLoggedIn`      | Delete product type                                                 |
-| GET                                                  | `/business/product-types/:id`                                     | `bind`                        | —                                                                   |
-| PUT                                                  | `/business/product-types/:id`                                     | `bind`                        | —                                                                   |
-| DELETE                                               | `/business/product-types/:id`                                     | `bind`                        | —                                                                   |
-| GET                                                  | `/business/product-types/:id/attributes`                          | `isOrganizationLoggedIn`      | Get attributes for a product type                                   |
-| GET                                                  | `/business/product-types/:id/attributes`                          | `bind`                        | —                                                                   |
-| GET                                                  | `/business/product-types/slug/:slug`                              | `isOrganizationLoggedIn`      | Get product type by slug                                            |
-| GET                                                  | `/business/product-types/slug/:slug`                              | `bind`                        | —                                                                   |
-| GET                                                  | `/business/products`                                              | `listProducts`                | List all products                                                   |
-| GET /business/products                               |
-| POST                                                 | `/business/products`                                              | `createProduct`               | Create a new product                                                |
-| POST /business/products                              |
-| GET                                                  | `/business/products/:productId`                                   | `getProduct`                  | Get product details                                                 |
-| GET /business/products/:productId                    |
-| PUT                                                  | `/business/products/:productId`                                   | `updateProduct`               | Update a product                                                    |
-| PUT /business/products/:productId                    |
-| DELETE                                               | `/business/products/:productId`                                   | `deleteProduct`               | Delete a product                                                    |
-| DELETE /business/products/:productId                 |
-| POST                                                 | `/business/products/:productId/apply-attribute-set`               | `applyAttributeSet`           | —                                                                   |
-| GET                                                  | `/business/products/:productId/attributes`                        | `isOrganizationLoggedIn`      | Get product attributes                                              |
-| POST                                                 | `/business/products/:productId/attributes`                        | `isOrganizationLoggedIn`      | Set single product attribute                                        |
-| PUT                                                  | `/business/products/:productId/attributes`                        | `isOrganizationLoggedIn`      | Set multiple product attributes                                     |
-| GET                                                  | `/business/products/:productId/attributes`                        | `bind`                        | Product Attributes                                                  |
-| POST                                                 | `/business/products/:productId/attributes`                        | `bind`                        | —                                                                   |
-| PUT                                                  | `/business/products/:productId/attributes`                        | `bind`                        | —                                                                   |
-| DELETE                                               | `/business/products/:productId/attributes/:attributeId`           | `isOrganizationLoggedIn`      | Remove product attribute                                            |
-| DELETE                                               | `/business/products/:productId/attributes/:attributeId`           | `bind`                        | —                                                                   |
-| POST                                                 | `/business/products/:productId/configure`                         | `configureVariant`            | —                                                                   |
-| GET                                                  | `/business/products/:productId/downloads`                         | `listDownloads`               | —                                                                   |
-| POST                                                 | `/business/products/:productId/downloads`                         | `createDownload`              | —                                                                   |
-| GET                                                  | `/business/products/:productId/grouped-children`                  | `listGroupedChildren`         | —                                                                   |
-| GET                                                  | `/business/products/:productId/images`                            | `getProductImages`            | —                                                                   |
-| POST                                                 | `/business/products/:productId/images`                            | `addProductImage`             | —                                                                   |
-| PUT                                                  | `/business/products/:productId/images/:imageId`                   | `updateProductImage`          | —                                                                   |
-| DELETE                                               | `/business/products/:productId/images/:imageId`                   | `deleteProductImage`          | —                                                                   |
-| POST                                                 | `/business/products/:productId/images/reorder`                    | `reorderProductImages`        | —                                                                   |
-| POST                                                 | `/business/products/:productId/publish`                           | `publishProduct`              | Publish a product                                                   |
-| POST /business/products/:productId/publish           |
-| GET                                                  | `/business/products/:productId/qa`                                | `listProductQa`               | —                                                                   |
-| PATCH                                                | `/business/products/:productId/qa/:qaId/status`                   | `updateQaStatus`              | —                                                                   |
-| GET                                                  | `/business/products/:productId/relationships`                     | `listRelationships`           | —                                                                   |
-| POST                                                 | `/business/products/:productId/relationships`                     | `createRelationship`          | —                                                                   |
-| GET                                                  | `/business/products/:productId/reviews/media`                     | `listReviewMedia`             | —                                                                   |
-| DELETE                                               | `/business/products/:productId/reviews/media/:mediaId`            | `deleteReviewMedia`           | —                                                                   |
-| GET                                                  | `/business/products/:productId/similar`                           | `bind`                        | Find similar products                                               |
-| PUT                                                  | `/business/products/:productId/status`                            | `updateProductStatus`         | Update product status                                               |
-| PUT /business/products/:productId/status             |
-| GET                                                  | `/business/products/:productId/store-availability`                | `getProductStoreAvailability` | Get product store availability                                      |
-| GET /business/products/:productId/store-availability |
-| POST                                                 | `/business/products/:productId/unpublish`                         | `unpublishProduct`            | Unpublish a product                                                 |
-| POST /business/products/:productId/unpublish         |
-| GET                                                  | `/business/products/:productId/variant-matrix`                    | `getVariantMatrix`            | —                                                                   |
-| GET                                                  | `/business/products/:productId/variants`                          | `getProductVariants`          | —                                                                   |
-| POST                                                 | `/business/products/:productId/variants`                          | `createProductVariant`        | —                                                                   |
-| GET                                                  | `/business/products/:productId/variants/:variantId`               | `getProductVariant`           | —                                                                   |
-| PUT                                                  | `/business/products/:productId/variants/:variantId`               | `updateProductVariant`        | —                                                                   |
-| DELETE                                               | `/business/products/:productId/variants/:variantId`               | `deleteProductVariant`        | —                                                                   |
-| PUT                                                  | `/business/products/:productId/visibility`                        | `updateProductVisibility`     | Update product visibility                                           |
-| PUT /business/products/:productId/visibility         |
-| GET                                                  | `/business/products/barcode/:barcode`                             | `findByBarcode`               | Find product by variant barcode                                     |
-| GET /business/products/barcode/:barcode              |
-| GET                                                  | `/business/products/by-attribute/:code/:value`                    | `bind`                        | Find products by attribute                                          |
-| GET                                                  | `/business/products/search`                                       | `bind`                        | Search products with filters and facets                             |
-| POST                                                 | `/business/products/search`                                       | `bind`                        | —                                                                   |
-| GET                                                  | `/business/products/search/suggestions`                           | `bind`                        | Get search suggestions for autocomplete                             |
-| GET                                                  | `/business/products/variants/:variantId`                          | `getProductVariant`           | Flat variant routes — must be before /:productId to avoid collision |
-| PUT                                                  | `/business/products/variants/:variantId`                          | `updateProductVariant`        | —                                                                   |
-| DELETE                                               | `/business/products/variants/:variantId`                          | `deleteProductVariant`        | —                                                                   |
-| PATCH                                                | `/business/products/variants/:variantId/inventory`                | `updateVariantInventory`      | —                                                                   |
-| DELETE                                               | `/business/relationships/:relationshipId`                         | `deleteRelationship`          | —                                                                   |
-| GET                                                  | `/business/reviews`                                               | `listReviews`                 | —                                                                   |
-| GET                                                  | `/business/reviews/:reviewId`                                     | `getReview`                   | —                                                                   |
-| DELETE                                               | `/business/reviews/:reviewId`                                     | `deleteReview`                | —                                                                   |
-| PUT                                                  | `/business/reviews/:reviewId/approve`                             | `approveReview`               | —                                                                   |
-| PUT                                                  | `/business/reviews/:reviewId/reject`                              | `rejectReview`                | —                                                                   |
-| POST                                                 | `/business/reviews/:reviewId/respond`                             | `respondToReview`             | —                                                                   |
-| GET                                                  | `/customer/categories`                                            | `listCategories`              | List all active categories                                          |
-| GET /customer/categories                             |
-| Query params: ?featured=true                         | ?menu=true                                                        | ?root=true                    |
-| GET                                                  | `/customer/categories/:categoryId/children`                       | `getCategoryChildren`         | Get subcategories of a parent category                              |
-| GET /customer/categories/:categoryId/children        |
-| GET                                                  | `/customer/categories/:identifier`                                | `getCategory`                 | Get category by ID or slug                                          |
-| GET /customer/categories/:identifier                 |
-| GET                                                  | `/customer/products`                                              | `listProducts`                | List products                                                       |
-| GET /products                                        |
-| GET                                                  | `/customer/products/:identifier`                                  | `getProduct`                  | Get product by ID or slug                                           |
-| GET /products/:identifier                            |
-| GET                                                  | `/customer/products/:productId/availability`                      | `getProductAvailability`      | Get product availability                                            |
-| GET /products/:productId/availability                |
-| POST                                                 | `/customer/products/:productId/configure`                         | `configureVariant`            | —                                                                   |
-| GET                                                  | `/customer/products/:productId/downloads`                         | `getProductDownloads`         | —                                                                   |
-| GET                                                  | `/customer/products/:productId/qa`                                | `listProductQaCustomer`       | —                                                                   |
-| POST                                                 | `/customer/products/:productId/qa`                                | `submitProductQa`             | —                                                                   |
-| GET                                                  | `/customer/products/:productId/related`                           | `getRelatedProducts`          | Get related products                                                |
-| GET /products/:productId/related                     |
-| GET                                                  | `/customer/products/:productId/reviews`                           | `getProductReviews`           | —                                                                   |
-| POST                                                 | `/customer/products/:productId/reviews`                           | `optionalCustomerAuth`        | —                                                                   |
-| POST                                                 | `/customer/products/:productId/reviews/:reviewId/vote`            | `isCustomerLoggedIn`          | —                                                                   |
-| GET                                                  | `/customer/products/:productId/similar`                           | `bind`                        | Find similar products                                               |
-| GET /customer/products/:productId/similar            |
-| GET                                                  | `/customer/products/barcode/:barcode`                             | `findByBarcode`               | Find product by variant barcode                                     |
-| GET /customer/products/barcode/:barcode              |
-| GET                                                  | `/customer/products/bundles`                                      | `getActiveBundles`            | —                                                                   |
-| GET                                                  | `/customer/products/bundles/:id`                                  | `getBundleDetails`            | —                                                                   |
-| POST                                                 | `/customer/products/bundles/:id/calculate`                        | `calculateBundlePrice`        | —                                                                   |
-| GET                                                  | `/customer/products/bundles/product/:productId`                   | `getBundleByProduct`          | —                                                                   |
-| GET                                                  | `/customer/products/by-attribute/:code/:value`                    | `bind`                        | Find products by attribute                                          |
-| GET /customer/products/by-attribute/:code/:value     |
-| GET                                                  | `/customer/products/category/:categoryId`                         | `getProductsByCategory`       | Get products by category                                            |
-| GET /products/category/:categoryId                   |
-| GET                                                  | `/customer/products/featured`                                     | `getFeaturedProducts`         | Get featured products                                               |
-| GET /products/featured                               |
-| GET                                                  | `/customer/products/search`                                       | `bind`                        | Search products with advanced filters and facets                    |
-| GET /customer/products/search                        |
-| POST                                                 | `/customer/products/search`                                       | `bind`                        | Search products (POST for complex queries)                          |
-| POST /customer/products/search                       |
-| GET                                                  | `/customer/products/search/suggestions`                           | `bind`                        | Get search suggestions for autocomplete                             |
-| GET /customer/products/search/suggestions            |
-| POST                                                 | `/customer/reviews/:reviewId/helpful`                             | `optionalCustomerAuth`        | —                                                                   |
-| POST                                                 | `/customer/reviews/:reviewId/report`                              | `optionalCustomerAuth`        | —                                                                   |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/attribute-groups` | `asyncHandler(attributeGroupController.listAttributeGroups.bi` | — |
+| POST | `/attribute-groups` | `asyncHandler(attributeGroupController.createAttributeGroup.b` | — |
+| GET | `/attribute-groups/:id` | `asyncHandler(attributeGroupController.getAttributeGroup.bind` | — |
+| PUT | `/attribute-groups/:id` | `asyncHandler(attributeGroupController.updateAttributeGroup.b` | — |
+| DELETE | `/attribute-groups/:id` | `asyncHandler(attributeGroupController.deleteAttributeGroup.b` | — |
+| GET | `/attribute-groups/code/:code` | `asyncHandler(attributeGroupController.getAttributeGroupByCod` | — |
+| POST | `/attribute-options` | `asyncHandler(attributeOptionController.createAttributeOption` | — |
+| GET | `/attribute-options/:id` | `asyncHandler(attributeOptionController.getAttributeOption.bi` | — |
+| PUT | `/attribute-options/:id` | `asyncHandler(attributeOptionController.updateAttributeOption` | — |
+| DELETE | `/attribute-options/:id` | `asyncHandler(attributeOptionController.deleteAttributeOption` | — |
+| GET | `/attribute-options/attribute/:attributeId` | `asyncHandler(attributeOptionController.getOptionsByAttribute` | — |
+| GET | `/attribute-options/attribute/:attributeId/value/:value` | `asyncHandler(attributeOptionController.getOptionByValue.bind` | — |
+| GET | `/attribute-sets` | `asyncHandler(attributeSetController.listAttributeSets.bind(a` | — |
+| POST | `/attribute-sets` | `asyncHandler(attributeSetController.createAttributeSet.bind(` | — |
+| GET | `/attribute-sets/:id` | `asyncHandler(attributeSetController.getAttributeSet.bind(att` | — |
+| PUT | `/attribute-sets/:id` | `asyncHandler(attributeSetController.updateAttributeSet.bind(` | — |
+| DELETE | `/attribute-sets/:id` | `asyncHandler(attributeSetController.deleteAttributeSet.bind(` | — |
+| POST | `/attribute-sets/:id/attributes` | `asyncHandler(attributeSetController.addAttributeToSet.bind(a` | — |
+| DELETE | `/attribute-sets/:id/attributes/:attributeId` | `asyncHandler(attributeSetController.removeAttributeFromSet.b` | — |
+| POST | `/attribute-sets/:id/attributes/reorder` | `asyncHandler(attributeSetController.reorderAttributes.bind(a` | — |
+| GET | `/attributes` | `isOrganizationLoggedIn` | List all attributes |
+| POST | `/attributes` | `isOrganizationLoggedIn` | Create attribute |
+| GET | `/attributes` | `asyncHandler(attributeController.listAttributes.bind(attribu` | — |
+| POST | `/attributes` | `asyncHandler(attributeController.createAttribute.bind(attrib` | — |
+| GET | `/attributes/:id` | `isOrganizationLoggedIn` | Get attribute by ID |
+| PUT | `/attributes/:id` | `isOrganizationLoggedIn` | Update attribute |
+| DELETE | `/attributes/:id` | `isOrganizationLoggedIn` | Delete attribute |
+| GET | `/attributes/:id` | `asyncHandler(attributeController.getAttribute.bind(attribute` | — |
+| PUT | `/attributes/:id` | `asyncHandler(attributeController.updateAttribute.bind(attrib` | — |
+| DELETE | `/attributes/:id` | `asyncHandler(attributeController.deleteAttribute.bind(attrib` | — |
+| GET | `/attributes/:id/values` | `isOrganizationLoggedIn` | Get attribute values |
+| POST | `/attributes/:id/values` | `isOrganizationLoggedIn` | Add attribute value |
+| GET | `/attributes/:id/values` | `asyncHandler(attributeController.getAttributeValues.bind(att` | Attribute Values |
+| POST | `/attributes/:id/values` | `asyncHandler(attributeController.addAttributeValue.bind(attr` | — |
+| DELETE | `/attributes/:id/values/:valueId` | `isOrganizationLoggedIn` | Remove attribute value |
+| DELETE | `/attributes/:id/values/:valueId` | `asyncHandler(attributeController.removeAttributeValue.bind(a` | — |
+| GET | `/attributes/code/:code` | `isOrganizationLoggedIn` | Get attribute by code |
+| GET | `/attributes/code/:code` | `asyncHandler(attributeController.getAttributeByCode.bind(att` | — |
+| GET | `/attributes/group/:groupId` | `asyncHandler(attributeController.listAttributesByGroup.bind(` | — |
+| GET | `/bundles` | `asyncHandler(bundleController.getBundles)` | — |
+| POST | `/bundles` | `asyncHandler(bundleController.createBundle)` | — |
+| GET | `/bundles/:id` | `asyncHandler(bundleController.getBundle)` | — |
+| PUT | `/bundles/:id` | `asyncHandler(bundleController.updateBundle)` | — |
+| DELETE | `/bundles/:id` | `asyncHandler(bundleController.deleteBundle)` | — |
+| POST | `/bundles/:id/items` | `asyncHandler(bundleController.addBundleItem)` | — |
+| PUT | `/bundles/:id/items/:itemId` | `asyncHandler(bundleController.updateBundleItem)` | — |
+| DELETE | `/bundles/:id/items/:itemId` | `asyncHandler(bundleController.deleteBundleItem)` | — |
+| GET | `/categories` | `asyncHandler(categoryController.listCategories)` | List all active categories
+GET /customer/categories
+Query params: ?featured=true | ?menu=true | ?root=true |
+| GET | `/categories` | `asyncHandler(categoryController.listCategories)` | — |
+| POST | `/categories` | `asyncHandler(categoryController.createCategory)` | — |
+| GET | `/categories/:categoryId/children` | `asyncHandler(categoryController.getCategoryChildren)` | Get subcategories of a parent category
+GET /customer/categories/:categoryId/children |
+| GET | `/categories/:id` | `asyncHandler(categoryController.getCategory)` | — |
+| PUT | `/categories/:id` | `asyncHandler(categoryController.updateCategory)` | — |
+| DELETE | `/categories/:id` | `asyncHandler(categoryController.deleteCategory)` | — |
+| GET | `/categories/:id/children` | `asyncHandler(categoryController.getCategoryChildren)` | — |
+| GET | `/categories/:identifier` | `asyncHandler(categoryController.getCategory)` | Get category by ID or slug
+GET /customer/categories/:identifier |
+| GET | `/categories/root` | `asyncHandler(categoryController.getRootCategories)` | — |
+| GET | `/categories/slug/:slug` | `asyncHandler(categoryController.getCategoryBySlug)` | — |
+| GET | `/collections` | `asyncHandler(productController.listCollections)` | — |
+| POST | `/collections` | `asyncHandler(productController.createCollection)` | — |
+| PUT | `/collections/:collectionId` | `asyncHandler(productController.updateCollection)` | — |
+| DELETE | `/collections/:collectionId` | `asyncHandler(productController.deleteCollection)` | — |
+| PUT | `/downloads/:downloadId` | `asyncHandler(productController.updateDownload)` | — |
+| DELETE | `/downloads/:downloadId` | `asyncHandler(productController.deleteDownload)` | — |
+| GET | `/product-types` | `isOrganizationLoggedIn` | List all product types |
+| POST | `/product-types` | `isOrganizationLoggedIn` | Create product type |
+| GET | `/product-types` | `asyncHandler(productTypeController.listProductTypes.bind(pro` | — |
+| POST | `/product-types` | `asyncHandler(productTypeController.createProductType.bind(pr` | — |
+| GET | `/product-types/:id` | `isOrganizationLoggedIn` | Get product type by ID |
+| PUT | `/product-types/:id` | `isOrganizationLoggedIn` | Update product type |
+| DELETE | `/product-types/:id` | `isOrganizationLoggedIn` | Delete product type |
+| GET | `/product-types/:id` | `asyncHandler(productTypeController.getProductType.bind(produ` | — |
+| PUT | `/product-types/:id` | `asyncHandler(productTypeController.updateProductType.bind(pr` | — |
+| DELETE | `/product-types/:id` | `asyncHandler(productTypeController.deleteProductType.bind(pr` | — |
+| GET | `/product-types/:id/attributes` | `isOrganizationLoggedIn` | Get attributes for a product type |
+| GET | `/product-types/:id/attributes` | `asyncHandler(productTypeController.getProductTypeAttributes.` | — |
+| GET | `/product-types/slug/:slug` | `isOrganizationLoggedIn` | Get product type by slug |
+| GET | `/product-types/slug/:slug` | `asyncHandler(productTypeController.getProductTypeBySlug.bind` | — |
+| GET | `/products` | `asyncHandler(productController.listProducts)` | List all products
+GET /business/products |
+| POST | `/products` | `asyncHandler(productController.createProduct)` | Create a new product
+POST /business/products |
+| GET | `/products` | `asyncHandler(productController.listProducts)` | List products
+GET /products |
+| GET | `/products/:identifier` | `asyncHandler(productController.getProduct)` | Get product by ID or slug
+GET /products/:identifier |
+| GET | `/products/:productId` | `asyncHandler(productController.getProduct)` | Get product details
+GET /business/products/:productId |
+| PUT | `/products/:productId` | `asyncHandler(productController.updateProduct)` | Update a product
+PUT /business/products/:productId |
+| DELETE | `/products/:productId` | `asyncHandler(productController.deleteProduct)` | Delete a product
+DELETE /business/products/:productId |
+| POST | `/products/:productId/apply-attribute-set` | `asyncHandler(productController.applyAttributeSet)` | — |
+| GET | `/products/:productId/attributes` | `isOrganizationLoggedIn` | Get product attributes |
+| POST | `/products/:productId/attributes` | `isOrganizationLoggedIn` | Set single product attribute |
+| PUT | `/products/:productId/attributes` | `isOrganizationLoggedIn` | Set multiple product attributes |
+| GET | `/products/:productId/attributes` | `asyncHandler(attributeController.getProductAttributes.bind(a` | Product Attributes |
+| POST | `/products/:productId/attributes` | `asyncHandler(attributeController.setProductAttribute.bind(at` | — |
+| PUT | `/products/:productId/attributes` | `asyncHandler(attributeController.setProductAttributes.bind(a` | — |
+| DELETE | `/products/:productId/attributes/:attributeId` | `isOrganizationLoggedIn` | Remove product attribute |
+| DELETE | `/products/:productId/attributes/:attributeId` | `asyncHandler(attributeController.removeProductAttribute.bind` | — |
+| GET | `/products/:productId/availability` | `asyncHandler(productController.getProductAvailability)` | Get product availability
+GET /products/:productId/availability |
+| POST | `/products/:productId/configure` | `asyncHandler(productController.configureVariant)` | — |
+| POST | `/products/:productId/configure` | `asyncHandler(productController.configureVariant)` | — |
+| GET | `/products/:productId/downloads` | `asyncHandler(productController.listDownloads)` | — |
+| POST | `/products/:productId/downloads` | `asyncHandler(productController.createDownload)` | — |
+| GET | `/products/:productId/downloads` | `asyncHandler(productController.getProductDownloads)` | — |
+| GET | `/products/:productId/grouped-children` | `asyncHandler(productController.listGroupedChildren)` | — |
+| GET | `/products/:productId/images` | `asyncHandler(productController.getProductImages)` | — |
+| POST | `/products/:productId/images` | `asyncHandler(productController.addProductImage)` | — |
+| PUT | `/products/:productId/images/:imageId` | `asyncHandler(productController.updateProductImage)` | — |
+| DELETE | `/products/:productId/images/:imageId` | `asyncHandler(productController.deleteProductImage)` | — |
+| POST | `/products/:productId/images/reorder` | `asyncHandler(productController.reorderProductImages)` | — |
+| POST | `/products/:productId/publish` | `asyncHandler(productController.publishProduct)` | Publish a product
+POST /business/products/:productId/publish |
+| GET | `/products/:productId/qa` | `asyncHandler(productController.listProductQa)` | — |
+| GET | `/products/:productId/qa` | `asyncHandler(productController.listProductQaCustomer)` | — |
+| POST | `/products/:productId/qa` | `asyncHandler(productController.submitProductQa)` | — |
+| PATCH | `/products/:productId/qa/:qaId/status` | `asyncHandler(productController.updateQaStatus)` | — |
+| GET | `/products/:productId/related` | `asyncHandler(productController.getRelatedProducts)` | Get related products
+GET /products/:productId/related |
+| GET | `/products/:productId/relationships` | `asyncHandler(productController.listRelationships)` | — |
+| POST | `/products/:productId/relationships` | `asyncHandler(productController.createRelationship)` | — |
+| GET | `/products/:productId/reviews` | `asyncHandler(productController.getProductReviews)` | — |
+| POST | `/products/:productId/reviews` | `optionalCustomerAuth` | — |
+| POST | `/products/:productId/reviews/:reviewId/vote` | `isCustomerLoggedIn` | — |
+| GET | `/products/:productId/reviews/media` | `asyncHandler(productController.listReviewMedia)` | — |
+| DELETE | `/products/:productId/reviews/media/:mediaId` | `asyncHandler(productController.deleteReviewMedia)` | — |
+| GET | `/products/:productId/similar` | `asyncHandler(productSearchController.findSimilar.bind(produc` | Find similar products |
+| GET | `/products/:productId/similar` | `asyncHandler(productSearchController.findSimilar.bind(produc` | Find similar products
+GET /customer/products/:productId/similar |
+| PUT | `/products/:productId/status` | `asyncHandler(productController.updateProductStatus)` | Update product status
+PUT /business/products/:productId/status |
+| GET | `/products/:productId/store-availability` | `asyncHandler(productController.getProductStoreAvailability)` | Get product store availability
+GET /business/products/:productId/store-availability |
+| POST | `/products/:productId/unpublish` | `asyncHandler(productController.unpublishProduct)` | Unpublish a product
+POST /business/products/:productId/unpublish |
+| GET | `/products/:productId/variant-matrix` | `asyncHandler(productController.getVariantMatrix)` | — |
+| GET | `/products/:productId/variants` | `asyncHandler(productController.getProductVariants)` | — |
+| POST | `/products/:productId/variants` | `asyncHandler(productController.createProductVariant)` | — |
+| GET | `/products/:productId/variants/:variantId` | `asyncHandler(productController.getProductVariant)` | — |
+| PUT | `/products/:productId/variants/:variantId` | `asyncHandler(productController.updateProductVariant)` | — |
+| DELETE | `/products/:productId/variants/:variantId` | `asyncHandler(productController.deleteProductVariant)` | — |
+| PUT | `/products/:productId/visibility` | `asyncHandler(productController.updateProductVisibility)` | Update product visibility
+PUT /business/products/:productId/visibility |
+| GET | `/products/barcode/:barcode` | `asyncHandler(productController.findByBarcode)` | Find product by variant barcode
+GET /business/products/barcode/:barcode |
+| GET | `/products/barcode/:barcode` | `asyncHandler(productController.findByBarcode)` | Find product by variant barcode
+GET /customer/products/barcode/:barcode |
+| GET | `/products/bundles` | `asyncHandler(bundleController.getActiveBundles)` | — |
+| GET | `/products/bundles/:id` | `asyncHandler(bundleController.getBundleDetails)` | — |
+| POST | `/products/bundles/:id/calculate` | `asyncHandler(bundleController.calculateBundlePrice)` | — |
+| GET | `/products/bundles/product/:productId` | `asyncHandler(bundleController.getBundleByProduct)` | — |
+| GET | `/products/by-attribute/:code/:value` | `asyncHandler(productSearchController.findByAttribute.bind(pr` | Find products by attribute |
+| GET | `/products/by-attribute/:code/:value` | `asyncHandler(productSearchController.findByAttribute.bind(pr` | Find products by attribute
+GET /customer/products/by-attribute/:code/:value |
+| GET | `/products/category/:categoryId` | `asyncHandler(productController.getProductsByCategory)` | Get products by category
+GET /products/category/:categoryId |
+| GET | `/products/featured` | `asyncHandler(productController.getFeaturedProducts)` | Get featured products
+GET /products/featured |
+| GET | `/products/search` | `asyncHandler(productSearchController.search.bind(productSear` | Search products with filters and facets |
+| POST | `/products/search` | `asyncHandler(productSearchController.searchPost.bind(product` | — |
+| GET | `/products/search` | `asyncHandler(productSearchController.search.bind(productSear` | Search products with advanced filters and facets
+GET /customer/products/search |
+| POST | `/products/search` | `asyncHandler(productSearchController.searchPost.bind(product` | Search products (POST for complex queries)
+POST /customer/products/search |
+| GET | `/products/search/suggestions` | `asyncHandler(productSearchController.getSuggestions.bind(pro` | Get search suggestions for autocomplete |
+| GET | `/products/search/suggestions` | `asyncHandler(productSearchController.getSuggestions.bind(pro` | Get search suggestions for autocomplete
+GET /customer/products/search/suggestions |
+| GET | `/products/variants/:variantId` | `asyncHandler(productController.getProductVariant)` | Flat variant routes — must be before /:productId to avoid collision |
+| PUT | `/products/variants/:variantId` | `asyncHandler(productController.updateProductVariant)` | — |
+| DELETE | `/products/variants/:variantId` | `asyncHandler(productController.deleteProductVariant)` | — |
+| PATCH | `/products/variants/:variantId/inventory` | `asyncHandler(productController.updateVariantInventory)` | — |
+| DELETE | `/relationships/:relationshipId` | `asyncHandler(productController.deleteRelationship)` | — |
+| GET | `/reviews` | `asyncHandler(productController.listReviews)` | — |
+| GET | `/reviews/:reviewId` | `asyncHandler(productController.getReview)` | — |
+| DELETE | `/reviews/:reviewId` | `asyncHandler(productController.deleteReview)` | — |
+| PUT | `/reviews/:reviewId/approve` | `asyncHandler(productController.approveReview)` | — |
+| POST | `/reviews/:reviewId/helpful` | `optionalCustomerAuth` | — |
+| PUT | `/reviews/:reviewId/reject` | `asyncHandler(productController.rejectReview)` | — |
+| POST | `/reviews/:reviewId/report` | `optionalCustomerAuth` | — |
+| POST | `/reviews/:reviewId/respond` | `asyncHandler(productController.respondToReview)` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

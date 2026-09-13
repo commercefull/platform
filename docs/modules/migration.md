@@ -350,3 +350,25 @@ All routes are mounted under `/business/migration` and require organization auth
 - **Auto-activate**: When `autoActivate=true`, imported entities should be set to active status immediately. When `false`, entities are created in a draft/inactive state for review.
 - **Re-runs**: The mapping table enables idempotent re-runs. The migration tool can check `findByJobAndSource` before importing a record to skip already-imported items.
 - **Rollback**: To roll back an import, find all mappings via `findByJob`, delete the corresponding platform entities, then delete the job (which cascades to mappings and errors).
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/errors/:importErrorId/resolve` | `asyncHandler(migrationController.resolveError.bind(migration` | — |
+| POST | `/jobs` | `asyncHandler(migrationController.createJob.bind(migrationCon` | Import job CRUD |
+| GET | `/jobs` | `asyncHandler(migrationController.listJobs.bind(migrationCont` | — |
+| GET | `/jobs/:importJobId` | `asyncHandler(migrationController.getJob.bind(migrationContro` | — |
+| DELETE | `/jobs/:importJobId` | `asyncHandler(migrationController.deleteJob.bind(migrationCon` | — |
+| POST | `/jobs/:importJobId/cancel` | `asyncHandler(migrationController.cancelJob.bind(migrationCon` | — |
+| POST | `/jobs/:importJobId/complete` | `asyncHandler(migrationController.completeJob.bind(migrationC` | — |
+| GET | `/jobs/:importJobId/errors` | `asyncHandler(migrationController.getErrors.bind(migrationCon` | Import errors |
+| POST | `/jobs/:importJobId/fail` | `asyncHandler(migrationController.failJob.bind(migrationContr` | — |
+| GET | `/jobs/:importJobId/mappings` | `asyncHandler(migrationController.getMappings.bind(migrationC` | Import mappings |
+| POST | `/jobs/:importJobId/mappings` | `asyncHandler(migrationController.createMapping.bind(migratio` | — |
+| GET | `/jobs/:importJobId/mappings/lookup` | `asyncHandler(migrationController.lookupMapping.bind(migratio` | — |
+| POST | `/jobs/:importJobId/pause` | `asyncHandler(migrationController.pauseJob.bind(migrationCont` | — |
+| POST | `/jobs/:importJobId/start` | `asyncHandler(migrationController.startJob.bind(migrationCont` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

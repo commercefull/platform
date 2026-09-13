@@ -120,18 +120,18 @@ The Coupon module manages discount codes and promotional rules. It supports perc
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                           | Controller       | Description                                |
-| ------ | ---------------------------------- | ---------------- | ------------------------------------------ |
-| GET    | `/business/coupons`                | `listCoupons`    | List coupons with filtering and pagination |
-| POST   | `/business/coupons`                | `createCoupon`   | Create a new coupon                        |
-| POST   | `/business/coupons/validate`       | `validateCoupon` | Validate a coupon code                     |
-| GET    | `/business/coupons/validate/:code` | `validateCoupon` | Validate a coupon by code                  |
-| POST   | `/business/coupons/apply`          | `applyCoupon`    | Apply coupon to basket                     |
-| POST   | `/business/coupons/redeem`         | `redeemCoupon`   | Redeem coupon for an order                 |
-| GET    | `/business/coupons/:couponId`      | `getCoupon`      | Get coupon by ID                           |
-| DELETE | `/business/coupons/:couponId`      | `deleteCoupon`   | Delete coupon                              |
-| POST   | `/customer/coupons/validate`       | `validateCoupon` | Validate coupon (customer)                 |
-| GET    | `/customer/coupons/validate/:code` | `validateCoupon` | Validate coupon by code (customer)         |
-| POST   | `/customer/coupons/apply`          | `applyCoupon`    | Apply coupon (customer)                    |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/coupons` | `asyncHandler(listCoupons)` | — |
+| POST | `/coupons` | `asyncHandler(createCoupon)` | — |
+| GET | `/coupons/:couponId` | `asyncHandler(getCoupon)` | — |
+| DELETE | `/coupons/:couponId` | `asyncHandler(deleteCoupon)` | — |
+| POST | `/coupons/apply` | `asyncHandler(applyCoupon)` | — |
+| POST | `/coupons/apply` | `asyncHandler(applyCoupon)` | — |
+| POST | `/coupons/redeem` | `asyncHandler(redeemCoupon)` | — |
+| POST | `/coupons/validate` | `asyncHandler(validateCoupon)` | — |
+| POST | `/coupons/validate` | `asyncHandler(validateCoupon)` | — |
+| GET | `/coupons/validate/:code` | `asyncHandler(validateCoupon)` | — |
+| GET | `/coupons/validate/:code` | `asyncHandler(validateCoupon)` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

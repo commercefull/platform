@@ -72,54 +72,54 @@ The Order feature manages the complete order lifecycle from creation through ful
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method                                   | Endpoint                                                 | Controller                 | Description                                                                                                                                                                            |
-| ---------------------------------------- | -------------------------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| POST                                     | `/business/order-items`                                  | `createOrderItem`          | —                                                                                                                                                                                      |
-| GET                                      | `/business/order-items/:orderItemId`                     | `getOrderItemById`         | —                                                                                                                                                                                      |
-| PUT                                      | `/business/order-items/:orderItemId`                     | `updateOrderItem`          | —                                                                                                                                                                                      |
-| DELETE                                   | `/business/order-items/:orderItemId`                     | `deleteOrderItem`          | —                                                                                                                                                                                      |
-| GET                                      | `/business/orders`                                       | `listOrders`               | List all orders with filters                                                                                                                                                           |
-| GET /business/orders                     |
-| GET                                      | `/business/orders/:orderId`                              | `getOrder`                 | Get order details                                                                                                                                                                      |
-| GET /business/orders/:orderId            |
-| POST                                     | `/business/orders/:orderId/cancel`                       | `cancelOrder`              | Cancel an order                                                                                                                                                                        |
-| POST /business/orders/:orderId/cancel    |
-| GET                                      | `/business/orders/:orderId/fulfillment-history`          | `getFulfillmentHistory`    | —                                                                                                                                                                                      |
-| PUT                                      | `/business/orders/:orderId/fulfillment-status`           | `updateFulfillmentStatus`  | —                                                                                                                                                                                      |
-| GET                                      | `/business/orders/:orderId/history`                      | `getOrderHistory`          | Get order status history                                                                                                                                                               |
-| GET /business/orders/:orderId/history    |
-| GET                                      | `/business/orders/:orderId/items`                        | `getOrderItems`            | ============================================================================ Order Items ============================================================================                  |
-| GET                                      | `/business/orders/:orderId/notes`                        | `listOrderNotes`           | —                                                                                                                                                                                      |
-| POST                                     | `/business/orders/:orderId/notes`                        | `addOrderNote`             | —                                                                                                                                                                                      |
-| DELETE                                   | `/business/orders/:orderId/notes/:noteId`                | `deleteOrderNote`          | —                                                                                                                                                                                      |
-| GET                                      | `/business/orders/:orderId/packages`                     | `listFulfillmentPackages`  | —                                                                                                                                                                                      |
-| POST                                     | `/business/orders/:orderId/packages`                     | `createFulfillmentPackage` | —                                                                                                                                                                                      |
-| POST                                     | `/business/orders/:orderId/packages/:packageId/tracking` | `trackFulfillmentPackage`  | —                                                                                                                                                                                      |
-| GET                                      | `/business/orders/:orderId/payment-history`              | `getPaymentHistory`        | —                                                                                                                                                                                      |
-| PUT                                      | `/business/orders/:orderId/payment-status`               | `updatePaymentStatus`      | ============================================================================ Payment & Fulfillment Status ============================================================================ |
-| POST                                     | `/business/orders/:orderId/refund`                       | `processRefund`            | Process refund                                                                                                                                                                         |
-| POST /business/orders/:orderId/refund    |
-| GET                                      | `/business/orders/:orderId/refunds`                      | `listOrderRefunds`         | —                                                                                                                                                                                      |
-| POST                                     | `/business/orders/:orderId/refunds`                      | `createOrderRefund`        | —                                                                                                                                                                                      |
-| PUT                                      | `/business/orders/:orderId/status`                       | `updateOrderStatus`        | Update order status                                                                                                                                                                    |
-| PUT /business/orders/:orderId/status     |
-| GET                                      | `/business/orders/:orderId/status-history`               | `getStatusHistory`         | ============================================================================ Status History ============================================================================               |
-| GET                                      | `/business/orders/number/:orderNumber`                   | `getOrderByNumber`         | Get order by order number                                                                                                                                                              |
-| GET /business/orders/number/:orderNumber |
-| GET                                      | `/business/orders/stats`                                 | `getOrderStats`            | Get order statistics                                                                                                                                                                   |
-| GET /business/orders/stats               |
-| GET                                      | `/business/orders/store-summary`                         | `getStoreSalesSummary`     | Get store sales summary                                                                                                                                                                |
-| GET /business/orders/store-summary       |
-| GET                                      | `/customer/order`                                        | `getMyOrders`              | Get customer's orders                                                                                                                                                                  |
-| GET /orders                              |
-| POST                                     | `/customer/order`                                        | `createOrder`              | Create a new order                                                                                                                                                                     |
-| POST /orders                             |
-| GET                                      | `/customer/order/:orderId`                               | `getOrder`                 | Get order by ID                                                                                                                                                                        |
-| GET /orders/:orderId                     |
-| POST                                     | `/customer/order/:orderId/cancel`                        | `cancelOrder`              | Cancel an order                                                                                                                                                                        |
-| POST /orders/:orderId/cancel             |
-| GET                                      | `/customer/order/number/:orderNumber`                    | `getOrderByNumber`         | Get order by order number                                                                                                                                                              |
-| GET /orders/number/:orderNumber          |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/order` | `asyncHandler(orderController.getMyOrders)` | Get customer's orders
+GET /orders |
+| POST | `/order` | `asyncHandler(orderController.createOrder)` | Create a new order
+POST /orders |
+| POST | `/order-items` | `asyncHandler(orderController.createOrderItem)` | — |
+| GET | `/order-items/:orderItemId` | `asyncHandler(orderController.getOrderItemById)` | — |
+| PUT | `/order-items/:orderItemId` | `asyncHandler(orderController.updateOrderItem)` | — |
+| DELETE | `/order-items/:orderItemId` | `asyncHandler(orderController.deleteOrderItem)` | — |
+| GET | `/order/:orderId` | `asyncHandler(orderController.getOrder)` | Get order by ID
+GET /orders/:orderId |
+| POST | `/order/:orderId/cancel` | `asyncHandler(orderController.cancelOrder)` | Cancel an order
+POST /orders/:orderId/cancel |
+| GET | `/order/number/:orderNumber` | `asyncHandler(orderController.getOrderByNumber)` | Get order by order number
+GET /orders/number/:orderNumber |
+| GET | `/orders` | `asyncHandler(orderController.listOrders)` | List all orders with filters
+GET /business/orders |
+| GET | `/orders/:orderId` | `asyncHandler(orderController.getOrder)` | Get order details
+GET /business/orders/:orderId |
+| POST | `/orders/:orderId/cancel` | `asyncHandler(orderController.cancelOrder)` | Cancel an order
+POST /business/orders/:orderId/cancel |
+| GET | `/orders/:orderId/fulfillment-history` | `asyncHandler(orderController.getFulfillmentHistory)` | — |
+| PUT | `/orders/:orderId/fulfillment-status` | `asyncHandler(orderController.updateFulfillmentStatus)` | — |
+| GET | `/orders/:orderId/history` | `asyncHandler(orderController.getOrderHistory)` | Get order status history
+GET /business/orders/:orderId/history |
+| GET | `/orders/:orderId/items` | `asyncHandler(orderController.getOrderItems)` | ============================================================================ Order Items ============================================================================ |
+| GET | `/orders/:orderId/notes` | `asyncHandler(orderController.listOrderNotes)` | — |
+| POST | `/orders/:orderId/notes` | `asyncHandler(orderController.addOrderNote)` | — |
+| DELETE | `/orders/:orderId/notes/:noteId` | `asyncHandler(orderController.deleteOrderNote)` | — |
+| GET | `/orders/:orderId/packages` | `asyncHandler(orderController.listFulfillmentPackages)` | — |
+| POST | `/orders/:orderId/packages` | `asyncHandler(orderController.createFulfillmentPackage)` | — |
+| POST | `/orders/:orderId/packages/:packageId/tracking` | `asyncHandler(orderController.trackFulfillmentPackage)` | — |
+| GET | `/orders/:orderId/payment-history` | `asyncHandler(orderController.getPaymentHistory)` | — |
+| PUT | `/orders/:orderId/payment-status` | `asyncHandler(orderController.updatePaymentStatus)` | ============================================================================ Payment & Fulfillment Status ============================================================================ |
+| POST | `/orders/:orderId/refund` | `asyncHandler(orderController.processRefund)` | Process refund
+POST /business/orders/:orderId/refund |
+| GET | `/orders/:orderId/refunds` | `asyncHandler(orderController.listOrderRefunds)` | — |
+| POST | `/orders/:orderId/refunds` | `asyncHandler(orderController.createOrderRefund)` | — |
+| PUT | `/orders/:orderId/status` | `asyncHandler(orderController.updateOrderStatus)` | Update order status
+PUT /business/orders/:orderId/status |
+| GET | `/orders/:orderId/status-history` | `asyncHandler(orderController.getStatusHistory)` | ============================================================================ Status History ============================================================================ |
+| GET | `/orders/number/:orderNumber` | `asyncHandler(orderController.getOrderByNumber)` | Get order by order number
+GET /business/orders/number/:orderNumber |
+| GET | `/orders/stats` | `asyncHandler(orderController.getOrderStats)` | Get order statistics
+GET /business/orders/stats |
+| GET | `/orders/store-summary` | `asyncHandler(orderController.getStoreSalesSummary)` | Get store sales summary
+GET /business/orders/store-summary |
 
 <!-- GENERATED:ENDPOINTS:END -->
 

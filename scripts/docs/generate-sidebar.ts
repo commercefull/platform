@@ -52,6 +52,15 @@ function scanDirectory(dir: string, prefix: string): SidebarEntry[] {
 function main(): void {
   const sections: SidebarSection[] = [];
 
+  // Product
+  const productDir = path.join(DOCS_DIR, 'product');
+  if (fs.existsSync(productDir)) {
+    sections.push({
+      title: 'Product',
+      entries: scanDirectory(productDir, '/product'),
+    });
+  }
+
   // Guides
   const guidesDir = path.join(DOCS_DIR, 'guides');
   if (fs.existsSync(guidesDir)) {

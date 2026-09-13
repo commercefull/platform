@@ -92,47 +92,47 @@ The Checkout feature manages the checkout flow, transforming a basket into an or
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method                                           | Endpoint                                                | Controller                | Description                                                        |
-| ------------------------------------------------ | ------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------ |
-| POST                                             | `/customer/checkout`                                    | `initiateCheckout`        | Initiate checkout session                                          |
-| POST /checkout                                   |
-| GET                                              | `/customer/checkout/:checkoutId`                        | `getCheckout`             | Get checkout session                                               |
-| GET /checkout/:checkoutId                        |
-| POST                                             | `/customer/checkout/:checkoutId/abandon`                | `abandonCheckout`         | Abandon checkout                                                   |
-| POST /checkout/:checkoutId/abandon               |
-| PUT                                              | `/customer/checkout/:checkoutId/billing-address`        | `setBillingAddress`       | Set billing address                                                |
-| PUT /checkout/:checkoutId/billing-address        |
-| POST                                             | `/customer/checkout/:checkoutId/complete`               | `completeCheckout`        | Complete checkout and create order                                 |
-| POST /checkout/:checkoutId/complete              |
-| POST                                             | `/customer/checkout/:checkoutId/coupon`                 | `applyCoupon`             | Apply coupon code                                                  |
-| POST /checkout/:checkoutId/coupon                |
-| DELETE                                           | `/customer/checkout/:checkoutId/coupon`                 | `removeCoupon`            | Remove coupon code                                                 |
-| DELETE /checkout/:checkoutId/coupon              |
-| PUT                                              | `/customer/checkout/:checkoutId/fulfillment-method`     | `setFulfillmentMethod`    | Set fulfillment method (shipping, pickup, local_delivery, digital) |
-| PUT /checkout/:checkoutId/fulfillment-method     |
-| GET                                              | `/customer/checkout/:checkoutId/fulfillment-options`    | `getFulfillmentOptions`   | Get all fulfillment options (unified)                              |
-| GET /checkout/:checkoutId/fulfillment-options    |
-| GET                                              | `/customer/checkout/:checkoutId/local-delivery-options` | `getLocalDeliveryOptions` | Get local delivery options                                         |
-| GET /checkout/:checkoutId/local-delivery-options |
-| POST                                             | `/customer/checkout/:checkoutId/payment-intent`         | `createPaymentIntent`     | Create payment intent and draft order                              |
-| POST /checkout/:checkoutId/payment-intent        |
-| PUT                                              | `/customer/checkout/:checkoutId/payment-method`         | `setPaymentMethod`        | Set payment method                                                 |
-| PUT /checkout/:checkoutId/payment-method         |
-| PUT                                              | `/customer/checkout/:checkoutId/pickup-location`        | `setPickupLocation`       | Set pickup location (BOPIS)                                        |
-| PUT /checkout/:checkoutId/pickup-location        |
-| GET                                              | `/customer/checkout/:checkoutId/pickup-slots`           | `getPickupSlots`          | Get available pickup time slots                                    |
-| GET /checkout/:checkoutId/pickup-slots           |
-| PUT                                              | `/customer/checkout/:checkoutId/shipping-address`       | `setShippingAddress`      | Set shipping address                                               |
-| PUT /checkout/:checkoutId/shipping-address       |
-| PUT                                              | `/customer/checkout/:checkoutId/shipping-method`        | `setShippingMethod`       | Set shipping method                                                |
-| PUT /checkout/:checkoutId/shipping-method        |
-| GET                                              | `/customer/checkout/:checkoutId/shipping-methods`       | `getShippingMethods`      | Get available shipping methods                                     |
-| GET /checkout/:checkoutId/shipping-methods       |
-| GET                                              | `/customer/checkout/:checkoutId/summary`                | `getCheckoutSummary`      | Get checkout summary                                               |
-| GET /checkout/:checkoutId/summary                |
-| GET                                              | `/customer/checkout/payment-methods`                    | `getPaymentMethods`       | Get available payment methods (no checkout required)               |
-| GET /checkout/payment-methods                    |
-| GET                                              | `/customer/checkout/pickup-locations`                   | `getPickupLocations`      | Get available pickup locations                                     |
-| GET /checkout/pickup-locations                   |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/checkout` | `asyncHandler(checkoutController.initiateCheckout)` | Initiate checkout session
+POST /checkout |
+| GET | `/checkout/:checkoutId` | `asyncHandler(checkoutController.getCheckout)` | Get checkout session
+GET /checkout/:checkoutId |
+| POST | `/checkout/:checkoutId/abandon` | `asyncHandler(checkoutController.abandonCheckout)` | Abandon checkout
+POST /checkout/:checkoutId/abandon |
+| PUT | `/checkout/:checkoutId/billing-address` | `asyncHandler(checkoutController.setBillingAddress)` | Set billing address
+PUT /checkout/:checkoutId/billing-address |
+| POST | `/checkout/:checkoutId/complete` | `asyncHandler(checkoutController.completeCheckout)` | Complete checkout and create order
+POST /checkout/:checkoutId/complete |
+| POST | `/checkout/:checkoutId/coupon` | `asyncHandler(checkoutController.applyCoupon)` | Apply coupon code
+POST /checkout/:checkoutId/coupon |
+| DELETE | `/checkout/:checkoutId/coupon` | `asyncHandler(checkoutController.removeCoupon)` | Remove coupon code
+DELETE /checkout/:checkoutId/coupon |
+| PUT | `/checkout/:checkoutId/fulfillment-method` | `asyncHandler(checkoutController.setFulfillmentMethod)` | Set fulfillment method (shipping, pickup, local_delivery, digital)
+PUT /checkout/:checkoutId/fulfillment-method |
+| GET | `/checkout/:checkoutId/fulfillment-options` | `asyncHandler(checkoutController.getFulfillmentOptions)` | Get all fulfillment options (unified)
+GET /checkout/:checkoutId/fulfillment-options |
+| GET | `/checkout/:checkoutId/local-delivery-options` | `asyncHandler(checkoutController.getLocalDeliveryOptions)` | Get local delivery options
+GET /checkout/:checkoutId/local-delivery-options |
+| POST | `/checkout/:checkoutId/payment-intent` | `asyncHandler(checkoutController.createPaymentIntent)` | Create payment intent and draft order
+POST /checkout/:checkoutId/payment-intent |
+| PUT | `/checkout/:checkoutId/payment-method` | `asyncHandler(checkoutController.setPaymentMethod)` | Set payment method
+PUT /checkout/:checkoutId/payment-method |
+| PUT | `/checkout/:checkoutId/pickup-location` | `asyncHandler(checkoutController.setPickupLocation)` | Set pickup location (BOPIS)
+PUT /checkout/:checkoutId/pickup-location |
+| GET | `/checkout/:checkoutId/pickup-slots` | `asyncHandler(checkoutController.getPickupSlots)` | Get available pickup time slots
+GET /checkout/:checkoutId/pickup-slots |
+| PUT | `/checkout/:checkoutId/shipping-address` | `asyncHandler(checkoutController.setShippingAddress)` | Set shipping address
+PUT /checkout/:checkoutId/shipping-address |
+| PUT | `/checkout/:checkoutId/shipping-method` | `asyncHandler(checkoutController.setShippingMethod)` | Set shipping method
+PUT /checkout/:checkoutId/shipping-method |
+| GET | `/checkout/:checkoutId/shipping-methods` | `asyncHandler(checkoutController.getShippingMethods)` | Get available shipping methods
+GET /checkout/:checkoutId/shipping-methods |
+| GET | `/checkout/:checkoutId/summary` | `asyncHandler(checkoutController.getCheckoutSummary)` | Get checkout summary
+GET /checkout/:checkoutId/summary |
+| GET | `/checkout/payment-methods` | `asyncHandler(checkoutController.getPaymentMethods)` | Get available payment methods (no checkout required)
+GET /checkout/payment-methods |
+| GET | `/checkout/pickup-locations` | `asyncHandler(checkoutController.getPickupLocations)` | Get available pickup locations
+GET /checkout/pickup-locations |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -73,34 +73,34 @@ The Localization feature manages multi-language support and regional settings. I
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                 | Controller             | Description                      |
-| ------ | ---------------------------------------- | ---------------------- | -------------------------------- |
-| GET    | `/business/countries`                    | `getCountries`         | Country CRUD                     |
-| POST   | `/business/countries`                    | `createCountry`        | —                                |
-| GET    | `/business/countries/:id`                | `getCountryById`       | —                                |
-| PUT    | `/business/countries/:id`                | `updateCountry`        | —                                |
-| DELETE | `/business/countries/:id`                | `deleteCountry`        | —                                |
-| POST   | `/business/countries/:id/activate`       | `activateCountry`      | Country status management        |
-| POST   | `/business/countries/:id/deactivate`     | `deactivateCountry`    | —                                |
-| GET    | `/business/countries/code/:code`         | `getCountryByCode`     | —                                |
-| GET    | `/business/countries/region/:region`     | `getCountriesByRegion` | —                                |
-| GET    | `/business/locales`                      | `getLocales`           | Locale CRUD                      |
-| POST   | `/business/locales`                      | `createLocale`         | —                                |
-| GET    | `/business/locales/:id`                  | `getLocaleById`        | —                                |
-| PUT    | `/business/locales/:id`                  | `updateLocale`         | —                                |
-| DELETE | `/business/locales/:id`                  | `deleteLocale`         | —                                |
-| POST   | `/business/locales/:id/activate`         | `activateLocale`       | —                                |
-| POST   | `/business/locales/:id/deactivate`       | `deactivateLocale`     | —                                |
-| POST   | `/business/locales/:id/default`          | `setDefaultLocale`     | Locale status management         |
-| GET    | `/business/locales/code/:code`           | `getLocaleByCode`      | —                                |
-| GET    | `/business/locales/country/:countryCode` | `getLocalesByCountry`  | —                                |
-| GET    | `/business/locales/default`              | `getDefaultLocale`     | —                                |
-| GET    | `/business/locales/language/:language`   | `getLocalesByLanguage` | —                                |
-| GET    | `/business/locales/statistics`           | `getLocaleStatistics`  | —                                |
-| GET    | `/customer/localization/countries`       | `getActiveCountries`   | —                                |
-| GET    | `/customer/localization/countries/:code` | `getCountryByCode`     | —                                |
-| GET    | `/customer/localization/detect`          | `detectLocale`         | —                                |
-| GET    | `/customer/localization/locales`         | `getActiveLocales`     | Public routes (no auth required) |
-| GET    | `/customer/localization/locales/:code`   | `getLocaleByCode`      | —                                |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/countries` | `asyncHandler(localizationController.getCountries)` | Country CRUD |
+| POST | `/countries` | `asyncHandler(localizationController.createCountry)` | — |
+| GET | `/countries/:id` | `asyncHandler(localizationController.getCountryById)` | — |
+| PUT | `/countries/:id` | `asyncHandler(localizationController.updateCountry)` | — |
+| DELETE | `/countries/:id` | `asyncHandler(localizationController.deleteCountry)` | — |
+| POST | `/countries/:id/activate` | `asyncHandler(localizationController.activateCountry)` | Country status management |
+| POST | `/countries/:id/deactivate` | `asyncHandler(localizationController.deactivateCountry)` | — |
+| GET | `/countries/code/:code` | `asyncHandler(localizationController.getCountryByCode)` | — |
+| GET | `/countries/region/:region` | `asyncHandler(localizationController.getCountriesByRegion)` | — |
+| GET | `/locales` | `asyncHandler(localizationController.getLocales)` | Locale CRUD |
+| POST | `/locales` | `asyncHandler(localizationController.createLocale)` | — |
+| GET | `/locales/:id` | `asyncHandler(localizationController.getLocaleById)` | — |
+| PUT | `/locales/:id` | `asyncHandler(localizationController.updateLocale)` | — |
+| DELETE | `/locales/:id` | `asyncHandler(localizationController.deleteLocale)` | — |
+| POST | `/locales/:id/activate` | `asyncHandler(localizationController.activateLocale)` | — |
+| POST | `/locales/:id/deactivate` | `asyncHandler(localizationController.deactivateLocale)` | — |
+| POST | `/locales/:id/default` | `asyncHandler(localizationController.setDefaultLocale)` | Locale status management |
+| GET | `/locales/code/:code` | `asyncHandler(localizationController.getLocaleByCode)` | — |
+| GET | `/locales/country/:countryCode` | `asyncHandler(localizationController.getLocalesByCountry)` | — |
+| GET | `/locales/default` | `asyncHandler(localizationController.getDefaultLocale)` | — |
+| GET | `/locales/language/:language` | `asyncHandler(localizationController.getLocalesByLanguage)` | — |
+| GET | `/locales/statistics` | `asyncHandler(localizationController.getLocaleStatistics)` | — |
+| GET | `/localization/countries` | `asyncHandler(getActiveCountries)` | — |
+| GET | `/localization/countries/:code` | `asyncHandler(getCountryByCode)` | — |
+| GET | `/localization/detect` | `asyncHandler(detectLocale)` | — |
+| GET | `/localization/locales` | `asyncHandler(getActiveLocales)` | Public routes (no auth required) |
+| GET | `/localization/locales/:code` | `asyncHandler(getLocaleByCode)` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

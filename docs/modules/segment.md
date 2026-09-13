@@ -60,3 +60,23 @@ The Segment module provides customer data platform (CDP) capabilities — custom
 | GET    | `/business/segment/segments/:id/members` | List segment members   |
 | GET    | `/business/segment/profiles`             | List customer profiles |
 | GET    | `/business/segment/profiles/:customerId` | Get customer profile   |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/segment` | `isOrganizationLoggedIn` | Segment CRUD |
+| POST | `/segment` | `isOrganizationLoggedIn` | — |
+| GET | `/segment/:segmentId` | `isOrganizationLoggedIn` | — |
+| PUT | `/segment/:segmentId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/segment/:segmentId` | `isOrganizationLoggedIn` | — |
+| POST | `/segment/:segmentId/evaluate` | `isOrganizationLoggedIn` | Segment evaluation & members |
+| GET | `/segment/:segmentId/members` | `isOrganizationLoggedIn` | — |
+| GET | `/segment/profiles` | `isOrganizationLoggedIn` | Customer profiles |
+| GET | `/segment/profiles/:customerId` | `isOrganizationLoggedIn` | — |
+| POST | `/segment/profiles/:customerId/compute` | `isOrganizationLoggedIn` | — |
+| GET | `/segment/profiles/:customerId/segments` | `isOrganizationLoggedIn` | Customer segment membership |
+| POST | `/segment/profiles/recompute-all` | `isOrganizationLoggedIn` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

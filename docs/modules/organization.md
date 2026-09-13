@@ -67,19 +67,19 @@ The Organization module manages organization accounts. It handles organization p
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                                              | Controller                      | Description |
-| ------ | --------------------------------------------------------------------- | ------------------------------- | ----------- |
-| GET    | `/business/organizations`                                             | `getOrganizations`              | —           |
-| POST   | `/business/organizations`                                             | `createOrganization`            | —           |
-| GET    | `/business/organizations/:id`                                         | `getOrganizationById`           | —           |
-| PUT    | `/business/organizations/:id`                                         | `updateOrganization`            | —           |
-| DELETE | `/business/organizations/:id`                                         | `deleteOrganization`            | —           |
-| GET    | `/business/organizations/:id/stores`                                  | `getOrganizationStores`         | —           |
-| GET    | `/business/organizations/:organizationId/addresses`                   | `getOrganizationAddresses`      | —           |
-| POST   | `/business/organizations/:organizationId/addresses`                   | `addOrganizationAddress`        | —           |
-| PUT    | `/business/organizations/:organizationId/addresses/:addressId`        | `updateOrganizationAddress`     | —           |
-| GET    | `/business/organizations/:organizationId/payment-info`                | `getOrganizationPaymentInfo`    | —           |
-| POST   | `/business/organizations/:organizationId/payment-info`                | `addOrganizationPaymentInfo`    | —           |
-| PUT    | `/business/organizations/:organizationId/payment-info/:paymentInfoId` | `updateOrganizationPaymentInfo` | —           |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/organizations` | `asyncHandler(getOrganizations)` | — |
+| POST | `/organizations` | `asyncHandler(createOrganization)` | — |
+| GET | `/organizations/:id` | `asyncHandler(getOrganizationById)` | — |
+| PUT | `/organizations/:id` | `asyncHandler(updateOrganization)` | — |
+| DELETE | `/organizations/:id` | `asyncHandler(deleteOrganization)` | — |
+| GET | `/organizations/:id/stores` | `asyncHandler(getOrganizationStores)` | — |
+| GET | `/organizations/:organizationId/addresses` | `asyncHandler(getOrganizationAddresses)` | — |
+| POST | `/organizations/:organizationId/addresses` | `asyncHandler(addOrganizationAddress)` | — |
+| PUT | `/organizations/:organizationId/addresses/:addressId` | `asyncHandler(updateOrganizationAddress)` | — |
+| GET | `/organizations/:organizationId/payment-info` | `asyncHandler(getOrganizationPaymentInfo)` | — |
+| POST | `/organizations/:organizationId/payment-info` | `asyncHandler(addOrganizationPaymentInfo)` | — |
+| PUT | `/organizations/:organizationId/payment-info/:paymentInfoId` | `asyncHandler(updateOrganizationPaymentInfo)` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -61,3 +61,24 @@ The Returns module provides return, exchange, and store credit management — ex
 | PUT    | `/business/returns/:id/complete`     | Complete return with refund |
 | GET    | `/business/store-credit`             | List store credit balances  |
 | GET    | `/business/store-credit/:customerId` | Get customer store credit   |
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/returns` | `isOrganizationLoggedIn` | Return request CRUD + workflow |
+| POST | `/returns` | `isOrganizationLoggedIn` | — |
+| GET | `/returns/:returnId` | `isOrganizationLoggedIn` | — |
+| POST | `/returns/:returnId/approve` | `isOrganizationLoggedIn` | — |
+| POST | `/returns/:returnId/cancel` | `isOrganizationLoggedIn` | — |
+| POST | `/returns/:returnId/complete` | `isOrganizationLoggedIn` | — |
+| POST | `/returns/:returnId/deny` | `isOrganizationLoggedIn` | — |
+| POST | `/returns/:returnId/in-transit` | `isOrganizationLoggedIn` | — |
+| POST | `/returns/:returnId/inspect` | `isOrganizationLoggedIn` | — |
+| POST | `/returns/:returnId/received` | `isOrganizationLoggedIn` | — |
+| GET | `/store-credit/balance` | `isOrganizationLoggedIn` | Store credit |
+| POST | `/store-credit/debit` | `isOrganizationLoggedIn` | — |
+| GET | `/store-credit/ledger` | `isOrganizationLoggedIn` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

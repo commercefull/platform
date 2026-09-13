@@ -1,6 +1,6 @@
 # CommerceFull Platform
 
-> **Creating tailor-made commerce solutions** — Empowering businesses to thrive in the digital marketplace through simple, innovative, and user-centric solutions.
+> **Own your store. Not just rent it.** — Your data. Your checkout. Your rules. Your exit.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
@@ -112,7 +112,7 @@ CommerceFull is an open-source e-commerce platform built with Node.js, TypeScrip
 
 ## Quality Metrics
 
-Enforced via `yarn lint` (TypeScript + ESLint + dependency-cruiser) and `yarn test`. See the [quality action plan](./docs/quality-action-plan.md) for the full audit trail.
+Enforced via `yarn lint` (TypeScript + ESLint + dependency-cruiser) and `yarn test`.
 
 | Metric                              | Value                                          |
 | ----------------------------------- | ---------------------------------------------- |

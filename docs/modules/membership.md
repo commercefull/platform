@@ -86,29 +86,29 @@ The Membership feature manages paid membership tiers with exclusive benefits. Un
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                           | Controller                  | Description                                             |
-| ------ | -------------------------------------------------- | --------------------------- | ------------------------------------------------------- |
-| GET    | `/business/membership/benefits`                    | `getMembershipBenefits`     | Admin routes for membership benefit management          |
-| POST   | `/business/membership/benefits`                    | `createMembershipBenefit`   | —                                                       |
-| GET    | `/business/membership/benefits/:id`                | `getMembershipBenefitById`  | —                                                       |
-| PUT    | `/business/membership/benefits/:id`                | `updateMembershipBenefit`   | —                                                       |
-| DELETE | `/business/membership/benefits/:id`                | `deleteMembershipBenefit`   | —                                                       |
-| GET    | `/business/membership/tiers`                       | `getMembershipTiers`        | Admin routes for membership tier management             |
-| POST   | `/business/membership/tiers`                       | `createMembershipTier`      | —                                                       |
-| GET    | `/business/membership/tiers/:id`                   | `getMembershipTierById`     | —                                                       |
-| PUT    | `/business/membership/tiers/:id`                   | `updateMembershipTier`      | —                                                       |
-| DELETE | `/business/membership/tiers/:id`                   | `deleteMembershipTier`      | —                                                       |
-| GET    | `/business/membership/user-memberships`            | `getUserMemberships`        | Admin routes for user membership management             |
-| POST   | `/business/membership/user-memberships`            | `createUserMembership`      | —                                                       |
-| GET    | `/business/membership/user-memberships/:id`        | `getUserMembershipById`     | —                                                       |
-| PUT    | `/business/membership/user-memberships/:id`        | `updateUserMembership`      | —                                                       |
-| POST   | `/business/membership/user-memberships/:id/cancel` | `cancelUserMembership`      | —                                                       |
-| GET    | `/business/membership/users/:userId/benefits`      | `getUserMembershipBenefits` | —                                                       |
-| GET    | `/business/membership/users/:userId/membership`    | `getUserMembershipByUserId` | Admin routes for fetching user-specific membership data |
-| GET    | `/customer/membership/tiers`                       | `getMembershipTiers`        | Get all active membership tiers                         |
-| GET    | `/customer/membership/tiers/:id`                   | `getMembershipTierById`     | Get specific membership tier details                    |
-| GET    | `/customer/membership/tiers/:tierId/benefits`      | `getTierBenefits`           | Get benefits for a specific tier                        |
-| GET    | `/customer/membership/user/:userId`                | `getUserMembershipByUserId` | Get current user's membership                           |
-| GET    | `/customer/membership/user/:userId/benefits`       | `getUserMembershipBenefits` | Get current user's membership benefits                  |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/membership/benefits` | `asyncHandler(getMembershipBenefits)` | Admin routes for membership benefit management |
+| POST | `/membership/benefits` | `asyncHandler(createMembershipBenefit)` | — |
+| GET | `/membership/benefits/:id` | `asyncHandler(getMembershipBenefitById)` | — |
+| PUT | `/membership/benefits/:id` | `asyncHandler(updateMembershipBenefit)` | — |
+| DELETE | `/membership/benefits/:id` | `asyncHandler(deleteMembershipBenefit)` | — |
+| GET | `/membership/tiers` | `asyncHandler(getMembershipTiers)` | Admin routes for membership tier management |
+| POST | `/membership/tiers` | `asyncHandler(createMembershipTier)` | — |
+| GET | `/membership/tiers` | `asyncHandler(getMembershipTiers)` | Get all active membership tiers |
+| GET | `/membership/tiers/:id` | `asyncHandler(getMembershipTierById)` | — |
+| PUT | `/membership/tiers/:id` | `asyncHandler(updateMembershipTier)` | — |
+| DELETE | `/membership/tiers/:id` | `asyncHandler(deleteMembershipTier)` | — |
+| GET | `/membership/tiers/:id` | `asyncHandler(getMembershipTierById)` | Get specific membership tier details |
+| GET | `/membership/tiers/:tierId/benefits` | `asyncHandler(getTierBenefits)` | Get benefits for a specific tier |
+| GET | `/membership/user-memberships` | `asyncHandler(getUserMemberships)` | Admin routes for user membership management |
+| POST | `/membership/user-memberships` | `asyncHandler(createUserMembership)` | — |
+| GET | `/membership/user-memberships/:id` | `asyncHandler(getUserMembershipById)` | — |
+| PUT | `/membership/user-memberships/:id` | `asyncHandler(updateUserMembership)` | — |
+| POST | `/membership/user-memberships/:id/cancel` | `asyncHandler(cancelUserMembership)` | — |
+| GET | `/membership/user/:userId` | `asyncHandler(getUserMembershipByUserId)` | Get current user's membership |
+| GET | `/membership/user/:userId/benefits` | `asyncHandler(getUserMembershipBenefits)` | Get current user's membership benefits |
+| GET | `/membership/users/:userId/benefits` | `asyncHandler(getUserMembershipBenefits)` | — |
+| GET | `/membership/users/:userId/membership` | `asyncHandler(getUserMembershipByUserId)` | Admin routes for fetching user-specific membership data |
 
 <!-- GENERATED:ENDPOINTS:END -->

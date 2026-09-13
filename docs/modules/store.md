@@ -71,26 +71,24 @@ The Store feature manages store entities for both marketplace (merchant-owned) a
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint           | Controller                                     | Description |
-| ------ | ------------------ | ---------------------------------------------- | ----------- |
-| GET    | `/customer/stores` | `async (req: TypedRequest, res: Response) => { |
-| try {  |
-
-    co` | — |
-
-| GET | `/customer/stores/:storeId` | `async (req: TypedRequest, res: Response) => {
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/stores` | `asyncHandler(storeController.createStore.bind(storeControlle` | Create store |
+| GET | `/stores` | `asyncHandler(storeController.listStores.bind(storeController` | List stores with filtering and pagination |
+| GET | `/stores` | `async (req: TypedRequest, res: Response) => {
   try {
     co` | — |
-| POST | `/stores` | `bind` | Create store |
-| GET | `/stores` | `bind` | List stores with filtering and pagination |
-| GET | `/stores/:storeId` | `bind` | Get store by ID |
-| PUT | `/stores/:storeId` | `bind` | Update store |
-| DELETE | `/stores/:storeId` | `bind` | Delete store |
-| PUT | `/stores/:storeId/local-delivery` | `bind` | Set local delivery zone |
-| PUT | `/stores/:storeId/pickup` | `bind` | Configure store pickup (BOPIS) |
-| GET | `/stores/active` | `bind` | Get active stores (must be before :storeId to avoid collision) |
-| GET | `/stores/business/:organizationId` | `bind` | Get stores by business |
-| POST | `/stores/hierarchy` | `bind` | Create store hierarchy |
-| GET | `/stores/slug/:slug` | `bind` | Get store by slug |
+| GET | `/stores/:storeId` | `asyncHandler(storeController.getStore.bind(storeController))` | Get store by ID |
+| PUT | `/stores/:storeId` | `asyncHandler(storeController.updateStore.bind(storeControlle` | Update store |
+| DELETE | `/stores/:storeId` | `asyncHandler(storeController.deleteStore.bind(storeControlle` | Delete store |
+| GET | `/stores/:storeId` | `async (req: TypedRequest, res: Response) => {
+  try {
+    co` | — |
+| PUT | `/stores/:storeId/local-delivery` | `asyncHandler(storeController.setLocalDelivery.bind(storeCont` | Set local delivery zone |
+| PUT | `/stores/:storeId/pickup` | `asyncHandler(storeController.configurePickup.bind(storeContr` | Configure store pickup (BOPIS) |
+| GET | `/stores/active` | `asyncHandler(storeController.getActiveStores.bind(storeContr` | Get active stores (must be before :storeId to avoid collision) |
+| GET | `/stores/business/:organizationId` | `asyncHandler(storeController.getStoresByBusiness.bind(storeC` | Get stores by business |
+| POST | `/stores/hierarchy` | `asyncHandler(storeController.createStoreHierarchy.bind(store` | Create store hierarchy |
+| GET | `/stores/slug/:slug` | `asyncHandler(storeController.getStoreBySlug.bind(storeContro` | Get store by slug |
 
 <!-- GENERATED:ENDPOINTS:END -->

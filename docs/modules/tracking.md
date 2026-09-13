@@ -158,3 +158,26 @@ The module subscribes to 10 platform events via `modules/tracking/application/ev
 - `TrackingConfig.test.ts` — 24 tests (create, reconstitute, event mappings, shouldSendToProvider, getConsentCategory, lifecycle, provider management, toJSON)
 - `TrackingAdapters.test.ts` — 12 tests (GTM send/validate, Meta CAPI send/validate, TrackingEvent consent gating + PII hashing)
 - **Total**: 36 tests pass
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/config` | `isOrganizationLoggedIn` | Config CRUD |
+| POST | `/config` | `isOrganizationLoggedIn` | — |
+| DELETE | `/config/:storeId` | `isOrganizationLoggedIn` | — |
+| POST | `/config/:storeId/activate` | `isOrganizationLoggedIn` | Lifecycle |
+| POST | `/config/:storeId/disable` | `isOrganizationLoggedIn` | — |
+| PUT | `/config/:storeId/gtm` | `isOrganizationLoggedIn` | GTM |
+| DELETE | `/config/:storeId/gtm` | `isOrganizationLoggedIn` | — |
+| POST | `/config/:storeId/hash-pii` | `isOrganizationLoggedIn` | — |
+| POST | `/config/:storeId/mappings` | `isOrganizationLoggedIn` | Event Mappings |
+| DELETE | `/config/:storeId/mappings/:sourceEvent` | `isOrganizationLoggedIn` | — |
+| PUT | `/config/:storeId/meta-capi` | `isOrganizationLoggedIn` | Meta CAPI |
+| DELETE | `/config/:storeId/meta-capi` | `isOrganizationLoggedIn` | — |
+| POST | `/config/:storeId/server-side` | `isOrganizationLoggedIn` | — |
+| POST | `/process-event` | `isOrganizationLoggedIn` | Process event (manual trigger) |
+| GET | `/status` | `isOrganizationLoggedIn` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->

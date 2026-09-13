@@ -94,35 +94,35 @@ The Fulfillment feature manages order fulfillment operations including picking, 
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                                 | Controller                | Description                                     |
-| ------ | -------------------------------------------------------- | ------------------------- | ----------------------------------------------- |
-| GET    | `/:fulfillmentId`                                        | `getFulfillment`          | Get fulfillment by ID (customer view)           |
-| GET    | `/:fulfillmentId/track`                                  | `getTrackingInfo`         | Track fulfillment                               |
-| GET    | `/business/fulfillment/locations`                        | `isOrganizationLoggedIn`  | —                                               |
-| POST   | `/business/fulfillment/locations`                        | `isOrganizationLoggedIn`  | —                                               |
-| GET    | `/business/fulfillment/locations/:locationId`            | `isOrganizationLoggedIn`  | —                                               |
-| PUT    | `/business/fulfillment/locations/:locationId`            | `isOrganizationLoggedIn`  | —                                               |
-| DELETE | `/business/fulfillment/locations/:locationId`            | `isOrganizationLoggedIn`  | —                                               |
-| POST   | `/business/fulfillment/locations/:locationId/activate`   | `isOrganizationLoggedIn`  | —                                               |
-| POST   | `/business/fulfillment/locations/:locationId/deactivate` | `isOrganizationLoggedIn`  | —                                               |
-| GET    | `/business/fulfillment/locations/nearest`                | `isOrganizationLoggedIn`  | —                                               |
-| GET    | `/business/fulfillment/partners`                         | `isOrganizationLoggedIn`  | —                                               |
-| POST   | `/business/fulfillment/partners`                         | `isOrganizationLoggedIn`  | —                                               |
-| GET    | `/business/fulfillment/partners/:partnerId`              | `isOrganizationLoggedIn`  | —                                               |
-| PUT    | `/business/fulfillment/partners/:partnerId`              | `isOrganizationLoggedIn`  | —                                               |
-| DELETE | `/business/fulfillment/partners/:partnerId`              | `isOrganizationLoggedIn`  | —                                               |
-| GET    | `/business/fulfillments`                                 | `listFulfillments`        | List all fulfillments (with filters/pagination) |
-| POST   | `/business/fulfillments`                                 | `createFulfillment`       | Create fulfillment                              |
-| GET    | `/business/fulfillments/:fulfillmentId`                  | `getFulfillment`          | Get fulfillment by ID                           |
-| POST   | `/business/fulfillments/:fulfillmentId/assign`           | `assignFulfillment`       | Assign fulfillment                              |
-| POST   | `/business/fulfillments/:fulfillmentId/cancel`           | `cancelFulfillment`       | Cancel fulfillment                              |
-| POST   | `/business/fulfillments/:fulfillmentId/deliver`          | `markDelivered`           | Mark delivered                                  |
-| POST   | `/business/fulfillments/:fulfillmentId/pack`             | `processPacking`          | Process packing                                 |
-| POST   | `/business/fulfillments/:fulfillmentId/pick`             | `processPicking`          | Process picking                                 |
-| POST   | `/business/fulfillments/:fulfillmentId/return`           | `initiateReturn`          | Initiate return                                 |
-| POST   | `/business/fulfillments/:fulfillmentId/ship`             | `shipOrder`               | Ship order                                      |
-| PUT    | `/business/fulfillments/:fulfillmentId/tracking`         | `updateTracking`          | Update tracking info                            |
-| GET    | `/business/fulfillments/order/:orderId`                  | `listFulfillmentsByOrder` | List by order                                   |
-| GET    | `/order/:orderId`                                        | `listFulfillmentsByOrder` | List fulfillments by order (customer view)      |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/:fulfillmentId` | `asyncHandler(getFulfillment)` | Get fulfillment by ID (customer view) |
+| GET | `/:fulfillmentId/track` | `asyncHandler(getTrackingInfo)` | Track fulfillment |
+| GET | `/fulfillment/locations` | `isOrganizationLoggedIn` | — |
+| POST | `/fulfillment/locations` | `isOrganizationLoggedIn` | — |
+| GET | `/fulfillment/locations/:locationId` | `isOrganizationLoggedIn` | — |
+| PUT | `/fulfillment/locations/:locationId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/fulfillment/locations/:locationId` | `isOrganizationLoggedIn` | — |
+| POST | `/fulfillment/locations/:locationId/activate` | `isOrganizationLoggedIn` | — |
+| POST | `/fulfillment/locations/:locationId/deactivate` | `isOrganizationLoggedIn` | — |
+| GET | `/fulfillment/locations/nearest` | `isOrganizationLoggedIn` | — |
+| GET | `/fulfillment/partners` | `isOrganizationLoggedIn` | — |
+| POST | `/fulfillment/partners` | `isOrganizationLoggedIn` | — |
+| GET | `/fulfillment/partners/:partnerId` | `isOrganizationLoggedIn` | — |
+| PUT | `/fulfillment/partners/:partnerId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/fulfillment/partners/:partnerId` | `isOrganizationLoggedIn` | — |
+| GET | `/fulfillments` | `asyncHandler(listFulfillments)` | List all fulfillments (with filters/pagination) |
+| POST | `/fulfillments` | `asyncHandler(createFulfillment)` | Create fulfillment |
+| GET | `/fulfillments/:fulfillmentId` | `asyncHandler(getFulfillment)` | Get fulfillment by ID |
+| POST | `/fulfillments/:fulfillmentId/assign` | `asyncHandler(assignFulfillment)` | Assign fulfillment |
+| POST | `/fulfillments/:fulfillmentId/cancel` | `asyncHandler(cancelFulfillment)` | Cancel fulfillment |
+| POST | `/fulfillments/:fulfillmentId/deliver` | `asyncHandler(markDelivered)` | Mark delivered |
+| POST | `/fulfillments/:fulfillmentId/pack` | `asyncHandler(processPacking)` | Process packing |
+| POST | `/fulfillments/:fulfillmentId/pick` | `asyncHandler(processPicking)` | Process picking |
+| POST | `/fulfillments/:fulfillmentId/return` | `asyncHandler(initiateReturn)` | Initiate return |
+| POST | `/fulfillments/:fulfillmentId/ship` | `asyncHandler(shipOrder)` | Ship order |
+| PUT | `/fulfillments/:fulfillmentId/tracking` | `asyncHandler(updateTracking)` | Update tracking info |
+| GET | `/fulfillments/order/:orderId` | `asyncHandler(listFulfillmentsByOrder)` | List by order |
+| GET | `/order/:orderId` | `asyncHandler(listFulfillmentsByOrder)` | List fulfillments by order (customer view) |
 
 <!-- GENERATED:ENDPOINTS:END -->

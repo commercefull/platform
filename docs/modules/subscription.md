@@ -115,44 +115,44 @@ The Subscription feature manages recurring billing products, subscription plans,
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                                    | Controller                         | Description                 |
-| ------ | ----------------------------------------------------------- | ---------------------------------- | --------------------------- |
-| GET    | `/business/subscriptions`                                   | `getCustomerSubscriptions`         | —                           |
-| GET    | `/business/subscriptions/:id`                               | `getCustomerSubscription`          | —                           |
-| POST   | `/business/subscriptions/:id/bill`                          | `processBillingCycle`              | —                           |
-| POST   | `/business/subscriptions/:id/cancel`                        | `cancelSubscriptionAdmin`          | —                           |
-| POST   | `/business/subscriptions/:id/pause`                         | `pauseSubscriptionAdmin`           | —                           |
-| POST   | `/business/subscriptions/:id/resume`                        | `resumeSubscriptionAdmin`          | —                           |
-| PUT    | `/business/subscriptions/:id/status`                        | `updateSubscriptionStatus`         | —                           |
-| GET    | `/business/subscriptions/:subscriptionId/dunning`           | `getDunningAttempts`               | —                           |
-| GET    | `/business/subscriptions/:subscriptionId/orders`            | `getSubscriptionOrders`            | Subscription Orders         |
-| GET    | `/business/subscriptions/billing/due`                       | `getSubscriptionsDueBilling`       | —                           |
-| GET    | `/business/subscriptions/dunning/pending`                   | `getPendingDunning`                | —                           |
-| POST   | `/business/subscriptions/orders/:orderId/retry`             | `retrySubscriptionOrder`           | —                           |
-| POST   | `/business/subscriptions/orders/:orderId/skip`              | `skipSubscriptionOrder`            | —                           |
-| GET    | `/business/subscriptions/products`                          | `getSubscriptionProducts`          | —                           |
-| POST   | `/business/subscriptions/products`                          | `createSubscriptionProduct`        | —                           |
-| GET    | `/business/subscriptions/products/:id`                      | `getSubscriptionProduct`           | —                           |
-| PUT    | `/business/subscriptions/products/:id`                      | `updateSubscriptionProduct`        | —                           |
-| DELETE | `/business/subscriptions/products/:id`                      | `deleteSubscriptionProduct`        | —                           |
-| GET    | `/business/subscriptions/products/:productId/plans`         | `getSubscriptionPlans`             | —                           |
-| POST   | `/business/subscriptions/products/:productId/plans`         | `createSubscriptionPlan`           | —                           |
-| GET    | `/business/subscriptions/products/:productId/plans/:planId` | `getSubscriptionPlan`              | —                           |
-| PUT    | `/business/subscriptions/products/:productId/plans/:planId` | `updateSubscriptionPlan`           | —                           |
-| DELETE | `/business/subscriptions/products/:productId/plans/:planId` | `deleteSubscriptionPlan`           | —                           |
-| GET    | `/customer/subscriptions/mine`                              | `isCustomerLoggedIn`               | List and view subscriptions |
-| GET    | `/customer/subscriptions/mine/:id`                          | `isCustomerLoggedIn`               | —                           |
-| PUT    | `/customer/subscriptions/mine/:id`                          | `isCustomerLoggedIn`               | Manage subscription         |
-| POST   | `/customer/subscriptions/mine/:id/cancel`                   | `cancelMySubscription`             | —                           |
-| POST   | `/customer/subscriptions/mine/:id/change-plan`              | `changePlan`                       | —                           |
-| GET    | `/customer/subscriptions/mine/:id/orders`                   | `getMySubscriptionOrders`          | Billing history             |
-| POST   | `/customer/subscriptions/mine/:id/pause`                    | `pauseMySubscription`              | —                           |
-| POST   | `/customer/subscriptions/mine/:id/reactivate`               | `reactivateMySubscription`         | —                           |
-| POST   | `/customer/subscriptions/mine/:id/resume`                   | `resumeMySubscription`             | —                           |
-| POST   | `/customer/subscriptions/mine/:id/skip`                     | `skipNextDelivery`                 | Skip delivery               |
-| GET    | `/customer/subscriptions/plans/:planId`                     | `getSubscriptionPlanDetails`       | —                           |
-| GET    | `/customer/subscriptions/products`                          | `getAvailableSubscriptionProducts` | —                           |
-| GET    | `/customer/subscriptions/products/:productId`               | `getSubscriptionProductDetails`    | —                           |
-| POST   | `/customer/subscriptions/subscribe`                         | `isCustomerLoggedIn`               | Create subscription         |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/subscriptions` | `asyncHandler(getCustomerSubscriptions)` | — |
+| GET | `/subscriptions/:id` | `asyncHandler(getCustomerSubscription)` | — |
+| POST | `/subscriptions/:id/bill` | `asyncHandler(processBillingCycle)` | — |
+| POST | `/subscriptions/:id/cancel` | `asyncHandler(cancelSubscriptionAdmin)` | — |
+| POST | `/subscriptions/:id/pause` | `asyncHandler(pauseSubscriptionAdmin)` | — |
+| POST | `/subscriptions/:id/resume` | `asyncHandler(resumeSubscriptionAdmin)` | — |
+| PUT | `/subscriptions/:id/status` | `asyncHandler(updateSubscriptionStatus)` | — |
+| GET | `/subscriptions/:subscriptionId/dunning` | `asyncHandler(getDunningAttempts)` | — |
+| GET | `/subscriptions/:subscriptionId/orders` | `asyncHandler(getSubscriptionOrders)` | Subscription Orders |
+| GET | `/subscriptions/billing/due` | `asyncHandler(getSubscriptionsDueBilling)` | — |
+| GET | `/subscriptions/dunning/pending` | `asyncHandler(getPendingDunning)` | — |
+| GET | `/subscriptions/mine` | `isCustomerLoggedIn` | List and view subscriptions |
+| GET | `/subscriptions/mine/:id` | `isCustomerLoggedIn` | — |
+| PUT | `/subscriptions/mine/:id` | `isCustomerLoggedIn` | Manage subscription |
+| POST | `/subscriptions/mine/:id/cancel` | `asyncHandler(cancelMySubscription)` | — |
+| POST | `/subscriptions/mine/:id/change-plan` | `asyncHandler(changePlan)` | — |
+| GET | `/subscriptions/mine/:id/orders` | `asyncHandler(getMySubscriptionOrders)` | Billing history |
+| POST | `/subscriptions/mine/:id/pause` | `asyncHandler(pauseMySubscription)` | — |
+| POST | `/subscriptions/mine/:id/reactivate` | `asyncHandler(reactivateMySubscription)` | — |
+| POST | `/subscriptions/mine/:id/resume` | `asyncHandler(resumeMySubscription)` | — |
+| POST | `/subscriptions/mine/:id/skip` | `asyncHandler(skipNextDelivery)` | Skip delivery |
+| POST | `/subscriptions/orders/:orderId/retry` | `asyncHandler(retrySubscriptionOrder)` | — |
+| POST | `/subscriptions/orders/:orderId/skip` | `asyncHandler(skipSubscriptionOrder)` | — |
+| GET | `/subscriptions/plans/:planId` | `asyncHandler(getSubscriptionPlanDetails)` | — |
+| GET | `/subscriptions/products` | `asyncHandler(getSubscriptionProducts)` | — |
+| POST | `/subscriptions/products` | `asyncHandler(createSubscriptionProduct)` | — |
+| GET | `/subscriptions/products` | `asyncHandler(getAvailableSubscriptionProducts)` | — |
+| GET | `/subscriptions/products/:id` | `asyncHandler(getSubscriptionProduct)` | — |
+| PUT | `/subscriptions/products/:id` | `asyncHandler(updateSubscriptionProduct)` | — |
+| DELETE | `/subscriptions/products/:id` | `asyncHandler(deleteSubscriptionProduct)` | — |
+| GET | `/subscriptions/products/:productId` | `asyncHandler(getSubscriptionProductDetails)` | — |
+| GET | `/subscriptions/products/:productId/plans` | `asyncHandler(getSubscriptionPlans)` | — |
+| POST | `/subscriptions/products/:productId/plans` | `asyncHandler(createSubscriptionPlan)` | — |
+| GET | `/subscriptions/products/:productId/plans/:planId` | `asyncHandler(getSubscriptionPlan)` | — |
+| PUT | `/subscriptions/products/:productId/plans/:planId` | `asyncHandler(updateSubscriptionPlan)` | — |
+| DELETE | `/subscriptions/products/:productId/plans/:planId` | `asyncHandler(deleteSubscriptionPlan)` | — |
+| POST | `/subscriptions/subscribe` | `isCustomerLoggedIn` | Create subscription |
 
 <!-- GENERATED:ENDPOINTS:END -->

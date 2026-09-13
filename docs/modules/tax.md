@@ -88,29 +88,29 @@ Total Tax = Sum of all item taxes
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                   | Controller                | Description                                                   |
-| ------ | ------------------------------------------ | ------------------------- | ------------------------------------------------------------- |
-| GET    | `/business/tax/categories`                 | `getAllTaxCategories`     | -------------------- Tax Category Routes -------------------- |
-| POST   | `/business/tax/categories`                 | `createTaxCategory`       | —                                                             |
-| GET    | `/business/tax/categories/:id`             | `getTaxCategory`          | —                                                             |
-| PUT    | `/business/tax/categories/:id`             | `updateTaxCategory`       | —                                                             |
-| DELETE | `/business/tax/categories/:id`             | `deleteTaxCategory`       | —                                                             |
-| GET    | `/business/tax/rates`                      | `getAllTaxRates`          | -------------------- Tax Rate Routes --------------------     |
-| POST   | `/business/tax/rates`                      | `createTaxRate`           | —                                                             |
-| GET    | `/business/tax/rates/:id`                  | `getTaxRate`              | —                                                             |
-| PUT    | `/business/tax/rates/:id`                  | `updateTaxRate`           | —                                                             |
-| DELETE | `/business/tax/rates/:id`                  | `deleteTaxRate`           | —                                                             |
-| GET    | `/business/tax/zones`                      | `getAllTaxZones`          | -------------------- Tax Zone Routes --------------------     |
-| POST   | `/business/tax/zones`                      | `createTaxZone`           | —                                                             |
-| GET    | `/business/tax/zones/:id`                  | `getTaxZoneById`          | —                                                             |
-| PUT    | `/business/tax/zones/:id`                  | `updateTaxZone`           | —                                                             |
-| DELETE | `/business/tax/zones/:id`                  | `deleteTaxZone`           | —                                                             |
-| POST   | `/customer/tax/calculate`                  | `calculateTaxForLineItem` | Public tax calculation endpoints                              |
-| POST   | `/customer/tax/calculate/basket/:basketId` | `isCustomerLoggedIn`      | Protected routes require authentication                       |
-| GET    | `/customer/tax/categories/:code`           | `getTaxCategoryByCode`    | —                                                             |
-| GET    | `/customer/tax/exemption/:customerId`      | `isCustomerLoggedIn`      | Customer exemption check (requires authentication)            |
-| GET    | `/customer/tax/rates`                      | `getTaxRates`             | Public tax information endpoints                              |
-| GET    | `/customer/tax/settings/:organizationId`   | `getCustomerTaxSettings`  | NEW: Get public tax settings for storefront                   |
-| POST   | `/customer/tax/zones/find`                 | `findTaxZoneForAddress`   | NEW: Tax zone finder endpoint                                 |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/tax/calculate` | `asyncHandler(calculateTaxForLineItem)` | Public tax calculation endpoints |
+| POST | `/tax/calculate/basket/:basketId` | `isCustomerLoggedIn` | Protected routes require authentication |
+| GET | `/tax/categories` | `asyncHandler(getAllTaxCategories)` | -------------------- Tax Category Routes -------------------- |
+| POST | `/tax/categories` | `asyncHandler(createTaxCategory)` | — |
+| GET | `/tax/categories/:code` | `asyncHandler(getTaxCategoryByCode)` | — |
+| GET | `/tax/categories/:id` | `asyncHandler(getTaxCategory)` | — |
+| PUT | `/tax/categories/:id` | `asyncHandler(updateTaxCategory)` | — |
+| DELETE | `/tax/categories/:id` | `asyncHandler(deleteTaxCategory)` | — |
+| GET | `/tax/exemption/:customerId` | `isCustomerLoggedIn` | Customer exemption check (requires authentication) |
+| GET | `/tax/rates` | `asyncHandler(getAllTaxRates)` | -------------------- Tax Rate Routes -------------------- |
+| POST | `/tax/rates` | `asyncHandler(createTaxRate)` | — |
+| GET | `/tax/rates` | `asyncHandler(getTaxRates)` | Public tax information endpoints |
+| GET | `/tax/rates/:id` | `asyncHandler(getTaxRate)` | — |
+| PUT | `/tax/rates/:id` | `asyncHandler(updateTaxRate)` | — |
+| DELETE | `/tax/rates/:id` | `asyncHandler(deleteTaxRate)` | — |
+| GET | `/tax/settings/:organizationId` | `asyncHandler(getCustomerTaxSettings)` | NEW: Get public tax settings for storefront |
+| GET | `/tax/zones` | `asyncHandler(getAllTaxZones)` | -------------------- Tax Zone Routes -------------------- |
+| POST | `/tax/zones` | `asyncHandler(createTaxZone)` | — |
+| GET | `/tax/zones/:id` | `asyncHandler(getTaxZoneById)` | — |
+| PUT | `/tax/zones/:id` | `asyncHandler(updateTaxZone)` | — |
+| DELETE | `/tax/zones/:id` | `asyncHandler(deleteTaxZone)` | — |
+| POST | `/tax/zones/find` | `asyncHandler(findTaxZoneForAddress)` | NEW: Tax zone finder endpoint |
 
 <!-- GENERATED:ENDPOINTS:END -->
