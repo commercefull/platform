@@ -6,4 +6,4 @@
 - Self-hosted commerce — 43 modules, fully exportable
 - PostgreSQL + Express + TypeScript
 
-[Get Started](#/guides/getting-started) [Why Commercefull](#/product/positioning) [API Reference](#/generated/api-reference) [Architecture](#/architecture/overview)
+<a href="#/guides/getting-started">Get Started</a> <a href="#/product/positioning">Why Commercefull</a> <a href="#/generated/api-reference">API Reference</a> <a href="#/architecture/overview">Architecture</a>
