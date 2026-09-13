@@ -4,7 +4,7 @@
  * Handles gift card redemption for orders
  */
 
-import * as giftCardRepo from '../../infrastructure/repositories/GiftCardRepository';
+import { giftCardRepo } from '../wired';
 
 // ============================================================================
 // Command

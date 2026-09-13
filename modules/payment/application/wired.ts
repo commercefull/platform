@@ -4,6 +4,7 @@ import paymentBillingDataRepository from '../infrastructure/repositories/Payment
 import type {
   FraudRule,
   RuleType,
+  RuleAction,
   CheckStatus,
   BlacklistType,
   RiskLevel,
@@ -16,6 +17,7 @@ export {
   paymentBillingDataRepository,
   FraudRule,
   RuleType,
+  RuleAction,
   CheckStatus,
   BlacklistType,
   RiskLevel,

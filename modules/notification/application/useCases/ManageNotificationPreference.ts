@@ -4,7 +4,8 @@
  * Upserts customer notification preferences via notificationPreferenceRepo.
  */
 
-import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import { notificationConfigRepository } from '../wired';
+import type { NotificationPreferenceRepository } from '../../domain/repositories/NotificationPreferenceRepository';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
 const notificationPreferenceRepo = notificationConfigRepository.preferences;
@@ -46,7 +47,7 @@ export interface ManageNotificationPreferenceResponse {
 // ============================================================================
 
 export class ManageNotificationPreferenceUseCase {
-  constructor(private readonly preferenceRepo: typeof notificationPreferenceRepo = notificationPreferenceRepo) {}
+  constructor(private readonly preferenceRepo: NotificationPreferenceRepository = notificationPreferenceRepo) {}
 
   async execute(command: ManageNotificationPreferenceCommand): Promise<ManageNotificationPreferenceResponse> {
     if (!command.userId) throw new NotificationValidationError('userId is required');

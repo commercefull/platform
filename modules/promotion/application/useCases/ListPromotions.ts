@@ -3,7 +3,7 @@
  * Lists promotions with filtering and pagination
  */
 
-import promotionRuleRepository, { type PromotionStatus } from '../../infrastructure/repositories/PromotionRuleRepository';
+import { PromotionRepository, type PromotionStatus } from '../../domain/repositories/PromotionRepository';
 
 // Command
 export class ListPromotionsCommand {
@@ -33,7 +33,7 @@ export interface ListPromotionsResponse {
 
 // Use Case
 export class ListPromotionsUseCase {
-  constructor(private readonly promotionRepo: typeof promotionRuleRepository.promotions) {}
+  constructor(private readonly promotionRepo: PromotionRepository) {}
 
   async execute(command: ListPromotionsCommand): Promise<ListPromotionsResponse> {
     const promotions = await this.promotionRepo.findAll(

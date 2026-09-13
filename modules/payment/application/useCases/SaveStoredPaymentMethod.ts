@@ -8,7 +8,7 @@
  */
 
 import { PaymentRepository, StoredPaymentMethod } from '../../domain/repositories/PaymentRepository';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+import { paymentDataRepository } from '../wired';
 
 const PaymentRepo = paymentDataRepository.payments;
 import { FailedToCreateStoredPaymentMethodError, FailedToRetrieveSavedPaymentMethodError } from '../../domain/errors/PaymentErrors';

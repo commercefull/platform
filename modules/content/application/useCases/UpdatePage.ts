@@ -3,7 +3,7 @@
  * Updates an existing content page
  */
 
-import type { ContentRepo } from '../../infrastructure/repositories/contentRepo';
+import type { IContentRepository } from '../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { ContentPageNotFoundError, ContentValidationError } from '../../domain/errors/ContentErrors';
 
@@ -49,7 +49,7 @@ export interface UpdatePageResponse {
 // ============================================================================
 
 export class UpdatePageUseCase {
-  constructor(private readonly contentRepo: ContentRepo) {}
+  constructor(private readonly contentRepo: IContentRepository) {}
 
   async execute(command: UpdatePageCommand): Promise<UpdatePageResponse> {
     // Validate command

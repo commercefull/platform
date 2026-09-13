@@ -3,7 +3,7 @@
  * Retrieves a navigation menu with all its items in tree structure
  */
 
-import type { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
+import type { IContentNavigationRepository } from '../../../domain/repositories/ContentNavigationRepository';
 import { ContentNavigationItem } from '../../../../../libs/db/types';
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -42,7 +42,7 @@ export interface NavigationWithItemsResponse {
 }
 
 export class GetNavigationWithItemsUseCase {
-  constructor(private readonly navigationRepo: ContentNavigationRepo) {}
+  constructor(private readonly navigationRepo: IContentNavigationRepository) {}
 
   async execute(query: GetNavigationWithItemsQuery): Promise<NavigationWithItemsResponse | null> {
     let navigation;

@@ -5,8 +5,8 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import shippingLabelRepo from '../../infrastructure/repositories/ShippingLabelAggregateRepository';
-import type { ShippingLabel } from '../../infrastructure/repositories/shippingLabelRepo';
+import { shippingLabelRepo } from '../wired';
+import type { ShippingLabel } from '../../domain/repositories/ShippingLabelRepository';
 
 export interface VoidLabelInput {
   shippingLabelId: string;

@@ -21,8 +21,8 @@
  */
 
 import { matchesConditions, type AttributeCondition } from '../../../../libs/rules/conditions';
-import * as fraudRepo from '../../infrastructure/repositories/fraudRepo';
-import type { FraudRule, RuleAction, RiskLevel, CheckStatus, BlacklistType } from '../../infrastructure/repositories/fraudRepo';
+import { fraudRepo } from '../wired';
+import type { FraudRule, RuleAction, RiskLevel, CheckStatus, BlacklistType } from '../wired';
 
 // ============================================================================
 // Types

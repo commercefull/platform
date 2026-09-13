@@ -6,7 +6,8 @@
  * Validates: Requirements 7.7, 7.8
  */
 
-import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import { notificationConfigRepository } from '../wired';
+import type { NotificationTemplateTranslationRepository } from '../../domain/repositories/NotificationTemplateTranslationRepository';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
 const notificationTemplateTranslationRepo = notificationConfigRepository.templateTranslations;
@@ -42,7 +43,9 @@ export interface UpsertTemplateTranslationResponse {
 // ============================================================================
 
 export class UpsertTemplateTranslationUseCase {
-  constructor(private readonly translationRepo: typeof notificationTemplateTranslationRepo = notificationTemplateTranslationRepo) {}
+  constructor(
+    private readonly translationRepo: NotificationTemplateTranslationRepository = notificationTemplateTranslationRepo,
+  ) {}
 
   async execute(command: UpsertTemplateTranslationCommand): Promise<UpsertTemplateTranslationResponse> {
     if (!command.templateId) throw new NotificationValidationError('templateId is required');

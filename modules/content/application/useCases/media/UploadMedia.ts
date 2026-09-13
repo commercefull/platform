@@ -3,7 +3,7 @@
  * Handles media file upload and registration
  */
 
-import type { ContentMediaRepo } from '../../../infrastructure/repositories/contentMediaRepo';
+import type { IContentMediaRepository } from '../../../domain/repositories/ContentMediaRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { MediaFolderNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -47,7 +47,7 @@ export interface MediaResponse {
 }
 
 export class UploadMediaUseCase {
-  constructor(private readonly mediaRepo: ContentMediaRepo) {}
+  constructor(private readonly mediaRepo: IContentMediaRepository) {}
 
   async execute(command: UploadMediaCommand): Promise<MediaResponse> {
     if (!command.title || !command.fileName || !command.url) {

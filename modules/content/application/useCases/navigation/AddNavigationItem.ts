@@ -3,8 +3,8 @@
  * Adds a new item to a navigation menu
  */
 
-import type { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
-import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { IContentNavigationRepository } from '../../../domain/repositories/ContentNavigationRepository';
+import type { IContentRepository } from '../../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { NavigationMenuNotFoundError, ContentPageNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -42,8 +42,8 @@ export interface NavigationItemResponse {
 
 export class AddNavigationItemUseCase {
   constructor(
-    private readonly navigationRepo: ContentNavigationRepo,
-    private readonly contentRepo: ContentRepo,
+    private readonly navigationRepo: IContentNavigationRepository,
+    private readonly contentRepo: IContentRepository,
   ) {}
 
   async execute(command: AddNavigationItemCommand): Promise<NavigationItemResponse> {

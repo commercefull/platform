@@ -1,6 +1,7 @@
-import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import { notificationConfigRepository } from '../wired';
+import type { NotificationTemplateCreateParams, NotificationTemplateRepository } from '../../domain/repositories/NotificationTemplateRepository';
 
-const notificationTemplateRepo = notificationConfigRepository.templates;
+const notificationTemplateRepo: NotificationTemplateRepository = notificationConfigRepository.templates;
 
 export class ManageNotificationTemplatesUseCase {
   async findAll(activeOnly?: boolean) {
@@ -15,7 +16,7 @@ export class ManageNotificationTemplatesUseCase {
   async count(activeOnly?: boolean) {
     return notificationTemplateRepo.count(activeOnly);
   }
-  async create(params: Parameters<typeof notificationTemplateRepo.create>[0]) {
+  async create(params: NotificationTemplateCreateParams) {
     return notificationTemplateRepo.create(params);
   }
   async update(id: string, updates: Record<string, unknown>) {

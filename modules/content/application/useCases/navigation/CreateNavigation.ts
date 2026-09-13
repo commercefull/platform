@@ -3,7 +3,7 @@
  * Creates a new navigation menu
  */
 
-import type { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
+import type { IContentNavigationRepository } from '../../../domain/repositories/ContentNavigationRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -29,7 +29,7 @@ export interface NavigationResponse {
 }
 
 export class CreateNavigationUseCase {
-  constructor(private readonly navigationRepo: ContentNavigationRepo) {}
+  constructor(private readonly navigationRepo: IContentNavigationRepository) {}
 
   async execute(command: CreateNavigationCommand): Promise<NavigationResponse> {
     if (!command.name || !command.slug) {

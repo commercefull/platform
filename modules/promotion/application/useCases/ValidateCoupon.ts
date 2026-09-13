@@ -3,7 +3,7 @@
  * Validates a coupon code for a given order
  */
 
-import couponDiscountRepository, { type PromotionCoupon } from '../../infrastructure/repositories/CouponDiscountRepository';
+import { couponDiscountRepository, type PromotionCoupon } from '../wired';
 
 const couponRepo = couponDiscountRepository.coupons;
 

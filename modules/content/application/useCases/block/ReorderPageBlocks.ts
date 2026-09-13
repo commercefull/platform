@@ -3,7 +3,7 @@
  * Reorders content blocks within a page
  */
 
-import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { IContentRepository } from '../../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentPageNotFoundError, ContentBlockNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -21,7 +21,7 @@ export interface ReorderBlocksResponse {
 }
 
 export class ReorderPageBlocksUseCase {
-  constructor(private readonly contentRepo: ContentRepo) {}
+  constructor(private readonly contentRepo: IContentRepository) {}
 
   async execute(command: ReorderPageBlocksCommand): Promise<ReorderBlocksResponse> {
     if (!command.pageId) {

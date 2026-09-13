@@ -4,7 +4,7 @@
  * Retrieves gift card balance and status
  */
 
-import * as giftCardRepo from '../../infrastructure/repositories/GiftCardRepository';
+import { giftCardRepo } from '../wired';
 
 // ============================================================================
 // Query

@@ -1,6 +1,4 @@
-import promotionRuleRepository from '../../infrastructure/repositories/PromotionRuleRepository';
-import couponDiscountRepository from '../../infrastructure/repositories/CouponDiscountRepository';
-import * as giftCardRepo from '../../infrastructure/repositories/GiftCardRepository';
+import { promotionRuleRepository, couponDiscountRepository, giftCardRepo } from '../wired';
 
 const promotionRepo = promotionRuleRepository.promotions;
 const couponRepo = couponDiscountRepository.coupons;

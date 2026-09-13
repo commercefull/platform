@@ -3,7 +3,7 @@
  * Retrieves the full category hierarchy as a tree structure
  */
 
-import type { ContentCategoryRepo } from '../../../infrastructure/repositories/contentCategoryRepo';
+import type { IContentCategoryRepository } from '../../../domain/repositories/ContentCategoryRepository';
 import { ContentCategory } from '../../../../../libs/db/types';
 
 export class GetCategoryTreeQuery {
@@ -24,7 +24,7 @@ export interface CategoryTreeNode {
 }
 
 export class GetCategoryTreeUseCase {
-  constructor(private readonly categoryRepo: ContentCategoryRepo) {}
+  constructor(private readonly categoryRepo: IContentCategoryRepository) {}
 
   async execute(query: GetCategoryTreeQuery): Promise<CategoryTreeNode[]> {
     const isActive = query.includeInactive ? undefined : true;

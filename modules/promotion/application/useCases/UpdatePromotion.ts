@@ -3,7 +3,7 @@
  * Updates an existing promotion
  */
 
-import promotionRuleRepository, { type UpdatePromotionInput } from '../../infrastructure/repositories/PromotionRuleRepository';
+import { PromotionRepository, type UpdatePromotionInput } from '../../domain/repositories/PromotionRepository';
 import { Promotion } from '../../../../libs/db/types';
 import { PromotionNotFoundError, PromotionValidationError } from '../../domain/errors/PromotionErrors';
 
@@ -37,7 +37,7 @@ export interface UpdatePromotionResponse {
 
 // Use Case
 export class UpdatePromotionUseCase {
-  constructor(private readonly promotionRepo: typeof promotionRuleRepository.promotions) {}
+  constructor(private readonly promotionRepo: PromotionRepository) {}
 
   async execute(command: UpdatePromotionCommand): Promise<UpdatePromotionResponse> {
     // Find existing promotion

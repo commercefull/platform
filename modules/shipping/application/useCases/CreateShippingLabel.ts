@@ -5,9 +5,8 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import shippingLabelRepo from '../../infrastructure/repositories/ShippingLabelAggregateRepository';
-import shippingConfigRepository from '../../infrastructure/repositories/ShippingConfigRepository';
-import type { CreateShippingLabelInput, ShippingLabel } from '../../infrastructure/repositories/shippingLabelRepo';
+import { shippingLabelRepo, shippingConfigRepository } from '../wired';
+import type { CreateShippingLabelInput, ShippingLabel } from '../../domain/repositories/ShippingLabelRepository';
 import { ShippingCarrierNotFoundError, ShippingValidationError } from '../../domain/errors/ShippingErrors';
 
 const shippingCarrierRepo = shippingConfigRepository.carriers;

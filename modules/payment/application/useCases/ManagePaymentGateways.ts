@@ -1,5 +1,5 @@
 import { PaymentGatewayRepository, PaymentGatewayCreateParams } from '../../domain/repositories/PaymentGatewayRepository';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+import { paymentDataRepository } from '../wired';
 
 const paymentRepo = paymentDataRepository.gateways;
 

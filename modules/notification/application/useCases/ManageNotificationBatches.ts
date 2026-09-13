@@ -1,4 +1,4 @@
-import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
+import { notificationDataRepository } from '../wired';
 
 const notificationBatchRepo = notificationDataRepository.batches;
 

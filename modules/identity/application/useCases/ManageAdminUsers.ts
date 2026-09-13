@@ -1,4 +1,4 @@
-import identityDataRepository from '../../infrastructure/repositories/IdentityDataRepository';
+import { identityDataRepository } from '../wired';
 
 const identityRepo = identityDataRepository.users;
 

@@ -3,7 +3,7 @@
  * Creates a new content page
  */
 
-import type { ContentRepo } from '../../infrastructure/repositories/contentRepo';
+import type { IContentRepository } from '../../domain/repositories/ContentRepository';
 import type { ContentPage } from '../../../../libs/db/types';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { ContentTypeNotFoundError, ContentTemplateNotFoundError, ContentValidationError } from '../../domain/errors/ContentErrors';
@@ -57,7 +57,7 @@ export interface PageResponse {
 // ============================================================================
 
 export class CreatePageUseCase {
-  constructor(private readonly contentRepo: ContentRepo) {}
+  constructor(private readonly contentRepo: IContentRepository) {}
 
   async execute(command: CreatePageCommand): Promise<PageResponse> {
     // Validate command

@@ -3,7 +3,7 @@
  * Creates a new URL redirect rule
  */
 
-import type { ContentRedirectRepo } from '../../../infrastructure/repositories/contentRedirectRepo';
+import type { IContentRedirectRepository } from '../../../domain/repositories/ContentRedirectRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -31,7 +31,7 @@ export interface RedirectResponse {
 }
 
 export class CreateRedirectUseCase {
-  constructor(private readonly redirectRepo: ContentRedirectRepo) {}
+  constructor(private readonly redirectRepo: IContentRedirectRepository) {}
 
   async execute(command: CreateRedirectCommand): Promise<RedirectResponse> {
     if (!command.sourceUrl || !command.targetUrl) {

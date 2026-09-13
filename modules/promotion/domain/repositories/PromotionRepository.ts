@@ -2,39 +2,116 @@
  * Promotion Repository Interface
  */
 
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
-import { Promotion, PromotionStatus, PromotionType } from '../entities/Promotion';
+import { Promotion, PromotionRule, PromotionAction } from '../../../../libs/db/types';
 
-export interface PromotionFilters {
-  status?: PromotionStatus | PromotionStatus[];
-  type?: PromotionType;
-  organizationId?: string;
+// Types matching infrastructure repository signatures
+export type PromotionStatus = 'active' | 'scheduled' | 'expired' | 'disabled' | 'pendingApproval';
+export type PromotionScope = 'cart' | 'product' | 'category' | 'organization' | 'shipping' | 'global';
+export type RuleCondition =
+  | 'cartTotal'
+  | 'itemQuantity'
+  | 'productCategory'
+  | 'customerGroup'
+  | 'firstOrder'
+  | 'dateRange'
+  | 'timeOfDay'
+  | 'dayOfWeek'
+  | 'shippingMethod'
+  | 'paymentMethod';
+export type ActionType = 'discountByPercentage' | 'discountByAmount' | 'discountShipping' | 'freeItem' | 'discountByTier' | 'freeGift';
+
+export interface CreateRuleInput {
+  name?: string;
+  condition: RuleCondition;
+  operator: string;
+  value: unknown;
   isActive?: boolean;
-  search?: string;
 }
+
+export interface CreateActionInput {
+  type: ActionType;
+  value: number;
+  targetType?: string;
+  targetId?: string;
+  metadata?: unknown;
+}
+
+export interface CreatePromotionInput {
+  name: string;
+  description?: string;
+  status?: PromotionStatus;
+  scope: PromotionScope;
+  priority?: number;
+  startDate?: Date;
+  endDate?: Date;
+  isActive?: boolean;
+  isExclusive?: boolean;
+  stackability?: 'none' | 'stackable' | 'exclusive';
+  maxUsage?: number;
+  maxUsagePerCustomer?: number;
+  minOrderAmount?: number;
+  maxDiscountAmount?: number;
+  organizationId?: string;
+  isGlobal?: boolean;
+  eligibleCustomerGroups?: string[];
+  excludedCustomerGroups?: string[];
+  rules?: CreateRuleInput[];
+  actions?: CreateActionInput[];
+}
+
+export type UpdatePromotionInput = Partial<Omit<CreatePromotionInput, 'rules' | 'actions'>>;
 
 export interface PromotionRepository {
   findById(promotionId: string): Promise<Promotion | null>;
-  findByCode(code: string): Promise<Promotion | null>;
-  findAll(filters?: PromotionFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Promotion>>;
-  findActive(pagination?: PaginationOptions): Promise<PaginatedResult<Promotion>>;
-  save(promotion: Promotion): Promise<Promotion>;
-  delete(promotionId: string): Promise<void>;
-  count(filters?: PromotionFilters): Promise<number>;
-
-  // Usage tracking
-  recordUsage(promotionId: string, customerId: string, orderId: string, discountAmount: number): Promise<void>;
-  getCustomerUsageCount(promotionId: string, customerId: string): Promise<number>;
-
-  // Validation
-  validateCode(
+  findAll(
+    filters?: {
+      status?: PromotionStatus | PromotionStatus[];
+      scope?: PromotionScope | PromotionScope[];
+      organizationId?: string;
+      isActive?: boolean;
+      isGlobal?: boolean;
+      startBefore?: Date;
+      endAfter?: Date;
+    },
+    options?: {
+      limit?: number;
+      offset?: number;
+      orderBy?: string;
+      direction?: 'ASC' | 'DESC';
+    },
+  ): Promise<Promotion[]>;
+  findActive(scope?: PromotionScope | PromotionScope[], organizationId?: string): Promise<Promotion[]>;
+  create(input: CreatePromotionInput): Promise<Promotion>;
+  update(id: string, input: UpdatePromotionInput): Promise<Promotion>;
+  delete(promotionId: string): Promise<boolean>;
+  findRulesByPromotionId(promotionId: string): Promise<PromotionRule[]>;
+  findActionsByPromotionId(promotionId: string): Promise<PromotionAction[]>;
+  recordUsage(
+    promotionId: string,
+    orderId: string,
+    customerId?: string,
+    discountAmount?: number,
+    currencyCode?: string,
+  ): Promise<unknown>;
+  getUsage(promotionId: string): Promise<unknown[]>;
+  getUsageCount(promotionId: string): Promise<number>;
+  getWithDetails(
+    id: string,
+  ): Promise<{
+    promotion: Promotion;
+    rules: PromotionRule[];
+    actions: PromotionAction[];
+  } | null>;
+  isValidForOrder(promotionId: string, orderTotal: number, customerId?: string): Promise<boolean>;
+  validateCode?(
     code: string,
     subtotal: number,
     customerId?: string,
   ): Promise<{
     valid: boolean;
-    promotion?: Promotion;
+    promotion?: Promotion & { code?: string; type?: string };
     discount?: number;
     message?: string;
   }>;
+  getCustomerUsageCount?(promotionId: string, customerId: string): Promise<number>;
 }

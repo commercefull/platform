@@ -3,7 +3,7 @@
  * Checks if a URL should be redirected and returns the target
  */
 
-import type { ContentRedirectRepo } from '../../../infrastructure/repositories/contentRedirectRepo';
+import type { IContentRedirectRepository } from '../../../domain/repositories/ContentRedirectRepository';
 
 export class ProcessRedirectQuery {
   constructor(public readonly url: string) {}
@@ -17,7 +17,7 @@ export interface RedirectResult {
 }
 
 export class ProcessRedirectUseCase {
-  constructor(private readonly redirectRepo: ContentRedirectRepo) {}
+  constructor(private readonly redirectRepo: IContentRedirectRepository) {}
 
   async execute(query: ProcessRedirectQuery): Promise<RedirectResult> {
     if (!query.url) {

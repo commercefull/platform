@@ -3,7 +3,7 @@
  * Adds a new content block to a page
  */
 
-import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { IContentRepository } from '../../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentPageNotFoundError, ContentTypeNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -31,7 +31,7 @@ export interface BlockResponse {
 }
 
 export class AddBlockToPageUseCase {
-  constructor(private readonly contentRepo: ContentRepo) {}
+  constructor(private readonly contentRepo: IContentRepository) {}
 
   async execute(command: AddBlockToPageCommand): Promise<BlockResponse> {
     if (!command.contentPageId || !command.blockTypeId || !command.title) {

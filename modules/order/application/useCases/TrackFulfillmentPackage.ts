@@ -10,7 +10,7 @@ import {
   OrderFulfillmentPackage,
   OrderFulfillmentPackageCreateParams,
 } from '../../domain/repositories/OrderFulfillmentPackageRepository';
-import orderFulfillmentDataRepository from '../../infrastructure/repositories/OrderFulfillmentDataRepository';
+import { orderFulfillmentDataRepository } from '../wired';
 
 const orderFulfillmentRepo = orderFulfillmentDataRepository.fulfillments;
 import { FulfillmentPackageNotFoundError } from '../../domain/errors/OrderErrors';

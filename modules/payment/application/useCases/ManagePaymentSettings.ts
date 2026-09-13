@@ -1,5 +1,5 @@
 import { PaymentRepository, PaymentSettingsUpsertParams } from '../../domain/repositories/PaymentRepository';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+import { paymentDataRepository } from '../wired';
 
 const PaymentRepo = paymentDataRepository.payments;
 

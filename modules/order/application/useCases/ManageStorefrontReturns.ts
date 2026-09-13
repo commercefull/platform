@@ -1,5 +1,5 @@
 import { OrderReturnRepository } from '../../domain/repositories/OrderReturnRepository';
-import orderFulfillmentDataRepository from '../../infrastructure/repositories/OrderFulfillmentDataRepository';
+import { orderFulfillmentDataRepository } from '../wired';
 
 const orderReturnRepo = orderFulfillmentDataRepository.returns;
 

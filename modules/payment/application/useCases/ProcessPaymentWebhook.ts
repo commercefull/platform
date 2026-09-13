@@ -8,7 +8,7 @@
  */
 
 import { PaymentRepository, PaymentWebhook } from '../../domain/repositories/PaymentRepository';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+import { paymentDataRepository } from '../wired';
 
 const PaymentRepo = paymentDataRepository.payments;
 import { FailedToCreatePaymentWebhookError } from '../../domain/errors/PaymentErrors';

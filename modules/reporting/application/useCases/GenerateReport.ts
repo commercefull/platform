@@ -1,7 +1,7 @@
-import reportingDataRepository from '../../infrastructure/repositories/ReportingDataRepository';
-import type { ReportParameters } from '../../infrastructure/repositories/ReportingDataRepository';
+import { reportingRepository } from '../wired';
+import type { ReportParameters } from '../../domain/repositories/ReportingRepository';
 
-const { generateReport } = reportingDataRepository.dataProvider;
+const { generateReport } = reportingRepository;
 import type { ReportData, ReportType } from '../../domain/entities/ReportEntities';
 
 export interface GenerateReportInput {

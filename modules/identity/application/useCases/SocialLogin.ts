@@ -5,7 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import type { SocialAccountRepo } from '../../infrastructure/repositories/socialAccountRepo';
+import type { SocialAccountRepository } from '../../domain/repositories/SocialAccountRepository';
 import { SocialProvider, UserType, SocialProfileData } from '../../domain/entities/SocialAccount';
 import {
   EmailRequiredError,
@@ -73,7 +73,7 @@ export interface LinkedAccount {
 
 export class SocialLoginUseCase {
   constructor(
-    private readonly socialAccountRepo: SocialAccountRepo,
+    private readonly socialAccountRepo: SocialAccountRepository,
     private readonly findOrCreateUser: (
       email: string,
       profile: SocialProfileData,
@@ -166,7 +166,7 @@ export class SocialLoginUseCase {
 }
 
 export class LinkSocialAccountUseCase {
-  constructor(private readonly socialAccountRepo: SocialAccountRepo) {}
+  constructor(private readonly socialAccountRepo: SocialAccountRepository) {}
 
   /**
    * Link a social account to an existing user
@@ -236,7 +236,7 @@ export class LinkSocialAccountUseCase {
 }
 
 export class UnlinkSocialAccountUseCase {
-  constructor(private readonly socialAccountRepo: SocialAccountRepo) {}
+  constructor(private readonly socialAccountRepo: SocialAccountRepository) {}
 
   /**
    * Unlink a social account from a user
@@ -266,7 +266,7 @@ export class UnlinkSocialAccountUseCase {
 }
 
 export class GetLinkedAccountsUseCase {
-  constructor(private readonly socialAccountRepo: SocialAccountRepo) {}
+  constructor(private readonly socialAccountRepo: SocialAccountRepository) {}
 
   /**
    * Get all linked social accounts for a user

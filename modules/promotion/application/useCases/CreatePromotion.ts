@@ -3,7 +3,7 @@
  * Creates a new promotion
  */
 
-import promotionRuleRepository from '../../infrastructure/repositories/PromotionRuleRepository';
+import { PromotionRepository } from '../../domain/repositories/PromotionRepository';
 import { Promotion } from '../../../../libs/db/types';
 import { PromotionCodeAlreadyExistsError, PromotionValidationError } from '../../domain/errors/PromotionErrors';
 
@@ -36,7 +36,7 @@ export interface CreatePromotionResponse {
 
 // Use Case
 export class CreatePromotionUseCase {
-  constructor(private readonly promotionRepo: typeof promotionRuleRepository.promotions) {}
+  constructor(private readonly promotionRepo: PromotionRepository) {}
 
   async execute(command: CreatePromotionCommand): Promise<CreatePromotionResponse> {
     // Validate command

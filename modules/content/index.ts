@@ -5,8 +5,15 @@
 
 export * from './application/useCases';
 export * from './domain/repositories/ContentRepository';
+export * from './domain/repositories/ContentCategoryRepository';
+export * from './domain/repositories/ContentMediaRepository';
+export * from './domain/repositories/ContentNavigationRepository';
+export * from './domain/repositories/ContentRedirectRepository';
 export * from './domain/events/ContentEvents';
 export * from './domain/errors/ContentErrors';
+export * from './domain/entities/ContentPage';
+export * from './domain/entities/ContentBlock';
+export * from './domain/entities/ContentType';
 
 // Interface exports (routers, GraphQL)
 export { contentCustomerRouter } from './interface/routers/contentCustomerRouter';

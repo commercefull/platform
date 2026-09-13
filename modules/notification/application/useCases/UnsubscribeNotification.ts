@@ -7,7 +7,9 @@
  * Validates: Requirements 7.4
  */
 
-import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import { notificationConfigRepository } from '../wired';
+import type { NotificationUnsubscribeRepository } from '../../domain/repositories/NotificationUnsubscribeRepository';
+import type { NotificationPreferenceRepository } from '../../domain/repositories/NotificationPreferenceRepository';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
 const notificationUnsubscribeRepo = notificationConfigRepository.unsubscribes;
@@ -44,8 +46,8 @@ export interface UnsubscribeNotificationResponse {
 
 export class UnsubscribeNotificationUseCase {
   constructor(
-    private readonly unsubscribeRepo: typeof notificationUnsubscribeRepo = notificationUnsubscribeRepo,
-    private readonly preferenceRepo: typeof notificationPreferenceRepo = notificationPreferenceRepo,
+    private readonly unsubscribeRepo: NotificationUnsubscribeRepository = notificationUnsubscribeRepo,
+    private readonly preferenceRepo: NotificationPreferenceRepository = notificationPreferenceRepo,
   ) {}
 
   async execute(command: UnsubscribeNotificationCommand): Promise<UnsubscribeNotificationResponse> {

@@ -4,8 +4,8 @@
  * Creates a shipment with carrier integration, generating tracking numbers and labels.
  */
 
-import shippingConfigRepository from '../../infrastructure/repositories/ShippingConfigRepository';
-import type { ShippingMethod } from '../../infrastructure/repositories/ShippingConfigRepository';
+import { shippingConfigRepository } from '../wired';
+import type { ShippingMethod } from '../../../../libs/db/types';
 import { ShippingCarrierNotFoundError, ShippingMethodNotFoundError } from '../../domain/errors/ShippingErrors';
 
 const shippingCarrierRepo = shippingConfigRepository.carriers;

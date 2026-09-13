@@ -22,6 +22,7 @@ export interface CreateSocialAccountInput {
   tokenExpiresAt?: Date;
   scopes?: string[];
   providerData?: Record<string, unknown>;
+  lastLoginIp?: string;
 }
 
 export interface SocialAccountRepository {
@@ -29,7 +30,8 @@ export interface SocialAccountRepository {
   findByUserAndProvider(userId: string, userType: UserType, provider: SocialProvider): Promise<SocialAccount | null>;
   findByUserId(userId: string, userType: UserType): Promise<SocialAccount[]>;
   create(params: CreateSocialAccountInput): Promise<SocialAccount>;
-  updateLastUsed(socialAccountId: string, ip?: string): Promise<void>;
+  updateTokens(socialAccountId: string, accessToken: string, refreshToken?: string, tokenExpiresAt?: Date): Promise<void>;
+  recordLogin(socialAccountId: string, ip?: string): Promise<void>;
   deactivate(socialAccountId: string): Promise<void>;
-  countActiveByUser(userId: string, userType: UserType): Promise<number>;
+  getLinkedProviderCount(userId: string, userType: UserType): Promise<number>;
 }

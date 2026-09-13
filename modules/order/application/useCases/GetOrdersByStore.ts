@@ -1,5 +1,5 @@
 import { OrderRepository, OrderFilters } from '../../domain/repositories/OrderRepository';
-import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
+import { orderDataRepository } from '../wired';
 
 const orderRepo = orderDataRepository.commands;
 

@@ -3,7 +3,7 @@
  * Creates a complete copy of a page including all its blocks
  */
 
-import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { IContentRepository } from '../../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentPageNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -26,7 +26,7 @@ export interface DuplicatePageResponse {
 }
 
 export class DuplicatePageUseCase {
-  constructor(private readonly contentRepo: ContentRepo) {}
+  constructor(private readonly contentRepo: IContentRepository) {}
 
   async execute(command: DuplicatePageCommand): Promise<DuplicatePageResponse> {
     if (!command.pageId || !command.newTitle || !command.newSlug) {

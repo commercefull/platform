@@ -15,6 +15,7 @@ jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
         updatedAt: new Date(),
       }),
     },
+    dataProvider: { generateReport: jest.fn() },
     executions: {},
     templates: {},
   },

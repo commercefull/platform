@@ -6,8 +6,8 @@
  * Validates: Requirements 7.6
  */
 
-import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
-import type { NotificationWebhook } from '../../infrastructure/repositories/notificationWebhookRepo';
+import { notificationConfigRepository } from '../wired';
+import type { NotificationWebhook, NotificationWebhookRepository } from '../../domain/repositories/NotificationWebhookRepository';
 
 const notificationWebhookRepo = notificationConfigRepository.webhooks;
 
@@ -55,7 +55,7 @@ export interface ManageNotificationWebhookResponse {
 // ============================================================================
 
 export class ManageNotificationWebhookUseCase {
-  constructor(private readonly webhookRepo: typeof notificationWebhookRepo = notificationWebhookRepo) {}
+  constructor(private readonly webhookRepo: NotificationWebhookRepository = notificationWebhookRepo) {}
 
   async execute(command: ManageNotificationWebhookCommand): Promise<ManageNotificationWebhookResponse> {
     switch (command.action) {

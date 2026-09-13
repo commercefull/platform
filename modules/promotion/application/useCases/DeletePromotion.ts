@@ -3,7 +3,7 @@
  * Deletes a promotion
  */
 
-import promotionRuleRepository from '../../infrastructure/repositories/PromotionRuleRepository';
+import { PromotionRepository } from '../../domain/repositories/PromotionRepository';
 import { PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
 
 // Command
@@ -19,7 +19,7 @@ export interface DeletePromotionResponse {
 
 // Use Case
 export class DeletePromotionUseCase {
-  constructor(private readonly promotionRepo: typeof promotionRuleRepository.promotions) {}
+  constructor(private readonly promotionRepo: PromotionRepository) {}
 
   async execute(command: DeletePromotionCommand): Promise<DeletePromotionResponse> {
     // Check if promotion exists

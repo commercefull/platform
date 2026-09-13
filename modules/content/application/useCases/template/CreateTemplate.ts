@@ -3,7 +3,7 @@
  * Creates a new content template for page layouts
  */
 
-import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { IContentRepository } from '../../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentTypeNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -37,7 +37,7 @@ export interface TemplateResponse {
 }
 
 export class CreateTemplateUseCase {
-  constructor(private readonly contentRepo: ContentRepo) {}
+  constructor(private readonly contentRepo: IContentRepository) {}
 
   async execute(command: CreateTemplateCommand): Promise<TemplateResponse> {
     if (!command.name || !command.slug) {

@@ -3,7 +3,7 @@
  * Retrieves a complete page with all its content blocks and related data
  */
 
-import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { IContentRepository } from '../../../domain/repositories/ContentRepository';
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class GetPageWithBlocksQuery {
@@ -57,7 +57,7 @@ export interface PageWithBlocksResponse {
 }
 
 export class GetPageWithBlocksUseCase {
-  constructor(private readonly contentRepo: ContentRepo) {}
+  constructor(private readonly contentRepo: IContentRepository) {}
 
   async execute(query: GetPageWithBlocksQuery): Promise<PageWithBlocksResponse | null> {
     let page;

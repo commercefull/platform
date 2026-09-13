@@ -7,7 +7,7 @@
  */
 
 import { PaymentBillingRepository, PaymentFee } from '../../domain/repositories/PaymentBillingRepository';
-import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
+import { paymentBillingDataRepository } from '../wired';
 
 const paymentBillingRepo = paymentBillingDataRepository.billing;
 import { FailedToCreatePaymentFeeError } from '../../domain/errors/PaymentErrors';

@@ -1,6 +1,4 @@
-import reportingDataRepository from '../../infrastructure/repositories/ReportingDataRepository';
-
-const reportingRepo = reportingDataRepository.schedules;
+import { reportingRepository as reportingRepo } from '../wired';
 import type { ReportExecutionProps } from '../../domain/entities/ReportEntities';
 
 export class ListReportExecutionsUseCase {

@@ -7,7 +7,7 @@
  */
 
 import { PaymentBillingRepository, PaymentReport } from '../../domain/repositories/PaymentBillingRepository';
-import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
+import { paymentBillingDataRepository } from '../wired';
 
 const paymentBillingRepo = paymentBillingDataRepository.billing;
 import { PeriodEndMustBeAfterStartError, FailedToGenerateReportError } from '../../domain/errors/PaymentErrors';

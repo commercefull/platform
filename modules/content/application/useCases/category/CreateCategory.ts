@@ -3,7 +3,7 @@
  * Creates a new content category with hierarchy support
  */
 
-import type { ContentCategoryRepo } from '../../../infrastructure/repositories/contentCategoryRepo';
+import type { IContentCategoryRepository } from '../../../domain/repositories/ContentCategoryRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { CategoryNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -33,7 +33,7 @@ export interface CategoryResponse {
 }
 
 export class CreateCategoryUseCase {
-  constructor(private readonly categoryRepo: ContentCategoryRepo) {}
+  constructor(private readonly categoryRepo: IContentCategoryRepository) {}
 
   async execute(command: CreateCategoryCommand): Promise<CategoryResponse> {
     if (!command.name || !command.slug) {

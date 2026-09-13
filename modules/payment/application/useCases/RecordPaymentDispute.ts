@@ -10,8 +10,7 @@
 import { PaymentBillingRepository, PaymentDispute } from '../../domain/repositories/PaymentBillingRepository';
 import { PaymentGatewayRepository } from '../../domain/repositories/PaymentGatewayRepository';
 import { FailedToCreatePaymentDisputeError } from '../../domain/errors/PaymentErrors';
-import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
+import { paymentBillingDataRepository, paymentDataRepository } from '../wired';
 
 const paymentBillingRepo = paymentBillingDataRepository.billing;
 const paymentRepo = paymentDataRepository.gateways;

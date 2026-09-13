@@ -5,7 +5,7 @@
  * Deletes a single notification or all notifications for a user.
  */
 
-import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
+import { notificationDataRepository } from '../wired';
 
 const notificationRepo = notificationDataRepository.notifications;
 

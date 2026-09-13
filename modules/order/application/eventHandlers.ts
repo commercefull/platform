@@ -11,7 +11,7 @@
 
 import { eventBus, EventPayload } from '../../../libs/events/eventBus';
 import { logger } from '../../../libs/logger';
-import orderDataRepository from '../infrastructure/repositories/OrderDataRepository';
+import { orderDataRepository } from './wired';
 import { UpdateOrderStatusUseCase, UpdateOrderStatusCommand } from '../application/useCases/UpdateOrderStatus';
 import { OrderStatus } from '../domain/valueObjects/OrderStatus';
 

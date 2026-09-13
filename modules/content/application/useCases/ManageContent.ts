@@ -1,4 +1,4 @@
-import contentDataRepository from '../../infrastructure/repositories/ContentDataRepository';
+import { contentDataRepository } from '../wired';
 
 const contentRepo = contentDataRepository.pages;
 

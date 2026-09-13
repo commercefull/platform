@@ -1,4 +1,4 @@
-import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
+import { notificationConfigRepository } from '../wired';
 
 const notificationTemplateTranslationRepo = notificationConfigRepository.templateTranslations;
 

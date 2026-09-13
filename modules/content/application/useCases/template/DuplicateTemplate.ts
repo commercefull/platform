@@ -3,7 +3,7 @@
  * Creates a copy of an existing template
  */
 
-import type { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
+import type { IContentRepository } from '../../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentTemplateNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -25,7 +25,7 @@ export interface DuplicateTemplateResponse {
 }
 
 export class DuplicateTemplateUseCase {
-  constructor(private readonly contentRepo: ContentRepo) {}
+  constructor(private readonly contentRepo: IContentRepository) {}
 
   async execute(command: DuplicateTemplateCommand): Promise<DuplicateTemplateResponse> {
     if (!command.templateId || !command.newName || !command.newSlug) {

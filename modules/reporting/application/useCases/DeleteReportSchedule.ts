@@ -1,6 +1,4 @@
-import reportingDataRepository from '../../infrastructure/repositories/ReportingDataRepository';
-
-const reportingRepo = reportingDataRepository.schedules;
+import { reportingRepository as reportingRepo } from '../wired';
 
 export class DeleteReportScheduleUseCase {
   async execute(reportScheduleId: string): Promise<boolean> {

@@ -6,7 +6,8 @@
  * Validates: Requirements 7.5
  */
 
-import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
+import { notificationDataRepository } from '../wired';
+import type { NotificationEventLogRepository } from '../../domain/repositories/NotificationEventLogRepository';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
 const notificationEventLogRepo = notificationDataRepository.eventLogs;
@@ -41,7 +42,7 @@ export interface LogNotificationEventResponse {
 // ============================================================================
 
 export class LogNotificationEventUseCase {
-  constructor(private readonly eventLogRepo: typeof notificationEventLogRepo = notificationEventLogRepo) {}
+  constructor(private readonly eventLogRepo: NotificationEventLogRepository = notificationEventLogRepo) {}
 
   async execute(command: LogNotificationEventCommand): Promise<LogNotificationEventResponse> {
     if (!command.eventType) throw new NotificationValidationError('eventType is required');

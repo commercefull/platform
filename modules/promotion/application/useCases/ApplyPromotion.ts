@@ -41,7 +41,7 @@ export class ApplyPromotionUseCase {
       return { valid: false, message: 'Promotion code is required' };
     }
 
-    const result = await this.promotionRepository.validateCode(command.code.toUpperCase(), command.subtotal, command.customerId);
+    const result = await this.promotionRepository.validateCode!(command.code.toUpperCase(), command.subtotal, command.customerId);
 
     if (!result.valid) {
       return { valid: false, message: result.message || 'Invalid promotion code' };

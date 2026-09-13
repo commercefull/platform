@@ -10,11 +10,12 @@
  * - Line-item-level discounts for product/category-scoped promotions
  */
 
-import promotionRuleRepository, {
+import {
+  promotionRuleRepository,
   type PromotionScope,
   type RuleCondition,
   type ActionType,
-} from '../../infrastructure/repositories/PromotionRuleRepository';
+} from '../wired';
 import { logger } from '../../../../libs/logger';
 import type {
   Promotion as DbPromotion,

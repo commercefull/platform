@@ -1,4 +1,4 @@
-import shippingConfigRepository from '../../infrastructure/repositories/ShippingConfigRepository';
+import { shippingConfigRepository } from '../wired';
 
 const shippingMethodRepo = shippingConfigRepository.methods;
 const shippingRateRepo = shippingConfigRepository.rates;

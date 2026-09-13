@@ -4,7 +4,7 @@
  * Retrieves capability information for a specific shipping carrier.
  */
 
-import shippingConfigRepository from '../../infrastructure/repositories/ShippingConfigRepository';
+import { shippingConfigRepository } from '../wired';
 
 const shippingCarrierRepo = shippingConfigRepository.carriers;
 

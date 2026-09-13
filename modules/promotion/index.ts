@@ -5,6 +5,7 @@
 
 export * from './application/useCases';
 export * from './domain/repositories/PromotionRepository';
+export * from './domain/entities/Promotion';
 export * from './domain/errors/PromotionErrors';
 
 // Interface exports (routers, GraphQL)

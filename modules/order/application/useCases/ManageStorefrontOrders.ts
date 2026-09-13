@@ -1,7 +1,7 @@
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
 import { OrderReturnRepository, OrderReturnStatus, OrderReturnCreateParams } from '../../domain/repositories/OrderReturnRepository';
-import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
-import orderFulfillmentDataRepository from '../../infrastructure/repositories/OrderFulfillmentDataRepository';
+import { orderDataRepository } from '../wired';
+import { orderFulfillmentDataRepository } from '../wired';
 
 const orderRepo = orderDataRepository.commands;
 const orderReturnRepo = orderFulfillmentDataRepository.returns;

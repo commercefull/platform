@@ -3,7 +3,7 @@
  * Creates and manages media folders for organization
  */
 
-import type { ContentMediaRepo } from '../../../infrastructure/repositories/contentMediaRepo';
+import type { IContentMediaRepository } from '../../../domain/repositories/ContentMediaRepository';
 import { MediaFolderNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 export class CreateFolderCommand {
@@ -47,7 +47,7 @@ export interface FolderTreeNode {
 }
 
 export class OrganizeMediaFolderUseCase {
-  constructor(private readonly mediaRepo: ContentMediaRepo) {}
+  constructor(private readonly mediaRepo: IContentMediaRepository) {}
 
   async createFolder(command: CreateFolderCommand): Promise<FolderResponse> {
     if (!command.name) {

@@ -15,7 +15,7 @@ import {
   OrderPayment,
   OrderPaymentRefund,
 } from '../../domain/repositories/OrderQueryRepository';
-import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
+import { orderDataRepository } from '../wired';
 
 const orderRepo = orderDataRepository.commands;
 const orderQueryRepo = orderDataRepository.queries;

@@ -18,6 +18,7 @@ jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
         },
       ]),
     },
+    dataProvider: { generateReport: jest.fn() },
   },
 }));
 

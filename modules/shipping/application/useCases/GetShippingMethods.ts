@@ -3,9 +3,9 @@
  * Retrieves available shipping methods with optional filtering
  */
 
-import shippingConfigRepository from '../../infrastructure/repositories/ShippingConfigRepository';
-import type { ShippingMethod } from '../../infrastructure/repositories/ShippingConfigRepository';
-import type { ShippingCarrier } from '../../infrastructure/repositories/ShippingConfigRepository';
+import { shippingConfigRepository } from '../wired';
+import type { ShippingMethod } from '../../../../libs/db/types';
+import type { ShippingCarrier } from '../../../../libs/db/types';
 
 const shippingMethodRepo = shippingConfigRepository.methods;
 const shippingCarrierRepo = shippingConfigRepository.carriers;

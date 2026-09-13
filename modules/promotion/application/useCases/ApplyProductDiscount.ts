@@ -4,7 +4,7 @@
  * Calculates applicable discounts for products
  */
 
-import couponDiscountRepository from '../../infrastructure/repositories/CouponDiscountRepository';
+import { couponDiscountRepository } from '../wired';
 
 // ============================================================================
 // Command

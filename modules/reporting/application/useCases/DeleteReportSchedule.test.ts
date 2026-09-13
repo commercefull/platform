@@ -4,6 +4,7 @@ jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
     schedules: {
       deleteSchedule: jest.fn().mockResolvedValue(true),
     },
+    dataProvider: { generateReport: jest.fn() },
     executions: {},
     templates: {},
   },

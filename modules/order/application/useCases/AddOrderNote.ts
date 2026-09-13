@@ -7,7 +7,7 @@
 
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
 import { OrderQueryRepository, OrderNote } from '../../domain/repositories/OrderQueryRepository';
-import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
+import { orderDataRepository } from '../wired';
 
 const orderRepo = orderDataRepository.commands;
 const orderQueryRepo = orderDataRepository.queries;
