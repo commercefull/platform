@@ -263,7 +263,7 @@ const vpc = new ec2.Vpc(this, 'CommerceFullVPC', {
 ```typescript
 const database = new rds.DatabaseInstance(this, 'CommerceFullDB', {
   engine: rds.DatabaseInstanceEngine.postgres({
-    version: rds.PostgresEngineVersion.VER_15,
+    version: rds.PostgresEngineVersion.VER_18,
   }),
   instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
   vpc,

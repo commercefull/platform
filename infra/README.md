@@ -132,7 +132,7 @@ cdk deploy CommerceFull-App
 - **Azure Database**: Check availability (new release)
 - **VPS (Ubuntu)**: Available via PostgreSQL official repository
 
-**Note:** PostgreSQL 18 was released in October 2024. If not available on your cloud provider, the infrastructure will fall back to PostgreSQL 15 or 16, which are fully compatible.
+**Note:** PostgreSQL 18 is required. The platform uses features only available in PostgreSQL 18+. All infrastructure configurations (AWS, GCP, Azure, VPS) are set to PostgreSQL 18.
 
 ## Environment Setup
 
@@ -210,7 +210,7 @@ See individual deployment directories for specific troubleshooting guides.
 - **Azure Database**: May not be available yet - check Azure portal
 - **VPS (Ubuntu)**: Available via PostgreSQL official repository
 
-If PostgreSQL 18 is not available on your chosen provider, use PostgreSQL 15 or 16 as an alternative.
+PostgreSQL 18 is required across all providers — the platform uses features only available in 18+.
 
 ### Provider-Specific Requirements and limitations
 

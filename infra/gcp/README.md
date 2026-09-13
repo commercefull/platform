@@ -108,7 +108,7 @@ region         = "us-central1"
 domain         = "yourdomain.com"
 app_name       = "commercefull"
 db_tier        = "db-f1-micro"
-db_version     = "POSTGRES_15"
+db_version     = "POSTGRES_18"
 ```
 
 ### Environment Variables

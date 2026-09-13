@@ -47,7 +47,7 @@ resource "azurerm_postgresql_flexible_server" "db" {
   name                  = "${var.app_name}-db-${var.environment}"
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
-  version               = "16"
+  version               = "18"
   sku_name              = var.db_sku
   storage_mb            = var.db_storage_mb
   backup_retention_days = var.db_backup_retention_days
