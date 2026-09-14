@@ -427,7 +427,7 @@ export class NotificationDeliveryLogRepo {
    * Clean up old logs
    */
   async cleanupOldLogs(daysToKeep: number = 90): Promise<number> {
-    const cutoffDate = unixTimestamp() - daysToKeep * 24 * 60 * 60;
+    const cutoffDate = new Date(Date.now() - daysToKeep * 24 * 60 * 60 * 1000).toISOString();
 
     const result = await queryOne<{ count: string }>(
       `DELETE FROM "notificationDeliveryLog" 
