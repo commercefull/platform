@@ -44,7 +44,7 @@ export interface CreateSessionInput {
 }
 
 class SessionServiceClass {
-  private readonly tableName = 'userSession';
+  private readonly tableName = 'identityUserSession';
   private readonly defaultExpiryHours = 8;
 
   /**

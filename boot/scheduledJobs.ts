@@ -145,18 +145,18 @@ export const initializeScheduledJobs = (): void => {
     async () => {
       try {
         const lowStockItems = await query<
-          Array<{ productId: string; sku: string; quantity: string; reserved: string; reorderPoint: string }>
+          Array<{ productId: string; sku: string; availableQuantity: string; reservedQuantity: string; minStockLevel: string }>
         >(
-          `SELECT il."productId", p.sku, il.quantity, il.reserved, il."reorderPoint"
+          `SELECT il."productId", p.sku, il."availableQuantity", il."reservedQuantity", il."minStockLevel"
            FROM "inventoryLevel" il
            LEFT JOIN product p ON il."productId" = p."productId"
-           WHERE (il.quantity - il.reserved) > 0
-             AND (il.quantity - il.reserved) <= il."reorderPoint"`,
+           WHERE (il."availableQuantity" - il."reservedQuantity") > 0
+             AND (il."availableQuantity" - il."reservedQuantity") <= COALESCE(il."minStockLevel", 0)`,
         );
 
         for (const item of lowStockItems || []) {
-          const currentStock = parseInt(item.quantity, 10) - parseInt(item.reserved, 10);
-          const reorderPoint = parseInt(item.reorderPoint, 10);
+          const currentStock = parseInt(item.availableQuantity, 10) - parseInt(item.reservedQuantity, 10);
+          const reorderPoint = parseInt(item.minStockLevel, 10);
           eventBus.emit('inventory.low', {
             productId: item.productId,
             sku: item.sku,
@@ -169,7 +169,7 @@ export const initializeScheduledJobs = (): void => {
           `SELECT il."productId", p.sku
            FROM "inventoryLevel" il
            LEFT JOIN product p ON il."productId" = p."productId"
-           WHERE (il.quantity - il.reserved) <= 0`,
+           WHERE (il."availableQuantity" - il."reservedQuantity") <= 0`,
         );
 
         for (const item of outOfStockItems || []) {
@@ -193,7 +193,7 @@ export const initializeScheduledJobs = (): void => {
     'Session Cleanup',
     async () => {
       try {
-        const result = await query<{ rowCount: number }>(`DELETE FROM "userSession" WHERE "expiresAt" < now()`);
+        const result = await query<{ rowCount: number }>(`DELETE FROM "identityUserSession" WHERE "expiresAt" < now()`);
         const count = result?.rowCount || 0;
 
         try {
