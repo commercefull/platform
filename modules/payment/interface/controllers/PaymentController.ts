@@ -16,6 +16,7 @@ import {
 } from '../../application/useCases/GetTransactions';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 import { query, queryOne } from '../../../../libs/db';
+import { isUuid } from '../../../../libs/uuid';
 import { paymentDataRepository } from '../../application/wired';
 
 function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
@@ -96,6 +97,10 @@ export const listTransactions = async (req: TypedRequest, res: Response): Promis
 
 export const getTransaction = async (req: TypedRequest, res: Response): Promise<void> => {
   const { transactionId } = req.params;
+  if (!isUuid(transactionId)) {
+    respondError(req, res, 'Transaction not found', 404);
+    return;
+  }
   const command = new GetTransactionCommand(transactionId);
   const useCase = new GetTransactionUseCase(PaymentRepo);
   const transaction = await useCase.execute(command);
@@ -175,6 +180,10 @@ export const listGateways = async (req: TypedRequest, res: Response): Promise<vo
 
 export const getGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   const { gatewayId } = req.params;
+  if (!isUuid(gatewayId)) {
+    respondError(req, res, 'Gateway not found', 404);
+    return;
+  }
   const gateway = await queryOne<Record<string, unknown>>(
     'SELECT * FROM "paymentGateway" WHERE "paymentGatewayId" = $1 AND "deletedAt" IS NULL',
     [gatewayId],
@@ -331,6 +340,10 @@ export const listMethodConfigs = async (req: TypedRequest, res: Response): Promi
 
 export const getMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
   const { methodConfigId } = req.params;
+  if (!isUuid(methodConfigId)) {
+    respondError(req, res, 'Method config not found', 404);
+    return;
+  }
   const config = await queryOne<Record<string, unknown>>(
     'SELECT * FROM "paymentMethodConfig" WHERE "paymentMethodConfigId" = $1 AND "deletedAt" IS NULL',
     [methodConfigId],

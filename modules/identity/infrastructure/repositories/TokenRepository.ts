@@ -64,7 +64,7 @@ export class TokenRepositoryImpl implements TokenRepository {
   }
 
   async revokeAllForUserWithType(userId: string, userType?: string): Promise<number> {
-    let whereClause = `WHERE "userId" = $1 AND "isRevoked" = false`;
+    let whereClause = `WHERE "userId" = $2 AND "isRevoked" = false`;
     const params: unknown[] = [new Date(), userId];
     if (userType) {
       whereClause += ` AND "userType" = $3`;
@@ -134,7 +134,7 @@ export class TokenRepositoryImpl implements TokenRepository {
     const result = await query<IdentityTokenBlacklist[]>(
       `DELETE FROM "identityTokenBlacklist"
        WHERE "expiresAt" < $1
-       RETURNING "identityTokenBlacklistId"`,
+       RETURNING "authTokenBlacklistId"`,
       [new Date()],
     );
 

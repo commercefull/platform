@@ -63,7 +63,7 @@ export type RoleRecord = Role & { userCount?: number };
 
 export class IdentityRepository implements IStoreUserRepository {
   private readonly adminTable = 'adminUser';
-  private readonly storeUserTable = 'userStore';
+  private readonly storeUserTable = 'storeUser';
 
   // ==========================================================================
   // Admin User (from AdminRepository)

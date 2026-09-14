@@ -2,6 +2,7 @@
 import PG from 'pg';
 import { getTestDbName } from './testDbContext';
 import { incrementQueryCounter } from './queryCounter';
+import { ConflictError } from '../errors';
 
 const isTestEnv = process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test';
 
@@ -80,6 +81,9 @@ export const query = async <T>(text: string, params?: Array<unknown>): Promise<T
       res = await activePool.query(text);
     }
   } catch (e: unknown) {
+    if ((e as { code?: string }).code === '23505') {
+      throw new ConflictError('Resource already exists', { cause: e });
+    }
     throw new Error(`Query failed: ${(e as Error).message}`, { cause: e });
   }
 
@@ -98,6 +102,9 @@ export const queryOne = async <T>(text: string, params: Array<unknown>): Promise
     incrementQueryCounter(text);
     res = await activePool.query(text, params);
   } catch (e: unknown) {
+    if ((e as { code?: string }).code === '23505') {
+      throw new ConflictError('Resource already exists', { cause: e });
+    }
     throw new Error(`Query failed: ${(e as Error).message}`, { cause: e });
   }
 
