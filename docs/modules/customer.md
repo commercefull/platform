@@ -64,6 +64,8 @@ The Customer feature manages customer accounts, profiles, and addresses. It hand
 
 | Method | Endpoint | Controller | Description |
 |---|---|---|---|
+| GET | `/customer-groups/:customerGroupId` | `asyncHandler(customerController.getCustomerGroup)` | — |
+| GET | `/customer-groups/:customerGroupId/customers` | `asyncHandler(customerController.getCustomersInGroup)` | — |
 | GET | `/customers` | `asyncHandler(customerController.listCustomers)` | List all customers
 GET /business/customers |
 | POST | `/customers` | `asyncHandler(customerController.createCustomer)` | Create a new customer

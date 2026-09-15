@@ -116,12 +116,13 @@ The Promotion feature manages discounts, coupons, gift cards, and promotional ca
 | POST | `/gift-cards` | `asyncHandler(giftCardController.createGiftCard)` | — |
 | GET | `/gift-cards/:id` | `asyncHandler(giftCardController.getGiftCard)` | — |
 | POST | `/gift-cards/:id/activate` | `asyncHandler(giftCardController.activateGiftCard)` | — |
+| POST | `/gift-cards/:id/assign` | `asyncHandler(giftCardController.assignGiftCard)` | — |
 | POST | `/gift-cards/:id/cancel` | `asyncHandler(giftCardController.cancelGiftCard)` | — |
 | POST | `/gift-cards/:id/refund` | `asyncHandler(giftCardController.refundToGiftCard)` | — |
 | GET | `/gift-cards/balance/:code` | `asyncHandler(giftCardController.checkGiftCardBalance)` | Gift Card routes |
-| GET | `/gift-cards/mine` | `asyncHandler(giftCardController.getMyGiftCards)` | — |
-| POST | `/gift-cards/redeem` | `asyncHandler(giftCardController.redeemGiftCard)` | — |
-| POST | `/gift-cards/reload` | `asyncHandler(giftCardController.reloadGiftCard)` | — |
+| GET | `/gift-cards/mine` | `isCustomerLoggedIn` | — |
+| POST | `/gift-cards/redeem` | `isCustomerLoggedIn` | — |
+| POST | `/gift-cards/reload` | `isCustomerLoggedIn` | — |
 | GET | `/promotions` | `asyncHandler(promotionController.getPromotions)` | Promotion routes |
 | POST | `/promotions` | `asyncHandler(promotionController.createPromotion)` | — |
 | GET | `/promotions/:id` | `asyncHandler(promotionController.getPromotionById)` | — |

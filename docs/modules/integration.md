@@ -194,22 +194,22 @@ The integration module is **separate from the webhook module** — webhooks forw
 
 | Method | Endpoint | Controller | Description |
 |---|---|---|---|
-| POST | `/` | `asyncHandler(integrationController.createIntegration.bind(in` | Integration CRUD |
-| GET | `/` | `asyncHandler(integrationController.listIntegrations.bind(int` | — |
-| GET | `/:integrationId` | `asyncHandler(integrationController.getIntegration.bind(integ` | — |
-| PUT | `/:integrationId` | `asyncHandler(integrationController.updateIntegration.bind(in` | — |
-| DELETE | `/:integrationId` | `asyncHandler(integrationController.deleteIntegration.bind(in` | — |
-| POST | `/:integrationId/activate` | `asyncHandler(integrationController.activateIntegration.bind(` | — |
-| POST | `/:integrationId/credentials` | `asyncHandler(integrationController.addCredential.bind(integr` | Credentials |
-| GET | `/:integrationId/credentials` | `asyncHandler(integrationController.listCredentials.bind(inte` | — |
-| PUT | `/:integrationId/credentials/:credentialId` | `asyncHandler(integrationController.updateCredential.bind(int` | — |
-| DELETE | `/:integrationId/credentials/:credentialId` | `asyncHandler(integrationController.deleteCredential.bind(int` | — |
-| POST | `/:integrationId/deactivate` | `asyncHandler(integrationController.deactivateIntegration.bin` | — |
-| GET | `/:integrationId/logs` | `asyncHandler(integrationController.listLogs.bind(integration` | Logs |
-| DELETE | `/:integrationId/logs` | `asyncHandler(integrationController.deleteLogs.bind(integrati` | — |
-| POST | `/:integrationId/subscriptions` | `asyncHandler(integrationController.createSubscription.bind(i` | Event subscriptions |
-| GET | `/:integrationId/subscriptions` | `asyncHandler(integrationController.listSubscriptions.bind(in` | — |
-| PUT | `/:integrationId/subscriptions/:subscriptionId` | `asyncHandler(integrationController.updateSubscription.bind(i` | — |
-| DELETE | `/:integrationId/subscriptions/:subscriptionId` | `asyncHandler(integrationController.deleteSubscription.bind(i` | — |
+| POST | `/integration` | `asyncHandler(integrationController.createIntegration.bind(in` | Integration CRUD |
+| GET | `/integration` | `asyncHandler(integrationController.listIntegrations.bind(int` | — |
+| GET | `/integration/:integrationId` | `asyncHandler(integrationController.getIntegration.bind(integ` | — |
+| PUT | `/integration/:integrationId` | `asyncHandler(integrationController.updateIntegration.bind(in` | — |
+| DELETE | `/integration/:integrationId` | `asyncHandler(integrationController.deleteIntegration.bind(in` | — |
+| POST | `/integration/:integrationId/activate` | `asyncHandler(integrationController.activateIntegration.bind(` | — |
+| POST | `/integration/:integrationId/credentials` | `asyncHandler(integrationController.addCredential.bind(integr` | Credentials |
+| GET | `/integration/:integrationId/credentials` | `asyncHandler(integrationController.listCredentials.bind(inte` | — |
+| PUT | `/integration/:integrationId/credentials/:credentialId` | `asyncHandler(integrationController.updateCredential.bind(int` | — |
+| DELETE | `/integration/:integrationId/credentials/:credentialId` | `asyncHandler(integrationController.deleteCredential.bind(int` | — |
+| POST | `/integration/:integrationId/deactivate` | `asyncHandler(integrationController.deactivateIntegration.bin` | — |
+| GET | `/integration/:integrationId/logs` | `asyncHandler(integrationController.listLogs.bind(integration` | Logs |
+| DELETE | `/integration/:integrationId/logs` | `asyncHandler(integrationController.deleteLogs.bind(integrati` | — |
+| POST | `/integration/:integrationId/subscriptions` | `asyncHandler(integrationController.createSubscription.bind(i` | Event subscriptions |
+| GET | `/integration/:integrationId/subscriptions` | `asyncHandler(integrationController.listSubscriptions.bind(in` | — |
+| PUT | `/integration/:integrationId/subscriptions/:subscriptionId` | `asyncHandler(integrationController.updateSubscription.bind(i` | — |
+| DELETE | `/integration/:integrationId/subscriptions/:subscriptionId` | `asyncHandler(integrationController.deleteSubscription.bind(i` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

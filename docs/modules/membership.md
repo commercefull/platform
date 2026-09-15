@@ -106,8 +106,8 @@ The Membership feature manages paid membership tiers with exclusive benefits. Un
 | GET | `/membership/user-memberships/:id` | `asyncHandler(getUserMembershipById)` | — |
 | PUT | `/membership/user-memberships/:id` | `asyncHandler(updateUserMembership)` | — |
 | POST | `/membership/user-memberships/:id/cancel` | `asyncHandler(cancelUserMembership)` | — |
-| GET | `/membership/user/:userId` | `asyncHandler(getUserMembershipByUserId)` | Get current user's membership |
-| GET | `/membership/user/:userId/benefits` | `asyncHandler(getUserMembershipBenefits)` | Get current user's membership benefits |
+| GET | `/membership/user/:userId` | `isCustomerLoggedIn` | Get current user's membership |
+| GET | `/membership/user/:userId/benefits` | `isCustomerLoggedIn` | Get current user's membership benefits |
 | GET | `/membership/users/:userId/benefits` | `asyncHandler(getUserMembershipBenefits)` | — |
 | GET | `/membership/users/:userId/membership` | `asyncHandler(getUserMembershipByUserId)` | Admin routes for fetching user-specific membership data |
 

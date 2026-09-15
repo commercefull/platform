@@ -77,24 +77,24 @@ The Theme module provides a theme engine — theme registry, per-store overrides
 
 | Method | Endpoint | Controller | Description |
 |---|---|---|---|
-| GET | `/` | `isOrganizationLoggedIn` | Theme CRUD |
-| POST | `/` | `isOrganizationLoggedIn` | — |
-| GET | `/:themeId` | `isOrganizationLoggedIn` | — |
-| PUT | `/:themeId` | `isOrganizationLoggedIn` | — |
-| DELETE | `/:themeId` | `isOrganizationLoggedIn` | — |
-| POST | `/:themeId/activate` | `isOrganizationLoggedIn` | — |
-| POST | `/:themeId/archive` | `isOrganizationLoggedIn` | — |
-| POST | `/assign/:storeId` | `isOrganizationLoggedIn` | Theme assignment |
-| DELETE | `/assign/:storeId` | `isOrganizationLoggedIn` | — |
-| GET | `/assignment/:storeId` | `isOrganizationLoggedIn` | — |
-| GET | `/built-in` | `isOrganizationLoggedIn` | — |
-| POST | `/overrides` | `isOrganizationLoggedIn` | — |
-| PUT | `/overrides/:overrideId` | `isOrganizationLoggedIn` | — |
-| DELETE | `/overrides/:overrideId` | `isOrganizationLoggedIn` | — |
-| GET | `/overrides/organization/:organizationId` | `isOrganizationLoggedIn` | — |
-| GET | `/overrides/store/:storeId` | `isOrganizationLoggedIn` | Theme overrides |
-| GET | `/resolve/:storeId` | `isOrganizationLoggedIn` | Resolve theme for storefront rendering |
-| POST | `/seed/built-in` | `isOrganizationLoggedIn` | Admin: seed built-in themes |
-| GET | `/slug/:slug` | `isOrganizationLoggedIn` | — |
+| GET | `/theme` | `isOrganizationLoggedIn` | Theme CRUD |
+| POST | `/theme` | `isOrganizationLoggedIn` | — |
+| GET | `/theme/:themeId` | `isOrganizationLoggedIn` | — |
+| PUT | `/theme/:themeId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/theme/:themeId` | `isOrganizationLoggedIn` | — |
+| POST | `/theme/:themeId/activate` | `isOrganizationLoggedIn` | — |
+| POST | `/theme/:themeId/archive` | `isOrganizationLoggedIn` | — |
+| POST | `/theme/assign/:storeId` | `isOrganizationLoggedIn` | Theme assignment |
+| DELETE | `/theme/assign/:storeId` | `isOrganizationLoggedIn` | — |
+| GET | `/theme/assignment/:storeId` | `isOrganizationLoggedIn` | — |
+| GET | `/theme/built-in` | `isOrganizationLoggedIn` | — |
+| POST | `/theme/overrides` | `isOrganizationLoggedIn` | — |
+| PUT | `/theme/overrides/:overrideId` | `isOrganizationLoggedIn` | — |
+| DELETE | `/theme/overrides/:overrideId` | `isOrganizationLoggedIn` | — |
+| GET | `/theme/overrides/organization/:organizationId` | `isOrganizationLoggedIn` | — |
+| GET | `/theme/overrides/store/:storeId` | `isOrganizationLoggedIn` | Theme overrides |
+| GET | `/theme/resolve/:storeId` | `isOrganizationLoggedIn` | Resolve theme for storefront rendering |
+| POST | `/theme/seed/built-in` | `isOrganizationLoggedIn` | Admin: seed built-in themes |
+| GET | `/theme/slug/:slug` | `isOrganizationLoggedIn` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

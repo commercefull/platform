@@ -5431,6 +5431,52 @@
         }
       }
     },
+    "/customer-groups/{customerGroupId}": {
+      "get": {
+        "summary": "asyncHandler(customerController.getCustomerGroup)",
+        "operationId": "asyncHandler(customerController.getCustomerGroup)_customer",
+        "tags": [
+          "customer"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/customer-groups/{customerGroupId}/customers": {
+      "get": {
+        "summary": "asyncHandler(customerController.getCustomersInGroup)",
+        "operationId": "asyncHandler(customerController.getCustomersInGroup)_customer",
+        "tags": [
+          "customer"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/register": {
       "post": {
         "summary": "Register a new customer\nPOST /customers/register",
@@ -7321,6 +7367,62 @@
         }
       }
     },
+    "/identity/request-verification": {
+      "post": {
+        "summary": "asyncHandler(requestEmailVerification)",
+        "operationId": "asyncHandler(requestEmailVerification)_identity",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyIdentityBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/verify-email": {
+      "get": {
+        "summary": "asyncHandler(verifyEmail)",
+        "operationId": "asyncHandler(verifyEmail)_identity",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/identity/forgot-password": {
       "post": {
         "summary": "Password reset flow",
@@ -7502,7 +7604,7 @@
     "/identity/{provider}/customer/link": {
       "post": {
         "summary": "POST /identity/social/:provider/customer/link\nLink a social account to an existing customer (requires auth)\nBody: { accessToken, profile: { id, email?, ... } }",
-        "operationId": "asyncHandler(linkCustomerSocialAccount)_identity",
+        "operationId": "isCustomerLoggedIn_identity",
         "tags": [
           "identity"
         ],
@@ -7535,7 +7637,7 @@
     "/identity/{provider}/customer/unlink": {
       "delete": {
         "summary": "DELETE /identity/social/:provider/customer/unlink\nUnlink a social account from a customer (requires auth)",
-        "operationId": "asyncHandler(unlinkCustomerSocialAccount)_identity",
+        "operationId": "isCustomerLoggedIn_identity",
         "tags": [
           "identity"
         ],
@@ -7558,7 +7660,7 @@
     "/identity/customer/accounts": {
       "get": {
         "summary": "GET /identity/social/customer/accounts\nGet all linked social accounts for a customer (requires auth)",
-        "operationId": "asyncHandler(getCustomerLinkedAccounts)_identity",
+        "operationId": "isCustomerLoggedIn_identity",
         "tags": [
           "identity"
         ],
@@ -7647,7 +7749,7 @@
     "/identity/merchant/accounts": {
       "get": {
         "summary": "GET /identity/social/merchant/accounts\nGet all linked social accounts for a merchant (requires auth)",
-        "operationId": "asyncHandler(getOrganizationLinkedAccounts)_identity",
+        "operationId": "isOrganizationLoggedIn_identity",
         "tags": [
           "identity"
         ],
@@ -7669,8 +7771,8 @@
     },
     "/identity/organization/accounts": {
       "get": {
-        "summary": "asyncHandler(getOrganizationLinkedAccounts)",
-        "operationId": "asyncHandler(getOrganizationLinkedAccounts)_identity",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_identity",
         "tags": [
           "identity"
         ],
@@ -8453,12 +8555,12 @@
         }
       }
     },
-    "/": {
+    "/integration": {
       "post": {
-        "summary": "isOrganizationLoggedIn",
-        "operationId": "isOrganizationLoggedIn_theme",
+        "summary": "Integration CRUD",
+        "operationId": "asyncHandler(integrationController.createIntegration.bind(in_integration",
         "tags": [
-          "theme"
+          "integration"
         ],
         "responses": {
           "200": {
@@ -8476,10 +8578,10 @@
         }
       },
       "get": {
-        "summary": "Theme CRUD",
-        "operationId": "isOrganizationLoggedIn_theme",
+        "summary": "asyncHandler(integrationController.listIntegrations.bind(int",
+        "operationId": "asyncHandler(integrationController.listIntegrations.bind(int_integration",
         "tags": [
-          "theme"
+          "integration"
         ],
         "responses": {
           "200": {
@@ -8497,7 +8599,7 @@
         }
       }
     },
-    "/{integrationId}": {
+    "/integration/{integrationId}": {
       "get": {
         "summary": "asyncHandler(integrationController.getIntegration.bind(integ",
         "operationId": "asyncHandler(integrationController.getIntegration.bind(integ_integration",
@@ -8562,7 +8664,7 @@
         }
       }
     },
-    "/{integrationId}/activate": {
+    "/integration/{integrationId}/activate": {
       "post": {
         "summary": "asyncHandler(integrationController.activateIntegration.bind(",
         "operationId": "asyncHandler(integrationController.activateIntegration.bind(_integration",
@@ -8585,7 +8687,7 @@
         }
       }
     },
-    "/{integrationId}/deactivate": {
+    "/integration/{integrationId}/deactivate": {
       "post": {
         "summary": "asyncHandler(integrationController.deactivateIntegration.bin",
         "operationId": "asyncHandler(integrationController.deactivateIntegration.bin_integration",
@@ -8608,7 +8710,7 @@
         }
       }
     },
-    "/{integrationId}/credentials": {
+    "/integration/{integrationId}/credentials": {
       "post": {
         "summary": "Credentials",
         "operationId": "asyncHandler(integrationController.addCredential.bind(integr_integration",
@@ -8652,7 +8754,7 @@
         }
       }
     },
-    "/{integrationId}/credentials/{credentialId}": {
+    "/integration/{integrationId}/credentials/{credentialId}": {
       "put": {
         "summary": "asyncHandler(integrationController.updateCredential.bind(int",
         "operationId": "asyncHandler(integrationController.updateCredential.bind(int_integration",
@@ -8696,7 +8798,7 @@
         }
       }
     },
-    "/{integrationId}/subscriptions": {
+    "/integration/{integrationId}/subscriptions": {
       "post": {
         "summary": "Event subscriptions",
         "operationId": "asyncHandler(integrationController.createSubscription.bind(i_integration",
@@ -8740,7 +8842,7 @@
         }
       }
     },
-    "/{integrationId}/subscriptions/{subscriptionId}": {
+    "/integration/{integrationId}/subscriptions/{subscriptionId}": {
       "put": {
         "summary": "asyncHandler(integrationController.updateSubscription.bind(i",
         "operationId": "asyncHandler(integrationController.updateSubscription.bind(i_integration",
@@ -8784,7 +8886,7 @@
         }
       }
     },
-    "/{integrationId}/logs": {
+    "/integration/{integrationId}/logs": {
       "get": {
         "summary": "Logs",
         "operationId": "asyncHandler(integrationController.listLogs.bind(integration_integration",
@@ -12134,7 +12236,7 @@
     "/membership/user/{userId}": {
       "get": {
         "summary": "Get current user's membership",
-        "operationId": "asyncHandler(getUserMembershipByUserId)_membership",
+        "operationId": "isCustomerLoggedIn_membership",
         "tags": [
           "membership"
         ],
@@ -12157,7 +12259,7 @@
     "/membership/user/{userId}/benefits": {
       "get": {
         "summary": "Get current user's membership benefits",
-        "operationId": "asyncHandler(getUserMembershipBenefits)_membership",
+        "operationId": "isCustomerLoggedIn_membership",
         "tags": [
           "membership"
         ],
@@ -13285,134 +13387,6 @@
         }
       }
     },
-    "/notifications/{notificationId}/read": {
-      "put": {
-        "summary": "async (req, res) => {\n  try {\n    const useCase = new MarkAs",
-        "operationId": "async (req, res) => {\n  try {\n    const useCase = new MarkAs_notification",
-        "tags": [
-          "notification"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateNotificationBody"
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
-        "tags": [
-          "notification"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateNotificationBody"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/notifications/read": {
-      "put": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
-        "tags": [
-          "notification"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateNotificationBody"
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
-        "tags": [
-          "notification"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateNotificationBody"
-              }
-            }
-          }
-        }
-      }
-    },
     "/notifications/preferences": {
       "get": {
         "summary": "asyncHandler(notificationCustomerController.getPreferences)",
@@ -13704,6 +13678,134 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/notifications/{notificationId}/read": {
+      "put": {
+        "summary": "async (req, res) => {\n  try {\n    const useCase = new MarkAs",
+        "operationId": "async (req, res) => {\n  try {\n    const useCase = new MarkAs_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/read": {
+      "put": {
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
           }
         }
       }
@@ -14865,7 +14967,7 @@
         }
       }
     },
-    "/block-types": {
+    "/page-builder/block-types": {
       "get": {
         "summary": "Block types",
         "operationId": "asyncHandler(pageBuilderController.listBlockTypes)_pagebuilder",
@@ -14888,7 +14990,7 @@
         }
       }
     },
-    "/block-types/{category}": {
+    "/page-builder/block-types/{category}": {
       "get": {
         "summary": "asyncHandler(pageBuilderController.listBlockTypesByCategory)",
         "operationId": "asyncHandler(pageBuilderController.listBlockTypesByCategory)_pagebuilder",
@@ -14911,7 +15013,7 @@
         }
       }
     },
-    "/drafts": {
+    "/page-builder/drafts": {
       "get": {
         "summary": "Drafts",
         "operationId": "asyncHandler(pageBuilderController.listDrafts)_pagebuilder",
@@ -14955,7 +15057,7 @@
         }
       }
     },
-    "/drafts/{draftId}": {
+    "/page-builder/drafts/{draftId}": {
       "get": {
         "summary": "asyncHandler(pageBuilderController.getDraft)",
         "operationId": "asyncHandler(pageBuilderController.getDraft)_pagebuilder",
@@ -14999,7 +15101,7 @@
         }
       }
     },
-    "/drafts/{draftId}/title": {
+    "/page-builder/drafts/{draftId}/title": {
       "patch": {
         "summary": "asyncHandler(pageBuilderController.updateDraftTitle)",
         "operationId": "asyncHandler(pageBuilderController.updateDraftTitle)_pagebuilder",
@@ -15022,7 +15124,7 @@
         }
       }
     },
-    "/drafts/{draftId}/slug": {
+    "/page-builder/drafts/{draftId}/slug": {
       "patch": {
         "summary": "asyncHandler(pageBuilderController.updateDraftSlug)",
         "operationId": "asyncHandler(pageBuilderController.updateDraftSlug)_pagebuilder",
@@ -15045,7 +15147,7 @@
         }
       }
     },
-    "/drafts/{draftId}/theme": {
+    "/page-builder/drafts/{draftId}/theme": {
       "patch": {
         "summary": "asyncHandler(pageBuilderController.updateDraftTheme)",
         "operationId": "asyncHandler(pageBuilderController.updateDraftTheme)_pagebuilder",
@@ -15068,7 +15170,7 @@
         }
       }
     },
-    "/drafts/{draftId}/blocks": {
+    "/page-builder/drafts/{draftId}/blocks": {
       "post": {
         "summary": "Blocks",
         "operationId": "asyncHandler(pageBuilderController.addBlock)_pagebuilder",
@@ -15091,7 +15193,7 @@
         }
       }
     },
-    "/drafts/{draftId}/blocks/{blockId}": {
+    "/page-builder/drafts/{draftId}/blocks/{blockId}": {
       "patch": {
         "summary": "asyncHandler(pageBuilderController.updateBlock)",
         "operationId": "asyncHandler(pageBuilderController.updateBlock)_pagebuilder",
@@ -15135,7 +15237,7 @@
         }
       }
     },
-    "/drafts/{draftId}/blocks/{blockId}/move": {
+    "/page-builder/drafts/{draftId}/blocks/{blockId}/move": {
       "patch": {
         "summary": "asyncHandler(pageBuilderController.moveBlock)",
         "operationId": "asyncHandler(pageBuilderController.moveBlock)_pagebuilder",
@@ -15158,7 +15260,7 @@
         }
       }
     },
-    "/drafts/{draftId}/regions/{region}/reorder": {
+    "/page-builder/drafts/{draftId}/regions/{region}/reorder": {
       "post": {
         "summary": "asyncHandler(pageBuilderController.reorderBlocks)",
         "operationId": "asyncHandler(pageBuilderController.reorderBlocks)_pagebuilder",
@@ -15181,7 +15283,7 @@
         }
       }
     },
-    "/drafts/{draftId}/publish": {
+    "/page-builder/drafts/{draftId}/publish": {
       "post": {
         "summary": "Publish",
         "operationId": "asyncHandler(pageBuilderController.publishDraft)_pagebuilder",
@@ -15204,7 +15306,7 @@
         }
       }
     },
-    "/drafts/{draftId}/unpublish": {
+    "/page-builder/drafts/{draftId}/unpublish": {
       "post": {
         "summary": "asyncHandler(pageBuilderController.unpublishDraft)",
         "operationId": "asyncHandler(pageBuilderController.unpublishDraft)_pagebuilder",
@@ -15227,7 +15329,7 @@
         }
       }
     },
-    "/drafts/{draftId}/preview": {
+    "/page-builder/drafts/{draftId}/preview": {
       "get": {
         "summary": "Preview",
         "operationId": "asyncHandler(pageBuilderController.previewDraft)_pagebuilder",
@@ -21226,6 +21328,39 @@
         }
       }
     },
+    "/gift-cards/{id}/assign": {
+      "post": {
+        "summary": "asyncHandler(giftCardController.assignGiftCard)",
+        "operationId": "asyncHandler(giftCardController.assignGiftCard)_promotion",
+        "tags": [
+          "promotion"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartPromotionBody"
+              }
+            }
+          }
+        }
+      }
+    },
     "/gift-cards/{id}/refund": {
       "post": {
         "summary": "asyncHandler(giftCardController.refundToGiftCard)",
@@ -21702,8 +21837,8 @@
     },
     "/gift-cards/redeem": {
       "post": {
-        "summary": "asyncHandler(giftCardController.redeemGiftCard)",
-        "operationId": "asyncHandler(giftCardController.redeemGiftCard)_promotion",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_promotion",
         "tags": [
           "promotion"
         ],
@@ -21735,8 +21870,8 @@
     },
     "/gift-cards/mine": {
       "get": {
-        "summary": "asyncHandler(giftCardController.getMyGiftCards)",
-        "operationId": "asyncHandler(giftCardController.getMyGiftCards)_promotion",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_promotion",
         "tags": [
           "promotion"
         ],
@@ -21758,8 +21893,8 @@
     },
     "/gift-cards/reload": {
       "post": {
-        "summary": "asyncHandler(giftCardController.reloadGiftCard)",
-        "operationId": "asyncHandler(giftCardController.reloadGiftCard)_promotion",
+        "summary": "isCustomerLoggedIn",
+        "operationId": "isCustomerLoggedIn_promotion",
         "tags": [
           "promotion"
         ],
@@ -22308,120 +22443,9 @@
         }
       }
     },
-    "/segment/{segmentId}": {
-      "get": {
-        "summary": "isOrganizationLoggedIn",
-        "operationId": "isOrganizationLoggedIn_segment",
-        "tags": [
-          "segment"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "put": {
-        "summary": "isOrganizationLoggedIn",
-        "operationId": "isOrganizationLoggedIn_segment",
-        "tags": [
-          "segment"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "delete": {
-        "summary": "isOrganizationLoggedIn",
-        "operationId": "isOrganizationLoggedIn_segment",
-        "tags": [
-          "segment"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/segment/{segmentId}/evaluate": {
-      "post": {
-        "summary": "Segment evaluation & members",
-        "operationId": "isOrganizationLoggedIn_segment",
-        "tags": [
-          "segment"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/segment/{segmentId}/members": {
-      "get": {
-        "summary": "isOrganizationLoggedIn",
-        "operationId": "isOrganizationLoggedIn_segment",
-        "tags": [
-          "segment"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
     "/segment/profiles": {
       "get": {
-        "summary": "Customer profiles",
+        "summary": "Customer profiles (must be before /segment/:segmentId to avoid param matching)",
         "operationId": "isOrganizationLoggedIn_segment",
         "tags": [
           "segment"
@@ -22513,7 +22537,118 @@
     },
     "/segment/profiles/{customerId}/segments": {
       "get": {
-        "summary": "Customer segment membership",
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_segment",
+        "tags": [
+          "segment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/segment/{segmentId}": {
+      "get": {
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_segment",
+        "tags": [
+          "segment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_segment",
+        "tags": [
+          "segment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_segment",
+        "tags": [
+          "segment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/segment/{segmentId}/evaluate": {
+      "post": {
+        "summary": "Segment evaluation & members",
+        "operationId": "isOrganizationLoggedIn_segment",
+        "tags": [
+          "segment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/segment/{segmentId}/members": {
+      "get": {
+        "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_segment",
         "tags": [
           "segment"
@@ -27080,7 +27215,51 @@
         }
       }
     },
-    "/built-in": {
+    "/theme": {
+      "get": {
+        "summary": "Theme CRUD",
+        "operationId": "isOrganizationLoggedIn_theme",
+        "tags": [
+          "theme"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "isOrganizationLoggedIn",
+        "operationId": "isOrganizationLoggedIn_theme",
+        "tags": [
+          "theme"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/theme/built-in": {
       "get": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27103,7 +27282,7 @@
         }
       }
     },
-    "/slug/{slug}": {
+    "/theme/slug/{slug}": {
       "get": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27126,7 +27305,7 @@
         }
       }
     },
-    "/{themeId}": {
+    "/theme/{themeId}": {
       "get": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27191,7 +27370,7 @@
         }
       }
     },
-    "/{themeId}/activate": {
+    "/theme/{themeId}/activate": {
       "post": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27214,7 +27393,7 @@
         }
       }
     },
-    "/{themeId}/archive": {
+    "/theme/{themeId}/archive": {
       "post": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27237,7 +27416,7 @@
         }
       }
     },
-    "/overrides/store/{storeId}": {
+    "/theme/overrides/store/{storeId}": {
       "get": {
         "summary": "Theme overrides",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27260,7 +27439,7 @@
         }
       }
     },
-    "/overrides/organization/{organizationId}": {
+    "/theme/overrides/organization/{organizationId}": {
       "get": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27283,7 +27462,7 @@
         }
       }
     },
-    "/overrides": {
+    "/theme/overrides": {
       "post": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27306,7 +27485,7 @@
         }
       }
     },
-    "/overrides/{overrideId}": {
+    "/theme/overrides/{overrideId}": {
       "put": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27350,7 +27529,7 @@
         }
       }
     },
-    "/assign/{storeId}": {
+    "/theme/assign/{storeId}": {
       "post": {
         "summary": "Theme assignment",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27394,7 +27573,7 @@
         }
       }
     },
-    "/assignment/{storeId}": {
+    "/theme/assignment/{storeId}": {
       "get": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27417,7 +27596,7 @@
         }
       }
     },
-    "/resolve/{storeId}": {
+    "/theme/resolve/{storeId}": {
       "get": {
         "summary": "Resolve theme for storefront rendering",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27440,7 +27619,7 @@
         }
       }
     },
-    "/seed/built-in": {
+    "/theme/seed/built-in": {
       "post": {
         "summary": "Admin: seed built-in themes",
         "operationId": "isOrganizationLoggedIn_theme",
@@ -27463,7 +27642,7 @@
         }
       }
     },
-    "/config": {
+    "/tracking/config": {
       "get": {
         "summary": "Config CRUD",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27517,7 +27696,7 @@
         }
       }
     },
-    "/status": {
+    "/tracking/status": {
       "get": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27540,7 +27719,7 @@
         }
       }
     },
-    "/config/{storeId}": {
+    "/tracking/config/{storeId}": {
       "delete": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27563,7 +27742,7 @@
         }
       }
     },
-    "/config/{storeId}/gtm": {
+    "/tracking/config/{storeId}/gtm": {
       "put": {
         "summary": "GTM",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27617,7 +27796,7 @@
         }
       }
     },
-    "/config/{storeId}/meta-capi": {
+    "/tracking/config/{storeId}/meta-capi": {
       "put": {
         "summary": "Meta CAPI",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27671,7 +27850,7 @@
         }
       }
     },
-    "/config/{storeId}/mappings": {
+    "/tracking/config/{storeId}/mappings": {
       "post": {
         "summary": "Event Mappings",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27704,7 +27883,7 @@
         }
       }
     },
-    "/config/{storeId}/mappings/{sourceEvent}": {
+    "/tracking/config/{storeId}/mappings/{sourceEvent}": {
       "delete": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27727,7 +27906,7 @@
         }
       }
     },
-    "/config/{storeId}/activate": {
+    "/tracking/config/{storeId}/activate": {
       "post": {
         "summary": "Lifecycle",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27760,7 +27939,7 @@
         }
       }
     },
-    "/config/{storeId}/disable": {
+    "/tracking/config/{storeId}/disable": {
       "post": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27793,7 +27972,7 @@
         }
       }
     },
-    "/config/{storeId}/hash-pii": {
+    "/tracking/config/{storeId}/hash-pii": {
       "post": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27826,7 +28005,7 @@
         }
       }
     },
-    "/config/{storeId}/server-side": {
+    "/tracking/config/{storeId}/server-side": {
       "post": {
         "summary": "isOrganizationLoggedIn",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -27859,7 +28038,7 @@
         }
       }
     },
-    "/process-event": {
+    "/tracking/process-event": {
       "post": {
         "summary": "Process event (manual trigger)",
         "operationId": "isOrganizationLoggedIn_tracking",
@@ -32348,7 +32527,8 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "string | undefined"
           },
           "channel": {
             "type": "string"
@@ -32363,11 +32543,12 @@
             "type": "string"
           },
           "recipients": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "{ userId: string; userType: string; }"
-            }
+            "type": "string",
+            "description": "{ userId: string; userType: string; }[] | undefined"
+          },
+          "userIds": {
+            "type": "string",
+            "description": "string[] | undefined"
           },
           "scheduledAt": {
             "type": "string",
@@ -32375,12 +32556,10 @@
           }
         },
         "required": [
-          "name",
           "channel",
           "type",
           "title",
-          "content",
-          "recipients"
+          "content"
         ]
       },
       "CreateWebhookBody": {

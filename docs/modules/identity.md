@@ -74,29 +74,31 @@ Get OAuth configuration for a provider (client ID, auth URL, scopes) |
 | POST | `/identity/:provider/customer` | `asyncHandler(customerSocialLogin)` | POST /identity/social/:provider/customer
 Authenticate or register a customer via social login
 Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
-| POST | `/identity/:provider/customer/link` | `asyncHandler(linkCustomerSocialAccount)` | POST /identity/social/:provider/customer/link
+| POST | `/identity/:provider/customer/link` | `isCustomerLoggedIn` | POST /identity/social/:provider/customer/link
 Link a social account to an existing customer (requires auth)
 Body: { accessToken, profile: { id, email?, ... } } |
-| DELETE | `/identity/:provider/customer/unlink` | `asyncHandler(unlinkCustomerSocialAccount)` | DELETE /identity/social/:provider/customer/unlink
+| DELETE | `/identity/:provider/customer/unlink` | `isCustomerLoggedIn` | DELETE /identity/social/:provider/customer/unlink
 Unlink a social account from a customer (requires auth) |
 | POST | `/identity/:provider/merchant` | `asyncHandler(merchantSocialLogin)` | POST /identity/social/:provider/merchant
 Authenticate or register a merchant via social login
 Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
 | POST | `/identity/:provider/organization` | `asyncHandler(merchantSocialLogin)` | — |
 | GET | `/identity/2fa/status` | `isCustomerLoggedIn` | 2FA status (requires auth) |
-| GET | `/identity/customer/accounts` | `asyncHandler(getCustomerLinkedAccounts)` | GET /identity/social/customer/accounts
+| GET | `/identity/customer/accounts` | `isCustomerLoggedIn` | GET /identity/social/customer/accounts
 Get all linked social accounts for a customer (requires auth) |
 | POST | `/identity/forgot-password` | `asyncHandler(requestPasswordReset)` | Password reset flow |
 | POST | `/identity/login` | `asyncHandler(loginCustomer)` | Simple login (returns access token only) |
 | POST | `/identity/logout` | `isCustomerLoggedIn` | Logout (requires auth to blacklist token) |
-| GET | `/identity/merchant/accounts` | `asyncHandler(getOrganizationLinkedAccounts)` | GET /identity/social/merchant/accounts
+| GET | `/identity/merchant/accounts` | `isOrganizationLoggedIn` | GET /identity/social/merchant/accounts
 Get all linked social accounts for a merchant (requires auth) |
-| GET | `/identity/organization/accounts` | `asyncHandler(getOrganizationLinkedAccounts)` | — |
+| GET | `/identity/organization/accounts` | `isOrganizationLoggedIn` | — |
 | POST | `/identity/refresh` | `asyncHandler(renewAccessToken)` | Refresh access token |
 | POST | `/identity/register` | `asyncHandler(registerCustomer)` | Register new customer account |
+| POST | `/identity/request-verification` | `asyncHandler(requestEmailVerification)` | — |
 | POST | `/identity/reset-password` | `asyncHandler(resetPassword)` | — |
 | POST | `/identity/token` | `asyncHandler(issueTokenPair)` | Token-based auth (returns access + refresh tokens) |
 | POST | `/identity/validate` | `asyncHandler(checkTokenValidity)` | Validate token |
+| GET | `/identity/verify-email` | `asyncHandler(verifyEmail)` | — |
 | GET | `/scim/v2/Users` | `asyncHandler(scimController.listUsers.bind(scimController))` | SCIM 2.0 /Users endpoints |
 | POST | `/scim/v2/Users` | `asyncHandler(scimController.createUser.bind(scimController))` | — |
 | GET | `/scim/v2/Users/:id` | `asyncHandler(scimController.getUser.bind(scimController))` | — |

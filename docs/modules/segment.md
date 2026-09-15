@@ -73,10 +73,10 @@ The Segment module provides customer data platform (CDP) capabilities — custom
 | DELETE | `/segment/:segmentId` | `isOrganizationLoggedIn` | — |
 | POST | `/segment/:segmentId/evaluate` | `isOrganizationLoggedIn` | Segment evaluation & members |
 | GET | `/segment/:segmentId/members` | `isOrganizationLoggedIn` | — |
-| GET | `/segment/profiles` | `isOrganizationLoggedIn` | Customer profiles |
+| GET | `/segment/profiles` | `isOrganizationLoggedIn` | Customer profiles (must be before /segment/:segmentId to avoid param matching) |
 | GET | `/segment/profiles/:customerId` | `isOrganizationLoggedIn` | — |
 | POST | `/segment/profiles/:customerId/compute` | `isOrganizationLoggedIn` | — |
-| GET | `/segment/profiles/:customerId/segments` | `isOrganizationLoggedIn` | Customer segment membership |
+| GET | `/segment/profiles/:customerId/segments` | `isOrganizationLoggedIn` | — |
 | POST | `/segment/profiles/recompute-all` | `isOrganizationLoggedIn` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->

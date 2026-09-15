@@ -3,38 +3,14 @@
 > Auto-generated from router source files. Do not edit manually.
 > Run `yarn docs:routes` to regenerate.
 
-**Total routes:** 1210
+**Total routes:** 1215
 
 ## (unmounted)
 
 | Method | Path | Controller | Description |
 |---|---|---|---|
-| <span class="badge badge-post">POST</span> | `/` | `asyncHandler(integrationController.createIntegration.bind(in` | Integration CRUD |
-| <span class="badge badge-get">GET</span> | `/` | `asyncHandler(integrationController.listIntegrations.bind(int` | — |
-| <span class="badge badge-get">GET</span> | `/` | `isOrganizationLoggedIn` | Theme CRUD |
-| <span class="badge badge-post">POST</span> | `/` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/:fulfillmentId` | `asyncHandler(getFulfillment)` | Get fulfillment by ID (customer view) |
 | <span class="badge badge-get">GET</span> | `/:fulfillmentId/track` | `asyncHandler(getTrackingInfo)` | Track fulfillment |
-| <span class="badge badge-get">GET</span> | `/:integrationId` | `asyncHandler(integrationController.getIntegration.bind(integ` | — |
-| <span class="badge badge-put">PUT</span> | `/:integrationId` | `asyncHandler(integrationController.updateIntegration.bind(in` | — |
-| <span class="badge badge-delete">DELETE</span> | `/:integrationId` | `asyncHandler(integrationController.deleteIntegration.bind(in` | — |
-| <span class="badge badge-post">POST</span> | `/:integrationId/activate` | `asyncHandler(integrationController.activateIntegration.bind(` | — |
-| <span class="badge badge-post">POST</span> | `/:integrationId/credentials` | `asyncHandler(integrationController.addCredential.bind(integr` | Credentials |
-| <span class="badge badge-get">GET</span> | `/:integrationId/credentials` | `asyncHandler(integrationController.listCredentials.bind(inte` | — |
-| <span class="badge badge-put">PUT</span> | `/:integrationId/credentials/:credentialId` | `asyncHandler(integrationController.updateCredential.bind(int` | — |
-| <span class="badge badge-delete">DELETE</span> | `/:integrationId/credentials/:credentialId` | `asyncHandler(integrationController.deleteCredential.bind(int` | — |
-| <span class="badge badge-post">POST</span> | `/:integrationId/deactivate` | `asyncHandler(integrationController.deactivateIntegration.bin` | — |
-| <span class="badge badge-get">GET</span> | `/:integrationId/logs` | `asyncHandler(integrationController.listLogs.bind(integration` | Logs |
-| <span class="badge badge-delete">DELETE</span> | `/:integrationId/logs` | `asyncHandler(integrationController.deleteLogs.bind(integrati` | — |
-| <span class="badge badge-post">POST</span> | `/:integrationId/subscriptions` | `asyncHandler(integrationController.createSubscription.bind(i` | Event subscriptions |
-| <span class="badge badge-get">GET</span> | `/:integrationId/subscriptions` | `asyncHandler(integrationController.listSubscriptions.bind(in` | — |
-| <span class="badge badge-put">PUT</span> | `/:integrationId/subscriptions/:subscriptionId` | `asyncHandler(integrationController.updateSubscription.bind(i` | — |
-| <span class="badge badge-delete">DELETE</span> | `/:integrationId/subscriptions/:subscriptionId` | `asyncHandler(integrationController.deleteSubscription.bind(i` | — |
-| <span class="badge badge-get">GET</span> | `/:themeId` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-put">PUT</span> | `/:themeId` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-delete">DELETE</span> | `/:themeId` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/:themeId/activate` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/:themeId/archive` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/active` | `(_req, res) => {
   res.json({ success: true, message: 'Get a` | — |
 | <span class="badge badge-get">GET</span> | `/analytics/customers/cohorts` | `asyncHandler(analyticsController.getCustomerCohorts)` | GET /business/analytics/customers/cohorts - Get customer cohort analysis |
@@ -61,9 +37,6 @@
 | <span class="badge badge-post">POST</span> | `/approvals/:workflowId/cancel` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/approvals/:workflowId/escalate` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/approvals/:workflowId/reject` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/assign/:storeId` | `isOrganizationLoggedIn` | Theme assignment |
-| <span class="badge badge-delete">DELETE</span> | `/assign/:storeId` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-get">GET</span> | `/assignment/:storeId` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/attribute-groups` | `asyncHandler(attributeGroupController.listAttributeGroups.bi` | — |
 | <span class="badge badge-post">POST</span> | `/attribute-groups` | `asyncHandler(attributeGroupController.createAttributeGroup.b` | — |
 | <span class="badge badge-get">GET</span> | `/attribute-groups/:id` | `asyncHandler(attributeGroupController.getAttributeGroup.bind` | — |
@@ -163,9 +136,6 @@ GET /basket/:basketId/summary |
 GET /basket/me |
 | <span class="badge badge-post">POST</span> | `/basket/merge` | `asyncHandler(basketController.mergeBaskets)` | Merge baskets (typically when guest logs in)
 POST /basket/merge |
-| <span class="badge badge-get">GET</span> | `/block-types` | `asyncHandler(pageBuilderController.listBlockTypes)` | Block types |
-| <span class="badge badge-get">GET</span> | `/block-types/:category` | `asyncHandler(pageBuilderController.listBlockTypesByCategory)` | — |
-| <span class="badge badge-get">GET</span> | `/built-in` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/bundles` | `asyncHandler(bundleController.getBundles)` | — |
 | <span class="badge badge-post">POST</span> | `/bundles` | `asyncHandler(bundleController.createBundle)` | — |
 | <span class="badge badge-get">GET</span> | `/bundles/:id` | `asyncHandler(bundleController.getBundle)` | — |
@@ -272,19 +242,6 @@ GET /checkout/pickup-locations |
 | <span class="badge badge-get">GET</span> | `/companies/:companyId/subsidiaries` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/companies/:companyId/suspend` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/companies/:companyId/terminate` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-get">GET</span> | `/config` | `isOrganizationLoggedIn` | Config CRUD |
-| <span class="badge badge-post">POST</span> | `/config` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-delete">DELETE</span> | `/config/:storeId` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/config/:storeId/activate` | `isOrganizationLoggedIn` | Lifecycle |
-| <span class="badge badge-post">POST</span> | `/config/:storeId/disable` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-put">PUT</span> | `/config/:storeId/gtm` | `isOrganizationLoggedIn` | GTM |
-| <span class="badge badge-delete">DELETE</span> | `/config/:storeId/gtm` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/config/:storeId/hash-pii` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/config/:storeId/mappings` | `isOrganizationLoggedIn` | Event Mappings |
-| <span class="badge badge-delete">DELETE</span> | `/config/:storeId/mappings/:sourceEvent` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-put">PUT</span> | `/config/:storeId/meta-capi` | `isOrganizationLoggedIn` | Meta CAPI |
-| <span class="badge badge-delete">DELETE</span> | `/config/:storeId/meta-capi` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/config/:storeId/server-side` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/configuration` | `asyncHandler(systemConfigurationController.createSystemConfi` | Create system configuration |
 | <span class="badge badge-get">GET</span> | `/configuration` | `asyncHandler(systemConfigurationController.listSystemConfigu` | List all system configurations |
 | <span class="badge badge-put">PUT</span> | `/configuration/:configId` | `asyncHandler(systemConfigurationController.updateSystemConfi` | Update system configuration |
@@ -402,6 +359,8 @@ GET /checkout/pickup-locations |
 | <span class="badge badge-post">POST</span> | `/coupons/validate` | `asyncHandler(couponController.validateCoupon)` | — |
 | <span class="badge badge-get">GET</span> | `/coupons/validate/:code` | `asyncHandler(validateCoupon)` | — |
 | <span class="badge badge-get">GET</span> | `/coupons/validate/:code` | `asyncHandler(validateCoupon)` | — |
+| <span class="badge badge-get">GET</span> | `/customer-groups/:customerGroupId` | `asyncHandler(customerController.getCustomerGroup)` | — |
+| <span class="badge badge-get">GET</span> | `/customer-groups/:customerGroupId/customers` | `asyncHandler(customerController.getCustomersInGroup)` | — |
 | <span class="badge badge-get">GET</span> | `/customers` | `asyncHandler(customerController.listCustomers)` | List all customers
 GET /business/customers |
 | <span class="badge badge-post">POST</span> | `/customers` | `asyncHandler(customerController.createCustomer)` | Create a new customer
@@ -438,21 +397,6 @@ POST /business/customers/:customerId/verify |
 | <span class="badge badge-put">PUT</span> | `/dispatches/:dispatchId/receive` | `asyncHandler(receiveStoreDispatch)` | — |
 | <span class="badge badge-put">PUT</span> | `/downloads/:downloadId` | `asyncHandler(productController.updateDownload)` | — |
 | <span class="badge badge-delete">DELETE</span> | `/downloads/:downloadId` | `asyncHandler(productController.deleteDownload)` | — |
-| <span class="badge badge-get">GET</span> | `/drafts` | `asyncHandler(pageBuilderController.listDrafts)` | Drafts |
-| <span class="badge badge-post">POST</span> | `/drafts` | `asyncHandler(pageBuilderController.createDraft)` | — |
-| <span class="badge badge-get">GET</span> | `/drafts/:draftId` | `asyncHandler(pageBuilderController.getDraft)` | — |
-| <span class="badge badge-delete">DELETE</span> | `/drafts/:draftId` | `asyncHandler(pageBuilderController.deleteDraft)` | — |
-| <span class="badge badge-post">POST</span> | `/drafts/:draftId/blocks` | `asyncHandler(pageBuilderController.addBlock)` | Blocks |
-| <span class="badge badge-patch">PATCH</span> | `/drafts/:draftId/blocks/:blockId` | `asyncHandler(pageBuilderController.updateBlock)` | — |
-| <span class="badge badge-delete">DELETE</span> | `/drafts/:draftId/blocks/:blockId` | `asyncHandler(pageBuilderController.removeBlock)` | — |
-| <span class="badge badge-patch">PATCH</span> | `/drafts/:draftId/blocks/:blockId/move` | `asyncHandler(pageBuilderController.moveBlock)` | — |
-| <span class="badge badge-get">GET</span> | `/drafts/:draftId/preview` | `asyncHandler(pageBuilderController.previewDraft)` | Preview |
-| <span class="badge badge-post">POST</span> | `/drafts/:draftId/publish` | `asyncHandler(pageBuilderController.publishDraft)` | Publish |
-| <span class="badge badge-post">POST</span> | `/drafts/:draftId/regions/:region/reorder` | `asyncHandler(pageBuilderController.reorderBlocks)` | — |
-| <span class="badge badge-patch">PATCH</span> | `/drafts/:draftId/slug` | `asyncHandler(pageBuilderController.updateDraftSlug)` | — |
-| <span class="badge badge-patch">PATCH</span> | `/drafts/:draftId/theme` | `asyncHandler(pageBuilderController.updateDraftTheme)` | — |
-| <span class="badge badge-patch">PATCH</span> | `/drafts/:draftId/title` | `asyncHandler(pageBuilderController.updateDraftTitle)` | — |
-| <span class="badge badge-post">POST</span> | `/drafts/:draftId/unpublish` | `asyncHandler(pageBuilderController.unpublishDraft)` | — |
 | <span class="badge badge-post">POST</span> | `/errors/:importErrorId/resolve` | `asyncHandler(migrationController.resolveError.bind(migration` | — |
 | <span class="badge badge-post">POST</span> | `/estimate-delivery` | `asyncHandler(shippingController.estimateDelivery)` | Estimate delivery time for a shipping method |
 | <span class="badge badge-get">GET</span> | `/fraud/blacklist` | `asyncHandler(fraudController.getBlacklist)` | — |
@@ -518,40 +462,60 @@ POST /business/customers/:customerId/verify |
 | <span class="badge badge-post">POST</span> | `/gift-cards` | `asyncHandler(giftCardController.createGiftCard)` | — |
 | <span class="badge badge-get">GET</span> | `/gift-cards/:id` | `asyncHandler(giftCardController.getGiftCard)` | — |
 | <span class="badge badge-post">POST</span> | `/gift-cards/:id/activate` | `asyncHandler(giftCardController.activateGiftCard)` | — |
+| <span class="badge badge-post">POST</span> | `/gift-cards/:id/assign` | `asyncHandler(giftCardController.assignGiftCard)` | — |
 | <span class="badge badge-post">POST</span> | `/gift-cards/:id/cancel` | `asyncHandler(giftCardController.cancelGiftCard)` | — |
 | <span class="badge badge-post">POST</span> | `/gift-cards/:id/refund` | `asyncHandler(giftCardController.refundToGiftCard)` | — |
 | <span class="badge badge-get">GET</span> | `/gift-cards/balance/:code` | `asyncHandler(giftCardController.checkGiftCardBalance)` | Gift Card routes |
-| <span class="badge badge-get">GET</span> | `/gift-cards/mine` | `asyncHandler(giftCardController.getMyGiftCards)` | — |
-| <span class="badge badge-post">POST</span> | `/gift-cards/redeem` | `asyncHandler(giftCardController.redeemGiftCard)` | — |
-| <span class="badge badge-post">POST</span> | `/gift-cards/reload` | `asyncHandler(giftCardController.reloadGiftCard)` | — |
+| <span class="badge badge-get">GET</span> | `/gift-cards/mine` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/gift-cards/redeem` | `isCustomerLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/gift-cards/reload` | `isCustomerLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/identity/:provider/config` | `asyncHandler(getOAuthConfig)` | GET /identity/social/:provider/config
 Get OAuth configuration for a provider (client ID, auth URL, scopes) |
 | <span class="badge badge-post">POST</span> | `/identity/:provider/customer` | `asyncHandler(customerSocialLogin)` | POST /identity/social/:provider/customer
 Authenticate or register a customer via social login
 Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
-| <span class="badge badge-post">POST</span> | `/identity/:provider/customer/link` | `asyncHandler(linkCustomerSocialAccount)` | POST /identity/social/:provider/customer/link
+| <span class="badge badge-post">POST</span> | `/identity/:provider/customer/link` | `isCustomerLoggedIn` | POST /identity/social/:provider/customer/link
 Link a social account to an existing customer (requires auth)
 Body: { accessToken, profile: { id, email?, ... } } |
-| <span class="badge badge-delete">DELETE</span> | `/identity/:provider/customer/unlink` | `asyncHandler(unlinkCustomerSocialAccount)` | DELETE /identity/social/:provider/customer/unlink
+| <span class="badge badge-delete">DELETE</span> | `/identity/:provider/customer/unlink` | `isCustomerLoggedIn` | DELETE /identity/social/:provider/customer/unlink
 Unlink a social account from a customer (requires auth) |
 | <span class="badge badge-post">POST</span> | `/identity/:provider/merchant` | `asyncHandler(merchantSocialLogin)` | POST /identity/social/:provider/merchant
 Authenticate or register a merchant via social login
 Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
 | <span class="badge badge-post">POST</span> | `/identity/:provider/organization` | `asyncHandler(merchantSocialLogin)` | — |
 | <span class="badge badge-get">GET</span> | `/identity/2fa/status` | `isCustomerLoggedIn` | 2FA status (requires auth) |
-| <span class="badge badge-get">GET</span> | `/identity/customer/accounts` | `asyncHandler(getCustomerLinkedAccounts)` | GET /identity/social/customer/accounts
+| <span class="badge badge-get">GET</span> | `/identity/customer/accounts` | `isCustomerLoggedIn` | GET /identity/social/customer/accounts
 Get all linked social accounts for a customer (requires auth) |
 | <span class="badge badge-post">POST</span> | `/identity/forgot-password` | `asyncHandler(requestPasswordReset)` | Password reset flow |
 | <span class="badge badge-post">POST</span> | `/identity/login` | `asyncHandler(loginCustomer)` | Simple login (returns access token only) |
 | <span class="badge badge-post">POST</span> | `/identity/logout` | `isCustomerLoggedIn` | Logout (requires auth to blacklist token) |
-| <span class="badge badge-get">GET</span> | `/identity/merchant/accounts` | `asyncHandler(getOrganizationLinkedAccounts)` | GET /identity/social/merchant/accounts
+| <span class="badge badge-get">GET</span> | `/identity/merchant/accounts` | `isOrganizationLoggedIn` | GET /identity/social/merchant/accounts
 Get all linked social accounts for a merchant (requires auth) |
-| <span class="badge badge-get">GET</span> | `/identity/organization/accounts` | `asyncHandler(getOrganizationLinkedAccounts)` | — |
+| <span class="badge badge-get">GET</span> | `/identity/organization/accounts` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/identity/refresh` | `asyncHandler(renewAccessToken)` | Refresh access token |
 | <span class="badge badge-post">POST</span> | `/identity/register` | `asyncHandler(registerCustomer)` | Register new customer account |
+| <span class="badge badge-post">POST</span> | `/identity/request-verification` | `asyncHandler(requestEmailVerification)` | — |
 | <span class="badge badge-post">POST</span> | `/identity/reset-password` | `asyncHandler(resetPassword)` | — |
 | <span class="badge badge-post">POST</span> | `/identity/token` | `asyncHandler(issueTokenPair)` | Token-based auth (returns access + refresh tokens) |
 | <span class="badge badge-post">POST</span> | `/identity/validate` | `asyncHandler(checkTokenValidity)` | Validate token |
+| <span class="badge badge-get">GET</span> | `/identity/verify-email` | `asyncHandler(verifyEmail)` | — |
+| <span class="badge badge-post">POST</span> | `/integration` | `asyncHandler(integrationController.createIntegration.bind(in` | Integration CRUD |
+| <span class="badge badge-get">GET</span> | `/integration` | `asyncHandler(integrationController.listIntegrations.bind(int` | — |
+| <span class="badge badge-get">GET</span> | `/integration/:integrationId` | `asyncHandler(integrationController.getIntegration.bind(integ` | — |
+| <span class="badge badge-put">PUT</span> | `/integration/:integrationId` | `asyncHandler(integrationController.updateIntegration.bind(in` | — |
+| <span class="badge badge-delete">DELETE</span> | `/integration/:integrationId` | `asyncHandler(integrationController.deleteIntegration.bind(in` | — |
+| <span class="badge badge-post">POST</span> | `/integration/:integrationId/activate` | `asyncHandler(integrationController.activateIntegration.bind(` | — |
+| <span class="badge badge-post">POST</span> | `/integration/:integrationId/credentials` | `asyncHandler(integrationController.addCredential.bind(integr` | Credentials |
+| <span class="badge badge-get">GET</span> | `/integration/:integrationId/credentials` | `asyncHandler(integrationController.listCredentials.bind(inte` | — |
+| <span class="badge badge-put">PUT</span> | `/integration/:integrationId/credentials/:credentialId` | `asyncHandler(integrationController.updateCredential.bind(int` | — |
+| <span class="badge badge-delete">DELETE</span> | `/integration/:integrationId/credentials/:credentialId` | `asyncHandler(integrationController.deleteCredential.bind(int` | — |
+| <span class="badge badge-post">POST</span> | `/integration/:integrationId/deactivate` | `asyncHandler(integrationController.deactivateIntegration.bin` | — |
+| <span class="badge badge-get">GET</span> | `/integration/:integrationId/logs` | `asyncHandler(integrationController.listLogs.bind(integration` | Logs |
+| <span class="badge badge-delete">DELETE</span> | `/integration/:integrationId/logs` | `asyncHandler(integrationController.deleteLogs.bind(integrati` | — |
+| <span class="badge badge-post">POST</span> | `/integration/:integrationId/subscriptions` | `asyncHandler(integrationController.createSubscription.bind(i` | Event subscriptions |
+| <span class="badge badge-get">GET</span> | `/integration/:integrationId/subscriptions` | `asyncHandler(integrationController.listSubscriptions.bind(in` | — |
+| <span class="badge badge-put">PUT</span> | `/integration/:integrationId/subscriptions/:subscriptionId` | `asyncHandler(integrationController.updateSubscription.bind(i` | — |
+| <span class="badge badge-delete">DELETE</span> | `/integration/:integrationId/subscriptions/:subscriptionId` | `asyncHandler(integrationController.deleteSubscription.bind(i` | — |
 | <span class="badge badge-get">GET</span> | `/inventory` | `asyncHandler(inventoryController.listInventoryLocations)` | — |
 | <span class="badge badge-get">GET</span> | `/inventory/:inventoryId` | `asyncHandler(inventoryController.getInventoryLocation)` | — |
 | <span class="badge badge-post">POST</span> | `/inventory/:inventoryId/adjust` | `asyncHandler(inventoryController.adjustStock)` | — |
@@ -671,8 +635,8 @@ POST /customers/me/addresses/:addressId/default |
 | <span class="badge badge-get">GET</span> | `/membership/user-memberships/:id` | `asyncHandler(getUserMembershipById)` | — |
 | <span class="badge badge-put">PUT</span> | `/membership/user-memberships/:id` | `asyncHandler(updateUserMembership)` | — |
 | <span class="badge badge-post">POST</span> | `/membership/user-memberships/:id/cancel` | `asyncHandler(cancelUserMembership)` | — |
-| <span class="badge badge-get">GET</span> | `/membership/user/:userId` | `asyncHandler(getUserMembershipByUserId)` | Get current user's membership |
-| <span class="badge badge-get">GET</span> | `/membership/user/:userId/benefits` | `asyncHandler(getUserMembershipBenefits)` | Get current user's membership benefits |
+| <span class="badge badge-get">GET</span> | `/membership/user/:userId` | `isCustomerLoggedIn` | Get current user's membership |
+| <span class="badge badge-get">GET</span> | `/membership/user/:userId/benefits` | `isCustomerLoggedIn` | Get current user's membership benefits |
 | <span class="badge badge-get">GET</span> | `/membership/users/:userId/benefits` | `asyncHandler(getUserMembershipBenefits)` | — |
 | <span class="badge badge-get">GET</span> | `/membership/users/:userId/membership` | `asyncHandler(getUserMembershipByUserId)` | Admin routes for fetching user-specific membership data |
 | <span class="badge badge-get">GET</span> | `/method-configs` | `asyncHandler(paymentController.listMethodConfigs)` | ============================================================================ Method Config Routes ============================================================================ |
@@ -810,17 +774,29 @@ GET /business/orders/store-summary |
 | <span class="badge badge-post">POST</span> | `/organizations/:organizationId/payment-info` | `asyncHandler(addOrganizationPaymentInfo)` | — |
 | <span class="badge badge-put">PUT</span> | `/organizations/:organizationId/payment-info/:paymentInfoId` | `asyncHandler(updateOrganizationPaymentInfo)` | — |
 | <span class="badge badge-get">GET</span> | `/organizations/:organizationId/warehouses` | `asyncHandler(warehouseController.getWarehousesByMerchant)` | Organization warehouses |
-| <span class="badge badge-post">POST</span> | `/overrides` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-put">PUT</span> | `/overrides/:overrideId` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-delete">DELETE</span> | `/overrides/:overrideId` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-get">GET</span> | `/overrides/organization/:organizationId` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-get">GET</span> | `/overrides/store/:storeId` | `isOrganizationLoggedIn` | Theme overrides |
 | <span class="badge badge-get">GET</span> | `/packaging-types` | `asyncHandler(shippingController.getPackagingTypes)` | — |
 | <span class="badge badge-post">POST</span> | `/packaging-types` | `asyncHandler(shippingController.createPackagingType)` | — |
 | <span class="badge badge-get">GET</span> | `/packaging-types` | `asyncHandler(shippingController.getPackagingTypes)` | Get packaging types (for reference) |
 | <span class="badge badge-get">GET</span> | `/packaging-types/:id` | `asyncHandler(shippingController.getPackagingTypeById)` | — |
 | <span class="badge badge-put">PUT</span> | `/packaging-types/:id` | `asyncHandler(shippingController.updatePackagingType)` | — |
 | <span class="badge badge-delete">DELETE</span> | `/packaging-types/:id` | `asyncHandler(shippingController.deletePackagingType)` | — |
+| <span class="badge badge-get">GET</span> | `/page-builder/block-types` | `asyncHandler(pageBuilderController.listBlockTypes)` | Block types |
+| <span class="badge badge-get">GET</span> | `/page-builder/block-types/:category` | `asyncHandler(pageBuilderController.listBlockTypesByCategory)` | — |
+| <span class="badge badge-get">GET</span> | `/page-builder/drafts` | `asyncHandler(pageBuilderController.listDrafts)` | Drafts |
+| <span class="badge badge-post">POST</span> | `/page-builder/drafts` | `asyncHandler(pageBuilderController.createDraft)` | — |
+| <span class="badge badge-get">GET</span> | `/page-builder/drafts/:draftId` | `asyncHandler(pageBuilderController.getDraft)` | — |
+| <span class="badge badge-delete">DELETE</span> | `/page-builder/drafts/:draftId` | `asyncHandler(pageBuilderController.deleteDraft)` | — |
+| <span class="badge badge-post">POST</span> | `/page-builder/drafts/:draftId/blocks` | `asyncHandler(pageBuilderController.addBlock)` | Blocks |
+| <span class="badge badge-patch">PATCH</span> | `/page-builder/drafts/:draftId/blocks/:blockId` | `asyncHandler(pageBuilderController.updateBlock)` | — |
+| <span class="badge badge-delete">DELETE</span> | `/page-builder/drafts/:draftId/blocks/:blockId` | `asyncHandler(pageBuilderController.removeBlock)` | — |
+| <span class="badge badge-patch">PATCH</span> | `/page-builder/drafts/:draftId/blocks/:blockId/move` | `asyncHandler(pageBuilderController.moveBlock)` | — |
+| <span class="badge badge-get">GET</span> | `/page-builder/drafts/:draftId/preview` | `asyncHandler(pageBuilderController.previewDraft)` | Preview |
+| <span class="badge badge-post">POST</span> | `/page-builder/drafts/:draftId/publish` | `asyncHandler(pageBuilderController.publishDraft)` | Publish |
+| <span class="badge badge-post">POST</span> | `/page-builder/drafts/:draftId/regions/:region/reorder` | `asyncHandler(pageBuilderController.reorderBlocks)` | — |
+| <span class="badge badge-patch">PATCH</span> | `/page-builder/drafts/:draftId/slug` | `asyncHandler(pageBuilderController.updateDraftSlug)` | — |
+| <span class="badge badge-patch">PATCH</span> | `/page-builder/drafts/:draftId/theme` | `asyncHandler(pageBuilderController.updateDraftTheme)` | — |
+| <span class="badge badge-patch">PATCH</span> | `/page-builder/drafts/:draftId/title` | `asyncHandler(pageBuilderController.updateDraftTitle)` | — |
+| <span class="badge badge-post">POST</span> | `/page-builder/drafts/:draftId/unpublish` | `asyncHandler(pageBuilderController.unpublishDraft)` | — |
 | <span class="badge badge-get">GET</span> | `/payment-methods` | `asyncHandler(paymentCustomerController.listStoredMethods)` | — |
 | <span class="badge badge-post">POST</span> | `/payment-methods` | `asyncHandler(paymentCustomerController.saveStoredMethod)` | — |
 | <span class="badge badge-delete">DELETE</span> | `/payment-methods/:methodId` | `asyncHandler(paymentCustomerController.deleteStoredMethod)` | — |
@@ -882,7 +858,6 @@ GET /payments/transactions |
 | <span class="badge badge-get">GET</span> | `/pricing/tier-prices/:id` | `asyncHandler(getTierPrice)` | — |
 | <span class="badge badge-put">PUT</span> | `/pricing/tier-prices/:id` | `asyncHandler(updateTierPrice)` | — |
 | <span class="badge badge-delete">DELETE</span> | `/pricing/tier-prices/:id` | `asyncHandler(deleteTierPrice)` | — |
-| <span class="badge badge-post">POST</span> | `/process-event` | `isOrganizationLoggedIn` | Process event (manual trigger) |
 | <span class="badge badge-get">GET</span> | `/product-types` | `isOrganizationLoggedIn` | List all product types |
 | <span class="badge badge-post">POST</span> | `/product-types` | `isOrganizationLoggedIn` | Create product type |
 | <span class="badge badge-get">GET</span> | `/product-types` | `asyncHandler(productTypeController.listProductTypes.bind(pro` | — |
@@ -1054,7 +1029,6 @@ POST /customers/register |
 | <span class="badge badge-delete">DELETE</span> | `/reports/schedules/:scheduleId` | `asyncHandler(reportingController.deleteSchedule)` | — |
 | <span class="badge badge-get">GET</span> | `/reports/schedules/:scheduleId/executions` | `asyncHandler(reportingController.listExecutions)` | Report executions (history) |
 | <span class="badge badge-get">GET</span> | `/reports/templates` | `asyncHandler(reportingController.getReportTemplates)` | Report templates |
-| <span class="badge badge-get">GET</span> | `/resolve/:storeId` | `isOrganizationLoggedIn` | Resolve theme for storefront rendering |
 | <span class="badge badge-get">GET</span> | `/returns` | `isOrganizationLoggedIn` | Return request CRUD + workflow |
 | <span class="badge badge-post">POST</span> | `/returns` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/returns/:returnId` | `isOrganizationLoggedIn` | — |
@@ -1079,7 +1053,6 @@ POST /customers/register |
 | <span class="badge badge-put">PUT</span> | `/scim/v2/Users/:id` | `asyncHandler(scimController.replaceUser.bind(scimController)` | — |
 | <span class="badge badge-patch">PATCH</span> | `/scim/v2/Users/:id` | `asyncHandler(scimController.patchUser.bind(scimController))` | — |
 | <span class="badge badge-delete">DELETE</span> | `/scim/v2/Users/:id` | `asyncHandler(scimController.deleteUser.bind(scimController))` | — |
-| <span class="badge badge-post">POST</span> | `/seed/built-in` | `isOrganizationLoggedIn` | Admin: seed built-in themes |
 | <span class="badge badge-get">GET</span> | `/segment` | `isOrganizationLoggedIn` | Segment CRUD |
 | <span class="badge badge-post">POST</span> | `/segment` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/segment/:segmentId` | `isOrganizationLoggedIn` | — |
@@ -1087,12 +1060,11 @@ POST /customers/register |
 | <span class="badge badge-delete">DELETE</span> | `/segment/:segmentId` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/segment/:segmentId/evaluate` | `isOrganizationLoggedIn` | Segment evaluation & members |
 | <span class="badge badge-get">GET</span> | `/segment/:segmentId/members` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-get">GET</span> | `/segment/profiles` | `isOrganizationLoggedIn` | Customer profiles |
+| <span class="badge badge-get">GET</span> | `/segment/profiles` | `isOrganizationLoggedIn` | Customer profiles (must be before /segment/:segmentId to avoid param matching) |
 | <span class="badge badge-get">GET</span> | `/segment/profiles/:customerId` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/segment/profiles/:customerId/compute` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-get">GET</span> | `/segment/profiles/:customerId/segments` | `isOrganizationLoggedIn` | Customer segment membership |
+| <span class="badge badge-get">GET</span> | `/segment/profiles/:customerId/segments` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/segment/profiles/recompute-all` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-get">GET</span> | `/slug/:slug` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/sso/oidc/callback/:providerId` | `asyncHandler(ssoController.oidcCallback.bind(ssoController))` | — |
 | <span class="badge badge-post">POST</span> | `/sso/oidc/login/:providerId` | `asyncHandler(ssoController.initiateOidcLogin.bind(ssoControl` | OIDC SSO |
 | <span class="badge badge-post">POST</span> | `/sso/oidc/providers` | `asyncHandler(ssoController.createOidcProvider.bind(ssoContro` | OIDC provider CRUD |
@@ -1110,7 +1082,6 @@ POST /customers/register |
 | <span class="badge badge-delete">DELETE</span> | `/sso/saml/providers/:providerId` | `asyncHandler(ssoController.deleteSamlProvider.bind(ssoContro` | — |
 | <span class="badge badge-post">POST</span> | `/sso/saml/providers/:providerId/activate` | `asyncHandler(ssoController.activateSamlProvider.bind(ssoCont` | — |
 | <span class="badge badge-post">POST</span> | `/sso/saml/providers/:providerId/deactivate` | `asyncHandler(ssoController.deactivateSamlProvider.bind(ssoCo` | — |
-| <span class="badge badge-get">GET</span> | `/status` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/store-credit/balance` | `isOrganizationLoggedIn` | Store credit |
 | <span class="badge badge-post">POST</span> | `/store-credit/debit` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/store-credit/ledger` | `isOrganizationLoggedIn` | — |
@@ -1260,8 +1231,42 @@ POST /customers/register |
 | <span class="badge badge-put">PUT</span> | `/tax/zones/:id` | `asyncHandler(updateTaxZone)` | — |
 | <span class="badge badge-delete">DELETE</span> | `/tax/zones/:id` | `asyncHandler(deleteTaxZone)` | — |
 | <span class="badge badge-post">POST</span> | `/tax/zones/find` | `asyncHandler(findTaxZoneForAddress)` | NEW: Tax zone finder endpoint |
+| <span class="badge badge-get">GET</span> | `/theme` | `isOrganizationLoggedIn` | Theme CRUD |
+| <span class="badge badge-post">POST</span> | `/theme` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/theme/:themeId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-put">PUT</span> | `/theme/:themeId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-delete">DELETE</span> | `/theme/:themeId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/theme/:themeId/activate` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/theme/:themeId/archive` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/theme/assign/:storeId` | `isOrganizationLoggedIn` | Theme assignment |
+| <span class="badge badge-delete">DELETE</span> | `/theme/assign/:storeId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/theme/assignment/:storeId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/theme/built-in` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/theme/overrides` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-put">PUT</span> | `/theme/overrides/:overrideId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-delete">DELETE</span> | `/theme/overrides/:overrideId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/theme/overrides/organization/:organizationId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-get">GET</span> | `/theme/overrides/store/:storeId` | `isOrganizationLoggedIn` | Theme overrides |
+| <span class="badge badge-get">GET</span> | `/theme/resolve/:storeId` | `isOrganizationLoggedIn` | Resolve theme for storefront rendering |
+| <span class="badge badge-post">POST</span> | `/theme/seed/built-in` | `isOrganizationLoggedIn` | Admin: seed built-in themes |
+| <span class="badge badge-get">GET</span> | `/theme/slug/:slug` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/track` | `asyncHandler(shippingController.trackShipment)` | — |
 | <span class="badge badge-get">GET</span> | `/track/:id` | `asyncHandler(shippingController.trackShipment)` | — |
+| <span class="badge badge-get">GET</span> | `/tracking/config` | `isOrganizationLoggedIn` | Config CRUD |
+| <span class="badge badge-post">POST</span> | `/tracking/config` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-delete">DELETE</span> | `/tracking/config/:storeId` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/tracking/config/:storeId/activate` | `isOrganizationLoggedIn` | Lifecycle |
+| <span class="badge badge-post">POST</span> | `/tracking/config/:storeId/disable` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-put">PUT</span> | `/tracking/config/:storeId/gtm` | `isOrganizationLoggedIn` | GTM |
+| <span class="badge badge-delete">DELETE</span> | `/tracking/config/:storeId/gtm` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/tracking/config/:storeId/hash-pii` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/tracking/config/:storeId/mappings` | `isOrganizationLoggedIn` | Event Mappings |
+| <span class="badge badge-delete">DELETE</span> | `/tracking/config/:storeId/mappings/:sourceEvent` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-put">PUT</span> | `/tracking/config/:storeId/meta-capi` | `isOrganizationLoggedIn` | Meta CAPI |
+| <span class="badge badge-delete">DELETE</span> | `/tracking/config/:storeId/meta-capi` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/tracking/config/:storeId/server-side` | `isOrganizationLoggedIn` | — |
+| <span class="badge badge-post">POST</span> | `/tracking/process-event` | `isOrganizationLoggedIn` | Process event (manual trigger) |
+| <span class="badge badge-get">GET</span> | `/tracking/status` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/transactions` | `asyncHandler(paymentController.listTransactions)` | ============================================================================ Transaction Routes ============================================================================ |
 | <span class="badge badge-post">POST</span> | `/transactions` | `asyncHandler(paymentController.initiatePayment)` | — |
 | <span class="badge badge-get">GET</span> | `/transactions/:transactionId` | `asyncHandler(paymentController.getTransaction)` | — |

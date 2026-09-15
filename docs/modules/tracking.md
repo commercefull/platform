@@ -164,20 +164,20 @@ The module subscribes to 10 platform events via `modules/tracking/application/ev
 
 | Method | Endpoint | Controller | Description |
 |---|---|---|---|
-| GET | `/config` | `isOrganizationLoggedIn` | Config CRUD |
-| POST | `/config` | `isOrganizationLoggedIn` | — |
-| DELETE | `/config/:storeId` | `isOrganizationLoggedIn` | — |
-| POST | `/config/:storeId/activate` | `isOrganizationLoggedIn` | Lifecycle |
-| POST | `/config/:storeId/disable` | `isOrganizationLoggedIn` | — |
-| PUT | `/config/:storeId/gtm` | `isOrganizationLoggedIn` | GTM |
-| DELETE | `/config/:storeId/gtm` | `isOrganizationLoggedIn` | — |
-| POST | `/config/:storeId/hash-pii` | `isOrganizationLoggedIn` | — |
-| POST | `/config/:storeId/mappings` | `isOrganizationLoggedIn` | Event Mappings |
-| DELETE | `/config/:storeId/mappings/:sourceEvent` | `isOrganizationLoggedIn` | — |
-| PUT | `/config/:storeId/meta-capi` | `isOrganizationLoggedIn` | Meta CAPI |
-| DELETE | `/config/:storeId/meta-capi` | `isOrganizationLoggedIn` | — |
-| POST | `/config/:storeId/server-side` | `isOrganizationLoggedIn` | — |
-| POST | `/process-event` | `isOrganizationLoggedIn` | Process event (manual trigger) |
-| GET | `/status` | `isOrganizationLoggedIn` | — |
+| GET | `/tracking/config` | `isOrganizationLoggedIn` | Config CRUD |
+| POST | `/tracking/config` | `isOrganizationLoggedIn` | — |
+| DELETE | `/tracking/config/:storeId` | `isOrganizationLoggedIn` | — |
+| POST | `/tracking/config/:storeId/activate` | `isOrganizationLoggedIn` | Lifecycle |
+| POST | `/tracking/config/:storeId/disable` | `isOrganizationLoggedIn` | — |
+| PUT | `/tracking/config/:storeId/gtm` | `isOrganizationLoggedIn` | GTM |
+| DELETE | `/tracking/config/:storeId/gtm` | `isOrganizationLoggedIn` | — |
+| POST | `/tracking/config/:storeId/hash-pii` | `isOrganizationLoggedIn` | — |
+| POST | `/tracking/config/:storeId/mappings` | `isOrganizationLoggedIn` | Event Mappings |
+| DELETE | `/tracking/config/:storeId/mappings/:sourceEvent` | `isOrganizationLoggedIn` | — |
+| PUT | `/tracking/config/:storeId/meta-capi` | `isOrganizationLoggedIn` | Meta CAPI |
+| DELETE | `/tracking/config/:storeId/meta-capi` | `isOrganizationLoggedIn` | — |
+| POST | `/tracking/config/:storeId/server-side` | `isOrganizationLoggedIn` | — |
+| POST | `/tracking/process-event` | `isOrganizationLoggedIn` | Process event (manual trigger) |
+| GET | `/tracking/status` | `isOrganizationLoggedIn` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->
