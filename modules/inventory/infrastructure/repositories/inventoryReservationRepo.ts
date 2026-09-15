@@ -116,7 +116,7 @@ export async function createAtomic(params: CreateReservationParams): Promise<Inv
     return insertResult.rows[0] as InventoryReservation;
   } catch (err: unknown) {
     await client.query('ROLLBACK');
-    logger.warning(`createAtomic failed: ${(err as Error).message}`);
+    logger.warn(`createAtomic failed: ${(err as Error).message}`);
     throw err;
   } finally {
     client.release();
@@ -192,7 +192,7 @@ export async function release(inventoryReservationId: string): Promise<boolean> 
     return true;
   } catch (err: unknown) {
     await client.query('ROLLBACK');
-    logger.warning(`release failed for ${inventoryReservationId}: ${(err as Error).message}`);
+    logger.warn(`release failed for ${inventoryReservationId}: ${(err as Error).message}`);
     return false;
   } finally {
     client.release();
@@ -238,7 +238,7 @@ export async function releaseByOrder(orderId: string): Promise<number> {
     return count;
   } catch (err: unknown) {
     await client.query('ROLLBACK');
-    logger.warning(`releaseByOrder failed for order ${orderId}: ${(err as Error).message}`);
+    logger.warn(`releaseByOrder failed for order ${orderId}: ${(err as Error).message}`);
     return count;
   } finally {
     client.release();
@@ -287,7 +287,7 @@ export async function releaseExpired(): Promise<number> {
     return count;
   } catch (err: unknown) {
     await client.query('ROLLBACK');
-    logger.warning(`releaseExpired failed: ${(err as Error).message}`);
+    logger.warn(`releaseExpired failed: ${(err as Error).message}`);
     return count;
   } finally {
     client.release();

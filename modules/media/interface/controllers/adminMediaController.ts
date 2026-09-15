@@ -29,7 +29,7 @@ export const uploadMedia = async (req: TypedRequest, res: Response): Promise<voi
   try {
     res.redirect('/admin/content/media?success=Media uploaded successfully');
   } catch (error: unknown) {
-    logger.warning('Error uploading media:', error);
+    logger.warn('Error uploading media:', error);
     adminRespond(req, res, 'content/media/upload', {
       pageName: 'Upload Media',
       folders: [],
@@ -58,7 +58,7 @@ export const updateMedia = async (req: TypedRequest, res: Response): Promise<voi
     const { mediaId } = req.params;
     res.redirect(`/admin/content/media/${mediaId}?success=Media updated successfully`);
   } catch (error: unknown) {
-    logger.warning('Error updating media:', error);
+    logger.warn('Error updating media:', error);
     adminRespond(req, res, 'content/media/edit', {
       pageName: 'Edit Media',
       media: null,

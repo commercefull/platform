@@ -132,7 +132,7 @@ export class FailoverRoutingEngine {
             state.failures++;
             if (state.failures >= this.config.circuitBreakerThreshold) {
               state.tripped = true;
-              logger.warning(`Circuit breaker tripped for ${route.provider}`, {
+              logger.warn(`Circuit breaker tripped for ${route.provider}`, {
                 provider: route.provider,
                 failures: state.failures,
               });
@@ -140,7 +140,7 @@ export class FailoverRoutingEngine {
           }
         }
       } catch (err) {
-        logger.warning(`Health check failed for ${route.provider}`, {
+        logger.warn(`Health check failed for ${route.provider}`, {
           provider: route.provider,
           error: err instanceof Error ? err.message : 'unknown',
         });
@@ -218,7 +218,7 @@ export class FailoverRoutingEngine {
           });
 
           this.recordFailure(route.provider);
-          logger.warning(`Payment attempt failed for ${route.provider}`, {
+          logger.warn(`Payment attempt failed for ${route.provider}`, {
             provider: route.provider,
             attempt: attempt + 1,
             error: err instanceof Error ? err.message : 'unknown',
@@ -314,7 +314,7 @@ export class FailoverRoutingEngine {
       state.lastFailureAt = Date.now();
       if (state.failures >= this.config.circuitBreakerThreshold) {
         state.tripped = true;
-        logger.warning(`Circuit breaker tripped for ${provider}`, {
+        logger.warn(`Circuit breaker tripped for ${provider}`, {
           provider,
           failures: state.failures,
         });

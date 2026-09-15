@@ -100,7 +100,7 @@ export const createNotificationTemplate = async (req: TypedRequest, res: Respons
 
     res.redirect(`/hub/notifications/templates/${template.notificationTemplateId}?success=Notification template created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'notifications/templates/create', {
       pageName: 'Create Notification Template',
@@ -334,7 +334,7 @@ export const createWebhook = async (req: TypedRequest, res: Response): Promise<v
 
     res.redirect('/admin/notifications/webhooks?success=Webhook+created+successfully');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     adminRespond(req, res, 'notifications/webhooks/form', {
       pageName: 'Create Webhook',
       webhook: null,
@@ -350,7 +350,7 @@ export const deactivateWebhook = async (req: TypedRequest, res: Response): Promi
     await manageWebhooksUseCase.deactivate(webhookId);
     res.redirect('/admin/notifications/webhooks?success=Webhook+deactivated');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect('/admin/notifications/webhooks?error=' + encodeURIComponent((error as Error).message || 'Failed to deactivate webhook'));
   }
 };

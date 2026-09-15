@@ -239,7 +239,7 @@ export const addOrderNote = async (req: TypedRequest, res: Response): Promise<vo
     req.flash?.('success', 'Note added');
     res.redirect(`/admin/orders/${orderId}`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     req.flash?.('error', (error as Error).message || 'Failed to add note');
     res.redirect(`/admin/orders/${req.params.orderId}`);
   }
@@ -252,7 +252,7 @@ export const deleteOrderNote = async (req: TypedRequest, res: Response): Promise
     req.flash?.('success', 'Note deleted');
     res.redirect(`/admin/orders/${orderId}`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     req.flash?.('error', (error as Error).message || 'Failed to delete note');
     res.redirect(`/admin/orders/${req.params.orderId}`);
   }
@@ -302,7 +302,7 @@ export const updatePackageTracking = async (req: TypedRequest, res: Response): P
     req.flash?.('success', 'Tracking updated');
     res.redirect(`/admin/orders/${orderId}`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     req.flash?.('error', (error as Error).message || 'Failed to update tracking');
     res.redirect(`/admin/orders/${req.params.orderId}`);
   }

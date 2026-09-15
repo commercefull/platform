@@ -76,7 +76,7 @@ export const createShippingSurcharge = async (req: TypedRequest, res: Response):
 
     res.redirect(`/admin/shipping/surcharges/${surcharge.shippingSurchargeId}?success=Surcharge created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error creating shipping surcharge:', error);
+    logger.warn('Error creating shipping surcharge:', error);
     adminRespond(req, res, 'shipping/surcharges/create', {
       pageName: 'Create Shipping Surcharge',
       error: (error as Error).message || 'Failed to create surcharge',
@@ -162,7 +162,7 @@ export const updateShippingSurcharge = async (req: TypedRequest, res: Response):
 
     res.redirect(`/admin/shipping/surcharges/${surchargeId}?success=Surcharge updated successfully`);
   } catch (error: unknown) {
-    logger.warning('Error updating shipping surcharge:', error);
+    logger.warn('Error updating shipping surcharge:', error);
     const { surchargeId } = req.params;
     adminRespond(req, res, 'shipping/surcharges/edit', {
       pageName: 'Edit Shipping Surcharge',

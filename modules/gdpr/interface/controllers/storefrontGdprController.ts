@@ -136,7 +136,7 @@ export const createRequestSubmit = async (req: TypedRequest, res: Response): Pro
 
     res.redirect(`/gdpr/requests/${result.gdprDataRequestId}?success=Your data request has been submitted`);
   } catch (error: unknown) {
-    logger.warning('Error creating GDPR request:', error);
+    logger.warn('Error creating GDPR request:', error);
     storefrontRespond(req, res, 'gdpr/create-request', {
       pageName: 'New Data Request',
       error: (error as Error).message || 'Failed to create request',
@@ -170,7 +170,7 @@ export const cancelRequest = async (req: TypedRequest, res: Response): Promise<v
     req.flash('success', 'Your data request has been cancelled');
     res.redirect('/gdpr/requests');
   } catch (error: unknown) {
-    logger.warning('Error cancelling GDPR request:', error);
+    logger.warn('Error cancelling GDPR request:', error);
     req.flash('error', (error as Error).message || 'Failed to cancel request');
     res.redirect('/gdpr/requests');
   }

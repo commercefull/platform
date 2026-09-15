@@ -28,7 +28,7 @@ class ModuleRegistryClass {
    */
   register(manifest: ModuleManifest): void {
     if (this.manifests.has(manifest.name)) {
-      logger.warning('Module already registered, skipping', { module: manifest.name });
+      logger.warn('Module already registered, skipping', { module: manifest.name });
       return;
     }
     this.manifests.set(manifest.name, manifest);
@@ -177,7 +177,7 @@ class ModuleRegistryClass {
       try {
         return await this.flagProvider(manifest.featureFlagKey);
       } catch (err: unknown) {
-        logger.warning('Feature flag provider error, defaulting to enabled', {
+        logger.warn('Feature flag provider error, defaulting to enabled', {
           module: manifest.name,
           flag: manifest.featureFlagKey,
           error: (err as Error).message,
@@ -218,7 +218,7 @@ class ModuleRegistryClass {
     } while (this.enabledModules.size > enabledCount);
 
     for (const name of pending) {
-      logger.warning('Module disabled — unmet dependencies', {
+      logger.warn('Module disabled — unmet dependencies', {
         module: name,
         dependsOn: this.manifests.get(name)?.dependsOn,
       });

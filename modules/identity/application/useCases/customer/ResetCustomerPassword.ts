@@ -109,7 +109,7 @@ export class ResetCustomerPasswordUseCase {
         firstName: customer.firstName,
       });
     } catch (err) {
-      logger.warning('Failed to send password reset email', { error: err });
+      logger.warn('Failed to send password reset email', { error: err });
     }
 
     // Emit event

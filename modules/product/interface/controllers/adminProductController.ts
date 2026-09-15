@@ -237,7 +237,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
 
     res.redirect(`/admin/products/${product.productId}?success=Product created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     const [productTypes, categories] = await Promise.all([
       listProductTypesUseCase.execute().catch(() => []),
@@ -415,7 +415,7 @@ export const createProductCategory = async (req: TypedRequest, res: Response): P
     });
     res.redirect('/admin/products/categories?success=Category created successfully');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect('/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to create category'));
   }
 };
@@ -456,7 +456,7 @@ export const updateProductCategory = async (req: TypedRequest, res: Response): P
     });
     res.redirect('/admin/products/categories?success=Category updated successfully');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect('/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to update category'));
   }
 };
@@ -467,7 +467,7 @@ export const deleteProductCategory = async (req: TypedRequest, res: Response): P
     await manageProductCategoriesUseCase.softDelete(categoryId);
     res.redirect('/admin/products/categories?success=Category deleted successfully');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect('/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to delete category'));
   }
 };
@@ -496,7 +496,7 @@ export const createProductTag = async (req: TypedRequest, res: Response): Promis
     });
     res.redirect('/admin/products/tags?success=Tag created successfully');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect('/admin/products/tags?error=' + encodeURIComponent((error as Error).message || 'Failed to create tag'));
   }
 };
@@ -507,7 +507,7 @@ export const deleteProductTag = async (req: TypedRequest, res: Response): Promis
     await manageProductTagsUseCase.softDelete(tagId);
     res.redirect('/admin/products/tags?success=Tag deleted successfully');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect('/admin/products/tags?error=' + encodeURIComponent((error as Error).message || 'Failed to delete tag'));
   }
 };
@@ -547,7 +547,7 @@ export const createProductCollection = async (req: TypedRequest, res: Response):
     });
     res.redirect('/admin/products/collections?success=Collection created successfully');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect('/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to create collection'));
   }
 };
@@ -580,7 +580,7 @@ export const updateProductCollection = async (req: TypedRequest, res: Response):
     });
     res.redirect('/admin/products/collections?success=Collection updated successfully');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect('/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to update collection'));
   }
 };
@@ -591,7 +591,7 @@ export const deleteProductCollection = async (req: TypedRequest, res: Response):
     await manageProductCollectionsUseCase.softDelete(collectionId);
     res.redirect('/admin/products/collections?success=Collection deleted successfully');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect('/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to delete collection'));
   }
 };
@@ -614,7 +614,7 @@ export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<
     await manageProductQaUseCase.updateStatus(qaId, status);
     res.redirect(`/admin/products/${productId}?success=Q%26A status updated`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect(
       `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to update Q&A status'),
     );
@@ -643,7 +643,7 @@ export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promi
     await manageReviewMediaUseCase.deleteMedia(mediaId);
     res.redirect(`/admin/products/${productId}?success=Media deleted`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect(
       `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to delete media'),
     );
@@ -704,7 +704,7 @@ export const upsertProductPrice = async (req: TypedRequest, res: Response): Prom
     }
     res.redirect(`/admin/products/${productId}?success=Price saved`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to save price'));
   }
 };

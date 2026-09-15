@@ -1,7 +1,7 @@
 import { PersistedQueryStore, persistedQueryStore, initPersistedQueries } from './persistedQueries';
 
 jest.mock('./logger', () => ({
-  logger: { info: jest.fn(), warning: jest.fn(), error: jest.fn(), debug: jest.fn() },
+  logger: { info: jest.fn(), warn: jest.fn(), warning: jest.fn(), error: jest.fn(), debug: jest.fn() },
 }));
 
 describe('persistedQueries', () => {

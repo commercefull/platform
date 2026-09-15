@@ -107,7 +107,7 @@ export const createStore = async (req: TypedRequest, res: Response): Promise<voi
     );
     res.redirect(`/admin/stores/${result.storeId}?success=Store created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     const organizations = await organizationLookupAdapter.findAll().catch(() => []);
     const stores = await findActiveStoresUseCase.execute().catch(() => []);
     adminRespond(req, res, 'stores/create', {
@@ -155,7 +155,7 @@ export const updateStore = async (req: TypedRequest, res: Response): Promise<voi
     );
     res.redirect(`/admin/stores/${req.params.storeId}?success=Store updated successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     const organizations = await organizationLookupAdapter.findAll().catch(() => []);
     const stores = await findActiveStoresUseCase.execute().catch(() => []);
     adminRespond(req, res, 'stores/edit', {
@@ -191,7 +191,7 @@ export const assignUserToStore = async (req: TypedRequest, res: Response): Promi
     });
     res.redirect(`/admin/stores/${req.params.storeId}/users?success=User assigned successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect(
       `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to assign user')}`,
     );
@@ -203,7 +203,7 @@ export const removeUserFromStore = async (req: TypedRequest, res: Response): Pro
     await removeUserFromStoreUseCase.execute(req.params.userId, req.params.storeId);
     res.redirect(`/admin/stores/${req.params.storeId}/users?success=User removed successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect(
       `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to remove user')}`,
     );

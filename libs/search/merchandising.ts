@@ -91,7 +91,7 @@ export async function getMerchandisingRules(searchTerm?: string, categoryId?: st
       pinnedProducts: pinnedProducts.length > 0 ? pinnedProducts : undefined,
     };
   } catch (error) {
-    logger.warning('Failed to load merchandising rules', { error: (error as Error).message });
+    logger.warn('Failed to load merchandising rules', { error: (error as Error).message });
     return {};
   }
 }
@@ -113,7 +113,7 @@ export async function getCategoryManualOrder(categoryId: string): Promise<Manual
       productIds: results.map(r => r.productId),
     };
   } catch (error) {
-    logger.warning('Failed to load category manual order', { categoryId, error: (error as Error).message });
+    logger.warn('Failed to load category manual order', { categoryId, error: (error as Error).message });
     return undefined;
   }
 }

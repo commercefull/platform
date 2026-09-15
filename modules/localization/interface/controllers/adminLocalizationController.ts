@@ -45,7 +45,7 @@ export const createLanguage = async (req: TypedRequest, res: Response): Promise<
   try {
     res.redirect('/admin/settings/localization/languages?success=Language added successfully');
   } catch (error: unknown) {
-    logger.warning('Error creating language:', error);
+    logger.warn('Error creating language:', error);
     adminRespond(req, res, 'settings/localization/languages/create', {
       pageName: 'Add Language',
       error: (error as Error).message || 'Failed to add language',
@@ -65,7 +65,7 @@ export const updateLanguage = async (req: TypedRequest, res: Response): Promise<
   try {
     res.redirect('/admin/settings/localization/languages?success=Language updated successfully');
   } catch (error: unknown) {
-    logger.warning('Error updating language:', error);
+    logger.warn('Error updating language:', error);
     adminRespond(req, res, 'settings/localization/languages/edit', {
       pageName: 'Edit Language',
       language: null,
@@ -102,7 +102,7 @@ export const createCurrency = async (req: TypedRequest, res: Response): Promise<
   try {
     res.redirect('/admin/settings/localization/currencies?success=Currency added successfully');
   } catch (error: unknown) {
-    logger.warning('Error creating currency:', error);
+    logger.warn('Error creating currency:', error);
     adminRespond(req, res, 'settings/localization/currencies/create', {
       pageName: 'Add Currency',
       error: (error as Error).message || 'Failed to add currency',
@@ -122,7 +122,7 @@ export const updateCurrency = async (req: TypedRequest, res: Response): Promise<
   try {
     res.redirect('/admin/settings/localization/currencies?success=Currency updated successfully');
   } catch (error: unknown) {
-    logger.warning('Error updating currency:', error);
+    logger.warn('Error updating currency:', error);
     adminRespond(req, res, 'settings/localization/currencies/edit', {
       pageName: 'Edit Currency',
       currency: null,
@@ -159,7 +159,7 @@ export const createRegion = async (req: TypedRequest, res: Response): Promise<vo
   try {
     res.redirect('/admin/settings/localization/regions?success=Region added successfully');
   } catch (error: unknown) {
-    logger.warning('Error creating region:', error);
+    logger.warn('Error creating region:', error);
     adminRespond(req, res, 'settings/localization/regions/create', {
       pageName: 'Add Region',
       error: (error as Error).message || 'Failed to add region',
@@ -179,7 +179,7 @@ export const updateRegion = async (req: TypedRequest, res: Response): Promise<vo
   try {
     res.redirect('/admin/settings/localization/regions?success=Region updated successfully');
   } catch (error: unknown) {
-    logger.warning('Error updating region:', error);
+    logger.warn('Error updating region:', error);
     adminRespond(req, res, 'settings/localization/regions/edit', {
       pageName: 'Edit Region',
       region: null,

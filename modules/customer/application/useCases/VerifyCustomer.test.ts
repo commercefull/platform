@@ -4,7 +4,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
 }));
 
 import { VerifyCustomerUseCase, VerifyCustomerCommand } from './VerifyCustomer';
-import { CustomerNotFoundError, CustomerValidationError, CustomerAlreadyVerifiedError } from '../../domain/errors/CustomerErrors';
+import { CustomerNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 beforeEach(() => {
@@ -49,9 +49,12 @@ describe('VerifyCustomerUseCase', () => {
     await expect(useCase.execute(new VerifyCustomerCommand('missing'))).rejects.toThrow(CustomerNotFoundError);
   });
 
-  it('should throw CustomerAlreadyVerifiedError when already verified', async () => {
+  it('should return success when already verified', async () => {
     mockRepo.findById.mockResolvedValue({ customerId: 'c1', email: 'test@test.com', isVerified: true });
 
-    await expect(useCase.execute(new VerifyCustomerCommand('c1'))).rejects.toThrow(CustomerAlreadyVerifiedError);
+    const result = await useCase.execute(new VerifyCustomerCommand('c1'));
+    expect(result.success).toBe(true);
+    expect(result.customerId).toBe('c1');
+    expect(result.email).toBe('test@test.com');
   });
 });

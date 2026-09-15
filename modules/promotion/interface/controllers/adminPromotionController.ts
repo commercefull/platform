@@ -106,7 +106,7 @@ export const createPromotion = async (req: TypedRequest, res: Response): Promise
 
     res.redirect(`/hub/promotions/${result.promotionId}?success=Promotion created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     // Reload form with error
     adminRespond(req, res, 'promotions/create', {
@@ -292,7 +292,7 @@ export const previewPromotion = async (req: TypedRequest, res: Response): Promis
       finalTotal: context.subtotal - result.totalDiscountAmount,
     });
   } catch (error: unknown) {
-    logger.warning('Error previewing promotion:', error);
+    logger.warn('Error previewing promotion:', error);
     res.status(500).json({ success: false, error: (error as Error).message });
   }
 };

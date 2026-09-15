@@ -233,7 +233,7 @@ function registerOrderEventHandlers(): void {
             });
           }
         } catch (itemErr: unknown) {
-          logger.warning(`inventory reservation failed for item ${item.productId}: ${(itemErr as Error).message}`);
+          logger.warn(`inventory reservation failed for item ${item.productId}: ${(itemErr as Error).message}`);
           eventBus.emit('inventory.reservation_failed', {
             orderId,
             productId: item.productId,
@@ -257,7 +257,7 @@ function registerOrderEventHandlers(): void {
     try {
       const order = await OrderRepo.findById(orderId);
       if (!order) {
-        logger.warning(`order.paid: order ${orderId} not found`);
+        logger.warn(`order.paid: order ${orderId} not found`);
         return;
       }
 
@@ -331,7 +331,7 @@ function registerOrderEventHandlers(): void {
       // Try intelligent routing via OrderRouter first, fall back to default warehouse
       const sa = order.shippingAddress;
       if (!sa) {
-        logger.warning(`order.paid: order ${orderId} has no shipping address, skipping fulfillment`);
+        logger.warn(`order.paid: order ${orderId} has no shipping address, skipping fulfillment`);
         return;
       }
 
@@ -424,7 +424,7 @@ function registerOrderEventHandlers(): void {
         logger.info(`order.paid: OrderRouter fallback to warehouse for order ${orderId}: ${(routeErr as Error).message}`);
         const warehouse = await WarehouseRepo.findDefault();
         if (!warehouse) {
-          logger.warning(`order.paid: no default warehouse found for order ${orderId}, fulfillment must be created manually`);
+          logger.warn(`order.paid: no default warehouse found for order ${orderId}, fulfillment must be created manually`);
           return;
         }
         fulfillmentSourceId = warehouse.distributionWarehouseId;

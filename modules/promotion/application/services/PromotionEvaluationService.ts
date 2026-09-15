@@ -192,7 +192,7 @@ export class PromotionEvaluationService {
         result.totalDiscountAmount = context.subtotal;
       }
     } catch (error: unknown) {
-      logger.warning(`PromotionEvaluationService error: ${(error as Error).message}`);
+      logger.warn(`PromotionEvaluationService error: ${(error as Error).message}`);
     }
 
     return result;

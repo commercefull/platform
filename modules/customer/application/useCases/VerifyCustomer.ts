@@ -50,7 +50,7 @@ export class VerifyCustomerUseCase {
         success: true,
         customerId: customer.customerId,
         email: customer.email,
-        verifiedAt: customer.updatedAt.toISOString(),
+        verifiedAt: customer.updatedAt ? new Date(customer.updatedAt).toISOString() : new Date().toISOString(),
       };
     }
 

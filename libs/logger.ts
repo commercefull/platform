@@ -52,7 +52,7 @@ const isTestEnv = process.env.JEST_WORKER_ID !== undefined || process.env.NODE_E
 // Define log levels similar to Monolog.
 const levels = {
   error: 0, // Error conditions
-  warning: 1, // Alias of `warn`
+  warn: 1,
   info: 2, // Informational messages
   debug: 3, // Debug-level messages
   http: 4, // HTTP requests
@@ -172,10 +172,6 @@ const expressHttpLogger = expressWinston.logger({
   requestWhitelist: [], // Don't log request headers
   responseWhitelist: ['statusCode'], // Only log status code from response
 });
-
-const logRequest = (req: Request) => {
-  logger.info('Request', stringify(req));
-};
 
 // Export the logger and httpLogger
 export { logger, expressHttpLogger };

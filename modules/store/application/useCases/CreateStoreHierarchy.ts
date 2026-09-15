@@ -6,7 +6,7 @@
 
 import type { StoreRepository } from '../../domain/repositories/StoreRepository';
 import { StoreNotFoundError, StoreValidationError } from '../../domain/errors/StoreErrors';
-import { generateUUID } from 'libs/uuid';
+import { generateUUID } from '../../../../libs/uuid';
 
 export interface CreateStoreHierarchyInput {
   organizationId: string;

@@ -52,7 +52,7 @@ export const createGdprRequest = async (req: TypedRequest, res: Response): Promi
 
     res.redirect('/hub/gdpr?success=GDPR request created');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     res.redirect('/hub/gdpr?error=' + encodeURIComponent((error as Error).message));
   }

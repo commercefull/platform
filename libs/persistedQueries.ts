@@ -27,7 +27,7 @@ export class PersistedQueryStore {
    */
   loadFromFile(filePath: string): void {
     if (!existsSync(filePath)) {
-      logger.warning('Persisted queries file not found, skipping', { filePath });
+      logger.warn('Persisted queries file not found, skipping', { filePath });
       return;
     }
 

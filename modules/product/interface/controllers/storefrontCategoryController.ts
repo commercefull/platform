@@ -18,7 +18,7 @@ export const loadCategoriesForNavigation = async (req: TypedRequest, res: Respon
     const categories = await manageCategoriesUseCase.findForMenu();
     res.locals.categories = categories;
   } catch (error) {
-    logger.warning('Failed to load categories for navigation', { error });
+    logger.warn('Failed to load categories for navigation', { error });
     res.locals.categories = [];
   }
   next();

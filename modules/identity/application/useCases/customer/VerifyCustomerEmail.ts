@@ -151,7 +151,7 @@ export class VerifyCustomerEmailUseCase {
         firstName: customer.firstName,
       });
     } catch (err) {
-      logger.warning('Failed to send customer welcome email', { error: err });
+      logger.warn('Failed to send customer welcome email', { error: err });
     }
 
     return {

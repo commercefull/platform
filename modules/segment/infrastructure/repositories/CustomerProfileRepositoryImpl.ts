@@ -337,7 +337,7 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
         await this.computeAggregatesFromOrder(customerId);
         count++;
       } catch (error) {
-        logger.warning('Failed to compute aggregates for customer', { customerId, error: (error as Error).message });
+        logger.warn('Failed to compute aggregates for customer', { customerId, error: (error as Error).message });
       }
     }
 

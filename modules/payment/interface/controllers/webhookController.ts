@@ -61,7 +61,7 @@ export async function handleGatewayWebhook(req: Request, res: Response): Promise
         return;
       }
     } else {
-      logger.warning(`[webhook] No webhook secret configured for provider "${provider}" — skipping signature verification`);
+      logger.warn(`[webhook] No webhook secret configured for provider "${provider}" — skipping signature verification`);
     }
 
     // 4. Parse body

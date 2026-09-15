@@ -79,7 +79,7 @@ export const createReturnRule = async (req: TypedRequest, res: Response): Promis
 
     res.redirect('/hub/returns/rules?success=Return rule created');
   } catch (error: unknown) {
-    logger.warning('Error creating return rule:', error);
+    logger.warn('Error creating return rule:', error);
     res.redirect('/hub/returns/rules?error=' + encodeURIComponent((error as Error).message));
   }
 };
@@ -94,7 +94,7 @@ export const deleteReturnRule = async (req: TypedRequest, res: Response): Promis
     // Soft delete by deactivating
     res.json({ success: true });
   } catch (error: unknown) {
-    logger.warning('Error deleting return rule:', error);
+    logger.warn('Error deleting return rule:', error);
     res.status(500).json({ success: false, error: (error as Error).message });
   }
 };

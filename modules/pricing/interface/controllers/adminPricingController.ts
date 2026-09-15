@@ -43,7 +43,7 @@ export const createPriceList = async (req: TypedRequest, res: Response): Promise
   try {
     res.redirect('/admin/catalog/pricing?success=Price list created successfully');
   } catch (error: unknown) {
-    logger.warning('Error creating price list:', error);
+    logger.warn('Error creating price list:', error);
     adminRespond(req, res, 'catalog/pricing/lists/create', {
       pageName: 'Create Price List',
       error: (error as Error).message || 'Failed to create price list',
@@ -72,7 +72,7 @@ export const updatePriceList = async (req: TypedRequest, res: Response): Promise
     const { listId } = req.params;
     res.redirect(`/admin/catalog/pricing/lists/${listId}?success=Price list updated successfully`);
   } catch (error: unknown) {
-    logger.warning('Error updating price list:', error);
+    logger.warn('Error updating price list:', error);
     adminRespond(req, res, 'catalog/pricing/lists/edit', {
       pageName: 'Edit Price List',
       priceList: null,
@@ -104,7 +104,7 @@ export const listPriceRules = async (req: TypedRequest, res: Response): Promise<
       status: r.isActive ? 'active' : r.status === PricingRuleStatus.ACTIVE ? 'active' : 'inactive',
     })) as never[];
   } catch (error) {
-    logger.warning('Error fetching price rules:', error);
+    logger.warn('Error fetching price rules:', error);
   }
 
   adminRespond(req, res, 'catalog/pricing/rules/index', {
@@ -154,7 +154,7 @@ export const createPriceRule = async (req: TypedRequest, res: Response): Promise
 
     res.redirect('/admin/catalog/pricing/rules?success=Price rule created successfully');
   } catch (error: unknown) {
-    logger.warning('Error creating price rule:', error);
+    logger.warn('Error creating price rule:', error);
     adminRespond(req, res, 'catalog/pricing/rules/create', {
       pageName: 'Create Price Rule',
       error: (error as Error).message || 'Failed to create price rule',
@@ -169,7 +169,7 @@ export const viewPriceRule = async (req: TypedRequest, res: Response): Promise<v
   try {
     priceRule = await pricingRuleRepo.findById(ruleId);
   } catch (error) {
-    logger.warning('Error fetching price rule:', error);
+    logger.warn('Error fetching price rule:', error);
   }
 
   adminRespond(req, res, 'catalog/pricing/rules/view', {
@@ -185,7 +185,7 @@ export const editPriceRuleForm = async (req: TypedRequest, res: Response): Promi
   try {
     priceRule = await pricingRuleRepo.findById(ruleId);
   } catch (error) {
-    logger.warning('Error fetching price rule for edit:', error);
+    logger.warn('Error fetching price rule for edit:', error);
   }
 
   adminRespond(req, res, 'catalog/pricing/rules/edit', {
@@ -226,7 +226,7 @@ export const updatePriceRule = async (req: TypedRequest, res: Response): Promise
 
     res.redirect(`/admin/catalog/pricing/rules/${ruleId}?success=Price rule updated successfully`);
   } catch (error: unknown) {
-    logger.warning('Error updating price rule:', error);
+    logger.warn('Error updating price rule:', error);
     adminRespond(req, res, 'catalog/pricing/rules/edit', {
       pageName: 'Edit Price Rule',
       priceRule: null,
@@ -242,7 +242,7 @@ export const deletePriceRule = async (req: TypedRequest, res: Response): Promise
     await pricingRuleRepo.delete(ruleId);
     res.json({ success: true, message: 'Price rule deleted successfully' });
   } catch (error: unknown) {
-    logger.warning('Error deleting price rule:', error);
+    logger.warn('Error deleting price rule:', error);
     res.status(500).json({ success: false, error: (error as Error).message });
   }
 };

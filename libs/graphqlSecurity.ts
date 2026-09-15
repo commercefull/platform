@@ -51,7 +51,7 @@ const defaultFieldCosts: Record<string, FieldCost> = {
  */
 export function createDepthLimitRule(maxDepth: number = DEFAULT_MAX_DEPTH) {
   return depthLimit(maxDepth, { ignore: [] }, (depth: number) => {
-    logger.warning('GraphQL query exceeded depth limit', { depth, maxDepth: maxDepth });
+    logger.warn('GraphQL query exceeded depth limit', { depth, maxDepth: maxDepth });
   });
 }
 
@@ -91,7 +91,7 @@ function createComplexityRule(maxComplexity: number = DEFAULT_MAX_COMPLEXITY, fi
       Document: {
         leave() {
           if (totalComplexity > maxComplexity) {
-            logger.warning('GraphQL query exceeded complexity limit', {
+            logger.warn('GraphQL query exceeded complexity limit', {
               totalComplexity,
               maxComplexity,
             });

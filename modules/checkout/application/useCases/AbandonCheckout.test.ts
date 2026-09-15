@@ -5,7 +5,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
 
 jest.mock('../../../../libs/logger', () => ({
   __esModule: true,
-  logger: { warning: jest.fn(), info: jest.fn(), error: jest.fn() },
+  logger: { warning: jest.fn(), warn: jest.fn(), info: jest.fn(), error: jest.fn() },
 }));
 
 import { AbandonCheckoutUseCase, AbandonCheckoutCommand } from './AbandonCheckout';

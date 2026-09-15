@@ -45,7 +45,7 @@ class CronScheduler {
    */
   registerJob(id: string, name: string, handler: () => Promise<void>, intervalMs: number, startImmediately: boolean = false): void {
     if (this.jobs.has(id)) {
-      logger.warning('Job already exists', { id, hint: 'Use updateJob() to modify' });
+      logger.warn('Job already exists', { id, hint: 'Use updateJob() to modify' });
       return;
     }
 
@@ -130,7 +130,7 @@ class CronScheduler {
     }
 
     if (job.isRunning) {
-      logger.warning('Job already running', { id });
+      logger.warn('Job already running', { id });
       return null;
     }
 
@@ -344,7 +344,7 @@ export class JobScheduler {
         if (emailCreator) {
           await emailCreator(data);
         } else {
-          logger.warning('[JobScheduler.scheduleEmail] no email creator registered');
+          logger.warn('[JobScheduler.scheduleEmail] no email creator registered');
         }
       } catch (err: unknown) {
         logger.error(`[JobScheduler.scheduleEmail] error: ${(err as Error).message}`);
@@ -358,7 +358,7 @@ export class JobScheduler {
         if (reportCreator) {
           await reportCreator(data);
         } else {
-          logger.warning('[JobScheduler.scheduleReport] no report creator registered');
+          logger.warn('[JobScheduler.scheduleReport] no report creator registered');
         }
       } catch (err: unknown) {
         logger.error(`[JobScheduler.scheduleReport] error: ${(err as Error).message}`);
@@ -372,7 +372,7 @@ export class JobScheduler {
         if (notificationCreator) {
           await notificationCreator(data);
         } else {
-          logger.warning('[JobScheduler.scheduleNotification] no notification creator registered');
+          logger.warn('[JobScheduler.scheduleNotification] no notification creator registered');
         }
       } catch (err: unknown) {
         logger.error(`[JobScheduler.scheduleNotification] error: ${(err as Error).message}`);

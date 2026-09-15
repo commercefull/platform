@@ -80,7 +80,7 @@ export class NotificationDeliveryService {
     for (const channel of channels) {
       const provider = this.providers.find(p => p.supportsChannel(channel));
       if (!provider) {
-        logger.warning(`No delivery provider for channel: ${channel}`);
+        logger.warn(`No delivery provider for channel: ${channel}`);
         results.push(false);
         continue;
       }

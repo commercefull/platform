@@ -197,7 +197,7 @@ export class FulfillmentPlanner {
       });
     } else if (unassigned.length > 0) {
       // No warehouse fallback — put in a placeholder group
-      logger.warning(`FulfillmentPlanner: ${unassigned.length} items could not be assigned to any source`);
+      logger.warn(`FulfillmentPlanner: ${unassigned.length} items could not be assigned to any source`);
     }
 
     return { groups, isSplit: groups.length > 1 };

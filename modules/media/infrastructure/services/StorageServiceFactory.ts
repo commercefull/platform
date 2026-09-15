@@ -16,7 +16,7 @@ export class StorageServiceFactory {
     switch (storageType) {
       case 's3':
         if (!isProduction && !process.env.AWS_S3_BUCKET) {
-          logger.warning('AWS S3 configuration not found, falling back to local storage');
+          logger.warn('AWS S3 configuration not found, falling back to local storage');
           return this.createLocalStorage();
         }
 

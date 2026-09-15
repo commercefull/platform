@@ -46,7 +46,7 @@ export class AbandonCheckoutUseCase {
           await this.orderPlacementPort.cancelOrder(session.orderId, 'Checkout abandoned by customer');
         } catch (err: unknown) {
           // Log but don't fail — order may already be cancelled
-          logger.warning(`AbandonCheckout: could not cancel order ${session.orderId}: ${(err as Error).message}`);
+          logger.warn(`AbandonCheckout: could not cancel order ${session.orderId}: ${(err as Error).message}`);
         }
       }
 

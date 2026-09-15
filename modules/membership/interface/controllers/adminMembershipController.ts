@@ -90,7 +90,7 @@ export const createMembershipPlan = async (req: TypedRequest, res: Response): Pr
 
     res.redirect(`/hub/membership/plans/${plan.membershipPlanId}?success=Membership plan created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'programs/membership/plans/create', {
       pageName: 'Create Membership Plan',
@@ -341,7 +341,7 @@ export const bulkMembershipOperations = async (req: TypedRequest, res: Response)
           throw new Error(`Unknown operation: ${operation}`);
       }
     } catch (error: unknown) {
-      logger.warning('Error:', error);
+      logger.warn('Error:', error);
       results.push({ id: membershipId, status: 'error', error: (error as Error).message });
       failureCount++;
     }

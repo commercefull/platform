@@ -191,19 +191,19 @@ export class RoutePaymentUseCase {
     for (const route of routes) {
       const adapter = getPSPAdapter(route.provider);
       if (!adapter) {
-        logger.warning(`No PSP adapter found for provider ${route.provider}, skipping`);
+        logger.warn(`No PSP adapter found for provider ${route.provider}, skipping`);
         continue;
       }
 
       // Check currency support
       if (!route.supportsCurrency(command.currency)) {
-        logger.warning(`Provider ${route.provider} does not support currency ${command.currency}, skipping`);
+        logger.warn(`Provider ${route.provider} does not support currency ${command.currency}, skipping`);
         continue;
       }
 
       // Check amount support
       if (!route.supportsAmount(command.amount)) {
-        logger.warning(`Provider ${route.provider} does not support amount ${command.amount}, skipping`);
+        logger.warn(`Provider ${route.provider} does not support amount ${command.amount}, skipping`);
         continue;
       }
 

@@ -103,7 +103,7 @@ export const createSchedule = async (req: TypedRequest, res: Response): Promise<
     });
     res.redirect(`/admin/reporting/schedules/${result.reportScheduleId}?success=Scheduled report created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     const templatesUseCase = new GetReportTemplatesUseCase();
     const templates = await templatesUseCase.execute().catch(() => ({}));
     adminRespond(req, res, 'reporting/create-schedule', {
@@ -150,7 +150,7 @@ export const updateSchedule = async (req: TypedRequest, res: Response): Promise<
     });
     res.redirect(`/admin/reporting/schedules/${req.params.scheduleId}?success=Scheduled report updated successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     const scheduleUseCase = new GetReportScheduleUseCase();
     const schedule = await scheduleUseCase.execute(req.params.scheduleId).catch(() => null);
     adminRespond(req, res, 'reporting/edit-schedule', {
@@ -168,7 +168,7 @@ export const deleteSchedule = async (req: TypedRequest, res: Response): Promise<
     await useCase.execute(req.params.scheduleId);
     res.redirect('/admin/reporting/schedules?success=Scheduled report deleted successfully');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect(`/admin/reporting/schedules?error=${encodeURIComponent((error as Error).message || 'Failed to delete schedule')}`);
   }
 };

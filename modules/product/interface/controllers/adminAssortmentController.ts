@@ -60,7 +60,7 @@ export const createCategory = async (req: TypedRequest, res: Response): Promise<
 
     res.redirect(`/admin/catalog/categories/${category.productCategoryId}?success=Category created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error creating category:', error);
+    logger.warn('Error creating category:', error);
     const parentCategories = await manageCategoriesUseCase.findAll();
     adminRespond(req, res, 'catalog/categories/create', {
       pageName: 'Create Category',
@@ -133,7 +133,7 @@ export const updateCategory = async (req: TypedRequest, res: Response): Promise<
 
     res.redirect(`/admin/catalog/categories/${categoryId}?success=Category updated successfully`);
   } catch (error: unknown) {
-    logger.warning('Error updating category:', error);
+    logger.warn('Error updating category:', error);
     const category = await manageCategoriesUseCase.findOne(req.params.categoryId);
     const parentCategories = await manageCategoriesUseCase.findAll();
     adminRespond(req, res, 'catalog/categories/edit', {
@@ -194,7 +194,7 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
     // Placeholder - would need collection repository
     res.redirect('/admin/catalog/collections?success=Collection created successfully');
   } catch (error: unknown) {
-    logger.warning('Error creating collection:', error);
+    logger.warn('Error creating collection:', error);
     adminRespond(req, res, 'catalog/collections/create', {
       pageName: 'Create Collection',
       error: (error as Error).message || 'Failed to create collection',
@@ -223,7 +223,7 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
     const { collectionId } = req.params;
     res.redirect(`/admin/catalog/collections/${collectionId}?success=Collection updated successfully`);
   } catch (error: unknown) {
-    logger.warning('Error updating collection:', error);
+    logger.warn('Error updating collection:', error);
     adminRespond(req, res, 'catalog/collections/edit', {
       pageName: 'Edit Collection',
       collection: null,

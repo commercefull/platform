@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { TaxRate, TaxCategory, TaxZone, TaxRateType } from '../../taxTypes';
 import { taxQueryRepository, taxCommandRepository } from '../../application/wired';
-import { isUuid } from 'libs/uuid';
+import { isUuid } from '../../../../libs/uuid';
 
 export const getTaxRate = async (req: TypedRequest, res: Response) => {
   const { id } = req.params;

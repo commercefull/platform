@@ -356,7 +356,7 @@ export class PricingService {
           });
         }
       } catch (error: unknown) {
-        logger.warning('Membership benefits lookup failed for pricing calculation', { customerId, error: (error as Error).message });
+        logger.warn('Membership benefits lookup failed for pricing calculation', { customerId, error: (error as Error).message });
       }
     }
 
@@ -391,7 +391,7 @@ export class PricingService {
           // This should happen during checkout/order processing
         }
       } catch (error: unknown) {
-        logger.warning('Loyalty balance lookup failed for pricing calculation', { customerId, error: (error as Error).message });
+        logger.warn('Loyalty balance lookup failed for pricing calculation', { customerId, error: (error as Error).message });
       }
     }
 

@@ -91,7 +91,7 @@ export const createSupplier = async (req: TypedRequest, res: Response): Promise<
 
     res.redirect(`/hub/suppliers/${supplier.supplierId}?success=Supplier created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'operations/suppliers/create', {
       pageName: 'Create Supplier',

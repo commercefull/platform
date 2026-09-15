@@ -52,7 +52,7 @@ export const createShippingZone = async (req: TypedRequest, res: Response): Prom
 
     res.redirect(`/hub/shipping/zones/${zone.shippingZoneId}?success=Shipping zone created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'shipping/zones/create', {
       pageName: 'Create Shipping Zone',

@@ -69,7 +69,7 @@ export const createShippingMethod = async (req: TypedRequest, res: Response): Pr
 
     res.redirect(`/hub/shipping/methods/${method.shippingMethodId}?success=Shipping method created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'shipping/methods/create', {
       pageName: 'Create Shipping Method',

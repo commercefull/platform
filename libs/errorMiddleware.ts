@@ -55,7 +55,7 @@ export function errorMiddleware(err: unknown, req: Request, res: Response, _next
   if (appError.severity === 'error') {
     logger.error('Unhandled error', logMeta);
   } else if (appError.severity === 'warn') {
-    logger.warning('Client warning', logMeta);
+    logger.warn('Client warning', logMeta);
   } else {
     logger.info('Client error', logMeta);
   }

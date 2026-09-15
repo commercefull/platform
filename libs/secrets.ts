@@ -52,7 +52,7 @@ export function validateSecret(name: string, value: string | undefined): string 
     }
     // Generate ephemeral dev secret
     const devSecret = `dev-${name.toLowerCase()}-${Math.random().toString(36).slice(2)}-${Date.now()}`;
-    logger.warning(`Using ephemeral dev secret for ${name} — NOT SECURE, do not use in production`);
+    logger.warn(`Using ephemeral dev secret for ${name} — NOT SECURE, do not use in production`);
     return devSecret;
   }
 
@@ -60,14 +60,14 @@ export function validateSecret(name: string, value: string | undefined): string 
     if (isProduction()) {
       throw new Error(`Insecure placeholder value for secret: ${name}. Set a real secret in production.`);
     }
-    logger.warning(`Insecure placeholder value for secret: ${name} — replace before deploying to production`);
+    logger.warn(`Insecure placeholder value for secret: ${name} — replace before deploying to production`);
   }
 
   if (value.length < MIN_SECRET_LENGTH) {
     if (isProduction()) {
       throw new Error(`Secret ${name} must be at least ${MIN_SECRET_LENGTH} characters long (got ${value.length}).`);
     }
-    logger.warning(`Secret ${name} is shorter than ${MIN_SECRET_LENGTH} characters — insecure for production`);
+    logger.warn(`Secret ${name} is shorter than ${MIN_SECRET_LENGTH} characters — insecure for production`);
   }
 
   return value;

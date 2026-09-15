@@ -27,7 +27,7 @@ export function registerCheckoutEventHandlers(repo: CheckoutRepository): void {
     try {
       const session = await repo.findById(checkoutId);
       if (!session) {
-        logger.warning('checkout.payment_captured: session not found', { checkoutId });
+        logger.warn('checkout.payment_captured: session not found', { checkoutId });
         return;
       }
 
@@ -51,7 +51,7 @@ export function registerCheckoutEventHandlers(repo: CheckoutRepository): void {
     try {
       const session = await repo.findById(checkoutId);
       if (!session) {
-        logger.warning('checkout.failed: session not found', { checkoutId });
+        logger.warn('checkout.failed: session not found', { checkoutId });
         return;
       }
 

@@ -87,7 +87,7 @@ export const cancelSubscription = async (req: TypedRequest, res: Response) => {
     req.flash?.('success', 'Subscription cancelled successfully');
     res.redirect('/subscriptions');
   } catch (error) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     req.flash?.('error', 'Failed to cancel subscription');
     res.redirect('/subscriptions');
   }

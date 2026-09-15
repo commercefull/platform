@@ -16,11 +16,13 @@ describe('UpdateSystemConfigurationUseCase', () => {
       updateNotificationSettings: jest.fn(),
       updateIntegrationSettings: jest.fn(),
       updateMetadata: jest.fn(),
+      toJSON: jest.fn(),
       configId: 'cfg-1',
       systemMode: 'multi_store',
       platformSettings: { platformName: 'Updated' },
       updatedAt: new Date(),
     };
+    (mockConfig.toJSON as jest.Mock).mockReturnValue(mockConfig);
     mockRepo = {
       findById: jest.fn().mockResolvedValue(mockConfig),
       save: jest.fn().mockResolvedValue(mockConfig),

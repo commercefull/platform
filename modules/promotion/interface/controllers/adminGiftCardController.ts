@@ -94,7 +94,7 @@ export const createGiftCard = async (req: TypedRequest, res: Response): Promise<
 
     res.redirect(`/hub/promotions/gift-cards/${giftCard.promotionGiftCardId}?success=Gift card created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'promotions/gift-cards/create', {
       pageName: 'Create Gift Card',

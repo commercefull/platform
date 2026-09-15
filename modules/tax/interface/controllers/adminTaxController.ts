@@ -55,7 +55,7 @@ export const createTaxRate = async (req: TypedRequest, res: Response): Promise<v
 
     res.redirect('/hub/tax?success=Tax rate created');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     res.redirect('/hub/tax?error=' + encodeURIComponent((error as Error).message));
   }
@@ -103,7 +103,7 @@ export const createTaxZone = async (req: TypedRequest, res: Response): Promise<v
 
     res.redirect('/hub/tax?success=Tax zone created');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     res.redirect('/hub/tax?error=' + encodeURIComponent((error as Error).message));
   }
@@ -147,7 +147,7 @@ export const createTaxClass = async (req: TypedRequest, res: Response): Promise<
 
     res.redirect('/hub/tax?success=Tax class created');
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     res.redirect('/hub/tax?error=' + encodeURIComponent((error as Error).message));
   }
@@ -196,7 +196,7 @@ export const approveTaxExemption = async (req: TypedRequest, res: Response): Pro
     await approveTaxExemptionUseCase.execute(exemptionId, verifiedBy);
     res.redirect('/hub/tax/exemptions?success=Exemption approved');
   } catch (error: unknown) {
-    logger.warning('Error approving tax exemption:', error);
+    logger.warn('Error approving tax exemption:', error);
     res.redirect('/hub/tax/exemptions?error=' + encodeURIComponent((error as Error).message));
   }
 };
@@ -209,7 +209,7 @@ export const rejectTaxExemption = async (req: TypedRequest, res: Response): Prom
     await rejectTaxExemptionUseCase.execute(exemptionId, reason);
     res.redirect('/hub/tax/exemptions?success=Exemption rejected');
   } catch (error: unknown) {
-    logger.warning('Error rejecting tax exemption:', error);
+    logger.warn('Error rejecting tax exemption:', error);
     res.redirect('/hub/tax/exemptions?error=' + encodeURIComponent((error as Error).message));
   }
 };

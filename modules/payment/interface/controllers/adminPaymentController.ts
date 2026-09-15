@@ -67,7 +67,7 @@ export const createPaymentGateway = async (req: TypedRequest, res: Response): Pr
 
     res.redirect(`/hub/payments/gateways/${gateway.paymentGatewayId}?success=Payment gateway created successfully`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
 
     adminRespond(req, res, 'payments/gateways/create', {
       pageName: 'Create Payment Gateway',
@@ -228,7 +228,7 @@ export const updateDisputeStatus = async (req: TypedRequest, res: Response): Pro
     await managePaymentDisputesUseCase.updateStatus(disputeId, status, resolvedAt);
     res.redirect(`/admin/payments/disputes/${disputeId}?success=Status updated`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect(`/admin/payments/disputes/${req.params.disputeId}?error=${encodeURIComponent((error as Error).message)}`);
   }
 };
@@ -276,7 +276,7 @@ export const updatePaymentSettings = async (req: TypedRequest, res: Response): P
 
     res.redirect(`/admin/payments/settings?success=Settings updated`);
   } catch (error: unknown) {
-    logger.warning('Error:', error);
+    logger.warn('Error:', error);
     res.redirect(`/admin/payments/settings?error=${encodeURIComponent((error as Error).message)}`);
   }
 };
