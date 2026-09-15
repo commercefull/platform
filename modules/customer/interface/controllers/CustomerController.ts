@@ -24,8 +24,7 @@ import {
   SetDefaultAddressCommand,
   ManageAddressesUseCase,
 } from '../../application/useCases/ManageAddresses';
-import { customerDataRepository } from '../../application/wired';
-import customerGroupDataRepository from '../../infrastructure/repositories/CustomerGroupDataRepository';
+import { customerDataRepository, customerGroupDataRepository } from '../../application/wired';
 
 // ============================================================================
 // Helpers

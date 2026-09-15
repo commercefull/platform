@@ -14,7 +14,12 @@
  */
 
 import { calculateRate } from './calculateRate';
-import { ShippingSurcharge as ShippingSurchargeEntity, SurchargeContext } from '../../domain/entities/ShippingSurcharge';
+import {
+  ShippingSurcharge as ShippingSurchargeEntity,
+  SurchargeContext,
+  type SurchargeType,
+  type SurchargeCalculationType,
+} from '../../domain/entities/ShippingSurcharge';
 import type { ShippingSurchargePort } from '../../domain/repositories/ShippingSurchargePort';
 import type { ShippingRate, ShippingSurcharge } from '../../../../libs/db/types';
 import type { AttributeCondition } from '../../../../libs/rules/conditions';
@@ -102,8 +107,8 @@ export class ShippingRateCalculator {
     return new ShippingSurchargeEntity({
       shippingSurchargeId: raw.shippingSurchargeId,
       shippingRateId: raw.shippingRateId,
-      type: raw.type,
-      calculationType: raw.calculationType,
+      type: raw.type as SurchargeType,
+      calculationType: raw.calculationType as SurchargeCalculationType,
       value: parseFloat(raw.value),
       conditions: (raw.conditions as AttributeCondition[] | null) ?? null,
       isActive: raw.isActive,
