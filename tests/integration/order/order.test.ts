@@ -477,7 +477,7 @@ describe('Order Cancellation Guards', () => {
       '/customer/order',
       {
         customerEmail: 'cancel-test@example.com',
-        items: [{ productId: '10000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
         shippingAddress: {
           firstName: 'A',
           lastName: 'B',
@@ -504,7 +504,9 @@ describe('Order Cancellation Guards', () => {
 
     const response = await client.post(`/customer/order/${orderId}/cancel`, {}, { headers: { Authorization: `Bearer ${customerToken}` } });
     expect(response.status).toBe(400);
-    expect(response.data.error || response.data.message || JSON.stringify(response.data)).toMatch(/cannot be cancelled/i);
+    const err = response.data.error;
+    const errMsg = typeof err === 'string' ? err : (err?.message || response.data.message || JSON.stringify(response.data));
+    expect(errMsg).toMatch(/cannot be cancelled/i);
 
     // Cleanup
     await client.delete(`/business/orders/${orderId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
@@ -539,7 +541,7 @@ describe('Order Event Emission', () => {
       '/customer/order',
       {
         customerEmail: 'event-test@example.com',
-        items: [{ productId: '10000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
         shippingAddress: {
           firstName: 'A',
           lastName: 'B',
@@ -571,7 +573,7 @@ describe('Order Event Emission', () => {
       '/customer/order',
       {
         customerEmail: 'cancel-event@example.com',
-        items: [{ productId: '10000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
         shippingAddress: {
           firstName: 'A',
           lastName: 'B',
@@ -619,7 +621,7 @@ describe('Order Optional Features', () => {
       {
         customerEmail: 'eur@example.com',
         currencyCode: 'EUR',
-        items: [{ productId: '10000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
         shippingAddress: {
           firstName: 'A',
           lastName: 'B',
@@ -647,7 +649,7 @@ describe('Order Optional Features', () => {
         hasGiftWrapping: true,
         giftMessage: 'Happy Birthday!',
         isGift: true,
-        items: [{ productId: '10000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
         shippingAddress: {
           firstName: 'A',
           lastName: 'B',

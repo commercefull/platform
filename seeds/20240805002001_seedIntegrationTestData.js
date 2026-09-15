@@ -531,7 +531,7 @@ exports.seed = async function (knex) {
 
     if (!existingSubProduct) {
       // Use the product ID that gets created by the product seed file
-      const productId = '10000000-0000-0000-0000-000000000001';
+      const productId = '00000000-0000-0000-0000-000000000001';
       await knex('subscriptionProduct')
         .insert({
           subscriptionProductId: TEST_SUBSCRIPTION_PRODUCT_ID,

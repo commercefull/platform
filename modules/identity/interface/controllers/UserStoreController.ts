@@ -43,6 +43,14 @@ export const assignUserToStore = async (
   req: TypedRequest<Record<string, string>, unknown, AssignUserBody>,
   res: Response,
 ): Promise<void> => {
+  if (!req.body.storeId) {
+    res.status(400).json({ success: false, error: 'storeId is required' });
+    return;
+  }
+  if (!req.body.role) {
+    res.status(400).json({ success: false, error: 'role is required' });
+    return;
+  }
   const result = await assignUserToStoreUseCase.execute({
     userId: req.params.userId,
     storeId: req.body.storeId,

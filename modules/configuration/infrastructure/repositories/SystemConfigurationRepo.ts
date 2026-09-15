@@ -40,8 +40,8 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
         `UPDATE "systemConfiguration" SET
           "systemMode" = $1, features = $2, "organizationSettings" = $3,
           "platformSettings" = $4, "securitySettings" = $5, "notificationSettings" = $6,
-          "integrationSettings" = $7, metadata = $8, "updatedAt" = $9
-        WHERE "configId" = $10`,
+          "integrationSettings" = $7, metadata = $8, "isActive" = $9, "updatedAt" = $10
+        WHERE "configId" = $11`,
         [
           config.systemMode,
           JSON.stringify(config.features),
@@ -51,6 +51,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
           JSON.stringify(config.notificationSettings),
           JSON.stringify(config.integrationSettings),
           JSON.stringify(config.metadata || {}),
+          config.isActive,
           now,
           config.configId,
         ],
@@ -60,8 +61,8 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
         `INSERT INTO "systemConfiguration" (
           "configId", "systemMode", features, "organizationSettings",
           "platformSettings", "securitySettings", "notificationSettings",
-          "integrationSettings", metadata, "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+          "integrationSettings", metadata, "isActive", "createdAt", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [
           config.configId,
           config.systemMode,
@@ -72,6 +73,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
           JSON.stringify(config.notificationSettings),
           JSON.stringify(config.integrationSettings),
           JSON.stringify(config.metadata || {}),
+          config.isActive,
           now,
           now,
         ],
@@ -101,6 +103,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
       notificationSettings: typeof row.notificationSettings === 'string' ? JSON.parse(row.notificationSettings) : row.notificationSettings,
       integrationSettings: typeof row.integrationSettings === 'string' ? JSON.parse(row.integrationSettings) : row.integrationSettings,
       metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : (row.metadata as Record<string, unknown> | undefined),
+      isActive: row.isActive,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

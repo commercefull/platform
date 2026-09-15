@@ -206,6 +206,8 @@ describe('Marketplace Module Integration Tests', () => {
   describe('Payouts', () => {
     it('POST /business/payouts creates a payout', async () => {
       if (!orgToken || !vendorId) return;
+      // Re-approve the vendor (it was suspended earlier in the test flow)
+      await client.post(`/business/vendors/${vendorId}/approve`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       const resp = await client.post(
         '/business/payouts',
         { vendorId, amount: 50.0, currency: 'USD' },

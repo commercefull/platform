@@ -7,10 +7,9 @@
 export interface NotificationUnsubscribe {
   notificationUnsubscribeId: string;
   userId: string;
-  userType: string;
-  channel: string;
-  type?: string;
+  category?: string;
   reason?: string;
+  isGlobal?: boolean;
   createdAt: Date;
 }
 

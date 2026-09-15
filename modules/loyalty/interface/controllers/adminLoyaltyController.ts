@@ -50,7 +50,7 @@ export const createLoyaltyTier = async (req: TypedRequest, res: Response): Promi
 
     res.redirect(`/hub/loyalty/tiers/${tier.tierId}?success=Loyalty tier created successfully`);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     adminRespond(req, res, 'programs/loyalty/tiers/create', {
       pageName: 'Create Loyalty Tier',
@@ -170,7 +170,7 @@ export const createLoyaltyReward = async (req: TypedRequest, res: Response): Pro
 
     res.redirect(`/hub/loyalty/rewards/${reward.rewardId}?success=Loyalty reward created successfully`);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     adminRespond(req, res, 'programs/loyalty/rewards/create', {
       pageName: 'Create Loyalty Reward',

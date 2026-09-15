@@ -285,7 +285,7 @@ describe('Support Feature Tests', () => {
       const response = await client.post(
         '/customer/support/alerts/stock',
         {
-          productId: '10000000-0000-0000-0000-000000000001',
+          productId: '00000000-0000-0000-0000-000000000001',
         },
         {
           headers: { Authorization: `Bearer ${customerToken}` },
@@ -299,7 +299,7 @@ describe('Support Feature Tests', () => {
       const response = await client.post(
         '/customer/support/alerts/price',
         {
-          productId: '10000000-0000-0000-0000-000000000001',
+          productId: '00000000-0000-0000-0000-000000000001',
           targetPrice: 50.0,
         },
         {

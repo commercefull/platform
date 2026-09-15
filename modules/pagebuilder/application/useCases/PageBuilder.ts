@@ -25,9 +25,9 @@ import { eventBus } from '../../../../libs/events/eventBus';
 // ── Commands ───────────────────────────────────────────────────
 
 export interface CreateDraftCommand {
-  storeId: string;
+  storeId?: string;
   organizationId: string;
-  themeId: string;
+  themeId?: string;
   title: string;
   slug: string;
   pageType: string;
@@ -88,15 +88,13 @@ export class ManageDraftsUseCase {
   async create(cmd: CreateDraftCommand): Promise<PageDraft> {
     if (!cmd.title?.trim()) throw new PageDraftValidationError('Title is required');
     if (!cmd.slug?.trim()) throw new PageDraftValidationError('Slug is required');
-    if (!cmd.storeId) throw new PageDraftValidationError('Store ID is required');
-    if (!cmd.themeId) throw new PageDraftValidationError('Theme ID is required');
 
     const draft = PageDraft.create({
       draftId: generateUUID(),
       pageId: cmd.pageId,
-      storeId: cmd.storeId,
+      storeId: cmd.storeId || '',
       organizationId: cmd.organizationId,
-      themeId: cmd.themeId,
+      themeId: cmd.themeId || '',
       title: cmd.title,
       slug: cmd.slug,
       pageType: cmd.pageType || 'page',
@@ -130,6 +128,10 @@ export class ManageDraftsUseCase {
 
   async listByOrganization(organizationId: string): Promise<PageDraft[]> {
     return this.repo.findByOrganization(organizationId);
+  }
+
+  async listAll(): Promise<PageDraft[]> {
+    return this.repo.findAll();
   }
 
   async updateTitle(draftId: string, title: string): Promise<PageDraft> {
@@ -315,7 +317,7 @@ export class PreviewDraftUseCase {
     const draft = await this.repo.findById(draftId);
     if (!draft) throw new PageDraftNotFoundError(draftId);
 
-    const resolved = await themeRegistry.resolveThemeForStore(draft.storeId, this.themeRepo);
+    const resolved = draft.storeId ? await themeRegistry.resolveThemeForStore(draft.storeId, this.themeRepo) : null;
 
     const blockTypes = new Map<string, { name: string; icon: string; category: string }>();
     for (const block of draft.blocks) {
@@ -330,7 +332,7 @@ export class PreviewDraftUseCase {
     return {
       draft,
       theme: {
-        themeId: resolved?.theme.themeId || draft.themeId,
+        themeId: resolved?.theme.themeId || draft.themeId || '',
         slug: resolved?.theme.slug || '',
         name: resolved?.theme.name || 'Unknown',
         cssVariables: resolved?.cssVariables || {},

@@ -106,7 +106,7 @@ export const createSubscriptionPlan = async (req: TypedRequest, res: Response): 
 
     res.redirect(`/hub/subscription/plans/${plan.subscriptionPlanId}?success=Subscription plan created successfully`);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     adminRespond(req, res, 'programs/subscription/plans/create', {
       pageName: 'Create Subscription Plan',

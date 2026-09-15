@@ -7,7 +7,7 @@ import { generateUUID } from '../../../../libs/uuid';
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
 import { BasketSnapshotPort } from '../../application/ports/BasketSnapshotPort';
 import { CheckoutSession } from '../../domain/entities/CheckoutSession';
-import { CheckoutValidationError } from '../../domain/errors/CheckoutErrors';
+import { CheckoutValidationError, CheckoutBasketNotFoundError } from '../../domain/errors/CheckoutErrors';
 import { Money } from '../../../../libs/money';
 import { eventBus } from '../../../../libs/events/eventBus';
 
@@ -128,7 +128,7 @@ export class InitiateCheckoutUseCase {
   async execute(command: InitiateCheckoutCommand): Promise<CheckoutResponse> {
     const basket = await this.basketSnapshotPort.getSnapshot(command.basketId);
     if (!basket) {
-      throw new CheckoutValidationError('Basket not found');
+      throw new CheckoutBasketNotFoundError(command.basketId);
     }
 
     if (basket.isEmpty) {

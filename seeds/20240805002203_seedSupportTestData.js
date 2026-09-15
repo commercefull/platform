@@ -46,7 +46,7 @@ const PRICE_ALERT_IDS = {
 // Test customer ID (should exist from customer seeds)
 const TEST_CUSTOMER_ID = '01910000-0000-7000-8000-000000000001';
 // Test product ID (should exist from product seeds)
-const TEST_PRODUCT_ID = '01912000-0000-7000-8000-000000000001';
+const TEST_PRODUCT_ID = '00000000-0000-0000-0000-000000000001';
 
 exports.seed = async function (knex) {
   // Clean up existing test data in reverse order of dependencies
@@ -404,7 +404,7 @@ exports.seed = async function (knex) {
         productName: 'Test Product',
         status: 'active',
         alertType: 'percentage_drop',
-        percentageThreshold: 20,
+        percentageDrop: 20,
         originalPrice: 100.0,
         notificationChannel: 'email',
         notificationCount: 0,

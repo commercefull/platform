@@ -102,7 +102,7 @@ export class DownloadImageUseCase {
       if (error instanceof MediaDownloadError || error instanceof InvalidImageUrlError) {
         throw error;
       }
-      logger.warn(`DownloadImageUseCase fetch error: ${(error as Error).message}`);
+      logger.warning(`DownloadImageUseCase fetch error: ${(error as Error).message}`);
       throw new MediaDownloadError(`Failed to download image: ${(error as Error).message}`);
     }
   }

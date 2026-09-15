@@ -74,6 +74,13 @@ class ThemeController {
   async createTheme(req: TypedRequest, res: Response) {
     try {
       const body = req.body as Record<string, unknown>;
+      // Normalize settingsSchema: accept either {groups:[...]} or a flat array of settings
+      let settingsSchema = body.settingsSchema as CreateThemeCommand['themeData']['settingsSchema'];
+      if (Array.isArray(body.settingsSchema)) {
+        settingsSchema = { groups: [{ groupId: 'general', label: 'General', settings: body.settingsSchema as never[] }] };
+      } else if (body.settingsSchema && !Array.isArray((body.settingsSchema as Record<string, unknown>).groups)) {
+        settingsSchema = { groups: [] };
+      }
       const command = new CreateThemeCommand({
         slug: body.slug as string,
         name: body.name as string,
@@ -82,14 +89,14 @@ class ThemeController {
         author: body.author as string | undefined,
         screenshotUrl: body.screenshotUrl as string | undefined,
         previewUrl: body.previewUrl as string | undefined,
-        settingsSchema: body.settingsSchema as CreateThemeCommand['themeData']['settingsSchema'],
-        defaultSettings: body.defaultSettings as Record<string, string | number | boolean>,
-        layout: body.layout as CreateThemeCommand['themeData']['layout'],
-        components: body.components as CreateThemeCommand['themeData']['components'],
+        settingsSchema,
+        defaultSettings: (body.defaultSettings as Record<string, string | number | boolean>) || {},
+        layout: (body.layout as CreateThemeCommand['themeData']['layout']) || { regions: [], pageLayouts: [] },
+        components: (body.components as CreateThemeCommand['themeData']['components']) || { components: [] },
         assets: body.assets as CreateThemeCommand['themeData']['assets'],
         tags: body.tags as string[] | undefined,
         isCustomizable: body.isCustomizable as boolean | undefined,
-        organizationId: body.organizationId as string | undefined,
+        organizationId: (body.organizationId as string | undefined) || (req.user?.id as string | undefined),
       });
 
       const result = await manageThemesUseCase.create(command);
@@ -173,7 +180,7 @@ class ThemeController {
       const command = new CreateThemeOverrideCommand({
         storeId: body.storeId as string,
         themeId: body.themeId as string,
-        organizationId: body.organizationId as string,
+        organizationId: (body.organizationId as string) || (req.user?.id as string) || '',
         settings: body.settings as Record<string, string | number | boolean> | undefined,
         customCss: body.customCss as string | undefined,
         customLogoUrl: body.customLogoUrl as string | undefined,
@@ -222,7 +229,11 @@ class ThemeController {
   async assignTheme(req: TypedRequest, res: Response) {
     try {
       const body = req.body as Record<string, unknown>;
-      const command = new AssignThemeToStoreCommand(req.params.storeId, body.themeId as string, body.organizationId as string);
+      const command = new AssignThemeToStoreCommand(
+        req.params.storeId,
+        body.themeId as string,
+        (body.organizationId as string) || (req.user?.id as string) || '',
+      );
       await assignThemeUseCase.execute(command);
       res.json({ success: true, message: 'Theme assigned to store' });
     } catch (error) {

@@ -56,9 +56,7 @@ export class UnsubscribeNotificationUseCase {
 
     await this.unsubscribeRepo.unsubscribe({
       userId: command.userId,
-      userType: command.userType,
-      channel: command.channel,
-      type: command.type,
+      category: command.type || command.channel,
       reason: command.reason,
     });
 

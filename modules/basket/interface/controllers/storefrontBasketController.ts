@@ -86,7 +86,7 @@ export const addToBasket = async (req: TypedRequest, res: Response): Promise<voi
     const redirectTo = (req.body as RequestBody).redirectTo || '/basket';
     res.redirect(redirectTo + '?success=' + encodeURIComponent('Item added to cart'));
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     res.redirect('/?error=' + encodeURIComponent((error as Error).message || 'Failed to add item to cart'));
   }

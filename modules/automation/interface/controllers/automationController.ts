@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { TypedRequest } from '../../../../libs/types/express';
+import { logger } from '../../../../libs/logger';
 import {
   createAutomationRuleUseCase,
   updateAutomationRuleUseCase,
@@ -38,11 +39,12 @@ class AutomationController {
       {
         name: string;
         description?: string;
-        triggerType: string;
-        triggerConfig: Record<string, unknown>;
+        triggerType?: string;
+        triggerConfig?: Record<string, unknown>;
+        trigger?: Record<string, unknown>;
         conditions?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[]; dataPath?: string }>;
         conditionMatchMode?: 'all' | 'any';
-        actions: Array<{ type: string; config: Record<string, unknown>; delayMs?: number }>;
+        actions: Array<{ type: string; config?: Record<string, unknown>; channel?: string; delayMs?: number }>;
         actionExecutionMode?: 'sequential' | 'parallel';
         priority?: number;
         organizationId?: string;
@@ -52,9 +54,35 @@ class AutomationController {
     res: Response,
   ): Promise<void> {
     try {
-      const rule = await createAutomationRuleUseCase.execute(req.body as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
+      const body = req.body;
+      // Normalize: accept "trigger" as shorthand for triggerType/triggerConfig
+      let triggerType = body.triggerType || '';
+      let triggerConfig = body.triggerConfig || {};
+      if (body.trigger) {
+        const evt = body.trigger.event || body.trigger.type || '';
+        if (evt) {
+          triggerType = 'event';
+          triggerConfig = { eventName: String(evt), ...(body.trigger as Record<string, unknown>) };
+        }
+      }
+      // Normalize: accept "channel" as shorthand for config
+      const actions = (body.actions || []).map(a => ({
+        type: a.type,
+        config: a.config || (a.channel ? { channel: a.channel } : {}),
+        delayMs: a.delayMs,
+      }));
+      const payload = {
+        ...body,
+        triggerType,
+        triggerConfig,
+        actions,
+        organizationId: body.organizationId || (req.user as { id?: string })?.id || '',
+        createdBy: body.createdBy || (req.user as { id?: string })?.id || '',
+      };
+      const rule = await createAutomationRuleUseCase.execute(payload as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
       res.status(201).json({ success: true, data: rule.toJSON() });
     } catch (error) {
+      logger.error('Automation createRule error:', error);
       if (error instanceof InvalidAutomationRuleError) {
         res.status(400).json({ success: false, error: error.message });
       } else {

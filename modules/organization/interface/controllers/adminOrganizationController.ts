@@ -27,7 +27,7 @@ export const createOrganization = async (req: TypedRequest, res: Response): Prom
   try {
     res.redirect('/admin/operations/organizations?success=Organization created successfully');
   } catch (error: unknown) {
-    logger.warn('Error creating organization:', error);
+    logger.warning('Error creating organization:', error);
     adminRespond(req, res, 'operations/organizations/create', {
       pageName: 'Add Organization',
       error: (error as Error).message || 'Failed to create organization',
@@ -56,7 +56,7 @@ export const updateOrganization = async (req: TypedRequest, res: Response): Prom
     const { organizationId } = req.params;
     res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization updated successfully`);
   } catch (error: unknown) {
-    logger.warn('Error updating organization:', error);
+    logger.warning('Error updating organization:', error);
     adminRespond(req, res, 'operations/organizations/edit', {
       pageName: 'Edit Organization',
       organization: null,

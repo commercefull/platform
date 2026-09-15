@@ -6,7 +6,7 @@ import type { CredentialType } from '../../domain/entities/IntegrationCredential
 
 class IntegrationController {
   async createIntegration(req: TypedRequest, res: Response): Promise<void> {
-    const { organizationId } = req.user!;
+    const organizationId = (req.user as { id?: string })?.id;
     if (!organizationId) {
       res.status(401).json({ success: false, error: 'Organization not found' });
       return;
@@ -29,7 +29,7 @@ class IntegrationController {
   }
 
   async listIntegrations(req: TypedRequest, res: Response): Promise<void> {
-    const { organizationId } = req.user!;
+    const organizationId = (req.user as { id?: string })?.id;
     if (!organizationId) {
       res.status(401).json({ success: false, error: 'Organization not found' });
       return;

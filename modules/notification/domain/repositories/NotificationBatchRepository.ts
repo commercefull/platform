@@ -7,9 +7,10 @@
 export interface NotificationBatch {
   notificationBatchId: string;
   name: string;
+  type: string;
   channel: string;
   status: string;
-  totalCount: number;
+  targetCount: number;
   sentCount: number;
   failedCount: number;
   scheduledAt?: Date;
@@ -20,7 +21,7 @@ export interface NotificationBatch {
 }
 
 export interface NotificationBatchRepository {
-  create(params: Pick<NotificationBatch, 'name' | 'channel' | 'totalCount' | 'scheduledAt'>): Promise<NotificationBatch | null>;
+  create(params: Pick<NotificationBatch, 'name' | 'type' | 'channel' | 'targetCount' | 'scheduledAt'>): Promise<NotificationBatch | null>;
   findById(notificationBatchId: string): Promise<NotificationBatch | null>;
   updateProgress(notificationBatchId: string, sentCount: number, failedCount: number): Promise<void>;
   complete(notificationBatchId: string): Promise<void>;

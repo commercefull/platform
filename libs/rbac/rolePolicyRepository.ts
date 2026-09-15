@@ -54,7 +54,7 @@ export async function loadOrgRolePolicies(): Promise<void> {
     setOrgPolicyCache(cache);
     logger.info('Organization role policies loaded', { orgCount: cache.size });
   } catch (err: unknown) {
-    logger.warn('Failed to load org role policies, using defaults only', {
+    logger.warning('Failed to load org role policies, using defaults only', {
       error: (err as Error).message,
     });
     clearOrgPolicyCache();

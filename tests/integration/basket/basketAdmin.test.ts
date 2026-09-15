@@ -57,7 +57,7 @@ describe('Basket Admin/Business API Tests', () => {
     await client.post(
       `/customer/basket/${basketId}/items`,
       {
-        productId: '10000000-0000-0000-0000-000000000001',
+        productId: '00000000-0000-0000-0000-000000000001',
         sku: 'TEST-SKU-001',
         name: 'Test Product',
         quantity: 2,

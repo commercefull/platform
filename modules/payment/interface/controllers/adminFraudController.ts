@@ -55,7 +55,7 @@ export const createFraudRule = async (req: TypedRequest, res: Response): Promise
 
     res.redirect('/hub/payment/fraud/rules?success=Fraud rule created');
   } catch (error: unknown) {
-    logger.warn('Error creating fraud rule:', error);
+    logger.warning('Error creating fraud rule:', error);
     res.redirect('/hub/payment/fraud/rules?error=' + encodeURIComponent((error as Error).message));
   }
 };
@@ -91,7 +91,7 @@ export const updateFraudRule = async (req: TypedRequest, res: Response): Promise
 
     res.redirect('/hub/payment/fraud/rules?success=Fraud rule updated');
   } catch (error: unknown) {
-    logger.warn('Error updating fraud rule:', error);
+    logger.warning('Error updating fraud rule:', error);
     res.redirect('/hub/payment/fraud/rules?error=' + encodeURIComponent((error as Error).message));
   }
 };
@@ -106,7 +106,7 @@ export const deleteFraudRule = async (req: TypedRequest, res: Response): Promise
     await fraudRepo.deleteRule(fraudRuleId);
     res.json({ success: true });
   } catch (error: unknown) {
-    logger.warn('Error deleting fraud rule:', error);
+    logger.warning('Error deleting fraud rule:', error);
     res.status(500).json({ success: false, error: (error as Error).message });
   }
 };
@@ -140,7 +140,7 @@ export const simulateFraudScreening = async (req: TypedRequest, res: Response): 
       triggeredRules: result.triggeredRules,
     });
   } catch (error: unknown) {
-    logger.warn('Error simulating fraud screening:', error);
+    logger.warning('Error simulating fraud screening:', error);
     res.status(500).json({ success: false, error: (error as Error).message });
   }
 };

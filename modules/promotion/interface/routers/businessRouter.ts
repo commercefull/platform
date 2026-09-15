@@ -45,6 +45,7 @@ router.get('/gift-cards', asyncHandler(giftCardController.getGiftCards));
 router.get('/gift-cards/:id', asyncHandler(giftCardController.getGiftCard));
 router.post('/gift-cards', asyncHandler(giftCardController.createGiftCard));
 router.post('/gift-cards/:id/activate', asyncHandler(giftCardController.activateGiftCard));
+router.post('/gift-cards/:id/assign', asyncHandler(giftCardController.assignGiftCard));
 router.post('/gift-cards/:id/refund', asyncHandler(giftCardController.refundToGiftCard));
 router.post('/gift-cards/:id/cancel', asyncHandler(giftCardController.cancelGiftCard));
 

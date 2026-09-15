@@ -101,9 +101,16 @@ export class MediaController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      res.status(500).json({
+      // Map client-side errors to 400
+      const isClientError = errorMessage.includes('invalid') || errorMessage.includes('Invalid') ||
+        errorMessage.includes('Unexpected end') || errorMessage.includes('unsupported') ||
+        errorMessage.includes('Unsupported') || errorMessage.includes('JSON') ||
+        (error as { code?: string }).code === 'LIMIT_FILE_SIZE' ||
+        (error as { code?: string }).code === 'LIMIT_UNEXPECTED_FILE';
+      const status = isClientError ? 400 : 500;
+      res.status(status).json({
         success: false,
-        message: 'Failed to process image',
+        message: status === 400 ? errorMessage : 'Failed to process image',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }

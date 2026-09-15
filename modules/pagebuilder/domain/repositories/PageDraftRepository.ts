@@ -9,6 +9,7 @@ export interface PageDraftRepository {
   findByPageId(pageId: string): Promise<PageDraft | null>;
   findByStore(storeId: string): Promise<PageDraft[]>;
   findByOrganization(organizationId: string): Promise<PageDraft[]>;
+  findAll(): Promise<PageDraft[]>;
   findBySlug(slug: string, storeId: string): Promise<PageDraft | null>;
 
   save(draft: PageDraft): Promise<PageDraft>;

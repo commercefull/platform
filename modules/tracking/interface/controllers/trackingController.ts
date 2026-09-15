@@ -22,8 +22,12 @@ class TrackingController {
   async getConfig(req: TypedRequest, res: Response) {
     try {
       const storeId = req.query.storeId as string;
+      const organizationId = (req.user?.id as string) || '';
+
       if (!storeId) {
-        res.status(400).json({ success: false, message: 'storeId is required' });
+        // No storeId → return all configs for the organization
+        const configs = await manageConfigUseCase.getByOrganizationId(organizationId);
+        res.json({ success: true, data: configs.map(c => c.toJSON()) });
         return;
       }
 
@@ -36,15 +40,24 @@ class TrackingController {
       res.json({ success: true, data: config.toJSON() });
     } catch (error) {
       logger.error('Error getting tracking config:', error);
-      res.status(500).json({ success: false, message: 'Failed to get tracking config' });
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
   }
 
   async getStatus(req: TypedRequest, res: Response) {
     try {
       const storeId = req.query.storeId as string;
+      const organizationId = (req.user?.id as string) || '';
+
       if (!storeId) {
-        res.status(400).json({ success: false, message: 'storeId is required' });
+        // No storeId → return status for the organization's first config
+        const configs = await manageConfigUseCase.getByOrganizationId(organizationId);
+        if (configs.length === 0) {
+          res.json({ success: true, data: { active: false, providers: [] } });
+          return;
+        }
+        const status = await getStatusUseCase.execute(configs[0].storeId);
+        res.json({ success: true, data: status });
         return;
       }
 
@@ -52,16 +65,17 @@ class TrackingController {
       res.json({ success: true, data: status });
     } catch (error) {
       logger.error('Error getting tracking status:', error);
-      res.status(500).json({ success: false, message: 'Failed to get tracking status' });
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
   }
 
   async createConfig(req: TypedRequest, res: Response) {
     try {
       const body = req.body as Record<string, unknown>;
+      const organizationId = (body.organizationId as string) || (req.user?.id as string) || '';
       const config = await manageConfigUseCase.create({
         storeId: body.storeId as string,
-        organizationId: body.organizationId as string,
+        organizationId,
         gtm: body.gtm as GTMConfig | undefined,
         metaCapi: body.metaCapi as MetaCAPIConfig | undefined,
         useDefaultMappings: body.useDefaultMappings !== false,
@@ -124,7 +138,7 @@ class TrackingController {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
       const config = await manageConfigUseCase.addEventMapping(storeId, body as unknown as EventMapping);
-      res.json({ success: true, data: config.toJSON() });
+      res.status(201).json({ success: true, data: config.toJSON() });
     } catch (error) {
       res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }

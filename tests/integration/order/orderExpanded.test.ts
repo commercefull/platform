@@ -215,7 +215,7 @@ describe('Order Expanded Tests', () => {
 
       if (listResp.data.data?.length > 0) {
         const orderId = listResp.data.data[0].orderId;
-        const resp = await client.get(`/customer/orders/${orderId}`, {
+        const resp = await client.get(`/customer/order/${orderId}`, {
           headers: customerAuthHeaders(),
         });
 

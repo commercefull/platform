@@ -24,7 +24,7 @@ services:
         condition: service_healthy
     volumes:
       - ../../logs:/app/logs
-      - ../../uploads:/app/uploads
+      - ../../uploads:/app/public/uploads
     networks:
       - commercefull-network
     healthcheck:

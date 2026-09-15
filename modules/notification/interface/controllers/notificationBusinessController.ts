@@ -37,12 +37,13 @@ interface UpdateNotificationBody {
 }
 
 interface SendBatchBody {
-  name: string;
+  name?: string;
   channel: string;
   type: string;
   title: string;
   content: string;
-  recipients: Array<{ userId: string; userType: string }>;
+  recipients?: Array<{ userId: string; userType: string }>;
+  userIds?: string[];
   scheduledAt?: string;
 }
 
@@ -264,10 +265,13 @@ export const getBatch = async (req: TypedRequest, res: Response): Promise<void> 
  * POST /business/notifications/batches
  */
 export const sendBatch = async (req: TypedRequest<Record<string, string>, unknown, SendBatchBody>, res: Response): Promise<void> => {
-  const { name, channel, type, title, content, recipients, scheduledAt } = req.body;
+  const { name, channel, type, title, content, recipients, userIds, scheduledAt } = req.body;
+  // Normalize: accept userIds as shorthand for recipients
+  const normalizedRecipients = recipients || (userIds || []).map(userId => ({ userId, userType: 'customer' }));
+  const normalizedName = name || title || 'Batch notification';
   const useCase = new SendNotificationBatchUseCase();
   const result = await useCase.execute(
-    new SendNotificationBatchCommand(name, channel, type, title, content, recipients, scheduledAt ? new Date(scheduledAt) : undefined),
+    new SendNotificationBatchCommand(normalizedName, channel, type, title, content, normalizedRecipients, scheduledAt ? new Date(scheduledAt) : undefined),
   );
   successResponse(res, result, 201);
 };

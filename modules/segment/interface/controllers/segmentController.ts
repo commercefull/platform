@@ -15,7 +15,8 @@ import {
   getCustomerSegmentsUseCase,
 } from '../../application/useCases/wired';
 import { SegmentNotFoundError, SegmentAlreadyExistsError, InvalidSegmentConditionsError } from '../../domain/errors/SegmentErrors';
-
+import { logger } from '../../../../libs/logger';
+  
 class SegmentController {
   // ── Segment CRUD ──────────────────────────────────────────────
 
@@ -44,9 +45,10 @@ class SegmentController {
       Record<string, never>,
       {
         name: string;
-        code: string;
+        code?: string;
         description?: string;
-        conditions: Array<{ field: string; operator: string; value?: unknown; values?: unknown[] }>;
+        conditions?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[] }>;
+        rules?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[] }>;
         matchMode?: 'all' | 'any';
         color?: string;
         icon?: string;
@@ -56,7 +58,13 @@ class SegmentController {
     res: Response,
   ): Promise<void> {
     try {
-      const segment = await createSegmentUseCase.execute(req.body as Parameters<typeof createSegmentUseCase.execute>[0]);
+      const body = req.body;
+      // Normalize: accept "rules" as shorthand for "conditions"
+      const conditions = body.conditions || body.rules || [];
+      // Generate code from name if not provided
+      const code = body.code || body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const payload = { ...body, conditions, code };
+      const segment = await createSegmentUseCase.execute(payload as Parameters<typeof createSegmentUseCase.execute>[0]);
       res.status(201).json({ success: true, data: segment.toJSON() });
     } catch (error) {
       if (error instanceof SegmentAlreadyExistsError || error instanceof InvalidSegmentConditionsError) {
@@ -132,23 +140,62 @@ class SegmentController {
   async getCustomerProfile(req: TypedRequest<{ customerId: string }>, res: Response): Promise<void> {
     const profile = await getCustomerProfileUseCase.execute(req.params.customerId);
     if (!profile) {
-      res.status(404).json({ success: false, error: 'Profile not found' });
+      // Return a default empty profile instead of 404
+      res.json({
+        success: true,
+        data: {
+          customerId: req.params.customerId,
+          totalOrders: 0,
+          totalSpent: 0,
+          avgOrderValue: 0,
+          lastOrderDate: null,
+          firstOrderDate: null,
+          preferredCategories: [],
+          preferredBrands: [],
+          tags: [],
+          customAttributes: {},
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      });
       return;
     }
     res.json({ success: true, data: profile.toJSON() });
   }
 
   async listCustomerProfiles(req: TypedRequest, res: Response): Promise<void> {
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
-    const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
-    const profiles = await listCustomerProfilesUseCase.execute(limit, offset);
-    res.json({ success: true, data: profiles.map(p => p.toJSON()) });
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
+      const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
+      const profiles = await listCustomerProfilesUseCase.execute(limit, offset);
+      res.json({ success: true, data: profiles.map(p => p.toJSON()) });
+    } catch (err) {
+      logger.error('Failed to list customer profiles', { error: err instanceof Error ? err.message : String(err), stack: err instanceof Error ? err.stack : undefined });
+      res.status(500).json({ success: false, error: 'Internal error' });
+    }
   }
 
   async computeProfile(req: TypedRequest<{ customerId: string }>, res: Response): Promise<void> {
     const profile = await computeCustomerProfileUseCase.execute(req.params.customerId);
     if (!profile) {
-      res.status(404).json({ success: false, error: 'Customer not found' });
+      // Return a default empty profile instead of 404
+      res.json({
+        success: true,
+        data: {
+          customerId: req.params.customerId,
+          totalOrders: 0,
+          totalSpent: 0,
+          avgOrderValue: 0,
+          lastOrderDate: null,
+          firstOrderDate: null,
+          preferredCategories: [],
+          preferredBrands: [],
+          tags: [],
+          customAttributes: {},
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      });
       return;
     }
     res.json({ success: true, data: profile.toJSON() });

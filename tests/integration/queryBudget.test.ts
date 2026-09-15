@@ -49,16 +49,16 @@ describe('Endpoint query-count budget tests', () => {
   });
 
   describe('Basket endpoints', () => {
-    it('POST /basket — get or create basket ≤ 8 queries', async () => {
+    it('POST /customer/basket — get or create basket ≤ 8 queries', async () => {
       const res = await client.post(
-        '/basket',
+        '/customer/basket',
         {},
         {
           headers: { Authorization: `Bearer ${customerToken}` },
         },
       );
-      expect(res.status).toBe(200);
-      expectQueryBudget(res, 8, 'POST /basket');
+      expect(res.status).toBe(201);
+      expectQueryBudget(res, 8, 'POST /customer/basket');
     });
   });
 

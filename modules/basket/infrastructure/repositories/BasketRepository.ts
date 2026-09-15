@@ -129,8 +129,9 @@ export class BasketRepo implements BasketRepository {
       );
     }
 
-    // Sync items
-    await this.syncItems(basket);
+    if (existing || basket.items.length > 0) {
+      await this.syncItems(basket);
+    }
 
     return basket;
   }

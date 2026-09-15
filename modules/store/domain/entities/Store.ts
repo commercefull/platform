@@ -125,6 +125,7 @@ export class Store {
   static create(props: {
     storeId: string;
     name: string;
+    slug?: string;
     storeType: StoreType;
     organizationId?: string;
     isHeadquarters?: boolean;
@@ -142,6 +143,18 @@ export class Store {
     theme?: string;
     defaultCurrency?: string;
     supportedCurrencies?: string[];
+    settings?: Partial<StoreProps['settings']>;
+    storePolicies?: StoreProps['storePolicies'];
+    metaTitle?: string;
+    metaDescription?: string;
+    metaKeywords?: string[];
+    socialLinks?: StoreProps['socialLinks'];
+    openingHours?: StoreProps['openingHours'];
+    customPages?: StoreProps['customPages'];
+    customFields?: StoreProps['customFields'];
+    isActive?: boolean;
+    isVerified?: boolean;
+    isFeatured?: boolean;
     metadata?: Record<string, unknown>;
   }): Store {
     const now = new Date();
@@ -154,10 +167,20 @@ export class Store {
       throw new StoreValidationError('Organization stores must have a organizationId');
     }
 
+    const defaultSettings: StoreProps['settings'] = {
+      allowGuestCheckout: true,
+      requireAccountForPurchase: false,
+      enableWishlist: true,
+      enableProductReviews: true,
+      enableStoreLocator: false,
+      inventoryDisplayMode: 'show_low_stock',
+      priceDisplayMode: 'exclusive_tax',
+    };
+
     return new Store({
       storeId: props.storeId,
       name: props.name,
-      slug: Store.generateSlug(props.name),
+      slug: props.slug || Store.generateSlug(props.name),
       description: props.description,
       storeType: props.storeType,
       organizationId: props.organizationId,
@@ -173,20 +196,20 @@ export class Store {
       primaryColor: props.primaryColor || '#007bff',
       secondaryColor: props.secondaryColor || '#6c757d',
       theme: props.theme,
-      isActive: true,
-      isVerified: false,
-      isFeatured: false,
+      isActive: props.isActive ?? true,
+      isVerified: props.isVerified ?? false,
+      isFeatured: props.isFeatured ?? false,
       defaultCurrency: props.defaultCurrency || 'USD',
       supportedCurrencies: props.supportedCurrencies || ['USD'],
-      settings: {
-        allowGuestCheckout: true,
-        requireAccountForPurchase: false,
-        enableWishlist: true,
-        enableProductReviews: true,
-        enableStoreLocator: false,
-        inventoryDisplayMode: 'show_low_stock',
-        priceDisplayMode: 'exclusive_tax',
-      },
+      settings: { ...defaultSettings, ...(props.settings as StoreProps['settings'] | undefined) },
+      storePolicies: props.storePolicies,
+      metaTitle: props.metaTitle,
+      metaDescription: props.metaDescription,
+      metaKeywords: props.metaKeywords,
+      socialLinks: props.socialLinks,
+      openingHours: props.openingHours,
+      customPages: props.customPages,
+      customFields: props.customFields,
       metadata: props.metadata,
       createdAt: now,
       updatedAt: now,

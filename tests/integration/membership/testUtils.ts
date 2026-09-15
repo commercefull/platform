@@ -98,6 +98,10 @@ export const setupMembershipTests = async () => {
     // Login as organization (admin) for business routes and customer for public routes
     adminToken = await loginTestAdmin(client);
     userToken = await loginTestUser(client, 'customer@example.com', 'password123');
+    if (userToken) {
+      const payload = JSON.parse(Buffer.from(userToken.split('.')[1], 'base64url').toString()) as { id?: string };
+      userId = payload.id || userId;
+    }
   } catch {}
 
   if (adminToken) {

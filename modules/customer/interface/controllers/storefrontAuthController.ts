@@ -86,7 +86,7 @@ export const signIn = async (req: TypedRequest, res: Response): Promise<void> =>
     req.flash('success', `Welcome back, ${customer.firstName}!`);
     res.redirect(redirectTo as string);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to sign in');
     res.redirect('/signin');
@@ -133,7 +133,7 @@ export const signUp = async (req: TypedRequest, res: Response): Promise<void> =>
     req.flash('success', `Welcome to our store, ${customer.firstName}!`);
     res.redirect('/profile');
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to create account');
     res.redirect('/signup');
@@ -188,7 +188,7 @@ export const updateProfile = async (req: TypedRequest, res: Response): Promise<v
     req.flash('success', 'Profile updated successfully');
     res.redirect('/profile');
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to update profile');
     res.redirect('/profile');
@@ -210,7 +210,7 @@ export const signOut = async (req: TypedRequest, res: Response): Promise<void> =
     req.flash('success', 'You have been signed out successfully');
     res.redirect('/');
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     res.redirect('/');
   }
@@ -252,7 +252,7 @@ export const changePassword = async (req: TypedRequest, res: Response): Promise<
     req.flash('success', 'Password changed successfully');
     res.redirect('/profile');
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to change password');
     res.redirect('/profile');

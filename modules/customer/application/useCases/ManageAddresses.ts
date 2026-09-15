@@ -60,7 +60,7 @@ export class SetDefaultAddressCommand {
 export interface AddressResponse {
   addressId: string;
   addressLine1: string;
-  addressLine2?: string;
+  addressLine2: string | null;
   city: string;
   state: string;
   postalCode: string;
@@ -163,7 +163,7 @@ export class ManageAddressesUseCase {
     return {
       addressId: address.customerAddressId,
       addressLine1: address.addressLine1,
-      addressLine2: address.addressLine2 || undefined,
+      addressLine2: address.addressLine2 ?? null,
       city: address.city,
       state: address.state || '',
       postalCode: address.postalCode,

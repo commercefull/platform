@@ -87,6 +87,10 @@ export class Coupon {
     metadata?: Record<string, unknown>;
   }): Coupon {
     // Validate inputs
+    if (!props.name?.trim()) {
+      throw new CouponValidationError('Coupon name is required');
+    }
+
     if (!props.code?.trim()) {
       throw new CouponValidationError('Coupon code is required');
     }

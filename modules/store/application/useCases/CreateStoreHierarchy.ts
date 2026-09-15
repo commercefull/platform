@@ -6,6 +6,7 @@
 
 import type { StoreRepository } from '../../domain/repositories/StoreRepository';
 import { StoreNotFoundError, StoreValidationError } from '../../domain/errors/StoreErrors';
+import { generateUUID } from 'libs/uuid';
 
 export interface CreateStoreHierarchyInput {
   organizationId: string;
@@ -50,7 +51,7 @@ export class CreateStoreHierarchyUseCase {
       }
     }
 
-    const hierarchyId = `hier_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+    const hierarchyId = generateUUID();
 
     const hierarchy = await this.storeRepository.createHierarchy({
       hierarchyId,

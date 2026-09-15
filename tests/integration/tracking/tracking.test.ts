@@ -38,24 +38,23 @@ describe('Tracking Module Integration Tests', () => {
   describe('Config CRUD', () => {
     it('POST /business/tracking/config creates config', async () => {
       if (!orgToken) return;
+      // Clean up any existing config first
+      await client
+        .delete(`/business/tracking/config/${testStoreId}`, {
+          headers: { Authorization: `Bearer ${orgToken}` },
+        })
+        .catch(() => {});
+
       const resp = await client.post(
         '/business/tracking/config',
         {
           storeId: testStoreId,
-          provider: 'gtm',
-          isActive: false,
+          gtm: { containerId: 'GTM-TEST123', serverContainerUrl: 'https://gtm.example.com' },
+          useDefaultMappings: true,
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
       expect(resp.status).toBe(201);
-    });
-
-    it('DELETE /business/tracking/config/:storeId deletes config', async () => {
-      if (!orgToken) return;
-      const resp = await client.delete(`/business/tracking/config/${testStoreId}`, {
-        headers: { Authorization: `Bearer ${orgToken}` },
-      });
-      expect(resp.status).toBe(200);
     });
   });
 
@@ -64,17 +63,9 @@ describe('Tracking Module Integration Tests', () => {
       if (!orgToken) return;
       const resp = await client.put(
         `/business/tracking/config/${testStoreId}/gtm`,
-        { containerId: 'GTM-TEST123' },
+        { containerId: 'GTM-UPDATED', serverContainerUrl: 'https://gtm.example.com' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
-      expect(resp.status).toBe(200);
-    });
-
-    it('DELETE /business/tracking/config/:storeId/gtm removes GTM', async () => {
-      if (!orgToken) return;
-      const resp = await client.delete(`/business/tracking/config/${testStoreId}/gtm`, {
-        headers: { Authorization: `Bearer ${orgToken}` },
-      });
       expect(resp.status).toBe(200);
     });
   });
@@ -85,6 +76,24 @@ describe('Tracking Module Integration Tests', () => {
       const resp = await client.put(
         `/business/tracking/config/${testStoreId}/meta-capi`,
         { pixelId: '1234567890', accessToken: 'test-token' },
+        { headers: { Authorization: `Bearer ${orgToken}` } },
+      );
+      expect(resp.status).toBe(200);
+    });
+
+    it('DELETE /business/tracking/config/:storeId/gtm removes GTM (after Meta CAPI added)', async () => {
+      if (!orgToken) return;
+      const resp = await client.delete(`/business/tracking/config/${testStoreId}/gtm`, {
+        headers: { Authorization: `Bearer ${orgToken}` },
+      });
+      expect(resp.status).toBe(200);
+    });
+
+    it('PUT /business/tracking/config/:storeId/gtm re-adds GTM', async () => {
+      if (!orgToken) return;
+      const resp = await client.put(
+        `/business/tracking/config/${testStoreId}/gtm`,
+        { containerId: 'GTM-READDED', serverContainerUrl: 'https://gtm.example.com' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
       expect(resp.status).toBe(200);
@@ -104,7 +113,12 @@ describe('Tracking Module Integration Tests', () => {
       if (!orgToken) return;
       const resp = await client.post(
         `/business/tracking/config/${testStoreId}/mappings`,
-        { sourceEvent: 'order.created', targetEvent: 'Purchase' },
+        {
+          sourceEvent: 'custom.event.test',
+          targetEvent: 'CustomEvent',
+          providers: ['gtm'],
+          consentCategory: 'analytics',
+        },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
       expect(resp.status).toBe(201);
@@ -112,9 +126,10 @@ describe('Tracking Module Integration Tests', () => {
 
     it('DELETE /business/tracking/config/:storeId/mappings/:sourceEvent removes mapping', async () => {
       if (!orgToken) return;
-      const resp = await client.delete(`/business/tracking/config/${testStoreId}/mappings/order.created`, {
-        headers: { Authorization: `Bearer ${orgToken}` },
-      });
+      const resp = await client.delete(
+        `/business/tracking/config/${testStoreId}/mappings/custom.event.test`,
+        { headers: { Authorization: `Bearer ${orgToken}` } },
+      );
       expect(resp.status).toBe(200);
     });
   });
@@ -144,7 +159,7 @@ describe('Tracking Module Integration Tests', () => {
       if (!orgToken) return;
       const resp = await client.post(
         `/business/tracking/config/${testStoreId}/hash-pii`,
-        { hashPii: true },
+        { enabled: true },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
       expect(resp.status).toBe(200);
@@ -154,7 +169,7 @@ describe('Tracking Module Integration Tests', () => {
       if (!orgToken) return;
       const resp = await client.post(
         `/business/tracking/config/${testStoreId}/server-side`,
-        { serverSideEnabled: true },
+        { enabled: true },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
       expect(resp.status).toBe(200);
@@ -166,9 +181,25 @@ describe('Tracking Module Integration Tests', () => {
       if (!orgToken) return;
       const resp = await client.post(
         '/business/tracking/process-event',
-        { storeId: testStoreId, event: 'order.created', data: { orderId: 'test-123' } },
+        {
+          storeId: testStoreId,
+          sourceEvent: 'order.created',
+          userData: {},
+          ecommerceData: { orderId: 'test-123' },
+          consentGranted: true,
+        },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
+      expect(resp.status).toBe(200);
+    });
+  });
+
+  describe('Config cleanup', () => {
+    it('DELETE /business/tracking/config/:storeId deletes config', async () => {
+      if (!orgToken) return;
+      const resp = await client.delete(`/business/tracking/config/${testStoreId}`, {
+        headers: { Authorization: `Bearer ${orgToken}` },
+      });
       expect(resp.status).toBe(200);
     });
   });

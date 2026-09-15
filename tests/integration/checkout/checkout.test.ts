@@ -56,7 +56,7 @@ describe('Checkout Feature Tests', () => {
       await client.post(
         `/customer/basket/${testBasketId}/items`,
         {
-          productId: '10000000-0000-0000-0000-000000000001',
+          productId: '00000000-0000-0000-0000-000000000001',
           sku: 'TEST-SKU-001',
           name: 'Test Product',
           quantity: 1,
@@ -405,7 +405,7 @@ describe('Checkout Feature Tests', () => {
       await client.post(
         `/customer/basket/${testBasketId}/items`,
         {
-          productId: '10000000-0000-0000-0000-000000000001',
+          productId: '00000000-0000-0000-0000-000000000001',
           sku: 'TEST-SKU-001',
           name: 'Test Product',
           quantity: 1,
@@ -519,7 +519,7 @@ describe('Checkout Gap Tests', () => {
     const basketId = basketResp.data.data.basketId;
     await c.post(
       `/customer/basket/${basketId}/items`,
-      { productId: '10000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'Product', quantity: 1, unitPrice: 29.99 },
+      { productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'Product', quantity: 1, unitPrice: 29.99 },
       { headers: { Authorization: `Bearer ${token}` } },
     );
     return basketId;
@@ -886,7 +886,9 @@ describe('Checkout Gap Tests', () => {
 
     const resp = await client.post('/customer/checkout', { basketId }, { headers: { Authorization: `Bearer ${customerToken}` } });
     expect(resp.status).toBe(400);
-    expect(resp.data.error || resp.data.message || JSON.stringify(resp.data)).toMatch(/empty basket/i);
+    const err = resp.data.error;
+    const errMsg = typeof err === 'string' ? err : (err?.message || resp.data.message || JSON.stringify(resp.data));
+    expect(errMsg).toMatch(/empty basket/i);
   });
 
   it('REQ 5.3.5 — POST /complete on session missing shipping address → 400 with literal message', async () => {

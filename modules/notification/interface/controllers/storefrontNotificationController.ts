@@ -116,7 +116,7 @@ export const updatePreferences = async (req: TypedRequest, res: Response) => {
     req.flash?.('success', 'Notification preferences updated');
     res.redirect('/notifications/preferences');
   } catch (error) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
     req.flash?.('error', 'Failed to update preferences');
     res.redirect('/notifications/preferences');
   }
@@ -157,7 +157,7 @@ export const registerDevice = async (req: TypedRequest, res: Response) => {
     req.flash?.('success', 'Device registered successfully');
     res.redirect('/notifications/devices');
   } catch (error) {
-    logger.warn('Error registering notification device:', error);
+    logger.warning('Error registering notification device:', error);
     req.flash?.('error', 'Failed to register device');
     res.redirect('/notifications/devices');
   }
@@ -179,7 +179,7 @@ export const deleteDevice = async (req: TypedRequest, res: Response) => {
     req.flash?.('success', 'Device removed successfully');
     res.redirect('/notifications/devices');
   } catch (error) {
-    logger.warn('Error deleting notification device:', error);
+    logger.warning('Error deleting notification device:', error);
     req.flash?.('error', 'Failed to remove device');
     res.redirect('/notifications/devices');
   }

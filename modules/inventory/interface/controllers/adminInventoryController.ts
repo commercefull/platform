@@ -237,7 +237,7 @@ export const createDispatch = async (req: TypedRequest, res: Response): Promise<
     });
     res.redirect(`/admin/dispatches/${dispatch.dispatchId}?success=Dispatch created successfully`);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
     const stores = await findActiveStoresUseCase.execute().catch(() => []);
     adminRespond(req, res, 'inventory/dispatches/create', {
       pageName: 'Create Dispatch',
@@ -262,7 +262,7 @@ export const approveDispatch = async (req: TypedRequest, res: Response): Promise
     await approveStoreDispatchUseCase.execute(req.params.dispatchId, req.user?.userId || 'admin');
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch approved successfully`);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
     res.redirect(
       `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve dispatch')}`,
     );
@@ -274,7 +274,7 @@ export const markDispatched = async (req: TypedRequest, res: Response): Promise<
     await dispatchFromStoreUseCase.execute(req.params.dispatchId, req.user?.userId || 'admin');
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch marked as shipped`);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
     res.redirect(
       `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to ship dispatch')}`,
     );
@@ -300,7 +300,7 @@ export const receiveDispatch = async (req: TypedRequest, res: Response): Promise
     });
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch received successfully`);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
     res.redirect(
       `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to receive dispatch')}`,
     );
@@ -312,7 +312,7 @@ export const cancelDispatch = async (req: TypedRequest, res: Response): Promise<
     await cancelStoreDispatchUseCase.execute(req.params.dispatchId, (req.body as RequestBody).reason || undefined);
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch cancelled successfully`);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
     res.redirect(
       `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to cancel dispatch')}`,
     );

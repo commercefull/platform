@@ -6,6 +6,7 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
+import { AppError, getErrorStatusCode } from '../../../../libs/errors';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { CreateStoreUseCase, CreateStoreCommand } from '../../application/useCases/CreateStore';
 import { UpdateStoreUseCase, UpdateStoreCommand } from '../../application/useCases/UpdateStore';
@@ -16,6 +17,18 @@ import { ListStoresUseCase, ListStoresQuery } from '../../application/useCases/L
 import { storeDataRepository, SystemConfigurationRepo, OrganizationLookupAdapter, SystemConfigAdapter } from '../../application/wired';
 
 const StoreRepo = storeDataRepository.stores;
+
+function handleControllerError(res: Response, action: string, error: unknown): void {
+  logger.error(`${action}:`, error);
+  const statusCode = getErrorStatusCode(error);
+  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+  res.status(statusCode).json({
+    success: false,
+    message: action,
+    error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+    ...(error instanceof AppError ? { code: error.code } : {}),
+  });
+}
 
 export class StoreController {
   private createStoreUseCase: CreateStoreUseCase;
@@ -67,6 +80,7 @@ export class StoreController {
         defaultCurrency: body.defaultCurrency as string | undefined,
         supportedCurrencies: body.supportedCurrencies as string[] | undefined,
         settings: body.settings as CreateStoreCommand['storeData']['settings'],
+        storePolicies: body.storePolicies as CreateStoreCommand['storeData']['storePolicies'],
         metaTitle: body.metaTitle as string | undefined,
         metaDescription: body.metaDescription as string | undefined,
         metaKeywords: body.metaKeywords as string[] | undefined,
@@ -84,15 +98,7 @@ export class StoreController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(statusCode).json({
-        success: false,
-        message: 'Failed to create store',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to create store', error);
     }
   }
 
@@ -117,15 +123,7 @@ export class StoreController {
         data: store.toJSON(),
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(statusCode).json({
-        success: false,
-        message: 'Failed to get store',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to get store', error);
     }
   }
 
@@ -150,15 +148,7 @@ export class StoreController {
         data: store.toJSON(),
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(statusCode).json({
-        success: false,
-        message: 'Failed to get store',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to get store', error);
     }
   }
 
@@ -177,15 +167,7 @@ export class StoreController {
         count: stores.length,
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(statusCode).json({
-        success: false,
-        message: 'Failed to get stores',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to get stores', error);
     }
   }
 
@@ -204,15 +186,7 @@ export class StoreController {
         count: stores.length,
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(statusCode).json({
-        success: false,
-        message: 'Failed to get active stores',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to get active stores', error);
     }
   }
 
@@ -230,15 +204,7 @@ export class StoreController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(statusCode).json({
-        success: false,
-        message: 'Failed to update store',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to update store', error);
     }
   }
 
@@ -260,15 +226,7 @@ export class StoreController {
         message: 'Store deleted successfully',
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(statusCode).json({
-        success: false,
-        message: 'Failed to delete store',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to delete store', error);
     }
   }
 
@@ -290,15 +248,7 @@ export class StoreController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(statusCode).json({
-        success: false,
-        message: 'Failed to configure pickup',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to configure pickup', error);
     }
   }
 
@@ -326,15 +276,7 @@ export class StoreController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(statusCode).json({
-        success: false,
-        message: 'Failed to set local delivery zone',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to set local delivery zone', error);
     }
   }
 
@@ -360,15 +302,7 @@ export class StoreController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const statusCode = errorMessage.toLowerCase().includes('not found') ? 404 : 400;
-      res.status(statusCode).json({
-        success: false,
-        message: 'Failed to create store hierarchy',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to create store hierarchy', error);
     }
   }
 
@@ -411,14 +345,7 @@ export class StoreController {
         },
       });
     } catch (error) {
-      logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      res.status(500).json({
-        success: false,
-        message: 'Failed to list stores',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
+      handleControllerError(res, 'Failed to list stores', error);
     }
   }
 }

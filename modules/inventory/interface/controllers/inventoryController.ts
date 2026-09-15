@@ -140,13 +140,24 @@ export const getInventoryLocation = async (req: TypedRequest, res: Response): Pr
  * List inventory locations with filtering and pagination
  */
 export const listInventoryLocations = async (req: TypedRequest, res: Response): Promise<void> => {
-  // If called without product/sku filters, return store locations for admin UI/tests
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
+  const includeInactive = req.query.includeInactive === 'true' || req.query.includeInactive === undefined;
 
-  // Prefer store locations listing
-  const result = await pickupLocationPort.findAll();
-  const data = result.map(loc => ({ ...loc, id: loc.id }));
+  // Get store pickup locations
+  const storeLocations = await pickupLocationPort.findAll();
+  const storeData = storeLocations
+    .filter(loc => includeInactive || loc.isActive !== false)
+    .map(loc => ({ ...loc, id: loc.id, isActive: loc.isActive ?? true }));
+
+  // Get inventory locations from the inventoryLocation table
+  const inventoryLocations = await inventoryRepo.findLocations(undefined, limit, offset);
+  const inventoryData = inventoryLocations
+    .filter(loc => includeInactive || loc.status !== 'inactive')
+    .map(loc => ({ ...loc, isActive: loc.status === 'available' || loc.status === 'active' }));
+
+  // Merge both sources
+  const data = [...storeData, ...inventoryData];
   respondWithPagination(res, data, limit, offset);
 };
 

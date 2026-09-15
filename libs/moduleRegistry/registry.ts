@@ -60,39 +60,27 @@ class ModuleRegistryClass {
       return;
     }
 
-    this.enabledModules.clear();
-
-    // First pass: enable all required modules
+    const candidates = new Set<string>();
     for (const [name, manifest] of this.manifests) {
-      if (manifest.requirement === 'required') {
-        this.enabledModules.add(name);
+      if (manifest.requirement === 'required' || (await this.resolveEnabled(manifest))) {
+        candidates.add(name);
       }
     }
+    this.enableCandidates(candidates);
+  }
 
-    // Second pass: resolve optional modules
-    for (const [name, manifest] of this.manifests) {
-      if (manifest.requirement === 'required') continue;
-
-      const enabled = await this.resolveEnabled(manifest);
-      if (enabled) {
-        // Check dependencies are enabled
-        if (this.checkDependencies(manifest)) {
-          this.enabledModules.add(name);
-        } else {
-          logger.warning('Module disabled — unmet dependencies', {
-            module: name,
-            dependsOn: manifest.dependsOn,
-          });
-        }
-      }
+  initializeSync(): void {
+    if (this.initialized) {
+      return;
     }
 
-    this.initialized = true;
-    logger.info('Module registry initialized', {
-      total: this.manifests.size,
-      enabled: this.enabledModules.size,
-      disabled: this.manifests.size - this.enabledModules.size,
-    });
+    const candidates = new Set<string>();
+    for (const [name, manifest] of this.manifests) {
+      if (manifest.requirement === 'required' || this.resolveEnabledSync(manifest)) {
+        candidates.add(name);
+      }
+    }
+    this.enableCandidates(candidates);
   }
 
   /**
@@ -181,12 +169,7 @@ class ModuleRegistryClass {
   private async resolveEnabled(manifest: ModuleManifest): Promise<boolean> {
     // No feature flag → check env var, default to enabled
     if (!manifest.featureFlagKey) {
-      const envKey = `MODULE_${manifest.name.toUpperCase()}_ENABLED`;
-      const envVal = process.env[envKey];
-      if (envVal === 'false' || envVal === '0') {
-        return false;
-      }
-      return true;
+      return this.resolveEnabledSync(manifest);
     }
 
     // Feature flag provider → ask it
@@ -204,12 +187,49 @@ class ModuleRegistryClass {
     }
 
     // No provider → check env var, default to enabled
-    const envKey = `MODULE_${manifest.name.toUpperCase()}_ENABLED`;
-    const envVal = process.env[envKey];
-    if (envVal === 'false' || envVal === '0') {
-      return false;
+    return this.resolveEnabledSync(manifest);
+  }
+
+  private resolveEnabledSync(manifest: ModuleManifest): boolean {
+    const envVal = process.env[`MODULE_${manifest.name.toUpperCase()}_ENABLED`];
+    return envVal !== 'false' && envVal !== '0';
+  }
+
+  private enableCandidates(candidates: Set<string>): void {
+    this.enabledModules.clear();
+
+    for (const [name, manifest] of this.manifests) {
+      if (manifest.requirement === 'required') {
+        this.enabledModules.add(name);
+      }
     }
-    return true;
+
+    const pending = new Set([...candidates].filter(name => !this.enabledModules.has(name)));
+    let enabledCount: number;
+    do {
+      enabledCount = this.enabledModules.size;
+      for (const name of pending) {
+        const manifest = this.manifests.get(name);
+        if (manifest && this.checkDependencies(manifest)) {
+          this.enabledModules.add(name);
+          pending.delete(name);
+        }
+      }
+    } while (this.enabledModules.size > enabledCount);
+
+    for (const name of pending) {
+      logger.warning('Module disabled — unmet dependencies', {
+        module: name,
+        dependsOn: this.manifests.get(name)?.dependsOn,
+      });
+    }
+
+    this.initialized = true;
+    logger.info('Module registry initialized', {
+      total: this.manifests.size,
+      enabled: this.enabledModules.size,
+      disabled: this.manifests.size - this.enabledModules.size,
+    });
   }
 
   private checkDependencies(manifest: ModuleManifest): boolean {

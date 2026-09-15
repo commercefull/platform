@@ -3,9 +3,10 @@ import { query, queryOne } from '../../../../libs/db';
 export interface NotificationBatch {
   notificationBatchId: string;
   name: string;
+  type: string;
   channel: string;
   status: string;
-  totalCount: number;
+  targetCount: number;
   sentCount: number;
   failedCount: number;
   scheduledAt?: Date;
@@ -16,13 +17,23 @@ export interface NotificationBatch {
 }
 
 export async function create(
-  params: Pick<NotificationBatch, 'name' | 'channel' | 'totalCount' | 'scheduledAt'>,
+  params: Pick<NotificationBatch, 'name' | 'type' | 'channel' | 'targetCount' | 'scheduledAt'>,
 ): Promise<NotificationBatch | null> {
   const now = new Date();
+  const mappedChannel = params.channel === 'in_app' ? 'inApp' : params.channel;
+  // Map notification types to batch types (orderStatus, promotion, accountAlert)
+  const mappedType =
+    params.type === 'order_confirmation' || params.type === 'order_shipped' || params.type === 'order_delivered' || params.type === 'order_cancelled' || params.type === 'return_initiated' || params.type === 'refund_processed'
+      ? 'orderStatus'
+      : params.type === 'promotion' || params.type === 'coupon_offer' || params.type === 'back_in_stock' || params.type === 'price_drop' || params.type === 'new_product'
+        ? 'promotion'
+        : params.type === 'account_registration' || params.type === 'password_reset' || params.type === 'email_verification' || params.type === 'review_request' || params.type === 'abandoned_cart'
+          ? 'accountAlert'
+          : params.type;
   return queryOne<NotificationBatch>(
-    `INSERT INTO "notificationBatch" (name, channel, status, "totalCount", "sentCount", "failedCount", "scheduledAt", "createdAt", "updatedAt")
-     VALUES ($1, $2, 'pending', $3, 0, 0, $4, $5, $6) RETURNING *`,
-    [params.name, params.channel, params.totalCount, params.scheduledAt || null, now, now],
+    `INSERT INTO "notificationBatch" (name, type, channel, status, "targetCount", "sentCount", "failedCount", "scheduledAt", "createdAt", "updatedAt")
+     VALUES ($1, $2, $3, 'draft', $4, 0, 0, $5, $6, $7) RETURNING *`,
+    [params.name, mappedType, mappedChannel, params.targetCount, params.scheduledAt || null, now, now],
   );
 }
 

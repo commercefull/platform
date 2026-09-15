@@ -278,15 +278,18 @@ export class StoreRepo implements IStoreRepository {
     const now = new Date().toISOString();
     await query(
       `INSERT INTO "storeHierarchy" (
-        "storeHierarchyId", "organizationId", "defaultStoreId",
-        "sharedInventoryPoolId", "sharedCatalogId", "isActive", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, true, $6, $7)`,
+        "storeHierarchyId", "organizationId", "name", "defaultStoreId", "storeIds",
+        "sharedInventoryPoolId", "sharedCatalogId", "settings", "isActive", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, $9, $10)`,
       [
         input.hierarchyId,
         input.organizationId,
+        input.name,
         input.defaultStoreId,
+        JSON.stringify(input.storeIds),
         input.sharedInventoryPoolId || null,
         input.sharedCatalogId || null,
+        JSON.stringify(input.settings || {}),
         now,
         now,
       ],

@@ -41,7 +41,7 @@ export class MarketplaceController {
   }
 
   private getOrgId(req: TypedRequest): string {
-    return (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+    return (req as unknown as { user?: { organizationId?: string; id?: string } }).user?.organizationId ?? (req as unknown as { user?: { id?: string } }).user?.id ?? '';
   }
 
   // ─── Vendor endpoints ───
@@ -198,7 +198,15 @@ export class MarketplaceController {
   async createCommissionRule(req: TypedRequest, res: Response): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
-      const rule = await this.commissionUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
+      const body = req.body as Record<string, unknown>;
+      // Default type and scope if not provided
+      const payload = {
+        ...body,
+        type: body.type || 'percentage',
+        scope: body.scope || 'global',
+        organizationId,
+      };
+      const rule = await this.commissionUseCase.create(payload as Parameters<
         typeof this.commissionUseCase.create
       >[0]);
       res.status(201).json({ success: true, data: rule.toJSON() });
@@ -313,9 +321,34 @@ export class MarketplaceController {
   async createPayout(req: TypedRequest, res: Response): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
-      const payout = await this.payoutUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
-        typeof this.payoutUseCase.create
-      >[0]);
+      const body = req.body as Record<string, unknown>;
+      // Map simple payload (amount, currency) to full use case input
+      const amount = typeof body.amount === 'number' ? body.amount : Number(body.amount) || 0;
+      const currency = (body.currency as string) || 'USD';
+      const method = (body.method as string) || 'bank_transfer';
+      const now = new Date();
+      const periodEnd = body.periodEnd ? new Date(body.periodEnd as string) : now;
+      const periodStart = body.periodStart ? new Date(body.periodStart as string) : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const lineItems = Array.isArray(body.lineItems) ? body.lineItems : [
+        {
+          lineItemId: `li-${Date.now()}`,
+          orderId: body.orderId as string || null,
+          orderNumber: body.orderNumber as string || null,
+          grossRevenue: amount,
+          commissionAmount: 0,
+          netRevenue: amount,
+          currency,
+        },
+      ];
+      const payout = await this.payoutUseCase.create({
+        vendorId: body.vendorId as string,
+        organizationId,
+        method: method as never,
+        periodStart,
+        periodEnd,
+        currency,
+        lineItems: lineItems as never,
+      });
       res.status(201).json({ success: true, data: payout.toJSON() });
     } catch (error) {
       this.handleError(res, error);

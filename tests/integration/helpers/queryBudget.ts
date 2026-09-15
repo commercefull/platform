@@ -17,14 +17,14 @@ export function expectQueryBudget(res: AxiosResponse, budget: number, label: str
   const count = raw !== undefined && raw !== null ? parseInt(Array.isArray(raw) ? raw[0] : String(raw), 10) : NaN;
 
   if (Number.isNaN(count)) {
-    fail(
+    throw new Error(
       `Query budget test for "${label}" could not read X-Query-Count header.\n` +
         'Ensure the server is running in dev/test mode (NODE_ENV !== "production").',
     );
   }
 
   if (count > budget) {
-    fail(
+    throw new Error(
       `Query budget exceeded for "${label}": ${count} queries > budget of ${budget}.\n` +
         'This likely indicates an N+1 query pattern. Check for loops that execute per-item SQL queries.',
     );

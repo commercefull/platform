@@ -139,7 +139,7 @@ export const createTicketSubmit = async (req: TypedRequest, res: Response): Prom
 
     res.redirect(`/support/tickets/${ticket.supportTicketId}?success=Ticket created successfully`);
   } catch (error: unknown) {
-    logger.warn('Error creating ticket:', error);
+    logger.warning('Error creating ticket:', error);
     storefrontRespond(req, res, 'support/create-ticket', {
       pageName: 'New Support Ticket',
       error: (error as Error).message || 'Failed to create ticket',
@@ -190,7 +190,7 @@ export const addTicketMessage = async (req: TypedRequest, res: Response): Promis
 
     res.redirect(`/support/tickets/${req.params.ticketId}?success=Message sent`);
   } catch (error: unknown) {
-    logger.warn('Error adding message:', error);
+    logger.warning('Error adding message:', error);
     req.flash('error', 'Failed to send message');
     res.redirect(`/support/tickets/${req.params.ticketId}`);
   }
@@ -231,7 +231,7 @@ export const submitTicketFeedback = async (req: TypedRequest, res: Response): Pr
     req.flash('success', 'Thank you for your feedback!');
     res.redirect(`/support/tickets/${req.params.ticketId}`);
   } catch (error: unknown) {
-    logger.warn('Error submitting feedback:', error);
+    logger.warning('Error submitting feedback:', error);
     req.flash('error', 'Failed to submit feedback');
     res.redirect(`/support/tickets/${req.params.ticketId}`);
   }

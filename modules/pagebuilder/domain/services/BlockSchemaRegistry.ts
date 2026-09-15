@@ -809,3 +809,6 @@ const BUILT_IN_BLOCK_TYPES = {
     isBuiltIn: true,
   },
 } satisfies Record<string, BlockTypeDefinition>;
+
+// Register built-in block types after definitions are available
+blockSchemaRegistry.registerBuiltIns();

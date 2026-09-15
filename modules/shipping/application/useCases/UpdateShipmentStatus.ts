@@ -23,7 +23,7 @@ export class UpdateShipmentStatusUseCase {
         logger.info(`updateShipmentStatus: updated shipment ${input.shipmentId} to ${input.status}`);
       }
     } catch (err: unknown) {
-      logger.warn(`updateShipmentStatus error: ${(err as Error).message}`);
+      logger.warning(`updateShipmentStatus error: ${(err as Error).message}`);
     }
   }
 }

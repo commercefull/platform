@@ -9,7 +9,7 @@ import { StorageService, UploadResult } from '../../domain/services/StorageServi
 
 export class LocalStorageService implements StorageService {
   constructor(
-    private readonly baseDir: string = './uploads',
+    private readonly baseDir: string = './public/uploads',
     private readonly baseUrl: string = 'http://localhost:3000/uploads',
   ) {}
 

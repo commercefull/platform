@@ -8,6 +8,7 @@ import { ImageProcessingOptions, ImageProcessingOptionsBuilder } from '../../dom
 import { MediaRepository } from '../../domain/repositories/MediaRepository';
 import { ImageProcessingService } from '../../domain/services/ImageProcessingService';
 import { StorageService } from '../../domain/services/StorageService';
+import { generateUUID } from '../../../../libs/uuid';
 
 export interface ProcessImageCommand {
   file: {
@@ -139,8 +140,7 @@ export class ProcessImageUseCase {
   }
 
   private generateMediaId(): string {
-    // Use UUID v7 for better database performance
-    return `media_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return generateUUID();
   }
 
   private getExtension(mimeType: string): string {

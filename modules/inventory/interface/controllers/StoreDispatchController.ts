@@ -51,6 +51,14 @@ export const createStoreDispatch = async (
   req: TypedRequest<Record<string, string>, unknown, CreateDispatchBody>,
   res: Response,
 ): Promise<void> => {
+  if (!req.body.fromStoreId) {
+    respondError(res, 'fromStoreId is required', 400);
+    return;
+  }
+  if (!req.body.toStoreId) {
+    respondError(res, 'toStoreId is required', 400);
+    return;
+  }
   const useCase = new CreateStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
   const result = await useCase.execute({
     fromStoreId: req.body.fromStoreId,

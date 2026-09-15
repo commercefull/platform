@@ -78,7 +78,7 @@ export const createAutomationRule = async (req: TypedRequest, res: Response): Pr
 
     res.redirect(`/admin/automation/${rule.automationRuleId}?success=Automation rule created successfully`);
   } catch (error: unknown) {
-    logger.warn('Error creating automation rule:', error);
+    logger.warning('Error creating automation rule:', error);
     adminRespond(req, res, 'operations/automation/create', {
       pageName: 'Create Automation Rule',
       error: (error as Error).message || 'Failed to create automation rule',
@@ -170,7 +170,7 @@ export const updateAutomationRule = async (req: TypedRequest, res: Response): Pr
     const rule = await updateAutomationRuleUseCase.execute(ruleId, updates as never);
     res.redirect(`/admin/automation/${rule.automationRuleId}?success=Automation rule updated successfully`);
   } catch (error: unknown) {
-    logger.warn('Error updating automation rule:', error);
+    logger.warning('Error updating automation rule:', error);
     const { ruleId } = req.params;
     adminRespond(req, res, 'operations/automation/edit', {
       pageName: 'Edit Automation Rule',
@@ -191,7 +191,7 @@ export const deleteAutomationRule = async (req: TypedRequest, res: Response): Pr
     await deleteAutomationRuleUseCase.execute(ruleId);
     res.redirect('/admin/automation?success=Automation rule deleted successfully');
   } catch (error: unknown) {
-    logger.warn('Error deleting automation rule:', error);
+    logger.warning('Error deleting automation rule:', error);
     res.redirect('/admin/automation?error=Failed to delete automation rule');
   }
 };
@@ -206,7 +206,7 @@ export const activateAutomationRule = async (req: TypedRequest, res: Response): 
     await updateAutomationRuleUseCase.execute(ruleId, { isActive: true } as never);
     res.redirect(`/admin/automation/${ruleId}?success=Rule activated successfully`);
   } catch (error: unknown) {
-    logger.warn('Error activating automation rule:', error);
+    logger.warning('Error activating automation rule:', error);
     res.redirect(`/admin/automation/${req.params.ruleId}?error=Failed to activate rule`);
   }
 };
@@ -217,7 +217,7 @@ export const deactivateAutomationRule = async (req: TypedRequest, res: Response)
     await updateAutomationRuleUseCase.execute(ruleId, { isActive: false } as never);
     res.redirect(`/admin/automation/${ruleId}?success=Rule deactivated successfully`);
   } catch (error: unknown) {
-    logger.warn('Error deactivating automation rule:', error);
+    logger.warning('Error deactivating automation rule:', error);
     res.redirect(`/admin/automation/${req.params.ruleId}?error=Failed to deactivate rule`);
   }
 };
@@ -232,7 +232,7 @@ export const triggerAutomationRule = async (req: TypedRequest, res: Response): P
     await executionEngine.triggerManual(ruleId, req.body as Record<string, unknown>);
     res.redirect(`/admin/automation/${ruleId}?success=Rule triggered successfully`);
   } catch (error: unknown) {
-    logger.warn('Error triggering automation rule:', error);
+    logger.warning('Error triggering automation rule:', error);
     res.redirect(`/admin/automation/${req.params.ruleId}?error=Failed to trigger rule`);
   }
 };

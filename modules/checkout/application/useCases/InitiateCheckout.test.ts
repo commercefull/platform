@@ -4,7 +4,7 @@
 
 import { InitiateCheckoutUseCase, InitiateCheckoutCommand } from './InitiateCheckout';
 import { CheckoutSession } from '../../domain/entities/CheckoutSession';
-import { CheckoutValidationError } from '../../domain/errors/CheckoutErrors';
+import { CheckoutValidationError, CheckoutBasketNotFoundError } from '../../domain/errors/CheckoutErrors';
 import { Money } from '../../../../libs/money';
 
 import type { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
@@ -72,12 +72,12 @@ describe('InitiateCheckoutUseCase', () => {
     expect(repo.save).toHaveBeenCalled();
   });
 
-  it('should throw CheckoutValidationError when basket not found', async () => {
+  it('should throw CheckoutBasketNotFoundError when basket not found', async () => {
     const basketPort = createMockBasketPort(null);
     const repo = createMockCheckoutRepo(null);
     const useCase = new InitiateCheckoutUseCase(repo, basketPort);
 
-    await expect(useCase.execute(new InitiateCheckoutCommand('nonexistent'))).rejects.toThrow(CheckoutValidationError);
+    await expect(useCase.execute(new InitiateCheckoutCommand('nonexistent'))).rejects.toThrow(CheckoutBasketNotFoundError);
   });
 
   it('should throw CheckoutValidationError when basket is empty', async () => {

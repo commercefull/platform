@@ -174,7 +174,7 @@ async function dispatchOne(client: import('pg').PoolClient, row: OutboxEvent): P
          WHERE "eventOutboxId" = $1`,
         [row.eventOutboxId, errorMsg],
       );
-      logger.warn('Outbox event moved to dead-letter', {
+      logger.warning('Outbox event moved to dead-letter', {
         eventOutboxId: row.eventOutboxId,
         type: row.eventType,
         attempts: row.attempts,
@@ -196,7 +196,7 @@ async function dispatchOne(client: import('pg').PoolClient, row: OutboxEvent): P
          WHERE "eventOutboxId" = $1`,
         [row.eventOutboxId, errorMsg, nextRetry],
       );
-      logger.warn('Outbox event retry scheduled', {
+      logger.warning('Outbox event retry scheduled', {
         eventOutboxId: row.eventOutboxId,
         type: row.eventType,
         attempts: row.attempts,

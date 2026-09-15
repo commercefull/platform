@@ -92,7 +92,7 @@ export const createCoupon = async (req: TypedRequest, res: Response): Promise<vo
 };
 
 export const validateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as ValidateCouponBody;
+  const body = (req.body || {}) as ValidateCouponBody;
   const useCase = new ValidateCouponUseCase(couponRepository);
   const command = new ValidateCouponCommand(body.code || req.params.code, body.orderValue, body.customerId, body.items);
   const result = await useCase.execute(command);

@@ -5,7 +5,6 @@ describe('Membership Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let userToken: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let userId: string;
   let testTierId: string;
   let testBenefitId: string;
@@ -252,18 +251,16 @@ describe('Membership Tests', () => {
     });
 
     it('should get user membership details when authenticated', async () => {
-      const response = await client.get('/customer/membership/my-membership', {
+      const response = await client.get(`/customer/membership/user/${userId}`, {
         headers: { Authorization: `Bearer ${userToken}` },
       });
 
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
     });
 
-    // TODO(phase-3.4): Fix — membership module has legacy facade; auth guard may not cover /customer/membership. Track in gap-analysis-and-roadmap.md Phase 3.4.
-    it.skip('should deny access to membership details without authentication', async () => {
-      const response = await client.get('/customer/membership/my-membership');
+    it('should deny access to membership details without authentication', async () => {
+      const response = await client.get(`/customer/membership/user/${userId}`);
 
       expect(response.status).toBe(401);
     });

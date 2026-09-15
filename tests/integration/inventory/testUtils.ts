@@ -58,7 +58,7 @@ export const setupInventoryTests = async () => {
     client,
     adminToken,
     testProductId: SEEDED_PRODUCT_ID,
-    testLocationId: SEEDED_STORE_WAREHOUSE_ID,
+    testLocationId: SEEDED_INVENTORY_LOCATION_ID,
     testInventoryItemId: SEEDED_INVENTORY_LOCATION_ID,
   };
 };

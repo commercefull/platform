@@ -35,3 +35,9 @@ export class CheckoutValidationError extends AppError {
     super(message, 400, { code: 'checkout.validation_error' });
   }
 }
+
+export class CheckoutBasketNotFoundError extends AppError {
+  constructor(basketId: string) {
+    super(`Basket not found: ${basketId}`, 404, { code: 'checkout.basket_not_found' });
+  }
+}

@@ -31,32 +31,36 @@ export class AuditAdminController {
 
     const result = await auditRepository.findAll(Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined, pagination);
 
-    res.json(result);
+    res.json({ success: true, data: result });
   });
 
   getLog = asyncHandler(async (req: Request, res: Response) => {
     const log = await auditRepository.findById(String(req.params.id));
     if (!log) {
-      res.status(404).json({ error: 'Audit log entry not found' });
+      res.status(404).json({ success: false, error: 'Audit log entry not found' });
       return;
     }
-    res.json(log.toJSON());
+    res.json({ success: true, data: log.toJSON() });
   });
 
   verifyChain = asyncHandler(async (req: Request, res: Response) => {
     const fromId = req.query.fromId as string | undefined;
     const toId = req.query.toId as string | undefined;
     const result = await auditRepository.verifyChain(fromId, toId);
-    res.json(result);
+    res.json({ success: true, data: result });
   });
 
   getStats = asyncHandler(async (_req: Request, res: Response) => {
     const [byAction, byActor] = await Promise.all([auditRepository.countByAction(), auditRepository.countByActor()]);
-    res.json({ byAction, byActor });
+    res.json({ success: true, data: { byAction, byActor } });
   });
 
   findByCorrelationId = asyncHandler(async (req: Request, res: Response) => {
     const logs = await auditRepository.findByCorrelationId(String(req.params.correlationId));
-    res.json(logs.map(l => l.toJSON()));
+    if (logs.length === 0) {
+      res.status(404).json({ success: false, error: 'No audit logs found for correlation ID' });
+      return;
+    }
+    res.json({ success: true, data: logs.map(l => l.toJSON()) });
   });
 }

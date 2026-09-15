@@ -163,7 +163,10 @@ describe('Notification Expanded Tests', () => {
     it('should create a notification template', async () => {
       if (!adminToken) return;
 
-      const resp = await client.post('/business/notification-templates', testTemplateData, {
+      const resp = await client.post('/business/notification-templates', {
+        ...testTemplateData,
+        code: `test-template-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      }, {
         headers: adminAuthHeaders(),
       });
 
@@ -237,7 +240,7 @@ describe('Notification Expanded Tests', () => {
         '/business/notifications/batches',
         {
           userIds: [testUserId || '00000000-0000-0000-0000-000000001001'],
-          type: 'test_notification',
+          type: 'order_confirmation',
           title: 'Test Notification',
           content: 'This is a test notification from admin',
           channel: 'in_app',
@@ -255,7 +258,7 @@ describe('Notification Expanded Tests', () => {
         '/business/notifications/batches',
         {
           userIds: [testUserId || '00000000-0000-0000-0000-000000001001'],
-          type: 'batch_test',
+          type: 'order_confirmation',
           title: 'Batch Test',
           content: 'Batch test notification',
           channel: 'in_app',

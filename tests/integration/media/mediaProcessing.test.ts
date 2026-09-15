@@ -4,13 +4,15 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import { loginTestAdmin } from '../testUtils';
 import FormData from 'form-data';
 
-// Create a minimal 1x1 transparent PNG for testing
+// Create a minimal 1x1 PNG for testing (Sharp-readable)
 const createTestImageBuffer = (): Buffer => {
-  // This is a minimal 1x1 transparent PNG
-  return Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9jU77yQAAAABJRU5ErkJggg==', 'base64');
+  // This is a minimal 1x1 red PNG that Sharp can process
+  return Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAADElEQVQImWP4z8AAAAMBAQCc479ZAAAAAElFTkSuQmCC', 'base64');
 };
 
 const createClient = (): AxiosInstance =>
@@ -27,11 +29,27 @@ const createClient = (): AxiosInstance =>
 describe('Media API Integration', () => {
   let client: AxiosInstance;
   let adminToken: string;
+  const uploadedMediaIds = new Set<string>();
 
   beforeAll(async () => {
     jest.setTimeout(30000);
     client = createClient();
+    client.interceptors.response.use(response => {
+      const data = response.data?.data;
+      const results = Array.isArray(data) ? data : [data];
+      for (const result of results) {
+        const mediaId = result?.media?.mediaId;
+        if (mediaId) uploadedMediaIds.add(mediaId);
+      }
+      return response;
+    });
     adminToken = await loginTestAdmin(client);
+  });
+
+  afterAll(async () => {
+    await Promise.all(
+      [...uploadedMediaIds].map(mediaId => fs.rm(path.join(process.cwd(), 'public/uploads/media', mediaId), { recursive: true, force: true })),
+    );
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });
@@ -68,13 +86,17 @@ describe('Media API Integration', () => {
 
       // Verify URLs
       const urls = response.data.data.urls;
-      expect(urls.original).toContain('uploads');
+      expect(new URL(urls.original).pathname).toMatch(/^\/uploads\/media\/[0-9a-f-]+\/original\.png$/);
       expect(urls.webp).toBeDefined();
       expect(urls.thumbnail).toBeDefined();
       expect(urls.responsive).toBeDefined();
       expect(Object.keys(urls.responsive)).toContain('_sm');
       expect(Object.keys(urls.responsive)).toContain('_md');
       expect(Object.keys(urls.responsive)).toContain('_lg');
+
+      const uploadedFileResponse = await client.get(urls.original, { responseType: 'arraybuffer' });
+      expect(uploadedFileResponse.status).toBe(200);
+      expect(uploadedFileResponse.headers['content-type']).toBe('image/png');
     });
 
     it('should handle custom metadata', async () => {

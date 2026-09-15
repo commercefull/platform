@@ -81,4 +81,11 @@ router.get('/customers/:customerId/addresses', asyncHandler(customerController.g
  */
 router.post('/customers/:customerId/addresses', asyncHandler(customerController.addCustomerAddress));
 
+// ============================================================================
+// Customer Group Routes (Business)
+// ============================================================================
+
+router.get('/customer-groups/:customerGroupId', asyncHandler(customerController.getCustomerGroup));
+router.get('/customer-groups/:customerGroupId/customers', asyncHandler(customerController.getCustomersInGroup));
+
 export const customerBusinessRouter = router;

@@ -70,7 +70,7 @@ export class SamlAssertionParser {
 
     // Verify issuer matches expected entity ID
     if (issuer && provider.entityId && issuer !== provider.entityId) {
-      logger.warn('SAML issuer mismatch', { expected: provider.entityId, actual: issuer });
+      logger.warning('SAML issuer mismatch', { expected: provider.entityId, actual: issuer });
     }
 
     // Verify time validity

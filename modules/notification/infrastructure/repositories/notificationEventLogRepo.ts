@@ -2,11 +2,15 @@ import { query, queryOne } from '../../../../libs/db';
 
 export interface NotificationEventLog {
   notificationEventLogId: string;
+  notificationId?: string;
+  deliveryLogId?: string;
+  userId?: string;
+  userType?: string;
   eventType: string;
-  entityId?: string;
-  entityType?: string;
-  payload?: Record<string, unknown>;
-  processedAt?: Date;
+  eventData?: Record<string, unknown>;
+  userAgent?: string;
+  ipAddress?: string;
+  deviceInfo?: Record<string, unknown>;
   createdAt: Date;
 }
 
@@ -14,14 +18,15 @@ export async function create(
   params: Omit<NotificationEventLog, 'notificationEventLogId' | 'createdAt'>,
 ): Promise<NotificationEventLog | null> {
   return queryOne<NotificationEventLog>(
-    `INSERT INTO "notificationEventLog" ("eventType", "entityId", "entityType", payload, "processedAt", "createdAt")
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    `INSERT INTO "notificationEventLog" ("notificationId", "deliveryLogId", "userId", "userType", "eventType", "eventData", "createdAt")
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
     [
+      params.notificationId || null,
+      params.deliveryLogId || null,
+      params.userId || null,
+      params.userType || null,
       params.eventType,
-      params.entityId || null,
-      params.entityType || null,
-      params.payload ? JSON.stringify(params.payload) : null,
-      params.processedAt || null,
+      params.eventData ? JSON.stringify(params.eventData) : (params as Record<string, unknown>).payload ? JSON.stringify((params as Record<string, unknown>).payload) : null,
       new Date(),
     ],
   );
@@ -30,15 +35,15 @@ export async function create(
 export async function findUnprocessed(limit = 100): Promise<NotificationEventLog[]> {
   return (
     (await query<NotificationEventLog[]>(
-      `SELECT * FROM "notificationEventLog" WHERE "processedAt" IS NULL ORDER BY "createdAt" ASC LIMIT $1`,
+      `SELECT * FROM "notificationEventLog" ORDER BY "createdAt" ASC LIMIT $1`,
       [limit],
     )) || []
   );
 }
 
 export async function markProcessed(notificationEventLogId: string): Promise<void> {
-  await query(`UPDATE "notificationEventLog" SET "processedAt" = $1 WHERE "notificationEventLogId" = $2`, [
-    new Date(),
+  await query(`UPDATE "notificationEventLog" SET "eventType" = $1 WHERE "notificationEventLogId" = $2`, [
+    'processed',
     notificationEventLogId,
   ]);
 }

@@ -34,9 +34,9 @@ const PURCHASE_ORDER_ITEM_IDS = {
 };
 
 // Test product ID (should exist from product seeds)
-const TEST_PRODUCT_ID = '01912000-0000-7000-8000-000000000001';
+const TEST_PRODUCT_ID = '00000000-0000-0000-0000-000000000001';
 // Test warehouse ID (should exist from warehouse seeds)
-const TEST_WAREHOUSE_ID = '01915000-0000-7000-8000-000000000001';
+const TEST_WAREHOUSE_ID = '0193b000-0000-7000-8000-000000000001';
 
 exports.seed = async function (knex) {
   // Clean up existing test data in reverse order of dependencies

@@ -76,7 +76,7 @@ export const updateSEOSettings = async (req: TypedRequest, res: Response): Promi
 
     res.redirect('/hub/marketing/seo?success=SEO settings updated successfully');
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     adminRespond(req, res, 'marketing/seo/index', {
       pageName: 'SEO Settings',

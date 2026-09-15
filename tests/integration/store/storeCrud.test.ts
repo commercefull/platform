@@ -61,14 +61,14 @@ describe('Store CRUD Tests', () => {
     it('should reject store creation with missing name', async () => {
       const response = await client.post('/business/stores', { slug: `test-${Date.now()}` }, { headers: authHeaders() });
 
-      expectStatus(response, 404);
+      expectStatus(response, 400);
       expect(response.data.success).toBe(false);
     });
 
     it('should reject store creation with missing slug', async () => {
       const response = await client.post('/business/stores', { name: 'Test Store' }, { headers: authHeaders() });
 
-      expectStatus(response, 404);
+      expectStatus(response, 400);
       expect(response.data.success).toBe(false);
     });
 

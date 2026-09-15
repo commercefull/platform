@@ -158,7 +158,7 @@ export const predictiveAnalytics = async (req: TypedRequest, res: Response): Pro
         ...analysis,
       };
     } catch (error) {
-      logger.warn('Error:', error);
+      logger.warning('Error:', error);
       return {
         customerId,
         churnProbability: 0,

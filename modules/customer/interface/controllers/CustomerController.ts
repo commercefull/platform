@@ -25,6 +25,7 @@ import {
   ManageAddressesUseCase,
 } from '../../application/useCases/ManageAddresses';
 import { customerDataRepository } from '../../application/wired';
+import customerGroupDataRepository from '../../infrastructure/repositories/CustomerGroupDataRepository';
 
 // ============================================================================
 // Helpers
@@ -205,6 +206,32 @@ export const addAddress = async (req: TypedRequest, res: Response): Promise<void
   const address = await useCase.addAddress(command);
 
   respond(req, res, address, 201);
+};
+
+// ============================================================================
+// Customer Group Routes (Business)
+// ============================================================================
+export const getCustomerGroup = async (req: TypedRequest, res: Response): Promise<void> => {
+  const { customerGroupId } = req.params;
+  const group = await customerGroupDataRepository.groups.findById(customerGroupId);
+  if (!group) {
+    res.status(404).json({ success: false, error: 'Customer group not found' });
+    return;
+  }
+  respond(req, res, group);
+};
+
+export const getCustomersInGroup = async (req: TypedRequest, res: Response): Promise<void> => {
+  const { customerGroupId } = req.params;
+  const memberships = await customerGroupDataRepository.memberships.findByGroupId(customerGroupId, true);
+  const customers = await Promise.all(
+    memberships.map(async m => {
+      const c = await CustomerRepo.findById(m.customerId);
+      return c;
+    }),
+  );
+  const validCustomers = customers.filter(Boolean);
+  respond(req, res, validCustomers);
 };
 
 export const updateAddress = async (req: TypedRequest, res: Response): Promise<void> => {

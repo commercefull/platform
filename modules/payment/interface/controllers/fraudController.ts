@@ -91,9 +91,18 @@ export const getPendingReviews: AsyncHandler = async (req, res, _next) => {
 };
 
 export const reviewFraudCheck: AsyncHandler = async (req, res, _next) => {
-  const body = req.body as { decision: 'approved' | 'rejected'; notes?: string };
+  const body = req.body as { decision?: string; notes?: string };
+  const existing = await fraudRepo.getCheck(req.params.id);
+  if (!existing) {
+    res.status(404).json({ success: false, message: 'Fraud check not found' });
+    return;
+  }
+  if (!body.decision || (body.decision !== 'approved' && body.decision !== 'rejected')) {
+    res.status(400).json({ success: false, message: 'decision must be "approved" or "rejected"' });
+    return;
+  }
   const reviewedBy = req.user?.userId || req.user?.organizationId || '';
-  await fraudRepo.reviewCheck(req.params.id, body.decision, reviewedBy, body.notes);
+  await fraudRepo.reviewCheck(req.params.id, body.decision as 'approved' | 'rejected', reviewedBy, body.notes);
   res.json({ success: true, message: 'Review submitted' });
 };
 

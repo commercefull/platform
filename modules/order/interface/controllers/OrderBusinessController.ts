@@ -24,9 +24,13 @@ import { CreateOrderRefundCommand, CreateOrderRefundUseCase } from '../../applic
 import { TrackFulfillmentPackageCommand, TrackFulfillmentPackageUseCase } from '../../application/useCases/TrackFulfillmentPackage';
 import { OrderItem } from '../../domain/entities/OrderItem';
 import { Money } from '../../domain/valueObjects/Money';
-import { generateUUID } from '../../../../libs/uuid';
+import { generateUUID, isUuid } from '../../../../libs/uuid';
 import { query, queryOne } from '../../../../libs/db';
 import { orderDataRepository, orderFulfillmentDataRepository } from '../../application/wired';
+import {
+  OrderNotFoundError,
+  RefundAmountMustBePositiveError,
+} from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Content Negotiation Helpers
@@ -105,13 +109,16 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
 export const getOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   const { orderId } = req.params;
 
+  if (!isUuid(orderId)) {
+    throw new OrderNotFoundError();
+  }
+
   const command = new GetOrderCommand(orderId);
   const useCase = new GetOrderUseCase(OrderRepo);
   const order = await useCase.execute(command);
 
   if (!order) {
-    respondError(req, res, 'Order not found', 404);
-    return;
+    throw new OrderNotFoundError();
   }
 
   respond(req, res, order, 200);
@@ -171,8 +178,7 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
   const { amount, reason, transactionId } = body;
 
   if (!amount || amount <= 0) {
-    respondError(req, res, 'Refund amount must be greater than zero', 400);
-    return;
+    throw new RefundAmountMustBePositiveError();
   }
 
   if (!reason) {

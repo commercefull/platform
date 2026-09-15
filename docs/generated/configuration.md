@@ -93,6 +93,6 @@
 | Variable | Default | Description |
 |---|---|---|
 | `STORAGE_TYPE` | `local` | ============================================================================ File Storage ============================================================================ |
-| `STORAGE_LOCAL_DIR` | `uploads` | — |
+| `STORAGE_LOCAL_DIR` | `public/uploads` | — |
 | `STORAGE_LOCAL_URL` | `http://127.0.0.1:3000/uploads` | — |
 

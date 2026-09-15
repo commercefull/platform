@@ -3,7 +3,7 @@
  */
 
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
-import { CustomerNotFoundError, CustomerValidationError, CustomerAlreadyVerifiedError } from '../../domain/errors/CustomerErrors';
+import { CustomerNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -46,7 +46,12 @@ export class VerifyCustomerUseCase {
     }
 
     if (customer.isVerified) {
-      throw new CustomerAlreadyVerifiedError();
+      return {
+        success: true,
+        customerId: customer.customerId,
+        email: customer.email,
+        verifiedAt: customer.updatedAt.toISOString(),
+      };
     }
 
     // Verify based on type

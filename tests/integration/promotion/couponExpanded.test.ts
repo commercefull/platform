@@ -10,7 +10,6 @@ import {
   SEEDED_COUPON_CODE_FIXED,
   SEEDED_COUPON_CODE_PERCENTAGE,
   SEEDED_COUPON_CODE_EXPIRED,
-  SEEDED_GIFT_CARD_CODE,
 } from './testUtils';
 import { loginTestUser, expectStatus } from '../testUtils';
 import { TEST_PRODUCT_1_ID } from '../testConstants';
@@ -135,21 +134,6 @@ describe('Coupon Expanded Tests', () => {
       await cleanup(basketId);
     });
 
-    // TODO(phase-3.4): Fix — gift card feature not yet implemented (no giftCard table). Track in gap-analysis-and-roadmap.md Phase 3.4.
-    it.skip('should apply gift card code correctly', async () => {
-      // Gift card feature not yet implemented (no giftCard table)
-      const basketId = await createBasketWithItems(50);
-      if (!basketId) return;
-
-      const resp = await client.post(
-        `/customer/basket/${basketId}/coupon`,
-        { couponCode: SEEDED_GIFT_CARD_CODE },
-        { headers: authHeaders() },
-      );
-
-      expectStatus(resp, 200);
-      await cleanup(basketId);
-    });
   });
 
   // ============================================================================

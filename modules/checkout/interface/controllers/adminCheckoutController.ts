@@ -22,7 +22,7 @@ export const updateCheckoutSettings = async (req: TypedRequest, res: Response): 
   try {
     res.redirect('/admin/settings/checkout?success=Checkout settings updated successfully');
   } catch (error: unknown) {
-    logger.warn('Error updating checkout settings:', error);
+    logger.warning('Error updating checkout settings:', error);
     adminRespond(req, res, 'settings/checkout/index', {
       pageName: 'Checkout Settings',
       settings: {},

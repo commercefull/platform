@@ -42,24 +42,6 @@ router.get('/notifications', async (req, res) => {
   }
 });
 
-router.get('/notifications/:id', async (req, res) => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id;
-
-    if (!customerId) {
-      return res.status(401).json({ success: false, error: 'Not authenticated' });
-    }
-
-    const notification = await notificationRepo.findById(String(req.params.id));
-    if (!notification) {
-      return res.status(404).json({ success: false, error: 'Notification not found' });
-    }
-    res.json({ success: true, data: notification });
-  } catch (error: unknown) {
-    res.status(400).json({ success: false, error: (error as Error).message });
-  }
-});
-
 router.get('/notifications/count', async (req, res) => {
   try {
     const customerId = req.user?.customerId || req.user?.id;
@@ -85,6 +67,45 @@ router.get('/notifications/unread-count', async (req, res) => {
 
     const count = await notificationRepo.countUnread(customerId);
     res.json({ success: true, data: { count } });
+  } catch (error: unknown) {
+    res.status(400).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// ============================================================================
+// Preferences (must be before /notifications/:id to avoid param matching)
+// ============================================================================
+
+router.get('/notifications/preferences', asyncHandler(notificationCustomerController.getPreferences));
+router.get('/notifications/preferences/type/:type', asyncHandler(notificationCustomerController.getPreferenceByType));
+router.get('/notifications/preferences/:id', asyncHandler(notificationCustomerController.getPreferenceById));
+router.post('/notifications/preferences', asyncHandler(notificationCustomerController.createPreference));
+router.post('/notifications/preferences/bulk', asyncHandler(notificationCustomerController.bulkUpdatePreferences));
+router.put('/notifications/preferences/:id/schedule', asyncHandler(notificationCustomerController.updateSchedule));
+router.put('/notifications/preferences/:id', asyncHandler(notificationCustomerController.updatePreference));
+router.delete('/notifications/preferences/:id', asyncHandler(notificationCustomerController.deletePreference));
+
+// ============================================================================
+// Devices
+// ============================================================================
+
+router.get('/notifications/devices', asyncHandler(notificationCustomerController.listDevices));
+router.post('/notifications/devices', asyncHandler(notificationCustomerController.registerDevice));
+router.delete('/notifications/devices/:deviceToken', asyncHandler(notificationCustomerController.deleteDevice));
+
+router.get('/notifications/:id', async (req, res) => {
+  try {
+    const customerId = req.user?.customerId || req.user?.id;
+
+    if (!customerId) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+
+    const notification = await notificationRepo.findById(String(req.params.id));
+    if (!notification) {
+      return res.status(404).json({ success: false, error: 'Notification not found' });
+    }
+    res.json({ success: true, data: notification });
   } catch (error: unknown) {
     res.status(400).json({ success: false, error: (error as Error).message });
   }
@@ -162,26 +183,5 @@ router.post('/notifications/read', async (req, res) => {
     res.status(400).json({ success: false, error: (error as Error).message });
   }
 });
-
-// ============================================================================
-// Preferences
-// ============================================================================
-
-router.get('/notifications/preferences', asyncHandler(notificationCustomerController.getPreferences));
-router.get('/notifications/preferences/type/:type', asyncHandler(notificationCustomerController.getPreferenceByType));
-router.get('/notifications/preferences/:id', asyncHandler(notificationCustomerController.getPreferenceById));
-router.post('/notifications/preferences', asyncHandler(notificationCustomerController.createPreference));
-router.post('/notifications/preferences/bulk', asyncHandler(notificationCustomerController.bulkUpdatePreferences));
-router.put('/notifications/preferences/:id/schedule', asyncHandler(notificationCustomerController.updateSchedule));
-router.put('/notifications/preferences/:id', asyncHandler(notificationCustomerController.updatePreference));
-router.delete('/notifications/preferences/:id', asyncHandler(notificationCustomerController.deletePreference));
-
-// ============================================================================
-// Devices
-// ============================================================================
-
-router.get('/notifications/devices', asyncHandler(notificationCustomerController.listDevices));
-router.post('/notifications/devices', asyncHandler(notificationCustomerController.registerDevice));
-router.delete('/notifications/devices/:deviceToken', asyncHandler(notificationCustomerController.deleteDevice));
 
 export const notificationCustomerRouter = router;

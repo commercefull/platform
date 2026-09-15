@@ -43,8 +43,8 @@ describe('Returns Module Integration Tests', () => {
       const resp = await client.post(
         '/business/returns',
         {
-          orderId: '00000000-0000-0000-0000-000000000001',
-          items: [{ productId: '00000000-0000-0000-0000-000000000002', quantity: 1, reason: 'defective' }],
+          orderId: '00000000-0000-0000-0000-000000000200',
+          items: [{ productId: '00000000-0000-0000-0000-000000000002', quantity: 1, reason: 'damaged' }],
           reason: 'Product arrived damaged',
         },
         { headers: { Authorization: `Bearer ${orgToken}` } },

@@ -44,6 +44,13 @@ describe('moduleRegistry', () => {
     events: { subscribes: [], publishes: [] },
   };
 
+  const dependentOptional: ModuleManifest = {
+    name: 'dependent',
+    description: 'Dependent optional module',
+    requirement: 'optional',
+    dependsOn: ['independent'],
+  };
+
   describe('register', () => {
     it('should register a module manifest', () => {
       moduleRegistry.register(requiredManifest);
@@ -126,11 +133,31 @@ describe('moduleRegistry', () => {
       expect(moduleRegistry.isEnabled('optional-mod')).toBe(true);
     });
 
+    it('should enable dependencies regardless of registration order', async () => {
+      moduleRegistry.registerAll([dependentOptional, independentOptional]);
+      await moduleRegistry.initialize();
+      expect(moduleRegistry.isEnabled('dependent')).toBe(true);
+    });
+
     it('should only initialize once', async () => {
       moduleRegistry.register(requiredManifest);
       await moduleRegistry.initialize();
       await moduleRegistry.initialize();
       expect(moduleRegistry.getAllManifests()).toHaveLength(1);
+    });
+  });
+
+  describe('initializeSync', () => {
+    it('should enable optional modules before returning', () => {
+      moduleRegistry.registerAll([requiredManifest, independentOptional]);
+      moduleRegistry.initializeSync();
+      expect(moduleRegistry.isEnabled('independent')).toBe(true);
+    });
+
+    it('should enable dependencies regardless of registration order', () => {
+      moduleRegistry.registerAll([dependentOptional, independentOptional]);
+      moduleRegistry.initializeSync();
+      expect(moduleRegistry.isEnabled('dependent')).toBe(true);
     });
   });
 

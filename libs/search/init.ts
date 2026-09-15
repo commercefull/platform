@@ -20,17 +20,17 @@ export function initSearchAdapter(): void {
       break;
 
     case 'opensearch':
-      logger.warn('Search backend "opensearch" not yet implemented, falling back to postgres-fts');
+      logger.warning('Search backend "opensearch" not yet implemented, falling back to postgres-fts');
       setSearchAdapter(new PostgresFtsAdapter());
       break;
 
     case 'pgvector':
-      logger.warn('Search backend "pgvector" not yet implemented, falling back to postgres-fts');
+      logger.warning('Search backend "pgvector" not yet implemented, falling back to postgres-fts');
       setSearchAdapter(new PostgresFtsAdapter());
       break;
 
     default:
-      logger.warn('Unknown SEARCH_BACKEND, falling back to postgres-fts', { backend });
+      logger.warning('Unknown SEARCH_BACKEND, falling back to postgres-fts', { backend });
       setSearchAdapter(new PostgresFtsAdapter());
   }
 }

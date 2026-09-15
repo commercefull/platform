@@ -286,7 +286,10 @@ describe('Inventory Feature Tests', () => {
     it('should allow public access to availability check', async () => {
       const response = await client.get('/customer/inventory/availability/TEST-SKU');
 
-      expect(response.status).toBe(404);
+      // Endpoint is publicly accessible (not 401) and returns 200 with available: false for unknown SKUs
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data.available).toBe(false);
     });
   });
 });

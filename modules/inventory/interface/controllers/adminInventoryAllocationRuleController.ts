@@ -80,7 +80,7 @@ export const createAllocationRule = async (req: TypedRequest, res: Response): Pr
 
     res.redirect('/hub/inventory/allocation-rules?success=Allocation rule created');
   } catch (error: unknown) {
-    logger.warn('Error creating allocation rule:', error);
+    logger.warning('Error creating allocation rule:', error);
     res.redirect('/hub/inventory/allocation-rules?error=' + encodeURIComponent((error as Error).message));
   }
 };
@@ -95,7 +95,7 @@ export const deleteAllocationRule = async (req: TypedRequest, res: Response): Pr
     // Soft delete by deactivating (repo doesn't expose delete yet)
     res.json({ success: true });
   } catch (error: unknown) {
-    logger.warn('Error deleting allocation rule:', error);
+    logger.warning('Error deleting allocation rule:', error);
     res.status(500).json({ success: false, error: (error as Error).message });
   }
 };

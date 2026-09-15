@@ -87,7 +87,7 @@ export const createCoupon = async (req: TypedRequest, res: Response): Promise<vo
 
     res.redirect(`/hub/promotions/coupons/${coupon.promotionCouponId}?success=Coupon created successfully`);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     adminRespond(req, res, 'promotions/coupons/create', {
       pageName: 'Create Coupon',

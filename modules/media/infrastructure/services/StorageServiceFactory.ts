@@ -34,7 +34,7 @@ export class StorageServiceFactory {
   }
 
   private static createLocalStorage(): LocalStorageService {
-    const baseDir = process.env.STORAGE_LOCAL_DIR || './uploads';
+    const baseDir = process.env.STORAGE_LOCAL_DIR || './public/uploads';
     const baseUrl = process.env.STORAGE_LOCAL_URL || 'http://localhost:3000/uploads';
 
     return new LocalStorageService(baseDir, baseUrl);

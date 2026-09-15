@@ -156,9 +156,9 @@ describe('Order Customer Error Handling (AppError)', () => {
   // 404 — OrderNotFoundError (customer)
   // ============================================================================
 
-  it('GET /customer/orders/nonexistent → 404', async () => {
+  it('GET /customer/order/nonexistent → 404', async () => {
     if (!customerToken) return;
-    const res = await client.get('/customer/orders/nonexistent-uuid', {
+    const res = await client.get('/customer/order/nonexistent-uuid', {
       headers: { Authorization: `Bearer ${customerToken}` },
     });
 
@@ -170,10 +170,10 @@ describe('Order Customer Error Handling (AppError)', () => {
   // 403 — OrderPermissionError (customer accessing another customer's order)
   // ============================================================================
 
-  it('GET /customer/orders/:orderId with wrong customer → 403 with code=order.permission_denied', async () => {
+  it('GET /customer/order/:orderId with wrong customer → 403 with code=order.permission_denied', async () => {
     if (!customerToken) return;
     // Use a known order from a different customer (seeded data)
-    const res = await client.get('/customer/orders/00000000-0000-0000-0000-000000000001', {
+    const res = await client.get('/customer/order/00000000-0000-0000-0000-000000000001', {
       headers: { Authorization: `Bearer ${customerToken}` },
     });
 

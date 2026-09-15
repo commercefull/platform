@@ -37,7 +37,7 @@ describe('Store API Integration', () => {
         name: 'Test Store',
         slug: `test-store-${Date.now()}`,
         storeType: 'merchant_store',
-        organizationId: '00000000-0000-0000-0000-000000000001',
+        organizationId: '01911000-0000-7000-8000-000000000001',
         defaultCurrency: 'USD',
         storeEmail: 'store@teststore.com',
         storePhone: '+1-555-0123',
@@ -60,7 +60,7 @@ describe('Store API Integration', () => {
         name: 'Settings Test Store',
         slug: `settings-store-${Date.now()}`,
         storeType: 'merchant_store',
-        organizationId: '00000000-0000-0000-0000-000000000001',
+        organizationId: '01911000-0000-7000-8000-000000000001',
         settings: {
           allowGuestCheckout: false,
           requireAccountForPurchase: true,
@@ -90,7 +90,7 @@ describe('Store API Integration', () => {
         name: 'First Store',
         slug,
         storeType: 'merchant_store',
-        organizationId: '00000000-0000-0000-0000-000000000001',
+        organizationId: '01911000-0000-7000-8000-000000000001',
       };
 
       await client.post('/business/stores', storeData1, { headers: authHeaders() });
@@ -99,7 +99,7 @@ describe('Store API Integration', () => {
         name: 'Second Store',
         slug,
         storeType: 'merchant_store',
-        organizationId: '00000000-0000-0000-0000-000000000001',
+        organizationId: '01911000-0000-7000-8000-000000000001',
       };
 
       const response = await client.post('/business/stores', storeData2, {

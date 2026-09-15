@@ -31,9 +31,9 @@ export interface PlacedBlockProps {
 export interface PageDraftProps {
   draftId: string;
   pageId?: string;
-  storeId: string;
+  storeId?: string;
   organizationId: string;
-  themeId: string;
+  themeId?: string;
   title: string;
   slug: string;
   pageType: string;
@@ -81,13 +81,13 @@ export class PageDraft {
   get pageId(): string | undefined {
     return this.props.pageId;
   }
-  get storeId(): string {
+  get storeId(): string | undefined {
     return this.props.storeId;
   }
   get organizationId(): string {
     return this.props.organizationId;
   }
-  get themeId(): string {
+  get themeId(): string | undefined {
     return this.props.themeId;
   }
   get title(): string {

@@ -143,7 +143,7 @@ describe('Tax Categories API Integration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
-      expect(duplicateResponse.status).toBe(400);
+      expect(duplicateResponse.status).toBe(409);
 
       // Clean up - delete the tax category we created
       await client.delete(`/business/tax/categories/${createdTaxCategoryId}`, {

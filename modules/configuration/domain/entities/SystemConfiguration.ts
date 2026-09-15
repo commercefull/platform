@@ -73,6 +73,7 @@ export interface SystemConfigurationProps {
     emailProviders: string[];
   };
   metadata?: Record<string, unknown>;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -166,6 +167,7 @@ export class SystemConfiguration {
         emailProviders: ['sendgrid'],
       },
       metadata: props.metadata,
+      isActive: true,
       createdAt: now,
       updatedAt: now,
     });
@@ -178,6 +180,9 @@ export class SystemConfiguration {
   // Getters
   get configId(): string {
     return this.props.configId;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
   }
   get systemMode(): SystemMode {
     return this.props.systemMode;
@@ -286,6 +291,7 @@ export class SystemConfiguration {
   toJSON(): Record<string, unknown> {
     return {
       ...this.props,
+      platformName: this.props.platformSettings.platformName,
       isMarketplace: this.isMarketplace,
       isMultiStore: this.isMultiStore,
       isSingleStore: this.isSingleStore,

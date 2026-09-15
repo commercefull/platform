@@ -11,6 +11,7 @@ import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { UpdateSystemConfigurationUseCase, UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
 import { isUuid } from 'libs/uuid';
 import { SystemConfigurationRepo } from '../../application/wired';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
 interface CreateConfigBody {
   configId?: string;
@@ -20,6 +21,7 @@ interface CreateConfigBody {
   defaultCurrency?: string;
   defaultLanguage?: string;
   timezone?: string;
+  systemMode?: 'marketplace' | 'multi_store' | 'single_store';
 }
 
 interface UpdateConfigBody {
@@ -54,6 +56,15 @@ export class SystemConfigurationController {
   async createSystemConfiguration(req: TypedRequest<Record<string, string>, unknown, CreateConfigBody>, res: Response) {
     try {
       const body = req.body;
+      if (!body.platformName || !body.platformName.trim()) {
+        return res.status(400).json({ success: false, message: 'platformName is required' });
+      }
+      if (!body.platformDomain || !body.platformDomain.trim()) {
+        return res.status(400).json({ success: false, message: 'platformDomain is required' });
+      }
+      if (!body.supportEmail || !body.supportEmail.trim()) {
+        return res.status(400).json({ success: false, message: 'supportEmail is required' });
+      }
       const config = SystemConfiguration.create({
         configId: body.configId || randomUUID(),
         platformName: body.platformName,
@@ -62,6 +73,7 @@ export class SystemConfigurationController {
         defaultCurrency: body.defaultCurrency,
         defaultLanguage: body.defaultLanguage,
         timezone: body.timezone,
+        systemMode: body.systemMode,
       });
 
       const systemConfigRepository = new SystemConfigurationRepo();
@@ -73,12 +85,9 @@ export class SystemConfigurationController {
       });
     } catch (error) {
       logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      res.status(400).json({
+      res.status(getErrorStatusCode(error)).json({
         success: false,
-        message: 'Failed to create system configuration',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+        message: getErrorMessage(error),
       });
     }
   }
@@ -121,12 +130,9 @@ export class SystemConfigurationController {
       });
     } catch (error) {
       logger.error('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      res.status(400).json({
+      res.status(getErrorStatusCode(error)).json({
         success: false,
-        message: 'Failed to update system configuration',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+        message: getErrorMessage(error),
       });
     }
   }

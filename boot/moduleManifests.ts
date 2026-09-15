@@ -724,9 +724,7 @@ const manifests: ModuleManifest[] = [
 export function registerModuleManifestsSync(): void {
   moduleRegistry.registerAll(manifests);
   // Initialize synchronously — env vars only, no DB flag provider yet
-  // The registry's initialize() is async but works synchronously when
-  // no flag provider is set, so we call it and discard the promise.
-  void moduleRegistry.initialize();
+  moduleRegistry.initializeSync();
 }
 
 /**

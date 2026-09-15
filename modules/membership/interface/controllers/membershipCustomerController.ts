@@ -59,6 +59,11 @@ export const getTierBenefits = async (req: TypedRequest, res: Response): Promise
 // User Membership Public Endpoints
 export const getUserMembershipByUserId = async (req: TypedRequest, res: Response): Promise<void> => {
   const { userId } = req.params;
+  const authenticatedUserId = req.user?.customerId || req.user?.id;
+  if (authenticatedUserId !== userId) {
+    res.status(403).json({ success: false, message: 'Not authorized to view this membership' });
+    return;
+  }
   const membership = await membershipRepo.findMembershipByUserId(userId);
 
   if (!membership) {
@@ -92,6 +97,11 @@ export const getUserMembershipByUserId = async (req: TypedRequest, res: Response
 
 export const getUserMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
   const { userId } = req.params;
+  const authenticatedUserId = req.user?.customerId || req.user?.id;
+  if (authenticatedUserId !== userId) {
+    res.status(403).json({ success: false, message: 'Not authorized to view these membership benefits' });
+    return;
+  }
 
   // First check if user has an active membership
   const membership = await membershipRepo.findMembershipByUserId(userId);

@@ -328,6 +328,53 @@ export const checkTokenValidity = async (req: TypedRequest<Record<string, string
   });
 };
 
+export const requestEmailVerification = async (
+  req: TypedRequest<Record<string, string>, unknown, EmailBody>,
+  res: Response,
+): Promise<void> => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({ success: false, message: 'Email is required' });
+    return;
+  }
+
+  const subject = await credentialPort.findByEmail(email);
+  let token: string | undefined;
+  if (subject && !subject.isVerified && credentialPort.createEmailVerificationToken) {
+    token = await credentialPort.createEmailVerificationToken(subject.id);
+    await JobScheduler.scheduleEmail({
+      to: email,
+      subject: 'Verify Your Email',
+      template: 'email-verification',
+      data: { token, email },
+    });
+  }
+
+  res.json({
+    success: true,
+    message: 'If an unverified account exists with that email, a verification link has been sent',
+    ...(process.env.NODE_ENV !== 'production' && token ? { data: { token } } : {}),
+  });
+};
+
+export const verifyEmail = async (req: TypedRequest, res: Response): Promise<void> => {
+  const token = String(req.query.token || '');
+  if (!token) {
+    res.status(400).json({ success: false, message: 'Verification token is required' });
+    return;
+  }
+
+  const customerId = credentialPort.verifyEmailVerificationToken
+    ? await credentialPort.verifyEmailVerificationToken(token)
+    : null;
+  if (!customerId) {
+    res.status(400).json({ success: false, error: 'Invalid verification token' });
+    return;
+  }
+
+  res.json({ success: true, message: 'Email verified successfully' });
+};
+
 /**
  * Initiates password reset flow by generating a reset token
  */

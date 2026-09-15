@@ -41,4 +41,6 @@ export interface CredentialSubjectPort {
   changePassword(id: string, newPassword: string): Promise<void>;
   createPasswordResetToken(id: string): Promise<string>;
   verifyPasswordResetToken(token: string): Promise<string | null>;
+  createEmailVerificationToken?(id: string): Promise<string>;
+  verifyEmailVerificationToken?(token: string): Promise<string | null>;
 }

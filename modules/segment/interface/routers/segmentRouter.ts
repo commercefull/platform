@@ -7,6 +7,34 @@ export const segmentBusinessRouter = express.Router();
 
 // Segment CRUD
 segmentBusinessRouter.get('/segment', isOrganizationLoggedIn, asyncHandler(segmentController.listSegments.bind(segmentController)));
+
+// Customer profiles (must be before /segment/:segmentId to avoid param matching)
+segmentBusinessRouter.get(
+  '/segment/profiles',
+  isOrganizationLoggedIn,
+  asyncHandler(segmentController.listCustomerProfiles.bind(segmentController)),
+);
+segmentBusinessRouter.get(
+  '/segment/profiles/:customerId',
+  isOrganizationLoggedIn,
+  asyncHandler(segmentController.getCustomerProfile.bind(segmentController)),
+);
+segmentBusinessRouter.post(
+  '/segment/profiles/:customerId/compute',
+  isOrganizationLoggedIn,
+  asyncHandler(segmentController.computeProfile.bind(segmentController)),
+);
+segmentBusinessRouter.post(
+  '/segment/profiles/recompute-all',
+  isOrganizationLoggedIn,
+  asyncHandler(segmentController.recomputeAll.bind(segmentController)),
+);
+segmentBusinessRouter.get(
+  '/segment/profiles/:customerId/segments',
+  isOrganizationLoggedIn,
+  asyncHandler(segmentController.getCustomerSegments.bind(segmentController)),
+);
+
 segmentBusinessRouter.get(
   '/segment/:segmentId',
   isOrganizationLoggedIn,
@@ -34,33 +62,4 @@ segmentBusinessRouter.get(
   '/segment/:segmentId/members',
   isOrganizationLoggedIn,
   asyncHandler(segmentController.getSegmentMembers.bind(segmentController)),
-);
-
-// Customer profiles
-segmentBusinessRouter.get(
-  '/segment/profiles',
-  isOrganizationLoggedIn,
-  asyncHandler(segmentController.listCustomerProfiles.bind(segmentController)),
-);
-segmentBusinessRouter.get(
-  '/segment/profiles/:customerId',
-  isOrganizationLoggedIn,
-  asyncHandler(segmentController.getCustomerProfile.bind(segmentController)),
-);
-segmentBusinessRouter.post(
-  '/segment/profiles/:customerId/compute',
-  isOrganizationLoggedIn,
-  asyncHandler(segmentController.computeProfile.bind(segmentController)),
-);
-segmentBusinessRouter.post(
-  '/segment/profiles/recompute-all',
-  isOrganizationLoggedIn,
-  asyncHandler(segmentController.recomputeAll.bind(segmentController)),
-);
-
-// Customer segment membership
-segmentBusinessRouter.get(
-  '/segment/profiles/:customerId/segments',
-  isOrganizationLoggedIn,
-  asyncHandler(segmentController.getCustomerSegments.bind(segmentController)),
 );

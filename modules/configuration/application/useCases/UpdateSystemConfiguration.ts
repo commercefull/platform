@@ -96,11 +96,6 @@ export class UpdateSystemConfigurationUseCase {
     // Save updated configuration
     const updatedConfig = await this.systemConfigRepository.save(existingConfig);
 
-    return {
-      configId: updatedConfig.configId,
-      systemMode: updatedConfig.systemMode,
-      platformName: updatedConfig.platformSettings.platformName,
-      updatedAt: updatedConfig.updatedAt.toISOString(),
-    };
+    return updatedConfig.toJSON() as unknown as UpdateSystemConfigurationResponse;
   }
 }

@@ -1,5 +1,6 @@
 import express from 'express';
 import { asyncHandler } from '../../../../libs/asyncHandler';
+import { isCustomerLoggedIn } from '../../../../libs/auth';
 import {
   getMembershipTiers,
   getMembershipTierById,
@@ -20,9 +21,9 @@ router.get('/membership/tiers/:id', asyncHandler(getMembershipTierById));
 router.get('/membership/tiers/:tierId/benefits', asyncHandler(getTierBenefits));
 
 // Get current user's membership
-router.get('/membership/user/:userId', asyncHandler(getUserMembershipByUserId));
+router.get('/membership/user/:userId', isCustomerLoggedIn, asyncHandler(getUserMembershipByUserId));
 
 // Get current user's membership benefits
-router.get('/membership/user/:userId/benefits', asyncHandler(getUserMembershipBenefits));
+router.get('/membership/user/:userId/benefits', isCustomerLoggedIn, asyncHandler(getUserMembershipBenefits));
 
 export const membershipCustomerRouter = router;

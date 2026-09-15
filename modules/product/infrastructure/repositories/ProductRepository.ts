@@ -72,9 +72,24 @@ export class ProductRepo implements IProductRepository {
     );
 
     const products: Product[] = [];
-    for (const row of rows || []) {
-      const images = await this.getProductImages(row.productId);
-      products.push(this.mapToProduct(row, images));
+    const rowsList = rows || [];
+    if (rowsList.length > 0) {
+      // Batch load all images in a single query to avoid N+1
+      const productIds = rowsList.map(r => r.productId);
+      const allImages = await query<Array<{ productId: string } & Record<string, unknown>>>(
+        `SELECT * FROM "productImage" WHERE "productId" = ANY($1) ORDER BY "productId", "position" ASC`,
+        [productIds],
+      );
+      const imagesByProduct = new Map<string, Array<Record<string, unknown>>>();
+      for (const img of allImages || []) {
+        const arr = imagesByProduct.get(img.productId) || [];
+        arr.push(img);
+        imagesByProduct.set(img.productId, arr);
+      }
+      for (const row of rowsList) {
+        const images = imagesByProduct.get(row.productId) || [];
+        products.push(this.mapToProduct(row, images as never));
+      }
     }
 
     return { data: products, total, limit, offset, hasMore: offset + products.length < total, length: products.length };
@@ -295,7 +310,7 @@ export class ProductRepo implements IProductRepository {
         `UPDATE "productVariant" SET
           sku = $1, name = $2, price = $3, "compareAtPrice" = $4,
           weight = $5, "weightUnit" = $6, "isDefault" = $7, "isActive" = $8,
-          "sortOrder" = $9, barcode = $10, "updatedAt" = $11
+          "position" = $9, barcode = $10, "updatedAt" = $11
         WHERE "productVariantId" = $12`,
         [
           variant.sku,

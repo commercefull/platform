@@ -131,7 +131,7 @@ export const postAdminLogin = async (req: TypedRequest, res: Response) => {
     // Redirect to dashboard
     return res.redirect('/admin');
   } catch (error) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     adminRespond(req, res, 'login', {
       pageName: 'Admin Login',
@@ -157,7 +157,7 @@ export const postAdminLogout = async (req: TypedRequest, res: Response) => {
     // Redirect to login page
     res.redirect('/admin/login');
   } catch (error) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     res.clearCookie(SESSION_COOKIE_NAME);
     res.redirect('/admin/login');

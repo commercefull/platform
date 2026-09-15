@@ -1,8 +1,7 @@
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin, loginTestUser, expectStatus } from '../testUtils';
 
-// TODO(phase-3.4): Fix — gift card customer API tests need seed data and endpoint wiring. Track in gap-analysis-and-roadmap.md Phase 3.4.
-describe.skip('Gift Card Customer API Tests', () => {
+describe('Gift Card Customer API Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let customerToken: string;
@@ -31,8 +30,13 @@ describe.skip('Gift Card Customer API Tests', () => {
           testGiftCardId = createResponse.data.data.promotionGiftCardId;
           testGiftCardCode = createResponse.data.data.code;
 
-          // Activate the gift card
+          // Activate and assign the gift card to the seeded customer
           await client.post(`/business/gift-cards/${testGiftCardId}/activate`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
+          await client.post(
+            `/business/gift-cards/${testGiftCardId}/assign`,
+            { customerId: '00000000-0000-0000-0000-000000001001' },
+            { headers: { Authorization: `Bearer ${adminToken}` } },
+          );
         }
       } catch {
         // ignore
@@ -186,13 +190,9 @@ describe.skip('Gift Card Customer API Tests', () => {
         { headers: customerHeaders() },
       );
 
-      // May fail if gift card not assigned to customer — that's OK
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('type', 'reload');
-      } else {
-        expectStatus(response, 400);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('type', 'reload');
     });
 
     it('should reject reload without authentication', async () => {

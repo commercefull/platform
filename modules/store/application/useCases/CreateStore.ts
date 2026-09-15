@@ -39,6 +39,7 @@ export class CreateStoreCommand {
       defaultCurrency?: string;
       supportedCurrencies?: string[];
       settings?: unknown;
+      storePolicies?: unknown;
       metaTitle?: string;
       metaDescription?: string;
       metaKeywords?: string[];
@@ -118,6 +119,7 @@ export class CreateStoreUseCase {
     const store = Store.create({
       storeId: this.generateStoreId(),
       name: command.storeData.name,
+      slug,
       storeType: command.storeData.storeType,
       organizationId: command.storeData.organizationId,
       isHeadquarters: command.storeData.isHeadquarters,
@@ -135,6 +137,18 @@ export class CreateStoreUseCase {
       theme: command.storeData.theme,
       defaultCurrency: command.storeData.defaultCurrency,
       supportedCurrencies: command.storeData.supportedCurrencies,
+      settings: command.storeData.settings as StoreProps['settings'] | undefined,
+      storePolicies: command.storeData.storePolicies as StoreProps['storePolicies'] | undefined,
+      metaTitle: command.storeData.metaTitle,
+      metaDescription: command.storeData.metaDescription,
+      metaKeywords: command.storeData.metaKeywords,
+      socialLinks: command.storeData.socialLinks as StoreProps['socialLinks'] | undefined,
+      openingHours: command.storeData.openingHours as StoreProps['openingHours'] | undefined,
+      customPages: command.storeData.customPages as StoreProps['customPages'] | undefined,
+      customFields: command.storeData.customFields as StoreProps['customFields'] | undefined,
+      isActive: command.storeData.isActive,
+      isVerified: command.storeData.isVerified,
+      isFeatured: command.storeData.isFeatured,
       metadata: command.storeData.metadata as Record<string, unknown> | undefined,
     });
 

@@ -191,6 +191,24 @@ export class CustomerRepo {
     return result ? parseInt(result.count) > 0 : false;
   }
 
+  async createEmailVerificationToken(customerId: string): Promise<string> {
+    const token = crypto.randomBytes(32).toString('hex');
+    await queryOne(
+      'UPDATE customer SET "verificationToken" = $1, "updatedAt" = $2 WHERE "customerId" = $3 RETURNING "customerId"',
+      [token, new Date(), customerId],
+    );
+    return token;
+  }
+
+  async verifyEmailVerificationToken(token: string): Promise<string | null> {
+    const customer = await queryOne<{ customerId: string }>(
+      `UPDATE customer SET "emailVerified" = true, "isVerified" = true, "verificationToken" = NULL, "updatedAt" = $1
+       WHERE "verificationToken" = $2 RETURNING "customerId"`,
+      [new Date(), token],
+    );
+    return customer?.customerId || null;
+  }
+
   async createPasswordResetToken(customerId: string): Promise<string> {
     const token = crypto.randomBytes(32).toString('hex');
     const hashedToken = await bcryptjs.hash(token, 10);
@@ -206,22 +224,26 @@ export class CustomerRepo {
   }
 
   async verifyPasswordResetToken(token: string): Promise<string | null> {
-    const resetRecord = await queryOne<Pick<DbCustomerPasswordReset, 'customerPasswordResetId' | 'userId' | 'token'>>(
+    const resetRecords = await query<Pick<DbCustomerPasswordReset, 'customerPasswordResetId' | 'userId' | 'token'>[]>(
       `SELECT "customerPasswordResetId", "userId", "token" FROM "customerPasswordReset"
-       WHERE "isUsed" = false AND "expiresAt" > $1 ORDER BY "createdAt" DESC LIMIT 1`,
+       WHERE "isUsed" = false AND "expiresAt" > $1 ORDER BY "createdAt" DESC`,
       [new Date()],
     );
 
-    if (!resetRecord) return null;
+    if (!resetRecords || resetRecords.length === 0) return null;
 
-    const isValid = await bcryptjs.compare(token, resetRecord.token);
-    if (!isValid) return null;
+    for (const resetRecord of resetRecords) {
+      const isValid = await bcryptjs.compare(token, resetRecord.token);
+      if (isValid) {
+        await queryOne('UPDATE "customerPasswordReset" SET "isUsed" = true, "updatedAt" = $1 WHERE "customerPasswordResetId" = $2', [
+          new Date(),
+          resetRecord.customerPasswordResetId,
+        ]);
+        return resetRecord.userId;
+      }
+    }
 
-    await queryOne('UPDATE "customerPasswordReset" SET "isUsed" = true, "updatedAt" = $1 WHERE "customerPasswordResetId" = $2', [
-      new Date(),
-      resetRecord.customerPasswordResetId,
-    ]);
-    return resetRecord.userId;
+    return null;
   }
 
   async changePassword(customerId: string, newPassword: string): Promise<boolean> {

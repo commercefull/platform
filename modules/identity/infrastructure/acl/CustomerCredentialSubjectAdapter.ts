@@ -91,6 +91,14 @@ export class CustomerCredentialSubjectAdapter implements CredentialSubjectPort {
     await this.customerRepo.changePassword(id, newPassword);
   }
 
+  async createEmailVerificationToken(id: string): Promise<string> {
+    return this.customerRepo.createEmailVerificationToken(id);
+  }
+
+  async verifyEmailVerificationToken(token: string): Promise<string | null> {
+    return this.customerRepo.verifyEmailVerificationToken(token);
+  }
+
   async createPasswordResetToken(id: string): Promise<string> {
     return this.customerRepo.createPasswordResetToken(id);
   }

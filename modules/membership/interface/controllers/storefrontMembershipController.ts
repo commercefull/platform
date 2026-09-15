@@ -94,7 +94,7 @@ export const joinPlan = async (req: TypedRequest, res: Response) => {
     req.flash?.('success', `Welcome! You've joined the ${(plan as Record<string, unknown>).name} plan.`);
     res.redirect('/membership/my');
   } catch (error) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
     req.flash?.('error', 'Failed to join membership plan');
     res.redirect('/membership');
   }

@@ -26,9 +26,9 @@ const CUSTOMER_SUBSCRIPTION_IDS = {
 
 // We need product IDs - use the ones from product test data seed
 const TEST_PRODUCT_IDS = {
-  MONTHLY_BOX: '10000000-0000-0000-0000-000000000001',
-  WEEKLY_DELIVERY: '10000000-0000-0000-0000-000000000002',
-  ANNUAL_MEMBERSHIP: '10000000-0000-0000-0000-000000000003',
+  MONTHLY_BOX: '00000000-0000-0000-0000-000000000001',
+  WEEKLY_DELIVERY: '00000000-0000-0000-0000-000000000002',
+  ANNUAL_MEMBERSHIP: '00000000-0000-0000-0000-000000000003',
 };
 const TEST_CUSTOMER_ID = '00000000-0000-0000-0000-000000001001';
 
@@ -268,7 +268,27 @@ exports.seed = async function (knex) {
   }
 
   // Check if test customer exists before creating subscriptions
-  const customerExists = await knex('customer').where('customerId', TEST_CUSTOMER_ID).first();
+  let customerExists = await knex('customer').where('customerId', TEST_CUSTOMER_ID).first();
+
+  // Create the test customer if it doesn't exist yet (it may be seeded later by another seed)
+  if (!customerExists) {
+    const customerByEmail = await knex('customer').where('email', 'testcustomer@example.com').first();
+    if (!customerByEmail) {
+      await knex('customer').insert({
+        customerId: TEST_CUSTOMER_ID,
+        email: 'testcustomer@example.com',
+        firstName: 'Test',
+        lastName: 'Customer',
+        password: '$2b$10$wADyOBQwHwy0mz49WoGA.OcCrjAAXaYnMhsOrWWQ9FzUmXkrq6.aC',
+        isActive: true,
+        isVerified: true,
+        emailVerified: true,
+        createdAt: knex.fn.now(),
+        updatedAt: knex.fn.now(),
+      });
+    }
+    customerExists = await knex('customer').where('customerId', TEST_CUSTOMER_ID).first();
+  }
 
   if (customerExists) {
     // Seed Customer Subscriptions with existence checks

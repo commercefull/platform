@@ -112,7 +112,7 @@ describe('Basket Feature Tests', () => {
         },
       );
 
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('basketId');
       expect(response.data.data).toHaveProperty('status');

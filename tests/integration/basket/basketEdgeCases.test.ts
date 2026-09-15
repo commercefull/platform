@@ -5,7 +5,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { loginTestUser, expectStatus } from '../testUtils';
-import { TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID } from '../testConstants';
+import { TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_GUEST_BASKET_ID } from '../testConstants';
 
 const createClient = () =>
   axios.create({
@@ -406,12 +406,12 @@ describe('Basket Edge Cases & Gap Tests', () => {
     });
 
     it('should allow guest basket retrieval without auth', async () => {
-      const response = await client.get('/customer/basket/00000000-0000-0000-0000-000000000001');
+      const response = await client.get(`/customer/basket/${TEST_GUEST_BASKET_ID}`);
       expect(response.status).toBe(200);
     });
 
     it('should allow guest adding items without auth', async () => {
-      const response = await client.post('/customer/basket/00000000-0000-0000-0000-000000000001/items', {
+      const response = await client.post(`/customer/basket/${TEST_GUEST_BASKET_ID}/items`, {
         productId: TEST_PRODUCT_1_ID,
         quantity: 1,
         unitPrice: 10,
@@ -420,18 +420,18 @@ describe('Basket Edge Cases & Gap Tests', () => {
     });
 
     it('should allow guest basket summary without auth', async () => {
-      const response = await client.get('/customer/basket/00000000-0000-0000-0000-000000000001/summary');
+      const response = await client.get(`/customer/basket/${TEST_GUEST_BASKET_ID}/summary`);
       expect(response.status).toBe(200);
     });
 
     it('should allow guest clearing basket without auth', async () => {
-      const response = await client.delete('/customer/basket/00000000-0000-0000-0000-000000000001/items');
+      const response = await client.delete(`/customer/basket/${TEST_GUEST_BASKET_ID}/items`);
       expect(response.status).toBe(200);
     });
 
     it('should allow guest merging baskets without auth', async () => {
       const response = await client.post('/customer/basket/merge', {
-        sourceBasketId: '00000000-0000-0000-0000-000000000001',
+        sourceBasketId: TEST_GUEST_BASKET_ID,
         targetBasketId: '00000000-0000-0000-0000-000000000002',
       });
       expect(response.status).toBe(201);

@@ -2,12 +2,16 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { TaxRate, TaxCategory, TaxZone, TaxRateType } from '../../taxTypes';
 import { taxQueryRepository, taxCommandRepository } from '../../application/wired';
+import { isUuid } from 'libs/uuid';
 
 export const getTaxRate = async (req: TypedRequest, res: Response) => {
   const { id } = req.params;
 
   if (!id) {
     return res.status(400).json({ success: false, error: 'Tax rate ID is required' });
+  }
+  if (!isUuid(id)) {
+    return res.status(404).json({ success: false, error: 'Tax rate not found' });
   }
 
   const taxRate = await taxQueryRepository.query.findTaxRateById(id);
@@ -97,6 +101,9 @@ export const createTaxRate = async (req: TypedRequest, res: Response) => {
 
 export const updateTaxRate = async (req: TypedRequest, res: Response) => {
   const { id } = req.params;
+  if (!isUuid(id)) {
+    return res.status(404).json({ success: false, error: 'Tax rate not found' });
+  }
   const body = req.body as {
     name?: string;
     description?: string;
@@ -131,6 +138,9 @@ export const updateTaxRate = async (req: TypedRequest, res: Response) => {
 
 export const deleteTaxRate = async (req: TypedRequest, res: Response) => {
   const { id } = req.params;
+  if (!isUuid(id)) {
+    return res.status(404).json({ success: false, error: 'Tax rate not found' });
+  }
 
   const existingTaxRate = await taxQueryRepository.query.findTaxRateById(id);
 
@@ -162,6 +172,9 @@ export const getAllTaxCategories = async (req: TypedRequest, res: Response) => {
 
 export const getTaxCategory = async (req: TypedRequest, res: Response) => {
   const { id } = req.params;
+  if (!isUuid(id)) {
+    return res.status(404).json({ success: false, error: 'Tax category not found' });
+  }
   const taxCategory = await taxQueryRepository.query.findTaxCategoryById(id);
 
   if (!taxCategory) {
@@ -202,6 +215,9 @@ export const createTaxCategory = async (req: TypedRequest, res: Response) => {
 
 export const updateTaxCategory = async (req: TypedRequest, res: Response) => {
   const { id } = req.params;
+  if (!isUuid(id)) {
+    return res.status(404).json({ success: false, error: 'Tax category not found' });
+  }
   const body = req.body as {
     name?: string;
     code?: string;
@@ -234,6 +250,9 @@ export const updateTaxCategory = async (req: TypedRequest, res: Response) => {
 
 export const deleteTaxCategory = async (req: TypedRequest, res: Response) => {
   const { id } = req.params;
+  if (!isUuid(id)) {
+    return res.status(404).json({ success: false, error: 'Tax category not found' });
+  }
 
   const existingCategory = await taxQueryRepository.query.findTaxCategoryById(id);
 

@@ -356,7 +356,7 @@ export async function merchantSocialLogin(
     accessToken: jwtToken,
     tokenType: 'Bearer',
     expiresIn: ACCESS_TOKEN_DURATION,
-    merchant: {
+    organization: {
       id: result.userId,
       email: result.email,
       name: result.profile.displayName,

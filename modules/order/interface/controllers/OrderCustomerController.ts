@@ -12,6 +12,8 @@ import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/Get
 import { GetCustomerOrdersCommand, GetCustomerOrdersUseCase } from '../../application/useCases/GetCustomerOrders';
 import { CancelOrderCommand, CancelOrderUseCase } from '../../application/useCases/CancelOrder';
 import { orderDataRepository } from '../../application/wired';
+import { isUuid } from '../../../../libs/uuid';
+import { OrderNotFoundError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Content Negotiation Helpers
@@ -59,13 +61,16 @@ export const getOrder = async (req: TypedRequest, res: Response): Promise<void> 
   const { orderId } = req.params;
   const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
+  if (!isUuid(orderId)) {
+    throw new OrderNotFoundError();
+  }
+
   const command = new GetOrderCommand(orderId, undefined, customerId);
   const useCase = new GetOrderUseCase(OrderRepo);
   const order = await useCase.execute(command);
 
   if (!order) {
-    respondError(req, res, 'Order not found', 404);
-    return;
+    throw new OrderNotFoundError();
   }
 
   respond(req, res, order, 200);

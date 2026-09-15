@@ -17,10 +17,28 @@ import { getCorrelationId } from './correlationId';
 export function errorMiddleware(err: unknown, req: Request, res: Response, _next: NextFunction): void {
   const isProduction = process.env.NODE_ENV === 'production';
 
+  // Handle multer errors (file upload validation)
+  const multerCode = (err as Record<string, unknown>)?.code as string | undefined;
+  const isMulterError = multerCode === 'LIMIT_FILE_SIZE' ||
+    multerCode === 'LIMIT_UNEXPECTED_FILE' ||
+    multerCode === 'LIMIT_FILE_COUNT' ||
+    multerCode === 'LIMIT_FIELD_KEY' ||
+    multerCode === 'LIMIT_FIELD_VALUE' ||
+    multerCode === 'LIMIT_FIELD_COUNT' ||
+    multerCode === 'LIMIT_PART_COUNT' ||
+    (err instanceof Error && err.message === 'Only image files are allowed');
+
   const appError =
     err instanceof AppError
       ? err
-      : new AppError(err instanceof Error ? err.message : 'Internal Server Error', (err as Record<string, number>)?.status ?? 500);
+      : isMulterError
+        ? new AppError(err instanceof Error ? err.message : 'File upload error', 400)
+        : new AppError(
+            err instanceof Error ? err.message : 'Internal Server Error',
+            (err as Record<string, number>)?.status ??
+              (err as Record<string, number>)?.statusCode ??
+              500,
+          );
 
   const logMeta = {
     code: appError.code,
@@ -37,7 +55,7 @@ export function errorMiddleware(err: unknown, req: Request, res: Response, _next
   if (appError.severity === 'error') {
     logger.error('Unhandled error', logMeta);
   } else if (appError.severity === 'warn') {
-    logger.warn('Client warning', logMeta);
+    logger.warning('Client warning', logMeta);
   } else {
     logger.info('Client error', logMeta);
   }

@@ -77,7 +77,20 @@ export const getCouponByCode = async (req: TypedRequest, res: Response): Promise
  * Create a new coupon
  */
 export const createCoupon = async (req: TypedRequest<Record<string, string>, unknown, CreateCouponInput>, res: Response): Promise<void> => {
-  const couponData = req.body;
+  const couponData = { ...req.body } as CreateCouponInput & { type: string };
+
+  // Map external type strings to the canonical CouponType enum values
+  const typeMapping: Record<string, string> = {
+    fixed_amount: 'fixedAmount',
+    free_shipping: 'freeShipping',
+    buy_x_get_y: 'buyXGetY',
+    first_order: 'firstOrder',
+    gift_card: 'giftCard',
+    percentage: 'percentage',
+  };
+  if (typeof couponData.type === 'string' && typeMapping[couponData.type]) {
+    couponData.type = typeMapping[couponData.type] as unknown as CreateCouponInput['type'];
+  }
 
   // Validate required fields
   if (!couponData.code || !couponData.name || !couponData.type) {

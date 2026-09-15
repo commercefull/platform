@@ -2,7 +2,7 @@
 import PG from 'pg';
 import { getTestDbName } from './testDbContext';
 import { incrementQueryCounter } from './queryCounter';
-import { ConflictError } from '../errors';
+import { ConflictError, BadRequestError, NotFoundError } from '../errors';
 
 const isTestEnv = process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test';
 
@@ -69,6 +69,42 @@ const closeTestPool = async (database: string): Promise<void> => {
   }
 };
 
+/**
+ * Map a PostgreSQL error (from `pg`) to an `AppError` subclass so the
+ * error middleware returns the correct 4xx status and structured body
+ * instead of a generic 500.
+ *
+ * - 23505 unique_violation     → 409 ConflictError
+ * - 23503 foreign_key_violation → 409 ConflictError (referenced row missing/in use)
+ * - 23502 not_null_violation   → 400 BadRequestError (missing required field)
+ * - 23514 check_violation      → 400 BadRequestError (constraint failed)
+ * - 22P02 invalid_text_representation → 400 BadRequestError (e.g. malformed UUID)
+ * - 22001 string_data_right_truncation → 400 BadRequestError (field too long)
+ * - everything else           → generic Error → 500
+ */
+function mapPgError(e: unknown): Error {
+  const pgErr = e as { code?: string; message?: string; constraint?: string };
+  const code = pgErr.code;
+  const msg = pgErr.message ?? (e as Error).message;
+
+  switch (code) {
+    case '23505':
+      return new ConflictError('Resource already exists', { cause: e });
+    case '23503':
+      return new ConflictError('Referenced resource does not exist or is in use', { cause: e });
+    case '23502':
+      return new BadRequestError('Missing required field', { cause: e });
+    case '23514':
+      return new BadRequestError(msg || 'Value violates a database constraint', { cause: e });
+    case '22P02':
+      return new BadRequestError(`Invalid input format: ${msg}`, { cause: e });
+    case '22001':
+      return new BadRequestError('Value too long for field', { cause: e });
+    default:
+      return new Error(`Query failed: ${msg}`, { cause: e });
+  }
+}
+
 export const query = async <T>(text: string, params?: Array<unknown>): Promise<T | null> => {
   let res: PG.QueryResult;
 
@@ -81,10 +117,7 @@ export const query = async <T>(text: string, params?: Array<unknown>): Promise<T
       res = await activePool.query(text);
     }
   } catch (e: unknown) {
-    if ((e as { code?: string }).code === '23505') {
-      throw new ConflictError('Resource already exists', { cause: e });
-    }
-    throw new Error(`Query failed: ${(e as Error).message}`, { cause: e });
+    throw mapPgError(e);
   }
 
   if (res.rows.length > 0) {
@@ -102,10 +135,7 @@ export const queryOne = async <T>(text: string, params: Array<unknown>): Promise
     incrementQueryCounter(text);
     res = await activePool.query(text, params);
   } catch (e: unknown) {
-    if ((e as { code?: string }).code === '23505') {
-      throw new ConflictError('Resource already exists', { cause: e });
-    }
-    throw new Error(`Query failed: ${(e as Error).message}`, { cause: e });
+    throw mapPgError(e);
   }
 
   if (res.rows.length === 1) {

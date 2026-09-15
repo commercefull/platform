@@ -7,6 +7,7 @@ import { Response, NextFunction } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import {
   activateGiftCardRepo,
+  assignGiftCardRepo,
   cancelGiftCardRepo,
   createGiftCardRepo,
   getGiftCardRepo,
@@ -74,6 +75,16 @@ export const createGiftCard: AsyncHandler = async (req, res, _next) => {
 export const activateGiftCard: AsyncHandler = async (req, res, _next) => {
   await activateGiftCardRepo(req.params.id);
   res.json({ success: true, message: 'Gift card activated' });
+};
+
+export const assignGiftCard: AsyncHandler = async (req, res, _next) => {
+  const { customerId } = req.body as { customerId?: string };
+  if (!customerId) {
+    res.status(400).json({ success: false, message: 'customerId is required' });
+    return;
+  }
+  await assignGiftCardRepo(req.params.id, customerId);
+  res.json({ success: true, message: 'Gift card assigned' });
 };
 
 export const refundToGiftCard: AsyncHandler = async (req, res, _next) => {

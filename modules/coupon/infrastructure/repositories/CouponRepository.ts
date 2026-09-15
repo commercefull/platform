@@ -68,6 +68,7 @@ export class CouponRepository {
 
   async save(coupon: Coupon): Promise<Coupon> {
     const now = new Date().toISOString();
+    const mappedType = coupon.type === 'fixed_amount' ? 'fixedAmount' : (coupon.type === 'free_shipping' ? 'freeShipping' : coupon.type);
 
     const existing = await queryOne<{ promotionCouponId: string }>(
       'SELECT "promotionCouponId" FROM "promotionCoupon" WHERE "promotionCouponId" = $1',
@@ -88,7 +89,7 @@ export class CouponRepository {
           coupon.code,
           coupon.name,
           coupon.description ?? null,
-          coupon.type === 'fixed_amount' ? 'fixedAmount' : coupon.type,
+          mappedType,
           String(coupon.value),
           coupon.currency ?? 'USD',
           coupon.minOrderValue ? String(coupon.minOrderValue) : null,
@@ -118,7 +119,7 @@ export class CouponRepository {
           coupon.code,
           coupon.name,
           coupon.description ?? null,
-          coupon.type === 'fixed_amount' ? 'fixedAmount' : coupon.type,
+          mappedType,
           String(coupon.value),
           coupon.currency ?? 'USD',
           coupon.minOrderValue ? String(coupon.minOrderValue) : null,

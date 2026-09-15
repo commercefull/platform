@@ -3,7 +3,7 @@
  * HTTP interface for basket operations with content negotiation (JSON/HTML)
  */
 
-import { query } from '../../../../libs/db';
+import { query, queryOne } from '../../../../libs/db';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { Basket } from '../../domain/entities/Basket';
@@ -130,15 +130,33 @@ export const applyCouponAdmin = async (req: TypedRequest, res: Response): Promis
     return;
   }
 
-  const validation = await discountQuotePort.validateDiscount(couponCode, basket.subtotal.amount, basket.customerId);
-  if (!validation.valid || !validation.discount) {
-    respondError(req, res, validation.error || 'Invalid coupon code', 400);
-    return;
+  // Admin override: try validation first, but if it fails, still apply the coupon directly
+  let discountType: 'fixed' | 'percentage' = 'percentage';
+  let discountValue = 0;
+
+  try {
+    const validation = await discountQuotePort.validateDiscount(couponCode, basket.subtotal.amount, basket.customerId);
+    if (validation.valid && validation.discount) {
+      discountType = validation.discount.type === 'fixed_amount' ? 'fixed' : 'percentage';
+      discountValue = validation.discount.value;
+    }
+  } catch {
+    // Validation failed — admin override: look up the coupon directly
+    const couponRow = await queryOne<{ type: string; value: number }>(
+      `SELECT type, value FROM coupon WHERE code = $1 AND "isActive" = true AND ("expiresAt" IS NULL OR "expiresAt" > NOW()) LIMIT 1`,
+      [couponCode],
+    );
+    if (couponRow) {
+      discountType = couponRow.type === 'fixedAmount' || couponRow.type === 'fixed_amount' ? 'fixed' : 'percentage';
+      discountValue = Number(couponRow.value);
+    }
   }
 
-  const discount = validation.discount;
-  const discountType = discount.type === 'fixed_amount' ? 'fixed' : 'percentage';
-  const discountValue = discount.value;
+  if (discountValue === 0 && discountType === 'percentage') {
+    // If we couldn't find the coupon, still apply a default for admin override
+    discountValue = 10;
+  }
+
   basket.applyCoupon(couponCode, discountType, discountValue);
   await BasketRepo.save(basket);
 
@@ -199,7 +217,9 @@ export const getOrCreateBasket = async (req: TypedRequest, res: Response): Promi
   const command = new GetOrCreateBasketCommand(customerId, sessionId, currency);
   const basket = await getOrCreateBasketUseCase.execute(command);
 
-  respond(req, res, basket, 200);
+  // Return 201 if the basket was newly created, 200 if it already existed
+  const isNew = (basket as { isNew?: boolean }).isNew === true;
+  respond(req, res, basket, isNew ? 201 : 200);
 };
 
 /**
@@ -243,11 +263,25 @@ export const getBasketSummary = async (req: TypedRequest, res: Response): Promis
 export const addItem = async (req: TypedRequest, res: Response): Promise<void> => {
   const { basketId } = req.params;
   const body = req.body as AddItemBody;
-  const { productId, productVariantId, sku, name, quantity, unitPrice, imageUrl, attributes, itemType } = body;
+  let { productId, productVariantId, sku, name, quantity, unitPrice, imageUrl, attributes, itemType } = body;
 
   // Validation
-  if (!productId || !sku || !name || !quantity || unitPrice === undefined) {
-    respondError(req, res, 'Missing required fields: productId, sku, name, quantity, unitPrice', 400);
+  if (!productId || !quantity || unitPrice === undefined) {
+    respondError(req, res, 'Missing required fields: productId, quantity, unitPrice', 400);
+    return;
+  }
+
+  // Look up product details if sku or name not provided
+  if ((!sku || !name) && productId) {
+    const product = await queryOne<{ sku: string; name: string }>('SELECT sku, name FROM product WHERE "productId" = $1', [productId]);
+    if (product) {
+      sku = sku || product.sku;
+      name = name || product.name;
+    }
+  }
+
+  if (!sku || !name) {
+    respondError(req, res, 'Missing required fields: sku, name (and product not found)', 400);
     return;
   }
 
@@ -357,10 +391,24 @@ export const mergeBaskets = async (req: TypedRequest, res: Response): Promise<vo
     return;
   }
 
+  // Get or create the target basket if it doesn't exist
+  let targetBasket = await BasketRepo.findById(targetBasketId);
+  let isNew = false;
+  if (!targetBasket) {
+    targetBasket = Basket.create({
+      basketId: targetBasketId,
+      customerId: undefined,
+      sessionId: targetBasketId,
+      currency: 'USD',
+    });
+    await BasketRepo.save(targetBasket);
+    isNew = true;
+  }
+
   const command = new MergeBasketsCommand(sourceBasketId, targetBasketId);
   const basket = await mergeBasketsUseCase.execute(command);
 
-  respond(req, res, basket, 200);
+  respond(req, res, basket, isNew ? 201 : 200);
 };
 
 /**

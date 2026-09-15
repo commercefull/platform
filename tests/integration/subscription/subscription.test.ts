@@ -114,7 +114,7 @@ describe('Subscription Feature Tests', () => {
 
   describe('Customer Subscription Management (Business)', () => {
     it('should list customer subscriptions', async () => {
-      const response = await client.get('/business/subscriptions/subscriptions', {
+      const response = await client.get('/business/subscriptions', {
         headers: authHeaders(),
       });
 
@@ -125,7 +125,7 @@ describe('Subscription Feature Tests', () => {
     });
 
     it('should filter subscriptions by status', async () => {
-      const response = await client.get('/business/subscriptions/subscriptions?status=active', {
+      const response = await client.get('/business/subscriptions?status=active', {
         headers: authHeaders(),
       });
 
@@ -135,7 +135,7 @@ describe('Subscription Feature Tests', () => {
     });
 
     it('should get seeded active subscription', async () => {
-      const response = await client.get(`/business/subscriptions/subscriptions/${SEEDED_CUSTOMER_SUBSCRIPTION_IDS.ACTIVE_MONTHLY}`, {
+      const response = await client.get(`/business/subscriptions/${SEEDED_CUSTOMER_SUBSCRIPTION_IDS.ACTIVE_MONTHLY}`, {
         headers: authHeaders(),
       });
 
@@ -216,7 +216,7 @@ describe('Subscription Feature Tests', () => {
 
   describe('Authorization', () => {
     it('should require auth for admin subscription list', async () => {
-      const response = await client.get('/business/subscriptions/subscriptions');
+      const response = await client.get('/business/subscriptions');
       expect(response.status).toBe(401);
     });
 

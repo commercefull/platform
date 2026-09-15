@@ -120,7 +120,7 @@ export const createFaq = async (req: TypedRequest, res: Response): Promise<void>
 
     res.redirect('/hub/support?success=FAQ created');
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     res.redirect('/hub/support?error=' + encodeURIComponent((error as Error).message));
   }
@@ -142,7 +142,7 @@ export const updateFaq = async (req: TypedRequest, res: Response): Promise<void>
 
     res.redirect('/hub/support?success=FAQ updated');
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     res.redirect('/hub/support?error=' + encodeURIComponent((error as Error).message));
   }

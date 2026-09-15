@@ -96,7 +96,7 @@ export const createReturn = async (req: TypedRequest, res: Response): Promise<vo
 
     res.redirect(`/admin/returns/${result.orderReturnId}?success=Return request created successfully`);
   } catch (error: unknown) {
-    logger.warn('Error creating return request:', error);
+    logger.warning('Error creating return request:', error);
     adminRespond(req, res, 'operations/returns/create', {
       pageName: 'Create Return Request',
       error: (error as Error).message || 'Failed to create return request',
@@ -116,7 +116,7 @@ export const approveReturn = async (req: TypedRequest, res: Response): Promise<v
     await approveReturnRequestUseCase.execute(returnId, body?.rmaNumber);
     res.redirect(`/admin/returns/${returnId}?success=Return approved successfully`);
   } catch (error: unknown) {
-    logger.warn('Error approving return:', error);
+    logger.warning('Error approving return:', error);
     res.redirect(`/admin/returns/${req.params.returnId}?error=Failed to approve return`);
   }
 };
@@ -128,7 +128,7 @@ export const denyReturn = async (req: TypedRequest, res: Response): Promise<void
     await denyReturnRequestUseCase.execute(returnId, body?.reason);
     res.redirect(`/admin/returns/${returnId}?success=Return denied`);
   } catch (error: unknown) {
-    logger.warn('Error denying return:', error);
+    logger.warning('Error denying return:', error);
     res.redirect(`/admin/returns/${req.params.returnId}?error=Failed to deny return`);
   }
 };
@@ -140,7 +140,7 @@ export const markInTransit = async (req: TypedRequest, res: Response): Promise<v
     await markReturnInTransitUseCase.execute(returnId, body?.trackingNumber, body?.trackingUrl);
     res.redirect(`/admin/returns/${returnId}?success=Return marked as in transit`);
   } catch (error: unknown) {
-    logger.warn('Error marking return in transit:', error);
+    logger.warning('Error marking return in transit:', error);
     res.redirect(`/admin/returns/${req.params.returnId}?error=Failed to update return`);
   }
 };
@@ -151,7 +151,7 @@ export const markReceived = async (req: TypedRequest, res: Response): Promise<vo
     await markReturnReceivedUseCase.execute(returnId);
     res.redirect(`/admin/returns/${returnId}?success=Return marked as received`);
   } catch (error: unknown) {
-    logger.warn('Error marking return received:', error);
+    logger.warning('Error marking return received:', error);
     res.redirect(`/admin/returns/${req.params.returnId}?error=Failed to update return`);
   }
 };
@@ -173,7 +173,7 @@ export const completeInspection = async (req: TypedRequest, res: Response): Prom
     await completeReturnInspectionUseCase.execute(returnId, passedItems, failedItems);
     res.redirect(`/admin/returns/${returnId}?success=Inspection completed`);
   } catch (error: unknown) {
-    logger.warn('Error completing inspection:', error);
+    logger.warning('Error completing inspection:', error);
     res.redirect(`/admin/returns/${req.params.returnId}?error=Failed to complete inspection`);
   }
 };
@@ -184,7 +184,7 @@ export const completeReturn = async (req: TypedRequest, res: Response): Promise<
     await completeReturnRequestUseCase.execute(returnId);
     res.redirect(`/admin/returns/${returnId}?success=Return completed successfully`);
   } catch (error: unknown) {
-    logger.warn('Error completing return:', error);
+    logger.warning('Error completing return:', error);
     res.redirect(`/admin/returns/${req.params.returnId}?error=Failed to complete return`);
   }
 };
@@ -196,7 +196,7 @@ export const cancelReturn = async (req: TypedRequest, res: Response): Promise<vo
     await cancelReturnRequestUseCase.execute(returnId, body?.reason);
     res.redirect(`/admin/returns/${returnId}?success=Return cancelled`);
   } catch (error: unknown) {
-    logger.warn('Error cancelling return:', error);
+    logger.warning('Error cancelling return:', error);
     res.redirect(`/admin/returns/${req.params.returnId}?error=Failed to cancel return`);
   }
 };

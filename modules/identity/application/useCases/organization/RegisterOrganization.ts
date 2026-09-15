@@ -116,7 +116,7 @@ export class RegisterOrganizationUseCase {
         firstName: input.firstName,
       });
     } catch (err) {
-      logger.warn('Failed to send organization welcome email', { error: err });
+      logger.warning('Failed to send organization welcome email', { error: err });
     }
 
     // Emit event

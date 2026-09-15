@@ -50,7 +50,7 @@ export interface SendNotificationBatchResponse {
   name: string;
   channel: string;
   status: string;
-  totalCount: number;
+  targetCount: number;
   enqueuedCount: number;
   suppressedCount: number;
   createdAt: string;
@@ -75,8 +75,9 @@ export class SendNotificationBatchUseCase {
 
     const batch = await this.batchRepo.create({
       name: command.name,
+      type: command.type,
       channel: command.channel,
-      totalCount: command.recipients.length,
+      targetCount: command.recipients.length,
       scheduledAt: command.scheduledAt,
     });
 
@@ -122,7 +123,7 @@ export class SendNotificationBatchUseCase {
       name: batch.name,
       channel: batch.channel,
       status: batch.status,
-      totalCount: command.recipients.length,
+      targetCount: command.recipients.length,
       enqueuedCount,
       suppressedCount,
       createdAt: batch.createdAt.toISOString(),

@@ -7,9 +7,9 @@ export async function up(knex) {
   await knex.schema.createTable('pageDraft', table => {
     table.uuid('draftId').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('pageId').nullable();
-    table.uuid('storeId').notNullable();
+    table.uuid('storeId').nullable();
     table.uuid('organizationId').notNullable();
-    table.uuid('themeId').notNullable();
+    table.uuid('themeId').nullable();
     table.string('title').notNullable();
     table.string('slug').notNullable();
     table.string('pageType').notNullable().defaultTo('page');

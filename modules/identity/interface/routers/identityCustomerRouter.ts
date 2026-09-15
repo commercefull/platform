@@ -12,6 +12,8 @@ import {
   issueTokenPair,
   renewAccessToken,
   checkTokenValidity,
+  requestEmailVerification,
+  verifyEmail,
   requestPasswordReset,
   resetPassword,
   logoutCustomer,
@@ -36,6 +38,9 @@ router.post('/identity/refresh', asyncHandler(renewAccessToken));
 
 // Validate token
 router.post('/identity/validate', asyncHandler(checkTokenValidity));
+
+router.post('/identity/request-verification', asyncHandler(requestEmailVerification));
+router.get('/identity/verify-email', asyncHandler(verifyEmail));
 
 // Password reset flow
 router.post('/identity/forgot-password', asyncHandler(requestPasswordReset));

@@ -78,7 +78,7 @@ export const createWarehouse = async (req: TypedRequest, res: Response): Promise
 
     res.redirect(`/hub/warehouses/${warehouse.distributionWarehouseId}?success=Warehouse created successfully`);
   } catch (error: unknown) {
-    logger.warn('Error:', error);
+    logger.warning('Error:', error);
 
     adminRespond(req, res, 'operations/warehouses/create', {
       pageName: 'Create Warehouse',

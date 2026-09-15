@@ -8,7 +8,7 @@ import { TypedRequest, RequestBody } from 'libs/types/express';
 import { manageVendorUseCase, manageCommissionRuleUseCase, managePayoutUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-const getOrgId = (req: TypedRequest): string => (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+const getOrgId = (req: TypedRequest): string => (req as unknown as { user?: { organizationId?: string; id?: string } }).user?.organizationId ?? (req as unknown as { user?: { id?: string } }).user?.id ?? '';
 
 export const listVendors = async (req: TypedRequest, res: Response): Promise<void> => {
   const organizationId = getOrgId(req);

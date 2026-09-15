@@ -265,8 +265,8 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
     }>(
       `SELECT
         COUNT(*) as "totalOrders",
-        COALESCE(SUM("grandTotal"), 0) as "totalSpent",
-        AVG("grandTotal") as "avgOrderValue",
+        COALESCE(SUM("totalAmount"), 0) as "totalSpent",
+        AVG("totalAmount") as "avgOrderValue",
         MIN("createdAt") as "firstOrderDate",
         MAX("createdAt") as "lastOrderDate"
        FROM "order" WHERE "customerId" = $1 AND "status" NOT IN ('cancelled')`,
@@ -337,7 +337,7 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
         await this.computeAggregatesFromOrder(customerId);
         count++;
       } catch (error) {
-        logger.warn('Failed to compute aggregates for customer', { customerId, error: (error as Error).message });
+        logger.warning('Failed to compute aggregates for customer', { customerId, error: (error as Error).message });
       }
     }
 

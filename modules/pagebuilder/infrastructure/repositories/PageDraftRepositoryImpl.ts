@@ -3,35 +3,19 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { PageDraft, PageDraftProps, PlacedBlockProps } from '../../domain/entities/PageDraft';
+import { PageDraft as DbPageDraft } from '../../../../libs/db/types';
+import { PageDraft, PageDraftProps } from '../../domain/entities/PageDraft';
 import { PageDraftRepository } from '../../domain/repositories/PageDraftRepository';
 import { PageDraftValidationError } from '../../domain/errors/PageBuilderErrors';
 
-interface DraftRow {
-  draftId: string;
-  pageId: string | null;
-  storeId: string;
-  organizationId: string;
-  themeId: string;
-  title: string;
-  slug: string;
-  pageType: string;
-  status: string;
-  blocks: PlacedBlockProps[];
-  version: number;
-  publishedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export class PageDraftRepositoryImpl implements PageDraftRepository {
   async findById(draftId: string): Promise<PageDraft | null> {
-    const row = await queryOne<DraftRow>(`SELECT * FROM "pageDraft" WHERE "draftId" = $1`, [draftId]);
+    const row = await queryOne<DbPageDraft>(`SELECT * FROM "pageDraft" WHERE "draftId" = $1`, [draftId]);
     return row ? this.mapToDraft(row) : null;
   }
 
   async findByPageId(pageId: string): Promise<PageDraft | null> {
-    const row = await queryOne<DraftRow>(
+    const row = await queryOne<DbPageDraft>(
       `SELECT * FROM "pageDraft" WHERE "pageId" = $1 AND "status" != 'archived' ORDER BY "updatedAt" DESC LIMIT 1`,
       [pageId],
     );
@@ -39,7 +23,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
   }
 
   async findByStore(storeId: string): Promise<PageDraft[]> {
-    const rows = await query<DraftRow[]>(
+    const rows = await query<DbPageDraft[]>(
       `SELECT * FROM "pageDraft" WHERE "storeId" = $1 AND "status" != 'archived' ORDER BY "updatedAt" DESC`,
       [storeId],
     );
@@ -47,15 +31,23 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
   }
 
   async findByOrganization(organizationId: string): Promise<PageDraft[]> {
-    const rows = await query<DraftRow[]>(
+    const rows = await query<DbPageDraft[]>(
       `SELECT * FROM "pageDraft" WHERE "organizationId" = $1 AND "status" != 'archived' ORDER BY "updatedAt" DESC`,
       [organizationId],
     );
     return (rows || []).map(row => this.mapToDraft(row));
   }
 
+  async findAll(): Promise<PageDraft[]> {
+    const rows = await query<DbPageDraft[]>(
+      `SELECT * FROM "pageDraft" WHERE "status" != 'archived' ORDER BY "updatedAt" DESC`,
+      [],
+    );
+    return (rows || []).map(row => this.mapToDraft(row));
+  }
+
   async findBySlug(slug: string, storeId: string): Promise<PageDraft | null> {
-    const row = await queryOne<DraftRow>(
+    const row = await queryOne<DbPageDraft>(
       `SELECT * FROM "pageDraft" WHERE "slug" = $1 AND "storeId" = $2 AND "status" != 'archived' LIMIT 1`,
       [slug, storeId],
     );
@@ -63,7 +55,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
   }
 
   async findPublishedByStore(storeId: string): Promise<PageDraft[]> {
-    const rows = await query<DraftRow[]>(
+    const rows = await query<DbPageDraft[]>(
       `SELECT * FROM "pageDraft" WHERE "storeId" = $1 AND "status" = 'published' ORDER BY "publishedAt" DESC`,
       [storeId],
     );
@@ -71,7 +63,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
   }
 
   async findPublishedBySlug(slug: string, storeId: string): Promise<PageDraft | null> {
-    const row = await queryOne<DraftRow>(
+    const row = await queryOne<DbPageDraft>(
       `SELECT * FROM "pageDraft" WHERE "slug" = $1 AND "storeId" = $2 AND "status" = 'published' LIMIT 1`,
       [slug, storeId],
     );
@@ -84,7 +76,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
     const existing = await this.findById(data.draftId);
 
     if (existing) {
-      const row = await queryOne<DraftRow>(
+      const row = await queryOne<DbPageDraft>(
         `UPDATE "pageDraft" SET
           "pageId" = $2,
           "themeId" = $3,
@@ -115,7 +107,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
       return this.mapToDraft(row);
     }
 
-    const row = await queryOne<DraftRow>(
+    const row = await queryOne<DbPageDraft>(
       `INSERT INTO "pageDraft" (
         "draftId", "pageId", "storeId", "organizationId", "themeId",
         "title", "slug", "pageType", "status", "blocks", "version",
@@ -125,9 +117,9 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
       [
         data.draftId,
         data.pageId || null,
-        data.storeId,
+        data.storeId || null,
         data.organizationId,
-        data.themeId,
+        data.themeId || null,
         data.title,
         data.slug,
         data.pageType,
@@ -146,18 +138,18 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
     return !!result;
   }
 
-  private mapToDraft(row: DraftRow): PageDraft {
+  private mapToDraft(row: DbPageDraft): PageDraft {
     const props: PageDraftProps = {
       draftId: row.draftId,
       pageId: row.pageId || undefined,
-      storeId: row.storeId,
+      storeId: row.storeId || undefined,
       organizationId: row.organizationId,
-      themeId: row.themeId,
+      themeId: row.themeId || undefined,
       title: row.title,
       slug: row.slug,
       pageType: row.pageType,
       status: row.status as PageDraftProps['status'],
-      blocks: Array.isArray(row.blocks) ? row.blocks : [],
+      blocks: Array.isArray(row.blocks) ? (row.blocks as PageDraftProps['blocks']) : [],
       version: row.version,
       publishedAt: row.publishedAt || undefined,
       createdAt: row.createdAt,

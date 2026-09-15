@@ -83,6 +83,7 @@ export class GetOrCreateBasketUseCase {
 
   async execute(command: GetOrCreateBasketCommand): Promise<BasketResponse> {
     let basket = await this.basketRepository.findActiveBasket(command.customerId, command.sessionId);
+    let isNew = false;
 
     if (!basket) {
       basket = Basket.create({
@@ -93,6 +94,7 @@ export class GetOrCreateBasketUseCase {
       });
 
       await this.basketRepository.save(basket);
+      isNew = true;
 
       eventBus.emit('basket.created', {
         basketId: basket.basketId,
@@ -101,6 +103,8 @@ export class GetOrCreateBasketUseCase {
       });
     }
 
-    return mapBasketToResponse(basket);
+    const response = mapBasketToResponse(basket);
+    (response as { isNew?: boolean }).isNew = isNew;
+    return response;
   }
 }

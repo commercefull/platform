@@ -44,7 +44,7 @@ class PageBuilderController {
 
   listDrafts = async (req: TypedRequest, res: Response): Promise<void> => {
     const storeId = req.query.storeId as string;
-    const orgId = (req.user as { organizationId?: string })?.organizationId;
+    const orgId = (req.user as { id?: string })?.id;
 
     if (storeId) {
       const drafts = await manageDraftsUseCase.listByStore(storeId);
@@ -53,7 +53,8 @@ class PageBuilderController {
       const drafts = await manageDraftsUseCase.listByOrganization(orgId);
       res.json({ success: true, data: drafts });
     } else {
-      res.status(400).json({ success: false, message: 'storeId is required' });
+      const drafts = await manageDraftsUseCase.listAll();
+      res.json({ success: true, data: drafts });
     }
   };
 
@@ -65,7 +66,7 @@ class PageBuilderController {
 
   createDraft = async (req: TypedRequest, res: Response): Promise<void> => {
     const { storeId, themeId, title, slug, pageType, pageId } = req.body as RequestBody;
-    const organizationId = (req.user as { organizationId?: string })?.organizationId || '';
+    const organizationId = (req.user as { id?: string })?.id || '';
 
     const cmd: CreateDraftCommand = {
       storeId,
@@ -112,7 +113,10 @@ class PageBuilderController {
 
   addBlock = async (req: TypedRequest, res: Response): Promise<void> => {
     const { draftId } = req.params;
-    const { typeId, region, content, settings, parentBlockId, order } = req.body as RequestBody;
+    const body = req.body as RequestBody & { blockType?: string };
+    const { region, content, settings, parentBlockId, order } = body;
+    // Accept both "typeId" and "blockType" as the block type identifier
+    const typeId = body.typeId || body.blockType;
 
     const cmd: AddBlockCommand = {
       draftId,
