@@ -21,15 +21,12 @@ describe('secrets', () => {
       expect(validateSecret('TEST_SECRET', value)).toBe(value);
     });
 
-    it('generates ephemeral dev secret when missing', () => {
-      const result = validateSecret('MISSING_SECRET', undefined);
-      expect(result).toContain('dev-missing_secret-');
-      expect(result.length).toBeGreaterThan(10);
+    it('throws when secret is missing', () => {
+      expect(() => validateSecret('MISSING_SECRET', undefined)).toThrow('Missing required secret: MISSING_SECRET');
     });
 
-    it('generates ephemeral dev secret when empty', () => {
-      const result = validateSecret('EMPTY_SECRET', '');
-      expect(result).toContain('dev-empty_secret-');
+    it('throws when secret is empty', () => {
+      expect(() => validateSecret('EMPTY_SECRET', '')).toThrow('Missing required secret: EMPTY_SECRET');
     });
 
     it('still returns insecure placeholder value in non-production (with warning)', () => {
@@ -73,6 +70,11 @@ describe('secrets', () => {
   describe('validateAllSecrets', () => {
     beforeEach(() => {
       process.env.NODE_ENV = 'test';
+      process.env.CUSTOMER_JWT_SECRET = 'a-very-secure-customer-secret-32+chars';
+      process.env.ORGANIZATION_JWT_SECRET = 'a-very-secure-org-secret-32+chars!!';
+      process.env.ADMIN_JWT_SECRET = 'a-very-secure-admin-secret-32+chars!!';
+      process.env.B2B_JWT_SECRET = 'a-very-secure-b2b-secret-32+chars!!!!';
+      process.env.SESSION_SECRET = 'a-very-secure-session-secret-32+chars';
     });
 
     it('returns all required secrets in non-production', () => {
@@ -86,6 +88,7 @@ describe('secrets', () => {
 
     it('throws in production when secrets are missing', () => {
       process.env.NODE_ENV = 'production';
+      delete process.env.CUSTOMER_JWT_SECRET;
       expect(() => validateAllSecrets()).toThrow('Missing required secret');
     });
 
@@ -112,10 +115,9 @@ describe('secrets', () => {
       expect(getSecret('MY_TEST_SECRET')).toBe('a-valid-secret-that-is-long-enough!!');
     });
 
-    it('generates ephemeral secret when not set', () => {
+    it('throws when secret is not set', () => {
       delete process.env.NONEXISTENT_SECRET;
-      const result = getSecret('NONEXISTENT_SECRET');
-      expect(result).toContain('dev-nonexistent_secret-');
+      expect(() => getSecret('NONEXISTENT_SECRET')).toThrow('Missing required secret: NONEXISTENT_SECRET');
     });
   });
 

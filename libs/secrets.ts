@@ -1,7 +1,7 @@
 /**
- * Secret validation utility — fail fast in production if required secrets
- * are missing or insecure. In non-production, generate ephemeral dev secrets
- * with a visible warning.
+ * Secret validation utility — fail fast in every environment if required secrets
+ * are missing. In non-production, insecure configured values produce a visible
+ * warning.
  */
 
 import { logger } from './logger';
@@ -31,7 +31,7 @@ const INSECURE_PLACEHOLDERS = new Set([
 const MIN_SECRET_LENGTH = 32;
 
 /**
- * Required secrets for production.
+ * Required application secrets.
  */
 const REQUIRED_SECRETS = [
   'CUSTOMER_JWT_SECRET',
@@ -43,17 +43,11 @@ const REQUIRED_SECRETS = [
 
 /**
  * Validate a single secret value.
- * Returns true if valid, throws in production if invalid.
+ * Throws if missing, and rejects insecure configured values in production.
  */
 export function validateSecret(name: string, value: string | undefined): string {
   if (!value || value.trim() === '') {
-    if (isProduction()) {
-      throw new Error(`Missing required secret: ${name}. Set it in your environment or .env file.`);
-    }
-    // Generate ephemeral dev secret
-    const devSecret = `dev-${name.toLowerCase()}-${Math.random().toString(36).slice(2)}-${Date.now()}`;
-    logger.warn(`Using ephemeral dev secret for ${name} — NOT SECURE, do not use in production`);
-    return devSecret;
+    throw new Error(`Missing required secret: ${name}. Set it in your environment or .env file.`);
   }
 
   if (INSECURE_PLACEHOLDERS.has(value)) {
@@ -75,8 +69,8 @@ export function validateSecret(name: string, value: string | undefined): string 
 
 /**
  * Validate all required secrets at boot.
- * Throws in production if any are missing or insecure.
- * In dev/test, logs warnings and generates ephemeral fallbacks.
+ * Throws if any are missing. In production, also rejects insecure values.
+ * In development and test, configured insecure values produce warnings.
  */
 export function validateAllSecrets(): Record<string, string> {
   const secrets: Record<string, string> = {};

@@ -12,8 +12,9 @@ import { OrganizationCredentialSubjectAdapter } from '../infrastructure/acl/Orga
 import { ScimProvisioningRepositoryImpl } from '../infrastructure/repositories/ScimProvisioningRepositoryImpl';
 import identityDataRepository from '../infrastructure/repositories/IdentityDataRepository';
 import { CustomerCredentialSubjectAdapter } from '../infrastructure/acl/CustomerCredentialSubjectAdapter';
+import { getSecret } from '../../../libs/secrets';
 
-const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
+const ORGANIZATION_JWT_SECRET = getSecret('ORGANIZATION_JWT_SECRET');
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 
 const samlRepo = new SamlProviderRepositoryImpl();

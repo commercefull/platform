@@ -8,9 +8,10 @@ import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import { eventBus } from '../../../../libs/events/eventBus';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
 import { identityDataRepository, CustomerCredentialSubjectAdapter } from '../../application/wired';
+import { getSecret } from '../../../../libs/secrets';
 
-// Environment configuration with secure defaults
-const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
+// Environment configuration
+const CUSTOMER_JWT_SECRET = getSecret('CUSTOMER_JWT_SECRET');
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 

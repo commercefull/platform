@@ -40,7 +40,7 @@ themeRegistry.registerBuiltInThemes();
 // Register built-in block types in the block schema registry
 blockSchemaRegistry.registerBuiltIns();
 
-// Validate all required secrets — fail fast in production before any service starts
+// Validate all required secrets before any service starts
 validateAllSecrets();
 
 // Initialize event handlers and outbox dispatcher

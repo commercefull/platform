@@ -7,9 +7,10 @@ import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
 import { emitOrganizationLogin, emitOrganizationRegistered, emitOrganizationTokenRefreshed } from '../../domain/events/emitIdentityEvent';
 import { identityDataRepository, OrganizationCredentialSubjectAdapter, CustomerCredentialSubjectAdapter } from '../../application/wired';
+import { getSecret } from '../../../../libs/secrets';
 
-// Environment configuration with secure defaults
-const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
+// Environment configuration
+const ORGANIZATION_JWT_SECRET = getSecret('ORGANIZATION_JWT_SECRET');
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 

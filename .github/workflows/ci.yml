@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [main, develop]
 
+env:
+  CUSTOMER_JWT_SECRET: ci-customer-jwt-secret-at-least-32-characters
+  ORGANIZATION_JWT_SECRET: ci-organization-jwt-secret-at-least-32-characters
+  ADMIN_JWT_SECRET: ci-admin-jwt-secret-at-least-32-characters
+  B2B_JWT_SECRET: ci-b2b-jwt-secret-at-least-32-characters
+  SESSION_SECRET: ci-session-secret-at-least-32-characters
+
 jobs:
   lint:
     name: Lint, Type Check & Deps
@@ -56,11 +63,6 @@ jobs:
       POSTGRES_DB: commercefull
       PORT: 3000
       NODE_ENV: development
-      CUSTOMER_JWT_SECRET: ci-customer-jwt-secret-at-least-32-characters
-      ORGANIZATION_JWT_SECRET: ci-organization-jwt-secret-at-least-32-characters
-      ADMIN_JWT_SECRET: ci-admin-jwt-secret-at-least-32-characters
-      B2B_JWT_SECRET: ci-b2b-jwt-secret-at-least-32-characters
-      SESSION_SECRET: ci-session-secret-at-least-32-characters
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4

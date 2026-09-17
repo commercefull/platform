@@ -20,10 +20,11 @@ import { generateAccessToken } from '../../utils/jwtHelpers';
 import { eventBus } from '../../../../libs/events/eventBus';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
 import { identityDataRepository, CustomerCredentialSubjectAdapter, OrganizationCredentialSubjectAdapter } from '../../application/wired';
+import { getSecret } from '../../../../libs/secrets';
 
 // Environment configuration
-const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
-const ORGANIZATION_JWT_SECRET = process.env.ORGANIZATION_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
+const CUSTOMER_JWT_SECRET = getSecret('CUSTOMER_JWT_SECRET');
+const ORGANIZATION_JWT_SECRET = getSecret('ORGANIZATION_JWT_SECRET');
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 
 // Ports
