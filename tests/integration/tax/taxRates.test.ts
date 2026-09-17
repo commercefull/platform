@@ -141,59 +141,8 @@ describe('Tax Rates API Integration Tests', () => {
   });
 
   describe('PUT /business/tax/rates/:id', () => {
-    let testTaxRateId: string;
-
-    beforeEach(async () => {
-      // Create a tax rate for testing updates
-      const categoriesResponse = await client.get('/business/tax/categories', {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      const zonesResponse = await client.get('/business/tax/zones', {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      if (categoriesResponse.data.data.length === 0 || zonesResponse.data.data.length === 0) {
-        // Skip setup if we don't have required data
-
-        return;
-      }
-
-      const taxCategoryId = categoriesResponse.data.data[0].taxCategoryId || categoriesResponse.data.data[0].id;
-      const taxZoneId = zonesResponse.data.data[0].taxZoneId || zonesResponse.data.data[0].id;
-
-      const newTaxRate = {
-        name: 'Update Test Tax Rate',
-        description: 'Tax rate for update testing',
-        rate: '7.5',
-        taxCategoryId,
-        taxZoneId,
-        type: 'percentage',
-        priority: Math.floor(Math.random() * 10000) + 100,
-        isCompound: false,
-        includeInPrice: false,
-        isShippingTaxable: false,
-        isActive: true,
-        startDate: Date.now() / 1000,
-      };
-
-      const createResponse = await client.post('/business/tax/rates', newTaxRate, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      if (createResponse.status === 201) {
-        testTaxRateId = createResponse.data.data.id;
-      }
-    });
-
-    afterEach(async () => {
-      // Clean up - delete the test tax rate if it exists
-      if (testTaxRateId) {
-        await client.delete(`/business/tax/rates/${testTaxRateId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-      }
-    });
+    // Seeded dedicated rate for update tests (seeds/20240805002000_seedTaxTestData.js)
+    const testTaxRateId = '0193a002-0000-7000-8000-000000000010';
 
     it('should update an existing tax rate when authenticated as admin', async () => {
       const updateData = {
@@ -225,50 +174,8 @@ describe('Tax Rates API Integration Tests', () => {
   });
 
   describe('DELETE /business/tax/rates/:id', () => {
-    let testTaxRateId: string;
-
-    beforeEach(async () => {
-      // Create a tax rate for testing deletion
-      const categoriesResponse = await client.get('/business/tax/categories', {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      const zonesResponse = await client.get('/business/tax/zones', {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      if (categoriesResponse.data.data.length === 0 || zonesResponse.data.data.length === 0) {
-        // Skip setup if we don't have required data
-
-        return;
-      }
-
-      const taxCategoryId = categoriesResponse.data.data[0].taxCategoryId || categoriesResponse.data.data[0].id;
-      const taxZoneId = zonesResponse.data.data[0].taxZoneId || zonesResponse.data.data[0].id;
-
-      const newTaxRate = {
-        name: 'Delete Test Tax Rate',
-        description: 'Tax rate for deletion testing',
-        rate: '9.0',
-        taxCategoryId,
-        taxZoneId,
-        type: 'percentage',
-        priority: Math.floor(Math.random() * 10000) + 100,
-        isCompound: false,
-        includeInPrice: false,
-        isShippingTaxable: false,
-        isActive: true,
-        startDate: Date.now() / 1000,
-      };
-
-      const createResponse = await client.post('/business/tax/rates', newTaxRate, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      if (createResponse.status === 201) {
-        testTaxRateId = createResponse.data.data.id;
-      }
-    });
+    // Seeded dedicated rate for delete tests (seeds/20240805002000_seedTaxTestData.js)
+    const testTaxRateId = '0193a002-0000-7000-8000-000000000011';
 
     it('should delete a tax rate when authenticated as admin', async () => {
       const response = await client.delete(`/business/tax/rates/${testTaxRateId}`, {

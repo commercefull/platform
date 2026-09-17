@@ -1,5 +1,6 @@
 import { AxiosInstance } from 'axios';
-import { setupOrderTests, cleanupOrderTests, testOrderData } from './testUtils';
+import { testOrderData, SEEDED_REFUND_ORDER_ID, SEEDED_ORDER_ID, SEEDED_SHIPPED_ORDER_ID, loginTestUser, loginTestUser as loginOrderTestUser } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 
 // Define interfaces for order types
 interface Order {
@@ -29,15 +30,10 @@ describe('Order Tests', () => {
   let testOrderId: string;
 
   beforeAll(async () => {
-    const setup = await setupOrderTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
-    testOrderId = setup.testOrderId;
-  });
-
-  afterAll(async () => {
-    await cleanupOrderTests(client, adminToken, testOrderId);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client);
+    testOrderId = SEEDED_ORDER_ID;
   });
 
   describe('Admin Order Operations', () => {
@@ -299,64 +295,20 @@ describe('Order Tests', () => {
 
   describe('Order Refund (UC-ORD-006)', () => {
     it('should process a refund (admin)', async () => {
-      // Create a fresh order for refund testing (testOrderId may have been cancelled)
-      const createResp = await client.post(
-        '/customer/order',
+      // Seeded completed+paid order (testOrderId may have been cancelled by earlier tests)
+      const response = await client.post(
+        `/business/orders/${SEEDED_REFUND_ORDER_ID}/refund`,
         {
-          ...testOrderData,
-          orderNumber: `TEST-REFUND-${Date.now()}`,
-          customerEmail: 'refund-test@example.com',
+          amount: 10.0,
+          reason: 'Integration test refund',
         },
         {
-          headers: { Authorization: `Bearer ${customerToken}` },
+          headers: { Authorization: `Bearer ${adminToken}` },
         },
       );
-      expect(createResp.status).toBe(201);
-      const refundOrderId = createResp.data.data.orderId;
-
-      // Ensure order is in a refundable state (status: completed, paymentStatus: paid)
-      await client.put(
-        `/business/orders/${refundOrderId}/status`,
-        { status: 'processing' },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      await client.put(
-        `/business/orders/${refundOrderId}/status`,
-        { status: 'shipped' },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      await client.put(
-        `/business/orders/${refundOrderId}/status`,
-        { status: 'delivered' },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      await client.put(
-        `/business/orders/${refundOrderId}/status`,
-        { status: 'completed' },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      await client.put(
-        `/business/orders/${refundOrderId}/payment-status`,
-        { paymentStatus: 'paid' },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-
-      const refundData = {
-        amount: 10.0,
-        reason: 'Integration test refund',
-      };
-
-      const response = await client.post(`/business/orders/${refundOrderId}/refund`, refundData, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-
-      // Clean up
-      await client.delete(`/business/orders/${refundOrderId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
     });
   });
 
@@ -383,9 +335,6 @@ describe('Order Tests', () => {
 // ============================================================================
 // Gap Tests — required by docs/specs/order/customer.md §9
 // ============================================================================
-
-import { createTestClient, loginTestAdmin } from '../testUtils';
-import { loginTestUser as loginOrderTestUser } from './testUtils';
 
 describe('Order Creation Validation', () => {
   let client: AxiosInstance;
@@ -472,44 +421,16 @@ describe('Order Cancellation Guards', () => {
   it('REQ 5.3.7 — cancel a SHIPPED order → 400 with correct message', async () => {
     if (!customerToken || !adminToken) return;
 
-    // Create an order
-    const createResp = await client.post(
-      '/customer/order',
-      {
-        customerEmail: 'cancel-test@example.com',
-        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
-        shippingAddress: {
-          firstName: 'A',
-          lastName: 'B',
-          address1: '1 St',
-          city: 'City',
-          state: 'ST',
-          postalCode: '00000',
-          country: 'US',
-          countryCode: 'US',
-        },
-      },
+    // Seeded order already in 'shipped' status, owned by customer@example.com
+    const response = await client.post(
+      `/customer/order/${SEEDED_SHIPPED_ORDER_ID}/cancel`,
+      {},
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
-    expect(createResp.status).toBe(201);
-    const orderId = createResp.data.data.orderId;
-
-    // Force to SHIPPED via admin
-    await client.put(
-      `/business/orders/${orderId}/status`,
-      { status: 'processing' },
-      { headers: { Authorization: `Bearer ${adminToken}` } },
-    );
-    await client.put(`/business/orders/${orderId}/status`, { status: 'shipped' }, { headers: { Authorization: `Bearer ${adminToken}` } });
-
-    const response = await client.post(`/customer/order/${orderId}/cancel`, {}, { headers: { Authorization: `Bearer ${customerToken}` } });
     expect(response.status).toBe(400);
     const err = response.data.error;
     const errMsg = typeof err === 'string' ? err : (err?.message || response.data.message || JSON.stringify(response.data));
     expect(errMsg).toMatch(/cannot be cancelled/i);
-
-    // Cleanup
-    await client.delete(`/business/orders/${orderId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
   });
 
   it('REQ 5.3.8 — cancel non-existent orderId → 404', async () => {

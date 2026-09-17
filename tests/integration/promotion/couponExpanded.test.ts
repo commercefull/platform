@@ -5,53 +5,39 @@
 
 import { AxiosInstance } from 'axios';
 import {
-  setupPromotionTests,
   testCoupon,
   SEEDED_COUPON_CODE_FIXED,
   SEEDED_COUPON_CODE_PERCENTAGE,
   SEEDED_COUPON_CODE_EXPIRED,
 } from './testUtils';
-import { loginTestUser, expectStatus } from '../testUtils';
-import { TEST_PRODUCT_1_ID } from '../testConstants';
+import { createTestClient, loginTestAdmin, loginTestUser, expectStatus } from '../testUtils';
+
+// Seeded single-use baskets ($59.98 each) owned by testcustomer@example.com —
+// sized above TESTPERCENT15's minOrderAmount of 50
+// (seeds/20240805002001_seedIntegrationTestData.js coupon basket pool)
+const SEEDED_BASKET_POOL = Array.from(
+  { length: 8 },
+  (_, i) => `00000000-0000-0000-0000-0000000040${String(i).padStart(2, '0')}`,
+);
 
 describe('Coupon Expanded Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let customerToken: string;
+  let basketPoolIndex = 0;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
-    const setup = await setupPromotionTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = await loginTestUser(client);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client, 'testcustomer@example.com', 'password123');
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${customerToken}` });
   const adminAuthHeaders = () => ({ Authorization: `Bearer ${adminToken}` });
 
-  const createBasketWithItems = async (totalValue: number = 100): Promise<string | null> => {
-    if (!customerToken) return null;
-    const basketResp = await client.post(
-      '/customer/basket',
-      { sessionId: `coupon-exp-${Date.now()}-${Math.random()}` },
-      { headers: authHeaders() },
-    );
-    if (basketResp.status !== 200 || !basketResp.data?.data?.basketId) return null;
-    const basketId = basketResp.data.data.basketId;
-
-    const qty = Math.max(1, Math.ceil(totalValue / 29.99));
-    await client.post(
-      `/customer/basket/${basketId}/items`,
-      { productId: TEST_PRODUCT_1_ID, sku: 'TEST-SKU-001', name: 'Test Product', quantity: qty, unitPrice: 29.99 },
-      { headers: authHeaders() },
-    );
-
-    return basketId;
-  };
-
-  const cleanup = async (basketId: string) => {
-    await client.delete(`/customer/basket/${basketId}`, { headers: authHeaders() }).catch(() => {});
+  const createBasketWithItems = async (): Promise<string | null> => {
+    return SEEDED_BASKET_POOL[basketPoolIndex++] || null;
   };
 
   // ============================================================================
@@ -60,27 +46,25 @@ describe('Coupon Expanded Tests', () => {
 
   describe('Coupon Validation', () => {
     it('should reject non-existent coupon code', async () => {
-      const basketId = await createBasketWithItems(100);
+      const basketId = await createBasketWithItems();
       if (!basketId) return;
 
       const resp = await client.post(`/customer/basket/${basketId}/coupon`, { couponCode: 'NONEXISTENT99999' }, { headers: authHeaders() });
 
       expectStatus(resp, 400);
-      await cleanup(basketId);
     });
 
     it('should reject empty coupon code', async () => {
-      const basketId = await createBasketWithItems(100);
+      const basketId = await createBasketWithItems();
       if (!basketId) return;
 
       const resp = await client.post(`/customer/basket/${basketId}/coupon`, { couponCode: '' }, { headers: authHeaders() });
 
       expectStatus(resp, 400);
-      await cleanup(basketId);
     });
 
     it('should reject expired coupon code', async () => {
-      const basketId = await createBasketWithItems(100);
+      const basketId = await createBasketWithItems();
       if (!basketId) return;
 
       const resp = await client.post(
@@ -90,7 +74,6 @@ describe('Coupon Expanded Tests', () => {
       );
 
       expectStatus(resp, 400);
-      await cleanup(basketId);
     });
   });
 
@@ -100,7 +83,7 @@ describe('Coupon Expanded Tests', () => {
 
   describe('Coupon Application', () => {
     it('should apply fixed amount coupon correctly', async () => {
-      const basketId = await createBasketWithItems(100);
+      const basketId = await createBasketWithItems();
       if (!basketId) return;
 
       const resp = await client.post(
@@ -113,12 +96,10 @@ describe('Coupon Expanded Tests', () => {
       expect(resp.data.success).toBe(true);
       expect(resp.data.data).toHaveProperty('discountAmount');
       expect(resp.data.data.discountAmount).toBeGreaterThan(0);
-
-      await cleanup(basketId);
     });
 
     it('should apply percentage coupon correctly', async () => {
-      const basketId = await createBasketWithItems(100);
+      const basketId = await createBasketWithItems();
       if (!basketId) return;
 
       const resp = await client.post(
@@ -130,8 +111,6 @@ describe('Coupon Expanded Tests', () => {
       expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);
       expect(resp.data.data).toHaveProperty('discountAmount');
-
-      await cleanup(basketId);
     });
 
   });
@@ -142,7 +121,7 @@ describe('Coupon Expanded Tests', () => {
 
   describe('Coupon Removal', () => {
     it('should remove applied coupon and reset discount', async () => {
-      const basketId = await createBasketWithItems(100);
+      const basketId = await createBasketWithItems();
       if (!basketId) return;
 
       const applyResp = await client.post(
@@ -153,7 +132,6 @@ describe('Coupon Expanded Tests', () => {
 
       // If coupon application failed, skip removal test
       if (applyResp.status !== 200) {
-        await cleanup(basketId);
         return;
       }
 
@@ -163,8 +141,6 @@ describe('Coupon Expanded Tests', () => {
 
       expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);
-
-      await cleanup(basketId);
     });
   });
 

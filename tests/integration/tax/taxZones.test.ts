@@ -13,19 +13,6 @@ describe('Tax Zones API Integration Tests', () => {
     userToken = await loginTestUser(client);
   });
 
-  afterAll(async () => {
-    // Cleanup: delete any remaining test zones
-    for (const id of createdZoneIds) {
-      try {
-        await client.delete(`/business/tax/zones/${id}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-      } catch {
-        // ignore
-      }
-    }
-  });
-
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });
 
   // ============================================================================

@@ -16,14 +16,6 @@ describe('Automation Module Integration Tests', () => {
     orgToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (orgToken && ruleId) {
-      await client.delete(`/business/automation/${ruleId}`, {
-        headers: { Authorization: `Bearer ${orgToken}` },
-      });
-    }
-  });
-
   describe('Rule CRUD', () => {
     it('POST /business/automation creates a rule', async () => {
       if (!orgToken) return;

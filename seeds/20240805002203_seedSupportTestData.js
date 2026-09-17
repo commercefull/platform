@@ -14,6 +14,9 @@ const SUPPORT_TICKET_IDS = {
   TICKET_OPEN: '01939001-0000-7000-8000-000000000001',
   TICKET_IN_PROGRESS: '01939001-0000-7000-8000-000000000002',
   TICKET_RESOLVED: '01939001-0000-7000-8000-000000000003',
+  TICKET_OPS_ESCALATE: '01939001-0000-7000-8000-000000000004',
+  TICKET_OPS_FEEDBACK: '01939001-0000-7000-8000-000000000005',
+  TICKET_ADMIN_WORKFLOW: '01939001-0000-7000-8000-000000000006',
 };
 
 const SUPPORT_MESSAGE_IDS = {
@@ -25,12 +28,14 @@ const FAQ_CATEGORY_IDS = {
   ORDERS: '01939003-0000-7000-8000-000000000001',
   SHIPPING: '01939003-0000-7000-8000-000000000002',
   RETURNS: '01939003-0000-7000-8000-000000000003',
+  OPS: '01939003-0000-7000-8000-000000000004',
 };
 
 const FAQ_ARTICLE_IDS = {
   HOW_TO_ORDER: '01939004-0000-7000-8000-000000000001',
   SHIPPING_TIMES: '01939004-0000-7000-8000-000000000002',
   RETURN_POLICY: '01939004-0000-7000-8000-000000000003',
+  OPS: '01939004-0000-7000-8000-000000000004',
 };
 
 const STOCK_ALERT_IDS = {
@@ -43,8 +48,8 @@ const PRICE_ALERT_IDS = {
   ALERT_2: '01939006-0000-7000-8000-000000000002',
 };
 
-// Test customer ID (should exist from customer seeds)
-const TEST_CUSTOMER_ID = '01910000-0000-7000-8000-000000000001';
+// Test customer email (customerId is a generated uuid7, so look it up by email)
+const TEST_CUSTOMER_EMAIL = 'customer@example.com';
 // Test product ID (should exist from product seeds)
 const TEST_PRODUCT_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -150,9 +155,9 @@ exports.seed = async function (knex) {
     },
   ]);
 
-  // Check if test customer exists
-  const customerExists = await knex('customer').where('customerId', TEST_CUSTOMER_ID).first();
-  const customerId = customerExists ? TEST_CUSTOMER_ID : null;
+  // Check if test customer exists (look up by email — customerId is generated)
+  const testCustomer = await knex('customer').where({ email: TEST_CUSTOMER_EMAIL }).first('customerId');
+  const customerId = testCustomer ? testCustomer.customerId : null;
 
   // Seed Support Tickets
   const now = new Date();
@@ -215,6 +220,53 @@ exports.seed = async function (knex) {
       customerSatisfaction: 5,
       customerFeedback: 'Great service!',
       createdAt: lastWeek,
+    },
+    {
+      supportTicketId: SUPPORT_TICKET_IDS.TICKET_OPS_ESCALATE,
+      ticketNumber: 'TKT-OPS-ESCALATE',
+      customerId: customerId,
+      email: 'customer@example.com',
+      name: 'Test Customer',
+      subject: 'Escalation test ticket',
+      description: 'Ticket used by escalation integration tests.',
+      status: 'open',
+      priority: 'medium',
+      category: 'order',
+      channel: 'web',
+      createdAt: now,
+    },
+    {
+      supportTicketId: SUPPORT_TICKET_IDS.TICKET_OPS_FEEDBACK,
+      ticketNumber: 'TKT-OPS-FEEDBACK',
+      customerId: customerId,
+      email: 'customer@example.com',
+      name: 'Test Customer',
+      subject: 'Feedback test ticket',
+      description: 'Resolved ticket used by feedback integration tests.',
+      status: 'resolved',
+      priority: 'low',
+      category: 'other',
+      channel: 'web',
+      assignedAgentId: SUPPORT_AGENT_IDS.AGENT_JOHN,
+      firstResponseAt: yesterday,
+      resolvedAt: yesterday,
+      resolutionType: 'resolved',
+      resolutionNotes: 'Resolved for feedback test',
+      createdAt: lastWeek,
+    },
+    {
+      supportTicketId: SUPPORT_TICKET_IDS.TICKET_ADMIN_WORKFLOW,
+      ticketNumber: 'TKT-ADMIN-WORKFLOW',
+      customerId: customerId,
+      email: 'customer@example.com',
+      name: 'Test Customer',
+      subject: 'Admin workflow test ticket',
+      description: 'Open ticket used by support.test.ts admin assign/message/resolve tests.',
+      status: 'open',
+      priority: 'medium',
+      category: 'order',
+      channel: 'web',
+      createdAt: now,
     },
   ]);
 
@@ -283,6 +335,16 @@ exports.seed = async function (knex) {
       isActive: true,
       isFeatured: false,
     },
+    {
+      faqCategoryId: FAQ_CATEGORY_IDS.OPS,
+      name: 'Ops Test Category',
+      slug: 'ops-test-category',
+      description: 'Category mutated by FAQ management integration tests',
+      sortOrder: 99,
+      articleCount: 1,
+      isActive: true,
+      isFeatured: false,
+    },
   ]);
 
   // Seed FAQ Articles
@@ -341,6 +403,26 @@ exports.seed = async function (knex) {
       helpfulYes: 100,
       helpfulNo: 15,
       helpfulScore: 0.87,
+      sortOrder: 1,
+      isPublished: true,
+      isFeatured: false,
+      isPinned: false,
+      publishedAt: lastWeek,
+    },
+    {
+      faqArticleId: FAQ_ARTICLE_IDS.OPS,
+      faqCategoryId: FAQ_CATEGORY_IDS.OPS,
+      title: 'Ops Test Article',
+      slug: 'ops-test-article',
+      content: 'Article mutated by FAQ management integration tests.',
+      contentHtml: '<p>Article mutated by FAQ management integration tests.</p>',
+      excerpt: 'Ops test article excerpt.',
+      keywords: ['ops', 'test'],
+      views: 0,
+      uniqueViews: 0,
+      helpfulYes: 0,
+      helpfulNo: 0,
+      helpfulScore: 0,
       sortOrder: 1,
       isPublished: true,
       isFeatured: false,

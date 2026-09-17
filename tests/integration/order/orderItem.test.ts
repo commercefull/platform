@@ -1,5 +1,6 @@
 import { AxiosInstance } from 'axios';
-import { setupOrderTests, cleanupOrderTests, testOrderItemData } from './testUtils';
+import { testOrderItemData, SEEDED_ORDER_ID, SEEDED_ORDER_ITEM_ID } from './testUtils';
+import { createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 // Define interfaces for order items
 interface OrderItem {
@@ -26,16 +27,11 @@ describe('Order Item Tests', () => {
   let testOrderItemId: string;
 
   beforeAll(async () => {
-    const setup = await setupOrderTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
-    testOrderId = setup.testOrderId;
-    testOrderItemId = setup.testOrderItemId;
-  });
-
-  afterAll(async () => {
-    await cleanupOrderTests(client, adminToken, testOrderId);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client, 'customer@example.com', 'password123');
+    testOrderId = SEEDED_ORDER_ID;
+    testOrderItemId = SEEDED_ORDER_ITEM_ID;
   });
 
   describe('Admin Order Item Operations', () => {

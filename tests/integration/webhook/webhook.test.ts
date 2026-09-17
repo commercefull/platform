@@ -133,9 +133,4 @@ describe('Outbound Webhook Integration Tests', () => {
     });
   });
 
-  afterAll(async () => {
-    if (organizationToken && endpointId) {
-      await client.delete(`/business/webhooks/${endpointId}`, { headers: { Authorization: `Bearer ${organizationToken}` } });
-    }
-  });
 });

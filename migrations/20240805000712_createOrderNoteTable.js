@@ -7,10 +7,12 @@ exports.up = function (knex) {
     t.text('content').notNullable();
     t.boolean('isCustomerVisible').notNullable().defaultTo(false);
     t.string('createdBy', 255);
+    t.timestamp('deletedAt').nullable();
 
     t.index('orderId');
     t.index('isCustomerVisible');
     t.index('createdAt');
+    t.index('deletedAt');
   });
 };
 

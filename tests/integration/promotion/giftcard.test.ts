@@ -11,17 +11,6 @@ describe('Gift Card Business API Tests', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    // Cleanup: cancel any remaining test gift cards
-    for (const id of createdGiftCardIds) {
-      try {
-        await client.post(`/business/gift-cards/${id}/cancel`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
-      } catch {
-        // ignore
-      }
-    }
-  });
-
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });
 
   // ============================================================================

@@ -1,5 +1,4 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../testUtils';
 
 // Export loginTestUser function (customer login)
 export const loginTestUser = async (
@@ -106,64 +105,10 @@ export const testOrderData = {
  * Setup function for order integration tests
  * Creates test data and returns necessary IDs and tokens
  */
-export const setupOrderTests = async () => {
-  const client = createTestClient();
-  let adminToken = '';
-  let customerToken = '';
-  let testOrderId = '';
-  let testOrderItemId = '';
-
-  try {
-    adminToken = await loginTestAdmin(client);
-  } catch {}
-
-  try {
-    customerToken = await loginTestUser(client);
-  } catch {}
-
-  if (customerToken) {
-    try {
-      // Create test order (items are included in testOrderData)
-      const createOrderResponse = await client.post(
-        '/customer/order',
-        {
-          ...testOrderData,
-          orderNumber: `TEST-${Date.now()}`, // Ensure unique order number
-        },
-        {
-          headers: { Authorization: `Bearer ${customerToken}` },
-        },
-      );
-
-      if (createOrderResponse.data?.success && createOrderResponse.data?.data?.orderId) {
-        testOrderId = createOrderResponse.data.data.orderId;
-
-        // Get the order item ID from the created order's items
-        const orderItems = createOrderResponse.data.data.items || [];
-        testOrderItemId = orderItems.length > 0 ? orderItems[0].orderItemId : '';
-      } else {
-      }
-    } catch {}
-  }
-
-  return {
-    client,
-    adminToken,
-    customerToken,
-    testOrderId,
-    testOrderItemId,
-  };
-};
-
-/**
- * Cleanup function for order integration tests
- * Removes test data created during setup
- */
-export const cleanupOrderTests = async (client: AxiosInstance, adminToken: string, testOrderId: string) => {
-  try {
-    // Delete test order (cascade deletes items)
-    await client.delete(`/business/orders/${testOrderId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-  } catch {}
-};
+// Seeded test order (seeds/20240805000495_seedTestOrder.js)
+export const SEEDED_ORDER_ID = '00000000-0000-0000-0000-000000000200';
+export const SEEDED_ORDER_ITEM_ID = '00000000-0000-0000-0000-000000000010';
+export const SEEDED_REFUND_ORDER_ID = '00000000-0000-0000-0000-000000000201';
+export const SEEDED_SHIPPED_ORDER_ID = '00000000-0000-0000-0000-000000000202';
+export const SEEDED_DELIVERED_ORDER_ID = '00000000-0000-0000-0000-000000000203';
+export const SEEDED_ORDER_PAYMENT_ID = '00000000-0000-0000-0000-000000000240';

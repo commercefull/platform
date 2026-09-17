@@ -123,7 +123,7 @@ describe('Inventory Feature Tests', () => {
       });
 
       if (response.data.data && response.data.data.length > 0) {
-        testLocationId = response.data.data[0].inventoryLocationId;
+    testLocationId = response.data.data[0].inventoryLocationId;
       }
     });
 

@@ -1,21 +1,19 @@
 import { AxiosInstance } from 'axios';
-import { setupPromotionTests, cleanupPromotionTests } from './testUtils';
+import { SEEDED_PRODUCT_CATEGORY_ID, SEEDED_PRODUCT_ID } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Discount Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testCartId: string;
   let testCategoryId: string;
   let testProductId: string;
   let discountId: string;
 
   beforeAll(async () => {
-    const setup = await setupPromotionTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    testCartId = setup.testCartId;
-    testCategoryId = setup.testCategoryId;
-    testProductId = setup.testProductId;
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    testCategoryId = SEEDED_PRODUCT_CATEGORY_ID;
+    testProductId = SEEDED_PRODUCT_ID;
   });
 
   it('should create a discount', async () => {
@@ -26,16 +24,15 @@ describe('Discount Tests', () => {
     const discountData = {
       name: 'Test Discount ' + Date.now(),
       description: 'Test discount for integration tests',
-      type: 'percentage',
-      value: 15,
-      minPurchaseAmount: 30,
-      maxDiscountAmount: 50,
+      discountType: 'percentage',
+      discountValue: 15,
+      minimumAmount: 30,
+      maximumDiscountAmount: 50,
       startDate: new Date().toISOString(),
       endDate: new Date(new Date().getTime() + 86400000).toISOString(),
-      // Don't include applicableProducts/Categories if they're placeholder IDs
-      combinable: true,
+      stackable: true,
       priority: 1,
-      status: 'active',
+      isActive: true,
     };
 
     const response = await client.post('/business/discounts', discountData, {
@@ -44,9 +41,9 @@ describe('Discount Tests', () => {
 
     expect(response.status).toBe(201);
     expect(response.data.success).toBe(true);
-    expect(response.data.data).toHaveProperty('discountId');
+    expect(response.data.data).toHaveProperty('promotionProductDiscountId');
 
-    discountId = response.data.data.discountId;
+    discountId = response.data.data.promotionProductDiscountId;
   });
 
   it('should get active discounts', async () => {
@@ -64,7 +61,7 @@ describe('Discount Tests', () => {
 
     // Only check for specific discount if it was created
     if (discountId) {
-      const foundDiscount = response.data.data.find((d: Record<string, unknown>) => d.discountId === discountId);
+      const foundDiscount = response.data.data.find((d: Record<string, unknown>) => d.promotionProductDiscountId === discountId);
       expect(foundDiscount).toBeDefined();
     }
   });
@@ -104,7 +101,7 @@ describe('Discount Tests', () => {
 
     const updateData = {
       name: 'Updated Test Discount',
-      value: 20,
+      discountValue: 20,
     };
 
     const response = await client.put(`/business/discounts/${discountId}`, updateData, {
@@ -114,7 +111,7 @@ describe('Discount Tests', () => {
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(response.data.data.name).toBe(updateData.name);
-    expect(response.data.data.value).toBe(updateData.value);
+    expect(parseFloat(response.data.data.discountValue)).toBe(updateData.discountValue);
   });
 
   it('should delete a discount', async () => {
@@ -137,7 +134,4 @@ describe('Discount Tests', () => {
     expect(getResponse.status).toBe(404);
   });
 
-  afterAll(async () => {
-    await cleanupPromotionTests(client, adminToken, testCartId, testProductId, testCategoryId);
-  });
 });

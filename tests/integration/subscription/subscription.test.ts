@@ -1,31 +1,16 @@
 import { AxiosInstance } from 'axios';
-import {
-  setupSubscriptionTests,
-  cleanupSubscriptionTests,
-  SEEDED_SUBSCRIPTION_PRODUCT_IDS,
-  SEEDED_SUBSCRIPTION_PLAN_IDS,
-  SEEDED_CUSTOMER_SUBSCRIPTION_IDS,
-} from './testUtils';
+import { SEEDED_SUBSCRIPTION_PRODUCT_IDS, SEEDED_SUBSCRIPTION_PLAN_IDS, SEEDED_CUSTOMER_SUBSCRIPTION_IDS } from './testUtils';
+import { createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 describe('Subscription Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let customerToken: string;
-  const createdResources = {
-    productIds: [] as string[],
-    planIds: [] as string[],
-    subscriptionIds: [] as string[],
-  };
 
   beforeAll(async () => {
-    const setup = await setupSubscriptionTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
-  });
-
-  afterAll(async () => {
-    await cleanupSubscriptionTests(client, adminToken, createdResources);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client, 'customer@example.com', 'password123');
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });

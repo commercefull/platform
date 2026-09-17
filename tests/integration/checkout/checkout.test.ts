@@ -13,6 +13,14 @@ const createClient = () =>
     },
   });
 
+// Pool of seeded single-use baskets (one item each, owned by testcustomer@example.com)
+// Provisioned by seeds/20240805002001_seedIntegrationTestData.js — checkout consumes
+// a basket, so each test draws a fresh ID from the pool instead of creating via API.
+const CHECKOUT_BASKET_POOL = Array.from({ length: 20 }, (_, i) => `00000000-0000-0000-0000-0000000031${String(i).padStart(2, '0')}`);
+// Seeded empty basket for the empty-basket rejection test
+const EMPTY_BASKET_ID = '00000000-0000-0000-0000-000000003120';
+const nextCheckoutBasketId = () => CHECKOUT_BASKET_POOL.shift();
+
 describe('Checkout Feature Tests', () => {
   let client: AxiosInstance;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -33,39 +41,8 @@ describe('Checkout Feature Tests', () => {
 
   describe('Checkout Session API', () => {
     it('should create a checkout session with camelCase properties', async () => {
-      // Create a new basket for this test
       const customerToken = await loginTestUser(client);
-
-      const basketResponse = await client.post(
-        '/customer/basket',
-        {
-          sessionId: 'checkout-test-session-' + Date.now(),
-        },
-        {
-          headers: { Authorization: `Bearer ${customerToken}` },
-        },
-      );
-
-      if (basketResponse.status !== 200) {
-        return;
-      }
-
-      const testBasketId = basketResponse.data.data.basketId;
-
-      // Add an item to the basket (use valid UUID for productId)
-      await client.post(
-        `/customer/basket/${testBasketId}/items`,
-        {
-          productId: '00000000-0000-0000-0000-000000000001',
-          sku: 'TEST-SKU-001',
-          name: 'Test Product',
-          quantity: 1,
-          unitPrice: 29.99,
-        },
-        {
-          headers: { Authorization: `Bearer ${customerToken}` },
-        },
-      );
+      const testBasketId = nextCheckoutBasketId();
 
       const response = await client.post(
         '/customer/checkout',
@@ -382,39 +359,8 @@ describe('Checkout Feature Tests', () => {
 
   describe('Checkout Completion', () => {
     it('should abandon checkout with proper response format', async () => {
-      // Create a new checkout to abandon
       const customerToken = await loginTestUser(client);
-
-      const basketResponse = await client.post(
-        '/customer/basket',
-        {
-          sessionId: 'abandon-test-session-' + Date.now(),
-        },
-        {
-          headers: { Authorization: `Bearer ${customerToken}` },
-        },
-      );
-
-      if (basketResponse.status !== 200) {
-        return;
-      }
-
-      const testBasketId = basketResponse.data.data.basketId;
-
-      // Add an item (use valid UUID for productId)
-      await client.post(
-        `/customer/basket/${testBasketId}/items`,
-        {
-          productId: '00000000-0000-0000-0000-000000000001',
-          sku: 'TEST-SKU-001',
-          name: 'Test Product',
-          quantity: 1,
-          unitPrice: 29.99,
-        },
-        {
-          headers: { Authorization: `Bearer ${customerToken}` },
-        },
-      );
+      const testBasketId = nextCheckoutBasketId();
 
       // Create checkout
       const checkoutResponse = await client.post(
@@ -509,20 +455,9 @@ describe('Checkout Gap Tests', () => {
   let client: AxiosInstance;
   let customerToken: string;
 
-  const createBasketWithItem = async (c: AxiosInstance, token: string) => {
-    const basketResp = await c.post(
-      '/customer/basket',
-      { sessionId: `gap-test-${Date.now()}` },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    if (basketResp.status !== 200) return null;
-    const basketId = basketResp.data.data.basketId;
-    await c.post(
-      `/customer/basket/${basketId}/items`,
-      { productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'Product', quantity: 1, unitPrice: 29.99 },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    return basketId;
+  // Draws the next seeded basket (one item) from the pool — no API fixture setup
+  const createBasketWithItem = async (_c: AxiosInstance, _token: string) => {
+    return nextCheckoutBasketId() || null;
   };
 
   const createCheckout = async (c: AxiosInstance, token: string, basketId: string) => {
@@ -875,16 +810,11 @@ describe('Checkout Gap Tests', () => {
 
   it('REQ 5.2.4 — POST /customer/checkout with empty basket → 400', async () => {
     if (!customerToken) return;
-    // Create empty basket
-    const basketResp = await client.post(
-      '/customer/basket',
-      { sessionId: `empty-${Date.now()}` },
+    const resp = await client.post(
+      '/customer/checkout',
+      { basketId: EMPTY_BASKET_ID },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
-    if (basketResp.status !== 200) return;
-    const basketId = basketResp.data.data.basketId;
-
-    const resp = await client.post('/customer/checkout', { basketId }, { headers: { Authorization: `Bearer ${customerToken}` } });
     expect(resp.status).toBe(400);
     const err = resp.data.error;
     const errMsg = typeof err === 'string' ? err : (err?.message || resp.data.message || JSON.stringify(resp.data));

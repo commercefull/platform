@@ -1,60 +1,17 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin, loginTestUser, expectStatus } from '../testUtils';
+import { createTestClient, loginTestUser, expectStatus } from '../testUtils';
 
 describe('Gift Card Customer API Tests', () => {
   let client: AxiosInstance;
-  let adminToken: string;
   let customerToken: string;
-  let testGiftCardId: string;
-  let testGiftCardCode: string;
+  // Seeded gift card GIFT-TEST-0001 (seeds/20240805001500 + assigned in 20240805002001)
+  const testGiftCardCode = 'GIFT-TEST-0001';
 
   beforeAll(async () => {
     client = createTestClient();
-    adminToken = await loginTestAdmin(client);
     customerToken = await loginTestUser(client);
-
-    // Create and activate a gift card for customer tests
-    if (adminToken) {
-      try {
-        const createResponse = await client.post(
-          '/business/gift-cards',
-          {
-            initialBalance: 200,
-            currency: 'USD',
-            isReloadable: true,
-          },
-          { headers: { Authorization: `Bearer ${adminToken}` } },
-        );
-
-        if (createResponse.data.success && createResponse.data.data) {
-          testGiftCardId = createResponse.data.data.promotionGiftCardId;
-          testGiftCardCode = createResponse.data.data.code;
-
-          // Activate and assign the gift card to the seeded customer
-          await client.post(`/business/gift-cards/${testGiftCardId}/activate`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
-          await client.post(
-            `/business/gift-cards/${testGiftCardId}/assign`,
-            { customerId: '00000000-0000-0000-0000-000000001001' },
-            { headers: { Authorization: `Bearer ${adminToken}` } },
-          );
-        }
-      } catch {
-        // ignore
-      }
-    }
   });
 
-  afterAll(async () => {
-    if (adminToken && testGiftCardId) {
-      try {
-        await client.post(`/business/gift-cards/${testGiftCardId}/cancel`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
-      } catch {
-        // ignore
-      }
-    }
-  });
-
-  const adminHeaders = () => ({ Authorization: `Bearer ${adminToken}` });
   const customerHeaders = () => ({ Authorization: `Bearer ${customerToken}` });
 
   // ============================================================================
@@ -82,29 +39,11 @@ describe('Gift Card Customer API Tests', () => {
     });
 
     it('should reject balance check for inactive gift card', async () => {
-      if (!adminToken) return;
+      // Seeded depleted card GIFT-TEST-0002 is not active
+      const response = await client.get('/customer/gift-cards/balance/GIFT-TEST-0002');
 
-      // Create a gift card but don't activate it
-      try {
-        const createResponse = await client.post(
-          '/business/gift-cards',
-          { initialBalance: 50, currency: 'USD' },
-          { headers: adminHeaders() },
-        );
-
-        if (createResponse.data.success) {
-          const inactiveCode = createResponse.data.data.code;
-          const response = await client.get(`/customer/gift-cards/balance/${inactiveCode}`);
-
-          expect(response.status).toBe(400);
-          expect(response.data.success).toBe(false);
-
-          // Cleanup
-          await client.post(`/business/gift-cards/${createResponse.data.data.promotionGiftCardId}/cancel`, {}, { headers: adminHeaders() });
-        }
-      } catch {
-        // ignore
-      }
+      expect(response.status).toBe(400);
+      expect(response.data.success).toBe(false);
     });
   });
 

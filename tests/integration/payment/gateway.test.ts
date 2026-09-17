@@ -1,22 +1,16 @@
 import { AxiosInstance } from 'axios';
-import { setupPaymentTests, cleanupPaymentTests, testGatewayData } from './testUtils';
+import { testGatewayData, SEEDED_GATEWAY_ID } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Payment Gateway Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let testGatewayId: string;
-  let testMethodConfigId: string;
 
   beforeAll(async () => {
-    const setup = await setupPaymentTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    testGatewayId = setup.testGatewayId;
-    testMethodConfigId = setup.testMethodConfigId;
-  });
-
-  afterAll(async () => {
-    await cleanupPaymentTests(client, adminToken, testGatewayId, testMethodConfigId);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    testGatewayId = SEEDED_GATEWAY_ID;
   });
 
   describe('Admin Gateway Operations', () => {

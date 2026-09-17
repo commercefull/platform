@@ -1,5 +1,6 @@
 import { AxiosInstance } from 'axios';
-import { setupNotificationTests, cleanupNotificationTests, testNotificationData, loginTestUser } from './testUtils';
+import { testNotificationData, loginTestUser, SEEDED_NOTIFICATION_ID } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 
 /**
  * Interface for Notification objects to ensure type safety in tests
@@ -30,22 +31,13 @@ describe('Notification Tests', () => {
   let customerToken: string;
   let testUserId: string;
   let testNotificationId: string;
-  let testTemplateId: string;
-  let testPreferenceId: string;
 
   beforeAll(async () => {
-    const setup = await setupNotificationTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
-    testUserId = setup.testUserId;
-    testNotificationId = setup.testNotificationId;
-    testTemplateId = setup.testTemplateId;
-    testPreferenceId = setup.testPreferenceId;
-  });
-
-  afterAll(async () => {
-    await cleanupNotificationTests(client, adminToken, testNotificationId, testTemplateId, testPreferenceId);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client);
+    testUserId = '00000000-0000-0000-0000-000000000001';
+    testNotificationId = SEEDED_NOTIFICATION_ID;
   });
 
   describe('Admin Notification Operations', () => {
@@ -303,7 +295,7 @@ describe('Notification Tests', () => {
     it('should filter notifications by type', async () => {
       // Note: Type filtering endpoint may not exist yet
       const response = await client.get(`/business/notifications?type=${testNotificationData.type}`, {
-        headers: { Authorization: `Bearer ${customerToken}` },
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);

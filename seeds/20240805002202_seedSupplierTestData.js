@@ -335,6 +335,70 @@ exports.seed = async function (knex) {
         },
       ]);
 
+      // Ops fixtures: a PO + receiving record + items mutated by the
+      // receiving operations integration tests (accept/reject/complete).
+      const OPS_PO_ID = '01938005-0000-7000-8000-000000000001';
+      const OPS_RECEIVING_ID = '01938006-0000-7000-8000-000000000001';
+      const OPS_ITEM_ACCEPT_ID = '01938007-0000-7000-8000-000000000001';
+      const OPS_ITEM_REJECT_ID = '01938007-0000-7000-8000-000000000002';
+
+      await knex('supplierReceivingItem').where('supplierReceivingRecordId', OPS_RECEIVING_ID).del();
+      await knex('supplierReceivingRecord').where('supplierReceivingRecordId', OPS_RECEIVING_ID).del();
+      await knex('supplierPurchaseOrder').where('supplierPurchaseOrderId', OPS_PO_ID).del();
+
+      await knex('supplierPurchaseOrder').insert({
+        supplierPurchaseOrderId: OPS_PO_ID,
+        poNumber: 'PO-OPS-001',
+        supplierId: SUPPLIER_IDS.ACME_CORP,
+        distributionWarehouseId: TEST_WAREHOUSE_ID,
+        status: 'confirmed',
+        orderType: 'standard',
+        priority: 'normal',
+        orderDate: now,
+        currency: 'USD',
+        subtotal: 100.0,
+        tax: 0,
+        shipping: 0,
+        discount: 0,
+        total: 100.0,
+      });
+
+      await knex('supplierReceivingRecord').insert({
+        supplierReceivingRecordId: OPS_RECEIVING_ID,
+        receiptNumber: 'SRR-OPS-001',
+        supplierPurchaseOrderId: OPS_PO_ID,
+        distributionWarehouseId: TEST_WAREHOUSE_ID,
+        supplierId: SUPPLIER_IDS.ACME_CORP,
+        status: 'pending',
+        receivedDate: now,
+        discrepancies: false,
+      });
+
+      await knex('supplierReceivingItem').insert([
+        {
+          supplierReceivingItemId: OPS_ITEM_ACCEPT_ID,
+          supplierReceivingRecordId: OPS_RECEIVING_ID,
+          productId: TEST_PRODUCT_ID,
+          sku: 'OPS-SKU-ACCEPT',
+          name: 'Ops Accept Item',
+          receivedQuantity: 3,
+          rejectedQuantity: 0,
+          status: 'received',
+          acceptanceStatus: 'pending',
+        },
+        {
+          supplierReceivingItemId: OPS_ITEM_REJECT_ID,
+          supplierReceivingRecordId: OPS_RECEIVING_ID,
+          productId: TEST_PRODUCT_ID,
+          sku: 'OPS-SKU-REJECT',
+          name: 'Ops Reject Item',
+          receivedQuantity: 2,
+          rejectedQuantity: 0,
+          status: 'received',
+          acceptanceStatus: 'pending',
+        },
+      ]);
+
       console.log('Supplier test data seeded successfully (with purchase orders)');
     } else {
       console.log('Supplier test data seeded (without purchase orders - warehouse not found)');

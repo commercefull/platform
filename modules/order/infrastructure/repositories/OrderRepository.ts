@@ -62,13 +62,7 @@ export class OrderRepo implements IOrderRepository {
       [customerId, limit, offset],
     );
 
-    const orders: Order[] = [];
-    for (const row of rows || []) {
-      const items = await this.getOrderItems(row.orderId);
-      const shippingAddress = await this.getShippingAddress(row.orderId);
-      const billingAddress = await this.getBillingAddress(row.orderId);
-      orders.push(this.mapToOrder(row, items, shippingAddress, billingAddress));
-    }
+    const orders = await this.hydrateOrders(rows || []);
 
     return { data: orders, total, limit, offset, hasMore: offset + orders.length < total, length: orders.length };
   }
@@ -91,13 +85,7 @@ export class OrderRepo implements IOrderRepository {
       [...params, limit, offset],
     );
 
-    const orders: Order[] = [];
-    for (const row of rows || []) {
-      const items = await this.getOrderItems(row.orderId);
-      const shippingAddress = await this.getShippingAddress(row.orderId);
-      const billingAddress = await this.getBillingAddress(row.orderId);
-      orders.push(this.mapToOrder(row, items, shippingAddress, billingAddress));
-    }
+    const orders = await this.hydrateOrders(rows || []);
 
     return { data: orders, total, limit, offset, hasMore: offset + orders.length < total, length: orders.length };
   }
@@ -630,6 +618,43 @@ export class OrderRepo implements IOrderRepository {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
       params,
     };
+  }
+
+  private async hydrateOrders(rows: DbOrder[]): Promise<Order[]> {
+    if (!rows.length) return [];
+
+    const orderIds = rows.map(row => row.orderId);
+    const [itemRows, addressRows] = await Promise.all([
+      query<DbOrderItem[]>('SELECT * FROM "orderItem" WHERE "orderId" = ANY($1) ORDER BY "createdAt" ASC', [orderIds]),
+      query<DbOrderAddress[]>('SELECT * FROM "orderAddress" WHERE "orderId" = ANY($1)', [orderIds]),
+    ]);
+
+    const itemsByOrderId = new Map<string, OrderItem[]>();
+    const shippingByOrderId = new Map<string, OrderAddress>();
+    const billingByOrderId = new Map<string, OrderAddress>();
+    const currencyByOrderId = new Map(rows.map(row => [row.orderId, row.currencyCode || 'USD']));
+
+    for (const itemRow of itemRows || []) {
+      const currency = currencyByOrderId.get(itemRow.orderId) || 'USD';
+      const items = itemsByOrderId.get(itemRow.orderId) || [];
+      items.push(this.mapToOrderItem(itemRow, currency));
+      itemsByOrderId.set(itemRow.orderId, items);
+    }
+
+    for (const addressRow of addressRows || []) {
+      const address = this.mapToOrderAddress(addressRow);
+      if (addressRow.addressType === 'shipping') shippingByOrderId.set(addressRow.orderId, address);
+      else if (addressRow.addressType === 'billing') billingByOrderId.set(addressRow.orderId, address);
+    }
+
+    return rows.map(row =>
+      this.mapToOrder(
+        row,
+        itemsByOrderId.get(row.orderId) || [],
+        shippingByOrderId.get(row.orderId) || null,
+        billingByOrderId.get(row.orderId) || null,
+      ),
+    );
   }
 
   private mapToOrder(row: DbOrder, items: OrderItem[], shippingAddress: OrderAddress | null, billingAddress: OrderAddress | null): Order {

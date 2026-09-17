@@ -1,5 +1,6 @@
 import { AxiosInstance } from 'axios';
-import { setupOrderTests, cleanupOrderTests } from './testUtils';
+import { SEEDED_ORDER_ID } from './testUtils';
+import { createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 // Define interfaces for the order status history entries
 interface OrderStatusHistoryEntry {
@@ -36,15 +37,10 @@ describe('Order Status Tests', () => {
   let testOrderId: string;
 
   beforeAll(async () => {
-    const setup = await setupOrderTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
-    testOrderId = setup.testOrderId;
-  });
-
-  afterAll(async () => {
-    await cleanupOrderTests(client, adminToken, testOrderId);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client, 'customer@example.com', 'password123');
+    testOrderId = SEEDED_ORDER_ID;
   });
 
   describe('Order Status Management', () => {

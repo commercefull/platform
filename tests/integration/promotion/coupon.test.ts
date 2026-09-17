@@ -4,24 +4,19 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { setupPromotionTests, cleanupPromotionTests, testCoupon } from './testUtils';
-import { expectStatus } from '../testUtils';
+import { testCoupon, SEEDED_PRODUCT_ID } from './testUtils';
+import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Coupon API Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testCartId: string;
-  let testCategoryId: string;
   let testProductId: string;
   let couponId: string;
 
   beforeAll(async () => {
-    const setup = await setupPromotionTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    testCartId = setup.testCartId;
-    testCategoryId = setup.testCategoryId;
-    testProductId = setup.testProductId;
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    testProductId = SEEDED_PRODUCT_ID;
   });
 
   // ============================================================================
@@ -317,7 +312,4 @@ describe('Coupon API Tests', () => {
     });
   });
 
-  afterAll(async () => {
-    await cleanupPromotionTests(client, adminToken, testCartId, testProductId, testCategoryId);
-  });
 });

@@ -22,14 +22,6 @@ describe('Category Management', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    for (const id of [childCategoryId, rootCategoryId]) {
-      if (id) {
-        await client.delete(`/business/categories/${id}`, { headers: { Authorization: `Bearer ${adminToken}` } }).catch(() => {});
-      }
-    }
-  });
-
   // ── Business CRUD ────────────────────────────────────────────────────────
 
   describe('Business: Category CRUD', () => {

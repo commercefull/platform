@@ -92,5 +92,29 @@ exports.seed = async function (knex) {
       valueType: 'percentage',
       isActive: true,
     },
+    {
+      rewardId: '0193c010-0000-7000-8000-000000000001',
+      name: 'Ops Reward',
+      description: 'Reward redeemed by loyalty ops integration tests',
+      type: 'discount',
+      pointsCost: 100,
+      value: 5.0,
+      valueType: 'fixed',
+      isActive: true,
+    },
   ]);
+
+  // Seed a pending redemption owned by the test customer for the
+  // PUT /business/loyalty/redemptions/:id/status integration test.
+  const testCustomer = await knex('customer').where({ email: 'customer@example.com' }).first('customerId');
+  if (testCustomer) {
+    await knex('loyaltyRedemption').insert({
+      redemptionId: '0193c011-0000-7000-8000-000000000001',
+      customerId: testCustomer.customerId,
+      rewardId: '0193c010-0000-7000-8000-000000000001',
+      pointsSpent: 100,
+      status: 'pending',
+      redeemedAt: new Date(),
+    });
+  }
 };

@@ -28,12 +28,6 @@ describe('Reviews & Q&A', () => {
     customerToken = await loginTestUser(client);
   });
 
-  afterAll(async () => {
-    if (createdReviewId) {
-      await client.delete(`/business/reviews/${createdReviewId}`, { headers: { Authorization: `Bearer ${adminToken}` } }).catch(() => {});
-    }
-  });
-
   // ── Customer: Submit review ──────────────────────────────────────────────
 
   describe('Customer: Submit review', () => {

@@ -20,16 +20,6 @@ describe('Product Images & Media', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (createdImageId) {
-      await client
-        .delete(`/business/products/${SEEDED_PRODUCT_1_ID}/images/${createdImageId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        })
-        .catch(() => {});
-    }
-  });
-
   describe('Image CRUD', () => {
     it('should add an image to a product', async () => {
       const res = await client.post(
@@ -97,19 +87,6 @@ describe('Product Images & Media', () => {
 
   describe('Primary image promotion on delete', () => {
     let primaryImageId: string | null = null;
-    let secondaryImageId: string | null = null;
-
-    afterAll(async () => {
-      for (const id of [secondaryImageId, primaryImageId]) {
-        if (id) {
-          await client
-            .delete(`/business/products/${SEEDED_PRODUCT_1_ID}/images/${id}`, {
-              headers: { Authorization: `Bearer ${adminToken}` },
-            })
-            .catch(() => {});
-        }
-      }
-    });
 
     it('should promote next image to primary when primary is deleted', async () => {
       // Add a primary image
@@ -138,7 +115,6 @@ describe('Product Images & Media', () => {
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       expect(secondaryRes.status).toBe(201);
-      secondaryImageId = secondaryRes.data.data?.imageId || secondaryRes.data.data?.productImageId || secondaryRes.data.data?.id;
 
       // Delete the primary image
       const deleteRes = await client.delete(`/business/products/${SEEDED_PRODUCT_1_ID}/images/${primaryImageId}`, {

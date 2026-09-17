@@ -1,7 +1,7 @@
 export interface StoredPaymentMethod {
   storedPaymentMethodId: string;
   customerId: string;
-  organizationId: string;
+  organizationId?: string;
   type: string;
   provider: string;
   providerToken: string;

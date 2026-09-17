@@ -4,8 +4,8 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { setupOrderTests } from './testUtils';
-import { expectStatus } from '../testUtils';
+import { SEEDED_ORDER_ID, SEEDED_REFUND_ORDER_ID, SEEDED_DELIVERED_ORDER_ID, SEEDED_ORDER_PAYMENT_ID } from './testUtils';
+import { expectStatus, createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 describe('Order Expanded Tests', () => {
   let client: AxiosInstance;
@@ -14,10 +14,9 @@ describe('Order Expanded Tests', () => {
 
   beforeAll(async () => {
     jest.setTimeout(30000);
-    const setup = await setupOrderTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client, 'customer@example.com', 'password123');
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });
@@ -39,34 +38,22 @@ describe('Order Expanded Tests', () => {
     });
 
     it('should get order status history', async () => {
-      const resp = await client.get('/business/orders', {
-        params: { status: 'pending' },
+      const historyResp = await client.get(`/business/orders/${SEEDED_ORDER_ID}/status-history`, {
         headers: authHeaders(),
       });
 
-      if (resp.data.data?.length > 0) {
-        const orderId = resp.data.data[0].orderId;
-        const historyResp = await client.get(`/business/orders/${orderId}/status-history`, {
-          headers: authHeaders(),
-        });
-
-        expectStatus(historyResp, 200);
-        expect(historyResp.data.success).toBe(true);
-      }
+      expectStatus(historyResp, 200);
+      expect(historyResp.data.success).toBe(true);
     });
 
     it('should update order status', async () => {
-      const resp = await client.get('/business/orders', {
-        params: { status: 'pending' },
-        headers: authHeaders(),
-      });
+      const updateResp = await client.put(
+        `/business/orders/${SEEDED_ORDER_ID}/status`,
+        { status: 'processing' },
+        { headers: authHeaders() },
+      );
 
-      if (resp.data.data?.length > 0) {
-        const orderId = resp.data.data[0].orderId;
-        const updateResp = await client.patch(`/business/orders/${orderId}/status`, { status: 'processing' }, { headers: authHeaders() });
-
-        expectStatus(updateResp, 200);
-      }
+      expectStatus(updateResp, 200);
     });
   });
 
@@ -76,39 +63,23 @@ describe('Order Expanded Tests', () => {
 
   describe('Cancellations', () => {
     it('should cancel an order', async () => {
-      const resp = await client.get('/business/orders', {
-        params: { status: 'pending' },
-        headers: authHeaders(),
-      });
+      const cancelResp = await client.post(
+        `/business/orders/${SEEDED_ORDER_ID}/cancel`,
+        { reason: 'Customer requested cancellation' },
+        { headers: authHeaders() },
+      );
 
-      if (resp.data.data?.length > 0) {
-        const orderId = resp.data.data[0].orderId;
-        const cancelResp = await client.post(
-          `/business/orders/${orderId}/cancel`,
-          { reason: 'Customer requested cancellation' },
-          { headers: authHeaders() },
-        );
-
-        expectStatus(cancelResp, 200);
-      }
+      expectStatus(cancelResp, 200);
     });
 
     it('should reject cancellation of already delivered order', async () => {
-      const resp = await client.get('/business/orders', {
-        params: { status: 'delivered' },
-        headers: authHeaders(),
-      });
+      const cancelResp = await client.post(
+        `/business/orders/${SEEDED_DELIVERED_ORDER_ID}/cancel`,
+        { reason: 'Test cancellation' },
+        { headers: authHeaders() },
+      );
 
-      if (resp.data.data?.length > 0) {
-        const orderId = resp.data.data[0].orderId;
-        const cancelResp = await client.post(
-          `/business/orders/${orderId}/cancel`,
-          { reason: 'Test cancellation' },
-          { headers: authHeaders() },
-        );
-
-        expectStatus(cancelResp, 400);
-      }
+      expectStatus(cancelResp, 400);
     });
   });
 
@@ -118,36 +89,21 @@ describe('Order Expanded Tests', () => {
 
   describe('Refunds', () => {
     it('should list refunds for an order', async () => {
-      const resp = await client.get('/business/orders', {
+      const refundResp = await client.get(`/business/orders/${SEEDED_REFUND_ORDER_ID}/refunds`, {
         headers: authHeaders(),
       });
 
-      if (resp.data.data?.length > 0) {
-        const orderId = resp.data.data[0].orderId;
-        const refundResp = await client.get(`/business/orders/${orderId}/refunds`, {
-          headers: authHeaders(),
-        });
-
-        expectStatus(refundResp, 200);
-      }
+      expectStatus(refundResp, 200);
     });
 
     it('should create a partial refund', async () => {
-      const resp = await client.get('/business/orders', {
-        params: { paymentStatus: 'paid' },
-        headers: authHeaders(),
-      });
+      const refundResp = await client.post(
+        `/business/orders/${SEEDED_REFUND_ORDER_ID}/refunds`,
+        { orderPaymentId: SEEDED_ORDER_PAYMENT_ID, amount: '10.00', reason: 'Partial refund for damaged item' },
+        { headers: authHeaders() },
+      );
 
-      if (resp.data.data?.length > 0) {
-        const orderId = resp.data.data[0].orderId;
-        const refundResp = await client.post(
-          `/business/orders/${orderId}/refunds`,
-          { amount: 10.0, reason: 'Partial refund for damaged item' },
-          { headers: authHeaders() },
-        );
-
-        expectStatus(refundResp, 201);
-      }
+      expectStatus(refundResp, 201);
     });
   });
 
@@ -156,37 +112,26 @@ describe('Order Expanded Tests', () => {
   // ============================================================================
 
   describe('Returns', () => {
-    it('should list returns for an order', async () => {
-      const resp = await client.get('/business/orders', {
+    it('should list returns', async () => {
+      const returnsResp = await client.get('/business/returns', {
         headers: authHeaders(),
       });
 
-      if (resp.data.data?.length > 0) {
-        const orderId = resp.data.data[0].orderId;
-        const returnsResp = await client.get(`/business/orders/${orderId}/returns`, {
-          headers: authHeaders(),
-        });
-
-        expectStatus(returnsResp, 200);
-      }
+      expectStatus(returnsResp, 200);
     });
 
     it('should create a return request', async () => {
-      const resp = await client.get('/business/orders', {
-        params: { status: 'delivered' },
-        headers: authHeaders(),
-      });
+      const returnResp = await client.post(
+        '/business/returns',
+        {
+          orderId: SEEDED_DELIVERED_ORDER_ID,
+          items: [{ productId: '00000000-0000-0000-0000-000000000002', quantity: 1, reason: 'Item not as described' }],
+          reason: 'Item not as described',
+        },
+        { headers: authHeaders() },
+      );
 
-      if (resp.data.data?.length > 0) {
-        const orderId = resp.data.data[0].orderId;
-        const returnResp = await client.post(
-          `/business/orders/${orderId}/returns`,
-          { reason: 'Item not as described', items: [] },
-          { headers: authHeaders() },
-        );
-
-        expectStatus(returnResp, 201);
-      }
+      expectStatus(returnResp, 201);
     });
   });
 
@@ -209,19 +154,12 @@ describe('Order Expanded Tests', () => {
     it('should get order details as customer', async () => {
       if (!customerToken) return;
 
-      const listResp = await client.get('/customer/order', {
+      const resp = await client.get(`/customer/order/${SEEDED_REFUND_ORDER_ID}`, {
         headers: customerAuthHeaders(),
       });
 
-      if (listResp.data.data?.length > 0) {
-        const orderId = listResp.data.data[0].orderId;
-        const resp = await client.get(`/customer/order/${orderId}`, {
-          headers: customerAuthHeaders(),
-        });
-
-        expect(resp.status).toBe(200);
-        expect(resp.data.success).toBe(true);
-      }
+      expect(resp.status).toBe(200);
+      expect(resp.data.success).toBe(true);
     });
   });
 

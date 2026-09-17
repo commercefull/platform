@@ -1,5 +1,4 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestUser, loginTestAdmin } from '../testUtils';
 import { MembershipTier, LegacyMembershipBenefit as MembershipBenefit, UserMembership } from '../../../modules/membership/infrastructure';
 
 // Common test data for membership tier
@@ -83,109 +82,7 @@ export const createTestUserMembership = async (
   return response.data.data.id;
 };
 
-// Setup function to initialize client and test data for membership tests
-export const setupMembershipTests = async () => {
-  // Create test client
-  const client = createTestClient();
-  let adminToken = '';
-  let userToken = '';
-  let userId = 'test-user-id';
-  let testTierId = '';
-  let testBenefitId = '';
-  let testUserMembershipId = '';
-
-  try {
-    // Login as organization (admin) for business routes and customer for public routes
-    adminToken = await loginTestAdmin(client);
-    userToken = await loginTestUser(client, 'customer@example.com', 'password123');
-    if (userToken) {
-      const payload = JSON.parse(Buffer.from(userToken.split('.')[1], 'base64url').toString()) as { id?: string };
-      userId = payload.id || userId;
-    }
-  } catch {}
-
-  if (adminToken) {
-    try {
-      // Create test tier
-      const tierResponse = await client.post('/business/membership/tiers', testTier, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-      if (tierResponse.data?.data?.id) {
-        testTierId = tierResponse.data.data.id;
-      }
-
-      // Create test benefit
-      if (testTierId) {
-        const benefitResponse = await client.post(
-          '/business/membership/benefits',
-          {
-            ...testBenefit,
-            tierIds: [testTierId],
-          },
-          {
-            headers: { Authorization: `Bearer ${adminToken}` },
-          },
-        );
-        if (benefitResponse.data?.data?.id) {
-          testBenefitId = benefitResponse.data.data.id;
-        }
-
-        // Create test user membership
-        const membershipResponse = await client.post(
-          '/business/membership/user-memberships',
-          {
-            ...testUserMembership,
-            userId,
-            tierId: testTierId,
-          },
-          {
-            headers: { Authorization: `Bearer ${adminToken}` },
-          },
-        );
-        if (membershipResponse.data?.data?.id) {
-          testUserMembershipId = membershipResponse.data.data.id;
-        }
-      }
-    } catch {}
-  }
-
-  return {
-    client,
-    adminToken,
-    userToken,
-    userId,
-    testTierId,
-    testBenefitId,
-    testUserMembershipId,
-  };
-};
-
-// Cleanup function to remove test resources
-export const cleanupMembershipTests = async (
-  client: AxiosInstance,
-  adminToken: string,
-  testTierId: string,
-  testBenefitId: string,
-  testUserMembershipId: string,
-) => {
-  try {
-    // Cancel test user membership
-    await client.put(
-      `/business/membership/user-memberships/${testUserMembershipId}/cancel`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      },
-    );
-
-    // Delete test benefit
-    await client.delete(`/business/membership/benefits/${testBenefitId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-
-    // Delete test tier
-    await client.delete(`/business/membership/tiers/${testTierId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-  } catch {}
-};
+// Seeded membership fixtures (seeds/20240805002205_seedMembershipOpsData.js)
+export const SEEDED_TIER_ID = '0193f002-0000-7000-8000-000000000001';
+export const SEEDED_BENEFIT_ID = '0193f003-0000-7000-8000-000000000001';
+export const SEEDED_USER_MEMBERSHIP_ID = '0193f005-0000-7000-8000-000000000001';

@@ -13,7 +13,11 @@ export interface NotificationDevice {
 
 export async function findByUser(userId: string): Promise<NotificationDevice[]> {
   return (
-    (await query<NotificationDevice[]>(`SELECT * FROM "notificationDevice" WHERE "userId" = $1 AND "isActive" = true`, [userId])) || []
+    (await query<NotificationDevice[]>(
+      `SELECT "notificationDeviceId", "userId", "userType", "deviceToken", "deviceType" AS platform, "isActive", "createdAt", "updatedAt"
+       FROM "notificationDevice" WHERE "userId" = $1 AND "isActive" = true`,
+      [userId],
+    )) || []
   );
 }
 
@@ -22,10 +26,10 @@ export async function upsert(
 ): Promise<NotificationDevice | null> {
   const now = new Date();
   return queryOne<NotificationDevice>(
-    `INSERT INTO "notificationDevice" ("userId", "userType", "deviceToken", platform, "isActive", "createdAt", "updatedAt")
+    `INSERT INTO "notificationDevice" ("userId", "userType", "deviceToken", "deviceType", "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7)
-     ON CONFLICT ("deviceToken") DO UPDATE SET "userId" = $1, "isActive" = $5, "updatedAt" = $7
-     RETURNING *`,
+     ON CONFLICT ("userId", "deviceToken") DO UPDATE SET "isActive" = $5, "updatedAt" = $7, "lastUsedAt" = $7
+     RETURNING "notificationDeviceId", "userId", "userType", "deviceToken", "deviceType" AS platform, "isActive", "createdAt", "updatedAt"`,
     [params.userId, params.userType, params.deviceToken, params.platform, params.isActive, now, now],
   );
 }

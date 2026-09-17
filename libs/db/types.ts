@@ -236,6 +236,7 @@ export enum Table {
   PromotionProductDiscountCustomerGroup = "promotionProductDiscountCustomerGroup",
   PromotionProductDiscountItem = "promotionProductDiscountItem",
   PromotionRule = "promotionRule",
+  PromotionUsage = "promotionUsage",
   PspRoute = "pspRoute",
   ReportingReportExecution = "reportingReportExecution",
   ReportingReportSchedule = "reportingReportSchedule",
@@ -545,6 +546,7 @@ export type Tables = {
   "promotionProductDiscountCustomerGroup": PromotionProductDiscountCustomerGroup,
   "promotionProductDiscountItem": PromotionProductDiscountItem,
   "promotionRule": PromotionRule,
+  "promotionUsage": PromotionUsage,
   "pspRoute": PspRoute,
   "reportingReportExecution": ReportingReportExecution,
   "reportingReportSchedule": ReportingReportSchedule,
@@ -3386,6 +3388,7 @@ export type OrderNote = {
   content: string;
   isCustomerVisible: boolean;
   createdBy: string | null;
+  deletedAt: Date | null;
 };
 
 export type OrderPayment = {
@@ -3693,9 +3696,9 @@ export type OrganizationPaymentInfo = {
 export type PageDraft = {
   draftId: string;
   pageId: string | null;
-  storeId: string;
+  storeId: string | null;
   organizationId: string;
-  themeId: string;
+  themeId: string | null;
   title: string;
   slug: string;
   pageType: string;
@@ -4812,6 +4815,7 @@ export type Promotion = {
   isGlobal: boolean;
   eligibleCustomerGroups: unknown | null;
   excludedCustomerGroups: unknown | null;
+  deletedAt: Date | null;
 };
 
 export type PromotionAction = {
@@ -5011,6 +5015,18 @@ export type PromotionRule = {
   isRequired: boolean;
   ruleGroup: string | null;
   sortOrder: number;
+};
+
+export type PromotionUsage = {
+  promotionUsageId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  promotionId: string;
+  orderId: string | null;
+  customerId: string | null;
+  discountAmount: string;
+  currencyCode: string;
+  usedAt: Date;
 };
 
 export type PspRoute = {
@@ -5445,9 +5461,12 @@ export type StoreDispatchItem = {
 export type StoreHierarchy = {
   storeHierarchyId: string;
   organizationId: string;
+  name: string;
   defaultStoreId: string | null;
+  storeIds: unknown[];
   sharedInventoryPoolId: string | null;
   sharedCatalogId: string | null;
+  settings: Record<string, unknown> | null;
   isActive: boolean | null;
   createdAt: Date | null;
   updatedAt: Date | null;

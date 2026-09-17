@@ -33,19 +33,6 @@ describe('Content Navigation API', () => {
     }
   });
 
-  afterAll(async () => {
-    // Cleanup
-    if (createdChildItemId) {
-      await client.delete(`${API_BASE}/navigation-items/${createdChildItemId}`);
-    }
-    if (createdItemId) {
-      await client.delete(`${API_BASE}/navigation-items/${createdItemId}`);
-    }
-    if (createdNavigationId) {
-      await client.delete(`${API_BASE}/navigations/${createdNavigationId}`);
-    }
-  });
-
   describe('GET /content/navigations', () => {
     it('should return a list of navigations', async () => {
       const response = await client.get(`${API_BASE}/navigations`);

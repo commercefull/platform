@@ -5,6 +5,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
+import { loginTestAdmin } from '../testUtils';
 
 // ============================================================================
 // Test Configuration
@@ -203,6 +204,55 @@ describe('Social Login Feature Tests', () => {
     });
   });
 
+  describe('POST /identity/social/:provider/merchant', () => {
+    it('should require access token or id token', async () => {
+      const response = await client.post('/customer/identity/google/merchant', {
+        profile: mockGoogleProfile,
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.data.success).toBe(false);
+    });
+
+    it('should require profile with id and email', async () => {
+      const response = await client.post('/customer/identity/google/merchant', {
+        accessToken: 'mock-access-token',
+        profile: { name: 'No ID Merchant' },
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.data.success).toBe(false);
+    });
+
+    it('should authenticate merchant with valid profile', async () => {
+      const merchantProfile = {
+        id: `google-merchant-${Date.now()}`,
+        email: `merchant-${Date.now()}@business.com`,
+        name: 'Merchant Owner',
+      };
+
+      const response = await client.post('/customer/identity/google/merchant', {
+        accessToken: 'mock-google-access-token',
+        profile: merchantProfile,
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data).toHaveProperty('accessToken');
+      expect(response.data.provider).toBe('google');
+    });
+
+    it('should reject unsupported provider', async () => {
+      const response = await client.post('/customer/identity/unsupported/merchant', {
+        accessToken: 'mock-access-token',
+        profile: mockGoogleProfile,
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.data.success).toBe(false);
+    });
+  });
+
   // ==========================================================================
   // Linked Accounts
   // ==========================================================================
@@ -245,6 +295,28 @@ describe('Social Login Feature Tests', () => {
 
       expect(response.status).toBe(401);
       expect(response.data.success).toBe(false);
+    });
+  });
+
+  describe('GET /identity/social/merchant/accounts', () => {
+    it('should require authentication', async () => {
+      const response = await client.get('/customer/identity/merchant/accounts');
+
+      expect(response.status).toBe(401);
+      expect(response.data.success).toBe(false);
+    });
+
+    it('should return linked accounts for authenticated merchant', async () => {
+      const token = await loginTestAdmin(client);
+      if (!token) return;
+
+      const response = await client.get('/customer/identity/merchant/accounts', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data).toHaveProperty('linkedAccounts');
     });
   });
 

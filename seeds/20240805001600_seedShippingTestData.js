@@ -39,6 +39,10 @@ const PACKAGING_IDS = {
   ENVELOPE: '01936004-0000-7000-8000-000000000004',
 };
 
+const LABEL_IDS = {
+  VOIDABLE: '01936005-0000-7000-8000-000000000001',
+};
+
 exports.seed = async function (knex) {
   // Check if required tables exist
   const hasCarrierTable = await knex.schema.hasTable('shippingCarrier');
@@ -395,4 +399,37 @@ exports.seed = async function (knex) {
     ])
     .onConflict('shippingPackagingTypeId')
     .ignore();
+
+  // =========================================================================
+  // Shipping Label for label ops tests (void, list-by-order)
+  // =========================================================================
+  const hasLabelTable = await knex.schema.hasTable('shippingLabel');
+  if (hasLabelTable) {
+    await knex('shippingLabel')
+      .where('shippingLabelId', LABEL_IDS.VOIDABLE)
+      .del()
+      .catch(() => {});
+    await knex('shippingLabel')
+      .insert({
+        shippingLabelId: LABEL_IDS.VOIDABLE,
+        shippingCarrierId: CARRIER_IDS.UPS,
+        carrierService: 'ground',
+        orderId: '00000000-0000-0000-0000-000000000200',
+        trackingNumber: 'TRK-OPS-SEED-001',
+        labelFormat: 'PDF',
+        status: 'created',
+        shipToName: 'Test Customer',
+        shipToAddressLine1: '1 Main St',
+        shipToCity: 'Portland',
+        shipToState: 'OR',
+        shipToPostalCode: '97201',
+        shipToCountry: 'US',
+        weight: '2.5',
+        shippingCost: '9.99',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflict('shippingLabelId')
+      .ignore();
+  }
 };

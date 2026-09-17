@@ -4,7 +4,7 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../../testUtils';
+import { createTestClient } from '../../testUtils';
 
 describe('Customer: Category Browsing', () => {
   let client: AxiosInstance;
@@ -47,46 +47,9 @@ describe('Customer: Category Browsing', () => {
   });
 
   describe('Category children', () => {
-    let adminToken: string;
-    let parentId: string | null = null;
-    let childId: string | null = null;
-
-    beforeAll(async () => {
-      adminToken = await loginTestAdmin(client);
-      const parentRes = await client.post(
-        '/business/categories',
-        {
-          name: `Customer Children Parent ${Date.now()}`,
-          isActive: true,
-          includeInMenu: true,
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      parentId = parentRes.data.data?.productCategoryId || parentRes.data.data?.categoryId || parentRes.data.data?.id;
-
-      const childRes = await client.post(
-        '/business/categories',
-        {
-          name: `Customer Children Child ${Date.now()}`,
-          parentId,
-          isActive: true,
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      childId = childRes.data.data?.productCategoryId || childRes.data.data?.categoryId || childRes.data.data?.id;
-    });
-
-    afterAll(async () => {
-      for (const id of [childId, parentId]) {
-        if (id) {
-          await client
-            .delete(`/business/categories/${id}`, {
-              headers: { Authorization: `Bearer ${adminToken}` },
-            })
-            .catch(() => {});
-        }
-      }
-    });
+    // Seeded parent/child pair (seeds/20240805000208_seedProductCategory.js)
+    const parentId = 'c0000000-0000-0000-0000-000000000010';
+    const childId = 'c0000000-0000-0000-0000-000000000011';
 
     it('should list children of a category', async () => {
       if (!parentId) return;

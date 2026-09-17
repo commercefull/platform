@@ -27,10 +27,6 @@ export const SEEDED_PURCHASE_ORDER_IDS = {
 // Warehouse ID from seeds/20240805002100_seedWarehouseTestData.js
 export const SEEDED_WAREHOUSE_ID = '0193b000-0000-7000-8000-000000000001';
 
-const adminCredentials = {
-  email: 'merchant@example.com',
-  password: 'password123',
-};
 
 export function createTestClient(): AxiosInstance {
   return axios.create({
@@ -42,19 +38,6 @@ export function createTestClient(): AxiosInstance {
       'X-Test-Request': 'true',
     },
   });
-}
-
-export async function setupSupplierTests() {
-  const client = createTestClient();
-
-  const adminLoginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
-  const adminToken = adminLoginResponse.data.accessToken;
-
-  if (!adminToken) {
-    throw new Error('Failed to get admin token for Supplier tests');
-  }
-
-  return { client, adminToken };
 }
 
 export function createTestSupplier(overrides: Partial<unknown> = {}) {
@@ -115,24 +98,4 @@ export function createTestSupplierAddress(supplierId: string, overrides: Partial
     isActive: true,
     ...overrides,
   };
-}
-
-export async function cleanupSupplierTests(
-  client: AxiosInstance,
-  adminToken: string,
-  resources: { supplierIds?: string[]; poIds?: string[] } = {},
-) {
-  const headers = { Authorization: `Bearer ${adminToken}` };
-
-  for (const id of resources.poIds || []) {
-    try {
-      await client.post(`/business/suppliers/purchase-orders/${id}/cancel`, { reason: 'Cleanup' }, { headers });
-    } catch {}
-  }
-
-  for (const id of resources.supplierIds || []) {
-    try {
-      await client.delete(`/business/suppliers/${id}`, { headers });
-    } catch {}
-  }
 }

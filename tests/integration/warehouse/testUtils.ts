@@ -22,10 +22,6 @@ export const SEEDED_BIN_IDS = {
   SHIP_01: '0193b002-0000-7000-8000-000000000004',
 };
 
-const adminCredentials = {
-  email: 'merchant@example.com',
-  password: 'password123',
-};
 
 export function createTestClient(): AxiosInstance {
   return axios.create({
@@ -37,19 +33,6 @@ export function createTestClient(): AxiosInstance {
       'X-Test-Request': 'true',
     },
   });
-}
-
-export async function setupWarehouseTests() {
-  const client = createTestClient();
-
-  const adminLoginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
-  const adminToken = adminLoginResponse.data.accessToken;
-
-  if (!adminToken) {
-    throw new Error('Failed to get admin token for Warehouse tests');
-  }
-
-  return { client, adminToken };
 }
 
 export function createTestWarehouse(overrides: Partial<unknown> = {}) {
@@ -76,14 +59,4 @@ export function createTestZone(overrides: Partial<unknown> = {}) {
     temperature: 'ambient',
     ...overrides,
   };
-}
-
-export async function cleanupWarehouseTests(client: AxiosInstance, adminToken: string, resources: { warehouseIds?: string[] } = {}) {
-  const headers = { Authorization: `Bearer ${adminToken}` };
-
-  for (const id of resources.warehouseIds || []) {
-    try {
-      await client.delete(`/business/warehouses/${id}`, { headers });
-    } catch {}
-  }
 }

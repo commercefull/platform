@@ -46,7 +46,7 @@ describe('Media API Integration', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
+afterAll(async () => {
     await Promise.all(
       [...uploadedMediaIds].map(mediaId => fs.rm(path.join(process.cwd(), 'public/uploads/media', mediaId), { recursive: true, force: true })),
     );

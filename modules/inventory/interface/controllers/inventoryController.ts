@@ -118,7 +118,7 @@ function respondError(res: Response, message: string, statusCode: number = 500):
  * Get inventory location by ID
  */
 export const getInventoryLocation = async (req: TypedRequest, res: Response): Promise<void> => {
-  const { inventoryLocationId } = req.params;
+  const inventoryLocationId = (req.params.inventoryLocationId || req.params.inventoryId) as string;
   // Try store location first
   const storeLoc = await pickupLocationPort.findById(inventoryLocationId);
   if (storeLoc) {
@@ -292,7 +292,7 @@ export const deleteInventoryLocation = async (req: TypedRequest, res: Response):
  * Adjust stock quantity (restock, adjustment, etc.)
  */
 export const adjustStock = async (req: TypedRequest, res: Response): Promise<void> => {
-  const { inventoryLocationId } = req.params;
+  const inventoryLocationId = (req.params.inventoryLocationId || req.params.inventoryId) as string;
   const { quantityChange, reason, transactionTypeCode } = req.body as AdjustStockBody;
 
   if (quantityChange === undefined) {
@@ -347,7 +347,7 @@ export const adjustStock = async (req: TypedRequest, res: Response): Promise<voi
  * Reserve stock for an order or basket
  */
 export const reserveStock = async (req: TypedRequest, res: Response): Promise<void> => {
-  const { inventoryLocationId } = req.params;
+  const inventoryLocationId = (req.params.inventoryLocationId || req.params.inventoryId) as string;
   const { quantity, orderId, basketId } = req.body as ReserveStockBody;
 
   if (!quantity || quantity <= 0) {

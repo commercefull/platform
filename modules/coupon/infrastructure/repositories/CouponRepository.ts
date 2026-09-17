@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { generateUUID } from '../../../../libs/uuid';
 import { Coupon, CouponUsage, DiscountType } from '../../domain/entities/Coupon';
 import { PromotionCoupon, PromotionCouponUsage } from '../../../../libs/db/types';
 import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
@@ -153,12 +154,9 @@ export class CouponRepository {
   ): Promise<CouponUsage> {
     const now = new Date().toISOString();
     const fullUsage: CouponUsage = {
-      usageId:
-        'usageId' in usage
-          ? (usage as CouponUsage).usageId
-          : `usg_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`,
+      usageId: 'usageId' in usage ? (usage as CouponUsage).usageId : generateUUID(),
       couponId: usage.couponId,
-      orderId: 'orderId' in usage ? (usage as CouponUsage).orderId : 'basketId' in usage ? usage.basketId || '' : '',
+      orderId: 'orderId' in usage ? (usage as CouponUsage).orderId : '',
       customerId: usage.customerId || '',
       discountAmount: usage.discountAmount,
       usedAt: 'usedAt' in usage ? (usage as CouponUsage).usedAt : new Date(),

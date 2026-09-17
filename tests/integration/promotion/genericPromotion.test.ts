@@ -1,21 +1,18 @@
 import { AxiosInstance } from 'axios';
-import { setupPromotionTests, cleanupPromotionTests, testPromotion } from './testUtils';
+import { testPromotion, SEEDED_CART_ID } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Generic Promotion API Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let testCartId: string;
-  let testCategoryId: string;
-  let testProductId: string;
   let promotionId: string;
+  let cartPromotionId: string;
 
   beforeAll(async () => {
-    const setup = await setupPromotionTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    testCartId = setup.testCartId;
-    testCategoryId = setup.testCategoryId;
-    testProductId = setup.testProductId;
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    testCartId = SEEDED_CART_ID;
   });
 
   it('should create a new promotion', async () => {
@@ -82,56 +79,52 @@ describe('Generic Promotion API Tests', () => {
       return;
     }
 
-    // Add an item to the cart first
-    await client.post(
-      `/api/cart/${testCartId}/items`,
-      {
-        productId: testProductId,
-        quantity: 2,
-        price: 49.99,
-      },
-      {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      },
-    );
-
-    // Apply the promotion to the cart
+    // Apply the promotion to the seeded cart
     const response = await client.post(
-      '/business/promotions/apply',
+      '/business/cart-promotions',
       {
-        cartId: testCartId,
+        basketId: testCartId,
         promotionId: promotionId,
+        discountAmount: 10,
+        currencyCode: 'USD',
+        status: 'active',
+        isAutoApplied: false,
+        isCustomerInitiated: true,
       },
       {
         headers: { Authorization: `Bearer ${adminToken}` },
       },
     );
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(201);
     expect(response.data.success).toBe(true);
+    cartPromotionId = response.data.data.cartPromotionId;
   });
 
-  it('should validate a promotion for a cart', async () => {
+  it('should list promotions applied to a cart', async () => {
     if (!adminToken || !promotionId || !testCartId) {
       return;
     }
 
-    const response = await client.post(
-      '/business/promotions/validate',
-      {
-        cartId: testCartId,
-        promotionId: promotionId,
-      },
-      {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      },
-    );
+    const response = await client.get(`/business/cart-promotions/cart/${testCartId}`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
 
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
+    const applied = Array.isArray(response.data.data) ? response.data.data : [];
+    expect(applied.some((p: Record<string, unknown>) => p.promotionId === promotionId)).toBe(true);
   });
 
   it('should delete a promotion', async () => {
+    // Remove the cart link created above first (promotionCart FK references the promotion)
+    if (cartPromotionId) {
+      const unlinkResp = await client.delete(`/business/cart-promotions/${cartPromotionId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expect(unlinkResp.status).toBe(200);
+    }
+
     const response = await client.delete(`/business/promotions/${promotionId}`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
@@ -147,7 +140,4 @@ describe('Generic Promotion API Tests', () => {
     expect(getResponse.status).toBe(404);
   });
 
-  afterAll(async () => {
-    await cleanupPromotionTests(client, adminToken, testCartId, testProductId, testCategoryId);
-  });
 });

@@ -24,6 +24,7 @@ const SEEDED_REVIEW_1_ID = 'a0000000-0000-0000-0000-000000000001';
 const SEEDED_QA_1_ID = 'b0000000-0000-0000-0000-000000000001';
 const SEEDED_BUNDLE_1_ID = 'c0000000-0000-0000-0000-000000000001';
 const SEEDED_COLLECTION_1_ID = 'd0000000-0000-0000-0000-000000000001';
+const SEEDED_COLLECTION_MAP_2_ID = 'd0000000-0000-0000-0000-000000000002';
 
 exports.seed = async function (knex) {
   // ── Guard: products must exist ──────────────────────────────────────────
@@ -139,6 +140,21 @@ exports.seed = async function (knex) {
       productCollectionId: SEEDED_COLLECTION_1_ID,
       productId: TEST_PRODUCT_1_ID,
       position: 0,
+    })
+    .onConflict()
+    .ignore();
+
+  // Second map item with a fixed ID — used by collection.test.ts removeMapIds test
+  await knex('productCollectionMap')
+    .where('productCollectionMapId', SEEDED_COLLECTION_MAP_2_ID)
+    .delete()
+    .catch(() => {});
+  await knex('productCollectionMap')
+    .insert({
+      productCollectionMapId: SEEDED_COLLECTION_MAP_2_ID,
+      productCollectionId: SEEDED_COLLECTION_1_ID,
+      productId: TEST_PRODUCT_2_ID,
+      position: 1,
     })
     .onConflict()
     .ignore();

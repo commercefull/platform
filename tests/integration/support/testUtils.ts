@@ -35,15 +35,7 @@ export const SEEDED_PRICE_ALERT_IDS = {
   ALERT_2: '01939006-0000-7000-8000-000000000002',
 };
 
-const adminCredentials = {
-  email: 'merchant@example.com',
-  password: 'password123',
-};
 
-const customerCredentials = {
-  email: 'customer@example.com',
-  password: 'password123',
-};
 
 export function createTestClient(): AxiosInstance {
   return axios.create({
@@ -55,29 +47,6 @@ export function createTestClient(): AxiosInstance {
       'X-Test-Request': 'true',
     },
   });
-}
-
-export async function setupSupportTests() {
-  const client = createTestClient();
-  let adminToken = '';
-  let customerToken = '';
-
-  try {
-    const adminLoginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
-    adminToken = adminLoginResponse.data?.accessToken || '';
-
-    const customerLoginResponse = await client.post('/customer/identity/login', customerCredentials, {
-      headers: { 'X-Test-Request': 'true' },
-    });
-    customerToken = customerLoginResponse.data?.accessToken || '';
-
-    if (!adminToken) {
-    }
-    if (!customerToken) {
-    }
-  } catch {}
-
-  return { client, adminToken, customerToken };
 }
 
 export function createTestTicket(overrides: Partial<unknown> = {}) {
@@ -130,24 +99,4 @@ export function createTestFaqArticle(categoryId: string, overrides: Partial<unkn
     tags: ['test', 'integration'],
     ...overrides,
   };
-}
-
-export async function cleanupSupportTests(
-  client: AxiosInstance,
-  adminToken: string,
-  resources: { ticketIds?: string[]; categoryIds?: string[]; articleIds?: string[] } = {},
-) {
-  const headers = { Authorization: `Bearer ${adminToken}` };
-
-  for (const id of resources.articleIds || []) {
-    try {
-      await client.delete(`/business/support/faq/articles/${id}`, { headers });
-    } catch {}
-  }
-
-  for (const id of resources.categoryIds || []) {
-    try {
-      await client.delete(`/business/support/faq/categories/${id}`, { headers });
-    } catch {}
-  }
 }

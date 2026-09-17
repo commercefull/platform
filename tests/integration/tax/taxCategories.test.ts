@@ -153,36 +153,8 @@ describe('Tax Categories API Integration Tests', () => {
   });
 
   describe('PUT /business/tax/categories/:id', () => {
-    let testCategoryId: string;
-
-    beforeEach(async () => {
-      // Create a tax category for testing updates
-      const newTaxCategory = {
-        name: 'Update Test Category',
-        code: `UPDATE-${Date.now()}`,
-        description: 'Tax category for update testing',
-        isDefault: false,
-        sortOrder: 200,
-        isActive: true,
-      };
-
-      const createResponse = await client.post('/business/tax/categories', newTaxCategory, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      if (createResponse.status === 201) {
-        testCategoryId = createResponse.data.data.taxCategoryId || createResponse.data.data.id;
-      }
-    });
-
-    afterEach(async () => {
-      // Clean up - delete the test category if it exists
-      if (testCategoryId) {
-        await client.delete(`/business/tax/categories/${testCategoryId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-      }
-    });
+    // Seeded dedicated category for update tests (seeds/20240805002000_seedTaxTestData.js)
+    const testCategoryId = '0193a000-0000-7000-8000-000000000010';
 
     it('should update an existing tax category when authenticated as admin', async () => {
       const updateData = {
@@ -215,27 +187,8 @@ describe('Tax Categories API Integration Tests', () => {
   });
 
   describe('DELETE /business/tax/categories/:id', () => {
-    let testCategoryId: string;
-
-    beforeEach(async () => {
-      // Create a tax category for testing deletion
-      const newTaxCategory = {
-        name: 'Delete Test Category',
-        code: `DELETE-${Date.now()}`,
-        description: 'Tax category for deletion testing',
-        isDefault: false,
-        sortOrder: 300,
-        isActive: true,
-      };
-
-      const createResponse = await client.post('/business/tax/categories', newTaxCategory, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      if (createResponse.status === 201) {
-        testCategoryId = createResponse.data.data.taxCategoryId || createResponse.data.data.id;
-      }
-    });
+    // Seeded dedicated category for delete tests (seeds/20240805002000_seedTaxTestData.js)
+    const testCategoryId = '0193a000-0000-7000-8000-000000000011';
 
     it('should delete a tax category when authenticated as admin', async () => {
       const response = await client.delete(`/business/tax/categories/${testCategoryId}`, {
@@ -250,18 +203,6 @@ describe('Tax Categories API Integration Tests', () => {
       });
 
       expect(getResponse.status).toBe(404);
-
-      // Clear the ID so afterEach doesn't try to delete again
-      testCategoryId = '';
-    });
-
-    afterEach(async () => {
-      // Clean up - delete the test category if it exists
-      if (testCategoryId) {
-        await client.delete(`/business/tax/categories/${testCategoryId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-      }
     });
   });
 });

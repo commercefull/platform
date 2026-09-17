@@ -2,13 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import {
   TEST_CONTENT_TYPE_ID,
   TEST_CONTENT_PAGE_ID,
-  TEST_CONTENT_BLOCK_ID,
   TEST_CONTENT_TEMPLATE_ID,
-  TEST_BLOCK_TYPE_ID,
-  TEST_CONTENT_TYPE,
-  TEST_CONTENT_PAGE,
-  TEST_CONTENT_BLOCK,
-  TEST_CONTENT_TEMPLATE,
   ADMIN_CREDENTIALS,
 } from '../testConstants';
 
@@ -23,25 +17,12 @@ const createClient = () =>
     },
   });
 
-// Use test data from constants
-const _testContentType = TEST_CONTENT_TYPE;
-const _testContentPage = TEST_CONTENT_PAGE;
-const _testContentBlock = TEST_CONTENT_BLOCK;
-const _testContentTemplate = TEST_CONTENT_TEMPLATE;
-
 describe('Content Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let testContentTypeId: string;
   let testContentPageId: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let testContentBlockId: string;
-
   let testContentTemplateId: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let testContentTypeSlug: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let testContentPageSlug: string;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
@@ -59,129 +40,10 @@ describe('Content Feature Tests', () => {
       return;
     }
 
-    // Check if seeded content type exists, create if not
-    const typeResponse = await client.get(`/business/content/types/${TEST_CONTENT_TYPE_ID}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-
-    if (typeResponse.status === 200) {
-      testContentTypeId = TEST_CONTENT_TYPE_ID;
-      testContentTypeSlug = TEST_CONTENT_TYPE.slug;
-    } else {
-      // Create content type dynamically
-      const createTypeResponse = await client.post(
-        '/business/content/types',
-        {
-          name: TEST_CONTENT_TYPE.name,
-          slug: TEST_CONTENT_TYPE.slug + '-' + Date.now(),
-          description: TEST_CONTENT_TYPE.description,
-          schema: { type: 'object' },
-          status: 'active',
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-
-      if (createTypeResponse.status === 201) {
-        // DB returns contentTypeId, not id
-        testContentTypeId = createTypeResponse.data.data.contentTypeId || createTypeResponse.data.data.id;
-        testContentTypeSlug = createTypeResponse.data.data.slug;
-      } else {
-      }
-    }
-
-    // Check if seeded template exists, create if not
-    const templateResponse = await client.get(`/business/content/templates/${TEST_CONTENT_TEMPLATE_ID}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-
-    if (templateResponse.status === 200) {
-      testContentTemplateId = TEST_CONTENT_TEMPLATE_ID;
-    } else {
-      // Create template dynamically
-      const templateSlug = 'test-template-' + Date.now();
-      const createTemplateResponse = await client.post(
-        '/business/content/templates',
-        {
-          name: TEST_CONTENT_TEMPLATE.name + '-' + Date.now(),
-          slug: templateSlug,
-          type: TEST_CONTENT_TEMPLATE.type,
-          description: TEST_CONTENT_TEMPLATE.description,
-          structure: TEST_CONTENT_TEMPLATE.structure,
-          status: 'active',
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-
-      if (createTemplateResponse.status === 201) {
-        // DB returns contentTemplateId, not id
-        testContentTemplateId = createTemplateResponse.data.data.contentTemplateId || createTemplateResponse.data.data.id;
-      } else {
-      }
-    }
-
-    // Check if seeded page exists, create if not
-    const pageResponse = await client.get(`/business/content/pages/${TEST_CONTENT_PAGE_ID}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-
-    if (pageResponse.status === 200) {
-      testContentPageId = TEST_CONTENT_PAGE_ID;
-      testContentPageSlug = TEST_CONTENT_PAGE.slug;
-    } else if (testContentTypeId) {
-      // Create page dynamically
-      const createPageResponse = await client.post(
-        '/business/content/pages',
-        {
-          title: TEST_CONTENT_PAGE.title,
-          slug: TEST_CONTENT_PAGE.slug + '-' + Date.now(),
-          contentTypeId: testContentTypeId,
-          templateId: testContentTemplateId,
-          status: 'published',
-          visibility: 'public',
-          summary: TEST_CONTENT_PAGE.summary,
-          metaTitle: TEST_CONTENT_PAGE.metaTitle,
-          metaDescription: TEST_CONTENT_PAGE.metaDescription,
-          isHomePage: false,
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-
-      if (createPageResponse.status === 201) {
-        // DB returns contentPageId, not id
-        testContentPageId = createPageResponse.data.data.contentPageId || createPageResponse.data.data.id;
-        testContentPageSlug = createPageResponse.data.data.slug;
-      } else {
-      }
-    }
-
-    // Check if seeded block exists, create if not
-    const blockResponse = await client.get(`/business/content/blocks/${TEST_CONTENT_BLOCK_ID}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-
-    if (blockResponse.status === 200) {
-      testContentBlockId = TEST_CONTENT_BLOCK_ID;
-    } else if (testContentPageId && testContentTypeId) {
-      // Create block dynamically
-      const createBlockResponse = await client.post(
-        '/business/content/blocks',
-        {
-          contentPageId: testContentPageId,
-          blockTypeId: TEST_BLOCK_TYPE_ID,
-          title: TEST_CONTENT_BLOCK.title,
-          sortOrder: 0,
-          content: TEST_CONTENT_BLOCK.content,
-          isVisible: true,
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-
-      if (createBlockResponse.status === 201) {
-        // DB returns contentBlockId, not id
-        testContentBlockId = createBlockResponse.data.data.contentBlockId || createBlockResponse.data.data.id;
-      } else {
-      }
-    }
+    // Content fixtures are provisioned by seeds/20240805002001_seedIntegrationTestData.js
+    testContentTypeId = TEST_CONTENT_TYPE_ID;
+    testContentTemplateId = TEST_CONTENT_TEMPLATE_ID;
+    testContentPageId = TEST_CONTENT_PAGE_ID;
   });
 
   describe('Content Type API', () => {

@@ -30,6 +30,7 @@ const ATTRIBUTE_VALUE_SIZE_S_ID = '60000000-0000-0000-0000-000000000011';
 const ATTRIBUTE_VALUE_SIZE_M_ID = '60000000-0000-0000-0000-000000000012';
 const ATTRIBUTE_VALUE_SIZE_L_ID = '60000000-0000-0000-0000-000000000013';
 const ATTRIBUTE_VALUE_SIZE_XL_ID = '60000000-0000-0000-0000-000000000014';
+const SETUP_ATTRIBUTE_OPTION_ID = '60000000-0000-0000-0000-000000000020';
 
 const ATTRIBUTE_GROUP_BASIC_ID = '70000000-0000-0000-0000-000000000001';
 const ATTRIBUTE_GROUP_PHYSICAL_ID = '70000000-0000-0000-0000-000000000002';
@@ -474,6 +475,22 @@ exports.seed = async function (knex) {
       }
     }
   }
+
+  // Attribute option used by attributeOption integration tests (previously created via API in setup)
+  const hasAttributeOption = await knex.schema.hasTable('productAttributeOption');
+  if (hasAttributeOption) {
+    await knex('productAttributeOption').where({ productAttributeOptionId: SETUP_ATTRIBUTE_OPTION_ID }).del();
+    await knex('productAttributeOption').insert({
+      productAttributeOptionId: SETUP_ATTRIBUTE_OPTION_ID,
+      attributeId: ATTRIBUTE_COLOR_ID,
+      value: 'setup-option',
+      label: 'Setup Option',
+      position: 99,
+      isDefault: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
 };
 
 exports.down = async function (knex) {
@@ -541,6 +558,7 @@ module.exports.ATTRIBUTE_SCREEN_SIZE_ID = ATTRIBUTE_SCREEN_SIZE_ID;
 module.exports.ATTRIBUTE_RAM_ID = ATTRIBUTE_RAM_ID;
 module.exports.ATTRIBUTE_STORAGE_ID = ATTRIBUTE_STORAGE_ID;
 module.exports.ATTRIBUTE_VALUE_RED_ID = ATTRIBUTE_VALUE_RED_ID;
+module.exports.SETUP_ATTRIBUTE_OPTION_ID = SETUP_ATTRIBUTE_OPTION_ID;
 module.exports.ATTRIBUTE_VALUE_BLUE_ID = ATTRIBUTE_VALUE_BLUE_ID;
 module.exports.ATTRIBUTE_VALUE_BLACK_ID = ATTRIBUTE_VALUE_BLACK_ID;
 module.exports.ATTRIBUTE_VALUE_WHITE_ID = ATTRIBUTE_VALUE_WHITE_ID;

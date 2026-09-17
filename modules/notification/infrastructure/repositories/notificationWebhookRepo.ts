@@ -19,18 +19,25 @@ export async function findActive(event: string): Promise<NotificationWebhook[]> 
   );
 }
 
-export async function findByMerchant(organizationId: string): Promise<NotificationWebhook[]> {
-  return (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" WHERE "organizationId" = $1`, [organizationId])) || [];
+export async function findByMerchant(_organizationId?: string): Promise<NotificationWebhook[]> {
+  // notificationWebhook has no organizationId column — webhooks are global.
+  return (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`)) || [];
 }
 
 export async function create(
   params: Omit<NotificationWebhook, 'notificationWebhookId' | 'createdAt' | 'updatedAt'>,
 ): Promise<NotificationWebhook | null> {
   const now = new Date();
+  let name = 'webhook';
+  try {
+    name = new URL(params.url).hostname;
+  } catch {
+    /* keep default name */
+  }
   return queryOne<NotificationWebhook>(
-    `INSERT INTO "notificationWebhook" ("organizationId", url, secret, events, "isActive", "createdAt", "updatedAt")
+    `INSERT INTO "notificationWebhook" (name, url, secret, events, "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-    [params.organizationId || null, params.url, params.secret || null, JSON.stringify(params.events), params.isActive, now, now],
+    [name, params.url, params.secret || null, JSON.stringify(params.events), params.isActive, now, now],
   );
 }
 

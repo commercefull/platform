@@ -15,19 +15,10 @@ import { SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID, SEEDED_PRODUCT_3_ID } from '.
 describe('Product Relationships', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let createdRelationshipId: string | null = null;
 
   beforeAll(async () => {
     client = createTestClient();
     adminToken = await loginTestAdmin(client);
-  });
-
-  afterAll(async () => {
-    if (createdRelationshipId) {
-      await client
-        .delete(`/business/relationships/${createdRelationshipId}`, { headers: { Authorization: `Bearer ${adminToken}` } })
-        .catch(() => {});
-    }
   });
 
   // ── Organization: Relationship CRUD ──────────────────────────────────────────
@@ -48,7 +39,6 @@ describe('Product Relationships', () => {
         expect(res.data.success).toBe(true);
         expect(res.data.data).toHaveProperty('productRelatedId');
         expect(res.data.data.type).toBe('related');
-        createdRelationshipId = res.data.data.productRelatedId;
       } else {
         expect(res.status).toBe(400);
       }

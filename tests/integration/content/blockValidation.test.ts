@@ -113,7 +113,4 @@ describe('Content Block Validation API', () => {
     expect(response.status).toBe(404);
   });
 
-  afterAll(async () => {
-    // No cleanup needed - using seeded block type
-  });
 });

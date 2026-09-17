@@ -1,37 +1,19 @@
 import { AxiosInstance } from 'axios';
-import { setupPromotionTests, cleanupPromotionTests, testPromotion } from './testUtils';
+import { SEEDED_PROMOTION_ID, SEEDED_PRODUCT_CATEGORY_ID } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Category Promotion Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testCartId: string;
   let testCategoryId: string;
-  let testProductId: string;
   let categoryPromotionId: string;
   let promotionId: string;
 
   beforeAll(async () => {
-    const setup = await setupPromotionTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    testCartId = setup.testCartId;
-    testCategoryId = setup.testCategoryId;
-    testProductId = setup.testProductId;
-
-    // Create a new promotion to apply to category
-    try {
-      const promotionResponse = await client.post('/business/promotions', testPromotion, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      if (promotionResponse.data?.data?.id) {
-        promotionId = promotionResponse.data.data.id;
-      } else {
-        promotionId = '';
-      }
-    } catch {
-      promotionId = '';
-    }
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    testCategoryId = SEEDED_PRODUCT_CATEGORY_ID;
+    promotionId = SEEDED_PROMOTION_ID;
   });
 
   it('should create a category promotion', async () => {
@@ -40,14 +22,12 @@ describe('Category Promotion Tests', () => {
     }
 
     const categoryPromotionData = {
-      categoryId: testCategoryId,
+      productCategoryId: testCategoryId,
       promotionId: promotionId,
-      discountPercentage: 10,
-      minPurchaseAmount: 50,
-      maxDiscountAmount: 100,
-      startDate: new Date().toISOString(),
-      endDate: new Date(new Date().getTime() + 86400000).toISOString(),
-      status: 'active',
+      displayOrder: 1,
+      bannerText: 'Category promotion test',
+      isDisplayedOnCategoryPage: true,
+      isDisplayedOnProductPage: true,
     };
 
     const response = await client.post('/business/category-promotions', categoryPromotionData, {
@@ -77,7 +57,7 @@ describe('Category Promotion Tests', () => {
     if (categoryPromotionId && response.data.data.length > 0) {
       const foundPromotion = response.data.data.find((p: Record<string, unknown>) => p.categoryPromotionId === categoryPromotionId);
       if (foundPromotion) {
-        expect(foundPromotion.categoryId).toBe(testCategoryId);
+        expect(foundPromotion.productCategoryId).toBe(testCategoryId);
         expect(foundPromotion.promotionId).toBe(promotionId);
       }
     }
@@ -88,7 +68,7 @@ describe('Category Promotion Tests', () => {
       return;
     }
 
-    const response = await client.get('/business/category-promotions', {
+    const response = await client.get('/business/category-promotions/active', {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
 
@@ -125,14 +105,4 @@ describe('Category Promotion Tests', () => {
     }
   });
 
-  afterAll(async () => {
-    // Clean up the promotion we created in this test
-    try {
-      await client.delete(`/business/promotions/${promotionId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-    } catch {}
-
-    await cleanupPromotionTests(client, adminToken, testCartId, testProductId, testCategoryId);
-  });
 });

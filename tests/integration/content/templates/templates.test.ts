@@ -32,16 +32,6 @@ describe('Content Templates API', () => {
     }
   });
 
-  afterAll(async () => {
-    // Cleanup
-    if (duplicatedTemplateId) {
-      await client.delete(`${API_BASE}/templates/${duplicatedTemplateId}`);
-    }
-    if (createdTemplateId) {
-      await client.delete(`${API_BASE}/templates/${createdTemplateId}`);
-    }
-  });
-
   describe('GET /content/templates', () => {
     it('should return a list of templates', async () => {
       const response = await client.get(`${API_BASE}/templates`);

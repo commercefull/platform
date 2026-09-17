@@ -1,5 +1,6 @@
 import { AxiosInstance } from 'axios';
-import { setupSupportTests, cleanupSupportTests, createTestTicket, createTestFaqCategory, createTestFaqArticle } from './testUtils';
+import { createTestTicket, createTestFaqCategory, createTestFaqArticle } from './testUtils';
+import { createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 describe('Support Feature Tests', () => {
   let client: AxiosInstance;
@@ -12,14 +13,9 @@ describe('Support Feature Tests', () => {
   };
 
   beforeAll(async () => {
-    const setup = await setupSupportTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
-  });
-
-  afterAll(async () => {
-    await cleanupSupportTests(client, adminToken, createdResources);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client, 'customer@example.com', 'password123');
   });
 
   // ============================================================================
@@ -27,18 +23,9 @@ describe('Support Feature Tests', () => {
   // ============================================================================
 
   describe('Ticket Management (Business)', () => {
-    let testTicketId: string;
-
-    beforeAll(async () => {
-      const ticketData = createTestTicket();
-      const response = await client.post('/customer/support/tickets', ticketData, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      });
-      if (response.data.data) {
-        testTicketId = response.data.data.id || response.data.data.ticketId;
-        createdResources.ticketIds.push(testTicketId);
-      }
-    });
+    // Seeded open ticket for the admin assign/message/resolve workflow
+    // (seeds/20240805002203_seedSupportTestData.js TICKET_ADMIN_WORKFLOW)
+    const testTicketId = '01939001-0000-7000-8000-000000000006';
 
     it('UC-SUP-005: should list tickets (admin)', async () => {
       const response = await client.get('/business/support/tickets', {
@@ -77,7 +64,8 @@ describe('Support Feature Tests', () => {
       const response = await client.post(
         `/business/support/tickets/${testTicketId}/assign`,
         {
-          agentId: 'agent-001',
+          // Seeded support agent AGENT_JOHN (seeds/20240805002203_seedSupportTestData.js)
+          agentId: '01939000-0000-7000-8000-000000000001',
         },
         {
           headers: { Authorization: `Bearer ${adminToken}` },

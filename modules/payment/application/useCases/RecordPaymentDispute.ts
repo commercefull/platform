@@ -25,7 +25,7 @@ export class RecordPaymentDisputeCommand {
     public readonly organizationId: string,
     public readonly amount: number,
     public readonly currency: string,
-    public readonly status: string = 'open',
+    public readonly status: string = 'pending',
     public readonly externalDisputeId?: string,
     public readonly reason?: string,
     public readonly evidence?: Record<string, unknown>,

@@ -36,10 +36,6 @@ export const SEEDED_PACKAGING_IDS = {
   ENVELOPE: '01936004-0000-7000-8000-000000000004',
 };
 
-const adminCredentials = {
-  email: 'merchant@example.com',
-  password: 'password123',
-};
 
 export function createTestClient(): AxiosInstance {
   return axios.create({
@@ -51,19 +47,6 @@ export function createTestClient(): AxiosInstance {
       'X-Test-Request': 'true',
     },
   });
-}
-
-export async function setupShippingTests() {
-  const client = createTestClient();
-
-  const adminLoginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
-  const adminToken = adminLoginResponse.data.accessToken;
-
-  if (!adminToken) {
-    throw new Error('Failed to get admin token for Shipping tests');
-  }
-
-  return { client, adminToken };
 }
 
 export function createTestCarrier(overrides: Partial<unknown> = {}) {
@@ -123,42 +106,4 @@ export function createTestRate(zoneId: string, methodId: string, overrides: Part
     priority: 0,
     ...overrides,
   };
-}
-
-export async function cleanupShippingTests(
-  client: AxiosInstance,
-  adminToken: string,
-  resources: {
-    carrierIds?: string[];
-    methodIds?: string[];
-    zoneIds?: string[];
-    rateIds?: string[];
-  } = {},
-) {
-  const headers = { Authorization: `Bearer ${adminToken}` };
-
-  // Delete in reverse order of dependencies
-  for (const id of resources.rateIds || []) {
-    try {
-      await client.delete(`/business/shipping/rates/${id}`, { headers });
-    } catch {}
-  }
-
-  for (const id of resources.methodIds || []) {
-    try {
-      await client.delete(`/business/shipping/methods/${id}`, { headers });
-    } catch {}
-  }
-
-  for (const id of resources.zoneIds || []) {
-    try {
-      await client.delete(`/business/shipping/zones/${id}`, { headers });
-    } catch {}
-  }
-
-  for (const id of resources.carrierIds || []) {
-    try {
-      await client.delete(`/business/shipping/carriers/${id}`, { headers });
-    } catch {}
-  }
 }

@@ -18,14 +18,6 @@ describe('Integration Module Integration Tests', () => {
     orgToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (orgToken && integrationId) {
-      await client.delete(`/business/integration/${integrationId}`, {
-        headers: { Authorization: `Bearer ${orgToken}` },
-      });
-    }
-  });
-
   describe('Integration CRUD', () => {
     it('UC-INT-001 — POST /business/integration creates a new integration', async () => {
       if (!orgToken) return;

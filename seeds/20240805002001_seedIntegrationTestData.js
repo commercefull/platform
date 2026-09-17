@@ -65,6 +65,15 @@ exports.seed = async function (knex) {
       .ignore();
   }
 
+  // Assign the seeded gift card to the test customer so customer gift-card
+  // endpoints (redeem/reload/mine) work without API-driven fixture setup
+  const hasGiftCardTable = await knex.schema.hasTable('promotionGiftCard');
+  if (hasGiftCardTable) {
+    await knex('promotionGiftCard')
+      .where({ promotionGiftCardId: '01935f00-0000-7000-8000-000000000030' })
+      .update({ assignedTo: TEST_CUSTOMER_ID, assignedAt: new Date() });
+  }
+
   // =========================================================================
   // Test Customer Address
   // =========================================================================
@@ -291,6 +300,131 @@ exports.seed = async function (knex) {
         updatedAt: new Date(),
       })
       .onConflict()
+      .ignore();
+  }
+
+  // Pool of single-use baskets with one item each for checkout tests —
+  // checkout consumes a basket, so each test needs its own dedicated basket
+  const CHECKOUT_BASKET_POOL_SIZE = 20;
+  for (let i = 0; i < CHECKOUT_BASKET_POOL_SIZE; i++) {
+    const poolBasketId = `00000000-0000-0000-0000-0000000031${String(i).padStart(2, '0')}`;
+    const existingPoolBasket = await knex('basket').where('basketId', poolBasketId).first();
+    if (!existingPoolBasket) {
+      await knex('basket')
+        .insert({
+          basketId: poolBasketId,
+          customerId: TEST_CUSTOMER_ID,
+          sessionId: `integration-test-checkout-pool-${i}`,
+          status: 'active',
+          currency: 'USD',
+          itemsCount: 1,
+          subTotal: 29.99,
+          taxAmount: 0,
+          discountAmount: 0,
+          shippingAmount: 0,
+          grandTotal: 29.99,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          lastActivityAt: new Date(),
+        })
+        .onConflict('basketId')
+        .ignore();
+
+      await knex('basketItem')
+        .insert({
+          basketItemId: knex.raw('uuidv7()'),
+          basketId: poolBasketId,
+          productId: TEST_PRODUCT_1_ID,
+          sku: 'TEST-SKU-001',
+          name: 'Integration Test Product 1',
+          quantity: 1,
+          unitPrice: 29.99,
+          totalPrice: 29.99,
+          discountAmount: 0,
+          taxAmount: 0,
+          finalPrice: 29.99,
+          itemType: 'physical',
+          isGift: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .onConflict()
+        .ignore();
+    }
+  }
+
+  // Pool of single-use baskets with a $59.98 total for coupon tests — the
+  // seeded percentage coupon TESTPERCENT15 requires minOrderAmount >= 50
+  const COUPON_BASKET_POOL_SIZE = 8;
+  for (let i = 0; i < COUPON_BASKET_POOL_SIZE; i++) {
+    const couponBasketId = `00000000-0000-0000-0000-0000000040${String(i).padStart(2, '0')}`;
+    const existingCouponBasket = await knex('basket').where('basketId', couponBasketId).first();
+    if (!existingCouponBasket) {
+      await knex('basket')
+        .insert({
+          basketId: couponBasketId,
+          customerId: TEST_CUSTOMER_ID,
+          sessionId: `integration-test-coupon-pool-${i}`,
+          status: 'active',
+          currency: 'USD',
+          itemsCount: 1,
+          subTotal: 59.98,
+          taxAmount: 0,
+          discountAmount: 0,
+          shippingAmount: 0,
+          grandTotal: 59.98,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          lastActivityAt: new Date(),
+        })
+        .onConflict('basketId')
+        .ignore();
+
+      await knex('basketItem')
+        .insert({
+          basketItemId: knex.raw('uuidv7()'),
+          basketId: couponBasketId,
+          productId: TEST_PRODUCT_1_ID,
+          sku: 'TEST-SKU-001',
+          name: 'Integration Test Product 1',
+          quantity: 2,
+          unitPrice: 29.99,
+          totalPrice: 59.98,
+          discountAmount: 0,
+          taxAmount: 0,
+          finalPrice: 59.98,
+          itemType: 'physical',
+          isGift: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .onConflict()
+        .ignore();
+    }
+  }
+
+  // Empty basket for the "empty basket → 400" checkout test
+  const EMPTY_BASKET_ID = '00000000-0000-0000-0000-000000003120';
+  const existingEmptyBasket = await knex('basket').where('basketId', EMPTY_BASKET_ID).first();
+  if (!existingEmptyBasket) {
+    await knex('basket')
+      .insert({
+        basketId: EMPTY_BASKET_ID,
+        customerId: TEST_CUSTOMER_ID,
+        sessionId: 'integration-test-checkout-empty',
+        status: 'active',
+        currency: 'USD',
+        itemsCount: 0,
+        subTotal: 0,
+        taxAmount: 0,
+        discountAmount: 0,
+        shippingAmount: 0,
+        grandTotal: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastActivityAt: new Date(),
+      })
+      .onConflict('basketId')
       .ignore();
   }
 
@@ -676,6 +810,53 @@ exports.seed = async function (knex) {
           lastActivityAt: new Date(),
         })
         .onConflict('checkoutSessionId')
+        .ignore();
+    }
+  } catch (e) {}
+
+  // =========================================================================
+  // Integration + Credential for integration ops tests (credential update)
+  // =========================================================================
+  try {
+    const hasIntegration = await knex.schema.hasTable('integration');
+    const hasCredential = await knex.schema.hasTable('integrationCredential');
+    if (hasIntegration && hasCredential) {
+      const OPS_INTEGRATION_ID = '00000000-0000-0000-0000-000000007001';
+      const OPS_CREDENTIAL_ID = '00000000-0000-0000-0000-000000007002';
+
+      await knex('integrationCredential').where('credentialId', OPS_CREDENTIAL_ID).del();
+      await knex('integration').where('integrationId', OPS_INTEGRATION_ID).del();
+
+      await knex('integration')
+        .insert({
+          integrationId: OPS_INTEGRATION_ID,
+          organizationId: '01911000-0000-7000-8000-000000000001',
+          name: 'Ops Integration',
+          provider: 'mailchimp',
+          status: 'active',
+          description: 'Credential update test integration',
+          webhookUrl: 'https://api.example.com/webhook',
+          config: JSON.stringify({ listId: 'ops-list' }),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .onConflict('integrationId')
+        .ignore();
+
+      await knex('integrationCredential')
+        .insert({
+          credentialId: OPS_CREDENTIAL_ID,
+          integrationId: OPS_INTEGRATION_ID,
+          type: 'api_key',
+          label: 'Ops API Key',
+          encryptedData: 'aGVsbG8=', // placeholder ciphertext; rotated via API in tests
+          iv: 'aXY=',
+          authTag: 'dGFn',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .onConflict('credentialId')
         .ignore();
     }
   } catch (e) {}

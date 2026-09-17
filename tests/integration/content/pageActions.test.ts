@@ -20,7 +20,6 @@ describe('Content Page Actions API', () => {
   let testContentPageId: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let testContentTemplateId: string;
-  let duplicatePageId: string;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
@@ -147,7 +146,6 @@ describe('Content Page Actions API', () => {
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('contentPageId');
-      duplicatePageId = response.data.data.contentPageId;
     });
 
     it('should return 400 when missing title or slug', async () => {
@@ -185,16 +183,4 @@ describe('Content Page Actions API', () => {
     });
   });
 
-  afterAll(async () => {
-    // Clean up duplicated page
-    if (duplicatePageId && adminToken) {
-      await client.delete(`/business/content/pages/${duplicatePageId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-    }
-    // Re-publish the shared test page since the unpublish test changed its state
-    if (testContentPageId && adminToken) {
-      await client.post(`/business/content/pages/${testContentPageId}/publish`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
-    }
-  });
 });

@@ -19,16 +19,6 @@ describe('Collections & Product Lists', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (createdCollectionId) {
-      await client
-        .delete(`/business/collections/${createdCollectionId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        })
-        .catch(() => {});
-    }
-  });
-
   // ── Collections ──────────────────────────────────────────────────────────
 
   describe('Collections', () => {
@@ -108,43 +98,11 @@ describe('Collections & Product Lists', () => {
   });
 
   describe('Collection product removal', () => {
-    let removeCollectionId: string | null = null;
-    let mapItemId: string | null = null;
-
-    beforeAll(async () => {
-      const res = await client.post(
-        '/business/collections',
-        {
-          name: `Remove Test Collection ${Date.now()}`,
-          slug: `remove-col-${Date.now()}`,
-          isActive: true,
-          addProducts: [
-            { productId: SEEDED_PRODUCT_1_ID, position: 0 },
-            { productId: SEEDED_PRODUCT_2_ID, position: 1 },
-          ],
-        },
-        { headers: { Authorization: `Bearer ${adminToken}` } },
-      );
-      removeCollectionId = res.data.data?.collection?.productCollectionId || res.data.data?.productCollectionId || res.data.data?.id;
-      // Grab a map item ID to remove
-      const mapItems = res.data.data?.mapItems || [];
-      if (mapItems.length > 0) {
-        mapItemId = mapItems[0]?.productCollectionMapId || mapItems[0]?.mapId || mapItems[0]?.id;
-      }
-    });
-
-    afterAll(async () => {
-      if (removeCollectionId) {
-        await client
-          .delete(`/business/collections/${removeCollectionId}`, {
-            headers: { Authorization: `Bearer ${adminToken}` },
-          })
-          .catch(() => {});
-      }
-    });
+    // Seeded collection + map item (seeds/20240805001059_seedProductTestExtended.js)
+    const removeCollectionId = 'd0000000-0000-0000-0000-000000000001';
+    const mapItemId = 'd0000000-0000-0000-0000-000000000002';
 
     it('should remove products from a collection via removeMapIds', async () => {
-      if (!removeCollectionId || !mapItemId) return;
       const res = await client.put(
         `/business/collections/${removeCollectionId}`,
         {

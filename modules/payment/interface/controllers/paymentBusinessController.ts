@@ -81,16 +81,34 @@ export const updateSettings = async (req: Request, res: Response): Promise<void>
     errorResponse(res, 'Authentication required', 401);
     return;
   }
-  const { provider, isEnabled, config } = req.body;
-  if (!provider) {
-    errorResponse(res, 'provider is required', 400);
+  const allowedFields = [
+    'capturePaymentsAutomatically',
+    'authorizationValidityPeriod',
+    'cardVaultingEnabled',
+    'allowGuestCheckout',
+    'requireBillingAddress',
+    'requireCvv',
+    'requirePostalCodeVerification',
+    'threeDSecureSettings',
+    'fraudDetectionSettings',
+    'receiptSettings',
+    'paymentFormCustomization',
+    'autoRefundOnCancel',
+    'paymentAttemptLimit',
+  ] as const;
+  const updates: Record<string, unknown> = {};
+  for (const field of allowedFields) {
+    if ((req.body as Record<string, unknown>)[field] !== undefined) {
+      updates[field] = (req.body as Record<string, unknown>)[field];
+    }
+  }
+  if (Object.keys(updates).length === 0) {
+    errorResponse(res, 'at least one settings field is required', 400);
     return;
   }
   const settings = await PaymentRepo.upsertSettings({
     organizationId,
-    provider,
-    isEnabled: isEnabled ?? true,
-    config: config || {},
+    ...updates,
   });
   successResponse(res, { settings });
 };

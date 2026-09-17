@@ -8,28 +8,20 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { SEEDED_PRODUCT_2_ID, cleanupProductTests, setupProductTests } from '../testUtils';
+import { SEEDED_PRODUCT_2_ID, SEEDED_PRODUCT_1_ID, SEEDED_VARIANT_1_ID } from '../testUtils';
+import { createTestClient, loginTestAdmin } from '../../testUtils';
 
 describe('Product Variants & Barcode', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let testProductId: string | null;
   let testVariantId: string | null;
-  let testCategoryId: string | null;
-  let testAttributeGroupId: string | null;
 
   beforeAll(async () => {
-    const setup = await setupProductTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    testProductId = setup.testProductId;
-    testVariantId = setup.testVariantId;
-    testCategoryId = setup.testCategoryId;
-    testAttributeGroupId = setup.testAttributeGroupId;
-  });
-
-  afterAll(async () => {
-    await cleanupProductTests(client, adminToken, testProductId, testCategoryId, testAttributeGroupId);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    testProductId = SEEDED_PRODUCT_1_ID;
+    testVariantId = SEEDED_VARIANT_1_ID;
   });
 
   // ── Organization: Variant CRUD ───────────────────────────────────────────────

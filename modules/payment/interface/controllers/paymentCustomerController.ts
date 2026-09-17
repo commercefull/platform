@@ -70,7 +70,12 @@ export const setDefaultMethod = async (req: Request, res: Response): Promise<voi
 
 export const deleteStoredMethod = async (req: Request, res: Response): Promise<void> => {
   const { methodId } = req.params;
-  const method = await PaymentRepo.softDeleteStoredMethod(String(methodId));
+  const customerId = req.user?.customerId || req.user?.id || req.user?._id;
+  if (!customerId) {
+    errorResponse(res, 'Authentication required', 401);
+    return;
+  }
+  const method = await PaymentRepo.softDeleteStoredMethod(String(methodId), String(customerId));
   if (!method) {
     errorResponse(res, 'Payment method not found', 404);
     return;

@@ -1,6 +1,3 @@
-import { AxiosInstance } from 'axios';
-import { createTestClient } from '../testUtils';
-import { randomUUID } from 'node:crypto';
 
 // Seeded promotion test data IDs (from seeds/20240805001500_seedPromotionTestData.js)
 export const SEEDED_PROMOTION_ID = '01935f00-0000-7000-8000-000000000001';
@@ -54,83 +51,9 @@ export const SEEDED_COUPON_CODE_PERCENTAGE = 'TESTPERCENT15';
 export const SEEDED_COUPON_CODE_EXPIRED = 'EXPIRED20';
 export const SEEDED_GIFT_CARD_CODE = 'GIFT-TEST-0001';
 
-// Helper function to create a test cart
-export async function createTestCart(client: AxiosInstance, _adminToken: string) {
-  try {
-    const cartResponse = await client.post('/customer/basket', {
-      sessionId: `test-session-${randomUUID()}`,
-    });
+// Seeded checkout basket with one item (seeds/20240805002001_seedIntegrationTestData.js)
+export const SEEDED_CART_ID = '00000000-0000-0000-0000-000000002003';
 
-    if (cartResponse.data?.data?.basketId) {
-      return cartResponse.data.data.basketId;
-    }
-    // Return a placeholder if cart creation fails
-    return `test-cart-${randomUUID()}`;
-  } catch {
-    return `test-cart-${randomUUID()}`;
-  }
-}
-
-// Helper function to create a test category and product
-export async function createTestCategoryAndProduct(_client: AxiosInstance, _adminToken: string) {
-  // Use seeded product IDs instead of creating new ones
-  // This avoids dependency on category/product creation endpoints
-  return {
-    categoryId: '00000000-0000-0000-0000-000000000001',
-    productId: '00000000-0000-0000-0000-000000000001',
-  };
-}
-
-// Setup function to initialize client and test data
-export async function setupPromotionTests() {
-  const client = createTestClient();
-  let adminToken = '';
-
-  try {
-    // Use organization login for business routes
-    const loginResponse = await client.post('/business/auth/login', {
-      email: 'merchant@example.com',
-      password: 'password123',
-    });
-    adminToken = loginResponse.data?.accessToken || '';
-
-    if (!adminToken) {
-    }
-  } catch {}
-
-  // Create test data: cart, category, product
-  const testCartId = await createTestCart(client, adminToken);
-  const { categoryId, productId } = await createTestCategoryAndProduct(client, adminToken);
-
-  return {
-    client,
-    adminToken,
-    testCartId,
-    testCategoryId: categoryId,
-    testProductId: productId,
-  };
-}
-
-// Cleanup function to remove test resources
-export async function cleanupPromotionTests(
-  client: AxiosInstance | undefined,
-  adminToken: string | undefined,
-  testCartId?: string,
-  _testProductId?: string,
-  _testCategoryId?: string,
-) {
-  // Skip cleanup if client or token not available
-  if (!client || !adminToken) {
-    return;
-  }
-
-  try {
-    // Only attempt cleanup for resources that were actually created
-    if (testCartId && !testCartId.startsWith('test-cart-')) {
-      await client.delete(`/customer/basket/${testCartId}`).catch(() => {});
-    }
-    // Don't delete seeded products/categories
-  } catch {
-    // Silently ignore cleanup errors
-  }
-}
+// Seeded productCategory + product used by promotion tests (seeds/20240805000208, 20240805001059)
+export const SEEDED_PRODUCT_CATEGORY_ID = 'c0000000-0000-0000-0000-000000000010';
+export const SEEDED_PRODUCT_ID = '00000000-0000-0000-0000-000000000001';

@@ -1,25 +1,19 @@
 import { AxiosInstance } from 'axios';
-import { cleanupProductTests, setupProductTests, testAttributeOption } from '../testUtils';
+import { testAttributeOption, SEEDED_ATTRIBUTE_COLOR_ID, SEEDED_ATTRIBUTE_OPTION_ID } from '../testUtils';
+import { createTestClient, loginTestAdmin } from '../../testUtils';
 
 describe('Attribute Option Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testProductId: string | null;
-  let testCategoryId: string | null;
-  let testAttributeGroupId: string | null;
   let testAttributeId: string | null;
   let testAttributeOptionId: string | null;
   let createdOptionId: string;
 
   beforeAll(async () => {
-    const setup = await setupProductTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    testProductId = setup.testProductId;
-    testCategoryId = setup.testCategoryId;
-    testAttributeGroupId = setup.testAttributeGroupId;
-    testAttributeId = setup.testAttributeId;
-    testAttributeOptionId = setup.testAttributeOptionId;
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    testAttributeId = SEEDED_ATTRIBUTE_COLOR_ID;
+    testAttributeOptionId = SEEDED_ATTRIBUTE_OPTION_ID;
   });
 
   describe('Attribute Option CRUD Operations', () => {
@@ -146,7 +140,4 @@ describe('Attribute Option Tests', () => {
     });
   });
 
-  afterAll(async () => {
-    await cleanupProductTests(client, adminToken, testProductId, testCategoryId, testAttributeGroupId);
-  });
 });

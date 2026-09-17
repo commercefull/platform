@@ -4,32 +4,21 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { setupNotificationTests, cleanupNotificationTests, testTemplateData } from './testUtils';
-import { expectStatus } from '../testUtils';
+import { testTemplateData } from './testUtils';
+import { expectStatus, createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 describe('Notification Expanded Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let customerToken: string;
   let testUserId: string;
-  let testNotificationId: string;
-  let testTemplateId: string;
-  let testPreferenceId: string;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
-    const setup = await setupNotificationTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
-    testUserId = setup.testUserId;
-    testNotificationId = setup.testNotificationId;
-    testTemplateId = setup.testTemplateId;
-    testPreferenceId = setup.testPreferenceId;
-  });
-
-  afterAll(async () => {
-    await cleanupNotificationTests(client, adminToken, testNotificationId, testTemplateId, testPreferenceId);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client, 'customer@example.com', 'password123');
+    testUserId = '00000000-0000-0000-0000-000000000001';
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${customerToken}` });

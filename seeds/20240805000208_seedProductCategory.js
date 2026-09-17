@@ -53,5 +53,33 @@ exports.seed = async function (knex) {
       position: 3,
       isGlobal: true,
     },
+    // Fixed-ID parent/child pair for category children integration tests
+    {
+      productCategoryId: 'c0000000-0000-0000-0000-000000000010',
+      name: 'Test Parent Category',
+      slug: 'test-parent-category',
+      description: 'Seeded parent category for integration tests',
+      isActive: true,
+      isFeatured: false,
+      includeInMenu: false,
+      path: '/test-parent-category',
+      depth: 0,
+      position: 90,
+      isGlobal: true,
+    },
+    {
+      productCategoryId: 'c0000000-0000-0000-0000-000000000011',
+      name: 'Test Child Category',
+      slug: 'test-child-category',
+      description: 'Seeded child category for integration tests',
+      parentId: 'c0000000-0000-0000-0000-000000000010',
+      isActive: true,
+      isFeatured: false,
+      includeInMenu: false,
+      path: '/test-parent-category/test-child-category',
+      depth: 1,
+      position: 0,
+      isGlobal: true,
+    },
   ]);
 };

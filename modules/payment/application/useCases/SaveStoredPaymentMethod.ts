@@ -39,7 +39,7 @@ export class SaveStoredPaymentMethodCommand {
 export interface SaveStoredPaymentMethodResponse {
   storedPaymentMethodId: string;
   customerId: string;
-  organizationId: string;
+  organizationId?: string;
   type: string;
   provider: string;
   last4?: string;

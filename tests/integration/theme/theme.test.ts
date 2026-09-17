@@ -17,14 +17,6 @@ describe('Theme Module Integration Tests', () => {
     orgToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (orgToken && themeId) {
-      await client.delete(`/business/theme/${themeId}`, {
-        headers: { Authorization: `Bearer ${orgToken}` },
-      });
-    }
-  });
-
   describe('Theme listing & built-in', () => {
     it('GET /business/theme returns list of themes', async () => {
       if (!orgToken) return;

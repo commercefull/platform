@@ -6,8 +6,9 @@
  * @returns { Promise<void> }
  */
 exports.seed = async function (knex) {
-  // Get test customer
+  // Get test customers
   const testCustomer = await knex('customer').where({ email: 'customer@example.com' }).first('customerId');
+  const opsCustomer = await knex('customer').where({ email: 'admin@example.com' }).first('customerId');
 
   if (!testCustomer) {
     return;
@@ -50,6 +51,36 @@ exports.seed = async function (knex) {
       requestType: 'restriction',
       status: 'pending',
       reason: 'Data restriction request',
+      identityVerified: false,
+      deadlineAt: deadline,
+      extensionRequested: false,
+      ipAddress: '127.0.0.1',
+      userAgent: 'Test Agent',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      gdprDataRequestId: '01939000-0000-7000-8000-000000000001',
+      // Separate customer so gdpr.test.ts can still create a pending request for customer@example.com
+      customerId: (opsCustomer || testCustomer).customerId,
+      requestType: 'deletion',
+      status: 'pending',
+      reason: 'Ops test deletion request',
+      identityVerified: false,
+      deadlineAt: deadline,
+      extensionRequested: false,
+      ipAddress: '127.0.0.1',
+      userAgent: 'Test Agent',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      // Used by gdpr.test.ts admin tests (get/verify/export)
+      gdprDataRequestId: '01939000-0000-7000-8000-000000000002',
+      customerId,
+      requestType: 'objection',
+      status: 'pending',
+      reason: 'Admin test request',
       identityVerified: false,
       deadlineAt: deadline,
       extensionRequested: false,

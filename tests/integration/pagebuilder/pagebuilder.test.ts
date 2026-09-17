@@ -17,14 +17,6 @@ describe('Page Builder Module Integration Tests', () => {
     orgToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (orgToken && draftId) {
-      await client.delete(`/business/page-builder/drafts/${draftId}`, {
-        headers: { Authorization: `Bearer ${orgToken}` },
-      });
-    }
-  });
-
   describe('Block types', () => {
     it('GET /business/page-builder/block-types returns list', async () => {
       if (!orgToken) return;

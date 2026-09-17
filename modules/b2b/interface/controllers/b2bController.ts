@@ -19,14 +19,25 @@ import {
   B2BUserStatusError,
   SpendingLimitExceededError,
   QuoteNotFoundError,
+  QuoteStatusError,
   QuoteExpiredError,
   ApprovalWorkflowNotFoundError,
+  ApprovalStatusError,
   UnauthorizedApproverError,
   CreditLimitExceededError,
   B2BValidationError,
 } from '../../domain/errors/B2BErrors';
 
 export class B2BController {
+  // JWT API auth exposes the org id as user.id; session auth exposes organizationId
+  private orgId(req: TypedRequest): string {
+    return req.user?.organizationId ?? req.user?.id ?? '';
+  }
+
+  private actorId(req: TypedRequest): string {
+    return req.user?.userId ?? req.user?.id ?? this.orgId(req);
+  }
+
   private companyUseCase: ManageCompanyUseCase;
   private userUseCase: ManageB2BUserUseCase;
   private quoteUseCase: ManageQuoteUseCase;
@@ -56,7 +67,9 @@ export class B2BController {
       error instanceof CompanyAlreadyExistsError ||
       error instanceof B2BUserAlreadyExistsError ||
       error instanceof CompanyStatusError ||
-      error instanceof B2BUserStatusError
+      error instanceof B2BUserStatusError ||
+      error instanceof QuoteStatusError ||
+      error instanceof ApprovalStatusError
     ) {
       res.status(409).json({ success: false, error: error.message, code: error.code });
     } else if (
@@ -79,7 +92,7 @@ export class B2BController {
 
   async listCompanies(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+      const organizationId = this.orgId(req);
       const companies = await this.companyUseCase.listByOrganization(organizationId);
       res.json({ success: true, data: companies.map(c => c.toJSON()) });
     } catch (error) {
@@ -98,7 +111,7 @@ export class B2BController {
 
   async createCompany(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+      const organizationId = this.orgId(req);
       const company = await this.companyUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
         typeof this.companyUseCase.create
       >[0]);
@@ -194,7 +207,7 @@ export class B2BController {
   async listUsers(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { companyId } = req.query as { companyId?: string };
-      const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+      const organizationId = this.orgId(req);
       if (companyId) {
         const users = await this.userUseCase.listByCompany(companyId);
         res.json({ success: true, data: users.map(u => u.toJSON()) });
@@ -218,7 +231,7 @@ export class B2BController {
 
   async inviteUser(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+      const organizationId = this.orgId(req);
       const user = await this.userUseCase.invite({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
         typeof this.userUseCase.invite
       >[0]);
@@ -302,7 +315,7 @@ export class B2BController {
   async listQuotes(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { companyId, status } = req.query as { companyId?: string; status?: string };
-      const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+      const organizationId = this.orgId(req);
       if (status && organizationId) {
         const quotes = await this.quoteUseCase.listByStatus(status, organizationId);
         res.json({ success: true, data: quotes.map(q => q.toJSON()) });
@@ -329,7 +342,7 @@ export class B2BController {
 
   async createQuote(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+      const organizationId = this.orgId(req);
       const quote = await this.quoteUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
         typeof this.quoteUseCase.create
       >[0]);
@@ -444,7 +457,7 @@ export class B2BController {
   async listApprovals(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { companyId, approverId, pending } = req.query as { companyId?: string; approverId?: string; pending?: string };
-      const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+      const organizationId = this.orgId(req);
       if (pending === 'true' && organizationId) {
         const workflows = await this.approvalUseCase.listPendingByOrganization(organizationId);
         res.json({ success: true, data: workflows.map(w => w.toJSON()) });
@@ -473,7 +486,7 @@ export class B2BController {
 
   async createApproval(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
+      const organizationId = this.orgId(req);
       const workflow = await this.approvalUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
         typeof this.approvalUseCase.create
       >[0]);
@@ -485,8 +498,7 @@ export class B2BController {
 
   async approveWorkflow(req: TypedRequest<{ workflowId: string }>, res: Response): Promise<void> {
     try {
-      const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
-      const approverId = (req as unknown as { user?: { userId?: string } }).user?.userId ?? organizationId;
+      const approverId = this.actorId(req);
       const workflow = await this.approvalUseCase.approve(
         req.params.workflowId,
         approverId,
@@ -500,8 +512,7 @@ export class B2BController {
 
   async rejectWorkflow(req: TypedRequest<{ workflowId: string }>, res: Response): Promise<void> {
     try {
-      const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
-      const approverId = (req as unknown as { user?: { userId?: string } }).user?.userId ?? organizationId;
+      const approverId = this.actorId(req);
       const workflow = await this.approvalUseCase.reject(
         req.params.workflowId,
         approverId,

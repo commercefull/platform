@@ -4,17 +4,16 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { setupIdentityTests, TEST_CUSTOMER, TEST_MERCHANT } from './testUtils';
-import { expectStatus } from '../testUtils';
+import { TEST_CUSTOMER, TEST_MERCHANT } from './testUtils';
+import { expectStatus, createTestClient } from '../testUtils';
 
 describe('Identity Expanded Tests', () => {
   let client: AxiosInstance;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
-    const setup = await setupIdentityTests();
-    client = setup.client;
-  });
+    client = createTestClient();
+      });
 
   // ============================================================================
   // Registration Tests

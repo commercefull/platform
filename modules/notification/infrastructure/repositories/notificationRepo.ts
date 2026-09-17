@@ -72,7 +72,8 @@ export class NotificationRepo {
         params.type,
         params.title,
         params.content,
-        params.channel,
+        // notification.channel enum uses 'in_app' while notificationBatch uses 'inApp'
+        params.channel === 'inApp' ? 'in_app' : params.channel,
         params.isRead || false,
         params.priority || 'normal',
         params.category || null,

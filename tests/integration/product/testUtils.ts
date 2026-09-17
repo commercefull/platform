@@ -1,5 +1,4 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../testUtils';
 
 // Fixed UUIDs from seed data for consistent testing
 // Source: seeds/20240805001058_seedProductTestData.js
@@ -31,6 +30,7 @@ export const SEEDED_ATTRIBUTE_VALUE_RED_ID = '60000000-0000-0000-0000-0000000000
 export const SEEDED_ATTRIBUTE_VALUE_BLUE_ID = '60000000-0000-0000-0000-000000000002';
 export const SEEDED_ATTRIBUTE_VALUE_BLACK_ID = '60000000-0000-0000-0000-000000000003';
 export const SEEDED_ATTRIBUTE_VALUE_SIZE_M_ID = '60000000-0000-0000-0000-000000000012';
+export const SEEDED_ATTRIBUTE_OPTION_ID = '60000000-0000-0000-0000-000000000020';
 
 export const SEEDED_ATTRIBUTE_GROUP_BASIC_ID = '70000000-0000-0000-0000-000000000001';
 export const SEEDED_ATTRIBUTE_GROUP_PHYSICAL_ID = '70000000-0000-0000-0000-000000000002';
@@ -143,7 +143,7 @@ export async function createTestProductVariant(client: AxiosInstance, adminToken
     headers: { Authorization: `Bearer ${adminToken}` },
   });
 
-  return response.data.data.id;
+  return response.data.data?.productVariantId || response.data.data?.id;
 }
 
 // Helper function to create a test category
@@ -196,95 +196,4 @@ export async function createTestAttributeOption(client: AxiosInstance, adminToke
   });
 
   return response.data.data.id;
-}
-
-// Setup function to initialize client and test data for product tests
-// Uses seeded data from seeds/20240805001058_seedProductTestData.js
-export async function setupProductTests() {
-  const client = createTestClient();
-  let adminToken = '';
-
-  try {
-    // Use organization login for business routes
-    adminToken = await loginTestAdmin(client);
-  } catch {}
-
-  // Create or fetch a reusable attribute option for tests that need one
-  let testAttributeOptionId: string | null = null;
-  try {
-    // Try to create; if duplicate, fetch the existing one
-    const optRes = await client.post(
-      '/business/attribute-options',
-      { attributeId: SEEDED_ATTRIBUTE_COLOR_ID, value: 'setup-option', label: 'Setup Option', sortOrder: 99 },
-      { headers: { Authorization: `Bearer ${adminToken}` } },
-    );
-    if (optRes.status === 201) {
-      testAttributeOptionId = optRes.data.data?.productAttributeOptionId || optRes.data.data?.id || null;
-    }
-  } catch (__) {}
-
-  // If creation failed (e.g. duplicate), fetch the existing option by value
-  if (!testAttributeOptionId) {
-    try {
-      const getRes = await client.get(`/business/attribute-options/attribute/${SEEDED_ATTRIBUTE_COLOR_ID}/value/setup-option`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-      if (getRes.status === 200) {
-        testAttributeOptionId = getRes.data.data?.productAttributeOptionId || getRes.data.data?.id || null;
-      }
-    } catch (__) {}
-  }
-
-  return {
-    client,
-    adminToken,
-    testCategoryId: null as string | null,
-    testProductId: SEEDED_PRODUCT_1_ID,
-    testVariantId: SEEDED_VARIANT_1_ID,
-    testAttributeGroupId: SEEDED_ATTRIBUTE_GROUP_BASIC_ID,
-    testAttributeId: SEEDED_ATTRIBUTE_COLOR_ID,
-    testAttributeOptionId,
-  };
-}
-
-// Cleanup function to remove test resources
-export async function cleanupProductTests(
-  client: AxiosInstance,
-  adminToken: string,
-  testProductId: string | null,
-  testCategoryId: string | null,
-  testAttributeGroupId: string | null,
-) {
-  try {
-    // Only delete products that were dynamically created (not seeded ones)
-    if (
-      testProductId &&
-      testProductId !== SEEDED_PRODUCT_1_ID &&
-      testProductId !== SEEDED_PRODUCT_2_ID &&
-      testProductId !== SEEDED_PRODUCT_3_ID
-    ) {
-      await client.delete(`/business/products/${testProductId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-    }
-
-    // Delete test category
-    if (testCategoryId) {
-      await client.delete(`/business/categories/${testCategoryId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-    }
-
-    // Only delete attribute groups that were dynamically created (not seeded ones)
-    if (
-      testAttributeGroupId &&
-      testAttributeGroupId !== SEEDED_ATTRIBUTE_GROUP_BASIC_ID &&
-      testAttributeGroupId !== SEEDED_ATTRIBUTE_GROUP_PHYSICAL_ID &&
-      testAttributeGroupId !== SEEDED_ATTRIBUTE_GROUP_TECH_ID
-    ) {
-      await client.delete(`/business/attribute-groups/${testAttributeGroupId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-    }
-  } catch {}
 }

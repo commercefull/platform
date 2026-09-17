@@ -33,19 +33,6 @@ describe('Content Media API', () => {
     }
   });
 
-  afterAll(async () => {
-    // Cleanup
-    if (createdMediaId) {
-      await client.delete(`${API_BASE}/media/${createdMediaId}`);
-    }
-    if (createdChildFolderId) {
-      await client.delete(`${API_BASE}/media-folders/${createdChildFolderId}`);
-    }
-    if (createdFolderId) {
-      await client.delete(`${API_BASE}/media-folders/${createdFolderId}`);
-    }
-  });
-
   describe('Media Folders', () => {
     describe('GET /content/media-folders', () => {
       it('should return a list of media folders', async () => {

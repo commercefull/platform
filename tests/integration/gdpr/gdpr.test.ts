@@ -1,5 +1,6 @@
 import { AxiosInstance } from 'axios';
-import { setupGdprTests, cleanupGdprTests, generateConsentId } from './testUtils';
+import { generateConsentId } from './testUtils';
+import { createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 describe('GDPR Feature Tests', () => {
   let client: AxiosInstance;
@@ -9,34 +10,9 @@ describe('GDPR Feature Tests', () => {
   let createdConsentIds: string[] = [];
 
   beforeAll(async () => {
-    const setup = await setupGdprTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
-
-    // Clean up any existing pending requests from previous test runs
-    if (customerToken) {
-      const existing = await client.get('/customer/gdpr/requests', {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      });
-      if (existing.data?.data) {
-        for (const req of existing.data.data) {
-          if (req.status === 'pending' && req.gdprDataRequestId) {
-            await client.post(
-              `/customer/gdpr/requests/${req.gdprDataRequestId}/cancel`,
-              {},
-              {
-                headers: { Authorization: `Bearer ${customerToken}` },
-              },
-            );
-          }
-        }
-      }
-    }
-  });
-
-  afterAll(async () => {
-    await cleanupGdprTests(client, adminToken, createdRequestIds, createdConsentIds);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client, 'customer@example.com', 'password123');
   });
 
   // ============================================================================
@@ -292,23 +268,8 @@ describe('GDPR Feature Tests', () => {
   // ============================================================================
 
   describe('Admin Data Request Management', () => {
-    let testRequestId: string;
-
-    beforeAll(async () => {
-      // Create a test request for admin tests
-      const response = await client.post(
-        '/customer/gdpr/requests',
-        {
-          requestType: 'objection',
-          reason: 'Admin test request',
-        },
-        {
-          headers: { Authorization: `Bearer ${customerToken}` },
-        },
-      );
-      testRequestId = response.data.data.gdprDataRequestId;
-      createdRequestIds.push(testRequestId);
-    });
+    // Seeded pending objection request (seeds/20240805001303_seedGdprData.js)
+    const testRequestId = '01939000-0000-7000-8000-000000000002';
 
     it('UC-GDP-009: should list all data requests (admin)', async () => {
       const response = await client.get('/business/gdpr/requests', {

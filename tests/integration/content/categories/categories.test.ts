@@ -32,16 +32,6 @@ describe('Content Categories API', () => {
     }
   });
 
-  afterAll(async () => {
-    // Cleanup in reverse order (child first)
-    if (createdChildCategoryId) {
-      await client.delete(`${API_BASE}/categories/${createdChildCategoryId}`);
-    }
-    if (createdCategoryId) {
-      await client.delete(`${API_BASE}/categories/${createdCategoryId}`);
-    }
-  });
-
   describe('GET /content/categories', () => {
     it('should return a list of categories', async () => {
       const response = await client.get(`${API_BASE}/categories`);

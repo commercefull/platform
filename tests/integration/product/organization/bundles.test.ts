@@ -21,12 +21,6 @@ describe('Bundle Management', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (createdBundleId) {
-      await client.delete(`/business/bundles/${createdBundleId}`, { headers: { Authorization: `Bearer ${adminToken}` } }).catch(() => {});
-    }
-  });
-
   // ── Organization: Bundle CRUD ────────────────────────────────────────────────
 
   describe('Organization: Bundle CRUD', () => {

@@ -1,32 +1,17 @@
 import { AxiosInstance } from 'axios';
 import { randomUUID } from 'node:crypto';
-import { setupInventoryTests, cleanupInventoryTests } from './testUtils';
+import { SEEDED_INVENTORY_LOCATION_ID } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Inventory Location Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testLocationId: string;
-  let testInventoryItemId: string;
+  const testLocationId = SEEDED_INVENTORY_LOCATION_ID;
   let additionalLocationId: string;
 
   beforeAll(async () => {
-    const setup = await setupInventoryTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    testLocationId = setup.testLocationId;
-    testInventoryItemId = setup.testInventoryItemId;
-  });
-
-  afterAll(async () => {
-    // Clean up the original test data
-    await cleanupInventoryTests(client, adminToken, testInventoryItemId, testLocationId);
-
-    // Delete additional location if it was created
-    if (additionalLocationId) {
-      await client.delete(`/business/inventory/locations/${additionalLocationId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-    }
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
   });
 
   describe('Location CRUD Operations', () => {

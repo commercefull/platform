@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { TEST_CONTENT_TYPE_ID, TEST_CONTENT_TEMPLATE_ID, ADMIN_CREDENTIALS } from '../testConstants';
+import { TEST_CONTENT_PAGE } from '../testConstants';
 
 const createClient = () =>
   axios.create({
@@ -13,57 +13,12 @@ const createClient = () =>
 
 describe('Content Customer API', () => {
   let client: AxiosInstance;
-  let adminToken: string;
-  let createdPageId: string;
-  let createdPageSlug: string;
+  // Seeded published page (seeds/20240805002001_seedIntegrationTestData.js)
+  const createdPageSlug = TEST_CONTENT_PAGE.slug;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
     client = createClient();
-
-    try {
-      const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, {
-        headers: { 'X-Test-Request': 'true' },
-      });
-      adminToken = loginResponse.data?.accessToken || '';
-      if (!adminToken) return;
-    } catch {
-      adminToken = '';
-      return;
-    }
-
-    // Create a dedicated published page for this test suite
-    const slug = 'customer-api-test-' + Date.now();
-    const response = await client.post(
-      '/business/content/pages',
-      {
-        title: 'Customer API Test Page',
-        slug,
-        contentTypeId: TEST_CONTENT_TYPE_ID,
-        templateId: TEST_CONTENT_TEMPLATE_ID,
-        status: 'published',
-        visibility: 'public',
-        summary: 'Test page for customer API tests',
-        isHomePage: false,
-      },
-      { headers: { Authorization: `Bearer ${adminToken}` } },
-    );
-
-    if (response.status === 201) {
-      createdPageId = response.data.data.contentPageId || response.data.data.id;
-      createdPageSlug = response.data.data.slug || slug;
-
-      // Ensure it's published
-      await client.post(`/business/content/pages/${createdPageId}/publish`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
-    }
-  });
-
-  afterAll(async () => {
-    if (createdPageId && adminToken) {
-      await client.delete(`/business/content/pages/${createdPageId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-    }
   });
 
   it('should get published pages via customer endpoint', async () => {

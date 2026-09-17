@@ -1,6 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
 
-const API_URL = process.env.API_URL || 'http://localhost:3000';
 
 // Seeded test data IDs
 // From seeds/20241220000023_seedStoreInventoryLocations.js
@@ -31,42 +29,3 @@ export const testInventoryLocation = {
   postalCode: '12345',
   isActive: true,
 };
-
-// Setup helper function — uses seeded data, only retrieves auth token
-export const setupInventoryTests = async () => {
-  const client = axios.create({
-    baseURL: API_URL,
-    validateStatus: () => true,
-    timeout: 10000,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'X-Test-Request': 'true',
-    },
-  });
-
-  let adminToken = '';
-  try {
-    const adminLogin = await client.post('/business/auth/login', {
-      email: 'merchant@example.com',
-      password: 'password123',
-    });
-    adminToken = adminLogin.data?.accessToken || '';
-  } catch {}
-
-  return {
-    client,
-    adminToken,
-    testProductId: SEEDED_PRODUCT_ID,
-    testLocationId: SEEDED_INVENTORY_LOCATION_ID,
-    testInventoryItemId: SEEDED_INVENTORY_LOCATION_ID,
-  };
-};
-
-// Cleanup helper function — no-op for seeded data
-export const cleanupInventoryTests = async (
-  _client: AxiosInstance | undefined,
-  _adminToken: string | undefined,
-  _testInventoryItemId?: string,
-  _testLocationId?: string,
-) => {};

@@ -16,14 +16,6 @@ describe('Segment Module Integration Tests', () => {
     orgToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (orgToken && segmentId) {
-      await client.delete(`/business/segment/${segmentId}`, {
-        headers: { Authorization: `Bearer ${orgToken}` },
-      });
-    }
-  });
-
   describe('Segment CRUD', () => {
     it('POST /business/segment creates a segment', async () => {
       if (!orgToken) return;

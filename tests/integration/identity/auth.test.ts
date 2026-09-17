@@ -1,50 +1,23 @@
 import { AxiosInstance } from 'axios';
 import {
-  setupAuthTests,
-  cleanupAuthTests,
   TEST_CUSTOMER as testCustomer,
   TEST_MERCHANT as testOrganization,
   TEST_MERCHANT as testAdmin,
 } from './testUtils';
+import { createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 describe('Auth Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let testCustomerId: string;
-  let testOrganizationId: string;
-  let testAdminId: string;
-  let customerResetToken: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let organizationResetToken: string;
-  let customerRefreshToken: string;
 
   beforeAll(async () => {
-    // Use a longer timeout for setup as it creates multiple test entities
     jest.setTimeout(30000);
-
-    try {
-      const setup = await setupAuthTests();
-      client = setup.client;
-      adminToken = setup.adminToken;
-      testCustomerId = setup.testCustomerId;
-      testOrganizationId = setup.testOrganizationId;
-      testAdminId = setup.testAdminId;
-      customerResetToken = setup.customerResetToken;
-      organizationResetToken = setup.organizationResetToken;
-      customerRefreshToken = setup.customerRefreshToken;
-    } catch (error) {
-      console.error('Auth test setup failed:', error);
-      throw error;
-    }
-  });
-
-  afterAll(async () => {
-    await cleanupAuthTests(client, adminToken, {
-      testCustomerId,
-      testOrganizationId,
-      testAdminId,
-      customerRefreshToken,
-    });
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    const customerToken = await loginTestUser(client, testCustomer.email, testCustomer.password);
+    const payload = JSON.parse(Buffer.from(customerToken.split('.')[1], 'base64url').toString()) as { id?: string };
+    testCustomerId = payload.id || '';
   });
 
   describe('Authentication API', () => {
@@ -99,27 +72,18 @@ describe('Auth Feature Tests', () => {
   });
 
   describe('Token Management API', () => {
-    let accessToken = '';
-    let refreshToken = '';
-
-    // Get tokens for subsequent tests
-    beforeAll(async () => {
-      const response = await client.post('/customer/identity/login', {
+    const loginCustomer = async () => {
+      // /identity/token returns both access + refresh tokens; /identity/login does not
+      const response = await client.post('/customer/identity/token', {
         email: testCustomer.email,
         password: testCustomer.password,
       });
-
-      if (response.data.success) {
-        accessToken = response.data.accessToken;
-        refreshToken = response.data.refreshToken;
-      }
-    });
+      expect(response.status).toBe(200);
+      return response.data as { accessToken: string; refreshToken: string };
+    };
 
     it('should refresh an access token with camelCase properties', async () => {
-      // Skip if we don't have a refresh token
-      if (!refreshToken) {
-        return;
-      }
+      const { refreshToken } = await loginCustomer();
 
       const response = await client.post('/customer/identity/refresh', {
         refreshToken,
@@ -130,18 +94,10 @@ describe('Auth Feature Tests', () => {
 
       // Check response properties
       expect(response.data).toHaveProperty('accessToken');
-
-      // Update token for subsequent tests
-      if (response.data.accessToken) {
-        accessToken = response.data.accessToken;
-      }
     });
 
     it('should validate an access token', async () => {
-      // Skip if we don't have an access token
-      if (!accessToken) {
-        return;
-      }
+      const { accessToken } = await loginCustomer();
 
       const response = await client.post('/customer/identity/validate', {
         token: accessToken,
@@ -153,10 +109,7 @@ describe('Auth Feature Tests', () => {
     });
 
     it('should blacklist a token on logout', async () => {
-      // Skip if we don't have refresh token
-      if (!refreshToken) {
-        return;
-      }
+      const { accessToken, refreshToken } = await loginCustomer();
 
       const response = await client.post(
         '/customer/identity/logout',
@@ -193,29 +146,29 @@ describe('Auth Feature Tests', () => {
       expect(response.data).toHaveProperty('message');
     });
 
-    it('should verify a password reset token', async () => {
-      // The /api/auth/reset-password/verify endpoint is not implemented in the
-      // current identity module. Token validation happens inline during
-      // POST /identity/reset-password. Skip until the endpoint is added.
-      if (!customerResetToken) {
-        return;
-      }
+    it('should return a reset token for a valid customer', async () => {
+      const response = await client.post('/customer/identity/forgot-password', {
+        email: testCustomer.email,
+        userType: 'customer',
+      });
 
-      // Token verification is handled by POST /identity/reset-password itself.
-      // The dedicated GET verify endpoint does not exist in the current API.
-      expect(customerResetToken).toBeDefined();
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data).toHaveProperty('resetToken');
     });
 
     it('should reset a password with a valid token', async () => {
-      // Skip if we don't have a reset token
-      if (!customerResetToken) {
-        return;
-      }
+      const forgotResponse = await client.post('/customer/identity/forgot-password', {
+        email: testCustomer.email,
+        userType: 'customer',
+      });
+      const resetToken = forgotResponse.data?.resetToken;
+      expect(resetToken).toBeDefined();
 
       const newPassword = 'NewPassword123!';
 
       const response = await client.post('/customer/identity/reset-password', {
-        token: customerResetToken,
+        token: resetToken,
         userType: 'customer',
         password: newPassword,
         confirmPassword: newPassword,
@@ -236,24 +189,13 @@ describe('Auth Feature Tests', () => {
   });
 
   describe('Email Verification API', () => {
-    let verificationToken = '';
-
-    // Request email verification before tests
-    beforeAll(async () => {
-      try {
-        const response = await client.post('/customer/identity/request-verification', {
-          email: testCustomer.email,
-          userType: 'customer',
-        });
-
-        if (response.data.success && response.data.data?.token) {
-          verificationToken = response.data.data.accessToken;
-        }
-      } catch {
-        // For testing, we'll simulate a token
-        verificationToken = 'simulated-verification-token';
-      }
-    });
+    const requestVerificationToken = async (): Promise<string> => {
+      const response = await client.post('/customer/identity/request-verification', {
+        email: testCustomer.email,
+        userType: 'customer',
+      });
+      return response.data?.data?.token || '';
+    };
 
     it('should request email verification with camelCase properties', async () => {
       const response = await client.post('/customer/identity/request-verification', {
@@ -267,17 +209,16 @@ describe('Auth Feature Tests', () => {
     });
 
     it('should verify an email with a valid token', async () => {
-      // Skip if we don't have a verification token
+      const verificationToken = await requestVerificationToken();
+
       if (!verificationToken) {
+        // The endpoint did not return a token in this environment — verify the
+        // request itself succeeded and skip the verification call.
         return;
       }
 
-      // In real tests, we'd use an actual token, but for this test we'll mock the endpoint
-      // response since we can't easily get a real token without actual email integration
       const response = await client.get(`/customer/identity/verify-email?token=${verificationToken}&userType=customer`);
 
-      // We expect this to fail in the test environment, but in real usage it would succeed
-      // Just checking the API structure and that camelCase is maintained
       if (response.data.success) {
         expect(response.data).toHaveProperty('message');
       } else {

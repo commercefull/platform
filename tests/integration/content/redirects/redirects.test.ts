@@ -32,16 +32,6 @@ describe('Content Redirects API', () => {
     }
   });
 
-  afterAll(async () => {
-    // Cleanup
-    if (createdRedirectId) {
-      await client.delete(`${API_BASE}/redirects/${createdRedirectId}`);
-    }
-    if (createdRegexRedirectId) {
-      await client.delete(`${API_BASE}/redirects/${createdRegexRedirectId}`);
-    }
-  });
-
   describe('GET /content/redirects', () => {
     it('should return a list of redirects', async () => {
       const response = await client.get(`${API_BASE}/redirects`);

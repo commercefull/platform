@@ -1,6 +1,6 @@
 import { AxiosInstance } from 'axios';
-import { setupWarehouseTests, cleanupWarehouseTests, createTestWarehouse, SEEDED_WAREHOUSE_IDS } from './testUtils';
-import { expectStatus } from '../testUtils';
+import { createTestWarehouse, SEEDED_WAREHOUSE_IDS } from './testUtils';
+import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Warehouse Feature Tests', () => {
   let client: AxiosInstance;
@@ -10,13 +10,8 @@ describe('Warehouse Feature Tests', () => {
   };
 
   beforeAll(async () => {
-    const setup = await setupWarehouseTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-  });
-
-  afterAll(async () => {
-    await cleanupWarehouseTests(client, adminToken, createdResources);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });

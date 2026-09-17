@@ -474,12 +474,12 @@ export class LoyaltyRepo {
   // ==========================================================================
 
   async findRedemptionById(loyaltyRedemptionId: string): Promise<LoyaltyRedemption | null> {
-    const sql = `SELECT * FROM "loyaltyRedemption" WHERE "loyaltyRedemptionId" = $1`;
+    const sql = `SELECT * FROM "loyaltyRedemption" WHERE "redemptionId" = $1`;
     return await queryOne<LoyaltyRedemption>(sql, [loyaltyRedemptionId]);
   }
 
   async findRedemptionByCode(redemptionCode: string): Promise<LoyaltyRedemption | null> {
-    const sql = `SELECT * FROM "loyaltyRedemption" WHERE "redemptionCode" = $1`;
+    const sql = `SELECT * FROM "loyaltyRedemption" WHERE "couponCode" = $1`;
     return await queryOne<LoyaltyRedemption>(sql, [redemptionCode]);
   }
 
@@ -515,9 +515,9 @@ export class LoyaltyRepo {
     // Create redemption
     const sql = `
       INSERT INTO "loyaltyRedemption" (
-        "customerId", "rewardId", "pointsSpent", "redemptionCode", 
-        "status", "expiresAt", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        "customerId", "rewardId", "pointsSpent", "couponCode",
+        "status", "expiresAt", "redeemedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
     const redemption = await queryOne<LoyaltyRedemption>(sql, [
@@ -527,7 +527,6 @@ export class LoyaltyRepo {
       redemptionCode,
       'pending',
       expiresAt,
-      now,
       now,
     ]);
 
@@ -555,11 +554,11 @@ export class LoyaltyRepo {
 
     const sql = `
       UPDATE "loyaltyRedemption" 
-      SET "status" = $2, "usedAt" = $3, "updatedAt" = $4
-      WHERE "loyaltyRedemptionId" = $1
+      SET "status" = $2, "usedAt" = $3
+      WHERE "redemptionId" = $1
       RETURNING *
     `;
-    const result = await queryOne<LoyaltyRedemption>(sql, [loyaltyRedemptionId, status, usedAt, now]);
+    const result = await queryOne<LoyaltyRedemption>(sql, [loyaltyRedemptionId, status, usedAt]);
     if (!result) throw new RedemptionNotFoundError(loyaltyRedemptionId);
     return result;
   }

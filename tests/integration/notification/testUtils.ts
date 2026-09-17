@@ -1,5 +1,4 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../testUtils';
 
 // Export loginTestUser function for the tests
 export const loginTestUser = async (
@@ -47,7 +46,8 @@ export const testNotificationData = {
 
 // Test data for notification templates
 export const testTemplateData = {
-  code: `test-template-${Date.now()}`,
+  // Matches seeded template 00000000-0000-0000-0000-000000000103
+  code: 'test-template-seeded',
   name: 'Test Template',
   description: 'Template created for integration tests',
   type: 'order_confirmation',
@@ -89,118 +89,7 @@ export const testPreferenceData = {
  * Setup function for notification integration tests
  * Creates test data and returns necessary IDs and tokens
  */
-export const setupNotificationTests = async () => {
-  const client = createTestClient();
-  let adminToken = '';
-  let customerToken = '';
-  let testNotificationId = '';
-  let testTemplateId = '';
-  let testPreferenceId = '';
-  const testUserId = '00000000-0000-0000-0000-000000000001';
-
-  try {
-    adminToken = await loginTestAdmin(client);
-  } catch {}
-
-  try {
-    customerToken = await loginTestUser(client);
-  } catch {}
-
-  if (adminToken) {
-    try {
-      // Create test notification
-      const notificationData = {
-        ...testNotificationData,
-        userId: testUserId,
-        userType: 'customer',
-      };
-
-      const createNotificationResponse = await client.post('/business/notifications', notificationData, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      if (createNotificationResponse.data?.data?.notificationId) {
-        testNotificationId = createNotificationResponse.data.data.notificationId;
-      }
-
-      // Create test template
-      const createTemplateResponse = await client.post('/business/notification-templates', testTemplateData, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-
-      if (createTemplateResponse.data?.data?.id) {
-        testTemplateId = createTemplateResponse.data.data.id;
-      }
-    } catch {}
-  }
-
-  // Create test preference using customer token
-  if (customerToken) {
-    try {
-      const createPreferenceResponse = await client.post('/customer/notifications/preferences', testPreferenceData, {
-        headers: { Authorization: `Bearer ${customerToken}` },
-      });
-
-      if (createPreferenceResponse.data?.data?.id) {
-        testPreferenceId = createPreferenceResponse.data.data.id;
-      }
-    } catch {}
-  }
-
-  return {
-    client,
-    adminToken,
-    customerToken,
-    testUserId,
-    testNotificationId,
-    testTemplateId,
-    testPreferenceId,
-  };
-};
-
-/**
- * Cleanup function for notification integration tests
- * Removes test data created during setup
- */
-export const cleanupNotificationTests = async (
-  client: AxiosInstance | undefined,
-  adminToken: string | undefined,
-  testNotificationId?: string,
-  testTemplateId?: string,
-  testPreferenceId?: string,
-) => {
-  if (!client || !adminToken) {
-    return;
-  }
-
-  try {
-    // Delete test notification
-    if (testNotificationId) {
-      await client
-        .delete(`/business/notifications/${testNotificationId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        })
-        .catch(() => {});
-    }
-
-    // Delete test template
-    if (testTemplateId) {
-      await client
-        .delete(`/business/notification-templates/${testTemplateId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        })
-        .catch(() => {});
-    }
-
-    // Delete test preference
-    if (testPreferenceId) {
-      await client
-        .delete(`/customer/notifications/preferences/${testPreferenceId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        })
-        .catch(() => {});
-    }
-  } catch {
-    // Silently ignore cleanup errors
-  }
-};
+// Seeded notification fixtures (seeds/20240805001215_seedTestNotification.js, 20240805001208_seedNotificationPreference.js)
+export const SEEDED_NOTIFICATION_ID = '00000000-0000-0000-0000-000000000100';
+export const SEEDED_TEMPLATE_ID = '00000000-0000-0000-0000-000000000103';
+export const SEEDED_PREFERENCE_ID = '00000000-0000-0000-0000-000000000105';

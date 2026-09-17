@@ -30,14 +30,6 @@ describe('Attribute Set Tests', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (createdSetId) {
-      await client
-        .delete(`/business/attribute-sets/${createdSetId}`, { headers: { Authorization: `Bearer ${adminToken}` } })
-        .catch(() => {});
-    }
-  });
-
   // ── Attribute Set Queries ────────────────────────────────────────────────
 
   describe('Attribute Set Queries', () => {

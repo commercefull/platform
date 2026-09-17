@@ -5,7 +5,7 @@ import type { ImportJobType, ImportSource, ImportJobStatus } from '../../domain/
 
 class MigrationController {
   async createJob(req: TypedRequest, res: Response): Promise<void> {
-    const { organizationId } = req.user!;
+    const organizationId = req.user?.organizationId || req.user?.id;
     if (!organizationId) {
       res.status(401).json({ success: false, error: 'Organization not found' });
       return;
@@ -31,7 +31,7 @@ class MigrationController {
   }
 
   async listJobs(req: TypedRequest, res: Response): Promise<void> {
-    const { organizationId } = req.user!;
+    const organizationId = req.user?.organizationId || req.user?.id;
     if (!organizationId) {
       res.status(401).json({ success: false, error: 'Organization not found' });
       return;

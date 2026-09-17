@@ -18,6 +18,19 @@ const BIN_IDS = {
   A1_02: '0193b002-0000-7000-8000-000000000002',
   B1_01: '0193b002-0000-7000-8000-000000000003',
   SHIP_01: '0193b002-0000-7000-8000-000000000004',
+  OPS: '0193b002-0000-7000-8000-000000000005',
+};
+
+const ZONE_IDS = {
+  OPS: '0193b003-0000-7000-8000-000000000001',
+};
+
+const RECEIVING_IDS = {
+  OPS: '0193b004-0000-7000-8000-000000000001',
+};
+
+const PICK_PACK_IDS = {
+  OPS: '0193b005-0000-7000-8000-000000000001',
 };
 
 exports.seed = async function (knex) {
@@ -28,6 +41,18 @@ exports.seed = async function (knex) {
   }
 
   // Clean up existing test data in reverse order of dependencies
+  await knex('warehousePickPack')
+    .whereIn('warehousePickPackId', Object.values(PICK_PACK_IDS))
+    .del()
+    .catch(() => {});
+  await knex('warehouseReceiving')
+    .whereIn('warehouseReceivingId', Object.values(RECEIVING_IDS))
+    .del()
+    .catch(() => {});
+  await knex('distributionWarehouseZone')
+    .whereIn('distributionWarehouseZoneId', Object.values(ZONE_IDS))
+    .del()
+    .catch(() => {});
   await knex('distributionWarehouseBin')
     .whereIn('distributionWarehouseBinId', Object.values(BIN_IDS))
     .del()
@@ -212,6 +237,54 @@ exports.seed = async function (knex) {
       isReceivable: false,
       isMixed: true,
       priority: 1,
+    },
+    {
+      distributionWarehouseBinId: BIN_IDS.OPS,
+      distributionWarehouseId: WAREHOUSE_IDS.MAIN,
+      locationCode: 'OPS-01',
+      isActive: true,
+      binType: 'storage',
+      isPickable: true,
+      isReceivable: true,
+      isMixed: false,
+      priority: 9,
+    },
+  ]);
+
+  // Seed a zone mutated/deleted by warehouse operations tests
+  await knex('distributionWarehouseZone').insert([
+    {
+      distributionWarehouseZoneId: ZONE_IDS.OPS,
+      distributionWarehouseId: WAREHOUSE_IDS.MAIN,
+      name: 'Ops Test Zone',
+      code: 'OPS-ZONE',
+      zoneType: 'storage',
+      isActive: true,
+      sortOrder: 99,
+    },
+  ]);
+
+  // Seed a pending receiving record for warehouse operations tests
+  await knex('warehouseReceiving').insert([
+    {
+      warehouseReceivingId: RECEIVING_IDS.OPS,
+      distributionWarehouseId: WAREHOUSE_IDS.MAIN,
+      receiptNumber: 'RCV-OPS-001',
+      sourceType: 'purchase_order',
+      status: 'pending',
+      carrierName: 'Ops Carrier',
+      packageCount: 2,
+    },
+  ]);
+
+  // Seed a pending pick/pack record for warehouse operations tests
+  await knex('warehousePickPack').insert([
+    {
+      warehousePickPackId: PICK_PACK_IDS.OPS,
+      distributionWarehouseId: WAREHOUSE_IDS.MAIN,
+      pickPackNumber: 'PP-OPS-001',
+      status: 'pending',
+      notes: 'Ops test pick/pack',
     },
   ]);
 };

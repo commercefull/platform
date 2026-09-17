@@ -1,28 +1,28 @@
 import { AxiosInstance } from 'axios';
-import { setupMembershipTests, cleanupMembershipTests, testTier, testBenefit } from './testUtils';
+import {
+  testTier,
+  testBenefit,
+  SEEDED_TIER_ID,
+  SEEDED_BENEFIT_ID,
+  SEEDED_USER_MEMBERSHIP_ID,
+} from './testUtils';
+import { createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 describe('Membership Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let userToken: string;
   let userId: string;
-  let testTierId: string;
-  let testBenefitId: string;
-  let testUserMembershipId: string;
+  const testTierId = SEEDED_TIER_ID;
+  const testBenefitId = SEEDED_BENEFIT_ID;
+  const testUserMembershipId = SEEDED_USER_MEMBERSHIP_ID;
 
   beforeAll(async () => {
-    const setup = await setupMembershipTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    userToken = setup.userToken;
-    userId = setup.userId;
-    testTierId = setup.testTierId;
-    testBenefitId = setup.testBenefitId;
-    testUserMembershipId = setup.testUserMembershipId;
-  });
-
-  afterAll(async () => {
-    await cleanupMembershipTests(client, adminToken, testTierId, testBenefitId, testUserMembershipId);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    userToken = await loginTestUser(client, 'customer@example.com', 'password123');
+    const payload = JSON.parse(Buffer.from(userToken.split('.')[1], 'base64url').toString()) as { id?: string };
+    userId = payload.id || '';
   });
 
   describe('Tier Management', () => {

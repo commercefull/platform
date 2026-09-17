@@ -37,19 +37,6 @@ describe('Analytics Feature Tests', () => {
     adminToken = loginResponse.data.accessToken;
   });
 
-  afterAll(async () => {
-    // Cleanup dynamically created dashboards
-    for (const dashboardId of createdDashboardIds) {
-      try {
-        await client.delete(`/business/analytics/dashboards/${dashboardId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-      } catch {
-        console.warn(`Failed to cleanup dashboard ${dashboardId}`);
-      }
-    }
-  });
-
   // ============================================================================
   // Sales Analytics Tests (UC-ANA-001, UC-ANA-002)
   // ============================================================================

@@ -1,21 +1,17 @@
 import { AxiosInstance } from 'axios';
-import { cleanupProductTests, setupProductTests, testAttributeGroup } from '../testUtils';
+import { testAttributeGroup, SEEDED_ATTRIBUTE_GROUP_BASIC_ID } from '../testUtils';
+import { createTestClient, loginTestAdmin } from '../../testUtils';
 
 describe('Attribute Group Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testProductId: string | null;
-  let testCategoryId: string | null;
   let testAttributeGroupId: string | null;
   let createdGroupId: string;
 
   beforeAll(async () => {
-    const setup = await setupProductTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    testProductId = setup.testProductId;
-    testCategoryId = setup.testCategoryId;
-    testAttributeGroupId = setup.testAttributeGroupId;
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    testAttributeGroupId = SEEDED_ATTRIBUTE_GROUP_BASIC_ID;
   });
 
   describe('Attribute Group CRUD Operations', () => {
@@ -149,7 +145,4 @@ describe('Attribute Group Tests', () => {
     });
   });
 
-  afterAll(async () => {
-    await cleanupProductTests(client, adminToken, testProductId, testCategoryId, testAttributeGroupId);
-  });
 });

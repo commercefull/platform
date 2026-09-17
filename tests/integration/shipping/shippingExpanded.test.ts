@@ -4,17 +4,8 @@
  */
 
 import { AxiosInstance } from 'axios';
-import {
-  setupShippingTests,
-  cleanupShippingTests,
-  createTestCarrier,
-  createTestZone,
-  SEEDED_CARRIER_IDS,
-  SEEDED_METHOD_IDS,
-  SEEDED_ZONE_IDS,
-  SEEDED_PACKAGING_IDS,
-} from './testUtils';
-import { expectStatus } from '../testUtils';
+import { createTestCarrier, createTestZone, SEEDED_CARRIER_IDS, SEEDED_METHOD_IDS, SEEDED_ZONE_IDS, SEEDED_PACKAGING_IDS } from './testUtils';
+import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Shipping Expanded Tests', () => {
   let client: AxiosInstance;
@@ -28,13 +19,8 @@ describe('Shipping Expanded Tests', () => {
 
   beforeAll(async () => {
     jest.setTimeout(30000);
-    const setup = await setupShippingTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-  });
-
-  afterAll(async () => {
-    await cleanupShippingTests(client, adminToken, createdResources);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });

@@ -15,6 +15,8 @@ const SEEDED_COUPON_FIXED10_MIN100_ID = '01935f00-0000-7000-8000-000000000015';
 const SEEDED_PRODUCT_DISCOUNT_ID = '01935f00-0000-7000-8000-000000000020';
 const SEEDED_GIFT_CARD_ID = '01935f00-0000-7000-8000-000000000030';
 const SEEDED_GIFT_CARD_DEPLETED_ID = '01935f00-0000-7000-8000-000000000031';
+const SEEDED_PROMOTION_DISABLED_ID = '01935f00-0000-7000-8000-000000000003';
+const SEEDED_CATEGORY_PROMOTION_ID = '01935f00-0000-7000-8000-000000000040';
 
 // Reference IDs from other seeds
 const SEEDED_MERCHANT_ID = '01935e00-0000-7000-8000-000000000001';
@@ -81,7 +83,53 @@ exports.seed = async function (knex) {
       createdAt: now,
       updatedAt: now,
     },
+    {
+      promotionId: SEEDED_PROMOTION_DISABLED_ID,
+      name: 'Test Disabled Promotion',
+      description: 'Disabled promotion for activate/pause ops tests',
+      status: 'disabled',
+      scope: 'global',
+      priority: 1,
+      startDate: pastDate,
+      endDate: futureDate,
+      isActive: false,
+      isExclusive: false,
+      maxUsage: 1000,
+      usageCount: 0,
+      maxUsagePerCustomer: 5,
+      minOrderAmount: 50.0,
+      maxDiscountAmount: 100.0,
+      organizationId: null,
+      isGlobal: true,
+      createdAt: now,
+      updatedAt: now,
+    },
   ]);
+
+  // Seed category promotion link for category-promotions/active ops tests
+  const hasPromotionCategory = await knex.schema.hasTable('promotionCategory');
+  if (hasPromotionCategory) {
+    const opsCategory = await knex('productCategory').where({ slug: 'electronics' }).first('productCategoryId');
+    if (opsCategory) {
+      await knex('promotionCategory')
+        .where('categoryPromotionId', SEEDED_CATEGORY_PROMOTION_ID)
+        .del()
+        .catch(() => {});
+      await knex('promotionCategory')
+        .insert({
+          categoryPromotionId: SEEDED_CATEGORY_PROMOTION_ID,
+          productCategoryId: opsCategory.productCategoryId,
+          promotionId: SEEDED_PROMOTION_ID,
+          displayOrder: 1,
+          isDisplayedOnCategoryPage: true,
+          isDisplayedOnProductPage: true,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflict('categoryPromotionId')
+        .ignore();
+    }
+  }
 
   // Seed promotion rules
   await knex('promotionRule').insert([

@@ -115,14 +115,4 @@ describe('Content Categorization API', () => {
     expect(response.data.success).toBe(true);
   });
 
-  afterAll(async () => {
-    // Remove categorization if created during tests
-    if (testContentPageId && testCategoryId && adminToken) {
-      await client
-        .delete(`/business/content/pages/${testContentPageId}/categories/${testCategoryId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        })
-        .catch(() => {});
-    }
-  });
 });

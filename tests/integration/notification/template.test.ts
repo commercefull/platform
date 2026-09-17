@@ -1,5 +1,6 @@
 import { AxiosInstance } from 'axios';
-import { setupNotificationTests, cleanupNotificationTests, testTemplateData } from './testUtils';
+import { testTemplateData, SEEDED_TEMPLATE_ID } from './testUtils';
+import { createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 /**
  * Interface for NotificationTemplate objects to ensure type safety in tests
@@ -32,22 +33,13 @@ describe('Notification Template Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let customerToken: string;
-  let testNotificationId: string;
   let testTemplateId: string;
-  let testPreferenceId: string;
 
   beforeAll(async () => {
-    const setup = await setupNotificationTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
-    testNotificationId = setup.testNotificationId;
-    testTemplateId = setup.testTemplateId;
-    testPreferenceId = setup.testPreferenceId;
-  });
-
-  afterAll(async () => {
-    await cleanupNotificationTests(client, adminToken, testNotificationId, testTemplateId, testPreferenceId);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginTestUser(client, 'customer@example.com', 'password123');
+    testTemplateId = SEEDED_TEMPLATE_ID;
   });
 
   describe('Admin Template Operations', () => {

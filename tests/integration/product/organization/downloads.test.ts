@@ -21,14 +21,6 @@ describe('Download Management', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (createdDownloadId) {
-      await client
-        .delete(`/business/downloads/${createdDownloadId}`, { headers: { Authorization: `Bearer ${adminToken}` } })
-        .catch(() => {});
-    }
-  });
-
   // ── Organization: Download CRUD ──────────────────────────────────────────────
 
   describe('Organization: Download CRUD', () => {

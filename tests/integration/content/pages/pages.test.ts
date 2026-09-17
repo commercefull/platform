@@ -21,7 +21,6 @@ describe('Content Pages API', () => {
   let client: AxiosInstance;
   let authToken: string;
   let createdPageId: string;
-  let createdContentTypeId: string;
 
   beforeAll(async () => {
     client = createClient();
@@ -31,28 +30,6 @@ describe('Content Pages API', () => {
     if (loginResponse.data.accessToken) {
       authToken = loginResponse.data.accessToken;
       client.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-    }
-
-    // Create a content type for pages
-    const typeResponse = await client.post(`${API_BASE}/types`, {
-      name: 'Page Type',
-      slug: `page-type-${Date.now()}`,
-      description: 'Test page type',
-      isActive: true,
-    });
-
-    if (typeResponse.status === 201) {
-      createdContentTypeId = typeResponse.data.data.contentTypeId;
-    }
-  });
-
-  afterAll(async () => {
-    // Cleanup
-    if (createdPageId) {
-      await client.delete(`${API_BASE}/pages/${createdPageId}`);
-    }
-    if (createdContentTypeId) {
-      await client.delete(`${API_BASE}/types/${createdContentTypeId}`);
     }
   });
 

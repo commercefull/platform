@@ -291,17 +291,4 @@ describe('Content Media & Redirects API', () => {
     });
   });
 
-  afterAll(async () => {
-    // Clean up media and folder
-    if (mediaId && adminToken) {
-      await client.delete(`/business/content/media/${mediaId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-    }
-    if (folderId && adminToken) {
-      await client.delete(`/business/content/media-folders/${folderId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-      });
-    }
-  });
 });

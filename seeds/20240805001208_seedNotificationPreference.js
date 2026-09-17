@@ -33,14 +33,36 @@ const PREFERENCES = [
   },
 ];
 
+// Fixed ID for the order_confirmation preference so tests can reference it directly
+const TEST_PREFERENCE_ID = '00000000-0000-0000-0000-000000000105';
+
 exports.up = async function (knex) {
+  // customerId is a generated uuid7 — resolve by email
+  const testCustomer = await knex('customer').where({ email: 'customer@example.com' }).first('customerId');
+  const userId = testCustomer ? testCustomer.customerId : '00000000-0000-0000-0000-000000000001';
+
   for (const pref of PREFERENCES) {
+    const isTestPref = pref.type === 'order_confirmation';
     const payload = {
       ...pref,
-      channelPreferences: JSON.stringify(pref.channelPreferences),
+      userId,
+      // Align the order_confirmation row with testPreferenceData in tests/integration/notification/testUtils.ts
+      channelPreferences: JSON.stringify(
+        isTestPref ? { email: true, sms: false, in_app: true, push: false } : pref.channelPreferences,
+      ),
+      schedulePreferences: JSON.stringify(
+        isTestPref ? { doNotDisturbStart: '22:00', doNotDisturbEnd: '08:00', timezone: 'UTC' } : null,
+      ),
     };
 
-    await knex('notificationPreference').insert(payload).onConflict(['userId', 'userType', 'type']).merge();
+    if (isTestPref) {
+      await knex('notificationPreference')
+        .insert({ notificationPreferenceId: TEST_PREFERENCE_ID, ...payload })
+        .onConflict(['userId', 'userType', 'type'])
+        .merge();
+    } else {
+      await knex('notificationPreference').insert(payload).onConflict(['userId', 'userType', 'type']).merge();
+    }
   }
 };
 

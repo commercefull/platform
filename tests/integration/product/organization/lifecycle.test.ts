@@ -17,16 +17,6 @@ describe('Organization: Product Lifecycle', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (createdProductId) {
-      await client
-        .delete(`/business/products/${createdProductId}?permanent=true`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        })
-        .catch(() => {});
-    }
-  });
-
   describe('Creation guards', () => {
     it('should reject creation without name', async () => {
       const res = await client.post(

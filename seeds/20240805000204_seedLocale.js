@@ -115,5 +115,19 @@ exports.seed = async function (knex) {
       dateFormat: 'dd/MM/yyyy',
       timeFormat: 'HH:mm',
     },
+    {
+      // Fixed ID for localization lifecycle ops tests
+      localeId: '01941000-0000-7000-8000-000000000001',
+      code: 'x-OPS',
+      name: 'Ops Test Locale',
+      language: 'en',
+      countryCode: 'US',
+      isActive: true,
+      isDefault: false,
+      textDirection: 'ltr',
+      dateFormat: 'yyyy-MM-dd',
+      timeFormat: 'HH:mm:ss',
+      timeZone: 'UTC',
+    },
   ]);
 };

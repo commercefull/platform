@@ -18,5 +18,13 @@ exports.seed = async function (knex) {
     { code: 'AU', name: 'Australia', alpha3Code: 'AUS', numericCode: 36, region: 'Oceania', isActive: true },
     { code: 'BR', name: 'Brazil', alpha3Code: 'BRA', numericCode: 76, region: 'South America', isActive: true },
     { code: 'MX', name: 'Mexico', alpha3Code: 'MEX', numericCode: 484, region: 'North America', isActive: true },
+    {
+      // Fixed ID for country lifecycle ops tests
+      countryId: '01941100-0000-7000-8000-000000000001',
+      code: 'XO',
+      name: 'Ops Test Country',
+      region: 'Test Region',
+      isActive: true,
+    },
   ]);
 };

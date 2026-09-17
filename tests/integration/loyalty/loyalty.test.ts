@@ -92,7 +92,7 @@ describe('Loyalty Feature Tests', () => {
         expect(response.status).toBe(201);
         expect(response.data.success).toBe(true);
         expect(response.data.data).toHaveProperty('tierId');
-        testTierId = response.data.data.tierId;
+    testTierId = response.data.data.tierId;
       });
 
       it('should require name and pointsThreshold', async () => {

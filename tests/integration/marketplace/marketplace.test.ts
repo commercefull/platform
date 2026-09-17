@@ -18,14 +18,6 @@ describe('Marketplace Module Integration Tests', () => {
     orgToken = await loginTestAdmin(client);
   });
 
-  afterAll(async () => {
-    if (orgToken && commissionRuleId) {
-      await client.delete(`/business/commission-rules/${commissionRuleId}`, {
-        headers: { Authorization: `Bearer ${orgToken}` },
-      });
-    }
-  });
-
   describe('Vendor CRUD', () => {
     it('POST /business/vendors creates a vendor', async () => {
       if (!orgToken) return;

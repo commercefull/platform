@@ -265,13 +265,36 @@ export const updatePaymentSettings = async (req: TypedRequest, res: Response): P
   try {
     const { organizationId } = req.params;
     const body = req.body as RequestBody;
-    const { provider, isEnabled, config } = body;
+
+    const booleanFields = [
+      'capturePaymentsAutomatically',
+      'cardVaultingEnabled',
+      'allowGuestCheckout',
+      'requireBillingAddress',
+      'requireCvv',
+      'requirePostalCodeVerification',
+      'autoRefundOnCancel',
+    ] as const;
+    const numberFields = ['authorizationValidityPeriod', 'paymentAttemptLimit'] as const;
+    const jsonbFields = ['threeDSecureSettings', 'fraudDetectionSettings', 'receiptSettings', 'paymentFormCustomization'] as const;
+
+    const updates: Record<string, unknown> = {};
+    for (const field of booleanFields) {
+      if (body[field] !== undefined) updates[field] = body[field] === 'true' || body[field] === true;
+    }
+    for (const field of numberFields) {
+      if (body[field] !== undefined) updates[field] = Number(body[field]);
+    }
+    for (const field of jsonbFields) {
+      if (body[field] !== undefined) {
+        const value = body[field];
+        updates[field] = typeof value === 'string' ? JSON.parse(value) : value;
+      }
+    }
 
     await managePaymentSettingsUseCase.upsert({
       organizationId,
-      provider,
-      isEnabled: isEnabled === 'true' || isEnabled === true,
-      config: config ? (typeof config === 'string' ? JSON.parse(config) : config) : {},
+      ...updates,
     });
 
     res.redirect(`/admin/payments/settings?success=Settings updated`);

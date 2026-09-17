@@ -1,24 +1,14 @@
 import { AxiosInstance } from 'axios';
-import {
-  setupSupplierTests,
-  createTestSupplier,
-  createTestPurchaseOrder,
-  createTestSupplierAddress,
-  SEEDED_SUPPLIER_IDS,
-  SEEDED_SUPPLIER_ADDRESS_IDS as _SEEDED_SUPPLIER_ADDRESS_IDS,
-  SEEDED_PURCHASE_ORDER_IDS,
-  SEEDED_WAREHOUSE_ID,
-} from './testUtils';
-import { expectStatus } from '../testUtils';
+import { createTestSupplier, createTestPurchaseOrder, createTestSupplierAddress, SEEDED_SUPPLIER_IDS, SEEDED_SUPPLIER_ADDRESS_IDS as _SEEDED_SUPPLIER_ADDRESS_IDS, SEEDED_PURCHASE_ORDER_IDS, SEEDED_WAREHOUSE_ID } from './testUtils';
+import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Supplier Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
 
   beforeAll(async () => {
-    const setup = await setupSupplierTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });

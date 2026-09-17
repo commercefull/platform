@@ -20,6 +20,10 @@ import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { PaymentRefund } from '../../domain/entities/PaymentRefund';
 import { TransactionStatus, RefundStatus } from '../../domain/valueObjects/PaymentStatus';
 
+// Maps repository-facing field names onto the actual storedPaymentMethod schema
+// (e.g. "paymentMethod" -> type, "token" -> providerToken).
+const STORED_METHOD_COLUMNS = `"storedPaymentMethodId", "customerId", "paymentMethod" AS type, provider, token AS "providerToken", "lastFour" AS last4, "cardType" AS brand, NULLIF("expiryMonth", '')::int AS "expiryMonth", NULLIF("expiryYear", '')::int AS "expiryYear", "isDefault", "isExpired", "createdAt", "updatedAt"`;
+
 export class PaymentRepo implements IPaymentRepository {
   async findTransactionById(transactionId: string): Promise<PaymentTransaction | null> {
     const row = await queryOne<Record<string, unknown>>(
@@ -258,20 +262,25 @@ export class PaymentRepo implements IPaymentRepository {
       processingFee?: number;
     }>
   > {
-    let sql = 'SELECT * FROM "paymentMethod" WHERE "organizationId" = $1 AND "isEnabled" = true AND "deletedAt" IS NULL';
-    const params: unknown[] = [organizationId];
+    const conditions = ['"isEnabled" = true', '"deletedAt" IS NULL'];
+    const params: unknown[] = [];
+
+    if (organizationId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(organizationId)) {
+      conditions.push(`"organizationId" = $${params.length + 1}`);
+      params.push(organizationId);
+    }
 
     if (currency) {
-      sql += ' AND ("supportedCurrencies" IS NULL OR $2 = ANY("supportedCurrencies"))';
+      conditions.push(`("supportedCurrencies" IS NULL OR $${params.length + 1} = ANY("supportedCurrencies"))`);
       params.push(currency);
     }
 
-    sql += ' ORDER BY "displayOrder" ASC';
+    const sql = `SELECT * FROM "paymentMethodConfig" WHERE ${conditions.join(' AND ')} ORDER BY "displayOrder" ASC`;
 
     const rows = await query<Record<string, unknown>[]>(sql, params);
     return (rows || []).map(row => ({
-      paymentMethodConfigId: row.paymentMethodId as string,
-      paymentMethod: row.type as string,
+      paymentMethodConfigId: row.paymentMethodConfigId as string,
+      paymentMethod: row.paymentMethod as string,
       displayName: (row.displayName as string) || (row.type as string),
       description: row.description as string | undefined,
       icon: row.icon as string | undefined,
@@ -408,12 +417,26 @@ export class PaymentRepo implements IPaymentRepository {
 
   async upsertSettings(params: PaymentSettingsUpsertParams): Promise<PaymentSettings | null> {
     const now = new Date();
+    const jsonbFields = new Set(['threeDSecureSettings', 'fraudDetectionSettings', 'receiptSettings', 'paymentFormCustomization']);
+    const fields = (Object.keys(params) as (keyof PaymentSettingsUpsertParams)[]).filter(
+      key => key !== 'organizationId' && params[key] !== undefined,
+    );
+
+    const columns = ['"organizationId"', ...fields.map(f => `"${f}"`), '"createdAt"', '"updatedAt"'];
+    const values: unknown[] = [
+      params.organizationId,
+      ...fields.map(f => (jsonbFields.has(f) ? JSON.stringify(params[f]) : params[f])),
+      now,
+      now,
+    ];
+    const updateSet = fields.length > 0 ? `${fields.map(f => `"${f}" = EXCLUDED."${f}"`).join(', ')}, ` : '';
+
     return queryOne<PaymentSettings>(
-      `INSERT INTO "paymentSettings" ("organizationId", provider, "isEnabled", config, "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT ("organizationId") DO UPDATE SET provider = $2, "isEnabled" = $3, config = $4, "updatedAt" = $6
+      `INSERT INTO "paymentSettings" (${columns.join(', ')})
+       VALUES (${values.map((_, i) => `$${i + 1}`).join(', ')})
+       ON CONFLICT ("organizationId") DO UPDATE SET ${updateSet}"updatedAt" = $${values.length}
        RETURNING *`,
-      [params.organizationId, params.provider, params.isEnabled, JSON.stringify(params.config), now, now],
+      values,
     );
   }
 
@@ -453,33 +476,33 @@ export class PaymentRepo implements IPaymentRepository {
   async findStoredMethodsByCustomer(customerId: string): Promise<StoredPaymentMethod[]> {
     return (
       (await query<StoredPaymentMethod[]>(
-        `SELECT * FROM "storedPaymentMethod" WHERE "customerId" = $1 AND "deletedAt" IS NULL ORDER BY "isDefault" DESC, "createdAt" DESC`,
+        `SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC`,
         [customerId],
       )) || []
     );
   }
 
   async findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
-    return queryOne<StoredPaymentMethod>(`SELECT * FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 AND "deletedAt" IS NULL`, [
-      storedPaymentMethodId,
-    ]);
+    return queryOne<StoredPaymentMethod>(
+      `SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1`,
+      [storedPaymentMethodId],
+    );
   }
 
   async createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {
     const now = new Date();
     return queryOne<StoredPaymentMethod>(
-      `INSERT INTO "storedPaymentMethod" ("customerId", "organizationId", type, provider, "providerToken", last4, brand, "expiryMonth", "expiryYear", "isDefault", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+      `INSERT INTO "storedPaymentMethod" ("customerId", "paymentMethod", provider, token, "lastFour", "cardType", "expiryMonth", "expiryYear", "isDefault", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING ${STORED_METHOD_COLUMNS}`,
       [
         params.customerId,
-        params.organizationId,
         params.type,
         params.provider,
         params.providerToken,
         params.last4 || null,
         params.brand || null,
-        params.expiryMonth || null,
-        params.expiryYear || null,
+        params.expiryMonth != null ? String(params.expiryMonth).padStart(2, '0') : null,
+        params.expiryYear != null ? String(params.expiryYear) : null,
         params.isDefault,
         now,
         now,
@@ -489,21 +512,19 @@ export class PaymentRepo implements IPaymentRepository {
 
   async setDefaultStoredMethod(storedPaymentMethodId: string, customerId: string): Promise<StoredPaymentMethod | null> {
     const now = new Date();
-    await query(`UPDATE "storedPaymentMethod" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "deletedAt" IS NULL`, [
-      now,
-      customerId,
-    ]);
+    await query(`UPDATE "storedPaymentMethod" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2`, [now, customerId]);
     return queryOne<StoredPaymentMethod>(
-      `UPDATE "storedPaymentMethod" SET "isDefault" = true, "updatedAt" = $1 WHERE "storedPaymentMethodId" = $2 RETURNING *`,
-      [now, storedPaymentMethodId],
+      `UPDATE "storedPaymentMethod" SET "isDefault" = true, "updatedAt" = $1 WHERE "storedPaymentMethodId" = $2 AND "customerId" = $3 RETURNING ${STORED_METHOD_COLUMNS}`,
+      [now, storedPaymentMethodId, customerId],
     );
   }
 
-  async softDeleteStoredMethod(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
-    return queryOne<StoredPaymentMethod>(
-      `UPDATE "storedPaymentMethod" SET "deletedAt" = $1, "updatedAt" = $1 WHERE "storedPaymentMethodId" = $2 RETURNING *`,
-      [new Date(), storedPaymentMethodId],
-    );
+  async softDeleteStoredMethod(storedPaymentMethodId: string, customerId?: string): Promise<StoredPaymentMethod | null> {
+    // The table has no deletedAt column — a "soft" delete is a hard delete.
+    const sql = customerId
+      ? `DELETE FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 AND "customerId" = $2 RETURNING ${STORED_METHOD_COLUMNS}`
+      : `DELETE FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 RETURNING ${STORED_METHOD_COLUMNS}`;
+    return queryOne<StoredPaymentMethod>(sql, customerId ? [storedPaymentMethodId, customerId] : [storedPaymentMethodId]);
   }
 
   private mapToRefund(row: Record<string, unknown>): PaymentRefund {

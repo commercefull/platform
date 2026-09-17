@@ -30,6 +30,12 @@ const TEST_PRODUCT_IDS = {
   WEEKLY_DELIVERY: '00000000-0000-0000-0000-000000000002',
   ANNUAL_MEMBERSHIP: '00000000-0000-0000-0000-000000000003',
 };
+
+// Dedicated fixtures for subscriptionExpanded integration tests
+const OPS_PRODUCT_ID = '01937010-0000-7000-8000-000000000001';
+const OPS_SUBSCRIPTION_PRODUCT_ID = '01937010-0000-7000-8000-000000000002';
+const OPS_PLAN_NO_TRIAL_ID = '01937010-0000-7000-8000-000000000003';
+const OPS_PLAN_MUTABLE_ID = '01937010-0000-7000-8000-000000000004';
 const TEST_CUSTOMER_ID = '00000000-0000-0000-0000-000000001001';
 
 exports.seed = async function (knex) {
@@ -399,4 +405,98 @@ exports.seed = async function (knex) {
   } else {
     console.log('Subscription products and plans seeded (no customer subscriptions - test customer not found)');
   }
+
+  // Dedicated ops fixtures: a product linked to a subscription product with a
+  // no-trial plan (so new subscriptions start 'active') plus a mutable plan for
+  // update/delete tests.
+  await knex('subscriptionPlan').whereIn('subscriptionPlanId', [OPS_PLAN_NO_TRIAL_ID, OPS_PLAN_MUTABLE_ID]).del();
+  await knex('subscriptionProduct').where('subscriptionProductId', OPS_SUBSCRIPTION_PRODUCT_ID).del();
+  await knex('product').where('productId', OPS_PRODUCT_ID).del();
+
+  await knex('product').insert({
+    productId: OPS_PRODUCT_ID,
+    sku: 'OPS-SUB-001',
+    name: 'Ops Subscription Product',
+    slug: 'ops-subscription-product',
+    type: 'simple',
+    status: 'active',
+    visibility: 'visible',
+    price: 25.0,
+    currency: 'USD',
+    isInventoryManaged: false,
+    isTaxable: true,
+    isFeatured: false,
+    isNew: false,
+    isBestseller: false,
+    preorderEnabled: false,
+    hasVariants: false,
+  });
+
+  await knex('subscriptionProduct').insert({
+    subscriptionProductId: OPS_SUBSCRIPTION_PRODUCT_ID,
+    productId: OPS_PRODUCT_ID,
+    isSubscriptionOnly: false,
+    allowOneTimePurchase: true,
+    minSubscriptionLength: 1,
+    maxSubscriptionLength: 24,
+    trialDays: 0,
+    trialRequiresPayment: false,
+    billingAnchor: 'subscription_start',
+    prorateOnChange: true,
+    allowPause: true,
+    maxPauseDays: 60,
+    maxPausesPerYear: 12,
+    allowSkip: true,
+    maxSkipsPerYear: 12,
+    allowEarlyCancel: true,
+    cancelNoticeDays: 0,
+    autoRenew: true,
+    renewalReminderDays: 7,
+    isActive: true,
+  });
+
+  await knex('subscriptionPlan').insert([
+    {
+      subscriptionPlanId: OPS_PLAN_NO_TRIAL_ID,
+      subscriptionProductId: OPS_SUBSCRIPTION_PRODUCT_ID,
+      name: 'Ops No-Trial Plan',
+      slug: 'ops-no-trial-plan',
+      description: 'No-trial plan for subscription integration tests',
+      billingInterval: 'month',
+      billingIntervalCount: 1,
+      price: 29.99,
+      currency: 'USD',
+      setupFee: 0,
+      trialDays: 0,
+      isContractRequired: false,
+      discountPercent: 0,
+      discountAmount: 0,
+      includesFreeShipping: false,
+      features: JSON.stringify(['Ops test plan']),
+      sortOrder: 1,
+      isPopular: false,
+      isActive: true,
+    },
+    {
+      subscriptionPlanId: OPS_PLAN_MUTABLE_ID,
+      subscriptionProductId: OPS_SUBSCRIPTION_PRODUCT_ID,
+      name: 'Ops Mutable Plan',
+      slug: 'ops-mutable-plan',
+      description: 'Plan updated/deleted by subscription integration tests',
+      billingInterval: 'month',
+      billingIntervalCount: 1,
+      price: 19.99,
+      currency: 'USD',
+      setupFee: 0,
+      trialDays: 0,
+      isContractRequired: false,
+      discountPercent: 0,
+      discountAmount: 0,
+      includesFreeShipping: false,
+      features: JSON.stringify(['Ops mutable plan']),
+      sortOrder: 2,
+      isPopular: false,
+      isActive: true,
+    },
+  ]);
 };

@@ -5,6 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
+import { generateUUID } from '../../../../libs/uuid';
 import { Coupon } from '../../domain/entities/Coupon';
 import { CouponNotFoundError } from '../../domain/errors/CouponErrors';
 
@@ -44,7 +45,7 @@ export class RedeemCouponUseCase {
       throw new CouponNotFoundError(input.couponCode);
     }
 
-    const redemptionId = `rmp_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+    const redemptionId = generateUUID();
     const now = new Date();
 
     // Create redemption record

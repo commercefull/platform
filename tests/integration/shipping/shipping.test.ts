@@ -1,17 +1,6 @@
 import { AxiosInstance } from 'axios';
-import {
-  setupShippingTests,
-  cleanupShippingTests,
-  createTestCarrier,
-  createTestMethod,
-  createTestZone,
-  SEEDED_CARRIER_IDS,
-  SEEDED_METHOD_IDS,
-  SEEDED_ZONE_IDS,
-  SEEDED_RATE_IDS,
-  SEEDED_PACKAGING_IDS,
-} from './testUtils';
-import { expectStatus } from '../testUtils';
+import { createTestCarrier, createTestMethod, createTestZone, SEEDED_CARRIER_IDS, SEEDED_METHOD_IDS, SEEDED_ZONE_IDS, SEEDED_RATE_IDS, SEEDED_PACKAGING_IDS } from './testUtils';
+import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Shipping Feature Tests', () => {
   let client: AxiosInstance;
@@ -24,13 +13,8 @@ describe('Shipping Feature Tests', () => {
   };
 
   beforeAll(async () => {
-    const setup = await setupShippingTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-  });
-
-  afterAll(async () => {
-    await cleanupShippingTests(client, adminToken, createdResources);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
   });
 
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });

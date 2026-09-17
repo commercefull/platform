@@ -29,14 +29,6 @@ describe('Coupon Business API', () => {
 
   const authHeaders = () => ({ Authorization: `Bearer ${adminToken}` });
 
-  afterAll(async () => {
-    if (createdCouponId && adminToken) {
-      await client.delete(`/business/coupons/${createdCouponId}`, {
-        headers: authHeaders(),
-      });
-    }
-  });
-
   describe('POST /business/coupons', () => {
     it('should create a percentage coupon successfully', async () => {
       if (!adminToken) return;

@@ -1,7 +1,6 @@
 import { AxiosInstance } from 'axios';
 import axios from 'axios';
 import {
-  cleanupPricingTests,
   createTestPricingRule,
   createTestTierPrice,
   createTestPriceList,
@@ -52,10 +51,6 @@ describe('Pricing Feature Tests', () => {
     } catch (error) {
       console.log('Warning: Login failed for pricing tests:', error instanceof Error ? (error as Error).message : String(error));
     }
-  });
-
-  afterAll(async () => {
-    await cleanupPricingTests(client, adminToken, createdResources);
   });
 
   // ============================================================================

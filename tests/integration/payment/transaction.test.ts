@@ -1,24 +1,18 @@
 import { AxiosInstance } from 'axios';
-import { setupPaymentTests, cleanupPaymentTests } from './testUtils';
+import { SEEDED_METHOD_CONFIG_ID, SEEDED_ORDER_ID } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Payment Transaction Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testGatewayId: string;
   let testMethodConfigId: string;
   let testOrderId: string;
 
   beforeAll(async () => {
-    const setup = await setupPaymentTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    testGatewayId = setup.testGatewayId;
-    testMethodConfigId = setup.testMethodConfigId;
-    testOrderId = setup.testOrderId;
-  });
-
-  afterAll(async () => {
-    await cleanupPaymentTests(client, adminToken, testGatewayId, testMethodConfigId, testOrderId);
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    testMethodConfigId = SEEDED_METHOD_CONFIG_ID;
+    testOrderId = SEEDED_ORDER_ID;
   });
 
   describe('Transaction Operations', () => {

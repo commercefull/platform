@@ -21,15 +21,6 @@ export const SEEDED_CUSTOMER_SUBSCRIPTION_IDS = {
   CANCELLED_ANNUAL: '01937002-0000-7000-8000-000000000003',
 };
 
-const adminCredentials = {
-  email: 'merchant@example.com',
-  password: 'password123',
-};
-
-const customerCredentials = {
-  email: 'customer@example.com',
-  password: 'password123',
-};
 
 export function createTestClient(): AxiosInstance {
   return axios.create({
@@ -41,27 +32,6 @@ export function createTestClient(): AxiosInstance {
       'X-Test-Request': 'true',
     },
   });
-}
-
-export async function setupSubscriptionTests() {
-  const client = createTestClient();
-  let adminToken = '';
-  let customerToken = '';
-
-  try {
-    const adminLoginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
-    adminToken = adminLoginResponse.data?.accessToken || '';
-
-    const customerLoginResponse = await client.post('/customer/identity/login', customerCredentials, {
-      headers: { 'X-Test-Request': 'true' },
-    });
-    customerToken = customerLoginResponse.data?.accessToken || '';
-
-    if (!adminToken) {
-    }
-  } catch {}
-
-  return { client, adminToken, customerToken };
 }
 
 export function createTestSubscriptionProduct(productId: string, overrides: Partial<unknown> = {}) {
@@ -132,37 +102,4 @@ export function createTestCustomerSubscription(
     billingIntervalCount: 1,
     ...overrides,
   };
-}
-
-export async function cleanupSubscriptionTests(
-  client: AxiosInstance,
-  adminToken: string,
-  resources: {
-    productIds?: string[];
-    planIds?: string[];
-    subscriptionIds?: string[];
-  } = {},
-) {
-  const headers = { Authorization: `Bearer ${adminToken}` };
-
-  // Cancel subscriptions first
-  for (const id of resources.subscriptionIds || []) {
-    try {
-      await client.post(`/business/subscriptions/subscriptions/${id}/cancel`, {}, { headers });
-    } catch {}
-  }
-
-  // Delete plans (they cascade from products, but try anyway)
-  for (const id of resources.planIds || []) {
-    try {
-      await client.delete(`/business/subscriptions/plans/${id}`, { headers });
-    } catch {}
-  }
-
-  // Delete products
-  for (const id of resources.productIds || []) {
-    try {
-      await client.delete(`/business/subscriptions/products/${id}`, { headers });
-    } catch {}
-  }
 }

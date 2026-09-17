@@ -1,5 +1,6 @@
 import { AxiosInstance } from 'axios';
-import { setupIdentityTests, cleanupIdentityTests, TEST_CUSTOMER, TEST_MERCHANT } from './testUtils';
+import { TEST_CUSTOMER, TEST_MERCHANT } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Identity Feature Tests', () => {
   let client: AxiosInstance;
@@ -15,13 +16,8 @@ describe('Identity Feature Tests', () => {
 
   beforeAll(async () => {
     jest.setTimeout(30000);
-    const setup = await setupIdentityTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-  });
-
-  afterAll(async () => {
-    await cleanupIdentityTests();
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
   });
 
   // ============================================================================
@@ -43,7 +39,7 @@ describe('Identity Feature Tests', () => {
         expect(response.data.customer).toHaveProperty('id');
         expect(response.data.customer).toHaveProperty('email', TEST_CUSTOMER.email);
 
-        customerToken = response.data.accessToken;
+    customerToken = response.data.accessToken;
       });
 
       it('should reject invalid credentials', async () => {
@@ -307,6 +303,54 @@ describe('Identity Feature Tests', () => {
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
+      });
+    });
+
+    describe('POST /business/auth/reset-password', () => {
+      it('should reject missing token or password', async () => {
+        const response = await client.post('/business/auth/reset-password', {});
+
+        expect(response.status).toBe(400);
+        expect(response.data.success).toBe(false);
+      });
+
+      it('should reject an invalid reset token', async () => {
+        const response = await client.post('/business/auth/reset-password', {
+          token: 'invalid-reset-token',
+          newPassword: 'newpassword123',
+        });
+
+        expect(response.status).toBe(400);
+        expect(response.data.success).toBe(false);
+      });
+
+      it('should reset password with a valid reset token', async () => {
+        // Request a reset token (returned in response in development mode)
+        const forgotResponse = await client.post('/business/auth/forgot-password', {
+          email: TEST_MERCHANT.email,
+        });
+
+        expect(forgotResponse.status).toBe(200);
+        const resetToken = forgotResponse.data.resetToken;
+        if (!resetToken) return;
+
+        // Reset to the same password so other tests are unaffected
+        const response = await client.post('/business/auth/reset-password', {
+          token: resetToken,
+          newPassword: TEST_MERCHANT.password,
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+
+        // Verify login still works with the (unchanged) password
+        const loginResponse = await client.post('/business/auth/login', {
+          email: TEST_MERCHANT.email,
+          password: TEST_MERCHANT.password,
+        });
+
+        expect(loginResponse.status).toBe(200);
+        expect(loginResponse.data).toHaveProperty('accessToken');
       });
     });
   });

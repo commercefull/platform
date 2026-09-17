@@ -125,7 +125,7 @@ export const escalateTicket: AsyncHandler = async (req, res, _next) => {
 };
 
 export const addAgentMessage: AsyncHandler = async (req, res, _next) => {
-  const agentId = req.user?.userId || req.user?.organizationId || '';
+  const agentId = req.user?.userId || req.user?.organizationId || req.user?.id || '';
   const agent = await supportRepo.getAgent(agentId);
 
   const body = req.body as { message: string; messageHtml?: string; isInternal?: boolean };
